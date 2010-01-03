@@ -28,6 +28,7 @@
 
 #include "juce_OutputStream.h"
 #include "../../containers/juce_MemoryBlock.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -87,8 +88,8 @@ public:
 
 private:
     MemoryBlock* data;
+    ScopedPointer <MemoryBlock> dataToDelete;
     int position, size, blockSize;
-    bool ownsMemoryBlock;
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__

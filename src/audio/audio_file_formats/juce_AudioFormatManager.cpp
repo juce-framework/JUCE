@@ -98,10 +98,7 @@ void AudioFormatManager::registerBasicFormats()
 void AudioFormatManager::clearFormats()
 {
     for (int i = getNumKnownFormats(); --i >= 0;)
-    {
-        AudioFormat* const af = getKnownFormat(i);
-        delete af;
-    }
+        delete getKnownFormat(i);
 
     knownFormats.clear();
     defaultFormatIndex = 0;
@@ -191,11 +188,13 @@ AudioFormatReader* AudioFormatManager::createReaderFor (const File& file)
     return 0;
 }
 
-AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* in)
+AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* audioFileStream)
 {
     // you need to actually register some formats before the manager can
     // use them to open a file!
     jassert (knownFormats.size() > 0);
+
+    ScopedPointer <InputStream> in (audioFileStream);
 
     if (in != 0)
     {
@@ -206,7 +205,10 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* in)
             AudioFormatReader* const r = getKnownFormat(i)->createReaderFor (in, false);
 
             if (r != 0)
+            {
+                in.release();
                 return r;
+            }
 
             in->setPosition (originalStreamPos);
 
@@ -214,8 +216,6 @@ AudioFormatReader* AudioFormatManager::createReaderFor (InputStream* in)
             // that all the formats can have a go at opening it.
             jassert (in->getPosition() == originalStreamPos);
         }
-
-        delete in;
     }
 
     return 0;

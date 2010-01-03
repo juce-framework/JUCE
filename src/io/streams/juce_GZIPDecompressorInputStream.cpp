@@ -163,28 +163,24 @@ public:
 const int gzipDecompBufferSize = 32768;
 
 GZIPDecompressorInputStream::GZIPDecompressorInputStream (InputStream* const sourceStream_,
-                                                          const bool deleteSourceWhenDestroyed_,
+                                                          const bool deleteSourceWhenDestroyed,
                                                           const bool noWrap_,
                                                           const int64 uncompressedStreamLength_)
   : sourceStream (sourceStream_),
+    streamToDelete (deleteSourceWhenDestroyed ? sourceStream_ : 0),
     uncompressedStreamLength (uncompressedStreamLength_),
-    deleteSourceWhenDestroyed (deleteSourceWhenDestroyed_),
     noWrap (noWrap_),
     isEof (false),
     activeBufferSize (0),
     originalSourcePos (sourceStream_->getPosition()),
     currentPos (0),
-    buffer (gzipDecompBufferSize)
+    buffer (gzipDecompBufferSize),
+    helper (new GZIPDecompressHelper (noWrap_))
 {
-    helper = new GZIPDecompressHelper (noWrap_);
 }
 
 GZIPDecompressorInputStream::~GZIPDecompressorInputStream()
 {
-    if (deleteSourceWhenDestroyed)
-        delete sourceStream;
-
-    delete (GZIPDecompressHelper*) helper;
 }
 
 int64 GZIPDecompressorInputStream::getTotalLength()
@@ -194,8 +190,6 @@ int64 GZIPDecompressorInputStream::getTotalLength()
 
 int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 {
-    GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-
     if ((howMany > 0) && ! isEof)
     {
         jassert (destBuffer != 0);
@@ -205,26 +199,26 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
             int numRead = 0;
             uint8* d = (uint8*) destBuffer;
 
-            while (! h->error)
+            while (! helper->error)
             {
-                const int n = h->doNextBlock (d, howMany);
+                const int n = helper->doNextBlock (d, howMany);
                 currentPos += n;
 
                 if (n == 0)
                 {
-                    if (h->finished || h->needsDictionary)
+                    if (helper->finished || helper->needsDictionary)
                     {
                         isEof = true;
                         return numRead;
                     }
 
-                    if (h->needsInput())
+                    if (helper->needsInput())
                     {
                         activeBufferSize = sourceStream->read (buffer, gzipDecompBufferSize);
 
                         if (activeBufferSize > 0)
                         {
-                            h->setInput ((uint8*) buffer, activeBufferSize);
+                            helper->setInput ((uint8*) buffer, activeBufferSize);
                         }
                         else
                         {
@@ -251,9 +245,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
 bool GZIPDecompressorInputStream::isExhausted()
 {
-    const GZIPDecompressHelper* const h = (GZIPDecompressHelper*) helper;
-
-    return h->error || isEof;
+    return helper->error || isEof;
 }
 
 int64 GZIPDecompressorInputStream::getPosition()
@@ -272,8 +264,6 @@ bool GZIPDecompressorInputStream::setPosition (int64 newPos)
         else
         {
             // reset the stream and start again..
-            delete (GZIPDecompressHelper*) helper;
-
             isEof = false;
             activeBufferSize = 0;
             currentPos = 0;

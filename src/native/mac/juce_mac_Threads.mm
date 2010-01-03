@@ -36,7 +36,7 @@
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-void* threadEntryProc (void* userData) throw()
+void* threadEntryProc (void* userData)
 {
     const ScopedAutoReleasePool pool;
     juce_threadEntryPoint (userData);

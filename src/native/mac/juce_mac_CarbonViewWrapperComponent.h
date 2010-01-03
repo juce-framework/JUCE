@@ -202,7 +202,7 @@ public:
         setEmbeddedWindowToOurSize();
     }
 
-    static void recursiveHIViewRepaint (HIViewRef view) throw()
+    static void recursiveHIViewRepaint (HIViewRef view)
     {
         HIViewSetNeedsDisplay (view, true);
         HIViewRef child = HIViewGetFirstSubview (view);

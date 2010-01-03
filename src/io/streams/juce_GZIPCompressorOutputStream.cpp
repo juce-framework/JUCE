@@ -136,39 +136,31 @@ const int gzipCompBufferSize = 32768;
 
 GZIPCompressorOutputStream::GZIPCompressorOutputStream (OutputStream* const destStream_,
                                                         int compressionLevel,
-                                                        const bool deleteDestStream_,
+                                                        const bool deleteDestStream,
                                                         const bool noWrap)
   : destStream (destStream_),
-    deleteDestStream (deleteDestStream_),
+    streamToDelete (deleteDestStream ? destStream_ : 0),
     buffer (gzipCompBufferSize)
 {
     if (compressionLevel < 1 || compressionLevel > 9)
         compressionLevel = -1;
 
     helper = new GZIPCompressorHelper (compressionLevel, noWrap);
-
 }
 
 GZIPCompressorOutputStream::~GZIPCompressorOutputStream()
 {
     flush();
-
-    delete (GZIPCompressorHelper*) helper;
-
-    if (deleteDestStream)
-        delete destStream;
 }
 
 //==============================================================================
 void GZIPCompressorOutputStream::flush()
 {
-    GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
-
-    if (! h->finished)
+    if (! helper->finished)
     {
-        h->shouldFinish = true;
+        helper->shouldFinish = true;
 
-        while (! h->finished)
+        while (! helper->finished)
             doNextBlock();
     }
 
@@ -177,13 +169,11 @@ void GZIPCompressorOutputStream::flush()
 
 bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 {
-    GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
-
-    if (! h->finished)
+    if (! helper->finished)
     {
-        h->setInput ((uint8*) destBuffer, howMany);
+        helper->setInput ((uint8*) destBuffer, howMany);
 
-        while (! h->needsInput())
+        while (! helper->needsInput())
         {
             if (! doNextBlock())
                 return false;
@@ -195,8 +185,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 
 bool GZIPCompressorOutputStream::doNextBlock()
 {
-    GZIPCompressorHelper* const h = (GZIPCompressorHelper*) helper;
-    const int len = h->doNextBlock (buffer, gzipCompBufferSize);
+    const int len = helper->doNextBlock (buffer, gzipCompBufferSize);
 
     if (len > 0)
         return destStream->write (buffer, len);

@@ -38,26 +38,22 @@ MemoryOutputStream::MemoryOutputStream (const int initialSize,
   : data (memoryBlockToWriteTo),
     position (0),
     size (0),
-    blockSize (jmax (16, blockSizeToIncreaseBy)),
-    ownsMemoryBlock (memoryBlockToWriteTo == 0)
+    blockSize (jmax (16, blockSizeToIncreaseBy))
 {
-    if (memoryBlockToWriteTo == 0)
-        data = new MemoryBlock (initialSize);
+    if (data == 0)
+        dataToDelete = data = new MemoryBlock (initialSize);
     else
-        memoryBlockToWriteTo->setSize (initialSize, false);
+        data->setSize (initialSize, false);
 }
 
 MemoryOutputStream::~MemoryOutputStream() throw()
 {
-    if (ownsMemoryBlock)
-        delete data;
-    else
-        flush();
+    flush();
 }
 
 void MemoryOutputStream::flush()
 {
-    if (! ownsMemoryBlock)
+    if (dataToDelete == 0)
         data->setSize (size, false);
 }
 

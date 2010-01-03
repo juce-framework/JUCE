@@ -77,7 +77,7 @@ public:
     /** MAC ONLY - Returns the current OS version number.
         E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
     */
-    static int getOSXMinorVersionNumber() throw();
+    static int getOSXMinorVersionNumber();
 #endif
 
 
@@ -273,20 +273,20 @@ public:
                                 false, it will be shared with other apps.
         @see stop
     */
-    bool start (const bool inExclusiveMode) throw();
+    bool start (const bool inExclusiveMode);
 
     /** Stops the device running.
         @see start
     */
-    void stop() throw();
+    void stop();
 
     /** Returns true if the device has been started successfully.
     */
-    bool isActive() const throw();
+    bool isActive() const;
 
     /** Returns the ID number of the remote, if it has sent one.
     */
-    int getRemoteId() const throw()             { return remoteId; }
+    int getRemoteId() const                     { return remoteId; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -299,7 +299,7 @@ private:
     void* queue;
     int remoteId;
 
-    bool open (const bool openInExclusiveMode) throw();
+    bool open (const bool openInExclusiveMode);
 
     AppleRemoteDevice (const AppleRemoteDevice&);
     const AppleRemoteDevice& operator= (const AppleRemoteDevice&);

@@ -107,7 +107,7 @@ const StringArray juce_getFileSystemRoots() throw()
 }
 
 //==============================================================================
-static bool isFileOnDriveType (const File* const f, const char** types) throw()
+static bool isFileOnDriveType (const File* const f, const char** types)
 {
     struct statfs buf;
 
@@ -157,7 +157,7 @@ bool File::isOnRemovableDrive() const throw()
 #endif
 }
 
-static bool juce_isHiddenFile (const String& path) throw()
+static bool juce_isHiddenFile (const String& path)
 {
 #if JUCE_IPHONE
     return File (path).getFileName().startsWithChar (T('.'));

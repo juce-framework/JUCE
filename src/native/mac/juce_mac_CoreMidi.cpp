@@ -236,12 +236,12 @@ static bool makeSureClientExists()
 class MidiPortAndEndpoint
 {
 public:
-    MidiPortAndEndpoint (MIDIPortRef port_, MIDIEndpointRef endPoint_) throw()
+    MidiPortAndEndpoint (MIDIPortRef port_, MIDIEndpointRef endPoint_)
         : port (port_), endPoint (endPoint_)
     {
     }
 
-    ~MidiPortAndEndpoint() throw()
+    ~MidiPortAndEndpoint()
     {
         if (port != 0)
             MIDIPortDispose (port);

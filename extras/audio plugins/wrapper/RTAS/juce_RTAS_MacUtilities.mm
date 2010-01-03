@@ -115,7 +115,7 @@ void removeSubWindow (void* nsWindow, Component* comp)
         MessageManager::getInstance()->runDispatchLoopUntil (1);
 }
 
-static bool isJuceWindow (WindowRef w) throw()
+static bool isJuceWindow (WindowRef w)
 {
     for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
     {

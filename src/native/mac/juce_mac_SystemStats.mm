@@ -46,7 +46,7 @@ static void juce_getCpuVendor (char* const v) throw()
     memcpy (v, vendor, 16);
 }
 
-static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures) throw()
+static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures)
 {
     unsigned int cpu = 0;
     unsigned int ext = 0;

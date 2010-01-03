@@ -52,8 +52,7 @@ class ZipInputStream  : public InputStream
 {
 public:
     //==============================================================================
-    ZipInputStream (ZipFile& file_,
-                    ZipEntryInfo& zei) throw()
+    ZipInputStream (ZipFile& file_, ZipEntryInfo& zei)
         : file (file_),
           zipEntryInfo (zei),
           pos (0),
@@ -161,19 +160,20 @@ private:
 
 //==============================================================================
 ZipFile::ZipFile (InputStream* const source_,
-                  const bool deleteStreamWhenDestroyed_) throw()
-   : inputStream (source_),
-     deleteStreamWhenDestroyed (deleteStreamWhenDestroyed_)
+                  const bool deleteStreamWhenDestroyed) throw()
+   : inputStream (source_)
 #ifdef JUCE_DEBUG
      , numOpenStreams (0)
 #endif
 {
+    if (deleteStreamWhenDestroyed)
+        streamToDelete = inputStream;
+
     init();
 }
 
 ZipFile::ZipFile (const File& file)
-    : inputStream (0),
-      deleteStreamWhenDestroyed (false)
+    : inputStream (0)
 #ifdef JUCE_DEBUG
       , numOpenStreams (0)
 #endif
@@ -184,8 +184,7 @@ ZipFile::ZipFile (const File& file)
 
 ZipFile::ZipFile (InputSource* const inputSource_)
     : inputStream (0),
-      inputSource (inputSource_),
-      deleteStreamWhenDestroyed (false)
+      inputSource (inputSource_)
 #ifdef JUCE_DEBUG
       , numOpenStreams (0)
 #endif
@@ -197,9 +196,6 @@ ZipFile::~ZipFile() throw()
 {
     for (int i = entries.size(); --i >= 0;)
         delete (ZipEntryInfo*) entries.getUnchecked(i);
-
-    if (deleteStreamWhenDestroyed)
-        delete inputStream;
 
 #ifdef JUCE_DEBUG
     // If you hit this assertion, it means you've created a stream to read

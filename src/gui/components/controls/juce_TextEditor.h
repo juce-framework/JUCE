@@ -609,7 +609,7 @@ protected:
 
 private:
     //==============================================================================
-    Viewport* viewport;
+    ScopedPointer <Viewport> viewport;
     TextHolderComponent* textHolder;
     BorderSize borderSize;
 

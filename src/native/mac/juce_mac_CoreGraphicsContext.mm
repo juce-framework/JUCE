@@ -55,7 +55,7 @@ public:
     LowLevelGraphicsContext* createLowLevelContext();
 
     //==============================================================================
-    static CGImageRef createImage (const Image& juceImage, const bool forAlpha, CGColorSpaceRef colourSpace) throw()
+    static CGImageRef createImage (const Image& juceImage, const bool forAlpha, CGColorSpaceRef colourSpace)
     {
         const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (&juceImage);
 
@@ -106,7 +106,7 @@ public:
     CGContextRef context;
 
 private:
-    static CGBitmapInfo getCGImageFlags (const Image& image) throw()
+    static CGBitmapInfo getCGImageFlags (const Image& image)
     {
 #if JUCE_BIG_ENDIAN
         return image.getFormat() == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big) : kCGBitmapByteOrderDefault;
@@ -536,18 +536,18 @@ private:
 
     struct SavedState
     {
-        SavedState() throw()
+        SavedState()
             : font (1.0f), fontRef (0), fontTransform (CGAffineTransformIdentity)
         {
         }
 
-        SavedState (const SavedState& other) throw()
+        SavedState (const SavedState& other)
             : fillType (other.fillType), font (other.font), fontRef (other.fontRef),
               fontTransform (other.fontTransform)
         {
         }
 
-        ~SavedState() throw()
+        ~SavedState()
         {
         }
 
@@ -576,7 +576,7 @@ private:
         outData[3] = colour.getAlpha() / 255.0f;
     }
 
-    CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient) throw()
+    CGShadingRef createGradient (const AffineTransform& transform, ColourGradient gradient)
     {
         numGradientLookupEntries = gradient.createLookupTable (transform, gradientLookupTable);
         --numGradientLookupEntries;
@@ -602,7 +602,7 @@ private:
         return result;
     }
 
-    void drawGradient() throw()
+    void drawGradient()
     {
         flip();
         applyTransform (state->fillType.transform);
@@ -615,7 +615,7 @@ private:
         CGShadingRelease (shading);
     }
 
-    void createPath (const Path& path) const throw()
+    void createPath (const Path& path) const
     {
         CGContextBeginPath (context);
         Path::Iterator i (path);
@@ -645,7 +645,7 @@ private:
         }
     }
 
-    void createPath (const Path& path, const AffineTransform& transform) const throw()
+    void createPath (const Path& path, const AffineTransform& transform) const
     {
         CGContextBeginPath (context);
         Path::Iterator i (path);
@@ -682,7 +682,7 @@ private:
         }
     }
 
-    static Image* createAlphaChannelImage (const Image& im) throw()
+    static Image* createAlphaChannelImage (const Image& im)
     {
         if (im.getFormat() == Image::SingleChannel)
             return const_cast <Image*> (&im);
@@ -690,18 +690,18 @@ private:
         return im.createCopyOfAlphaChannel();
     }
 
-    static void deleteAlphaChannelImage (const Image& im, Image* const alphaIm) throw()
+    static void deleteAlphaChannelImage (const Image& im, Image* const alphaIm)
     {
         if (im.getFormat() != Image::SingleChannel)
             delete alphaIm;
     }
 
-    void flip() const throw()
+    void flip() const
     {
         CGContextConcatCTM (context, CGAffineTransformMake (1, 0, 0, -1, 0, flipHeight));
     }
 
-    void applyTransform (const AffineTransform& transform) const throw()
+    void applyTransform (const AffineTransform& transform) const
     {
         CGAffineTransform t;
         t.a = transform.mat00;
@@ -713,7 +713,7 @@ private:
         CGContextConcatCTM (context, t);
     }
 
-    float flipY (float y) const throw()
+    float flipY (float y) const
     {
         return flipHeight - y;
     }

@@ -637,7 +637,7 @@ void ModifierKeys::updateCurrentModifiers() throw()
     currentModifierFlags = currentModifiers;
 }
 
-static int64 getMouseTime (NSEvent* e) throw()
+static int64 getMouseTime (NSEvent* e)
 {
     return (Time::currentTimeMillis() - Time::getMillisecondCounter())
             + (int64) ([e timestamp] * 1000.0);
@@ -650,7 +650,7 @@ static void getMousePos (NSEvent* e, NSView* view, int& x, int& y)
     y = roundFloatToInt ([view frame].size.height - p.y);
 }
 
-static int getModifierForButtonNumber (const int num) throw()
+static int getModifierForButtonNumber (const int num)
 {
     return num == 0 ? ModifierKeys::leftButtonModifier
                 : (num == 1 ? ModifierKeys::rightButtonModifier

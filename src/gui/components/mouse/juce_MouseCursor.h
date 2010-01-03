@@ -26,8 +26,9 @@
 #ifndef __JUCE_MOUSECURSOR_JUCEHEADER__
 #define __JUCE_MOUSECURSOR_JUCEHEADER__
 
+#include "../../../containers/juce_ReferenceCountedObject.h"
 class Image;
-class RefCountedMouseCursor;
+class SharedMouseCursorInternal;
 class ComponentPeer;
 class Component;
 
@@ -88,7 +89,7 @@ public:
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
     */
-    MouseCursor (Image& image,
+    MouseCursor (const Image& image,
                  const int hotSpotX,
                  const int hotSpotY) throw();
 
@@ -146,13 +147,11 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    RefCountedMouseCursor* cursorHandle;
+    ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
 
     friend class Component;
-
     void showInWindow (ComponentPeer* window) const throw();
     void showInAllWindows() const throw();
-
     void* getHandle() const throw();
 };
 

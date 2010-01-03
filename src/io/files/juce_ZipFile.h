@@ -150,9 +150,9 @@ private:
     friend class ZipInputStream;
     CriticalSection lock;
     InputStream* inputStream;
+    ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
 
-    bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG

@@ -129,7 +129,7 @@ public:
         delete this;
     }
 
-    void postMessage (void* m) throw()
+    void postMessage (void* m)
     {
         messages.add (m);
         CFRunLoopSourceSignal (runLoopSource);
@@ -141,7 +141,7 @@ private:
     CFRunLoopSourceRef runLoopSource;
     Array <void*, CriticalSection> messages;
 
-    void runLoopCallback() throw()
+    void runLoopCallback()
     {
         int numDispatched = 0;
 

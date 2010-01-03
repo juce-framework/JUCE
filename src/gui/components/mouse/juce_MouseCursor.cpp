@@ -39,47 +39,32 @@ void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) th
 
 
 //==============================================================================
-static CriticalSection mouseCursorLock;
-static VoidArray standardCursors (2);
+static CriticalSection activeCursorListLock;
+static VoidArray activeCursors (2);
 
 //==============================================================================
-class RefCountedMouseCursor
+class SharedMouseCursorInternal  : public ReferenceCountedObject
 {
 public:
-    RefCountedMouseCursor (const MouseCursor::StandardCursorType t) throw()
-        : refCount (1),
-          standardType (t),
+    SharedMouseCursorInternal (const MouseCursor::StandardCursorType type) throw()
+        : standardType (type),
           isStandard (true)
     {
         handle = juce_createStandardMouseCursor (standardType);
-        standardCursors.add (this);
+        activeCursors.add (this);
     }
 
-    RefCountedMouseCursor (Image& image,
-                           const int hotSpotX,
-                           const int hotSpotY) throw()
-        : refCount (1),
-          standardType (MouseCursor::NormalCursor),
+    SharedMouseCursorInternal (const Image& image, const int hotSpotX, const int hotSpotY) throw()
+        : standardType (MouseCursor::NormalCursor),
           isStandard (false)
     {
         handle = juce_createMouseCursorFromImage (image, hotSpotX, hotSpotY);
     }
 
-    ~RefCountedMouseCursor() throw()
+    ~SharedMouseCursorInternal() throw()
     {
         juce_deleteMouseCursor (handle, isStandard);
-        standardCursors.removeValue (this);
-    }
-
-    void decRef() throw()
-    {
-        if (--refCount == 0)
-            delete this;
-    }
-
-    void incRef() throw()
-    {
-        ++refCount;
+        activeCursors.removeValue (this);
     }
 
     void* getHandle() const throw()
@@ -87,22 +72,17 @@ public:
         return handle;
     }
 
-    static RefCountedMouseCursor* findInstance (MouseCursor::StandardCursorType type) throw()
+    static SharedMouseCursorInternal* findInstance (MouseCursor::StandardCursorType type) throw()
     {
-        const ScopedLock sl (mouseCursorLock);
-
-        for (int i = 0; i < standardCursors.size(); i++)
+        for (int i = activeCursors.size(); --i >= 0;)
         {
-            RefCountedMouseCursor* const r = (RefCountedMouseCursor*) standardCursors.getUnchecked(i);
+            SharedMouseCursorInternal* const r = (SharedMouseCursorInternal*) activeCursors.getUnchecked(i);
 
             if (r->standardType == type)
-            {
-                r->incRef();
                 return r;
-            }
         }
 
-        return new RefCountedMouseCursor (type);
+        return new SharedMouseCursorInternal (type);
     }
 
     //==============================================================================
@@ -110,56 +90,44 @@ public:
 
 private:
     void* handle;
-    int refCount;
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
 
-    const RefCountedMouseCursor& operator= (const RefCountedMouseCursor&);
+    const SharedMouseCursorInternal& operator= (const SharedMouseCursorInternal&);
 };
 
 
 //==============================================================================
 MouseCursor::MouseCursor() throw()
 {
-    cursorHandle = RefCountedMouseCursor::findInstance (NormalCursor);
+    const ScopedLock sl (activeCursorListLock);
+    cursorHandle = SharedMouseCursorInternal::findInstance (NormalCursor);
 }
 
 MouseCursor::MouseCursor (const StandardCursorType type) throw()
 {
-    cursorHandle = RefCountedMouseCursor::findInstance (type);
+    const ScopedLock sl (activeCursorListLock);
+    cursorHandle = SharedMouseCursorInternal::findInstance (type);
 }
 
-MouseCursor::MouseCursor (Image& image,
-                          const int hotSpotX,
-                          const int hotSpotY) throw()
+MouseCursor::MouseCursor (const Image& image, const int hotSpotX, const int hotSpotY) throw()
 {
-    cursorHandle = new RefCountedMouseCursor (image, hotSpotX, hotSpotY);
+    const ScopedLock sl (activeCursorListLock);
+    cursorHandle = new SharedMouseCursorInternal (image, hotSpotX, hotSpotY);
 }
 
 MouseCursor::MouseCursor (const MouseCursor& other) throw()
     : cursorHandle (other.cursorHandle)
 {
-    const ScopedLock sl (mouseCursorLock);
-    cursorHandle->incRef();
 }
 
 MouseCursor::~MouseCursor() throw()
 {
-    const ScopedLock sl (mouseCursorLock);
-    cursorHandle->decRef();
 }
 
 const MouseCursor& MouseCursor::operator= (const MouseCursor& other) throw()
 {
-    if (this != &other)
-    {
-        const ScopedLock sl (mouseCursorLock);
-
-        cursorHandle->decRef();
-        cursorHandle = other.cursorHandle;
-        cursorHandle->incRef();
-    }
-
+    cursorHandle = other.cursorHandle;
     return *this;
 }
 

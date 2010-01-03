@@ -59,7 +59,7 @@ void PlatformUtilities::addItemToDock (const File& file)
     }
 }
 
-int PlatformUtilities::getOSXMinorVersionNumber() throw()
+int PlatformUtilities::getOSXMinorVersionNumber()
 {
     SInt32 versionMinor = 0;
     OSErr err = Gestalt (gestaltSystemVersionMinor, &versionMinor);

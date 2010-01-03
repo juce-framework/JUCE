@@ -94,17 +94,17 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents) throw();
+    LocalisedStrings (const String& fileContents);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad) throw();
+    LocalisedStrings (const File& fileToLoad);
 
     /** Destructor. */
-    ~LocalisedStrings() throw();
+    ~LocalisedStrings();
 
     //==============================================================================
     /** Selects the current set of mappings to be used by the system.
@@ -117,14 +117,14 @@ public:
 
         @see translateWithCurrentMappings
     */
-    static void setCurrentMappings (LocalisedStrings* newTranslations) throw();
+    static void setCurrentMappings (LocalisedStrings* newTranslations);
 
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
         be 0 if none has been created.
     */
-    static LocalisedStrings* getCurrentMappings() throw();
+    static LocalisedStrings* getCurrentMappings();
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -135,7 +135,7 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const String& text) throw();
+    static const String translateWithCurrentMappings (const String& text);
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -146,14 +146,14 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const char* text) throw();
+    static const String translateWithCurrentMappings (const char* text);
 
     //==============================================================================
     /** Attempts to look up a string and return its localised version.
 
         If the string isn't found in the list, the original string will be returned.
     */
-    const String translate (const String& text) const throw();
+    const String translate (const String& text) const;
 
     /** Returns the name of the language specified in the translation file.
 
@@ -162,7 +162,7 @@ public:
         language: german
         @endcode
     */
-    const String getLanguageName() const throw()                { return languageName; }
+    const String getLanguageName() const                        { return languageName; }
 
     /** Returns the list of suitable country codes listed in the translation file.
 
@@ -173,14 +173,14 @@ public:
 
         The country codes are supposed to be 2-character ISO complient codes.
     */
-    const StringArray getCountryCodes() const throw()           { return countryCodes; }
+    const StringArray getCountryCodes() const                   { return countryCodes; }
 
 
     //==============================================================================
     /** Indicates whether to use a case-insensitive search when looking up a string.
         This defaults to true.
     */
-    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+    void setIgnoresCase (const bool shouldIgnoreCase);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -190,7 +190,7 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents) throw();
+    void loadFromText (const String& fileContents);
 };
 
 

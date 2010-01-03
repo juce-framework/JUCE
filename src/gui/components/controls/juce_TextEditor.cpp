@@ -1045,7 +1045,7 @@ TextEditor::TextEditor (const String& name,
 TextEditor::~TextEditor()
 {
     clearInternal (0);
-    delete viewport;
+    viewport = 0;
 }
 
 //==============================================================================
@@ -2614,15 +2614,15 @@ void TextEditor::splitSection (const int sectionIndex,
 
     sections.insert (sectionIndex + 1,
                       ((UniformTextSection*) sections.getUnchecked (sectionIndex))
-                        ->split (charToSplitAt, passwordCharacter));
+                           ->split (charToSplitAt, passwordCharacter));
 }
 
 void TextEditor::coalesceSimilarSections() throw()
 {
     for (int i = 0; i < sections.size() - 1; ++i)
     {
-        UniformTextSection* const s1 = (UniformTextSection*) (sections.getUnchecked (i));
-        UniformTextSection* const s2 = (UniformTextSection*) (sections.getUnchecked (i + 1));
+        UniformTextSection* const s1 = (UniformTextSection*) sections.getUnchecked (i);
+        UniformTextSection* const s2 = (UniformTextSection*) sections.getUnchecked (i + 1);
 
         if (s1->font == s2->font
              && s1->colour == s2->colour)

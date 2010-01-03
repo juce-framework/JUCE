@@ -27,6 +27,8 @@
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
+#include "../../containers/juce_ScopedPointer.h"
+class GZIPDecompressHelper;
 
 
 //==============================================================================
@@ -75,13 +77,14 @@ public:
 
 private:
     InputStream* const sourceStream;
+    ScopedPointer <InputStream> streamToDelete;
     const int64 uncompressedStreamLength;
-    const bool deleteSourceWhenDestroyed, noWrap;
+    const bool noWrap;
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
     HeapBlock <uint8> buffer;
-    void* helper;
+    ScopedPointer <GZIPDecompressHelper> helper;
 
     GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
     const GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);

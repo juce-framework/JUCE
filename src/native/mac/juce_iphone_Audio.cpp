@@ -271,7 +271,7 @@ private:
 
     //==================================================================================================
     OSStatus process (AudioUnitRenderActionFlags* ioActionFlags, const AudioTimeStamp* inTimeStamp,
-                      UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList* ioData) throw()
+                      UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList* ioData)
     {
         OSStatus err = noErr;
 
@@ -349,7 +349,7 @@ private:
         return err;
     }
 
-    void updateDeviceInfo() throw()
+    void updateDeviceInfo()
     {
         UInt32 size = sizeof (sampleRate);
         AudioSessionGetProperty (kAudioSessionProperty_CurrentHardwareSampleRate, &size, &sampleRate);
@@ -496,7 +496,7 @@ private:
 
     // If the routing is set to go through the receiver (i.e. the speaker, but quiet), this re-routes it
     // to make it loud. Needed because by default when using an input + output, the output is kept quiet.
-    static void fixAudioRouteIfSetToReceiver() throw()
+    static void fixAudioRouteIfSetToReceiver()
     {
         CFStringRef audioRoute = 0;
         UInt32 propertySize = sizeof (audioRoute);

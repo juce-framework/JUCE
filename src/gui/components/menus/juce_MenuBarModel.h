@@ -151,12 +151,12 @@ public:
         object then newMenuBarModel must be non-null.
     */
     static void setMacMainMenu (MenuBarModel* newMenuBarModel,
-                                const PopupMenu* extraAppleMenuItems = 0) throw();
+                                const PopupMenu* extraAppleMenuItems = 0);
 
     /** MAC ONLY - Returns the menu model that is currently being shown as
         the main menu bar.
     */
-    static MenuBarModel* getMacMainMenu() throw();
+    static MenuBarModel* getMacMainMenu();
 
 #endif
 

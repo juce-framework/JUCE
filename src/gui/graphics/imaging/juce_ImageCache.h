@@ -31,6 +31,7 @@
 #include "../../../events/juce_Timer.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
 #include "../../../containers/juce_VoidArray.h"
+struct ImageCacheItem;
 
 
 //==============================================================================
@@ -162,7 +163,7 @@ public:
 private:
     //==============================================================================
     CriticalSection lock;
-    VoidArray images;
+    OwnedArray <ImageCacheItem> images;
 
     ImageCache() throw();
     ImageCache (const ImageCache&);

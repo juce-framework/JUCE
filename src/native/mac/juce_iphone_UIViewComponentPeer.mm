@@ -179,14 +179,14 @@ void ModifierKeys::updateCurrentModifiers() throw()
     currentModifierFlags = currentModifiers;
 }
 
-static int getModifierForButtonNumber (const int num) throw()
+static int getModifierForButtonNumber (const int num)
 {
     return num == 0 ? ModifierKeys::leftButtonModifier
                 : (num == 1 ? ModifierKeys::rightButtonModifier
                             : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
 }
 
-static int64 getMouseTime (UIEvent* e) throw()
+static int64 getMouseTime (UIEvent* e)
 {
     return (Time::currentTimeMillis() - Time::getMillisecondCounter())
             + (int64) ([e timestamp] * 1000.0);

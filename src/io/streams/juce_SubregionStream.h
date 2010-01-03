@@ -27,6 +27,7 @@
 #define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
 
 #include "juce_InputStream.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================
@@ -82,7 +83,7 @@ public:
 
 private:
     InputStream* const source;
-    const bool deleteSourceWhenDestroyed;
+    ScopedPointer <InputStream> sourceToDelete;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
     SubregionStream (const SubregionStream&);

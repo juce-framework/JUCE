@@ -349,7 +349,7 @@ private:
     AffineTransform pathTransform;
 #endif
 
-    void createGlyphsForString (const juce_wchar* const text, const int length, HeapBlock <CGGlyph>& glyphs) throw()
+    void createGlyphsForString (const juce_wchar* const text, const int length, HeapBlock <CGGlyph>& glyphs)
     {
 #if SUPPORT_10_4_FONTS
   #if ! SUPPORT_ONLY_10_4_FONTS
@@ -382,7 +382,7 @@ private:
     class CharToGlyphMapper
     {
     public:
-        CharToGlyphMapper (CGFontRef fontRef) throw()
+        CharToGlyphMapper (CGFontRef fontRef)
             : segCount (0), endCode (0), startCode (0), idDelta (0),
               idRangeOffset (0), glyphIndexes (0)
         {
@@ -424,7 +424,7 @@ private:
             }
         }
 
-        ~CharToGlyphMapper() throw()
+        ~CharToGlyphMapper()
         {
             if (endCode != 0)
             {
@@ -436,7 +436,7 @@ private:
             }
         }
 
-        int getGlyphForCharacter (const juce_wchar c) const throw()
+        int getGlyphForCharacter (const juce_wchar c) const
         {
             for (int i = 0; i < segCount; ++i)
             {
@@ -464,12 +464,12 @@ private:
         int segCount;
         CFDataRef endCode, startCode, idDelta, idRangeOffset, glyphIndexes;
 
-        static uint16 getValue16 (CFDataRef data, const int index) throw()
+        static uint16 getValue16 (CFDataRef data, const int index)
         {
             return CFSwapInt16BigToHost (*(UInt16*) (CFDataGetBytePtr (data) + index));
         }
 
-        static uint32 getValue32 (CFDataRef data, const int index) throw()
+        static uint32 getValue32 (CFDataRef data, const int index)
         {
             return CFSwapInt32BigToHost (*(UInt32*) (CFDataGetBytePtr (data) + index));
         }

@@ -60,14 +60,14 @@ public:
     static JuceMainMenuHandler* instance;
 
     //==============================================================================
-    JuceMainMenuHandler() throw()
+    JuceMainMenuHandler()
         : currentModel (0),
           lastUpdateTime (0)
     {
         callback = [[JuceMenuCallback alloc] initWithOwner: this];
     }
 
-    ~JuceMainMenuHandler() throw()
+    ~JuceMainMenuHandler()
     {
         setMenu (0);
 
@@ -77,7 +77,7 @@ public:
         [callback release];
     }
 
-    void setMenu (MenuBarModel* const newMenuBarModel) throw()
+    void setMenu (MenuBarModel* const newMenuBarModel)
     {
         if (currentModel != newMenuBarModel)
         {
@@ -489,7 +489,7 @@ static void rebuildMainMenu (const PopupMenu* extraItems)
 }
 
 void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
-                                   const PopupMenu* extraAppleMenuItems) throw()
+                                   const PopupMenu* extraAppleMenuItems)
 {
     if (getMacMainMenu() != newMenuBarModel)
     {
@@ -518,7 +518,7 @@ void MenuBarModel::setMacMainMenu (MenuBarModel* newMenuBarModel,
         newMenuBarModel->menuItemsChanged();
 }
 
-MenuBarModel* MenuBarModel::getMacMainMenu() throw()
+MenuBarModel* MenuBarModel::getMacMainMenu()
 {
     return JuceMainMenuHandler::instance != 0
             ? JuceMainMenuHandler::instance->currentModel : 0;

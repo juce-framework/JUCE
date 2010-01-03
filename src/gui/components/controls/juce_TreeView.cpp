@@ -218,7 +218,7 @@ public:
 
         for (int i = rowComponentItems.size(); --i >= 0;)
         {
-            Component* const comp = (Component*) (rowComponents.getUnchecked(i));
+            Component* const comp = (Component*) rowComponents.getUnchecked(i);
 
             bool keep = false;
 
@@ -466,7 +466,6 @@ void TreeView::deleteRootItem()
     const ScopedPointer <TreeViewItem> deleter (rootItem);
     setRootItem (0);
 }
-
 
 void TreeView::setRootItemVisible (const bool shouldBeVisible)
 {

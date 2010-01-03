@@ -12659,7 +12659,7 @@ public:
     /** MAC ONLY - Returns the current OS version number.
         E.g. if it's running on 10.4, this will be 4, 10.5 will return 5, etc.
     */
-    static int getOSXMinorVersionNumber() throw();
+    static int getOSXMinorVersionNumber();
 #endif
 
 #if JUCE_WINDOWS || DOXYGEN
@@ -12846,20 +12846,20 @@ public:
                                 false, it will be shared with other apps.
         @see stop
     */
-    bool start (const bool inExclusiveMode) throw();
+    bool start (const bool inExclusiveMode);
 
     /** Stops the device running.
         @see start
     */
-    void stop() throw();
+    void stop();
 
     /** Returns true if the device has been started successfully.
     */
-    bool isActive() const throw();
+    bool isActive() const;
 
     /** Returns the ID number of the remote, if it has sent one.
     */
-    int getRemoteId() const throw()             { return remoteId; }
+    int getRemoteId() const                     { return remoteId; }
 
     juce_UseDebuggingNewOperator
 
@@ -12871,7 +12871,7 @@ private:
     void* queue;
     int remoteId;
 
-    bool open (const bool openInExclusiveMode) throw();
+    bool open (const bool openInExclusiveMode);
 
     AppleRemoteDevice (const AppleRemoteDevice&);
     const AppleRemoteDevice& operator= (const AppleRemoteDevice&);
@@ -14348,9 +14348,9 @@ private:
     friend class ZipInputStream;
     CriticalSection lock;
     InputStream* inputStream;
+    ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
 
-    bool deleteStreamWhenDestroyed;
     int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG
@@ -14940,7 +14940,7 @@ public:
 
 private:
     InputStream* const source;
-    const bool deleteSourceWhenDestroyed;
+    ScopedPointer <InputStream> sourceToDelete;
     int bufferSize;
     int64 position, lastReadPos, bufferStart, bufferOverlap;
     HeapBlock <char> buffer;
@@ -14995,6 +14995,8 @@ private:
 #ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 
+class GZIPCompressorHelper;
+
 /**
     A stream which uses zlib to compress the data written into it.
 
@@ -15034,9 +15036,9 @@ public:
 
 private:
     OutputStream* const destStream;
-    const bool deleteDestStream;
+    ScopedPointer <OutputStream> streamToDelete;
     HeapBlock <uint8> buffer;
-    void* helper;
+    ScopedPointer <GZIPCompressorHelper> helper;
     bool doNextBlock();
 
     GZIPCompressorOutputStream (const GZIPCompressorOutputStream&);
@@ -15052,6 +15054,8 @@ private:
 /********* Start of inlined file: juce_GZIPDecompressorInputStream.h *********/
 #ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
+
+class GZIPDecompressHelper;
 
 /**
     This stream will decompress a source-stream using zlib.
@@ -15095,13 +15099,14 @@ public:
 
 private:
     InputStream* const sourceStream;
+    ScopedPointer <InputStream> streamToDelete;
     const int64 uncompressedStreamLength;
-    const bool deleteSourceWhenDestroyed, noWrap;
+    const bool noWrap;
     bool isEof;
     int activeBufferSize;
     int64 originalSourcePos, currentPos;
     HeapBlock <uint8> buffer;
-    void* helper;
+    ScopedPointer <GZIPDecompressHelper> helper;
 
     GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
     const GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
@@ -15226,8 +15231,8 @@ public:
 
 private:
     MemoryBlock* data;
+    ScopedPointer <MemoryBlock> dataToDelete;
     int position, size, blockSize;
-    bool ownsMemoryBlock;
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
@@ -15291,7 +15296,7 @@ public:
 
 private:
     InputStream* const source;
-    const bool deleteSourceWhenDestroyed;
+    ScopedPointer <InputStream> sourceToDelete;
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
     SubregionStream (const SubregionStream&);
@@ -15370,17 +15375,17 @@ public:
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const String& fileContents) throw();
+    LocalisedStrings (const String& fileContents);
 
     /** Creates a set of translations from a file.
 
         When you create one of these, you can call setCurrentMappings() to make it
         the set of mappings that the system's using.
     */
-    LocalisedStrings (const File& fileToLoad) throw();
+    LocalisedStrings (const File& fileToLoad);
 
     /** Destructor. */
-    ~LocalisedStrings() throw();
+    ~LocalisedStrings();
 
     /** Selects the current set of mappings to be used by the system.
 
@@ -15392,14 +15397,14 @@ public:
 
         @see translateWithCurrentMappings
     */
-    static void setCurrentMappings (LocalisedStrings* newTranslations) throw();
+    static void setCurrentMappings (LocalisedStrings* newTranslations);
 
     /** Returns the currently selected set of mappings.
 
         This is the object that was last passed to setCurrentMappings(). It may
         be 0 if none has been created.
     */
-    static LocalisedStrings* getCurrentMappings() throw();
+    static LocalisedStrings* getCurrentMappings();
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -15410,7 +15415,7 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const String& text) throw();
+    static const String translateWithCurrentMappings (const String& text);
 
     /** Tries to translate a string using the currently selected set of mappings.
 
@@ -15421,13 +15426,13 @@ public:
 
         @see setCurrentMappings, getCurrentMappings
     */
-    static const String translateWithCurrentMappings (const char* text) throw();
+    static const String translateWithCurrentMappings (const char* text);
 
     /** Attempts to look up a string and return its localised version.
 
         If the string isn't found in the list, the original string will be returned.
     */
-    const String translate (const String& text) const throw();
+    const String translate (const String& text) const;
 
     /** Returns the name of the language specified in the translation file.
 
@@ -15436,7 +15441,7 @@ public:
         language: german
         @endcode
     */
-    const String getLanguageName() const throw()                { return languageName; }
+    const String getLanguageName() const                        { return languageName; }
 
     /** Returns the list of suitable country codes listed in the translation file.
 
@@ -15447,12 +15452,12 @@ public:
 
         The country codes are supposed to be 2-character ISO complient codes.
     */
-    const StringArray getCountryCodes() const throw()           { return countryCodes; }
+    const StringArray getCountryCodes() const                   { return countryCodes; }
 
     /** Indicates whether to use a case-insensitive search when looking up a string.
         This defaults to true.
     */
-    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+    void setIgnoresCase (const bool shouldIgnoreCase);
 
     juce_UseDebuggingNewOperator
 
@@ -15461,7 +15466,7 @@ private:
     StringArray countryCodes;
     StringPairArray translations;
 
-    void loadFromText (const String& fileContents) throw();
+    void loadFromText (const String& fileContents);
 };
 
 #endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
@@ -16809,7 +16814,7 @@ private:
 #define __JUCE_MOUSECURSOR_JUCEHEADER__
 
 class Image;
-class RefCountedMouseCursor;
+class SharedMouseCursorInternal;
 class ComponentPeer;
 class Component;
 
@@ -16867,7 +16872,7 @@ public:
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
     */
-    MouseCursor (Image& image,
+    MouseCursor (const Image& image,
                  const int hotSpotX,
                  const int hotSpotY) throw();
 
@@ -16921,13 +16926,11 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    RefCountedMouseCursor* cursorHandle;
+    ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
 
     friend class Component;
-
     void showInWindow (ComponentPeer* window) const throw();
     void showInAllWindows() const throw();
-
     void* getHandle() const throw();
 };
 
@@ -33540,7 +33543,7 @@ protected:
 
 private:
 
-    Viewport* viewport;
+    ScopedPointer <Viewport> viewport;
     TextHolderComponent* textHolder;
     BorderSize borderSize;
 
@@ -48976,12 +48979,12 @@ public:
         object then newMenuBarModel must be non-null.
     */
     static void setMacMainMenu (MenuBarModel* newMenuBarModel,
-                                const PopupMenu* extraAppleMenuItems = 0) throw();
+                                const PopupMenu* extraAppleMenuItems = 0);
 
     /** MAC ONLY - Returns the menu model that is currently being shown as
         the main menu bar.
     */
-    static MenuBarModel* getMacMainMenu() throw();
+    static MenuBarModel* getMacMainMenu();
 
 #endif
 
@@ -55816,6 +55819,8 @@ private:
 #ifndef __JUCE_IMAGECACHE_JUCEHEADER__
 #define __JUCE_IMAGECACHE_JUCEHEADER__
 
+struct ImageCacheItem;
+
 /**
     A global cache of images that have been loaded from files or memory.
 
@@ -55942,7 +55947,7 @@ public:
 private:
 
     CriticalSection lock;
-    VoidArray images;
+    OwnedArray <ImageCacheItem> images;
 
     ImageCache() throw();
     ImageCache (const ImageCache&);

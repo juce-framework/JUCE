@@ -62,15 +62,16 @@ void DeletedAtShutdown::deleteAll()
     {
         JUCE_TRY
         {
-            DeletedAtShutdown* const deletee = (DeletedAtShutdown*) localCopy.getUnchecked(i);
+            DeletedAtShutdown* deletee = (DeletedAtShutdown*) localCopy.getUnchecked(i);
 
             // double-check that it's not already been deleted during another object's destructor.
-            lock.enter();
-            const bool okToDelete = objectsToDelete.contains (deletee);
-            lock.exit();
+            {
+                const ScopedLock sl (lock);
+                if (! objectsToDelete.contains (deletee))
+                    deletee = 0;
+            }
 
-            if (okToDelete)
-                delete deletee;
+            delete deletee;
         }
         JUCE_CATCH_EXCEPTION
     }

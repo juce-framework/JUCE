@@ -32,27 +32,27 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-LocalisedStrings::LocalisedStrings (const String& fileContents) throw()
+LocalisedStrings::LocalisedStrings (const String& fileContents)
 {
     loadFromText (fileContents);
 }
 
-LocalisedStrings::LocalisedStrings (const File& fileToLoad) throw()
+LocalisedStrings::LocalisedStrings (const File& fileToLoad)
 {
     loadFromText (fileToLoad.loadFileAsString());
 }
 
-LocalisedStrings::~LocalisedStrings() throw()
+LocalisedStrings::~LocalisedStrings()
 {
 }
 
 //==============================================================================
-const String LocalisedStrings::translate (const String& text) const throw()
+const String LocalisedStrings::translate (const String& text) const
 {
     return translations.getValue (text, text);
 }
 
-static int findCloseQuote (const String& text, int startPos) throw()
+static int findCloseQuote (const String& text, int startPos)
 {
     tchar lastChar = 0;
 
@@ -70,7 +70,7 @@ static int findCloseQuote (const String& text, int startPos) throw()
     return startPos;
 }
 
-static const String unescapeString (const String& s) throw()
+static const String unescapeString (const String& s)
 {
     return s.replace (T("\\\""), T("\""))
             .replace (T("\\\'"), T("\'"))
@@ -79,7 +79,7 @@ static const String unescapeString (const String& s) throw()
             .replace (T("\\n"), T("\n"));
 }
 
-void LocalisedStrings::loadFromText (const String& fileContents) throw()
+void LocalisedStrings::loadFromText (const String& fileContents)
 {
     StringArray lines;
     lines.addLines (fileContents);
@@ -118,7 +118,7 @@ void LocalisedStrings::loadFromText (const String& fileContents) throw()
     }
 }
 
-void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase) throw()
+void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase)
 {
     translations.setIgnoresCase (shouldIgnoreCase);
 }
@@ -127,7 +127,7 @@ void LocalisedStrings::setIgnoresCase (const bool shouldIgnoreCase) throw()
 static CriticalSection currentMappingsLock;
 static LocalisedStrings* currentMappings = 0;
 
-void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations) throw()
+void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations)
 {
     const ScopedLock sl (currentMappingsLock);
 
@@ -135,12 +135,12 @@ void LocalisedStrings::setCurrentMappings (LocalisedStrings* newTranslations) th
     currentMappings = newTranslations;
 }
 
-LocalisedStrings* LocalisedStrings::getCurrentMappings() throw()
+LocalisedStrings* LocalisedStrings::getCurrentMappings()
 {
     return currentMappings;
 }
 
-const String LocalisedStrings::translateWithCurrentMappings (const String& text) throw()
+const String LocalisedStrings::translateWithCurrentMappings (const String& text)
 {
     const ScopedLock sl (currentMappingsLock);
 
@@ -150,7 +150,7 @@ const String LocalisedStrings::translateWithCurrentMappings (const String& text)
     return text;
 }
 
-const String LocalisedStrings::translateWithCurrentMappings (const char* text) throw()
+const String LocalisedStrings::translateWithCurrentMappings (const char* text)
 {
     return translateWithCurrentMappings (String (text));
 }

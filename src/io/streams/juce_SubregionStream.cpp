@@ -35,19 +35,19 @@ BEGIN_JUCE_NAMESPACE
 SubregionStream::SubregionStream (InputStream* const sourceStream,
                                   const int64 startPositionInSourceStream_,
                                   const int64 lengthOfSourceStream_,
-                                  const bool deleteSourceWhenDestroyed_) throw()
+                                  const bool deleteSourceWhenDestroyed) throw()
   : source (sourceStream),
-    deleteSourceWhenDestroyed (deleteSourceWhenDestroyed_),
     startPositionInSourceStream (startPositionInSourceStream_),
     lengthOfSourceStream (lengthOfSourceStream_)
 {
+    if (deleteSourceWhenDestroyed)
+        sourceToDelete = source;
+
     setPosition (0);
 }
 
 SubregionStream::~SubregionStream() throw()
 {
-    if (deleteSourceWhenDestroyed)
-        delete source;
 }
 
 int64 SubregionStream::getTotalLength()

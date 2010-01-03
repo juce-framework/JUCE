@@ -926,10 +926,11 @@ void AudioDeviceManager::CallbackHandler::handleIncomingMidiMessage (MidiInput* 
 //==============================================================================
 void AudioDeviceManager::playTestSound()
 {
-    audioCallbackLock.enter();
-    AudioSampleBuffer* oldSound = testSound.release();
-    audioCallbackLock.exit();
-    delete oldSound;
+    {
+        audioCallbackLock.enter();
+        ScopedPointer <AudioSampleBuffer> oldSound (testSound);
+        audioCallbackLock.exit();
+    }
 
     testSoundPosition = 0;
 

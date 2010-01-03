@@ -40,7 +40,7 @@ AppleRemoteDevice::~AppleRemoteDevice()
     stop();
 }
 
-static io_object_t getAppleRemoteDevice() throw()
+static io_object_t getAppleRemoteDevice()
 {
     CFMutableDictionaryRef dict = IOServiceMatching ("AppleIRController");
 
@@ -57,7 +57,7 @@ static io_object_t getAppleRemoteDevice() throw()
     return iod;
 }
 
-static bool createAppleRemoteInterface (io_object_t iod, void** device) throw()
+static bool createAppleRemoteInterface (io_object_t iod, void** device)
 {
     jassert (*device == 0);
     io_name_t classname;
@@ -86,7 +86,7 @@ static bool createAppleRemoteInterface (io_object_t iod, void** device) throw()
     return *device != 0;
 }
 
-bool AppleRemoteDevice::start (const bool inExclusiveMode) throw()
+bool AppleRemoteDevice::start (const bool inExclusiveMode)
 {
     if (queue != 0)
         return true;
@@ -109,7 +109,7 @@ bool AppleRemoteDevice::start (const bool inExclusiveMode) throw()
     return result;
 }
 
-void AppleRemoteDevice::stop() throw()
+void AppleRemoteDevice::stop()
 {
     if (queue != 0)
     {
@@ -127,7 +127,7 @@ void AppleRemoteDevice::stop() throw()
     }
 }
 
-bool AppleRemoteDevice::isActive() const throw()
+bool AppleRemoteDevice::isActive() const
 {
     return queue != 0;
 }
@@ -138,7 +138,7 @@ static void appleRemoteQueueCallback (void* const target, const IOReturn result,
         ((AppleRemoteDevice*) target)->handleCallbackInternal();
 }
 
-bool AppleRemoteDevice::open (const bool openInExclusiveMode) throw()
+bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 {
     Array <int> cookies;
 
