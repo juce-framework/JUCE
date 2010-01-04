@@ -788,17 +788,15 @@ bool AiffAudioFormat::canHandleFile (const File& f)
 AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream,
                                                      const bool deleteStreamIfOpeningFails)
 {
-    AiffAudioFormatReader* w = new AiffAudioFormatReader (sourceStream);
+    ScopedPointer <AiffAudioFormatReader> w (new AiffAudioFormatReader (sourceStream));
 
-    if (w->sampleRate == 0)
-    {
-        if (! deleteStreamIfOpeningFails)
-            w->input = 0;
+    if (w->sampleRate != 0)
+        return w.release();
 
-        deleteAndZero (w);
-    }
+    if (! deleteStreamIfOpeningFails)
+        w->input = 0;
 
-    return w;
+    return 0;
 }
 
 AudioFormatWriter* AiffAudioFormat::createWriterFor (OutputStream* out,

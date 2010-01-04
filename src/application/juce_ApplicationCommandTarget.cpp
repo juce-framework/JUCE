@@ -33,13 +33,12 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ApplicationCommandTarget::ApplicationCommandTarget()
-    : messageInvoker (0)
 {
 }
 
 ApplicationCommandTarget::~ApplicationCommandTarget()
 {
-    deleteAndZero (messageInvoker);
+    messageInvoker = 0;
 }
 
 //==============================================================================

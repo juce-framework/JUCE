@@ -373,17 +373,15 @@ bool QuickTimeAudioFormat::canDoMono()
 AudioFormatReader* QuickTimeAudioFormat::createReaderFor (InputStream* sourceStream,
                                                           const bool deleteStreamIfOpeningFails)
 {
-    QTAudioReader* r = new QTAudioReader (sourceStream, 0);
+    ScopedPointer <QTAudioReader> r (new QTAudioReader (sourceStream, 0));
 
-    if (! r->ok)
-    {
-        if (! deleteStreamIfOpeningFails)
-            r->input = 0;
+    if (r->ok)
+        return r.release();
 
-        deleteAndZero (r);
-    }
+    if (! deleteStreamIfOpeningFails)
+        r->input = 0;
 
-    return r;
+    return 0;
 }
 
 AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*streamToWriteTo*/,

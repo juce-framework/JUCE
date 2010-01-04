@@ -254,7 +254,7 @@ private:
         const CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
     };
 
-    CommandTargetMessageInvoker* messageInvoker;
+    ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
 
     friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, const bool async);

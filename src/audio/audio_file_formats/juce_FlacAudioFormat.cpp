@@ -516,17 +516,15 @@ bool FlacAudioFormat::isCompressed()
 AudioFormatReader* FlacAudioFormat::createReaderFor (InputStream* in,
                                                      const bool deleteStreamIfOpeningFails)
 {
-    FlacReader* r = new FlacReader (in);
+    ScopedPointer <FlacReader> r (new FlacReader (in));
 
-    if (r->sampleRate == 0)
-    {
-        if (! deleteStreamIfOpeningFails)
-            r->input = 0;
+    if (r->sampleRate != 0)
+        return r.release();
 
-        deleteAndZero (r);
-    }
+    if (! deleteStreamIfOpeningFails)
+        r->input = 0;
 
-    return r;
+    return 0;
 }
 
 AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
@@ -538,15 +536,13 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 {
     if (getPossibleBitDepths().contains (bitsPerSample))
     {
-        FlacWriter* w = new FlacWriter (out,
-                                        sampleRate,
-                                        numberOfChannels,
-                                        bitsPerSample);
+        ScopedPointer <FlacWriter> w (new FlacWriter (out,
+                                                      sampleRate,
+                                                      numberOfChannels,
+                                                      bitsPerSample));
 
-        if (! w->ok)
-            deleteAndZero (w);
-
-        return w;
+        if (w->ok)
+            return w.release();
     }
 
     return 0;

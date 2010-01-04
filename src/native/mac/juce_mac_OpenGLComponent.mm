@@ -262,13 +262,10 @@ OpenGLContext* OpenGLContext::createContextForWindow (Component* const component
                                                       const OpenGLPixelFormat& pixelFormat,
                                                       const OpenGLContext* const contextToShareWith)
 {
-    WindowedGLContext* c = new WindowedGLContext (component, pixelFormat,
-                                                  contextToShareWith != 0 ? (NSOpenGLContext*) contextToShareWith->getRawContext() : 0);
+    ScopedPointer <WindowedGLContext> c (new WindowedGLContext (component, pixelFormat,
+                                                                contextToShareWith != 0 ? (NSOpenGLContext*) contextToShareWith->getRawContext() : 0));
 
-    if (c->renderContext == 0)
-        deleteAndZero (c);
-
-    return c;
+    return (c->renderContext != 0) ? c.release() : 0;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const

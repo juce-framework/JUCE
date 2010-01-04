@@ -452,15 +452,12 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      const String& extraHeaders,
                                      const int timeOutMs) const
 {
-    WebInputStream* wi = new WebInputStream (*this, usePostCommand,
-                                             progressCallback, progressCallbackContext,
-                                             extraHeaders,
-                                             timeOutMs);
+    ScopedPointer <WebInputStream> wi (new WebInputStream (*this, usePostCommand,
+                                                           progressCallback, progressCallbackContext,
+                                                           extraHeaders,
+                                                           timeOutMs));
 
-    if (wi->isError())
-        deleteAndZero (wi);
-
-    return wi;
+    return wi->isError() ? 0 : wi.release();
 }
 
 //==============================================================================

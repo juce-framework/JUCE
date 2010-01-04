@@ -426,17 +426,15 @@ bool OggVorbisAudioFormat::canDoMono()
 AudioFormatReader* OggVorbisAudioFormat::createReaderFor (InputStream* in,
                                                           const bool deleteStreamIfOpeningFails)
 {
-    OggReader* r = new OggReader (in);
+    ScopedPointer <OggReader> r (new OggReader (in));
 
-    if (r->sampleRate == 0)
-    {
-        if (! deleteStreamIfOpeningFails)
-            r->input = 0;
+    if (r->sampleRate != 0)
+        return r.release();
 
-        deleteAndZero (r);
-    }
+    if (! deleteStreamIfOpeningFails)
+        r->input = 0;
 
-    return r;
+    return 0;
 }
 
 AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
@@ -446,16 +444,13 @@ AudioFormatWriter* OggVorbisAudioFormat::createWriterFor (OutputStream* out,
                                                           const StringPairArray& /*metadataValues*/,
                                                           int qualityOptionIndex)
 {
-    OggWriter* w = new OggWriter (out,
-                                  sampleRate,
-                                  numChannels,
-                                  bitsPerSample,
-                                  qualityOptionIndex);
+    ScopedPointer <OggWriter> w (new OggWriter (out,
+                                                sampleRate,
+                                                numChannels,
+                                                bitsPerSample,
+                                                qualityOptionIndex));
 
-    if (! w->ok)
-        deleteAndZero (w);
-
-    return w;
+    return w->ok ? w.release() : 0;
 }
 
 bool OggVorbisAudioFormat::isCompressed()

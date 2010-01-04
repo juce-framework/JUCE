@@ -1093,10 +1093,10 @@ private:
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
-    AudioProcessorEditor* w = new AudioUnitPluginWindowCocoa (*this, false);
+    ScopedPointer <AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! ((AudioUnitPluginWindowCocoa*) w)->isValid())
-        deleteAndZero (w);
+        w = 0;
 
 #if JUCE_SUPPORT_CARBON
     if (w == 0)
@@ -1104,14 +1104,14 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
         w = new AudioUnitPluginWindowCarbon (*this);
 
         if (! ((AudioUnitPluginWindowCarbon*) w)->isValid())
-            deleteAndZero (w);
+            w = 0;
     }
 #endif
 
     if (w == 0)
         w = new AudioUnitPluginWindowCocoa (*this, true); // use AUGenericView as a fallback
 
-    return w;
+    return w.release();
 }
 
 
@@ -1415,43 +1415,37 @@ void AudioUnitPluginFormat::findAllTypesForFile (OwnedArray <PluginDescription>&
     desc.fileOrIdentifier = fileOrIdentifier;
     desc.uid = 0;
 
-    AudioUnitPluginInstance* instance = dynamic_cast <AudioUnitPluginInstance*> (createInstanceFromDescription (desc));
-
-    if (instance == 0)
-        return;
-
     try
     {
-        instance->fillInPluginDescription (desc);
-        results.add (new PluginDescription (desc));
+        ScopedPointer <AudioPluginInstance> createdInstance (createInstanceFromDescription (desc));
+        AudioUnitPluginInstance* const auInstance = dynamic_cast <AudioUnitPluginInstance*> ((AudioPluginInstance*) createdInstance);
+
+        if (auInstance != 0)
+        {
+            auInstance->fillInPluginDescription (desc);
+            results.add (new PluginDescription (desc));
+        }
     }
     catch (...)
     {
         // crashed while loading...
     }
-
-    deleteAndZero (instance);
 }
 
 AudioPluginInstance* AudioUnitPluginFormat::createInstanceFromDescription (const PluginDescription& desc)
 {
-    AudioUnitPluginInstance* result = 0;
-
     if (fileMightContainThisPluginType (desc.fileOrIdentifier))
     {
-        result = new AudioUnitPluginInstance (desc.fileOrIdentifier);
+        ScopedPointer <AudioUnitPluginInstance> result (new AudioUnitPluginInstance (desc.fileOrIdentifier));
 
         if (result->audioUnit != 0)
         {
             result->initialise();
-        }
-        else
-        {
-            deleteAndZero (result);
+            return result.release();
         }
     }
 
-    return result;
+    return 0;
 }
 
 const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath& /*directoriesToSearch*/,

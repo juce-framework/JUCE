@@ -129,7 +129,7 @@ public:
 
     /** Returns the object that this ScopedPointer refers to.
     */
-    inline  ObjectType& operator*() const                                   { return *object; }
+    inline ObjectType& operator*() const                                    { return *object; }
 
     /** Lets you access methods and properties of the object that this ScopedPointer refers to. */
     inline ObjectType* operator->() const                                   { return object; }

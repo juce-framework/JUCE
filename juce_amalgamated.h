@@ -5037,7 +5037,7 @@ public:
 
     /** Returns the object that this ScopedPointer refers to.
     */
-    inline  ObjectType& operator*() const                                   { return *object; }
+    inline ObjectType& operator*() const                                    { return *object; }
 
     /** Lets you access methods and properties of the object that this ScopedPointer refers to. */
     inline ObjectType* operator->() const                                   { return object; }
@@ -25313,7 +25313,7 @@ private:
         const CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
     };
 
-    CommandTargetMessageInvoker* messageInvoker;
+    ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
 
     friend class CommandTargetMessageInvoker;
     bool tryToInvoke (const InvocationInfo& info, const bool async);

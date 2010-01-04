@@ -759,17 +759,15 @@ bool WavAudioFormat::canDoMono()
 AudioFormatReader* WavAudioFormat::createReaderFor (InputStream* sourceStream,
                                                     const bool deleteStreamIfOpeningFails)
 {
-    WavAudioFormatReader* r = new WavAudioFormatReader (sourceStream);
+    ScopedPointer <WavAudioFormatReader> r (new WavAudioFormatReader (sourceStream));
 
-    if (r->sampleRate == 0)
-    {
-        if (! deleteStreamIfOpeningFails)
-            r->input = 0;
+    if (r->sampleRate != 0)
+        return r.release();
 
-        deleteAndZero (r);
-    }
+    if (! deleteStreamIfOpeningFails)
+        r->input = 0;
 
-    return r;
+    return 0;
 }
 
 AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,

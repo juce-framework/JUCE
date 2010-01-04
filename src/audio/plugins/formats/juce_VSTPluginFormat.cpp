@@ -365,15 +365,15 @@ public:
 
         log ("Attempting to load VST: " + file.getFullPathName());
 
-        ModuleHandle* m = new ModuleHandle (file);
+        ScopedPointer <ModuleHandle> m (new ModuleHandle (file));
 
         if (! m->open())
-            deleteAndZero (m);
+            m = 0;
 
         --insideVSTCallback;
         _fpreset(); // (doesn't do any harm)
 
-        return m;
+        return m.release();
     }
 
     //==============================================================================
@@ -2915,7 +2915,7 @@ AudioPluginInstance* VSTPluginFormat::createInstanceFromDescription (const Plugi
 
             if (result->effect != 0)
             {
-                result->effect->resvd2 = (VstIntPtr) (pointer_sized_int) result;
+                result->effect->resvd2 = (VstIntPtr) (pointer_sized_int) (VSTPluginInstance*) result;
                 result->initialise();
             }
             else
