@@ -149,7 +149,7 @@ void WaitableEvent::reset() const throw()
 }
 
 //==============================================================================
-void JUCE_CALLTYPE Thread::sleep (int millisecs) throw()
+void JUCE_CALLTYPE Thread::sleep (int millisecs)
 {
     struct timespec time;
     time.tv_sec = millisecs / 1000;
@@ -164,15 +164,15 @@ const tchar* File::separatorString = T("/");
 
 
 //==============================================================================
-bool juce_copyFile (const String& s, const String& d) throw();
+bool juce_copyFile (const String& s, const String& d);
 
-static bool juce_stat (const String& fileName, struct stat& info) throw()
+static bool juce_stat (const String& fileName, struct stat& info)
 {
     return fileName.isNotEmpty()
             && (stat (fileName.toUTF8(), &info) == 0);
 }
 
-bool juce_isDirectory (const String& fileName) throw()
+bool juce_isDirectory (const String& fileName)
 {
     struct stat info;
 
@@ -181,7 +181,7 @@ bool juce_isDirectory (const String& fileName) throw()
                   && ((info.st_mode & S_IFDIR) != 0));
 }
 
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories) throw()
+bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
 {
     if (fileName.isEmpty())
         return false;
@@ -201,19 +201,19 @@ bool juce_fileExists (const String& fileName, const bool dontCountDirectories) t
     return exists;
 }
 
-int64 juce_getFileSize (const String& fileName) throw()
+int64 juce_getFileSize (const String& fileName)
 {
     struct stat info;
     return juce_stat (fileName, info) ? info.st_size : 0;
 }
 
 //==============================================================================
-bool juce_canWriteToFile (const String& fileName) throw()
+bool juce_canWriteToFile (const String& fileName)
 {
     return access (fileName.toUTF8(), W_OK) == 0;
 }
 
-bool juce_deleteFile (const String& fileName) throw()
+bool juce_deleteFile (const String& fileName)
 {
     if (juce_isDirectory (fileName))
         return rmdir ((const char*) fileName.toUTF8()) == 0;
@@ -221,7 +221,7 @@ bool juce_deleteFile (const String& fileName) throw()
         return remove ((const char*) fileName.toUTF8()) == 0;
 }
 
-bool juce_moveFile (const String& source, const String& dest) throw()
+bool juce_moveFile (const String& source, const String& dest)
 {
     if (rename (source.toUTF8(), dest.toUTF8()) == 0)
         return true;
@@ -238,12 +238,12 @@ bool juce_moveFile (const String& source, const String& dest) throw()
     return false;
 }
 
-void juce_createDirectory (const String& fileName) throw()
+void juce_createDirectory (const String& fileName)
 {
     mkdir (fileName.toUTF8(), 0777);
 }
 
-void* juce_fileOpen (const String& fileName, bool forWriting) throw()
+void* juce_fileOpen (const String& fileName, bool forWriting)
 {
     int flags = O_RDONLY;
 
@@ -267,13 +267,13 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
     return (void*) open ((const char*) fileName.toUTF8(), flags, 00644);
 }
 
-void juce_fileClose (void* handle) throw()
+void juce_fileClose (void* handle)
 {
     if (handle != 0)
         close ((int) (pointer_sized_int) handle);
 }
 
-int juce_fileRead (void* handle, void* buffer, int size) throw()
+int juce_fileRead (void* handle, void* buffer, int size)
 {
     if (handle != 0)
         return read ((int) (pointer_sized_int) handle, buffer, size);
@@ -281,7 +281,7 @@ int juce_fileRead (void* handle, void* buffer, int size) throw()
     return 0;
 }
 
-int juce_fileWrite (void* handle, const void* buffer, int size) throw()
+int juce_fileWrite (void* handle, const void* buffer, int size)
 {
     if (handle != 0)
         return write ((int) (pointer_sized_int) handle, buffer, size);
@@ -289,7 +289,7 @@ int juce_fileWrite (void* handle, const void* buffer, int size) throw()
     return 0;
 }
 
-int64 juce_fileSetPosition (void* handle, int64 pos) throw()
+int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     if (handle != 0 && lseek ((int) (pointer_sized_int) handle, pos, SEEK_SET) == pos)
         return pos;
@@ -297,7 +297,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos) throw()
     return -1;
 }
 
-int64 juce_fileGetPosition (void* handle) throw()
+int64 juce_fileGetPosition (void* handle)
 {
     if (handle != 0)
         return lseek ((int) (pointer_sized_int) handle, 0, SEEK_CUR);
@@ -305,7 +305,7 @@ int64 juce_fileGetPosition (void* handle) throw()
         return -1;
 }
 
-void juce_fileFlush (void* handle) throw()
+void juce_fileFlush (void* handle)
 {
     if (handle != 0)
         fsync ((int) (pointer_sized_int) handle);
@@ -320,7 +320,7 @@ const File juce_getExecutableFile()
 
 //==============================================================================
 // if this file doesn't exist, find a parent of it that does..
-static bool doStatFS (const File* file, struct statfs& result) throw()
+static bool doStatFS (const File* file, struct statfs& result)
 {
     File f (*file);
 
@@ -335,7 +335,7 @@ static bool doStatFS (const File* file, struct statfs& result) throw()
     return statfs (f.getFullPathName().toUTF8(), &result) == 0;
 }
 
-int64 File::getBytesFreeOnVolume() const throw()
+int64 File::getBytesFreeOnVolume() const
 {
     struct statfs buf;
     if (doStatFS (this, buf))
@@ -344,7 +344,7 @@ int64 File::getBytesFreeOnVolume() const throw()
     return 0;
 }
 
-int64 File::getVolumeTotalSize() const throw()
+int64 File::getVolumeTotalSize() const
 {
     struct statfs buf;
     if (doStatFS (this, buf))
@@ -354,7 +354,7 @@ int64 File::getVolumeTotalSize() const throw()
 }
 
 const String juce_getVolumeLabel (const String& filenameOnVolume,
-                                  int& volumeSerialNumber) throw()
+                                  int& volumeSerialNumber)
 {
     volumeSerialNumber = 0;
 
@@ -422,7 +422,7 @@ const String juce_getOutputFromCommand (const String& command)
   #define filedesc ((int) internal)
 #endif
 
-InterProcessLock::InterProcessLock (const String& name_) throw()
+InterProcessLock::InterProcessLock (const String& name_)
     : internal (0),
       name (name_),
       reentrancyLevel (0)
@@ -439,7 +439,7 @@ InterProcessLock::InterProcessLock (const String& name_) throw()
     internal = (void*) open (temp.getFullPathName().toUTF8(), O_RDWR);
 }
 
-InterProcessLock::~InterProcessLock() throw()
+InterProcessLock::~InterProcessLock()
 {
     while (reentrancyLevel > 0)
         this->exit();
@@ -447,7 +447,7 @@ InterProcessLock::~InterProcessLock() throw()
     close (filedesc);
 }
 
-bool InterProcessLock::enter (const int timeOutMillisecs) throw()
+bool InterProcessLock::enter (const int timeOutMillisecs)
 {
     if (internal == 0)
         return false;
@@ -485,7 +485,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs) throw()
     return false;
 }
 
-void InterProcessLock::exit() throw()
+void InterProcessLock::exit()
 {
     if (reentrancyLevel > 0 && internal != 0)
     {

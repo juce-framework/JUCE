@@ -43,7 +43,7 @@ class JUCE_API  URL
 public:
     //==============================================================================
     /** Creates an empty URL. */
-    URL() throw();
+    URL();
 
     /** Creates a URL from a string. */
     URL (const String& url);
@@ -52,7 +52,7 @@ public:
     URL (const URL& other);
 
     /** Destructor. */
-    ~URL() throw();
+    ~URL();
 
     /** Copies this URL from another one. */
     const URL& operator= (const URL& other);
@@ -128,18 +128,18 @@ public:
 
         @see getNamedParameter, withParameter
     */
-    const StringPairArray& getParameters() const throw();
+    const StringPairArray& getParameters() const;
 
     /** Returns the set of files that should be uploaded as part of a POST operation.
 
         This is the set of files that were added to the URL with the withFileToUpload()
         method.
     */
-    const StringPairArray& getFilesToUpload() const throw();
+    const StringPairArray& getFilesToUpload() const;
 
     /** Returns the set of mime types associated with each of the upload files.
     */
-    const StringPairArray& getMimeTypesOfUploadFiles() const throw();
+    const StringPairArray& getMimeTypesOfUploadFiles() const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
@@ -157,7 +157,7 @@ public:
 
     /** Returns the data that was set using withPOSTData().
     */
-    const String getPostData() const throw()                        { return postData; }
+    const String getPostData() const                            { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.

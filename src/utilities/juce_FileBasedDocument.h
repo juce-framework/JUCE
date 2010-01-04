@@ -74,7 +74,7 @@ public:
 
         @see resetChangedFlag, changed
     */
-    bool hasChangedSinceSaved() const throw()                   { return changedSinceSave; }
+    bool hasChangedSinceSaved() const                           { return changedSinceSave; }
 
     /** Called to indicate that the document has changed and needs saving.
 
@@ -211,7 +211,7 @@ public:
         It is changed when one of the load or save methods is used, or when setFile()
         is used to explicitly set it.
     */
-    const File getFile() const throw()                      { return documentFile; }
+    const File getFile() const                              { return documentFile; }
 
     /** Sets the file that this document thinks it was loaded from.
 

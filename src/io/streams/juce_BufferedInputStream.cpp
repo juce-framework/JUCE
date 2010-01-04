@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 BufferedInputStream::BufferedInputStream (InputStream* const source_,
                                           const int bufferSize_,
-                                          const bool deleteSourceWhenDestroyed) throw()
+                                          const bool deleteSourceWhenDestroyed)
    : source (source_),
      sourceToDelete (deleteSourceWhenDestroyed ? source_ : 0),
      bufferSize (jmax (256, bufferSize_)),
@@ -50,7 +50,7 @@ BufferedInputStream::BufferedInputStream (InputStream* const source_,
     buffer.malloc (bufferSize);
 }
 
-BufferedInputStream::~BufferedInputStream() throw()
+BufferedInputStream::~BufferedInputStream()
 {
 }
 

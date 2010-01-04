@@ -44,15 +44,15 @@ public:
         @param size     the length of each dimension of the kernel, so e.g. if the size
                         is 5, it will create a 5x5 kernel
     */
-    ImageConvolutionKernel (const int size) throw();
+    ImageConvolutionKernel (const int size);
 
     /** Destructor. */
-    ~ImageConvolutionKernel() throw();
+    ~ImageConvolutionKernel();
 
     //==============================================================================
     /** Resets all values in the kernel to zero.
     */
-    void clear() throw();
+    void clear();
 
     /** Sets the value of a specific cell in the kernel.
 
@@ -62,16 +62,16 @@ public:
     */
     void setKernelValue (const int x,
                          const int y,
-                         const float value) throw();
+                         const float value);
 
     /** Rescales all values in the kernel to make the total add up to a fixed value.
 
         This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
     */
-    void setOverallSum (const float desiredTotalSum) throw();
+    void setOverallSum (const float desiredTotalSum);
 
     /** Multiplies all values in the kernel by a value. */
-    void rescaleAllValues (const float multiplier) throw();
+    void rescaleAllValues (const float multiplier);
 
     /** Intialises the kernel for a gaussian blur.
 
@@ -80,20 +80,20 @@ public:
                             edges. Ideally the kernel should be just larger than
                             (blurRadius * 2).
     */
-    void createGaussianBlur (const float blurRadius) throw();
+    void createGaussianBlur (const float blurRadius);
 
     //==============================================================================
     /** Returns the size of the kernel.
 
         E.g. if it's a 3x3 kernel, this returns 3.
     */
-    int getKernelSize() const throw()       { return size; }
+    int getKernelSize() const               { return size; }
 
     /** Returns a 2-dimensional array of the kernel's values.
 
         The size of each dimension of the array will be getKernelSize().
     */
-    float** getValues() const throw()       { return values; }
+    float** getValues() const               { return values; }
 
     //==============================================================================
     /** Applies the kernel to an image.

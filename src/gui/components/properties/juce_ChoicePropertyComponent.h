@@ -80,7 +80,7 @@ public:
     virtual int getIndex() const = 0;
 
     /** Returns the list of options. */
-    const StringArray& getChoices() const throw();
+    const StringArray& getChoices() const;
 
 
     //==============================================================================

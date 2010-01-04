@@ -48,7 +48,7 @@ static ImageCache* instance = 0;
 static int cacheTimeout = 5000;
 
 
-ImageCache::ImageCache() throw()
+ImageCache::ImageCache()
     : images (4)
 {
 }

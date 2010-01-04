@@ -334,7 +334,7 @@ void DropShadower::setShadowImage (Image* const src,
                                    const int w,
                                    const int h,
                                    const int sx,
-                                   const int sy) throw()
+                                   const int sy)
 {
     shadowImageSections[num] = new Image (Image::ARGB, w, h, true);
 

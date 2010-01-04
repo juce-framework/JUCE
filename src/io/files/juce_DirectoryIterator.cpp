@@ -32,18 +32,18 @@ BEGIN_JUCE_NAMESPACE
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDirectory, bool* isHidden, int64* fileSize,
-                          Time* modTime, Time* creationTime, bool* isReadOnly) throw();
+                          Time* modTime, Time* creationTime, bool* isReadOnly);
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDirectory, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly) throw();
-void juce_findFileClose (void* handle) throw();
+                        Time* modTime, Time* creationTime, bool* isReadOnly);
+void juce_findFileClose (void* handle);
 
 
 //==============================================================================
 DirectoryIterator::DirectoryIterator (const File& directory,
                                       bool isRecursive,
                                       const String& wc,
-                                      const int whatToLookFor_) throw()
+                                      const int whatToLookFor_)
   : wildCard (wc),
     index (-1),
     whatToLookFor (whatToLookFor_)
@@ -105,11 +105,11 @@ DirectoryIterator::DirectoryIterator (const File& directory,
     }
 }
 
-DirectoryIterator::~DirectoryIterator() throw()
+DirectoryIterator::~DirectoryIterator()
 {
 }
 
-bool DirectoryIterator::next() throw()
+bool DirectoryIterator::next()
 {
     if (subIterator != 0)
     {
@@ -134,7 +134,7 @@ bool DirectoryIterator::next() throw()
     return true;
 }
 
-const File DirectoryIterator::getFile() const throw()
+const File DirectoryIterator::getFile() const
 {
     if (subIterator != 0)
         return subIterator->getFile();
@@ -145,7 +145,7 @@ const File DirectoryIterator::getFile() const throw()
                     : File::nonexistent;
 }
 
-float DirectoryIterator::getEstimatedProgress() const throw()
+float DirectoryIterator::getEstimatedProgress() const
 {
     if (filesFound.size() + dirsFound.size() == 0)
     {

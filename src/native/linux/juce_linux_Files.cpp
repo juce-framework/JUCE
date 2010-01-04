@@ -37,7 +37,7 @@
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
-                        int64& creationTime) throw()
+                        int64& creationTime)
 {
     modificationTime = 0;
     accessTime = 0;
@@ -56,7 +56,7 @@ void juce_getFileTimes (const String& fileName,
 bool juce_setFileTimes (const String& fileName,
                         int64 modificationTime,
                         int64 accessTime,
-                        int64 creationTime) throw()
+                        int64 creationTime)
 {
     struct utimbuf times;
     times.actime = (time_t) (accessTime / 1000);
@@ -65,7 +65,7 @@ bool juce_setFileTimes (const String& fileName,
     return utime (fileName.toUTF8(), &times) == 0;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
 {
     struct stat info;
     const int res = stat (fileName.toUTF8(), &info);
@@ -83,7 +83,7 @@ bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
     return chmod (fileName.toUTF8(), info.st_mode) == 0;
 }
 
-bool juce_copyFile (const String& s, const String& d) throw()
+bool juce_copyFile (const String& s, const String& d)
 {
     const File source (s), dest (d);
 
@@ -114,7 +114,7 @@ bool juce_copyFile (const String& s, const String& d) throw()
     return ok;
 }
 
-const StringArray juce_getFileSystemRoots() throw()
+const StringArray juce_getFileSystemRoots()
 {
     StringArray s;
     s.add (T("/"));
@@ -122,7 +122,7 @@ const StringArray juce_getFileSystemRoots() throw()
 }
 
 //==============================================================================
-bool File::isOnCDRomDrive() const throw()
+bool File::isOnCDRomDrive() const
 {
     struct statfs buf;
 
@@ -133,7 +133,7 @@ bool File::isOnCDRomDrive() const throw()
     return false;
 }
 
-bool File::isOnHardDisk() const throw()
+bool File::isOnHardDisk() const
 {
     struct statfs buf;
 
@@ -159,13 +159,13 @@ bool File::isOnHardDisk() const throw()
     return true;
 }
 
-bool File::isOnRemovableDrive() const throw()
+bool File::isOnRemovableDrive() const
 {
     jassertfalse // xxx not implemented for linux!
     return false;
 }
 
-bool File::isHidden() const throw()
+bool File::isHidden() const
 {
     return getFileName().startsWithChar (T('.'));
 }
@@ -240,25 +240,25 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory() throw()
+const File File::getCurrentWorkingDirectory()
 {
     char buf [2048];
     return File (String::fromUTF8 ((const uint8*) getcwd (buf, sizeof (buf))));
 }
 
-bool File::setAsCurrentWorkingDirectory() const throw()
+bool File::setAsCurrentWorkingDirectory() const
 {
     return chdir (getFullPathName().toUTF8()) == 0;
 }
 
 //==============================================================================
-const String File::getVersion() const throw()
+const String File::getVersion() const
 {
     return String::empty; // xxx not yet implemented
 }
 
 //==============================================================================
-const File File::getLinkedTarget() const throw()
+const File File::getLinkedTarget() const
 {
     char buffer [4096];
     size_t numChars = readlink ((const char*) getFullPathName().toUTF8(),
@@ -271,7 +271,7 @@ const File File::getLinkedTarget() const throw()
 }
 
 //==============================================================================
-bool File::moveToTrash() const throw()
+bool File::moveToTrash() const
 {
     if (! exists())
         return true;
@@ -295,7 +295,7 @@ struct FindFileStruct
     DIR* dir;
 
     bool getNextMatch (String& result, bool* const isDir, bool* const isHidden, int64* const fileSize,
-                       Time* const modTime, Time* const creationTime, bool* const isReadOnly) throw()
+                       Time* const modTime, Time* const creationTime, bool* const isReadOnly)
     {
         const char* const wildcardUTF8 = wildCard.toUTF8();
 
@@ -353,7 +353,7 @@ struct FindFileStruct
 // returns 0 on failure
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly) throw()
+                          Time* creationTime, bool* isReadOnly)
 {
     DIR* d = opendir (directory.toUTF8());
 
@@ -389,7 +389,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 }
 
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
+                        bool* isDir, bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
 {
     FindFileStruct* const ff = (FindFileStruct*) handle;
 
@@ -399,7 +399,7 @@ bool juce_findFileNext (void* handle, String& resultFile,
     return false;
 }
 
-void juce_findFileClose (void* handle) throw()
+void juce_findFileClose (void* handle)
 {
     FindFileStruct* const ff = (FindFileStruct*) handle;
 
@@ -411,7 +411,7 @@ void juce_findFileClose (void* handle) throw()
 }
 
 bool juce_launchFile (const String& fileName,
-                      const String& parameters) throw()
+                      const String& parameters)
 {
     String cmdString (fileName);
     cmdString << " " << parameters;
@@ -447,7 +447,7 @@ bool juce_launchFile (const String& fileName,
     return cpid >= 0;
 }
 
-void File::revealToUser() const throw()
+void File::revealToUser() const
 {
     if (isDirectory())
         startAsProcess();

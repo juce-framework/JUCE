@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-FileInputSource::FileInputSource (const File& file_) throw()
+FileInputSource::FileInputSource (const File& file_)
     : file (file_)
 {
 }

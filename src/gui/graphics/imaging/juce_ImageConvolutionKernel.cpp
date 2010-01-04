@@ -31,21 +31,21 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-ImageConvolutionKernel::ImageConvolutionKernel (const int size_) throw()
+ImageConvolutionKernel::ImageConvolutionKernel (const int size_)
     : values (size_ * size_),
       size (size_)
 {
     clear();
 }
 
-ImageConvolutionKernel::~ImageConvolutionKernel() throw()
+ImageConvolutionKernel::~ImageConvolutionKernel()
 {
 }
 
 //==============================================================================
 void ImageConvolutionKernel::setKernelValue (const int x,
                                              const int y,
-                                             const float value) throw()
+                                             const float value)
 {
     if (((unsigned int) x) < (unsigned int) size
          && ((unsigned int) y) < (unsigned int) size)
@@ -58,13 +58,13 @@ void ImageConvolutionKernel::setKernelValue (const int x,
     }
 }
 
-void ImageConvolutionKernel::clear() throw()
+void ImageConvolutionKernel::clear()
 {
     for (int i = size * size; --i >= 0;)
         values[i] = 0;
 }
 
-void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum) throw()
+void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum)
 {
     double currentTotal = 0.0;
 
@@ -74,14 +74,14 @@ void ImageConvolutionKernel::setOverallSum (const float desiredTotalSum) throw()
     rescaleAllValues ((float) (desiredTotalSum / currentTotal));
 }
 
-void ImageConvolutionKernel::rescaleAllValues (const float multiplier) throw()
+void ImageConvolutionKernel::rescaleAllValues (const float multiplier)
 {
     for (int i = size * size; --i >= 0;)
         values[i] *= multiplier;
 }
 
 //==============================================================================
-void ImageConvolutionKernel::createGaussianBlur (const float radius) throw()
+void ImageConvolutionKernel::createGaussianBlur (const float radius)
 {
     const double radiusFactor = -1.0 / (radius * radius * 2);
     const int centre = size >> 1;

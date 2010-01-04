@@ -49,7 +49,7 @@ static const tchar* const propertyTagName       = T("VALUE");
 //==============================================================================
 PropertiesFile::PropertiesFile (const File& f,
                                 const int millisecondsBeforeSaving,
-                                const int options_) throw()
+                                const int options_)
     : PropertySet (ignoreCaseOfKeyNames),
       file (f),
       timerInterval (millisecondsBeforeSaving),
@@ -136,14 +136,12 @@ PropertiesFile::~PropertiesFile()
 bool PropertiesFile::saveIfNeeded()
 {
     const ScopedLock sl (getLock());
-
     return (! needsWriting) || save();
 }
 
-bool PropertiesFile::needsToBeSaved() const throw()
+bool PropertiesFile::needsToBeSaved() const
 {
     const ScopedLock sl (getLock());
-
     return needsWriting;
 }
 
@@ -245,11 +243,6 @@ void PropertiesFile::propertyChanged()
         startTimer (timerInterval);
     else if (timerInterval == 0)
         saveIfNeeded();
-}
-
-const File PropertiesFile::getFile() const throw()
-{
-    return file;
 }
 
 //==============================================================================

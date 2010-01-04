@@ -35,7 +35,7 @@
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-void* threadEntryProc (void* value) throw()
+void* threadEntryProc (void* value)
 {
     // New threads start off as root when running suid
     Process::lowerPrivilege();
@@ -44,7 +44,7 @@ void* threadEntryProc (void* value) throw()
     return 0;
 }
 
-void* juce_createThread (void* userData) throw()
+void* juce_createThread (void* userData)
 {
     pthread_t handle = 0;
 
@@ -57,17 +57,17 @@ void* juce_createThread (void* userData) throw()
     return 0;
 }
 
-void juce_killThread (void* handle) throw()
+void juce_killThread (void* handle)
 {
     if (handle != 0)
         pthread_cancel ((pthread_t)handle);
 }
 
-void juce_setCurrentThreadName (const String& /*name*/) throw()
+void juce_setCurrentThreadName (const String& /*name*/)
 {
 }
 
-Thread::ThreadID Thread::getCurrentThreadId() throw()
+Thread::ThreadID Thread::getCurrentThreadId()
 {
     return (ThreadID) pthread_self();
 }
@@ -88,7 +88,7 @@ Thread::ThreadID Thread::getCurrentThreadId() throw()
 
 // priority 1 to 10 where 5=normal, 1=low. If the handle is 0, sets the
 // priority of the current thread
-bool juce_setThreadPriority (void* handle, int priority) throw()
+bool juce_setThreadPriority (void* handle, int priority)
 {
     struct sched_param param;
     int policy, maxp, minp, pri;
@@ -119,7 +119,7 @@ bool juce_setThreadPriority (void* handle, int priority) throw()
     return false;
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
 #if SUPPORT_AFFINITIES
     cpu_set_t affinity;
@@ -148,7 +148,7 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
 #endif
 }
 
-void Thread::yield() throw()
+void Thread::yield()
 {
     sched_yield();
 }
@@ -188,7 +188,7 @@ void Process::terminate()
     exit (0);
 }
 
-bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
     static char testResult = 0;
 
@@ -206,7 +206,7 @@ bool JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
     return testResult < 0;
 }
 
-bool JUCE_CALLTYPE Process::isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 {
     return juce_isRunningUnderDebugger();
 }

@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-URL::URL() throw()
+URL::URL()
 {
 }
 
@@ -92,7 +92,7 @@ const URL& URL::operator= (const URL& other)
     return *this;
 }
 
-URL::~URL() throw()
+URL::~URL()
 {
 }
 
@@ -282,7 +282,7 @@ public:
         juce_closeInternetFile (handle);
     }
 
-    bool isError() const throw()
+    bool isError() const
     {
         return handle == 0;
     }
@@ -436,7 +436,7 @@ private:
         }
     }
 
-    void appendUTF8ToPostData (const String& text) throw()
+    void appendUTF8ToPostData (const String& text)
     {
         postData.append (text.toUTF8(),
                          (int) strlen (text.toUTF8()));
@@ -519,17 +519,17 @@ const URL URL::withPOSTData (const String& postData_) const
     return u;
 }
 
-const StringPairArray& URL::getParameters() const throw()
+const StringPairArray& URL::getParameters() const
 {
     return parameters;
 }
 
-const StringPairArray& URL::getFilesToUpload() const throw()
+const StringPairArray& URL::getFilesToUpload() const
 {
     return filesToUpload;
 }
 
-const StringPairArray& URL::getMimeTypesOfUploadFiles() const throw()
+const StringPairArray& URL::getMimeTypesOfUploadFiles() const
 {
     return mimeTypes;
 }
@@ -597,8 +597,7 @@ const String URL::addEscapeChars (const String& s, const bool isParameter)
 }
 
 //==============================================================================
-extern bool juce_launchFile (const String& fileName,
-                             const String& parameters) throw();
+extern bool juce_launchFile (const String& fileName, const String& parameters);
 
 bool URL::launchInDefaultBrowser() const
 {

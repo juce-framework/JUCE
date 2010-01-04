@@ -114,7 +114,7 @@ public:
 
         @see setSliderStyle
     */
-    SliderStyle getSliderStyle() const throw()                                  { return style; }
+    SliderStyle getSliderStyle() const                                      { return style; }
 
     //==============================================================================
     /** Changes the properties of a rotary slider.
@@ -149,12 +149,12 @@ public:
 
         If false, the slider will just try to snap to wherever the mouse is.
     */
-    void setVelocityBasedMode (const bool isVelocityBased) throw();
+    void setVelocityBasedMode (const bool isVelocityBased);
 
     /** Returns true if velocity-based mode is active.
         @see setVelocityBasedMode
     */
-    bool getVelocityBasedMode() const throw()                   { return isVelocityBased; }
+    bool getVelocityBasedMode() const                       { return isVelocityBased; }
 
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
 
@@ -172,27 +172,27 @@ public:
     void setVelocityModeParameters (const double sensitivity = 1.0,
                                     const int threshold = 1,
                                     const double offset = 0.0,
-                                    const bool userCanPressKeyToSwapMode = true) throw();
+                                    const bool userCanPressKeyToSwapMode = true);
 
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters
     */
-    double getVelocitySensitivity() const throw()               { return velocityModeSensitivity; }
+    double getVelocitySensitivity() const                       { return velocityModeSensitivity; }
 
     /** Returns the velocity threshold setting.
         @see setVelocityModeParameters
     */
-    int getVelocityThreshold() const throw()                    { return velocityModeThreshold; }
+    int getVelocityThreshold() const                            { return velocityModeThreshold; }
 
     /** Returns the velocity offset setting.
         @see setVelocityModeParameters
     */
-    double getVelocityOffset() const throw()                    { return velocityModeOffset; }
+    double getVelocityOffset() const                            { return velocityModeOffset; }
 
     /** Returns the velocity user key setting.
         @see setVelocityModeParameters
     */
-    bool getVelocityModeIsSwappable() const throw()             { return userKeyOverridesVelocity; }
+    bool getVelocityModeIsSwappable() const                     { return userKeyOverridesVelocity; }
 
     //==============================================================================
     /** Sets up a skew factor to alter the way values are distributed.
@@ -210,7 +210,7 @@ public:
 
         @see getSkewFactor, setSkewFactorFromMidPoint
     */
-    void setSkewFactor (const double factor) throw();
+    void setSkewFactor (const double factor);
 
     /** Sets up a skew factor to alter the way values are distributed.
 
@@ -219,7 +219,7 @@ public:
 
         @see setSkewFactor, getSkewFactor
      */
-    void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint) throw();
+    void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint);
 
     /** Returns the current skew factor.
 
@@ -227,7 +227,7 @@ public:
 
         @see setSkewFactor, setSkewFactorFromMidPoint
     */
-    double getSkewFactor() const throw()                        { return skewFactor; }
+    double getSkewFactor() const                                { return skewFactor; }
 
     //==============================================================================
     /** Used by setIncDecButtonsMode().
@@ -285,17 +285,17 @@ public:
     /** Returns the status of the text-box.
         @see setTextBoxStyle
     */
-    const TextEntryBoxPosition getTextBoxPosition() const throw()           { return textBoxPos; }
+    const TextEntryBoxPosition getTextBoxPosition() const                   { return textBoxPos; }
 
     /** Returns the width used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxWidth() const throw()                                     { return textBoxWidth; }
+    int getTextBoxWidth() const                                             { return textBoxWidth; }
 
     /** Returns the height used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxHeight() const throw()                                    { return textBoxHeight; }
+    int getTextBoxHeight() const                                            { return textBoxHeight; }
 
     /** Makes the text-box editable.
 
@@ -304,12 +304,12 @@ public:
 
         @see setTextBoxStyle, getValueFromText, getTextFromValue
     */
-    void setTextBoxIsEditable (const bool shouldBeEditable) throw();
+    void setTextBoxIsEditable (const bool shouldBeEditable);
 
     /** Returns true if the text-box is read-only.
         @see setTextBoxStyle
     */
-    bool isTextBoxEditable() const throw()                                  { return editableText; }
+    bool isTextBoxEditable() const                                          { return editableText; }
 
     /** If the text-box is editable, this will give it the focus so that the user can
         type directly into it.
@@ -349,7 +349,7 @@ public:
                    const bool sendMessageSynchronously = false);
 
     /** Returns the slider's current value. */
-    double getValue() const throw();
+    double getValue() const;
 
     //==============================================================================
     /** Sets the limits that the slider's value can take.
@@ -366,17 +366,17 @@ public:
     /** Returns the current maximum value.
         @see setRange
     */
-    double getMaximum() const throw()                                       { return maximum; }
+    double getMaximum() const                                               { return maximum; }
 
     /** Returns the current minimum value.
         @see setRange
     */
-    double getMinimum() const throw()                                       { return minimum; }
+    double getMinimum() const                                               { return minimum; }
 
     /** Returns the current step-size for values.
         @see setRange
     */
-    double getInterval() const throw()                                      { return interval; }
+    double getInterval() const                                              { return interval; }
 
     //==============================================================================
     /** For a slider with two or three thumbs, this returns the lower of its values.
@@ -387,7 +387,7 @@ public:
 
         @see setMinValue, getMaxValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
-    double getMinValue() const throw();
+    double getMinValue() const;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -421,7 +421,7 @@ public:
 
         @see getMinValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
-    double getMaxValue() const throw();
+    double getMaxValue() const;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -449,10 +449,10 @@ public:
 
     //==============================================================================
     /** Adds a listener to be called when this slider's value changes. */
-    void addListener (SliderListener* const listener) throw();
+    void addListener (SliderListener* const listener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (SliderListener* const listener) throw();
+    void removeListener (SliderListener* const listener);
 
     //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
@@ -464,7 +464,7 @@ public:
         @see getDoubleClickReturnValue
     */
     void setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                    const double valueToSetOnDoubleClick) throw();
+                                    const double valueToSetOnDoubleClick);
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
 
@@ -473,7 +473,7 @@ public:
 
         @see setDoubleClickReturnValue
     */
-    double getDoubleClickReturnValue (bool& isEnabled) const throw();
+    double getDoubleClickReturnValue (bool& isEnabled) const;
 
     //==============================================================================
     /** Tells the slider whether to keep sending change messages while the user
@@ -484,7 +484,7 @@ public:
         will be continuously sent as they drag it while the mouse button is still
         held down.
     */
-    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw();
+    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease);
 
     /** This lets you change whether the slider thumb jumps to the mouse position
         when you click.
@@ -495,7 +495,7 @@ public:
         This only applies to linear bars, and won't affect two- or three- value
         sliders.
     */
-    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse) throw();
+    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse);
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
@@ -510,7 +510,7 @@ public:
         you'll have to add it to a parent component instead).
     */
     void setPopupDisplayEnabled (const bool isEnabled,
-                                 Component* const parentComponentToUse) throw();
+                                 Component* const parentComponentToUse);
 
     /** If this is set to true, then right-clicking on the slider will pop-up
         a menu to let the user change the way it works.
@@ -519,13 +519,13 @@ public:
         things like velocity sensitivity, and for rotary sliders, whether they
         use a linear or rotary mouse-drag to move them.
     */
-    void setPopupMenuEnabled (const bool menuEnabled) throw();
+    void setPopupMenuEnabled (const bool menuEnabled);
 
     /** This can be used to stop the mouse scroll-wheel from moving the slider.
 
         By default it's enabled.
     */
-    void setScrollWheelEnabled (const bool enabled) throw();
+    void setScrollWheelEnabled (const bool enabled);
 
     /** Returns a number to indicate which thumb is currently being dragged by the
         mouse.
@@ -533,7 +533,7 @@ public:
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
         the maximum-value thumb, or -1 if none is currently down.
     */
-    int getThumbBeingDragged() const throw()        { return sliderBeingDragged; }
+    int getThumbBeingDragged() const                { return sliderBeingDragged; }
 
     //==============================================================================
     /** Callback to indicate that the user is about to start dragging the slider.
@@ -659,9 +659,9 @@ public:
 
 
     /** True if the slider moves horizontally. */
-    bool isHorizontal() const throw();
+    bool isHorizontal() const;
     /** True if the slider moves vertically. */
-    bool isVertical() const throw();
+    bool isVertical() const;
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
@@ -758,9 +758,9 @@ private:
     void restoreMouseIfHidden();
     void sendDragStart();
     void sendDragEnd();
-    double constrainedValue (double value) const throw();
+    double constrainedValue (double value) const;
     void triggerChangeMessage (const bool synchronous);
-    bool incDecDragDirectionIsHorizontal() const throw();
+    bool incDecDragDirectionIsHorizontal() const;
 
     Slider (const Slider&);
     const Slider& operator= (const Slider&);

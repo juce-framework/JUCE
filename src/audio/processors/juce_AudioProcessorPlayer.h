@@ -66,13 +66,13 @@ public:
 
     /** Returns the current audio processor that is being played.
     */
-    AudioProcessor* getCurrentProcessor() const throw()             { return processor; }
+    AudioProcessor* getCurrentProcessor() const                     { return processor; }
 
     /** Returns a midi message collector that you can pass midi messages to if you
         want them to be injected into the midi stream that is being sent to the
         processor.
     */
-    MidiMessageCollector& getMidiMessageCollector() throw()         { return messageCollector; }
+    MidiMessageCollector& getMidiMessageCollector()                 { return messageCollector; }
 
     //==============================================================================
     /** @internal */

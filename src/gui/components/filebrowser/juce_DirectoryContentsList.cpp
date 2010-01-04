@@ -32,11 +32,11 @@ BEGIN_JUCE_NAMESPACE
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly) throw();
+                          Time* creationTime, bool* isReadOnly);
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDirectory, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly) throw();
-void juce_findFileClose (void* handle) throw();
+                        Time* modTime, Time* creationTime, bool* isReadOnly);
+void juce_findFileClose (void* handle);
 
 
 //==============================================================================
@@ -63,7 +63,7 @@ void DirectoryContentsList::setIgnoresHiddenFiles (const bool shouldIgnoreHidden
 }
 
 //==============================================================================
-const File& DirectoryContentsList::getDirectory() const throw()
+const File& DirectoryContentsList::getDirectory() const
 {
     return root;
 }
@@ -247,7 +247,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 }
 
 int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInfo* const first,
-                                            const DirectoryContentsList::FileInfo* const second) throw()
+                                            const DirectoryContentsList::FileInfo* const second)
 {
 #if JUCE_WINDOWS
     if (first->isDirectory != second->isDirectory)

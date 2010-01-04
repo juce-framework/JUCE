@@ -36,11 +36,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PositionedGlyph::PositionedGlyph() throw()
+PositionedGlyph::PositionedGlyph()
 {
 }
 
-void PositionedGlyph::draw (const Graphics& g) const throw()
+void PositionedGlyph::draw (const Graphics& g) const
 {
     if (! isWhitespace())
     {
@@ -50,7 +50,7 @@ void PositionedGlyph::draw (const Graphics& g) const throw()
 }
 
 void PositionedGlyph::draw (const Graphics& g,
-                            const AffineTransform& transform) const throw()
+                            const AffineTransform& transform) const
 {
     if (! isWhitespace())
     {
@@ -60,7 +60,7 @@ void PositionedGlyph::draw (const Graphics& g,
     }
 }
 
-void PositionedGlyph::createPath (Path& path) const throw()
+void PositionedGlyph::createPath (Path& path) const
 {
     if (! isWhitespace())
     {
@@ -77,7 +77,7 @@ void PositionedGlyph::createPath (Path& path) const throw()
     }
 }
 
-bool PositionedGlyph::hitTest (float px, float py) const throw()
+bool PositionedGlyph::hitTest (float px, float py) const
 {
     if (px >= getLeft() && px < getRight()
         && py >= getTop() && py < getBottom()
@@ -102,7 +102,7 @@ bool PositionedGlyph::hitTest (float px, float py) const throw()
 }
 
 void PositionedGlyph::moveBy (const float deltaX,
-                              const float deltaY) throw()
+                              const float deltaY)
 {
     x += deltaX;
     y += deltaY;
@@ -110,17 +110,17 @@ void PositionedGlyph::moveBy (const float deltaX,
 
 
 //==============================================================================
-GlyphArrangement::GlyphArrangement() throw()
+GlyphArrangement::GlyphArrangement()
     : glyphs (128)
 {
 }
 
-GlyphArrangement::GlyphArrangement (const GlyphArrangement& other) throw()
+GlyphArrangement::GlyphArrangement (const GlyphArrangement& other)
 {
     addGlyphArrangement (other);
 }
 
-const GlyphArrangement& GlyphArrangement::operator= (const GlyphArrangement& other) throw()
+const GlyphArrangement& GlyphArrangement::operator= (const GlyphArrangement& other)
 {
     if (this != &other)
     {
@@ -131,17 +131,17 @@ const GlyphArrangement& GlyphArrangement::operator= (const GlyphArrangement& oth
     return *this;
 }
 
-GlyphArrangement::~GlyphArrangement() throw()
+GlyphArrangement::~GlyphArrangement()
 {
 }
 
 //==============================================================================
-void GlyphArrangement::clear() throw()
+void GlyphArrangement::clear()
 {
     glyphs.clear();
 }
 
-PositionedGlyph& GlyphArrangement::getGlyph (const int index) const throw()
+PositionedGlyph& GlyphArrangement::getGlyph (const int index) const
 {
     jassert (((unsigned int) index) < (unsigned int) glyphs.size());
 
@@ -149,7 +149,7 @@ PositionedGlyph& GlyphArrangement::getGlyph (const int index) const throw()
 }
 
 //==============================================================================
-void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other) throw()
+void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other)
 {
     glyphs.ensureStorageAllocated (glyphs.size() + other.glyphs.size());
 
@@ -157,7 +157,7 @@ void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other) throw
         glyphs.add (new PositionedGlyph (*other.glyphs.getUnchecked (i)));
 }
 
-void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num) throw()
+void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num)
 {
     glyphs.removeRange (startIndex, num < 0 ? glyphs.size() : num);
 }
@@ -166,7 +166,7 @@ void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num) throw
 void GlyphArrangement::addLineOfText (const Font& font,
                                       const String& text,
                                       const float xOffset,
-                                      const float yOffset) throw()
+                                      const float yOffset)
 {
     addCurtailedLineOfText (font, text,
                             xOffset, yOffset,
@@ -178,7 +178,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
                                                float xOffset,
                                                const float yOffset,
                                                const float maxWidthPixels,
-                                               const bool useEllipsis) throw()
+                                               const bool useEllipsis)
 {
     int textLen = text.length();
 
@@ -221,7 +221,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
 }
 
 int GlyphArrangement::insertEllipsis (const Font& font, const float maxXPos,
-                                      const int startIndex, int endIndex) throw()
+                                      const int startIndex, int endIndex)
 {
     int numDeleted = 0;
 
@@ -273,7 +273,7 @@ void GlyphArrangement::addJustifiedText (const Font& font,
                                          const String& text,
                                          float x, float y,
                                          const float maxLineWidth,
-                                         const Justification& horizontalLayout) throw()
+                                         const Justification& horizontalLayout)
 {
     int lineStartIndex = glyphs.size();
     addLineOfText (font, text, x, y);
@@ -357,7 +357,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                       const float width, const float height,
                                       const Justification& layout,
                                       int maximumLines,
-                                      const float minimumHorizontalScale) throw()
+                                      const float minimumHorizontalScale)
 {
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
     jassert (minimumHorizontalScale > 0 && minimumHorizontalScale <= 1.0f);
@@ -548,7 +548,7 @@ void GlyphArrangement::addFittedText (const Font& f,
 
 //==============================================================================
 void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num,
-                                          const float dx, const float dy) throw()
+                                          const float dx, const float dy)
 {
     jassert (startIndex >= 0);
 
@@ -563,7 +563,7 @@ void GlyphArrangement::moveRangeOfGlyphs (int startIndex, int num,
 }
 
 int GlyphArrangement::fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                                        const Justification& justification, float minimumHorizontalScale) throw()
+                                        const Justification& justification, float minimumHorizontalScale)
 {
     int numDeleted = 0;
     const float lineStartX = glyphs.getUnchecked (start)->getLeft();
@@ -589,7 +589,7 @@ int GlyphArrangement::fitLineIntoSpace (int start, int numGlyphs, float x, float
 }
 
 void GlyphArrangement::stretchRangeOfGlyphs (int startIndex, int num,
-                                             const float horizontalScaleFactor) throw()
+                                             const float horizontalScaleFactor)
 {
     jassert (startIndex >= 0);
 
@@ -616,7 +616,7 @@ void GlyphArrangement::getBoundingBox (int startIndex, int num,
                                        float& top,
                                        float& right,
                                        float& bottom,
-                                       const bool includeWhitespace) const throw()
+                                       const bool includeWhitespace) const
 {
     jassert (startIndex >= 0);
 
@@ -658,7 +658,7 @@ void GlyphArrangement::justifyGlyphs (const int startIndex,
                                       const int num,
                                       const float x, const float y,
                                       const float width, const float height,
-                                      const Justification& justification) throw()
+                                      const Justification& justification)
 {
     jassert (num >= 0 && startIndex >= 0);
 
@@ -716,7 +716,7 @@ void GlyphArrangement::justifyGlyphs (const int startIndex,
     }
 }
 
-void GlyphArrangement::spreadOutLine (const int start, const int num, const float targetWidth) throw()
+void GlyphArrangement::spreadOutLine (const int start, const int num, const float targetWidth)
 {
     if (start + num < glyphs.size()
          && glyphs.getUnchecked (start + num - 1)->getCharacter() != T('\r')
@@ -762,7 +762,7 @@ void GlyphArrangement::spreadOutLine (const int start, const int num, const floa
 }
 
 //==============================================================================
-void GlyphArrangement::draw (const Graphics& g) const throw()
+void GlyphArrangement::draw (const Graphics& g) const
 {
     for (int i = 0; i < glyphs.size(); ++i)
     {
@@ -785,7 +785,7 @@ void GlyphArrangement::draw (const Graphics& g) const throw()
     }
 }
 
-void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform) const throw()
+void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform) const
 {
     for (int i = 0; i < glyphs.size(); ++i)
     {
@@ -812,13 +812,13 @@ void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform
     }
 }
 
-void GlyphArrangement::createPath (Path& path) const throw()
+void GlyphArrangement::createPath (Path& path) const
 {
     for (int i = 0; i < glyphs.size(); ++i)
         glyphs.getUnchecked (i)->createPath (path);
 }
 
-int GlyphArrangement::findGlyphIndexAt (float x, float y) const throw()
+int GlyphArrangement::findGlyphIndexAt (float x, float y) const
 {
     for (int i = 0; i < glyphs.size(); ++i)
         if (glyphs.getUnchecked (i)->hitTest (x, y))

@@ -105,7 +105,7 @@ public:
 
         bool isPrepared;
 
-        Node (const uint32 id, AudioProcessor* const processor) throw();
+        Node (const uint32 id, AudioProcessor* const processor);
 
         void prepare (const double sampleRate, const int blockSize, AudioProcessorGraph* const graph);
         void unprepare();
@@ -165,21 +165,21 @@ public:
     void clear();
 
     /** Returns the number of nodes in the graph. */
-    int getNumNodes() const throw()                                 { return nodes.size(); }
+    int getNumNodes() const                                         { return nodes.size(); }
 
     /** Returns a pointer to one of the nodes in the graph.
 
         This will return 0 if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (const int index) const throw()                   { return nodes [index]; }
+    Node* getNode (const int index) const                           { return nodes [index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
 
         If no such node was found, this returns 0.
         @see getNode
     */
-    Node* getNodeForId (const uint32 nodeId) const throw();
+    Node* getNodeForId (const uint32 nodeId) const;
 
     /** Adds a node to the graph.
 
@@ -203,10 +203,10 @@ public:
 
     //==============================================================================
     /** Returns the number of connections in the graph. */
-    int getNumConnections() const throw()                               { return connections.size(); }
+    int getNumConnections() const                                       { return connections.size(); }
 
     /** Returns a pointer to one of the connections in the graph. */
-    const Connection* getConnection (const int index) const throw()     { return connections [index]; }
+    const Connection* getConnection (const int index) const             { return connections [index]; }
 
     /** Searches for a connection between some specified channels.
 
@@ -215,18 +215,18 @@ public:
     const Connection* getConnectionBetween (const uint32 sourceNodeId,
                                             const int sourceChannelIndex,
                                             const uint32 destNodeId,
-                                            const int destChannelIndex) const throw();
+                                            const int destChannelIndex) const;
 
     /** Returns true if there is a connection between any of the channels of
         two specified nodes.
     */
     bool isConnected (const uint32 possibleSourceNodeId,
-                      const uint32 possibleDestNodeId) const throw();
+                      const uint32 possibleDestNodeId) const;
 
     /** Returns true if it would be legal to connect the specified points.
     */
     bool canConnect (const uint32 sourceNodeId, const int sourceChannelIndex,
-                     const uint32 destNodeId, const int destChannelIndex) const throw();
+                     const uint32 destNodeId, const int destChannelIndex) const;
 
     /** Attempts to connect two specified channels of two nodes.
 
@@ -306,16 +306,16 @@ public:
 
         //==============================================================================
         /** Returns the mode of this processor. */
-        IODeviceType getType() const throw()                        { return type; }
+        IODeviceType getType() const                                { return type; }
 
         /** Returns the parent graph to which this processor belongs, or 0 if it
             hasn't yet been added to one. */
-        AudioProcessorGraph* getParentGraph() const throw()         { return graph; }
+        AudioProcessorGraph* getParentGraph() const                 { return graph; }
 
         /** True if this is an audio or midi input. */
-        bool isInput() const throw();
+        bool isInput() const;
         /** True if this is an audio or midi output. */
-        bool isOutput() const throw();
+        bool isOutput() const;
 
         //==============================================================================
         AudioGraphIOProcessor (const IODeviceType type);
@@ -353,7 +353,7 @@ public:
         void setStateInformation (const void* data, int sizeInBytes);
 
         /** @internal */
-        void setParentGraph (AudioProcessorGraph* const graph) throw();
+        void setParentGraph (AudioProcessorGraph* const graph);
 
         juce_UseDebuggingNewOperator
 
@@ -426,7 +426,7 @@ private:
 
     bool isAnInputTo (const uint32 possibleInputId,
                       const uint32 possibleDestinationId,
-                      const int recursionCheck) const throw();
+                      const int recursionCheck) const;
 
     AudioProcessorGraph (const AudioProcessorGraph&);
     const AudioProcessorGraph& operator= (const AudioProcessorGraph&);

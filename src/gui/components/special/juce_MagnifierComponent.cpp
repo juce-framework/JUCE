@@ -332,7 +332,7 @@ void MagnifierComponent::mouseWheelMove (const MouseEvent& e, float ix, float iy
         Component::mouseWheelMove (e, ix, iy);
 }
 
-int MagnifierComponent::scaleInt (const int n) const throw()
+int MagnifierComponent::scaleInt (const int n) const
 {
     return roundDoubleToInt (n / scaleFactor);
 }

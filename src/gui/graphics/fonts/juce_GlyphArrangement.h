@@ -42,41 +42,41 @@ class JUCE_API  PositionedGlyph
 public:
     //==============================================================================
     /** Returns the character the glyph represents. */
-    juce_wchar getCharacter() const throw()     { return character; }
+    juce_wchar getCharacter() const             { return character; }
     /** Checks whether the glyph is actually empty. */
-    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (character); }
+    bool isWhitespace() const                   { return CharacterFunctions::isWhitespace (character); }
 
     /** Returns the position of the glyph's left-hand edge. */
-    float getLeft() const throw()               { return x; }
+    float getLeft() const                       { return x; }
     /** Returns the position of the glyph's right-hand edge. */
-    float getRight() const throw()              { return x + w; }
+    float getRight() const                      { return x + w; }
     /** Returns the y position of the glyph's baseline. */
-    float getBaselineY() const throw()          { return y; }
+    float getBaselineY() const                  { return y; }
     /** Returns the y position of the top of the glyph. */
-    float getTop() const throw()                { return y - font.getAscent(); }
+    float getTop() const                        { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
-    float getBottom() const throw()             { return y + font.getDescent(); }
+    float getBottom() const                     { return y + font.getDescent(); }
 
     //==============================================================================
     /** Shifts the glyph's position by a relative amount. */
     void moveBy (const float deltaX,
-                 const float deltaY) throw();
+                 const float deltaY);
 
     //==============================================================================
     /** Draws the glyph into a graphics context. */
-    void draw (const Graphics& g) const throw();
+    void draw (const Graphics& g) const;
 
     /** Draws the glyph into a graphics context, with an extra transform applied to it. */
-    void draw (const Graphics& g, const AffineTransform& transform) const throw();
+    void draw (const Graphics& g, const AffineTransform& transform) const;
 
     /** Returns the path for this glyph.
 
         @param path     the glyph's outline will be appended to this path
     */
-    void createPath (Path& path) const throw();
+    void createPath (Path& path) const;
 
     /** Checks to see if a point lies within this glyph. */
-    bool hitTest (float x, float y) const throw();
+    bool hitTest (float x, float y) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -89,7 +89,7 @@ private:
     juce_wchar character;
     int glyph;
 
-    PositionedGlyph() throw();
+    PositionedGlyph();
 };
 
 
@@ -108,23 +108,23 @@ class JUCE_API  GlyphArrangement
 public:
     //==============================================================================
     /** Creates an empty arrangement. */
-    GlyphArrangement() throw();
+    GlyphArrangement();
 
     /** Takes a copy of another arrangement. */
-    GlyphArrangement (const GlyphArrangement& other) throw();
+    GlyphArrangement (const GlyphArrangement& other);
 
     /** Copies another arrangement onto this one.
 
         To add another arrangement without clearing this one, use addGlyphArrangement().
     */
-    const GlyphArrangement& operator= (const GlyphArrangement& other) throw();
+    const GlyphArrangement& operator= (const GlyphArrangement& other);
 
     /** Destructor. */
-    ~GlyphArrangement() throw();
+    ~GlyphArrangement();
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const throw()                            { return glyphs.size(); }
+    int getNumGlyphs() const                                    { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 
@@ -132,12 +132,12 @@ public:
                         careful not to pass an out-of-range index here, as it
                         doesn't do any bounds-checking.
     */
-    PositionedGlyph& getGlyph (const int index) const throw();
+    PositionedGlyph& getGlyph (const int index) const;
 
     //==============================================================================
     /** Clears all text from the arrangement and resets it.
     */
-    void clear() throw();
+    void clear();
 
     /** Appends a line of text to the arrangement.
 
@@ -150,7 +150,7 @@ public:
     void addLineOfText (const Font& font,
                         const String& text,
                         const float x,
-                        const float y) throw();
+                        const float y);
 
     /** Adds a line of text, truncating it if it's wider than a specified size.
 
@@ -163,7 +163,7 @@ public:
                                  float x,
                                  const float y,
                                  const float maxWidthPixels,
-                                 const bool useEllipsis) throw();
+                                 const bool useEllipsis);
 
     /** Adds some multi-line text, breaking lines at word-boundaries if they are too wide.
 
@@ -182,7 +182,7 @@ public:
                            const String& text,
                            float x, float y,
                            const float maxLineWidth,
-                           const Justification& horizontalLayout) throw();
+                           const Justification& horizontalLayout);
 
     /** Tries to fit some text withing a given space.
 
@@ -205,11 +205,11 @@ public:
                         const float width, const float height,
                         const Justification& layout,
                         int maximumLinesToUse,
-                        const float minimumHorizontalScale = 0.7f) throw();
+                        const float minimumHorizontalScale = 0.7f);
 
 
     /** Appends another glyph arrangement to this one. */
-    void addGlyphArrangement (const GlyphArrangement& other) throw();
+    void addGlyphArrangement (const GlyphArrangement& other);
 
     //==============================================================================
     /** Draws this glyph arrangement to a graphics context.
@@ -217,26 +217,26 @@ public:
         This uses cached bitmaps so is much faster than the draw (Graphics&, const AffineTransform&)
         method, which renders the glyphs as filled vectors.
     */
-    void draw (const Graphics& g) const throw();
+    void draw (const Graphics& g) const;
 
     /** Draws this glyph arrangement to a graphics context.
 
         This renders the paths as filled vectors, so is far slower than the draw (Graphics&)
         method for non-transformed arrangements.
     */
-    void draw (const Graphics& g, const AffineTransform& transform) const throw();
+    void draw (const Graphics& g, const AffineTransform& transform) const;
 
     /** Converts the set of glyphs into a path.
 
         @param path     the glyphs' outlines will be appended to this path
     */
-    void createPath (Path& path) const throw();
+    void createPath (Path& path) const;
 
     /** Looks for a glyph that contains the given co-ordinate.
 
         @returns the index of the glyph, or -1 if none were found.
     */
-    int findGlyphIndexAt (float x, float y) const throw();
+    int findGlyphIndexAt (float x, float y) const;
 
     //==============================================================================
     /** Finds the smallest rectangle that will enclose a subset of the glyphs.
@@ -258,7 +258,7 @@ public:
                          float& top,
                          float& right,
                          float& bottom,
-                         const bool includeWhitespace) const throw();
+                         const bool includeWhitespace) const;
 
     /** Shifts a set of glyphs by a given amount.
 
@@ -270,7 +270,7 @@ public:
     */
     void moveRangeOfGlyphs (int startIndex, int numGlyphs,
                             const float deltaX,
-                            const float deltaY) throw();
+                            const float deltaY);
 
     /** Removes a set of glyphs from the arrangement.
 
@@ -278,7 +278,7 @@ public:
         @param numGlyphs    the number of glyphs to remove; if this is < 0, all glyphs after
                             startIndex will be deleted
     */
-    void removeRangeOfGlyphs (int startIndex, int numGlyphs) throw();
+    void removeRangeOfGlyphs (int startIndex, int numGlyphs);
 
     /** Expands or compresses a set of glyphs horizontally.
 
@@ -288,7 +288,7 @@ public:
         @param horizontalScaleFactor    how much to scale their horizontal width by
     */
     void stretchRangeOfGlyphs (int startIndex, int numGlyphs,
-                               const float horizontalScaleFactor) throw();
+                               const float horizontalScaleFactor);
 
     /** Justifies a set of glyphs within a given space.
 
@@ -303,7 +303,7 @@ public:
                         const float y,
                         const float width,
                         const float height,
-                        const Justification& justification) throw();
+                        const Justification& justification);
 
 
     //==============================================================================
@@ -312,10 +312,10 @@ public:
 private:
     OwnedArray <PositionedGlyph> glyphs;
 
-    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex) throw();
+    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                          const Justification& justification, float minimumHorizontalScale) throw();
-    void spreadOutLine (const int start, const int numGlyphs, const float targetWidth) throw();
+                          const Justification& justification, float minimumHorizontalScale);
+    void spreadOutLine (const int start, const int numGlyphs, const float targetWidth);
 };
 
 

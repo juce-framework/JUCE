@@ -94,7 +94,7 @@ void WaitableEvent::reset() const throw()
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-static unsigned int __stdcall threadEntryProc (void* userData) throw()
+static unsigned int __stdcall threadEntryProc (void* userData)
 {
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
     AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, 0),
@@ -107,12 +107,12 @@ static unsigned int __stdcall threadEntryProc (void* userData) throw()
     return 0;
 }
 
-void juce_CloseThreadHandle (void* handle) throw()
+void juce_CloseThreadHandle (void* handle)
 {
     CloseHandle ((HANDLE) handle);
 }
 
-void* juce_createThread (void* userData) throw()
+void* juce_createThread (void* userData)
 {
     unsigned int threadId;
 
@@ -122,7 +122,7 @@ void* juce_createThread (void* userData) throw()
                                    0, &threadId);
 }
 
-void juce_killThread (void* handle) throw()
+void juce_killThread (void* handle)
 {
     if (handle != 0)
     {
@@ -133,7 +133,7 @@ void juce_killThread (void* handle) throw()
     }
 }
 
-void juce_setCurrentThreadName (const String& name) throw()
+void juce_setCurrentThreadName (const String& name)
 {
 #if defined (JUCE_DEBUG) && JUCE_MSVC
     struct
@@ -162,13 +162,13 @@ void juce_setCurrentThreadName (const String& name) throw()
 #endif
 }
 
-Thread::ThreadID Thread::getCurrentThreadId() throw()
+Thread::ThreadID Thread::getCurrentThreadId()
 {
     return (ThreadID) (pointer_sized_int) GetCurrentThreadId();
 }
 
 // priority 1 to 10 where 5=normal, 1=low
-bool juce_setThreadPriority (void* threadHandle, int priority) throw()
+bool juce_setThreadPriority (void* threadHandle, int priority)
 {
     int pri = THREAD_PRIORITY_TIME_CRITICAL;
 
@@ -191,14 +191,14 @@ bool juce_setThreadPriority (void* threadHandle, int priority) throw()
     return SetThreadPriority (threadHandle, pri) != FALSE;
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
     SetThreadAffinityMask (GetCurrentThread(), affinityMask);
 }
 
 static HANDLE sleepEvent = 0;
 
-void juce_initialiseThreadEvents() throw()
+void juce_initialiseThreadEvents()
 {
     if (sleepEvent == 0)
 #ifdef JUCE_DEBUG
@@ -208,12 +208,12 @@ void juce_initialiseThreadEvents() throw()
 #endif
 }
 
-void Thread::yield() throw()
+void Thread::yield()
 {
     Sleep (0);
 }
 
-void JUCE_CALLTYPE Thread::sleep (const int millisecs) throw()
+void JUCE_CALLTYPE Thread::sleep (const int millisecs)
 {
     if (millisecs >= 10)
     {
@@ -235,7 +235,7 @@ static int lastProcessPriority = -1;
 
 // called by WindowDriver because Windows does wierd things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
-void juce_repeatLastProcessPriority() throw()
+void juce_repeatLastProcessPriority()
 {
     if (lastProcessPriority >= 0) // (avoid changing this if it's not been explicitly set by the app..)
     {
@@ -277,12 +277,12 @@ void Process::setPriority (ProcessPriority prior)
     }
 }
 
-bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger() throw()
+bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger()
 {
     return IsDebuggerPresent() != FALSE;
 }
 
-bool JUCE_CALLTYPE Process::isRunningUnderDebugger() throw()
+bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 {
     return juce_isRunningUnderDebugger();
 }
@@ -341,19 +341,19 @@ void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 
 
 //==============================================================================
-InterProcessLock::InterProcessLock (const String& name_) throw()
+InterProcessLock::InterProcessLock (const String& name_)
     : internal (0),
       name (name_),
       reentrancyLevel (0)
 {
 }
 
-InterProcessLock::~InterProcessLock() throw()
+InterProcessLock::~InterProcessLock()
 {
     exit();
 }
 
-bool InterProcessLock::enter (const int timeOutMillisecs) throw()
+bool InterProcessLock::enter (const int timeOutMillisecs)
 {
     if (reentrancyLevel++ == 0)
     {
@@ -375,7 +375,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs) throw()
     return (internal != 0);
 }
 
-void InterProcessLock::exit() throw()
+void InterProcessLock::exit()
 {
     if (--reentrancyLevel == 0 && internal != 0)
     {

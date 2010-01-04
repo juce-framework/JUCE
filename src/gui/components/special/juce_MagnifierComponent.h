@@ -67,7 +67,7 @@ public:
 
     //==============================================================================
     /** Returns the current content component. */
-    Component* getContentComponent() const throw()          { return content; }
+    Component* getContentComponent() const                  { return content; }
 
     //==============================================================================
     /** Changes the zoom level.
@@ -81,7 +81,7 @@ public:
     void setScaleFactor (double newScaleFactor);
 
     /** Returns the current zoom factor. */
-    double getScaleFactor() const throw()                   { return scaleFactor; }
+    double getScaleFactor() const                           { return scaleFactor; }
 
     /** Changes the quality setting used to rescale the graphics.
     */
@@ -111,7 +111,7 @@ private:
     void mouseExit (const MouseEvent& e);
     void mouseWheelMove (const MouseEvent& e, float, float);
 
-    int scaleInt (const int n) const throw();
+    int scaleInt (const int n) const;
 
     MagnifierComponent (const MagnifierComponent&);
     const MagnifierComponent& operator= (const MagnifierComponent&);

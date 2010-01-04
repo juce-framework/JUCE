@@ -536,7 +536,7 @@ public:
 
         @see setUsingNonZeroWinding
     */
-    bool isUsingNonZeroWinding() const throw()          { return useNonZeroWinding; }
+    bool isUsingNonZeroWinding() const                  { return useNonZeroWinding; }
 
 
     //==============================================================================

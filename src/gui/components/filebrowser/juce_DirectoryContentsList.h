@@ -84,7 +84,7 @@ public:
                        const bool includeFiles);
 
     /** Returns the directory that's currently being used. */
-    const File& getDirectory() const throw();
+    const File& getDirectory() const;
 
     /** Clears the list, and stops the thread scanning for files. */
     void clear();
@@ -104,7 +104,7 @@ public:
     /** Returns true if hidden files are ignored.
         @see setIgnoresHiddenFiles
     */
-    bool ignoresHiddenFiles() const throw()          { return ignoreHiddenFiles; }
+    bool ignoresHiddenFiles() const             { return ignoreHiddenFiles; }
 
     //==============================================================================
     /** Contains cached information about one of the files in a DirectoryContentsList.
@@ -181,16 +181,16 @@ public:
 
         The filter is specified in the constructor.
     */
-    const FileFilter* getFilter() const throw()             { return fileFilter; }
+    const FileFilter* getFilter() const                     { return fileFilter; }
 
     //==============================================================================
     /** @internal */
     bool useTimeSlice();
     /** @internal */
-    TimeSliceThread& getTimeSliceThread() throw()           { return thread; }
+    TimeSliceThread& getTimeSliceThread()                   { return thread; }
     /** @internal */
     static int compareElements (const DirectoryContentsList::FileInfo* const first,
-                                const DirectoryContentsList::FileInfo* const second) throw();
+                                const DirectoryContentsList::FileInfo* const second);
 
     juce_UseDebuggingNewOperator
 

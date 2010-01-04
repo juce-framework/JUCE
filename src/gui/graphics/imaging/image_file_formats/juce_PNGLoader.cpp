@@ -109,7 +109,7 @@ using ::malloc;
 using ::free;
 
 //==============================================================================
-static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length) throw()
+static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length)
 {
     InputStream* const in = (InputStream*) png_get_io_ptr (pngReadStruct);
     in->read (data, (int) length);
@@ -123,7 +123,7 @@ static void pngErrorCallback (png_structp, png_const_charp)
 }
 
 //==============================================================================
-Image* juce_loadPNGImageFromStream (InputStream& in) throw()
+Image* juce_loadPNGImageFromStream (InputStream& in)
 {
     Image* image = 0;
 
@@ -234,7 +234,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in) throw()
 }
 
 //==============================================================================
-static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_t length) throw()
+static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_t length)
 {
     OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
 
@@ -244,7 +244,7 @@ static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_
     jassert (ok);
 }
 
-bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw()
+bool juce_writePNGImageToStream (const Image& image, OutputStream& out)
 {
     const int width = image.getWidth();
     const int height = image.getHeight();

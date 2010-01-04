@@ -33,8 +33,6 @@
 
 
 //==============================================================================
-static const int maxGifCode = 1 << 12;
-
 /**
     Used internally by ImageFileFormat - don't use this class directly in your
     application.
@@ -45,9 +43,9 @@ class GIFLoader
 {
 public:
     GIFLoader (InputStream& in);
-    ~GIFLoader() throw();
+    ~GIFLoader();
 
-    Image* getImage() const throw()         { return image; }
+    Image* getImage() const             { return image; }
 
 private:
     Image* image;
@@ -60,6 +58,7 @@ private:
     int maxCode, maxCodeSize;
     int firstcode, oldcode;
     int clearCode, end_code;
+    enum { maxGifCode = 1 << 12 };
     int table [2] [maxGifCode];
     int stack [2 * maxGifCode];
     int *sp;

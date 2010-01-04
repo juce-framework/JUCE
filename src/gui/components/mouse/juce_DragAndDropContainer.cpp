@@ -121,7 +121,7 @@ public:
     }
 
     DragAndDropTarget* findTarget (const int screenX, const int screenY,
-                                   int& relX, int& relY) const throw()
+                                   int& relX, int& relY) const
     {
         Component* hit = getParentComponent();
 

@@ -223,21 +223,21 @@ public:
     class BitmapData
     {
     public:
-        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
-        BitmapData (const Image& image, int x, int y, int w, int h) throw();
-        ~BitmapData() throw();
+        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable);
+        BitmapData (const Image& image, int x, int y, int w, int h);
+        ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
             The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
+        inline uint8* getLinePointer (const int y) const                        { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (const int x, const int y) const          { return data + y * lineStride + x * pixelStride; }
 
         uint8* data;
         int lineStride, pixelStride, width, height;

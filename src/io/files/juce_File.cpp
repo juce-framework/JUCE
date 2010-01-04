@@ -47,33 +47,33 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
-void* juce_fileOpen (const String& path, bool forWriting) throw();
-void juce_fileClose (void* handle) throw();
-int juce_fileWrite (void* handle, const void* buffer, int size) throw();
-int64 juce_fileGetPosition (void* handle) throw();
-int64 juce_fileSetPosition (void* handle, int64 pos) throw();
-void juce_fileFlush (void* handle) throw();
+void* juce_fileOpen (const String& path, bool forWriting);
+void juce_fileClose (void* handle);
+int juce_fileWrite (void* handle, const void* buffer, int size);
+int64 juce_fileGetPosition (void* handle);
+int64 juce_fileSetPosition (void* handle, int64 pos);
+void juce_fileFlush (void* handle);
 
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories) throw();
-bool juce_isDirectory (const String& fileName) throw();
-int64 juce_getFileSize (const String& fileName) throw();
-bool juce_canWriteToFile (const String& fileName) throw();
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw();
+bool juce_fileExists (const String& fileName, const bool dontCountDirectories);
+bool juce_isDirectory (const String& fileName);
+int64 juce_getFileSize (const String& fileName);
+bool juce_canWriteToFile (const String& fileName);
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly);
 
-void juce_getFileTimes (const String& fileName, int64& modificationTime, int64& accessTime, int64& creationTime) throw();
-bool juce_setFileTimes (const String& fileName, int64 modificationTime, int64 accessTime, int64 creationTime) throw();
+void juce_getFileTimes (const String& fileName, int64& modificationTime, int64& accessTime, int64& creationTime);
+bool juce_setFileTimes (const String& fileName, int64 modificationTime, int64 accessTime, int64 creationTime);
 
-bool juce_deleteFile (const String& fileName) throw();
-bool juce_copyFile (const String& source, const String& dest) throw();
-bool juce_moveFile (const String& source, const String& dest) throw();
+bool juce_deleteFile (const String& fileName);
+bool juce_copyFile (const String& source, const String& dest);
+bool juce_moveFile (const String& source, const String& dest);
 
 // this must also create all paths involved in the directory.
-void juce_createDirectory (const String& fileName) throw();
+void juce_createDirectory (const String& fileName);
 
-bool juce_launchFile (const String& fileName, const String& parameters) throw();
+bool juce_launchFile (const String& fileName, const String& parameters);
 
-const StringArray juce_getFileSystemRoots() throw();
-const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSerialNumber) throw();
+const StringArray juce_getFileSystemRoots();
+const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSerialNumber);
 
 // starts a directory search operation with a wildcard, returning a handle for
 // use in calls to juce_findFileNext.
@@ -81,24 +81,24 @@ const String juce_getVolumeLabel (const String& filenameOnVolume, int& volumeSer
 // the other pointers, if non-null, are set based on the properties of the file.
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly) throw();
+                          Time* creationTime, bool* isReadOnly);
 
 // returns false when no more files are found
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDirectory, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly) throw();
+                        Time* modTime, Time* creationTime, bool* isReadOnly);
 
-void juce_findFileClose (void* handle) throw();
+void juce_findFileClose (void* handle);
 
 //==============================================================================
-static const String juce_addTrailingSeparator (const String& path) throw()
+static const String juce_addTrailingSeparator (const String& path)
 {
     return path.endsWithChar (File::separator) ? path
                                                : path + File::separator;
 }
 
 //==============================================================================
-static const String parseAbsolutePath (String path) throw()
+static const String parseAbsolutePath (String path)
 {
     if (path.isEmpty())
         return String::empty;
@@ -194,28 +194,28 @@ const File File::nonexistent;
 
 
 //==============================================================================
-File::File (const String& fullPathName) throw()
+File::File (const String& fullPathName)
     : fullPath (parseAbsolutePath (fullPathName))
 {
 }
 
-File::File (const String& path, int) throw()
+File::File (const String& path, int)
     : fullPath (path)
 {
 }
 
-File::File (const File& other) throw()
+File::File (const File& other)
     : fullPath (other.fullPath)
 {
 }
 
-const File& File::operator= (const String& newPath) throw()
+const File& File::operator= (const String& newPath)
 {
     fullPath = parseAbsolutePath (newPath);
     return *this;
 }
 
-const File& File::operator= (const File& other) throw()
+const File& File::operator= (const File& other)
 {
     fullPath = other.fullPath;
     return *this;
@@ -235,7 +235,7 @@ bool File::areFileNamesCaseSensitive()
 #endif
 }
 
-bool File::operator== (const File& other) const throw()
+bool File::operator== (const File& other) const
 {
     // case-insensitive on Windows, but not on linux.
 #if NAMES_ARE_CASE_SENSITIVE
@@ -245,28 +245,28 @@ bool File::operator== (const File& other) const throw()
 #endif
 }
 
-bool File::operator!= (const File& other) const throw()
+bool File::operator!= (const File& other) const
 {
     return ! operator== (other);
 }
 
 //==============================================================================
-bool File::exists() const throw()
+bool File::exists() const
 {
     return juce_fileExists (fullPath, false);
 }
 
-bool File::existsAsFile() const throw()
+bool File::existsAsFile() const
 {
     return juce_fileExists (fullPath, true);
 }
 
-bool File::isDirectory() const throw()
+bool File::isDirectory() const
 {
     return juce_isDirectory (fullPath);
 }
 
-bool File::hasWriteAccess() const throw()
+bool File::hasWriteAccess() const
 {
     if (exists())
         return juce_canWriteToFile (fullPath);
@@ -285,7 +285,7 @@ bool File::hasWriteAccess() const throw()
 }
 
 bool File::setReadOnly (const bool shouldBeReadOnly,
-                        const bool applyRecursively) const throw()
+                        const bool applyRecursively) const
 {
     bool worked = true;
 
@@ -301,13 +301,13 @@ bool File::setReadOnly (const bool shouldBeReadOnly,
     return juce_setFileReadOnly (fullPath, shouldBeReadOnly) && worked;
 }
 
-bool File::deleteFile() const throw()
+bool File::deleteFile() const
 {
     return (! exists())
             || juce_deleteFile (fullPath);
 }
 
-bool File::deleteRecursively() const throw()
+bool File::deleteRecursively() const
 {
     bool worked = true;
 
@@ -323,7 +323,7 @@ bool File::deleteRecursively() const throw()
     return deleteFile() && worked;
 }
 
-bool File::moveFileTo (const File& newFile) const throw()
+bool File::moveFileTo (const File& newFile) const
 {
     if (newFile.fullPath == fullPath)
         return true;
@@ -337,7 +337,7 @@ bool File::moveFileTo (const File& newFile) const throw()
     return juce_moveFile (fullPath, newFile.fullPath);
 }
 
-bool File::copyFileTo (const File& newFile) const throw()
+bool File::copyFileTo (const File& newFile) const
 {
     if (*this == newFile)
         return true;
@@ -348,7 +348,7 @@ bool File::copyFileTo (const File& newFile) const throw()
     return juce_copyFile (fullPath, newFile.fullPath);
 }
 
-bool File::copyDirectoryTo (const File& newDirectory) const throw()
+bool File::copyDirectoryTo (const File& newDirectory) const
 {
     if (isDirectory() && newDirectory.createDirectory())
     {
@@ -374,7 +374,7 @@ bool File::copyDirectoryTo (const File& newDirectory) const throw()
 }
 
 //==============================================================================
-const String File::getPathUpToLastSlash() const throw()
+const String File::getPathUpToLastSlash() const
 {
     const int lastSlash = fullPath.lastIndexOfChar (separator);
 
@@ -386,28 +386,28 @@ const String File::getPathUpToLastSlash() const throw()
         return fullPath;
 }
 
-const File File::getParentDirectory() const throw()
+const File File::getParentDirectory() const
 {
     return File (getPathUpToLastSlash());
 }
 
 //==============================================================================
-const String File::getFileName() const throw()
+const String File::getFileName() const
 {
     return fullPath.substring (fullPath.lastIndexOfChar (separator) + 1);
 }
 
-int File::hashCode() const throw()
+int File::hashCode() const
 {
     return fullPath.hashCode();
 }
 
-int64 File::hashCode64() const throw()
+int64 File::hashCode64() const
 {
     return fullPath.hashCode64();
 }
 
-const String File::getFileNameWithoutExtension() const throw()
+const String File::getFileNameWithoutExtension() const
 {
     const int lastSlash = fullPath.lastIndexOfChar (separator) + 1;
     const int lastDot = fullPath.lastIndexOfChar (T('.'));
@@ -418,7 +418,7 @@ const String File::getFileNameWithoutExtension() const throw()
         return fullPath.substring (lastSlash);
 }
 
-bool File::isAChildOf (const File& potentialParent) const throw()
+bool File::isAChildOf (const File& potentialParent) const
 {
     const String ourPath (getPathUpToLastSlash());
 
@@ -441,7 +441,7 @@ bool File::isAChildOf (const File& potentialParent) const throw()
 }
 
 //==============================================================================
-bool File::isAbsolutePath (const String& path) throw()
+bool File::isAbsolutePath (const String& path)
 {
     return path.startsWithChar (T('/')) || path.startsWithChar (T('\\'))
 #if JUCE_WINDOWS
@@ -451,7 +451,7 @@ bool File::isAbsolutePath (const String& path) throw()
 #endif
 }
 
-const File File::getChildFile (String relativePath) const throw()
+const File File::getChildFile (String relativePath) const
 {
     if (isAbsolutePath (relativePath))
     {
@@ -502,13 +502,13 @@ const File File::getChildFile (String relativePath) const throw()
     }
 }
 
-const File File::getSiblingFile (const String& fileName) const throw()
+const File File::getSiblingFile (const String& fileName) const
 {
     return getParentDirectory().getChildFile (fileName);
 }
 
 //==============================================================================
-int64 File::getSize() const throw()
+int64 File::getSize() const
 {
     return juce_getFileSize (fullPath);
 }
@@ -538,7 +538,7 @@ const String File::descriptionOfSizeInBytes (const int64 bytes)
 }
 
 //==============================================================================
-bool File::create() const throw()
+bool File::create() const
 {
     if (! exists())
     {
@@ -558,7 +558,7 @@ bool File::create() const throw()
     return true;
 }
 
-bool File::createDirectory() const throw()
+bool File::createDirectory() const
 {
     if (! isDirectory())
     {
@@ -581,44 +581,44 @@ bool File::createDirectory() const throw()
 }
 
 //==============================================================================
-const Time File::getCreationTime() const throw()
+const Time File::getCreationTime() const
 {
     int64 m, a, c;
     juce_getFileTimes (fullPath, m, a, c);
     return Time (c);
 }
 
-bool File::setCreationTime (const Time& t) const throw()
+bool File::setCreationTime (const Time& t) const
 {
     return juce_setFileTimes (fullPath, 0, 0, t.toMilliseconds());
 }
 
-const Time File::getLastModificationTime() const throw()
+const Time File::getLastModificationTime() const
 {
     int64 m, a, c;
     juce_getFileTimes (fullPath, m, a, c);
     return Time (m);
 }
 
-bool File::setLastModificationTime (const Time& t) const throw()
+bool File::setLastModificationTime (const Time& t) const
 {
     return juce_setFileTimes (fullPath, t.toMilliseconds(), 0, 0);
 }
 
-const Time File::getLastAccessTime() const throw()
+const Time File::getLastAccessTime() const
 {
     int64 m, a, c;
     juce_getFileTimes (fullPath, m, a, c);
     return Time (a);
 }
 
-bool File::setLastAccessTime (const Time& t) const throw()
+bool File::setLastAccessTime (const Time& t) const
 {
     return juce_setFileTimes (fullPath, 0, t.toMilliseconds(), 0);
 }
 
 //==============================================================================
-bool File::loadFileAsData (MemoryBlock& destBlock) const throw()
+bool File::loadFileAsData (MemoryBlock& destBlock) const
 {
     if (! existsAsFile())
         return false;
@@ -627,7 +627,7 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const throw()
     return getSize() == in.readIntoMemoryBlock (destBlock);
 }
 
-const String File::loadFileAsString() const throw()
+const String File::loadFileAsString() const
 {
     if (! existsAsFile())
         return String::empty;
@@ -650,7 +650,7 @@ static inline bool fileTypeMatches (const int whatToLookFor,
 int File::findChildFiles (OwnedArray<File>& results,
                           const int whatToLookFor,
                           const bool searchRecursively,
-                          const String& wildCardPattern) const throw()
+                          const String& wildCardPattern) const
 {
     // you have to specify the type of files you're looking for!
     jassert ((whatToLookFor & (findFiles | findDirectories)) != 0);
@@ -711,7 +711,7 @@ int File::findChildFiles (OwnedArray<File>& results,
 }
 
 int File::getNumberOfChildFiles (const int whatToLookFor,
-                                 const String& wildCardPattern) const throw()
+                                 const String& wildCardPattern) const
 {
     // you have to specify the type of files you're looking for!
     jassert (whatToLookFor > 0 && whatToLookFor <= 3);
@@ -751,7 +751,7 @@ int File::getNumberOfChildFiles (const int whatToLookFor,
     return count;
 }
 
-bool File::containsSubDirectories() const throw()
+bool File::containsSubDirectories() const
 {
     bool result = false;
 
@@ -785,7 +785,7 @@ bool File::containsSubDirectories() const throw()
 //==============================================================================
 const File File::getNonexistentChildFile (const String& prefix_,
                                           const String& suffix,
-                                          bool putNumbersInBrackets) const throw()
+                                          bool putNumbersInBrackets) const
 {
     File f (getChildFile (prefix_ + suffix));
 
@@ -828,7 +828,7 @@ const File File::getNonexistentChildFile (const String& prefix_,
     return f;
 }
 
-const File File::getNonexistentSibling (const bool putNumbersInBrackets) const throw()
+const File File::getNonexistentSibling (const bool putNumbersInBrackets) const
 {
     if (exists())
     {
@@ -844,7 +844,7 @@ const File File::getNonexistentSibling (const bool putNumbersInBrackets) const t
 }
 
 //==============================================================================
-const String File::getFileExtension() const throw()
+const String File::getFileExtension() const
 {
     String ext;
 
@@ -859,7 +859,7 @@ const String File::getFileExtension() const throw()
     return ext;
 }
 
-bool File::hasFileExtension (const String& possibleSuffix) const throw()
+bool File::hasFileExtension (const String& possibleSuffix) const
 {
     if (possibleSuffix.isEmpty())
         return fullPath.lastIndexOfChar (T('.')) <= fullPath.lastIndexOfChar (separator);
@@ -888,7 +888,7 @@ bool File::hasFileExtension (const String& possibleSuffix) const throw()
     return false;
 }
 
-const File File::withFileExtension (const String& newExtension) const throw()
+const File File::withFileExtension (const String& newExtension) const
 {
     if (fullPath.isEmpty())
         return File::nonexistent;
@@ -908,14 +908,14 @@ const File File::withFileExtension (const String& newExtension) const throw()
 }
 
 //==============================================================================
-bool File::startAsProcess (const String& parameters) const throw()
+bool File::startAsProcess (const String& parameters) const
 {
     return exists()
             && juce_launchFile (fullPath, parameters);
 }
 
 //==============================================================================
-FileInputStream* File::createInputStream() const throw()
+FileInputStream* File::createInputStream() const
 {
     if (existsAsFile())
         return new FileInputStream (*this);
@@ -923,7 +923,7 @@ FileInputStream* File::createInputStream() const throw()
         return 0;
 }
 
-FileOutputStream* File::createOutputStream (const int bufferSize) const throw()
+FileOutputStream* File::createOutputStream (const int bufferSize) const
 {
     ScopedPointer <FileOutputStream> out (new FileOutputStream (*this, bufferSize));
 
@@ -935,7 +935,7 @@ FileOutputStream* File::createOutputStream (const int bufferSize) const throw()
 
 //==============================================================================
 bool File::appendData (const void* const dataToAppend,
-                       const int numberOfBytes) const throw()
+                       const int numberOfBytes) const
 {
     if (numberOfBytes > 0)
     {
@@ -951,7 +951,7 @@ bool File::appendData (const void* const dataToAppend,
 }
 
 bool File::replaceWithData (const void* const dataToWrite,
-                            const int numberOfBytes) const throw()
+                            const int numberOfBytes) const
 {
     jassert (numberOfBytes >= 0); // a negative number of bytes??
 
@@ -972,7 +972,7 @@ bool File::replaceWithData (const void* const dataToWrite,
 
 bool File::appendText (const String& text,
                        const bool asUnicode,
-                       const bool writeUnicodeHeaderBytes) const throw()
+                       const bool writeUnicodeHeaderBytes) const
 {
     const ScopedPointer <FileOutputStream> out (createOutputStream());
 
@@ -985,7 +985,7 @@ bool File::appendText (const String& text,
     return false;
 }
 
-bool File::printf (const tchar* pf, ...) const throw()
+bool File::printf (const tchar* pf, ...) const
 {
     va_list list;
     va_start (list, pf);
@@ -998,7 +998,7 @@ bool File::printf (const tchar* pf, ...) const throw()
 
 bool File::replaceWithText (const String& textToWrite,
                             const bool asUnicode,
-                            const bool writeUnicodeHeaderBytes) const throw()
+                            const bool writeUnicodeHeaderBytes) const
 {
     const File tempFile (getSiblingFile (T(".") + getFileName()).getNonexistentSibling (false));
 
@@ -1013,7 +1013,7 @@ bool File::replaceWithText (const String& textToWrite,
 }
 
 //==============================================================================
-const String File::createLegalPathName (const String& original) throw()
+const String File::createLegalPathName (const String& original)
 {
     String s (original);
     String start;
@@ -1028,7 +1028,7 @@ const String File::createLegalPathName (const String& original) throw()
                     .substring (0, 1024);
 }
 
-const String File::createLegalFileName (const String& original) throw()
+const String File::createLegalFileName (const String& original)
 {
     String s (original.removeCharacters (T("\"#@,;:<>*^|?\\/")));
 
@@ -1054,7 +1054,7 @@ const String File::createLegalFileName (const String& original) throw()
 }
 
 //==============================================================================
-const String File::getRelativePathFrom (const File& dir)  const throw()
+const String File::getRelativePathFrom (const File& dir)  const
 {
     String thisPath (fullPath);
 
@@ -1116,7 +1116,7 @@ const String File::getRelativePathFrom (const File& dir)  const throw()
 }
 
 //==============================================================================
-void File::findFileSystemRoots (OwnedArray<File>& destArray) throw()
+void File::findFileSystemRoots (OwnedArray<File>& destArray)
 {
     const StringArray roots (juce_getFileSystemRoots());
 
@@ -1124,13 +1124,13 @@ void File::findFileSystemRoots (OwnedArray<File>& destArray) throw()
         destArray.add (new File (roots[i]));
 }
 
-const String File::getVolumeLabel() const throw()
+const String File::getVolumeLabel() const
 {
     int serialNum;
     return juce_getVolumeLabel (fullPath, serialNum);
 }
 
-int File::getVolumeSerialNumber() const throw()
+int File::getVolumeSerialNumber() const
 {
     int serialNum;
     juce_getVolumeLabel (fullPath, serialNum);
@@ -1139,7 +1139,7 @@ int File::getVolumeSerialNumber() const throw()
 }
 
 //==============================================================================
-const File File::createTempFile (const String& fileNameEnding) throw()
+const File File::createTempFile (const String& fileNameEnding)
 {
     String tempName (T("temp"));
     static int tempNum = 0;

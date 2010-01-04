@@ -43,7 +43,7 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 }
 
 //==============================================================================
-const StringArray& ChoicePropertyComponent::getChoices() const throw()
+const StringArray& ChoicePropertyComponent::getChoices() const
 {
     return choices;
 }

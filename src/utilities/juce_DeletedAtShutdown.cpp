@@ -38,7 +38,7 @@ static VoidArray objectsToDelete (16);
 static CriticalSection lock;
 
 //==============================================================================
-DeletedAtShutdown::DeletedAtShutdown() throw()
+DeletedAtShutdown::DeletedAtShutdown()
 {
     const ScopedLock sl (lock);
     objectsToDelete.add (this);

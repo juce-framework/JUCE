@@ -345,7 +345,7 @@ void TableListBox::setModel (TableListBoxModel* const newModel)
     }
 }
 
-int TableListBox::getHeaderHeight() const throw()
+int TableListBox::getHeaderHeight() const
 {
     return header->getHeight();
 }
@@ -375,7 +375,7 @@ void TableListBox::setAutoSizeMenuOptionShown (const bool shouldBeShown)
     autoSizeOptionsShown = shouldBeShown;
 }
 
-bool TableListBox::isAutoSizeMenuOptionShown() const throw()
+bool TableListBox::isAutoSizeMenuOptionShown() const
 {
     return autoSizeOptionsShown;
 }

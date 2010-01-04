@@ -2286,7 +2286,7 @@ void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, con
 
 
 //==============================================================================
-bool Process::isForegroundProcess() throw()
+bool Process::isForegroundProcess()
 {
     HWND fg = GetForegroundWindow();
 

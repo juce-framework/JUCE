@@ -71,30 +71,30 @@ public:
     DirectoryIterator (const File& directory,
                        bool isRecursive,
                        const String& wildCard = JUCE_T("*"),
-                       const int whatToLookFor = File::findFiles) throw();
+                       const int whatToLookFor = File::findFiles);
 
     /** Destructor. */
-    ~DirectoryIterator() throw();
+    ~DirectoryIterator();
 
     /** Call this to move the iterator along to the next file.
 
         @returns    true if a file was found (you can then use getFile() to see what it was) - or
                     false if there are no more matching files.
     */
-    bool next() throw();
+    bool next();
 
     /** Returns the file that the iterator is currently pointing at.
 
         The result of this call is only valid after a call to next() has returned true.
     */
-    const File getFile() const throw();
+    const File getFile() const;
 
     /** Returns a guess of how far through the search the iterator has got.
 
         @returns    a value 0.0 to 1.0 to show the progress, although this won't be
                     very accurate.
     */
-    float getEstimatedProgress() const throw();
+    float getEstimatedProgress() const;
 
 
     //==============================================================================

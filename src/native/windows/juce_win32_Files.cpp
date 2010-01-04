@@ -43,8 +43,7 @@ const tchar* File::separatorString  = T("\\");
 
 
 //==============================================================================
-bool juce_fileExists (const String& fileName,
-                      const bool dontCountDirectories) throw()
+bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
 {
     if (fileName.isEmpty())
         return false;
@@ -55,7 +54,7 @@ bool juce_fileExists (const String& fileName,
                                 : (attr != 0xffffffff);
 }
 
-bool juce_isDirectory (const String& fileName) throw()
+bool juce_isDirectory (const String& fileName)
 {
     const DWORD attr = GetFileAttributes (fileName);
 
@@ -63,15 +62,14 @@ bool juce_isDirectory (const String& fileName) throw()
              && ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0);
 }
 
-bool juce_canWriteToFile (const String& fileName) throw()
+bool juce_canWriteToFile (const String& fileName)
 {
     const DWORD attr = GetFileAttributes (fileName);
 
     return ((attr & FILE_ATTRIBUTE_READONLY) == 0);
 }
 
-bool juce_setFileReadOnly (const String& fileName,
-                           bool isReadOnly) throw()
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
 {
     DWORD attr = GetFileAttributes (fileName);
 
@@ -89,13 +87,13 @@ bool juce_setFileReadOnly (const String& fileName,
     return SetFileAttributes (fileName, attr) != FALSE;
 }
 
-bool File::isHidden() const throw()
+bool File::isHidden() const
 {
     return (GetFileAttributes (getFullPathName()) & FILE_ATTRIBUTE_HIDDEN) != 0;
 }
 
 //==============================================================================
-bool juce_deleteFile (const String& fileName) throw()
+bool juce_deleteFile (const String& fileName)
 {
     if (juce_isDirectory (fileName))
         return RemoveDirectory (fileName) != 0;
@@ -103,7 +101,7 @@ bool juce_deleteFile (const String& fileName) throw()
     return DeleteFile (fileName) != 0;
 }
 
-bool File::moveToTrash() const throw()
+bool File::moveToTrash() const
 {
     if (! exists())
         return true;
@@ -126,17 +124,17 @@ bool File::moveToTrash() const throw()
     return SHFileOperation (&fos) == 0;
 }
 
-bool juce_moveFile (const String& source, const String& dest) throw()
+bool juce_moveFile (const String& source, const String& dest)
 {
     return MoveFile (source, dest) != 0;
 }
 
-bool juce_copyFile (const String& source, const String& dest) throw()
+bool juce_copyFile (const String& source, const String& dest)
 {
     return CopyFile (source, dest, false) != 0;
 }
 
-void juce_createDirectory (const String& fileName) throw()
+void juce_createDirectory (const String& fileName)
 {
     if (! juce_fileExists (fileName, true))
     {
@@ -146,7 +144,7 @@ void juce_createDirectory (const String& fileName) throw()
 
 //==============================================================================
 // return 0 if not possible
-void* juce_fileOpen (const String& fileName, bool forWriting) throw()
+void* juce_fileOpen (const String& fileName, bool forWriting)
 {
     HANDLE h;
 
@@ -172,20 +170,20 @@ void* juce_fileOpen (const String& fileName, bool forWriting) throw()
     return (void*) h;
 }
 
-void juce_fileClose (void* handle) throw()
+void juce_fileClose (void* handle)
 {
     CloseHandle (handle);
 }
 
 //==============================================================================
-int juce_fileRead (void* handle, void* buffer, int size) throw()
+int juce_fileRead (void* handle, void* buffer, int size)
 {
     DWORD num = 0;
     ReadFile ((HANDLE) handle, buffer, size, &num, 0);
     return num;
 }
 
-int juce_fileWrite (void* handle, const void* buffer, int size) throw()
+int juce_fileWrite (void* handle, const void* buffer, int size)
 {
     DWORD num;
 
@@ -196,7 +194,7 @@ int juce_fileWrite (void* handle, const void* buffer, int size) throw()
     return num;
 }
 
-int64 juce_fileSetPosition (void* handle, int64 pos) throw()
+int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     LARGE_INTEGER li;
     li.QuadPart = pos;
@@ -208,7 +206,7 @@ int64 juce_fileSetPosition (void* handle, int64 pos) throw()
     return li.QuadPart;
 }
 
-int64 juce_fileGetPosition (void* handle) throw()
+int64 juce_fileGetPosition (void* handle)
 {
     LARGE_INTEGER li;
     li.QuadPart = 0;
@@ -219,12 +217,12 @@ int64 juce_fileGetPosition (void* handle) throw()
     return jmax ((int64) 0, li.QuadPart);
 }
 
-void juce_fileFlush (void* handle) throw()
+void juce_fileFlush (void* handle)
 {
     FlushFileBuffers ((HANDLE) handle);
 }
 
-int64 juce_getFileSize (const String& fileName) throw()
+int64 juce_getFileSize (const String& fileName)
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
@@ -238,7 +236,7 @@ int64 juce_getFileSize (const String& fileName) throw()
 }
 
 //==============================================================================
-static int64 fileTimeToTime (const FILETIME* const ft) throw()
+static int64 fileTimeToTime (const FILETIME* const ft)
 {
     // tell me if this fails!
     static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME));
@@ -250,7 +248,7 @@ static int64 fileTimeToTime (const FILETIME* const ft) throw()
 #endif
 }
 
-static void timeToFileTime (const int64 time, FILETIME* const ft) throw()
+static void timeToFileTime (const int64 time, FILETIME* const ft)
 {
 #if JUCE_GCC
     ((ULARGE_INTEGER*) ft)->QuadPart = time * 10000 + 116444736000000000LL;
@@ -262,7 +260,7 @@ static void timeToFileTime (const int64 time, FILETIME* const ft) throw()
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
-                        int64& creationTime) throw()
+                        int64& creationTime)
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
@@ -282,7 +280,7 @@ void juce_getFileTimes (const String& fileName,
 bool juce_setFileTimes (const String& fileName,
                         int64 modificationTime,
                         int64 accessTime,
-                        int64 creationTime) throw()
+                        int64 creationTime)
 {
     FILETIME m, a, c;
 
@@ -312,7 +310,7 @@ bool juce_setFileTimes (const String& fileName,
 
 //==============================================================================
 // return '\0' separated list of strings
-const StringArray juce_getFileSystemRoots() throw()
+const StringArray juce_getFileSystemRoots()
 {
     TCHAR buffer [2048];
     buffer[0] = 0;
@@ -337,7 +335,7 @@ const StringArray juce_getFileSystemRoots() throw()
 
 //==============================================================================
 const String juce_getVolumeLabel (const String& filenameOnVolume,
-                                  int& volumeSerialNumber) throw()
+                                  int& volumeSerialNumber)
 {
     TCHAR n [4];
     n[0] = *(const TCHAR*) filenameOnVolume;
@@ -358,7 +356,7 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
     return String (dest);
 }
 
-static int64 getDiskSpaceInfo (String fn, const bool total) throw()
+static int64 getDiskSpaceInfo (String fn, const bool total)
 {
     if (fn[1] == T(':'))
         fn = fn.substring (0, 2) + T("\\");
@@ -372,18 +370,18 @@ static int64 getDiskSpaceInfo (String fn, const bool total) throw()
     return 0;
 }
 
-int64 File::getBytesFreeOnVolume() const throw()
+int64 File::getBytesFreeOnVolume() const
 {
     return getDiskSpaceInfo (getFullPathName(), false);
 }
 
-int64 File::getVolumeTotalSize() const throw()
+int64 File::getVolumeTotalSize() const
 {
     return getDiskSpaceInfo (getFullPathName(), true);
 }
 
 //==============================================================================
-static unsigned int getWindowsDriveType (const String& fileName) throw()
+static unsigned int getWindowsDriveType (const String& fileName)
 {
     TCHAR n[4];
     n[0] = *(const TCHAR*) fileName;
@@ -394,12 +392,12 @@ static unsigned int getWindowsDriveType (const String& fileName) throw()
     return GetDriveType (n);
 }
 
-bool File::isOnCDRomDrive() const throw()
+bool File::isOnCDRomDrive() const
 {
     return getWindowsDriveType (getFullPathName()) == DRIVE_CDROM;
 }
 
-bool File::isOnHardDisk() const throw()
+bool File::isOnHardDisk() const
 {
     if (fullPath.isEmpty())
         return false;
@@ -417,7 +415,7 @@ bool File::isOnHardDisk() const throw()
     }
 }
 
-bool File::isOnRemovableDrive() const throw()
+bool File::isOnRemovableDrive() const
 {
     if (fullPath.isEmpty())
         return false;
@@ -433,7 +431,7 @@ bool File::isOnRemovableDrive() const throw()
 //==============================================================================
 #define MAX_PATH_CHARS (MAX_PATH + 256)
 
-static const File juce_getSpecialFolderPath (int type) throw()
+static const File juce_getSpecialFolderPath (int type)
 {
     WCHAR path [MAX_PATH_CHARS];
 
@@ -511,7 +509,7 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
 }
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory() throw()
+const File File::getCurrentWorkingDirectory()
 {
     WCHAR dest [MAX_PATH_CHARS];
     dest[0] = 0;
@@ -519,14 +517,14 @@ const File File::getCurrentWorkingDirectory() throw()
     return File (String (dest));
 }
 
-bool File::setAsCurrentWorkingDirectory() const throw()
+bool File::setAsCurrentWorkingDirectory() const
 {
     return SetCurrentDirectory (getFullPathName()) != FALSE;
 }
 
 
 //==============================================================================
-const String File::getVersion() const throw()
+const String File::getVersion() const
 {
     String result;
 
@@ -554,7 +552,7 @@ const String File::getVersion() const throw()
 }
 
 //==============================================================================
-const File File::getLinkedTarget() const throw()
+const File File::getLinkedTarget() const
 {
     File result (*this);
     String p (getFullPathName());
@@ -591,7 +589,7 @@ template <class FindDataType>
 static void getFindFileInfo (FindDataType& findData,
                              String& filename, bool* const isDir, bool* const isHidden,
                              int64* const fileSize, Time* const modTime, Time* const creationTime,
-                             bool* const isReadOnly) throw()
+                             bool* const isReadOnly)
 {
     filename = findData.cFileName;
 
@@ -617,7 +615,7 @@ static void getFindFileInfo (FindDataType& findData,
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResult,
                           bool* isDir, bool* isHidden, int64* fileSize,
-                          Time* modTime, Time* creationTime, bool* isReadOnly) throw()
+                          Time* modTime, Time* creationTime, bool* isReadOnly)
 {
     String wc (directory);
 
@@ -642,7 +640,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDir, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly) throw()
+                        Time* modTime, Time* creationTime, bool* isReadOnly)
 {
     WIN32_FIND_DATA findData;
 
@@ -657,14 +655,14 @@ bool juce_findFileNext (void* handle, String& resultFile,
     return false;
 }
 
-void juce_findFileClose (void* handle) throw()
+void juce_findFileClose (void* handle)
 {
     FindClose (handle);
 }
 
 //==============================================================================
 bool juce_launchFile (const String& fileName,
-                      const String& parameters) throw()
+                      const String& parameters)
 {
     HINSTANCE hInstance = 0;
 
@@ -677,7 +675,7 @@ bool juce_launchFile (const String& fileName,
     return hInstance > (HINSTANCE) 32;
 }
 
-void File::revealToUser() const throw()
+void File::revealToUser() const
 {
     if (isDirectory())
         startAsProcess();

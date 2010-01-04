@@ -79,7 +79,7 @@ public:
     */
     PropertiesFile (const File& file,
                     const int millisecondsBeforeSaving,
-                    const int options) throw();
+                    const int options);
 
     /** Destructor.
 
@@ -111,11 +111,11 @@ public:
     /** Returns true if the properties have been altered since the last time they were
         saved.
     */
-    bool needsToBeSaved() const throw();
+    bool needsToBeSaved() const;
 
     //==============================================================================
     /** Returns the file that's being used. */
-    const File getFile() const throw();
+    const File getFile() const                              { return file; }
 
     //==============================================================================
     /** Handy utility to create a properties file in whatever the standard OS-specific

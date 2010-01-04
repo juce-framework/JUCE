@@ -54,12 +54,12 @@ bool NamedPipe::createNewPipe (const String& pipeName)
     return openInternal (pipeName, true);
 }
 
-bool NamedPipe::isOpen() const throw()
+bool NamedPipe::isOpen() const
 {
     return internal != 0;
 }
 
-const String NamedPipe::getName() const throw()
+const String NamedPipe::getName() const
 {
     return currentPipeName;
 }

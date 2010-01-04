@@ -65,10 +65,10 @@ public:
     void close();
 
     /** True if the pipe is currently open. */
-    bool isOpen() const throw();
+    bool isOpen() const;
 
     /** Returns the last name that was used to try to open this pipe. */
-    const String getName() const throw();
+    const String getName() const;
 
     //==============================================================================
     /** Reads data from the pipe.

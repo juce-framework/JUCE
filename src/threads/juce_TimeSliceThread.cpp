@@ -77,12 +77,12 @@ void TimeSliceThread::removeTimeSliceClient (TimeSliceClient* const client)
     }
 }
 
-int TimeSliceThread::getNumClients() const throw()
+int TimeSliceThread::getNumClients() const
 {
     return clients.size();
 }
 
-TimeSliceClient* TimeSliceThread::getClient (const int i) const throw()
+TimeSliceClient* TimeSliceThread::getClient (const int i) const
 {
     const ScopedLock sl (listLock);
     return clients [i];

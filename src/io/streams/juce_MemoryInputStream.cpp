@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
                                       const int sourceDataSize,
-                                      const bool keepInternalCopy) throw()
+                                      const bool keepInternalCopy)
     : data ((const char*) sourceData),
       dataSize (sourceDataSize),
       position (0)
@@ -46,7 +46,7 @@ MemoryInputStream::MemoryInputStream (const void* const sourceData,
     }
 }
 
-MemoryInputStream::~MemoryInputStream() throw()
+MemoryInputStream::~MemoryInputStream()
 {
 }
 

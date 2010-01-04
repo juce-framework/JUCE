@@ -95,7 +95,7 @@ static bool untrapErrors()
 //==============================================================================
 static bool isActiveApplication = false;
 
-bool Process::isForegroundProcess() throw()
+bool Process::isForegroundProcess()
 {
     return isActiveApplication;
 }

@@ -95,7 +95,7 @@ private:
     void setShadowImage (Image* const src,
                          const int num,
                          const int w, const int h,
-                         const int sx, const int sy) throw();
+                         const int sx, const int sy);
 
     void bringShadowWindowsToFront();
     void deleteShadowWindows();

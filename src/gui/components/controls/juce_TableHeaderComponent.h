@@ -176,12 +176,12 @@ public:
 
         @see isColumnVisible
     */
-    int getNumColumns (const bool onlyCountVisibleColumns) const throw();
+    int getNumColumns (const bool onlyCountVisibleColumns) const;
 
     /** Returns the name for a column.
         @see setColumnName
     */
-    const String getColumnName (const int columnId) const throw();
+    const String getColumnName (const int columnId) const;
 
     /** Changes the name of a column. */
     void setColumnName (const int columnId, const String& newName);
@@ -195,7 +195,7 @@ public:
 
     /** Returns the width of one of the columns.
     */
-    int getColumnWidth (const int columnId) const throw();
+    int getColumnWidth (const int columnId) const;
 
     /** Changes the width of a column.
 
@@ -230,12 +230,12 @@ public:
 
         @see setSortColumnId, isSortedForwards
     */
-    int getSortColumnId() const throw();
+    int getSortColumnId() const;
 
     /** Returns true if the table is currently sorted forwards, or false if it's backwards.
         @see setSortColumnId
     */
-    bool isSortedForwards() const throw();
+    bool isSortedForwards() const;
 
     /** Triggers a re-sort of the table according to the current sort-column.
 
@@ -250,7 +250,7 @@ public:
     //==============================================================================
     /** Returns the total width of all the visible columns in the table.
     */
-    int getTotalWidth() const throw();
+    int getTotalWidth() const;
 
     /** Returns the index of a given column.
 
@@ -259,7 +259,7 @@ public:
         If onlyCountVisibleColumns is true, this will return the index amoungst the visible columns;
         otherwise it'll return the index amongst all the columns, including any hidden ones.
     */
-    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const throw();
+    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const;
 
     /** Returns the ID of the column at a given index.
 
@@ -268,7 +268,7 @@ public:
 
         If the index is out-of-range, it'll return 0.
     */
-    int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const throw();
+    int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const;
 
     /** Returns the rectangle containing of one of the columns.
 
@@ -276,13 +276,13 @@ public:
         ones are not counted). It returns a rectangle showing the position of the column relative
         to this component's top-left. If the index is out-of-range, an empty rectangle is retrurned.
     */
-    const Rectangle getColumnPosition (const int index) const throw();
+    const Rectangle getColumnPosition (const int index) const;
 
     /** Finds the column ID at a given x-position in the component.
 
         If there is a column at this point this returns its ID, or if not, it will return 0.
     */
-    int getColumnIdAtX (const int xToFind) const throw();
+    int getColumnIdAtX (const int xToFind) const;
 
     /** If set to true, this indicates that the columns should be expanded or shrunk to fill the
         entire width of the component.
@@ -295,7 +295,7 @@ public:
     /** Returns true if stretch-to-fit has been enabled.
         @see setStretchToFitActive
     */
-    bool isStretchToFitActive() const throw();
+    bool isStretchToFitActive() const;
 
     /** If stretch-to-fit is enabled, this will resize all the columns to make them fit into the
         specified width, keeping their relative proportions the same.
@@ -320,7 +320,7 @@ public:
     /** Returns true if the pop-up menu is enabled.
         @see setPopupMenuActive
     */
-    bool isPopupMenuActive() const throw();
+    bool isPopupMenuActive() const;
 
     //==============================================================================
     /** Returns a string that encapsulates the table's current layout.
@@ -341,10 +341,10 @@ public:
 
     //==============================================================================
     /** Adds a listener to be informed about things that happen to the header. */
-    void addListener (TableHeaderListener* const newListener) throw();
+    void addListener (TableHeaderListener* const newListener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (TableHeaderListener* const listenerToRemove) throw();
+    void removeListener (TableHeaderListener* const listenerToRemove);
 
     //==============================================================================
     /** This can be overridden to handle a mouse-click on one of the column headers.
@@ -408,7 +408,7 @@ private:
         int id, propertyFlags, width, minimumWidth, maximumWidth;
         double lastDeliberateWidth;
 
-        bool isVisible() const throw();
+        bool isVisible() const;
     };
 
     OwnedArray <ColumnInfo> columns;
@@ -419,13 +419,13 @@ private:
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
     int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
 
-    ColumnInfo* getInfoForId (const int columnId) const throw();
-    int visibleIndexToTotalIndex (const int visibleIndex) const throw();
+    ColumnInfo* getInfoForId (const int columnId) const;
+    int visibleIndexToTotalIndex (const int visibleIndex) const;
     void sendColumnsChanged();
     void handleAsyncUpdate();
     void beginDrag (const MouseEvent&);
     void endDrag (const int finalIndex);
-    int getResizeDraggerAt (const int mouseX) const throw();
+    int getResizeDraggerAt (const int mouseX) const;
     void updateColumnUnderMouse (int x, int y);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 

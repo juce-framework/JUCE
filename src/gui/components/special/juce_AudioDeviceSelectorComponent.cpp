@@ -192,7 +192,7 @@ private:
         }
     }
 
-    int getTickX() const throw()
+    int getTickX() const
     {
         return getRowHeight() + 5;
     }
@@ -921,7 +921,7 @@ private:
             }
         }
 
-        int getTickX() const throw()
+        int getTickX() const
         {
             return getRowHeight() + 5;
         }

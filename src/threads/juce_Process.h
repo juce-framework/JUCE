@@ -70,7 +70,7 @@ public:
     /** Returns true if this application process is the one that the user is
         currently using.
     */
-    static bool isForegroundProcess() throw();
+    static bool isForegroundProcess();
 
     //==============================================================================
     /** Raises the current process's privilege level.
@@ -90,7 +90,7 @@ public:
     //==============================================================================
     /** Returns true if this process is being hosted by a debugger.
     */
-    static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
+    static bool JUCE_CALLTYPE isRunningUnderDebugger();
 };
 
 

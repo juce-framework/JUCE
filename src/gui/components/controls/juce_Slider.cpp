@@ -182,14 +182,14 @@ void Slider::sendDragEnd()
     }
 }
 
-void Slider::addListener (SliderListener* const listener) throw()
+void Slider::addListener (SliderListener* const listener)
 {
     jassert (listener != 0);
     if (listener != 0)
         listeners.add (listener);
 }
 
-void Slider::removeListener (SliderListener* const listener) throw()
+void Slider::removeListener (SliderListener* const listener)
 {
     listeners.removeValue (listener);
 }
@@ -219,7 +219,7 @@ void Slider::setRotaryParameters (const float startAngleRadians,
     rotaryStop = stopAtEnd;
 }
 
-void Slider::setVelocityBasedMode (const bool velBased) throw()
+void Slider::setVelocityBasedMode (const bool velBased)
 {
     isVelocityBased = velBased;
 }
@@ -227,7 +227,7 @@ void Slider::setVelocityBasedMode (const bool velBased) throw()
 void Slider::setVelocityModeParameters (const double sensitivity,
                                         const int threshold,
                                         const double offset,
-                                        const bool userCanPressKeyToSwapMode) throw()
+                                        const bool userCanPressKeyToSwapMode)
 {
     jassert (threshold >= 0);
     jassert (sensitivity > 0);
@@ -239,12 +239,12 @@ void Slider::setVelocityModeParameters (const double sensitivity,
     userKeyOverridesVelocity = userCanPressKeyToSwapMode;
 }
 
-void Slider::setSkewFactor (const double factor) throw()
+void Slider::setSkewFactor (const double factor)
 {
     skewFactor = factor;
 }
 
-void Slider::setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint) throw()
+void Slider::setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint)
 {
     if (maximum > minimum)
         skewFactor = log (0.5) / log ((sliderValueToShowAtMidPoint - minimum)
@@ -281,7 +281,7 @@ void Slider::setTextBoxStyle (const TextEntryBoxPosition newPosition,
     lookAndFeelChanged();
 }
 
-void Slider::setTextBoxIsEditable (const bool shouldBeEditable) throw()
+void Slider::setTextBoxIsEditable (const bool shouldBeEditable)
 {
     editableText = shouldBeEditable;
 
@@ -308,18 +308,18 @@ void Slider::hideTextBox (const bool discardCurrentEditorContents)
     }
 }
 
-void Slider::setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw()
+void Slider::setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease)
 {
     sendChangeOnlyOnRelease = onlyNotifyOnRelease;
 }
 
-void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse) throw()
+void Slider::setSliderSnapsToMousePosition (const bool shouldSnapToMouse)
 {
     snapsToMousePos = shouldSnapToMouse;
 }
 
 void Slider::setPopupDisplayEnabled (const bool enabled,
-                                     Component* const parentComponentToUse) throw()
+                                     Component* const parentComponentToUse)
 {
     popupDisplayEnabled = enabled;
     parentForPopupDisplay = parentComponentToUse;
@@ -442,7 +442,7 @@ void Slider::triggerChangeMessage (const bool synchronous)
     valueChanged();
 }
 
-double Slider::getValue() const throw()
+double Slider::getValue() const
 {
     // for a two-value style slider, you should use the getMinValue() and getMaxValue()
     // methods to get the two values.
@@ -487,7 +487,7 @@ void Slider::setValue (double newValue,
     }
 }
 
-double Slider::getMinValue() const throw()
+double Slider::getMinValue() const
 {
     // The minimum value only applies to sliders that are in two- or three-value mode.
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -496,7 +496,7 @@ double Slider::getMinValue() const throw()
     return valueMin;
 }
 
-double Slider::getMaxValue() const throw()
+double Slider::getMaxValue() const
 {
     // The maximum value only applies to sliders that are in two- or three-value mode.
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
@@ -584,13 +584,13 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
 }
 
 void Slider::setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                        const double valueToSetOnDoubleClick) throw()
+                                        const double valueToSetOnDoubleClick)
 {
     doubleClickToValue = isDoubleClickEnabled;
     doubleClickReturnValue = valueToSetOnDoubleClick;
 }
 
-double Slider::getDoubleClickReturnValue (bool& isEnabled_) const throw()
+double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
 {
     isEnabled_ = doubleClickToValue;
     return doubleClickReturnValue;
@@ -672,12 +672,12 @@ void Slider::enablementChanged()
     repaint();
 }
 
-void Slider::setPopupMenuEnabled (const bool menuEnabled_) throw()
+void Slider::setPopupMenuEnabled (const bool menuEnabled_)
 {
     menuEnabled = menuEnabled_;
 }
 
-void Slider::setScrollWheelEnabled (const bool enabled) throw()
+void Slider::setScrollWheelEnabled (const bool enabled)
 {
     scrollWheelEnabled = enabled;
 }
@@ -713,7 +713,7 @@ void Slider::buttonClicked (Button* button)
 }
 
 //==============================================================================
-double Slider::constrainedValue (double value) const throw()
+double Slider::constrainedValue (double value) const
 {
     if (interval > 0)
         value = minimum + interval * floor ((value - minimum) / interval + 0.5);
@@ -757,7 +757,7 @@ float Slider::getLinearSliderPos (const double value)
     return (float) (sliderRegionStart + sliderPosProportional * sliderRegionSize);
 }
 
-bool Slider::isHorizontal() const throw()
+bool Slider::isHorizontal() const
 {
     return style == LinearHorizontal
         || style == LinearBar
@@ -765,14 +765,14 @@ bool Slider::isHorizontal() const throw()
         || style == ThreeValueHorizontal;
 }
 
-bool Slider::isVertical() const throw()
+bool Slider::isVertical() const
 {
     return style == LinearVertical
         || style == TwoValueVertical
         || style == ThreeValueVertical;
 }
 
-bool Slider::incDecDragDirectionIsHorizontal() const throw()
+bool Slider::incDecDragDirectionIsHorizontal() const
 {
     return incDecButtonMode == incDecButtonsDraggable_Horizontal
             || (incDecButtonMode == incDecButtonsDraggable_AutoDirection && incDecButtonsSideBySide);

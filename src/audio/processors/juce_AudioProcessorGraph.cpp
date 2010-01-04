@@ -34,8 +34,7 @@ BEGIN_JUCE_NAMESPACE
 const int AudioProcessorGraph::midiChannelIndex = 0x1000;
 
 //==============================================================================
-AudioProcessorGraph::Node::Node (const uint32 id_,
-                                 AudioProcessor* const processor_) throw()
+AudioProcessorGraph::Node::Node (const uint32 id_, AudioProcessor* const processor_)
     : id (id_),
       processor (processor_),
       isPrepared (false)
@@ -105,7 +104,7 @@ void AudioProcessorGraph::clear()
     triggerAsyncUpdate();
 }
 
-AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeId) const throw()
+AudioProcessorGraph::Node* AudioProcessorGraph::getNodeForId (const uint32 nodeId) const
 {
     for (int i = nodes.size(); --i >= 0;)
         if (nodes.getUnchecked(i)->id == nodeId)
@@ -177,7 +176,7 @@ bool AudioProcessorGraph::removeNode (const uint32 nodeId)
 const AudioProcessorGraph::Connection* AudioProcessorGraph::getConnectionBetween (const uint32 sourceNodeId,
                                                                                   const int sourceChannelIndex,
                                                                                   const uint32 destNodeId,
-                                                                                  const int destChannelIndex) const throw()
+                                                                                  const int destChannelIndex) const
 {
     for (int i = connections.size(); --i >= 0;)
     {
@@ -196,7 +195,7 @@ const AudioProcessorGraph::Connection* AudioProcessorGraph::getConnectionBetween
 }
 
 bool AudioProcessorGraph::isConnected (const uint32 possibleSourceNodeId,
-                                       const uint32 possibleDestNodeId) const throw()
+                                       const uint32 possibleDestNodeId) const
 {
     for (int i = connections.size(); --i >= 0;)
     {
@@ -215,7 +214,7 @@ bool AudioProcessorGraph::isConnected (const uint32 possibleSourceNodeId,
 bool AudioProcessorGraph::canConnect (const uint32 sourceNodeId,
                                       const int sourceChannelIndex,
                                       const uint32 destNodeId,
-                                      const int destChannelIndex) const throw()
+                                      const int destChannelIndex) const
 {
     if (sourceChannelIndex < 0
          || destChannelIndex < 0
@@ -347,12 +346,12 @@ namespace GraphRenderingOps
 class AudioGraphRenderingOp
 {
 public:
-    AudioGraphRenderingOp() throw() {}
-    virtual ~AudioGraphRenderingOp() throw()  {}
+    AudioGraphRenderingOp() {}
+    virtual ~AudioGraphRenderingOp()  {}
 
     virtual void perform (AudioSampleBuffer& sharedBufferChans,
                           const OwnedArray <MidiBuffer>& sharedMidiBuffers,
-                          const int numSamples) throw() = 0;
+                          const int numSamples) = 0;
 
     juce_UseDebuggingNewOperator
 };
@@ -361,13 +360,13 @@ public:
 class ClearChannelOp : public AudioGraphRenderingOp
 {
 public:
-    ClearChannelOp (const int channelNum_) throw()
+    ClearChannelOp (const int channelNum_)
         : channelNum (channelNum_)
     {}
 
-    ~ClearChannelOp() throw()        {}
+    ~ClearChannelOp()        {}
 
-    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples) throw()
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
         sharedBufferChans.clear (channelNum, 0, numSamples);
     }
@@ -383,14 +382,14 @@ private:
 class CopyChannelOp : public AudioGraphRenderingOp
 {
 public:
-    CopyChannelOp (const int srcChannelNum_, const int dstChannelNum_) throw()
+    CopyChannelOp (const int srcChannelNum_, const int dstChannelNum_)
         : srcChannelNum (srcChannelNum_),
           dstChannelNum (dstChannelNum_)
     {}
 
-    ~CopyChannelOp() throw()        {}
+    ~CopyChannelOp()        {}
 
-    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples) throw()
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
         sharedBufferChans.copyFrom (dstChannelNum, 0, sharedBufferChans, srcChannelNum, 0, numSamples);
     }
@@ -406,14 +405,14 @@ private:
 class AddChannelOp : public AudioGraphRenderingOp
 {
 public:
-    AddChannelOp (const int srcChannelNum_, const int dstChannelNum_) throw()
+    AddChannelOp (const int srcChannelNum_, const int dstChannelNum_)
         : srcChannelNum (srcChannelNum_),
           dstChannelNum (dstChannelNum_)
     {}
 
-    ~AddChannelOp() throw()        {}
+    ~AddChannelOp()        {}
 
-    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples) throw()
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>&, const int numSamples)
     {
         sharedBufferChans.addFrom (dstChannelNum, 0, sharedBufferChans, srcChannelNum, 0, numSamples);
     }
@@ -429,13 +428,13 @@ private:
 class ClearMidiBufferOp : public AudioGraphRenderingOp
 {
 public:
-    ClearMidiBufferOp (const int bufferNum_) throw()
+    ClearMidiBufferOp (const int bufferNum_)
         : bufferNum (bufferNum_)
     {}
 
-    ~ClearMidiBufferOp() throw()        {}
+    ~ClearMidiBufferOp()        {}
 
-    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int) throw()
+    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int)
     {
         sharedMidiBuffers.getUnchecked (bufferNum)->clear();
     }
@@ -451,14 +450,14 @@ private:
 class CopyMidiBufferOp : public AudioGraphRenderingOp
 {
 public:
-    CopyMidiBufferOp (const int srcBufferNum_, const int dstBufferNum_) throw()
+    CopyMidiBufferOp (const int srcBufferNum_, const int dstBufferNum_)
         : srcBufferNum (srcBufferNum_),
           dstBufferNum (dstBufferNum_)
     {}
 
-    ~CopyMidiBufferOp() throw()        {}
+    ~CopyMidiBufferOp()        {}
 
-    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int) throw()
+    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int)
     {
         *sharedMidiBuffers.getUnchecked (dstBufferNum) = *sharedMidiBuffers.getUnchecked (srcBufferNum);
     }
@@ -474,14 +473,14 @@ private:
 class AddMidiBufferOp : public AudioGraphRenderingOp
 {
 public:
-    AddMidiBufferOp (const int srcBufferNum_, const int dstBufferNum_) throw()
+    AddMidiBufferOp (const int srcBufferNum_, const int dstBufferNum_)
         : srcBufferNum (srcBufferNum_),
           dstBufferNum (dstBufferNum_)
     {}
 
-    ~AddMidiBufferOp() throw()        {}
+    ~AddMidiBufferOp()        {}
 
-    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples) throw()
+    void perform (AudioSampleBuffer&, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples)
     {
         sharedMidiBuffers.getUnchecked (dstBufferNum)
             ->addEvents (*sharedMidiBuffers.getUnchecked (srcBufferNum), 0, numSamples, 0);
@@ -501,7 +500,7 @@ public:
     ProcessBufferOp (const AudioProcessorGraph::Node::Ptr& node_,
                      const Array <int>& audioChannelsToUse_,
                      const int totalChans_,
-                     const int midiBufferToUse_) throw()
+                     const int midiBufferToUse_)
         : node (node_),
           processor (node_->processor),
           audioChannelsToUse (audioChannelsToUse_),
@@ -514,11 +513,11 @@ public:
             audioChannelsToUse.add (0);
     }
 
-    ~ProcessBufferOp() throw()
+    ~ProcessBufferOp()
     {
     }
 
-    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples) throw()
+    void perform (AudioSampleBuffer& sharedBufferChans, const OwnedArray <MidiBuffer>& sharedMidiBuffers, const int numSamples)
     {
         for (int i = totalChans; --i >= 0;)
             channels[i] = sharedBufferChans.getSampleData (audioChannelsToUse.getUnchecked (i), 0);
@@ -569,9 +568,9 @@ public:
         }
     }
 
-    int getNumBuffersNeeded() const throw()         { return nodeIds.size(); }
+    int getNumBuffersNeeded() const         { return nodeIds.size(); }
 
-    int getNumMidiBuffersNeeded() const throw()     { return midiNodeIds.size(); }
+    int getNumMidiBuffersNeeded() const     { return midiNodeIds.size(); }
 
 
     //==============================================================================
@@ -858,12 +857,12 @@ private:
         }
     }
 
-    int getReadOnlyEmptyBuffer() const throw()
+    int getReadOnlyEmptyBuffer() const
     {
         return 0;
     }
 
-    int getBufferContaining (const int nodeId, const int outputChannel) const throw()
+    int getBufferContaining (const int nodeId, const int outputChannel) const
     {
         if (outputChannel == AudioProcessorGraph::midiChannelIndex)
         {
@@ -911,7 +910,7 @@ private:
     bool isBufferNeededLater (int stepIndexToSearchFrom,
                               int inputChannelOfIndexToIgnore,
                               const int nodeId,
-                              const int outputChanIndex) const throw()
+                              const int outputChanIndex) const
     {
         while (stepIndexToSearchFrom < orderedNodes.size())
         {
@@ -980,7 +979,7 @@ void AudioProcessorGraph::clearRenderingSequence()
 
 bool AudioProcessorGraph::isAnInputTo (const uint32 possibleInputId,
                                        const uint32 possibleDestinationId,
-                                       const int recursionCheck) const throw()
+                                       const int recursionCheck) const
 {
     if (recursionCheck > 0)
     {
@@ -1302,12 +1301,12 @@ bool AudioProcessorGraph::AudioGraphIOProcessor::isOutputChannelStereoPair (int 
     return isInputChannelStereoPair (index);
 }
 
-bool AudioProcessorGraph::AudioGraphIOProcessor::isInput() const throw()
+bool AudioProcessorGraph::AudioGraphIOProcessor::isInput() const
 {
     return type == audioInputNode || type == midiInputNode;
 }
 
-bool AudioProcessorGraph::AudioGraphIOProcessor::isOutput() const throw()
+bool AudioProcessorGraph::AudioGraphIOProcessor::isOutput() const
 {
     return type == audioOutputNode || type == midiOutputNode;
 }
@@ -1339,7 +1338,7 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setStateInformation (const void
 {
 }
 
-void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorGraph* const newGraph) throw()
+void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorGraph* const newGraph)
 {
     graph = newGraph;
 

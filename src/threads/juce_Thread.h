@@ -86,7 +86,7 @@ public:
 
         @see stopThread
     */
-    void startThread() throw();
+    void startThread();
 
     /** Starts the thread with a given priority.
 
@@ -95,7 +95,7 @@ public:
 
         @see startThread, setPriority
     */
-    void startThread (const int priority) throw();
+    void startThread (const int priority);
 
     /** Attempts to stop the thread running.
 
@@ -115,11 +115,11 @@ public:
                                     value in here will wait forever.
         @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
     */
-    void stopThread (const int timeOutMilliseconds) throw();
+    void stopThread (const int timeOutMilliseconds);
 
     //==============================================================================
     /** Returns true if the thread is currently active */
-    bool isThreadRunning() const throw();
+    bool isThreadRunning() const;
 
     /** Sets a flag to tell the thread it should stop.
 
@@ -129,7 +129,7 @@ public:
         @see threadShouldExit
         @see waitForThreadToExit
     */
-    void signalThreadShouldExit() throw();
+    void signalThreadShouldExit();
 
     /** Checks whether the thread has been told to stop running.
 
@@ -138,7 +138,7 @@ public:
 
         @see signalThreadShouldExit
     */
-    inline bool threadShouldExit() const throw()  { return threadShouldExit_; }
+    inline bool threadShouldExit() const                { return threadShouldExit_; }
 
     /** Waits for the thread to stop.
 
@@ -148,7 +148,7 @@ public:
                                     is less than zero, it will wait forever.
         @returns    true if the thread exits, or false if the timeout expires first.
     */
-    bool waitForThreadToExit (const int timeOutMilliseconds) const throw();
+    bool waitForThreadToExit (const int timeOutMilliseconds) const;
 
     //==============================================================================
     /** Changes the thread's priority.
@@ -157,7 +157,7 @@ public:
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
     */
-    bool setPriority (const int priority) throw();
+    bool setPriority (const int priority);
 
     /** Changes the priority of the caller thread.
 
@@ -166,7 +166,7 @@ public:
 
         @see setPriority
     */
-    static bool setCurrentThreadPriority (const int priority) throw();
+    static bool setCurrentThreadPriority (const int priority);
 
     //==============================================================================
     /** Sets the affinity mask for the thread.
@@ -176,7 +176,7 @@ public:
 
         @see setCurrentThreadAffinityMask
     */
-    void setAffinityMask (const uint32 affinityMask) throw();
+    void setAffinityMask (const uint32 affinityMask);
 
     /** Changes the affinity mask for the caller thread.
 
@@ -184,14 +184,14 @@ public:
 
         @see setAffinityMask
     */
-    static void setCurrentThreadAffinityMask (const uint32 affinityMask) throw();
+    static void setCurrentThreadAffinityMask (const uint32 affinityMask);
 
     //==============================================================================
     // this can be called from any thread that needs to pause..
-    static void JUCE_CALLTYPE sleep (int milliseconds) throw();
+    static void JUCE_CALLTYPE sleep (int milliseconds);
 
     /** Yields the calling thread's current time-slot. */
-    static void JUCE_CALLTYPE yield() throw();
+    static void JUCE_CALLTYPE yield();
 
     //==============================================================================
     /** Makes the thread wait for a notification.
@@ -201,7 +201,7 @@ public:
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */
-    bool wait (const int timeOutMilliseconds) const throw();
+    bool wait (const int timeOutMilliseconds) const;
 
     /** Wakes up the thread.
 
@@ -209,7 +209,7 @@ public:
 
         @see wait
     */
-    void notify() const throw();
+    void notify() const;
 
     //==============================================================================
     /** A value type used for thread IDs.
@@ -224,14 +224,14 @@ public:
         @returns    a unique identifier that identifies the calling thread.
         @see getThreadId
     */
-    static ThreadID getCurrentThreadId() throw();
+    static ThreadID getCurrentThreadId();
 
     /** Finds the thread object that is currently running.
 
         Note that the main UI thread (or other non-Juce threads) don't have a Thread
         object associated with them, so this will return 0.
     */
-    static Thread* getCurrentThread() throw();
+    static Thread* getCurrentThread();
 
     /** Returns the ID of this thread.
 
@@ -242,13 +242,13 @@ public:
 
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const throw();
+    ThreadID getThreadId() const                                    { return threadId_; }
 
     /** Returns the name of the thread.
 
         This is the name that gets set in the constructor.
     */
-    const String getThreadName() const throw()                      { return threadName_; }
+    const String getThreadName() const                              { return threadName_; }
 
     //==============================================================================
     /** Returns the number of currently-running threads.
@@ -256,13 +256,13 @@ public:
         @returns  the number of Thread objects known to be currently running.
         @see stopAllThreads
     */
-    static int getNumRunningThreads() throw();
+    static int getNumRunningThreads();
 
     /** Tries to stop all currently-running threads.
 
         This will attempt to stop all the threads known to be running at the moment.
     */
-    static void stopAllThreads (const int timeoutInMillisecs) throw();
+    static void stopAllThreads (const int timeoutInMillisecs);
 
 
     //==============================================================================
@@ -280,7 +280,7 @@ private:
     bool volatile threadShouldExit_;
 
     friend void JUCE_API juce_threadEntryPoint (void*);
-    static void threadEntryPoint (Thread* thread) throw();
+    static void threadEntryPoint (Thread* thread);
 
     Thread (const Thread&);
     const Thread& operator= (const Thread&);

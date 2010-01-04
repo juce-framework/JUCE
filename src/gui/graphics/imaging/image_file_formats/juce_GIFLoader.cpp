@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static inline int makeWord (const unsigned char a, const unsigned char b) throw()
+static inline int makeWord (const unsigned char a, const unsigned char b)
 {
     return (b << 8) | a;
 }
@@ -113,7 +113,7 @@ GIFLoader::GIFLoader (InputStream& in)
     }
 }
 
-GIFLoader::~GIFLoader() throw()
+GIFLoader::~GIFLoader()
 {
 }
 

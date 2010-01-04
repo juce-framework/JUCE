@@ -46,7 +46,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../threads/juce_Process.h"
 #include "../core/juce_PlatformUtilities.h"
 
-void juce_setCurrentThreadName (const String& name) throw();
+void juce_setCurrentThreadName (const String& name);
 
 static JUCEApplication* appInstance = 0;
 

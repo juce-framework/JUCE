@@ -40,7 +40,7 @@ class JUCE_API  FileInputSource     : public InputSource
 {
 public:
     //==============================================================================
-    FileInputSource (const File& file) throw();
+    FileInputSource (const File& file);
     ~FileInputSource();
 
     InputStream* createInputStream();

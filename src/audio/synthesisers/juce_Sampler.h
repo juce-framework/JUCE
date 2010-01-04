@@ -77,12 +77,12 @@ public:
 
     //==============================================================================
     /** Returns the sample's name */
-    const String& getName() const throw()                   { return name; }
+    const String& getName() const                           { return name; }
 
     /** Returns the audio sample data.
         This could be 0 if there was a problem loading it.
     */
-    AudioSampleBuffer* getAudioData() const throw()         { return data; }
+    AudioSampleBuffer* getAudioData() const                 { return data; }
 
 
     //==============================================================================

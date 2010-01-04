@@ -75,7 +75,7 @@ public:
 
         @see getNumTracks, getTrack
     */
-    void addTrack (const MidiMessageSequence& trackSequence)  throw();
+    void addTrack (const MidiMessageSequence& trackSequence) throw();
 
     /** Removes all midi tracks from the file.
 

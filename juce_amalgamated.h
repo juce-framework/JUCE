@@ -743,7 +743,7 @@
 // Now include some basics that are needed by most of the Juce classes...
 BEGIN_JUCE_NAMESPACE
 
-extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger() throw();
+extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
   extern void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw();
@@ -7285,7 +7285,7 @@ public:
 
         You can use its operator= method to point it at a proper file.
     */
-    File() throw()   {}
+    File()   {}
 
     /** Creates a file from an absolute path.
 
@@ -7297,13 +7297,13 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    File (const String& path) throw();
+    File (const String& path);
 
     /** Creates a copy of another file object. */
-    File (const File& other) throw();
+    File (const File& other);
 
     /** Destructor. */
-    ~File() throw()  {}
+    ~File()  {}
 
     /** Sets the file based on an absolute pathname.
 
@@ -7315,10 +7315,10 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    const File& operator= (const String& newFilePath) throw();
+    const File& operator= (const String& newFilePath);
 
     /** Copies from another file object. */
-    const File& operator= (const File& otherFile) throw();
+    const File& operator= (const File& otherFile);
 
     /** This static constant is used for referring to an 'invalid' file. */
     static const File nonexistent;
@@ -7328,7 +7328,7 @@ public:
         @returns    true if the file exists, either as a file or a directory.
         @see existsAsFile, isDirectory
     */
-    bool exists() const throw();
+    bool exists() const;
 
     /** Checks whether the file exists and is a file rather than a directory.
 
@@ -7336,7 +7336,7 @@ public:
                     or doesn't exist
         @see exists, isDirectory
     */
-    bool existsAsFile() const throw();
+    bool existsAsFile() const;
 
     /** Checks whether the file is a directory that exists.
 
@@ -7344,13 +7344,13 @@ public:
                     false if it's a file or doesn't exist at all
         @see exists, existsAsFile
     */
-    bool isDirectory() const throw();
+    bool isDirectory() const;
 
     /** Returns the size of the file in bytes.
 
         @returns    the number of bytes in the file, or 0 if it doesn't exist.
     */
-    int64 getSize() const throw();
+    int64 getSize() const;
 
     /** Utility function to convert a file size in bytes to a neat string description.
 
@@ -7370,7 +7370,7 @@ public:
 
         @see getFileName, getRelativePathFrom
     */
-    const String& getFullPathName() const throw()    { return fullPath; }
+    const String& getFullPathName() const               { return fullPath; }
 
     /** Returns the last section of the pathname.
 
@@ -7385,7 +7385,7 @@ public:
 
         @see getFullPathName, getFileNameWithoutExtension
     */
-    const String getFileName() const throw();
+    const String getFileName() const;
 
     /** Creates a relative path that refers to a file relatively to a given directory.
 
@@ -7402,7 +7402,7 @@ public:
                                         If it doesn't exist, it's assumed to be a directory.
         @see getChildFile, isAbsolutePath
     */
-    const String getRelativePathFrom (const File& directoryToBeRelativeTo) const throw();
+    const String getRelativePathFrom (const File& directoryToBeRelativeTo) const;
 
     /** Returns the file's extension.
 
@@ -7412,7 +7412,7 @@ public:
 
         @see hasFileExtension, withFileExtension, getFileNameWithoutExtension
     */
-    const String getFileExtension() const throw();
+    const String getFileExtension() const;
 
     /** Checks whether the file has a given extension.
 
@@ -7426,7 +7426,7 @@ public:
 
         @see getFileExtension, withFileExtension, getFileNameWithoutExtension
     */
-    bool hasFileExtension (const String& extensionToTest) const throw();
+    bool hasFileExtension (const String& extensionToTest) const;
 
     /** Returns a version of this file with a different file extension.
 
@@ -7438,7 +7438,7 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, getFileNameWithoutExtension
     */
-    const File withFileExtension (const String& newExtension) const throw();
+    const File withFileExtension (const String& newExtension) const;
 
     /** Returns the last part of the filename, without its file extension.
 
@@ -7446,21 +7446,21 @@ public:
 
         @see getFileName, getFileExtension, hasFileExtension, withFileExtension
     */
-    const String getFileNameWithoutExtension() const throw();
+    const String getFileNameWithoutExtension() const;
 
     /** Returns a 32-bit hash-code that identifies this file.
 
         This is based on the filename. Obviously it's possible, although unlikely, that
         two files will have the same hash-code.
     */
-    int hashCode() const throw();
+    int hashCode() const;
 
     /** Returns a 64-bit hash-code that identifies this file.
 
         This is based on the filename. Obviously it's possible, although unlikely, that
         two files will have the same hash-code.
     */
-    int64 hashCode64() const throw();
+    int64 hashCode64() const;
 
     /** Returns a file based on a relative path.
 
@@ -7475,7 +7475,7 @@ public:
 
         @see getSiblingFile, getParentDirectory, getRelativePathFrom, isAChildOf
     */
-    const File getChildFile (String relativePath) const throw();
+    const File getChildFile (String relativePath) const;
 
     /** Returns a file which is in the same directory as this one.
 
@@ -7483,13 +7483,13 @@ public:
 
         @see getChildFile, getParentDirectory
     */
-    const File getSiblingFile (const String& siblingFileName) const throw();
+    const File getSiblingFile (const String& siblingFileName) const;
 
     /** Returns the directory that contains this file or directory.
 
         e.g. for "/moose/fish/foo.txt" this will return "/moose/fish".
     */
-    const File getParentDirectory() const throw();
+    const File getParentDirectory() const;
 
     /** Checks whether a file is somewhere inside a directory.
 
@@ -7500,7 +7500,7 @@ public:
         e.g. File ("/moose/fish/foo.txt").isAChildOf ("/moose") is true.
              File ("/moose/fish/foo.txt").isAChildOf ("/moose/fish") is also true.
     */
-    bool isAChildOf (const File& potentialParentDirectory) const throw();
+    bool isAChildOf (const File& potentialParentDirectory) const;
 
     /** Chooses a filename relative to this one that doesn't already exist.
 
@@ -7521,7 +7521,7 @@ public:
     */
     const File getNonexistentChildFile (const String& prefix,
                                         const String& suffix,
-                                        bool putNumbersInBrackets = true) const throw();
+                                        bool putNumbersInBrackets = true) const;
 
     /** Chooses a filename for a sibling file to this one that doesn't already exist.
 
@@ -7532,12 +7532,12 @@ public:
         @param putNumbersInBrackets     whether to add brackets around the numbers that
                                         get appended to the new filename.
     */
-    const File getNonexistentSibling (const bool putNumbersInBrackets = true) const throw();
+    const File getNonexistentSibling (const bool putNumbersInBrackets = true) const;
 
     /** Compares the pathnames for two files. */
-    bool operator== (const File& otherFile) const throw();
+    bool operator== (const File& otherFile) const;
     /** Compares the pathnames for two files. */
-    bool operator!= (const File& otherFile) const throw();
+    bool operator!= (const File& otherFile) const;
 
     /** Checks whether a file can be created or written to.
 
@@ -7546,7 +7546,7 @@ public:
                     see if writing is allowed.
         @see setReadOnly
     */
-    bool hasWriteAccess() const throw();
+    bool hasWriteAccess() const;
 
     /** Changes the write-permission of a file or directory.
 
@@ -7558,40 +7558,40 @@ public:
         @see hasWriteAccess
     */
     bool setReadOnly (const bool shouldBeReadOnly,
-                      const bool applyRecursively = false) const throw();
+                      const bool applyRecursively = false) const;
 
     /** Returns true if this file is a hidden or system file.
 
         The criteria for deciding whether a file is hidden are platform-dependent.
     */
-    bool isHidden() const throw();
+    bool isHidden() const;
 
     /** If this file is a link, this returns the file that it points to.
 
         If this file isn't actually link, it'll just return itself.
     */
-    const File getLinkedTarget() const throw();
+    const File getLinkedTarget() const;
 
     /** Returns the last modification time of this file.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastModificationTime, getLastAccessTime, getCreationTime
     */
-    const Time getLastModificationTime() const throw();
+    const Time getLastModificationTime() const;
 
     /** Returns the last time this file was accessed.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see setLastAccessTime, getLastModificationTime, getCreationTime
     */
-    const Time getLastAccessTime() const throw();
+    const Time getLastAccessTime() const;
 
     /** Returns the time that this file was created.
 
         @returns    the time, or an invalid time if the file doesn't exist.
         @see getLastModificationTime, getLastAccessTime
     */
-    const Time getCreationTime() const throw();
+    const Time getCreationTime() const;
 
     /** Changes the modification time for this file.
 
@@ -7599,7 +7599,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastModificationTime, setLastAccessTime, setCreationTime
     */
-    bool setLastModificationTime (const Time& newTime) const throw();
+    bool setLastModificationTime (const Time& newTime) const;
 
     /** Changes the last-access time for this file.
 
@@ -7607,7 +7607,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getLastAccessTime, setLastModificationTime, setCreationTime
     */
-    bool setLastAccessTime (const Time& newTime) const throw();
+    bool setLastAccessTime (const Time& newTime) const;
 
     /** Changes the creation date for this file.
 
@@ -7615,7 +7615,7 @@ public:
         @returns true if it manages to change the file's time.
         @see getCreationTime, setLastModificationTime, setLastAccessTime
     */
-    bool setCreationTime (const Time& newTime) const throw();
+    bool setCreationTime (const Time& newTime) const;
 
     /** If possible, this will try to create a version string for the given file.
 
@@ -7623,7 +7623,7 @@ public:
         executables, bundles, dlls, etc. If no version is available, this will
         return an empty string.
     */
-    const String getVersion() const throw();
+    const String getVersion() const;
 
     /** Creates an empty file if it doesn't already exist.
 
@@ -7635,7 +7635,7 @@ public:
         @returns    true if the file has been created (or if it already existed).
         @see createDirectory
     */
-    bool create() const throw();
+    bool create() const;
 
     /** Creates a new directory for this filename.
 
@@ -7646,7 +7646,7 @@ public:
                     already existed beforehand).
         @see create
     */
-    bool createDirectory() const throw();
+    bool createDirectory() const;
 
     /** Deletes a file.
 
@@ -7657,7 +7657,7 @@ public:
                     begin with).
         @see deleteRecursively
     */
-    bool deleteFile() const throw();
+    bool deleteFile() const;
 
     /** Deletes a file or directory and all its subdirectories.
 
@@ -7668,7 +7668,7 @@ public:
                     (or if it didn't exist to begin with).
         @see deleteFile
     */
-    bool deleteRecursively() const throw();
+    bool deleteRecursively() const;
 
     /** Moves this file or folder to the trash.
 
@@ -7676,7 +7676,7 @@ public:
                  if the file is write-protected, so you should check the return value
                  and act appropriately.
     */
-    bool moveToTrash() const throw();
+    bool moveToTrash() const;
 
     /** Moves or renames a file.
 
@@ -7689,7 +7689,7 @@ public:
 
         @returns    true if the operation succeeds
     */
-    bool moveFileTo (const File& targetLocation) const throw();
+    bool moveFileTo (const File& targetLocation) const;
 
     /** Copies a file.
 
@@ -7699,7 +7699,7 @@ public:
 
         @returns    true if the operation succeeds
     */
-    bool copyFileTo (const File& targetLocation) const throw();
+    bool copyFileTo (const File& targetLocation) const;
 
     /** Copies a directory.
 
@@ -7714,7 +7714,7 @@ public:
                                write privileges to create it if it doesn't exist. Any files inside
                                it will be overwritten by similarly named ones that are copied.
     */
-    bool copyDirectoryTo (const File& newDirectory) const throw();
+    bool copyDirectoryTo (const File& newDirectory) const;
 
     /** Used in file searching, to specify whether to return files, directories, or both.
     */
@@ -7746,7 +7746,7 @@ public:
     int findChildFiles (OwnedArray<File>& results,
                         const int whatToLookFor,
                         const bool searchRecursively,
-                        const String& wildCardPattern = JUCE_T("*")) const throw();
+                        const String& wildCardPattern = JUCE_T("*")) const;
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
 
@@ -7765,12 +7765,12 @@ public:
         @see findChildFiles, DirectoryIterator
     */
     int getNumberOfChildFiles (const int whatToLookFor,
-                               const String& wildCardPattern = JUCE_T("*")) const throw();
+                               const String& wildCardPattern = JUCE_T("*")) const;
 
     /** Returns true if this file is a directory that contains one or more subdirectories.
         @see isDirectory, findChildFiles
     */
-    bool containsSubDirectories() const throw();
+    bool containsSubDirectories() const;
 
     /** Creates a stream to read from this file.
 
@@ -7778,7 +7778,7 @@ public:
                     start of the file), or 0 if the file can't be opened for some reason
         @see createOutputStream, loadFileAsData
     */
-    FileInputStream* createInputStream() const throw();
+    FileInputStream* createInputStream() const;
 
     /** Creates a stream to write to this file.
 
@@ -7790,7 +7790,7 @@ public:
                     end of the file), or 0 if the file can't be opened for some reason
         @see createInputStream, printf, appendData, appendText
     */
-    FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const throw();
+    FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const;
 
     /** Loads a file's contents into memory as a block of binary data.
 
@@ -7802,7 +7802,7 @@ public:
                         might want to clear it first
         @returns        true if the file could all be read into memory
     */
-    bool loadFileAsData (MemoryBlock& result) const throw();
+    bool loadFileAsData (MemoryBlock& result) const;
 
     /** Reads a file into memory as a string.
 
@@ -7811,7 +7811,7 @@ public:
         This makes use of InputStream::readEntireStreamAsString, which should
         automatically cope with unicode/acsii file formats.
     */
-    const String loadFileAsString() const throw();
+    const String loadFileAsString() const;
 
     /** Writes text to the end of the file.
 
@@ -7819,7 +7819,7 @@ public:
 
         @returns  false if it can't write to the file for some reason
     */
-    bool printf (const tchar* format, ...) const throw();
+    bool printf (const tchar* format, ...) const;
 
     /** Appends a block of binary data to the end of the file.
 
@@ -7828,7 +7828,7 @@ public:
         @returns false if it can't write to the file for some reason
     */
     bool appendData (const void* const dataToAppend,
-                     const int numberOfBytes) const throw();
+                     const int numberOfBytes) const;
 
     /** Replaces this file's contents with a given block of data.
 
@@ -7845,7 +7845,7 @@ public:
         @see appendText
     */
     bool replaceWithData (const void* const dataToWrite,
-                          const int numberOfBytes) const throw();
+                          const int numberOfBytes) const;
 
     /** Appends a string to the end of the file.
 
@@ -7861,7 +7861,7 @@ public:
     */
     bool appendText (const String& textToAppend,
                      const bool asUnicode = false,
-                     const bool writeUnicodeHeaderBytes = false) const throw();
+                     const bool writeUnicodeHeaderBytes = false) const;
 
     /** Replaces this file's contents with a given text string.
 
@@ -7881,7 +7881,7 @@ public:
     */
     bool replaceWithText (const String& textToWrite,
                           const bool asUnicode = false,
-                          const bool writeUnicodeHeaderBytes = false) const throw();
+                          const bool writeUnicodeHeaderBytes = false) const;
 
     /** Creates a set of files to represent each file root.
 
@@ -7889,49 +7889,49 @@ public:
         to which ones are available. On the Mac/Linux, this will probably
         just add a single entry for "/".
     */
-    static void findFileSystemRoots (OwnedArray<File>& results) throw();
+    static void findFileSystemRoots (OwnedArray<File>& results);
 
     /** Finds the name of the drive on which this file lives.
 
         @returns the volume label of the drive, or an empty string if this isn't possible
     */
-    const String getVolumeLabel() const throw();
+    const String getVolumeLabel() const;
 
     /** Returns the serial number of the volume on which this file lives.
 
         @returns the serial number, or zero if there's a problem doing this
     */
-    int getVolumeSerialNumber() const throw();
+    int getVolumeSerialNumber() const;
 
     /** Returns the number of bytes free on the drive that this file lives on.
 
         @returns the number of bytes free, or 0 if there's a problem finding this out
         @see getVolumeTotalSize
     */
-    int64 getBytesFreeOnVolume() const throw();
+    int64 getBytesFreeOnVolume() const;
 
     /** Returns the total size of the drive that contains this file.
 
         @returns the total number of bytes that the volume can hold
         @see getBytesFreeOnVolume
     */
-    int64 getVolumeTotalSize() const throw();
+    int64 getVolumeTotalSize() const;
 
     /** Returns true if this file is on a CD or DVD drive. */
-    bool isOnCDRomDrive() const throw();
+    bool isOnCDRomDrive() const;
 
     /** Returns true if this file is on a hard disk.
 
         This will fail if it's a network drive, but will still be true for
         removable hard-disks.
     */
-    bool isOnHardDisk() const throw();
+    bool isOnHardDisk() const;
 
     /** Returns true if this file is on a removable disk drive.
 
         This might be a usb-drive, a CD-rom, or maybe a network drive.
     */
-    bool isOnRemovableDrive() const throw();
+    bool isOnRemovableDrive() const;
 
     /** Launches the file as a process.
 
@@ -7944,12 +7944,12 @@ public:
 
         @see revealToUser
     */
-    bool startAsProcess (const String& parameters = String::empty) const throw();
+    bool startAsProcess (const String& parameters = String::empty) const;
 
     /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
         @see startAsProcess
     */
-    void revealToUser() const throw();
+    void revealToUser() const;
 
     /** A set of types of location that can be passed to the getSpecialLocation() method.
     */
@@ -8049,13 +8049,13 @@ public:
 
         To get the temp folder, you can use getSpecialLocation (File::tempDirectory).
     */
-    static const File createTempFile (const String& fileNameEnding) throw();
+    static const File createTempFile (const String& fileNameEnding);
 
     /** Returns the current working directory.
 
         @see setAsCurrentWorkingDirectory
     */
-    static const File getCurrentWorkingDirectory() throw();
+    static const File getCurrentWorkingDirectory();
 
     /** Sets the current working directory to be this file.
 
@@ -8064,7 +8064,7 @@ public:
         @returns true if the current directory has been changed.
         @see getCurrentWorkingDirectory
     */
-    bool setAsCurrentWorkingDirectory() const throw();
+    bool setAsCurrentWorkingDirectory() const;
 
     /** The system-specific file separator character.
 
@@ -8088,7 +8088,7 @@ public:
 
         @see createLegalPathName
     */
-    static const String createLegalFileName (const String& fileNameToFix) throw();
+    static const String createLegalFileName (const String& fileNameToFix);
 
     /** Removes illegal characters from a pathname.
 
@@ -8097,7 +8097,7 @@ public:
 
         @see createLegalFileName
     */
-    static const String createLegalPathName (const String& pathNameToFix) throw();
+    static const String createLegalPathName (const String& pathNameToFix);
 
     /** Indicates whether filenames are case-sensitive on the current operating system.
     */
@@ -8105,7 +8105,7 @@ public:
 
     /** Returns true if the string seems to be a fully-specified absolute path.
     */
-    static bool isAbsolutePath (const String& path) throw();
+    static bool isAbsolutePath (const String& path);
 
     juce_UseDebuggingNewOperator
 
@@ -8115,8 +8115,8 @@ private:
 
     // internal way of contructing a file without checking the path
     friend class DirectoryIterator;
-    File (const String&, int) throw();
-    const String getPathUpToLastSlash() const throw();
+    File (const String&, int);
+    const String getPathUpToLastSlash() const;
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__
@@ -13806,30 +13806,30 @@ public:
     DirectoryIterator (const File& directory,
                        bool isRecursive,
                        const String& wildCard = JUCE_T("*"),
-                       const int whatToLookFor = File::findFiles) throw();
+                       const int whatToLookFor = File::findFiles);
 
     /** Destructor. */
-    ~DirectoryIterator() throw();
+    ~DirectoryIterator();
 
     /** Call this to move the iterator along to the next file.
 
         @returns    true if a file was found (you can then use getFile() to see what it was) - or
                     false if there are no more matching files.
     */
-    bool next() throw();
+    bool next();
 
     /** Returns the file that the iterator is currently pointing at.
 
         The result of this call is only valid after a call to next() has returned true.
     */
-    const File getFile() const throw();
+    const File getFile() const;
 
     /** Returns a guess of how far through the search the iterator has got.
 
         @returns    a value 0.0 to 1.0 to show the progress, although this won't be
                     very accurate.
     */
-    float getEstimatedProgress() const throw();
+    float getEstimatedProgress() const;
 
     juce_UseDebuggingNewOperator
 
@@ -13938,11 +13938,11 @@ public:
 
     /** Returns the file that this stream is writing to.
     */
-    const File& getFile() const throw()                 { return file; }
+    const File& getFile() const                         { return file; }
 
     /** Returns true if the stream couldn't be opened for some reason.
     */
-    bool failedToOpen() const throw()                   { return fileHandle == 0; }
+    bool failedToOpen() const                           { return fileHandle == 0; }
 
     void flush();
     int64 getPosition();
@@ -14139,10 +14139,10 @@ public:
     void close();
 
     /** True if the pipe is currently open. */
-    bool isOpen() const throw();
+    bool isOpen() const;
 
     /** Returns the last name that was used to try to open this pipe. */
-    const String getName() const throw();
+    const String getName() const;
 
     /** Reads data from the pipe.
 
@@ -14653,7 +14653,7 @@ class JUCE_API  URL
 public:
 
     /** Creates an empty URL. */
-    URL() throw();
+    URL();
 
     /** Creates a URL from a string. */
     URL (const String& url);
@@ -14662,7 +14662,7 @@ public:
     URL (const URL& other);
 
     /** Destructor. */
-    ~URL() throw();
+    ~URL();
 
     /** Copies this URL from another one. */
     const URL& operator= (const URL& other);
@@ -14736,18 +14736,18 @@ public:
 
         @see getNamedParameter, withParameter
     */
-    const StringPairArray& getParameters() const throw();
+    const StringPairArray& getParameters() const;
 
     /** Returns the set of files that should be uploaded as part of a POST operation.
 
         This is the set of files that were added to the URL with the withFileToUpload()
         method.
     */
-    const StringPairArray& getFilesToUpload() const throw();
+    const StringPairArray& getFilesToUpload() const;
 
     /** Returns the set of mime types associated with each of the upload files.
     */
-    const StringPairArray& getMimeTypesOfUploadFiles() const throw();
+    const StringPairArray& getMimeTypesOfUploadFiles() const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
@@ -14765,7 +14765,7 @@ public:
 
     /** Returns the data that was set using withPOSTData().
     */
-    const String getPostData() const throw()                        { return postData; }
+    const String getPostData() const                            { return postData; }
 
     /** Tries to launch the system's default browser to open the URL.
 
@@ -14920,14 +14920,14 @@ public:
     */
     BufferedInputStream (InputStream* const sourceStream,
                          const int bufferSize,
-                         const bool deleteSourceWhenDestroyed) throw();
+                         const bool deleteSourceWhenDestroyed);
 
     /** Destructor.
 
         This may also delete the source stream, if that option was chosen when the
         buffered stream was created.
     */
-    ~BufferedInputStream() throw();
+    ~BufferedInputStream();
 
     int64 getTotalLength();
     int64 getPosition();
@@ -14969,7 +14969,7 @@ class JUCE_API  FileInputSource     : public InputSource
 {
 public:
 
-    FileInputSource (const File& file) throw();
+    FileInputSource (const File& file);
     ~FileInputSource();
 
     InputStream* createInputStream();
@@ -15150,10 +15150,10 @@ public:
     */
     MemoryInputStream (const void* const sourceData,
                        const int sourceDataSize,
-                       const bool keepInternalCopyOfData) throw();
+                       const bool keepInternalCopyOfData);
 
     /** Destructor. */
-    ~MemoryInputStream() throw();
+    ~MemoryInputStream();
 
     int64 getPosition();
     bool setPosition (int64 pos);
@@ -15638,13 +15638,13 @@ public:
 
         @param name     a name that processes will use to identify this lock object
     */
-    InterProcessLock (const String& name) throw();
+    InterProcessLock (const String& name);
 
     /** Destructor.
 
         This will also release the lock if it's currently held by this process.
     */
-    ~InterProcessLock() throw();
+    ~InterProcessLock();
 
     /** Attempts to lock the critical section.
 
@@ -15655,11 +15655,11 @@ public:
         @returns    true if the lock could be gained within the timeout period, or
                     false if the timeout expired.
     */
-    bool enter (int timeOutMillisecs = -1) throw();
+    bool enter (int timeOutMillisecs = -1);
 
     /** Releases the lock if it's currently held by this process.
     */
-    void exit() throw();
+    void exit();
 
     juce_UseDebuggingNewOperator
 
@@ -15722,7 +15722,7 @@ public:
     /** Returns true if this application process is the one that the user is
         currently using.
     */
-    static bool isForegroundProcess() throw();
+    static bool isForegroundProcess();
 
     /** Raises the current process's privilege level.
 
@@ -15740,7 +15740,7 @@ public:
 
     /** Returns true if this process is being hosted by a debugger.
     */
-    static bool JUCE_CALLTYPE isRunningUnderDebugger() throw();
+    static bool JUCE_CALLTYPE isRunningUnderDebugger();
 };
 
 #endif   // __JUCE_PROCESS_JUCEHEADER__
@@ -15878,7 +15878,7 @@ public:
 
         @see stopThread
     */
-    void startThread() throw();
+    void startThread();
 
     /** Starts the thread with a given priority.
 
@@ -15887,7 +15887,7 @@ public:
 
         @see startThread, setPriority
     */
-    void startThread (const int priority) throw();
+    void startThread (const int priority);
 
     /** Attempts to stop the thread running.
 
@@ -15907,10 +15907,10 @@ public:
                                     value in here will wait forever.
         @see signalThreadShouldExit, threadShouldExit, waitForThreadToExit, isThreadRunning
     */
-    void stopThread (const int timeOutMilliseconds) throw();
+    void stopThread (const int timeOutMilliseconds);
 
     /** Returns true if the thread is currently active */
-    bool isThreadRunning() const throw();
+    bool isThreadRunning() const;
 
     /** Sets a flag to tell the thread it should stop.
 
@@ -15920,7 +15920,7 @@ public:
         @see threadShouldExit
         @see waitForThreadToExit
     */
-    void signalThreadShouldExit() throw();
+    void signalThreadShouldExit();
 
     /** Checks whether the thread has been told to stop running.
 
@@ -15929,7 +15929,7 @@ public:
 
         @see signalThreadShouldExit
     */
-    inline bool threadShouldExit() const throw()  { return threadShouldExit_; }
+    inline bool threadShouldExit() const                { return threadShouldExit_; }
 
     /** Waits for the thread to stop.
 
@@ -15939,7 +15939,7 @@ public:
                                     is less than zero, it will wait forever.
         @returns    true if the thread exits, or false if the timeout expires first.
     */
-    bool waitForThreadToExit (const int timeOutMilliseconds) const throw();
+    bool waitForThreadToExit (const int timeOutMilliseconds) const;
 
     /** Changes the thread's priority.
         May return false if for some reason the priority can't be changed.
@@ -15947,7 +15947,7 @@ public:
         @param priority     the new priority, in the range 0 (lowest) to 10 (highest). A priority
                             of 5 is normal.
     */
-    bool setPriority (const int priority) throw();
+    bool setPriority (const int priority);
 
     /** Changes the priority of the caller thread.
 
@@ -15956,7 +15956,7 @@ public:
 
         @see setPriority
     */
-    static bool setCurrentThreadPriority (const int priority) throw();
+    static bool setCurrentThreadPriority (const int priority);
 
     /** Sets the affinity mask for the thread.
 
@@ -15965,7 +15965,7 @@ public:
 
         @see setCurrentThreadAffinityMask
     */
-    void setAffinityMask (const uint32 affinityMask) throw();
+    void setAffinityMask (const uint32 affinityMask);
 
     /** Changes the affinity mask for the caller thread.
 
@@ -15973,13 +15973,13 @@ public:
 
         @see setAffinityMask
     */
-    static void setCurrentThreadAffinityMask (const uint32 affinityMask) throw();
+    static void setCurrentThreadAffinityMask (const uint32 affinityMask);
 
     // this can be called from any thread that needs to pause..
-    static void JUCE_CALLTYPE sleep (int milliseconds) throw();
+    static void JUCE_CALLTYPE sleep (int milliseconds);
 
     /** Yields the calling thread's current time-slot. */
-    static void JUCE_CALLTYPE yield() throw();
+    static void JUCE_CALLTYPE yield();
 
     /** Makes the thread wait for a notification.
 
@@ -15988,7 +15988,7 @@ public:
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */
-    bool wait (const int timeOutMilliseconds) const throw();
+    bool wait (const int timeOutMilliseconds) const;
 
     /** Wakes up the thread.
 
@@ -15996,7 +15996,7 @@ public:
 
         @see wait
     */
-    void notify() const throw();
+    void notify() const;
 
     /** A value type used for thread IDs.
         @see getCurrentThreadId(), getThreadId()
@@ -16010,14 +16010,14 @@ public:
         @returns    a unique identifier that identifies the calling thread.
         @see getThreadId
     */
-    static ThreadID getCurrentThreadId() throw();
+    static ThreadID getCurrentThreadId();
 
     /** Finds the thread object that is currently running.
 
         Note that the main UI thread (or other non-Juce threads) don't have a Thread
         object associated with them, so this will return 0.
     */
-    static Thread* getCurrentThread() throw();
+    static Thread* getCurrentThread();
 
     /** Returns the ID of this thread.
 
@@ -16028,26 +16028,26 @@ public:
 
         @see getCurrentThreadId
     */
-    ThreadID getThreadId() const throw();
+    ThreadID getThreadId() const                                    { return threadId_; }
 
     /** Returns the name of the thread.
 
         This is the name that gets set in the constructor.
     */
-    const String getThreadName() const throw()                      { return threadName_; }
+    const String getThreadName() const                              { return threadName_; }
 
     /** Returns the number of currently-running threads.
 
         @returns  the number of Thread objects known to be currently running.
         @see stopAllThreads
     */
-    static int getNumRunningThreads() throw();
+    static int getNumRunningThreads();
 
     /** Tries to stop all currently-running threads.
 
         This will attempt to stop all the threads known to be running at the moment.
     */
-    static void stopAllThreads (const int timeoutInMillisecs) throw();
+    static void stopAllThreads (const int timeoutInMillisecs);
 
     juce_UseDebuggingNewOperator
 
@@ -16063,7 +16063,7 @@ private:
     bool volatile threadShouldExit_;
 
     friend void JUCE_API juce_threadEntryPoint (void*);
-    static void threadEntryPoint (Thread* thread) throw();
+    static void threadEntryPoint (Thread* thread);
 
     Thread (const Thread&);
     const Thread& operator= (const Thread&);
@@ -16431,12 +16431,12 @@ public:
     /** Returns the name of this job.
         @see setJobName
     */
-    const String getJobName() const throw();
+    const String getJobName() const;
 
     /** Changes the job's name.
         @see getJobName
     */
-    void setJobName (const String& newName) throw();
+    void setJobName (const String& newName);
 
     /** These are the values that can be returned by the runJob() method.
     */
@@ -16469,7 +16469,7 @@ public:
     virtual JobStatus runJob() = 0;
 
     /** Returns true if this job is currently running its runJob() method. */
-    bool isRunning() const throw()       { return isActive; }
+    bool isRunning() const                  { return isActive; }
 
     /** Returns true if something is trying to interrupt this job and make it stop.
 
@@ -16478,14 +16478,14 @@ public:
 
         @see signalJobShouldExit()
     */
-    bool shouldExit() const throw()      { return shouldStop; }
+    bool shouldExit() const                 { return shouldStop; }
 
     /** Calling this will cause the shouldExit() method to return true, and the job
         should (if it's been implemented correctly) stop as soon as possible.
 
         @see shouldExit()
     */
-    void signalJobShouldExit() throw();
+    void signalJobShouldExit();
 
     juce_UseDebuggingNewOperator
 
@@ -16607,20 +16607,20 @@ public:
 
     /** Returns the number of jobs currently running or queued.
     */
-    int getNumJobs() const throw();
+    int getNumJobs() const;
 
     /** Returns one of the jobs in the queue.
 
         Note that this can be a very volatile list as jobs might be continuously getting shifted
         around in the list, and this method may return 0 if the index is currently out-of-range.
     */
-    ThreadPoolJob* getJob (const int index) const throw();
+    ThreadPoolJob* getJob (const int index) const;
 
     /** Returns true if the given job is currently queued or running.
 
         @see isJobRunning()
     */
-    bool contains (const ThreadPoolJob* const job) const throw();
+    bool contains (const ThreadPoolJob* const job) const;
 
     /** Returns true if the given job is currently being run by a thread.
     */
@@ -16641,7 +16641,7 @@ public:
 
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
-    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const throw();
+    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
 
@@ -16755,10 +16755,10 @@ public:
     void removeTimeSliceClient (TimeSliceClient* const client);
 
     /** Returns the number of registered clients. */
-    int getNumClients() const throw();
+    int getNumClients() const;
 
     /** Returns one of the registered clients. */
-    TimeSliceClient* getClient (const int index) const throw();
+    TimeSliceClient* getClient (const int index) const;
 
     /** @internal */
     void run();
@@ -19178,7 +19178,7 @@ public:
 
         @see setUsingNonZeroWinding
     */
-    bool isUsingNonZeroWinding() const throw()          { return useNonZeroWinding; }
+    bool isUsingNonZeroWinding() const                  { return useNonZeroWinding; }
 
     /** Iterates the lines and curves that a path contains.
 
@@ -25741,7 +25741,7 @@ class JUCE_API  DeletedAtShutdown
 {
 protected:
     /** Creates a DeletedAtShutdown object. */
-    DeletedAtShutdown() throw();
+    DeletedAtShutdown();
 
     /** Destructor.
 
@@ -26473,7 +26473,7 @@ public:
     */
     PropertiesFile (const File& file,
                     const int millisecondsBeforeSaving,
-                    const int options) throw();
+                    const int options);
 
     /** Destructor.
 
@@ -26504,10 +26504,10 @@ public:
     /** Returns true if the properties have been altered since the last time they were
         saved.
     */
-    bool needsToBeSaved() const throw();
+    bool needsToBeSaved() const;
 
     /** Returns the file that's being used. */
-    const File getFile() const throw();
+    const File getFile() const                              { return file; }
 
     /** Handy utility to create a properties file in whatever the standard OS-specific
         location is for these things.
@@ -32675,19 +32675,19 @@ class JUCE_API  PopupMenu
 public:
 
     /** Creates an empty popup menu. */
-    PopupMenu() throw();
+    PopupMenu();
 
     /** Creates a copy of another menu. */
-    PopupMenu (const PopupMenu& other) throw();
+    PopupMenu (const PopupMenu& other);
 
     /** Destructor. */
-    ~PopupMenu() throw();
+    ~PopupMenu();
 
     /** Copies this menu from another one. */
-    const PopupMenu& operator= (const PopupMenu& other) throw();
+    const PopupMenu& operator= (const PopupMenu& other);
 
     /** Resets the menu, removing all its items. */
-    void clear() throw();
+    void clear();
 
     /** Appends a new text item for this menu to show.
 
@@ -32710,7 +32710,7 @@ public:
                   const String& itemText,
                   const bool isActive = true,
                   const bool isTicked = false,
-                  const Image* const iconToUse = 0) throw();
+                  const Image* const iconToUse = 0);
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -32722,7 +32722,7 @@ public:
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
                          const int commandID,
-                         const String& displayName = String::empty) throw();
+                         const String& displayName = String::empty);
 
     /** Appends a text item with a special colour.
 
@@ -32735,7 +32735,7 @@ public:
                           const Colour& itemTextColour,
                           const bool isActive = true,
                           const bool isTicked = false,
-                          const Image* const iconToUse = 0) throw();
+                          const Image* const iconToUse = 0);
 
     /** Appends a custom menu item.
 
@@ -32745,7 +32745,7 @@ public:
         @see PopupMenuCustomComponent
     */
     void addCustomItem (const int itemResultId,
-                        PopupMenuCustomComponent* const customComponent) throw();
+                        PopupMenuCustomComponent* const customComponent);
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
@@ -32765,7 +32765,7 @@ public:
     void addCustomItem (const int itemResultId,
                         Component* customComponent,
                         int idealWidth, int idealHeight,
-                        const bool triggerMenuItemAutomaticallyWhenClicked) throw();
+                        const bool triggerMenuItemAutomaticallyWhenClicked);
 
     /** Appends a sub-menu.
 
@@ -32775,7 +32775,7 @@ public:
                      const PopupMenu& subMenu,
                      const bool isActive = true,
                      Image* const iconToUse = 0,
-                     const bool isTicked = false) throw();
+                     const bool isTicked = false);
 
     /** Appends a separator to the menu, to help break it up into sections.
 
@@ -32784,26 +32784,26 @@ public:
         one, so your code can be quite free and easy about adding these, and it'll
         always look ok.
     */
-    void addSeparator() throw();
+    void addSeparator();
 
     /** Adds a non-clickable text item to the menu.
 
         This is a bold-font items which can be used as a header to separate the items
         into named groups.
     */
-    void addSectionHeader (const String& title) throw();
+    void addSectionHeader (const String& title);
 
     /** Returns the number of items that the menu currently contains.
 
         (This doesn't count separators).
     */
-    int getNumItems() const throw();
+    int getNumItems() const;
 
     /** Returns true if the menu contains a command item that triggers the given command. */
-    bool containsCommandItem (const int commandID) const throw();
+    bool containsCommandItem (const int commandID) const;
 
     /** Returns true if the menu contains any items that can be used. */
-    bool containsAnyActiveItems() const throw();
+    bool containsAnyActiveItems() const;
 
     /** Displays the menu and waits for the user to pick something.
 
@@ -32873,14 +32873,14 @@ public:
         by some means other than a user action, and you'd like to make sure that menus
         aren't left hanging around.
     */
-    static void JUCE_CALLTYPE dismissAllActiveMenus() throw();
+    static void JUCE_CALLTYPE dismissAllActiveMenus();
 
     /** Specifies a look-and-feel for the menu and any sub-menus that it has.
 
         This can be called before show() if you need a customised menu. Be careful
         not to delete the LookAndFeel object before the menu has been deleted.
     */
-    void setLookAndFeel (LookAndFeel* const newLookAndFeel) throw();
+    void setLookAndFeel (LookAndFeel* const newLookAndFeel);
 
     /** A set of colour IDs to use to change the colour of various aspects of the menu.
 
@@ -32921,15 +32921,15 @@ public:
             Be careful not to add any items to a menu while it is being iterated,
             or things could get out of step.
         */
-        MenuItemIterator (const PopupMenu& menu) throw();
+        MenuItemIterator (const PopupMenu& menu);
 
         /** Destructor. */
-        ~MenuItemIterator() throw();
+        ~MenuItemIterator();
 
         /** Returns true if there is another item, and sets up all this object's
             member variables to reflect that item's properties.
         */
-        bool next() throw();
+        bool next();
 
         String itemName;
         const PopupMenu* subMenu;
@@ -32970,7 +32970,7 @@ private:
                   const int maximumNumColumns,
                   const int standardItemHeight,
                   const bool alignToRectangle,
-                  Component* const componentAttachedTo) throw();
+                  Component* const componentAttachedTo);
 
     friend class MenuBarComponent;
     Component* createMenuComponent (const int x, const int y, const int w, const int h,
@@ -32981,7 +32981,7 @@ private:
                                     const bool alignToRectangle,
                                     Component* menuBarComponent,
                                     ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* const componentAttachedTo) throw();
+                                    Component* const componentAttachedTo);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
@@ -35116,7 +35116,7 @@ public:
 
         @see getNumTracks, getTrack
     */
-    void addTrack (const MidiMessageSequence& trackSequence)  throw();
+    void addTrack (const MidiMessageSequence& trackSequence) throw();
 
     /** Removes all midi tracks from the file.
 
@@ -37905,7 +37905,7 @@ public:
 
         bool isPrepared;
 
-        Node (const uint32 id, AudioProcessor* const processor) throw();
+        Node (const uint32 id, AudioProcessor* const processor);
 
         void prepare (const double sampleRate, const int blockSize, AudioProcessorGraph* const graph);
         void unprepare();
@@ -37962,21 +37962,21 @@ public:
     void clear();
 
     /** Returns the number of nodes in the graph. */
-    int getNumNodes() const throw()                                 { return nodes.size(); }
+    int getNumNodes() const                                         { return nodes.size(); }
 
     /** Returns a pointer to one of the nodes in the graph.
 
         This will return 0 if the index is out of range.
         @see getNodeForId
     */
-    Node* getNode (const int index) const throw()                   { return nodes [index]; }
+    Node* getNode (const int index) const                           { return nodes [index]; }
 
     /** Searches the graph for a node with the given ID number and returns it.
 
         If no such node was found, this returns 0.
         @see getNode
     */
-    Node* getNodeForId (const uint32 nodeId) const throw();
+    Node* getNodeForId (const uint32 nodeId) const;
 
     /** Adds a node to the graph.
 
@@ -37999,10 +37999,10 @@ public:
     bool removeNode (const uint32 nodeId);
 
     /** Returns the number of connections in the graph. */
-    int getNumConnections() const throw()                               { return connections.size(); }
+    int getNumConnections() const                                       { return connections.size(); }
 
     /** Returns a pointer to one of the connections in the graph. */
-    const Connection* getConnection (const int index) const throw()     { return connections [index]; }
+    const Connection* getConnection (const int index) const             { return connections [index]; }
 
     /** Searches for a connection between some specified channels.
 
@@ -38011,18 +38011,18 @@ public:
     const Connection* getConnectionBetween (const uint32 sourceNodeId,
                                             const int sourceChannelIndex,
                                             const uint32 destNodeId,
-                                            const int destChannelIndex) const throw();
+                                            const int destChannelIndex) const;
 
     /** Returns true if there is a connection between any of the channels of
         two specified nodes.
     */
     bool isConnected (const uint32 possibleSourceNodeId,
-                      const uint32 possibleDestNodeId) const throw();
+                      const uint32 possibleDestNodeId) const;
 
     /** Returns true if it would be legal to connect the specified points.
     */
     bool canConnect (const uint32 sourceNodeId, const int sourceChannelIndex,
-                     const uint32 destNodeId, const int destChannelIndex) const throw();
+                     const uint32 destNodeId, const int destChannelIndex) const;
 
     /** Attempts to connect two specified channels of two nodes.
 
@@ -38098,16 +38098,16 @@ public:
         };
 
         /** Returns the mode of this processor. */
-        IODeviceType getType() const throw()                        { return type; }
+        IODeviceType getType() const                                { return type; }
 
         /** Returns the parent graph to which this processor belongs, or 0 if it
             hasn't yet been added to one. */
-        AudioProcessorGraph* getParentGraph() const throw()         { return graph; }
+        AudioProcessorGraph* getParentGraph() const                 { return graph; }
 
         /** True if this is an audio or midi input. */
-        bool isInput() const throw();
+        bool isInput() const;
         /** True if this is an audio or midi output. */
-        bool isOutput() const throw();
+        bool isOutput() const;
 
         AudioGraphIOProcessor (const IODeviceType type);
         ~AudioGraphIOProcessor();
@@ -38144,7 +38144,7 @@ public:
         void setStateInformation (const void* data, int sizeInBytes);
 
         /** @internal */
-        void setParentGraph (AudioProcessorGraph* const graph) throw();
+        void setParentGraph (AudioProcessorGraph* const graph);
 
         juce_UseDebuggingNewOperator
 
@@ -38215,7 +38215,7 @@ private:
 
     bool isAnInputTo (const uint32 possibleInputId,
                       const uint32 possibleDestinationId,
-                      const int recursionCheck) const throw();
+                      const int recursionCheck) const;
 
     AudioProcessorGraph (const AudioProcessorGraph&);
     const AudioProcessorGraph& operator= (const AudioProcessorGraph&);
@@ -38266,13 +38266,13 @@ public:
 
     /** Returns the current audio processor that is being played.
     */
-    AudioProcessor* getCurrentProcessor() const throw()             { return processor; }
+    AudioProcessor* getCurrentProcessor() const                     { return processor; }
 
     /** Returns a midi message collector that you can pass midi messages to if you
         want them to be injected into the midi stream that is being sent to the
         processor.
     */
-    MidiMessageCollector& getMidiMessageCollector() throw()         { return messageCollector; }
+    MidiMessageCollector& getMidiMessageCollector()                 { return messageCollector; }
 
     /** @internal */
     void audioDeviceIOCallback (const float** inputChannelData,
@@ -38516,7 +38516,7 @@ public:
     /** Returns the message that is displayed when there are no properties.
         @see setMessageWhenEmpty
     */
-    const String& getMessageWhenEmpty() const throw();
+    const String& getMessageWhenEmpty() const;
 
     /** @internal */
     void paint (Graphics& g);
@@ -38641,13 +38641,13 @@ public:
 
         Returns a value less than 0 if no note is playing.
     */
-    int getCurrentlyPlayingNote() const throw()                     { return currentlyPlayingNote; }
+    int getCurrentlyPlayingNote() const                                     { return currentlyPlayingNote; }
 
     /** Returns the sound that this voice is currently playing.
 
         Returns 0 if it's not playing.
     */
-    const SynthesiserSound::Ptr getCurrentlyPlayingSound() const throw()      { return currentlyPlayingSound; }
+    const SynthesiserSound::Ptr getCurrentlyPlayingSound() const            { return currentlyPlayingSound; }
 
     /** Must return true if this voice object is capable of playing the given sound.
 
@@ -38741,7 +38741,7 @@ protected:
 
         This is available for subclasses so they can pitch things correctly.
     */
-    double getSampleRate() const throw()                        { return currentSampleRate; }
+    double getSampleRate() const                                { return currentSampleRate; }
 
     /** Resets the state of this voice after a sound has finished playing.
 
@@ -38807,10 +38807,10 @@ public:
     void clearVoices();
 
     /** Returns the number of voices that have been added. */
-    int getNumVoices() const throw()                                { return voices.size(); }
+    int getNumVoices() const                                        { return voices.size(); }
 
     /** Returns one of the voices that have been added. */
-    SynthesiserVoice* getVoice (const int index) const throw();
+    SynthesiserVoice* getVoice (const int index) const;
 
     /** Adds a new voice to the synth.
 
@@ -38829,10 +38829,10 @@ public:
     void clearSounds();
 
     /** Returns the number of sounds that have been added to the synth. */
-    int getNumSounds() const throw()                                { return sounds.size(); }
+    int getNumSounds() const                                        { return sounds.size(); }
 
     /** Returns one of the sounds. */
-    SynthesiserSound* getSound (const int index) const throw()      { return sounds [index]; }
+    SynthesiserSound* getSound (const int index) const              { return sounds [index]; }
 
     /** Adds a new sound to the synthesiser.
 
@@ -38855,7 +38855,7 @@ public:
     /** Returns true if note-stealing is enabled.
         @see setNoteStealingEnabled
     */
-    bool isNoteStealingEnabled() const throw()                      { return shouldStealNotes; }
+    bool isNoteStealingEnabled() const                              { return shouldStealNotes; }
 
     /** Triggers a note-on event.
 
@@ -39051,12 +39051,12 @@ public:
     ~SamplerSound();
 
     /** Returns the sample's name */
-    const String& getName() const throw()                   { return name; }
+    const String& getName() const                           { return name; }
 
     /** Returns the audio sample data.
         This could be 0 if there was a problem loading it.
     */
-    AudioSampleBuffer* getAudioData() const throw()         { return data; }
+    AudioSampleBuffer* getAudioData() const                 { return data; }
 
     bool appliesToNote (const int midiNoteNumber);
     bool appliesToChannel (const int midiChannel);
@@ -42638,7 +42638,7 @@ public:
 
         @see setSliderStyle
     */
-    SliderStyle getSliderStyle() const throw()                                  { return style; }
+    SliderStyle getSliderStyle() const                                      { return style; }
 
     /** Changes the properties of a rotary slider.
 
@@ -42671,12 +42671,12 @@ public:
 
         If false, the slider will just try to snap to wherever the mouse is.
     */
-    void setVelocityBasedMode (const bool isVelocityBased) throw();
+    void setVelocityBasedMode (const bool isVelocityBased);
 
     /** Returns true if velocity-based mode is active.
         @see setVelocityBasedMode
     */
-    bool getVelocityBasedMode() const throw()                   { return isVelocityBased; }
+    bool getVelocityBasedMode() const                       { return isVelocityBased; }
 
     /** Changes aspects of the scaling used when in velocity-sensitive mode.
 
@@ -42694,27 +42694,27 @@ public:
     void setVelocityModeParameters (const double sensitivity = 1.0,
                                     const int threshold = 1,
                                     const double offset = 0.0,
-                                    const bool userCanPressKeyToSwapMode = true) throw();
+                                    const bool userCanPressKeyToSwapMode = true);
 
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters
     */
-    double getVelocitySensitivity() const throw()               { return velocityModeSensitivity; }
+    double getVelocitySensitivity() const                       { return velocityModeSensitivity; }
 
     /** Returns the velocity threshold setting.
         @see setVelocityModeParameters
     */
-    int getVelocityThreshold() const throw()                    { return velocityModeThreshold; }
+    int getVelocityThreshold() const                            { return velocityModeThreshold; }
 
     /** Returns the velocity offset setting.
         @see setVelocityModeParameters
     */
-    double getVelocityOffset() const throw()                    { return velocityModeOffset; }
+    double getVelocityOffset() const                            { return velocityModeOffset; }
 
     /** Returns the velocity user key setting.
         @see setVelocityModeParameters
     */
-    bool getVelocityModeIsSwappable() const throw()             { return userKeyOverridesVelocity; }
+    bool getVelocityModeIsSwappable() const                     { return userKeyOverridesVelocity; }
 
     /** Sets up a skew factor to alter the way values are distributed.
 
@@ -42731,7 +42731,7 @@ public:
 
         @see getSkewFactor, setSkewFactorFromMidPoint
     */
-    void setSkewFactor (const double factor) throw();
+    void setSkewFactor (const double factor);
 
     /** Sets up a skew factor to alter the way values are distributed.
 
@@ -42740,7 +42740,7 @@ public:
 
         @see setSkewFactor, getSkewFactor
      */
-    void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint) throw();
+    void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint);
 
     /** Returns the current skew factor.
 
@@ -42748,7 +42748,7 @@ public:
 
         @see setSkewFactor, setSkewFactorFromMidPoint
     */
-    double getSkewFactor() const throw()                        { return skewFactor; }
+    double getSkewFactor() const                                { return skewFactor; }
 
     /** Used by setIncDecButtonsMode().
     */
@@ -42804,17 +42804,17 @@ public:
     /** Returns the status of the text-box.
         @see setTextBoxStyle
     */
-    const TextEntryBoxPosition getTextBoxPosition() const throw()           { return textBoxPos; }
+    const TextEntryBoxPosition getTextBoxPosition() const                   { return textBoxPos; }
 
     /** Returns the width used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxWidth() const throw()                                     { return textBoxWidth; }
+    int getTextBoxWidth() const                                             { return textBoxWidth; }
 
     /** Returns the height used for the text-box.
         @see setTextBoxStyle
     */
-    int getTextBoxHeight() const throw()                                    { return textBoxHeight; }
+    int getTextBoxHeight() const                                            { return textBoxHeight; }
 
     /** Makes the text-box editable.
 
@@ -42823,12 +42823,12 @@ public:
 
         @see setTextBoxStyle, getValueFromText, getTextFromValue
     */
-    void setTextBoxIsEditable (const bool shouldBeEditable) throw();
+    void setTextBoxIsEditable (const bool shouldBeEditable);
 
     /** Returns true if the text-box is read-only.
         @see setTextBoxStyle
     */
-    bool isTextBoxEditable() const throw()                                  { return editableText; }
+    bool isTextBoxEditable() const                                          { return editableText; }
 
     /** If the text-box is editable, this will give it the focus so that the user can
         type directly into it.
@@ -42866,7 +42866,7 @@ public:
                    const bool sendMessageSynchronously = false);
 
     /** Returns the slider's current value. */
-    double getValue() const throw();
+    double getValue() const;
 
     /** Sets the limits that the slider's value can take.
 
@@ -42882,17 +42882,17 @@ public:
     /** Returns the current maximum value.
         @see setRange
     */
-    double getMaximum() const throw()                                       { return maximum; }
+    double getMaximum() const                                               { return maximum; }
 
     /** Returns the current minimum value.
         @see setRange
     */
-    double getMinimum() const throw()                                       { return minimum; }
+    double getMinimum() const                                               { return minimum; }
 
     /** Returns the current step-size for values.
         @see setRange
     */
-    double getInterval() const throw()                                      { return interval; }
+    double getInterval() const                                              { return interval; }
 
     /** For a slider with two or three thumbs, this returns the lower of its values.
 
@@ -42902,7 +42902,7 @@ public:
 
         @see setMinValue, getMaxValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
-    double getMinValue() const throw();
+    double getMinValue() const;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -42936,7 +42936,7 @@ public:
 
         @see getMinValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
-    double getMaxValue() const throw();
+    double getMaxValue() const;
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -42963,10 +42963,10 @@ public:
                       const bool allowNudgingOfOtherValues = false);
 
     /** Adds a listener to be called when this slider's value changes. */
-    void addListener (SliderListener* const listener) throw();
+    void addListener (SliderListener* const listener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (SliderListener* const listener) throw();
+    void removeListener (SliderListener* const listener);
 
     /** This lets you choose whether double-clicking moves the slider to a given position.
 
@@ -42977,7 +42977,7 @@ public:
         @see getDoubleClickReturnValue
     */
     void setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                    const double valueToSetOnDoubleClick) throw();
+                                    const double valueToSetOnDoubleClick);
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
 
@@ -42986,7 +42986,7 @@ public:
 
         @see setDoubleClickReturnValue
     */
-    double getDoubleClickReturnValue (bool& isEnabled) const throw();
+    double getDoubleClickReturnValue (bool& isEnabled) const;
 
     /** Tells the slider whether to keep sending change messages while the user
         is dragging the slider.
@@ -42996,7 +42996,7 @@ public:
         will be continuously sent as they drag it while the mouse button is still
         held down.
     */
-    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease) throw();
+    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease);
 
     /** This lets you change whether the slider thumb jumps to the mouse position
         when you click.
@@ -43007,7 +43007,7 @@ public:
         This only applies to linear bars, and won't affect two- or three- value
         sliders.
     */
-    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse) throw();
+    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse);
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
@@ -43022,7 +43022,7 @@ public:
         you'll have to add it to a parent component instead).
     */
     void setPopupDisplayEnabled (const bool isEnabled,
-                                 Component* const parentComponentToUse) throw();
+                                 Component* const parentComponentToUse);
 
     /** If this is set to true, then right-clicking on the slider will pop-up
         a menu to let the user change the way it works.
@@ -43031,13 +43031,13 @@ public:
         things like velocity sensitivity, and for rotary sliders, whether they
         use a linear or rotary mouse-drag to move them.
     */
-    void setPopupMenuEnabled (const bool menuEnabled) throw();
+    void setPopupMenuEnabled (const bool menuEnabled);
 
     /** This can be used to stop the mouse scroll-wheel from moving the slider.
 
         By default it's enabled.
     */
-    void setScrollWheelEnabled (const bool enabled) throw();
+    void setScrollWheelEnabled (const bool enabled);
 
     /** Returns a number to indicate which thumb is currently being dragged by the
         mouse.
@@ -43045,7 +43045,7 @@ public:
         This will return 0 for the main thumb, 1 for the minimum-value thumb, 2 for
         the maximum-value thumb, or -1 if none is currently down.
     */
-    int getThumbBeingDragged() const throw()        { return sliderBeingDragged; }
+    int getThumbBeingDragged() const                { return sliderBeingDragged; }
 
     /** Callback to indicate that the user is about to start dragging the slider.
 
@@ -43164,9 +43164,9 @@ public:
     void updateText();
 
     /** True if the slider moves horizontally. */
-    bool isHorizontal() const throw();
+    bool isHorizontal() const;
     /** True if the slider moves vertically. */
-    bool isVertical() const throw();
+    bool isVertical() const;
 
     /** A set of colour IDs to use to change the colour of various aspects of the slider.
 
@@ -43261,9 +43261,9 @@ private:
     void restoreMouseIfHidden();
     void sendDragStart();
     void sendDragEnd();
-    double constrainedValue (double value) const throw();
+    double constrainedValue (double value) const;
     void triggerChangeMessage (const bool synchronous);
-    bool incDecDragDirectionIsHorizontal() const throw();
+    bool incDecDragDirectionIsHorizontal() const;
 
     Slider (const Slider&);
     const Slider& operator= (const Slider&);
@@ -43423,12 +43423,12 @@ public:
 
         @see isColumnVisible
     */
-    int getNumColumns (const bool onlyCountVisibleColumns) const throw();
+    int getNumColumns (const bool onlyCountVisibleColumns) const;
 
     /** Returns the name for a column.
         @see setColumnName
     */
-    const String getColumnName (const int columnId) const throw();
+    const String getColumnName (const int columnId) const;
 
     /** Changes the name of a column. */
     void setColumnName (const int columnId, const String& newName);
@@ -43442,7 +43442,7 @@ public:
 
     /** Returns the width of one of the columns.
     */
-    int getColumnWidth (const int columnId) const throw();
+    int getColumnWidth (const int columnId) const;
 
     /** Changes the width of a column.
 
@@ -43477,12 +43477,12 @@ public:
 
         @see setSortColumnId, isSortedForwards
     */
-    int getSortColumnId() const throw();
+    int getSortColumnId() const;
 
     /** Returns true if the table is currently sorted forwards, or false if it's backwards.
         @see setSortColumnId
     */
-    bool isSortedForwards() const throw();
+    bool isSortedForwards() const;
 
     /** Triggers a re-sort of the table according to the current sort-column.
 
@@ -43496,7 +43496,7 @@ public:
 
     /** Returns the total width of all the visible columns in the table.
     */
-    int getTotalWidth() const throw();
+    int getTotalWidth() const;
 
     /** Returns the index of a given column.
 
@@ -43505,7 +43505,7 @@ public:
         If onlyCountVisibleColumns is true, this will return the index amoungst the visible columns;
         otherwise it'll return the index amongst all the columns, including any hidden ones.
     */
-    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const throw();
+    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const;
 
     /** Returns the ID of the column at a given index.
 
@@ -43514,7 +43514,7 @@ public:
 
         If the index is out-of-range, it'll return 0.
     */
-    int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const throw();
+    int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const;
 
     /** Returns the rectangle containing of one of the columns.
 
@@ -43522,13 +43522,13 @@ public:
         ones are not counted). It returns a rectangle showing the position of the column relative
         to this component's top-left. If the index is out-of-range, an empty rectangle is retrurned.
     */
-    const Rectangle getColumnPosition (const int index) const throw();
+    const Rectangle getColumnPosition (const int index) const;
 
     /** Finds the column ID at a given x-position in the component.
 
         If there is a column at this point this returns its ID, or if not, it will return 0.
     */
-    int getColumnIdAtX (const int xToFind) const throw();
+    int getColumnIdAtX (const int xToFind) const;
 
     /** If set to true, this indicates that the columns should be expanded or shrunk to fill the
         entire width of the component.
@@ -43541,7 +43541,7 @@ public:
     /** Returns true if stretch-to-fit has been enabled.
         @see setStretchToFitActive
     */
-    bool isStretchToFitActive() const throw();
+    bool isStretchToFitActive() const;
 
     /** If stretch-to-fit is enabled, this will resize all the columns to make them fit into the
         specified width, keeping their relative proportions the same.
@@ -43565,7 +43565,7 @@ public:
     /** Returns true if the pop-up menu is enabled.
         @see setPopupMenuActive
     */
-    bool isPopupMenuActive() const throw();
+    bool isPopupMenuActive() const;
 
     /** Returns a string that encapsulates the table's current layout.
 
@@ -43584,10 +43584,10 @@ public:
     void restoreFromString (const String& storedVersion);
 
     /** Adds a listener to be informed about things that happen to the header. */
-    void addListener (TableHeaderListener* const newListener) throw();
+    void addListener (TableHeaderListener* const newListener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (TableHeaderListener* const listenerToRemove) throw();
+    void removeListener (TableHeaderListener* const listenerToRemove);
 
     /** This can be overridden to handle a mouse-click on one of the column headers.
 
@@ -43649,7 +43649,7 @@ private:
         int id, propertyFlags, width, minimumWidth, maximumWidth;
         double lastDeliberateWidth;
 
-        bool isVisible() const throw();
+        bool isVisible() const;
     };
 
     OwnedArray <ColumnInfo> columns;
@@ -43660,13 +43660,13 @@ private:
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
     int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
 
-    ColumnInfo* getInfoForId (const int columnId) const throw();
-    int visibleIndexToTotalIndex (const int visibleIndex) const throw();
+    ColumnInfo* getInfoForId (const int columnId) const;
+    int visibleIndexToTotalIndex (const int visibleIndex) const;
     void sendColumnsChanged();
     void handleAsyncUpdate();
     void beginDrag (const MouseEvent&);
     void endDrag (const int finalIndex);
-    int getResizeDraggerAt (const int mouseX) const throw();
+    int getResizeDraggerAt (const int mouseX) const;
     void updateColumnUnderMouse (int x, int y);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
@@ -43863,10 +43863,10 @@ public:
     void setModel (TableListBoxModel* const newModel);
 
     /** Returns the model currently in use. */
-    TableListBoxModel* getModel() const throw()                     { return model; }
+    TableListBoxModel* getModel() const                             { return model; }
 
     /** Returns the header component being used in this table. */
-    TableHeaderComponent* getHeader() const throw()                 { return header; }
+    TableHeaderComponent* getHeader() const                         { return header; }
 
     /** Changes the height of the table header component.
         @see getHeaderHeight
@@ -43876,7 +43876,7 @@ public:
     /** Returns the height of the table header.
         @see setHeaderHeight
     */
-    int getHeaderHeight() const throw();
+    int getHeaderHeight() const;
 
     /** Resizes a column to fit its contents.
 
@@ -43899,7 +43899,7 @@ public:
     /** True if the auto-size options should be shown on the menu.
         @see setAutoSizeMenuOptionsShown
     */
-    bool isAutoSizeMenuOptionShown() const throw();
+    bool isAutoSizeMenuOptionShown() const;
 
     /** Returns the position of one of the cells in the table.
 
@@ -45182,21 +45182,21 @@ public:
     class BitmapData
     {
     public:
-        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable) throw();
-        BitmapData (const Image& image, int x, int y, int w, int h) throw();
-        ~BitmapData() throw();
+        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable);
+        BitmapData (const Image& image, int x, int y, int w, int h);
+        ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
             The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (const int y) const throw()                { return data + y * lineStride; }
+        inline uint8* getLinePointer (const int y) const                        { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (const int x, const int y) const throw()  { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (const int x, const int y) const          { return data + y * lineStride + x * pixelStride; }
 
         uint8* data;
         int lineStride, pixelStride, width, height;
@@ -45309,7 +45309,7 @@ public:
                        const bool includeFiles);
 
     /** Returns the directory that's currently being used. */
-    const File& getDirectory() const throw();
+    const File& getDirectory() const;
 
     /** Clears the list, and stops the thread scanning for files. */
     void clear();
@@ -45329,7 +45329,7 @@ public:
     /** Returns true if hidden files are ignored.
         @see setIgnoresHiddenFiles
     */
-    bool ignoresHiddenFiles() const throw()          { return ignoreHiddenFiles; }
+    bool ignoresHiddenFiles() const             { return ignoreHiddenFiles; }
 
     /** Contains cached information about one of the files in a DirectoryContentsList.
     */
@@ -45404,15 +45404,15 @@ public:
 
         The filter is specified in the constructor.
     */
-    const FileFilter* getFilter() const throw()             { return fileFilter; }
+    const FileFilter* getFilter() const                     { return fileFilter; }
 
     /** @internal */
     bool useTimeSlice();
     /** @internal */
-    TimeSliceThread& getTimeSliceThread() throw()           { return thread; }
+    TimeSliceThread& getTimeSliceThread()                   { return thread; }
     /** @internal */
     static int compareElements (const DirectoryContentsList::FileInfo* const first,
-                                const DirectoryContentsList::FileInfo* const second) throw();
+                                const DirectoryContentsList::FileInfo* const second);
 
     juce_UseDebuggingNewOperator
 
@@ -46049,7 +46049,7 @@ private:
     void setShadowImage (Image* const src,
                          const int num,
                          const int w, const int h,
-                         const int sx, const int sy) throw();
+                         const int sx, const int sy);
 
     void bringShadowWindowsToFront();
     void deleteShadowWindows();
@@ -46930,39 +46930,39 @@ class JUCE_API  PositionedGlyph
 public:
 
     /** Returns the character the glyph represents. */
-    juce_wchar getCharacter() const throw()     { return character; }
+    juce_wchar getCharacter() const             { return character; }
     /** Checks whether the glyph is actually empty. */
-    bool isWhitespace() const throw()           { return CharacterFunctions::isWhitespace (character); }
+    bool isWhitespace() const                   { return CharacterFunctions::isWhitespace (character); }
 
     /** Returns the position of the glyph's left-hand edge. */
-    float getLeft() const throw()               { return x; }
+    float getLeft() const                       { return x; }
     /** Returns the position of the glyph's right-hand edge. */
-    float getRight() const throw()              { return x + w; }
+    float getRight() const                      { return x + w; }
     /** Returns the y position of the glyph's baseline. */
-    float getBaselineY() const throw()          { return y; }
+    float getBaselineY() const                  { return y; }
     /** Returns the y position of the top of the glyph. */
-    float getTop() const throw()                { return y - font.getAscent(); }
+    float getTop() const                        { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
-    float getBottom() const throw()             { return y + font.getDescent(); }
+    float getBottom() const                     { return y + font.getDescent(); }
 
     /** Shifts the glyph's position by a relative amount. */
     void moveBy (const float deltaX,
-                 const float deltaY) throw();
+                 const float deltaY);
 
     /** Draws the glyph into a graphics context. */
-    void draw (const Graphics& g) const throw();
+    void draw (const Graphics& g) const;
 
     /** Draws the glyph into a graphics context, with an extra transform applied to it. */
-    void draw (const Graphics& g, const AffineTransform& transform) const throw();
+    void draw (const Graphics& g, const AffineTransform& transform) const;
 
     /** Returns the path for this glyph.
 
         @param path     the glyph's outline will be appended to this path
     */
-    void createPath (Path& path) const throw();
+    void createPath (Path& path) const;
 
     /** Checks to see if a point lies within this glyph. */
-    bool hitTest (float x, float y) const throw();
+    bool hitTest (float x, float y) const;
 
     juce_UseDebuggingNewOperator
 
@@ -46974,7 +46974,7 @@ private:
     juce_wchar character;
     int glyph;
 
-    PositionedGlyph() throw();
+    PositionedGlyph();
 };
 
 /**
@@ -46991,22 +46991,22 @@ class JUCE_API  GlyphArrangement
 public:
 
     /** Creates an empty arrangement. */
-    GlyphArrangement() throw();
+    GlyphArrangement();
 
     /** Takes a copy of another arrangement. */
-    GlyphArrangement (const GlyphArrangement& other) throw();
+    GlyphArrangement (const GlyphArrangement& other);
 
     /** Copies another arrangement onto this one.
 
         To add another arrangement without clearing this one, use addGlyphArrangement().
     */
-    const GlyphArrangement& operator= (const GlyphArrangement& other) throw();
+    const GlyphArrangement& operator= (const GlyphArrangement& other);
 
     /** Destructor. */
-    ~GlyphArrangement() throw();
+    ~GlyphArrangement();
 
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const throw()                            { return glyphs.size(); }
+    int getNumGlyphs() const                                    { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 
@@ -47014,11 +47014,11 @@ public:
                         careful not to pass an out-of-range index here, as it
                         doesn't do any bounds-checking.
     */
-    PositionedGlyph& getGlyph (const int index) const throw();
+    PositionedGlyph& getGlyph (const int index) const;
 
     /** Clears all text from the arrangement and resets it.
     */
-    void clear() throw();
+    void clear();
 
     /** Appends a line of text to the arrangement.
 
@@ -47031,7 +47031,7 @@ public:
     void addLineOfText (const Font& font,
                         const String& text,
                         const float x,
-                        const float y) throw();
+                        const float y);
 
     /** Adds a line of text, truncating it if it's wider than a specified size.
 
@@ -47044,7 +47044,7 @@ public:
                                  float x,
                                  const float y,
                                  const float maxWidthPixels,
-                                 const bool useEllipsis) throw();
+                                 const bool useEllipsis);
 
     /** Adds some multi-line text, breaking lines at word-boundaries if they are too wide.
 
@@ -47063,7 +47063,7 @@ public:
                            const String& text,
                            float x, float y,
                            const float maxLineWidth,
-                           const Justification& horizontalLayout) throw();
+                           const Justification& horizontalLayout);
 
     /** Tries to fit some text withing a given space.
 
@@ -47086,36 +47086,36 @@ public:
                         const float width, const float height,
                         const Justification& layout,
                         int maximumLinesToUse,
-                        const float minimumHorizontalScale = 0.7f) throw();
+                        const float minimumHorizontalScale = 0.7f);
 
     /** Appends another glyph arrangement to this one. */
-    void addGlyphArrangement (const GlyphArrangement& other) throw();
+    void addGlyphArrangement (const GlyphArrangement& other);
 
     /** Draws this glyph arrangement to a graphics context.
 
         This uses cached bitmaps so is much faster than the draw (Graphics&, const AffineTransform&)
         method, which renders the glyphs as filled vectors.
     */
-    void draw (const Graphics& g) const throw();
+    void draw (const Graphics& g) const;
 
     /** Draws this glyph arrangement to a graphics context.
 
         This renders the paths as filled vectors, so is far slower than the draw (Graphics&)
         method for non-transformed arrangements.
     */
-    void draw (const Graphics& g, const AffineTransform& transform) const throw();
+    void draw (const Graphics& g, const AffineTransform& transform) const;
 
     /** Converts the set of glyphs into a path.
 
         @param path     the glyphs' outlines will be appended to this path
     */
-    void createPath (Path& path) const throw();
+    void createPath (Path& path) const;
 
     /** Looks for a glyph that contains the given co-ordinate.
 
         @returns the index of the glyph, or -1 if none were found.
     */
-    int findGlyphIndexAt (float x, float y) const throw();
+    int findGlyphIndexAt (float x, float y) const;
 
     /** Finds the smallest rectangle that will enclose a subset of the glyphs.
 
@@ -47135,7 +47135,7 @@ public:
                          float& top,
                          float& right,
                          float& bottom,
-                         const bool includeWhitespace) const throw();
+                         const bool includeWhitespace) const;
 
     /** Shifts a set of glyphs by a given amount.
 
@@ -47147,7 +47147,7 @@ public:
     */
     void moveRangeOfGlyphs (int startIndex, int numGlyphs,
                             const float deltaX,
-                            const float deltaY) throw();
+                            const float deltaY);
 
     /** Removes a set of glyphs from the arrangement.
 
@@ -47155,7 +47155,7 @@ public:
         @param numGlyphs    the number of glyphs to remove; if this is < 0, all glyphs after
                             startIndex will be deleted
     */
-    void removeRangeOfGlyphs (int startIndex, int numGlyphs) throw();
+    void removeRangeOfGlyphs (int startIndex, int numGlyphs);
 
     /** Expands or compresses a set of glyphs horizontally.
 
@@ -47165,7 +47165,7 @@ public:
         @param horizontalScaleFactor    how much to scale their horizontal width by
     */
     void stretchRangeOfGlyphs (int startIndex, int numGlyphs,
-                               const float horizontalScaleFactor) throw();
+                               const float horizontalScaleFactor);
 
     /** Justifies a set of glyphs within a given space.
 
@@ -47180,17 +47180,17 @@ public:
                         const float y,
                         const float width,
                         const float height,
-                        const Justification& justification) throw();
+                        const Justification& justification);
 
     juce_UseDebuggingNewOperator
 
 private:
     OwnedArray <PositionedGlyph> glyphs;
 
-    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex) throw();
+    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
-                          const Justification& justification, float minimumHorizontalScale) throw();
-    void spreadOutLine (const int start, const int numGlyphs, const float targetWidth) throw();
+                          const Justification& justification, float minimumHorizontalScale);
+    void spreadOutLine (const int start, const int numGlyphs, const float targetWidth);
 };
 
 #endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
@@ -51992,7 +51992,7 @@ public:
     virtual int getIndex() const = 0;
 
     /** Returns the list of options. */
-    const StringArray& getChoices() const throw();
+    const StringArray& getChoices() const;
 
     /** @internal */
     void refresh();
@@ -52767,7 +52767,7 @@ public:
     ~MagnifierComponent();
 
     /** Returns the current content component. */
-    Component* getContentComponent() const throw()          { return content; }
+    Component* getContentComponent() const                  { return content; }
 
     /** Changes the zoom level.
 
@@ -52780,7 +52780,7 @@ public:
     void setScaleFactor (double newScaleFactor);
 
     /** Returns the current zoom factor. */
-    double getScaleFactor() const throw()                   { return scaleFactor; }
+    double getScaleFactor() const                           { return scaleFactor; }
 
     /** Changes the quality setting used to rescale the graphics.
     */
@@ -52808,7 +52808,7 @@ private:
     void mouseExit (const MouseEvent& e);
     void mouseWheelMove (const MouseEvent& e, float, float);
 
-    int scaleInt (const int n) const throw();
+    int scaleInt (const int n) const;
 
     MagnifierComponent (const MagnifierComponent&);
     const MagnifierComponent& operator= (const MagnifierComponent&);
@@ -55330,7 +55330,7 @@ public:
     int subPathIndex;
 
     /** Returns true if the current segment is the last in the current sub-path. */
-    bool isLastInSubpath() const throw()    { return stackPos == stackBase
+    bool isLastInSubpath() const            { return stackPos == stackBase
                                                       && (index >= path.numElements
                                                            || points [index] == Path::moveMarker); }
 
@@ -55743,7 +55743,7 @@ public:
                                      int maxWidth = 1024, int maxHeight = 768);
 
     /** Returns the name of this device */
-    const String getName() const throw()        { return name; }
+    const String getName() const                { return name; }
 
     /** Creates a component that can be used to display a preview of the
         video from this camera.
@@ -55949,7 +55949,7 @@ private:
     CriticalSection lock;
     OwnedArray <ImageCacheItem> images;
 
-    ImageCache() throw();
+    ImageCache();
     ImageCache (const ImageCache&);
     const ImageCache& operator= (const ImageCache&);
     ~ImageCache();
@@ -55981,14 +55981,14 @@ public:
         @param size     the length of each dimension of the kernel, so e.g. if the size
                         is 5, it will create a 5x5 kernel
     */
-    ImageConvolutionKernel (const int size) throw();
+    ImageConvolutionKernel (const int size);
 
     /** Destructor. */
-    ~ImageConvolutionKernel() throw();
+    ~ImageConvolutionKernel();
 
     /** Resets all values in the kernel to zero.
     */
-    void clear() throw();
+    void clear();
 
     /** Sets the value of a specific cell in the kernel.
 
@@ -55998,16 +55998,16 @@ public:
     */
     void setKernelValue (const int x,
                          const int y,
-                         const float value) throw();
+                         const float value);
 
     /** Rescales all values in the kernel to make the total add up to a fixed value.
 
         This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
     */
-    void setOverallSum (const float desiredTotalSum) throw();
+    void setOverallSum (const float desiredTotalSum);
 
     /** Multiplies all values in the kernel by a value. */
-    void rescaleAllValues (const float multiplier) throw();
+    void rescaleAllValues (const float multiplier);
 
     /** Intialises the kernel for a gaussian blur.
 
@@ -56016,19 +56016,19 @@ public:
                             edges. Ideally the kernel should be just larger than
                             (blurRadius * 2).
     */
-    void createGaussianBlur (const float blurRadius) throw();
+    void createGaussianBlur (const float blurRadius);
 
     /** Returns the size of the kernel.
 
         E.g. if it's a 3x3 kernel, this returns 3.
     */
-    int getKernelSize() const throw()       { return size; }
+    int getKernelSize() const               { return size; }
 
     /** Returns a 2-dimensional array of the kernel's values.
 
         The size of each dimension of the array will be getKernelSize().
     */
-    float** getValues() const throw()       { return values; }
+    float** getValues() const               { return values; }
 
     /** Applies the kernel to an image.
 
@@ -56084,11 +56084,11 @@ class JUCE_API  ImageFileFormat
 protected:
 
     /** Creates an ImageFormat. */
-    ImageFileFormat() throw()           {}
+    ImageFileFormat()                   {}
 
 public:
     /** Destructor. */
-    virtual ~ImageFileFormat() throw()  {}
+    virtual ~ImageFileFormat()          {}
 
     /** Returns a description of this file format.
 
@@ -56182,8 +56182,8 @@ class JUCE_API  PNGImageFormat  : public ImageFileFormat
 {
 public:
 
-    PNGImageFormat() throw();
-    ~PNGImageFormat() throw();
+    PNGImageFormat();
+    ~PNGImageFormat();
 
     const String getFormatName();
     bool canUnderstand (InputStream& input);
@@ -56202,8 +56202,8 @@ class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 {
 public:
 
-    JPEGImageFormat() throw();
-    ~JPEGImageFormat() throw();
+    JPEGImageFormat();
+    ~JPEGImageFormat();
 
     /** Specifies the quality to be used when writing a JPEG file.
 
@@ -56279,7 +56279,7 @@ public:
 
         @see resetChangedFlag, changed
     */
-    bool hasChangedSinceSaved() const throw()                   { return changedSinceSave; }
+    bool hasChangedSinceSaved() const                           { return changedSinceSave; }
 
     /** Called to indicate that the document has changed and needs saving.
 
@@ -56413,7 +56413,7 @@ public:
         It is changed when one of the load or save methods is used, or when setFile()
         is used to explicitly set it.
     */
-    const File getFile() const throw()                      { return documentFile; }
+    const File getFile() const                              { return documentFile; }
 
     /** Sets the file that this document thinks it was loaded from.
 

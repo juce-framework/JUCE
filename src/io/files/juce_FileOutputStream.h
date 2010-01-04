@@ -63,11 +63,11 @@ public:
     //==============================================================================
     /** Returns the file that this stream is writing to.
     */
-    const File& getFile() const throw()                 { return file; }
+    const File& getFile() const                         { return file; }
 
     /** Returns true if the stream couldn't be opened for some reason.
     */
-    bool failedToOpen() const throw()                   { return fileHandle == 0; }
+    bool failedToOpen() const                           { return fileHandle == 0; }
 
     //==============================================================================
     void flush();

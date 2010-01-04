@@ -49,17 +49,17 @@ ThreadPoolJob::~ThreadPoolJob()
     jassert (pool == 0 || ! pool->contains (this));
 }
 
-const String ThreadPoolJob::getJobName() const throw()
+const String ThreadPoolJob::getJobName() const
 {
     return jobName;
 }
 
-void ThreadPoolJob::setJobName (const String& newName) throw()
+void ThreadPoolJob::setJobName (const String& newName)
 {
     jobName = newName;
 }
 
-void ThreadPoolJob::signalJobShouldExit() throw()
+void ThreadPoolJob::signalJobShouldExit()
 {
     shouldStop = true;
 }
@@ -181,18 +181,18 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
     }
 }
 
-int ThreadPool::getNumJobs() const throw()
+int ThreadPool::getNumJobs() const
 {
     return jobs.size();
 }
 
-ThreadPoolJob* ThreadPool::getJob (const int index) const throw()
+ThreadPoolJob* ThreadPool::getJob (const int index) const
 {
     const ScopedLock sl (lock);
     return (ThreadPoolJob*) jobs [index];
 }
 
-bool ThreadPool::contains (const ThreadPoolJob* const job) const throw()
+bool ThreadPool::contains (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
     return jobs.contains ((void*) job);
@@ -308,7 +308,7 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
     return true;
 }
 
-const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const throw()
+const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs) const
 {
     StringArray s;
     const ScopedLock sl (lock);

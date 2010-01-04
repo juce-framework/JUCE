@@ -156,11 +156,11 @@ static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
 
 
 //==============================================================================
-static void dummyCallback1 (j_decompress_ptr) throw()
+static void dummyCallback1 (j_decompress_ptr)
 {
 }
 
-static void jpegSkip (j_decompress_ptr decompStruct, long num) throw()
+static void jpegSkip (j_decompress_ptr decompStruct, long num)
 {
     decompStruct->src->next_input_byte += num;
 
@@ -168,13 +168,13 @@ static void jpegSkip (j_decompress_ptr decompStruct, long num) throw()
     decompStruct->src->bytes_in_buffer -= num;
 }
 
-static boolean jpegFill (j_decompress_ptr) throw()
+static boolean jpegFill (j_decompress_ptr)
 {
     return 0;
 }
 
 //==============================================================================
-Image* juce_loadJPEGImageFromStream (InputStream& in) throw()
+Image* juce_loadJPEGImageFromStream (InputStream& in)
 {
     MemoryBlock mb;
     in.readIntoMemoryBlock (mb);
@@ -278,11 +278,11 @@ struct JuceJpegDest  : public jpeg_destination_mgr
     char* buffer;
 };
 
-static void jpegWriteInit (j_compress_ptr) throw()
+static void jpegWriteInit (j_compress_ptr)
 {
 }
 
-static void jpegWriteTerminate (j_compress_ptr cinfo) throw()
+static void jpegWriteTerminate (j_compress_ptr cinfo)
 {
     JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
 
@@ -290,7 +290,7 @@ static void jpegWriteTerminate (j_compress_ptr cinfo) throw()
     dest->output->write (dest->buffer, numToWrite);
 }
 
-static boolean jpegWriteFlush (j_compress_ptr cinfo) throw()
+static boolean jpegWriteFlush (j_compress_ptr cinfo)
 {
     JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
 
@@ -305,7 +305,7 @@ static boolean jpegWriteFlush (j_compress_ptr cinfo) throw()
 //==============================================================================
 bool juce_writeJPEGImageToStream (const Image& image,
                                   OutputStream& out,
-                                  float quality) throw()
+                                  float quality)
 {
     if (image.hasAlphaChannel())
     {

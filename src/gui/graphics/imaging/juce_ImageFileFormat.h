@@ -47,11 +47,11 @@ class JUCE_API  ImageFileFormat
 protected:
     //==============================================================================
     /** Creates an ImageFormat. */
-    ImageFileFormat() throw()           {}
+    ImageFileFormat()                   {}
 
 public:
     /** Destructor. */
-    virtual ~ImageFileFormat() throw()  {}
+    virtual ~ImageFileFormat()          {}
 
     //==============================================================================
     /** Returns a description of this file format.
@@ -150,8 +150,8 @@ class JUCE_API  PNGImageFormat  : public ImageFileFormat
 {
 public:
     //==============================================================================
-    PNGImageFormat() throw();
-    ~PNGImageFormat() throw();
+    PNGImageFormat();
+    ~PNGImageFormat();
 
     //==============================================================================
     const String getFormatName();
@@ -173,8 +173,8 @@ class JUCE_API  JPEGImageFormat  : public ImageFileFormat
 {
 public:
     //==============================================================================
-    JPEGImageFormat() throw();
-    ~JPEGImageFormat() throw();
+    JPEGImageFormat();
+    ~JPEGImageFormat();
 
     //==============================================================================
     /** Specifies the quality to be used when writing a JPEG file.

@@ -52,10 +52,10 @@ public:
     */
     MemoryInputStream (const void* const sourceData,
                        const int sourceDataSize,
-                       const bool keepInternalCopyOfData) throw();
+                       const bool keepInternalCopyOfData);
 
     /** Destructor. */
-    ~MemoryInputStream() throw();
+    ~MemoryInputStream();
 
     //==============================================================================
     int64 getPosition();

@@ -29,12 +29,12 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_FileOutputStream.h"
 
-void* juce_fileOpen (const String& path, bool forWriting) throw();
-void juce_fileClose (void* handle) throw();
-int juce_fileWrite (void* handle, const void* buffer, int size) throw();
-void juce_fileFlush (void* handle) throw();
-int64 juce_fileGetPosition (void* handle) throw();
-int64 juce_fileSetPosition (void* handle, int64 pos) throw();
+void* juce_fileOpen (const String& path, bool forWriting);
+void juce_fileClose (void* handle);
+int juce_fileWrite (void* handle, const void* buffer, int size);
+void juce_fileFlush (void* handle);
+int64 juce_fileGetPosition (void* handle);
+int64 juce_fileSetPosition (void* handle, int64 pos);
 
 
 //==============================================================================

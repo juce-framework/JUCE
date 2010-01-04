@@ -36,7 +36,7 @@
 void juce_getFileTimes (const String& fileName,
                         int64& modificationTime,
                         int64& accessTime,
-                        int64& creationTime) throw()
+                        int64& creationTime)
 {
     modificationTime = 0;
     accessTime = 0;
@@ -55,7 +55,7 @@ void juce_getFileTimes (const String& fileName,
 bool juce_setFileTimes (const String& fileName,
                         int64 modificationTime,
                         int64 accessTime,
-                        int64 creationTime) throw()
+                        int64 creationTime)
 {
     struct utimbuf times;
     times.actime = (time_t) (accessTime / 1000);
@@ -64,7 +64,7 @@ bool juce_setFileTimes (const String& fileName,
     return utime (fileName.toUTF8(), &times) == 0;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
 {
     struct stat info;
     const int res = stat (fileName.toUTF8(), &info);
@@ -82,7 +82,7 @@ bool juce_setFileReadOnly (const String& fileName, bool isReadOnly) throw()
     return chmod (fileName.toUTF8(), info.st_mode) == 0;
 }
 
-bool juce_copyFile (const String& src, const String& dst) throw()
+bool juce_copyFile (const String& src, const String& dst)
 {
     const ScopedAutoReleasePool pool;
     NSFileManager* fm = [NSFileManager defaultManager];
@@ -99,7 +99,7 @@ bool juce_copyFile (const String& src, const String& dst) throw()
 #endif
 }
 
-const StringArray juce_getFileSystemRoots() throw()
+const StringArray juce_getFileSystemRoots()
 {
     StringArray s;
     s.add (T("/"));
@@ -123,21 +123,21 @@ static bool isFileOnDriveType (const File* const f, const char** types)
     return false;
 }
 
-bool File::isOnCDRomDrive() const throw()
+bool File::isOnCDRomDrive() const
 {
     static const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", 0 };
 
     return isFileOnDriveType (this, (const char**) cdTypes);
 }
 
-bool File::isOnHardDisk() const throw()
+bool File::isOnHardDisk() const
 {
     static const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", 0 };
 
     return ! (isOnCDRomDrive() || isFileOnDriveType (this, (const char**) nonHDTypes));
 }
 
-bool File::isOnRemovableDrive() const throw()
+bool File::isOnRemovableDrive() const
 {
 #if JUCE_IPHONE
     return false; // xxx is this possible?
@@ -176,7 +176,7 @@ static bool juce_isHiddenFile (const String& path)
 #endif
 }
 
-bool File::isHidden() const throw()
+bool File::isHidden() const
 {
     return juce_isHiddenFile (getFullPathName());
 }
@@ -262,7 +262,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 }
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory() throw()
+const File File::getCurrentWorkingDirectory()
 {
     char buf [2048];
     getcwd (buf, sizeof(buf));
@@ -270,13 +270,13 @@ const File File::getCurrentWorkingDirectory() throw()
     return File (PlatformUtilities::convertToPrecomposedUnicode (buf));
 }
 
-bool File::setAsCurrentWorkingDirectory() const throw()
+bool File::setAsCurrentWorkingDirectory() const
 {
     return chdir (getFullPathName().toUTF8()) == 0;
 }
 
 //==============================================================================
-const String File::getVersion() const throw()
+const String File::getVersion() const
 {
     const ScopedAutoReleasePool pool;
     String result;
@@ -300,7 +300,7 @@ const String File::getVersion() const throw()
 }
 
 //==============================================================================
-const File File::getLinkedTarget() const throw()
+const File File::getLinkedTarget() const
 {
 #if JUCE_IPHONE || (defined (MAC_OS_X_VERSION_10_5) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5)
     NSString* dest = [[NSFileManager defaultManager] destinationOfSymbolicLinkAtPath: juceStringToNS (getFullPathName()) error: nil];
@@ -316,7 +316,7 @@ const File File::getLinkedTarget() const throw()
 }
 
 //==============================================================================
-bool File::moveToTrash() const throw()
+bool File::moveToTrash() const
 {
     if (! exists())
         return true;
@@ -345,7 +345,7 @@ struct FindFileStruct
 };
 
 bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly) throw()
+                        bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
 {
     FindFileStruct* ff = (FindFileStruct*) handle;
     NSString* file;
@@ -400,7 +400,7 @@ bool juce_findFileNext (void* handle, String& resultFile,
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
                           bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly) throw()
+                          Time* creationTime, bool* isReadOnly)
 {
     NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
 
@@ -424,7 +424,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
     return 0;
 }
 
-void juce_findFileClose (void* handle) throw()
+void juce_findFileClose (void* handle)
 {
     FindFileStruct* ff = (FindFileStruct*) handle;
     [ff->enumerator release];
@@ -432,7 +432,7 @@ void juce_findFileClose (void* handle) throw()
 }
 
 //==============================================================================
-bool juce_launchExecutable (const String& pathAndArguments) throw()
+bool juce_launchExecutable (const String& pathAndArguments)
 {
     const char* const argv[4] = { "/bin/sh", "-c", (const char*) pathAndArguments, 0 };
 
@@ -453,8 +453,7 @@ bool juce_launchExecutable (const String& pathAndArguments) throw()
     return true;
 }
 
-bool juce_launchFile (const String& fileName,
-                      const String& parameters) throw()
+bool juce_launchFile (const String& fileName, const String& parameters)
 {
 #if JUCE_IPHONE
     return [[UIApplication sharedApplication] openURL: [NSURL fileURLWithPath: juceStringToNS (fileName)]];
@@ -497,7 +496,7 @@ bool juce_launchFile (const String& fileName,
 #endif
 }
 
-void File::revealToUser() const throw()
+void File::revealToUser() const
 {
 #if ! JUCE_IPHONE
     if (exists())

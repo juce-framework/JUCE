@@ -140,7 +140,7 @@ public:
         }
     }
 
-    bool isOpen() const throw()
+    bool isOpen() const
     {
         return isOpen_;
     }
@@ -427,7 +427,7 @@ void PropertyPanel::setMessageWhenEmpty (const String& newMessage)
     }
 }
 
-const String& PropertyPanel::getMessageWhenEmpty() const throw()
+const String& PropertyPanel::getMessageWhenEmpty() const
 {
     return messageWhenEmpty;
 }

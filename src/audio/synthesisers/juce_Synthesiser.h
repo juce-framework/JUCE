@@ -105,13 +105,13 @@ public:
 
         Returns a value less than 0 if no note is playing.
     */
-    int getCurrentlyPlayingNote() const throw()                     { return currentlyPlayingNote; }
+    int getCurrentlyPlayingNote() const                                     { return currentlyPlayingNote; }
 
     /** Returns the sound that this voice is currently playing.
 
         Returns 0 if it's not playing.
     */
-    const SynthesiserSound::Ptr getCurrentlyPlayingSound() const throw()      { return currentlyPlayingSound; }
+    const SynthesiserSound::Ptr getCurrentlyPlayingSound() const            { return currentlyPlayingSound; }
 
     /** Must return true if this voice object is capable of playing the given sound.
 
@@ -208,7 +208,7 @@ protected:
 
         This is available for subclasses so they can pitch things correctly.
     */
-    double getSampleRate() const throw()                        { return currentSampleRate; }
+    double getSampleRate() const                                { return currentSampleRate; }
 
     /** Resets the state of this voice after a sound has finished playing.
 
@@ -278,10 +278,10 @@ public:
     void clearVoices();
 
     /** Returns the number of voices that have been added. */
-    int getNumVoices() const throw()                                { return voices.size(); }
+    int getNumVoices() const                                        { return voices.size(); }
 
     /** Returns one of the voices that have been added. */
-    SynthesiserVoice* getVoice (const int index) const throw();
+    SynthesiserVoice* getVoice (const int index) const;
 
     /** Adds a new voice to the synth.
 
@@ -301,10 +301,10 @@ public:
     void clearSounds();
 
     /** Returns the number of sounds that have been added to the synth. */
-    int getNumSounds() const throw()                                { return sounds.size(); }
+    int getNumSounds() const                                        { return sounds.size(); }
 
     /** Returns one of the sounds. */
-    SynthesiserSound* getSound (const int index) const throw()      { return sounds [index]; }
+    SynthesiserSound* getSound (const int index) const              { return sounds [index]; }
 
     /** Adds a new sound to the synthesiser.
 
@@ -328,7 +328,7 @@ public:
     /** Returns true if note-stealing is enabled.
         @see setNoteStealingEnabled
     */
-    bool isNoteStealingEnabled() const throw()                      { return shouldStealNotes; }
+    bool isNoteStealingEnabled() const                              { return shouldStealNotes; }
 
     //==============================================================================
     /** Triggers a note-on event.

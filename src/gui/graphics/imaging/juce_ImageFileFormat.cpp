@@ -34,11 +34,11 @@ BEGIN_JUCE_NAMESPACE
 #include "image_file_formats/juce_GIFLoader.h"
 
 //==============================================================================
-Image* juce_loadPNGImageFromStream (InputStream& inputStream) throw();
-bool juce_writePNGImageToStream (const Image& image, OutputStream& out) throw();
+Image* juce_loadPNGImageFromStream (InputStream& inputStream);
+bool juce_writePNGImageToStream (const Image& image, OutputStream& out);
 
-PNGImageFormat::PNGImageFormat() throw() {}
-PNGImageFormat::~PNGImageFormat() throw() {}
+PNGImageFormat::PNGImageFormat()    {}
+PNGImageFormat::~PNGImageFormat()   {}
 
 const String PNGImageFormat::getFormatName()
 {
@@ -68,15 +68,15 @@ bool PNGImageFormat::writeImageToStream (const Image& sourceImage,
 }
 
 //==============================================================================
-Image* juce_loadJPEGImageFromStream (InputStream& inputStream) throw();
-bool juce_writeJPEGImageToStream (const Image& image, OutputStream& out, float quality) throw();
+Image* juce_loadJPEGImageFromStream (InputStream& inputStream);
+bool juce_writeJPEGImageToStream (const Image& image, OutputStream& out, float quality);
 
-JPEGImageFormat::JPEGImageFormat() throw()
+JPEGImageFormat::JPEGImageFormat()
     : quality (-1.0f)
 {
 }
 
-JPEGImageFormat::~JPEGImageFormat() throw() {}
+JPEGImageFormat::~JPEGImageFormat()     {}
 
 void JPEGImageFormat::setQuality (const float newQuality)
 {
@@ -120,8 +120,8 @@ bool JPEGImageFormat::writeImageToStream (const Image& sourceImage,
 class GIFImageFormat  : public ImageFileFormat
 {
 public:
-    GIFImageFormat() throw() {}
-    ~GIFImageFormat() throw() {}
+    GIFImageFormat()    {}
+    ~GIFImageFormat()   {}
 
     const String getFormatName()
     {

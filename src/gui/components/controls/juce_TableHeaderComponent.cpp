@@ -88,11 +88,11 @@ void TableHeaderComponent::setPopupMenuActive (const bool hasMenu)
     menuActive = hasMenu;
 }
 
-bool TableHeaderComponent::isPopupMenuActive() const throw()              { return menuActive; }
+bool TableHeaderComponent::isPopupMenuActive() const                    { return menuActive; }
 
 
 //==============================================================================
-int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) const throw()
+int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) const
 {
     if (onlyCountVisibleColumns)
     {
@@ -110,7 +110,7 @@ int TableHeaderComponent::getNumColumns (const bool onlyCountVisibleColumns) con
     }
 }
 
-const String TableHeaderComponent::getColumnName (const int columnId) const throw()
+const String TableHeaderComponent::getColumnName (const int columnId) const
 {
     const ColumnInfo* const ci = getInfoForId (columnId);
     return ci != 0 ? ci->name : String::empty;
@@ -188,7 +188,7 @@ void TableHeaderComponent::moveColumn (const int columnId, int newIndex)
     }
 }
 
-int TableHeaderComponent::getColumnWidth (const int columnId) const throw()
+int TableHeaderComponent::getColumnWidth (const int columnId) const
 {
     const ColumnInfo* const ci = getInfoForId (columnId);
     return ci != 0 ? ci->width : 0;
@@ -227,7 +227,7 @@ void TableHeaderComponent::setColumnWidth (const int columnId, const int newWidt
 }
 
 //==============================================================================
-int TableHeaderComponent::getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const throw()
+int TableHeaderComponent::getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const
 {
     int n = 0;
 
@@ -245,7 +245,7 @@ int TableHeaderComponent::getIndexOfColumnId (const int columnId, const bool onl
     return -1;
 }
 
-int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const throw()
+int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const
 {
     if (onlyCountVisibleColumns)
         index = visibleIndexToTotalIndex (index);
@@ -254,7 +254,7 @@ int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVis
     return (ci != 0) ? ci->id : 0;
 }
 
-const Rectangle TableHeaderComponent::getColumnPosition (const int index) const throw()
+const Rectangle TableHeaderComponent::getColumnPosition (const int index) const
 {
     int x = 0, width = 0, n = 0;
 
@@ -278,7 +278,7 @@ const Rectangle TableHeaderComponent::getColumnPosition (const int index) const 
     return Rectangle (x, 0, width, getHeight());
 }
 
-int TableHeaderComponent::getColumnIdAtX (const int xToFind) const throw()
+int TableHeaderComponent::getColumnIdAtX (const int xToFind) const
 {
     if (xToFind >= 0)
     {
@@ -301,7 +301,7 @@ int TableHeaderComponent::getColumnIdAtX (const int xToFind) const throw()
     return 0;
 }
 
-int TableHeaderComponent::getTotalWidth() const throw()
+int TableHeaderComponent::getTotalWidth() const
 {
     int w = 0;
 
@@ -319,7 +319,7 @@ void TableHeaderComponent::setStretchToFitActive (const bool shouldStretchToFit)
     resized();
 }
 
-bool TableHeaderComponent::isStretchToFitActive() const throw()
+bool TableHeaderComponent::isStretchToFitActive() const
 {
     return stretchToFit;
 }
@@ -410,7 +410,7 @@ void TableHeaderComponent::setSortColumnId (const int columnId, const bool sortF
     }
 }
 
-int TableHeaderComponent::getSortColumnId() const throw()
+int TableHeaderComponent::getSortColumnId() const
 {
     for (int i = columns.size(); --i >= 0;)
         if ((columns.getUnchecked(i)->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
@@ -419,7 +419,7 @@ int TableHeaderComponent::getSortColumnId() const throw()
     return 0;
 }
 
-bool TableHeaderComponent::isSortedForwards() const throw()
+bool TableHeaderComponent::isSortedForwards() const
 {
     for (int i = columns.size(); --i >= 0;)
         if ((columns.getUnchecked(i)->propertyFlags & (sortedForwards | sortedBackwards)) != 0)
@@ -494,12 +494,12 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
 }
 
 //==============================================================================
-void TableHeaderComponent::addListener (TableHeaderListener* const newListener) throw()
+void TableHeaderComponent::addListener (TableHeaderListener* const newListener)
 {
     listeners.addIfNotAlreadyThere (newListener);
 }
 
-void TableHeaderComponent::removeListener (TableHeaderListener* const listenerToRemove) throw()
+void TableHeaderComponent::removeListener (TableHeaderListener* const listenerToRemove)
 {
     listeners.removeValue (listenerToRemove);
 }
@@ -810,12 +810,12 @@ const MouseCursor TableHeaderComponent::getMouseCursor()
 }
 
 //==============================================================================
-bool TableHeaderComponent::ColumnInfo::isVisible() const throw()
+bool TableHeaderComponent::ColumnInfo::isVisible() const
 {
     return (propertyFlags & TableHeaderComponent::visible) != 0;
 }
 
-TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int id) const throw()
+TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int id) const
 {
     for (int i = columns.size(); --i >= 0;)
         if (columns.getUnchecked(i)->id == id)
@@ -824,7 +824,7 @@ TableHeaderComponent::ColumnInfo* TableHeaderComponent::getInfoForId (const int 
     return 0;
 }
 
-int TableHeaderComponent::visibleIndexToTotalIndex (const int visibleIndex) const throw()
+int TableHeaderComponent::visibleIndexToTotalIndex (const int visibleIndex) const
 {
     int n = 0;
 
@@ -889,7 +889,7 @@ void TableHeaderComponent::handleAsyncUpdate()
     }
 }
 
-int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const throw()
+int TableHeaderComponent::getResizeDraggerAt (const int mouseX) const
 {
     if (((unsigned int) mouseX) < (unsigned int) getWidth())
     {

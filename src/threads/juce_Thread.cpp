@@ -34,12 +34,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../containers/juce_VoidArray.h"
 
 // these functions are implemented in the platform-specific code.
-void* juce_createThread (void* userData) throw();
-void juce_killThread (void* handle) throw();
-bool juce_setThreadPriority (void* handle, int priority) throw();
-void juce_setCurrentThreadName (const String& name) throw();
+void* juce_createThread (void* userData);
+void juce_killThread (void* handle);
+bool juce_setThreadPriority (void* handle, int priority);
+void juce_setCurrentThreadName (const String& name);
 #if JUCE_WIN32
-void juce_CloseThreadHandle (void* handle) throw();
+void juce_CloseThreadHandle (void* handle);
 #endif
 
 //==============================================================================
@@ -47,7 +47,7 @@ static VoidArray runningThreads (4);
 static CriticalSection runningThreadsLock;
 
 //==============================================================================
-void Thread::threadEntryPoint (Thread* const thread) throw()
+void Thread::threadEntryPoint (Thread* const thread)
 {
     {
         const ScopedLock sl (runningThreadsLock);
@@ -110,7 +110,7 @@ Thread::~Thread()
 }
 
 //==============================================================================
-void Thread::startThread() throw()
+void Thread::startThread()
 {
     const ScopedLock sl (startStopLock);
 
@@ -124,7 +124,7 @@ void Thread::startThread() throw()
     }
 }
 
-void Thread::startThread (const int priority) throw()
+void Thread::startThread (const int priority)
 {
     const ScopedLock sl (startStopLock);
 
@@ -139,18 +139,18 @@ void Thread::startThread (const int priority) throw()
     }
 }
 
-bool Thread::isThreadRunning() const throw()
+bool Thread::isThreadRunning() const
 {
     return threadHandle_ != 0;
 }
 
 //==============================================================================
-void Thread::signalThreadShouldExit() throw()
+void Thread::signalThreadShouldExit()
 {
     threadShouldExit_ = true;
 }
 
-bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const throw()
+bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const
 {
     // Doh! So how exactly do you expect this thread to wait for itself to stop??
     jassert (getThreadId() != getCurrentThreadId());
@@ -169,7 +169,7 @@ bool Thread::waitForThreadToExit (const int timeOutMilliseconds) const throw()
     return true;
 }
 
-void Thread::stopThread (const int timeOutMilliseconds) throw()
+void Thread::stopThread (const int timeOutMilliseconds)
 {
     // agh! You can't stop the thread that's calling this method! How on earth
     // would that work??
@@ -204,7 +204,7 @@ void Thread::stopThread (const int timeOutMilliseconds) throw()
 }
 
 //==============================================================================
-bool Thread::setPriority (const int priority) throw()
+bool Thread::setPriority (const int priority)
 {
     const ScopedLock sl (startStopLock);
 
@@ -216,39 +216,34 @@ bool Thread::setPriority (const int priority) throw()
     return worked;
 }
 
-bool Thread::setCurrentThreadPriority (const int priority) throw()
+bool Thread::setCurrentThreadPriority (const int priority)
 {
     return juce_setThreadPriority (0, priority);
 }
 
-void Thread::setAffinityMask (const uint32 affinityMask) throw()
+void Thread::setAffinityMask (const uint32 affinityMask)
 {
     affinityMask_ = affinityMask;
 }
 
-Thread::ThreadID Thread::getThreadId() const throw()
-{
-    return threadId_;
-}
-
 //==============================================================================
-bool Thread::wait (const int timeOutMilliseconds) const throw()
+bool Thread::wait (const int timeOutMilliseconds) const
 {
     return defaultEvent_.wait (timeOutMilliseconds);
 }
 
-void Thread::notify() const throw()
+void Thread::notify() const
 {
     defaultEvent_.signal();
 }
 
 //==============================================================================
-int Thread::getNumRunningThreads() throw()
+int Thread::getNumRunningThreads()
 {
     return runningThreads.size();
 }
 
-Thread* Thread::getCurrentThread() throw()
+Thread* Thread::getCurrentThread()
 {
     const ThreadID thisId = getCurrentThreadId();
 
@@ -256,7 +251,7 @@ Thread* Thread::getCurrentThread() throw()
 
     for (int i = runningThreads.size(); --i >= 0;)
     {
-        Thread* const t = (Thread*) (runningThreads.getUnchecked(i));
+        Thread* const t = (Thread*) runningThreads.getUnchecked(i);
 
         if (t->threadId_ == thisId)
             return t;
@@ -265,7 +260,7 @@ Thread* Thread::getCurrentThread() throw()
     return 0;
 }
 
-void Thread::stopAllThreads (const int timeOutMilliseconds) throw()
+void Thread::stopAllThreads (const int timeOutMilliseconds)
 {
     {
         const ScopedLock sl (runningThreadsLock);

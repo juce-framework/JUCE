@@ -165,7 +165,7 @@ private:
     CriticalSection lock;
     OwnedArray <ImageCacheItem> images;
 
-    ImageCache() throw();
+    ImageCache();
     ImageCache (const ImageCache&);
     const ImageCache& operator= (const ImageCache&);
     ~ImageCache();

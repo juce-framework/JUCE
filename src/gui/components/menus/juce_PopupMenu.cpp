@@ -55,7 +55,7 @@ public:
     ApplicationCommandManager* const commandManager;
 
     //==============================================================================
-    MenuItemInfo() throw()
+    MenuItemInfo()
         : itemId (0),
           active (true),
           isSeparator (true),
@@ -75,7 +75,7 @@ public:
                   const bool usesColour_,
                   PopupMenuCustomComponent* const customComp_,
                   const PopupMenu* const subMenu_,
-                  ApplicationCommandManager* const commandManager_) throw()
+                  ApplicationCommandManager* const commandManager_)
         : itemId (itemId_),
           text (text_),
           textColour (textColour_),
@@ -122,7 +122,7 @@ public:
         }
     }
 
-    MenuItemInfo (const MenuItemInfo& other) throw()
+    MenuItemInfo (const MenuItemInfo& other)
         : itemId (other.itemId),
           text (other.text),
           textColour (other.textColour),
@@ -143,18 +143,18 @@ public:
             customComp->refCount_++;
     }
 
-    ~MenuItemInfo() throw()
+    ~MenuItemInfo()
     {
         if (customComp != 0 && --(customComp->refCount_) == 0)
             delete customComp;
     }
 
-    bool canBeTriggered() const throw()
+    bool canBeTriggered() const
     {
         return active && ! (isSeparator || (subMenu != 0));
     }
 
-    bool hasActiveSubMenu() const throw()
+    bool hasActiveSubMenu() const
     {
         return active && (subMenu != 0);
     }
@@ -277,7 +277,7 @@ class PopupMenuWindow  : public Component,
 {
 public:
     //==============================================================================
-    PopupMenuWindow() throw()
+    PopupMenuWindow()
        : Component (T("menu")),
          owner (0),
          currentChild (0),
@@ -341,7 +341,7 @@ public:
                                     const int itemIdThatMustBeVisible,
                                     Component* const menuBarComponent,
                                     ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* const componentAttachedTo) throw()
+                                    Component* const componentAttachedTo)
     {
         if (menu.items.size() > 0)
         {
@@ -426,7 +426,7 @@ public:
     }
 
     //==============================================================================
-    void addItem (const MenuItemInfo& item) throw()
+    void addItem (const MenuItemInfo& item)
     {
         MenuItemComponent* const mic = new MenuItemComponent (item);
         addAndMakeVisible (mic);
@@ -440,7 +440,7 @@ public:
 
     //==============================================================================
     // hide this and all sub-comps
-    void hide (const MenuItemInfo* const item) throw()
+    void hide (const MenuItemInfo* const item)
     {
         if (isVisible())
         {
@@ -461,7 +461,7 @@ public:
         }
     }
 
-    void dismissMenu (const MenuItemInfo* const item) throw()
+    void dismissMenu (const MenuItemInfo* const item)
     {
         if (owner != 0)
         {
@@ -771,19 +771,19 @@ private:
     double scrollAcceleration;
 
     //==============================================================================
-    bool overlaps (const Rectangle& r) const throw()
+    bool overlaps (const Rectangle& r) const
     {
         return r.intersects (getBounds())
                 || (owner != 0 && owner->overlaps (r));
     }
 
-    bool isOverAnyMenu() const throw()
+    bool isOverAnyMenu() const
     {
         return (owner != 0) ? owner->isOverAnyMenu()
                             : isOverChildren();
     }
 
-    bool isOverChildren() const throw()
+    bool isOverChildren() const
     {
         jassert (activeSubMenu == 0 || activeSubMenu->isValidComponent());
 
@@ -791,7 +791,7 @@ private:
                 && (isOver || (activeSubMenu != 0 && activeSubMenu->isOverChildren()));
     }
 
-    void updateMouseOverStatus (const int mx, const int my) throw()
+    void updateMouseOverStatus (const int mx, const int my)
     {
         int rx = mx, ry = my;
         globalPositionToRelative (rx, ry);
@@ -801,7 +801,7 @@ private:
             activeSubMenu->updateMouseOverStatus (mx, my);
     }
 
-    bool treeContains (const PopupMenuWindow* const window) const throw()
+    bool treeContains (const PopupMenuWindow* const window) const
     {
         const PopupMenuWindow* mw = this;
 
@@ -1096,12 +1096,12 @@ private:
         return x;
     }
 
-    bool isScrolling() const throw()
+    bool isScrolling() const
     {
         return childYOffset != 0 || needsToScroll;
     }
 
-    void setCurrentlyHighlightedChild (MenuItemComponent* const child) throw()
+    void setCurrentlyHighlightedChild (MenuItemComponent* const child)
     {
         if (currentChild->isValidComponent())
             currentChild->setHighlighted (false);
@@ -1266,7 +1266,7 @@ private:
         setCurrentlyHighlightedChild (mic);
     }
 
-    void disableTimerUntilMouseMoves() throw()
+    void disableTimerUntilMouseMoves()
     {
         disableMouseMoves = true;
 
@@ -1280,14 +1280,14 @@ private:
 
 
 //==============================================================================
-PopupMenu::PopupMenu() throw()
+PopupMenu::PopupMenu()
     : items (8),
       lookAndFeel (0),
       separatorPending (false)
 {
 }
 
-PopupMenu::PopupMenu (const PopupMenu& other) throw()
+PopupMenu::PopupMenu (const PopupMenu& other)
     : items (8),
       lookAndFeel (other.lookAndFeel),
       separatorPending (false)
@@ -1298,7 +1298,7 @@ PopupMenu::PopupMenu (const PopupMenu& other) throw()
         items.add (new MenuItemInfo (*(const MenuItemInfo*) other.items.getUnchecked(i)));
 }
 
-const PopupMenu& PopupMenu::operator= (const PopupMenu& other) throw()
+const PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 {
     if (this != &other)
     {
@@ -1314,12 +1314,12 @@ const PopupMenu& PopupMenu::operator= (const PopupMenu& other) throw()
     return *this;
 }
 
-PopupMenu::~PopupMenu() throw()
+PopupMenu::~PopupMenu()
 {
     clear();
 }
 
-void PopupMenu::clear() throw()
+void PopupMenu::clear()
 {
     for (int i = items.size(); --i >= 0;)
         delete (MenuItemInfo*) items.getUnchecked(i);
@@ -1343,7 +1343,7 @@ void PopupMenu::addItem (const int itemResultId,
                          const String& itemText,
                          const bool isActive,
                          const bool isTicked,
-                         const Image* const iconToUse) throw()
+                         const Image* const iconToUse)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1363,7 +1363,7 @@ void PopupMenu::addItem (const int itemResultId,
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                 const int commandID,
-                                const String& displayName) throw()
+                                const String& displayName)
 {
     jassert (commandManager != 0 && commandID != 0);
 
@@ -1394,7 +1394,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                  const Colour& itemTextColour,
                                  const bool isActive,
                                  const bool isTicked,
-                                 const Image* const iconToUse) throw()
+                                 const Image* const iconToUse)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1414,7 +1414,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
 
 //==============================================================================
 void PopupMenu::addCustomItem (const int itemResultId,
-                               PopupMenuCustomComponent* const customComponent) throw()
+                               PopupMenuCustomComponent* const customComponent)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1472,7 +1472,7 @@ private:
 void PopupMenu::addCustomItem (const int itemResultId,
                                Component* customComponent,
                                int idealWidth, int idealHeight,
-                               const bool triggerMenuItemAutomaticallyWhenClicked) throw()
+                               const bool triggerMenuItemAutomaticallyWhenClicked)
 {
     addCustomItem (itemResultId,
                    new NormalComponentWrapper (customComponent,
@@ -1485,7 +1485,7 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                             const PopupMenu& subMenu,
                             const bool isActive,
                             Image* const iconToUse,
-                            const bool isTicked) throw()
+                            const bool isTicked)
 {
     addSeparatorIfPending();
 
@@ -1501,7 +1501,7 @@ void PopupMenu::addSubMenu (const String& subMenuName,
                                  0));
 }
 
-void PopupMenu::addSeparator() throw()
+void PopupMenu::addSeparator()
 {
     separatorPending = true;
 }
@@ -1545,7 +1545,7 @@ public:
     juce_UseDebuggingNewOperator
 };
 
-void PopupMenu::addSectionHeader (const String& title) throw()
+void PopupMenu::addSectionHeader (const String& title)
 {
     addCustomItem (0X4734a34f, new HeaderItemComponent (title));
 }
@@ -1559,7 +1559,7 @@ Component* PopupMenu::createMenuComponent (const int x, const int y, const int w
                                            const bool alignToRectangle,
                                            Component* menuBarComponent,
                                            ApplicationCommandManager** managerOfChosenCommand,
-                                           Component* const componentAttachedTo) throw()
+                                           Component* const componentAttachedTo)
 {
     PopupMenuWindow* const pw
         = PopupMenuWindow::create (*this,
@@ -1588,7 +1588,7 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
                          const int maximumNumColumns,
                          const int standardItemHeight,
                          const bool alignToRectangle,
-                         Component* const componentAttachedTo) throw()
+                         Component* const componentAttachedTo)
 {
     Component* const prevFocused = Component::getCurrentlyFocusedComponent();
 
@@ -1701,7 +1701,7 @@ int PopupMenu::showAt (Component* componentToAttachTo,
     }
 }
 
-void JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus() throw()
+void JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus()
 {
     for (int i = activeMenuWindows.size(); --i >= 0;)
     {
@@ -1713,7 +1713,7 @@ void JUCE_CALLTYPE PopupMenu::dismissAllActiveMenus() throw()
 }
 
 //==============================================================================
-int PopupMenu::getNumItems() const throw()
+int PopupMenu::getNumItems() const
 {
     int num = 0;
 
@@ -1724,7 +1724,7 @@ int PopupMenu::getNumItems() const throw()
     return num;
 }
 
-bool PopupMenu::containsCommandItem (const int commandID) const throw()
+bool PopupMenu::containsCommandItem (const int commandID) const
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -1740,7 +1740,7 @@ bool PopupMenu::containsCommandItem (const int commandID) const throw()
     return false;
 }
 
-bool PopupMenu::containsAnyActiveItems() const throw()
+bool PopupMenu::containsAnyActiveItems() const
 {
     for (int i = items.size(); --i >= 0;)
     {
@@ -1760,7 +1760,7 @@ bool PopupMenu::containsAnyActiveItems() const throw()
     return false;
 }
 
-void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel) throw()
+void PopupMenu::setLookAndFeel (LookAndFeel* const newLookAndFeel)
 {
     lookAndFeel = newLookAndFeel;
 }
@@ -1805,7 +1805,7 @@ void PopupMenuCustomComponent::triggerMenuItem()
 }
 
 //==============================================================================
-PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& menu_) throw()
+PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& menu_)
     : subMenu (0),
       itemId (0),
       isSeparator (false),
@@ -1820,11 +1820,11 @@ PopupMenu::MenuItemIterator::MenuItemIterator (const PopupMenu& menu_) throw()
 {
 }
 
-PopupMenu::MenuItemIterator::~MenuItemIterator() throw()
+PopupMenu::MenuItemIterator::~MenuItemIterator()
 {
 }
 
-bool PopupMenu::MenuItemIterator::next() throw()
+bool PopupMenu::MenuItemIterator::next()
 {
     if (index >= menu.items.size())
         return false;

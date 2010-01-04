@@ -43,13 +43,13 @@ public:
 
         @param name     a name that processes will use to identify this lock object
     */
-    InterProcessLock (const String& name) throw();
+    InterProcessLock (const String& name);
 
     /** Destructor.
 
         This will also release the lock if it's currently held by this process.
     */
-    ~InterProcessLock() throw();
+    ~InterProcessLock();
 
     //==============================================================================
     /** Attempts to lock the critical section.
@@ -61,11 +61,11 @@ public:
         @returns    true if the lock could be gained within the timeout period, or
                     false if the timeout expired.
     */
-    bool enter (int timeOutMillisecs = -1) throw();
+    bool enter (int timeOutMillisecs = -1);
 
     /** Releases the lock if it's currently held by this process.
     */
-    void exit() throw();
+    void exit();
 
 
     //==============================================================================

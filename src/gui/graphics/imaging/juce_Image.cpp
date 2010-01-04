@@ -96,7 +96,7 @@ LowLevelGraphicsContext* Image::createLowLevelContext()
 }
 
 //==============================================================================
-Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const bool /*makeWritable*/) throw()
+Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const bool /*makeWritable*/)
     : data (image.imageData + image.lineStride * y + image.pixelStride * x),
       lineStride (image.lineStride),
       pixelStride (image.pixelStride),
@@ -106,7 +106,7 @@ Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const b
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 }
 
-Image::BitmapData::BitmapData (const Image& image, int x, int y, int w, int h) throw()
+Image::BitmapData::BitmapData (const Image& image, int x, int y, int w, int h)
     : data (image.imageData + image.lineStride * y + image.pixelStride * x),
       lineStride (image.lineStride),
       pixelStride (image.pixelStride),
@@ -116,7 +116,7 @@ Image::BitmapData::BitmapData (const Image& image, int x, int y, int w, int h) t
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 }
 
-Image::BitmapData::~BitmapData() throw()
+Image::BitmapData::~BitmapData()
 {
 }
 

@@ -140,7 +140,7 @@ public:
     /** Returns the message that is displayed when there are no properties.
         @see setMessageWhenEmpty
     */
-    const String& getMessageWhenEmpty() const throw();
+    const String& getMessageWhenEmpty() const;
 
     //==============================================================================
     /** @internal */

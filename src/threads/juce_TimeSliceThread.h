@@ -110,10 +110,10 @@ public:
     void removeTimeSliceClient (TimeSliceClient* const client);
 
     /** Returns the number of registered clients. */
-    int getNumClients() const throw();
+    int getNumClients() const;
 
     /** Returns one of the registered clients. */
-    TimeSliceClient* getClient (const int index) const throw();
+    TimeSliceClient* getClient (const int index) const;
 
     //==============================================================================
     /** @internal */

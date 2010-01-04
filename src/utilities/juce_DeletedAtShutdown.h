@@ -44,7 +44,7 @@ class JUCE_API  DeletedAtShutdown
 {
 protected:
     /** Creates a DeletedAtShutdown object. */
-    DeletedAtShutdown() throw();
+    DeletedAtShutdown();
 
     /** Destructor.
 

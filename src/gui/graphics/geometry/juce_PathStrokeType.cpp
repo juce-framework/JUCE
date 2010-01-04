@@ -348,8 +348,8 @@ static inline void addLineEnd (Path& destPath,
 
 struct LineSection
 {
-    LineSection() throw()       {}
-    LineSection (int) throw()   {}
+    LineSection()           {}
+    LineSection (int)       {}
 
     float x1, y1, x2, y2;      // original line
     float lx1, ly1, lx2, ly2;  // the left-hand stroke

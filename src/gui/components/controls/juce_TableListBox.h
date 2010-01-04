@@ -220,11 +220,11 @@ public:
     void setModel (TableListBoxModel* const newModel);
 
     /** Returns the model currently in use. */
-    TableListBoxModel* getModel() const throw()                     { return model; }
+    TableListBoxModel* getModel() const                             { return model; }
 
     //==============================================================================
     /** Returns the header component being used in this table. */
-    TableHeaderComponent* getHeader() const throw()                 { return header; }
+    TableHeaderComponent* getHeader() const                         { return header; }
 
     /** Changes the height of the table header component.
         @see getHeaderHeight
@@ -234,7 +234,7 @@ public:
     /** Returns the height of the table header.
         @see setHeaderHeight
     */
-    int getHeaderHeight() const throw();
+    int getHeaderHeight() const;
 
     //==============================================================================
     /** Resizes a column to fit its contents.
@@ -258,7 +258,7 @@ public:
     /** True if the auto-size options should be shown on the menu.
         @see setAutoSizeMenuOptionsShown
     */
-    bool isAutoSizeMenuOptionShown() const throw();
+    bool isAutoSizeMenuOptionShown() const;
 
     /** Returns the position of one of the cells in the table.
 

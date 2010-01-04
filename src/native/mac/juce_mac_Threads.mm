@@ -43,7 +43,7 @@ void* threadEntryProc (void* userData)
     return 0;
 }
 
-void* juce_createThread (void* userData) throw()
+void* juce_createThread (void* userData)
 {
     pthread_t handle = 0;
 
@@ -56,22 +56,22 @@ void* juce_createThread (void* userData) throw()
     return 0;
 }
 
-void juce_killThread (void* handle) throw()
+void juce_killThread (void* handle)
 {
     if (handle != 0)
         pthread_cancel ((pthread_t) handle);
 }
 
-void juce_setCurrentThreadName (const String& /*name*/) throw()
+void juce_setCurrentThreadName (const String& /*name*/)
 {
 }
 
-Thread::ThreadID Thread::getCurrentThreadId() throw()
+Thread::ThreadID Thread::getCurrentThreadId()
 {
     return (ThreadID) pthread_self();
 }
 
-bool juce_setThreadPriority (void* handle, int priority) throw()
+bool juce_setThreadPriority (void* handle, int priority)
 {
     if (handle == 0)
         handle = (void*) pthread_self();
@@ -83,19 +83,19 @@ bool juce_setThreadPriority (void* handle, int priority) throw()
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
-void Thread::yield() throw()
+void Thread::yield()
 {
     sched_yield();
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask) throw()
+void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
     // xxx
     jassertfalse
 }
 
 //==============================================================================
-bool Process::isForegroundProcess() throw()
+bool Process::isForegroundProcess()
 {
 #if JUCE_MAC
     return [NSApp isActive];

@@ -66,12 +66,12 @@ public:
     /** Returns the name of this job.
         @see setJobName
     */
-    const String getJobName() const throw();
+    const String getJobName() const;
 
     /** Changes the job's name.
         @see getJobName
     */
-    void setJobName (const String& newName) throw();
+    void setJobName (const String& newName);
 
     //==============================================================================
     /** These are the values that can be returned by the runJob() method.
@@ -107,7 +107,7 @@ public:
 
     //==============================================================================
     /** Returns true if this job is currently running its runJob() method. */
-    bool isRunning() const throw()       { return isActive; }
+    bool isRunning() const                  { return isActive; }
 
     /** Returns true if something is trying to interrupt this job and make it stop.
 
@@ -116,14 +116,14 @@ public:
 
         @see signalJobShouldExit()
     */
-    bool shouldExit() const throw()      { return shouldStop; }
+    bool shouldExit() const                 { return shouldStop; }
 
     /** Calling this will cause the shouldExit() method to return true, and the job
         should (if it's been implemented correctly) stop as soon as possible.
 
         @see shouldExit()
     */
-    void signalJobShouldExit() throw();
+    void signalJobShouldExit();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -250,20 +250,20 @@ public:
 
     /** Returns the number of jobs currently running or queued.
     */
-    int getNumJobs() const throw();
+    int getNumJobs() const;
 
     /** Returns one of the jobs in the queue.
 
         Note that this can be a very volatile list as jobs might be continuously getting shifted
         around in the list, and this method may return 0 if the index is currently out-of-range.
     */
-    ThreadPoolJob* getJob (const int index) const throw();
+    ThreadPoolJob* getJob (const int index) const;
 
     /** Returns true if the given job is currently queued or running.
 
         @see isJobRunning()
     */
-    bool contains (const ThreadPoolJob* const job) const throw();
+    bool contains (const ThreadPoolJob* const job) const;
 
     /** Returns true if the given job is currently being run by a thread.
     */
@@ -284,7 +284,7 @@ public:
 
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
-    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const throw();
+    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
 
