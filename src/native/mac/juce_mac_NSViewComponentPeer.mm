@@ -942,12 +942,20 @@ void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 
         if (fullScreen != shouldBeFullScreen)
         {
-            if (shouldBeFullScreen)
-                r = Desktop::getInstance().getMainMonitorArea();
+            if (shouldBeFullScreen && (getStyleFlags() & windowHasTitleBar) != 0)
+            {
+                fullScreen = true;
+                [window performZoom: nil];
+            }
+            else
+            {
+                if (shouldBeFullScreen)
+                    r = Desktop::getInstance().getMainMonitorArea();
 
-            // (can't call the component's setBounds method because that'll reset our fullscreen flag)
-            if (r != getComponent()->getBounds() && ! r.isEmpty())
-                setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+                // (can't call the component's setBounds method because that'll reset our fullscreen flag)
+                if (r != getComponent()->getBounds() && ! r.isEmpty())
+                    setBounds (r.getX(), r.getY(), r.getWidth(), r.getHeight(), shouldBeFullScreen);
+            }
         }
     }
 }

@@ -189,7 +189,9 @@ public:
     {
         if (recordNextFrameTime)
         {
-            firstRecordedTime = Time::getCurrentTime();
+            const double defaultCameraLatency = 0.1;
+
+            firstRecordedTime = Time::getCurrentTime() - RelativeTime (defaultCameraLatency);
             recordNextFrameTime = false;
 
             ComSmartPtr <IPin> pin;

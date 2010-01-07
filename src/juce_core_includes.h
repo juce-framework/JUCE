@@ -65,6 +65,9 @@
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
  #include "containers/juce_SparseSet.h"
 #endif
+#ifndef __JUCE_VALUE_JUCEHEADER__
+ #include "containers/juce_Value.h"
+#endif
 #ifndef __JUCE_VALUETREE_JUCEHEADER__
  #include "containers/juce_ValueTree.h"
 #endif

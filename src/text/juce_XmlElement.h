@@ -42,7 +42,7 @@
 
     forEachXmlChildElement (*myParentXml, child)
     {
-        if (child->hasTagName ("FOO"))
+        if (child->hasTagName (T("FOO")))
             doSomethingWithXmlElement (child);
     }
 
@@ -100,12 +100,12 @@
 
     Here's an example of parsing some elements: @code
     // check we're looking at the right kind of document..
-    if (myElement->hasTagName ("ANIMALS"))
+    if (myElement->hasTagName (T("ANIMALS")))
     {
         // now we'll iterate its sub-elements looking for 'giraffe' elements..
         forEachXmlChildElement (*myElement, e)
         {
-            if (e->hasTagName ("GIRAFFE"))
+            if (e->hasTagName (T("GIRAFFE")))
             {
                 // found a giraffe, so use some of its attributes..
 

@@ -80,36 +80,24 @@ using namespace zlibNamespace;
 // included publicly.
 class GZIPDecompressHelper
 {
-private:
-    HeapBlock <z_stream> stream;
-    uint8* data;
-    int dataSize;
-
 public:
-    bool finished, needsDictionary, error;
-
     GZIPDecompressHelper (const bool noWrap) throw()
         : data (0),
           dataSize (0),
-          finished (false),
+          finished (true),
           needsDictionary (false),
-          error (false)
+          error (true),
+          streamIsValid (false)
     {
-        stream.calloc (1);
-
-        if (inflateInit2 (stream, (noWrap) ? -MAX_WBITS
-                                           : MAX_WBITS) != Z_OK)
-        {
-            stream.free();
-            error = true;
-            finished = true;
-        }
+        zerostruct (stream);
+        streamIsValid = (inflateInit2 (&stream, noWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
+        finished = error = ! streamIsValid;
     }
 
     ~GZIPDecompressHelper() throw()
     {
-        if (stream != 0)
-            inflateEnd (stream);
+        if (streamIsValid)
+            inflateEnd (&stream);
     }
 
     bool needsInput() const throw()         { return dataSize <= 0; }
@@ -122,28 +110,27 @@ public:
 
     int doNextBlock (uint8* const dest, const int destSize) throw()
     {
-        if (stream != 0 && data != 0 && ! finished)
+        if (streamIsValid && data != 0 && ! finished)
         {
-            stream->next_in  = data;
-            stream->next_out = dest;
-            stream->avail_in  = dataSize;
-            stream->avail_out = destSize;
+            stream.next_in  = data;
+            stream.next_out = dest;
+            stream.avail_in  = dataSize;
+            stream.avail_out = destSize;
 
-            switch (inflate (stream, Z_PARTIAL_FLUSH))
+            switch (inflate (&stream, Z_PARTIAL_FLUSH))
             {
             case Z_STREAM_END:
                 finished = true;
                 // deliberate fall-through
-
             case Z_OK:
-                data += dataSize - stream->avail_in;
-                dataSize = stream->avail_in;
-                return destSize - stream->avail_out;
+                data += dataSize - stream.avail_in;
+                dataSize = stream.avail_in;
+                return destSize - stream.avail_out;
 
             case Z_NEED_DICT:
                 needsDictionary = true;
-                data += dataSize - stream->avail_in;
-                dataSize = stream->avail_in;
+                data += dataSize - stream.avail_in;
+                dataSize = stream.avail_in;
                 break;
 
             case Z_DATA_ERROR:
@@ -157,6 +144,14 @@ public:
 
         return 0;
     }
+
+private:
+    z_stream stream;
+    uint8* data;
+    int dataSize;
+
+public:
+    bool finished, needsDictionary, error, streamIsValid;
 };
 
 //==============================================================================
@@ -255,25 +250,18 @@ int64 GZIPDecompressorInputStream::getPosition()
 
 bool GZIPDecompressorInputStream::setPosition (int64 newPos)
 {
-    if (newPos != currentPos)
+    if (newPos < currentPos)
     {
-        if (newPos > currentPos)
-        {
-            skipNextBytes (newPos - currentPos);
-        }
-        else
-        {
-            // reset the stream and start again..
-            isEof = false;
-            activeBufferSize = 0;
-            currentPos = 0;
-            helper = new GZIPDecompressHelper (noWrap);
+        // to go backwards, reset the stream and start again..
+        isEof = false;
+        activeBufferSize = 0;
+        currentPos = 0;
+        helper = new GZIPDecompressHelper (noWrap);
 
-            sourceStream->setPosition (originalSourcePos);
-            skipNextBytes (newPos);
-        }
+        sourceStream->setPosition (originalSourcePos);
     }
 
+    skipNextBytes (newPos - currentPos);
     return true;
 }
 

@@ -385,8 +385,6 @@ public:
         shouldDeleteEditor = false;
         speakerIn = kSpeakerArrEmpty;
         speakerOut = kSpeakerArrEmpty;
-        speakerInChans = 0;
-        speakerOutChans = 0;
         numInChans = JucePlugin_MaxNumInputChannels;
         numOutChans = JucePlugin_MaxNumOutputChannels;
 
@@ -1019,26 +1017,49 @@ public:
         return filter != 0 && filter->isParameterAutomatable ((int) index);
     }
 
+    class ChannelConfigComparator
+    {
+    public:
+        static int compareElements (const short* const first, const short* const second)
+        {
+            if (first[0] < second[0])
+                return -1;
+            else if (first[0] > second[0])
+                return 1;
+            else if (first[1] < second[1])
+                return -1;
+            else if (first[1] > second[1])
+                return 1;
+
+            return 0;
+        }
+    };
+
     bool setSpeakerArrangement (VstSpeakerArrangement* pluginInput,
                                 VstSpeakerArrangement* pluginOutput)
     {
-        const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
+        short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
+
+        Array <short*> channelConfigsSorted;
+        ChannelConfigComparator <short*> comp;
 
         for (int i = 0; i < numElementsInArray (channelConfigs); ++i)
-        {
-            bool configMono      = (channelConfigs[i][1] == 1) && (pluginOutput->type == kSpeakerArrMono);
-            bool configStereo    = (channelConfigs[i][1] == 2) && (pluginOutput->type == kSpeakerArrStereo);
-            bool inCountMatches  = (channelConfigs[i][0] == pluginInput->numChannels);
-            bool outCountMatches = (channelConfigs[i][1] == pluginOutput->numChannels);
+            channelConfigsSorted.addSorted (comp, channelConfigs[i]);
 
-            if ((configMono || configStereo) && inCountMatches && outCountMatches)
+        for (int i = channelConfigsSorted.size(); --i >= 0;)
+        {
+            const short* const config = channelConfigsSorted.getUnchecked(i);
+            bool inCountMatches  = (config[0] == pluginInput->numChannels);
+            bool outCountMatches = (config[1] == pluginOutput->numChannels);
+
+            if (inCountMatches && outCountMatches)
             {
                 speakerIn = (VstSpeakerArrangementType) pluginInput->type;
                 speakerOut = (VstSpeakerArrangementType) pluginOutput->type;
-                speakerInChans = pluginInput->numChannels;
-                speakerOutChans = pluginOutput->numChannels;
+                numInChans = speakerInChans;
+                numOutChans = speakerOutChans;
 
-                filter->setPlayConfigDetails (speakerInChans, speakerOutChans,
+                filter->setPlayConfigDetails (numInChans, numOutChans,
                                               filter->getSampleRate(),
                                               filter->getBlockSize());
                 return true;
@@ -1392,7 +1413,6 @@ private:
     bool firstProcessCallback;
     int diffW, diffH;
     VstSpeakerArrangementType speakerIn, speakerOut;
-    int speakerInChans, speakerOutChans;
     int numInChans, numOutChans;
     HeapBlock <float*> channels;
     VoidArray tempChannels; // see note in processReplacing()

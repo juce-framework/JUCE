@@ -479,12 +479,12 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                     control = info.release();
                     setControlBounds (Rectangle (x, y, getWidth(), getHeight()));
 
-                    info->controlHWND = getHWND (this);
+                    ((ActiveXControlData*) control)->controlHWND = getHWND (this);
 
-                    if (info->controlHWND != 0)
+                    if (((ActiveXControlData*) control)->controlHWND != 0)
                     {
-                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC);
-                        SetWindowLongPtr ((HWND) info->controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
+                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC);
+                        SetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
                     }
 
                     return true;

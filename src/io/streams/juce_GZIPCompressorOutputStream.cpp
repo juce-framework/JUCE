@@ -48,41 +48,28 @@ using namespace zlibNamespace;
 // included publicly.
 class GZIPCompressorHelper
 {
-private:
-    HeapBlock <z_stream> stream;
-    uint8* data;
-    int dataSize, compLevel, strategy;
-    bool setParams;
-
 public:
-    bool finished, shouldFinish;
-
     GZIPCompressorHelper (const int compressionLevel, const bool nowrap)
         : data (0),
           dataSize (0),
           compLevel (compressionLevel),
           strategy (0),
           setParams (true),
+          streamIsValid (false),
           finished (false),
           shouldFinish (false)
     {
-        stream.calloc (1);
+        zerostruct (stream);
 
-        if (deflateInit2 (stream,
-                          compLevel,
-                          Z_DEFLATED,
-                          nowrap ? -MAX_WBITS : MAX_WBITS,
-                          8,
-                          strategy) != Z_OK)
-        {
-            stream.free();
-        }
+        streamIsValid = (deflateInit2 (&stream, compLevel, Z_DEFLATED,
+                                       nowrap ? -MAX_WBITS : MAX_WBITS,
+                                       8, strategy) == Z_OK);
     }
 
     ~GZIPCompressorHelper()
     {
-        if (stream != 0)
-            deflateEnd (stream);
+        if (streamIsValid)
+            deflateEnd (&stream);
     }
 
     bool needsInput() const throw()
@@ -98,15 +85,15 @@ public:
 
     int doNextBlock (uint8* const dest, const int destSize) throw()
     {
-        if (stream != 0)
+        if (streamIsValid)
         {
-            stream->next_in = data;
-            stream->next_out = dest;
-            stream->avail_in = dataSize;
-            stream->avail_out = destSize;
+            stream.next_in = data;
+            stream.next_out = dest;
+            stream.avail_in = dataSize;
+            stream.avail_out = destSize;
 
-            const int result = setParams ? deflateParams (stream, compLevel, strategy)
-                                         : deflate (stream, shouldFinish ? Z_FINISH : Z_NO_FLUSH);
+            const int result = setParams ? deflateParams (&stream, compLevel, strategy)
+                                         : deflate (&stream, shouldFinish ? Z_FINISH : Z_NO_FLUSH);
 
             setParams = false;
 
@@ -114,12 +101,12 @@ public:
             {
             case Z_STREAM_END:
                 finished = true;
-
+                // Deliberate fall-through..
             case Z_OK:
-                data += dataSize - stream->avail_in;
-                dataSize = stream->avail_in;
+                data += dataSize - stream.avail_in;
+                dataSize = stream.avail_in;
 
-                return destSize - stream->avail_out;
+                return destSize - stream.avail_out;
 
             default:
                 break;
@@ -128,6 +115,15 @@ public:
 
         return 0;
     }
+
+private:
+    z_stream stream;
+    uint8* data;
+    int dataSize, compLevel, strategy;
+    bool setParams, streamIsValid;
+
+public:
+    bool finished, shouldFinish;
 };
 
 

@@ -254,24 +254,24 @@ MidiMessage::MidiMessage (const uint8* src,
 
 const MidiMessage& MidiMessage::operator= (const MidiMessage& other) throw()
 {
-    if (this == &other)
-        return *this;
-
-    timeStamp = other.timeStamp;
-    size = other.size;
-    message = other.message;
-
-    if (data != (uint8*) &message)
-        juce_free (data);
-
-    if (other.data != (uint8*) &other.message)
+    if (this != &other)
     {
-        data = (uint8*) juce_malloc (size);
-        memcpy (data, other.data, size);
-    }
-    else
-    {
-        data = (uint8*) &message;
+        timeStamp = other.timeStamp;
+        size = other.size;
+        message = other.message;
+
+        if (data != (uint8*) &message)
+            juce_free (data);
+
+        if (other.data != (uint8*) &other.message)
+        {
+            data = (uint8*) juce_malloc (size);
+            memcpy (data, other.data, size);
+        }
+        else
+        {
+            data = (uint8*) &message;
+        }
     }
 
     return *this;
@@ -293,12 +293,16 @@ int MidiMessage::getChannel() const throw()
 
 bool MidiMessage::isForChannel (const int channel) const throw()
 {
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
+
     return ((data[0] & 0xf) == channel - 1)
              && ((data[0] & 0xf0) != 0xf0);
 }
 
 void MidiMessage::setChannel (const int channel) throw()
 {
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
+
     if ((data[0] & 0xf0) != (uint8) 0xf0)
         data[0] = (uint8) ((data[0] & (uint8)0xf0)
                             | (uint8)(channel - 1));
@@ -372,7 +376,7 @@ const MidiMessage MidiMessage::aftertouchChange (const int channel,
                                                  const int noteNum,
                                                  const int aftertouchValue) throw()
 {
-    jassert (channel > 0 && channel <= 16);
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (((unsigned int) noteNum) <= 127);
     jassert (((unsigned int) aftertouchValue) <= 127);
 
@@ -396,7 +400,7 @@ int MidiMessage::getChannelPressureValue() const throw()
 const MidiMessage MidiMessage::channelPressureChange (const int channel,
                                                       const int pressure) throw()
 {
-    jassert (channel > 0 && channel <= 16);
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (((unsigned int) pressure) <= 127);
 
     return MidiMessage (0xd0 | jlimit (0, 15, channel - 1),
@@ -416,7 +420,7 @@ int MidiMessage::getProgramChangeNumber() const throw()
 const MidiMessage MidiMessage::programChange (const int channel,
                                               const int programNumber) throw()
 {
-    jassert (channel > 0 && channel <= 16);
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
 
     return MidiMessage (0xc0 | jlimit (0, 15, channel - 1),
                         programNumber & 0x7f);
@@ -435,7 +439,7 @@ int MidiMessage::getPitchWheelValue() const throw()
 const MidiMessage MidiMessage::pitchWheel (const int channel,
                                            const int position) throw()
 {
-    jassert (channel > 0 && channel <= 16);
+    jassert (channel > 0 && channel <= 16); // valid channels are numbered 1 to 16
     jassert (((unsigned int) position) <= 0x3fff);
 
     return MidiMessage (0xe0 | jlimit (0, 15, channel - 1),

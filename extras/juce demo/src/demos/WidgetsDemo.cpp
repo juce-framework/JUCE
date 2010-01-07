@@ -381,11 +381,32 @@ static Component* createSlidersPage()
     for (i = 7; i <= 10; ++i)
     {
         sliders[i]->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
-        sliders[i]->setMinValue (Random::getSystemRandom().nextDouble() * 100.0, false, false);
-        sliders[i]->setMaxValue (Random::getSystemRandom().nextDouble() * 100.0, false, false);
         sliders[i]->setPopupDisplayEnabled (true, page);
     }
 
+    /* Here, we'll create a Value object, and tell a bunch of our sliders to use it as their
+       value source. By telling them all to share the same Value, they'll stay in sync with
+       each other.
+
+       We could also optionally keep a copy of this Value elsewhere, and by changing it,
+       cause all the sliders to automatically update.
+    */
+    Value sharedValue;
+    sharedValue = Random::getSystemRandom().nextDouble() * 100;
+    for (i = 0; i < 7; ++i)
+        sliders[i]->getValueObject().referTo (sharedValue);
+
+    // ..and now we'll do the same for all our min/max slider values..
+    Value sharedValueMin, sharedValueMax;
+    sharedValueMin = Random::getSystemRandom().nextDouble() * 60.0;
+    sharedValueMax = Random::getSystemRandom().nextDouble() * 60.0 + 40.0;
+    for (i = 7; i <= 10; ++i)
+    {
+        sliders[i]->getMinValueObject().referTo (sharedValueMin);
+        sliders[i]->getMaxValueObject().referTo (sharedValueMax);
+    }
+
+    // Create a description label...
     Label* label = new Label (T("hint"), T("Try right-clicking on a slider for an options menu. \n\nAlso, holding down CTRL while dragging will turn on a slider's velocity-sensitive mode"));
     label->setBounds (20, 245, 350, 150);
     page->addAndMakeVisible (label);

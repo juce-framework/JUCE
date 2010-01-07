@@ -92,9 +92,9 @@ private:
 Slider::Slider (const String& name)
   : Component (name),
     listeners (2),
-    currentValue (0.0),
-    valueMin (0.0),
-    valueMax (0.0),
+    lastCurrentValue (0),
+    lastValueMin (0),
+    lastValueMax (0),
     minimum (0),
     maximum (10),
     interval (0),
@@ -137,10 +137,17 @@ Slider::Slider (const String& name)
 
     lookAndFeelChanged();
     updateText();
+
+    currentValue.addListener (this);
+    valueMin.addListener (this);
+    valueMax.addListener (this);
 }
 
 Slider::~Slider()
 {
+    currentValue.removeListener (this);
+    valueMin.removeListener (this);
+    valueMax.removeListener (this);
     popupDisplay = 0;
     deleteAllChildren();
 }
@@ -334,7 +341,7 @@ void Slider::colourChanged()
 void Slider::lookAndFeelChanged()
 {
     const String previousTextBoxContent (valueBox != 0 ? valueBox->getText()
-                                                       : getTextFromValue (currentValue));
+                                                       : getTextFromValue (currentValue.getValue()));
 
     deleteAllChildren();
     valueBox = 0;
@@ -420,7 +427,7 @@ void Slider::setRange (const double newMin,
         // keep the current values inside the new range..
         if (style != TwoValueHorizontal && style != TwoValueVertical)
         {
-            setValue (currentValue, false, false);
+            setValue (getValue(), false, false);
         }
         else
         {
@@ -442,13 +449,26 @@ void Slider::triggerChangeMessage (const bool synchronous)
     valueChanged();
 }
 
+void Slider::valueChanged (Value& value)
+{
+    if (value.refersToSameSourceAs (currentValue))
+    {
+        if (style != TwoValueHorizontal && style != TwoValueVertical)
+            setValue (currentValue.getValue(), false, false);
+    }
+    else if (value.refersToSameSourceAs (valueMin))
+        setMinValue (valueMin.getValue(), false, false);
+    else if (value.refersToSameSourceAs (valueMax))
+        setMaxValue (valueMax.getValue(), false, false);
+}
+
 double Slider::getValue() const
 {
     // for a two-value style slider, you should use the getMinValue() and getMaxValue()
     // methods to get the two values.
     jassert (style != TwoValueHorizontal && style != TwoValueVertical);
 
-    return currentValue;
+    return currentValue.getValue();
 }
 
 void Slider::setValue (double newValue,
@@ -463,22 +483,26 @@ void Slider::setValue (double newValue,
 
     if (style == ThreeValueHorizontal || style == ThreeValueVertical)
     {
-        jassert (valueMin <= valueMax);
-        newValue = jlimit (valueMin, valueMax, newValue);
+        jassert ((double) valueMin.getValue() <= (double) valueMax.getValue());
+
+        newValue = jlimit ((double) valueMin.getValue(),
+                           (double) valueMax.getValue(),
+                           newValue);
     }
 
-    if (currentValue != newValue)
+    if (newValue != lastCurrentValue)
     {
         if (valueBox != 0)
             valueBox->hideEditor (true);
 
-        currentValue = newValue;
+        lastCurrentValue = newValue;
+        currentValue = var (newValue);
         updateText();
         repaint();
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (currentValue));
+            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (newValue));
             popupDisplay->repaint();
         }
 
@@ -493,7 +517,7 @@ double Slider::getMinValue() const
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
               || style == ThreeValueHorizontal || style == ThreeValueVertical);
 
-    return valueMin;
+    return valueMin.getValue();
 }
 
 double Slider::getMaxValue() const
@@ -502,7 +526,7 @@ double Slider::getMaxValue() const
     jassert (style == TwoValueHorizontal || style == TwoValueVertical
               || style == ThreeValueHorizontal || style == ThreeValueVertical);
 
-    return valueMax;
+    return valueMax.getValue();
 }
 
 void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const bool sendMessageSynchronously, const bool allowNudgingOfOtherValues)
@@ -515,27 +539,28 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
 
     if (style == TwoValueHorizontal || style == TwoValueVertical)
     {
-        if (allowNudgingOfOtherValues && newValue > valueMax)
+        if (allowNudgingOfOtherValues && newValue > (double) valueMax.getValue())
             setMaxValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmin (valueMax, newValue);
+        newValue = jmin ((double) valueMax.getValue(), newValue);
     }
     else
     {
-        if (allowNudgingOfOtherValues && newValue > currentValue)
+        if (allowNudgingOfOtherValues && newValue > (double) currentValue.getValue())
             setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmin (currentValue, newValue);
+        newValue = jmin ((double) currentValue.getValue(), newValue);
     }
 
-    if (valueMin != newValue)
+    if (lastValueMin != newValue)
     {
+        lastValueMin = newValue;
         valueMin = newValue;
         repaint();
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (valueMin));
+            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (newValue));
             popupDisplay->repaint();
         }
 
@@ -554,27 +579,28 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
 
     if (style == TwoValueHorizontal || style == TwoValueVertical)
     {
-        if (allowNudgingOfOtherValues && newValue < valueMin)
+        if (allowNudgingOfOtherValues && newValue < (double) valueMin.getValue())
             setMinValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmax (valueMin, newValue);
+        newValue = jmax ((double) valueMin.getValue(), newValue);
     }
     else
     {
-        if (allowNudgingOfOtherValues && newValue < currentValue)
+        if (allowNudgingOfOtherValues && newValue < (double) currentValue.getValue())
             setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmax (currentValue, newValue);
+        newValue = jmax ((double) currentValue.getValue(), newValue);
     }
 
-    if (valueMax != newValue)
+    if (lastValueMax != newValue)
     {
+        lastValueMax = newValue;
         valueMax = newValue;
         repaint();
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (valueMax));
+            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (valueMax.getValue()));
             popupDisplay->repaint();
         }
 
@@ -599,7 +625,7 @@ double Slider::getDoubleClickReturnValue (bool& isEnabled_) const
 void Slider::updateText()
 {
     if (valueBox != 0)
-        valueBox->setText (getTextFromValue (currentValue), false);
+        valueBox->setText (getTextFromValue (currentValue.getValue()), false);
 }
 
 void Slider::setTextValueSuffix (const String& suffix)
@@ -687,7 +713,7 @@ void Slider::labelTextChanged (Label* label)
 {
     const double newValue = snapValue (getValueFromText (label->getText()), false);
 
-    if (getValue() != newValue)
+    if (newValue != (double) currentValue.getValue())
     {
         sendDragStart();
         setValue (newValue, true, true);
@@ -798,7 +824,7 @@ void Slider::paint (Graphics& g)
     {
         if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
         {
-            const float sliderPos = (float) valueToProportionOfLength (currentValue);
+            const float sliderPos = (float) valueToProportionOfLength (currentValue.getValue());
             jassert (sliderPos >= 0 && sliderPos <= 1.0f);
 
             getLookAndFeel().drawRotarySlider (g,
@@ -817,9 +843,9 @@ void Slider::paint (Graphics& g)
                                                sliderRect.getY(),
                                                sliderRect.getWidth(),
                                                sliderRect.getHeight(),
-                                               getLinearSliderPos (currentValue),
-                                               getLinearSliderPos (valueMin),
-                                               getLinearSliderPos (valueMax),
+                                               getLinearSliderPos (currentValue.getValue()),
+                                               getLinearSliderPos (valueMin.getValue()),
+                                               getLinearSliderPos (valueMax.getValue()),
                                                style,
                                                *this);
         }
@@ -1027,9 +1053,9 @@ void Slider::mouseDown (const MouseEvent& e)
             {
                 const float mousePos = (float) (isVertical() ? e.y : e.x);
 
-                const float normalPosDistance = fabsf (getLinearSliderPos (currentValue) - mousePos);
-                const float minPosDistance = fabsf (getLinearSliderPos (valueMin) - 0.1f - mousePos);
-                const float maxPosDistance = fabsf (getLinearSliderPos (valueMax) + 0.1f - mousePos);
+                const float normalPosDistance = fabsf (getLinearSliderPos (currentValue.getValue()) - mousePos);
+                const float minPosDistance = fabsf (getLinearSliderPos (valueMin.getValue()) - 0.1f - mousePos);
+                const float maxPosDistance = fabsf (getLinearSliderPos (valueMax.getValue()) + 0.1f - mousePos);
 
                 if (style == TwoValueHorizontal || style == TwoValueVertical)
                 {
@@ -1047,17 +1073,14 @@ void Slider::mouseDown (const MouseEvent& e)
                 }
             }
 
-            minMaxDiff = valueMax - valueMin;
+            minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
 
             lastAngle = rotaryStart + (rotaryEnd - rotaryStart)
-                                        * valueToProportionOfLength (currentValue);
+                                        * valueToProportionOfLength (currentValue.getValue());
 
-            if (sliderBeingDragged == 2)
-                valueWhenLastDragged = valueMax;
-            else if (sliderBeingDragged == 1)
-                valueWhenLastDragged = valueMin;
-            else
-                valueWhenLastDragged = currentValue;
+            valueWhenLastDragged = ((sliderBeingDragged == 2) ? valueMax
+                                                              : ((sliderBeingDragged == 1) ? valueMin
+                                                                                           : currentValue)).getValue();
 
             valueOnMouseDown = valueWhenLastDragged;
 
@@ -1094,7 +1117,7 @@ void Slider::mouseUp (const MouseEvent&)
     {
         restoreMouseIfHidden();
 
-        if (sendChangeOnlyOnRelease && valueOnMouseDown != currentValue)
+        if (sendChangeOnlyOnRelease && valueOnMouseDown != (double) currentValue.getValue())
             triggerChangeMessage (false);
 
         sendDragEnd();
@@ -1124,7 +1147,7 @@ void Slider::restoreMouseIfHidden()
 
         const double pos = (sliderBeingDragged == 2) ? getMaxValue()
                                                      : ((sliderBeingDragged == 1) ? getMinValue()
-                                                                                  : currentValue);
+                                                                                  : (double) currentValue.getValue());
 
         if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
         {
@@ -1336,7 +1359,7 @@ void Slider::mouseDrag (const MouseEvent& e)
             if (e.mods.isShiftDown())
                 setMaxValue (getMinValue() + minMaxDiff, false, false, true);
             else
-                minMaxDiff = valueMax - valueMin;
+                minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
         }
         else
         {
@@ -1348,7 +1371,7 @@ void Slider::mouseDrag (const MouseEvent& e)
             if (e.mods.isShiftDown())
                 setMinValue (getMaxValue() - minMaxDiff, false, false, true);
             else
-                minMaxDiff = valueMax - valueMin;
+                minMaxDiff = (double) valueMax.getValue() - (double) valueMin.getValue();
         }
 
         mouseXWhenLastDragged = e.x;
@@ -1381,18 +1404,19 @@ void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float w
             if (valueBox != 0)
                 valueBox->hideEditor (false);
 
+            const double value = (double) currentValue.getValue();
             const double proportionDelta = (wheelIncrementX != 0 ? -wheelIncrementX : wheelIncrementY) * 0.15f;
-            const double currentPos = valueToProportionOfLength (currentValue);
+            const double currentPos = valueToProportionOfLength (value);
             const double newValue = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + proportionDelta));
 
-            double delta = (newValue != currentValue)
-                            ? jmax (fabs (newValue - currentValue), interval) : 0;
+            double delta = (newValue != value)
+                            ? jmax (fabs (newValue - value), interval) : 0;
 
-            if (currentValue > newValue)
+            if (value > newValue)
                 delta = -delta;
 
             sendDragStart();
-            setValue (snapValue (currentValue + delta, false), true, true);
+            setValue (snapValue (value + delta, false), true, true);
             sendDragEnd();
         }
     }

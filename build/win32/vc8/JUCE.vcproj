@@ -1118,11 +1118,23 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\containers\juce_ScopedPointer.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\containers\juce_SortedSet.h"
 					>
 				</File>
 				<File
 					RelativePath="..\..\..\src\containers\juce_SparseSet.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_Value.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_Value.h"
 					>
 				</File>
 				<File

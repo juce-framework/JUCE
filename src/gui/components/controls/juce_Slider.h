@@ -31,6 +31,7 @@
 #include "../buttons/juce_Button.h"
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../../../containers/juce_SortedSet.h"
+#include "../../../containers/juce_Value.h"
 
 
 //==============================================================================
@@ -58,7 +59,8 @@ class JUCE_API  Slider  : public Component,
                           public SettableTooltipClient,
                           private AsyncUpdater,
                           private ButtonListener,
-                          private LabelListener
+                          private LabelListener,
+                          private Value::Listener
 {
 public:
     //==============================================================================
@@ -351,6 +353,14 @@ public:
     /** Returns the slider's current value. */
     double getValue() const;
 
+    /** Returns the Value object that represents the slider's current position.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMaxValue, getMinValueObject
+    */
+    Value& getValueObject()                                                 { return currentValue; }
+
     //==============================================================================
     /** Sets the limits that the slider's value can take.
 
@@ -389,6 +399,14 @@ public:
     */
     double getMinValue() const;
 
+    /** For a slider with two or three thumbs, this returns the lower of its values.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMinValue, getMaxValueObject
+    */
+    Value& getMinValueObject()                                              { return valueMin; }
+
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
         This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
@@ -422,6 +440,14 @@ public:
         @see getMinValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
     double getMaxValue() const;
+
+    /** For a slider with two or three thumbs, this returns the higher of its values.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMaxValue, getMinValueObject
+    */
+    Value& getMaxValueObject()                                              { return valueMax; }
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -720,10 +746,13 @@ protected:
     void handleAsyncUpdate();
     /** @internal */
     void colourChanged();
+    /** @internal */
+    void valueChanged (Value& value);
 
 private:
     SortedSet <void*> listeners;
-    double currentValue, valueMin, valueMax;
+    Value currentValue, valueMin, valueMax;
+    double lastCurrentValue, lastValueMin, lastValueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;

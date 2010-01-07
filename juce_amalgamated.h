@@ -8132,7 +8132,7 @@ private:
 
     forEachXmlChildElement (*myParentXml, child)
     {
-        if (child->hasTagName ("FOO"))
+        if (child->hasTagName (T("FOO")))
             doSomethingWithXmlElement (child);
     }
 
@@ -8188,12 +8188,12 @@ private:
 
     Here's an example of parsing some elements: @code
     // check we're looking at the right kind of document..
-    if (myElement->hasTagName ("ANIMALS"))
+    if (myElement->hasTagName (T("ANIMALS")))
     {
         // now we'll iterate its sub-elements looking for 'giraffe' elements..
         forEachXmlChildElement (*myElement, e)
         {
-            if (e->hasTagName ("GIRAFFE"))
+            if (e->hasTagName (T("GIRAFFE")))
             {
                 // found a giraffe, so use some of its attributes..
 
@@ -11105,11 +11105,11 @@ private:
 /********* End of inlined file: juce_SparseSet.h *********/
 
 #endif
-#ifndef __JUCE_VALUETREE_JUCEHEADER__
+#ifndef __JUCE_VALUE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ValueTree.h *********/
-#ifndef __JUCE_VALUETREE_JUCEHEADER__
-#define __JUCE_VALUETREE_JUCEHEADER__
+/********* Start of inlined file: juce_Value.h *********/
+#ifndef __JUCE_VALUE_JUCEHEADER__
+#define __JUCE_VALUE_JUCEHEADER__
 
 /********* Start of inlined file: juce_Variant.h *********/
 #ifndef __JUCE_VARIANT_JUCEHEADER__
@@ -11338,51 +11338,9 @@ private:
 #endif   // __JUCE_VARIANT_JUCEHEADER__
 /********* End of inlined file: juce_Variant.h *********/
 
-/********* Start of inlined file: juce_UndoManager.h *********/
-#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
-#define __JUCE_UNDOMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ChangeBroadcaster.h *********/
-#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-#define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-
-/********* Start of inlined file: juce_ChangeListenerList.h *********/
-#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-#define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-
-/********* Start of inlined file: juce_ChangeListener.h *********/
-#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
-#define __JUCE_CHANGELISTENER_JUCEHEADER__
-
-/**
-    Receives callbacks about changes to some kind of object.
-
-    Many objects use a ChangeListenerList to keep a set of listeners which they
-    will inform when something changes. A subclass of ChangeListener
-    is used to receive these callbacks.
-
-    Note that the major difference between an ActionListener and a ChangeListener
-    is that for a ChangeListener, multiple changes will be coalesced into fewer
-    callbacks, but ActionListeners perform one callback for every event posted.
-
-    @see ChangeListenerList, ChangeBroadcaster, ActionListener
-*/
-class JUCE_API  ChangeListener
-{
-public:
-    /** Destructor. */
-    virtual ~ChangeListener()  {}
-
-    /** Overridden by your subclass to receive the callback.
-
-        @param objectThatHasChanged the value that was passed to the
-                                    ChangeListenerList::sendChangeMessage() method
-    */
-    virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
-};
-
-#endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_ChangeListener.h *********/
+/********* Start of inlined file: juce_AsyncUpdater.h *********/
+#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
+#define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
 /********* Start of inlined file: juce_MessageListener.h *********/
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
@@ -11506,6 +11464,313 @@ public:
 
 #endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
 /********* End of inlined file: juce_MessageListener.h *********/
+
+/**
+    Has a callback method that is triggered asynchronously.
+
+    This object allows an asynchronous callback function to be triggered, for
+    tasks such as coalescing multiple updates into a single callback later on.
+
+    Basically, one or more calls to the triggerAsyncUpdate() will result in the
+    message thread calling handleAsyncUpdate() as soon as it can.
+*/
+class JUCE_API  AsyncUpdater
+{
+public:
+
+    /** Creates an AsyncUpdater object. */
+    AsyncUpdater() throw();
+
+    /** Destructor.
+
+        If there are any pending callbacks when the object is deleted, these are lost.
+    */
+    virtual ~AsyncUpdater();
+
+    /** Causes the callback to be triggered at a later time.
+
+        This method returns immediately, having made sure that a callback
+        to the handleAsyncUpdate() method will occur as soon as possible.
+
+        If an update callback is already pending but hasn't happened yet, calls
+        to this method will be ignored.
+
+        It's thread-safe to call this method from any number of threads without
+        needing to worry about locking.
+    */
+    void triggerAsyncUpdate() throw();
+
+    /** This will stop any pending updates from happening.
+
+        If called after triggerAsyncUpdate() and before the handleAsyncUpdate()
+        callback happens, this will cancel the handleAsyncUpdate() callback.
+    */
+    void cancelPendingUpdate() throw();
+
+    /** If an update has been triggered and is pending, this will invoke it
+        synchronously.
+
+        Use this as a kind of "flush" operation - if an update is pending, the
+        handleAsyncUpdate() method will be called immediately; if no update is
+        pending, then nothing will be done.
+    */
+    void handleUpdateNowIfNeeded();
+
+    /** Called back to do whatever your class needs to do.
+
+        This method is called by the message thread at the next convenient time
+        after the triggerAsyncUpdate() method has been called.
+    */
+    virtual void handleAsyncUpdate() = 0;
+
+private:
+
+    class AsyncUpdaterInternal  : public MessageListener
+    {
+    public:
+        AsyncUpdaterInternal() throw() {}
+        ~AsyncUpdaterInternal() {}
+
+        void handleMessage (const Message&);
+
+        AsyncUpdater* owner;
+
+    private:
+        AsyncUpdaterInternal (const AsyncUpdaterInternal&);
+        const AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
+    };
+
+    AsyncUpdaterInternal internalAsyncHandler;
+    bool asyncMessagePending;
+};
+
+#endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
+/********* End of inlined file: juce_AsyncUpdater.h *********/
+
+/**
+    Represents a shared variant value.
+
+    A Value object contains a reference to a var object, and can get and set its value.
+    Listeners can be attached to be told when the value is changed.
+
+    The Value class is a wrapper around a shared, reference-counted underlying data
+    object - this means that multiple Value objects can all refer to the same piece of
+    data, allowing all of them to be notified when any of them changes it.
+
+    The base class of Value contains a simple var object, but subclasses can be
+    created that map a Value onto any kind of underlying data, e.g.
+    ValueTree::getPropertyAsValue() returns a Value object that is a wrapper
+    for one of its properties.
+*/
+class JUCE_API  Value
+{
+public:
+
+    /** Creates an empty Value, containing a void var. */
+    Value();
+
+    /** Creates a Value that refers to the same value as another one.
+
+        Note that this doesn't make a copy of the other value - both this and the other
+        Value will share the same underlying value, so that when either one alters it, both
+        will see it change.
+    */
+    Value (const Value& other);
+
+    /** Creates a Value that is set to the specified value. */
+    Value (const var& initialValue);
+
+    /** Destructor. */
+    ~Value();
+
+    /** Returns the current value. */
+    const var getValue() const;
+
+    /** Returns the current value. */
+    operator const var() const;
+
+    /** Sets the current value.
+
+        You can also use operator= to set the value.
+
+        If there are any listeners registered, they will be notified of the
+        change asynchronously.
+    */
+    void setValue (const var& newValue);
+
+    /** Sets the current value.
+
+        This is the same as calling setValue().
+
+        If there are any listeners registered, they will be notified of the
+        change asynchronously.
+    */
+    const Value& operator= (const var& newValue);
+
+    /** Makes this object refer to the same underlying value as another one.
+
+    */
+    void referTo (const Value& valueToReferTo);
+
+    /**
+    */
+    bool refersToSameSourceAs (const Value& other) const;
+
+    /**
+    */
+    bool operator== (const Value& other) const;
+
+    /**
+    */
+    bool operator!= (const Value& other) const;
+
+    /** Receives callbacks when a Value object changes.
+        @see Value::addListener
+    */
+    class JUCE_API  Listener
+    {
+    public:
+        Listener()          {}
+        virtual ~Listener() {}
+
+        /** Called when a Value object is changed.
+
+            Note that the Value object passed as a parameter may not be exactly the same
+            object that you registered the listener with - it might be a copy that refers
+            to the same underlying ValueSource. To find out, you can call Value::refersToSameSourceAs().
+        */
+        virtual void valueChanged (Value& value) = 0;
+    };
+
+    /** Adds a listener to receive callbacks when the value changes.
+
+        The listener is added to this specific Value object, and not to the shared
+        object that it refers to. When this object is deleted, all the listeners will
+        be lost, even if other references to the same Value still exist. So when you're
+        adding a listener, make sure that you add it to a ValueTree instance that will last
+        for as long as you need the listener. In general, you'd never want to add a listener
+        to a local stack-based ValueTree, but more likely to one that's a member variable.
+
+        @see removeListener
+    */
+    void addListener (Listener* const listener);
+
+    /** Removes a listener that was previously added with addListener(). */
+    void removeListener (Listener* const listener);
+
+    /**
+        Used internally by the Value class as the base class for its shared value objects.
+
+        The Value class is essentially a reference-counted pointer to a shared instance
+        of a ValueSource object. If you're feeling adventurous, you can create your own custom
+        ValueSource classes to allow Value objects to represent your own custom data items.
+    */
+    class JUCE_API  ValueSource   : public ReferenceCountedObject,
+                                    public AsyncUpdater
+    {
+    public:
+        ValueSource();
+        virtual ~ValueSource();
+
+        /** Returns the current value of this object. */
+        virtual const var getValue() const = 0;
+        /** Changes the current value.
+            This must also trigger a change message if the value actually changes.
+        */
+        virtual void setValue (const var& newValue) = 0;
+
+        /** Delivers a change message to all the listeners that are registered with
+            this value.
+
+            If dispatchSynchronously is true, the method will call all the listeners
+            before returning; otherwise it'll dispatch a message and make the call later.
+        */
+        void sendChangeMessage (const bool dispatchSynchronously);
+
+        juce_UseDebuggingNewOperator
+
+    protected:
+        friend class Value;
+        SortedSet <Value*> valuesWithListeners;
+
+        void handleAsyncUpdate();
+
+        ValueSource (const ValueSource&);
+        const ValueSource& operator= (const ValueSource&);
+    };
+
+    /** @internal */
+    explicit Value (ValueSource* const valueSource);
+
+    juce_UseDebuggingNewOperator
+
+private:
+    friend class ValueSource;
+    ReferenceCountedObjectPtr <ValueSource> value;
+    SortedSet <Listener*> listeners;
+
+    void callListeners();
+
+    // This is disallowed to avoid confusion about whether it should
+    // do a by-value or by-reference copy.
+    const Value& operator= (const Value& other);
+};
+
+#endif   // __JUCE_VALUE_JUCEHEADER__
+/********* End of inlined file: juce_Value.h *********/
+
+#endif
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+
+/********* Start of inlined file: juce_ValueTree.h *********/
+#ifndef __JUCE_VALUETREE_JUCEHEADER__
+#define __JUCE_VALUETREE_JUCEHEADER__
+
+/********* Start of inlined file: juce_UndoManager.h *********/
+#ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
+#define __JUCE_UNDOMANAGER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeBroadcaster.h *********/
+#ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+#define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeListenerList.h *********/
+#ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+#define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
+
+/********* Start of inlined file: juce_ChangeListener.h *********/
+#ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
+#define __JUCE_CHANGELISTENER_JUCEHEADER__
+
+/**
+    Receives callbacks about changes to some kind of object.
+
+    Many objects use a ChangeListenerList to keep a set of listeners which they
+    will inform when something changes. A subclass of ChangeListener
+    is used to receive these callbacks.
+
+    Note that the major difference between an ActionListener and a ChangeListener
+    is that for a ChangeListener, multiple changes will be coalesced into fewer
+    callbacks, but ActionListeners perform one callback for every event posted.
+
+    @see ChangeListenerList, ChangeBroadcaster, ActionListener
+*/
+class JUCE_API  ChangeListener
+{
+public:
+    /** Destructor. */
+    virtual ~ChangeListener()  {}
+
+    /** Overridden by your subclass to receive the callback.
+
+        @param objectThatHasChanged the value that was passed to the
+                                    ChangeListenerList::sendChangeMessage() method
+    */
+    virtual void changeListenerCallback (void* objectThatHasChanged) = 0;
+};
+
+#endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
+/********* End of inlined file: juce_ChangeListener.h *********/
 
 /********* Start of inlined file: juce_ScopedLock.h *********/
 #ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
@@ -12078,111 +12343,119 @@ public:
         Like an XmlElement, each ValueTree node has a type, which you can access with
         getType() and hasType().
     */
-    ValueTree (const String& type) throw();
+    ValueTree (const String& type);
 
     /** Creates a reference to another ValueTree. */
-    ValueTree (const ValueTree& other) throw();
+    ValueTree (const ValueTree& other);
 
     /** Makes this object reference another node. */
-    const ValueTree& operator= (const ValueTree& other) throw();
+    const ValueTree& operator= (const ValueTree& other);
 
     /** Destructor. */
-    ~ValueTree() throw();
+    ~ValueTree();
 
     /** Returns true if both this and the other tree node refer to the same underlying structure.
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator== (const ValueTree& other) const throw();
+    bool operator== (const ValueTree& other) const;
 
     /** Returns true if this and the other node refer to different underlying structures.
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator!= (const ValueTree& other) const throw();
+    bool operator!= (const ValueTree& other) const;
 
     /** Returns true if this node refers to some valid data.
         It's hard to create an invalid node, but you might get one returned, e.g. by an out-of-range
         call to getChild().
     */
-    bool isValid() const throw()                    { return object != 0; }
+    bool isValid() const                            { return object != 0; }
 
     /** Returns a deep copy of this tree and all its sub-nodes. */
-    ValueTree createCopy() const throw();
+    ValueTree createCopy() const;
 
     /** Returns the type of this node.
         The type is specified when the ValueTree is created.
         @see hasType
     */
-    const String getType() const throw();
+    const String getType() const;
 
     /** Returns true if the node has this type.
         The comparison is case-sensitive.
     */
-    bool hasType (const String& typeName) const throw();
+    bool hasType (const String& typeName) const;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant.
         You can also use operator[] to get a property.
         @see var, setProperty, hasProperty
     */
-    const var getProperty (const var::identifier& name) const throw();
+    const var getProperty (const var::identifier& name) const;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as
         calling getProperty().
         @see getProperty
     */
-    const var operator[] (const var::identifier& name) const throw();
+    const var operator[] (const var::identifier& name) const;
 
     /** Changes a named property of the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
         @see var, getProperty, removeProperty
     */
-    void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager) throw();
+    void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
 
     /** Returns true if the node contains a named property. */
-    bool hasProperty (const var::identifier& name) const throw();
+    bool hasProperty (const var::identifier& name) const;
 
     /** Removes a property from the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeProperty (const var::identifier& name, UndoManager* const undoManager) throw();
+    void removeProperty (const var::identifier& name, UndoManager* const undoManager);
 
     /** Removes all properties from the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeAllProperties (UndoManager* const undoManager) throw();
+    void removeAllProperties (UndoManager* const undoManager);
 
     /** Returns the total number of properties that the node contains.
         @see getProperty.
     */
-    int getNumProperties() const throw();
+    int getNumProperties() const;
 
     /** Returns the identifier of the property with a given index.
         @see getNumProperties
     */
-    const var::identifier getPropertyName (int index) const throw();
+    const var::identifier getPropertyName (int index) const;
+
+    /** Returns a Value object that can be used to control and respond to one of the tree's properties.
+
+        The Value object will maintain a reference to this tree, and will use the undo manager when
+        it needs to change the value. Attaching a Value::Listener to the value object will provide
+        callbacks whenever the property changes.
+    */
+    Value getPropertyAsValue (const var::identifier& name, UndoManager* const undoManager) const;
 
     /** Returns the number of child nodes belonging to this one.
         @see getChild
     */
-    int getNumChildren() const throw();
+    int getNumChildren() const;
 
     /** Returns one of this node's child nodes.
         If the index is out of range, it'll return an invalid node. (See isValid() to find out
         whether a node is valid).
     */
-    ValueTree getChild (int index) const throw();
+    ValueTree getChild (int index) const;
 
     /** Looks for a child node with the speficied type name.
         If no such node is found, it'll return an invalid node. (See isValid() to find out
         whether a node is valid).
     */
-    ValueTree getChildWithName (const String& type) const throw();
+    ValueTree getChildWithName (const String& type) const;
 
     /** Looks for the first child node that has the speficied property value.
 
@@ -12192,7 +12465,7 @@ public:
         If no such node is found, it'll return an invalid node. (See isValid() to find out
         whether a node is valid).
     */
-    ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
+    ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
 
     /** Adds a child to this node.
 
@@ -12205,36 +12478,36 @@ public:
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void addChild (ValueTree child, int index, UndoManager* const undoManager) throw();
+    void addChild (ValueTree child, int index, UndoManager* const undoManager);
 
     /** Removes the specified child from this node's child-list.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeChild (ValueTree& child, UndoManager* const undoManager) throw();
+    void removeChild (ValueTree& child, UndoManager* const undoManager);
 
     /** Removes a child from this node's child-list.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeChild (const int childIndex, UndoManager* const undoManager) throw();
+    void removeChild (const int childIndex, UndoManager* const undoManager);
 
     /** Removes all child-nodes from this node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeAllChildren (UndoManager* const undoManager) throw();
+    void removeAllChildren (UndoManager* const undoManager);
 
     /** Returns true if this node is anywhere below the specified parent node.
         This returns true if the node is a child-of-a-child, as well as a direct child.
     */
-    bool isAChildOf (const ValueTree& possibleParent) const throw();
+    bool isAChildOf (const ValueTree& possibleParent) const;
 
     /** Returns the parent node that contains this one.
         If the node has no parent, this will return an invalid node. (See isValid() to find out
         whether a node is valid).
     */
-    ValueTree getParent() const throw();
+    ValueTree getParent() const;
 
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 
@@ -12242,14 +12515,14 @@ public:
         be used to recreate a similar node by calling fromXml()
         @see fromXml
     */
-    XmlElement* createXml() const throw();
+    XmlElement* createXml() const;
 
     /** Tries to recreate a node from its XML representation.
 
         This isn't designed to cope with random XML data - for a sensible result, it should only
         be fed XML that was created by the createXml() method.
     */
-    static ValueTree fromXml (const XmlElement& xml) throw();
+    static ValueTree fromXml (const XmlElement& xml);
 
     /** Stores this tree (and all its children) in a binary format.
 
@@ -12258,11 +12531,11 @@ public:
         It's much faster to load/save your tree in binary form than as XML, but
         obviously isn't human-readable.
     */
-    void writeToStream (OutputStream& output) throw();
+    void writeToStream (OutputStream& output);
 
     /** Reloads a tree from a stream that was written with writeToStream().
     */
-    static ValueTree readFromStream (InputStream& input) throw();
+    static ValueTree readFromStream (InputStream& input);
 
     /** Listener class for events that happen to a ValueTree.
 
@@ -12275,21 +12548,34 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** This method is called when one or more of the properties of this node have changed. */
-        virtual void valueTreePropertyChanged (ValueTree& tree) = 0;
+        /** This method is called when one of the properties of this node has been changed. */
+        virtual void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property) = 0;
 
         /** This method is called when one or more of the children of this node have been added or removed. */
         virtual void valueTreeChildrenChanged (ValueTree& tree) = 0;
 
         /** This method is called when this node has been added or removed from a parent node. */
-        virtual void valueTreeParentChanged() = 0;
+        virtual void valueTreeParentChanged (ValueTree& tree) = 0;
     };
 
-    /** Adds a listener to receive callbacks when this node is changed. */
-    void addListener (Listener* listener) throw();
+    /** Adds a listener to receive callbacks when this node is changed.
+
+        The listener is added to this specific ValueTree object, and not to the shared
+        object that it refers to. When this object is deleted, all the listeners will
+        be lost, even if other references to the same ValueTree still exist. And if you
+        use the operator= to make this refer to a different ValueTree, any listeners will
+        begin listening to changes to the new tree instead of the old one.
+
+        When you're adding a listener, make sure that you add it to a ValueTree instance that
+        will last for as long as you need the listener. In general, you'd never want to add a
+        listener to a local stack-based ValueTree, and would usually add one to a member variable.
+
+        @see removeListener
+    */
+    void addListener (Listener* listener);
 
     /** Removes a listener that was previously added with addListener(). */
-    void removeListener (Listener* listener) throw();
+    void removeListener (Listener* listener);
 
     juce_UseDebuggingNewOperator
 
@@ -12297,16 +12583,16 @@ private:
     friend class ValueTreeSetPropertyAction;
     friend class ValueTreeChildChangeAction;
 
-    class SharedObject    : public ReferenceCountedObject
+    class JUCE_API  SharedObject    : public ReferenceCountedObject
     {
     public:
-        SharedObject (const String& type) throw();
-        SharedObject (const SharedObject& other) throw();
-        ~SharedObject() throw();
+        SharedObject (const String& type);
+        SharedObject (const SharedObject& other);
+        ~SharedObject();
 
         struct Property
         {
-            Property (const var::identifier& name, const var& value) throw();
+            Property (const var::identifier& name, const var& value);
 
             var::identifier name;
             var value;
@@ -12315,24 +12601,29 @@ private:
         const String type;
         OwnedArray <Property> properties;
         ReferenceCountedArray <SharedObject> children;
-        SortedSet <Listener*> listeners;
+        SortedSet <ValueTree*> valueTreesWithListeners;
         SharedObject* parent;
 
-        void sendPropertyChangeMessage();
+        void sendPropertyChangeMessage (const var::identifier& property);
         void sendChildChangeMessage();
         void sendParentChangeMessage();
-        const var getProperty (const var::identifier& name) const throw();
-        void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager) throw();
-        bool hasProperty (const var::identifier& name) const throw();
-        void removeProperty (const var::identifier& name, UndoManager* const undoManager) throw();
-        void removeAllProperties (UndoManager* const undoManager) throw();
-        bool isAChildOf (const SharedObject* const possibleParent) const throw();
-        ValueTree getChildWithName (const String& type) const throw();
-        ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const throw();
-        void addChild (SharedObject* child, int index, UndoManager* const undoManager) throw();
-        void removeChild (const int childIndex, UndoManager* const undoManager) throw();
-        void removeAllChildren (UndoManager* const undoManager) throw();
-        XmlElement* createXml() const throw();
+        const var getProperty (const var::identifier& name) const;
+        void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
+        bool hasProperty (const var::identifier& name) const;
+        void removeProperty (const var::identifier& name, UndoManager* const undoManager);
+        void removeAllProperties (UndoManager* const undoManager);
+        bool isAChildOf (const SharedObject* const possibleParent) const;
+        ValueTree getChildWithName (const String& type) const;
+        ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
+        void addChild (SharedObject* child, int index, UndoManager* const undoManager);
+        void removeChild (const int childIndex, UndoManager* const undoManager);
+        void removeAllChildren (UndoManager* const undoManager);
+        XmlElement* createXml() const;
+
+        juce_UseDebuggingNewOperator
+
+    private:
+        const SharedObject& operator= (const SharedObject&);
     };
 
     friend class SharedObject;
@@ -12340,8 +12631,13 @@ private:
     typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
 
     ReferenceCountedObjectPtr <SharedObject> object;
+    SortedSet <Listener*> listeners;
 
-    ValueTree (SharedObject* const object_) throw();
+    void deliverPropertyChangeMessage (const var::identifier& property);
+    void deliverChildChangeMessage();
+    void deliverParentChangeMessage();
+
+    ValueTree (SharedObject* const object_);
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
@@ -25632,92 +25928,6 @@ public:
 /********* Start of inlined file: juce_ApplicationCommandManager.h *********/
 #ifndef __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
 #define __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
-
-/********* Start of inlined file: juce_AsyncUpdater.h *********/
-#ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
-#define __JUCE_ASYNCUPDATER_JUCEHEADER__
-
-/**
-    Has a callback method that is triggered asynchronously.
-
-    This object allows an asynchronous callback function to be triggered, for
-    tasks such as coalescing multiple updates into a single callback later on.
-
-    Basically, one or more calls to the triggerAsyncUpdate() will result in the
-    message thread calling handleAsyncUpdate() as soon as it can.
-*/
-class JUCE_API  AsyncUpdater
-{
-public:
-
-    /** Creates an AsyncUpdater object. */
-    AsyncUpdater() throw();
-
-    /** Destructor.
-
-        If there are any pending callbacks when the object is deleted, these are lost.
-    */
-    virtual ~AsyncUpdater();
-
-    /** Causes the callback to be triggered at a later time.
-
-        This method returns immediately, having made sure that a callback
-        to the handleAsyncUpdate() method will occur as soon as possible.
-
-        If an update callback is already pending but hasn't happened yet, calls
-        to this method will be ignored.
-
-        It's thread-safe to call this method from any number of threads without
-        needing to worry about locking.
-    */
-    void triggerAsyncUpdate() throw();
-
-    /** This will stop any pending updates from happening.
-
-        If called after triggerAsyncUpdate() and before the handleAsyncUpdate()
-        callback happens, this will cancel the handleAsyncUpdate() callback.
-    */
-    void cancelPendingUpdate() throw();
-
-    /** If an update has been triggered and is pending, this will invoke it
-        synchronously.
-
-        Use this as a kind of "flush" operation - if an update is pending, the
-        handleAsyncUpdate() method will be called immediately; if no update is
-        pending, then nothing will be done.
-    */
-    void handleUpdateNowIfNeeded();
-
-    /** Called back to do whatever your class needs to do.
-
-        This method is called by the message thread at the next convenient time
-        after the triggerAsyncUpdate() method has been called.
-    */
-    virtual void handleAsyncUpdate() = 0;
-
-private:
-
-    class AsyncUpdaterInternal  : public MessageListener
-    {
-    public:
-        AsyncUpdaterInternal() throw() {}
-        ~AsyncUpdaterInternal() {}
-
-        void handleMessage (const Message&);
-
-        AsyncUpdater* owner;
-
-    private:
-        AsyncUpdaterInternal (const AsyncUpdaterInternal&);
-        const AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
-    };
-
-    AsyncUpdaterInternal internalAsyncHandler;
-    bool asyncMessagePending;
-};
-
-#endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
-/********* End of inlined file: juce_AsyncUpdater.h *********/
 
 /********* Start of inlined file: juce_Desktop.h *********/
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
@@ -42583,7 +42793,8 @@ class JUCE_API  Slider  : public Component,
                           public SettableTooltipClient,
                           private AsyncUpdater,
                           private ButtonListener,
-                          private LabelListener
+                          private LabelListener,
+                          private Value::Listener
 {
 public:
 
@@ -42868,6 +43079,14 @@ public:
     /** Returns the slider's current value. */
     double getValue() const;
 
+    /** Returns the Value object that represents the slider's current position.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMaxValue, getMinValueObject
+    */
+    Value& getValueObject()                                                 { return currentValue; }
+
     /** Sets the limits that the slider's value can take.
 
         @param newMinimum   the lowest value allowed
@@ -42904,6 +43123,14 @@ public:
     */
     double getMinValue() const;
 
+    /** For a slider with two or three thumbs, this returns the lower of its values.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMinValue, getMaxValueObject
+    */
+    Value& getMinValueObject()                                              { return valueMin; }
+
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
         This will trigger a callback to SliderListener::sliderValueChanged() for any listeners
@@ -42937,6 +43164,14 @@ public:
         @see getMinValue, TwoValueHorizontal, TwoValueVertical, ThreeValueHorizontal, ThreeValueVertical
     */
     double getMaxValue() const;
+
+    /** For a slider with two or three thumbs, this returns the higher of its values.
+        You can use this Value object to connect the slider's position to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see Value, getMaxValue, getMinValueObject
+    */
+    Value& getMaxValueObject()                                              { return valueMax; }
 
     /** For a slider with two or three thumbs, this sets the lower of its values.
 
@@ -43223,10 +43458,13 @@ protected:
     void handleAsyncUpdate();
     /** @internal */
     void colourChanged();
+    /** @internal */
+    void valueChanged (Value& value);
 
 private:
     SortedSet <void*> listeners;
-    double currentValue, valueMin, valueMax;
+    Value currentValue, valueMin, valueMax;
+    double lastCurrentValue, lastValueMin, lastValueMax;
     double minimum, maximum, interval, doubleClickReturnValue;
     double valueWhenLastDragged, valueOnMouseDown, skewFactor, lastAngle;
     double velocityModeSensitivity, velocityModeOffset, minMaxDiff;

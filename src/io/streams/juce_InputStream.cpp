@@ -270,12 +270,10 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
     if (numBytesToSkip > 0)
     {
         const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-        MemoryBlock temp (skipBufferSize);
+        HeapBlock <char> temp (skipBufferSize);
 
-        while ((numBytesToSkip > 0) && ! isExhausted())
-        {
-            numBytesToSkip -= read (temp.getData(), (int) jmin (numBytesToSkip, (int64) skipBufferSize));
-        }
+        while (numBytesToSkip > 0 && ! isExhausted())
+            numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
     }
 }
 

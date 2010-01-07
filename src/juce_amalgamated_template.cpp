@@ -120,6 +120,7 @@
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
 #include "containers/juce_ValueTree.cpp"
+#include "containers/juce_Value.cpp"
 #include "application/juce_Application.cpp"
 #include "application/juce_ApplicationCommandInfo.cpp"
 #include "application/juce_ApplicationCommandManager.cpp"
