@@ -1041,7 +1041,7 @@ public:
         short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 
         Array <short*> channelConfigsSorted;
-        ChannelConfigComparator <short*> comp;
+        ChannelConfigComparator comp;
 
         for (int i = 0; i < numElementsInArray (channelConfigs); ++i)
             channelConfigsSorted.addSorted (comp, channelConfigs[i]);
@@ -1056,8 +1056,8 @@ public:
             {
                 speakerIn = (VstSpeakerArrangementType) pluginInput->type;
                 speakerOut = (VstSpeakerArrangementType) pluginOutput->type;
-                numInChans = speakerInChans;
-                numOutChans = speakerOutChans;
+                numInChans = pluginInput->numChannels;
+                numOutChans = pluginOutput->numChannels;
 
                 filter->setPlayConfigDetails (numInChans, numOutChans,
                                               filter->getSampleRate(),
