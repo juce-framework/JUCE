@@ -80,8 +80,8 @@
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
  #include "core/juce_Atomic.h"
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
- #include "core/juce_DataConversions.h"
+#ifndef __JUCE_BYTEORDER_JUCEHEADER__
+ #include "core/juce_ByteOrder.h"
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
  #include "core/juce_FileLogger.h"

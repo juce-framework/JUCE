@@ -83,25 +83,25 @@ void OutputStream::writeByte (char byte)
 
 void OutputStream::writeShort (short value)
 {
-    const unsigned short v = swapIfBigEndian ((unsigned short) value);
+    const unsigned short v = ByteOrder::swapIfBigEndian ((unsigned short) value);
     write (&v, 2);
 }
 
 void OutputStream::writeShortBigEndian (short value)
 {
-    const unsigned short v = swapIfLittleEndian ((unsigned short) value);
+    const unsigned short v = ByteOrder::swapIfLittleEndian ((unsigned short) value);
     write (&v, 2);
 }
 
 void OutputStream::writeInt (int value)
 {
-    const unsigned int v = swapIfBigEndian ((unsigned int) value);
+    const unsigned int v = ByteOrder::swapIfBigEndian ((unsigned int) value);
     write (&v, 4);
 }
 
 void OutputStream::writeIntBigEndian (int value)
 {
-    const unsigned int v = swapIfLittleEndian ((unsigned int) value);
+    const unsigned int v = ByteOrder::swapIfLittleEndian ((unsigned int) value);
     write (&v, 4);
 }
 
@@ -129,13 +129,13 @@ void OutputStream::writeCompressedInt (int value)
 
 void OutputStream::writeInt64 (int64 value)
 {
-    const uint64 v = swapIfBigEndian ((uint64) value);
+    const uint64 v = ByteOrder::swapIfBigEndian ((uint64) value);
     write (&v, 8);
 }
 
 void OutputStream::writeInt64BigEndian (int64 value)
 {
-    const uint64 v = swapIfLittleEndian ((uint64) value);
+    const uint64 v = ByteOrder::swapIfLittleEndian ((uint64) value);
     write (&v, 8);
 }
 

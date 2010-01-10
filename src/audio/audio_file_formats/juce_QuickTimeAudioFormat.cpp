@@ -68,7 +68,7 @@ BEGIN_JUCE_NAMESPACE
 
 bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle& dataHandle);
 
-#define quickTimeFormatName                          TRANS("QuickTime file")
+static const char* const quickTimeFormatName = "QuickTime file";
 static const tchar* const quickTimeExtensions[] =    { T(".mov"), T(".mp3"), T(".mp4"), 0 };
 
 //==============================================================================
@@ -76,7 +76,7 @@ class QTAudioReader     : public AudioFormatReader
 {
 public:
     QTAudioReader (InputStream* const input_, const int trackNum_)
-        : AudioFormatReader (input_, quickTimeFormatName),
+        : AudioFormatReader (input_, TRANS (quickTimeFormatName)),
           ok (false),
           movie (0),
           trackNum (trackNum_),
@@ -341,7 +341,7 @@ private:
 
 //==============================================================================
 QuickTimeAudioFormat::QuickTimeAudioFormat()
-    : AudioFormat (quickTimeFormatName, (const tchar**) quickTimeExtensions)
+    : AudioFormat (TRANS (quickTimeFormatName), (const tchar**) quickTimeExtensions)
 {
 }
 

@@ -276,7 +276,7 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum, const 
                     mac = (mac << 8) | adapter->Address[i];
 
                 if (littleEndian)
-                    mac = (int64) swapByteOrder ((uint64) mac);
+                    mac = (int64) ByteOrder::swap ((uint64) mac);
 
                 if (numFound < maxNum && mac != 0)
                     addresses [numFound++] = mac;

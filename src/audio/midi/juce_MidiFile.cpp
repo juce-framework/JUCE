@@ -140,21 +140,21 @@ static bool parseMidiHeader (const char* &data,
                              short& fileType,
                              short& numberOfTracks)
 {
-    unsigned int ch = (int) bigEndianInt (data);
+    unsigned int ch = (int) ByteOrder::bigEndianInt (data);
     data += 4;
 
-    if (ch != bigEndianInt ("MThd"))
+    if (ch != ByteOrder::bigEndianInt ("MThd"))
     {
         bool ok = false;
 
-        if (ch == bigEndianInt ("RIFF"))
+        if (ch == ByteOrder::bigEndianInt ("RIFF"))
         {
             for (int i = 0; i < 8; ++i)
             {
-                ch = bigEndianInt (data);
+                ch = ByteOrder::bigEndianInt (data);
                 data += 4;
 
-                if (ch == bigEndianInt ("MThd"))
+                if (ch == ByteOrder::bigEndianInt ("MThd"))
                 {
                     ok = true;
                     break;
@@ -166,13 +166,13 @@ static bool parseMidiHeader (const char* &data,
             return false;
     }
 
-    unsigned int bytesRemaining = bigEndianInt (data);
+    unsigned int bytesRemaining = ByteOrder::bigEndianInt (data);
     data += 4;
-    fileType = (short)bigEndianShort (data);
+    fileType = (short) ByteOrder::bigEndianShort (data);
     data += 2;
-    numberOfTracks = (short)bigEndianShort (data);
+    numberOfTracks = (short) ByteOrder::bigEndianShort (data);
     data += 2;
-    timeFormat = (short)bigEndianShort (data);
+    timeFormat = (short) ByteOrder::bigEndianShort (data);
     data += 2;
     bytesRemaining -= 6;
     data += bytesRemaining;
@@ -202,9 +202,9 @@ bool MidiFile::readFrom (InputStream& sourceStream)
 
             while (size > 0 && track < expectedTracks)
             {
-                const int chunkType = (int)bigEndianInt (d);
+                const int chunkType = (int) ByteOrder::bigEndianInt (d);
                 d += 4;
-                const int chunkSize = (int)bigEndianInt (d);
+                const int chunkSize = (int) ByteOrder::bigEndianInt (d);
                 d += 4;
 
                 if (chunkSize <= 0)
@@ -213,7 +213,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
                 if (size < 0)
                     return false;
 
-                if (chunkType == (int)bigEndianInt ("MTrk"))
+                if (chunkType == (int) ByteOrder::bigEndianInt ("MTrk"))
                 {
                     readNextTrack (d, chunkSize);
                 }
@@ -400,10 +400,10 @@ static void writeVariableLengthInt (OutputStream& out, unsigned int v)
 
 bool MidiFile::writeTo (OutputStream& out)
 {
-    out.writeIntBigEndian ((int) bigEndianInt ("MThd"));
+    out.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MThd"));
     out.writeIntBigEndian (6);
     out.writeShortBigEndian (1); // type
-    out.writeShortBigEndian (tracks.size());
+    out.writeShortBigEndian ((short) tracks.size());
     out.writeShortBigEndian (timeFormat);
 
     for (int i = 0; i < tracks.size(); ++i)
@@ -457,7 +457,7 @@ void MidiFile::writeTrack (OutputStream& mainOut,
     out.write (m.getRawData(),
                m.getRawDataSize());
 
-    mainOut.writeIntBigEndian ((int)bigEndianInt ("MTrk"));
+    mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));
     mainOut.writeIntBigEndian (out.getDataSize());
     mainOut.write (out.getData(), out.getDataSize());
 }

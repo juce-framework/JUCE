@@ -93,7 +93,7 @@ public:
                 elements = newElements;
 
             }
-            else if (elements != 0)
+            else
             {
                 delete[] elements;
                 elements = 0;

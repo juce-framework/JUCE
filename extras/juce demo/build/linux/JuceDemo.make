@@ -60,8 +60,8 @@ OBJECTS := \
 	$(OBJDIR)/WebBrowserDemo.o \
 	$(OBJDIR)/CodeEditorDemo.o \
 	$(OBJDIR)/RenderingTestComponent.o \
-	$(OBJDIR)/WidgetsDemo.o \
 	$(OBJDIR)/AudioDemoRecordPage.o \
+	$(OBJDIR)/WidgetsDemo.o \
 
 MKDIR_TYPE := msdos
 CMD := $(subst \,\\,$(ComSpec)$(COMSPEC))
@@ -208,12 +208,12 @@ $(OBJDIR)/RenderingTestComponent.o: ../../src/demos/RenderingTestComponent.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
+$(OBJDIR)/AudioDemoRecordPage.o: ../../src/demos/AudioDemoRecordPage.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoRecordPage.o: ../../src/demos/AudioDemoRecordPage.cpp
+$(OBJDIR)/WidgetsDemo.o: ../../src/demos/WidgetsDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

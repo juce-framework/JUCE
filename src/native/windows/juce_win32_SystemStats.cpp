@@ -59,20 +59,6 @@ static double hiResTicksScaleFactor;
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
-/*static unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0) throw()
-{
-    int info [4];
-    __cpuid (info, 1);
-
-    if (familyModel != 0)
-        *familyModel = info [0];
-
-    if (extFeatures != 0)
-        *extFeatures = info[1];
-
-    return info[3];
-}*/
-
 const String SystemStats::getCpuVendor() throw()
 {
     int info [4];
@@ -90,50 +76,6 @@ const String SystemStats::getCpuVendor() throw()
 
 //==============================================================================
 // CPU info functions using old fashioned inline asm...
-
-/*static juce_noinline unsigned int getCPUIDWord (int* familyModel = 0, int* extFeatures = 0)
-{
-    unsigned int cpu = 0;
-    unsigned int ext = 0;
-    unsigned int family = 0;
-
-  #if JUCE_GCC
-    unsigned int dummy = 0;
-  #endif
-
-  #ifndef __MINGW32__
-    __try
-  #endif
-    {
-  #if JUCE_GCC
-        __asm__ ("cpuid" : "=a" (family), "=b" (ext), "=c" (dummy),"=d" (cpu) : "a" (1));
-  #else
-        __asm
-        {
-            mov eax, 1
-            cpuid
-            mov cpu, edx
-            mov family, eax
-            mov ext, ebx
-        }
-
-  #endif
-    }
-  #ifndef __MINGW32__
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        return 0;
-    }
-  #endif
-
-    if (familyModel != 0)
-        *familyModel = family;
-
-    if (extFeatures != 0)
-        *extFeatures = ext;
-
-    return cpu;
-}*/
 
 static void juce_getCpuVendor (char* const v)
 {

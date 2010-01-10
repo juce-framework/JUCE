@@ -82,7 +82,7 @@ BEGIN_JUCE_NAMESPACE
 using namespace FlacNamespace;
 
 //==============================================================================
-#define flacFormatName                          TRANS("FLAC file")
+static const char* const flacFormatName = "FLAC file";
 static const tchar* const flacExtensions[] =    { T(".flac"), 0 };
 
 
@@ -97,7 +97,7 @@ class FlacReader  : public AudioFormatReader
 public:
     //==============================================================================
     FlacReader (InputStream* const in)
-        : AudioFormatReader (in, flacFormatName),
+        : AudioFormatReader (in, TRANS (flacFormatName)),
           reservoir (2, 0),
           reservoirStart (0),
           samplesInReservoir (0),
@@ -317,7 +317,7 @@ public:
                 const double sampleRate_,
                 const int numChannels_,
                 const int bitsPerSample_)
-        : AudioFormatWriter (out, flacFormatName,
+        : AudioFormatWriter (out, TRANS (flacFormatName),
                              sampleRate_,
                              numChannels_,
                              bitsPerSample_)
@@ -478,7 +478,7 @@ public:
 
 //==============================================================================
 FlacAudioFormat::FlacAudioFormat()
-    : AudioFormat (flacFormatName, (const tchar**) flacExtensions)
+    : AudioFormat (TRANS (flacFormatName), (const tchar**) flacExtensions)
 {
 }
 

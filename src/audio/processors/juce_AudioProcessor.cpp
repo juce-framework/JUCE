@@ -255,8 +255,8 @@ void AudioProcessor::copyXmlToBinary (const XmlElement& xml,
     destData.setSize (stringLength + 10);
 
     char* const d = (char*) destData.getData();
-    *(uint32*) d = swapIfBigEndian ((const uint32) magicXmlNumber);
-    *(uint32*) (d + 4) = swapIfBigEndian ((const uint32) stringLength);
+    *(uint32*) d = ByteOrder::swapIfBigEndian ((const uint32) magicXmlNumber);
+    *(uint32*) (d + 4) = ByteOrder::swapIfBigEndian ((const uint32) stringLength);
 
     xmlString.copyToBuffer (d + 8, stringLength);
 }
@@ -265,9 +265,9 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
                                               const int sizeInBytes)
 {
     if (sizeInBytes > 8
-         && littleEndianInt ((const char*) data) == magicXmlNumber)
+         && ByteOrder::littleEndianInt ((const char*) data) == magicXmlNumber)
     {
-        const uint32 stringLength = littleEndianInt (((const char*) data) + 4);
+        const uint32 stringLength = ByteOrder::littleEndianInt (((const char*) data) + 4);
 
         if (stringLength > 0)
         {

@@ -131,12 +131,14 @@ public:
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
-    inline ElementType& operator[] (const pointer_sized_int index) const    { return data [index]; }
+    template <typename IndexType>
+    inline ElementType& operator[] (IndexType index) const                  { return data [index]; }
 
     /** Returns a pointer to a data element at an offset from the start of the array.
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
-    inline ElementType* operator+ (const pointer_sized_int index) const     { return data + index; }
+    template <typename IndexType>
+    inline ElementType* operator+ (IndexType index) const                   { return data + index; }
 
     /** Returns a reference to the raw data pointer.
         Beware that the pointer returned here will become invalid as soon as you call

@@ -83,7 +83,7 @@ BEGIN_JUCE_NAMESPACE
 using namespace OggVorbisNamespace;
 
 //==============================================================================
-#define oggFormatName                          TRANS("Ogg-Vorbis file")
+static const char* const oggFormatName = "Ogg-Vorbis file";
 static const tchar* const oggExtensions[] =    { T(".ogg"), 0 };
 
 
@@ -98,7 +98,7 @@ class OggReader : public AudioFormatReader
 public:
     //==============================================================================
     OggReader (InputStream* const inp)
-        : AudioFormatReader (inp, oggFormatName),
+        : AudioFormatReader (inp, TRANS (oggFormatName)),
           reservoir (2, 4096),
           reservoirStart (0),
           samplesInReservoir (0)
@@ -263,7 +263,7 @@ public:
                const int numChannels,
                const int bitsPerSample,
                const int qualityIndex)
-        : AudioFormatWriter (out, oggFormatName,
+        : AudioFormatWriter (out, TRANS (oggFormatName),
                              sampleRate,
                              numChannels,
                              bitsPerSample)
@@ -392,7 +392,7 @@ public:
 
 //==============================================================================
 OggVorbisAudioFormat::OggVorbisAudioFormat()
-    : AudioFormat (oggFormatName, (const tchar**) oggExtensions)
+    : AudioFormat (TRANS (oggFormatName), (const tchar**) oggExtensions)
 {
 }
 

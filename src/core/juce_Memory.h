@@ -180,7 +180,7 @@
 
 //==============================================================================
 #if JUCE_MSVC
-  /** This is a compiler-indenpendent way of declaring a variable as being thread-local.
+  /** This is a compiler-independent way of declaring a variable as being thread-local.
 
       E.g.
       @code

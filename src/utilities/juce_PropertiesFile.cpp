@@ -40,8 +40,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static const int propFileMagicNumber            = ((int) littleEndianInt ("PROP"));
-static const int propFileMagicNumberCompressed  = ((int) littleEndianInt ("CPRP"));
+static const int propFileMagicNumber            = ((int) ByteOrder::littleEndianInt ("PROP"));
+static const int propFileMagicNumberCompressed  = ((int) ByteOrder::littleEndianInt ("CPRP"));
 
 static const tchar* const propertyFileXmlTag    = T("PROPERTIES");
 static const tchar* const propertyTagName       = T("VALUE");

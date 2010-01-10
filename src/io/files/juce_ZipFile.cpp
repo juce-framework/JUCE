@@ -77,10 +77,10 @@ public:
         if (inputStream != 0
              && inputStream->setPosition (zei.streamOffset)
              && inputStream->read (buffer, 30) == 30
-             && littleEndianInt (buffer) == 0x04034b50)
+             && ByteOrder::littleEndianInt (buffer) == 0x04034b50)
         {
-            headerSize = 30 + littleEndianShort (buffer + 26)
-                            + littleEndianShort (buffer + 28);
+            headerSize = 30 + ByteOrder::littleEndianShort (buffer + 26)
+                            + ByteOrder::littleEndianShort (buffer + 28);
         }
     }
 
@@ -309,7 +309,7 @@ void ZipFile::init()
 
                     const char* const buffer = ((const char*) headerData.getData()) + pos;
 
-                    const int fileNameLen = littleEndianShort (buffer + 28);
+                    const int fileNameLen = ByteOrder::littleEndianShort (buffer + 28);
 
                     if (pos + 46 + fileNameLen > size)
                         break;
@@ -317,8 +317,8 @@ void ZipFile::init()
                     ZipEntryInfo* const zei = new ZipEntryInfo();
                     zei->entry.filename = String::fromUTF8 ((const uint8*) buffer + 46, fileNameLen);
 
-                    const int time = littleEndianShort (buffer + 12);
-                    const int date = littleEndianShort (buffer + 14);
+                    const int time = ByteOrder::littleEndianShort (buffer + 12);
+                    const int date = ByteOrder::littleEndianShort (buffer + 14);
 
                     const int year      = 1980 + (date >> 9);
                     const int month     = ((date >> 5) & 15) - 1;
@@ -329,16 +329,16 @@ void ZipFile::init()
 
                     zei->entry.fileTime = Time (year, month, day, hours, minutes, seconds);
 
-                    zei->compressed = littleEndianShort (buffer + 10) != 0;
-                    zei->compressedSize = littleEndianInt (buffer + 20);
-                    zei->entry.uncompressedSize = littleEndianInt (buffer + 24);
+                    zei->compressed = ByteOrder::littleEndianShort (buffer + 10) != 0;
+                    zei->compressedSize = ByteOrder::littleEndianInt (buffer + 20);
+                    zei->entry.uncompressedSize = ByteOrder::littleEndianInt (buffer + 24);
 
-                    zei->streamOffset = littleEndianInt (buffer + 42);
+                    zei->streamOffset = ByteOrder::littleEndianInt (buffer + 42);
                     entries.add (zei);
 
                     pos += 46 + fileNameLen
-                            + littleEndianShort (buffer + 30)
-                            + littleEndianShort (buffer + 32);
+                            + ByteOrder::littleEndianShort (buffer + 30)
+                            + ByteOrder::littleEndianShort (buffer + 32);
                 }
             }
         }
@@ -367,13 +367,13 @@ int ZipFile::findEndOfZipEntryTable (InputStream* input)
 
         for (int i = 0; i < 22; ++i)
         {
-            if (littleEndianInt (buffer + i) == 0x06054b50)
+            if (ByteOrder::littleEndianInt (buffer + i) == 0x06054b50)
             {
                 in.setPosition (pos + i);
                 in.read (buffer, 22);
-                numEntries = littleEndianShort (buffer + 10);
+                numEntries = ByteOrder::littleEndianShort (buffer + 10);
 
-                return littleEndianInt (buffer + 16);
+                return ByteOrder::littleEndianInt (buffer + 16);
             }
         }
     }

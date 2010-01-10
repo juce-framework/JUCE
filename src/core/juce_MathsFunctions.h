@@ -170,7 +170,7 @@ inline double jmin (const double a, const double b, const double c, const double
                 and upperLimit (inclusive)
     @see jlimit0To, jmin, jmax
 */
-template <class Type>
+template <typename Type>
 inline Type jlimit (const Type lowerLimit,
                     const Type upperLimit,
                     const Type valueToConstrain) throw()
@@ -185,8 +185,8 @@ inline Type jlimit (const Type lowerLimit,
 //==============================================================================
 /** Handy function to swap two values over.
 */
-template <class Type>
-inline void swapVariables (Type& variable1, Type& variable2) throw()
+template <typename Type>
+inline void swapVariables (Type& variable1, Type& variable2)
 {
     const Type tempVal = variable1;
     variable1 = variable2;
@@ -207,25 +207,33 @@ inline void swapVariables (Type& variable1, Type& variable2) throw()
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-#if JUCE_WINDOWS || defined (DOXYGEN)
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline double juce_hypot (double a, double b)           { return _hypot (a, b); }
+/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
+    versions of these functions of various platforms and compilers. */
+inline double juce_hypot (double a, double b)
+{
+  #if JUCE_WINDOWS
+    return _hypot (a, b);
+  #else
+    return hypot (a, b);
+  #endif
+}
 
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline float juce_hypotf (float a, float b)             { return (float) _hypot (a, b); }
-#else
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline double juce_hypot (double a, double b)           { return hypot (a, b); }
+/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
+    versions of these functions of various platforms and compilers. */
+inline float juce_hypotf (float a, float b)
+{
+  #if JUCE_WINDOWS
+    return (float) _hypot (a, b);
+  #else
+    return hypotf (a, b);
+  #endif
+}
 
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline float juce_hypotf (float a, float b)             { return hypotf (a, b); }
-#endif
-
-inline int64 abs64 (const int64 n) throw()                      { return (n >= 0) ? n : -n; }
+/** 64-bit abs function. */
+inline int64 abs64 (const int64 n)
+{
+    return (n >= 0) ? n : -n;
+}
 
 
 //==============================================================================
@@ -243,17 +251,74 @@ const float   float_Pi   = 3.14159265358979323846f;
 
 
 //==============================================================================
-/** The isfinite() method seems to vary greatly between platforms, so this is a
-    platform-independent macro for it.
+/** The isfinite() method seems to vary between platforms, so this is a
+    platform-independent function for it.
 */
-#if JUCE_LINUX || JUCE_MAC || JUCE_IPHONE
-  #define juce_isfinite(v)      std::isfinite(v)
-#elif JUCE_WINDOWS && ! defined (isfinite)
-  #define juce_isfinite(v)      _finite(v)
-#else
-  #define juce_isfinite(v)      isfinite(v)
-#endif
+template <typename FloatingPointType>
+inline bool juce_isfinite (FloatingPointType value)
+{
+    #if JUCE_WINDOWS
+      return _finite (value);
+    #else
+      return std::isfinite (value);
+    #endif
+}
 
+//==============================================================================
+/** Fast floating-point-to-integer conversion.
+
+    This is faster than using the normal c++ cast to convert a double to an int, and
+    it will round the value to the nearest integer, rather than rounding it down
+    like the normal cast does.
+
+    Note that this routine gets its speed at the expense of some accuracy, and when
+    rounding values whose floating point component is exactly 0.5, odd numbers and
+    even numbers will be rounded up or down differently. For a more accurate conversion,
+    see roundDoubleToIntAccurate().
+*/
+inline int roundDoubleToInt (const double value) throw()
+{
+    union { int asInt[2]; double asDouble; } n;
+    n.asDouble = value + 6755399441055744.0;
+
+    #if JUCE_BIG_ENDIAN
+      return n.asInt [1];
+    #else
+      return n.asInt [0];
+    #endif
+}
+
+/** Fast floating-point-to-integer conversion.
+
+    This is a slightly slower and slightly more accurate version of roundDoubleToInt(). It works
+    fine for values above zero, but negative numbers are rounded the wrong way.
+*/
+inline int roundDoubleToIntAccurate (const double value) throw()
+{
+    return roundDoubleToInt (value + 1.5e-8);
+}
+
+/** Fast floating-point-to-integer conversion.
+
+    This is faster than using the normal c++ cast to convert a float to an int, and
+    it will round the value to the nearest integer, rather than rounding it down
+    like the normal cast does.
+
+    Note that this routine gets its speed at the expense of some accuracy, and when
+    rounding values whose floating point component is exactly 0.5, odd numbers and
+    even numbers will be rounded up or down differently.
+*/
+inline int roundFloatToInt (const float value) throw()
+{
+    union { int asInt[2]; double asDouble; } n;
+    n.asDouble = value + 6755399441055744.0;
+
+    #if JUCE_BIG_ENDIAN
+      return n.asInt [1];
+    #else
+      return n.asInt [0];
+    #endif
+}
 
 //==============================================================================
 

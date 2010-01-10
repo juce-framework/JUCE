@@ -26,186 +26,183 @@
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
 #define __JUCE_ATOMIC_JUCEHEADER__
 
-//==============================================================================
-// Atomic increment/decrement operations..
-
 
 //==============================================================================
-#if (JUCE_MAC || JUCE_IPHONE) && ! DOXYGEN
+/** Contains static functions for thread-safe atomic operations.
+*/
+class JUCE_API  Atomic
+{
+public:
+    /** Increments an integer in a thread-safe way. */
+    static void increment (int& variable);
 
-    //==============================================================================
-    #include <libkern/OSAtomic.h>
-    static forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    static forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    static forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    static forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+    /** Increments an integer in a thread-safe way and returns its new value. */
+    static int incrementAndReturn (int& variable);
+
+    /** Decrements an integer in a thread-safe way. */
+    static void decrement (int& variable);
+
+    /** Decrements an integer in a thread-safe way and returns its new value. */
+    static int decrementAndReturn (int& variable);
+};
+
+
+//==============================================================================
+#if (JUCE_MAC || JUCE_IPHONE)           //  Mac and iPhone...
+
+#include <libkern/OSAtomic.h>
+inline void Atomic::increment (int& variable)               { OSAtomicIncrement32 ((int32_t*) &variable); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return OSAtomicIncrement32 ((int32_t*) &variable); }
+inline void Atomic::decrement (int& variable)               { OSAtomicDecrement32 ((int32_t*) &variable); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return OSAtomicDecrement32 ((int32_t*) &variable); }
 
 #elif JUCE_GCC
-    //==============================================================================
-  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
-    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
-    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
-  #else
-    //==============================================================================
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void atomicIncrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock incl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock incl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
+
+//==============================================================================
+#if JUCE_USE_GCC_ATOMIC_INTRINSICS      //  Linux with intrinsics...
+
+inline void Atomic::increment (int& variable)               { __sync_add_and_fetch (&variable, 1); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, 1); }
+inline void Atomic::decrement (int& variable)               { __sync_add_and_fetch (&variable, -1); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, -1); }
+
+//==============================================================================
+#else                                   //  Linux without intrinsics...
+
+inline void Atomic::increment (int& variable)
+{
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock incl (%%rax)"
+        :
+        : "a" (&variable)
+        : "cc", "memory");
+    #else
+        "lock incl %0"
+        : "=m" (variable)
+        : "m" (variable));
+    #endif
+}
+
+inline int Atomic::incrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock xaddl %%ebx, (%%rax) \n\
+         incl %%ebx"
+        : "=b" (result)
+        : "a" (&variable), "b" (1)
+        : "cc", "memory");
+    #else
+        "lock xaddl %%eax, (%%ecx) \n\
+         incl %%eax"
+        : "=a" (result)
+        : "c" (&variable), "a" (1)
+        : "memory");
+    #endif
+
+    return result;
+}
+
+inline void Atomic::decrement (int& variable)
+{
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock decl (%%rax)"
+        :
+        : "a" (&variable)
+        : "cc", "memory");
+    #else
+        "lock decl %0"
+        : "=m" (variable)
+        : "m" (variable));
+    #endif
+}
+
+inline int Atomic::decrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock xaddl %%ebx, (%%rax) \n\
+         decl %%ebx"
+        : "=b" (result)
+        : "a" (&variable), "b" (-1)
+        : "cc", "memory");
+    #else
+        "lock xaddl %%eax, (%%ecx) \n\
+         decl %%eax"
+        : "=a" (result)
+        : "c" (&variable), "a" (-1)
+        : "memory");
+    #endif
+    return result;
+}
+#endif
+
+//==============================================================================
+#elif JUCE_USE_INTRINSICS           // Windows with intrinsics...
+
+#pragma intrinsic (_InterlockedIncrement)
+#pragma intrinsic (_InterlockedDecrement)
+
+inline void Atomic::increment (int& variable)               { _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline void Atomic::decrement (int& variable)               { _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+
+//==============================================================================
+#else                               // Windows without intrinsics...
+
+inline void Atomic::increment (int& variable)
+{
+    __asm {
+        mov ecx, dword ptr [variable]
+        lock inc dword ptr [ecx]
+    }
+}
+
+inline int Atomic::incrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm {
+        mov ecx, dword ptr [variable]
+        mov eax, 1
+        lock xadd dword ptr [ecx], eax
+        inc eax
+        mov result, eax
     }
 
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
+    return result;
+}
 
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             incl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             incl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (1)
-            : "memory");
-        #endif
+inline void Atomic::decrement (int& variable)
+{
+    __asm {
+        mov ecx, dword ptr [variable]
+        lock dec dword ptr [ecx]
+    }
+}
 
-        return result;
+inline int Atomic::decrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm {
+        mov ecx, dword ptr [variable]
+        mov eax, -1
+        lock xadd dword ptr [ecx], eax
+        dec eax
+        mov result, eax
     }
 
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void atomicDecrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock decl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock decl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
+    return result;
+}
 
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             decl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (-1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             decl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (-1)
-            : "memory");
-        #endif
-        return result;
-    }
-  #endif
-
-#elif JUCE_USE_INTRINSICS
-    //==============================================================================
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-#else
-    //==============================================================================
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock inc dword ptr [ecx]
-        }
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, 1
-            lock xadd dword ptr [ecx], eax
-            inc eax
-            mov result, eax
-        }
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock dec dword ptr [ecx]
-        }
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, -1
-            lock xadd dword ptr [ecx], eax
-            dec eax
-            mov result, eax
-        }
-
-        return result;
-    }
 #endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__

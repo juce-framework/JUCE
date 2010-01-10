@@ -32,8 +32,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../imaging/juce_Image.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
 
-#define SHOULD_WRAP(x, wrapwidth)       (((x) - 0.0001f) >= (wrapwidth))
-
 
 //==============================================================================
 PositionedGlyph::PositionedGlyph()
@@ -310,7 +308,7 @@ void GlyphArrangement::addJustifiedText (const Font& font,
             {
                 lastWordBreakIndex = i + 1;
             }
-            else if (SHOULD_WRAP (pg->getRight(), lineMaxX))
+            else if (pg->getRight() - 0.0001f >= lineMaxX)
             {
                 if (lastWordBreakIndex >= 0)
                     i = lastWordBreakIndex;

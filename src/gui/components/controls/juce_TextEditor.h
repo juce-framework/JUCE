@@ -31,6 +31,7 @@
 #include "../../../utilities/juce_UndoManager.h"
 #include "../layout/juce_Viewport.h"
 #include "../menus/juce_PopupMenu.h"
+#include "../../../containers/juce_Value.h"
 class TextEditor;
 class TextHolderComponent;
 
@@ -108,7 +109,7 @@ public:
 
     /** Returns true if the editor is in multi-line mode.
     */
-    bool isMultiLine() const throw();
+    bool isMultiLine() const;
 
     //==============================================================================
     /** Changes the behaviour of the return key.
@@ -124,7 +125,7 @@ public:
 
         See setReturnKeyStartsNewLine() for more info.
     */
-    bool getReturnKeyStartsNewLine() const throw()                  { return returnKeyStartsNewLine; }
+    bool getReturnKeyStartsNewLine() const                      { return returnKeyStartsNewLine; }
 
     /** Indicates whether the tab key should be accepted and used to input a tab character,
         or whether it gets ignored.
@@ -132,12 +133,12 @@ public:
         By default the tab key is ignored, so that it can be used to switch keyboard focus
         between components.
     */
-    void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed) throw();
+    void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed);
 
     /** Returns true if the tab key is being used for input.
         @see setTabKeyUsedAsCharacter
     */
-    bool isTabKeyUsedAsCharacter() const throw()                    { return tabKeyUsed; }
+    bool isTabKeyUsedAsCharacter() const                        { return tabKeyUsed; }
 
     //==============================================================================
     /** Changes the editor to read-only mode.
@@ -153,7 +154,7 @@ public:
 
     /** Returns true if the editor is in read-only mode.
     */
-    bool isReadOnly() const throw();
+    bool isReadOnly() const;
 
     //==============================================================================
     /** Makes the caret visible or invisible.
@@ -162,12 +163,12 @@ public:
 
         @see setCaretColour, setCaretPosition
     */
-    void setCaretVisible (const bool shouldBeVisible) throw();
+    void setCaretVisible (const bool shouldBeVisible);
 
     /** Returns true if the caret is enabled.
         @see setCaretVisible
     */
-    bool isCaretVisible() const throw()                             { return caretVisible; }
+    bool isCaretVisible() const                                 { return caretVisible; }
 
     //==============================================================================
     /** Enables/disables a vertical scrollbar.
@@ -178,12 +179,12 @@ public:
 
         By default the scrollbar is enabled.
     */
-    void setScrollbarsShown (bool shouldBeEnabled) throw();
+    void setScrollbarsShown (bool shouldBeEnabled);
 
     /** Returns true if scrollbars are enabled.
         @see setScrollbarsShown
     */
-    bool areScrollbarsShown() const throw()                         { return scrollbarVisible; }
+    bool areScrollbarsShown() const                             { return scrollbarVisible; }
 
 
     /** Changes the password character used to disguise the text.
@@ -195,12 +196,12 @@ public:
                                     for a black splodge (not all fonts include this, though), or 0x2022,
                                     which is a bullet (probably the best choice for linux).
     */
-    void setPasswordCharacter (const tchar passwordCharacter) throw();
+    void setPasswordCharacter (const tchar passwordCharacter);
 
     /** Returns the current password character.
         @see setPasswordCharacter
 l    */
-    tchar getPasswordCharacter() const throw()                      { return passwordCharacter; }
+    tchar getPasswordCharacter() const                          { return passwordCharacter; }
 
 
     //==============================================================================
@@ -211,16 +212,16 @@ l    */
         If enabled, right-clicking (or command-clicking on the Mac) will pop up a menu
         of options such as cut/copy/paste, undo/redo, etc.
     */
-    void setPopupMenuEnabled (const bool menuEnabled) throw();
+    void setPopupMenuEnabled (const bool menuEnabled);
 
     /** Returns true if the right-click menu is enabled.
         @see setPopupMenuEnabled
     */
-    bool isPopupMenuEnabled() const throw()                         { return popupMenuEnabled; }
+    bool isPopupMenuEnabled() const                                 { return popupMenuEnabled; }
 
     /** Returns true if a popup-menu is currently being displayed.
     */
-    bool isPopupMenuCurrentlyActive() const throw()                 { return menuActive; }
+    bool isPopupMenuCurrentlyActive() const                         { return menuActive; }
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -267,7 +268,7 @@ l    */
 
         @see applyFontToAllText
     */
-    void setFont (const Font& newFont) throw();
+    void setFont (const Font& newFont);
 
     /** Applies a font to all the text in the editor.
 
@@ -281,7 +282,7 @@ l    */
 
         @see setFont
     */
-    const Font getFont() const throw();
+    const Font getFont() const;
 
     //==============================================================================
     /** If set to true, focusing on the editor will highlight all its text.
@@ -291,7 +292,7 @@ l    */
         This is useful for boxes where you expect the user to re-enter all the
         text when they focus on the component, rather than editing what's already there.
     */
-    void setSelectAllWhenFocused (const bool b) throw();
+    void setSelectAllWhenFocused (const bool b);
 
     /** Sets limits on the characters that can be entered.
 
@@ -301,7 +302,7 @@ l    */
                                     this string are allowed to be entered into the editor.
     */
     void setInputRestrictions (const int maxTextLength,
-                               const String& allowedCharacters = String::empty) throw();
+                               const String& allowedCharacters = String::empty);
 
     /** When the text editor is empty, it can be set to display a message.
 
@@ -309,7 +310,7 @@ l    */
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse) throw();
+    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
 
     //==============================================================================
     /** Changes the size of the scrollbars that are used.
@@ -329,26 +330,26 @@ l    */
 
         @see removeListener
     */
-    void addListener (TextEditorListener* const newListener) throw();
+    void addListener (TextEditorListener* const newListener);
 
     /** Deregisters a listener.
 
         @see addListener
     */
-    void removeListener (TextEditorListener* const listenerToRemove) throw();
+    void removeListener (TextEditorListener* const listenerToRemove);
 
     //==============================================================================
     /** Returns the entire contents of the editor. */
-    const String getText() const throw();
+    const String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    const String getTextSubstring (const int startCharacter, const int endCharacter) const throw();
+    const String getTextSubstring (const int startCharacter, const int endCharacter) const;
 
     /** Returns true if there are no characters in the editor.
 
         This is more efficient than calling getText().isEmpty().
     */
-    bool isEmpty() const throw();
+    bool isEmpty() const;
 
     /** Sets the entire content of the editor.
 
@@ -364,6 +365,14 @@ l    */
     */
     void setText (const String& newText,
                   const bool sendTextChangeMessage = true);
+
+    /** Returns a Value object that can be used to get or set the text.
+
+        Bear in mind that this operate quite slowly if your text box contains large
+        amounts of text, as it needs to dynamically build the string that's involved. It's
+        best used for small text boxes.
+    */
+    Value& getTextValue();
 
     /** Inserts some text at the current cursor position.
 
@@ -403,13 +412,13 @@ l    */
 
         @see getCaretPosition
     */
-    void setCaretPosition (const int newIndex) throw();
+    void setCaretPosition (const int newIndex);
 
     /** Returns the current index of the caret.
 
         @see setCaretPosition
     */
-    int getCaretPosition() const throw();
+    int getCaretPosition() const;
 
     /** Attempts to scroll the text editor so that the caret ends up at
         a specified position.
@@ -423,19 +432,19 @@ l    */
         will go as far as it can in that direction.
     */
     void scrollEditorToPositionCaret (const int desiredCaretX,
-                                      const int desiredCaretY) throw();
+                                      const int desiredCaretY);
 
     /** Get the graphical position of the caret.
 
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    const Rectangle getCaretRectangle() throw();
+    const Rectangle getCaretRectangle();
 
     /** Selects a section of the text.
     */
     void setHighlightedRegion (int startIndex,
-                               int numberOfCharactersToHighlight) throw();
+                               int numberOfCharactersToHighlight);
 
     /** Returns the first character that is selected.
 
@@ -444,68 +453,68 @@ l    */
 
         @see setHighlightedRegion, getHighlightedRegionLength
     */
-    int getHighlightedRegionStart() const throw()                       { return selectionStart; }
+    int getHighlightedRegionStart() const                           { return selectionStart; }
 
     /** Returns the number of characters that are selected.
 
         @see setHighlightedRegion, getHighlightedRegionStart
     */
-    int getHighlightedRegionLength() const throw()                      { return jmax (0, selectionEnd - selectionStart); }
+    int getHighlightedRegionLength() const                          { return jmax (0, selectionEnd - selectionStart); }
 
     /** Returns the section of text that is currently selected. */
-    const String getHighlightedText() const throw();
+    const String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
 
         The co-ordinates are relative to the component's top-left.
     */
-    int getTextIndexAt (const int x, const int y) throw();
+    int getTextIndexAt (const int x, const int y);
 
     /** Counts the number of characters in the text.
 
         This is quicker than getting the text as a string if you just need to know
         the length.
     */
-    int getTotalNumChars() throw();
+    int getTotalNumChars() const;
 
     /** Returns the total width of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextWidth() const throw();
+    int getTextWidth() const;
 
     /** Returns the maximum height of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextHeight() const throw();
+    int getTextHeight() const;
 
     /** Changes the size of the gap at the top and left-edge of the editor.
 
         By default there's a gap of 4 pixels.
     */
-    void setIndents (const int newLeftIndent, const int newTopIndent) throw();
+    void setIndents (const int newLeftIndent, const int newTopIndent);
 
     /** Changes the size of border left around the edge of the component.
 
         @see getBorder
     */
-    void setBorder (const BorderSize& border) throw();
+    void setBorder (const BorderSize& border);
 
     /** Returns the size of border around the edge of the component.
 
         @see setBorder
     */
-    const BorderSize getBorder() const throw();
+    const BorderSize getBorder() const;
 
     /** Used to disable the auto-scrolling which keeps the cursor visible.
 
         If true (the default), the editor will scroll when the cursor moves offscreen. If
         set to false, it won't.
     */
-    void setScrollToShowCursor (const bool shouldScrollToShowCursor) throw();
+    void setScrollToShowCursor (const bool shouldScrollToShowCursor);
 
     //==============================================================================
     /** @internal */
@@ -580,20 +589,20 @@ protected:
 
     //==============================================================================
     /** Scrolls the minimum distance needed to get the caret into view. */
-    void scrollToMakeSureCursorIsVisible() throw();
+    void scrollToMakeSureCursorIsVisible();
 
     /** @internal */
-    void moveCaret (int newCaretPos) throw();
+    void moveCaret (int newCaretPos);
 
     /** @internal */
-    void moveCursorTo (const int newPosition, const bool isSelecting) throw();
+    void moveCursorTo (const int newPosition, const bool isSelecting);
 
     /** Used internally to dispatch a text-change message. */
-    void textChanged() throw();
+    void textChanged();
 
     /** Begins a new transaction in the UndoManager.
     */
-    void newTransaction() throw();
+    void newTransaction();
 
     /** Used internally to trigger an undo or redo. */
     void doUndoRedo (const bool isRedo);
@@ -626,6 +635,7 @@ private:
     bool keepCursorOnScreen         : 1;
     bool tabKeyUsed                 : 1;
     bool menuActive                 : 1;
+    bool valueTextNeedsUpdating     : 1;
 
     UndoManager undoManager;
     float cursorX, cursorY, cursorHeight;
@@ -634,11 +644,13 @@ private:
     int leftIndent, topIndent;
     unsigned int lastTransactionTime;
     Font currentFont;
-    int totalNumChars, caretPosition;
+    mutable int totalNumChars;
+    int caretPosition;
     VoidArray sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
     tchar passwordCharacter;
+    Value textValue;
 
     enum
     {
@@ -653,43 +665,45 @@ private:
     friend class TextEditorInsertAction;
     friend class TextEditorRemoveAction;
 
-    void coalesceSimilarSections() throw();
-    void splitSection (const int sectionIndex, const int charToSplitAt) throw();
+    void coalesceSimilarSections();
+    void splitSection (const int sectionIndex, const int charToSplitAt);
 
-    void clearInternal (UndoManager* const um) throw();
+    void clearInternal (UndoManager* const um);
 
     void insert (const String& text,
                  const int insertIndex,
                  const Font& font,
                  const Colour& colour,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo) throw();
+                 const int caretPositionToMoveTo);
 
     void reinsert (const int insertIndex,
-                   const VoidArray& sections) throw();
+                   const VoidArray& sections);
 
     void remove (const int startIndex,
                  int endIndex,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo) throw();
+                 const int caretPositionToMoveTo);
 
     void getCharPosition (const int index,
                           float& x, float& y,
-                          float& lineHeight) const throw();
+                          float& lineHeight) const;
 
-    void updateCaretPosition() throw();
+    void updateCaretPosition();
+
+    void textWasChangedByValue();
 
     int indexAtPosition (const float x,
-                         const float y) throw();
+                         const float y);
 
-    int findWordBreakAfter (const int position) const throw();
-    int findWordBreakBefore (const int position) const throw();
+    int findWordBreakAfter (const int position) const;
+    int findWordBreakBefore (const int position) const;
 
     friend class TextHolderComponent;
     friend class TextEditorViewport;
     void drawContent (Graphics& g);
-    void updateTextHolderSize() throw();
-    float getWordWrapWidth() const throw();
+    void updateTextHolderSize();
+    float getWordWrapWidth() const;
     void timerCallbackInt();
     void repaintCaret();
     void repaintText (int textStartIndex, int textEndIndex);

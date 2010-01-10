@@ -962,7 +962,7 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\src\core\juce_DataConversions.h"
+					RelativePath="..\..\..\src\core\juce_ByteOrder.h"
 					>
 				</File>
 				<File

@@ -1130,12 +1130,13 @@ void XmlElement::setText (const String& newText) throw()
 const String XmlElement::getAllSubText() const throw()
 {
     String result;
+    String::Concatenator concatenator (result);
     const XmlElement* child = firstChildElement;
 
     while (child != 0)
     {
         if (child->isTextElement())
-            result += child->getText();
+            concatenator.append (child->getText());
 
         child = child->nextElement;
     }

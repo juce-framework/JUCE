@@ -43,7 +43,7 @@ void Logger::outputDebugPrintf (const tchar* format, ...) throw()
     outputDebugString (text);
 }
 
-bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger()
 {
     static char testResult = 0;
 

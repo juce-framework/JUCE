@@ -413,7 +413,7 @@ void juce_findFileClose (void* handle)
 bool juce_launchFile (const String& fileName,
                       const String& parameters)
 {
-    String cmdString (fileName);
+    String cmdString (fileName.replace (T(" "), T("\\ "),false));
     cmdString << " " << parameters;
 
     if (URL::isProbablyAWebsiteURL (fileName)

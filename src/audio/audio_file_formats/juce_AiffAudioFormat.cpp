@@ -32,12 +32,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../core/juce_PlatformUtilities.h"
 #include "../../text/juce_LocalisedStrings.h"
 
-
-#undef chunkName
-#define chunkName(a) (int)littleEndianInt(a)
-
 //==============================================================================
-#define aiffFormatName                          TRANS("AIFF file")
+static const char* const aiffFormatName = "AIFF file";
 static const tchar* const aiffExtensions[] =    { T(".aiff"), T(".aif"), 0 };
 
 
@@ -51,7 +47,7 @@ public:
 
     //==============================================================================
     AiffAudioFormatReader (InputStream* in)
-        : AudioFormatReader (in, aiffFormatName)
+        : AudioFormatReader (in, TRANS (aiffFormatName))
     {
         if (input->readInt() == chunkName ("FORM"))
         {
@@ -97,9 +93,9 @@ public:
                              || (byte0 == 0x40 && sampleRateBytes[1] > 0x1C))
                             break;
 
-                        unsigned int sampRate = bigEndianInt ((char*) sampleRateBytes + 2);
-                        sampRate >>= (16414 - bigEndianShort ((char*) sampleRateBytes));
-                        sampleRate = (int)sampRate;
+                        unsigned int sampRate = ByteOrder::bigEndianInt ((char*) sampleRateBytes + 2);
+                        sampRate >>= (16414 - ByteOrder::bigEndianShort ((char*) sampleRateBytes));
+                        sampleRate = (int) sampRate;
 
                         if (length <= 18)
                         {
@@ -202,7 +198,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                                *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                                 ++src;
                             }
                         }
@@ -211,15 +207,15 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                                *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                             }
                         }
                         else
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                                *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                                *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
+                                *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                             }
                         }
                     }
@@ -227,7 +223,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
                     }
                 }
@@ -241,7 +237,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *right++ = bigEndianShort (src) << 16;
+                                *right++ = ByteOrder::bigEndianShort (src) << 16;
                                 src += 4;
                             }
                         }
@@ -250,7 +246,7 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 src += 2;
-                                *left++ = bigEndianShort (src) << 16;
+                                *left++ = ByteOrder::bigEndianShort (src) << 16;
                                 src += 2;
                             }
                         }
@@ -258,9 +254,9 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = bigEndianShort (src) << 16;
+                                *left++ = ByteOrder::bigEndianShort (src) << 16;
                                 src += 2;
-                                *right++ = bigEndianShort (src) << 16;
+                                *right++ = ByteOrder::bigEndianShort (src) << 16;
                                 src += 2;
                             }
                         }
@@ -269,7 +265,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = bigEndianShort (src) << 16;
+                            *left++ = ByteOrder::bigEndianShort (src) << 16;
                             src += 2;
                         }
                     }
@@ -287,7 +283,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *right++ = littleEndian24Bit (src) << 8;
+                                *right++ = ByteOrder::littleEndian24Bit (src) << 8;
                                 src += 6;
                             }
                         }
@@ -296,7 +292,7 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 src += 3;
-                                *left++ = littleEndian24Bit (src) << 8;
+                                *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                                 src += 3;
                             }
                         }
@@ -304,9 +300,9 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = littleEndian24Bit (src) << 8;
+                                *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                                 src += 3;
-                                *right++ = littleEndian24Bit (src) << 8;
+                                *right++ = ByteOrder::littleEndian24Bit (src) << 8;
                                 src += 3;
                             }
                         }
@@ -315,7 +311,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = littleEndian24Bit (src) << 8;
+                            *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                             src += 3;
                         }
                     }
@@ -328,7 +324,7 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *right++ = bigEndian24Bit (src) << 8;
+                                *right++ = ByteOrder::bigEndian24Bit (src) << 8;
                                 src += 6;
                             }
                         }
@@ -337,7 +333,7 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 src += 3;
-                                *left++ = bigEndian24Bit (src) << 8;
+                                *left++ = ByteOrder::bigEndian24Bit (src) << 8;
                                 src += 3;
                             }
                         }
@@ -345,9 +341,9 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *left++ = bigEndian24Bit (src) << 8;
+                                *left++ = ByteOrder::bigEndian24Bit (src) << 8;
                                 src += 3;
-                                *right++ = bigEndian24Bit (src) << 8;
+                                *right++ = ByteOrder::bigEndian24Bit (src) << 8;
                                 src += 3;
                             }
                         }
@@ -356,7 +352,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = bigEndian24Bit (src) << 8;
+                            *left++ = ByteOrder::bigEndian24Bit (src) << 8;
                             src += 3;
                         }
                     }
@@ -377,14 +373,14 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *r++ = swapIfBigEndian (*src++);
+                                *r++ = ByteOrder::swapIfBigEndian (*src++);
                             }
                         }
                         else if (r == 0)
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = swapIfBigEndian (*src++);
+                                *l++ = ByteOrder::swapIfBigEndian (*src++);
                                 ++src;
                             }
                         }
@@ -392,8 +388,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = swapIfBigEndian (*src++);
-                                *r++ = swapIfBigEndian (*src++);
+                                *l++ = ByteOrder::swapIfBigEndian (*src++);
+                                *r++ = ByteOrder::swapIfBigEndian (*src++);
                             }
                         }
                     }
@@ -401,7 +397,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *l++ = swapIfBigEndian (*src++);
+                            *l++ = ByteOrder::swapIfBigEndian (*src++);
                         }
                     }
                 }
@@ -414,14 +410,14 @@ public:
                             for (int i = numThisTime; --i >= 0;)
                             {
                                 ++src;
-                                *r++ = swapIfLittleEndian (*src++);
+                                *r++ = ByteOrder::swapIfLittleEndian (*src++);
                             }
                         }
                         else if (r == 0)
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = swapIfLittleEndian (*src++);
+                                *l++ = ByteOrder::swapIfLittleEndian (*src++);
                                 ++src;
                             }
                         }
@@ -429,8 +425,8 @@ public:
                         {
                             for (int i = numThisTime; --i >= 0;)
                             {
-                                *l++ = swapIfLittleEndian (*src++);
-                                *r++ = swapIfLittleEndian (*src++);
+                                *l++ = ByteOrder::swapIfLittleEndian (*src++);
+                                *r++ = ByteOrder::swapIfLittleEndian (*src++);
                             }
                         }
                     }
@@ -438,7 +434,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *l++ = swapIfLittleEndian (*src++);
+                            *l++ = ByteOrder::swapIfLittleEndian (*src++);
                         }
                     }
                 }
@@ -506,6 +502,8 @@ public:
 private:
     AiffAudioFormatReader (const AiffAudioFormatReader&);
     const AiffAudioFormatReader& operator= (const AiffAudioFormatReader&);
+
+    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 };
 
 //==============================================================================
@@ -515,6 +513,8 @@ class AiffAudioFormatWriter  : public AudioFormatWriter
     uint32 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
+
+    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
     AiffAudioFormatWriter (const AiffAudioFormatWriter&);
     const AiffAudioFormatWriter& operator= (const AiffAudioFormatWriter&);
@@ -600,7 +600,7 @@ public:
                            const unsigned int chans,
                            const int bits)
         : AudioFormatWriter (out,
-                             aiffFormatName,
+                             TRANS (aiffFormatName),
                              sampleRate_,
                              chans,
                              bits),
@@ -643,15 +643,15 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = (short) swapIfLittleEndian ((unsigned short) (*left++ >> 16));
-                    *b++ = (short) swapIfLittleEndian ((unsigned short) (*right++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfLittleEndian ((uint16) (*left++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfLittleEndian ((uint16) (*right++ >> 16));
                 }
             }
             else
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = (short) swapIfLittleEndian ((unsigned short) (*left++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfLittleEndian ((uint16) (*left++ >> 16));
                 }
             }
         }
@@ -663,9 +663,9 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    bigEndian24BitToChars (*left++ >> 8, b);
+                    ByteOrder::bigEndian24BitToChars (*left++ >> 8, b);
                     b += 3;
-                    bigEndian24BitToChars (*right++ >> 8, b);
+                    ByteOrder::bigEndian24BitToChars (*right++ >> 8, b);
                     b += 3;
                 }
             }
@@ -673,34 +673,34 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    bigEndian24BitToChars (*left++ >> 8, b);
+                    ByteOrder::bigEndian24BitToChars (*left++ >> 8, b);
                     b += 3;
                 }
             }
         }
         else if (bitsPerSample == 32)
         {
-            unsigned int* b = (unsigned int*) buffer;
+            uint32* b = (uint32*) buffer;
 
             if (numChannels > 1)
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = swapIfLittleEndian ((unsigned int) *left++);
-                    *b++ = swapIfLittleEndian ((unsigned int) *right++);
+                    *b++ = ByteOrder::swapIfLittleEndian ((uint32) *left++);
+                    *b++ = ByteOrder::swapIfLittleEndian ((uint32) *right++);
                 }
             }
             else
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = swapIfLittleEndian ((unsigned int) *left++);
+                    *b++ = ByteOrder::swapIfLittleEndian ((uint32) *left++);
                 }
             }
         }
         else if (bitsPerSample == 8)
         {
-            char* b = (char*)buffer;
+            char* b = (char*) buffer;
 
             if (numChannels > 1)
             {
@@ -743,7 +743,7 @@ public:
 
 //==============================================================================
 AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (aiffFormatName, (const tchar**) aiffExtensions)
+    : AudioFormat (TRANS (aiffFormatName), (const tchar**) aiffExtensions)
 {
 }
 

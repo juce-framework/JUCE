@@ -1076,9 +1076,12 @@ TreeViewItem* TreeViewContentComponent::findItemAt (int y, Rectangle& itemPositi
 }
 
 //==============================================================================
-#define opennessDefault 0
-#define opennessClosed  1
-#define opennessOpen    2
+enum TreeViewOpenness
+{
+    opennessDefault = 0,
+    opennessClosed = 1,
+    opennessOpen = 2
+};
 
 TreeViewItem::TreeViewItem()
     : ownerView (0),

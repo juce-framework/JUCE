@@ -48,8 +48,8 @@ struct AudioThumbnailDataFormat
 };
 
 #if JUCE_BIG_ENDIAN
- static void swap (int& n)   { n = (int) swapByteOrder ((uint32) n); }
- static void swap (int64& n) { n = (int64) swapByteOrder ((uint64) n); }
+ static void swap (int& n)   { n = (int) ByteOrder::swap ((uint32) n); }
+ static void swap (int64& n) { n = (int64) ByteOrder::swap ((uint64) n); }
 #endif
 
 static void swapEndiannessIfNeeded (AudioThumbnailDataFormat* const d)

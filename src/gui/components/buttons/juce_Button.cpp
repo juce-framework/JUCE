@@ -50,7 +50,7 @@ Button::Button (const String& name)
     commandID (0),
     connectedEdgeFlags (0),
     buttonState (buttonNormal),
-    isOn (false),
+    lastToggleState (false),
     clickTogglesState (false),
     needsToRelease (false),
     needsRepainting (false),
@@ -59,10 +59,13 @@ Button::Button (const String& name)
     generateTooltip (false)
 {
     setWantsKeyboardFocus (true);
+    isOn.addListener (this);
 }
 
 Button::~Button()
 {
+    isOn.removeListener (this);
+
     if (commandManagerToUse != 0)
         commandManagerToUse->removeListener (this);
 
@@ -98,10 +101,12 @@ const String Button::getTooltip()
         {
             const String key (keyPresses.getReference(i).getTextDescription());
 
+            tt << " [";
+
             if (key.length() == 1)
-                tt << " [" << TRANS("shortcut") << ": '" << key << "']";
+                tt << TRANS("shortcut") << ": '" << key << "']";
             else
-                tt << " [" << key << ']';
+                tt << key << ']';
         }
 
         return tt;
@@ -123,17 +128,18 @@ void Button::setConnectedEdges (const int connectedEdgeFlags_) throw()
 void Button::setToggleState (const bool shouldBeOn,
                              const bool sendChangeNotification)
 {
-    if (shouldBeOn != isOn)
+    if (shouldBeOn != lastToggleState)
     {
         const ComponentDeletionWatcher deletionWatcher (this);
 
         isOn = shouldBeOn;
+        lastToggleState = shouldBeOn;
         repaint();
 
         if (sendChangeNotification)
             sendClickMessage (ModifierKeys());
 
-        if ((! deletionWatcher.hasBeenDeleted()) && isOn)
+        if ((! deletionWatcher.hasBeenDeleted()) && getToggleState())
             turnOffOtherButtonsInGroup (sendChangeNotification);
     }
 }
@@ -154,13 +160,19 @@ bool Button::getClickingTogglesState() const throw()
     return clickTogglesState;
 }
 
+void Button::valueChanged (Value& value)
+{
+    if (value.refersToSameSourceAs (isOn))
+        setToggleState (isOn.getValue(), true);
+}
+
 void Button::setRadioGroupId (const int newGroupId)
 {
     if (radioGroupId != newGroupId)
     {
         radioGroupId = newGroupId;
 
-        if (isOn)
+        if (getToggleState())
             turnOffOtherButtonsInGroup (true);
     }
 }
@@ -294,7 +306,7 @@ void Button::triggerClick()
 void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
-        setToggleState ((radioGroupId != 0) || ! isOn, false);
+        setToggleState ((radioGroupId != 0) || ! getToggleState(), false);
 
     sendClickMessage (modifiers);
 }

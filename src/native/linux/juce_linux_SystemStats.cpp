@@ -29,32 +29,6 @@
 
 
 //==============================================================================
-/*static juce_noinline unsigned int getCPUIDWord (int* familyModel, int* extFeatures) throw()
-{
-    unsigned int cpu = 0;
-    unsigned int ext = 0;
-    unsigned int family = 0;
-    unsigned int dummy = 0;
-
-#if JUCE_64BIT
-    __asm__ ("cpuid"
-               : "=a" (family), "=b" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
-
-#else
-    __asm__ ("push %%ebx; cpuid; mov %%ebx, %%edi; pop %%ebx"
-               : "=a" (family), "=D" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
-#endif
-
-    if (familyModel != 0)
-        *familyModel = family;
-
-    if (extFeatures != 0)
-        *extFeatures = ext;
-
-    return cpu;
-}*/
-
-//==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
     fputs (text.toUTF8(), stdout);

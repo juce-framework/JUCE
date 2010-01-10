@@ -117,21 +117,55 @@ const var& var::operator= (const var& valueToCopy) throw()
 {
     if (this != &valueToCopy)
     {
-        if (type == stringType)
-            delete value.stringValue;
+        if (type == valueToCopy.type)
+        {
+            switch (type)
+            {
+                case voidType:
+                    break;
 
-        DynamicObject* const oldObject = getObject();
+                case intType:
+                case boolType:
+                case doubleType:
+                    value = valueToCopy.value;
+                    break;
 
-        type = valueToCopy.type;
-        value = valueToCopy.value;
+                case stringType:
+                    *(value.stringValue) = *(valueToCopy.value.stringValue);
+                    break;
 
-        if (type == stringType)
-            value.stringValue = new String (*(value.stringValue));
-        else if (type == objectType && value.objectValue != 0)
-            value.objectValue->incReferenceCount();
+                case objectType:
+                    if (valueToCopy.value.objectValue != 0)
+                        valueToCopy.value.objectValue->incReferenceCount();
 
-        if (oldObject != 0)
-            oldObject->decReferenceCount();
+                    if (value.objectValue != 0)
+                        value.objectValue->decReferenceCount();
+
+                    value.objectValue = valueToCopy.value.objectValue;
+                    break;
+
+                default:
+                    jassertfalse;
+                    break;
+            }
+        }
+        else
+        {
+            releaseValue();
+            type = valueToCopy.type;
+
+            if (type == stringType)
+            {
+                value.stringValue = new String (*(valueToCopy.value.stringValue));
+            }
+            else
+            {
+                value = valueToCopy.value;
+
+                if (type == objectType && value.objectValue != 0)
+                    value.objectValue->incReferenceCount();
+            }
+        }
     }
 
     return *this;

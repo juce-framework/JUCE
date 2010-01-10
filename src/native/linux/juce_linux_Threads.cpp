@@ -188,7 +188,7 @@ void Process::terminate()
     exit (0);
 }
 
-bool JUCE_CALLTYPE juce_isRunningUnderDebugger()
+bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger()
 {
     static char testResult = 0;
 

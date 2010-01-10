@@ -49,7 +49,7 @@ short InputStream::readShort()
     char temp [2];
 
     if (read (temp, 2) == 2)
-        return (short) littleEndianShort (temp);
+        return (short) ByteOrder::littleEndianShort (temp);
     else
         return 0;
 }
@@ -59,7 +59,7 @@ short InputStream::readShortBigEndian()
     char temp [2];
 
     if (read (temp, 2) == 2)
-        return (short) bigEndianShort (temp);
+        return (short) ByteOrder::bigEndianShort (temp);
     else
         return 0;
 }
@@ -69,7 +69,7 @@ int InputStream::readInt()
     char temp [4];
 
     if (read (temp, 4) == 4)
-        return (int) littleEndianInt (temp);
+        return (int) ByteOrder::littleEndianInt (temp);
     else
         return 0;
 }
@@ -79,7 +79,7 @@ int InputStream::readIntBigEndian()
     char temp [4];
 
     if (read (temp, 4) == 4)
-        return (int) bigEndianInt (temp);
+        return (int) ByteOrder::bigEndianInt (temp);
     else
         return 0;
 }
@@ -102,7 +102,7 @@ int InputStream::readCompressedInt()
     if (read (bytes, numBytes) != numBytes)
         return 0;
 
-    const int num = (int) littleEndianInt (bytes);
+    const int num = (int) ByteOrder::littleEndianInt (bytes);
     return (sizeByte >> 7) ? -num : num;
 }
 
@@ -111,7 +111,7 @@ int64 InputStream::readInt64()
     char temp [8];
 
     if (read (temp, 8) == 8)
-        return (int64) swapIfBigEndian (*(uint64*) temp);
+        return (int64) ByteOrder::swapIfBigEndian (*(uint64*) temp);
     else
         return 0;
 }
@@ -121,7 +121,7 @@ int64 InputStream::readInt64BigEndian()
     char temp [8];
 
     if (read (temp, 8) == 8)
-        return (int64) swapIfLittleEndian (*(uint64*) temp);
+        return (int64) ByteOrder::swapIfLittleEndian (*(uint64*) temp);
     else
         return 0;
 }

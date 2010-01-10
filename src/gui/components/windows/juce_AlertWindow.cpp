@@ -46,17 +46,10 @@ static const int iconWidth = 80;
 class AlertWindowTextEditor  : public TextEditor
 {
 public:
-    #if JUCE_LINUX
-      #define PASSWORD_CHAR 0x2022
-    #else
-      #define PASSWORD_CHAR 0x25cf
-    #endif
+    static const tchar passwordChar;
 
-    AlertWindowTextEditor (const String& name,
-                           const bool isPasswordBox)
-        : TextEditor (name,
-                      isPasswordBox ? (const tchar) PASSWORD_CHAR
-                                    : (const tchar) 0)
+    AlertWindowTextEditor (const String& name, const bool isPasswordBox)
+        : TextEditor (name, isPasswordBox ? passwordChar :  0)
     {
         setSelectAllWhenFocused (true);
     }
@@ -82,6 +75,11 @@ private:
     const AlertWindowTextEditor& operator= (const AlertWindowTextEditor&);
 };
 
+#if JUCE_LINUX
+const tchar AlertWindowTextEditor::passwordChar = 0x2022;
+#else
+const tchar AlertWindowTextEditor::passwordChar = 0x25cf;
+#endif
 
 //==============================================================================
 AlertWindow::AlertWindow (const String& title,

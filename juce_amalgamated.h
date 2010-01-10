@@ -743,7 +743,7 @@
 // Now include some basics that are needed by most of the Juce classes...
 BEGIN_JUCE_NAMESPACE
 
-extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger();
+extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
 
 #if JUCE_LOG_ASSERTIONS
   extern void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw();
@@ -903,7 +903,7 @@ extern bool JUCE_API JUCE_CALLTYPE juce_isRunningUnderDebugger();
 #endif
 
 #if JUCE_MSVC
-  /** This is a compiler-indenpendent way of declaring a variable as being thread-local.
+  /** This is a compiler-independent way of declaring a variable as being thread-local.
 
       E.g.
       @code
@@ -1070,7 +1070,7 @@ inline double jmin (const double a, const double b, const double c, const double
                 and upperLimit (inclusive)
     @see jlimit0To, jmin, jmax
 */
-template <class Type>
+template <typename Type>
 inline Type jlimit (const Type lowerLimit,
                     const Type upperLimit,
                     const Type valueToConstrain) throw()
@@ -1084,8 +1084,8 @@ inline Type jlimit (const Type lowerLimit,
 
 /** Handy function to swap two values over.
 */
-template <class Type>
-inline void swapVariables (Type& variable1, Type& variable2) throw()
+template <typename Type>
+inline void swapVariables (Type& variable1, Type& variable2)
 {
     const Type tempVal = variable1;
     variable1 = variable2;
@@ -1105,25 +1105,33 @@ inline void swapVariables (Type& variable1, Type& variable2) throw()
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
-#if JUCE_WINDOWS || defined (DOXYGEN)
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline double juce_hypot (double a, double b)           { return _hypot (a, b); }
+/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
+    versions of these functions of various platforms and compilers. */
+inline double juce_hypot (double a, double b)
+{
+  #if JUCE_WINDOWS
+    return _hypot (a, b);
+  #else
+    return hypot (a, b);
+  #endif
+}
 
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline float juce_hypotf (float a, float b)             { return (float) _hypot (a, b); }
-#else
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline double juce_hypot (double a, double b)           { return hypot (a, b); }
+/** Using juce_hypot and juce_hypotf is easier than dealing with all the different
+    versions of these functions of various platforms and compilers. */
+inline float juce_hypotf (float a, float b)
+{
+  #if JUCE_WINDOWS
+    return (float) _hypot (a, b);
+  #else
+    return hypotf (a, b);
+  #endif
+}
 
-  /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
-      versions of these functions of various platforms and compilers. */
-  forcedinline float juce_hypotf (float a, float b)             { return hypotf (a, b); }
-#endif
-
-inline int64 abs64 (const int64 n) throw()                      { return (n >= 0) ? n : -n; }
+/** 64-bit abs function. */
+inline int64 abs64 (const int64 n)
+{
+    return (n >= 0) ? n : -n;
+}
 
 /** A predefined value for Pi, at double-precision.
 
@@ -1137,145 +1145,18 @@ const double  double_Pi  = 3.1415926535897932384626433832795;
 */
 const float   float_Pi   = 3.14159265358979323846f;
 
-/** The isfinite() method seems to vary greatly between platforms, so this is a
-    platform-independent macro for it.
+/** The isfinite() method seems to vary between platforms, so this is a
+    platform-independent function for it.
 */
-#if JUCE_LINUX || JUCE_MAC || JUCE_IPHONE
-  #define juce_isfinite(v)      std::isfinite(v)
-#elif JUCE_WINDOWS && ! defined (isfinite)
-  #define juce_isfinite(v)      _finite(v)
-#else
-  #define juce_isfinite(v)      isfinite(v)
-#endif
-
-#endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-/********* End of inlined file: juce_MathsFunctions.h *********/
-
-/********* Start of inlined file: juce_DataConversions.h *********/
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
-#define __JUCE_DATACONVERSIONS_JUCEHEADER__
-
-#if JUCE_USE_INTRINSICS
-  #pragma intrinsic (_byteswap_ulong)
-#endif
-
-// Endianness conversions..
-
-#if JUCE_IPHONE
-// a gcc compiler error seems to mean that these functions only work properly
-// on the iPhone if they are declared static..
-static forcedinline uint32 swapByteOrder (uint32 n) throw();
-static inline uint16 swapByteOrder (const uint16 n) throw();
-static inline uint64 swapByteOrder (const uint64 value) throw();
-#endif
-
-/** Swaps the byte-order in an integer from little to big-endianness or vice-versa. */
-forcedinline uint32 swapByteOrder (uint32 n) throw()
+template <typename FloatingPointType>
+inline bool juce_isfinite (FloatingPointType value)
 {
-#if JUCE_MAC || JUCE_IPHONE
-    // Mac version
-    return OSSwapInt32 (n);
-#elif JUCE_GCC
-    // Inpenetrable GCC version..
-    asm("bswap %%eax" : "=a"(n) : "a"(n));
-    return n;
-#elif JUCE_USE_INTRINSICS
-    // Win32 intrinsics version..
-    return _byteswap_ulong (n);
-#else
-    // Win32 version..
-    __asm {
-        mov eax, n
-        bswap eax
-        mov n, eax
-    }
-    return n;
-#endif
+    #if JUCE_WINDOWS
+      return _finite (value);
+    #else
+      return std::isfinite (value);
+    #endif
 }
-
-/** Swaps the byte-order of a 16-bit short. */
-inline uint16 swapByteOrder (const uint16 n) throw()
-{
-#if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
-    // Win32 intrinsics version..
-    return (uint16) _byteswap_ushort (n);
-#else
-    return (uint16) ((n << 8) | (n >> 8));
-#endif
-}
-
-inline uint64 swapByteOrder (const uint64 value) throw()
-{
-#if JUCE_MAC || JUCE_IPHONE
-    return OSSwapInt64 (value);
-#elif JUCE_USE_INTRINSICS
-    return _byteswap_uint64 (value);
-#else
-    return (((int64) swapByteOrder ((uint32) value)) << 32)
-            | swapByteOrder ((uint32) (value >> 32));
-#endif
-}
-
-#if JUCE_LITTLE_ENDIAN
-  /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
-  inline uint16     swapIfBigEndian (const uint16 v) throw()             { return v; }
-  /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
-  inline uint32     swapIfBigEndian (const uint32 v) throw()             { return v; }
-  /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
-  inline uint64     swapIfBigEndian (const uint64 v) throw()             { return v; }
-
-  /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
-  inline uint16     swapIfLittleEndian (const uint16 v) throw()          { return swapByteOrder (v); }
-  /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
-  inline uint32     swapIfLittleEndian (const uint32 v) throw()          { return swapByteOrder (v); }
-  /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
-  inline uint64     swapIfLittleEndian (const uint64 v) throw()          { return swapByteOrder (v); }
-
-  /** Turns 4 bytes into a little-endian integer. */
-  inline uint32     littleEndianInt (const char* const bytes) throw()    { return *(uint32*) bytes; }
-  /** Turns 2 bytes into a little-endian integer. */
-  inline uint16     littleEndianShort (const char* const bytes) throw()  { return *(uint16*) bytes; }
-
-  /** Turns 4 bytes into a big-endian integer. */
-  inline uint32     bigEndianInt (const char* const bytes) throw()       { return swapByteOrder (*(uint32*) bytes); }
-  /** Turns 2 bytes into a big-endian integer. */
-  inline uint16     bigEndianShort (const char* const bytes) throw()     { return swapByteOrder (*(uint16*) bytes); }
-
-#else
-  /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
-  inline uint16     swapIfBigEndian (const uint16 v) throw()             { return swapByteOrder (v); }
-  /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
-  inline uint32     swapIfBigEndian (const uint32 v) throw()             { return swapByteOrder (v); }
-  /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
-  inline uint64     swapIfBigEndian (const uint64 v) throw()             { return swapByteOrder (v); }
-
-  /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
-  inline uint16     swapIfLittleEndian (const uint16 v) throw()          { return v; }
-  /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
-  inline uint32     swapIfLittleEndian (const uint32 v) throw()          { return v; }
-  /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
-  inline uint64     swapIfLittleEndian (const uint64 v) throw()          { return v; }
-
-  /** Turns 4 bytes into a little-endian integer. */
-  inline uint32     littleEndianInt (const char* const bytes) throw()    { return swapByteOrder (*(uint32*) bytes); }
-  /** Turns 2 bytes into a little-endian integer. */
-  inline uint16     littleEndianShort (const char* const bytes) throw()  { return swapByteOrder (*(uint16*) bytes); }
-
-  /** Turns 4 bytes into a big-endian integer. */
-  inline uint32     bigEndianInt (const char* const bytes) throw()       { return *(uint32*) bytes; }
-  /** Turns 2 bytes into a big-endian integer. */
-  inline uint16     bigEndianShort (const char* const bytes) throw()     { return *(uint16*) bytes; }
-#endif
-
-/** Converts 3 little-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-inline int littleEndian24Bit (const char* const bytes) throw()                          { return (((int) bytes[2]) << 16) | (((uint32) (uint8) bytes[1]) << 8) | ((uint32) (uint8) bytes[0]); }
-/** Converts 3 big-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-inline int bigEndian24Bit (const char* const bytes) throw()                             { return (((int) bytes[0]) << 16) | (((uint32) (uint8) bytes[1]) << 8) | ((uint32) (uint8) bytes[2]); }
-
-/** Copies a 24-bit number to 3 little-endian bytes. */
-inline void littleEndian24BitToChars (const int value, char* const destBytes) throw()   { destBytes[0] = (char)(value & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)((value >> 16) & 0xff); }
-/** Copies a 24-bit number to 3 big-endian bytes. */
-inline void bigEndian24BitToChars (const int value, char* const destBytes) throw()      { destBytes[0] = (char)((value >> 16) & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)(value & 0xff); }
 
 /** Fast floating-point-to-integer conversion.
 
@@ -1293,11 +1174,11 @@ inline int roundDoubleToInt (const double value) throw()
     union { int asInt[2]; double asDouble; } n;
     n.asDouble = value + 6755399441055744.0;
 
-#if JUCE_BIG_ENDIAN
-    return n.asInt [1];
-#else
-    return n.asInt [0];
-#endif
+    #if JUCE_BIG_ENDIAN
+      return n.asInt [1];
+    #else
+      return n.asInt [0];
+    #endif
 }
 
 /** Fast floating-point-to-integer conversion.
@@ -1325,15 +1206,158 @@ inline int roundFloatToInt (const float value) throw()
     union { int asInt[2]; double asDouble; } n;
     n.asDouble = value + 6755399441055744.0;
 
-#if JUCE_BIG_ENDIAN
-    return n.asInt [1];
+    #if JUCE_BIG_ENDIAN
+      return n.asInt [1];
+    #else
+      return n.asInt [0];
+    #endif
+}
+
+#endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
+/********* End of inlined file: juce_MathsFunctions.h *********/
+
+/********* Start of inlined file: juce_ByteOrder.h *********/
+#ifndef __JUCE_BYTEORDER_JUCEHEADER__
+#define __JUCE_BYTEORDER_JUCEHEADER__
+
+/** Contains static methods for converting the byte order between different
+    endiannesses.
+*/
+class JUCE_API  ByteOrder
+{
+public:
+
+    /** Swaps the upper and lower bytes of a 16-bit integer. */
+    static uint16 swap (uint16 value);
+
+    /** Reverses the order of the 4 bytes in a 32-bit integer. */
+    static uint32 swap (uint32 value);
+
+    /** Reverses the order of the 8 bytes in a 64-bit integer. */
+    static uint64 swap (uint64 value);
+
+    /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
+    static uint16 swapIfBigEndian (const uint16 value);
+
+    /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
+    static uint32 swapIfBigEndian (const uint32 value);
+
+    /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
+    static uint64 swapIfBigEndian (const uint64 value);
+
+    /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
+    static uint16 swapIfLittleEndian (const uint16 value);
+
+    /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
+    static uint32 swapIfLittleEndian (const uint32 value);
+
+    /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
+    static uint64 swapIfLittleEndian (const uint64 value);
+
+    /** Turns 4 bytes into a little-endian integer. */
+    static uint32 littleEndianInt (const char* const bytes);
+
+    /** Turns 2 bytes into a little-endian integer. */
+    static uint16 littleEndianShort (const char* const bytes);
+
+    /** Turns 4 bytes into a big-endian integer. */
+    static uint32 bigEndianInt (const char* const bytes);
+
+    /** Turns 2 bytes into a big-endian integer. */
+    static uint16 bigEndianShort (const char* const bytes);
+
+    /** Converts 3 little-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
+    static int littleEndian24Bit (const char* const bytes);
+
+    /** Converts 3 big-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
+    static int bigEndian24Bit (const char* const bytes);
+
+    /** Copies a 24-bit number to 3 little-endian bytes. */
+    static void littleEndian24BitToChars (const int value, char* const destBytes);
+
+    /** Copies a 24-bit number to 3 big-endian bytes. */
+    static void bigEndian24BitToChars (const int value, char* const destBytes);
+
+    /** Returns true if the current CPU is big-endian. */
+    static bool isBigEndian();
+};
+
+#if JUCE_USE_INTRINSICS
+  #pragma intrinsic (_byteswap_ulong)
+#endif
+
+inline uint16 ByteOrder::swap (uint16 n)
+{
+#if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
+    return (uint16) _byteswap_ushort (n);
 #else
-    return n.asInt [0];
+    return (uint16) ((n << 8) | (n >> 8));
 #endif
 }
 
-#endif   // __JUCE_DATACONVERSIONS_JUCEHEADER__
-/********* End of inlined file: juce_DataConversions.h *********/
+inline uint32 ByteOrder::swap (uint32 n)
+{
+#if JUCE_MAC || JUCE_IPHONE
+    return OSSwapInt32 (n);
+#elif JUCE_GCC
+    asm("bswap %%eax" : "=a"(n) : "a"(n));
+    return n;
+#elif JUCE_USE_INTRINSICS
+    return _byteswap_ulong (n);
+#else
+    __asm {
+        mov eax, n
+        bswap eax
+        mov n, eax
+    }
+    return n;
+#endif
+}
+
+inline uint64 ByteOrder::swap (uint64 value)
+{
+#if JUCE_MAC || JUCE_IPHONE
+    return OSSwapInt64 (value);
+#elif JUCE_USE_INTRINSICS
+    return _byteswap_uint64 (value);
+#else
+    return (((int64) swap ((uint32) value)) << 32) | swap ((uint32) (value >> 32));
+#endif
+}
+
+#if JUCE_LITTLE_ENDIAN
+ inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)                                  { return v; }
+ inline uint32 ByteOrder::swapIfBigEndian (const uint32 v)                                  { return v; }
+ inline uint64 ByteOrder::swapIfBigEndian (const uint64 v)                                  { return v; }
+ inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)                               { return swap (v); }
+ inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)                               { return swap (v); }
+ inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)                               { return swap (v); }
+ inline uint32 ByteOrder::littleEndianInt (const char* const bytes)                         { return *(uint32*) bytes; }
+ inline uint16 ByteOrder::littleEndianShort (const char* const bytes)                       { return *(uint16*) bytes; }
+ inline uint32 ByteOrder::bigEndianInt (const char* const bytes)                            { return swap (*(uint32*) bytes); }
+ inline uint16 ByteOrder::bigEndianShort (const char* const bytes)                          { return swap (*(uint16*) bytes); }
+ inline bool ByteOrder::isBigEndian()                                                       { return false; }
+#else
+ inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)                                  { return swap (v); }
+ inline uint32 ByteOrder::swapIfBigEndian (const uint32 v)                                  { return swap (v); }
+ inline uint64 ByteOrder::swapIfBigEndian (const uint64 v)                                  { return swap (v); }
+ inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)                               { return v; }
+ inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)                               { return v; }
+ inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)                               { return v; }
+ inline uint32 ByteOrder::littleEndianInt (const char* const bytes)                         { return swap (*(uint32*) bytes); }
+ inline uint16 ByteOrder::littleEndianShort (const char* const bytes)                       { return swap (*(uint16*) bytes); }
+ inline uint32 ByteOrder::bigEndianInt (const char* const bytes)                            { return *(uint32*) bytes; }
+ inline uint16 ByteOrder::bigEndianShort (const char* const bytes)                          { return *(uint16*) bytes; }
+ inline bool ByteOrder::isBigEndian()                                                       { return true; }
+#endif
+
+inline int  ByteOrder::littleEndian24Bit (const char* const bytes)                          { return (((int) bytes[2]) << 16) | (((uint32) (uint8) bytes[1]) << 8) | ((uint32) (uint8) bytes[0]); }
+inline int  ByteOrder::bigEndian24Bit (const char* const bytes)                             { return (((int) bytes[0]) << 16) | (((uint32) (uint8) bytes[1]) << 8) | ((uint32) (uint8) bytes[2]); }
+inline void ByteOrder::littleEndian24BitToChars (const int value, char* const destBytes)    { destBytes[0] = (char)(value & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)((value >> 16) & 0xff); }
+inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destBytes)       { destBytes[0] = (char)((value >> 16) & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)(value & 0xff); }
+
+#endif   // __JUCE_BYTEORDER_JUCEHEADER__
+/********* End of inlined file: juce_ByteOrder.h *********/
 
 /********* Start of inlined file: juce_Logger.h *********/
 #ifndef __JUCE_LOGGER_JUCEHEADER__
@@ -2508,6 +2532,31 @@ public:
     */
     void preallocateStorage (const int numCharsNeeded) throw();
 
+    /** A helper class to improve performance when concatenating many large strings
+        together.
+
+        Because appending one string to another involves measuring the length of
+        both strings, repeatedly doing this for many long strings will become
+        an exponentially slow operation. This class uses some internal state to
+        avoid that, so that each append operation only needs to measure the length
+        of the appended string.
+    */
+    class JUCE_API  Concatenator
+    {
+    public:
+        Concatenator (String& stringToAppendTo);
+        ~Concatenator();
+
+        void append (const String& s);
+
+    private:
+        String& result;
+        int nextIndex;
+
+        Concatenator (const Concatenator&);
+        const Concatenator& operator= (const Concatenator&);
+    };
+
     juce_UseDebuggingNewOperator // (adds debugging info to find leaked objects)
 
 private:
@@ -2723,7 +2772,7 @@ public:
                 elements = newElements;
 
             }
-            else if (elements != 0)
+            else
             {
                 delete[] elements;
                 elements = 0;
@@ -4308,12 +4357,14 @@ public:
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
-    inline ElementType& operator[] (const pointer_sized_int index) const    { return data [index]; }
+    template <typename IndexType>
+    inline ElementType& operator[] (IndexType index) const                  { return data [index]; }
 
     /** Returns a pointer to a data element at an offset from the start of the array.
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
-    inline ElementType* operator+ (const pointer_sized_int index) const     { return data + index; }
+    template <typename IndexType>
+    inline ElementType* operator+ (IndexType index) const                   { return data + index; }
 
     /** Returns a reference to the raw data pointer.
         Beware that the pointer returned here will become invalid as soon as you call
@@ -4954,7 +5005,7 @@ private:
     can use the release() method.
 */
 template <class ObjectType>
-class ScopedPointer
+class JUCE_API  ScopedPointer
 {
 public:
 
@@ -4997,7 +5048,7 @@ public:
     */
     const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
     {
-        if (this != &objectToTransferFrom)
+        if (this != objectToTransferFrom.getAddress())
         {
             // Two ScopedPointers should never be able to refer to the same object - if
             // this happens, you must have done something dodgy!
@@ -5080,6 +5131,9 @@ public:
 private:
 
     ObjectType* object;
+
+    // (Required as an alternative to the overloaded & operator).
+    ScopedPointer* getAddress()                                             { return this; }
 };
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
@@ -9016,182 +9070,175 @@ private:
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
 #define __JUCE_ATOMIC_JUCEHEADER__
 
-// Atomic increment/decrement operations..
+/** Contains static functions for thread-safe atomic operations.
+*/
+class JUCE_API  Atomic
+{
+public:
+    /** Increments an integer in a thread-safe way. */
+    static void increment (int& variable);
 
-#if (JUCE_MAC || JUCE_IPHONE) && ! DOXYGEN
+    /** Increments an integer in a thread-safe way and returns its new value. */
+    static int incrementAndReturn (int& variable);
 
-    #include <libkern/OSAtomic.h>
-    static forcedinline void atomicIncrement (int& variable) throw()           { OSAtomicIncrement32 ((int32_t*) &variable); }
-    static forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-    static forcedinline void atomicDecrement (int& variable) throw()           { OSAtomicDecrement32 ((int32_t*) &variable); }
-    static forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+    /** Decrements an integer in a thread-safe way. */
+    static void decrement (int& variable);
+
+    /** Decrements an integer in a thread-safe way and returns its new value. */
+    static int decrementAndReturn (int& variable);
+};
+
+#if (JUCE_MAC || JUCE_IPHONE)           //  Mac and iPhone...
+
+#include <libkern/OSAtomic.h>
+inline void Atomic::increment (int& variable)               { OSAtomicIncrement32 ((int32_t*) &variable); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return OSAtomicIncrement32 ((int32_t*) &variable); }
+inline void Atomic::decrement (int& variable)               { OSAtomicDecrement32 ((int32_t*) &variable); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return OSAtomicDecrement32 ((int32_t*) &variable); }
 
 #elif JUCE_GCC
 
-  #if JUCE_USE_GCC_ATOMIC_INTRINSICS
-    forcedinline void atomicIncrement (int& variable) throw()           { __sync_add_and_fetch (&variable, 1); }
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, 1); }
-    forcedinline void atomicDecrement (int& variable) throw()           { __sync_add_and_fetch (&variable, -1); }
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()   { return __sync_add_and_fetch (&variable, -1); }
-  #else
+#if JUCE_USE_GCC_ATOMIC_INTRINSICS      //  Linux with intrinsics...
 
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void atomicIncrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock incl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock incl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
+inline void Atomic::increment (int& variable)               { __sync_add_and_fetch (&variable, 1); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, 1); }
+inline void Atomic::decrement (int& variable)               { __sync_add_and_fetch (&variable, -1); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, -1); }
+
+#else                                   //  Linux without intrinsics...
+
+inline void Atomic::increment (int& variable)
+{
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock incl (%%rax)"
+        :
+        : "a" (&variable)
+        : "cc", "memory");
+    #else
+        "lock incl %0"
+        : "=m" (variable)
+        : "m" (variable));
+    #endif
+}
+
+inline int Atomic::incrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock xaddl %%ebx, (%%rax) \n\
+         incl %%ebx"
+        : "=b" (result)
+        : "a" (&variable), "b" (1)
+        : "cc", "memory");
+    #else
+        "lock xaddl %%eax, (%%ecx) \n\
+         incl %%eax"
+        : "=a" (result)
+        : "c" (&variable), "a" (1)
+        : "memory");
+    #endif
+
+    return result;
+}
+
+inline void Atomic::decrement (int& variable)
+{
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock decl (%%rax)"
+        :
+        : "a" (&variable)
+        : "cc", "memory");
+    #else
+        "lock decl %0"
+        : "=m" (variable)
+        : "m" (variable));
+    #endif
+}
+
+inline int Atomic::decrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm__ __volatile__ (
+    #if JUCE_64BIT
+        "lock xaddl %%ebx, (%%rax) \n\
+         decl %%ebx"
+        : "=b" (result)
+        : "a" (&variable), "b" (-1)
+        : "cc", "memory");
+    #else
+        "lock xaddl %%eax, (%%ecx) \n\
+         decl %%eax"
+        : "=a" (result)
+        : "c" (&variable), "a" (-1)
+        : "memory");
+    #endif
+    return result;
+}
+#endif
+
+#elif JUCE_USE_INTRINSICS           // Windows with intrinsics...
+
+#pragma intrinsic (_InterlockedIncrement)
+#pragma intrinsic (_InterlockedDecrement)
+
+inline void Atomic::increment (int& variable)               { _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int  Atomic::incrementAndReturn (int& variable)      { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline void Atomic::decrement (int& variable)               { _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int  Atomic::decrementAndReturn (int& variable)      { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+
+#else                               // Windows without intrinsics...
+
+inline void Atomic::increment (int& variable)
+{
+    __asm {
+        mov ecx, dword ptr [variable]
+        lock inc dword ptr [ecx]
+    }
+}
+
+inline int Atomic::incrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm {
+        mov ecx, dword ptr [variable]
+        mov eax, 1
+        lock xadd dword ptr [ecx], eax
+        inc eax
+        mov result, eax
     }
 
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
+    return result;
+}
 
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             incl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             incl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (1)
-            : "memory");
-        #endif
+inline void Atomic::decrement (int& variable)
+{
+    __asm {
+        mov ecx, dword ptr [variable]
+        lock dec dword ptr [ecx]
+    }
+}
 
-        return result;
+inline int Atomic::decrementAndReturn (int& variable)
+{
+    int result;
+
+    __asm {
+        mov ecx, dword ptr [variable]
+        mov eax, -1
+        lock xadd dword ptr [ecx], eax
+        dec eax
+        mov result, eax
     }
 
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void atomicDecrement (int& variable) throw()
-    {
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock decl (%%rax)"
-            :
-            : "a" (&variable)
-            : "cc", "memory");
-        #else
-            "lock decl %0"
-            : "=m" (variable)
-            : "m" (variable));
-        #endif
-    }
+    return result;
+}
 
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm__ __volatile__ (
-        #if JUCE_64BIT
-            "lock xaddl %%ebx, (%%rax) \n\
-             decl %%ebx"
-            : "=b" (result)
-            : "a" (&variable), "b" (-1)
-            : "cc", "memory");
-        #else
-            "lock xaddl %%eax, (%%ecx) \n\
-             decl %%eax"
-            : "=a" (result)
-            : "c" (&variable), "a" (-1)
-            : "memory");
-        #endif
-        return result;
-    }
-  #endif
-
-#elif JUCE_USE_INTRINSICS
-
-    #pragma intrinsic (_InterlockedIncrement)
-    #pragma intrinsic (_InterlockedDecrement)
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable));
-    }
-#else
-
-    /** Increments an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicIncrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock inc dword ptr [ecx]
-        }
-    }
-
-    /** Increments an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicIncrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, 1
-            lock xadd dword ptr [ecx], eax
-            inc eax
-            mov result, eax
-        }
-
-        return result;
-    }
-
-    /** Decrememts an integer in a thread-safe way. */
-    forcedinline void __fastcall atomicDecrement (int& variable) throw()
-    {
-        __asm {
-            mov ecx, dword ptr [variable]
-            lock dec dword ptr [ecx]
-        }
-    }
-
-    /** Decrememts an integer in a thread-safe way and returns the incremented value. */
-    forcedinline int __fastcall atomicDecrementAndReturn (int& variable) throw()
-    {
-        int result;
-
-        __asm {
-            mov ecx, dword ptr [variable]
-            mov eax, -1
-            lock xadd dword ptr [ecx], eax
-            dec eax
-            mov result, eax
-        }
-
-        return result;
-    }
 #endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
@@ -9235,7 +9282,7 @@ public:
     */
     inline void incReferenceCount() throw()
     {
-        atomicIncrement (refCounts);
+        Atomic::increment (refCounts);
 
         jassert (refCounts > 0);
     }
@@ -9248,7 +9295,7 @@ public:
     {
         jassert (refCounts > 0);
 
-        if (atomicDecrementAndReturn (refCounts) == 0)
+        if (Atomic::decrementAndReturn (refCounts) == 0)
             delete this;
     }
 
@@ -11607,20 +11654,29 @@ public:
     */
     const Value& operator= (const var& newValue);
 
-    /** Makes this object refer to the same underlying value as another one.
+    /** Makes this object refer to the same underlying ValueSource as another one.
 
+        Once this object has been connected to another one, changing either one
+        will update the other.
+
+        Existing listeners will still be registered after you call this method, and
+        they'll continue to receive messages when the new value changes.
     */
     void referTo (const Value& valueToReferTo);
 
-    /**
+    /** Returns true if this value and the other one are references to the same value.
     */
     bool refersToSameSourceAs (const Value& other) const;
 
-    /**
+    /** Compares two values.
+        This is a compare-by-value comparison, so is effectively the same as
+        saying (this->getValue() == other.getValue()).
     */
     bool operator== (const Value& other) const;
 
-    /**
+    /** Compares two values.
+        This is a compare-by-value comparison, so is effectively the same as
+        saying (this->getValue() != other.getValue()).
     */
     bool operator!= (const Value& other) const;
 
@@ -11701,6 +11757,8 @@ public:
 
     /** @internal */
     explicit Value (ValueSource* const valueSource);
+    /** @internal */
+    ValueSource& getValueSource()       { return *value; }
 
     juce_UseDebuggingNewOperator
 
@@ -12668,7 +12726,7 @@ typedef Array <void*> VoidArray;
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_DATACONVERSIONS_JUCEHEADER__
+#ifndef __JUCE_BYTEORDER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
@@ -15898,6 +15956,8 @@ private:
     int findNextTokenLength() throw();
     void readQuotedString (String& result) throw();
     void readEntity (String& result) throw();
+    static bool isXmlIdentifierCharSlow (const tchar c) throw();
+    bool isXmlIdentifierChar (const tchar c) const throw();
 
     const String getFileContents (const String& filename) const;
     const String expandEntity (const String& entity);
@@ -31870,6 +31930,7 @@ public:
 class JUCE_API  Button  : public Component,
                           public SettableTooltipClient,
                           public ApplicationCommandManagerListener,
+                          public Value::Listener,
                           private KeyListener
 {
 protected:
@@ -31938,7 +31999,15 @@ public:
 
         @see setToggleState
     */
-    bool getToggleState() const throw()                         { return isOn; }
+    bool getToggleState() const throw()                         { return isOn.getValue(); }
+
+    /** Returns the Value object that represents the botton's toggle state.
+        You can use this Value object to connect the button's state to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see getToggleState, Value
+    */
+    Value& getToggleStateValue()                                { return isOn; }
 
     /** This tells the button to automatically flip the toggle state when
         the button is clicked.
@@ -32238,6 +32307,8 @@ protected:
     void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
     /** @internal */
     void applicationCommandListChanged();
+    /** @internal */
+    void valueChanged (Value& value);
 
 private:
 
@@ -32254,7 +32325,8 @@ private:
     int radioGroupId, commandID, connectedEdgeFlags;
     ButtonState buttonState;
 
-    bool isOn : 1;
+    Value isOn;
+    bool lastToggleState : 1;
     bool clickTogglesState : 1;
     bool needsToRelease : 1;
     bool needsRepainting : 1;
@@ -33268,7 +33340,7 @@ public:
 
     /** Returns true if the editor is in multi-line mode.
     */
-    bool isMultiLine() const throw();
+    bool isMultiLine() const;
 
     /** Changes the behaviour of the return key.
 
@@ -33283,7 +33355,7 @@ public:
 
         See setReturnKeyStartsNewLine() for more info.
     */
-    bool getReturnKeyStartsNewLine() const throw()                  { return returnKeyStartsNewLine; }
+    bool getReturnKeyStartsNewLine() const                      { return returnKeyStartsNewLine; }
 
     /** Indicates whether the tab key should be accepted and used to input a tab character,
         or whether it gets ignored.
@@ -33291,12 +33363,12 @@ public:
         By default the tab key is ignored, so that it can be used to switch keyboard focus
         between components.
     */
-    void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed) throw();
+    void setTabKeyUsedAsCharacter (const bool shouldTabKeyBeUsed);
 
     /** Returns true if the tab key is being used for input.
         @see setTabKeyUsedAsCharacter
     */
-    bool isTabKeyUsedAsCharacter() const throw()                    { return tabKeyUsed; }
+    bool isTabKeyUsedAsCharacter() const                        { return tabKeyUsed; }
 
     /** Changes the editor to read-only mode.
 
@@ -33311,7 +33383,7 @@ public:
 
     /** Returns true if the editor is in read-only mode.
     */
-    bool isReadOnly() const throw();
+    bool isReadOnly() const;
 
     /** Makes the caret visible or invisible.
 
@@ -33319,12 +33391,12 @@ public:
 
         @see setCaretColour, setCaretPosition
     */
-    void setCaretVisible (const bool shouldBeVisible) throw();
+    void setCaretVisible (const bool shouldBeVisible);
 
     /** Returns true if the caret is enabled.
         @see setCaretVisible
     */
-    bool isCaretVisible() const throw()                             { return caretVisible; }
+    bool isCaretVisible() const                                 { return caretVisible; }
 
     /** Enables/disables a vertical scrollbar.
 
@@ -33334,12 +33406,12 @@ public:
 
         By default the scrollbar is enabled.
     */
-    void setScrollbarsShown (bool shouldBeEnabled) throw();
+    void setScrollbarsShown (bool shouldBeEnabled);
 
     /** Returns true if scrollbars are enabled.
         @see setScrollbarsShown
     */
-    bool areScrollbarsShown() const throw()                         { return scrollbarVisible; }
+    bool areScrollbarsShown() const                             { return scrollbarVisible; }
 
     /** Changes the password character used to disguise the text.
 
@@ -33350,12 +33422,12 @@ public:
                                     for a black splodge (not all fonts include this, though), or 0x2022,
                                     which is a bullet (probably the best choice for linux).
     */
-    void setPasswordCharacter (const tchar passwordCharacter) throw();
+    void setPasswordCharacter (const tchar passwordCharacter);
 
     /** Returns the current password character.
         @see setPasswordCharacter
 l    */
-    tchar getPasswordCharacter() const throw()                      { return passwordCharacter; }
+    tchar getPasswordCharacter() const                          { return passwordCharacter; }
 
     /** Allows a right-click menu to appear for the editor.
 
@@ -33364,16 +33436,16 @@ l    */
         If enabled, right-clicking (or command-clicking on the Mac) will pop up a menu
         of options such as cut/copy/paste, undo/redo, etc.
     */
-    void setPopupMenuEnabled (const bool menuEnabled) throw();
+    void setPopupMenuEnabled (const bool menuEnabled);
 
     /** Returns true if the right-click menu is enabled.
         @see setPopupMenuEnabled
     */
-    bool isPopupMenuEnabled() const throw()                         { return popupMenuEnabled; }
+    bool isPopupMenuEnabled() const                                 { return popupMenuEnabled; }
 
     /** Returns true if a popup-menu is currently being displayed.
     */
-    bool isPopupMenuCurrentlyActive() const throw()                 { return menuActive; }
+    bool isPopupMenuCurrentlyActive() const                         { return menuActive; }
 
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
 
@@ -33418,7 +33490,7 @@ l    */
 
         @see applyFontToAllText
     */
-    void setFont (const Font& newFont) throw();
+    void setFont (const Font& newFont);
 
     /** Applies a font to all the text in the editor.
 
@@ -33432,7 +33504,7 @@ l    */
 
         @see setFont
     */
-    const Font getFont() const throw();
+    const Font getFont() const;
 
     /** If set to true, focusing on the editor will highlight all its text.
 
@@ -33441,7 +33513,7 @@ l    */
         This is useful for boxes where you expect the user to re-enter all the
         text when they focus on the component, rather than editing what's already there.
     */
-    void setSelectAllWhenFocused (const bool b) throw();
+    void setSelectAllWhenFocused (const bool b);
 
     /** Sets limits on the characters that can be entered.
 
@@ -33451,7 +33523,7 @@ l    */
                                     this string are allowed to be entered into the editor.
     */
     void setInputRestrictions (const int maxTextLength,
-                               const String& allowedCharacters = String::empty) throw();
+                               const String& allowedCharacters = String::empty);
 
     /** When the text editor is empty, it can be set to display a message.
 
@@ -33459,7 +33531,7 @@ l    */
         string is only displayed, it's not taken to actually be the contents of
         the editor.
     */
-    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse) throw();
+    void setTextToShowWhenEmpty (const String& text, const Colour& colourToUse);
 
     /** Changes the size of the scrollbars that are used.
 
@@ -33477,25 +33549,25 @@ l    */
 
         @see removeListener
     */
-    void addListener (TextEditorListener* const newListener) throw();
+    void addListener (TextEditorListener* const newListener);
 
     /** Deregisters a listener.
 
         @see addListener
     */
-    void removeListener (TextEditorListener* const listenerToRemove) throw();
+    void removeListener (TextEditorListener* const listenerToRemove);
 
     /** Returns the entire contents of the editor. */
-    const String getText() const throw();
+    const String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    const String getTextSubstring (const int startCharacter, const int endCharacter) const throw();
+    const String getTextSubstring (const int startCharacter, const int endCharacter) const;
 
     /** Returns true if there are no characters in the editor.
 
         This is more efficient than calling getText().isEmpty().
     */
-    bool isEmpty() const throw();
+    bool isEmpty() const;
 
     /** Sets the entire content of the editor.
 
@@ -33511,6 +33583,14 @@ l    */
     */
     void setText (const String& newText,
                   const bool sendTextChangeMessage = true);
+
+    /** Returns a Value object that can be used to get or set the text.
+
+        Bear in mind that this operate quite slowly if your text box contains large
+        amounts of text, as it needs to dynamically build the string that's involved. It's
+        best used for small text boxes.
+    */
+    Value& getTextValue();
 
     /** Inserts some text at the current cursor position.
 
@@ -33549,13 +33629,13 @@ l    */
 
         @see getCaretPosition
     */
-    void setCaretPosition (const int newIndex) throw();
+    void setCaretPosition (const int newIndex);
 
     /** Returns the current index of the caret.
 
         @see setCaretPosition
     */
-    int getCaretPosition() const throw();
+    int getCaretPosition() const;
 
     /** Attempts to scroll the text editor so that the caret ends up at
         a specified position.
@@ -33569,19 +33649,19 @@ l    */
         will go as far as it can in that direction.
     */
     void scrollEditorToPositionCaret (const int desiredCaretX,
-                                      const int desiredCaretY) throw();
+                                      const int desiredCaretY);
 
     /** Get the graphical position of the caret.
 
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    const Rectangle getCaretRectangle() throw();
+    const Rectangle getCaretRectangle();
 
     /** Selects a section of the text.
     */
     void setHighlightedRegion (int startIndex,
-                               int numberOfCharactersToHighlight) throw();
+                               int numberOfCharactersToHighlight);
 
     /** Returns the first character that is selected.
 
@@ -33590,68 +33670,68 @@ l    */
 
         @see setHighlightedRegion, getHighlightedRegionLength
     */
-    int getHighlightedRegionStart() const throw()                       { return selectionStart; }
+    int getHighlightedRegionStart() const                           { return selectionStart; }
 
     /** Returns the number of characters that are selected.
 
         @see setHighlightedRegion, getHighlightedRegionStart
     */
-    int getHighlightedRegionLength() const throw()                      { return jmax (0, selectionEnd - selectionStart); }
+    int getHighlightedRegionLength() const                          { return jmax (0, selectionEnd - selectionStart); }
 
     /** Returns the section of text that is currently selected. */
-    const String getHighlightedText() const throw();
+    const String getHighlightedText() const;
 
     /** Finds the index of the character at a given position.
 
         The co-ordinates are relative to the component's top-left.
     */
-    int getTextIndexAt (const int x, const int y) throw();
+    int getTextIndexAt (const int x, const int y);
 
     /** Counts the number of characters in the text.
 
         This is quicker than getting the text as a string if you just need to know
         the length.
     */
-    int getTotalNumChars() throw();
+    int getTotalNumChars() const;
 
     /** Returns the total width of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextWidth() const throw();
+    int getTextWidth() const;
 
     /** Returns the maximum height of the text, as it is currently laid-out.
 
         This may be larger than the size of the TextEditor, and can change when
         the TextEditor is resized or the text changes.
     */
-    int getTextHeight() const throw();
+    int getTextHeight() const;
 
     /** Changes the size of the gap at the top and left-edge of the editor.
 
         By default there's a gap of 4 pixels.
     */
-    void setIndents (const int newLeftIndent, const int newTopIndent) throw();
+    void setIndents (const int newLeftIndent, const int newTopIndent);
 
     /** Changes the size of border left around the edge of the component.
 
         @see getBorder
     */
-    void setBorder (const BorderSize& border) throw();
+    void setBorder (const BorderSize& border);
 
     /** Returns the size of border around the edge of the component.
 
         @see setBorder
     */
-    const BorderSize getBorder() const throw();
+    const BorderSize getBorder() const;
 
     /** Used to disable the auto-scrolling which keeps the cursor visible.
 
         If true (the default), the editor will scroll when the cursor moves offscreen. If
         set to false, it won't.
     */
-    void setScrollToShowCursor (const bool shouldScrollToShowCursor) throw();
+    void setScrollToShowCursor (const bool shouldScrollToShowCursor);
 
     /** @internal */
     void paint (Graphics& g);
@@ -33724,20 +33804,20 @@ protected:
     virtual void performPopupMenuAction (const int menuItemID);
 
     /** Scrolls the minimum distance needed to get the caret into view. */
-    void scrollToMakeSureCursorIsVisible() throw();
+    void scrollToMakeSureCursorIsVisible();
 
     /** @internal */
-    void moveCaret (int newCaretPos) throw();
+    void moveCaret (int newCaretPos);
 
     /** @internal */
-    void moveCursorTo (const int newPosition, const bool isSelecting) throw();
+    void moveCursorTo (const int newPosition, const bool isSelecting);
 
     /** Used internally to dispatch a text-change message. */
-    void textChanged() throw();
+    void textChanged();
 
     /** Begins a new transaction in the UndoManager.
     */
-    void newTransaction() throw();
+    void newTransaction();
 
     /** Used internally to trigger an undo or redo. */
     void doUndoRedo (const bool isRedo);
@@ -33770,6 +33850,7 @@ private:
     bool keepCursorOnScreen         : 1;
     bool tabKeyUsed                 : 1;
     bool menuActive                 : 1;
+    bool valueTextNeedsUpdating     : 1;
 
     UndoManager undoManager;
     float cursorX, cursorY, cursorHeight;
@@ -33778,11 +33859,13 @@ private:
     int leftIndent, topIndent;
     unsigned int lastTransactionTime;
     Font currentFont;
-    int totalNumChars, caretPosition;
+    mutable int totalNumChars;
+    int caretPosition;
     VoidArray sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
     tchar passwordCharacter;
+    Value textValue;
 
     enum
     {
@@ -33797,43 +33880,45 @@ private:
     friend class TextEditorInsertAction;
     friend class TextEditorRemoveAction;
 
-    void coalesceSimilarSections() throw();
-    void splitSection (const int sectionIndex, const int charToSplitAt) throw();
+    void coalesceSimilarSections();
+    void splitSection (const int sectionIndex, const int charToSplitAt);
 
-    void clearInternal (UndoManager* const um) throw();
+    void clearInternal (UndoManager* const um);
 
     void insert (const String& text,
                  const int insertIndex,
                  const Font& font,
                  const Colour& colour,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo) throw();
+                 const int caretPositionToMoveTo);
 
     void reinsert (const int insertIndex,
-                   const VoidArray& sections) throw();
+                   const VoidArray& sections);
 
     void remove (const int startIndex,
                  int endIndex,
                  UndoManager* const um,
-                 const int caretPositionToMoveTo) throw();
+                 const int caretPositionToMoveTo);
 
     void getCharPosition (const int index,
                           float& x, float& y,
-                          float& lineHeight) const throw();
+                          float& lineHeight) const;
 
-    void updateCaretPosition() throw();
+    void updateCaretPosition();
+
+    void textWasChangedByValue();
 
     int indexAtPosition (const float x,
-                         const float y) throw();
+                         const float y);
 
-    int findWordBreakAfter (const int position) const throw();
-    int findWordBreakBefore (const int position) const throw();
+    int findWordBreakAfter (const int position) const;
+    int findWordBreakBefore (const int position) const;
 
     friend class TextHolderComponent;
     friend class TextEditorViewport;
     void drawContent (Graphics& g);
-    void updateTextHolderSize() throw();
-    float getWordWrapWidth() const throw();
+    void updateTextHolderSize();
+    float getWordWrapWidth() const;
     void timerCallbackInt();
     void repaintCaret();
     void repaintText (int textStartIndex, int textEndIndex);

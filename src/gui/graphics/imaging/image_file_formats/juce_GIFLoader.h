@@ -69,8 +69,8 @@ private:
     int processExtension (int type, int& transparent);
     int readLZWByte (bool initialise, int input_code_size);
     int getCode (int code_size, bool initialise);
-    bool readImage (int width, int height,
-                    int interlace, int transparent);
+    bool readImage (int width, int height, int interlace, int transparent);
+    static inline int makeWord (const uint8 a, const uint8 b)    { return (b << 8) | a; }
 
     GIFLoader (const GIFLoader&);
     const GIFLoader& operator= (const GIFLoader&);

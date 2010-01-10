@@ -30,6 +30,7 @@
 #include "../keyboard/juce_KeyListener.h"
 #include "../../../application/juce_ApplicationCommandManager.h"
 #include "../../../containers/juce_SortedSet.h"
+#include "../../../containers/juce_Value.h"
 #include "../windows/juce_TooltipWindow.h"
 #include "../../../events/juce_Timer.h"
 class Button;
@@ -68,6 +69,7 @@ public:
 class JUCE_API  Button  : public Component,
                           public SettableTooltipClient,
                           public ApplicationCommandManagerListener,
+                          public Value::Listener,
                           private KeyListener
 {
 protected:
@@ -139,7 +141,15 @@ public:
 
         @see setToggleState
     */
-    bool getToggleState() const throw()                         { return isOn; }
+    bool getToggleState() const throw()                         { return isOn.getValue(); }
+
+    /** Returns the Value object that represents the botton's toggle state.
+        You can use this Value object to connect the button's state to external values or setters,
+        either by taking a copy of the Value, or by using Value::referTo() to make it point to
+        your own Value object.
+        @see getToggleState, Value
+    */
+    Value& getToggleStateValue()                                { return isOn; }
 
     /** This tells the button to automatically flip the toggle state when
         the button is clicked.
@@ -454,7 +464,8 @@ protected:
     void applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo&);
     /** @internal */
     void applicationCommandListChanged();
-
+    /** @internal */
+    void valueChanged (Value& value);
 
 private:
     //==============================================================================
@@ -471,7 +482,8 @@ private:
     int radioGroupId, commandID, connectedEdgeFlags;
     ButtonState buttonState;
 
-    bool isOn : 1;
+    Value isOn;
+    bool lastToggleState : 1;
     bool clickTogglesState : 1;
     bool needsToRelease : 1;
     bool needsRepainting : 1;

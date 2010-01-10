@@ -177,20 +177,26 @@ struct fxProgramSet
 };
 
 
-#ifdef JUCE_LITTLE_ENDIAN
- static long vst_swap (const long x) throw()    { return (long) swapByteOrder ((uint32) x); }
+static long vst_swap (const long x) throw()
+{
+  #ifdef JUCE_LITTLE_ENDIAN
+    return (long) ByteOrder::swap ((uint32) x);
+  #else
+    return x;
+  #endif
+}
 
- static float vst_swapFloat (const float x) throw()
- {
-     union { uint32 asInt; float asFloat; } n;
-     n.asFloat = x;
-     n.asInt = swapByteOrder (n.asInt);
-     return n.asFloat;
- }
-#else
- #define vst_swap(x) (x)
- #define vst_swapFloat(x) (x)
-#endif
+static float vst_swapFloat (const float x) throw()
+{
+  #ifdef JUCE_LITTLE_ENDIAN
+    union { uint32 asInt; float asFloat; } n;
+    n.asFloat = x;
+    n.asInt = ByteOrder::swap (n.asInt);
+    return n.asFloat;
+  #else
+    return x;
+  #endif
+}
 
 //==============================================================================
 typedef AEffect* (*MainCall) (audioMasterCallback);

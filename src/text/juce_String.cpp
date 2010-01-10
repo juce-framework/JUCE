@@ -58,7 +58,7 @@ void juce_initialiseStrings()
 //==============================================================================
 void String::deleteInternal() throw()
 {
-    if (atomicDecrementAndReturn (text->refCount) == 0)
+    if (Atomic::decrementAndReturn (text->refCount) == 0)
         juce_free (text);
 }
 
@@ -105,7 +105,7 @@ void String::appendInternal (const tchar* const newText,
             InternalRefCountedStringHolder* const old = text;
             text = newTextHolder;
 
-            if (atomicDecrementAndReturn (old->refCount) == 0)
+            if (Atomic::decrementAndReturn (old->refCount) == 0)
                 juce_free (old);
         }
         else
@@ -145,7 +145,7 @@ void String::dupeInternalIfMultiplyReferenced() throw()
 
         text = newTextHolder;
 
-        if (atomicDecrementAndReturn (old->refCount) == 0)
+        if (Atomic::decrementAndReturn (old->refCount) == 0)
             juce_free (old);
     }
 }
@@ -163,7 +163,7 @@ String::String() throw()
 String::String (const String& other) throw()
     : text (other.text)
 {
-    atomicIncrement (text->refCount);
+    Atomic::increment (text->refCount);
 }
 
 String::String (const int numChars,
@@ -461,7 +461,7 @@ String::~String() throw()
 {
     emptyString.refCount = safeEmptyStringRefCount;
 
-    if (atomicDecrementAndReturn (text->refCount) == 0)
+    if (Atomic::decrementAndReturn (text->refCount) == 0)
         juce_free (text);
 }
 
@@ -625,9 +625,9 @@ const String& String::operator= (const String& other) throw()
 {
     if (this != &other)
     {
-        atomicIncrement (other.text->refCount);
+        Atomic::increment (other.text->refCount);
 
-        if (atomicDecrementAndReturn (text->refCount) == 0)
+        if (Atomic::decrementAndReturn (text->refCount) == 0)
             juce_free (text);
 
         text = other.text;
@@ -2087,12 +2087,12 @@ const String String::createStringFromData (const void* const data_,
         if (bigEndian)
         {
             for (int i = 0; i < numChars; ++i)
-                dst[i] = (tchar) swapIfLittleEndian (src[i]);
+                dst[i] = (tchar) ByteOrder::swapIfLittleEndian (src[i]);
         }
         else
         {
             for (int i = 0; i < numChars; ++i)
-                dst[i] = (tchar) swapIfBigEndian (src[i]);
+                dst[i] = (tchar) ByteOrder::swapIfBigEndian (src[i]);
         }
 
         dst [numChars] = 0;
@@ -2274,6 +2274,29 @@ const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) t
 
     *dest = 0;
     return result;
+}
+
+//==============================================================================
+String::Concatenator::Concatenator (String& stringToAppendTo)
+    : result (stringToAppendTo),
+      nextIndex (stringToAppendTo.length())
+{
+}
+
+String::Concatenator::~Concatenator()
+{
+}
+
+void String::Concatenator::append (const String& s)
+{
+    const int len = s.length();
+
+    if (len > 0)
+    {
+        result.preallocateStorage (nextIndex + len);
+        s.copyToBuffer (const_cast <tchar*> ((const tchar*) result) + nextIndex, len);
+        nextIndex += len;
+    }
 }
 
 

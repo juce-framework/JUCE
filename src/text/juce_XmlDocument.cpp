@@ -32,20 +32,6 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static bool isXmlIdentifierChar_Slow (const tchar c) throw()
-{
-    return CharacterFunctions::isLetterOrDigit (c)
-            || c == T('_')
-            || c == T('-')
-            || c == T(':')
-            || c == T('.');
-}
-
-#define isXmlIdentifierChar(c) \
-    ((c > 0 && c <= 127) ? identifierLookupTable [(int) c] : isXmlIdentifierChar_Slow (c))
-
-
-//==============================================================================
 XmlDocument::XmlDocument (const String& documentText) throw()
     : originalText (documentText),
       ignoreEmptyTextElements (true)
@@ -69,6 +55,21 @@ void XmlDocument::setInputSource (InputSource* const newSource) throw()
 void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw()
 {
     ignoreEmptyTextElements = shouldBeIgnored;
+}
+
+bool XmlDocument::isXmlIdentifierCharSlow (const tchar c) throw()
+{
+    return CharacterFunctions::isLetterOrDigit (c)
+            || c == T('_')
+            || c == T('-')
+            || c == T(':')
+            || c == T('.');
+}
+
+inline bool XmlDocument::isXmlIdentifierChar (const tchar c) const throw()
+{
+    return (c > 0 && c <= 127) ? identifierLookupTable [(int) c]
+                               : isXmlIdentifierCharSlow (c);
 }
 
 XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentElement)
@@ -108,7 +109,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     needToLoadDTD = true;
 
     for (int i = 0; i < 128; ++i)
-        identifierLookupTable[i] = isXmlIdentifierChar_Slow ((tchar) i);
+        identifierLookupTable[i] = isXmlIdentifierCharSlow ((tchar) i);
 
     if (textToParse.isEmpty())
     {

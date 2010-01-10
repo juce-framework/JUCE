@@ -161,8 +161,8 @@ const String InterprocessConnection::getConnectedHostName() const
 bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 {
     uint32 messageHeader[2];
-    messageHeader [0] = swapIfBigEndian (magicMessageHeader);
-    messageHeader [1] = swapIfBigEndian ((uint32) message.getSize());
+    messageHeader [0] = ByteOrder::swapIfBigEndian (magicMessageHeader);
+    messageHeader [1] = ByteOrder::swapIfBigEndian ((uint32) message.getSize());
 
     MemoryBlock messageData (sizeof (messageHeader) + message.getSize());
     messageData.copyFrom (messageHeader, 0, sizeof (messageHeader));
@@ -279,9 +279,9 @@ bool InterprocessConnection::readNextMessageInt()
                                     : pipe->read (messageHeader, sizeof (messageHeader), pipeReceiveMessageTimeout);
 
     if (bytes == sizeof (messageHeader)
-         && swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
+         && ByteOrder::swapIfBigEndian (messageHeader[0]) == magicMessageHeader)
     {
-        const int bytesInMessage = (int) swapIfBigEndian (messageHeader[1]);
+        const int bytesInMessage = (int) ByteOrder::swapIfBigEndian (messageHeader[1]);
 
         if (bytesInMessage > 0 && bytesInMessage < maximumMessageSize)
         {

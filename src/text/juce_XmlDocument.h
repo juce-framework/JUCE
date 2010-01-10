@@ -148,6 +148,8 @@ private:
     int findNextTokenLength() throw();
     void readQuotedString (String& result) throw();
     void readEntity (String& result) throw();
+    static bool isXmlIdentifierCharSlow (const tchar c) throw();
+    bool isXmlIdentifierChar (const tchar c) const throw();
 
     const String getFileContents (const String& filename) const;
     const String expandEntity (const String& entity);

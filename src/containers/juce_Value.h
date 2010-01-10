@@ -94,21 +94,29 @@ public:
     */
     const Value& operator= (const var& newValue);
 
-    /** Makes this object refer to the same underlying value as another one.
+    /** Makes this object refer to the same underlying ValueSource as another one.
 
+        Once this object has been connected to another one, changing either one
+        will update the other.
 
+        Existing listeners will still be registered after you call this method, and
+        they'll continue to receive messages when the new value changes.
     */
     void referTo (const Value& valueToReferTo);
 
-    /**
+    /** Returns true if this value and the other one are references to the same value.
     */
     bool refersToSameSourceAs (const Value& other) const;
 
-    /**
+    /** Compares two values.
+        This is a compare-by-value comparison, so is effectively the same as
+        saying (this->getValue() == other.getValue()).
     */
     bool operator== (const Value& other) const;
 
-    /**
+    /** Compares two values.
+        This is a compare-by-value comparison, so is effectively the same as
+        saying (this->getValue() != other.getValue()).
     */
     bool operator!= (const Value& other) const;
 
@@ -195,6 +203,8 @@ public:
     //==============================================================================
     /** @internal */
     explicit Value (ValueSource* const valueSource);
+    /** @internal */
+    ValueSource& getValueSource()       { return *value; }
 
     juce_UseDebuggingNewOperator
 

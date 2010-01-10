@@ -63,12 +63,13 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
             // Some simple test code to keep an eye on things and make sure these functions
             // work ok on all platforms. Let me know if any of these assertions fail!
             int n = 1;
-            atomicIncrement (n);
-            jassert (atomicIncrementAndReturn (n) == 3);
-            atomicDecrement (n);
-            jassert (atomicDecrementAndReturn (n) == 1);
+            Atomic::increment (n);
+            jassert (Atomic::incrementAndReturn (n) == 3);
+            Atomic::decrement (n);
+            jassert (Atomic::decrementAndReturn (n) == 1);
 
-            jassert (swapByteOrder ((uint32) 0x11223344) == 0x44332211);
+            jassert (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
+            jassert (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
 
             // quick test to make sure the run-time lib doesn't crash on freeing a null-pointer.
             SystemStats* nullPointer = 0;

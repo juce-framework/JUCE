@@ -68,7 +68,7 @@ public:
     */
     inline void incReferenceCount() throw()
     {
-        atomicIncrement (refCounts);
+        Atomic::increment (refCounts);
 
         jassert (refCounts > 0);
     }
@@ -81,7 +81,7 @@ public:
     {
         jassert (refCounts > 0);
 
-        if (atomicDecrementAndReturn (refCounts) == 0)
+        if (Atomic::decrementAndReturn (refCounts) == 0)
             delete this;
     }
 

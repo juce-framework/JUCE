@@ -77,7 +77,7 @@ MD5::MD5 (const String& text)
         // force the string into integer-sized unicode characters, to try to make it
         // get the same results on all platforms + compilers.
         uint32 unicodeChar = (uint32) t[i];
-        swapIfBigEndian (unicodeChar);
+        ByteOrder::swapIfBigEndian (unicodeChar);
 
         context.processBlock ((const uint8*) &unicodeChar,
                               sizeof (unicodeChar));
@@ -183,7 +183,7 @@ static void encode (uint8* const output,
     uint32* const o = (uint32*) output;
 
     for (int i = 0; i < (numBytes >> 2); ++i)
-        o[i] = swapIfBigEndian (input [i]);
+        o[i] = ByteOrder::swapIfBigEndian (input [i]);
 }
 
 static void decode (uint32* const output,
@@ -191,7 +191,7 @@ static void decode (uint32* const output,
                     const int numBytes)
 {
     for (int i = 0; i < (numBytes >> 2); ++i)
-        output[i] = littleEndianInt ((const char*) input + (i << 2));
+        output[i] = ByteOrder::littleEndianInt ((const char*) input + (i << 2));
 }
 
 //==============================================================================

@@ -1067,6 +1067,31 @@ public:
     */
     void preallocateStorage (const int numCharsNeeded) throw();
 
+    //==============================================================================
+    /** A helper class to improve performance when concatenating many large strings
+        together.
+
+        Because appending one string to another involves measuring the length of
+        both strings, repeatedly doing this for many long strings will become
+        an exponentially slow operation. This class uses some internal state to
+        avoid that, so that each append operation only needs to measure the length
+        of the appended string.
+    */
+    class JUCE_API  Concatenator
+    {
+    public:
+        Concatenator (String& stringToAppendTo);
+        ~Concatenator();
+
+        void append (const String& s);
+
+    private:
+        String& result;
+        int nextIndex;
+
+        Concatenator (const Concatenator&);
+        const Concatenator& operator= (const Concatenator&);
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator // (adds debugging info to find leaked objects)

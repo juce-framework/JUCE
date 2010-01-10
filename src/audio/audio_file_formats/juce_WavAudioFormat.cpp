@@ -35,7 +35,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#define wavFormatName                          TRANS("WAV file")
+static const char* const wavFormatName = "WAV file";
 static const tchar* const wavExtensions[] =    { T(".wav"), T(".bwf"), 0 };
 
 
@@ -101,8 +101,8 @@ struct BWAVChunk
         values.set (WavAudioFormat::bwavOriginationDate, String::fromUTF8 (originationDate, 10));
         values.set (WavAudioFormat::bwavOriginationTime, String::fromUTF8 (originationTime, 8));
 
-        const uint32 timeLow = swapIfBigEndian (timeRefLow);
-        const uint32 timeHigh = swapIfBigEndian (timeRefHigh);
+        const uint32 timeLow = ByteOrder::swapIfBigEndian (timeRefLow);
+        const uint32 timeHigh = ByteOrder::swapIfBigEndian (timeRefHigh);
         const int64 time = (((int64)timeHigh) << 32) + timeLow;
 
         values.set (WavAudioFormat::bwavTimeReference, String (time));
@@ -126,8 +126,8 @@ struct BWAVChunk
         values [WavAudioFormat::bwavOriginationTime].copyToUTF8 (b->originationTime, 9);
 
         const int64 time = values [WavAudioFormat::bwavTimeReference].getLargeIntValue();
-        b->timeRefLow = swapIfBigEndian ((uint32) (time & 0xffffffff));
-        b->timeRefHigh = swapIfBigEndian ((uint32) (time >> 32));
+        b->timeRefLow = ByteOrder::swapIfBigEndian ((uint32) (time & 0xffffffff));
+        b->timeRefHigh = ByteOrder::swapIfBigEndian ((uint32) (time >> 32));
 
         values [WavAudioFormat::bwavCodingHistory].copyToUTF8 (b->codingHistory);
 
@@ -173,27 +173,27 @@ struct SMPLChunk
 
     void copyTo (StringPairArray& values, const int totalSize) const
     {
-        values.set (T("Manufacturer"),      String (swapIfBigEndian (manufacturer)));
-        values.set (T("Product"),           String (swapIfBigEndian (product)));
-        values.set (T("SamplePeriod"),      String (swapIfBigEndian (samplePeriod)));
-        values.set (T("MidiUnityNote"),     String (swapIfBigEndian (midiUnityNote)));
-        values.set (T("MidiPitchFraction"), String (swapIfBigEndian (midiPitchFraction)));
-        values.set (T("SmpteFormat"),       String (swapIfBigEndian (smpteFormat)));
-        values.set (T("SmpteOffset"),       String (swapIfBigEndian (smpteOffset)));
-        values.set (T("NumSampleLoops"),    String (swapIfBigEndian (numSampleLoops)));
-        values.set (T("SamplerData"),       String (swapIfBigEndian (samplerData)));
+        values.set (T("Manufacturer"),      String (ByteOrder::swapIfBigEndian (manufacturer)));
+        values.set (T("Product"),           String (ByteOrder::swapIfBigEndian (product)));
+        values.set (T("SamplePeriod"),      String (ByteOrder::swapIfBigEndian (samplePeriod)));
+        values.set (T("MidiUnityNote"),     String (ByteOrder::swapIfBigEndian (midiUnityNote)));
+        values.set (T("MidiPitchFraction"), String (ByteOrder::swapIfBigEndian (midiPitchFraction)));
+        values.set (T("SmpteFormat"),       String (ByteOrder::swapIfBigEndian (smpteFormat)));
+        values.set (T("SmpteOffset"),       String (ByteOrder::swapIfBigEndian (smpteOffset)));
+        values.set (T("NumSampleLoops"),    String (ByteOrder::swapIfBigEndian (numSampleLoops)));
+        values.set (T("SamplerData"),       String (ByteOrder::swapIfBigEndian (samplerData)));
 
         for (uint32 i = 0; i < numSampleLoops; ++i)
         {
             if ((uint8*) (loops + (i + 1)) > ((uint8*) this) + totalSize)
                 break;
 
-            values.set (String::formatted (T("Loop%dIdentifier"), i),   String (swapIfBigEndian (loops[i].identifier)));
-            values.set (String::formatted (T("Loop%dType"), i),         String (swapIfBigEndian (loops[i].type)));
-            values.set (String::formatted (T("Loop%dStart"), i),        String (swapIfBigEndian (loops[i].start)));
-            values.set (String::formatted (T("Loop%dEnd"), i),          String (swapIfBigEndian (loops[i].end)));
-            values.set (String::formatted (T("Loop%dFraction"), i),     String (swapIfBigEndian (loops[i].fraction)));
-            values.set (String::formatted (T("Loop%dPlayCount"), i),    String (swapIfBigEndian (loops[i].playCount)));
+            values.set (String::formatted (T("Loop%dIdentifier"), i),   String (ByteOrder::swapIfBigEndian (loops[i].identifier)));
+            values.set (String::formatted (T("Loop%dType"), i),         String (ByteOrder::swapIfBigEndian (loops[i].type)));
+            values.set (String::formatted (T("Loop%dStart"), i),        String (ByteOrder::swapIfBigEndian (loops[i].start)));
+            values.set (String::formatted (T("Loop%dEnd"), i),          String (ByteOrder::swapIfBigEndian (loops[i].end)));
+            values.set (String::formatted (T("Loop%dFraction"), i),     String (ByteOrder::swapIfBigEndian (loops[i].fraction)));
+            values.set (String::formatted (T("Loop%dPlayCount"), i),    String (ByteOrder::swapIfBigEndian (loops[i].playCount)));
         }
     }
 } PACKED;
@@ -204,14 +204,14 @@ struct SMPLChunk
 
 #undef PACKED
 
-#undef chunkName
-#define chunkName(a) ((int) littleEndianInt(a))
 
 //==============================================================================
 class WavAudioFormatReader  : public AudioFormatReader
 {
     int bytesPerFrame;
     int64 dataChunkStart, dataLength;
+
+    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
     WavAudioFormatReader (const WavAudioFormatReader&);
     const WavAudioFormatReader& operator= (const WavAudioFormatReader&);
@@ -221,7 +221,7 @@ public:
 
     //==============================================================================
     WavAudioFormatReader (InputStream* const in)
-        : AudioFormatReader (in, wavFormatName),
+        : AudioFormatReader (in, TRANS (wavFormatName)),
           dataLength (0),
           bwavChunkStart (0),
           bwavSize (0)
@@ -353,14 +353,14 @@ public:
                         for (int i = numThisTime; --i >= 0;)
                         {
                             ++src;
-                            *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
                     }
                     else if (right == 0)
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                             ++src;
                         }
                     }
@@ -368,8 +368,8 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
-                            *right++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
+                            *right++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                         }
                     }
                 }
@@ -377,7 +377,7 @@ public:
                 {
                     for (int i = numThisTime; --i >= 0;)
                     {
-                        *left++ = (int) swapIfBigEndian ((unsigned short) *src++) << 16;
+                        *left++ = (int) ByteOrder::swapIfBigEndian ((unsigned short) *src++) << 16;
                     }
                 }
             }
@@ -392,7 +392,7 @@ public:
                         for (int i = numThisTime; --i >= 0;)
                         {
                             src += 3;
-                            *right++ = littleEndian24Bit (src) << 8;
+                            *right++ = ByteOrder::littleEndian24Bit (src) << 8;
                             src += 3;
                         }
                     }
@@ -400,7 +400,7 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *left++ = littleEndian24Bit (src) << 8;
+                            *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                             src += 6;
                         }
                     }
@@ -408,9 +408,9 @@ public:
                     {
                         for (int i = 0; i < numThisTime; ++i)
                         {
-                            *left++ = littleEndian24Bit (src) << 8;
+                            *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                             src += 3;
-                            *right++ = littleEndian24Bit (src) << 8;
+                            *right++ = ByteOrder::littleEndian24Bit (src) << 8;
                             src += 3;
                         }
                     }
@@ -419,7 +419,7 @@ public:
                 {
                     for (int i = 0; i < numThisTime; ++i)
                     {
-                        *left++ = littleEndian24Bit (src) << 8;
+                        *left++ = ByteOrder::littleEndian24Bit (src) << 8;
                         src += 3;
                     }
                 }
@@ -437,14 +437,14 @@ public:
                         for (int i = numThisTime; --i >= 0;)
                         {
                             ++src;
-                            *r++ = swapIfBigEndian (*src++);
+                            *r++ = ByteOrder::swapIfBigEndian (*src++);
                         }
                     }
                     else if (r == 0)
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *l++ = swapIfBigEndian (*src++);
+                            *l++ = ByteOrder::swapIfBigEndian (*src++);
                             ++src;
                         }
                     }
@@ -452,8 +452,8 @@ public:
                     {
                         for (int i = numThisTime; --i >= 0;)
                         {
-                            *l++ = swapIfBigEndian (*src++);
-                            *r++ = swapIfBigEndian (*src++);
+                            *l++ = ByteOrder::swapIfBigEndian (*src++);
+                            *r++ = ByteOrder::swapIfBigEndian (*src++);
                         }
                     }
                 }
@@ -461,7 +461,7 @@ public:
                 {
                     for (int i = numThisTime; --i >= 0;)
                     {
-                        *l++ = swapIfBigEndian (*src++);
+                        *l++ = ByteOrder::swapIfBigEndian (*src++);
                     }
                 }
 
@@ -534,6 +534,8 @@ class WavAudioFormatWriter  : public AudioFormatWriter
     int64 headerPosition;
     bool writeFailed;
 
+    static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
+
     WavAudioFormatWriter (const WavAudioFormatWriter&);
     const WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
 
@@ -583,7 +585,7 @@ public:
                           const int bits,
                           const StringPairArray& metadataValues)
         : AudioFormatWriter (out,
-                             wavFormatName,
+                             TRANS (wavFormatName),
                              sampleRate_,
                              numChannels_,
                              bits),
@@ -626,15 +628,15 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = (short) swapIfBigEndian ((unsigned short) (*left++ >> 16));
-                    *b++ = (short) swapIfBigEndian ((unsigned short) (*right++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*left++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*right++ >> 16));
                 }
             }
             else
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = (short) swapIfBigEndian ((unsigned short) (*left++ >> 16));
+                    *b++ = (short) ByteOrder::swapIfBigEndian ((unsigned short) (*left++ >> 16));
                 }
             }
         }
@@ -646,9 +648,9 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    littleEndian24BitToChars ((*left++) >> 8, b);
+                    ByteOrder::littleEndian24BitToChars ((*left++) >> 8, b);
                     b += 3;
-                    littleEndian24BitToChars ((*right++) >> 8, b);
+                    ByteOrder::littleEndian24BitToChars ((*right++) >> 8, b);
                     b += 3;
                 }
             }
@@ -656,7 +658,7 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    littleEndian24BitToChars ((*left++) >> 8, b);
+                    ByteOrder::littleEndian24BitToChars ((*left++) >> 8, b);
                     b += 3;
                 }
             }
@@ -669,15 +671,15 @@ public:
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = swapIfBigEndian ((unsigned int) *left++);
-                    *b++ = swapIfBigEndian ((unsigned int) *right++);
+                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *left++);
+                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *right++);
                 }
             }
             else
             {
                 for (int i = numSamples; --i >= 0;)
                 {
-                    *b++ = swapIfBigEndian ((unsigned int) *left++);
+                    *b++ = ByteOrder::swapIfBigEndian ((unsigned int) *left++);
                 }
             }
         }
@@ -726,7 +728,7 @@ public:
 
 //==============================================================================
 WavAudioFormat::WavAudioFormat()
-    : AudioFormat (wavFormatName, (const tchar**) wavExtensions)
+    : AudioFormat (TRANS (wavFormatName), (const tchar**) wavExtensions)
 {
 }
 

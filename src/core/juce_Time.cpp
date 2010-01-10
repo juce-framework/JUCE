@@ -335,28 +335,20 @@ const String Time::toString (const bool includeDate,
 
 const String Time::formatted (const tchar* const format) const throw()
 {
-    tchar buffer[80];
+    String buffer;
+    int bufferSize = 128;
+    buffer.preallocateStorage (bufferSize);
 
     struct tm t;
     millisToLocal (millisSinceEpoch, t);
 
-    if (CharacterFunctions::ftime (buffer, 79, format, &t) <= 0)
+    while (CharacterFunctions::ftime ((tchar*) (const tchar*) buffer, bufferSize, format, &t) <= 0)
     {
-        int bufferSize = 128;
-
-        for (;;)
-        {
-            MemoryBlock mb (bufferSize * sizeof (tchar));
-            tchar* const b = (tchar*) mb.getData();
-
-            if (CharacterFunctions::ftime (b, bufferSize, format, &t) > 0)
-                return String (b);
-
-            bufferSize += 128;
-        }
+        bufferSize += 128;
+        buffer.preallocateStorage (bufferSize);
     }
 
-    return String (buffer);
+    return buffer;
 }
 
 //==============================================================================

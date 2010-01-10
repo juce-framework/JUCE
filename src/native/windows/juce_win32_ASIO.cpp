@@ -1466,7 +1466,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * (short) littleEndianShort (src));
+                *dest++ = (float) (g * (short) ByteOrder::littleEndianShort (src));
                 src += srcStrideBytes;
             }
         }
@@ -1474,7 +1474,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * (short) bigEndianShort (src));
+                *dest++ = (float) (g * (short) ByteOrder::bigEndianShort (src));
                 src += srcStrideBytes;
             }
         }
@@ -1492,7 +1492,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint16*) dest = swapIfBigEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint16*) dest = ByteOrder::swapIfBigEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }
@@ -1500,7 +1500,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint16*) dest = swapIfLittleEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint16*) dest = ByteOrder::swapIfLittleEndian ((uint16) (short) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }
@@ -1518,7 +1518,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * littleEndian24Bit (src));
+                *dest++ = (float) (g * ByteOrder::littleEndian24Bit (src));
                 src += srcStrideBytes;
             }
         }
@@ -1526,7 +1526,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * bigEndian24Bit (src));
+                *dest++ = (float) (g * ByteOrder::bigEndian24Bit (src));
                 src += srcStrideBytes;
             }
         }
@@ -1544,7 +1544,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                littleEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                ByteOrder::littleEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
                 dest += dstStrideBytes;
             }
         }
@@ -1552,7 +1552,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                bigEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
+                ByteOrder::bigEndian24BitToChars ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)), dest);
                 dest += dstStrideBytes;
             }
         }
@@ -1570,7 +1570,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * (int) littleEndianInt (src));
+                *dest++ = (float) (g * (int) ByteOrder::littleEndianInt (src));
                 src += srcStrideBytes;
             }
         }
@@ -1578,7 +1578,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *dest++ = (float) (g * (int) bigEndianInt (src));
+                *dest++ = (float) (g * (int) ByteOrder::bigEndianInt (src));
                 src += srcStrideBytes;
             }
         }
@@ -1596,7 +1596,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = swapIfBigEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint32*) dest = ByteOrder::swap ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }
@@ -1604,7 +1604,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = swapIfLittleEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint32*) dest = ByteOrder::swap ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }

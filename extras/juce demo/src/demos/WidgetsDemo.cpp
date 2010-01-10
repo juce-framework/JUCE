@@ -398,12 +398,13 @@ static Component* createSlidersPage()
 
     // ..and now we'll do the same for all our min/max slider values..
     Value sharedValueMin, sharedValueMax;
-    sharedValueMin = Random::getSystemRandom().nextDouble() * 60.0;
-    sharedValueMax = Random::getSystemRandom().nextDouble() * 60.0 + 40.0;
+    sharedValueMin = Random::getSystemRandom().nextDouble() * 40.0;
+    sharedValueMax = Random::getSystemRandom().nextDouble() * 40.0 + 60.0;
+
     for (i = 7; i <= 10; ++i)
     {
-        sliders[i]->getMinValueObject().referTo (sharedValueMin);
         sliders[i]->getMaxValueObject().referTo (sharedValueMax);
+        sliders[i]->getMinValueObject().referTo (sharedValueMin);
     }
 
     // Create a description label...
@@ -626,15 +627,15 @@ static Component* createMiscPage()
 {
     DemoPageComp* page = new DemoPageComp();
 
-    TextEditor* textEditor = new TextEditor();
-    page->addAndMakeVisible (textEditor);
-    textEditor->setBounds (10, 25, 200, 24);
-    textEditor->setText (T("single-line text box"));
+    TextEditor* textEditor1 = new TextEditor();
+    page->addAndMakeVisible (textEditor1);
+    textEditor1->setBounds (10, 25, 200, 24);
+    textEditor1->setText (T("single-line text box"));
 
-    textEditor = new TextEditor (T("password"), (tchar) 0x2022);
-    page->addAndMakeVisible (textEditor);
-    textEditor->setBounds (10, 55, 200, 24);
-    textEditor->setText (T("password"));
+    TextEditor* textEditor2 = new TextEditor (T("password"), (tchar) 0x2022);
+    page->addAndMakeVisible (textEditor2);
+    textEditor2->setBounds (10, 55, 200, 24);
+    textEditor2->setText (T("password"));
 
     //==============================================================================
     ComboBox* comboBox = new ComboBox (T("combo"));

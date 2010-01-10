@@ -270,7 +270,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in)
 
 
 //==============================================================================
-static const int bufferSize = 512;
+static const int jpegBufferSize = 512;
 
 struct JuceJpegDest  : public jpeg_destination_mgr
 {
@@ -286,7 +286,7 @@ static void jpegWriteTerminate (j_compress_ptr cinfo)
 {
     JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
 
-    const int numToWrite = bufferSize - dest->free_in_buffer;
+    const int numToWrite = jpegBufferSize - dest->free_in_buffer;
     dest->output->write (dest->buffer, numToWrite);
 }
 
@@ -294,10 +294,10 @@ static boolean jpegWriteFlush (j_compress_ptr cinfo)
 {
     JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
 
-    const int numToWrite = bufferSize;
+    const int numToWrite = jpegBufferSize;
 
     dest->next_output_byte = (JOCTET*) dest->buffer;
-    dest->free_in_buffer = bufferSize;
+    dest->free_in_buffer = jpegBufferSize;
 
     return dest->output->write (dest->buffer, numToWrite);
 }
@@ -326,10 +326,10 @@ bool juce_writeJPEGImageToStream (const Image& image,
     jpegCompStruct.dest = &dest;
 
     dest.output = &out;
-    HeapBlock <char> tempBuffer (bufferSize);
+    HeapBlock <char> tempBuffer (jpegBufferSize);
     dest.buffer = (char*) tempBuffer;
     dest.next_output_byte = (JOCTET*) dest.buffer;
-    dest.free_in_buffer = bufferSize;
+    dest.free_in_buffer = jpegBufferSize;
     dest.init_destination = jpegWriteInit;
     dest.empty_output_buffer = jpegWriteFlush;
     dest.term_destination = jpegWriteTerminate;

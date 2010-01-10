@@ -457,9 +457,9 @@ void Slider::valueChanged (Value& value)
             setValue (currentValue.getValue(), false, false);
     }
     else if (value.refersToSameSourceAs (valueMin))
-        setMinValue (valueMin.getValue(), false, false);
+        setMinValue (valueMin.getValue(), false, false, true);
     else if (value.refersToSameSourceAs (valueMax))
-        setMaxValue (valueMax.getValue(), false, false);
+        setMaxValue (valueMax.getValue(), false, false, true);
 }
 
 double Slider::getValue() const
@@ -496,7 +496,7 @@ void Slider::setValue (double newValue,
             valueBox->hideEditor (true);
 
         lastCurrentValue = newValue;
-        currentValue = var (newValue);
+        currentValue = newValue;
         updateText();
         repaint();
 
@@ -546,10 +546,10 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
     }
     else
     {
-        if (allowNudgingOfOtherValues && newValue > (double) currentValue.getValue())
+        if (allowNudgingOfOtherValues && newValue > lastCurrentValue)
             setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmin ((double) currentValue.getValue(), newValue);
+        newValue = jmin (lastCurrentValue, newValue);
     }
 
     if (lastValueMin != newValue)
@@ -586,10 +586,10 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
     }
     else
     {
-        if (allowNudgingOfOtherValues && newValue < (double) currentValue.getValue())
+        if (allowNudgingOfOtherValues && newValue < lastCurrentValue)
             setValue (newValue, sendUpdateMessage, sendMessageSynchronously);
 
-        newValue = jmax ((double) currentValue.getValue(), newValue);
+        newValue = jmax (lastCurrentValue, newValue);
     }
 
     if (lastValueMax != newValue)
@@ -824,7 +824,7 @@ void Slider::paint (Graphics& g)
     {
         if (style == Rotary || style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
         {
-            const float sliderPos = (float) valueToProportionOfLength (currentValue.getValue());
+            const float sliderPos = (float) valueToProportionOfLength (lastCurrentValue);
             jassert (sliderPos >= 0 && sliderPos <= 1.0f);
 
             getLookAndFeel().drawRotarySlider (g,
@@ -843,9 +843,9 @@ void Slider::paint (Graphics& g)
                                                sliderRect.getY(),
                                                sliderRect.getWidth(),
                                                sliderRect.getHeight(),
-                                               getLinearSliderPos (currentValue.getValue()),
-                                               getLinearSliderPos (valueMin.getValue()),
-                                               getLinearSliderPos (valueMax.getValue()),
+                                               getLinearSliderPos (lastCurrentValue),
+                                               getLinearSliderPos (lastValueMin),
+                                               getLinearSliderPos (lastValueMax),
                                                style,
                                                *this);
         }

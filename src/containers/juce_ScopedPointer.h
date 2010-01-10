@@ -45,7 +45,7 @@
     can use the release() method.
 */
 template <class ObjectType>
-class ScopedPointer
+class JUCE_API  ScopedPointer
 {
 public:
     //==============================================================================
@@ -88,7 +88,7 @@ public:
     */
     const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
     {
-        if (this != &objectToTransferFrom)
+        if (this != objectToTransferFrom.getAddress())
         {
             // Two ScopedPointers should never be able to refer to the same object - if
             // this happens, you must have done something dodgy!
@@ -175,6 +175,9 @@ public:
 private:
     //==============================================================================
     ObjectType* object;
+
+    // (Required as an alternative to the overloaded & operator).
+    ScopedPointer* getAddress()                                             { return this; }
 };
 
 

@@ -470,7 +470,7 @@ const String CodeDocument::getTextBetween (const Position& start, const Position
 
     String result;
     result.preallocateStorage (end.getPosition() - start.getPosition() + 4);
-    tchar* dest = (tchar*) (const tchar*) result;
+    String::Concatenator concatenator (result);
 
     const int maxLine = jmin (lines.size() - 1, endLine);
 
@@ -482,25 +482,18 @@ const String CodeDocument::getTextBetween (const Position& start, const Position
         if (i == startLine)
         {
             const int index = start.getIndexInLine();
-            len -= index;
-            line->line.substring (index).copyToBuffer (dest, len);
-            dest += len;
+            concatenator.append (line->line.substring (index, len));
         }
         else if (i == endLine)
         {
             len = end.getIndexInLine();
-            line->line.copyToBuffer (dest, len);
-            dest += len;
+            concatenator.append (line->line.substring (0, len));
         }
         else
         {
-            line->line.copyToBuffer (dest, len);
-            dest += len;
+            concatenator.append (line->line);
         }
     }
-
-    // check we preallocated enough space..
-    jassert ((dest - (const tchar*) result) <= end.getPosition() - start.getPosition());
 
     return result;
 }
