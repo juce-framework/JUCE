@@ -143,7 +143,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray tokens;
+    class Token;
+    OwnedArray <Token> tokens;
     int totalLines;
 };
 

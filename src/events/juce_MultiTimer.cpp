@@ -33,16 +33,16 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class InternalMultiTimerCallback    : public Timer
+class MultiTimer::MultiTimerCallback    : public Timer
 {
 public:
-    InternalMultiTimerCallback (const int timerId_, MultiTimer& owner_)
+    MultiTimerCallback (const int timerId_, MultiTimer& owner_)
         : timerId (timerId_),
           owner (owner_)
     {
     }
 
-    ~InternalMultiTimerCallback()
+    ~MultiTimerCallback()
     {
     }
 
@@ -69,10 +69,6 @@ MultiTimer::MultiTimer (const MultiTimer&) throw()
 MultiTimer::~MultiTimer()
 {
     const ScopedLock sl (timerListLock);
-
-    for (int i = timers.size(); --i >= 0;)
-        delete (InternalMultiTimerCallback*) timers.getUnchecked(i);
-
     timers.clear();
 }
 
@@ -83,7 +79,7 @@ void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds
 
     for (int i = timers.size(); --i >= 0;)
     {
-        InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
+        MultiTimerCallback* const t = timers.getUnchecked(i);
 
         if (t->timerId == timerId)
         {
@@ -92,7 +88,7 @@ void MultiTimer::startTimer (const int timerId, const int intervalInMilliseconds
         }
     }
 
-    InternalMultiTimerCallback* const newTimer = new InternalMultiTimerCallback (timerId, *this);
+    MultiTimerCallback* const newTimer = new MultiTimerCallback (timerId, *this);
     timers.add (newTimer);
     newTimer->startTimer (intervalInMilliseconds);
 }
@@ -103,7 +99,7 @@ void MultiTimer::stopTimer (const int timerId) throw()
 
     for (int i = timers.size(); --i >= 0;)
     {
-        InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
+        MultiTimerCallback* const t = timers.getUnchecked(i);
 
         if (t->timerId == timerId)
             t->stopTimer();
@@ -116,7 +112,7 @@ bool MultiTimer::isTimerRunning (const int timerId) const throw()
 
     for (int i = timers.size(); --i >= 0;)
     {
-        const InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
+        const MultiTimerCallback* const t = timers.getUnchecked(i);
         if (t->timerId == timerId)
             return t->isTimerRunning();
     }
@@ -130,7 +126,7 @@ int MultiTimer::getTimerInterval (const int timerId) const throw()
 
     for (int i = timers.size(); --i >= 0;)
     {
-        const InternalMultiTimerCallback* const t = (InternalMultiTimerCallback*) timers.getUnchecked(i);
+        const MultiTimerCallback* const t = timers.getUnchecked(i);
         if (t->timerId == timerId)
             return t->getTimerInterval();
     }

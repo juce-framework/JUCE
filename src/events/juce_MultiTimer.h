@@ -27,7 +27,7 @@
 #define __JUCE_MULTITIMER_JUCEHEADER__
 
 #include "juce_Timer.h"
-#include "../containers/juce_VoidArray.h"
+#include "../containers/juce_OwnedArray.h"
 
 
 //==============================================================================
@@ -122,8 +122,9 @@ public:
 
     //==============================================================================
 private:
+    class MultiTimerCallback;
     CriticalSection timerListLock;
-    VoidArray timers;
+    OwnedArray <MultiTimerCallback> timers;
 
     const MultiTimer& operator= (const MultiTimer&);
 };

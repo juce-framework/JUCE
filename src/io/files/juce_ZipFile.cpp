@@ -36,23 +36,22 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_FileOutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
 
-
 //==============================================================================
-struct ZipEntryInfo
+class ZipFile::ZipEntryInfo
 {
+public:
     ZipFile::ZipEntry entry;
     int streamOffset;
     int compressedSize;
     bool compressed;
 };
 
-
 //==============================================================================
-class ZipInputStream  : public InputStream
+class ZipFile::ZipInputStream  : public InputStream
 {
 public:
     //==============================================================================
-    ZipInputStream (ZipFile& file_, ZipEntryInfo& zei)
+    ZipInputStream (ZipFile& file_, ZipFile::ZipEntryInfo& zei)
         : file (file_),
           zipEntryInfo (zei),
           pos (0),
@@ -194,10 +193,9 @@ ZipFile::ZipFile (InputSource* const inputSource_)
 
 ZipFile::~ZipFile() throw()
 {
-    for (int i = entries.size(); --i >= 0;)
-        delete (ZipEntryInfo*) entries.getUnchecked(i);
-
 #ifdef JUCE_DEBUG
+    entries.clear();
+
     // If you hit this assertion, it means you've created a stream to read
     // one of the items in the zipfile, but you've forgotten to delete that
     // stream object before deleting the file.. Streams can't be kept open
@@ -224,7 +222,7 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const throw()
 int ZipFile::getIndexOfFileName (const String& fileName) const throw()
 {
     for (int i = 0; i < entries.size(); ++i)
-        if (((ZipEntryInfo*) entries.getUnchecked (i))->entry.filename == fileName)
+        if (entries.getUnchecked (i)->entry.filename == fileName)
             return i;
 
     return -1;
@@ -237,8 +235,7 @@ const ZipFile::ZipEntry* ZipFile::getEntry (const String& fileName) const throw(
 
 InputStream* ZipFile::createStreamForEntry (const int index)
 {
-    ZipEntryInfo* const zei = (ZipEntryInfo*) entries[index];
-
+    ZipEntryInfo* const zei = entries[index];
     InputStream* stream = 0;
 
     if (zei != 0)
@@ -258,13 +255,12 @@ InputStream* ZipFile::createStreamForEntry (const int index)
     return stream;
 }
 
-class ZipFilenameComparator
+class ZipFile::ZipFilenameComparator
 {
 public:
-    static int compareElements (const void* const first, const void* const second) throw()
+    int compareElements (const ZipFile::ZipEntryInfo* first, const ZipFile::ZipEntryInfo* second)
     {
-        return ((const ZipEntryInfo*) first)->entry.filename
-                    .compare (((const ZipEntryInfo*) second)->entry.filename);
+        return first->entry.filename.compare (second->entry.filename);
     }
 };
 
@@ -288,8 +284,8 @@ void ZipFile::init()
 
     if (in != 0)
     {
-        numEntries = 0;
-        int pos = findEndOfZipEntryTable (in);
+        int numEntries = 0;
+        int pos = findEndOfZipEntryTable (in, numEntries);
 
         if (pos >= 0 && pos < in->getTotalLength())
         {
@@ -345,7 +341,7 @@ void ZipFile::init()
     }
 }
 
-int ZipFile::findEndOfZipEntryTable (InputStream* input)
+int ZipFile::findEndOfZipEntryTable (InputStream* input, int& numEntries)
 {
     BufferedInputStream in (input, 8192, false);
 
@@ -386,11 +382,11 @@ void ZipFile::uncompressTo (const File& targetDirectory,
 {
     for (int i = 0; i < entries.size(); ++i)
     {
-        const ZipEntryInfo& zei = *(ZipEntryInfo*) entries[i];
+        const ZipEntry& zei = entries.getUnchecked(i)->entry;
 
-        const File targetFile (targetDirectory.getChildFile (zei.entry.filename));
+        const File targetFile (targetDirectory.getChildFile (zei.filename));
 
-        if (zei.entry.filename.endsWithChar (T('/')))
+        if (zei.filename.endsWithChar (T('/')))
         {
             targetFile.createDirectory(); // (entry is a directory, not a file)
         }
@@ -413,9 +409,9 @@ void ZipFile::uncompressTo (const File& targetDirectory,
                         out->writeFromInputStream (*in, -1);
                         out = 0;
 
-                        targetFile.setCreationTime (zei.entry.fileTime);
-                        targetFile.setLastModificationTime (zei.entry.fileTime);
-                        targetFile.setLastAccessTime (zei.entry.fileTime);
+                        targetFile.setCreationTime (zei.fileTime);
+                        targetFile.setLastModificationTime (zei.fileTime);
+                        targetFile.setLastAccessTime (zei.fileTime);
                     }
                 }
             }

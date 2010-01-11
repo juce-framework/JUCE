@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class TextLayoutToken
+class TextLayout::Token
 {
 public:
     String text;
@@ -41,9 +41,9 @@ public:
     int line, lineHeight;
     bool isWhitespace, isNewLine;
 
-    TextLayoutToken (const String& t,
-                     const Font& f,
-                     const bool isWhitespace_) throw()
+    Token (const String& t,
+           const Font& f,
+           const bool isWhitespace_) throw()
         : text (t),
           font (f),
           x(0),
@@ -55,7 +55,7 @@ public:
         isNewLine = t.containsAnyOf (T("\r\n"));
     }
 
-    TextLayoutToken (const TextLayoutToken& other) throw()
+    Token (const Token& other) throw()
         : text (other.text),
           font (other.font),
           x (other.x),
@@ -69,7 +69,7 @@ public:
     {
     }
 
-    ~TextLayoutToken() throw()
+    ~Token() throw()
     {
     }
 
@@ -122,7 +122,7 @@ const TextLayout& TextLayout::operator= (const TextLayout& other) throw()
         totalLines = other.totalLines;
 
         for (int i = 0; i < other.tokens.size(); ++i)
-            tokens.add (new TextLayoutToken (*(const TextLayoutToken*)(other.tokens.getUnchecked(i))));
+            tokens.add (new Token (*other.tokens.getUnchecked(i)));
     }
 
     return *this;
@@ -136,9 +136,6 @@ TextLayout::~TextLayout() throw()
 //==============================================================================
 void TextLayout::clear() throw()
 {
-    for (int i = tokens.size(); --i >= 0;)
-        delete (TextLayoutToken*) tokens.getUnchecked(i);
-
     tokens.clear();
     totalLines = 0;
 }
@@ -174,8 +171,8 @@ void TextLayout::appendText (const String& text,
         {
             if (currentString.isNotEmpty())
             {
-                tokens.add (new TextLayoutToken (currentString, font,
-                                                 lastCharType == 2 || lastCharType == 0));
+                tokens.add (new Token (currentString, font,
+                                       lastCharType == 2 || lastCharType == 0));
             }
 
             currentString = String::charToString (c);
@@ -192,9 +189,7 @@ void TextLayout::appendText (const String& text,
     }
 
     if (currentString.isNotEmpty())
-        tokens.add (new TextLayoutToken (currentString,
-                                         font,
-                                         lastCharType == 2));
+        tokens.add (new Token (currentString, font, lastCharType == 2));
 }
 
 void TextLayout::setText (const String& text, const Font& font) throw()
@@ -250,14 +245,14 @@ void TextLayout::layout (int maxWidth,
 
         for (i = 0; i < tokens.size(); ++i)
         {
-            TextLayoutToken* const t = (TextLayoutToken*)tokens.getUnchecked(i);
+            Token* const t = tokens.getUnchecked(i);
             t->x = x;
             t->y = y;
             t->line = totalLines;
             x += t->w;
             h = jmax (h, t->h);
 
-            const TextLayoutToken* nextTok = (TextLayoutToken*) tokens [i + 1];
+            const Token* nextTok = tokens [i + 1];
 
             if (nextTok == 0)
                 break;
@@ -267,7 +262,7 @@ void TextLayout::layout (int maxWidth,
                 // finished a line, so go back and update the heights of the things on it
                 for (int j = i; j >= 0; --j)
                 {
-                    TextLayoutToken* const tok = (TextLayoutToken*)tokens.getUnchecked(j);
+                    Token* const tok = tokens.getUnchecked(j);
 
                     if (tok->line == totalLines)
                         tok->lineHeight = h;
@@ -285,7 +280,7 @@ void TextLayout::layout (int maxWidth,
         // finished a line, so go back and update the heights of the things on it
         for (int j = jmin (i, tokens.size() - 1); j >= 0; --j)
         {
-            TextLayoutToken* const t = (TextLayoutToken*) tokens.getUnchecked(j);
+            Token* const t = tokens.getUnchecked(j);
 
             if (t->line == totalLines)
                 t->lineHeight = h;
@@ -311,7 +306,7 @@ void TextLayout::layout (int maxWidth,
 
                 for (int j = tokens.size(); --j >= 0;)
                 {
-                    TextLayoutToken* const t = (TextLayoutToken*)tokens.getUnchecked(j);
+                    Token* const t = tokens.getUnchecked(j);
 
                     if (t->line == i)
                         t->x += dx;
@@ -328,7 +323,7 @@ int TextLayout::getLineWidth (const int lineNumber) const throw()
 
     for (int i = tokens.size(); --i >= 0;)
     {
-        const TextLayoutToken* const t = (TextLayoutToken*) tokens.getUnchecked(i);
+        const Token* const t = tokens.getUnchecked(i);
 
         if (t->line == lineNumber && ! t->isWhitespace)
             maxW = jmax (maxW, t->x + t->w);
@@ -343,7 +338,7 @@ int TextLayout::getWidth() const throw()
 
     for (int i = tokens.size(); --i >= 0;)
     {
-        const TextLayoutToken* const t = (TextLayoutToken*) tokens.getUnchecked(i);
+        const Token* const t = tokens.getUnchecked(i);
         if (! t->isWhitespace)
             maxW = jmax (maxW, t->x + t->w);
     }
@@ -357,7 +352,7 @@ int TextLayout::getHeight() const throw()
 
     for (int i = tokens.size(); --i >= 0;)
     {
-        const TextLayoutToken* const t = (TextLayoutToken*) tokens.getUnchecked(i);
+        const Token* const t = tokens.getUnchecked(i);
 
         if (! t->isWhitespace)
             maxH = jmax (maxH, t->y + t->h);
@@ -372,7 +367,7 @@ void TextLayout::draw (Graphics& g,
                        const int yOffset) const throw()
 {
     for (int i = tokens.size(); --i >= 0;)
-        ((TextLayoutToken*) tokens.getUnchecked(i))->draw (g, xOffset, yOffset);
+        tokens.getUnchecked(i)->draw (g, xOffset, yOffset);
 }
 
 void TextLayout::drawWithin (Graphics& g,

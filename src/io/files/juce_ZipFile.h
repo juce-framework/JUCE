@@ -146,21 +146,23 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray entries;
-    friend class ZipInputStream;
+    class ZipInputStream;
+    class ZipFilenameComparator;
+    class ZipEntryInfo;
+
+    OwnedArray <ZipEntryInfo> entries;
     CriticalSection lock;
     InputStream* inputStream;
     ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
-
-    int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG
     int numOpenStreams;
 #endif
 
     void init();
-    int findEndOfZipEntryTable (InputStream* in);
+    int findEndOfZipEntryTable (InputStream* in, int& numEntries);
+    static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
     ZipFile (const ZipFile&);
     const ZipFile& operator= (const ZipFile&);

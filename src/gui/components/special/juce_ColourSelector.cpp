@@ -300,7 +300,7 @@ private:
 };
 
 //==============================================================================
-class SwatchComponent   : public Component
+class ColourSelector::SwatchComponent   : public Component
 {
 public:
     SwatchComponent (ColourSelector* owner_, int index_)
@@ -402,6 +402,7 @@ ColourSelector::ColourSelector (const int flags_,
 ColourSelector::~ColourSelector()
 {
     dispatchPendingMessages();
+    swatchComponents.clear();
     deleteAllChildren();
 }
 
@@ -572,11 +573,9 @@ void ColourSelector::resized()
 
         if (swatchComponents.size() != numSwatches)
         {
-            int i;
-            for (i = swatchComponents.size(); --i >= 0;)
-                delete (SwatchComponent*) swatchComponents.getUnchecked(i);
+            swatchComponents.clear();
 
-            for (i = 0; i < numSwatches; ++i)
+            for (int i = 0; i < numSwatches; ++i)
             {
                 SwatchComponent* const sc = new SwatchComponent (this, i);
                 swatchComponents.add (sc);
@@ -588,7 +587,7 @@ void ColourSelector::resized()
 
         for (int i = 0; i < swatchComponents.size(); ++i)
         {
-            SwatchComponent* const sc = (SwatchComponent*) swatchComponents.getUnchecked(i);
+            SwatchComponent* const sc = swatchComponents.getUnchecked(i);
 
             sc->setBounds (x + xGap / 2,
                            y + yGap / 2,

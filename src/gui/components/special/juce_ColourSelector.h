@@ -143,7 +143,8 @@ private:
     Slider* sliders[4];
     Component* colourSpace;
     Component* hueSelector;
-    VoidArray swatchComponents;
+    class SwatchComponent;
+    OwnedArray <SwatchComponent> swatchComponents;
     const int flags;
     int topSpace, edgeGap;
 

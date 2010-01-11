@@ -14698,21 +14698,23 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray entries;
-    friend class ZipInputStream;
+    class ZipInputStream;
+    class ZipFilenameComparator;
+    class ZipEntryInfo;
+
+    OwnedArray <ZipEntryInfo> entries;
     CriticalSection lock;
     InputStream* inputStream;
     ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
-
-    int numEntries, centralRecStart;
 
 #ifdef JUCE_DEBUG
     int numOpenStreams;
 #endif
 
     void init();
-    int findEndOfZipEntryTable (InputStream* in);
+    int findEndOfZipEntryTable (InputStream* in, int& numEntries);
+    static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
     ZipFile (const ZipFile&);
     const ZipFile& operator= (const ZipFile&);
@@ -40244,8 +40246,9 @@ public:
     int getTimerInterval (const int timerId) const throw();
 
 private:
+    class MultiTimerCallback;
     CriticalSection timerListLock;
-    VoidArray timers;
+    OwnedArray <MultiTimerCallback> timers;
 
     const MultiTimer& operator= (const MultiTimer&);
 };
@@ -50451,7 +50454,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray tokens;
+    class Token;
+    OwnedArray <Token> tokens;
     int totalLines;
 };
 
@@ -53020,7 +53024,8 @@ private:
     Slider* sliders[4];
     Component* colourSpace;
     Component* hueSelector;
-    VoidArray swatchComponents;
+    class SwatchComponent;
+    OwnedArray <SwatchComponent> swatchComponents;
     const int flags;
     int topSpace, edgeGap;
 
