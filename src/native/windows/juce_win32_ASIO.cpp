@@ -1596,7 +1596,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = ByteOrder::swap ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint32*) dest = ByteOrder::swapIfBigEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }
@@ -1604,7 +1604,7 @@ private:
         {
             while (--numSamples >= 0)
             {
-                *(uint32*) dest = ByteOrder::swap ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
+                *(uint32*) dest = ByteOrder::swapIfLittleEndian ((uint32) roundDoubleToInt (jlimit (-maxVal, maxVal, maxVal * *src++)));
                 dest += dstStrideBytes;
             }
         }
