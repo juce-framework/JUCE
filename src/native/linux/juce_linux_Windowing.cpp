@@ -100,12 +100,6 @@ bool Process::isForegroundProcess()
     return isActiveApplication;
 }
 
-// (used in the messaging code, declared here for build reasons)
-bool juce_isRunningAsApplication()
-{
-    return JUCEApplication::getInstance() != 0;
-}
-
 //==============================================================================
 // These are defined in juce_linux_Messaging.cpp
 extern Display* display;
@@ -611,7 +605,7 @@ public:
         // blit results to screen.
 #if JUCE_USE_XSHM
         if (usingXShm)
-            XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, False);
+            XShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
         else
 #endif
             XPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
@@ -1627,6 +1621,10 @@ public:
                 break;
 
             default:
+#if JUCE_USE_XSHM
+                if (event->xany.type == XShmGetEventBase (display))
+                    repainter->notifyPaintCompleted();
+#endif
                 break;
         }
     }
@@ -1716,6 +1714,8 @@ private:
               lastTimeImageUsed (0)
         {
 #if JUCE_USE_XSHM
+            shmCompletedDrawing = true;
+
             useARGBImagesForRendering = isShmAvailable();
 
             if (useARGBImagesForRendering)
@@ -1738,7 +1738,7 @@ private:
 
         void timerCallback()
         {
-            if (! regionsNeedingRepaint.isEmpty())
+            if (! regionsNeedingRepaint.isEmpty() && shmCompletedDrawing)
             {
                 stopTimer();
                 performAnyPendingRepaintsNow();
@@ -1766,6 +1766,8 @@ private:
 
             if (! totalArea.isEmpty())
             {
+                shmCompletedDrawing = false;
+
                 if (image == 0 || image->getWidth() < totalArea.getWidth()
                      || image->getHeight() < totalArea.getHeight())
                 {
@@ -1809,6 +1811,13 @@ private:
             startTimer (repaintTimerPeriod);
         }
 
+#if JUCE_USE_XSHM
+        void notifyPaintCompleted()
+        {
+            shmCompletedDrawing = true;
+        }
+#endif
+
     private:
         LinuxComponentPeer* const peer;
         ScopedPointer <XBitmapImage> image;
@@ -1817,6 +1826,7 @@ private:
 
 #if JUCE_USE_XSHM
         bool useARGBImagesForRendering;
+        bool shmCompletedDrawing;
 #endif
         LinuxRepaintManager (const LinuxRepaintManager&);
         const LinuxRepaintManager& operator= (const LinuxRepaintManager&);
@@ -2555,6 +2565,9 @@ void juce_windowMessageReceive (XEvent* event)
 //==============================================================================
 void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /*clipToWorkArea*/) throw()
 {
+    if (display == 0)
+        return;
+
 #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
 
@@ -3095,85 +3108,6 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
 
 #endif
 
-
-//==============================================================================
-static void initClipboard (Window root, Atom* cutBuffers) throw()
-{
-    static bool init = false;
-
-    if (! init)
-    {
-        init = true;
-
-        // Make sure all cut buffers exist before use
-        for (int i = 0; i < 8; i++)
-        {
-            XChangeProperty (display, root, cutBuffers[i],
-                             XA_STRING, 8, PropModeAppend, NULL, 0);
-        }
-    }
-}
-
-// Clipboard implemented currently using cut buffers
-// rather than the more powerful selection method
-void SystemClipboard::copyTextToClipboard (const String& clipText) throw()
-{
-    Window root = RootWindow (display, DefaultScreen (display));
-    Atom cutBuffers[8] = { XA_CUT_BUFFER0, XA_CUT_BUFFER1, XA_CUT_BUFFER2, XA_CUT_BUFFER3,
-                           XA_CUT_BUFFER4, XA_CUT_BUFFER5, XA_CUT_BUFFER6, XA_CUT_BUFFER7 };
-
-    initClipboard (root, cutBuffers);
-
-    XRotateWindowProperties (display, root, cutBuffers, 8, 1);
-    XChangeProperty (display, root, cutBuffers[0],
-                     XA_STRING, 8, PropModeReplace, (const unsigned char*) (const char*) clipText,
-                     clipText.length());
-}
-
-const String SystemClipboard::getTextFromClipboard() throw()
-{
-    const int bufSize = 64;  // in words
-    String returnData;
-    int byteOffset = 0;
-
-    Window root = RootWindow (display, DefaultScreen (display));
-
-    Atom cutBuffers[8] = { XA_CUT_BUFFER0, XA_CUT_BUFFER1, XA_CUT_BUFFER2, XA_CUT_BUFFER3,
-                           XA_CUT_BUFFER4, XA_CUT_BUFFER5, XA_CUT_BUFFER6, XA_CUT_BUFFER7 };
-
-    initClipboard (root, cutBuffers);
-
-    for (;;)
-    {
-        unsigned long bytesLeft = 0, nitems = 0;
-        unsigned char* clipData = 0;
-        int actualFormat = 0;
-        Atom actualType;
-
-        if (XGetWindowProperty (display, root, cutBuffers[0], byteOffset >> 2, bufSize,
-                                False, XA_STRING, &actualType, &actualFormat, &nitems, &bytesLeft,
-                                &clipData) == Success)
-        {
-            if (actualType == XA_STRING && actualFormat == 8)
-            {
-                byteOffset += nitems;
-                returnData += String ((const char*) clipData, nitems);
-            }
-            else
-            {
-                bytesLeft = 0;
-            }
-
-            if (clipData != 0)
-                XFree (clipData);
-        }
-
-        if (bytesLeft == 0)
-            break;
-    }
-
-    return returnData;
-}
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)

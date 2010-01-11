@@ -39,6 +39,62 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* previewComponent)
 {
+    const tchar* const separator = T(":");
+    String command ("zenity --file-selection");
+
+    if (title.isNotEmpty())
+        command << " --title=\"" << title << "\"";
+
+    if (file != File::nonexistent)
+        command << " --filename=\"" << file.getFullPathName () << "\"";
+
+    if (isDirectory)
+        command << " --directory";
+
+    if (isSave)
+        command << " --save";
+
+    if (selectMultipleFiles)
+        command << " --multiple --separator=\"" << separator << "\"";
+
+    command << " 2>&1";
+
+    MemoryOutputStream result;
+    int status = -1;
+    FILE* stream = popen ((const char*) command.toUTF8(), "r");
+
+    if (stream != 0)
+    {
+        for (;;)
+        {
+            char buffer [1024];
+            const int bytesRead = fread (buffer, 1, sizeof (buffer), stream);
+
+            if (bytesRead <= 0)
+                break;
+
+            result.write (buffer, bytesRead);
+        }
+
+        status = pclose (stream);
+    }
+
+    if (status == 0)
+    {
+        String resultString (String::fromUTF8 ((const uint8*) result.getData(), result.getDataSize()));
+        StringArray tokens;
+
+        if (selectMultipleFiles)
+            tokens.addTokens (resultString, separator, 0);
+        else
+            tokens.add (resultString);
+
+        for (int i = 0; i < tokens.size(); i++)
+            results.add (new File (tokens[i]));
+
+        return;
+    }
+
     //xxx ain't got one!
     jassertfalse
 }

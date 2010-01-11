@@ -41,6 +41,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Random.h"
 #include "../io/network/juce_URL.h"
 #include "../io/files/juce_NamedPipe.h"
+#include "../io/streams/juce_MemoryOutputStream.h"
 #include "../threads/juce_InterProcessLock.h"
 #include "../audio/devices/juce_AudioIODeviceType.h"
 #include "../threads/juce_Thread.h"
@@ -100,6 +101,7 @@ BEGIN_JUCE_NAMESPACE
 #include "linux/juce_linux_Threads.cpp"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
+ #include "linux/juce_linux_Clipboard.cpp"
  #include "linux/juce_linux_Messaging.cpp"
  #include "linux/juce_linux_Fonts.cpp"
  #include "linux/juce_linux_Windowing.cpp"

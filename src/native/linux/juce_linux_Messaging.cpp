@@ -29,11 +29,11 @@
 
 //==============================================================================
 #ifdef JUCE_DEBUG
-  #define JUCE_DEBUG_XERRORS 1
+ #define JUCE_DEBUG_XERRORS 1
 #endif
 
 Display* display = 0;     // This is also referenced from WindowDriver.cpp
-static Window juce_messageWindowHandle = None;
+Window juce_messageWindowHandle = None;
 
 #define SpecialAtom         "JUCESpecialAtom"
 #define BroadcastAtom       "JUCEBroadcastAtom"
@@ -49,8 +49,70 @@ XContext improbableNumber;
 // Defined in WindowDriver.cpp
 extern void juce_windowMessageReceive (XEvent* event);
 
+// Defined in ClipboardDriver.cpp
+extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);
+
+//==============================================================================
+class InternalMessageQueue
+{
+public:
+    InternalMessageQueue()
+    {
+        int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
+        (void) ret; jassert (ret == 0);
+    }
+
+    ~InternalMessageQueue()
+    {
+        close (fd[0]);
+        close (fd[1]);
+    }
+
+    void postMessage (Message* msg)
+    {
+        ScopedLock sl (lock);
+        queue.add (msg);
+
+        const unsigned char x = 0xff;
+        write (fd[0], &x, 1);
+    }
+
+    bool isEmpty() const
+    {
+        ScopedLock sl (lock);
+        return queue.size() == 0;
+    }
+
+    Message* popMessage()
+    {
+        Message* m = 0;
+        ScopedLock sl (lock);
+
+        if (queue.size() != 0)
+        {
+            unsigned char x;
+            read (fd[1], &x, 1);
+
+            m = queue.getUnchecked(0);
+            queue.remove (0, false /* deleteObject */);
+        }
+
+        return m;
+    }
+
+    int getWaitHandle() const     { return fd[1]; }
+    
+private:
+    CriticalSection lock;
+    OwnedArray <Message> queue;
+    int fd[2];
+};
+
+//==============================================================================
 struct MessageThreadFuncCall
 {
+    enum { uniqueID = 0x73774623 };
+
     MessageCallbackFunction* func;
     void* parameter;
     void* result;
@@ -58,21 +120,23 @@ struct MessageThreadFuncCall
     WaitableEvent event;
 };
 
-static bool errorCondition = false;
+//==============================================================================
+static InternalMessageQueue* juce_internalMessageQueue = 0;
+
+// error handling in X11
+static bool errorOccurred = false;
+static bool keyboardBreakOccurred = false;
 static XErrorHandler oldErrorHandler = (XErrorHandler) 0;
 static XIOErrorHandler oldIOErrorHandler = (XIOErrorHandler) 0;
-
-// (defined in another file to avoid problems including certain headers in this one)
-extern bool juce_isRunningAsApplication();
 
 // Usually happens when client-server connection is broken
 static int ioErrorHandler (Display* display)
 {
     DBG (T("ERROR: connection to X server broken.. terminating."));
 
-    errorCondition = true;
+    errorOccurred = true;
 
-    if (juce_isRunningAsApplication())
+    if (JUCEApplication::getInstance() != 0)
         Process::terminate();
 
     return 0;
@@ -100,20 +164,18 @@ static int errorHandler (Display* display, XErrorEvent* event)
     return 0;
 }
 
-static bool breakIn = false;
-
 // Breakin from keyboard
-static void sig_handler (int sig)
+static void signalHandler (int sig)
 {
     if (sig == SIGINT)
     {
-        breakIn = true;
+        keyboardBreakOccurred = true;
         return;
     }
 
     static bool reentrant = false;
 
-    if (reentrant == false)
+    if (! reentrant)
     {
         reentrant = true;
 
@@ -121,14 +183,14 @@ static void sig_handler (int sig)
         fflush (stdout);
         Logger::outputDebugString ("ERROR: Program executed illegal instruction.. terminating");
 
-        errorCondition = true;
+        errorOccurred = true;
 
-        if (juce_isRunningAsApplication())
+        if (JUCEApplication::getInstance() != 0)
             Process::terminate();
     }
     else
     {
-        if (juce_isRunningAsApplication())
+        if (JUCEApplication::getInstance() != 0)
             exit(0);
     }
 }
@@ -146,7 +208,7 @@ void MessageManager::doPlatformSpecificInitialisation()
             // This is fatal!  Print error and closedown
             Logger::outputDebugString ("Failed to initialise xlib thread support.");
 
-            if (juce_isRunningAsApplication())
+            if (JUCEApplication::getInstance() != 0)
                 Process::terminate();
 
             return;
@@ -165,7 +227,7 @@ void MessageManager::doPlatformSpecificInitialisation()
     struct sigaction saction;
     sigset_t maskSet;
     sigemptyset (&maskSet);
-    saction.sa_handler = sig_handler;
+    saction.sa_handler = signalHandler;
     saction.sa_mask = maskSet;
     saction.sa_flags = 0;
     sigaction (SIGINT, &saction, NULL);
@@ -179,6 +241,10 @@ void MessageManager::doPlatformSpecificInitialisation()
     sigaction (SIGSYS, &saction, NULL);
 #endif
 
+    // Create the internal message queue
+    juce_internalMessageQueue = new InternalMessageQueue();
+
+    // Try to connect to a display
     String displayName (getenv ("DISPLAY"));
     if (displayName.isEmpty())
         displayName = T(":0.0");
@@ -187,12 +253,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
     if (display == 0)
     {
-        // This is fatal!  Print error and closedown
-        Logger::outputDebugString ("Failed to open the X display.");
-
-        if (juce_isRunningAsApplication())
-            Process::terminate();
-
+        // This is not fatal! we can run headless.
         return;
     }
 
@@ -223,7 +284,9 @@ void MessageManager::doPlatformSpecificInitialisation()
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    if (errorCondition == false)
+    deleteAndZero (juce_internalMessageQueue);
+
+    if (display != 0 && ! errorOccurred)
     {
         XDestroyWindow (display, juce_messageWindowHandle);
         XCloseDisplay (display);
@@ -242,9 +305,15 @@ void MessageManager::doPlatformSpecificShutdown()
 
 bool juce_postMessageToSystemQueue (void* message)
 {
-    if (errorCondition)
+    if (errorOccurred)
         return false;
 
+    juce_internalMessageQueue->postMessage ((Message*) message);
+    return true;
+}
+
+/*bool juce_postMessageToX11Queue (void *message)
+{
     XClientMessageEvent clientMsg;
     clientMsg.display = display;
     clientMsg.window = juce_messageWindowHandle;
@@ -264,131 +333,79 @@ bool juce_postMessageToSystemQueue (void* message)
     XFlush (display); // This is necessary to ensure the event is delivered
 
     return true;
-}
+}*/
 
 void MessageManager::broadcastMessage (const String& value) throw()
 {
+    /* TODO */
 }
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func,
                                                    void* parameter)
 {
-    void* retVal = 0;
+    if (errorOccurred)
+        return 0;
 
-    if (! errorCondition)
+    if (! isThisTheMessageThread())
     {
-        if (! isThisTheMessageThread())
-        {
-            static MessageThreadFuncCall messageFuncCallContext;
+        MessageThreadFuncCall messageCallContext;
+        messageCallContext.func = func;
+        messageCallContext.parameter = parameter;
 
-            const ScopedLock sl (messageFuncCallContext.lock);
+        juce_internalMessageQueue->postMessage (new Message (MessageThreadFuncCall::uniqueID, 
+                                                             0, 0, &messageCallContext));
 
-            XClientMessageEvent clientMsg;
-            clientMsg.display = display;
-            clientMsg.window = juce_messageWindowHandle;
-            clientMsg.type = ClientMessage;
-            clientMsg.format = 32;
-            clientMsg.message_type = specialCallbackId;
-#if JUCE_64BIT
-            clientMsg.data.l[0] = (long) (0x00000000ffffffff & (((uint64) &messageFuncCallContext) >> 32));
-            clientMsg.data.l[1] = (long) (0x00000000ffffffff & (uint64) &messageFuncCallContext);
-#else
-            clientMsg.data.l[0] = (long) &messageFuncCallContext;
-#endif
+        // Wait for it to complete before continuing
+        messageCallContext.event.wait();
 
-            messageFuncCallContext.func = func;
-            messageFuncCallContext.parameter = parameter;
-
-            if (XSendEvent (display, juce_messageWindowHandle, false, NoEventMask, (XEvent*) &clientMsg) == 0)
-                return 0;
-
-            XFlush (display); // This is necessary to ensure the event is delivered
-
-            // Wait for it to complete before continuing
-            messageFuncCallContext.event.wait();
-
-            retVal = messageFuncCallContext.result;
-        }
-        else
-        {
-            // Just call the function directly
-            retVal = func (parameter);
-        }
+        return messageCallContext.result;
     }
-
-    return retVal;
+    else
+    {
+        // Just call the function directly
+        return func (parameter);
+    }
 }
 
-bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+// Wait for an event (either XEvent, or an internal Message)
+static bool juce_sleepUntilEvent (const int timeoutMs)
 {
-    if (errorCondition)
-        return false;
+    if ((display != 0 && XPending (display)) || ! juce_internalMessageQueue->isEmpty())
+        return true;
 
-    if (breakIn)
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = timeoutMs * 1000;
+    int fd0 = juce_internalMessageQueue->getWaitHandle();
+    int fdmax = fd0;
+
+    fd_set readset;
+    FD_ZERO (&readset);
+    FD_SET (fd0, &readset);
+
+    if (display != 0)
     {
-        errorCondition = true;
-
-        if (juce_isRunningAsApplication())
-            Process::terminate();
-
-        return false;
+        int fd1 = XConnectionNumber (display);
+        FD_SET (fd1, &readset);
+        fdmax = jmax (fd0, fd1);
     }
 
-    if (returnIfNoPendingMessages && ! XPending (display))
+    int ret = select (fdmax + 1, &readset, 0, 0, &tv);
+    return (ret > 0); // ret <= 0 if error or timeout
+}
+
+// Handle next XEvent (if any)
+static bool juce_dispatchNextXEvent()
+{
+    if (display == 0 || ! XPending (display))
         return false;
 
     XEvent evt;
     XNextEvent (display, &evt);
 
-    if (evt.type == ClientMessage && evt.xany.window == juce_messageWindowHandle)
+    if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
     {
-        XClientMessageEvent* const clientMsg = (XClientMessageEvent*) &evt;
-
-        if (clientMsg->format != 32)
-        {
-            jassertfalse
-            DBG ("Error: juce_dispatchNextMessageOnSystemQueue received malformed client message.");
-        }
-        else
-        {
-            JUCE_TRY
-            {
-#if JUCE_64BIT
-                void* const messagePtr
-                    = (void*) ((0xffffffff00000000 & (((uint64) clientMsg->data.l[0]) << 32))
-                               | (clientMsg->data.l[1] & 0x00000000ffffffff));
-#else
-                void* const messagePtr = (void*) (clientMsg->data.l[0]);
-#endif
-
-                if (clientMsg->message_type == specialId)
-                {
-                    MessageManager::getInstance()->deliverMessage (messagePtr);
-                }
-                else if (clientMsg->message_type == specialCallbackId)
-                {
-                    MessageThreadFuncCall* const call = (MessageThreadFuncCall*) messagePtr;
-                    MessageCallbackFunction* func = call->func;
-                    call->result = (*func) (call->parameter);
-                    call->event.signal();
-                }
-                else if (clientMsg->message_type == broadcastId)
-                {
-#if 0
-                    TCHAR buffer[8192];
-                    zeromem (buffer, sizeof (buffer));
-
-                    if (GlobalGetAtomName ((ATOM) lParam, buffer, 8192) != 0)
-                        mq->deliverBroadcastMessage (String (buffer));
-#endif
-                }
-                else
-                {
-                    DBG ("Error: juce_dispatchNextMessageOnSystemQueue received unknown client message.");
-                }
-            }
-            JUCE_CATCH_ALL
-        }
+        juce_handleSelectionRequest (evt.xselectionrequest);
     }
     else if (evt.xany.window != juce_messageWindowHandle)
     {
@@ -396,6 +413,76 @@ bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
     }
 
     return true;
+}
+
+// Handle next internal Message (if any)
+static bool juce_dispatchNextInternalMessage()
+{
+    if (juce_internalMessageQueue->isEmpty())
+        return false;
+
+    ScopedPointer <Message> msg (juce_internalMessageQueue->popMessage());
+
+    if (msg->intParameter1 == MessageThreadFuncCall::uniqueID)
+    {
+        // Handle callback message
+        MessageThreadFuncCall* const call = (MessageThreadFuncCall*) msg->pointerParameter;
+
+        call->result = (*(call->func)) (call->parameter);
+        call->event.signal();
+    }
+    else
+    {
+        // Handle "normal" messages
+        MessageManager::getInstance()->deliverMessage (msg.release());
+    }
+
+    return true;
+}
+
+// this function expects that it will NEVER be called simultaneously for two concurrent threads
+bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+{
+    for (;;)
+    {
+        if (errorOccurred)
+            break;
+
+        if (keyboardBreakOccurred)
+        {
+            errorOccurred = true;
+
+            if (JUCEApplication::getInstance() != 0)
+                Process::terminate();
+
+            break;
+        }
+
+        static int totalEventCount = 0;
+        ++totalEventCount;
+
+        // The purpose here is to give either priority to XEvents or
+        // to internal messages This is necessary to keep a "good"
+        // behaviour when the cpu is overloaded
+        if (totalEventCount & 1)
+        {
+            if (juce_dispatchNextXEvent() || juce_dispatchNextInternalMessage())
+                return true;
+        }
+        else
+        {
+            if (juce_dispatchNextInternalMessage() || juce_dispatchNextXEvent())
+                return true;
+        }
+
+        if (returnIfNoPendingMessages) // early exit
+            break;
+
+        // the timeout is to be on the safe side, but it does not seem to be useful
+        juce_sleepUntilEvent (2000);
+    }
+
+    return false;
 }
 
 #endif

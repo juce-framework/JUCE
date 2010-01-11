@@ -53,7 +53,6 @@ END_JUCE_NAMESPACE
 - (void) captureOutput: (QTCaptureFileOutput*) captureOutput
          didOutputSampleBuffer: (QTSampleBuffer*) sampleBuffer
          fromConnection: (QTCaptureConnection*) connection;
-
 @end
 
 BEGIN_JUCE_NAMESPACE
@@ -120,6 +119,7 @@ public:
 
     void resetFile()
     {
+        [fileOutput recordToOutputFileURL: nil];
         [session removeOutput: fileOutput];
         [fileOutput release];
         fileOutput = [[QTCaptureMovieFileOutput alloc] init];
@@ -199,11 +199,14 @@ END_JUCE_NAMESPACE
          withSampleBuffer: (QTSampleBuffer*) sampleBuffer
          fromConnection: (QTCaptureConnection*) connection
 {
-    const ScopedAutoReleasePool pool;
+    if (internal->listeners.size() > 0)
+    {
+        const ScopedAutoReleasePool pool;
 
-    internal->callListeners ([CIImage imageWithCVImageBuffer: videoFrame],
-                             CVPixelBufferGetWidth (videoFrame),
-                             CVPixelBufferGetHeight (videoFrame));
+        internal->callListeners ([CIImage imageWithCVImageBuffer: videoFrame],
+                                 CVPixelBufferGetWidth (videoFrame),
+                                 CVPixelBufferGetHeight (videoFrame));
+    }
 }
 
 - (void) captureOutput: (QTCaptureFileOutput*) captureOutput
@@ -338,12 +341,11 @@ CameraDevice* CameraDevice::openDevice (int index,
                                         int minWidth, int minHeight,
                                         int maxWidth, int maxHeight)
 {
-    CameraDevice* d = new CameraDevice (getAvailableDevices() [index], index);
+    ScopedPointer <CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index));
 
     if (((QTCameraDeviceInteral*) (d->internal))->openingError.isEmpty())
-        return d;
+        return d.release();
 
-    delete d;
     return 0;
 }
 
