@@ -70,6 +70,8 @@ public:
         NSArray* devs = [QTCaptureDevice inputDevicesWithMediaType: QTMediaTypeVideo];
         device = (QTCaptureDevice*) [devs objectAtIndex: index];
         input = 0;
+        audioInput = 0;
+        audioDevice = 0;
         fileOutput = 0;
         imageOutput = 0;
         callbackDelegate = [[QTCaptureCallbackDelegate alloc] initWithOwner: owner
@@ -82,6 +84,7 @@ public:
         if (err == 0)
         {
             input = [[QTCaptureDeviceInput alloc] initWithDevice: device];
+            audioInput = [[QTCaptureDeviceInput alloc] initWithDevice: device];
 
             [session addInput: input error: &err];
 
@@ -112,6 +115,8 @@ public:
         [session release];
         [input release];
         [device release];
+        [audioDevice release];
+        [audioInput release];
         [fileOutput release];
         [imageOutput release];
         [callbackDelegate release];
@@ -123,7 +128,31 @@ public:
         [session removeOutput: fileOutput];
         [fileOutput release];
         fileOutput = [[QTCaptureMovieFileOutput alloc] init];
+
+        [session removeInput: audioInput];
+        [audioInput release];
+        audioInput = 0;
+        [audioDevice release];
+        audioDevice = 0;
+
         [fileOutput setDelegate: callbackDelegate];
+    }
+
+    void addDefaultAudioInput()
+    {
+        NSError* err = nil;
+        audioDevice = [QTCaptureDevice defaultInputDeviceWithMediaType: QTMediaTypeSound];
+
+        if ([audioDevice open: &err])
+            [audioDevice retain];
+        else
+            audioDevice = nil;
+
+        if (audioDevice != 0)
+        {
+            audioInput = [[QTCaptureDeviceInput alloc] initWithDevice: audioDevice];
+            [session addInput: audioInput error: &err];
+        }
     }
 
     void addListener (CameraImageListener* listenerToAdd)
@@ -165,6 +194,8 @@ public:
 
     QTCaptureDevice* device;
     QTCaptureDeviceInput* input;
+    QTCaptureDevice* audioDevice;
+    QTCaptureDeviceInput* audioInput;
     QTCaptureSession* session;
     QTCaptureMovieFileOutput* fileOutput;
     QTCaptureDecompressedVideoOutput* imageOutput;
@@ -280,8 +311,33 @@ void CameraDevice::startRecordingToFile (const File& file)
     QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
     deleteAndZero (d->callbackDelegate->firstRecordedTime);
     file.deleteFile();
-    [d->fileOutput recordToOutputFileURL: [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())]];
+
+    // In some versions of QT (e.g. on 10.5), if you record video without audio, the speed comes
+    // out wrong, so we'll put some audio in there too..,
+    d->addDefaultAudioInput();
+
     [d->session addOutput: d->fileOutput error: nil];
+
+    NSEnumerator* connectionEnumerator = [[d->fileOutput connections] objectEnumerator];
+
+    for (;;)
+    {
+        QTCaptureConnection* connection = [connectionEnumerator nextObject];
+        if (connection == 0)
+            break;
+
+        QTCompressionOptions* options = 0;
+        NSString* mediaType = [connection mediaType];
+
+        if ([mediaType isEqualToString: QTMediaTypeVideo])
+            options = [QTCompressionOptions compressionOptionsWithIdentifier: @"QTCompressionOptionsSD480SizeH264Video"];
+        else if ([mediaType isEqualToString: QTMediaTypeSound])
+            options = [QTCompressionOptions compressionOptionsWithIdentifier: @"QTCompressionOptionsHighQualityAACAudio"];
+
+        [d->fileOutput setCompressionOptions: options forConnection: connection];
+    }
+
+    [d->fileOutput recordToOutputFileURL: [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())]];
     isRecording = true;
 }
 

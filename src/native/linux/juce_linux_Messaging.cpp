@@ -101,7 +101,7 @@ public:
     }
 
     int getWaitHandle() const     { return fd[1]; }
-    
+
 private:
     CriticalSection lock;
     OwnedArray <Message> queue;
@@ -352,7 +352,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func
         messageCallContext.func = func;
         messageCallContext.parameter = parameter;
 
-        juce_internalMessageQueue->postMessage (new Message (MessageThreadFuncCall::uniqueID, 
+        juce_internalMessageQueue->postMessage (new Message (MessageThreadFuncCall::uniqueID,
                                                              0, 0, &messageCallContext));
 
         // Wait for it to complete before continuing

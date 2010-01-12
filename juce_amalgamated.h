@@ -50453,8 +50453,10 @@ public:
 
     juce_UseDebuggingNewOperator
 
-private:
+    /** @internal */
     class Token;
+
+private:
     OwnedArray <Token> tokens;
     int totalLines;
 };

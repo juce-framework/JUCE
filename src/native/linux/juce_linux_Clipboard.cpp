@@ -100,7 +100,7 @@ static bool juce_requestSelectionContent (String &selection_content, Atom select
 
     // The selection owner will be asked to set the JUCE_SEL property on the
     // juce_messageWindowHandle with the selection content
-    XConvertSelection (display, selection, requested_format, property_name, 
+    XConvertSelection (display, selection, requested_format, property_name,
                        juce_messageWindowHandle, CurrentTime);
 
     int timeoutMs = 200; // will wait at most for 200 ms
