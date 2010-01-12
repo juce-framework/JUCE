@@ -71,6 +71,10 @@
     #define JUCE_DEBUG 1
   #endif
 
+  #ifdef __MINGW32__
+    #define JUCE_MINGW 1
+  #endif
+
   /** If defined, this indicates that the processor is little-endian. */
   #define JUCE_LITTLE_ENDIAN 1
 

@@ -102,7 +102,7 @@ const StringArray Font::findAllTypefaceNames() throw()
     return results;
 }
 
-extern bool juce_IsRunningInWine() throw();
+extern bool juce_IsRunningInWine();
 
 void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
 {

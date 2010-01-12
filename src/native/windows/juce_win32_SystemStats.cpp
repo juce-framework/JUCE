@@ -27,8 +27,7 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-extern void juce_updateMultiMonitorInfo() throw();
-extern void juce_initialiseThreadEvents() throw();
+extern void juce_initialiseThreadEvents();
 
 
 //==============================================================================

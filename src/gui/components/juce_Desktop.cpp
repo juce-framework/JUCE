@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../graphics/geometry/juce_RectangleList.h"
 
 extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
-                                         const bool clipToWorkArea) throw();
+                                         const bool clipToWorkArea);
 
 
 //==============================================================================

@@ -181,7 +181,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
 {
     const ScopedAutoReleasePool pool;
     monitorCoords.clear();

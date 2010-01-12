@@ -32,6 +32,9 @@
 namespace jpeglibNamespace
 {
 #if JUCE_INCLUDE_JPEGLIB_CODE
+  #if JUCE_MINGW
+    typedef unsigned char boolean;
+  #endif
   extern "C"
   {
     #define JPEG_INTERNALS

@@ -65,12 +65,15 @@
 #include <iphlpapi.h>
 #include <mapi.h>
 #include <float.h>
-#include <crtdbg.h>
 #include <process.h>
-#include <comutil.h>
 #include <Exdisp.h>
 #include <exdispid.h>
 #include <shlobj.h>
+
+#if ! JUCE_MINGW
+ #include <crtdbg.h>
+ #include <comutil.h>
+#endif
 
 #if JUCE_OPENGL
  #include <gl/gl.h>

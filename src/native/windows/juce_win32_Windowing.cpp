@@ -42,9 +42,9 @@
   #define WM_APPCOMMAND                     0x0319
 #endif
 
-extern void juce_repeatLastProcessPriority() throw(); // in juce_win32_Threads.cpp
-extern void juce_CheckCurrentlyFocusedTopLevelWindow() throw();  // in juce_TopLevelWindow.cpp
-extern bool juce_IsRunningInWine() throw();
+extern void juce_repeatLastProcessPriority(); // in juce_win32_Threads.cpp
+extern void juce_CheckCurrentlyFocusedTopLevelWindow();  // in juce_TopLevelWindow.cpp
+extern bool juce_IsRunningInWine();
 
 #ifndef ULW_ALPHA
   #define ULW_ALPHA     0x00000002
@@ -2428,7 +2428,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
     return TRUE;
 }
 
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea) throw()
+void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
 {
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
 

@@ -135,7 +135,7 @@ private:
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)
 
-void juce_CheckCurrentlyFocusedTopLevelWindow() throw()
+void juce_CheckCurrentlyFocusedTopLevelWindow()
 {
     if (TopLevelWindowManager::getInstanceWithoutCreating() != 0)
         TopLevelWindowManager::getInstanceWithoutCreating()->startTimer (20);
