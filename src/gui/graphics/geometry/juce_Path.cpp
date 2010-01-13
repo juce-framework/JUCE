@@ -49,8 +49,7 @@ static const int defaultGranularity = 32;
 
 //==============================================================================
 Path::Path() throw()
-    : data (defaultGranularity),
-      numElements (0),
+    : numElements (0),
       pathXMin (0),
       pathXMax (0),
       pathYMin (0),
@@ -64,8 +63,7 @@ Path::~Path() throw()
 }
 
 Path::Path (const Path& other) throw()
-    : data (defaultGranularity),
-      numElements (other.numElements),
+    : numElements (other.numElements),
       pathXMin (other.pathXMin),
       pathXMax (other.pathXMax),
       pathYMin (other.pathYMin),

@@ -60,6 +60,11 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 
 #ifdef JUCE_DEBUG
         {
+            char a1[7];
+            jassert (numElementsInArray(a1) == 7);
+            int a2[3];
+            jassert (numElementsInArray(a2) == 3);
+
             // Some simple test code to keep an eye on things and make sure these functions
             // work ok on all platforms. Let me know if any of these assertions fail!
             int n = 1;

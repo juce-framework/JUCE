@@ -443,10 +443,9 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
                 pixel = Colours::transparentWhite;
             }
 
-            char colourString [16];
-            sprintf (colourString, "%x%x%x", pixel.getRed(), pixel.getGreen(), pixel.getBlue());
+            const uint8 pixelValues[3] = { pixel.getRed(), pixel.getGreen(), pixel.getBlue() };
 
-            out << (const char*) colourString;
+            out << String::toHexString (pixelValues, 3, 0);
             charsOnLine += 3;
 
             if (charsOnLine > 100)

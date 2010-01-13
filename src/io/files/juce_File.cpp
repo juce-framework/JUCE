@@ -985,17 +985,6 @@ bool File::appendText (const String& text,
     return false;
 }
 
-bool File::printf (const tchar* pf, ...) const
-{
-    va_list list;
-    va_start (list, pf);
-
-    String text;
-    text.vprintf (pf, list);
-
-    return appendData ((const char*) text, text.length());
-}
-
 bool File::replaceWithText (const String& textToWrite,
                             const bool asUnicode,
                             const bool writeUnicodeHeaderBytes) const

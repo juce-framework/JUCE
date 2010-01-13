@@ -204,7 +204,8 @@ private:
         const float* s = buffer.getSampleData (0, 0);
         const int spikeDriftAllowed = 5;
 
-        Array <int> spikesFound (100);
+        Array <int> spikesFound;
+        spikesFound.ensureStorageAllocated (100);
         double runningAverage = 0;
         int lastSpike = 0;
 

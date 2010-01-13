@@ -33,8 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 DirectoryContentsDisplayComponent::DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow)
-    : fileList (listToShow),
-      listeners (2)
+    : fileList (listToShow)
 {
 }
 

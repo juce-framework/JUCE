@@ -1723,7 +1723,6 @@ class ASIOAudioIODeviceType  : public AudioIODeviceType
 public:
     ASIOAudioIODeviceType()
         : AudioIODeviceType (T("ASIO")),
-          classIds (2),
           hasScanned (false)
     {
         CoInitialize (0);

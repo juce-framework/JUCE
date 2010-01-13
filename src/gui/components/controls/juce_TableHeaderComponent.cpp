@@ -64,8 +64,7 @@ private:
 
 //==============================================================================
 TableHeaderComponent::TableHeaderComponent()
-    : listeners (2),
-      columnsChanged (false),
+    : columnsChanged (false),
       columnsResized (false),
       sortChanged (false),
       menuActive (true),

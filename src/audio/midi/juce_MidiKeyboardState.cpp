@@ -33,7 +33,6 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 MidiKeyboardState::MidiKeyboardState()
-    : listeners (2)
 {
     zeromem (noteStates, sizeof (noteStates));
 }

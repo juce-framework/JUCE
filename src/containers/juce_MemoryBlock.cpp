@@ -145,6 +145,12 @@ void MemoryBlock::ensureSize (const int minimumSize,
         setSize (minimumSize, initialiseToZero);
 }
 
+void MemoryBlock::swapWith (MemoryBlock& other) throw()
+{
+    swapVariables (size, other.size);
+    data.swapWith (other.data);
+}
+
 //==============================================================================
 void MemoryBlock::fillWith (const uint8 value) throw()
 {

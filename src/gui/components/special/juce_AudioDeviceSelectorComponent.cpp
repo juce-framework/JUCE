@@ -674,6 +674,7 @@ private:
         return y;
     }
 
+public:
     //==============================================================================
     class ChannelSelectorListBox  : public ListBox,
                                     public ListBoxModel
@@ -930,6 +931,7 @@ private:
         const ChannelSelectorListBox& operator= (const ChannelSelectorListBox&);
     };
 
+private:
     ChannelSelectorListBox* inputChanList;
     ChannelSelectorListBox* outputChanList;
 

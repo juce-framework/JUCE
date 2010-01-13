@@ -1086,7 +1086,6 @@ enum TreeViewOpenness
 TreeViewItem::TreeViewItem()
     : ownerView (0),
       parentItem (0),
-      subItems (8),
       y (0),
       itemHeight (0),
       totalHeight (0),

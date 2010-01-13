@@ -145,6 +145,11 @@ void Value::setValue (const var& newValue)
     value->setValue (newValue);
 }
 
+const String Value::toString() const
+{
+    return value->getValue().toString();
+}
+
 const Value& Value::operator= (const var& newValue)
 {
     value->setValue (newValue);

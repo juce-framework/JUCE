@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static VoidArray objectsToDelete (16);
+static VoidArray objectsToDelete;
 static CriticalSection lock;
 
 //==============================================================================

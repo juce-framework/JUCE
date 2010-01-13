@@ -203,19 +203,11 @@
       forcedinline void myfunction (int x)
       @endcode
   */
-  #ifdef JUCE_DEBUG
+  #ifndef JUCE_DEBUG
     #define forcedinline  __forceinline
   #else
     #define forcedinline  inline
   #endif
-
-  /** A platform-independent way of stopping the compiler inlining a function.
-
-      Use the syntax: @code
-      juce_noinline void myfunction (int x)
-      @endcode
-  */
-  #define juce_noinline
 
 #else
   /** A platform-independent way of forcing an inline function.
@@ -229,14 +221,6 @@
   #else
     #define forcedinline  inline
   #endif
-
-  /** A platform-independent way of stopping the compiler inlining a function.
-
-      Use the syntax: @code
-      juce_noinline void myfunction (int x)
-      @endcode
-  */
-  #define juce_noinline __attribute__((noinline))
 
 #endif
 

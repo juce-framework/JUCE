@@ -415,7 +415,7 @@ struct MidiOutHandle
     juce_UseDebuggingNewOperator
 };
 
-static VoidArray handles (4);
+static Array <MidiOutHandle*> midiOutputHandles;
 
 //==============================================================================
 const StringArray MidiOutput::getDevices()
@@ -485,9 +485,9 @@ MidiOutput* MidiOutput::openDevice (int index)
         }
     }
 
-    for (i = handles.size(); --i >= 0;)
+    for (i = midiOutputHandles.size(); --i >= 0;)
     {
-        MidiOutHandle* const han = (MidiOutHandle*) handles.getUnchecked(i);
+        MidiOutHandle* const han = midiOutputHandles.getUnchecked(i);
 
         if (han != 0 && han->deviceId == deviceId)
         {
@@ -510,7 +510,7 @@ MidiOutput* MidiOutput::openDevice (int index)
             han->deviceId = deviceId;
             han->refCount = 1;
             han->handle = h;
-            handles.add (han);
+            midiOutputHandles.add (han);
 
             MidiOutput* const out = new MidiOutput();
             out->internal = (void*) han;
@@ -533,10 +533,10 @@ MidiOutput::~MidiOutput()
 {
     MidiOutHandle* const h = (MidiOutHandle*) internal;
 
-    if (handles.contains ((void*) h) && --(h->refCount) == 0)
+    if (midiOutputHandles.contains (h) && --(h->refCount) == 0)
     {
         midiOutClose (h->handle);
-        handles.removeValue ((void*) h);
+        midiOutputHandles.removeValue (h);
         delete h;
     }
 }

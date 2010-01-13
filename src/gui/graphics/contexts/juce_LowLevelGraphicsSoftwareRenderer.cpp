@@ -1341,10 +1341,10 @@ private:
 
 //==============================================================================
 LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image_)
-    : image (image_),
-      stateStack (20)
+    : image (image_)
 {
-    currentState = new LLGCSavedState (image_.getBounds(), 0, 0, Font(), FillType(), Graphics::mediumResamplingQuality);
+    currentState = new LLGCSavedState (image_.getBounds(), 0, 0, Font(),
+                                       FillType(), Graphics::mediumResamplingQuality);
 }
 
 LowLevelGraphicsSoftwareRenderer::~LowLevelGraphicsSoftwareRenderer()

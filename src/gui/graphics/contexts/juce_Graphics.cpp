@@ -35,20 +35,16 @@ BEGIN_JUCE_NAMESPACE
 static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
 
 //==============================================================================
-#define MINIMUM_COORD -0x3fffffff
-#define MAXIMUM_COORD 0x3fffffff
+template <typename Type>
+static bool areCoordsSensibleNumbers (Type x, Type y, Type w, Type h)
+{
+    const int maxVal = 0x3fffffff;
 
-#undef ASSERT_COORDS_ARE_SENSIBLE_NUMBERS
-#define ASSERT_COORDS_ARE_SENSIBLE_NUMBERS(x, y, w, h) \
-    jassert ((int) x >= MINIMUM_COORD  \
-              && (int) x <= MAXIMUM_COORD \
-              && (int) y >= MINIMUM_COORD \
-              && (int) y <= MAXIMUM_COORD \
-              && (int) w >= MINIMUM_COORD \
-              && (int) w <= MAXIMUM_COORD \
-              && (int) h >= MINIMUM_COORD \
-              && (int) h <= MAXIMUM_COORD);
-
+    return (int) x >= -maxVal && (int) x <= maxVal
+        && (int) y >= -maxVal && (int) y <= maxVal
+        && (int) w >= -maxVal && (int) w <= maxVal
+        && (int) h >= -maxVal && (int) h <= maxVal;
+}
 
 //==============================================================================
 LowLevelGraphicsContext::LowLevelGraphicsContext()
@@ -62,7 +58,7 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext()
 //==============================================================================
 Graphics::Graphics (Image& imageToDrawOnto) throw()
     : context (imageToDrawOnto.createLowLevelContext()),
-      ownsContext (true),
+      contextToDelete (context),
       saveStatePending (false)
 {
     resetToDefaultState();
@@ -70,7 +66,6 @@ Graphics::Graphics (Image& imageToDrawOnto) throw()
 
 Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
     : context (internalContext),
-      ownsContext (false),
       saveStatePending (false)
 {
     resetToDefaultState();
@@ -78,8 +73,6 @@ Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
 
 Graphics::~Graphics() throw()
 {
-    if (ownsContext)
-        delete context;
 }
 
 //==============================================================================
@@ -325,7 +318,7 @@ void Graphics::fillRect (int x,
                          int height) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     context->fillRect (Rectangle (x, y, width, height), false);
 }
@@ -341,7 +334,7 @@ void Graphics::fillRect (const float x,
                          const float height) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addRectangle (x, y, width, height);
@@ -397,7 +390,7 @@ void Graphics::drawRect (const int x,
                          const int lineThickness) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     context->fillRect (Rectangle (x, y, width, lineThickness), false);
     context->fillRect (Rectangle (x, y + lineThickness, lineThickness, height - lineThickness * 2), false);
@@ -412,7 +405,7 @@ void Graphics::drawRect (const float x,
                          const float lineThickness) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addRectangle (x, y, width, lineThickness);
@@ -441,7 +434,7 @@ void Graphics::drawBevel (const int x,
                           const bool sharpEdgeOnOutside) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     if (clipRegionIntersects (x, y, width, height))
     {
@@ -476,7 +469,7 @@ void Graphics::fillEllipse (const float x,
                             const float height) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addEllipse (x, y, width, height);
@@ -490,7 +483,7 @@ void Graphics::drawEllipse (const float x,
                             const float lineThickness) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addEllipse (x, y, width, height);
@@ -504,7 +497,7 @@ void Graphics::fillRoundedRectangle (const float x,
                                      const float cornerSize) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
@@ -529,7 +522,7 @@ void Graphics::drawRoundedRectangle (const float x,
                                      const float lineThickness) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (x, y, width, height);
+    jassert (areCoordsSensibleNumbers (x, y, width, height));
 
     Path p;
     p.addRoundedRectangle (x, y, width, height, cornerSize);
@@ -723,7 +716,7 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
                                 const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (destX, destY, destW, destH);
+    jassert (areCoordsSensibleNumbers (destX, destY, destW, destH));
 
     if (imageToDraw != 0)
     {
@@ -757,8 +750,8 @@ void Graphics::drawImage (const Image* const imageToDraw,
                           const bool fillAlphaChannelWithCurrentBrush) const throw()
 {
     // passing in a silly number can cause maths problems in rendering!
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (dx, dy, dw, dh);
-    ASSERT_COORDS_ARE_SENSIBLE_NUMBERS (sx, sy, sw, sh);
+    jassert (areCoordsSensibleNumbers (dx, dy, dw, dh));
+    jassert (areCoordsSensibleNumbers (sx, sy, sw, sh));
 
     if (context->clipRegionIntersects  (Rectangle (dx, dy, dw, dh)))
     {

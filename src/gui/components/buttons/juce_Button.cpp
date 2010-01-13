@@ -36,10 +36,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 Button::Button (const String& name)
   : Component (name),
-    shortcuts (2),
     keySource (0),
     text (name),
-    buttonListeners (2),
     buttonPressTime (0),
     lastTimeCallbackTime (0),
     commandManagerToUse (0),

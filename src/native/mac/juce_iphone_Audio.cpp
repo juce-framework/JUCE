@@ -504,7 +504,7 @@ private:
         {
             NSString* route = (NSString*) audioRoute;
 
-            //printf ("audio route: %s\n", [route cString]);
+            //DBG ("audio route: " + nsStringToJuce (route));
 
             if ([route hasPrefix: @"Receiver"])
             {

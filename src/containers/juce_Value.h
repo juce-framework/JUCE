@@ -76,6 +76,12 @@ public:
     /** Returns the current value. */
     operator const var() const;
 
+    /** Returns the value as a string.
+
+        This is alternative to writing things like "myValue.getValue().toString()".
+    */
+    const String toString() const;
+
     /** Sets the current value.
 
         You can also use operator= to set the value.

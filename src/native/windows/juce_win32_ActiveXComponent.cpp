@@ -171,7 +171,7 @@ public:
 
     HRESULT __stdcall GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
     {
-        frame->AddRef();
+        // frame->AddRef();   // MS docs are unclear about whether this is needed, but it seems to lead to a memory leak..
         *lplpFrame = frame;
         *lplpDoc = 0;
         lpFrameInfo->fMDIApp = FALSE;

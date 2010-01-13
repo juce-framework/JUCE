@@ -575,7 +575,7 @@ public:
 
         @returns    a stream that will write to this file (initially positioned at the
                     end of the file), or 0 if the file can't be opened for some reason
-        @see createInputStream, printf, appendData, appendText
+        @see createInputStream, appendData, appendText
     */
     FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const;
 
@@ -602,14 +602,6 @@ public:
     const String loadFileAsString() const;
 
     //==============================================================================
-    /** Writes text to the end of the file.
-
-        This will try to do a printf to the file.
-
-        @returns  false if it can't write to the file for some reason
-    */
-    bool printf (const tchar* format, ...) const;
-
     /** Appends a block of binary data to the end of the file.
 
         This will try to write the given buffer to the end of the file.

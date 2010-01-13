@@ -715,10 +715,7 @@ void XmlElement::setAttribute (const tchar* const attributeName,
 void XmlElement::setAttribute (const tchar* const attributeName,
                                const double number) throw()
 {
-    tchar buffer [40];
-    CharacterFunctions::printf (buffer, numElementsInArray (buffer), T("%.9g"), number);
-
-    setAttribute (attributeName, buffer);
+    setAttribute (attributeName, String (number));
 }
 
 void XmlElement::removeAttribute (const tchar* const attributeName) throw()

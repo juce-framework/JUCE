@@ -72,9 +72,7 @@ void SynthesiserVoice::clearCurrentNote()
 
 //==============================================================================
 Synthesiser::Synthesiser()
-    : voices (2),
-      sounds (2),
-      sampleRate (0),
+    : sampleRate (0),
       lastNoteOnCounter (0),
       shouldStealNotes (true)
 {

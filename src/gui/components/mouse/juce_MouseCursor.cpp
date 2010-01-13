@@ -40,7 +40,7 @@ void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) th
 
 //==============================================================================
 static CriticalSection activeCursorListLock;
-static VoidArray activeCursors (2);
+static VoidArray activeCursors;
 
 //==============================================================================
 class SharedMouseCursorInternal  : public ReferenceCountedObject

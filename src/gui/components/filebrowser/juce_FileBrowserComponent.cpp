@@ -44,7 +44,6 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
    : FileFilter (String::empty),
      fileFilter (fileFilter_),
      flags (flags_),
-     listeners (2),
      previewComp (previewComp_),
      thread ("Juce FileBrowser")
 {

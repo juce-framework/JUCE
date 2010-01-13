@@ -38,8 +38,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ApplicationCommandManager::ApplicationCommandManager()
-    : listeners (8),
-      firstTarget (0)
+    : firstTarget (0)
 {
     keyMappings = new KeyPressMappingSet (this);
 
@@ -166,7 +165,7 @@ const StringArray ApplicationCommandManager::getCommandCategories() const throw(
 
 const Array <CommandID> ApplicationCommandManager::getCommandsInCategory (const String& categoryName) const throw()
 {
-    Array <CommandID> results (4);
+    Array <CommandID> results;
 
     for (int i = 0; i < commands.size(); ++i)
         if (commands.getUnchecked(i)->categoryName == categoryName)

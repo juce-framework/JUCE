@@ -72,7 +72,7 @@ static HKEY findKeyForPath (String name,
 const String PlatformUtilities::getRegistryValue (const String& regValuePath,
                                                   const String& defaultValue)
 {
-    String valueName, s;
+    String valueName, result (defaultValue);
     HKEY k = findKeyForPath (regValuePath, false, valueName);
 
     if (k != 0)
@@ -82,14 +82,17 @@ const String PlatformUtilities::getRegistryValue (const String& regValuePath,
         DWORD type = REG_SZ;
 
         if (RegQueryValueEx (k, valueName, 0, &type, (LPBYTE) buffer, &bufferSize) == ERROR_SUCCESS)
-            s = buffer;
-        else
-            s = defaultValue;
+        {
+            if (type == REG_SZ)
+                result = buffer;
+            else if (type == REG_DWORD)
+                result = String ((int) *(DWORD*) buffer);
+        }
 
         RegCloseKey (k);
     }
 
-    return s;
+    return result;
 }
 
 void PlatformUtilities::setRegistryValue (const String& regValuePath,

@@ -40,11 +40,7 @@ extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
 static Desktop* juce_desktopInstance = 0;
 
 Desktop::Desktop() throw()
-    : mouseListeners (2),
-      desktopComponents (4),
-      monitorCoordsClipped (2),
-      monitorCoordsUnclipped (2),
-      lastMouseX (0),
+    : lastMouseX (0),
       lastMouseY (0),
       kioskModeComponent (0)
 {

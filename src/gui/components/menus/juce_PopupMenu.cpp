@@ -1281,15 +1281,13 @@ private:
 
 //==============================================================================
 PopupMenu::PopupMenu()
-    : items (8),
-      lookAndFeel (0),
+    : lookAndFeel (0),
       separatorPending (false)
 {
 }
 
 PopupMenu::PopupMenu (const PopupMenu& other)
-    : items (8),
-      lookAndFeel (other.lookAndFeel),
+    : lookAndFeel (other.lookAndFeel),
       separatorPending (false)
 {
     items.ensureStorageAllocated (other.items.size());

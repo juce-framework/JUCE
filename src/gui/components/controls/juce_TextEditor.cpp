@@ -79,17 +79,17 @@ public:
                         const Colour& colour_,
                         const tchar passwordCharacter)
       : font (font_),
-        colour (colour_),
-        atoms (64)
+        colour (colour_)
     {
         initialiseAtoms (text, passwordCharacter);
     }
 
     UniformTextSection (const UniformTextSection& other)
       : font (other.font),
-        colour (other.colour),
-        atoms (64)
+        colour (other.colour)
     {
+        atoms.ensureStorageAllocated (other.atoms.size());
+
         for (int i = 0; i < other.atoms.size(); ++i)
             atoms.add (new TextAtom (*(const TextAtom*) other.atoms.getUnchecked(i)));
     }
@@ -140,6 +140,8 @@ public:
                     }
                 }
             }
+
+            atoms.ensureStorageAllocated (atoms.size() + other.atoms.size() - i);
 
             while (i < other.atoms.size())
             {
@@ -990,10 +992,8 @@ TextEditor::TextEditor (const String& name,
       currentFont (14.0f),
       totalNumChars (0),
       caretPosition (0),
-      sections (8),
       passwordCharacter (passwordCharacter_),
-      dragType (notDragging),
-      listeners (2)
+      dragType (notDragging)
 {
     setOpaque (true);
 

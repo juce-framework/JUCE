@@ -53,7 +53,7 @@ extern bool juce_MouseHasMovedSignificantlySincePressed;
 
 static const int fakeMouseMoveMessage = 0x7fff00ff;
 
-static VoidArray heavyweightPeers (4);
+static VoidArray heavyweightPeers;
 
 
 //==============================================================================

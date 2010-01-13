@@ -717,7 +717,7 @@ public:
 private:
     //==============================================================================
     LowLevelGraphicsContext* const context;
-    const bool ownsContext;
+    ScopedPointer <LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending;
     void saveStateIfPending() throw();

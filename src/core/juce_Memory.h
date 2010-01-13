@@ -200,15 +200,17 @@
 
 //==============================================================================
 /** Clears a block of memory. */
-#define zeromem(memory, numBytes)               memset (memory, 0, numBytes)
+inline void zeromem (void* memory, int numBytes)                { memset (memory, 0, numBytes); }
 
 /** Clears a reference to a local structure. */
-#define zerostruct(structure)                   memset (&structure, 0, sizeof (structure))
+template <typename Type>
+inline void zerostruct (Type& structure)                        { memset (&structure, 0, sizeof (structure)); }
 
-/** A handy macro that calls delete on a pointer if it's non-zero, and
-    then sets the pointer to null.
+/** A handy function that calls delete on a pointer if it's non-zero, and then sets
+    the pointer to null.
 */
-#define deleteAndZero(pointer)                  { delete (pointer); (pointer) = 0; }
+template <typename Type>
+inline void deleteAndZero (Type& pointer)                       { delete pointer; pointer = 0; }
 
 
 

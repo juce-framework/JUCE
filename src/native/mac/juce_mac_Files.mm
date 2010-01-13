@@ -406,7 +406,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
     if (e != 0)
     {
-        FindFileStruct* ff = new FindFileStruct();
+        ScopedPointer <FindFileStruct> ff (new FindFileStruct());
         ff->enumerator = [e retain];
         ff->parentDir = directory;
         ff->wildCard = wildCard;
@@ -415,10 +415,9 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
             ff->parentDir += File::separator;
 
         if (juce_findFileNext (ff, firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
-            return ff;
+            return ff.release();
 
         [e release];
-        delete ff;
     }
 
     return 0;
@@ -426,9 +425,8 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
 void juce_findFileClose (void* handle)
 {
-    FindFileStruct* ff = (FindFileStruct*) handle;
+    ScopedPointer <FindFileStruct> ff ((FindFileStruct*) handle);
     [ff->enumerator release];
-    delete ff;
 }
 
 //==============================================================================

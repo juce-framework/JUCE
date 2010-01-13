@@ -960,8 +960,6 @@ public:
           isStarted (false),
           outputDeviceIndex (outputDeviceIndex_),
           inputDeviceIndex (inputDeviceIndex_),
-          inChans (4),
-          outChans (4),
           numInputBuffers (0),
           numOutputBuffers (0),
           totalSamplesOut (0),

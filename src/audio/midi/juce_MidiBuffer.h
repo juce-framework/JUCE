@@ -26,7 +26,7 @@
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
 #define __JUCE_MIDIBUFFER_JUCEHEADER__
 
-#include "../../containers/juce_ArrayAllocationBase.h"
+#include "../../containers/juce_MemoryBlock.h"
 #include "juce_MidiMessage.h"
 
 
@@ -226,7 +226,7 @@ public:
 
 private:
     friend class MidiBuffer::Iterator;
-    ArrayAllocationBase <uint8> data;
+    MemoryBlock data;
     int bytesUsed;
 
     uint8* findEventAfter (uint8* d, const int samplePosition) const throw();

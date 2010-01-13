@@ -37,8 +37,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 AudioFormatManager::AudioFormatManager()
-    : knownFormats (4),
-      defaultFormatIndex (0)
+    : defaultFormatIndex (0)
 {
 }
 

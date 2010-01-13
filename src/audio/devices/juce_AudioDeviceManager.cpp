@@ -64,9 +64,6 @@ AudioDeviceManager::AudioDeviceManager()
       inputLevelMeasurementEnabledCount (0),
       inputLevel (0),
       tempBuffer (2, 2),
-      enabledMidiInputs (4),
-      midiCallbacks (4),
-      midiCallbackDevices (4),
       defaultMidiOutput (0),
       cpuUsageMs (0),
       timeToCpuScale (0)

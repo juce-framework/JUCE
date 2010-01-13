@@ -62,15 +62,9 @@ class SortedSet
 {
 public:
     //==============================================================================
-    /** Creates an empty set.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-    */
-    SortedSet (const int granularity = juceDefaultArrayGranularity) throw()
-       : data (granularity),
-         numUsed (0)
+    /** Creates an empty set. */
+    SortedSet() throw()
+       : numUsed (0)
     {
     }
 
@@ -78,7 +72,6 @@ public:
         @param other    the set to copy
     */
     SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
-       : data (other.data.granularity)
     {
         other.lockSet();
         numUsed = other.numUsed;
@@ -102,7 +95,6 @@ public:
             other.lockSet();
             lock.enter();
 
-            data.granularity = other.data.granularity;
             data.ensureAllocatedSize (other.size());
             numUsed = other.numUsed;
             memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
@@ -572,19 +564,7 @@ public:
     void minimiseStorageOverheads() throw()
     {
         lock.enter();
-
-        if (numUsed == 0)
-        {
-            data.setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = data.granularity * (numUsed / data.granularity + 1);
-
-            if (newAllocation < data.numAllocated)
-                data.setAllocatedSize (newAllocation);
-        }
-
+        data.shrinkToNoMoreThan (numUsed);
         lock.exit();
     }
 

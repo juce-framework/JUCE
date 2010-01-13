@@ -416,12 +416,6 @@ const String juce_getOutputFromCommand (const String& command)
 }
 
 //==============================================================================
-#if JUCE_64BIT
-  #define filedesc ((long long) internal)
-#else
-  #define filedesc ((int) internal)
-#endif
-
 InterProcessLock::InterProcessLock (const String& name_)
     : internal (0),
       name (name_),
@@ -436,7 +430,7 @@ InterProcessLock::InterProcessLock (const String& name_)
 
     temp.create();
 
-    internal = (void*) open (temp.getFullPathName().toUTF8(), O_RDWR);
+    internal = open (temp.getFullPathName().toUTF8(), O_RDWR);
 }
 
 InterProcessLock::~InterProcessLock()
@@ -444,7 +438,7 @@ InterProcessLock::~InterProcessLock()
     while (reentrancyLevel > 0)
         this->exit();
 
-    close (filedesc);
+    close (internal);
 }
 
 bool InterProcessLock::enter (const int timeOutMillisecs)
@@ -464,7 +458,7 @@ bool InterProcessLock::enter (const int timeOutMillisecs)
 
     for (;;)
     {
-        const int result = fcntl (filedesc, F_SETLK, &fl);
+        const int result = fcntl (internal, F_SETLK, &fl);
 
         if (result >= 0)
         {
@@ -498,7 +492,7 @@ void InterProcessLock::exit()
 
         for (;;)
         {
-            const int result = fcntl (filedesc, F_SETLKW, &fl);
+            const int result = fcntl (internal, F_SETLKW, &fl);
 
             if (result >= 0 || errno != EINTR)
                 break;

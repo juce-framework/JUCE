@@ -341,8 +341,7 @@ class TypefaceCache  : public DeletedAtShutdown
 {
 public:
     TypefaceCache (int numToCache = 10) throw()
-        : counter (1),
-          faces (2)
+        : counter (1)
     {
         while (--numToCache >= 0)
             faces.add (new CachedFace());

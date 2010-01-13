@@ -178,7 +178,7 @@ public:
     {
         makeInactive();
         [renderContext clearDrawable];
-        delete viewHolder;
+        viewHolder = 0;
     }
 
     bool makeActive() const throw()
@@ -250,7 +250,7 @@ public:
 
 private:
     OpenGLPixelFormat pixelFormat;
-    NSViewComponentInternal* viewHolder;
+    ScopedPointer <NSViewComponentInternal> viewHolder;
 
     //==============================================================================
     WindowedGLContext (const WindowedGLContext&);

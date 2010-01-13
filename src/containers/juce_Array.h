@@ -56,15 +56,9 @@ class Array
 {
 public:
     //==============================================================================
-    /** Creates an empty array.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-    */
-    Array (const int granularity = juceDefaultArrayGranularity) throw()
-       : data (granularity),
-         numUsed (0)
+    /** Creates an empty array. */
+    Array() throw()
+       : numUsed (0)
     {
     }
 
@@ -72,7 +66,6 @@ public:
         @param other    the array to copy
     */
     Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other) throw()
-       : data (other.data.granularity)
     {
         other.lockArray();
         numUsed = other.numUsed;
@@ -86,8 +79,7 @@ public:
         @param values   the array to copy from
     */
     Array (const ElementType* values) throw()
-       : data (juceDefaultArrayGranularity),
-         numUsed (0)
+       : numUsed (0)
     {
         while (*values != 0)
             add (*values++);
@@ -99,8 +91,7 @@ public:
         @param numValues    the number of values in the array
     */
     Array (const ElementType* values, int numValues) throw()
-       : data (juceDefaultArrayGranularity),
-         numUsed (numValues)
+       : numUsed (numValues)
     {
         data.setAllocatedSize (numValues);
         memcpy (data.elements, values, numValues * sizeof (ElementType));
@@ -121,7 +112,6 @@ public:
             other.lockArray();
             lock.enter();
 
-            data.granularity = other.data.granularity;
             data.ensureAllocatedSize (other.size());
             numUsed = other.numUsed;
             memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
@@ -977,19 +967,7 @@ public:
     void minimiseStorageOverheads() throw()
     {
         lock.enter();
-
-        if (numUsed == 0)
-        {
-            data.setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = data.granularity * (numUsed / data.granularity + 1);
-
-            if (newAllocation < data.numAllocated)
-                data.setAllocatedSize (newAllocation);
-        }
-
+        data.shrinkToNoMoreThan (numUsed);
         lock.exit();
     }
 
@@ -1001,7 +979,9 @@ public:
     */
     void ensureStorageAllocated (const int minNumElements) throw()
     {
+        lock.enter();
         data.ensureAllocatedSize (minNumElements);
+        lock.exit();
     }
 
     //==============================================================================

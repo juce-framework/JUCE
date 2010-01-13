@@ -28,14 +28,6 @@
 
 
 //==============================================================================
-/** The default size of chunk in which arrays increase their storage.
-
-    Used by ArrayAllocationBase and its subclasses.
-*/
-const int juceDefaultArrayGranularity = 8;
-
-
-//==============================================================================
 /**
     Implements some basic array storage allocation functions.
 
@@ -49,17 +41,11 @@ class ArrayAllocationBase
 {
 public:
     //==============================================================================
-    /** Creates an empty array.
-
-        @param granularity_  this is the size of increment by which the internal storage
-        will be increased.
-    */
-    ArrayAllocationBase (const int granularity_) throw()
+    /** Creates an empty array. */
+    ArrayAllocationBase() throw()
         : elements (0),
-          numAllocated (0),
-          granularity (granularity_)
+          numAllocated (0)
     {
-        jassert (granularity > 0);
     }
 
     /** Destructor. */
@@ -114,25 +100,21 @@ public:
     void ensureAllocatedSize (int minNumElements) throw()
     {
         if (minNumElements > numAllocated)
-        {
-            // for arrays with small granularity that get big, start
-            // increasing the size in bigger jumps
-            if (minNumElements > (granularity << 6))
-            {
-                minNumElements += (minNumElements / granularity);
-                if (minNumElements > (granularity << 8))
-                    minNumElements += granularity << 6;
-                else
-                    minNumElements += granularity << 5;
-            }
+            setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
+    }
 
-            setAllocatedSize (granularity * (minNumElements / granularity + 1));
-        }
+    /** Minimises the amount of storage allocated so that it's no more than
+        the given number of elements.
+    */
+    void shrinkToNoMoreThan (int maxNumElements) throw()
+    {
+        if (maxNumElements < numAllocated)
+            setAllocatedSize (maxNumElements);
     }
 
     //==============================================================================
     ElementType* elements;
-    int numAllocated, granularity;
+    int numAllocated;
 
 private:
     ArrayAllocationBase (const ArrayAllocationBase&);

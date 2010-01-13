@@ -93,22 +93,21 @@ public:
 
 //==============================================================================
 TextLayout::TextLayout() throw()
-    : tokens (64),
-      totalLines (0)
+    : totalLines (0)
 {
+    tokens.ensureStorageAllocated (64);
 }
 
 TextLayout::TextLayout (const String& text,
                         const Font& font) throw()
-    : tokens (64),
-      totalLines (0)
+    : totalLines (0)
 {
+    tokens.ensureStorageAllocated (64);
     appendText (text, font);
 }
 
 TextLayout::TextLayout (const TextLayout& other) throw()
-    : tokens (64),
-      totalLines (0)
+    : totalLines (0)
 {
     *this = other;
 }

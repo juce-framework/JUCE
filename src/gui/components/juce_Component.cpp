@@ -46,8 +46,8 @@ BEGIN_JUCE_NAMESPACE
 Component* Component::componentUnderMouse = 0;
 Component* Component::currentlyFocusedComponent = 0;
 
-static Array <Component*> modalComponentStack (4), modalComponentReturnValueKeys (4);
-static Array <int> modalReturnValues (4);
+static Array <Component*> modalComponentStack, modalComponentReturnValueKeys;
+static Array <int> modalReturnValues;
 
 static const int customCommandMessage   = 0x7fff0001;
 static const int exitModalStateMessage  = 0x7fff0002;
@@ -108,7 +108,6 @@ Component::Component() throw()
   : parentComponent_ (0),
     componentUID (++nextComponentUID),
     numDeepMouseListeners (0),
-    childComponentList_ (16),
     lookAndFeel_ (0),
     effect_ (0),
     bufferedImage_ (0),
@@ -125,7 +124,6 @@ Component::Component (const String& name) throw()
     parentComponent_ (0),
     componentUID (++nextComponentUID),
     numDeepMouseListeners (0),
-    childComponentList_ (16),
     lookAndFeel_ (0),
     effect_ (0),
     bufferedImage_ (0),
@@ -2163,7 +2161,7 @@ void Component::parentSizeChanged()
 void Component::addComponentListener (ComponentListener* const newListener) throw()
 {
     if (componentListeners_ == 0)
-        componentListeners_ = new VoidArray (4);
+        componentListeners_ = new VoidArray();
 
     componentListeners_->addIfNotAlreadyThere (newListener);
 }
@@ -2243,7 +2241,7 @@ void Component::addMouseListener (MouseListener* const newListener,
     checkMessageManagerIsLocked
 
     if (mouseListeners_ == 0)
-        mouseListeners_ = new VoidArray (4);
+        mouseListeners_ = new VoidArray();
 
     if (! mouseListeners_->contains (newListener))
     {
@@ -3509,7 +3507,7 @@ const Rectangle Component::getParentMonitorArea() const throw()
 void Component::addKeyListener (KeyListener* const newListener) throw()
 {
     if (keyListeners_ == 0)
-        keyListeners_ = new VoidArray (4);
+        keyListeners_ = new VoidArray();
 
     keyListeners_->addIfNotAlreadyThere (newListener);
 }

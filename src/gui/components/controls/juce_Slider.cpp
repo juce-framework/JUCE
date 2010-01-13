@@ -91,7 +91,6 @@ private:
 //==============================================================================
 Slider::Slider (const String& name)
   : Component (name),
-    listeners (2),
     lastCurrentValue (0),
     lastValueMin (0),
     lastValueMax (0),

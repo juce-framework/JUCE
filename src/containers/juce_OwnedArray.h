@@ -58,15 +58,9 @@ class OwnedArray
 {
 public:
     //==============================================================================
-    /** Creates an empty array.
-
-        @param granularity  this is the size of increment by which the internal storage
-        used by the array will grow. Only change it from the default if you know the
-        array is going to be very big and needs to be able to grow efficiently.
-    */
-    OwnedArray (const int granularity = juceDefaultArrayGranularity) throw()
-        : data (granularity),
-          numUsed (0)
+    /** Creates an empty array. */
+    OwnedArray() throw()
+        : numUsed (0)
     {
     }
 
@@ -674,19 +668,7 @@ public:
     void minimiseStorageOverheads() throw()
     {
         lock.enter();
-
-        if (numUsed == 0)
-        {
-            data.setAllocatedSize (0);
-        }
-        else
-        {
-            const int newAllocation = data.granularity * (numUsed / data.granularity + 1);
-
-            if (newAllocation < data.numAllocated)
-                data.setAllocatedSize (newAllocation);
-        }
-
+        data.shrinkToNoMoreThan (numUsed);
         lock.exit();
     }
 
@@ -698,7 +680,9 @@ public:
     */
     void ensureStorageAllocated (const int minNumElements) throw()
     {
+        lock.enter();
         data.ensureAllocatedSize (minNumElements);
+        lock.exit();
     }
 
     //==============================================================================

@@ -95,8 +95,6 @@ MidiKeyboardComponent::MidiKeyboardComponent (MidiKeyboardState& state_,
       canScroll (true),
       mouseDragging (false),
       useMousePositionForVelocity (true),
-      keyPresses (4),
-      keyPressNotes (16),
       keyMappingOctave (6),
       octaveNumForMiddleC (3)
 {

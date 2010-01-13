@@ -49,7 +49,6 @@ static int cacheTimeout = 5000;
 
 
 ImageCache::ImageCache()
-    : images (4)
 {
 }
 

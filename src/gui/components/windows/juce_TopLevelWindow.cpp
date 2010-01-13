@@ -45,8 +45,7 @@ class TopLevelWindowManager  : public Timer,
 public:
     //==============================================================================
     TopLevelWindowManager()
-        : windows (8),
-          currentActive (0)
+        : currentActive (0)
     {
     }
 

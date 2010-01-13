@@ -193,7 +193,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
     variable2 = tempVal;
 }
 
-/** Handy macro for getting the number of elements in a simple const C array.
+/** Handy function for getting the number of elements in a simple const C array.
 
     E.g.
     @code
@@ -202,7 +202,8 @@ inline void swapVariables (Type& variable1, Type& variable2)
     int numElements = numElementsInArray (myArray) // returns 3
     @endcode
 */
-#define numElementsInArray(a)   ((int) (sizeof (a) / sizeof ((a)[0])))
+template <typename Type>
+inline int numElementsInArray (Type& array)         { return (int) (sizeof (array) / sizeof (array[0])); }
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.

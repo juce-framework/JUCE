@@ -34,7 +34,6 @@ BEGIN_JUCE_NAMESPACE
 ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
     : component (component_),
       lastPeer (0),
-      registeredParentComps (4),
       reentrant (false)
 {
     jassert (component != 0); // can't use this with a null pointer..

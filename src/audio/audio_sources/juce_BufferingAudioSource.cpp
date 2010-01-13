@@ -42,8 +42,7 @@ class SharedBufferingAudioSourceThread  : public DeletedAtShutdown,
 {
 public:
     SharedBufferingAudioSourceThread()
-        : Thread ("Audio Buffer"),
-          sources (8)
+        : Thread ("Audio Buffer")
     {
     }
 

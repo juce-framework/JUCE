@@ -109,8 +109,8 @@ void PositionedGlyph::moveBy (const float deltaX,
 
 //==============================================================================
 GlyphArrangement::GlyphArrangement()
-    : glyphs (128)
 {
+    glyphs.ensureStorageAllocated (128);
 }
 
 GlyphArrangement::GlyphArrangement (const GlyphArrangement& other)

@@ -98,8 +98,7 @@ ScrollBar::ScrollBar (const bool vertical_,
       isDraggingThumb (false),
       alwaysVisible (false),
       upButton (0),
-      downButton (0),
-      listeners (2)
+      downButton (0)
 {
     setButtonVisibility (buttonsAreVisible);
 

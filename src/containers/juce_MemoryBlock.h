@@ -151,6 +151,11 @@ public:
     void append (const void* const data,
                  const int numBytes) throw();
 
+    /** Exchanges the contents of this and another memory block.
+        No actual copying is required for this, so it's very fast.
+    */
+    void swapWith (MemoryBlock& other) throw();
+
     //==============================================================================
     /** Copies data into this MemoryBlock from a memory address.
 

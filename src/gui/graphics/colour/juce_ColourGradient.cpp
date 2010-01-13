@@ -32,7 +32,6 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ColourGradient::ColourGradient() throw()
-    : colours (4)
 {
 #ifdef JUCE_DEBUG
     x1 = 987654.0f;
@@ -50,8 +49,7 @@ ColourGradient::ColourGradient (const Colour& colour1,
       y1 (y1_),
       x2 (x2_),
       y2 (y2_),
-      isRadial (isRadial_),
-      colours (4)
+      isRadial (isRadial_)
 {
     colours.add (0);
     colours.add (colour1.getARGB());

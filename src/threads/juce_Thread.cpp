@@ -43,7 +43,7 @@ void juce_CloseThreadHandle (void* handle);
 #endif
 
 //==============================================================================
-static VoidArray runningThreads (4);
+static VoidArray runningThreads;
 static CriticalSection runningThreadsLock;
 
 //==============================================================================
