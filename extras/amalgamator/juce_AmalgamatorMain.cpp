@@ -24,6 +24,7 @@
 */
 
 
+#include <iostream>
 #include "juce_AppConfig.h"
 #include "../../juce_amalgamated.h"
 
@@ -79,11 +80,9 @@ static bool parseFile (const File& rootFolder,
                        const bool isOuterFile,
                        const bool stripUnnecessaryStuff)
 {
-    printf ("reading: " + file.getFileName() + "\n");
-
     if (! file.exists())
     {
-        printf ("!! ERROR - file doesn't exist!");
+        std::cout << "!! ERROR - file doesn't exist!";
         return false;
     }
 
@@ -170,7 +169,68 @@ static bool parseFile (const File& rootFolder,
             }
         }
 
-        dest.add (line.trimEnd());
+        if (line.trimStart().startsWith (T("/*")))
+        {
+            int originalI = i;
+            String originalLine = line;
+
+            for (;;)
+            {
+                int end = line.indexOf (T("*/"));
+                
+                if (end >= 0)
+                {
+                    line = line.substring (end + 2);
+                    
+                    // If our comment appeared just before an assertion, leave it in, as it
+                    // might be useful..
+                    if (lines [i + 1].contains (T("assert"))
+                         || lines [i + 2].contains (T("assert")))
+                    {
+                        i = originalI;
+                        line = originalLine;
+                    }
+    
+                    break;
+                }
+
+                line = lines [++i];
+
+                if (i >= lines.size())
+                    break;
+            }
+            
+            line = line.trimEnd();
+            if (line.isEmpty())
+                continue;
+        }
+        
+        line = line.trimEnd();
+        
+        {
+            // Turn initial spaces into tabs..
+            int numIntialSpaces = 0;
+            int len = line.length();
+            while (numIntialSpaces < len && line [numIntialSpaces] == ' ')
+                ++numIntialSpaces;
+            
+            if (numIntialSpaces > 0)
+            {
+                int tabSize = 4;
+                int numTabs = numIntialSpaces / tabSize;
+                line = String::repeatedString (T("\t"), numTabs) + line.substring (numTabs * tabSize);
+            }
+            
+            if (! line.containsChar (T('"')))
+            {
+                // turn large areas of spaces into tabs - this will mess up alignment a bit, but
+                // it's only the amalgamated file, so doesn't matter...
+                line = line.replace (T("        "), T("\t"), false);
+                line = line.replace (T("    "), T("\t"), false);
+            }
+        }
+
+        dest.add (line);
     }
 
     return true;
@@ -183,7 +243,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
 {
     if (! templateFile.existsAsFile())
     {
-        printf (" The template file doesn't exist!\n\n");
+        std::cout << " The template file doesn't exist!\n\n";
         return false;
     }
 
@@ -203,9 +263,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
         return false;
     }
 
-    //lines.trim();
-    //lines.removeEmptyStrings();
-    printf ("\nwriting: " + targetFile.getFullPathName() + "...\n\n");
+    std::cout << "Building: " << (const char*) targetFile.getFullPathName() << "...\n";
 
     for (int i = 0; i < lines.size() - 2; ++i)
     {
@@ -223,13 +281,14 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
 
     if (oldData == newData)
     {
-        printf ("(No need to write - new file is identical)\n\n");
+        std::cout << "(No need to write - new file is identical)\n";
         return true;
     }
 
     if (! targetFile.replaceWithData (newData.getData(), newData.getSize()))
     {
-        printf ("\n!! ERROR - couldn't write to the target file: " + targetFile.getFullPathName() + "\n\n");
+        std::cout << "\n!! ERROR - couldn't write to the target file: " 
+                  << (const char*) targetFile.getFullPathName() << "\n\n";
         return false;
     }
 
@@ -267,7 +326,7 @@ static void mungeJuce (const File& juceFolder)
 {
     if (! juceFolder.isDirectory())
     {
-        printf (" The folder supplied must be the root of your Juce directory!\n\n");
+        std::cout << " The folder supplied must be the root of your Juce directory!\n\n";
         return;
     }
 
@@ -300,7 +359,7 @@ int main (int argc, char* argv[])
     // before calling any Juce functionality..
     initialiseJuce_NonGUI();
 
-    printf ("\n The C++ Amalgamator! Copyright 2008 by Julian Storer - www.rawmaterialsoftware.com\n\n");
+    std::cout << "\n*** The C++ Amalgamator! Written for Juce - www.rawmaterialsoftware.com\n";
 
     if (argc == 4)
     {
@@ -318,18 +377,18 @@ int main (int argc, char* argv[])
     }
     else
     {
-        printf (" Usage: amalgamator TemplateFile TargetFile \"FileToReplaceWildcard\"\n\n");
-        printf (" amalgamator will run through a C++ file and replace any\n"
-                " #include statements with the contents of the file they refer to.\n"
-                " It'll only do this for files that are within the same parent\n"
-                " directory as the target file, and will ignore include statements\n"
-                " that use '<>' instead of quotes. It'll also only include a file once,\n"
-                " ignoring any repeated instances of it.\n\n"
-                " The wildcard lets you specify what kind of files will be replaced, so\n"
-                " \"*.cpp;*.h\" would replace only includes that reference a .cpp or .h file.\n\n"
-                " Or: just run 'amalgamator YourJuceDirectory' to rebuild the juce files."
-                );
+        std::cout << " Usage: amalgamator TemplateFile TargetFile \"FileToReplaceWildcard\"\n\n";
+                     " amalgamator will run through a C++ file and replace any\n"
+                     " #include statements with the contents of the file they refer to.\n"
+                     " It'll only do this for files that are within the same parent\n"
+                     " directory as the target file, and will ignore include statements\n"
+                     " that use '<>' instead of quotes. It'll also only include a file once,\n"
+                     " ignoring any repeated instances of it.\n\n"
+                     " The wildcard lets you specify what kind of files will be replaced, so\n"
+                     " \"*.cpp;*.h\" would replace only includes that reference a .cpp or .h file.\n\n"
+                     " Or: just run 'amalgamator YourJuceDirectory' to rebuild the juce files.";
     }
 
+    std::cout << "\n";
     return 0;
 }
