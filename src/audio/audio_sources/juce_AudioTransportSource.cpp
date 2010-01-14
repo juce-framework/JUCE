@@ -157,7 +157,7 @@ void AudioTransportSource::stop()
 void AudioTransportSource::setPosition (double newPosition)
 {
     if (sampleRate > 0.0)
-        setNextReadPosition (roundDoubleToInt (newPosition * sampleRate));
+        setNextReadPosition (roundToInt (newPosition * sampleRate));
 }
 
 double AudioTransportSource::getCurrentPosition() const
@@ -173,7 +173,7 @@ void AudioTransportSource::setNextReadPosition (int newPosition)
     if (positionableSource != 0)
     {
         if (sampleRate > 0 && sourceSampleRate > 0)
-            newPosition = roundDoubleToInt (newPosition * sourceSampleRate / sampleRate);
+            newPosition = roundToInt (newPosition * sourceSampleRate / sampleRate);
 
         positionableSource->setNextReadPosition (newPosition);
     }
@@ -185,7 +185,7 @@ int AudioTransportSource::getNextReadPosition() const
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
-        return roundDoubleToInt (positionableSource->getNextReadPosition() * ratio);
+        return roundToInt (positionableSource->getNextReadPosition() * ratio);
     }
 
     return 0;
@@ -199,7 +199,7 @@ int AudioTransportSource::getTotalLength() const
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
 
-        return roundDoubleToInt (positionableSource->getTotalLength() * ratio);
+        return roundToInt (positionableSource->getTotalLength() * ratio);
     }
 
     return 0;

@@ -47,7 +47,7 @@ void NamedPipe::cancelPendingReads()
         intern->stopReadOperation = true;
 
         char buffer [1] = { 0 };
-        int bytesWritten = ::write (intern->pipeIn, buffer, 1);
+        int bytesWritten = (int) ::write (intern->pipeIn, buffer, 1);
         (void) bytesWritten;
 
         int timeout = 2000;
@@ -147,7 +147,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int /*timeOutMillisec
         while (bytesRead < maxBytesToRead)
         {
             const int bytesThisTime = maxBytesToRead - bytesRead;
-            const int numRead = ::read (intern->pipeIn, p, bytesThisTime);
+            const int numRead = (int) ::read (intern->pipeIn, p, bytesThisTime);
 
             if (numRead <= 0 || intern->stopReadOperation)
             {
@@ -194,7 +194,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
                && (timeOutMilliseconds < 0 || Time::getMillisecondCounter() < timeOutTime))
         {
             const int bytesThisTime = numBytesToWrite - bytesWritten;
-            const int numWritten = ::write (intern->pipeOut, p, bytesThisTime);
+            const int numWritten = (int) ::write (intern->pipeOut, p, bytesThisTime);
 
             if (numWritten <= 0)
             {

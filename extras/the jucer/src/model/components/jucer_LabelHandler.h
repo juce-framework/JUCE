@@ -67,7 +67,7 @@ public:
         e->setAttribute (T("focusDiscardsChanges"), l->doesLossOfFocusDiscardChanges());
 
         e->setAttribute (T("fontname"), l->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont));
-        e->setAttribute (T("fontsize"), roundDoubleToInt (l->getFont().getHeight() * 100.0) / 100.0);
+        e->setAttribute (T("fontsize"), roundToInt (l->getFont().getHeight() * 100.0) / 100.0);
         e->setAttribute (T("bold"), l->getFont().isBold());
         e->setAttribute (T("italic"), l->getFont().isItalic());
         e->setAttribute (T("justification"), l->getJustificationType().getFlags());

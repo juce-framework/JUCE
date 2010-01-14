@@ -236,10 +236,10 @@ public:
     {
         CGRect bounds = CGRectIntegral (CGContextGetClipBoundingBox (context));
 
-        return Rectangle (roundFloatToInt (bounds.origin.x),
-                          roundFloatToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
-                          roundFloatToInt (bounds.size.width),
-                          roundFloatToInt (bounds.size.height));
+        return Rectangle (roundToInt (bounds.origin.x),
+                          roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
+                          roundToInt (bounds.size.width),
+                          roundToInt (bounds.size.height));
     }
 
     bool isClipEmpty() const
@@ -498,7 +498,7 @@ public:
             {
                 CGGlyph g = glyphNumber;
                 CGContextShowGlyphsAtPoint (context, transform.getTranslationX(),
-                                            flipHeight - roundFloatToInt (transform.getTranslationY()), &g, 1);
+                                            flipHeight - roundToInt (transform.getTranslationY()), &g, 1);
             }
             else
             {
@@ -566,7 +566,7 @@ private:
     {
         const CoreGraphicsContext* const g = (const CoreGraphicsContext*) info;
 
-        const int index = roundFloatToInt (g->numGradientLookupEntries * inData[0]);
+        const int index = roundToInt (g->numGradientLookupEntries * inData[0]);
         PixelARGB colour (g->gradientLookupTable [jlimit (0, g->numGradientLookupEntries, index)]);
         colour.unpremultiply();
 

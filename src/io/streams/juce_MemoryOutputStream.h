@@ -50,8 +50,8 @@ public:
                                     will allocate its own storage internally, which you can
                                     access using getData() and getDataSize()
     */
-    MemoryOutputStream (const int initialSize = 256,
-                        const int granularity = 256,
+    MemoryOutputStream (const size_t initialSize = 256,
+                        const size_t granularity = 256,
                         MemoryBlock* const memoryBlockToWriteTo = 0) throw();
 
     /** Destructor.
@@ -71,7 +71,7 @@ public:
 
         @see getData
     */
-    int getDataSize() const throw();
+    size_t getDataSize() const throw();
 
     /** Resets the stream, clearing any data that has been written to it so far. */
     void reset() throw();
@@ -89,7 +89,7 @@ public:
 private:
     MemoryBlock* data;
     ScopedPointer <MemoryBlock> dataToDelete;
-    int position, size, blockSize;
+    size_t position, size, blockSize;
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__

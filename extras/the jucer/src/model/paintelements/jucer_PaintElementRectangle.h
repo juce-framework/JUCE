@@ -70,7 +70,7 @@ public:
             strokeType.fill.setFillType (g, getDocument(), parentArea);
 
             g.drawRect (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                        roundDoubleToInt (getStrokeType().stroke.getStrokeThickness()));
+                        roundToInt (getStrokeType().stroke.getStrokeThickness()));
         }
     }
 
@@ -101,7 +101,7 @@ public:
 
             strokeType.fill.fillInGeneratedCode (code, paintMethodCode);
             s << "g.drawRect (" << x << ", " << y << ", " << w << ", " << h << ", "
-              << roundDoubleToInt (strokeType.stroke.getStrokeThickness()) << ");\n\n";
+              << roundToInt (strokeType.stroke.getStrokeThickness()) << ");\n\n";
 
             paintMethodCode += s;
         }

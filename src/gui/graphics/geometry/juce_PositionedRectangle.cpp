@@ -130,8 +130,8 @@ const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) cons
     applyPosAndSize (x_, w_, x, w, xMode, wMode, target.getX(), target.getWidth());
     applyPosAndSize (y_, h_, y, h, yMode, hMode, target.getY(), target.getHeight());
 
-    return Rectangle (roundDoubleToInt (x_), roundDoubleToInt (y_),
-                      roundDoubleToInt (w_), roundDoubleToInt (h_));
+    return Rectangle (roundToInt (x_), roundToInt (y_),
+                      roundToInt (w_), roundToInt (h_));
 }
 
 void PositionedRectangle::getRectangleDouble (const Rectangle& target,
@@ -254,11 +254,11 @@ void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const 
 {
     if ((mode & proportionOfParentSize) != 0)
     {
-        s << (roundDoubleToInt (value * 100000.0) / 1000.0) << T('%');
+        s << (roundToInt (value * 100000.0) / 1000.0) << T('%');
     }
     else
     {
-        s << (roundDoubleToInt (value * 100.0) / 100.0);
+        s << (roundToInt (value * 100.0) / 100.0);
 
         if ((mode & absoluteFromParentBottomRight) != 0)
             s << T('R');
@@ -275,11 +275,11 @@ void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const 
 void PositionedRectangle::addSizeDescription (String& s, const uint8 mode, const double value) const throw()
 {
     if (mode == proportionalSize)
-        s << (roundDoubleToInt (value * 100000.0) / 1000.0) << T('%');
+        s << (roundToInt (value * 100000.0) / 1000.0) << T('%');
     else if (mode == parentSizeMinusAbsolute)
-        s << (roundDoubleToInt (value * 100.0) / 100.0) << T('M');
+        s << (roundToInt (value * 100.0) / 100.0) << T('M');
     else
-        s << (roundDoubleToInt (value * 100.0) / 100.0);
+        s << (roundToInt (value * 100.0) / 100.0);
 }
 
 void PositionedRectangle::decodePosString (const String& s, uint8& mode, double& value) throw()
@@ -335,11 +335,11 @@ void PositionedRectangle::applyPosAndSize (double& xOut, double& wOut,
                                            const int parentSize) const throw()
 {
     if (wMode_ == proportionalSize)
-        wOut = roundDoubleToInt (w_ * parentSize);
+        wOut = roundToInt (w_ * parentSize);
     else if (wMode_ == parentSizeMinusAbsolute)
-        wOut = jmax (0, parentSize - roundDoubleToInt (w_));
+        wOut = jmax (0, parentSize - roundToInt (w_));
     else
-        wOut = roundDoubleToInt (w_);
+        wOut = roundToInt (w_);
 
     if ((xMode_ & proportionOfParentSize) != 0)
         xOut = parentPos + x_ * parentSize;

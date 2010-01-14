@@ -58,7 +58,7 @@ public:
     MD5 (const MemoryBlock& data);
 
     /** Creates a checksum for a block of binary data. */
-    MD5 (const char* data, const int numBytes);
+    MD5 (const char* data, const size_t numBytes);
 
     /** Creates a checksum for a string.
 
@@ -76,7 +76,7 @@ public:
         checksum of that. If the number of bytes to read is negative, it'll read
         until the stream is exhausted.
     */
-    MD5 (InputStream& input, int numBytesToRead = -1);
+    MD5 (InputStream& input, int64 numBytesToRead = -1);
 
     /** Creates a checksum for a file. */
     MD5 (const File& file);
@@ -114,12 +114,12 @@ private:
 
         ProcessContext();
 
-        void processBlock (const uint8* const data, int dataSize);
+        void processBlock (const uint8* const data, size_t dataSize);
         void transform (const uint8* const buffer);
         void finish (uint8* const result);
     };
 
-    void processStream (InputStream& input, int numBytesToRead);
+    void processStream (InputStream& input, int64 numBytesToRead);
 };
 
 

@@ -219,9 +219,9 @@ public:
             }
             else
             {
-                components.b = (uint8) jmin (0xff, (components.b * 0xff) / alpha);
-                components.g = (uint8) jmin (0xff, (components.g * 0xff) / alpha);
-                components.r = (uint8) jmin (0xff, (components.r * 0xff) / alpha);
+                components.b = (uint8) jmin ((uint32) 0xff, (components.b * 0xff) / alpha);
+                components.g = (uint8) jmin ((uint32) 0xff, (components.g * 0xff) / alpha);
+                components.r = (uint8) jmin ((uint32) 0xff, (components.r * 0xff) / alpha);
             }
         }
     }

@@ -1841,6 +1841,15 @@ private:
     bool fullScreen, entered, mapped, depthIs16Bit;
     BorderSize windowBorder;
 
+    struct MotifWmHints
+    {
+        unsigned long flags;
+        unsigned long functions;
+        unsigned long decorations;
+        long input_mode;
+        unsigned long status;
+    };
+
     //==============================================================================
     void removeWindowDecorations (Window wndH)
     {
@@ -1848,15 +1857,6 @@ private:
 
         if (hints != None)
         {
-            typedef struct
-            {
-                unsigned long flags;
-                unsigned long functions;
-                unsigned long decorations;
-                long input_mode;
-                unsigned long status;
-            } MotifWmHints;
-
             MotifWmHints motifHints;
             zerostruct (motifHints);
             motifHints.flags = 2; /* MWM_HINTS_DECORATIONS */
@@ -1916,15 +1916,6 @@ private:
 
         if (hints != None)
         {
-            typedef struct
-            {
-                unsigned long flags;
-                unsigned long functions;
-                unsigned long decorations;
-                long input_mode;
-                unsigned long status;
-            } MotifWmHints;
-
             MotifWmHints motifHints;
             zerostruct (motifHints);
 

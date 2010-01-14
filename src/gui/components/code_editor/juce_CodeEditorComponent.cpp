@@ -151,8 +151,8 @@ public:
         if (highlightColumnStart < highlightColumnEnd)
         {
             g.setColour (highlightColour);
-            g.fillRect (roundFloatToInt (x + highlightColumnStart * owner.getCharWidth()), y,
-                        roundFloatToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
+            g.fillRect (roundToInt (x + highlightColumnStart * owner.getCharWidth()), y,
+                        roundToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
         }
 
         int lastType = INT_MIN;
@@ -167,7 +167,7 @@ public:
                 g.setColour (owner.getColourForTokenType (lastType));
             }
 
-            g.drawSingleLineText (token->text, roundFloatToInt (x), y + baselineOffset);
+            g.drawSingleLineText (token->text, roundToInt (x), y + baselineOffset);
 
             if (i < tokens.size() - 1)
             {
@@ -590,16 +590,16 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
 
 const Rectangle CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const throw()
 {
-    return Rectangle (roundDoubleToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
+    return Rectangle (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
                       (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
-                      roundFloatToInt (charWidth),
+                      roundToInt (charWidth),
                       lineHeight);
 }
 
 const CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)
 {
     const int line = y / lineHeight + firstLineOnScreen;
-    const int column = roundDoubleToInt ((x - (gutter - xOffset * charWidth)) / charWidth);
+    const int column = roundToInt ((x - (gutter - xOffset * charWidth)) / charWidth);
     const int index = columnToIndex (line, column);
 
     return CodeDocument::Position (&document, line, index);
@@ -1095,7 +1095,7 @@ void CodeEditorComponent::setFont (const Font& newFont)
 {
     font = newFont;
     charWidth = font.getStringWidthFloat (T("0"));
-    lineHeight = roundFloatToInt (font.getHeight());
+    lineHeight = roundToInt (font.getHeight());
     resized();
 }
 

@@ -271,7 +271,7 @@ END_JUCE_NAMESPACE
 {
     if (source != 0)
     {
-        const int numSamples = JUCE_NAMESPACE::jmin (bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
+        const int numSamples = JUCE_NAMESPACE::jmin ((int) bufferLength / 4, (lengthInFrames * (44100 / 75)) - readPosition);
 
         if (numSamples > 0)
         {

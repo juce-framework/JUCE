@@ -458,7 +458,7 @@ void TabbedButtonBar::resized()
 
         if (tb != 0)
         {
-            const int bestLength = roundDoubleToInt (scale * tb->getBestTabLength (depth));
+            const int bestLength = roundToInt (scale * tb->getBestTabLength (depth));
 
             if (i < numVisibleButtons)
             {

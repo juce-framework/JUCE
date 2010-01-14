@@ -51,8 +51,8 @@ void ImagePreviewComponent::getThumbSize (int& w, int& h) const
                                availableW / (double) w,
                                availableH / (double) h);
 
-    w = roundDoubleToInt (scale * w);
-    h = roundDoubleToInt (scale * h);
+    w = roundToInt (scale * w);
+    h = roundToInt (scale * h);
 }
 
 void ImagePreviewComponent::selectedFileChanged (const File& file)

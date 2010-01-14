@@ -153,7 +153,7 @@ public:
         The data could be an image that the ImageFileFormat class understands, or it
         could be SVG.
     */
-    static Drawable* createFromImageData (const void* data, const int numBytes);
+    static Drawable* createFromImageData (const void* data, const size_t numBytes);
 
     /** Tries to turn a stream containing some kind of image data into a drawable.
 

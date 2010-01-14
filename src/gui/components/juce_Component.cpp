@@ -361,11 +361,11 @@ public:
                 centreY += yChangePerMs * msPassed;
                 scale += scaleChangePerMs * msPassed;
 
-                const int w = roundFloatToInt (image->getWidth() * scale);
-                const int h = roundFloatToInt (image->getHeight() * scale);
+                const int w = roundToInt (image->getWidth() * scale);
+                const int h = roundToInt (image->getHeight() * scale);
 
-                setBounds (roundFloatToInt (centreX) - w / 2,
-                           roundFloatToInt (centreY) - h / 2,
+                setBounds (roundToInt (centreX) - w / 2,
+                           roundToInt (centreY) - h / 2,
                            w, h);
             }
 
@@ -763,12 +763,12 @@ bool Component::isAlwaysOnTop() const throw()
 //==============================================================================
 int Component::proportionOfWidth (const float proportion) const throw()
 {
-    return roundDoubleToInt (proportion * bounds_.getWidth());
+    return roundToInt (proportion * bounds_.getWidth());
 }
 
 int Component::proportionOfHeight (const float proportion) const throw()
 {
-    return roundDoubleToInt (proportion * bounds_.getHeight());
+    return roundToInt (proportion * bounds_.getHeight());
 }
 
 int Component::getParentWidth() const throw()
@@ -984,10 +984,10 @@ void Component::setBoundsRelative (const float x, const float y,
     const int pw = getParentWidth();
     const int ph = getParentHeight();
 
-    setBounds (roundFloatToInt (x * pw),
-               roundFloatToInt (y * ph),
-               roundFloatToInt (w * pw),
-               roundFloatToInt (h * ph));
+    setBounds (roundToInt (x * pw),
+               roundToInt (y * ph),
+               roundToInt (w * pw),
+               roundToInt (h * ph));
 }
 
 void Component::setCentrePosition (const int x, const int y)
@@ -998,8 +998,8 @@ void Component::setCentrePosition (const int x, const int y)
 
 void Component::setCentreRelative (const float x, const float y)
 {
-    setCentrePosition (roundFloatToInt (getParentWidth() * x),
-                       roundFloatToInt (getParentHeight() * y));
+    setCentrePosition (roundToInt (getParentWidth() * x),
+                       roundToInt (getParentHeight() * y));
 }
 
 void Component::centreWithSize (const int width, const int height)
@@ -1044,12 +1044,12 @@ void Component::setBoundsToFit (int x, int y, int width, int height,
             if (imageRatio <= targetRatio)
             {
                 newW = width;
-                newH = jmin (height, roundDoubleToInt (newW * imageRatio));
+                newH = jmin (height, roundToInt (newW * imageRatio));
             }
             else
             {
                 newH = height;
-                newW = jmin (width, roundDoubleToInt (newH / imageRatio));
+                newW = jmin (width, roundToInt (newH / imageRatio));
             }
         }
 

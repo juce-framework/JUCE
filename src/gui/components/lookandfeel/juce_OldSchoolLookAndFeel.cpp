@@ -80,8 +80,8 @@ void OldSchoolLookAndFeel::drawButtonBackground (Graphics& g,
     const int height = button.getHeight();
 
     const float indent = 2.0f;
-    const int cornerSize = jmin (roundFloatToInt (width * 0.4f),
-                                 roundFloatToInt (height * 0.4f));
+    const int cornerSize = jmin (roundToInt (width * 0.4f),
+                                 roundToInt (height * 0.4f));
 
     Path p;
     p.addRoundedRectangle (indent, indent,
@@ -193,7 +193,7 @@ void OldSchoolLookAndFeel::drawProgressBar (Graphics& g, ProgressBar& progressBa
         g.setColour (foreground);
 
         g.fillRect (1, 1,
-                    jlimit (0, width - 2, roundDoubleToInt (progress * (width - 2))),
+                    jlimit (0, width - 2, roundToInt (progress * (width - 2))),
                     height - 2);
 
         if (textToShow.isNotEmpty())
@@ -273,8 +273,8 @@ void OldSchoolLookAndFeel::drawScrollbar (Graphics& g,
         if (isScrollbarVertical)
         {
             width -= 2;
-            g.fillRect (x + roundFloatToInt (width * 0.35f), y,
-                        roundFloatToInt (width * 0.3f), height);
+            g.fillRect (x + roundToInt (width * 0.35f), y,
+                        roundToInt (width * 0.3f), height);
 
             thumb.setBounds (x + 1, thumbStartPosition,
                              width - 2, thumbSize);
@@ -282,8 +282,8 @@ void OldSchoolLookAndFeel::drawScrollbar (Graphics& g,
         else
         {
             height -= 2;
-            g.fillRect (x, y + roundFloatToInt (height * 0.35f),
-                        width, roundFloatToInt (height * 0.3f));
+            g.fillRect (x, y + roundToInt (height * 0.35f),
+                        width, roundToInt (height * 0.3f));
 
             thumb.setBounds (thumbStartPosition, y + 1,
                              thumbSize, height - 2);
@@ -434,13 +434,13 @@ void OldSchoolLookAndFeel::drawLinearSlider (Graphics& g,
 
         if (slider.isHorizontal())
         {
-            g.fillRect (x, y + roundFloatToInt (h * 0.6f),
-                        w, roundFloatToInt (h * 0.2f));
+            g.fillRect (x, y + roundToInt (h * 0.6f),
+                        w, roundToInt (h * 0.2f));
         }
         else
         {
-            g.fillRect (x + roundFloatToInt (w * 0.5f - jmin (3.0f, w * 0.1f)), y,
-                        jmin (4, roundFloatToInt (w * 0.2f)), h);
+            g.fillRect (x + roundToInt (w * 0.5f - jmin (3.0f, w * 0.1f)), y,
+                        jmin (4, roundToInt (w * 0.2f)), h);
         }
 
         float alpha = 0.35f;

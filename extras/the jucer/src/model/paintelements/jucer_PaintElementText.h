@@ -114,7 +114,7 @@ public:
         addColourAttributes (e);
         e->setAttribute (T("text"), text);
         e->setAttribute (T("fontname"), typefaceName);
-        e->setAttribute (T("fontsize"), roundDoubleToInt (font.getHeight() * 100.0) / 100.0);
+        e->setAttribute (T("fontsize"), roundToInt (font.getHeight() * 100.0) / 100.0);
         e->setAttribute (T("bold"), font.isBold());
         e->setAttribute (T("italic"), font.isItalic());
         e->setAttribute (T("justification"), justification.getFlags());

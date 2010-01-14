@@ -505,7 +505,7 @@ public:
 
     void mouseWheelMove (const MouseEvent&, float /*amountX*/, float amountY)
     {
-        alterChildYPos (roundFloatToInt (-10.0f * amountY * scrollZone));
+        alterChildYPos (roundToInt (-10.0f * amountY * scrollZone));
         lastMouseX = -1;
     }
 

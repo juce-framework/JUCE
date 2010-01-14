@@ -537,7 +537,7 @@ public:
                     {
                         while (--samples1 >= 0)
                         {
-                            int r = roundFloatToInt (gainR * *right++);
+                            int r = roundToInt (gainR * *right++);
 
                             if (r < -32768)
                                 r = -32768;
@@ -551,7 +551,7 @@ public:
 
                         while (--samples2 >= 0)
                         {
-                            int r = roundFloatToInt (gainR * *right++);
+                            int r = roundToInt (gainR * *right++);
 
                             if (r < -32768)
                                 r = -32768;
@@ -565,7 +565,7 @@ public:
                     {
                         while (--samples1 >= 0)
                         {
-                            int l = roundFloatToInt (gainL * *left++);
+                            int l = roundToInt (gainL * *left++);
 
                             if (l < -32768)
                                 l = -32768;
@@ -581,7 +581,7 @@ public:
 
                         while (--samples2 >= 0)
                         {
-                            int l = roundFloatToInt (gainL * *left++);
+                            int l = roundToInt (gainL * *left++);
 
                             if (l < -32768)
                                 l = -32768;
@@ -597,7 +597,7 @@ public:
                     {
                         while (--samples1 >= 0)
                         {
-                            int l = roundFloatToInt (gainL * *left++);
+                            int l = roundToInt (gainL * *left++);
 
                             if (l < -32768)
                                 l = -32768;
@@ -606,7 +606,7 @@ public:
 
                             l &= 0xffff;
 
-                            int r = roundFloatToInt (gainR * *right++);
+                            int r = roundToInt (gainR * *right++);
 
                             if (r < -32768)
                                 r = -32768;
@@ -620,7 +620,7 @@ public:
 
                         while (--samples2 >= 0)
                         {
-                            int l = roundFloatToInt (gainL * *left++);
+                            int l = roundToInt (gainL * *left++);
 
                             if (l < -32768)
                                 l = -32768;
@@ -629,7 +629,7 @@ public:
 
                             l &= 0xffff;
 
-                            int r = roundFloatToInt (gainR * *right++);
+                            int r = roundToInt (gainR * *right++);
 
                             if (r < -32768)
                                 r = -32768;

@@ -251,7 +251,7 @@ void DropShadower::updateShadows()
                            bigIm->getWidth() - (shadowEdge * 2),
                            bigIm->getHeight() - (shadowEdge * 2));
 
-            ImageConvolutionKernel blurKernel (roundFloatToInt (blurRadius * 2.0f));
+            ImageConvolutionKernel blurKernel (roundToInt (blurRadius * 2.0f));
             blurKernel.createGaussianBlur (blurRadius);
 
             blurKernel.applyToImage (*bigIm, 0,

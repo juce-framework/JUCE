@@ -454,7 +454,7 @@ public:
                 Array <int> types;
                 currentBitDepth = 16;
 
-                for (i = 0; i < jmin (totalNumInputChans, maxASIOChannels); ++i)
+                for (i = 0; i < jmin ((int) totalNumInputChans, maxASIOChannels); ++i)
                 {
                     if (inputChannels[i])
                     {
@@ -483,7 +483,7 @@ public:
                 jassert (numActiveInputChans == n);
                 n = 0;
 
-                for (i = 0; i < jmin (totalNumOutputChans, maxASIOChannels); ++i)
+                for (i = 0; i < jmin ((int) totalNumOutputChans, maxASIOChannels); ++i)
                 {
                     if (outputChannels[i])
                     {
@@ -978,7 +978,7 @@ private:
                         {
                             granularity = jmax (1, (int) granularity);
 
-                            for (int i = jmax (minSize, (int) granularity); i < jmin (6400, maxSize); i += granularity)
+                            for (int i = jmax ((int) minSize, (int) granularity); i < jmin (6400, (int) maxSize); i += granularity)
                                 bufferSizes.addIfNotAlreadyThere (granularity * (i / granularity));
                         }
                         else if (granularity < 0)
@@ -1037,7 +1037,7 @@ private:
 
                         ASIOBufferInfo* info = bufferInfos;
                         int i, numChans = 0;
-                        for (i = 0; i < jmin (2, totalNumInputChans); ++i)
+                        for (i = 0; i < jmin (2, (int) totalNumInputChans); ++i)
                         {
                             info->isInput = 1;
                             info->channelNum = i;
@@ -1048,7 +1048,7 @@ private:
 
                         const int outputBufferIndex = numChans;
 
-                        for (i = 0; i < jmin (2, totalNumOutputChans); ++i)
+                        for (i = 0; i < jmin (2, (int) totalNumOutputChans); ++i)
                         {
                             info->isInput = 0;
                             info->channelNum = i;

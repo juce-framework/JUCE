@@ -1590,8 +1590,8 @@ void PathPointComponent::updatePosition()
     double x, y;
     path->getPoint (index, pointNumber, x, y, area);
 
-    setCentrePosition (roundDoubleToInt (x),
-                       roundDoubleToInt (y));
+    setCentrePosition (roundToInt (x),
+                       roundToInt (y));
 }
 
 void PathPointComponent::showPopupMenu()

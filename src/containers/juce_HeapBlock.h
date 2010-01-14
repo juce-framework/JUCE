@@ -89,7 +89,7 @@ public:
 
         If you want an array of zero values, you can use the calloc() method instead.
     */
-    HeapBlock (const int numElements)
+    HeapBlock (const size_t numElements)
         : data ((ElementType*) ::juce_malloc (numElements * sizeof (ElementType)))
     {
     }
@@ -170,7 +170,7 @@ public:
         The data that is allocated will be freed when this object is deleted, or when you
         call free() or any of the allocation methods.
     */
-    void malloc (const int newNumElements, const unsigned int elementSize = sizeof (ElementType))
+    void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         ::juce_free (data);
         data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
@@ -179,7 +179,7 @@ public:
     /** Allocates a specified amount of memory and clears it.
         This does the same job as the malloc() method, but clears the memory that it allocates.
     */
-    void calloc (const int newNumElements, const unsigned int elementSize = sizeof (ElementType))
+    void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         ::juce_free (data);
         data = (ElementType*) ::juce_calloc (newNumElements * elementSize);
@@ -189,7 +189,7 @@ public:
         This does the same job as either malloc() or calloc(), depending on the
         initialiseToZero parameter.
     */
-    void allocate (const int newNumElements, const bool initialiseToZero)
+    void allocate (const size_t newNumElements, const bool initialiseToZero)
     {
         ::juce_free (data);
 
@@ -204,7 +204,7 @@ public:
         The semantics of this method are the same as malloc() and calloc(), but it
         uses realloc() to keep as much of the existing data as possible.
     */
-    void realloc (const int newNumElements, const unsigned int elementSize = sizeof (ElementType))
+    void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         if (data == 0)
             data = (ElementType*) ::juce_malloc (newNumElements * elementSize);

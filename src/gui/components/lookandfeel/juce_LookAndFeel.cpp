@@ -394,7 +394,7 @@ void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
     const int yIndent = jmin (4, button.proportionOfHeight (0.3f));
     const int cornerSize = jmin (button.getHeight(), button.getWidth()) / 2;
 
-    const int fontHeight = roundFloatToInt (font.getHeight() * 0.6f);
+    const int fontHeight = roundToInt (font.getHeight() * 0.6f);
     const int leftIndent  = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnLeft() ? 4 : 2));
     const int rightIndent = jmin (fontHeight, 2 + cornerSize / (button.isConnectedOnRight() ? 4 : 2));
 
@@ -976,7 +976,7 @@ void LookAndFeel::getIdealPopupMenuItemSize (const String& text,
         if (standardMenuItemHeight > 0 && font.getHeight() > standardMenuItemHeight / 1.3f)
             font.setHeight (standardMenuItemHeight / 1.3f);
 
-        idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : roundFloatToInt (font.getHeight() * 1.3f);
+        idealHeight = standardMenuItemHeight > 0 ? standardMenuItemHeight : roundToInt (font.getHeight() * 1.3f);
         idealWidth = font.getStringWidth (text) + idealHeight * 2;
     }
 }
@@ -2056,9 +2056,9 @@ void LookAndFeel::drawGroupComponentOutline (Graphics& g, int width, int height,
                     .withMultipliedAlpha (alpha));
     g.setFont (f);
     g.drawText (text,
-                roundFloatToInt (x + textX), 0,
-                roundFloatToInt (textW),
-                roundFloatToInt (textH),
+                roundToInt (x + textX), 0,
+                roundToInt (textW),
+                roundToInt (textH),
                 Justification::centred, true);
 }
 
@@ -2579,8 +2579,8 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
 
     if (width > 450 && ! isDirectory)
     {
-        const int sizeX = roundFloatToInt (width * 0.7f);
-        const int dateX = roundFloatToInt (width * 0.8f);
+        const int sizeX = roundToInt (width * 0.7f);
+        const int dateX = roundToInt (width * 0.8f);
 
         g.drawFittedText (filename,
                           x, 0, sizeX - x, height,
@@ -2755,7 +2755,7 @@ void LookAndFeel::drawLevelMeter (Graphics& g, int width, int height, float leve
     g.drawRoundedRectangle (1.0f, 1.0f, width - 2.0f, height - 2.0f, 3.0f, 1.0f);
 
     const int totalBlocks = 7;
-    const int numBlocks = roundDoubleToInt (totalBlocks * level);
+    const int numBlocks = roundToInt (totalBlocks * level);
     const float w = (width - 6.0f) / (float) totalBlocks;
 
     for (int i = 0; i < totalBlocks; ++i)

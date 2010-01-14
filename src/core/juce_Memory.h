@@ -200,7 +200,7 @@
 
 //==============================================================================
 /** Clears a block of memory. */
-inline void zeromem (void* memory, int numBytes)                { memset (memory, 0, numBytes); }
+inline void zeromem (void* memory, size_t numBytes)             { memset (memory, 0, numBytes); }
 
 /** Clears a reference to a local structure. */
 template <typename Type>

@@ -49,7 +49,7 @@ AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) throw()
     size (other.size)
 {
     allocateData();
-    const int numBytes = size * sizeof (float);
+    const size_t numBytes = size * sizeof (float);
 
     for (int i = 0; i < numChannels; ++i)
         memcpy (channels[i], other.channels[i], numBytes);
@@ -57,8 +57,8 @@ AudioSampleBuffer::AudioSampleBuffer (const AudioSampleBuffer& other) throw()
 
 void AudioSampleBuffer::allocateData()
 {
-    const int channelListSize = (numChannels + 1) * sizeof (float*);
-    allocatedBytes = numChannels * size * sizeof (float) + channelListSize + 32;
+    const size_t channelListSize = (numChannels + 1) * sizeof (float*);
+    allocatedBytes = (int) (numChannels * size * sizeof (float) + channelListSize + 32);
     allocatedData.malloc (allocatedBytes);
     channels = (float**) allocatedData;
 
@@ -128,7 +128,7 @@ const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& 
     {
         setSize (other.getNumChannels(), other.getNumSamples(), false, false, false);
 
-        const int numBytes = size * sizeof (float);
+        const size_t numBytes = size * sizeof (float);
 
         for (int i = 0; i < numChannels; ++i)
             memcpy (channels[i], other.channels[i], numBytes);
@@ -151,8 +151,8 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
     if (newNumSamples != size || newNumChannels != numChannels)
     {
-        const int channelListSize = (newNumChannels + 1) * sizeof (float*);
-        const int newTotalBytes = (newNumChannels * newNumSamples * sizeof (float)) + channelListSize + 32;
+        const size_t channelListSize = (newNumChannels + 1) * sizeof (float*);
+        const size_t newTotalBytes = (newNumChannels * newNumSamples * sizeof (float)) + channelListSize + 32;
 
         if (keepExistingContent)
         {
@@ -160,7 +160,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             newData.allocate (newTotalBytes, clearExtraSpace);
 
             const int numChansToCopy = jmin (numChannels, newNumChannels);
-            const int numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
+            const size_t numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
 
             float** const newChannels = (float**) newData;
             float* newChan = (float*) (newData + channelListSize);
@@ -172,7 +172,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             }
 
             allocatedData.swapWith (newData);
-            allocatedBytes = newTotalBytes;
+            allocatedBytes = (int) newTotalBytes;
             channels = (float**) allocatedData;
         }
         else
@@ -680,7 +680,7 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
                         else if (samp >= 1.0)
                             dest[i] = INT_MAX;
                         else
-                            dest[i] = roundDoubleToInt (INT_MAX * samp);
+                            dest[i] = roundToInt (INT_MAX * samp);
                     }
                 }
             }

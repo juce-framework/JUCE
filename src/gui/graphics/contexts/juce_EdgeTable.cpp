@@ -71,8 +71,8 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
 
     while (iter.next())
     {
-        int y1 = roundFloatToInt (iter.y1 * 256.0f);
-        int y2 = roundFloatToInt (iter.y2 * 256.0f);
+        int y1 = roundToInt (iter.y1 * 256.0f);
+        int y2 = roundToInt (iter.y2 * 256.0f);
 
         if (y1 != y2)
         {
@@ -103,7 +103,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
                 do
                 {
                     const int step = jmin (stepSize, y2 - y1, 256 - (y1 & 255));
-                    int x = roundDoubleToInt (startX + multiplier * ((y1 + (step >> 1)) - startY));
+                    int x = roundToInt (startX + multiplier * ((y1 + (step >> 1)) - startY));
 
                     if (x < leftLimit)
                         x = leftLimit;
@@ -180,7 +180,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
 }
 
 EdgeTable::EdgeTable (const float x, const float y, const float w, const float h) throw()
-   : bounds (Rectangle ((int) floorf (x), roundFloatToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
+   : bounds (Rectangle ((int) floorf (x), roundToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
@@ -189,12 +189,12 @@ EdgeTable::EdgeTable (const float x, const float y, const float w, const float h
     table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
     table[0] = 0;
 
-    const int x1 = roundFloatToInt (x * 256.0f);
-    const int x2 = roundFloatToInt ((x + w) * 256.0f);
+    const int x1 = roundToInt (x * 256.0f);
+    const int x2 = roundToInt ((x + w) * 256.0f);
 
-    int y1 = roundFloatToInt (y * 256.0f) - (bounds.getY() << 8);
+    int y1 = roundToInt (y * 256.0f) - (bounds.getY() << 8);
     jassert (y1 < 256);
-    int y2 = roundFloatToInt ((y + h) * 256.0f) - (bounds.getY() << 8);
+    int y2 = roundToInt ((y + h) * 256.0f) - (bounds.getY() << 8);
 
     if (x2 <= x1 || y2 <= y1)
     {
@@ -436,7 +436,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) t
     }
 
     ++otherLine;
-    const int lineSizeBytes = (dest[0] * 2 + 1) * sizeof (int);
+    const size_t lineSizeBytes = (dest[0] * 2 + 1) * sizeof (int);
     int* temp = (int*) alloca (lineSizeBytes);
     memcpy (temp, dest, lineSizeBytes);
 

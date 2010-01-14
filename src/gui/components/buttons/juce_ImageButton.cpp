@@ -98,7 +98,7 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     downOpacity   = imageOpacityWhenDown;
     downOverlay   = overlayColourWhenDown;
 
-    alphaThreshold = (unsigned char) jlimit (0, 0xff, roundFloatToInt (255.0f * hitTestAlphaThreshold));
+    alphaThreshold = (unsigned char) jlimit (0, 0xff, roundToInt (255.0f * hitTestAlphaThreshold));
 
     repaint();
 }
@@ -162,13 +162,13 @@ void ImageButton::paintButton (Graphics& g,
 
                 if (imRatio > destRatio)
                 {
-                    newW = roundFloatToInt (imageH / imRatio);
+                    newW = roundToInt (imageH / imRatio);
                     newH = imageH;
                 }
                 else
                 {
                     newW = imageW;
-                    newH = roundFloatToInt (imageW * imRatio);
+                    newH = roundToInt (imageW * imRatio);
                 }
 
                 imageX = (imageW - newW) / 2;

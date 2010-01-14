@@ -240,8 +240,8 @@ public:
         RectanglePlacement rp (RectanglePlacement::centred);
         double dx = 0, dy = 0, dw = width, dh = height;
         rp.applyTo (dx, dy, dw, dh, x, y, w, h);
-        const int rx = roundDoubleToInt (dx), ry = roundDoubleToInt (dy);
-        const int rw = roundDoubleToInt (dw), rh = roundDoubleToInt (dh);
+        const int rx = roundToInt (dx), ry = roundToInt (dy);
+        const int rw = roundToInt (dw), rh = roundToInt (dh);
 
         g.saveState();
         g.excludeClipRegion (rx, ry, rw, rh);

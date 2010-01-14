@@ -90,11 +90,11 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
                  && ((data[0] == (char)-2 && data[1] == (char)-1)
                       || (data[0] == (char)-1 && data[1] == (char)-2)))
             {
-                textToParse = String::createStringFromData ((const char*) data.getData(), data.getSize());
+                textToParse = String::createStringFromData ((const char*) data.getData(), (int) data.getSize());
             }
             else
             {
-                textToParse = String::fromUTF8 ((const uint8*) data.getData(), data.getSize());
+                textToParse = String::fromUTF8 ((const uint8*) data.getData(), (int) data.getSize());
             }
 
             if (! onlyReadOuterDocumentElement)

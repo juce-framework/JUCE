@@ -431,7 +431,7 @@ private:
 
             // just a short text attachment, so use simple url encoding..
             headers = "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
-                        + String (postData.getSize())
+                        + String ((unsigned int) postData.getSize())
                         + "\r\n";
         }
     }

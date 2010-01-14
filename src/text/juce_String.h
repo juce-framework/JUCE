@@ -64,7 +64,7 @@ public:
         less if the string is actually shorter)
     */
     String (const char* const text,
-            const int maxChars) throw();
+            const size_t maxChars) throw();
 
     /** Creates a string from a zero-terminated unicode text string. */
     String (const juce_wchar* const unicodeText) throw();
@@ -75,7 +75,7 @@ public:
         less if the string is actually shorter)
     */
     String (const juce_wchar* const unicodeText,
-            const int maxChars) throw();
+            const size_t maxChars) throw();
 
     /** Creates a string from a single character. */
     static const String charToString (const tchar character) throw();
@@ -1065,7 +1065,7 @@ public:
                                 value is less than the currently allocated size, it will
                                 have no effect.
     */
-    void preallocateStorage (const int numCharsNeeded) throw();
+    void preallocateStorage (const size_t numCharsNeeded) throw();
 
     //==============================================================================
     /** A helper class to improve performance when concatenating many large strings

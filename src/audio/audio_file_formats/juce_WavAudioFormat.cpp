@@ -111,7 +111,7 @@ struct BWAVChunk
 
     static MemoryBlock createFrom (const StringPairArray& values)
     {
-        const int sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].copyToUTF8 (0) - 1;
+        const size_t sizeNeeded = sizeof (BWAVChunk) + values [WavAudioFormat::bwavCodingHistory].copyToUTF8 (0) - 1;
         MemoryBlock data ((sizeNeeded + 3) & ~3);
         data.fillWith (0);
 
@@ -277,14 +277,14 @@ public:
 
                         // Broadcast-wav extension chunk..
                         HeapBlock <BWAVChunk> bwav;
-                        bwav.calloc (jmax (length + 1, (int) sizeof (BWAVChunk)), 1);
+                        bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
                         input->read (bwav, length);
                         bwav->copyTo (metadataValues);
                     }
                     else if (chunkType == chunkName ("smpl"))
                     {
                         HeapBlock <SMPLChunk> smpl;
-                        smpl.calloc (jmax (length + 1, (int) sizeof (SMPLChunk)), 1);
+                        smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
                         input->read (smpl, length);
                         smpl->copyTo (metadataValues, length);
                     }
@@ -550,8 +550,8 @@ class WavAudioFormatWriter  : public AudioFormatWriter
 
         const int bytesPerFrame = numChannels * bitsPerSample / 8;
         output->writeInt (chunkName ("RIFF"));
-        output->writeInt (lengthInSamples * bytesPerFrame
-                            + ((bwavChunk.getSize() > 0) ? (44 + bwavChunk.getSize()) : 36));
+        output->writeInt ((int) (lengthInSamples * bytesPerFrame
+                                   + ((bwavChunk.getSize() > 0) ? (44 + bwavChunk.getSize()) : 36)));
 
         output->writeInt (chunkName ("WAVE"));
         output->writeInt (chunkName ("fmt "));
@@ -567,8 +567,8 @@ class WavAudioFormatWriter  : public AudioFormatWriter
         if (bwavChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("bext"));
-            output->writeInt (bwavChunk.getSize());
-            output->write (bwavChunk.getData(), bwavChunk.getSize());
+            output->writeInt ((int) bwavChunk.getSize());
+            output->write (bwavChunk.getData(), (int) bwavChunk.getSize());
         }
 
         output->writeInt (chunkName ("data"));
@@ -843,7 +843,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
         {
             MemoryBlock chunk = BWAVChunk::createFrom (newMetadata);
 
-            if (chunk.getSize() <= bwavSize)
+            if (chunk.getSize() <= (size_t) bwavSize)
             {
                 // the new one will fit in the space available, so write it directly..
                 const int64 oldSize = wavFile.getSize();
@@ -851,7 +851,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
                 {
                     ScopedPointer <FileOutputStream> out (wavFile.createOutputStream());
                     out->setPosition (bwavPos);
-                    out->write (chunk.getData(), chunk.getSize());
+                    out->write (chunk.getData(), (int) chunk.getSize());
                     out->setPosition (oldSize);
                 }
 

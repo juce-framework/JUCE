@@ -36,7 +36,7 @@ MemoryBlock::MemoryBlock() throw()
 {
 }
 
-MemoryBlock::MemoryBlock (const int initialSize,
+MemoryBlock::MemoryBlock (const size_t initialSize,
                           const bool initialiseToZero) throw()
 {
     if (initialSize > 0)
@@ -62,8 +62,8 @@ MemoryBlock::MemoryBlock (const MemoryBlock& other) throw()
 }
 
 MemoryBlock::MemoryBlock (const void* const dataToInitialiseFrom,
-                          const int sizeInBytes) throw()
-    : size (jmax (0, sizeInBytes))
+                          const size_t sizeInBytes) throw()
+    : size (jmax ((size_t) 0, sizeInBytes))
 {
     jassert (sizeInBytes >= 0);
 
@@ -109,7 +109,7 @@ bool MemoryBlock::operator!= (const MemoryBlock& other) const throw()
 
 //==============================================================================
 // this will resize the block to this size
-void MemoryBlock::setSize (const int newSize,
+void MemoryBlock::setSize (const size_t newSize,
                            const bool initialiseToZero) throw()
 {
     if (size != newSize)
@@ -138,7 +138,7 @@ void MemoryBlock::setSize (const int newSize,
     }
 }
 
-void MemoryBlock::ensureSize (const int minimumSize,
+void MemoryBlock::ensureSize (const size_t minimumSize,
                               const bool initialiseToZero) throw()
 {
     if (size < minimumSize)
@@ -158,17 +158,17 @@ void MemoryBlock::fillWith (const uint8 value) throw()
 }
 
 void MemoryBlock::append (const void* const srcData,
-                          const int numBytes) throw()
+                          const size_t numBytes) throw()
 {
     if (numBytes > 0)
     {
-        const int oldSize = size;
+        const size_t oldSize = size;
         setSize (size + numBytes);
         memcpy (data + oldSize, srcData, numBytes);
     }
 }
 
-void MemoryBlock::copyFrom (const void* const src, int offset, int num) throw()
+void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) throw()
 {
     const char* d = (const char*) src;
 
@@ -186,7 +186,7 @@ void MemoryBlock::copyFrom (const void* const src, int offset, int num) throw()
         memcpy (data + offset, d, num);
 }
 
-void MemoryBlock::copyTo (void* const dst, int offset, int num) const throw()
+void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const throw()
 {
     char* d = (char*) dst;
 
@@ -201,7 +201,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, int num) const throw()
 
     if (offset + num > size)
     {
-        const int newNum = size - offset;
+        const size_t newNum = size - offset;
         zeromem (d + newNum, num - newNum);
         num = newNum;
     }
@@ -210,7 +210,7 @@ void MemoryBlock::copyTo (void* const dst, int offset, int num) const throw()
         memcpy (d, data + offset, num);
 }
 
-void MemoryBlock::removeSection (int startByte, int numBytesToRemove) throw()
+void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove) throw()
 {
     if (startByte < 0)
     {
@@ -238,17 +238,17 @@ const String MemoryBlock::toString() const throw()
 }
 
 //==============================================================================
-int MemoryBlock::getBitRange (const int bitRangeStart, int numBits) const throw()
+int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const throw()
 {
     int res = 0;
 
-    int byte = bitRangeStart >> 3;
-    int offsetInByte = bitRangeStart & 7;
-    int bitsSoFar = 0;
+    size_t byte = bitRangeStart >> 3;
+    size_t offsetInByte = bitRangeStart & 7;
+    size_t bitsSoFar = 0;
 
-    while (numBits > 0 && byte < size)
+    while (numBits > 0 && (size_t) byte < size)
     {
-        const int bitsThisTime = jmin (numBits, 8 - offsetInByte);
+        const size_t bitsThisTime = jmin (numBits, 8 - offsetInByte);
         const int mask = (0xff >> (8 - bitsThisTime)) << offsetInByte;
 
         res |= (((data[byte] & mask) >> offsetInByte) << bitsSoFar);
@@ -262,15 +262,15 @@ int MemoryBlock::getBitRange (const int bitRangeStart, int numBits) const throw(
     return res;
 }
 
-void MemoryBlock::setBitRange (const int bitRangeStart, int numBits, int bitsToSet) throw()
+void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int bitsToSet) throw()
 {
-    int byte = bitRangeStart >> 3;
-    int offsetInByte = bitRangeStart & 7;
+    size_t byte = bitRangeStart >> 3;
+    size_t offsetInByte = bitRangeStart & 7;
     unsigned int mask = ~((((unsigned int)0xffffffff) << (32 - numBits)) >> (32 - numBits));
 
-    while (numBits > 0 && byte < size)
+    while (numBits > 0 && (size_t) byte < size)
     {
-        const int bitsThisTime = jmin (numBits, 8 - offsetInByte);
+        const size_t bitsThisTime = jmin (numBits, 8 - offsetInByte);
 
         const unsigned int tempMask = (mask << offsetInByte) | ~((((unsigned int)0xffffffff) >> offsetInByte) << offsetInByte);
         const unsigned int tempBits = bitsToSet << offsetInByte;
@@ -337,16 +337,16 @@ static const char* const encodingTable
 
 const String MemoryBlock::toBase64Encoding() const throw()
 {
-    const int numChars = ((size << 3) + 5) / 6;
+    const size_t numChars = ((size << 3) + 5) / 6;
 
-    String destString (size); // store the length, followed by a '.', and then the data.
+    String destString ((unsigned int) size); // store the length, followed by a '.', and then the data.
     const int initialLen = destString.length();
     destString.preallocateStorage (initialLen + 2 + numChars);
 
     tchar* d = const_cast <tchar*> (((const tchar*) destString) + initialLen);
     *d++ = T('.');
 
-    for (int i = 0; i < numChars; ++i)
+    for (size_t i = 0; i < numChars; ++i)
         *d++ = encodingTable [getBitRange (i * 6, 6)];
 
     *d++ = 0;

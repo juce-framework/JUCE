@@ -190,7 +190,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     // (put a sanity-check on the file size, as midi files are generally small)
     if (sourceStream.readIntoMemoryBlock (data, maxSensibleMidiFileSize))
     {
-        int size = data.getSize();
+        size_t size = data.getSize();
         const char* d = (char*) data.getData();
         short fileType, expectedTracks;
 
@@ -430,7 +430,7 @@ void MidiFile::writeTrack (OutputStream& mainOut,
     {
         const MidiMessage& mm = ms.getEventPointer(i)->message;
 
-        const int tick = roundDoubleToInt (mm.getTimeStamp());
+        const int tick = roundToInt (mm.getTimeStamp());
         const int delta = jmax (0, tick - lastTick);
         writeVariableLengthInt (out, delta);
         lastTick = tick;
@@ -458,8 +458,8 @@ void MidiFile::writeTrack (OutputStream& mainOut,
                m.getRawDataSize());
 
     mainOut.writeIntBigEndian ((int) ByteOrder::bigEndianInt ("MTrk"));
-    mainOut.writeIntBigEndian (out.getDataSize());
-    mainOut.write (out.getData(), out.getDataSize());
+    mainOut.writeIntBigEndian ((int) out.getDataSize());
+    mainOut.write (out.getData(), (int) out.getDataSize());
 }
 
 END_JUCE_NAMESPACE

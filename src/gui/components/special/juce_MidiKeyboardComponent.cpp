@@ -227,8 +227,8 @@ void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyW
     const int octave = midiNoteNumber / 12;
     const int note = midiNoteNumber % 12;
 
-    x = roundFloatToInt (octave * 7.0f * keyWidth + notePos [note] * keyWidth);
-    w = roundFloatToInt (widths [note] * keyWidth);
+    x = roundToInt (octave * 7.0f * keyWidth + notePos [note] * keyWidth);
+    w = roundToInt (widths [note] * keyWidth);
 }
 
 void MidiKeyboardComponent::getKeyPos (int midiNoteNumber, int& x, int& w) const
@@ -589,7 +589,7 @@ void MidiKeyboardComponent::resized()
         if (orientation != horizontalKeyboard)
             swapVariables (w, h);
 
-        blackNoteLength = roundFloatToInt (h * 0.7f);
+        blackNoteLength = roundToInt (h * 0.7f);
 
         int kx2, kw2;
         getKeyPos (rangeEnd, kx2, kw2);
@@ -795,7 +795,7 @@ void MidiKeyboardComponent::mouseExit (const MouseEvent& e)
 
 void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, float ix, float iy)
 {
-    setLowestVisibleKey (getLowestVisibleKey() + roundFloatToInt ((ix != 0 ? ix : iy) * 5.0f));
+    setLowestVisibleKey (getLowestVisibleKey() + roundToInt ((ix != 0 ? ix : iy) * 5.0f));
 }
 
 void MidiKeyboardComponent::timerCallback()

@@ -168,17 +168,17 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
     messageData.copyFrom (messageHeader, 0, sizeof (messageHeader));
     messageData.copyFrom (message.getData(), sizeof (messageHeader), message.getSize());
 
-    int bytesWritten = 0;
+    size_t bytesWritten = 0;
 
     const ScopedLock sl (pipeAndSocketLock);
 
     if (socket != 0)
     {
-        bytesWritten = socket->write (messageData.getData(), messageData.getSize());
+        bytesWritten = socket->write (messageData.getData(), (int) messageData.getSize());
     }
     else if (pipe != 0)
     {
-        bytesWritten = pipe->write (messageData.getData(), messageData.getSize());
+        bytesWritten = pipe->write (messageData.getData(), (int) messageData.getSize());
     }
 
     if (bytesWritten < 0)

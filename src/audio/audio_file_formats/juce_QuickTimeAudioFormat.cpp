@@ -171,7 +171,7 @@ public:
                                         | kAudioFormatFlagIsPacked
                                         | kAudioFormatFlagsNativeEndian;
         inputStreamDesc.mBitsPerChannel = sizeof (SInt16) * 8;
-        inputStreamDesc.mChannelsPerFrame = jmin (2, inputStreamDesc.mChannelsPerFrame);
+        inputStreamDesc.mChannelsPerFrame = jmin ((UInt32) 2, inputStreamDesc.mChannelsPerFrame);
         inputStreamDesc.mBytesPerFrame = sizeof (SInt16) * inputStreamDesc.mChannelsPerFrame;
         inputStreamDesc.mBytesPerPacket = inputStreamDesc.mBytesPerFrame;
 

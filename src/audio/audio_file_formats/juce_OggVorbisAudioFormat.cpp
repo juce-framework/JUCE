@@ -184,7 +184,7 @@ public:
 
                     jassert (samps <= numToRead);
 
-                    for (int i = jmin (numChannels, reservoir.getNumChannels()); --i >= 0;)
+                    for (int i = jmin ((int) numChannels, reservoir.getNumChannels()); --i >= 0;)
                     {
                         memcpy (reservoir.getSampleData (i, offset),
                                 dataIn[i],

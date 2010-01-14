@@ -312,7 +312,7 @@ int OutputStream::writeFromInputStream (InputStream& source,
     {
         char buffer [8192];
 
-        const int num = source.read (buffer, jmin (numBytesToWrite, sizeof (buffer)));
+        const int num = source.read (buffer, (int) jmin ((size_t) numBytesToWrite, sizeof (buffer)));
 
         if (num == 0)
             break;

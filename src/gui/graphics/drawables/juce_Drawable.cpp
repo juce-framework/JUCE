@@ -87,11 +87,11 @@ void Drawable::drawWithin (Graphics& g,
 }
 
 //==============================================================================
-Drawable* Drawable::createFromImageData (const void* data, const int numBytes)
+Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes)
 {
     Drawable* result = 0;
 
-    Image* const image = ImageFileFormat::loadFrom (data, numBytes);
+    Image* const image = ImageFileFormat::loadFrom (data, (int) numBytes);
 
     if (image != 0)
     {
@@ -101,7 +101,7 @@ Drawable* Drawable::createFromImageData (const void* data, const int numBytes)
     }
     else
     {
-        const String asString (String::createStringFromData (data, numBytes));
+        const String asString (String::createStringFromData (data, (int) numBytes));
 
         XmlDocument doc (asString);
         ScopedPointer <XmlElement> outer (doc.getDocumentElement (true));

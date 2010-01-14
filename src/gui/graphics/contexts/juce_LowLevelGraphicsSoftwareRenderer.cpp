@@ -205,19 +205,19 @@ public:
 
         if (vertical)
         {
-            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (double) (y2 - y1));
-            start = roundDoubleToInt (y1 * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (y2 - y1));
+            start = roundToInt (y1 * scale);
         }
         else if (horizontal)
         {
-            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (double) (x2 - x1));
-            start = roundDoubleToInt (x1 * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (x2 - x1));
+            start = roundToInt (x1 * scale);
         }
         else
         {
             grad = (y2 - y1) / (double) (x1 - x2);
             yTerm = y1 - x1 / grad;
-            scale = roundDoubleToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (y2 * grad - x2)));
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (y2 * grad - x2)));
             grad *= scale;
         }
     }
@@ -227,7 +227,7 @@ public:
         if (vertical)
             linePix = lookupTable [jlimit (0, numEntries, (y * scale - start) >> (int) numScaleBits)];
         else if (! horizontal)
-            start = roundDoubleToInt ((y - yTerm) * grad);
+            start = roundToInt ((y - yTerm) * grad);
     }
 
     forcedinline const PixelARGB getPixel (const int x) const throw()
@@ -265,7 +265,7 @@ public:
         const float gdy = gradient.y1 - gradient.y2;
         maxDist = gdx * gdx + gdy * gdy;
         invScale = numEntries / sqrt (maxDist);
-        jassert (roundDoubleToInt (sqrt (maxDist) * invScale) <= numEntries);
+        jassert (roundToInt (sqrt (maxDist) * invScale) <= numEntries);
     }
 
     forcedinline void setY (const int y) throw()
@@ -280,7 +280,7 @@ public:
         x *= x;
         x += dy;
 
-        return lookupTable [x >= maxDist ? numEntries : roundDoubleToInt (sqrt (x) * invScale)];
+        return lookupTable [x >= maxDist ? numEntries : roundToInt (sqrt (x) * invScale)];
     }
 
 protected:
@@ -323,7 +323,7 @@ public:
         if (x >= maxDist)
             return lookupTable [numEntries];
         else
-            return lookupTable [jmin (numEntries, roundDoubleToInt (sqrt (x) * invScale))];
+            return lookupTable [jmin (numEntries, roundToInt (sqrt (x) * invScale))];
     }
 
 private:
@@ -1573,7 +1573,7 @@ public:
             if (edgeTable != 0)
             {
                 EdgeTable et (*edgeTable);
-                et.translate (x, roundFloatToInt (y));
+                et.translate (x, roundToInt (y));
                 state.fillEdgeTable (image, et, false);
             }
         }
@@ -1596,7 +1596,7 @@ public:
                 glyphPath.getBoundsTransformed (transform.translated (0.0f, -0.5f), px, py, pw, ph);
 
                 Rectangle clip ((int) floorf (px), (int) floorf (py),
-                                roundFloatToInt (pw) + 2, roundFloatToInt (ph) + 2);
+                                roundToInt (pw) + 2, roundToInt (ph) + 2);
 
                 edgeTable = new EdgeTable (clip, glyphPath, transform);
             }

@@ -68,10 +68,10 @@ struct AnimationTask
 
             if (delta < 1.0)
             {
-                const Rectangle newBounds (roundDoubleToInt (left),
-                                           roundDoubleToInt (top),
-                                           roundDoubleToInt (right - left),
-                                           roundDoubleToInt (bottom - top));
+                const Rectangle newBounds (roundToInt (left),
+                                           roundToInt (top),
+                                           roundToInt (right - left),
+                                           roundToInt (bottom - top));
 
                 if (newBounds != destination)
                 {

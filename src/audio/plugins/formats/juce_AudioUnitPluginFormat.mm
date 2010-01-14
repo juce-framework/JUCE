@@ -570,7 +570,7 @@ void AudioUnitPluginInstance::prepareToPlay (double sampleRate_,
         AudioUnitGetProperty (audioUnit, kAudioUnitProperty_Latency, kAudioUnitScope_Global,
                               0, &latencySecs, &latencySize);
 
-        setLatencySamples (roundDoubleToInt (latencySecs * sampleRate_));
+        setLatencySamples (roundToInt (latencySecs * sampleRate_));
 
         AudioUnitReset (audioUnit, kAudioUnitScope_Input, 0);
         AudioUnitReset (audioUnit, kAudioUnitScope_Output, 0);
@@ -796,7 +796,7 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
         }
 
         if (outCurrentSampleInTimeLine != 0)
-            *outCurrentSampleInTimeLine = roundDoubleToInt (result.timeInSeconds * getSampleRate());
+            *outCurrentSampleInTimeLine = roundToInt (result.timeInSeconds * getSampleRate());
 
         if (outIsCycling != 0)
             *outIsCycling = false;

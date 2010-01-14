@@ -75,8 +75,8 @@ private:
     //==============================================================================
   #if JUCE_WINDOWS
     void* internal;
-  #elif JUCE_64BIT
-    long long internal;
+//  #elif JUCE_64BIT
+  //  long long internal;
   #else
     int internal;
   #endif

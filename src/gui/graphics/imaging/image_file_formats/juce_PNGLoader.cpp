@@ -193,11 +193,11 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
 
         // now convert the data to a juce image format..
         image = Image::createNativeImage (hasAlphaChan ? Image::ARGB : Image::RGB,
-                                          width, height, hasAlphaChan);
+                                          (int) width, (int) height, hasAlphaChan);
 
         hasAlphaChan = image->hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-        const Image::BitmapData destData (*image, 0, 0, width, height, true);
+        const Image::BitmapData destData (*image, 0, 0, (int) width, (int) height, true);
         uint8* srcRow = tempBuffer;
         uint8* destRow = destData.data;
 
@@ -210,7 +210,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
 
             if (hasAlphaChan)
             {
-                for (int i = width; --i >= 0;)
+                for (int i = (int) width; --i >= 0;)
                 {
                     ((PixelARGB*) dest)->setARGB (src[3], src[0], src[1], src[2]);
                     ((PixelARGB*) dest)->premultiply();
@@ -220,7 +220,7 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
             }
             else
             {
-                for (int i = width; --i >= 0;)
+                for (int i = (int) width; --i >= 0;)
                 {
                     ((PixelRGB*) dest)->setARGB (0, src[0], src[1], src[2]);
                     dest += destData.pixelStride;
@@ -238,7 +238,7 @@ static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_
 {
     OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
 
-    const bool ok = out->write (data, length);
+    const bool ok = out->write (data, (int) length);
 
     (void) ok;
     jassert (ok);

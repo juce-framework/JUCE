@@ -424,7 +424,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    int numChannels, size, allocatedBytes;
+    int numChannels, size;
+    size_t allocatedBytes;
     float** channels;
     HeapBlock <char> allocatedData;
     float* preallocatedChannelSpace [32];

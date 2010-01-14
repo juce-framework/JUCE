@@ -213,8 +213,8 @@ void ScrollBar::handleAsyncUpdate()
 //==============================================================================
 void ScrollBar::updateThumbPosition() throw()
 {
-    int newThumbSize = roundDoubleToInt ((maximum > minimum) ? (rangeSize * thumbAreaSize) / (maximum - minimum)
-                                                             : thumbAreaSize);
+    int newThumbSize = roundToInt ((maximum > minimum) ? (rangeSize * thumbAreaSize) / (maximum - minimum)
+                                                       : thumbAreaSize);
 
     if (newThumbSize < getLookAndFeel().getMinimumScrollbarThumbSize (*this))
         newThumbSize = jmin (getLookAndFeel().getMinimumScrollbarThumbSize (*this), thumbAreaSize - 1);
@@ -225,8 +225,8 @@ void ScrollBar::updateThumbPosition() throw()
     int newThumbStart = thumbAreaStart;
 
     if (maximum - minimum > rangeSize)
-        newThumbStart += roundDoubleToInt (((rangeStart - minimum) * (thumbAreaSize - newThumbSize))
-                                              / ((maximum - minimum) - rangeSize));
+        newThumbStart += roundToInt (((rangeStart - minimum) * (thumbAreaSize - newThumbSize))
+                                         / ((maximum - minimum) - rangeSize));
 
     setVisible (alwaysVisible || (maximum - minimum > rangeSize && rangeSize > 0.0));
 

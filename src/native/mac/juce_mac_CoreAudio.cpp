@@ -246,7 +246,7 @@ public:
 
                 for (int i = 32; i < 8192; i += 32)
                 {
-                    for (int j = size / sizeof (AudioValueRange); --j >= 0;)
+                    for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {
                         if (i >= ranges[j].mMinimum && i <= ranges[j].mMaximum)
                         {
@@ -281,7 +281,7 @@ public:
                 {
                     bool ok = false;
 
-                    for (int j = size / sizeof (AudioValueRange); --j >= 0;)
+                    for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                         if (possibleRates[i] >= ranges[j].mMinimum - 2 && possibleRates[i] <= ranges[j].mMaximum + 2)
                             ok = true;
 
@@ -852,7 +852,7 @@ private:
             types.calloc (size, 1);
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, types)))
-                return size / sizeof (OSType);
+                return size / (int) sizeof (OSType);
         }
 
         return 0;
@@ -1152,7 +1152,7 @@ public:
             if (OK (AudioObjectGetPropertyData (kAudioObjectSystemObject, &pa, 0, 0, &size, devs)))
             {
                 static bool alreadyLogged = false;
-                const int num = size / sizeof (AudioDeviceID);
+                const int num = size / (int) sizeof (AudioDeviceID);
                 for (int i = 0; i < num; ++i)
                 {
                     char name [1024];
@@ -1161,7 +1161,7 @@ public:
 
                     if (OK (AudioObjectGetPropertyData (devs[i], &pa, 0, 0, &size, name)))
                     {
-                        const String nameString (String::fromUTF8 ((const uint8*) name, strlen (name)));
+                        const String nameString (String::fromUTF8 ((const uint8*) name, (int) strlen (name)));
 
                         if (! alreadyLogged)
                             log (T("CoreAudio device: ") + nameString);

@@ -195,10 +195,10 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     }
                 }
 
-                *dest++ = (uint8) jmin (0xff, roundFloatToInt (c1));
-                *dest++ = (uint8) jmin (0xff, roundFloatToInt (c2));
-                *dest++ = (uint8) jmin (0xff, roundFloatToInt (c3));
-                *dest++ = (uint8) jmin (0xff, roundFloatToInt (c4));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c1));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c2));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c3));
+                *dest++ = (uint8) jmin (0xff, roundToInt (c4));
             }
         }
     }
@@ -249,9 +249,9 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                     }
                 }
 
-                *dest++ = (uint8) roundFloatToInt (c1);
-                *dest++ = (uint8) roundFloatToInt (c2);
-                *dest++ = (uint8) roundFloatToInt (c3);
+                *dest++ = (uint8) roundToInt (c1);
+                *dest++ = (uint8) roundToInt (c2);
+                *dest++ = (uint8) roundToInt (c3);
             }
         }
     }

@@ -182,7 +182,7 @@ public:
 
     static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)
     {
-        for (int i = [menu numberOfItems]; --i >= 0;)
+        for (NSInteger i = [menu numberOfItems]; --i >= 0;)
         {
             NSMenuItem* m = [menu itemAtIndex: i];
             if ([m tag] == info.commandID)
@@ -386,7 +386,7 @@ END_JUCE_NAMESPACE
 
         NSArray* info = (NSArray*) [item representedObject];
 
-        owner->invoke ([item tag],
+        owner->invoke ((int) [item tag],
                        (ApplicationCommandManager*) (pointer_sized_int)
                             [((NSNumber*) [info objectAtIndex: 0]) unsignedLongLongValue],
                        (int) [((NSNumber*) [info objectAtIndex: 1]) intValue]);

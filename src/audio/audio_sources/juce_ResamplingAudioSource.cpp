@@ -65,7 +65,7 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected,
 
     input->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
-    buffer.setSize (2, roundDoubleToInt (samplesPerBlockExpected * ratio) + 32);
+    buffer.setSize (2, roundToInt (samplesPerBlockExpected * ratio) + 32);
     buffer.clear();
     sampsInBuffer = 0;
     bufferPos = 0;
@@ -91,7 +91,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         lastRatio = ratio;
     }
 
-    const int sampsNeeded = roundDoubleToInt (info.numSamples * ratio) + 2;
+    const int sampsNeeded = roundToInt (info.numSamples * ratio) + 2;
 
     int bufferSize = buffer.getNumSamples();
 

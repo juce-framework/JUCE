@@ -141,7 +141,7 @@ void* juce_openInternetFile (const String& url,
 
                             for (;;)
                             {
-                                const int bytesToDo = jmin (1024, postData.getSize() - bytesSent);
+                                const int bytesToDo = jmin (1024, (int) postData.getSize() - bytesSent);
                                 DWORD bytesDone = 0;
 
                                 if (bytesToDo > 0

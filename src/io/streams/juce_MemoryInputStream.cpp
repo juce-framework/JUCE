@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
-                                      const int sourceDataSize,
+                                      const size_t sourceDataSize,
                                       const bool keepInternalCopy)
     : data ((const char*) sourceData),
       dataSize (sourceDataSize),
@@ -57,10 +57,10 @@ int64 MemoryInputStream::getTotalLength()
 
 int MemoryInputStream::read (void* buffer, int howMany)
 {
-    const int num = jmin (howMany, dataSize - position);
+    const size_t num = jmin ((size_t) howMany, dataSize - position);
     memcpy (buffer, data + position, num);
     position += num;
-    return num;
+    return (int) num;
 }
 
 bool MemoryInputStream::isExhausted()

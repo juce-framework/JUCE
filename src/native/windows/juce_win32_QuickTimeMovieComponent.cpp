@@ -497,8 +497,8 @@ void QuickTimeMovieComponent::setBoundsWithCorrectAspectRatio (const Rectangle& 
 
         if (w > 0 && h > 0)
         {
-            setBounds (roundDoubleToInt (x), roundDoubleToInt (y),
-                       roundDoubleToInt (w), roundDoubleToInt (h));
+            setBounds (roundToInt (x), roundToInt (y),
+                       roundToInt (w), roundToInt (h));
         }
     }
     else

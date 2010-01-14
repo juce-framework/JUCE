@@ -99,58 +99,28 @@ typedef wchar_t                     juce_wchar;
 // Some indispensible min/max functions
 
 /** Returns the larger of two values. */
-forcedinline int    jmax (const int a, const int b) throw()                                   { return (a < b) ? b : a; }
-/** Returns the larger of two values. */
-forcedinline int64  jmax (const int64 a, const int64 b) throw()                               { return (a < b) ? b : a; }
-/** Returns the larger of two values. */
-forcedinline float  jmax (const float a, const float b) throw()                               { return (a < b) ? b : a; }
-/** Returns the larger of two values. */
-forcedinline double jmax (const double a, const double b) throw()                             { return (a < b) ? b : a; }
+template <typename Type>
+inline Type jmax (const Type a, const Type b)                                               { return (a < b) ? b : a; }
 
 /** Returns the larger of three values. */
-inline int    jmax (const int a, const int b, const int c) throw()                            { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
-/** Returns the larger of three values. */
-inline int64  jmax (const int64 a, const int64 b, const int64 c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
-/** Returns the larger of three values. */
-inline float  jmax (const float a, const float b, const float c) throw()                      { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
-/** Returns the larger of three values. */
-inline double jmax (const double a, const double b, const double c) throw()                   { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
+template <typename Type>
+inline Type jmax (const Type a, const Type b, const Type c)                                 { return (a < b) ? ((b < c) ? c : b) : ((a < c) ? c : a); }
 
 /** Returns the larger of four values. */
-inline int    jmax (const int a, const int b, const int c, const int d) throw()               { return jmax (a, jmax (b, c, d)); }
-/** Returns the larger of four values. */
-inline int64  jmax (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmax (a, jmax (b, c, d)); }
-/** Returns the larger of four values. */
-inline float  jmax (const float a, const float b, const float c, const float d) throw()       { return jmax (a, jmax (b, c, d)); }
-/** Returns the larger of four values. */
-inline double jmax (const double a, const double b, const double c, const double d) throw()   { return jmax (a, jmax (b, c, d)); }
+template <typename Type>
+inline Type jmax (const Type a, const Type b, const Type c, const Type d)                   { return jmax (a, jmax (b, c, d)); }
 
 /** Returns the smaller of two values. */
-inline int    jmin (const int a, const int b) throw()                                         { return (a > b) ? b : a; }
-/** Returns the smaller of two values. */
-inline int64  jmin (const int64 a, const int64 b) throw()                                     { return (a > b) ? b : a; }
-/** Returns the smaller of two values. */
-inline float  jmin (const float a, const float b) throw()                                     { return (a > b) ? b : a; }
-/** Returns the smaller of two values. */
-inline double jmin (const double a, const double b) throw()                                   { return (a > b) ? b : a; }
+template <typename Type>
+inline Type jmin (const Type a, const Type b)                                               { return (a > b) ? b : a; }
 
 /** Returns the smaller of three values. */
-inline int    jmin (const int a, const int b, const int c) throw()                            { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
-/** Returns the smaller of three values. */
-inline int64  jmin (const int64 a, const int64 b, const int64 c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
-/** Returns the smaller of three values. */
-inline float  jmin (const float a, const float b, const float c) throw()                      { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
-/** Returns the smaller of three values. */
-inline double jmin (const double a, const double b, const double c) throw()                   { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+template <typename Type>
+inline Type jmin (const Type a, const Type b, const Type c)                                 { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
 
 /** Returns the smaller of four values. */
-inline int    jmin (const int a, const int b, const int c, const int d) throw()               { return jmin (a, jmin (b, c, d)); }
-/** Returns the smaller of four values. */
-inline int64  jmin (const int64 a, const int64 b, const int64 c, const int64 d) throw()       { return jmin (a, jmin (b, c, d)); }
-/** Returns the smaller of four values. */
-inline float  jmin (const float a, const float b, const float c, const float d) throw()       { return jmin (a, jmin (b, c, d)); }
-/** Returns the smaller of four values. */
-inline double jmin (const double a, const double b, const double c, const double d) throw()   { return jmin (a, jmin (b, c, d)); }
+template <typename Type>
+inline Type jmin (const Type a, const Type b, const Type c, const Type d)                   { return jmin (a, jmin (b, c, d)); }
 
 
 //==============================================================================
@@ -268,19 +238,19 @@ inline bool juce_isfinite (FloatingPointType value)
 //==============================================================================
 /** Fast floating-point-to-integer conversion.
 
-    This is faster than using the normal c++ cast to convert a double to an int, and
+    This is faster than using the normal c++ cast to convert a float to an int, and
     it will round the value to the nearest integer, rather than rounding it down
     like the normal cast does.
 
     Note that this routine gets its speed at the expense of some accuracy, and when
     rounding values whose floating point component is exactly 0.5, odd numbers and
-    even numbers will be rounded up or down differently. For a more accurate conversion,
-    see roundDoubleToIntAccurate().
+    even numbers will be rounded up or down differently.
 */
-inline int roundDoubleToInt (const double value) throw()
+template <typename FloatType>
+inline int roundToInt (const FloatType value) throw()
 {
     union { int asInt[2]; double asDouble; } n;
-    n.asDouble = value + 6755399441055744.0;
+    n.asDouble = ((double) value) + 6755399441055744.0;
 
     #if JUCE_BIG_ENDIAN
       return n.asInt [1];
@@ -294,9 +264,25 @@ inline int roundDoubleToInt (const double value) throw()
     This is a slightly slower and slightly more accurate version of roundDoubleToInt(). It works
     fine for values above zero, but negative numbers are rounded the wrong way.
 */
-inline int roundDoubleToIntAccurate (const double value) throw()
+inline int roundToIntAccurate (const double value) throw()
 {
-    return roundDoubleToInt (value + 1.5e-8);
+    return roundToInt (value + 1.5e-8);
+}
+
+/** Fast floating-point-to-integer conversion.
+
+    This is faster than using the normal c++ cast to convert a double to an int, and
+    it will round the value to the nearest integer, rather than rounding it down
+    like the normal cast does.
+
+    Note that this routine gets its speed at the expense of some accuracy, and when
+    rounding values whose floating point component is exactly 0.5, odd numbers and
+    even numbers will be rounded up or down differently. For a more accurate conversion,
+    see roundDoubleToIntAccurate().
+*/
+inline int roundDoubleToInt (const double value) throw()
+{
+    return roundToInt (value);
 }
 
 /** Fast floating-point-to-integer conversion.
@@ -311,15 +297,9 @@ inline int roundDoubleToIntAccurate (const double value) throw()
 */
 inline int roundFloatToInt (const float value) throw()
 {
-    union { int asInt[2]; double asDouble; } n;
-    n.asDouble = value + 6755399441055744.0;
-
-    #if JUCE_BIG_ENDIAN
-      return n.asInt [1];
-    #else
-      return n.asInt [0];
-    #endif
+    return roundToInt (value);
 }
+
 
 //==============================================================================
 

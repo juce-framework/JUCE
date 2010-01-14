@@ -206,7 +206,7 @@ public:
     while (runLoopThread->isThreadRunning() && ! initialised)
     {
         if (callback != 0)
-            callback (context, -1, [[request HTTPBody] length]);
+            callback (context, -1, (int) [[request HTTPBody] length]);
 
         Thread::sleep (1);
     }
@@ -283,7 +283,7 @@ public:
 
     while (numNeeded > 0)
     {
-        int available = jmin (numNeeded, [data length]);
+        int available = jmin (numNeeded, (int) [data length]);
 
         if (available > 0)
         {

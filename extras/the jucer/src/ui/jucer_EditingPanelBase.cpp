@@ -155,9 +155,9 @@ void EditingPanelBase::resized()
 
     if (document.isFixedSize())
         editor->setSize (jmax (document.getInitialWidth(),
-                               roundDoubleToInt ((viewport->getWidth() - viewport->getScrollBarThickness()) / getZoom())),
+                               roundToInt ((viewport->getWidth() - viewport->getScrollBarThickness()) / getZoom())),
                          jmax (document.getInitialHeight(),
-                               roundDoubleToInt ((viewport->getHeight() - viewport->getScrollBarThickness()) / getZoom())));
+                               roundToInt ((viewport->getHeight() - viewport->getScrollBarThickness()) / getZoom())));
     else
         editor->setSize (viewport->getWidth(),
                          viewport->getHeight());

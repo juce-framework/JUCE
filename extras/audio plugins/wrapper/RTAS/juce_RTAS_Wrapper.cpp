@@ -140,9 +140,9 @@ static float longToFloat (const long n) throw()
 
 static long floatToLong (const float n) throw()
 {
-    return roundDoubleToInt (jlimit (-(double) 0x80000000,
-                                     (double) 0x7fffffff,
-                                     n * (double) 0xffffffff - (double) 0x80000000));
+    return roundToInt (jlimit (-(double) 0x80000000,
+                               (double) 0x7fffffff,
+                               n * (double) 0xffffffff - (double) 0x80000000));
 }
 
 static int numInstances = 0;

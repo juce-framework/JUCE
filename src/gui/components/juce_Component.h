@@ -2014,7 +2014,7 @@ private:
     Component* parentComponent_;
     uint32 componentUID;
     Rectangle bounds_;
-    unsigned short numDeepMouseListeners;
+    int numDeepMouseListeners;
     Array <Component*> childComponentList_;
     LookAndFeel* lookAndFeel_;
     MouseCursor cursor_;

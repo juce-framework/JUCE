@@ -123,7 +123,7 @@ bool DrawableImage::hitTest (float x, float y) const
             && y >= 0.0f
             && x < image->getWidth()
             && y < image->getHeight()
-            && image->getPixelAt (roundFloatToInt (x), roundFloatToInt (y)).getAlpha() >= 127;
+            && image->getPixelAt (roundToInt (x), roundToInt (y)).getAlpha() >= 127;
 }
 
 Drawable* DrawableImage::createCopy() const
@@ -195,7 +195,7 @@ DrawableImage* DrawableImage::createFromValueTree (const ValueTree& tree) throw(
     MemoryBlock imageData;
     if (imageData.fromBase64Encoding (tree ["data"]))
     {
-        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), imageData.getSize());
+        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), (int) imageData.getSize());
         if (im == 0)
             return false;
 

@@ -158,7 +158,7 @@ const String InputStream::readString()
 {
     MemoryBlock buffer (256);
     uint8* data = (uint8*) buffer.getData();
-    int i = 0;
+    size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
     {
@@ -169,14 +169,14 @@ const String InputStream::readString()
         }
     }
 
-    return String::fromUTF8 (data, i);
+    return String::fromUTF8 (data, (int) i);
 }
 
 const String InputStream::readNextLine()
 {
     MemoryBlock buffer (256);
     uint8* data = (uint8*) buffer.getData();
-    int i = 0;
+    size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
     {
@@ -200,7 +200,7 @@ const String InputStream::readNextLine()
         }
     }
 
-    return String::fromUTF8 (data, i);
+    return String::fromUTF8 (data, (int) i);
 }
 
 int InputStream::readIntoMemoryBlock (MemoryBlock& block,
@@ -221,7 +221,7 @@ int InputStream::readIntoMemoryBlock (MemoryBlock& block,
             return 0;
     }
 
-    const int originalBlockSize = block.getSize();
+    const size_t originalBlockSize = block.getSize();
     int totalBytesRead = 0;
 
     if (numBytes > 0)

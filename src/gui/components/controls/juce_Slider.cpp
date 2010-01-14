@@ -641,7 +641,7 @@ const String Slider::getTextFromValue (double v)
     if (numDecimalPlaces > 0)
         return String (v, numDecimalPlaces) + textSuffix;
     else
-        return String (roundDoubleToInt (v)) + textSuffix;
+        return String (roundToInt (v)) + textSuffix;
 }
 
 double Slider::getValueFromText (const String& text)
@@ -1157,14 +1157,14 @@ void Slider::restoreMouseIfHidden()
             if (style == RotaryHorizontalDrag)
             {
                 const double posDiff = valueToProportionOfLength (pos) - valueToProportionOfLength (valueOnMouseDown);
-                x = roundDoubleToInt (pixelsForFullDragExtent * posDiff + downX);
+                x = roundToInt (pixelsForFullDragExtent * posDiff + downX);
                 y = downY;
             }
             else
             {
                 const double posDiff = valueToProportionOfLength (valueOnMouseDown) - valueToProportionOfLength (pos);
                 x = downX;
-                y = roundDoubleToInt (pixelsForFullDragExtent * posDiff + downY);
+                y = roundToInt (pixelsForFullDragExtent * posDiff + downY);
             }
 
             Desktop::setMousePosition (x, y);

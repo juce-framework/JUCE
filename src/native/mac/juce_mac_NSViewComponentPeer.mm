@@ -646,11 +646,11 @@ static int64 getMouseTime (NSEvent* e)
 static void getMousePos (NSEvent* e, NSView* view, int& x, int& y)
 {
     NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-    x = roundFloatToInt (p.x);
-    y = roundFloatToInt ([view frame].size.height - p.y);
+    x = roundToInt (p.x);
+    y = roundToInt ([view frame].size.height - p.y);
 }
 
-static int getModifierForButtonNumber (const int num)
+static int getModifierForButtonNumber (const NSInteger num)
 {
     return num == 0 ? ModifierKeys::leftButtonModifier
                 : (num == 1 ? ModifierKeys::rightButtonModifier
@@ -1268,8 +1268,8 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
     updateModifiers (ev);
 
-    handleMouseWheel (roundFloatToInt ([ev deltaX] * 10.0f),
-                      roundFloatToInt ([ev deltaY] * 10.0f),
+    handleMouseWheel (roundToInt ([ev deltaX] * 10.0f),
+                      roundToInt ([ev deltaY] * 10.0f),
                       getMouseTime (ev));
 }
 
@@ -1346,7 +1346,7 @@ void NSViewComponentPeer::drawRect (NSRect r)
 #if USE_COREGRAPHICS_RENDERING
     if (usingCoreGraphics)
     {
-        CoreGraphicsContext context (cg, [view frame].size.height);
+        CoreGraphicsContext context (cg, (float) [view frame].size.height);
 
         insideDrawRect = true;
         handlePaint (context);
@@ -1361,8 +1361,8 @@ void NSViewComponentPeer::drawRect (NSRect r)
                     ! getComponent()->isOpaque());
 
         LowLevelGraphicsSoftwareRenderer context (temp);
-        context.setOrigin (-roundFloatToInt (r.origin.x),
-                           -roundFloatToInt ([view frame].size.height - (r.origin.y + r.size.height)));
+        context.setOrigin (-roundToInt (r.origin.x),
+                           -roundToInt ([view frame].size.height - (r.origin.y + r.size.height)));
 
         const NSRect* rects = 0;
         NSInteger numRects = 0;
@@ -1371,10 +1371,10 @@ void NSViewComponentPeer::drawRect (NSRect r)
         RectangleList clip;
         for (int i = 0; i < numRects; ++i)
         {
-            clip.addWithoutMerging (Rectangle (roundFloatToInt (rects[i].origin.x),
-                                               roundFloatToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
-                                               roundFloatToInt (rects[i].size.width),
-                                               roundFloatToInt (rects[i].size.height)));
+            clip.addWithoutMerging (Rectangle (roundToInt (rects[i].origin.x),
+                                               roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
+                                               roundToInt (rects[i].size.width),
+                                               roundToInt (rects[i].size.height)));
         }
 
         if (context.clipToRectangleList (clip))

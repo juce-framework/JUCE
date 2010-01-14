@@ -185,8 +185,8 @@ private:
 
     void updateMarker() const throw()
     {
-        marker->setBounds (roundFloatToInt ((getWidth() - edge * 2) * s),
-                           roundFloatToInt ((getHeight() - edge * 2) * (1.0f - v)),
+        marker->setBounds (roundToInt ((getWidth() - edge * 2) * s),
+                           roundToInt ((getHeight() - edge * 2) * (1.0f - v)),
                            edge * 2, edge * 2);
     }
 
@@ -265,7 +265,7 @@ public:
 
     void resized()
     {
-        marker->setBounds (0, roundFloatToInt ((getHeight() - edge * 2) * h),
+        marker->setBounds (0, roundToInt ((getHeight() - edge * 2) * h),
                            getWidth(), edge * 2);
     }
 

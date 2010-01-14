@@ -167,7 +167,7 @@ void FileChooserDialogBox::ContentComponent::resized()
     float left, top, right, bottom;
     text.getBoundingBox (0, text.getNumGlyphs(), left, top, right, bottom, false);
 
-    const int y = roundFloatToInt (bottom) + 10;
+    const int y = roundToInt (bottom) + 10;
     const int buttonHeight = 26;
     const int buttonY = getHeight() - buttonHeight - 8;
 

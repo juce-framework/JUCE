@@ -328,7 +328,7 @@ public:
         FLAC__stream_encoder_set_do_mid_side_stereo (encoder, numChannels == 2);
         FLAC__stream_encoder_set_loose_mid_side_stereo (encoder, numChannels == 2);
         FLAC__stream_encoder_set_channels (encoder, numChannels);
-        FLAC__stream_encoder_set_bits_per_sample (encoder, jmin (24, bitsPerSample));
+        FLAC__stream_encoder_set_bits_per_sample (encoder, jmin ((unsigned int) 24, bitsPerSample));
         FLAC__stream_encoder_set_sample_rate (encoder, (unsigned int) sampleRate);
         FLAC__stream_encoder_set_blocksize (encoder, 2048);
         FLAC__stream_encoder_set_do_escape_coding (encoder, true);

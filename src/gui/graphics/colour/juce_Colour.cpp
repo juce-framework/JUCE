@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 static forcedinline uint8 floatAlphaToInt (const float alpha)
 {
-    return (uint8) jlimit (0, 0xff, roundFloatToInt (alpha * 255.0f));
+    return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
 }
 
 static const float oneOver255 = 1.0f / 255.0f;
@@ -124,7 +124,7 @@ static void convertHSBtoRGB (float h, float s, float v,
 {
     v = jlimit (0.0f, 1.0f, v);
     v *= 255.0f;
-    const uint8 intV = (uint8) roundFloatToInt (v);
+    const uint8 intV = (uint8) roundToInt (v);
 
     if (s <= 0)
     {
@@ -139,19 +139,19 @@ static void convertHSBtoRGB (float h, float s, float v,
         h = (h - floorf (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
         const float f = h - floorf (h);
 
-        const uint8 x = (uint8) roundFloatToInt (v * (1.0f - s));
+        const uint8 x = (uint8) roundToInt (v * (1.0f - s));
         const float y = v * (1.0f - s * f);
         const float z = v * (1.0f - (s * (1.0f - f)));
 
         if (h < 1.0f)
         {
             r = intV;
-            g = (uint8) roundFloatToInt (z);
+            g = (uint8) roundToInt (z);
             b = x;
         }
         else if (h < 2.0f)
         {
-            r = (uint8) roundFloatToInt (y);
+            r = (uint8) roundToInt (y);
             g = intV;
             b = x;
         }
@@ -159,17 +159,17 @@ static void convertHSBtoRGB (float h, float s, float v,
         {
             r = x;
             g = intV;
-            b = (uint8) roundFloatToInt (z);
+            b = (uint8) roundToInt (z);
         }
         else if (h < 4.0f)
         {
             r = x;
-            g = (uint8) roundFloatToInt (y);
+            g = (uint8) roundToInt (y);
             b = intV;
         }
         else if (h < 5.0f)
         {
-            r = (uint8) roundFloatToInt (z);
+            r = (uint8) roundToInt (z);
             g = x;
             b = intV;
         }
@@ -177,7 +177,7 @@ static void convertHSBtoRGB (float h, float s, float v,
         {
             r = intV;
             g = x;
-            b = (uint8) roundFloatToInt (y);
+            b = (uint8) roundToInt (y);
         }
         else
         {
@@ -267,7 +267,7 @@ const Colour Colour::withMultipliedAlpha (const float alphaMultiplier) const thr
     jassert (alphaMultiplier >= 0);
 
     PixelARGB newCol (argb);
-    newCol.setAlpha ((uint8) jmin (0xff, roundFloatToInt (alphaMultiplier * newCol.getAlpha())));
+    newCol.setAlpha ((uint8) jmin (0xff, roundToInt (alphaMultiplier * newCol.getAlpha())));
     return Colour (newCol.getARGB());
 }
 
@@ -309,7 +309,7 @@ const Colour Colour::interpolatedWith (const Colour& other, float proportionOfOt
 
     PixelARGB c1 (getPixelARGB());
     const PixelARGB c2 (other.getPixelARGB());
-    c1.tween (c2, roundFloatToInt (proportionOfOther * 255.0f));
+    c1.tween (c2, roundToInt (proportionOfOther * 255.0f));
     c1.unpremultiply();
 
     return Colour (c1.getARGB());
@@ -489,7 +489,7 @@ const Colour Colour::darker (float amount) const throw()
 const Colour Colour::greyLevel (const float brightness) throw()
 {
     const uint8 level
-        = (uint8) jlimit (0x00, 0xff, roundFloatToInt (brightness * 255.0f));
+        = (uint8) jlimit (0x00, 0xff, roundToInt (brightness * 255.0f));
 
     return Colour (level, level, level);
 }

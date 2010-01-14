@@ -215,7 +215,7 @@ void AudioThumbnail::saveTo (OutputStream& output) const
 {
     AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
     swapEndiannessIfNeeded (d);
-    output.write (data.getData(), data.getSize());
+    output.write (data.getData(), (int) data.getSize());
     swapEndiannessIfNeeded (d);
 }
 
@@ -224,9 +224,9 @@ bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& fileReader)
     AudioThumbnailDataFormat* d = (AudioThumbnailDataFormat*) data.getData();
 
     d->totalSamples = fileReader.lengthInSamples;
-    d->numChannels = jmin (2, fileReader.numChannels);
+    d->numChannels = jmin ((uint32) 2, fileReader.numChannels);
     d->numFinishedSamples = 0;
-    d->sampleRate = roundDoubleToInt (fileReader.sampleRate);
+    d->sampleRate = roundToInt (fileReader.sampleRate);
     d->numThumbnailSamples = (int) (d->totalSamples / d->samplesPerThumbSample) + 1;
 
     data.setSize (sizeof (AudioThumbnailDataFormat) + 3 + d->numThumbnailSamples * d->numChannels * 2);
@@ -384,11 +384,11 @@ void AudioThumbnail::refillCache (const int numSamples,
         startTimer (timeBeforeDeletingReader);
 
         char* cacheData = (char*) cachedLevels.getData();
-        int sample = roundDoubleToInt (startTime * d->sampleRate);
+        int sample = roundToInt (startTime * d->sampleRate);
 
         for (int i = numSamples; --i >= 0;)
         {
-            const int nextSample = roundDoubleToInt ((startTime + timePerPixel) * d->sampleRate);
+            const int nextSample = roundToInt ((startTime + timePerPixel) * d->sampleRate);
 
             if (sample >= 0)
             {
@@ -427,12 +427,12 @@ void AudioThumbnail::refillCache (const int numSamples,
             const double timeToThumbSampleFactor = d->sampleRate / (double) d->samplesPerThumbSample;
 
             startTime = cachedStart;
-            int sample = roundDoubleToInt (startTime * timeToThumbSampleFactor);
+            int sample = roundToInt (startTime * timeToThumbSampleFactor);
             const int numFinished = (int) (d->numFinishedSamples / d->samplesPerThumbSample);
 
             for (int i = numSamples; --i >= 0;)
             {
-                const int nextSample = roundDoubleToInt ((startTime + timePerPixel) * timeToThumbSampleFactor);
+                const int nextSample = roundToInt ((startTime + timePerPixel) * timeToThumbSampleFactor);
 
                 if (sample >= 0 && channelData != 0)
                 {

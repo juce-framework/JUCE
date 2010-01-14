@@ -39,7 +39,7 @@ static const String timeToTimecodeString (const double seconds)
 
     return String::formatted (T("%s%02d:%02d:%02d:%03d"),
                               sign, hours, mins, secs,
-                              roundDoubleToInt (absSecs * 1000) % 1000);
+                              roundToInt (absSecs * 1000) % 1000);
 }
 
 // quick-and-dirty function to format a bars/beats string

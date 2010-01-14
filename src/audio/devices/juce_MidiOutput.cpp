@@ -128,11 +128,11 @@ void MidiOutput::run()
 
         if (message != 0)
         {
-            eventTime = roundDoubleToInt (message->message.getTimeStamp());
+            eventTime = roundToInt (message->message.getTimeStamp());
 
             if (eventTime > now + 20)
             {
-                timeToWait = jmax (10, eventTime - now - 100);
+                timeToWait = eventTime - (now + 20);
                 message = 0;
             }
             else

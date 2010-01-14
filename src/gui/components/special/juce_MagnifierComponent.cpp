@@ -97,8 +97,8 @@ public:
     void relativePositionToGlobal (int& x, int& y)
     {
         const double zoom = magnifierComp->getScaleFactor();
-        x = roundDoubleToInt (x * zoom);
-        y = roundDoubleToInt (y * zoom);
+        x = roundToInt (x * zoom);
+        y = roundToInt (y * zoom);
 
         magnifierComp->relativePositionToGlobal (x, y);
     }
@@ -108,8 +108,8 @@ public:
         magnifierComp->globalPositionToRelative (x, y);
 
         const double zoom = magnifierComp->getScaleFactor();
-        x = roundDoubleToInt (x / zoom);
-        y = roundDoubleToInt (y / zoom);
+        x = roundToInt (x / zoom);
+        y = roundToInt (y / zoom);
     }
 
     bool contains (int x, int y, bool) const
@@ -124,8 +124,8 @@ public:
 
         magnifierComp->repaint ((int) (x * zoom),
                                 (int) (y * zoom),
-                                roundDoubleToInt (w * zoom) + 1,
-                                roundDoubleToInt (h * zoom) + 1);
+                                roundToInt (w * zoom) + 1,
+                                roundToInt (h * zoom) + 1);
     }
 
     void performAnyPendingRepaintsNow()
@@ -256,8 +256,8 @@ void MagnifierComponent::paint (Graphics& g)
 
     const int srcX = (int) (r.getX() / scaleFactor);
     const int srcY = (int) (r.getY() / scaleFactor);
-    int srcW = roundDoubleToInt (r.getRight() / scaleFactor) - srcX;
-    int srcH = roundDoubleToInt (r.getBottom() / scaleFactor) - srcY;
+    int srcW = roundToInt (r.getRight() / scaleFactor) - srcX;
+    int srcH = roundToInt (r.getBottom() / scaleFactor) - srcY;
 
     if (scaleFactor >= 1.0)
     {
@@ -282,8 +282,8 @@ void MagnifierComponent::paint (Graphics& g)
 void MagnifierComponent::childBoundsChanged (Component* c)
 {
     if (c != 0)
-        setSize (roundDoubleToInt (c->getWidth() * scaleFactor),
-                 roundDoubleToInt (c->getHeight() * scaleFactor));
+        setSize (roundToInt (c->getWidth() * scaleFactor),
+                 roundToInt (c->getHeight() * scaleFactor));
 }
 
 void MagnifierComponent::mouseDown (const MouseEvent& e)
@@ -325,8 +325,8 @@ void MagnifierComponent::mouseExit (const MouseEvent& e)
 void MagnifierComponent::mouseWheelMove (const MouseEvent& e, float ix, float iy)
 {
     if (peer != 0)
-        peer->handleMouseWheel (roundFloatToInt (ix * 256.0f),
-                                roundFloatToInt (iy * 256.0f),
+        peer->handleMouseWheel (roundToInt (ix * 256.0f),
+                                roundToInt (iy * 256.0f),
                                 e.eventTime.toMilliseconds());
     else
         Component::mouseWheelMove (e, ix, iy);
@@ -334,7 +334,7 @@ void MagnifierComponent::mouseWheelMove (const MouseEvent& e, float ix, float iy
 
 int MagnifierComponent::scaleInt (const int n) const
 {
-    return roundDoubleToInt (n / scaleFactor);
+    return roundToInt (n / scaleFactor);
 }
 
 

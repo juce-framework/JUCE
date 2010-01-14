@@ -926,7 +926,7 @@ void BitArray::parseString (const String& text,
 const MemoryBlock BitArray::toMemoryBlock() const throw()
 {
     const int numBytes = (getHighestBit() + 8) >> 3;
-    MemoryBlock mb (numBytes);
+    MemoryBlock mb ((size_t) numBytes);
 
     for (int i = 0; i < numBytes; ++i)
         mb[i] = (uint8) getBitRangeAsInt (i << 3, 8);
@@ -938,8 +938,8 @@ void BitArray::loadFromMemoryBlock (const MemoryBlock& data) throw()
 {
     clear();
 
-    for (int i = data.getSize(); --i >= 0;)
-        this->setBitRangeAsInt (i << 3, 8, data [i]);
+    for (size_t i = data.getSize(); --i >= 0;)
+        this->setBitRangeAsInt ((int) (i << 3), 8, data [i]);
 }
 
 END_JUCE_NAMESPACE

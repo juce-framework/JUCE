@@ -259,22 +259,22 @@ void ComponentBoundsConstrainer::checkBounds (int& x, int& y, int& w, int& h,
 
         if (adjustWidth)
         {
-            w = roundDoubleToInt (h * aspectRatio);
+            w = roundToInt (h * aspectRatio);
 
             if (w > maxW || w < minW)
             {
                 w = jlimit (minW, maxW, w);
-                h = roundDoubleToInt (w / aspectRatio);
+                h = roundToInt (w / aspectRatio);
             }
         }
         else
         {
-            h = roundDoubleToInt (w / aspectRatio);
+            h = roundToInt (w / aspectRatio);
 
             if (h > maxH || h < minH)
             {
                 h = jlimit (minH, maxH, h);
-                w = roundDoubleToInt (h * aspectRatio);
+                w = roundToInt (h * aspectRatio);
             }
         }
 

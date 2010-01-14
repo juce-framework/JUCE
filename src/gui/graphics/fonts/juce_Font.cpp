@@ -290,7 +290,7 @@ float Font::getDescent() const throw()
 
 int Font::getStringWidth (const String& text) const throw()
 {
-    return roundFloatToInt (getStringWidthFloat (text));
+    return roundToInt (getStringWidthFloat (text));
 }
 
 float Font::getStringWidthFloat (const String& text) const throw()

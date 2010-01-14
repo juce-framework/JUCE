@@ -672,7 +672,7 @@ void ListBox::setVerticalPosition (const double proportion)
     const int offscreen = viewport->getViewedComponent()->getHeight() - viewport->getHeight();
 
     viewport->setViewPosition (viewport->getViewPositionX(),
-                               jmax (0, roundDoubleToInt (proportion * offscreen)));
+                               jmax (0, roundToInt (proportion * offscreen)));
 }
 
 double ListBox::getVerticalPosition() const

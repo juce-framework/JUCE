@@ -1208,7 +1208,7 @@ private:
                         while (--num >= 0)
                         {
                             // (need to move this one pixel to the left because of a win32 bug)
-                            const int cx = jmax (x, rects->left - 1);
+                            const int cx = jmax (x, (int) rects->left - 1);
                             const int cy = rects->top;
                             const int cw = rects->right - cx;
                             const int ch = rects->bottom - rects->top;
@@ -2453,11 +2453,11 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
 
         Rectangle& screen = monitorCoords.getReference (0);
 
-        screen.setPosition (jmax (screen.getX(), r.left),
-                            jmax (screen.getY(), r.top));
+        screen.setPosition (jmax (screen.getX(), (int) r.left),
+                            jmax (screen.getY(), (int) r.top));
 
-        screen.setSize (jmin (screen.getRight(), r.right) - screen.getX(),
-                        jmin (screen.getBottom(), r.bottom) - screen.getY());
+        screen.setSize (jmin (screen.getRight(), (int) r.right) - screen.getX(),
+                        jmin (screen.getBottom(), (int) r.bottom) - screen.getY());
     }
 }
 

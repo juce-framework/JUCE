@@ -369,7 +369,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
 {
     if (hasAlphaChannel())
     {
-        const uint8 threshold = (uint8) jlimit (0, 255, roundFloatToInt (alphaThreshold * 255.0f));
+        const uint8 threshold = (uint8) jlimit (0, 255, roundToInt (alphaThreshold * 255.0f));
         SparseSet <int> pixelsOnRow;
 
         const BitmapData srcData (*this, 0, 0, getWidth(), getHeight());

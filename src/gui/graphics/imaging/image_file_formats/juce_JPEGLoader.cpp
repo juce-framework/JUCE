@@ -167,7 +167,7 @@ static void jpegSkip (j_decompress_ptr decompStruct, long num)
 {
     decompStruct->src->next_input_byte += num;
 
-    num = jmin (num, (int) decompStruct->src->bytes_in_buffer);
+    num = jmin (num, (long) decompStruct->src->bytes_in_buffer);
     decompStruct->src->bytes_in_buffer -= num;
 }
 
@@ -289,8 +289,8 @@ static void jpegWriteTerminate (j_compress_ptr cinfo)
 {
     JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
 
-    const int numToWrite = jpegBufferSize - dest->free_in_buffer;
-    dest->output->write (dest->buffer, numToWrite);
+    const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
+    dest->output->write (dest->buffer, (int) numToWrite);
 }
 
 static boolean jpegWriteFlush (j_compress_ptr cinfo)
@@ -355,7 +355,7 @@ bool juce_writeJPEGImageToStream (const Image& image,
     if (quality < 0.0f)
         quality = 0.85f;
 
-    jpeg_set_quality (&jpegCompStruct, jlimit (0, 100, roundFloatToInt (quality * 100.0f)), TRUE);
+    jpeg_set_quality (&jpegCompStruct, jlimit (0, 100, roundToInt (quality * 100.0f)), TRUE);
 
     jpeg_start_compress (&jpegCompStruct, TRUE);
 

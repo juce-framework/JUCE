@@ -212,7 +212,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
 int SystemStats::getNumCpus() throw()
 {
 #if JUCE_IPHONE || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
-    return [[NSProcessInfo processInfo] activeProcessorCount];
+    return (int) [[NSProcessInfo processInfo] activeProcessorCount];
 #else
     return MPProcessors();
 #endif
@@ -253,7 +253,7 @@ bool Time::setSystemTimeToThisTime() const throw()
 //==============================================================================
 int SystemStats::getPageSize() throw()
 {
-    return NSPageSize();
+    return (int) NSPageSize();
 }
 
 void PlatformUtilities::fpuReset()

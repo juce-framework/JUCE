@@ -58,7 +58,7 @@ MD5::MD5 (const MemoryBlock& data)
     context.finish (result);
 }
 
-MD5::MD5 (const char* data, const int numBytes)
+MD5::MD5 (const char* data, const size_t numBytes)
 {
     ProcessContext context;
     context.processBlock ((const uint8*) data, numBytes);
@@ -86,7 +86,7 @@ MD5::MD5 (const String& text)
     context.finish (result);
 }
 
-void MD5::processStream (InputStream& input, int numBytesToRead)
+void MD5::processStream (InputStream& input, int64 numBytesToRead)
 {
     ProcessContext context;
 
@@ -96,7 +96,7 @@ void MD5::processStream (InputStream& input, int numBytesToRead)
     while (numBytesToRead > 0)
     {
         char tempBuffer [512];
-        const int bytesRead = input.read (tempBuffer, jmin (numBytesToRead, sizeof (tempBuffer)));
+        const int bytesRead = input.read (tempBuffer, (int) jmin ((size_t) numBytesToRead, sizeof (tempBuffer)));
 
         if (bytesRead <= 0)
             break;
@@ -109,7 +109,7 @@ void MD5::processStream (InputStream& input, int numBytesToRead)
     context.finish (result);
 }
 
-MD5::MD5 (InputStream& input, int numBytesToRead)
+MD5::MD5 (InputStream& input, int64 numBytesToRead)
 {
     processStream (input, numBytesToRead);
 }
@@ -140,20 +140,20 @@ MD5::ProcessContext::ProcessContext()
     count[1] = 0;
 }
 
-void MD5::ProcessContext::processBlock (const uint8* const data, int dataSize)
+void MD5::ProcessContext::processBlock (const uint8* const data, size_t dataSize)
 {
     int bufferPos = ((count[0] >> 3) & 0x3F);
 
-    count[0] += (dataSize << 3);
+    count[0] += (uint32) (dataSize << 3);
 
     if (count[0] < ((uint32) dataSize << 3))
         count[1]++;
 
-    count[1] += (dataSize >> 29);
+    count[1] += (uint32) (dataSize >> 29);
 
-    const int spaceLeft = 64 - bufferPos;
+    const size_t spaceLeft = 64 - bufferPos;
 
-    int i = 0;
+    size_t i = 0;
 
     if (dataSize >= spaceLeft)
     {

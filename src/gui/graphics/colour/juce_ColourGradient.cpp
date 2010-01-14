@@ -74,7 +74,7 @@ void ColourGradient::addColour (const double proportionAlongGradient,
     // must be within the two end-points
     jassert (proportionAlongGradient >= 0 && proportionAlongGradient <= 1.0);
 
-    const uint32 pos = jlimit (0, 65535, roundDoubleToInt (proportionAlongGradient * 65536.0));
+    const uint32 pos = jlimit (0, 65535, roundToInt (proportionAlongGradient * 65536.0));
 
     int i;
     for (i = 0; i < colours.size(); i += 2)
@@ -114,7 +114,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
 {
     jassert (colours.getUnchecked (0) == 0); // the first colour specified has to go at position 0
 
-    const int integerPos = jlimit (0, 65535, roundFloatToInt (position * 65536.0f));
+    const int integerPos = jlimit (0, 65535, roundToInt (position * 65536.0f));
 
     if (integerPos <= 0 || colours.size() <= 2)
         return getColour (0);

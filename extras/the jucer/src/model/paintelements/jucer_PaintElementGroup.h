@@ -163,12 +163,12 @@ public:
 
                 Rectangle pos (e->getCurrentBounds (parentArea));
 
-                const int newX = roundDoubleToInt ((pos.getX() - scaleStartX) * scaleX + scaleStartX + dx);
-                const int newY = roundDoubleToInt ((pos.getY() - scaleStartY) * scaleY + scaleStartY + dy);
+                const int newX = roundToInt ((pos.getX() - scaleStartX) * scaleX + scaleStartX + dx);
+                const int newY = roundToInt ((pos.getY() - scaleStartY) * scaleY + scaleStartY + dy);
 
                 pos.setBounds (newX, newY,
-                               roundDoubleToInt ((pos.getRight() - scaleStartX) * scaleX + scaleStartX + dx) - newX,
-                               roundDoubleToInt ((pos.getBottom() - scaleStartY) * scaleY + scaleStartY + dy) - newY);
+                               roundToInt ((pos.getRight() - scaleStartX) * scaleX + scaleStartX + dx) - newX,
+                               roundToInt ((pos.getBottom() - scaleStartY) * scaleY + scaleStartY + dy) - newY);
 
                 e->setCurrentBounds (pos, parentArea, undoable);
             }

@@ -228,7 +228,7 @@ public:
                     break;
 
                 const int start = jmax (0, startCharacter - index);
-                const int end = jmin (endCharacter - index, atom->numChars);
+                const int end = jmin (endCharacter - index, (int) atom->numChars);
 
                 if (start < end)
                     concatenator.append (atom->atomText.substring (start, end));
@@ -603,7 +603,7 @@ public:
             ga.addLineOfText (currentSection->font,
                               atom->getTrimmedText (passwordCharacter),
                               atomX,
-                              (float) roundFloatToInt (lineY + lineHeight - maxDescent));
+                              (float) roundToInt (lineY + lineHeight - maxDescent));
             ga.draw (g);
         }
     }
@@ -612,11 +612,11 @@ public:
                         const int selectionStart,
                         const int selectionEnd) const
     {
-        const int startX = roundFloatToInt (indexToX (selectionStart));
-        const int endX   = roundFloatToInt (indexToX (selectionEnd));
+        const int startX = roundToInt (indexToX (selectionStart));
+        const int endX   = roundToInt (indexToX (selectionEnd));
 
-        const int y = roundFloatToInt (lineY);
-        const int nextY = roundFloatToInt (lineY + lineHeight);
+        const int y = roundToInt (lineY);
+        const int nextY = roundToInt (lineY + lineHeight);
 
         g.fillRect (startX, y, endX - startX, nextY - y);
     }
@@ -632,7 +632,7 @@ public:
             ga.addLineOfText (currentSection->font,
                               atom->getTrimmedText (passwordCharacter),
                               atomX,
-                              (float) roundFloatToInt (lineY + lineHeight - maxDescent));
+                              (float) roundToInt (lineY + lineHeight - maxDescent));
 
             if (selectionEnd < indexInText + atom->numChars)
             {
@@ -1299,10 +1299,10 @@ void TextEditor::timerCallbackInt()
 void TextEditor::repaintCaret()
 {
     if (! findColour (caretColourId).isTransparent())
-        repaint (borderSize.getLeft() + textHolder->getX() + leftIndent + roundFloatToInt (cursorX) - 1,
-                 borderSize.getTop() + textHolder->getY() + topIndent + roundFloatToInt (cursorY) - 1,
+        repaint (borderSize.getLeft() + textHolder->getX() + leftIndent + roundToInt (cursorX) - 1,
+                 borderSize.getTop() + textHolder->getY() + topIndent + roundToInt (cursorY) - 1,
                  4,
-                 roundFloatToInt (cursorHeight) + 2);
+                 roundToInt (cursorHeight) + 2);
 }
 
 void TextEditor::repaintText (int textStartIndex, int textEndIndex)
@@ -1372,8 +1372,8 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
 {
     updateCaretPosition();
 
-    int vx = roundFloatToInt (cursorX) - desiredCaretX;
-    int vy = roundFloatToInt (cursorY) - desiredCaretY;
+    int vx = roundToInt (cursorX) - desiredCaretX;
+    int vy = roundToInt (cursorY) - desiredCaretY;
 
     if (desiredCaretX < jmax (1, proportionOfWidth (0.05f)))
     {
@@ -1394,7 +1394,7 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
     {
         vy = jlimit (0, jmax (0, textHolder->getHeight() - viewport->getMaximumVisibleHeight()), vy);
 
-        const int curH = roundFloatToInt (cursorHeight);
+        const int curH = roundToInt (cursorHeight);
 
         if (desiredCaretY < 0)
         {
@@ -1413,9 +1413,9 @@ const Rectangle TextEditor::getCaretRectangle()
 {
     updateCaretPosition();
 
-    return Rectangle (roundFloatToInt (cursorX) - viewport->getX(),
-                      roundFloatToInt (cursorY) - viewport->getY(),
-                      1, roundFloatToInt (cursorHeight));
+    return Rectangle (roundToInt (cursorX) - viewport->getX(),
+                      roundToInt (cursorY) - viewport->getY(),
+                      1, roundToInt (cursorHeight));
 }
 
 //==============================================================================
@@ -1438,9 +1438,9 @@ void TextEditor::updateTextHolderSize()
         while (i.next())
             maxWidth = jmax (maxWidth, i.atomRight);
 
-        const int w = leftIndent + roundFloatToInt (maxWidth);
-        const int h = topIndent + roundFloatToInt (jmax (i.lineY + i.lineHeight,
-                                                         currentFont.getHeight()));
+        const int w = leftIndent + roundToInt (maxWidth);
+        const int h = topIndent + roundToInt (jmax (i.lineY + i.lineHeight,
+                                                    currentFont.getHeight()));
 
         textHolder->setSize (w + 1, h + 1);
     }
@@ -1494,8 +1494,8 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
         int x = viewport->getViewPositionX();
         int y = viewport->getViewPositionY();
 
-        const int relativeCursorX = roundFloatToInt (cursorX) - x;
-        const int relativeCursorY = roundFloatToInt (cursorY) - y;
+        const int relativeCursorX = roundToInt (cursorX) - x;
+        const int relativeCursorY = roundToInt (cursorY) - y;
 
         if (relativeCursorX < jmax (1, proportionOfWidth (0.05f)))
         {
@@ -1514,7 +1514,7 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
         }
         else
         {
-            const int curH = roundFloatToInt (cursorHeight);
+            const int curH = roundToInt (cursorHeight);
 
             if (relativeCursorY < 0)
             {
@@ -2165,7 +2165,7 @@ void TextEditor::focusLost (FocusChangeType)
 void TextEditor::resized()
 {
     viewport->setBoundsInset (borderSize);
-    viewport->setSingleStepSizes (16, roundFloatToInt (currentFont.getHeight()));
+    viewport->setSingleStepSizes (16, roundToInt (currentFont.getHeight()));
 
     updateTextHolderSize();
 

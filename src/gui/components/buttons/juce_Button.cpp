@@ -680,7 +680,7 @@ void Button::repeatTimerCallback() throw()
 
         const uint32 now = Time::getApproximateMillisecondCounter();
         const int numTimesToCallback
-            = (now > lastTimeCallbackTime) ? jmax (1, (now - lastTimeCallbackTime) / repeatSpeed) : 1;
+            = (now > lastTimeCallbackTime) ? jmax ((uint32) 1, (now - lastTimeCallbackTime) / repeatSpeed) : 1;
 
         lastTimeCallbackTime = now;
 

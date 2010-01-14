@@ -177,11 +177,11 @@ static bool parseFile (const File& rootFolder,
             for (;;)
             {
                 int end = line.indexOf (T("*/"));
-                
+
                 if (end >= 0)
                 {
                     line = line.substring (end + 2);
-                    
+
                     // If our comment appeared just before an assertion, leave it in, as it
                     // might be useful..
                     if (lines [i + 1].contains (T("assert"))
@@ -190,7 +190,7 @@ static bool parseFile (const File& rootFolder,
                         i = originalI;
                         line = originalLine;
                     }
-    
+
                     break;
                 }
 
@@ -199,28 +199,28 @@ static bool parseFile (const File& rootFolder,
                 if (i >= lines.size())
                     break;
             }
-            
+
             line = line.trimEnd();
             if (line.isEmpty())
                 continue;
         }
-        
+
         line = line.trimEnd();
-        
+
         {
             // Turn initial spaces into tabs..
             int numIntialSpaces = 0;
             int len = line.length();
             while (numIntialSpaces < len && line [numIntialSpaces] == ' ')
                 ++numIntialSpaces;
-            
+
             if (numIntialSpaces > 0)
             {
                 int tabSize = 4;
                 int numTabs = numIntialSpaces / tabSize;
                 line = String::repeatedString (T("\t"), numTabs) + line.substring (numTabs * tabSize);
             }
-            
+
             if (! line.containsChar (T('"')))
             {
                 // turn large areas of spaces into tabs - this will mess up alignment a bit, but
@@ -287,7 +287,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
 
     if (! targetFile.replaceWithData (newData.getData(), newData.getSize()))
     {
-        std::cout << "\n!! ERROR - couldn't write to the target file: " 
+        std::cout << "\n!! ERROR - couldn't write to the target file: "
                   << (const char*) targetFile.getFullPathName() << "\n\n";
         return false;
     }

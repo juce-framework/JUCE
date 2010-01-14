@@ -32,13 +32,13 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MemoryOutputStream::MemoryOutputStream (const int initialSize,
-                                        const int blockSizeToIncreaseBy,
+MemoryOutputStream::MemoryOutputStream (const size_t initialSize,
+                                        const size_t blockSizeToIncreaseBy,
                                         MemoryBlock* const memoryBlockToWriteTo) throw()
   : data (memoryBlockToWriteTo),
     position (0),
     size (0),
-    blockSize (jmax (16, blockSizeToIncreaseBy))
+    blockSize (jmax ((size_t) 16, blockSizeToIncreaseBy))
 {
     if (data == 0)
         dataToDelete = data = new MemoryBlock (initialSize);
@@ -67,7 +67,7 @@ bool MemoryOutputStream::write (const void* buffer, int howMany)
 {
     if (howMany > 0)
     {
-        int storageNeeded = position + howMany;
+        size_t storageNeeded = position + howMany;
 
         if (storageNeeded >= data->getSize())
         {
@@ -78,7 +78,7 @@ bool MemoryOutputStream::write (const void* buffer, int howMany)
             data->ensureSize (storageNeeded);
         }
 
-        data->copyFrom (buffer, position, howMany);
+        data->copyFrom (buffer, (int) position, howMany);
         position += howMany;
         size = jmax (size, position);
     }
@@ -94,7 +94,7 @@ const char* MemoryOutputStream::getData() throw()
     return (const char*) data->getData();
 }
 
-int MemoryOutputStream::getDataSize() const throw()
+size_t MemoryOutputStream::getDataSize() const throw()
 {
     return size;
 }
@@ -106,10 +106,10 @@ int64 MemoryOutputStream::getPosition()
 
 bool MemoryOutputStream::setPosition (int64 newPosition)
 {
-    if (newPosition <= size)
+    if (newPosition <= (int64) size)
     {
         // ok to seek backwards
-        position = jlimit (0, size, (int) newPosition);
+        position = jlimit ((size_t) 0, size, (size_t) newPosition);
         return true;
     }
     else

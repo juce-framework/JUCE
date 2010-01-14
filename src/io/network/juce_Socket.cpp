@@ -129,7 +129,7 @@ static int readSocket (const int handle,
 #if JUCE_WINDOWS
         bytesThisTime = recv (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead, 0);
 #else
-        while ((bytesThisTime = ::read (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead)) < 0
+        while ((bytesThisTime = (int) ::read (handle, ((char*) destBuffer) + bytesRead, maxBytesToRead - bytesRead)) < 0
                  && errno == EINTR
                  && connected)
         {
@@ -349,7 +349,7 @@ int StreamingSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 #else
     int result;
 
-    while ((result = ::write (handle, sourceBuffer, numBytesToWrite)) < 0
+    while ((result = (int) ::write (handle, sourceBuffer, numBytesToWrite)) < 0
             && errno == EINTR)
     {
     }
@@ -616,10 +616,10 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
     // You need to call connect() first to set the server address..
     jassert (serverAddress != 0 && connected);
 
-    return connected ? sendto (handle, (const char*) sourceBuffer,
-                               numBytesToWrite, 0,
-                               (const struct sockaddr*) serverAddress,
-                               sizeof (struct sockaddr_in))
+    return connected ? (int) sendto (handle, (const char*) sourceBuffer,
+                                     numBytesToWrite, 0,
+                                     (const struct sockaddr*) serverAddress,
+                                     sizeof (struct sockaddr_in))
                      : -1;
 }
 

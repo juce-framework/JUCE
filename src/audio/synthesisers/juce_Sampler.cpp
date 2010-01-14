@@ -56,12 +56,12 @@ SamplerSound::SamplerSound (const String& name_,
         length = jmin ((int) source.lengthInSamples,
                        (int) (maxSampleLengthSeconds * sourceSampleRate));
 
-        data = new AudioSampleBuffer (jmin (2, source.numChannels), length + 4);
+        data = new AudioSampleBuffer (jmin (2, (int) source.numChannels), length + 4);
 
         data->readFromAudioReader (&source, 0, length + 4, 0, true, true);
 
-        attackSamples = roundDoubleToInt (attackTimeSecs * sourceSampleRate);
-        releaseSamples = roundDoubleToInt (releaseTimeSecs * sourceSampleRate);
+        attackSamples = roundToInt (attackTimeSecs * sourceSampleRate);
+        releaseSamples = roundToInt (releaseTimeSecs * sourceSampleRate);
     }
 }
 

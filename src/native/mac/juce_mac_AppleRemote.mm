@@ -260,7 +260,7 @@ void AppleRemoteDevice::handleCallbackInternal()
             break;
         }
 
-        i += strlen (buttonPatterns + i) + 1;
+        i += (int) strlen (buttonPatterns + i) + 1;
         ++buttonNum;
     }
 }

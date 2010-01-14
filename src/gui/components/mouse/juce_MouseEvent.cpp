@@ -88,8 +88,8 @@ int MouseEvent::getDistanceFromDragStartY() const throw()
 
 int MouseEvent::getDistanceFromDragStart() const throw()
 {
-    return roundDoubleToInt (juce_hypot (getDistanceFromDragStartX(),
-                                         getDistanceFromDragStartY()));
+    return roundToInt (juce_hypot (getDistanceFromDragStartX(),
+                                   getDistanceFromDragStartY()));
 }
 
 int MouseEvent::getLengthOfMousePress() const throw()

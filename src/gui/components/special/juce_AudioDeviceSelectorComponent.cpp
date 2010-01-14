@@ -555,11 +555,11 @@ public:
 
                 for (int i = 0; i < numRates; ++i)
                 {
-                    const int rate = roundDoubleToInt (currentDevice->getSampleRate (i));
+                    const int rate = roundToInt (currentDevice->getSampleRate (i));
                     sampleRateDropDown->addItem (String (rate) + T(" Hz"), rate);
                 }
 
-                sampleRateDropDown->setSelectedId (roundDoubleToInt (currentDevice->getCurrentSampleRate()), true);
+                sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), true);
                 sampleRateDropDown->addListener (this);
             }
 

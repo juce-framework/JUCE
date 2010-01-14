@@ -353,13 +353,13 @@ float MidiMessage::getFloatVelocity() const throw()
 void MidiMessage::setVelocity (const float newVelocity) throw()
 {
     if (isNoteOnOrOff())
-        data[2] = (uint8) jlimit (0, 0x7f, roundFloatToInt (newVelocity * 127.0f));
+        data[2] = (uint8) jlimit (0, 0x7f, roundToInt (newVelocity * 127.0f));
 }
 
 void MidiMessage::multiplyVelocity (const float scaleFactor) throw()
 {
     if (isNoteOnOrOff())
-        data[2] = (uint8) jlimit (0, 0x7f, roundFloatToInt (scaleFactor * data[2]));
+        data[2] = (uint8) jlimit (0, 0x7f, roundToInt (scaleFactor * data[2]));
 }
 
 bool MidiMessage::isAftertouch() const throw()
@@ -494,7 +494,7 @@ const MidiMessage MidiMessage::noteOn (const int channel,
 
     return MidiMessage (0x90 | jlimit (0, 15, channel - 1),
                         noteNumber & 127,
-                        jlimit (0, 127, roundFloatToInt (velocity)));
+                        jlimit (0, 127, roundToInt (velocity)));
 }
 
 const MidiMessage MidiMessage::noteOff (const int channel,
@@ -537,7 +537,7 @@ const MidiMessage MidiMessage::allControllersOff (const int channel) throw()
 
 const MidiMessage MidiMessage::masterVolume (const float volume) throw()
 {
-    const int vol = jlimit (0, 0x3fff, roundFloatToInt (volume * 0x4000));
+    const int vol = jlimit (0, 0x3fff, roundToInt (volume * 0x4000));
 
     uint8 buf[8];
     buf[0] = 0xf0;

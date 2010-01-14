@@ -56,7 +56,7 @@ void GlowEffect::applyEffect (Image& image, Graphics& g)
 
     Image temp (image.getFormat(), w, h, true);
 
-    ImageConvolutionKernel blurKernel (roundFloatToInt (radius * 2.0f));
+    ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
 
     blurKernel.createGaussianBlur (radius);
     blurKernel.rescaleAllValues (radius);

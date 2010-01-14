@@ -75,7 +75,7 @@ bool AudioFormatReader::read (int** destSamples,
     if (numSamplesToRead <= 0)
         return true;
 
-    if (! readSamples (destSamples, jmin (numChannels, numDestChannels), startOffsetInDestBuffer,
+    if (! readSamples (destSamples, jmin ((int) numChannels, numDestChannels), startOffsetInDestBuffer,
                        startSampleInSource, numSamplesToRead))
         return false;
 
@@ -273,8 +273,8 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
     const double doubleMin = jlimit (0.0, (double) INT_MAX, magnitudeRangeMinimum * INT_MAX);
     const double doubleMax = jlimit (doubleMin, (double) INT_MAX, magnitudeRangeMaximum * INT_MAX);
-    const int intMagnitudeRangeMinimum = roundDoubleToInt (doubleMin);
-    const int intMagnitudeRangeMaximum = roundDoubleToInt (doubleMax);
+    const int intMagnitudeRangeMinimum = roundToInt (doubleMin);
+    const int intMagnitudeRangeMaximum = roundToInt (doubleMax);
 
     while (numSamplesToSearch != 0)
     {
@@ -438,7 +438,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                         else if (samp >= 1.0)
                             *b++ = INT_MAX;
                         else
-                            *b++ = roundDoubleToInt (INT_MAX * samp);
+                            *b++ = roundToInt (INT_MAX * samp);
                     }
                 }
             }
@@ -499,7 +499,7 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
                     else if (samp >= 1.0)
                         *b++ = INT_MAX;
                     else
-                        *b++ = roundDoubleToInt (INT_MAX * samp);
+                        *b++ = roundToInt (INT_MAX * samp);
                 }
             }
         }

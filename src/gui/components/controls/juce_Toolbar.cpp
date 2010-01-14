@@ -68,7 +68,7 @@ public:
         }
         else
         {
-            maxSize = roundFloatToInt (toolbarThickness * fixedSize);
+            maxSize = roundToInt (toolbarThickness * fixedSize);
             minSize = drawBar ? maxSize : jmin (4, maxSize);
             preferredSize = maxSize;
 

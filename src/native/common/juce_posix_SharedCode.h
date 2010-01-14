@@ -276,7 +276,7 @@ void juce_fileClose (void* handle)
 int juce_fileRead (void* handle, void* buffer, int size)
 {
     if (handle != 0)
-        return read ((int) (pointer_sized_int) handle, buffer, size);
+        return (int) read ((int) (pointer_sized_int) handle, buffer, size);
 
     return 0;
 }
@@ -284,7 +284,7 @@ int juce_fileRead (void* handle, void* buffer, int size)
 int juce_fileWrite (void* handle, const void* buffer, int size)
 {
     if (handle != 0)
-        return write ((int) (pointer_sized_int) handle, buffer, size);
+        return (int) write ((int) (pointer_sized_int) handle, buffer, size);
 
     return 0;
 }

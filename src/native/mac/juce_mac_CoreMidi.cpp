@@ -122,7 +122,7 @@ static const String getConnectedEndpointName (MIDIEndpointRef endpoint)
 
     if (connections != 0)
     {
-        numConnections = CFDataGetLength (connections) / sizeof (MIDIUniqueID);
+        numConnections = (int) (CFDataGetLength (connections) / sizeof (MIDIUniqueID));
 
         if (numConnections > 0)
         {

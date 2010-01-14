@@ -593,7 +593,7 @@ private:
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
-            document.perform (new TabDepthChangeAction (component, *document.getComponentLayout(), roundDoubleToInt (newValue)),
+            document.perform (new TabDepthChangeAction (component, *document.getComponentLayout(), roundToInt (newValue)),
                               T("Change TabComponent tab depth"));
         }
 

@@ -47,7 +47,7 @@ public:
         @param initialSize          the size of block to create
         @param initialiseToZero     whether to clear the memory or just leave it uninitialised
     */
-    MemoryBlock (const int initialSize,
+    MemoryBlock (const size_t initialSize,
                  const bool initialiseToZero = false) throw();
 
     /** Creates a copy of another memory block. */
@@ -59,7 +59,7 @@ public:
         @param sizeInBytes              how much space to use
     */
     MemoryBlock (const void* const dataToInitialiseFrom,
-                 const int sizeInBytes) throw();
+                 const size_t sizeInBytes) throw();
 
     /** Destructor. */
     ~MemoryBlock() throw();
@@ -103,12 +103,13 @@ public:
 
         This returns a reference, so you can also use it to set a byte.
     */
-    char& operator[] (const int offset) const throw()               { return data [offset]; }
+    template <typename Type>
+    char& operator[] (const Type offset) const throw()              { return data [offset]; }
 
 
     //==============================================================================
     /** Returns the block's current allocated size, in bytes. */
-    int getSize() const throw()                                     { return size; }
+    size_t getSize() const throw()                                  { return size; }
 
     /** Resizes the memory block.
 
@@ -122,7 +123,7 @@ public:
                                             uninitialised
         @see ensureSize
     */
-    void setSize (const int newSize,
+    void setSize (const size_t newSize,
                   const bool initialiseNewSpaceToZero = false) throw();
 
     /** Increases the block's size only if it's smaller than a given size.
@@ -134,7 +135,7 @@ public:
                                             uninitialised
         @see setSize
     */
-    void ensureSize (const int minimumSize,
+    void ensureSize (const size_t minimumSize,
                      const bool initialiseNewSpaceToZero = false) throw();
 
     //==============================================================================
@@ -149,7 +150,7 @@ public:
         This block's size will be increased accordingly.
     */
     void append (const void* const data,
-                 const int numBytes) throw();
+                 const size_t numBytes) throw();
 
     /** Exchanges the contents of this and another memory block.
         No actual copying is required for this, so it's very fast.
@@ -166,7 +167,7 @@ public:
     */
     void copyFrom (const void* srcData,
                    int destinationOffset,
-                   int numBytes) throw();
+                   size_t numBytes) throw();
 
     /** Copies data from this MemoryBlock to a memory address.
 
@@ -177,7 +178,7 @@ public:
     */
     void copyTo (void* destData,
                  int sourceOffset,
-                 int numBytes) const throw();
+                 size_t numBytes) const throw();
 
     /** Chops out a section  of the block.
 
@@ -186,7 +187,7 @@ public:
 
         If the range specified goes beyond the size of the block, it will be clipped.
     */
-    void removeSection (int startByte, int numBytesToRemove) throw();
+    void removeSection (size_t startByte, size_t numBytesToRemove) throw();
 
     //==============================================================================
     /** Attempts to parse the contents of the block as a zero-terminated string of 8-bit
@@ -205,13 +206,13 @@ public:
 
     //==============================================================================
     /** Sets a number of bits in the memory block, treating it as a long binary sequence. */
-    void setBitRange (int bitRangeStart,
-                      int numBits,
+    void setBitRange (size_t bitRangeStart,
+                      size_t numBits,
                       int binaryNumberToApply) throw();
 
     /** Reads a number of bits from the memory block, treating it as one long binary sequence */
-    int getBitRange (int bitRangeStart,
-                     int numBitsToRead) const throw();
+    int getBitRange (size_t bitRangeStart,
+                     size_t numBitsToRead) const throw();
 
     //==============================================================================
     /** Returns a string of characters that represent the binary contents of this block.
@@ -239,7 +240,7 @@ public:
 private:
     //==============================================================================
     HeapBlock <char> data;
-    int size;
+    size_t size;
 };
 
 

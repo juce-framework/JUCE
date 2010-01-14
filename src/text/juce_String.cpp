@@ -216,10 +216,10 @@ String::String (const juce_wchar* const t) throw()
 }
 
 String::String (const char* const t,
-                const int maxChars) throw()
+                const size_t maxChars) throw()
 {
     int i;
-    for (i = 0; i < maxChars; ++i)
+    for (i = 0; (size_t) i < maxChars; ++i)
         if (t[i] == 0)
             break;
 
@@ -243,10 +243,10 @@ String::String (const char* const t,
 }
 
 String::String (const juce_wchar* const t,
-                const int maxChars) throw()
+                const size_t maxChars) throw()
 {
     int i;
-    for (i = 0; i < maxChars; ++i)
+    for (i = 0; (size_t) i < maxChars; ++i)
         if (t[i] == 0)
             break;
 
@@ -466,15 +466,15 @@ String::~String() throw()
 }
 
 //==============================================================================
-void String::preallocateStorage (const int numChars) throw()
+void String::preallocateStorage (const size_t numChars) throw()
 {
-    if (numChars > text->allocatedNumChars)
+    if (numChars > (size_t) text->allocatedNumChars)
     {
         dupeInternalIfMultiplyReferenced();
 
         text = (InternalRefCountedStringHolder*) juce_realloc (text, sizeof (InternalRefCountedStringHolder)
                                                                        + numChars * sizeof (tchar));
-        text->allocatedNumChars = numChars;
+        text->allocatedNumChars = (int) numChars;
     }
 }
 
@@ -2224,15 +2224,15 @@ const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) t
     if (bufferSizeBytes < 0)
         bufferSizeBytes = INT_MAX;
 
-    int numBytes;
-    for (numBytes = 0; numBytes < bufferSizeBytes; ++numBytes)
+    size_t numBytes;
+    for (numBytes = 0; numBytes < (size_t) bufferSizeBytes; ++numBytes)
         if (buffer [numBytes] == 0)
             break;
 
-    String result (numBytes + 1, 0);
+    String result ((int) numBytes + 1, 0);
     tchar* dest = result.text->text;
 
-    int i = 0;
+    size_t i = 0;
     while (i < numBytes)
     {
         const uint8 c = buffer [i++];
@@ -2252,7 +2252,7 @@ const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) t
 
             int n = (c & mask);
 
-            while (--numExtraValues >= 0 && i < bufferSizeBytes)
+            while (--numExtraValues >= 0 && i < (size_t) bufferSizeBytes)
             {
                 const uint8 nextByte = buffer[i];
 

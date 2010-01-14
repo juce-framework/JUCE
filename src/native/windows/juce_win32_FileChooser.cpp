@@ -83,8 +83,8 @@ static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/,
 
             SetWindowPos (dialogH, 0,
                           r.left, r.top,
-                          currentExtraFileWin->getWidth() + jmax (150, r.right - r.left),
-                          jmax (150, r.bottom - r.top),
+                          currentExtraFileWin->getWidth() + jmax (150, (int) (r.right - r.left)),
+                          jmax (150, (int) (r.bottom - r.top)),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
 
             currentExtraFileWin->setBounds (cr.right, cr.top, currentExtraFileWin->getWidth(), cr.bottom - cr.top);

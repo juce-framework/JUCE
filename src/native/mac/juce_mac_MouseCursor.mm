@@ -41,9 +41,9 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     return (void*) c;
 }
 
-static void* juce_cursorFromData (const unsigned char* data, const int size, float hx, float hy) throw()
+static void* juce_cursorFromData (const unsigned char* data, const size_t size, float hx, float hy) throw()
 {
-    ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) data, size));
+    ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) data, (int) size));
     jassert (im != 0);
 
     if (im == 0)

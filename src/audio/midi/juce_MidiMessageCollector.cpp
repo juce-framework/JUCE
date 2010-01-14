@@ -90,7 +90,7 @@ void MidiMessageCollector::removeNextBlockOfMessages (MidiBuffer& destBuffer,
 
     if (! incomingMessages.isEmpty())
     {
-        int numSourceSamples = jmax (1, roundDoubleToInt (msElapsed * 0.001 * sampleRate));
+        int numSourceSamples = jmax (1, roundToInt (msElapsed * 0.001 * sampleRate));
 
         int startSample = 0;
         int scale = 1 << 16;

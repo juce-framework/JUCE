@@ -117,8 +117,8 @@ public:
 
         [nsFont retain];
 
-        ascent = fabsf ([nsFont ascender]);
-        float totalSize = ascent + fabsf ([nsFont descender]);
+        ascent = fabsf ((float) [nsFont ascender]);
+        float totalSize = ascent + fabsf ((float) [nsFont descender]);
         ascent /= totalSize;
 
         pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
@@ -310,13 +310,13 @@ public:
             switch ([bez elementAtIndex: i associatedPoints: p])
             {
             case NSMoveToBezierPathElement:
-                path.startNewSubPath (p[0].x, -p[0].y);
+                path.startNewSubPath ((float) p[0].x, (float) -p[0].y);
                 break;
             case NSLineToBezierPathElement:
-                path.lineTo (p[0].x, -p[0].y);
+                path.lineTo ((float) p[0].x, (float) -p[0].y);
                 break;
             case NSCurveToBezierPathElement:
-                path.cubicTo (p[0].x, -p[0].y, p[1].x, -p[1].y, p[2].x, -p[2].y);
+                path.cubicTo ((float) p[0].x, (float) -p[0].y, (float) p[1].x, (float) -p[1].y, (float) p[2].x, (float) -p[2].y);
                 break;
             case NSClosePathBezierPathElement:
                 path.closeSubPath();

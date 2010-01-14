@@ -378,16 +378,16 @@ void positionToCode (const RelativePositionedRectangle& position,
     else if (position.rect.getWidthMode() == PositionedRectangle::parentSizeMinusAbsolute)
     {
         if (wrw.isNotEmpty())
-            w << "(" << wrw << ") - " << roundDoubleToInt (position.rect.getWidth());
+            w << "(" << wrw << ") - " << roundToInt (position.rect.getWidth());
         else
-            w << "getWidth() - " << roundDoubleToInt (position.rect.getWidth());
+            w << "getWidth() - " << roundToInt (position.rect.getWidth());
     }
     else
     {
         if (wrw.isNotEmpty())
             w << "(" << wrw << ") + ";
 
-        w << roundDoubleToInt (position.rect.getWidth());
+        w << roundToInt (position.rect.getWidth());
     }
 
     // height
@@ -401,16 +401,16 @@ void positionToCode (const RelativePositionedRectangle& position,
     else if (position.rect.getHeightMode() == PositionedRectangle::parentSizeMinusAbsolute)
     {
         if (hrh.isNotEmpty())
-            h << "(" << hrh << ") - " << roundDoubleToInt (position.rect.getHeight());
+            h << "(" << hrh << ") - " << roundToInt (position.rect.getHeight());
         else
-            h << "getHeight() - " << roundDoubleToInt (position.rect.getHeight());
+            h << "getHeight() - " << roundToInt (position.rect.getHeight());
     }
     else
     {
         if (hrh.isNotEmpty())
             h << "(" << hrh << ") + ";
 
-        h << roundDoubleToInt (position.rect.getHeight());
+        h << roundToInt (position.rect.getHeight());
     }
 
     // x-pos
@@ -426,7 +426,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         if (xrx.isNotEmpty())
             x << "(" << xrx << ") + ";
 
-        x << roundDoubleToInt (position.rect.getX());
+        x << roundToInt (position.rect.getX());
     }
     else if (position.rect.getPositionModeX() == PositionedRectangle::absoluteFromParentBottomRight)
     {
@@ -435,7 +435,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         else
             x << "getWidth()";
 
-        const int d = roundDoubleToInt (position.rect.getX());
+        const int d = roundToInt (position.rect.getX());
         if (d != 0)
             x << " - " << d;
     }
@@ -446,7 +446,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         else
             x << "(getWidth() / 2)";
 
-        const int d = roundDoubleToInt (position.rect.getX());
+        const int d = roundToInt (position.rect.getX());
         if (d != 0)
             x << " + " << d;
     }
@@ -472,7 +472,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         if (yry.isNotEmpty())
             y << "(" << yry << ") + ";
 
-        y << roundDoubleToInt (position.rect.getY());
+        y << roundToInt (position.rect.getY());
     }
     else if (position.rect.getPositionModeY() == PositionedRectangle::absoluteFromParentBottomRight)
     {
@@ -481,7 +481,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         else
             y << "getHeight()";
 
-        const int d = roundDoubleToInt (position.rect.getY());
+        const int d = roundToInt (position.rect.getY());
         if (d != 0)
             y << " - " << d;
     }
@@ -492,7 +492,7 @@ void positionToCode (const RelativePositionedRectangle& position,
         else
             y << "(getHeight() / 2)";
 
-        const int d = roundDoubleToInt (position.rect.getY());
+        const int d = roundToInt (position.rect.getY());
         if (d != 0)
             y << " + " << d;
     }

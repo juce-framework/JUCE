@@ -178,7 +178,7 @@ public:
                                                               hostPath, url,
                                                               headers, postData,
                                                               isPost));
-        int totalHeaderSent = 0;
+        size_t totalHeaderSent = 0;
 
         while (totalHeaderSent < requestHeader.getSize())
         {
@@ -188,7 +188,7 @@ public:
                 return false;
             }
 
-            const int numToSend = jmin (1024, requestHeader.getSize() - totalHeaderSent);
+            const int numToSend = jmin (1024, (int) (requestHeader.getSize() - totalHeaderSent));
 
             if (send (socketHandle,
                       ((const char*) requestHeader.getData()) + totalHeaderSent,

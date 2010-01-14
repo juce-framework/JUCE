@@ -43,8 +43,8 @@ MidiBuffer::MidiBuffer (const MidiMessage& message) throw()
 }
 
 MidiBuffer::MidiBuffer (const MidiBuffer& other) throw()
-    : bytesUsed (other.bytesUsed),
-      data (other.data)
+    : data (other.data),
+      bytesUsed (other.bytesUsed)
 {
 }
 

@@ -392,7 +392,7 @@ private:
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
-            document.perform (new ViewportScrollbarSizeChangeAction (component, *document.getComponentLayout(), roundDoubleToInt (newValue)),
+            document.perform (new ViewportScrollbarSizeChangeAction (component, *document.getComponentLayout(), roundToInt (newValue)),
                               T("Change Viewport scrollbar size"));
         }
 

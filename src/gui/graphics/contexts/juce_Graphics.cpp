@@ -735,8 +735,8 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
             if (newW > 0 && newH > 0)
             {
                 drawImage (imageToDraw,
-                           roundDoubleToInt (newX), roundDoubleToInt (newY),
-                           roundDoubleToInt (newW), roundDoubleToInt (newH),
+                           roundToInt (newX), roundToInt (newY),
+                           roundToInt (newW), roundToInt (newH),
                            0, 0, imageW, imageH,
                            fillAlphaChannelWithCurrentBrush);
             }

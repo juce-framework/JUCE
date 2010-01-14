@@ -51,7 +51,7 @@ public:
                                         data and use that.
     */
     MemoryInputStream (const void* const sourceData,
-                       const int sourceDataSize,
+                       const size_t sourceDataSize,
                        const bool keepInternalCopyOfData);
 
     /** Destructor. */
@@ -70,7 +70,7 @@ public:
 
 private:
     const char* data;
-    int dataSize, position;
+    size_t dataSize, position;
     MemoryBlock internalCopy;
 };
 

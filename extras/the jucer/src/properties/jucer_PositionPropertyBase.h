@@ -118,7 +118,7 @@ public:
 
     static const String valueToString (const double n)
     {
-        return String (roundDoubleToInt (n * 1000.0) / 1000.0);
+        return String (roundToInt (n * 1000.0) / 1000.0);
     }
 
     void setText (const String& newText)

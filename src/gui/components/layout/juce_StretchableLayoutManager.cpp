@@ -275,7 +275,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
             const int bestSize = jlimit (layout->currentSize,
                                          jmax (layout->currentSize,
                                                sizeToRealSize (layout->maxSize, totalSize)),
-                                         roundDoubleToInt (sizeWanted * availableSpace / totalIdealSize));
+                                         roundToInt (sizeWanted * availableSpace / totalIdealSize));
 
             if (bestSize > layout->currentSize)
                 ++numWantingMoreSpace;
@@ -290,7 +290,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
 
             int bestSize = jlimit (layout->currentSize,
                                    jmax (layout->currentSize, sizeToRealSize (layout->maxSize, totalSize)),
-                                   roundDoubleToInt (sizeWanted * availableSpace / totalIdealSize));
+                                   roundToInt (sizeWanted * availableSpace / totalIdealSize));
 
             const int extraWanted = bestSize - layout->currentSize;
 
@@ -362,7 +362,7 @@ int StretchableLayoutManager::sizeToRealSize (double size, int totalSpace)
     if (size < 0)
         size *= -totalSpace;
 
-    return roundDoubleToInt (size);
+    return roundToInt (size);
 }
 
 END_JUCE_NAMESPACE

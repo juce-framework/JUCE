@@ -173,7 +173,7 @@ void MidiKeyboardState::processNextMidiBuffer (MidiBuffer& buffer,
 
         while (i2.getNextEvent (message, time))
         {
-            const int pos = jlimit (0, numSamples - 1, roundDoubleToInt ((time - firstEventToAdd) * scaleFactor));
+            const int pos = jlimit (0, numSamples - 1, roundToInt ((time - firstEventToAdd) * scaleFactor));
             buffer.addEvent (message, startSample + pos);
         }
     }

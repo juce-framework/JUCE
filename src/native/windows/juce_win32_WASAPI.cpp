@@ -444,7 +444,7 @@ public:
 
                     if (samplesToDo < numSamplesAvailable)
                     {
-                        reservoirSize = jmin (numSamplesAvailable - samplesToDo, reservoirCapacity);
+                        reservoirSize = jmin ((int) (numSamplesAvailable - samplesToDo), reservoirCapacity);
                         memcpy ((uint8*) reservoir.getData(), inputData + bytesPerSample * actualNumChannels * samplesToDo,
                                 bytesPerSample * actualNumChannels * reservoirSize);
                     }

@@ -120,8 +120,8 @@ void Viewport::setViewPositionProportionately (const double x,
                                                const double y)
 {
     if (contentComp != 0)
-        setViewPosition (jmax (0, roundDoubleToInt (x * (contentComp->getWidth() - getWidth()))),
-                         jmax (0, roundDoubleToInt (y * (contentComp->getHeight() - getHeight()))));
+        setViewPosition (jmax (0, roundToInt (x * (contentComp->getWidth() - getWidth()))),
+                         jmax (0, roundToInt (y * (contentComp->getHeight() - getHeight()))));
 }
 
 bool Viewport::autoScroll (int mouseX, int mouseY, int activeBorderThickness, int maximumSpeed)
@@ -290,11 +290,11 @@ void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double ne
 {
     if (scrollBarThatHasMoved == horizontalScrollBar)
     {
-        setViewPosition (roundDoubleToInt (newRangeStart), getViewPositionY());
+        setViewPosition (roundToInt (newRangeStart), getViewPositionY());
     }
     else if (scrollBarThatHasMoved == verticalScrollBar)
     {
-        setViewPosition (getViewPositionX(), roundDoubleToInt (newRangeStart));
+        setViewPosition (getViewPositionX(), roundToInt (newRangeStart));
     }
 }
 

@@ -1429,7 +1429,7 @@ const String Path::toString() const
     }
 
     const char* const result = (const char*) s.getData();
-    int len = s.getDataSize();
+    size_t len = s.getDataSize();
 
     while (len > 0 && CharacterFunctions::isWhitespace (result [len - 1]))
         --len;

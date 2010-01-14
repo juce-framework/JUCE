@@ -64,8 +64,8 @@ public:
 
         HIRect bounds;
         HIViewGetBounds (embeddedView, &bounds);
-        w = jmax (1, roundFloatToInt (bounds.size.width));
-        h = jmax (1, roundFloatToInt (bounds.size.height));
+        w = jmax (1, roundToInt (bounds.size.width));
+        h = jmax (1, roundToInt (bounds.size.height));
         return true;
     }
 

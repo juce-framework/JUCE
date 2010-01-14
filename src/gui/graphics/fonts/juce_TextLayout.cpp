@@ -51,7 +51,7 @@ public:
           isWhitespace (isWhitespace_)
     {
         w = font.getStringWidth (t);
-        h = roundFloatToInt (f.getHeight());
+        h = roundToInt (f.getHeight());
         isNewLine = t.containsAnyOf (T("\r\n"));
     }
 
@@ -83,7 +83,7 @@ public:
             g.drawSingleLineText (text.trimEnd(),
                                   xOffset + x,
                                   yOffset + y + (lineHeight - h)
-                                    + roundFloatToInt (font.getAscent()));
+                                    + roundToInt (font.getAscent()));
         }
     }
 
