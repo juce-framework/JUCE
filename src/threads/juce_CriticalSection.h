@@ -119,11 +119,11 @@ private:
 class JUCE_API  DummyCriticalSection
 {
 public:
-    forcedinline DummyCriticalSection() throw()         {}
-    forcedinline ~DummyCriticalSection() throw()        {}
+    inline DummyCriticalSection() throw()         {}
+    inline ~DummyCriticalSection() throw()        {}
 
-    forcedinline void enter() const throw()             {}
-    forcedinline void exit() const throw()              {}
+    inline void enter() const throw()             {}
+    inline void exit() const throw()              {}
 };
 
 

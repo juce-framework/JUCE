@@ -53,7 +53,7 @@
 static VoidArray activePlugins, activeUIs;
 
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
-static const int numChannelConfigs = numElementsInArray (channelConfigs);
+static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
 
 #if JucePlugin_IsSynth
  #define JuceAUBaseClass MusicDeviceBase

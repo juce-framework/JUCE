@@ -96,7 +96,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
     while (numBytesToRead > 0)
     {
         char tempBuffer [512];
-        const int bytesRead = input.read (tempBuffer, (int) jmin ((size_t) numBytesToRead, sizeof (tempBuffer)));
+        const int bytesRead = input.read (tempBuffer, (int) jmin (numBytesToRead, (int64) sizeof (tempBuffer)));
 
         if (bytesRead <= 0)
             break;

@@ -137,7 +137,7 @@ void Button::setToggleState (const bool shouldBeOn,
         if (sendChangeNotification)
             sendClickMessage (ModifierKeys());
 
-        if ((! deletionWatcher.hasBeenDeleted()) && getToggleState())
+        if ((! deletionWatcher.hasBeenDeleted()) && lastToggleState)
             turnOffOtherButtonsInGroup (sendChangeNotification);
     }
 }
@@ -170,7 +170,7 @@ void Button::setRadioGroupId (const int newGroupId)
     {
         radioGroupId = newGroupId;
 
-        if (getToggleState())
+        if (lastToggleState)
             turnOffOtherButtonsInGroup (true);
     }
 }
@@ -304,7 +304,7 @@ void Button::triggerClick()
 void Button::internalClickCallback (const ModifierKeys& modifiers)
 {
     if (clickTogglesState)
-        setToggleState ((radioGroupId != 0) || ! getToggleState(), false);
+        setToggleState ((radioGroupId != 0) || ! lastToggleState, false);
 
     sendClickMessage (modifiers);
 }
@@ -679,8 +679,7 @@ void Button::repeatTimerCallback() throw()
         getRepeatTimer().startTimer (repeatSpeed);
 
         const uint32 now = Time::getApproximateMillisecondCounter();
-        const int numTimesToCallback
-            = (now > lastTimeCallbackTime) ? jmax ((uint32) 1, (now - lastTimeCallbackTime) / repeatSpeed) : 1;
+        const int numTimesToCallback = (now > lastTimeCallbackTime) ? jmax (1, (int) (now - lastTimeCallbackTime) / repeatSpeed) : 1;
 
         lastTimeCallbackTime = now;
 

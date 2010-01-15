@@ -57,7 +57,8 @@ int64 MemoryInputStream::getTotalLength()
 
 int MemoryInputStream::read (void* buffer, int howMany)
 {
-    const size_t num = jmin ((size_t) howMany, dataSize - position);
+    jassert (howMany >= 0);
+    const int num = jmin (howMany, (int) (dataSize - position));
     memcpy (buffer, data + position, num);
     position += num;
     return (int) num;

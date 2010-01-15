@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static forcedinline uint8 floatAlphaToInt (const float alpha)
+static uint8 floatAlphaToInt (const float alpha)
 {
     return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
 }
