@@ -46,7 +46,9 @@ BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
 BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,
                                                     const String& name,
                                                     const String& buttonText)
-    : PropertyComponent (name)
+    : PropertyComponent (name),
+      onText (buttonText),
+      offText (buttonText)
 {
     createButton();
     button->setButtonText (buttonText);

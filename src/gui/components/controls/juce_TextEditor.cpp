@@ -1008,6 +1008,7 @@ TextEditor::TextEditor (const String& name,
 
 TextEditor::~TextEditor()
 {
+    textValue.referTo (Value());
     clearInternal (0);
     viewport = 0;
     textHolder = 0;
