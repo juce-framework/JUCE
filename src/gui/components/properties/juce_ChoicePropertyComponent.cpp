@@ -37,12 +37,49 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 {
 }
 
+ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
+                                                  const String& name,
+                                                  const StringArray& choices_)
+    : PropertyComponent (name),
+      choices (choices_),
+      comboBox (0)
+{
+    createComboBox();
+
+    comboBox->getSelectedIdAsValue().referTo (valueToControl);
+}
+
 ChoicePropertyComponent::~ChoicePropertyComponent()
 {
     deleteAllChildren();
 }
 
 //==============================================================================
+void ChoicePropertyComponent::createComboBox()
+{
+    addAndMakeVisible (comboBox = new ComboBox (String::empty));
+
+    for (int i = 0; i < choices.size(); ++i)
+    {
+        if (choices[i].isNotEmpty())
+            comboBox->addItem (choices[i], i + 1);
+        else
+            comboBox->addSeparator();
+    }
+
+    comboBox->setEditableText (false);
+}
+
+void ChoicePropertyComponent::setIndex (const int newIndex)
+{
+    comboBox->setSelectedId (comboBox->getItemId (newIndex));
+}
+
+int ChoicePropertyComponent::getIndex() const
+{
+    return comboBox->getSelectedItemIndex();
+}
+
 const StringArray& ChoicePropertyComponent::getChoices() const
 {
     return choices;
@@ -53,17 +90,7 @@ void ChoicePropertyComponent::refresh()
 {
     if (comboBox == 0)
     {
-        addAndMakeVisible (comboBox = new ComboBox (String::empty));
-
-        for (int i = 0; i < choices.size(); ++i)
-        {
-            if (choices[i].isNotEmpty())
-                comboBox->addItem (choices[i], i + 1);
-            else
-                comboBox->addSeparator();
-        }
-
-        comboBox->setEditableText (false);
+        createComboBox();
         comboBox->addListener (this);
     }
 

@@ -39,14 +39,40 @@ BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
       onText (buttonTextWhenTrue),
       offText (buttonTextWhenFalse)
 {
-    addAndMakeVisible (button = new ToggleButton (String::empty));
-    button->setClickingTogglesState (false);
+    createButton();
     button->addButtonListener (this);
+}
+
+BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,
+                                                    const String& name,
+                                                    const String& buttonText)
+    : PropertyComponent (name)
+{
+    createButton();
+    button->setButtonText (buttonText);
+    button->getToggleStateValue().referTo (valueToControl);
+    button->setClickingTogglesState (true);
 }
 
 BooleanPropertyComponent::~BooleanPropertyComponent()
 {
     deleteAllChildren();
+}
+
+void BooleanPropertyComponent::createButton()
+{
+    addAndMakeVisible (button = new ToggleButton (String::empty));
+    button->setClickingTogglesState (false);
+}
+
+void BooleanPropertyComponent::setState (const bool newState)
+{
+    button->setToggleState (newState, true);
+}
+
+bool BooleanPropertyComponent::getState() const
+{
+    return button->getToggleState();
 }
 
 void BooleanPropertyComponent::paint (Graphics& g)

@@ -42,9 +42,12 @@
 class JUCE_API  BooleanPropertyComponent  : public PropertyComponent,
                                             private ButtonListener
 {
-public:
+protected:
     //==============================================================================
     /** Creates a button component.
+
+        If you use this constructor, you must override the getState() and setState()
+        methods.
 
         @param propertyName         the property name to be passed to the PropertyComponent
         @param buttonTextWhenTrue   the text shown in the button when the value is true
@@ -54,15 +57,26 @@ public:
                               const String& buttonTextWhenTrue,
                               const String& buttonTextWhenFalse);
 
+public:
+    /** Creates a button component.
+
+        @param valueToControl       a Value object that this property should refer to.
+        @param propertyName         the property name to be passed to the PropertyComponent
+        @param buttonText           the text shown in the ToggleButton component
+    */
+    BooleanPropertyComponent (const Value& valueToControl,
+                              const String& propertyName,
+                              const String& buttonText);
+
     /** Destructor. */
     ~BooleanPropertyComponent();
 
     //==============================================================================
     /** Called to change the state of the boolean value. */
-    virtual void setState (const bool newState) = 0;
+    virtual void setState (const bool newState);
 
     /** Must return the current value of the property. */
-    virtual bool getState() const = 0;
+    virtual bool getState() const;
 
     //==============================================================================
     /** @internal */
@@ -77,6 +91,8 @@ public:
 private:
     ToggleButton* button;
     String onText, offText;
+
+    void createButton();
 };
 
 

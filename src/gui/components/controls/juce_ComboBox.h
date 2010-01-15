@@ -28,6 +28,7 @@
 
 #include "juce_Label.h"
 #include "../../../text/juce_StringArray.h"
+#include "../../../containers/juce_Value.h"
 class ComboBox;
 
 
@@ -70,7 +71,8 @@ public:
 class JUCE_API  ComboBox  : public Component,
                             public SettableTooltipClient,
                             private LabelListener,
-                            private AsyncUpdater
+                            private AsyncUpdater,
+                            private Value::Listener
 {
 public:
     //==============================================================================
@@ -187,6 +189,11 @@ public:
     */
     int getItemId (const int index) const throw();
 
+    /** Returns the index in the list of a particular item ID.
+        If no such ID is found, this will return -1.
+    */
+    int indexOfItemId (const int itemId) const throw();
+
     //==============================================================================
     /** Returns the ID of the item that's currently shown in the box.
 
@@ -197,6 +204,13 @@ public:
         @see setSelectedId, getSelectedItemIndex, getText
     */
     int getSelectedId() const throw();
+
+    /** Returns a Value object that can be used to get or set the selected item's ID.
+
+        You can call Value::referTo() on this object to make the combo box control
+        another Value object.
+    */
+    Value& getSelectedIdAsValue() throw()                   { return currentId; }
 
     /** Sets one of the items to be the current selection.
 
@@ -357,6 +371,8 @@ public:
     bool keyStateChanged (const bool isKeyDown);
     /** @internal */
     bool keyPressed (const KeyPress&);
+    /** @internal */
+    void valueChanged (Value&);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -373,10 +389,9 @@ private:
     };
 
     OwnedArray <ItemInfo> items;
-    int currentIndex;
-    bool isButtonDown;
-    bool separatorPending;
-    bool menuActive;
+    Value currentId;
+    int lastCurrentId;
+    bool isButtonDown, separatorPending, menuActive, textIsCustom;
     SortedSet <void*> listeners;
     Label* label;
     String textWhenNothingSelected, noChoicesMessage;

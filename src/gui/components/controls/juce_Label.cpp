@@ -35,7 +35,8 @@ BEGIN_JUCE_NAMESPACE
 Label::Label (const String& componentName,
               const String& labelText)
     : Component (componentName),
-      text (labelText),
+      textValue (labelText),
+      lastTextValue (labelText),
       font (15.0f),
       justification (Justification::centredLeft),
       ownerComponent (0),
@@ -49,10 +50,14 @@ Label::Label (const String& componentName,
     setColour (TextEditor::textColourId, Colours::black);
     setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
     setColour (TextEditor::outlineColourId, Colours::transparentBlack);
+
+    textValue.addListener (this);
 }
 
 Label::~Label()
 {
+    textValue.removeListener (this);
+
     if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
         ownerComponent->removeComponentListener (this);
 
@@ -65,9 +70,10 @@ void Label::setText (const String& newText,
 {
     hideEditor (true);
 
-    if (text != newText)
+    if (lastTextValue != newText)
     {
-        text = newText;
+        lastTextValue = newText;
+        textValue = newText;
         repaint();
 
         textWasChanged();
@@ -84,9 +90,16 @@ const String Label::getText (const bool returnActiveEditorContents) const throw(
 {
     return (returnActiveEditorContents && isBeingEdited())
                 ? editor->getText()
-                : text;
+                : textValue.toString();
 }
 
+void Label::valueChanged (Value&)
+{
+    if (lastTextValue != textValue.toString())
+        setText (textValue.toString(), true);
+}
+
+//==============================================================================
 void Label::setFont (const Font& newFont) throw()
 {
     font = newFont;
@@ -152,7 +165,7 @@ void Label::componentMovedOrResized (Component& component,
 {
     if (leftOfOwnerComp)
     {
-        setSize (jmin (getFont().getStringWidth (text) + 8, component.getX()),
+        setSize (jmin (getFont().getStringWidth (textValue.toString()) + 8, component.getX()),
                  component.getHeight());
 
         setTopRightPosition (component.getX(), component.getY());
@@ -160,7 +173,7 @@ void Label::componentMovedOrResized (Component& component,
     else
     {
         setSize (component.getWidth(),
-                 8 + roundFloatToInt (getFont().getHeight()));
+                 8 + roundToInt (getFont().getHeight()));
 
         setTopLeftPosition (component.getX(), component.getY() - getHeight());
     }
@@ -194,7 +207,7 @@ void Label::showEditor()
         editor->setText (getText(), false);
         editor->addListener (this);
         editor->grabKeyboardFocus();
-        editor->setHighlightedRegion (0, text.length());
+        editor->setHighlightedRegion (0, textValue.toString().length());
         editor->addListener (this);
 
         resized();
@@ -220,9 +233,10 @@ bool Label::updateFromTextEditorContents()
     jassert (editor != 0);
     const String newText (editor->getText());
 
-    if (text != newText)
+    if (textValue.toString() != newText)
     {
-        text = newText;
+        lastTextValue = newText;
+        textValue = newText;
         repaint();
 
         textWasChanged();
@@ -441,7 +455,7 @@ void Label::textEditorEscapeKeyPressed (TextEditor& ed)
         jassert (&ed == editor);
         (void) ed;
 
-        editor->setText (text, false);
+        editor->setText (textValue.toString(), false);
         hideEditor (true);
     }
 }

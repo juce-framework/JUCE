@@ -79,9 +79,40 @@ public:
 
 //==============================================================================
 TextPropertyComponent::TextPropertyComponent (const String& name,
-                                            const int maxNumChars,
-                                            const bool isMultiLine)
+                                              const int maxNumChars,
+                                              const bool isMultiLine)
     : PropertyComponent (name)
+{
+    createEditor (maxNumChars, isMultiLine);
+}
+
+TextPropertyComponent::TextPropertyComponent (const Value& valueToControl,
+                                              const String& name,
+                                              const int maxNumChars,
+                                              const bool isMultiLine)
+    : PropertyComponent (name)
+{
+    createEditor (maxNumChars, isMultiLine);
+
+    textEditor->getTextValue().referTo (valueToControl);
+}
+
+TextPropertyComponent::~TextPropertyComponent()
+{
+    deleteAllChildren();
+}
+
+void TextPropertyComponent::setText (const String& newText)
+{
+    textEditor->setText (newText, true);
+}
+
+const String TextPropertyComponent::getText() const
+{
+    return textEditor->getText();
+}
+
+void TextPropertyComponent::createEditor (const int maxNumChars, const bool isMultiLine)
 {
     addAndMakeVisible (textEditor = new TextPropLabel (*this, maxNumChars, isMultiLine));
 
@@ -90,11 +121,6 @@ TextPropertyComponent::TextPropertyComponent (const String& name,
         textEditor->setJustificationType (Justification::topLeft);
         preferredHeight = 120;
     }
-}
-
-TextPropertyComponent::~TextPropertyComponent()
-{
-    deleteAllChildren();
 }
 
 void TextPropertyComponent::refresh()

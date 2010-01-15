@@ -62,7 +62,8 @@ public:
 class JUCE_API  Label  : public Component,
                          public SettableTooltipClient,
                          protected TextEditorListener,
-                         private ComponentListener
+                         private ComponentListener,
+                         private Value::Listener
 {
 public:
     //==============================================================================
@@ -97,6 +98,12 @@ public:
                                             key.
     */
     const String getText (const bool returnActiveEditorContents = false) const throw();
+
+    /** Returns the text content as a Value object.
+        You can call Value::referTo() on this object to make the label read and control
+        a Value object that you supply.
+    */
+    Value& getTextValue()                               { return textValue; }
 
     //==============================================================================
     /** Changes the font to use to draw the text.
@@ -256,6 +263,30 @@ public:
     juce_UseDebuggingNewOperator
 
 protected:
+    /** Creates the TextEditor component that will be used when the user has clicked on the label.
+
+        Subclasses can override this if they need to customise this component in some way.
+    */
+    virtual TextEditor* createEditorComponent();
+
+    /** Called after the user changes the text.
+    */
+    virtual void textWasEdited();
+
+    /** Called when the text has been altered.
+    */
+    virtual void textWasChanged();
+
+    /** Called when the text editor has just appeared, due to a user click or other
+        focus change.
+    */
+    virtual void editorShown (TextEditor* editorComponent);
+
+    /** Called when the text editor is going to be deleted, after editing has finished.
+    */
+    virtual void editorAboutToBeHidden (TextEditor* editorComponent);
+
+    //==============================================================================
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -288,32 +319,12 @@ protected:
     void textEditorFocusLost (TextEditor& editor);
     /** @internal */
     void colourChanged();
-
-    /** Creates the TextEditor component that will be used when the user has clicked on the label.
-
-        Subclasses can override this if they need to customise this component in some way.
-    */
-    virtual TextEditor* createEditorComponent();
-
-    /** Called after the user changes the text.
-    */
-    virtual void textWasEdited();
-
-    /** Called when the text has been altered.
-    */
-    virtual void textWasChanged();
-
-    /** Called when the text editor has just appeared, due to a user click or other
-        focus change.
-    */
-    virtual void editorShown (TextEditor* editorComponent);
-
-    /** Called when the text editor is going to be deleted, after editing has finished.
-    */
-    virtual void editorAboutToBeHidden (TextEditor* editorComponent);
+    /** @internal */
+    void valueChanged (Value&);
 
 private:
-    String text;
+    Value textValue;
+    String lastTextValue;
     Font font;
     Justification justification;
     ScopedPointer <TextEditor> editor;

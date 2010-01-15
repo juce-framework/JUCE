@@ -38,7 +38,7 @@
 */
 class JUCE_API  TextPropertyComponent  : public PropertyComponent
 {
-public:
+protected:
     //==============================================================================
     /** Creates a text property component.
 
@@ -51,6 +51,19 @@ public:
                            const int maxNumChars,
                            const bool isMultiLine);
 
+public:
+    /** Creates a text property component.
+
+        The maxNumChars is used to set the length of string allowable, and isMultiLine
+        sets whether the text editor allows carriage returns.
+
+        @see TextEditor
+    */
+    TextPropertyComponent (const Value& valueToControl,
+                           const String& propertyName,
+                           const int maxNumChars,
+                           const bool isMultiLine);
+
     /** Destructor. */
     ~TextPropertyComponent();
 
@@ -60,11 +73,11 @@ public:
         Your subclass must use this callback to change the value of whatever item
         this property component represents.
     */
-    virtual void setText (const String& newText) = 0;
+    virtual void setText (const String& newText);
 
     /** Returns the text that should be shown in the text editor.
     */
-    virtual const String getText() const = 0;
+    virtual const String getText() const;
 
 
     //==============================================================================
@@ -77,6 +90,8 @@ public:
 
 private:
     Label* textEditor;
+
+    void createEditor (const int maxNumChars, const bool isMultiLine);
 };
 
 

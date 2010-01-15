@@ -72,6 +72,8 @@
  #define JUCE_USE_CAMERA 0
 #elif JUCE_MAC
  #define JUCE_USE_CAMERA 1
+#else // WINDOWS
+ #define JUCE_USE_CAMERA 0
 #endif
 
 //#define JUCE_CHECK_MEMORY_LEAKS  1

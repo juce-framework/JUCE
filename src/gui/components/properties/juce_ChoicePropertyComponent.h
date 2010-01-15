@@ -52,13 +52,23 @@
 class JUCE_API  ChoicePropertyComponent    : public PropertyComponent,
                                              private ComboBoxListener
 {
-public:
+protected:
     /** Creates the component.
 
         Your subclass's constructor must add a list of options to the choices
         member variable.
     */
     ChoicePropertyComponent (const String& propertyName);
+
+public:
+    /** Creates the component.
+
+        Your subclass's constructor must add a list of options to the choices
+        member variable.
+    */
+    ChoicePropertyComponent (const Value& valueToControl,
+                             const String& propertyName,
+                             const StringArray& choices);
 
     /** Destructor. */
     ~ChoicePropertyComponent();
@@ -70,14 +80,14 @@ public:
         represents. The index is the index of the chosen item in the choices
         StringArray.
     */
-    virtual void setIndex (const int newIndex) = 0;
+    virtual void setIndex (const int newIndex);
 
     /** Returns the index of the item that should currently be shown.
 
         This is the index of the item in the choices StringArray that will be
         shown.
     */
-    virtual int getIndex() const = 0;
+    virtual int getIndex() const;
 
     /** Returns the list of options. */
     const StringArray& getChoices() const;
@@ -102,6 +112,8 @@ protected:
 
 private:
     ComboBox* comboBox;
+
+    void createComboBox();
 };
 
 

@@ -39,7 +39,7 @@
 class JUCE_API  SliderPropertyComponent   : public PropertyComponent,
                                             private SliderListener
 {
-public:
+protected:
     //==============================================================================
     /** Creates the property component.
 
@@ -49,6 +49,22 @@ public:
         access the slider member variable and change it directly.
     */
     SliderPropertyComponent (const String& propertyName,
+                             const double rangeMin,
+                             const double rangeMax,
+                             const double interval,
+                             const double skewFactor = 1.0);
+
+public:
+    //==============================================================================
+    /** Creates the property component.
+
+        The ranges, interval and skew factor are passed to the Slider component.
+
+        If you need to customise the slider in other ways, your constructor can
+        access the slider member variable and change it directly.
+    */
+    SliderPropertyComponent (Value& valueToControl,
+                             const String& propertyName,
                              const double rangeMin,
                              const double rangeMax,
                              const double interval,
@@ -64,10 +80,10 @@ public:
         Your subclass must use this method to update whatever item this property
         represents.
     */
-    virtual void setValue (const double newValue) = 0;
+    virtual void setValue (const double newValue);
 
     /** Returns the value that the slider should show. */
-    virtual const double getValue() const = 0;
+    virtual const double getValue() const;
 
 
     //==============================================================================

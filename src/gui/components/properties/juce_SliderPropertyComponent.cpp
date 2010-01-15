@@ -47,9 +47,35 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
     slider->addListener (this);
 }
 
+SliderPropertyComponent::SliderPropertyComponent (Value& valueToControl,
+                                                  const String& name,
+                                                  const double rangeMin,
+                                                  const double rangeMax,
+                                                  const double interval,
+                                                  const double skewFactor)
+    : PropertyComponent (name)
+{
+    addAndMakeVisible (slider = new Slider (name));
+
+    slider->setRange (rangeMin, rangeMax, interval);
+    slider->setSkewFactor (skewFactor);
+    slider->setSliderStyle (Slider::LinearBar);
+
+    slider->getValueObject().referTo (valueToControl);
+}
+
 SliderPropertyComponent::~SliderPropertyComponent()
 {
     deleteAllChildren();
+}
+
+void SliderPropertyComponent::setValue (const double newValue)
+{
+}
+
+const double SliderPropertyComponent::getValue() const
+{
+    return slider->getValue();
 }
 
 void SliderPropertyComponent::refresh()

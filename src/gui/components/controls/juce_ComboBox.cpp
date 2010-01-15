@@ -36,22 +36,24 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ComboBox::ComboBox (const String& name)
     : Component (name),
-      items (4),
-      currentIndex (-1),
+      lastCurrentId (0),
       isButtonDown (false),
       separatorPending (false),
       menuActive (false),
-      listeners (2),
       label (0)
 {
     noChoicesMessage = TRANS("(no choices)");
     setRepaintsOnMouseActivity (true);
 
     lookAndFeelChanged();
+
+    currentId.addListener (this);
 }
 
 ComboBox::~ComboBox()
 {
+    currentId.removeListener (this);
+
     if (menuActive)
         PopupMenu::dismissAllActiveMenus();
 
@@ -185,10 +187,19 @@ void ComboBox::clear (const bool dontSendChangeMessage)
 }
 
 //==============================================================================
+bool ComboBox::ItemInfo::isSeparator() const throw()
+{
+    return name.isEmpty();
+}
+
+bool ComboBox::ItemInfo::isRealItem() const throw()
+{
+    return ! (isHeading || name.isEmpty());
+}
+
+//==============================================================================
 ComboBox::ItemInfo* ComboBox::getItemForId (const int itemId) const throw()
 {
-    jassert (itemId != 0);
-
     if (itemId != 0)
     {
         for (int i = items.size(); --i >= 0;)
@@ -208,10 +219,8 @@ ComboBox::ItemInfo* ComboBox::getItemForIndex (const int index) const throw()
         ItemInfo* const item = items.getUnchecked(i);
 
         if (item->isRealItem())
-        {
             if (n++ == index)
                 return item;
-        }
     }
 
     return 0;
@@ -222,19 +231,15 @@ int ComboBox::getNumItems() const throw()
     int n = 0;
 
     for (int i = items.size(); --i >= 0;)
-    {
-        ItemInfo* const item = items.getUnchecked(i);
-
-        if (item->isRealItem())
+        if (items.getUnchecked(i)->isRealItem())
             ++n;
-    }
 
     return n;
 }
 
 const String ComboBox::getItemText (const int index) const throw()
 {
-    ItemInfo* const item = getItemForIndex (index);
+    const ItemInfo* const item = getItemForIndex (index);
 
     if (item != 0)
         return item->name;
@@ -244,90 +249,80 @@ const String ComboBox::getItemText (const int index) const throw()
 
 int ComboBox::getItemId (const int index) const throw()
 {
-    ItemInfo* const item = getItemForIndex (index);
+    const ItemInfo* const item = getItemForIndex (index);
 
     return (item != 0) ? item->itemId : 0;
 }
 
-
-//==============================================================================
-bool ComboBox::ItemInfo::isSeparator() const throw()
+int ComboBox::indexOfItemId (const int itemId) const throw()
 {
-    return name.isEmpty();
-}
+    int n = 0;
 
-bool ComboBox::ItemInfo::isRealItem() const throw()
-{
-    return ! (isHeading || name.isEmpty());
+    for (int i = 0; i < items.size(); ++i)
+    {
+        const ItemInfo* const item = items.getUnchecked(i);
+
+        if (item->isRealItem())
+        {
+            if (item->itemId == itemId)
+                return n;
+
+            ++n;
+        }
+    }
+
+    return -1;
 }
 
 //==============================================================================
 int ComboBox::getSelectedItemIndex() const throw()
 {
-    return (currentIndex >= 0 && getText() == getItemText (currentIndex))
-                ? currentIndex
-                : -1;
+    int index = indexOfItemId (currentId.getValue());
+
+    if (getText() != getItemText (index))
+        index = -1;
+
+    return index;
 }
 
 void ComboBox::setSelectedItemIndex (const int index,
                                      const bool dontSendChangeMessage) throw()
 {
-    if (currentIndex != index || label->getText() != getItemText (currentIndex))
-    {
-        if (((unsigned int) index) < (unsigned int) getNumItems())
-            currentIndex = index;
-        else
-            currentIndex = -1;
-
-        label->setText (getItemText (currentIndex), false);
-
-        if (! dontSendChangeMessage)
-            triggerAsyncUpdate();
-    }
-}
-
-void ComboBox::setSelectedId (const int newItemId,
-                              const bool dontSendChangeMessage) throw()
-{
-    for (int i = getNumItems(); --i >= 0;)
-    {
-        if (getItemId(i) == newItemId)
-        {
-            setSelectedItemIndex (i, dontSendChangeMessage);
-            break;
-        }
-    }
+    setSelectedId (getItemId (index), dontSendChangeMessage);
 }
 
 int ComboBox::getSelectedId() const throw()
 {
-    const ItemInfo* const item = getItemForIndex (currentIndex);
+    const ItemInfo* const item = getItemForId (currentId.getValue());
 
     return (item != 0 && getText() == item->name)
                 ? item->itemId
                 : 0;
 }
 
-//==============================================================================
-void ComboBox::addListener (ComboBoxListener* const listener) throw()
+void ComboBox::setSelectedId (const int newItemId,
+                              const bool dontSendChangeMessage) throw()
 {
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
-}
+    const ItemInfo* const item = getItemForId (newItemId);
+    const String newItemText (item != 0 ? item->name : String::empty);
 
-void ComboBox::removeListener (ComboBoxListener* const listener) throw()
-{
-    listeners.removeValue (listener);
-}
-
-void ComboBox::handleAsyncUpdate()
-{
-    for (int i = listeners.size(); --i >= 0;)
+    if (lastCurrentId != newItemId || label->getText() != newItemText)
     {
-        ((ComboBoxListener*) listeners.getUnchecked (i))->comboBoxChanged (this);
-        i = jmin (i, listeners.size());
+        if (! dontSendChangeMessage)
+            triggerAsyncUpdate();
+
+        label->setText (newItemText, false);
+        lastCurrentId = newItemId;
+        currentId = newItemId;
+
+        repaint();  // for the benefit of the 'none selected' text
     }
+}
+
+void ComboBox::valueChanged (Value&)
+{
+    if (lastCurrentId != (int) currentId.getValue())
+        setSelectedId (currentId.getValue(), false);
 }
 
 //==============================================================================
@@ -341,7 +336,7 @@ void ComboBox::setText (const String& newText,
 {
     for (int i = items.size(); --i >= 0;)
     {
-        ItemInfo* const item = items.getUnchecked(i);
+        const ItemInfo* const item = items.getUnchecked(i);
 
         if (item->isRealItem()
              && item->name == newText)
@@ -351,7 +346,8 @@ void ComboBox::setText (const String& newText,
         }
     }
 
-    currentIndex = -1;
+    lastCurrentId = 0;
+    currentId = 0;
 
     if (label->getText() != newText)
     {
@@ -477,13 +473,13 @@ bool ComboBox::keyPressed (const KeyPress& key)
     if (key.isKeyCode (KeyPress::upKey)
         || key.isKeyCode (KeyPress::leftKey))
     {
-        setSelectedItemIndex (jmax (0, currentIndex - 1));
+        setSelectedItemIndex (jmax (0, getSelectedItemIndex() - 1));
         used = true;
     }
     else if (key.isKeyCode (KeyPress::downKey)
               || key.isKeyCode (KeyPress::rightKey))
     {
-        setSelectedItemIndex (jmin (currentIndex + 1, getNumItems() - 1));
+        setSelectedItemIndex (jmin (getSelectedItemIndex() + 1, getNumItems() - 1));
         used = true;
     }
     else if (key.isKeyCode (KeyPress::returnKey))
@@ -528,7 +524,7 @@ void ComboBox::showPopup()
 {
     if (! menuActive)
     {
-        const int currentId = getSelectedId();
+        const int selectedId = getSelectedId();
         ComponentDeletionWatcher deletionWatcher (this);
 
         PopupMenu menu;
@@ -545,7 +541,7 @@ void ComboBox::showPopup()
                 menu.addSectionHeader (item->name);
             else
                 menu.addItem (item->itemId, item->name,
-                              item->isEnabled, item->itemId == currentId);
+                              item->isEnabled, item->itemId == selectedId);
         }
 
         if (items.size() == 0)
@@ -554,7 +550,7 @@ void ComboBox::showPopup()
         const int itemHeight = jlimit (12, 24, getHeight());
 
         menuActive = true;
-        const int resultId = menu.showAt (this, currentId,
+        const int resultId = menu.showAt (this, selectedId,
                                           getWidth(), 1, itemHeight);
 
         if (deletionWatcher.hasBeenDeleted())
@@ -603,6 +599,28 @@ void ComboBox::mouseUp (const MouseEvent& e2)
         {
             showPopup();
         }
+    }
+}
+
+//==============================================================================
+void ComboBox::addListener (ComboBoxListener* const listener) throw()
+{
+    jassert (listener != 0);
+    if (listener != 0)
+        listeners.add (listener);
+}
+
+void ComboBox::removeListener (ComboBoxListener* const listener) throw()
+{
+    listeners.removeValue (listener);
+}
+
+void ComboBox::handleAsyncUpdate()
+{
+    for (int i = listeners.size(); --i >= 0;)
+    {
+        ((ComboBoxListener*) listeners.getUnchecked (i))->comboBoxChanged (this);
+        i = jmin (i, listeners.size());
     }
 }
 
