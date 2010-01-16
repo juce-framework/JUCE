@@ -10769,7 +10769,7 @@ public:
 		a = (uint8) (a * multiplier);
 	}
 
-	forcedinline void setARGB (const uint8 a_, const uint8 r, const uint8 g, const uint8 b) throw()
+	forcedinline void setARGB (const uint8 a_, const uint8 /*r*/, const uint8 /*g*/, const uint8 /*b*/) throw()
 	{
 		a = a_;
 	}

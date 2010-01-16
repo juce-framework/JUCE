@@ -151,7 +151,7 @@ private:
     File temporaryFile, targetFile;
 
     void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
-    
+
     TemporaryFile (const TemporaryFile&);
     const TemporaryFile& operator= (const TemporaryFile&);
 };
