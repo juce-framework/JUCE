@@ -2605,6 +2605,14 @@
 						>
 					</File>
 					<File
+						RelativePath="..\..\..\src\io\files\juce_TemporaryFile.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\..\src\io\files\juce_TemporaryFile.h"
+						>
+					</File>
+					<File
 						RelativePath="..\..\..\src\io\files\juce_ZipFile.cpp"
 						>
 					</File>

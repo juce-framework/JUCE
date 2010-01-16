@@ -93,6 +93,9 @@ private:
     String onText, offText;
 
     void createButton();
+
+    BooleanPropertyComponent (const BooleanPropertyComponent&);
+    const BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
 };
 
 

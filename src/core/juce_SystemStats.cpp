@@ -63,7 +63,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
             // Some simple test code to keep an eye on things and make sure these functions
             // work ok on all platforms. Let me know if any of these assertions fail!
 
-            jassert (sizeof (pointer_sized_int) == sizeof (void*));
+            static_jassert (sizeof (pointer_sized_int) == sizeof (void*));
 
             char a1[7];
             jassert (numElementsInArray(a1) == 7);

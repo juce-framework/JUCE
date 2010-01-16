@@ -39,8 +39,9 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_File.h"
 #include "juce_FileInputStream.h"
-#include "juce_FileOutputStream.h"
+#include "juce_TemporaryFile.h"
 #include "../../core/juce_SystemStats.h"
+#include "../../core/juce_Random.h"
 
 #ifdef _MSC_VER
   #pragma warning (pop)
@@ -958,16 +959,9 @@ bool File::replaceWithData (const void* const dataToWrite,
     if (numberOfBytes <= 0)
         return deleteFile();
 
-    const File tempFile (getSiblingFile (T(".") + getFileName()).getNonexistentSibling (false));
-
-    if (tempFile.appendData (dataToWrite, numberOfBytes)
-         && tempFile.moveFileTo (*this))
-    {
-        return true;
-    }
-
-    tempFile.deleteFile();
-    return false;
+    TemporaryFile tempFile (*this, TemporaryFile::useHiddenFile);
+    tempFile.getFile().appendData (dataToWrite, numberOfBytes);
+    return tempFile.overwriteTargetFileWithTemporary();
 }
 
 bool File::appendText (const String& text,
@@ -989,16 +983,9 @@ bool File::replaceWithText (const String& textToWrite,
                             const bool asUnicode,
                             const bool writeUnicodeHeaderBytes) const
 {
-    const File tempFile (getSiblingFile (T(".") + getFileName()).getNonexistentSibling (false));
-
-    if (tempFile.appendText (textToWrite, asUnicode, writeUnicodeHeaderBytes)
-         && tempFile.moveFileTo (*this))
-    {
-        return true;
-    }
-
-    tempFile.deleteFile();
-    return false;
+    TemporaryFile tempFile (*this, TemporaryFile::useHiddenFile);
+    tempFile.getFile().appendText (textToWrite, asUnicode, writeUnicodeHeaderBytes);
+    return tempFile.overwriteTargetFileWithTemporary();
 }
 
 //==============================================================================
@@ -1130,12 +1117,9 @@ int File::getVolumeSerialNumber() const
 //==============================================================================
 const File File::createTempFile (const String& fileNameEnding)
 {
-    String tempName (T("temp"));
-    static int tempNum = 0;
-    tempName << tempNum++ << fileNameEnding;
-
     const File tempFile (getSpecialLocation (tempDirectory)
-                            .getChildFile (tempName));
+                            .getChildFile (T("temp_") + String (Random::getSystemRandom().nextInt()))
+                            .withFileExtension (fileNameEnding));
 
     if (tempFile.exists())
         return createTempFile (fileNameEnding);

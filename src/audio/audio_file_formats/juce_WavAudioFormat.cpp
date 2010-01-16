@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/streams/juce_BufferedInputStream.h"
 #include "../../text/juce_LocalisedStrings.h"
 #include "../../io/files/juce_FileInputStream.h"
-#include "../../io/files/juce_FileOutputStream.h"
+#include "../../io/files/juce_TemporaryFile.h"
 
 
 //==============================================================================
@@ -793,40 +793,34 @@ AudioFormatWriter* WavAudioFormat::createWriterFor (OutputStream* out,
 
 static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const StringPairArray& metadata)
 {
-    bool ok = false;
+    TemporaryFile tempFile (file);
+
     WavAudioFormat wav;
+    ScopedPointer <AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
 
-    const File dest (file.getNonexistentSibling());
-
+    if (reader != 0)
     {
-        ScopedPointer <OutputStream> outStream (dest.createOutputStream());
+        ScopedPointer <OutputStream> outStream (tempFile.getFile().createOutputStream());
 
         if (outStream != 0)
         {
-            ScopedPointer <AudioFormatReader> reader (wav.createReaderFor (file.createInputStream(), true));
+            ScopedPointer <AudioFormatWriter> writer (wav.createWriterFor (outStream, reader->sampleRate,
+                                                                           reader->numChannels, reader->bitsPerSample,
+                                                                           metadata, 0));
 
-            if (reader != 0)
+            if (writer != 0)
             {
-                ScopedPointer <AudioFormatWriter> writer (wav.createWriterFor (outStream, reader->sampleRate,
-                                                                               reader->numChannels, reader->bitsPerSample,
-                                                                               metadata, 0));
+                outStream.release();
 
-                if (writer != 0)
-                {
-                    ok = writer->writeFromAudioReader (*reader, 0, -1);
-                    outStream.release();
-                }
+                bool ok = writer->writeFromAudioReader (*reader, 0, -1);
+                writer = 0;
+
+                return ok && tempFile.overwriteTargetFileWithTemporary();
             }
         }
     }
 
-    if (ok)
-        ok = dest.moveFileTo (file);
-
-    if (! ok)
-        dest.deleteFile();
-
-    return ok;
+    return false;
 }
 
 bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPairArray& newMetadata)

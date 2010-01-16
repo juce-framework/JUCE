@@ -7602,6 +7602,55 @@ private:
 /********* End of inlined file: juce_NamedPipe.h *********/
 
 #endif
+#ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
+
+/********* Start of inlined file: juce_TemporaryFile.h *********/
+#ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
+#define __JUCE_TEMPORARYFILE_JUCEHEADER__
+
+class JUCE_API  TemporaryFile
+{
+public:
+
+	enum OptionFlags
+	{
+		useHiddenFile = 1,	  /**< Indicates that the temporary file should be hidden -
+										 i.e. its name should start with a dot. */
+		putNumbersInBrackets = 2	/**< Indicates that when numbers are appended to make sure
+										 the file is unique, they should go in brackets rather
+										 than just being appended (see File::getNonexistentSibling() )*/
+	};
+
+	TemporaryFile (const String& suffix = String::empty,
+				   const int optionFlags = 0);
+
+	TemporaryFile (const File& targetFile,
+				   const int optionFlags = 0);
+
+	~TemporaryFile();
+
+	const File getFile() const		  { return temporaryFile; }
+
+	const File getTargetFile() const		{ return targetFile; }
+
+	bool overwriteTargetFileWithTemporary() const;
+
+	juce_UseDebuggingNewOperator
+
+private:
+
+	File temporaryFile, targetFile;
+
+	void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
+
+	TemporaryFile (const TemporaryFile&);
+	const TemporaryFile& operator= (const TemporaryFile&);
+};
+
+#endif   // __JUCE_TEMPORARYFILE_JUCEHEADER__
+/********* End of inlined file: juce_TemporaryFile.h *********/
+
+#endif
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
 
 /********* Start of inlined file: juce_ZipFile.h *********/
@@ -25100,6 +25149,9 @@ private:
 	String onText, offText;
 
 	void createButton();
+
+	BooleanPropertyComponent (const BooleanPropertyComponent&);
+	const BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
 };
 
 #endif   // __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -25176,6 +25228,9 @@ private:
 	ComboBox* comboBox;
 
 	void createComboBox();
+
+	ChoicePropertyComponent (const ChoicePropertyComponent&);
+	const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
 };
 
 #endif   // __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
@@ -25229,6 +25284,9 @@ public:
 protected:
 
 	Slider* slider;
+
+	SliderPropertyComponent (const SliderPropertyComponent&);
+	const SliderPropertyComponent& operator= (const SliderPropertyComponent&);
 };
 
 #endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
@@ -25270,6 +25328,9 @@ private:
 	Label* textEditor;
 
 	void createEditor (const int maxNumChars, const bool isMultiLine);
+
+	TextPropertyComponent (const TextPropertyComponent&);
+	const TextPropertyComponent& operator= (const TextPropertyComponent&);
 };
 
 #endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__

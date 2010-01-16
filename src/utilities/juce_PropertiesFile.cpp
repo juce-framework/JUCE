@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_PropertiesFile.h"
+#include "../io/files/juce_TemporaryFile.h"
 #include "../io/files/juce_FileInputStream.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../io/streams/juce_BufferedInputStream.h"
@@ -182,8 +183,9 @@ bool PropertiesFile::save()
     }
     else
     {
-        const File tempFile (file.getNonexistentSibling (false));
-        ScopedPointer <OutputStream> out (tempFile.createOutputStream());
+        TemporaryFile tempFile (file);
+
+        ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
 
         if (out != 0)
         {
@@ -212,16 +214,13 @@ bool PropertiesFile::save()
                 out->writeString (getAllProperties().getAllValues() [i]);
             }
 
-            out->flush();
             out = 0;
 
-            if (tempFile.moveFileTo (file))
+            if (tempFile.overwriteTargetFileWithTemporary())
             {
                 needsWriting = false;
                 return true;
             }
-
-            tempFile.deleteFile();
         }
     }
 

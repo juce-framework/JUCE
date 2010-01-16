@@ -289,6 +289,12 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum, const 
     return numFound;
 }
 
+struct ASTAT
+{
+    ADAPTER_STATUS adapt;
+    NAME_BUFFER    NameBuff [30];
+};
+
 static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     int numFound = 0;
@@ -300,12 +306,6 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool l
     {
         NCB ncb;
         zerostruct (ncb);
-
-        typedef struct _ASTAT_
-        {
-            ADAPTER_STATUS adapt;
-            NAME_BUFFER    NameBuff [30];
-        } ASTAT;
 
         ASTAT astat;
         zerostruct (astat);

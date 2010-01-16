@@ -540,11 +540,10 @@ const String File::getVersion() const
 
         if (VerQueryValue (buffer, _T("\\"), (LPVOID*) &vffi, &len))
         {
-            result.printf (T("%d.%d.%d.%d"),
-                           HIWORD (vffi->dwFileVersionMS),
-                           LOWORD (vffi->dwFileVersionMS),
-                           HIWORD (vffi->dwFileVersionLS),
-                           LOWORD (vffi->dwFileVersionLS));
+            result << (int) HIWORD (vffi->dwFileVersionMS) << "."
+                   << (int) LOWORD (vffi->dwFileVersionMS) << "."
+                   << (int) HIWORD (vffi->dwFileVersionLS) << "."
+                   << (int) LOWORD (vffi->dwFileVersionLS);
         }
     }
 

@@ -161,6 +161,9 @@
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
  #include "io/files/juce_NamedPipe.h"
 #endif
+#ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
+ #include "io/files/juce_TemporaryFile.h"
+#endif
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
  #include "io/files/juce_ZipFile.h"
 #endif

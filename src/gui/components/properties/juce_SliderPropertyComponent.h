@@ -103,6 +103,9 @@ protected:
         Your subclass has access to this in case it needs to customise it in some way.
     */
     Slider* slider;
+
+    SliderPropertyComponent (const SliderPropertyComponent&);
+    const SliderPropertyComponent& operator= (const SliderPropertyComponent&);
 };
 
 

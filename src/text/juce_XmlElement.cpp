@@ -30,7 +30,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_XmlElement.h"
 #include "../io/streams/juce_MemoryOutputStream.h"
-#include "../io/files/juce_FileOutputStream.h"
+#include "../io/files/juce_TemporaryFile.h"
 #include "../threads/juce_Thread.h"
 #include "../containers/juce_ScopedPointer.h"
 
@@ -429,34 +429,15 @@ bool XmlElement::writeToFile (const File& file,
 {
     if (file.hasWriteAccess())
     {
-        const File tempFile (file.getNonexistentSibling());
-
-        ScopedPointer <FileOutputStream> out (tempFile.createOutputStream());
+        TemporaryFile tempFile (file);
+        ScopedPointer <FileOutputStream> out (tempFile.getFile().createOutputStream());
 
         if (out != 0)
         {
             writeToStream (*out, dtdToUse, false, true, encodingType, lineWrapLength);
             out = 0;
 
-            if (! tempFile.exists())
-                return false;
-
-            int i;
-            for (i = 5; --i >= 0;)
-            {
-                if (tempFile.moveFileTo (file))
-                    return true;
-
-                Thread::sleep (100);
-            }
-
-            for (i = 5; --i >= 0;)
-            {
-                if (tempFile.deleteFile())
-                    break;
-
-                Thread::sleep (100);
-            }
+            return tempFile.overwriteTargetFileWithTemporary();
         }
     }
 

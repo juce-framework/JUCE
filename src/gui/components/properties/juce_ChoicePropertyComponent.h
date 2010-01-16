@@ -114,6 +114,9 @@ private:
     ComboBox* comboBox;
 
     void createComboBox();
+
+    ChoicePropertyComponent (const ChoicePropertyComponent&);
+    const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
 };
 
 

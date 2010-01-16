@@ -94,6 +94,7 @@
 #include "io/files/juce_FileOutputStream.cpp"
 #include "io/files/juce_FileSearchPath.cpp"
 #include "io/files/juce_NamedPipe.cpp"
+#include "io/files/juce_TemporaryFile.cpp"
 #include "io/network/juce_Socket.cpp"
 #include "io/network/juce_URL.cpp"
 #include "io/streams/juce_BufferedInputStream.cpp"

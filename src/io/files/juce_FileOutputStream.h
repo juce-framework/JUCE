@@ -53,6 +53,8 @@ public:
 
         It's better to use File::createOutputStream() to create one of these, rather
         than using the class directly.
+
+        @see TemporaryFile
     */
     FileOutputStream (const File& fileToWriteTo,
                       const int bufferSizeToUse = 16384);

@@ -34,11 +34,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_Rectangle.h"
 #include "../../../containers/juce_SparseSet.h"
 
-#if JUCE_MSVC
-  #pragma warning (disable: 4996) // deprecated sprintf warning
-#endif
-
-
 // this will throw an assertion if you try to draw something that's not
 // possible in postscript
 #define WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS 0
