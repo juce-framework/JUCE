@@ -287,14 +287,38 @@ public:
         /** Destructor. */
         virtual ~Listener() {}
 
-        /** This method is called when one of the properties of this node has been changed. */
-        virtual void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property) = 0;
+        /** This method is called when a property of this node (or of one of its sub-nodes) has
+            changed.
 
-        /** This method is called when one or more of the children of this node have been added or removed. */
-        virtual void valueTreeChildrenChanged (ValueTree& tree) = 0;
+            The tree parameter indicates which tree has had its property changed, and the property
+            parameter indicates the property.
 
-        /** This method is called when this node has been added or removed from a parent node. */
-        virtual void valueTreeParentChanged (ValueTree& tree) = 0;
+            Note that when you register a listener to a tree, it will receive this callback for
+            property changes in that tree, and also for any of its children, (recursively, at any depth).
+            If your tree has sub-trees but you only want to know about changes to the top level tree,
+            simply check the tree parameter in this callback to make sure it's the tree you're interested in.
+        */
+        virtual void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
+                                               const var::identifier& property) = 0;
+
+        /** This method is called when a child sub-tree is added or removed.
+
+            The tree parameter indicates the tree whose child was added or removed.
+
+            Note that when you register a listener to a tree, it will receive this callback for
+            child changes in that tree, and also in any of its children, (recursively, at any depth).
+            If your tree has sub-trees but you only want to know about changes to the top level tree,
+            simply check the tree parameter in this callback to make sure it's the tree you're interested in.
+        */
+        virtual void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged) = 0;
+
+        /** This method is called when a tree has been added or removed from a parent node.
+
+            This callback happens when the tree to which the listener was registered is added or
+            removed from a parent. Unlike the other callbacks, it applies only to the tree to which
+            the listener is registered, and not to any of its children.
+        */
+        virtual void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) = 0;
     };
 
     /** Adds a listener to receive callbacks when this node is changed.
@@ -345,7 +369,9 @@ private:
         SharedObject* parent;
 
         void sendPropertyChangeMessage (const var::identifier& property);
+        void sendPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
         void sendChildChangeMessage();
+        void sendChildChangeMessage (ValueTree& tree);
         void sendParentChangeMessage();
         const var getProperty (const var::identifier& name) const;
         void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
@@ -373,9 +399,9 @@ private:
     ReferenceCountedObjectPtr <SharedObject> object;
     SortedSet <Listener*> listeners;
 
-    void deliverPropertyChangeMessage (const var::identifier& property);
-    void deliverChildChangeMessage();
-    void deliverParentChangeMessage();
+    void deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
+    void deliverChildChangeMessage (ValueTree& tree);
+    void deliverParentChangeMessage (ValueTree& tree);
 
     ValueTree (SharedObject* const object_);
 };

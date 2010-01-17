@@ -70,7 +70,7 @@ public:
 
     int getSizeInUnits()
     {
-        return 32; //xxx should be more accurate
+        return (int) sizeof (*this); //xxx should be more accurate
     }
 
 private:
@@ -122,7 +122,7 @@ public:
 
     int getSizeInUnits()
     {
-        return 32; //xxx should be more accurate
+        return (int) sizeof (*this); //xxx should be more accurate
     }
 
 private:
@@ -174,64 +174,84 @@ ValueTree::SharedObject::Property::Property (const var::identifier& name_, const
 }
 
 //==============================================================================
-void ValueTree::deliverPropertyChangeMessage (const var::identifier& property)
+void ValueTree::deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property)
 {
-    ValueTree v (object);
-
     for (int i = listeners.size(); --i >= 0;)
     {
         ValueTree::Listener* const l = listeners[i];
         if (l != 0)
-            l->valueTreePropertyChanged (v, property);
+            l->valueTreePropertyChanged (tree, property);
+    }
+}
+
+void ValueTree::SharedObject::sendPropertyChangeMessage (ValueTree& tree, const var::identifier& property)
+{
+    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    {
+        ValueTree* const v = valueTreesWithListeners[i];
+        if (v != 0)
+            v->deliverPropertyChangeMessage (tree, property);
     }
 }
 
 void ValueTree::SharedObject::sendPropertyChangeMessage (const var::identifier& property)
 {
-    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    ValueTree tree (this);
+    ValueTree::SharedObject* t = this;
+
+    while (t != 0)
     {
-        ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
-            v->deliverPropertyChangeMessage (property);
+        t->sendPropertyChangeMessage (tree, property);
+        t = t->parent;
     }
 }
 
-void ValueTree::deliverChildChangeMessage()
+void ValueTree::deliverChildChangeMessage (ValueTree& tree)
 {
-    ValueTree v (object);
-
     for (int i = listeners.size(); --i >= 0;)
     {
         ValueTree::Listener* const l = listeners[i];
         if (l != 0)
-            l->valueTreeChildrenChanged (v);
+            l->valueTreeChildrenChanged (tree);
+    }
+}
+
+void ValueTree::SharedObject::sendChildChangeMessage (ValueTree& tree)
+{
+    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    {
+        ValueTree* const v = valueTreesWithListeners[i];
+        if (v != 0)
+            v->deliverChildChangeMessage (tree);
     }
 }
 
 void ValueTree::SharedObject::sendChildChangeMessage()
 {
-    for (int i = valueTreesWithListeners.size(); --i >= 0;)
+    ValueTree tree (this);
+    ValueTree::SharedObject* t = this;
+
+    while (t != 0)
     {
-        ValueTree* const v = valueTreesWithListeners[i];
-        if (v != 0)
-            v->deliverChildChangeMessage();
+        t->sendChildChangeMessage (tree);
+        t = t->parent;
     }
 }
 
-void ValueTree::deliverParentChangeMessage()
+void ValueTree::deliverParentChangeMessage (ValueTree& tree)
 {
-    ValueTree v (object);
-
     for (int i = listeners.size(); --i >= 0;)
     {
         ValueTree::Listener* const l = listeners[i];
         if (l != 0)
-            l->valueTreeParentChanged (v);
+            l->valueTreeParentChanged (tree);
     }
 }
 
 void ValueTree::SharedObject::sendParentChangeMessage()
 {
+    ValueTree tree (this);
+
     int i;
     for (i = children.size(); --i >= 0;)
     {
@@ -244,7 +264,7 @@ void ValueTree::SharedObject::sendParentChangeMessage()
     {
         ValueTree* const v = valueTreesWithListeners[i];
         if (v != 0)
-            v->deliverParentChangeMessage();
+            v->deliverParentChangeMessage (tree);
     }
 }
 
@@ -590,9 +610,9 @@ public:
         tree.setProperty (property, newValue, undoManager);
     }
 
-    void valueTreePropertyChanged (ValueTree& tree, const var::identifier& changedProperty)
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& changedProperty)
     {
-        if (property == changedProperty)
+        if (tree == treeWhosePropertyHasChanged && property == changedProperty)
             sendChangeMessage (false);
     }
 
