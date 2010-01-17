@@ -140,7 +140,7 @@ void LowLevelGraphicsPostScriptRenderer::clipToPath (const Path& path, const Aff
     out << "clip\n";
 }
 
-void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform)
+void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& /*sourceImage*/, const Rectangle& /*srcClip*/, const AffineTransform& /*transform*/)
 {
     needToClip = true;
     jassertfalse // xxx
@@ -324,11 +324,11 @@ void LowLevelGraphicsPostScriptRenderer::setFill (const FillType& fillType)
     stateStack.getLast()->fillType = fillType;
 }
 
-void LowLevelGraphicsPostScriptRenderer::setOpacity (float opacity)
+void LowLevelGraphicsPostScriptRenderer::setOpacity (float /*opacity*/)
 {
 }
 
-void LowLevelGraphicsPostScriptRenderer::setInterpolationQuality (Graphics::ResamplingQuality quality)
+void LowLevelGraphicsPostScriptRenderer::setInterpolationQuality (Graphics::ResamplingQuality /*quality*/)
 {
 }
 
@@ -455,7 +455,7 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
 }
 
 void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const Rectangle& srcClip,
-                                                    const AffineTransform& transform, const bool fillEntireClipAsTiles)
+                                                    const AffineTransform& transform, const bool /*fillEntireClipAsTiles*/)
 {
     const int w = jmin (sourceImage.getWidth(), srcClip.getRight());
     const int h = jmin (sourceImage.getHeight(), srcClip.getBottom());

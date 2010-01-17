@@ -998,7 +998,7 @@ const String ListBoxModel::getDragSourceDescription (const SparseSet<int>&)
     return String::empty;
 }
 
-const String ListBoxModel::getTooltipForRow (int row)
+const String ListBoxModel::getTooltipForRow (int)
 {
     return String::empty;
 }

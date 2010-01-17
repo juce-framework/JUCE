@@ -59,8 +59,7 @@ void TemporaryFile::createTempFile (const File& parentDirectory, String name,
     if ((optionFlags & useHiddenFile) != 0)
         name = T(".") + name;
 
-    temporaryFile = parentDirectory.getNonexistentChildFile (name, targetFile.getFileExtension(),
-                                                             (optionFlags & putNumbersInBrackets) != 0);
+    temporaryFile = parentDirectory.getNonexistentChildFile (name, suffix, (optionFlags & putNumbersInBrackets) != 0);
 }
 
 TemporaryFile::~TemporaryFile()

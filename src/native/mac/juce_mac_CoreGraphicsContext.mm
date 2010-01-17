@@ -455,12 +455,24 @@ public:
 
     void drawVerticalLine (const int x, double top, double bottom)
     {
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake (x, flipHeight - (float) bottom, 1.0f, (float) (bottom - top)));
+#else
+        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x co-ord slightly to trick it..
+        CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - (float) bottom, 1.0f + 1.0f / 256.0f, (float) (bottom - top)));
+#endif
     }
 
     void drawHorizontalLine (const int y, double left, double right)
     {
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
         CGContextFillRect (context, CGRectMake ((float) left, flipHeight - (y + 1.0f), (float) (right - left), 1.0f));
+#else
+        // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
+        // the x co-ord slightly to trick it..
+        CGContextFillRect (context, CGRectMake ((float) left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), (float) (right - left), 1.0f + 1.0f / 256.0f));
+#endif
     }
 
     void setFont (const Font& newFont)

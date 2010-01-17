@@ -991,7 +991,7 @@ void TreeView::handleDrop (const StringArray& files, const String& sourceDescrip
 }
 
 //==============================================================================
-bool TreeView::isInterestedInFileDrag (const StringArray& files)
+bool TreeView::isInterestedInFileDrag (const StringArray&)
 {
     return true;
 }
@@ -1006,7 +1006,7 @@ void TreeView::fileDragMove (const StringArray& files, int x, int y)
     handleDrag (files, String::empty, 0, x, y);
 }
 
-void TreeView::fileDragExit (const StringArray& files)
+void TreeView::fileDragExit (const StringArray&)
 {
     hideDragHighlight();
 }
@@ -1016,7 +1016,7 @@ void TreeView::filesDropped (const StringArray& files, int x, int y)
     handleDrop (files, String::empty, 0, x, y);
 }
 
-bool TreeView::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+bool TreeView::isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
 {
     return true;
 }
@@ -1031,7 +1031,7 @@ void TreeView::itemDragMove (const String& sourceDescription, Component* sourceC
     handleDrag (StringArray(), sourceDescription, sourceComponent, x, y);
 }
 
-void TreeView::itemDragExit (const String& sourceDescription, Component* sourceComponent)
+void TreeView::itemDragExit (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
 {
     hideDragHighlight();
 }
@@ -1272,21 +1272,21 @@ const String TreeViewItem::getDragSourceDescription()
     return String::empty;
 }
 
-bool TreeViewItem::isInterestedInFileDrag (const StringArray& files)
+bool TreeViewItem::isInterestedInFileDrag (const StringArray&)
 {
     return false;
 }
 
-void TreeViewItem::filesDropped (const StringArray& files, int insertIndex)
+void TreeViewItem::filesDropped (const StringArray& /*files*/, int /*insertIndex*/)
 {
 }
 
-bool TreeViewItem::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+bool TreeViewItem::isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
 {
     return false;
 }
 
-void TreeViewItem::itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex)
+void TreeViewItem::itemDropped (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*insertIndex*/)
 {
 }
 

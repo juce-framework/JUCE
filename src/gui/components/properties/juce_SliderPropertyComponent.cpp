@@ -69,7 +69,7 @@ SliderPropertyComponent::~SliderPropertyComponent()
     deleteAllChildren();
 }
 
-void SliderPropertyComponent::setValue (const double newValue)
+void SliderPropertyComponent::setValue (const double /*newValue*/)
 {
 }
 

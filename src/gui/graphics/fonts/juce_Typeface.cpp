@@ -231,7 +231,7 @@ CustomTypefaceGlyphInfo* CustomTypeface::findGlyphSubstituting (const juce_wchar
     return glyph;
 }
 
-bool CustomTypeface::loadGlyphIfPossible (const juce_wchar characterNeeded)
+bool CustomTypeface::loadGlyphIfPossible (const juce_wchar /*characterNeeded*/)
 {
     return false;
 }

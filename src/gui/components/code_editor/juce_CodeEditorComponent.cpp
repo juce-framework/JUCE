@@ -95,7 +95,7 @@ public:
         else if (lineNum < document.getNumLines())
         {
             const CodeDocument::Position pos (&document, lineNum, 0);
-            createTokens (document, pos.getPosition(), pos.getLineText(),
+            createTokens (pos.getPosition(), pos.getLineText(),
                           source, analyser, newTokens);
         }
 
@@ -200,7 +200,7 @@ private:
     OwnedArray <SyntaxToken> tokens;
     int highlightColumnStart, highlightColumnEnd;
 
-    static void createTokens (CodeDocument& document, int startPosition, const String& lineText,
+    static void createTokens (int startPosition, const String& lineText,
                               CodeDocument::Iterator& source,
                               CodeTokeniser* analyser,
                               OwnedArray <SyntaxToken>& newTokens)
@@ -994,7 +994,7 @@ void CodeEditorComponent::mouseDrag (const MouseEvent& e)
         moveCaretTo (getPositionAt (e.x, e.y), true);
 }
 
-void CodeEditorComponent::mouseUp (const MouseEvent& e)
+void CodeEditorComponent::mouseUp (const MouseEvent&)
 {
     newTransaction();
     beginDragAutoRepeat (0);

@@ -220,11 +220,11 @@ void Label::showEditor()
     }
 }
 
-void Label::editorShown (TextEditor* editorComponent)
+void Label::editorShown (TextEditor* /*editorComponent*/)
 {
 }
 
-void Label::editorAboutToBeHidden (TextEditor* editorComponent)
+void Label::editorAboutToBeHidden (TextEditor* /*editorComponent*/)
 {
 }
 

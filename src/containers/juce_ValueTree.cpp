@@ -461,7 +461,7 @@ void ValueTree::SharedObject::removeChild (const int childIndex, UndoManager* co
 void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
 {
     while (children.size() > 0)
-        removeChild (children.size() - 1, 0);
+        removeChild (children.size() - 1, undoManager);
 }
 
 
@@ -616,8 +616,8 @@ public:
             sendChangeMessage (false);
     }
 
-    void valueTreeChildrenChanged (ValueTree& tree) {}
-    void valueTreeParentChanged (ValueTree& tree)   {}
+    void valueTreeChildrenChanged (ValueTree&) {}
+    void valueTreeParentChanged (ValueTree&)   {}
 
 private:
     ValueTree tree;

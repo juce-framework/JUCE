@@ -119,7 +119,13 @@ private:
     private:
         AudioProcessor* const owner;
         const int index;
+
+        ParamSlider (const ParamSlider&);
+        const ParamSlider& operator= (const ParamSlider&);
     };
+
+    ProcessorParameterPropertyComp (const ProcessorParameterPropertyComp&);
+    const ProcessorParameterPropertyComp& operator= (const ProcessorParameterPropertyComp&);
 };
 
 

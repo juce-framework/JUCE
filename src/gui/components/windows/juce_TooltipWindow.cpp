@@ -75,7 +75,7 @@ void TooltipWindow::mouseEnter (const MouseEvent&)
     hide();
 }
 
-void TooltipWindow::showFor (Component* const c, const String& tip)
+void TooltipWindow::showFor (const String& tip)
 {
     jassert (tip.isNotEmpty());
     tipShowing = tip;
@@ -171,7 +171,7 @@ void TooltipWindow::timerCallback()
         }
         else if (tipChanged)
         {
-            showFor (newComp, newTip);
+            showFor (newTip);
         }
     }
     else
@@ -182,7 +182,7 @@ void TooltipWindow::timerCallback()
              && newTip != tipShowing
              && now > lastCompChangeTime + millisecondsBeforeTipAppears)
         {
-            showFor (newComp, newTip);
+            showFor (newTip);
         }
     }
 }

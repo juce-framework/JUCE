@@ -111,7 +111,7 @@ private:
     void timerCallback();
 
     static const String getTipFor (Component* const c);
-    void showFor (Component* const c, const String& tip);
+    void showFor (const String& tip);
     void hide();
 
     TooltipWindow (const TooltipWindow&);

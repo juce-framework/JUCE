@@ -8,6 +8,8 @@
 #ifndef __JUCE_JUCEHEADER__
 #define __JUCE_JUCEHEADER__
 
+#define JUCE_PUBLIC_INCLUDES 1
+
 // (this includes things that need defining outside of the JUCE namespace)
 
 /********* Start of inlined file: juce_StandardHeader.h *********/
@@ -495,6 +497,10 @@
 #if JUCE_MSVC
   #include <malloc.h>
   #pragma warning (pop)
+
+  #if ! JUCE_PUBLIC_INCLUDES
+	#pragma warning (4: 4511 4512 4100)  // (enable some warnings that are turned off in VC8)
+  #endif
 #endif
 
 // DLL building settings on Win32
@@ -1439,8 +1445,6 @@ BEGIN_JUCE_NAMESPACE
 #if JUCE_MAC || JUCE_IPHONE
   #pragma align=natural
 #endif
-
-#define JUCE_PUBLIC_INCLUDES
 
 // this is where all the class header files get brought in..
 
@@ -6517,11 +6521,12 @@ public:
 	public:
 		virtual ~Listener() {}
 
-		virtual void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property) = 0;
+		virtual void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
+											   const var::identifier& property) = 0;
 
-		virtual void valueTreeChildrenChanged (ValueTree& tree) = 0;
+		virtual void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged) = 0;
 
-		virtual void valueTreeParentChanged (ValueTree& tree) = 0;
+		virtual void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) = 0;
 	};
 
 	void addListener (Listener* listener);
@@ -6556,7 +6561,9 @@ private:
 		SharedObject* parent;
 
 		void sendPropertyChangeMessage (const var::identifier& property);
+		void sendPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
 		void sendChildChangeMessage();
+		void sendChildChangeMessage (ValueTree& tree);
 		void sendParentChangeMessage();
 		const var getProperty (const var::identifier& name) const;
 		void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
@@ -6584,9 +6591,9 @@ private:
 	ReferenceCountedObjectPtr <SharedObject> object;
 	SortedSet <Listener*> listeners;
 
-	void deliverPropertyChangeMessage (const var::identifier& property);
-	void deliverChildChangeMessage();
-	void deliverParentChangeMessage();
+	void deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
+	void deliverChildChangeMessage (ValueTree& tree);
+	void deliverParentChangeMessage (ValueTree& tree);
 
 	ValueTree (SharedObject* const object_);
 };
@@ -15329,7 +15336,7 @@ private:
 	void timerCallback();
 
 	static const String getTipFor (Component* const c);
-	void showFor (Component* const c, const String& tip);
+	void showFor (const String& tip);
 	void hide();
 
 	TooltipWindow (const TooltipWindow&);
@@ -18585,6 +18592,9 @@ public:
 
 private:
 	PropertyPanel* panel;
+
+	GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
+	const GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
 };
 
 #endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
@@ -25100,6 +25110,9 @@ private:
 
 	void hoverTimerCallback();
 	void checkJustHoveredCallback();
+
+	MouseHoverDetector (const MouseHoverDetector&);
+	const MouseHoverDetector& operator= (const MouseHoverDetector&);
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
@@ -25185,6 +25198,9 @@ public:
 
 private:
 	TextButton* button;
+
+	ButtonPropertyComponent (const ButtonPropertyComponent&);
+	const ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
 };
 
 #endif   // __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__

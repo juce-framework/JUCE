@@ -66,7 +66,7 @@ public:
     {
     }
 
-    void paintButton (Graphics& g, bool isOver, bool isDown)
+    void paintButton (Graphics& g, bool /*isOver*/, bool /*isDown*/)
     {
         getLookAndFeel().drawKeymapChangeButton (g, getWidth(), getHeight(), *this,
                                                  keyNum >= 0 ? getName() : String::empty);

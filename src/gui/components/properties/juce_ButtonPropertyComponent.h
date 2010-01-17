@@ -76,6 +76,9 @@ public:
 
 private:
     TextButton* button;
+
+    ButtonPropertyComponent (const ButtonPropertyComponent&);
+    const ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
 };
 
 
