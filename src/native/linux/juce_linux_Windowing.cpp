@@ -3157,8 +3157,7 @@ void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
 //==============================================================================
 void PlatformUtilities::beep()
 {
-    fprintf (stdout, "\a");
-    fflush (stdout);
+    std::cout << "\a" << std::flush;
 }
 
 

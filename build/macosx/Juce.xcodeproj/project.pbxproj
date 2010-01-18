@@ -661,6 +661,8 @@
 		84BA604110F2017A001D9D70 /* juce_Value.h in Headers */ = {isa = PBXBuildFile; fileRef = 84BA603F10F2017A001D9D70 /* juce_Value.h */; };
 		84CABF691101292D0088D64D /* juce_TemporaryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84CABF671101292D0088D64D /* juce_TemporaryFile.cpp */; };
 		84CABF6A1101292D0088D64D /* juce_TemporaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 84CABF681101292D0088D64D /* juce_TemporaryFile.h */; };
+		84CAC0C0110478D50088D64D /* juce_TemporaryFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84CABF671101292D0088D64D /* juce_TemporaryFile.cpp */; };
+		84CAC0C1110478D50088D64D /* juce_TemporaryFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 84CABF681101292D0088D64D /* juce_TemporaryFile.h */; };
 		84D0F00C109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		84DEDD9F10EE496500909D01 /* juce_HeapBlock.h in Headers */ = {isa = PBXBuildFile; fileRef = 84DEDD9E10EE496500909D01 /* juce_HeapBlock.h */; };
 		84F1E6E710403605006A1807 /* juce_Application.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E6DC10403605006A1807 /* juce_Application.cpp */; };
@@ -3229,6 +3231,7 @@
 				84AB6F6E10EF948B00117E64 /* juce_HeapBlock.h in Headers */,
 				84AF419B10F0008E0035D74F /* juce_ScopedPointer.h in Headers */,
 				84842F9610F6559400490977 /* juce_Value.h in Headers */,
+				84CAC0C1110478D50088D64D /* juce_TemporaryFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3905,6 +3908,7 @@
 				844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */,
 				84B2053F10D535EC008B4A79 /* juce_ValueTree.cpp in Sources */,
 				84842F9510F6559300490977 /* juce_Value.cpp in Sources */,
+				84CAC0C0110478D50088D64D /* juce_TemporaryFile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
