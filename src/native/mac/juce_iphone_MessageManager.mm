@@ -136,8 +136,6 @@ void MessageManager::runDispatchLoop()
     runDispatchLoopUntil (-1);
 }
 
-static const int quitMessageId = 0xfffff321;
-
 void MessageManager::stopDispatchLoop()
 {
     exit (0); // iPhone apps get no mercy..

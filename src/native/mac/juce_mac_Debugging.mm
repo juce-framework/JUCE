@@ -30,8 +30,7 @@
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    fputs (text.toUTF8(), stderr);
-    fputs ("\n", stderr);
+    std::cerr << (const char*) text.toUTF8() << std::endl;
 }
 
 void Logger::outputDebugPrintf (const tchar* format, ...) throw()
