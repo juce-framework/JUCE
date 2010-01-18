@@ -1643,9 +1643,9 @@ public:
         Screen* const screen = XDefaultScreenOfDisplay (display);
         const int screenNumber = XScreenNumberOfScreen (screen);
 
-        char screenAtom[32];
-        snprintf (screenAtom, sizeof (screenAtom), "_NET_SYSTEM_TRAY_S%d", screenNumber);
-        Atom selectionAtom = XInternAtom (display, screenAtom, false);
+        String screenAtom ("_NET_SYSTEM_TRAY_S");
+        screenAtom << screenNumber;
+        Atom selectionAtom = XInternAtom (display, (const char*) screenAtom, false);
 
         XGrabServer (display);
         Window managerWin = XGetSelectionOwner (display, selectionAtom);

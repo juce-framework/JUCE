@@ -77,6 +77,7 @@
 #include <typeinfo>
 #include <cstring>
 #include <cstdio>
+#include <iostream>
 
 #if JUCE_USE_INTRINSICS
   #include <intrin.h>

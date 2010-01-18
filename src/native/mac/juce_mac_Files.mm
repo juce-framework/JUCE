@@ -347,6 +347,7 @@ struct FindFileStruct
 bool juce_findFileNext (void* handle, String& resultFile,
                         bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
 {
+    ScopedAutoReleasePool pool;
     FindFileStruct* ff = (FindFileStruct*) handle;
     NSString* file;
     const char* const wildcardUTF8 = ff->wildCard.toUTF8();
@@ -402,6 +403,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
                           bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
                           Time* creationTime, bool* isReadOnly)
 {
+    ScopedAutoReleasePool pool;
     NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
 
     if (e != 0)
@@ -425,6 +427,7 @@ void* juce_findFileStart (const String& directory, const String& wildCard, Strin
 
 void juce_findFileClose (void* handle)
 {
+    ScopedAutoReleasePool pool;
     ScopedPointer <FindFileStruct> ff ((FindFileStruct*) handle);
     [ff->enumerator release];
 }

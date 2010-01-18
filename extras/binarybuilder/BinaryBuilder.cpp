@@ -29,19 +29,16 @@ static int addFile (const File& file,
                            .replaceCharacter ('.', '_')
                            .retainCharacters (T("abcdefghijklmnopqrstuvwxyz_0123456789")));
 
-    printf ("Adding %s: %d bytes\n",
-            (const char*) name,
-            mb.getSize());
+    std::cout << "Adding " << (const char*) name << ": "
+              << (int) mb.getSize() << " bytes" << std::endl;
 
-    headerStream.printf ("    extern const char*  %s;\r\n"
-                         "    const int           %sSize = %d;\r\n\r\n",
-                         (const char*) name,
-                         (const char*) name,
-                         mb.getSize());
+    headerStream << "    extern const char*  " << name << ";\r\n"
+                    "    const int           " << name << "Size = "
+                 << (int) mb.getSize() << ";\r\n\r\n";
 
     static int tempNum = 0;
 
-    cppStream.printf ("static const unsigned char temp%d[] = {", ++tempNum);
+    cppStream << "static const unsigned char temp" << ++tempNum << "[] = {";
 
     int i = 0;
     const uint8* const data = (const uint8*) mb.getData();
@@ -49,19 +46,17 @@ static int addFile (const File& file,
     while (i < mb.getSize() - 1)
     {
         if ((i % 40) != 39)
-            cppStream.printf ("%d,", (int) data[i]);
+            cppStream << (int) data[i] << ",";
         else
-            cppStream.printf ("%d,\r\n  ", (int) data[i]);
+            cppStream << (int) data[i] << ",\r\n  ";
 
         ++i;
     }
 
-    cppStream.printf ("%d,0,0};\r\n", (int) data[i]);
+    cppStream << (int) data[i] << ",0,0};\r\n";
 
-    cppStream.printf ("const char* %s::%s = (const char*) temp%d;\r\n\r\n",
-                      (const char*) classname,
-                      (const char*) name,
-                      tempNum);
+    cppStream << "const char* " << classname << "::" << name
+              << " = (const char*) temp" << tempNum << ";\r\n\r\n";
 
     return mb.getSize();
 }
@@ -82,17 +77,17 @@ int main (int argc, char* argv[])
     // before calling any Juce functionality..
     initialiseJuce_NonGUI();
 
-    printf ("\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n");
+    std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n";
 
     if (argc < 4 || argc > 5)
     {
-        printf (" Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname [optional wildcard pattern]\n\n");
-        printf (" BinaryBuilder will find all files in the source directory, and encode them\n");
-        printf (" into two files called (targetclassname).cpp and (targetclassname).h, which it\n");
-        printf (" will write into the target directory supplied.\n\n");
-        printf (" Any files in sub-directories of the source directory will be put into the\n");
-        printf (" resultant class, but #ifdef'ed out using the name of the sub-directory (hard to\n");
-        printf (" explain, but obvious when you try it...)\n");
+        std::cout << " Usage: BinaryBuilder  sourcedirectory targetdirectory targetclassname [optional wildcard pattern]\n\n"
+                     " BinaryBuilder will find all files in the source directory, and encode them\n"
+                     " into two files called (targetclassname).cpp and (targetclassname).h, which it\n"
+                     " will write into the target directory supplied.\n\n"
+                     " Any files in sub-directories of the source directory will be put into the\n"
+                     " resultant class, but #ifdef'ed out using the name of the sub-directory (hard to\n"
+                     " explain, but obvious when you try it...)\n";
 
         return 0;
     }
@@ -102,10 +97,10 @@ int main (int argc, char* argv[])
 
     if (! sourceDirectory.isDirectory())
     {
-        String error ("Source directory doesn't exist: ");
-        error << sourceDirectory.getFullPathName() << "\n\n";
+        std::cout << "Source directory doesn't exist: "
+                  << (const char*) sourceDirectory.getFullPathName()
+                  << std::endl << std::endl;
 
-        printf ((const char*) error);
         return 0;
     }
 
@@ -114,10 +109,9 @@ int main (int argc, char* argv[])
 
     if (! destDirectory.isDirectory())
     {
-        String error ("Destination directory doesn't exist: ");
-        error << destDirectory.getFullPathName() << "\n\n";
+        std::cout << "Destination directory doesn't exist: "
+                  << (const char*) destDirectory.getFullPathName() << std::endl << std::endl;
 
-        printf ((const char*) error);
         return 0;
     }
 
@@ -127,13 +121,10 @@ int main (int argc, char* argv[])
     const File headerFile (destDirectory.getChildFile (className).withFileExtension (T(".h")));
     const File cppFile    (destDirectory.getChildFile (className).withFileExtension (T(".cpp")));
 
-    String message;
-    message << "Creating " << headerFile.getFullPathName()
-            << " and " << cppFile.getFullPathName()
-            << " from files in " << sourceDirectory.getFullPathName()
-            << "...\n\n";
-
-    printf ((const char*) message);
+    std::cout << "Creating " << (const char*) headerFile.getFullPathName()
+              << " and " << (const char*) cppFile.getFullPathName()
+              << " from files in " << (const char*) sourceDirectory.getFullPathName()
+              << "..." << std::endl << std::endl;
 
     OwnedArray <File> files;
     sourceDirectory.findChildFiles (files, File::findFiles, true,
@@ -141,47 +132,40 @@ int main (int argc, char* argv[])
 
     if (files.size() == 0)
     {
-        String error ("Didn't find any source files in: ");
-        error << sourceDirectory.getFullPathName() << "\n\n";
-        printf ((const char*) error);
+        std::cout << "Didn't find any source files in: "
+                  << (const char*) sourceDirectory.getFullPathName() << std::endl << std::endl;
         return 0;
     }
 
     headerFile.deleteFile();
     cppFile.deleteFile();
 
-    OutputStream* header = headerFile.createOutputStream();
+    ScopedPointer <OutputStream> header (headerFile.createOutputStream());
 
     if (header == 0)
     {
-        String error ("Couldn't open ");
-        error << headerFile.getFullPathName() << " for writing\n\n";
-        printf ((const char*) error);
+        std::cout << "Couldn't open "
+                  << (const char*) headerFile.getFullPathName() << " for writing" << std::endl << std::endl;
         return 0;
     }
 
-    OutputStream* cpp = cppFile.createOutputStream();
+    ScopedPointer <OutputStream> cpp (cppFile.createOutputStream());
 
     if (cpp == 0)
     {
-        String error ("Couldn't open ");
-        error << cppFile.getFullPathName() << " for writing\n\n";
-        printf ((const char*) error);
+        std::cout << "Couldn't open "
+                  << (const char*) cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
         return 0;
     }
 
-    header->printf ("/* (Auto-generated binary data file). */\r\n\r\n"
-                    "#ifndef BINARY_%s_H\r\n"
-                    "#define BINARY_%s_H\r\n\r\n"
-                    "namespace %s\r\n"
-                    "{\r\n",
-                    (const char*) className.toUpperCase(),
-                    (const char*) className.toUpperCase(),
-                    (const char*) className);
+    *header << "/* (Auto-generated binary data file). */\r\n\r\n"
+               "#ifndef BINARY_" << className.toUpperCase() << "_H\r\n"
+               "#define BINARY_" << className.toUpperCase() << "_H\r\n\r\n"
+               "namespace " << className << "\r\n"
+               "{\r\n";
 
-    cpp->printf ("/* (Auto-generated binary data file). */\r\n\r\n"
-                 "#include \"%s.h\"\r\n\r\n",
-                 (const char*) className);
+    *cpp << "/* (Auto-generated binary data file). */\r\n\r\n"
+            "#include \"" << className << ".h\"\r\n\r\n";
 
     int totalBytes = 0;
 
@@ -194,13 +178,13 @@ int main (int argc, char* argv[])
         {
             if (file.getParentDirectory() != sourceDirectory)
             {
-                header->printf ("  #ifdef %s\r\n", (const char*) file.getParentDirectory().getFileName().toUpperCase());
-                cpp->printf      ("#ifdef %s\r\n", (const char*) file.getParentDirectory().getFileName().toUpperCase());
+                *header << "  #ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
+                *cpp << "#ifdef " << file.getParentDirectory().getFileName().toUpperCase() << "\r\n";
 
                 totalBytes += addFile (file, className, *header, *cpp);
 
-                header->printf ("  #endif\r\n");
-                cpp->printf ("#endif\r\n");
+                *header << "  #endif\r\n";
+                *cpp << "#endif\r\n";
             }
             else
             {
@@ -209,13 +193,13 @@ int main (int argc, char* argv[])
         }
     }
 
-    header->printf ("};\r\n\r\n"
-                    "#endif\r\n");
+    *header << "};\r\n\r\n"
+               "#endif\r\n";
 
-    delete header;
-    delete cpp;
+    header = 0;
+    cpp = 0;
 
-    printf ("\n Total size of binary data: %d bytes\n", totalBytes);
+    std::cout << std::endl << " Total size of binary data: " << totalBytes << " bytes" << std::endl;
 
     shutdownJuce_NonGUI();
 
