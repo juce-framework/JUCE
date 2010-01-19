@@ -163,7 +163,7 @@ void MD5::ProcessContext::processBlock (const uint8* const data, size_t dataSize
 
         i = spaceLeft;
 
-        while (i < dataSize - 63)
+        while (i + 64 <= dataSize)
         {
             transform (data + i);
             i += 64;
