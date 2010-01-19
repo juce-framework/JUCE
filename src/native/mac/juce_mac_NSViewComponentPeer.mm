@@ -769,9 +769,14 @@ void NSViewComponentPeer::setVisible (bool shouldBeVisible)
     else
     {
         if (shouldBeVisible)
+        {
             [window orderFront: nil];
+            handleBroughtToFront();
+        }
         else
+        {
             [window orderOut: nil];
+        }
     }
 }
 
@@ -1027,6 +1032,8 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
             [window makeKeyAndOrderFront: nil];
         else
             [window orderFront: nil];
+
+        handleBroughtToFront();
     }
 }
 

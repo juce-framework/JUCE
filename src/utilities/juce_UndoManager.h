@@ -185,6 +185,12 @@ public:
     */
     void getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const;
 
+    /** Returns the number of UndoableAction objects that have been performed during the
+        transaction that is currently open.
+        @see getActionsInCurrentTransaction
+    */
+    int getNumActionsInCurrentTransaction() const;
+
     //==============================================================================
     /** Returns true if there's at least one action in the list to redo.
 

@@ -6423,6 +6423,8 @@ public:
 
 	void getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const;
 
+	int getNumActionsInCurrentTransaction() const;
+
 	bool canRedo() const;
 
 	const String getRedoDescription() const;
@@ -12775,7 +12777,7 @@ private:
 	friend class Component;
 	friend class ComponentPeer;
 	SortedSet <void*> mouseListeners, focusListeners;
-	VoidArray desktopComponents;
+	Array <Component*> desktopComponents;
 
 	friend class DeletedAtShutdown;
 	friend class TopLevelWindowManager;

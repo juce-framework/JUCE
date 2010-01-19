@@ -149,7 +149,7 @@ int Desktop::getNumComponents() const throw()
 
 Component* Desktop::getComponent (const int index) const throw()
 {
-    return (Component*) desktopComponents [index];
+    return desktopComponents [index];
 }
 
 Component* Desktop::findComponentAt (const int screenX,
@@ -157,7 +157,7 @@ Component* Desktop::findComponentAt (const int screenX,
 {
     for (int i = desktopComponents.size(); --i >= 0;)
     {
-        Component* const c = (Component*) desktopComponents.getUnchecked(i);
+        Component* const c = desktopComponents.getUnchecked(i);
 
         int x = screenX, y = screenY;
         c->globalPositionToRelative (x, y);
@@ -188,7 +188,21 @@ void Desktop::componentBroughtToFront (Component* const c) throw()
     jassert (index >= 0);
 
     if (index >= 0)
-        desktopComponents.move (index, -1);
+    {
+        int newIndex = -1;
+
+        if (! c->isAlwaysOnTop())
+        {
+            newIndex = desktopComponents.size();
+
+            while (newIndex > 0 && desktopComponents.getUnchecked (newIndex - 1)->isAlwaysOnTop())
+                --newIndex;
+
+            --newIndex;
+        }
+
+        desktopComponents.move (index, newIndex);
+    }
 }
 
 //==============================================================================

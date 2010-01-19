@@ -240,7 +240,7 @@ private:
     friend class Component;
     friend class ComponentPeer;
     SortedSet <void*> mouseListeners, focusListeners;
-    VoidArray desktopComponents;
+    Array <Component*> desktopComponents;
 
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;

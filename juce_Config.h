@@ -40,17 +40,17 @@
 #endif
 
 //=============================================================================
-/** Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and project settings,
-    but if you define this value, you can override this can force it to be true or
-    false.
+/** JUCE_FORCE_DEBUG: Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and
+    project settings, but if you define this value, you can override this can force
+    it to be true or false.
 */
 #ifndef JUCE_FORCE_DEBUG
   //#define JUCE_FORCE_DEBUG 1
 #endif
 
 //=============================================================================
-/** If this flag is enabled, the the jassert and jassertfalse macros will
-    always use Logger::writeToLog() to write a message when an assertion happens.
+/** JUCE_LOG_ASSERTIONS: If this flag is enabled, the the jassert and jassertfalse
+    macros will always use Logger::writeToLog() to write a message when an assertion happens.
 
     Enabling it will also leave this turned on in release builds. When it's disabled,
     however, the jassert and jassertfalse macros will not be compiled in a
@@ -63,48 +63,42 @@
 #endif
 
 //=============================================================================
-/** Comment out this macro if you haven't got the Steinberg ASIO SDK, without
-    which the ASIOAudioIODevice class can't be built. See the comments in the
-    ASIOAudioIODevice class's header file for more info about this.
+/** JUCE_ASIO: Enables ASIO audio devices (MS Windows only).
+    Turning this on means that you'll need to have the Steinberg ASIO SDK installed
+    on your Windows build machine.
 
-    (This only affects a Win32 build)
+    See the comments in the ASIOAudioIODevice class's header file for more
+    info about this.
 */
 #ifndef JUCE_ASIO
   #define JUCE_ASIO 1
 #endif
 
-/** Comment out this macro to disable the Windows WASAPI audio device type.
+/** JUCE_WASAPI: Enables WASAPI audio devices (Windows Vista and above).
 */
 #ifndef JUCE_WASAPI
 //  #define JUCE_WASAPI 1
 #endif
 
-/** Comment out this macro to disable the Windows WASAPI audio device type.
+/** JUCE_DIRECTSOUND: Enables DirectSound audio (MS Windows only).
 */
 #ifndef JUCE_DIRECTSOUND
   #define JUCE_DIRECTSOUND 1
 #endif
 
-/** Comment out this macro to disable building of ALSA device support on Linux.
-*/
+/** JUCE_ALSA: Enables ALSA audio devices (Linux only). */
 #ifndef JUCE_ALSA
   #define JUCE_ALSA 1
 #endif
 
-/** Comment out this macro to disable building of JACK device support on Linux.
-*/
+/** JUCE_JACK: Enables JACK audio devices (Linux only). */
 #ifndef JUCE_JACK
   #define JUCE_JACK 1
 #endif
 
 //=============================================================================
-/** Comment out this macro if you don't want to enable QuickTime or if you don't
-    have the SDK installed.
-
-    If this flag is not enabled, the QuickTimeMovieComponent and QuickTimeAudioFormat
-    classes will be unavailable.
-
-    On Windows, if you enable this, you'll need to have the QuickTime SDK
+/** JUCE_QUICKTIME: Enables the QuickTimeMovieComponent class (Mac and Windows).
+    If you're building on Windows, you'll need to have the Apple QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
@@ -113,83 +107,92 @@
 
 
 //=============================================================================
-/** Comment out this macro if you don't want to enable OpenGL or if you don't
-    have the appropriate headers and libraries available. If it's not enabled, the
-    OpenGLComponent class will be unavailable.
+/** JUCE_OPENGL: Enables the OpenGLComponent class (available on all platforms).
+    If you're not using OpenGL, you might want to turn this off to reduce your binary's size.
 */
 #ifndef JUCE_OPENGL
   #define JUCE_OPENGL 1
 #endif
 
 //=============================================================================
-/** These flags enable the Ogg-Vorbis and Flac audio formats.
-
-    If you're not going to need either of these formats, turn off the flags to
-    avoid bloating your codebase with them.
+/** JUCE_USE_FLAC: Enables the FLAC audio codec classes (available on all platforms).
+    If your app doesn't need to read FLAC files, you might want to disable this to
+    reduce the size of your codebase and build time.
 */
 #ifndef JUCE_USE_FLAC
   #define JUCE_USE_FLAC 1
 #endif
 
+/** JUCE_USE_OGGBORBIS: Enables the Ogg-Vorbis audio codec classes (available on all platforms).
+    If your app doesn't need to read Ogg-Vorbis files, you might want to disable this to
+    reduce the size of your codebase and build time.
+*/
 #ifndef JUCE_USE_OGGVORBIS
   #define JUCE_USE_OGGVORBIS 1
 #endif
 
 //=============================================================================
-/** This flag lets you enable the AudioCDBurner class. You might want to disable
-    it to build without the MS SDK under windows.
+/** JUCE_USE_CDBURNER: Enables the audio CD reader code (Mac and Windows only).
+    Unless you're using CD-burning, you should probably turn this flag off to
+    reduce code size.
 */
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
   #define JUCE_USE_CDBURNER 1
 #endif
 
-/** This flag lets you enable support for the AudioCDReader class. You might want to disable
-    it to build without the MS SDK under windows.
+/** JUCE_USE_CDREADER: Enables the audio CD reader code (Mac and Windows only).
+    Unless you're using CD-reading, you should probably turn this flag off to
+    reduce code size.
 */
 #ifndef JUCE_USE_CDREADER
   #define JUCE_USE_CDREADER 1
 #endif
 
 //=============================================================================
-/** Enabling this provides support for cameras, using the CameraDevice class
+/** JUCE_USE_CAMERA: Enables web-cam support using the CameraDevice class (Mac and Windows).
 */
 #if JUCE_QUICKTIME && ! defined (JUCE_USE_CAMERA)
 //  #define JUCE_USE_CAMERA 1
 #endif
 
 //=============================================================================
-/** Enabling this macro means that all regions that get repainted will have a coloured
-    line drawn around them.
-
-    This is handy if you're trying to optimise drawing, because it lets you easily see
-    when anything is being repainted unnecessarily.
+/** JUCE_ENABLE_REPAINT_DEBUGGING: If this option is turned on, each area of the screen that
+    gets repainted will flash in a random colour, so that you can check exactly how much and how
+    often your components are being drawn.
 */
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
 //  #define JUCE_ENABLE_REPAINT_DEBUGGING 1
 #endif
 
 //=============================================================================
-/** Enable this under Linux to use Xinerama for multi-monitor support.
+/** JUCE_USE_XINERAMA: Enables Xinerama multi-monitor support (Linux only).
+    Unless you specifically want to disable this, it's best to leave this option turned on.
 */
 #ifndef JUCE_USE_XINERAMA
   #define JUCE_USE_XINERAMA 1
 #endif
 
-/** Enable this under Linux to use XShm for faster shared-memory rendering.
+/** JUCE_USE_XSHM: Enables X shared memory for faster rendering on Linux. This is best left
+    turned on unless you have a good reason to disable it.
 */
 #ifndef JUCE_USE_XSHM
   #define JUCE_USE_XSHM 1
 #endif
 
 //=============================================================================
-/** Enabling this builds support for VST audio plugins.
+/** JUCE_PLUGINHOST_VST: Enables the VST audio plugin hosting classes. This requires the
+    Steinberg VST SDK to be installed on your machine, and should be left turned off unless
+    you're building a plugin hosting app.
+
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
 #ifndef JUCE_PLUGINHOST_VST
 //  #define JUCE_PLUGINHOST_VST 1
 #endif
 
-/** Enabling this builds support for AudioUnit audio plugins.
+/** JUCE_PLUGINHOST_AU: Enables the AudioUnit plugin hosting classes. This is Mac-only,
+    of course, and should only be enabled if you're building a plugin hosting app.
+
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
 */
 #ifndef JUCE_PLUGINHOST_AU
@@ -197,15 +200,15 @@
 #endif
 
 //=============================================================================
-/** Enabling this will avoid including any UI code in the build. This is handy for
-    writing command-line utilities, e.g. on linux boxes which don't have some
-    of the UI libraries installed.
+/** JUCE_ONLY_BUILD_CORE_LIBRARY: Enabling this will avoid including any UI classes in the build.
+    This should be enabled if you're writing a console application.
 */
 #ifndef JUCE_ONLY_BUILD_CORE_LIBRARY
   //#define JUCE_ONLY_BUILD_CORE_LIBRARY  1
 #endif
 
-/** This lets you disable building of the WebBrowserComponent, if it's not required.
+/** JUCE_WEB_BROWSER: This lets you disable the WebBrowserComponent class (Mac and Windows).
+    If you're not using any embedded web-pages, turning this off may reduce your code size.
 */
 #ifndef JUCE_WEB_BROWSER
   #define JUCE_WEB_BROWSER 1
@@ -213,18 +216,19 @@
 
 
 //=============================================================================
-/** Setting this allows the build to use old Carbon libraries that will be
-    deprecated in newer versions of OSX. This is handy for some backwards-compatibility
-    reasons.
+/** JUCE_SUPPORT_CARBON: Enabling this allows the Mac code to use old Carbon library functions.
+
+    Carbon isn't required for a normal app, but may be needed by specialised classes like
+    plugin-hosts, which support older APIs.
 */
 #ifndef JUCE_SUPPORT_CARBON
   #define JUCE_SUPPORT_CARBON 1
 #endif
 
 //=============================================================================
-/*  These flags let you avoid the direct inclusion of some 3rd-party libs in the
-    codebase - you might need to use this if you're linking to some of these libraries
-    yourself.
+/*  JUCE_INCLUDE_ZLIB_CODE: Can be used to disable Juce's embedded 3rd-party zlib code.
+    You might need to tweak this if you're linking to an external zlib library in your app,
+    but for normal apps, this option should be left alone.
 */
 #ifndef JUCE_INCLUDE_ZLIB_CODE
   #define JUCE_INCLUDE_ZLIB_CODE        1
@@ -247,25 +251,23 @@
 #endif
 
 //=============================================================================
-/** Enable this to add extra memory-leak info to the new and delete operators.
-
+/** JUCE_CHECK_MEMORY_LEAKS: Enables a memory-leak check when an app terminates.
     (Currently, this only affects Windows builds in debug mode).
 */
 #ifndef JUCE_CHECK_MEMORY_LEAKS
   #define JUCE_CHECK_MEMORY_LEAKS 1
 #endif
 
-/** Enable this to turn on juce's internal catching of exceptions.
-
-    Turning it off will avoid any exception catching. With it on, all exceptions
+/** JUCE_CATCH_UNHANDLED_EXCEPTIONS: Turn on juce's internal catching of exceptions
+    that are thrown by the message dispatch loop. With it enabled, any unhandled exceptions
     are passed to the JUCEApplication::unhandledException() callback for logging.
 */
 #ifndef JUCE_CATCH_UNHANDLED_EXCEPTIONS
   #define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
 
-/** If this macro is set, the Juce String class will use unicode as its
-    internal representation. If it isn't set, it'll use ANSI.
+/** JUCE_STRINGS_ARE_UNICODE: If this macro is set, the Juce String class will use
+    unicode as its internal representation. If disabled, it'll use ANSI.
 */
 #ifndef JUCE_STRINGS_ARE_UNICODE
   #define JUCE_STRINGS_ARE_UNICODE 1

@@ -281,5 +281,15 @@ void UndoManager::getActionsInCurrentTransaction (Array <const UndoableAction*>&
     }
 }
 
+int UndoManager::getNumActionsInCurrentTransaction() const
+{
+    const OwnedArray <UndoableAction>* const commandSet = transactions [nextIndex - 1];
+
+    if (commandSet != 0 && ! newTransaction)
+        return commandSet->size();
+
+    return 0;
+}
+
 
 END_JUCE_NAMESPACE
