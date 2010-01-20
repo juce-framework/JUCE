@@ -70,7 +70,7 @@ public:
         other.lockArray();
         numUsed = other.numUsed;
         data.setAllocatedSize (other.numUsed);
-        
+
         for (int i = 0; i < numUsed; ++i)
             new (data.elements + i) ElementType (other.data.elements[i]);
 
@@ -122,11 +122,11 @@ public:
             if (other.size() > numUsed)
             {
                 data.ensureAllocatedSize (other.size());
-                
+
                 int i = 0;
                 for (; i < numUsed; ++i)
                     data.elements[i] = other.data.elements[i];
-                
+
                 numUsed = other.size();
                 for (; i < numUsed; ++i)
                     new (data.elements + i) ElementType (other.data.elements[i]);
@@ -134,7 +134,7 @@ public:
             else
             {
                 numUsed = other.size();
-                
+
                 for (int i = 0; i < numUsed; ++i)
                     data.elements[i] = other.data.elements[i];
 
@@ -462,7 +462,7 @@ public:
             lock.enter();
             data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
             ElementType* insertPos;
-            
+
             if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
             {
                 insertPos = data.elements + indexToInsertAt;
@@ -847,7 +847,7 @@ public:
     void removeLast (int howManyToRemove = 1) throw()
     {
         lock.enter();
-        
+
         if (howManyToRemove > numUsed)
             howManyToRemove = numUsed;
 

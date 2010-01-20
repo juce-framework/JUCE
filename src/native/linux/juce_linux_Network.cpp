@@ -261,7 +261,7 @@ public:
         if (select (socketHandle + 1, &readbits, 0, 0, &tv) <= 0)
             return 0;   // (timeout)
 
-        const int bytesRead = jmax (0, recv (socketHandle, buffer, bytesToRead, MSG_WAITALL));
+        const int bytesRead = jmax (0, (int) recv (socketHandle, buffer, bytesToRead, MSG_WAITALL));
         readPosition += bytesRead;
         return bytesRead;
     }

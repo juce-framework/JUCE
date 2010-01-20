@@ -97,7 +97,7 @@ public:
         if (maxNumElements < numAllocated)
             setAllocatedSize (maxNumElements);
     }
-    
+
     /** Swap the contents of two objects. */
     void swapWith (ArrayAllocationBase <ElementType>& other)
     {
