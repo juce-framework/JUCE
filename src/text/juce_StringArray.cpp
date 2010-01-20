@@ -93,7 +93,7 @@ bool StringArray::operator== (const StringArray& other) const throw()
         return false;
 
     for (int i = size(); --i >= 0;)
-        if (*other.strings.getUnchecked(i) != *strings.getUnchecked(i))
+        if (other.strings.getReference(i) != strings.getReference(i))
             return false;
 
     return true;
@@ -112,20 +112,20 @@ void StringArray::clear() throw()
 const String& StringArray::operator[] (const int index) const throw()
 {
     if (((unsigned int) index) < (unsigned int) strings.size())
-        return *strings.getUnchecked (index);
+        return strings.getReference (index);
 
     return String::empty;
 }
 
 void StringArray::add (const String& newString) throw()
 {
-    strings.add (new String (newString));
+    strings.add (newString);
 }
 
 void StringArray::insert (const int index,
                           const String& newString) throw()
 {
-    strings.insert (index, new String (newString));
+    strings.insert (index, newString);
 }
 
 void StringArray::addIfNotAlreadyThere (const String& newString,
@@ -149,18 +149,13 @@ void StringArray::addArray (const StringArray& otherArray,
         numElementsToAdd = otherArray.size() - startIndex;
 
     while (--numElementsToAdd >= 0)
-        strings.add (new String (*otherArray.strings.getUnchecked (startIndex++)));
+        strings.add (otherArray.strings.getReference (startIndex++));
 }
 
 void StringArray::set (const int index,
                        const String& newString) throw()
 {
-    String* const s = strings [index];
-
-    if (s != 0)
-        *s = newString;
-    else if (index >= 0)
-        add (newString);
+    strings.set (index, newString);
 }
 
 bool StringArray::contains (const String& stringToLookFor,
@@ -169,13 +164,13 @@ bool StringArray::contains (const String& stringToLookFor,
     if (ignoreCase)
     {
         for (int i = size(); --i >= 0;)
-            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToLookFor))
+            if (strings.getReference(i).equalsIgnoreCase (stringToLookFor))
                 return true;
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (stringToLookFor == *strings.getUnchecked(i))
+            if (stringToLookFor == strings.getReference(i))
                 return true;
     }
 
@@ -195,7 +190,7 @@ int StringArray::indexOf (const String& stringToLookFor,
     {
         while (i < numElements)
         {
-            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToLookFor))
+            if (strings.getReference(i).equalsIgnoreCase (stringToLookFor))
                 return i;
 
             ++i;
@@ -205,7 +200,7 @@ int StringArray::indexOf (const String& stringToLookFor,
     {
         while (i < numElements)
         {
-            if (stringToLookFor == *strings.getUnchecked (i))
+            if (stringToLookFor == strings.getReference (i))
                 return i;
 
             ++i;
@@ -227,13 +222,13 @@ void StringArray::removeString (const String& stringToRemove,
     if (ignoreCase)
     {
         for (int i = size(); --i >= 0;)
-            if (strings.getUnchecked(i)->equalsIgnoreCase (stringToRemove))
+            if (strings.getReference(i).equalsIgnoreCase (stringToRemove))
                 strings.remove (i);
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (stringToRemove == *strings.getUnchecked (i))
+            if (stringToRemove == strings.getReference (i))
                 strings.remove (i);
     }
 }
@@ -244,13 +239,13 @@ void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings) throw(
     if (removeWhitespaceStrings)
     {
         for (int i = size(); --i >= 0;)
-            if (! strings.getUnchecked(i)->containsNonWhitespaceChars())
+            if (! strings.getReference(i).containsNonWhitespaceChars())
                 strings.remove (i);
     }
     else
     {
         for (int i = size(); --i >= 0;)
-            if (strings.getUnchecked(i)->isEmpty())
+            if (strings.getReference(i).isEmpty())
                 strings.remove (i);
     }
 }
@@ -259,40 +254,34 @@ void StringArray::trim() throw()
 {
     for (int i = size(); --i >= 0;)
     {
-        String& s = *strings.getUnchecked(i);
+        String& s = strings.getReference(i);
         s = s.trim();
     }
 }
 
 //==============================================================================
-class InternalStringArrayComparator
+class InternalStringArrayComparator_CaseSensitive
 {
 public:
-    static int compareElements (void* const first, void* const second) throw()
-    {
-        return ((const String*) first)->compare (*(const String*) second);
-    }
+    static int compareElements (String& first, String& second)      { return first.compare (second); }
 };
 
-class InsensitiveInternalStringArrayComparator
+class InternalStringArrayComparator_CaseInsensitive
 {
 public:
-    static int compareElements (void* const first, void* const second) throw()
-    {
-        return ((const String*) first)->compareIgnoreCase (*(const String*) second);
-    }
+    static int compareElements (String& first, String& second)      { return first.compareIgnoreCase (second); }
 };
 
 void StringArray::sort (const bool ignoreCase) throw()
 {
     if (ignoreCase)
     {
-        InsensitiveInternalStringArrayComparator comp;
+        InternalStringArrayComparator_CaseInsensitive comp;
         strings.sort (comp);
     }
     else
     {
-        InternalStringArrayComparator comp;
+        InternalStringArrayComparator_CaseSensitive comp;
         strings.sort (comp);
     }
 }
@@ -318,13 +307,13 @@ const String StringArray::joinIntoString (const String& separator,
         return String::empty;
 
     if (start == last - 1)
-        return *strings.getUnchecked (start);
+        return strings.getReference (start);
 
     const int separatorLen = separator.length();
     int charsNeeded = separatorLen * (last - start - 1);
 
     for (int i = start; i < last; ++i)
-        charsNeeded += strings.getUnchecked(i)->length();
+        charsNeeded += strings.getReference(i).length();
 
     String result;
     result.preallocateStorage (charsNeeded);
@@ -333,7 +322,7 @@ const String StringArray::joinIntoString (const String& separator,
 
     while (start < last)
     {
-        const String& s = *strings.getUnchecked (start);
+        const String& s = strings.getReference (start);
         const int len = s.length();
 
         if (len > 0)
@@ -499,7 +488,7 @@ void StringArray::removeDuplicates (const bool ignoreCase) throw()
 {
     for (int i = 0; i < size() - 1; ++i)
     {
-        const String& s = *strings.getUnchecked(i);
+        const String s (strings.getReference(i));
 
         int nextIndex = i + 1;
 
@@ -522,7 +511,7 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
 {
     for (int i = 0; i < size() - 1; ++i)
     {
-        String& s = *strings.getUnchecked(i);
+        String& s = strings.getReference(i);
 
         int nextIndex = indexOf (s, ignoreCase, i + 1);
 

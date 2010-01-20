@@ -26,6 +26,8 @@
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 #define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
+#include "juce_HeapBlock.h"
+
 
 //==============================================================================
 /**
@@ -43,15 +45,13 @@ public:
     //==============================================================================
     /** Creates an empty array. */
     ArrayAllocationBase() throw()
-        : elements (0),
-          numAllocated (0)
+        : numAllocated (0)
     {
     }
 
     /** Destructor. */
     ~ArrayAllocationBase()
     {
-        delete[] elements;
     }
 
     //==============================================================================
@@ -62,28 +62,14 @@ public:
 
         @param numElements  the number of elements that are needed
     */
-    void setAllocatedSize (const int numElements) throw()
+    void setAllocatedSize (const int numElements)
     {
         if (numAllocated != numElements)
         {
             if (numElements > 0)
-            {
-                ElementType* const newElements = new ElementType [numElements];
-
-                const int itemsToRetain = jmin (numElements, numAllocated);
-
-                for (int i = 0; i < itemsToRetain; ++i)
-                    newElements[i] = elements[i];
-
-                delete[] elements;
-                elements = newElements;
-
-            }
+                elements.realloc (numElements);
             else
-            {
-                delete[] elements;
-                elements = 0;
-            }
+                elements.free();
 
             numAllocated = numElements;
         }
@@ -97,7 +83,7 @@ public:
 
         @param minNumElements  the minimum number of elements that are needed
     */
-    void ensureAllocatedSize (int minNumElements) throw()
+    void ensureAllocatedSize (int minNumElements)
     {
         if (minNumElements > numAllocated)
             setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
@@ -106,14 +92,21 @@ public:
     /** Minimises the amount of storage allocated so that it's no more than
         the given number of elements.
     */
-    void shrinkToNoMoreThan (int maxNumElements) throw()
+    void shrinkToNoMoreThan (int maxNumElements)
     {
         if (maxNumElements < numAllocated)
             setAllocatedSize (maxNumElements);
     }
+    
+    /** Swap the contents of two objects. */
+    void swapWith (ArrayAllocationBase <ElementType>& other)
+    {
+        elements.swapWith (other.elements);
+        swapVariables (numAllocated, other.numAllocated);
+    }
 
     //==============================================================================
-    ElementType* elements;
+    HeapBlock <ElementType> elements;
     int numAllocated;
 
 private:

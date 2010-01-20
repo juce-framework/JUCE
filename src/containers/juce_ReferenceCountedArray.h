@@ -424,7 +424,7 @@ public:
                     ObjectClass* newObject) throw()
     {
         lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
         lock.exit();
     }
 
@@ -438,7 +438,7 @@ public:
                              ObjectClass* newObject) throw()
     {
         lock.enter();
-        const int index = findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed);
+        const int index = findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed);
 
         if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
             set (index - 1, newObject); // replace an existing object that matches
@@ -716,7 +716,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         lock.enter();
-        sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, (ObjectClass*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
         lock.exit();
     }
 

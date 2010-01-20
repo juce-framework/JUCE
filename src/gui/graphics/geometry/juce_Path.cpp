@@ -108,8 +108,7 @@ void Path::clear() throw()
 
 void Path::swapWithPath (Path& other)
 {
-    swapVariables <int> (data.numAllocated, other.data.numAllocated);
-    swapVariables <float*> (data.elements, other.data.elements);
+    data.swapWith (other.data);
     swapVariables <int> (numElements, other.numElements);
     swapVariables <float> (pathXMin, other.pathXMin);
     swapVariables <float> (pathXMax, other.pathXMax);

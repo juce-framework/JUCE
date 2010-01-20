@@ -210,7 +210,7 @@ public:
 
     NSWindow* window;
     JuceNSView* view;
-    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics;
+    bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, recursiveToFrontCall;
 };
 
 //==============================================================================
@@ -668,10 +668,11 @@ NSViewComponentPeer::NSViewComponentPeer (Component* const component_,
       fullScreen (false),
       insideDrawRect (false),
 #if USE_COREGRAPHICS_RENDERING
-      usingCoreGraphics (true)
+      usingCoreGraphics (true),
 #else
-      usingCoreGraphics (false)
+      usingCoreGraphics (false),
 #endif
+      recursiveToFrontCall (false)
 {
     NSRect r;
     r.origin.x = 0;
@@ -1033,7 +1034,12 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
         else
             [window orderFront: nil];
 
-        handleBroughtToFront();
+        if (! recursiveToFrontCall)
+        {
+            recursiveToFrontCall = true;
+            handleBroughtToFront();
+            recursiveToFrontCall = false;
+        }
     }
 }
 

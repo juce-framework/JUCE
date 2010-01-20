@@ -1463,62 +1463,148 @@ BEGIN_JUCE_NAMESPACE
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 #define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
+/********* Start of inlined file: juce_HeapBlock.h *********/
+#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+#define __JUCE_HEAPBLOCK_JUCEHEADER__
+
+template <class ElementType>
+class HeapBlock
+{
+public:
+
+	HeapBlock()  : data (0)
+	{
+	}
+
+	HeapBlock (const size_t numElements)
+		: data ((ElementType*) ::juce_malloc (numElements * sizeof (ElementType)))
+	{
+	}
+
+	~HeapBlock()
+	{
+		::juce_free (data);
+	}
+
+	inline operator ElementType*() const					{ return data; }
+
+	inline operator void*() const					   { return (void*) data; }
+
+	inline ElementType* operator->() const				  { return data; }
+
+	template <class CastType>
+	inline operator CastType*() const					   { return (CastType*) data; }
+
+	template <typename IndexType>
+	inline ElementType& operator[] (IndexType index) const		  { return data [index]; }
+
+	template <typename IndexType>
+	inline ElementType* operator+ (IndexType index) const		   { return data + index; }
+
+	inline ElementType** operator&() const				  { return (ElementType**) &data; }
+
+	inline bool operator== (const ElementType* const otherPointer) const	{ return otherPointer == data; }
+
+	inline bool operator!= (const ElementType* const otherPointer) const	{ return otherPointer != data; }
+
+	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+	{
+		::juce_free (data);
+		data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
+	}
+
+	void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+	{
+		::juce_free (data);
+		data = (ElementType*) ::juce_calloc (newNumElements * elementSize);
+	}
+
+	void allocate (const size_t newNumElements, const bool initialiseToZero)
+	{
+		::juce_free (data);
+
+		if (initialiseToZero)
+			data = (ElementType*) ::juce_calloc (newNumElements * sizeof (ElementType));
+		else
+			data = (ElementType*) ::juce_malloc (newNumElements * sizeof (ElementType));
+	}
+
+	void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
+	{
+		if (data == 0)
+			data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
+		else
+			data = (ElementType*) ::juce_realloc (data, newNumElements * elementSize);
+	}
+
+	void free()
+	{
+		::juce_free (data);
+		data = 0;
+	}
+
+	void swapWith (HeapBlock <ElementType>& other)
+	{
+		swapVariables (data, other.data);
+	}
+
+private:
+
+	ElementType* data;
+
+	HeapBlock (const HeapBlock&);
+	const HeapBlock& operator= (const HeapBlock&);
+};
+
+#endif   // __JUCE_HEAPBLOCK_JUCEHEADER__
+/********* End of inlined file: juce_HeapBlock.h *********/
+
 template <class ElementType>
 class ArrayAllocationBase
 {
 public:
 
 	ArrayAllocationBase() throw()
-		: elements (0),
-		  numAllocated (0)
+		: numAllocated (0)
 	{
 	}
 
 	~ArrayAllocationBase()
 	{
-		delete[] elements;
 	}
 
-	void setAllocatedSize (const int numElements) throw()
+	void setAllocatedSize (const int numElements)
 	{
 		if (numAllocated != numElements)
 		{
 			if (numElements > 0)
-			{
-				ElementType* const newElements = new ElementType [numElements];
-
-				const int itemsToRetain = jmin (numElements, numAllocated);
-
-				for (int i = 0; i < itemsToRetain; ++i)
-					newElements[i] = elements[i];
-
-				delete[] elements;
-				elements = newElements;
-
-			}
+				elements.realloc (numElements);
 			else
-			{
-				delete[] elements;
-				elements = 0;
-			}
+				elements.free();
 
 			numAllocated = numElements;
 		}
 	}
 
-	void ensureAllocatedSize (int minNumElements) throw()
+	void ensureAllocatedSize (int minNumElements)
 	{
 		if (minNumElements > numAllocated)
 			setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
 	}
 
-	void shrinkToNoMoreThan (int maxNumElements) throw()
+	void shrinkToNoMoreThan (int maxNumElements)
 	{
 		if (maxNumElements < numAllocated)
 			setAllocatedSize (maxNumElements);
 	}
 
-	ElementType* elements;
+	void swapWith (ArrayAllocationBase <ElementType>& other)
+	{
+		elements.swapWith (other.elements);
+		swapVariables (numAllocated, other.numAllocated);
+	}
+
+	HeapBlock <ElementType> elements;
 	int numAllocated;
 
 private:
@@ -1800,7 +1886,10 @@ public:
 		other.lockArray();
 		numUsed = other.numUsed;
 		data.setAllocatedSize (other.numUsed);
-		memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
+
+		for (int i = 0; i < numUsed; ++i)
+			new (data.elements + i) ElementType (other.data.elements[i]);
+
 		other.unlockArray();
 	}
 
@@ -1815,11 +1904,15 @@ public:
 	   : numUsed (numValues)
 	{
 		data.setAllocatedSize (numValues);
-		memcpy (data.elements, values, numValues * sizeof (ElementType));
+
+		for (int i = 0; i < numValues; ++i)
+			new (data.elements + i) ElementType (values[i]);
 	}
 
 	~Array() throw()
 	{
+		for (int i = 0; i < numUsed; ++i)
+			data.elements[i].~ElementType();
 	}
 
 	const Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other) throw()
@@ -1829,10 +1922,27 @@ public:
 			other.lockArray();
 			lock.enter();
 
-			data.ensureAllocatedSize (other.size());
-			numUsed = other.numUsed;
-			memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
-			minimiseStorageOverheads();
+			if (other.size() > numUsed)
+			{
+				data.ensureAllocatedSize (other.size());
+
+				int i = 0;
+				for (; i < numUsed; ++i)
+					data.elements[i] = other.data.elements[i];
+
+				numUsed = other.size();
+				for (; i < numUsed; ++i)
+					new (data.elements + i) ElementType (other.data.elements[i]);
+			}
+			else
+			{
+				numUsed = other.size();
+
+				for (int i = 0; i < numUsed; ++i)
+					data.elements[i] = other.data.elements[i];
+
+				minimiseStorageOverheads();
+			}
 
 			lock.exit();
 			other.unlockArray();
@@ -1874,6 +1984,10 @@ public:
 	void clear() throw()
 	{
 		lock.enter();
+
+		for (int i = 0; i < numUsed; ++i)
+			data.elements[i].~ElementType();
+
 		data.setAllocatedSize (0);
 		numUsed = 0;
 		lock.exit();
@@ -1882,6 +1996,10 @@ public:
 	void clearQuick() throw()
 	{
 		lock.enter();
+
+		for (int i = 0; i < numUsed; ++i)
+			data.elements[i].~ElementType();
+
 		numUsed = 0;
 		lock.exit();
 	}
@@ -2005,7 +2123,7 @@ public:
 	{
 		lock.enter();
 		data.ensureAllocatedSize (numUsed + 1);
-		data.elements [numUsed++] = newElement;
+		new (data.elements + numUsed++) ElementType (newElement);
 		lock.exit();
 	}
 
@@ -2022,12 +2140,12 @@ public:
 			if (numberToMove > 0)
 				memmove (insertPos + 1, insertPos, numberToMove * sizeof (ElementType));
 
-			*insertPos = newElement;
+			new (insertPos) ElementType (newElement);
 			++numUsed;
 		}
 		else
 		{
-			data.elements [numUsed++] = newElement;
+			new (data.elements + numUsed++) ElementType (newElement);
 		}
 
 		lock.exit();
@@ -2040,23 +2158,23 @@ public:
 		{
 			lock.enter();
 			data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
+			ElementType* insertPos;
 
 			if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
 			{
-				ElementType* insertPos = data.elements + indexToInsertAt;
+				insertPos = data.elements + indexToInsertAt;
 				const int numberToMove = numUsed - indexToInsertAt;
-
 				memmove (insertPos + numberOfTimesToInsertIt, insertPos, numberToMove * sizeof (ElementType));
-				numUsed += numberOfTimesToInsertIt;
-
-				while (--numberOfTimesToInsertIt >= 0)
-					*insertPos++ = newElement;
 			}
 			else
 			{
-				while (--numberOfTimesToInsertIt >= 0)
-					data.elements [numUsed++] = newElement;
+				insertPos = data.elements + numUsed;
 			}
+
+			numUsed += numberOfTimesToInsertIt;
+
+			while (--numberOfTimesToInsertIt >= 0)
+				new (insertPos++) ElementType (newElement);
 
 			lock.exit();
 		}
@@ -2070,23 +2188,23 @@ public:
 		{
 			lock.enter();
 			data.ensureAllocatedSize (numUsed + numberOfElements);
+			ElementType* insertPos;
 
 			if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
 			{
-				ElementType* insertPos = data.elements + indexToInsertAt;
+				insertPos = data.elements + indexToInsertAt;
 				const int numberToMove = numUsed - indexToInsertAt;
-
 				memmove (insertPos + numberOfElements, insertPos, numberToMove * sizeof (ElementType));
-				numUsed += numberOfElements;
-
-				while (--numberOfElements >= 0)
-					*insertPos++ = *newElements++;
 			}
 			else
 			{
-				while (--numberOfElements >= 0)
-					data.elements [numUsed++] = *newElements++;
+				insertPos = data.elements + numUsed;
 			}
+
+			numUsed += numberOfElements;
+
+			while (--numberOfElements >= 0)
+				new (insertPos++) ElementType (*newElements++);
 
 			lock.exit();
 		}
@@ -2107,22 +2225,19 @@ public:
 	{
 		jassert (indexToChange >= 0);
 
-		if (indexToChange >= 0)
+		lock.enter();
+
+		if (((unsigned int) indexToChange) < (unsigned int) numUsed)
 		{
-			lock.enter();
-
-			if (indexToChange < numUsed)
-			{
-				data.elements [indexToChange] = newValue;
-			}
-			else
-			{
-				data.ensureAllocatedSize (numUsed + 1);
-				data.elements [numUsed++] = newValue;
-			}
-
-			lock.exit();
+			data.elements [indexToChange] = newValue;
 		}
+		else if (indexToChange >= 0)
+		{
+			data.ensureAllocatedSize (numUsed + 1);
+			new (data.elements + numUsed++) ElementType (newValue);
+		}
+
+		lock.exit();
 	}
 
 	void setUnchecked (const int indexToChange,
@@ -2144,20 +2259,18 @@ public:
 			data.ensureAllocatedSize (numUsed + numElementsToAdd);
 
 			while (--numElementsToAdd >= 0)
-				data.elements [numUsed++] = *elementsToAdd++;
+				new (data.elements + numUsed++) ElementType (*elementsToAdd++);
 		}
 
 		lock.exit();
 	}
 
-	template <class OtherArrayType>
-	void swapWithArray (OtherArrayType& otherArray) throw()
+	void swapWithArray (Array <ElementType>& otherArray) throw()
 	{
 		lock.enter();
 		otherArray.lock.enter();
-		swapVariables <int> (numUsed, otherArray.numUsed);
-		swapVariables <ElementType*> (data.elements, otherArray.data.elements);
-		swapVariables <int> (data.numAllocated, otherArray.data.numAllocated);
+		data.swapWith (otherArray.data);
+		swapVariables (numUsed, otherArray.numUsed);
 		otherArray.lock.exit();
 		lock.exit();
 	}
@@ -2191,7 +2304,7 @@ public:
 					const ElementType newElement) throw()
 	{
 		lock.enter();
-		insert (findInsertIndexInSortedArray (comparator, data.elements, newElement, 0, numUsed), newElement);
+		insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
 		lock.exit();
 	}
 
@@ -2244,7 +2357,8 @@ public:
 			--numUsed;
 
 			ElementType* const e = data.elements + indexToRemove;
-			ElementType const removed = *e;
+			ElementType removed (*e);
+			e->~ElementType();
 			const int numberToShift = numUsed - indexToRemove;
 
 			if (numberToShift > 0)
@@ -2283,7 +2397,7 @@ public:
 	}
 
 	void removeRange (int startIndex,
-					  const int numberToRemove) throw()
+					  int numberToRemove) throw()
 	{
 		lock.enter();
 		const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -2291,16 +2405,17 @@ public:
 
 		if (endIndex > startIndex)
 		{
-			const int rangeSize = endIndex - startIndex;
 			ElementType* e = data.elements + startIndex;
-			int numToShift = numUsed - endIndex;
-			numUsed -= rangeSize;
 
-			while (--numToShift >= 0)
-			{
-				*e = e [rangeSize];
-				++e;
-			}
+			numberToRemove = endIndex - startIndex;
+			for (int i = 0; i < numberToRemove; ++i)
+				e[i].~ElementType();
+
+			const int numToShift = numUsed - endIndex;
+			if (numToShift > 0)
+				memmove (e, e + numberToRemove, numToShift * sizeof (ElementType));
+
+			numUsed -= numberToRemove;
 
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
@@ -2309,10 +2424,17 @@ public:
 		lock.exit();
 	}
 
-	void removeLast (const int howManyToRemove = 1) throw()
+	void removeLast (int howManyToRemove = 1) throw()
 	{
 		lock.enter();
-		numUsed = jmax (0, numUsed - howManyToRemove);
+
+		if (howManyToRemove > numUsed)
+			howManyToRemove = numUsed;
+
+		for (int i = 0; i < howManyToRemove; ++i)
+			data.elements [numUsed - i].~ElementType();
+
+		numUsed -= howManyToRemove;
 
 		if ((numUsed << 1) < data.numAllocated)
 			minimiseStorageOverheads();
@@ -2395,7 +2517,8 @@ public:
 				if (((unsigned int) newIndex) >= (unsigned int) numUsed)
 					newIndex = numUsed - 1;
 
-				const ElementType value = data.elements [currentIndex];
+				char tempCopy [sizeof (ElementType)];
+				memcpy (tempCopy, data.elements + currentIndex, sizeof (ElementType));
 
 				if (newIndex > currentIndex)
 				{
@@ -2410,7 +2533,7 @@ public:
 							 (currentIndex - newIndex) * sizeof (ElementType));
 				}
 
-				data.elements [newIndex] = value;
+				memcpy (data.elements + newIndex, tempCopy, sizeof (ElementType));
 			}
 
 			lock.exit();
@@ -2438,7 +2561,7 @@ public:
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 		lock.enter();
-		sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, (ElementType*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
 		lock.exit();
 	}
 
@@ -2472,102 +2595,6 @@ private:
 /********* Start of inlined file: juce_BitArray.h *********/
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
 #define __JUCE_BITARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_HeapBlock.h *********/
-#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
-#define __JUCE_HEAPBLOCK_JUCEHEADER__
-
-template <class ElementType>
-class HeapBlock
-{
-public:
-
-	HeapBlock()  : data (0)
-	{
-	}
-
-	HeapBlock (const size_t numElements)
-		: data ((ElementType*) ::juce_malloc (numElements * sizeof (ElementType)))
-	{
-	}
-
-	~HeapBlock()
-	{
-		::juce_free (data);
-	}
-
-	inline operator ElementType*() const					{ return data; }
-
-	inline operator void*() const					   { return (void*) data; }
-
-	inline ElementType* operator->() const				  { return data; }
-
-	template <class CastType>
-	inline operator CastType*() const					   { return (CastType*) data; }
-
-	template <typename IndexType>
-	inline ElementType& operator[] (IndexType index) const		  { return data [index]; }
-
-	template <typename IndexType>
-	inline ElementType* operator+ (IndexType index) const		   { return data + index; }
-
-	inline ElementType** operator&() const				  { return (ElementType**) &data; }
-
-	inline bool operator== (const ElementType* const otherPointer) const	{ return otherPointer == data; }
-
-	inline bool operator!= (const ElementType* const otherPointer) const	{ return otherPointer != data; }
-
-	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
-	{
-		::juce_free (data);
-		data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
-	}
-
-	void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
-	{
-		::juce_free (data);
-		data = (ElementType*) ::juce_calloc (newNumElements * elementSize);
-	}
-
-	void allocate (const size_t newNumElements, const bool initialiseToZero)
-	{
-		::juce_free (data);
-
-		if (initialiseToZero)
-			data = (ElementType*) ::juce_calloc (newNumElements * sizeof (ElementType));
-		else
-			data = (ElementType*) ::juce_malloc (newNumElements * sizeof (ElementType));
-	}
-
-	void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
-	{
-		if (data == 0)
-			data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
-		else
-			data = (ElementType*) ::juce_realloc (data, newNumElements * elementSize);
-	}
-
-	void free()
-	{
-		::juce_free (data);
-		data = 0;
-	}
-
-	void swapWith (HeapBlock <ElementType>& other)
-	{
-		swapVariables (data, other.data);
-	}
-
-private:
-
-	ElementType* data;
-
-	HeapBlock (const HeapBlock&);
-	const HeapBlock& operator= (const HeapBlock&);
-};
-
-#endif   // __JUCE_HEAPBLOCK_JUCEHEADER__
-/********* End of inlined file: juce_HeapBlock.h *********/
 
 class MemoryBlock;
 
@@ -3098,7 +3125,7 @@ public:
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 		lock.enter();
-		insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
+		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
 		lock.exit();
 	}
 
@@ -3292,14 +3319,12 @@ public:
 		}
 	}
 
-	template <class OtherArrayType>
-	void swapWithArray (OtherArrayType& otherArray) throw()
+	void swapWithArray (OwnedArray <ObjectClass>& otherArray) throw()
 	{
 		lock.enter();
 		otherArray.lock.enter();
-		swapVariables <int> (numUsed, otherArray.numUsed);
-		swapVariables <ObjectClass**> (data.elements, otherArray.data.elements);
-		swapVariables <int> (data.numAllocated, otherArray.data.numAllocated);
+		data.swapWith (otherArray.data);
+		swapVariables (numUsed, otherArray.numUsed);
 		otherArray.lock.exit();
 		lock.exit();
 	}
@@ -3326,7 +3351,7 @@ public:
 							// avoids getting warning messages about the parameter being unused
 
 		lock.enter();
-		sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
 		lock.exit();
 	}
 
@@ -3468,7 +3493,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	OwnedArray <String> strings;
+	Array <String> strings;
 };
 
 #endif   // __JUCE_STRINGARRAY_JUCEHEADER__
@@ -4956,7 +4981,7 @@ public:
 					ObjectClass* newObject) throw()
 	{
 		lock.enter();
-		insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
+		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
 		lock.exit();
 	}
 
@@ -4965,7 +4990,7 @@ public:
 							 ObjectClass* newObject) throw()
 	{
 		lock.enter();
-		const int index = findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed);
+		const int index = findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed);
 
 		if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
 			set (index - 1, newObject); // replace an existing object that matches
@@ -5144,7 +5169,7 @@ public:
 							// avoids getting warning messages about the parameter being unused
 
 		lock.enter();
-		sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, (ObjectClass*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
 		lock.exit();
 	}
 

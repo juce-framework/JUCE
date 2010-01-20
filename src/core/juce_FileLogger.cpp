@@ -134,7 +134,8 @@ FileLogger* FileLogger::createDefaultAppLogger (const String& logFileSubDirector
 {
 #if JUCE_MAC
     File logFile ("~/Library/Logs");
-    logFile = logFile.getChildFile (logFileName);
+    logFile = logFile.getChildFile (logFileSubDirectoryName)
+                     .getChildFile (logFileName);
 
 #else
     File logFile (File::getSpecialLocation (File::userApplicationDataDirectory));

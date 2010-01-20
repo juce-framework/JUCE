@@ -40,6 +40,7 @@
   #define kNoViews                  0
   #define kUseDSPCodeDecode         0
 
+  #define WIN32                     1
   #define WINDOWS_VERSION           1
   #define PLUGIN_SDK_BUILD          1
   #define PLUGIN_SDK_DIRECTMIDI     1

@@ -379,7 +379,7 @@ public:
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
         lock.enter();
-        insert (findInsertIndexInSortedArray (comparator, data.elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
         lock.exit();
     }
 
@@ -646,14 +646,12 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    template <class OtherArrayType>
-    void swapWithArray (OtherArrayType& otherArray) throw()
+    void swapWithArray (OwnedArray <ObjectClass>& otherArray) throw()
     {
         lock.enter();
         otherArray.lock.enter();
-        swapVariables <int> (numUsed, otherArray.numUsed);
-        swapVariables <ObjectClass**> (data.elements, otherArray.data.elements);
-        swapVariables <int> (data.numAllocated, otherArray.data.numAllocated);
+        data.swapWith (otherArray.data);
+        swapVariables (numUsed, otherArray.numUsed);
         otherArray.lock.exit();
         lock.exit();
     }
@@ -719,7 +717,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         lock.enter();
-        sortArray (comparator, data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
         lock.exit();
     }
 

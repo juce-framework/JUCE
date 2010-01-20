@@ -1738,7 +1738,11 @@ private:
 
         void timerCallback()
         {
-            if (! regionsNeedingRepaint.isEmpty() && shmCompletedDrawing)
+#if JUCE_USE_XSHM
+            if (! shmCompletedDrawing)
+                return;
+#endif
+            if (! regionsNeedingRepaint.isEmpty())
             {
                 stopTimer();
                 performAnyPendingRepaintsNow();
@@ -1760,13 +1764,23 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
+            if (! shmCompletedDrawing)
+            {
+                startTimer (repaintTimerPeriod);
+                return;
+            }
+
             peer->clearMaskedRegion();
 
-            const Rectangle totalArea (regionsNeedingRepaint.getBounds());
+            RectangleList originalRepaintRegion (regionsNeedingRepaint);
+            regionsNeedingRepaint.clear();
+            const Rectangle totalArea (originalRepaintRegion.getBounds());
 
             if (! totalArea.isEmpty())
             {
+#if JUCE_USE_XSHM
                 shmCompletedDrawing = false;
+#endif
 
                 if (image == 0 || image->getWidth() < totalArea.getWidth()
                      || image->getHeight() < totalArea.getHeight())
@@ -1789,13 +1803,13 @@ private:
 
                 context.setOrigin (-totalArea.getX(), -totalArea.getY());
 
-                if (context.clipToRectangleList (regionsNeedingRepaint))
+                if (context.clipToRectangleList (originalRepaintRegion))
                     peer->handlePaint (context);
 
                 if (! peer->maskedRegion.isEmpty())
-                    regionsNeedingRepaint.subtract (peer->maskedRegion);
+                    originalRepaintRegion.subtract (peer->maskedRegion);
 
-                for (RectangleList::Iterator i (regionsNeedingRepaint); i.next();)
+                for (RectangleList::Iterator i (originalRepaintRegion); i.next();)
                 {
                     const Rectangle& r = *i.getRectangle();
 
@@ -1805,17 +1819,12 @@ private:
                 }
             }
 
-            regionsNeedingRepaint.clear();
-
             lastTimeImageUsed = Time::getApproximateMillisecondCounter();
             startTimer (repaintTimerPeriod);
         }
 
 #if JUCE_USE_XSHM
-        void notifyPaintCompleted()
-        {
-            shmCompletedDrawing = true;
-        }
+        void notifyPaintCompleted()                 { shmCompletedDrawing = true; }
 #endif
 
     private:
@@ -1825,8 +1834,7 @@ private:
         RectangleList regionsNeedingRepaint;
 
 #if JUCE_USE_XSHM
-        bool useARGBImagesForRendering;
-        bool shmCompletedDrawing;
+        bool useARGBImagesForRendering, shmCompletedDrawing;
 #endif
         LinuxRepaintManager (const LinuxRepaintManager&);
         const LinuxRepaintManager& operator= (const LinuxRepaintManager&);
