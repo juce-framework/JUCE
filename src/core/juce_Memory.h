@@ -96,8 +96,9 @@
     */
     #define juce_UseDebuggingNewOperator \
       static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-      static void* operator new (size_t sz, void* p)  { return ::operator new (sz, p); } \
-      static void operator delete (void* p)           { juce_free (p); }
+      static void* operator new (size_t, void* p)     { return p; } \
+      static void operator delete (void* p)           { juce_free (p); } \
+      static void operator delete (void*, void*)      { }
   #endif
 
 #elif defined (JUCE_DLL)
@@ -133,8 +134,9 @@
 
   #define juce_UseDebuggingNewOperator \
     static void* operator new (size_t sz)           { void* const p = juce_malloc ((int) sz); return (p != 0) ? p : ::operator new (sz); } \
-    static void* operator new (size_t sz, void* p)  { return ::operator new (sz, p); } \
-    static void operator delete (void* p)           { juce_free (p); }
+    static void* operator new (size_t, void* p)     { return p; } \
+    static void operator delete (void* p)           { juce_free (p); } \
+    static void operator delete (void*, void*)      { }
 
 #else
 

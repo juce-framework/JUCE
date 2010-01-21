@@ -43,13 +43,13 @@ static Atom specialId;
 static Atom broadcastId;
 static Atom specialCallbackId;
 
-// This is referenced from WindowDriver.cpp
+// This is referenced from Windowing.cpp
 XContext improbableNumber;
 
-// Defined in WindowDriver.cpp
+// Defined in Windowing.cpp
 extern void juce_windowMessageReceive (XEvent* event);
 
-// Defined in ClipboardDriver.cpp
+// Defined in Clipboard.cpp
 extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);
 
 //==============================================================================
