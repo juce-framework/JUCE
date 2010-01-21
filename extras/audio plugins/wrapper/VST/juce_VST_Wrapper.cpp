@@ -1087,7 +1087,7 @@ public:
         // hope so) we'll give it a while and then free it in the timer callback.
         chunkMemoryTime = JUCE_NAMESPACE::Time::getApproximateMillisecondCounter();
 
-        return chunkMemory.getSize();
+        return (VstInt32) chunkMemory.getSize();
     }
 
     VstInt32 setChunk (void* data, VstInt32 byteSize, bool onlyRestoreCurrentProgramData)

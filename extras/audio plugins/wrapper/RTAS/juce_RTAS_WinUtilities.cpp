@@ -51,7 +51,7 @@ void JUCE_CALLTYPE attachSubWindow (void* hostWindow,
     GetClientRect ((HWND) hostWindow, &clientRect);
 
     titleW = clientRect.right - clientRect.left;
-    titleH = jmax (0, (clientRect.bottom - clientRect.top) - comp->getHeight());
+    titleH = jmax (0, (int) (clientRect.bottom - clientRect.top) - comp->getHeight());
     comp->setTopLeftPosition (0, titleH);
 
     comp->addToDesktop (0);

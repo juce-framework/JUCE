@@ -174,7 +174,7 @@ NPError OSCALL NP_Initialize (NPNetscapeFuncs* funcs
         return NPERR_INCOMPATIBLE_VERSION_ERROR;
 
     zerostruct (browser);
-    memcpy (&browser, funcs, jmin (funcs->size, sizeof (browser)));
+    memcpy (&browser, funcs, jmin ((size_t) funcs->size, sizeof (browser)));
 
 #ifdef XP_UNIX
     pluginFuncs->version            = (NP_VERSION_MAJOR << 8) + NP_VERSION_MINOR;
