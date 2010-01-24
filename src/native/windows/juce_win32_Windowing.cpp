@@ -2042,11 +2042,6 @@ private:
 
                     return 0;
 
-                case WM_QUIT:
-                    if (JUCEApplication::getInstance() != 0)
-                        JUCEApplication::getInstance()->systemRequestedQuit();
-                    return 0;
-
                 case WM_QUERYENDSESSION:
                     if (JUCEApplication::getInstance() != 0)
                     {

@@ -130,6 +130,7 @@ static void getMousePos (int& x, int& y, int& mouseMods) throw()
     unsigned int mask;
 
     mouseMods = 0;
+    ScopedXLock xlock;
 
     if (XQueryPointer (display,
                        RootWindow (display, DefaultScreen (display)),
@@ -201,6 +202,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
         }
     }
 
+    ScopedXLock xlock;
     return keyDown (XKeysymToKeycode (display, keysym));
 }
 
@@ -209,6 +211,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 // modifier constants: check what they're mapped to
 static void getModifierMapping() throw()
 {
+    ScopedXLock xlock;
     const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
     const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
 
@@ -325,6 +328,8 @@ static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
 #if JUCE_USE_XSHM
 static bool isShmAvailable() throw()
 {
+    ScopedXLock xlock;
+
     static bool isChecked = false;
     static bool isAvailable = false;
 
@@ -384,6 +389,8 @@ static bool isShmAvailable() throw()
 //==============================================================================
 static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& image)
 {
+    ScopedXLock xlock;
+
     const int width = image.getWidth();
     const int height = image.getHeight();
     HeapBlock <uint32> colour (width * height);
@@ -408,6 +415,8 @@ static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& i
 
 static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& image)
 {
+    ScopedXLock xlock;
+
     const int width = image.getWidth();
     const int height = image.getHeight();
     const int stride = (width + 7) >> 3;
@@ -447,6 +456,7 @@ public:
         pixelStride = (format_ == RGB) ? 3 : 4;
         lineStride = ((w * pixelStride + 3) & ~3);
 
+        ScopedXLock xlock;
         Visual* const visual = DefaultVisual (display, DefaultScreen (display));
 
 #if JUCE_USE_XSHM
@@ -545,6 +555,8 @@ public:
 
     ~XBitmapImage()
     {
+        ScopedXLock xlock;
+
 #if JUCE_USE_XSHM
         if (usingXShm)
         {
@@ -566,6 +578,8 @@ public:
 
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
+        ScopedXLock xlock;
+
         static GC gc = 0;
 
         if (gc == 0)
@@ -688,6 +702,7 @@ public:
     {
         XPointer peer = 0;
 
+        ScopedXLock xlock;
         if (! XFindContext (display, (XID) windowHandle, improbableNumber, &peer))
         {
             if (peer != 0 && ! ((LinuxComponentPeer*) peer)->isValidMessageListener())
@@ -699,6 +714,7 @@ public:
 
     void setVisible (bool shouldBeVisible)
     {
+        ScopedXLock xlock;
         if (shouldBeVisible)
             XMapWindow (display, windowH);
         else
@@ -732,6 +748,8 @@ public:
             wy = y;
             ww = jmax (1, w);
             wh = jmax (1, h);
+
+            ScopedXLock xlock;
 
             // Make sure the Window manager does what we want
             XSizeHints* hints = XAllocSizeHints();
@@ -807,6 +825,7 @@ public:
             clientMsg.message_type = wm_ChangeState;
             clientMsg.data.l[0] = IconicState;
 
+            ScopedXLock xlock;
             XSendEvent (display, root, false,
                         SubstructureRedirectMask | SubstructureNotifyMask,
                         (XEvent*) &clientMsg);
@@ -826,6 +845,7 @@ public:
         Atom actualType;
         int actualFormat;
 
+        ScopedXLock xlock;
         if (XGetWindowProperty (display, windowH, wm_State, 0, 64, False,
                                 wm_State, &actualType, &actualFormat, &nitems, &bytesLeft,
                                 &stateProp) == Success
@@ -871,6 +891,7 @@ public:
         uint32 windowListSize = 0;
         Window parent, root;
 
+        ScopedXLock xlock;
         if (XQueryTree (display, windowH, &root, &parent, &windowList, &windowListSize) != 0)
         {
             if (windowList != 0)
@@ -888,6 +909,7 @@ public:
         uint32 windowListSize = 0;
         bool result = false;
 
+        ScopedXLock xlock;
         Window parent, root = RootWindow (display, DefaultScreen (display));
 
         if (XQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
@@ -945,6 +967,7 @@ public:
         unsigned int bw, depth;
         int wx, wy, w, h;
 
+        ScopedXLock xlock;
         if (! XGetGeometry (display, (::Drawable) windowH, &root,
                             &wx, &wy, (unsigned int*) &w, (unsigned int*) &h,
                             &bw, &depth))
@@ -972,10 +995,13 @@ public:
             if (wasVisible)
                 setVisible (false);  // doesn't always seem to work if the window is visible when this is done..
 
-            XSetWindowAttributes swa;
-            swa.override_redirect = alwaysOnTop ? True : False;
+            {
+                ScopedXLock xlock;
+                XSetWindowAttributes swa;
+                swa.override_redirect = alwaysOnTop ? True : False;
 
-            XChangeWindowAttributes (display, windowH, CWOverrideRedirect, &swa);
+                XChangeWindowAttributes (display, windowH, CWOverrideRedirect, &swa);
+            }
 
             if (wasVisible)
                 setVisible (true);
@@ -1005,18 +1031,21 @@ public:
         ev.xclient.data.l[3] = 0;
         ev.xclient.data.l[4] = 0;
 
-        XSendEvent (display, RootWindow (display, DefaultScreen (display)),
-                    False,
-                    SubstructureRedirectMask | SubstructureNotifyMask,
-                    &ev);
+        {
+            ScopedXLock xlock;
+            XSendEvent (display, RootWindow (display, DefaultScreen (display)),
+                        False,
+                        SubstructureRedirectMask | SubstructureNotifyMask,
+                        &ev);
 
-        XWindowAttributes attr;
-        XGetWindowAttributes (display, windowH, &attr);
+            XWindowAttributes attr;
+            XGetWindowAttributes (display, windowH, &attr);
 
-        if (attr.override_redirect)
-            XRaiseWindow (display, windowH);
+            if (attr.override_redirect)
+                XRaiseWindow (display, windowH);
 
-        XSync (display, False);
+            XSync (display, False);
+        }
 
         handleBroughtToFront();
     }
@@ -1032,6 +1061,7 @@ public:
 
             Window newStack[] = { otherPeer->windowH, windowH };
 
+            ScopedXLock xlock;
             XRestackWindows (display, newStack, 2);
         }
     }
@@ -1040,6 +1070,7 @@ public:
     {
         int revert;
         Window focusedWindow = 0;
+        ScopedXLock xlock;
         XGetInputFocus (display, &focusedWindow, &revert);
 
         return focusedWindow == windowH;
@@ -1048,6 +1079,7 @@ public:
     void grabFocus()
     {
         XWindowAttributes atts;
+        ScopedXLock xlock;
 
         if (windowH != 0
             && XGetWindowAttributes (display, windowH, &atts)
@@ -1092,6 +1124,7 @@ public:
             for (int x = 0; x < newIcon.getWidth(); ++x)
                 data[index++] = newIcon.getPixelAt (x, y).getARGB();
 
+        ScopedXLock xlock;
         XChangeProperty (display, windowH,
                          XInternAtom (display, "_NET_WM_ICON", False),
                          XA_CARDINAL, 32, PropModeReplace,
@@ -1116,6 +1149,7 @@ public:
 
     void deleteIconPixmaps()
     {
+        ScopedXLock xlock;
         XWMHints* wmHints = XGetWMHints (display, windowH);
 
         if (wmHints != 0)
@@ -1144,6 +1178,7 @@ public:
         {
             case 2: // 'KeyPress'
             {
+                ScopedXLock xlock;
                 XKeyEvent* const keyEvent = (XKeyEvent*) &event->xkey;
                 updateKeyStates (keyEvent->keycode, true);
 
@@ -1254,6 +1289,7 @@ public:
                 const XKeyEvent* const keyEvent = (const XKeyEvent*) &event->xkey;
                 updateKeyStates (keyEvent->keycode, false);
 
+                ScopedXLock xlock;
                 KeySym sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
 
                 const int oldMods = currentModifiers;
@@ -1363,7 +1399,11 @@ public:
                         Window wRoot = 0, wParent = 0;
                         Window* wChild = 0;
                         unsigned int numChildren;
-                        XQueryTree (display, windowH, &wRoot, &wParent, &wChild, &numChildren);
+
+                        {
+                            ScopedXLock xlock;
+                            XQueryTree (display, windowH, &wRoot, &wParent, &wChild, &numChildren);
+                        }
 
                         if (wParent != 0
                             && wParent != windowH
@@ -1458,6 +1498,7 @@ public:
                 // Batch together all pending expose events
                 XExposeEvent* exposeEvent = (XExposeEvent*) &event->xexpose;
                 XEvent nextEvent;
+                ScopedXLock xlock;
 
                 if (exposeEvent->window != windowH)
                 {
@@ -1526,7 +1567,11 @@ public:
                 Window wRoot = 0;
                 Window* wChild = 0;
                 unsigned int numChildren;
-                XQueryTree (display, windowH, &wRoot, &parentWindow, &wChild, &numChildren);
+
+                {
+                    ScopedXLock xlock;
+                    XQueryTree (display, windowH, &wRoot, &parentWindow, &wChild, &numChildren);
+                }
 
                 if (parentWindow == windowH || parentWindow == wRoot)
                     parentWindow = 0;
@@ -1553,6 +1598,7 @@ public:
                 if (mappingEvent->request != MappingPointer)
                 {
                     // Deal with modifier/keyboard mapping
+                    ScopedXLock xlock;
                     XRefreshKeyboardMapping (mappingEvent);
                     getModifierMapping();
                 }
@@ -1572,6 +1618,7 @@ public:
                     {
                         XWindowAttributes atts;
 
+                        ScopedXLock xlock;
                         if (clientMsg->window != 0
                              && XGetWindowAttributes (display, clientMsg->window, &atts))
                         {
@@ -1622,8 +1669,11 @@ public:
 
             default:
 #if JUCE_USE_XSHM
+            {
+                ScopedXLock xlock;
                 if (event->xany.type == XShmGetEventBase (display))
                     repainter->notifyPaintCompleted();
+            }
 #endif
                 break;
         }
@@ -1631,12 +1681,14 @@ public:
 
     void showMouseCursor (Cursor cursor) throw()
     {
+        ScopedXLock xlock;
         XDefineCursor (display, windowH, cursor);
     }
 
     //==============================================================================
     void setTaskBarIcon (const Image& image)
     {
+        ScopedXLock xlock;
         deleteTaskBarIcon();
         taskbarImage = image.createCopy();
 
@@ -1720,6 +1772,7 @@ private:
 
             if (useARGBImagesForRendering)
             {
+                ScopedXLock xlock;
                 XShmSegmentInfo segmentinfo;
 
                 XImage* const testImage
@@ -1764,11 +1817,13 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
+#if JUCE_USE_XSHM
             if (! shmCompletedDrawing)
             {
                 startTimer (repaintTimerPeriod);
                 return;
             }
+#endif
 
             peer->clearMaskedRegion();
 
@@ -1870,6 +1925,7 @@ private:
             motifHints.flags = 2; /* MWM_HINTS_DECORATIONS */
             motifHints.decorations = 0;
 
+            ScopedXLock xlock;
             XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
                              (unsigned char*) &motifHints, 4);
         }
@@ -1880,6 +1936,7 @@ private:
         {
             long gnomeHints = 0;
 
+            ScopedXLock xlock;
             XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
                              (unsigned char*) &gnomeHints, 1);
         }
@@ -1890,6 +1947,7 @@ private:
         {
             long kwmHints = 2; /*KDE_tinyDecoration*/
 
+            ScopedXLock xlock;
             XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
                              (unsigned char*) &kwmHints, 1);
         }
@@ -1898,6 +1956,7 @@ private:
 
         if (hints != None)
         {
+            ScopedXLock xlock;
             int netHints [2];
             int numHints = 0;
             if ((styleFlags & windowIsTemporary) != 0)
@@ -1920,6 +1979,7 @@ private:
 
     void addWindowButtons (Window wndH)
     {
+        ScopedXLock xlock;
         Atom hints = XInternAtom (display, "_MOTIF_WM_HINTS", True);
 
         if (hints != None)
@@ -1975,6 +2035,7 @@ private:
 
     void createWindow()
     {
+        ScopedXLock xlock;
         static bool atomsInitialised = false;
 
         if (! atomsInitialised)
@@ -2173,6 +2234,8 @@ private:
 
     void destroyWindow()
     {
+        ScopedXLock xlock;
+
         XPointer handlePointer;
         if (! XFindContext (display, (XID) windowH, improbableNumber, &handlePointer))
             XDeleteContext (display, (XID) windowH, improbableNumber);
@@ -2203,6 +2266,7 @@ private:
     {
         XTextProperty nameProperty;
         char* strings[] = { (char*) title };
+        ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))
         {
@@ -2221,6 +2285,7 @@ private:
         }
         else if (windowBorder.getTopAndBottom() == 0 && windowBorder.getLeftAndRight() == 0)
         {
+            ScopedXLock xlock;
             Atom hints = XInternAtom (display, "_NET_FRAME_EXTENTS", True);
 
             if (hints != None)
@@ -2253,6 +2318,7 @@ private:
         {
             Window root, child;
             unsigned int bw, depth;
+            ScopedXLock xlock;
 
             if (! XGetGeometry (display, (::Drawable) windowH, &root,
                                 &wx, &wy, (unsigned int*) &ww, (unsigned int*) &wh,
@@ -2285,6 +2351,7 @@ private:
         msg.format = 32;
         msg.data.l[0] = windowH;
 
+        ScopedXLock xlock;
         XSendEvent (display, dragAndDropSourceWindow, False, 0, (XEvent*) &msg);
     }
 
@@ -2404,6 +2471,7 @@ private:
             unsigned long count = 0, remaining = 0;
             unsigned char* data = 0;
 
+            ScopedXLock xlock;
             XGetWindowProperty (display, dragAndDropSourceWindow, XA_XdndTypeList,
                                 0, 0x8000000L, False, XA_ATOM, &actual, &format,
                                 &count, &remaining, &data);
@@ -2461,6 +2529,7 @@ private:
                     uint8* data = 0;
                     unsigned long count = 0, remaining = 0;
                     int format = 0;
+                    ScopedXLock xlock;
 
                     if (XGetWindowProperty (display, evt->xany.window, evt->xselection.property,
                                             dropData.getSize() / 4, 65536, 1, AnyPropertyType, &actual,
@@ -2499,6 +2568,7 @@ private:
         {
             dragAndDropTimestamp = clientMsg->data.l[2];
 
+            ScopedXLock xlock;
             XConvertSelection (display,
                                XA_XdndSelection,
                                dragAndDropCurrentMimeType,
@@ -2570,6 +2640,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
 #if JUCE_USE_XINERAMA
     int major_opcode, first_event, first_error;
 
+    ScopedXLock xlock;
     if (XQueryExtension (display, "XINERAMA", &major_opcode, &first_event, &first_error))
     {
         typedef Bool (*tXineramaIsActive) (Display*);
@@ -2675,6 +2746,7 @@ void Desktop::getMousePosition (int& x, int& y) throw()
 
 void Desktop::setMousePosition (int x, int y) throw()
 {
+    ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));
     XWarpPointer (display, None, root, 0, 0, 0, 0, x, y);
 }
@@ -2700,6 +2772,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
                 xScreenSaverSuspend = (tXScreenSaverSuspend) dlsym (h, "XScreenSaverSuspend");
         }
 
+        ScopedXLock xlock;
         if (xScreenSaverSuspend != 0)
             xScreenSaverSuspend (display, ! isEnabled);
     }
@@ -2713,6 +2786,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 //==============================================================================
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
+    ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));
     const unsigned int imageW = image.getWidth();
     const unsigned int imageH = image.getHeight();
@@ -2779,6 +2853,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
 
 void juce_deleteMouseCursor (void* const cursorHandle, const bool) throw()
 {
+    ScopedXLock xlock;
     if (cursorHandle != None)
         XFreeCursor (display, (Cursor) cursorHandle);
 }
@@ -2889,6 +2964,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
             return (void*) None; // Use parent cursor
     }
 
+    ScopedXLock xlock;
     return (void*) XCreateFontCursor (display, shape);
 }
 
@@ -2938,6 +3014,7 @@ public:
         if (peer == 0)
             return;
 
+        ScopedXLock xlock;
         XSync (display, False);
 
         GLint attribs [64];
@@ -3005,6 +3082,7 @@ public:
     {
         makeInactive();
 
+        ScopedXLock xlock;
         glXDestroyContext (display, renderContext);
 
         XUnmapWindow (display, embeddedWindow);
@@ -3015,17 +3093,20 @@ public:
     {
         jassert (renderContext != 0);
 
+        ScopedXLock xlock;
         return glXMakeCurrent (display, embeddedWindow, renderContext)
                 && XSync (display, False);
     }
 
     bool makeInactive() const throw()
     {
+        ScopedXLock xlock;
         return (! isActive()) || glXMakeCurrent (display, None, 0);
     }
 
     bool isActive() const throw()
     {
+        ScopedXLock xlock;
         return glXGetCurrentContext() == renderContext;
     }
 
@@ -3041,12 +3122,14 @@ public:
 
     void updateWindowPosition (int x, int y, int w, int h, int)
     {
+        ScopedXLock xlock;
         XMoveResizeWindow (display, embeddedWindow,
                            x, y, jmax (1, w), jmax (1, h));
     }
 
     void swapBuffers()
     {
+        ScopedXLock xlock;
         glXSwapBuffers (display, embeddedWindow);
     }
 

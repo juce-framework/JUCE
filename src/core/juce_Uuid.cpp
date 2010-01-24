@@ -76,9 +76,7 @@ Uuid::Uuid (const Uuid& other)
 
 Uuid& Uuid::operator= (const Uuid& other)
 {
-    if (this != &other)
-        value = other.value;
-
+    value = other.value;
     return *this;
 }
 

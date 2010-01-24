@@ -1474,7 +1474,7 @@ class HeapBlock
 {
 public:
 
-	HeapBlock()  : data (0)
+	HeapBlock() throw() : data (0)
 	{
 	}
 
@@ -1488,26 +1488,26 @@ public:
 		::juce_free (data);
 	}
 
-	inline operator ElementType*() const					{ return data; }
+	inline operator ElementType*() const throw()				{ return data; }
 
-	inline operator void*() const					   { return (void*) data; }
+	inline operator void*() const throw()				   { return (void*) data; }
 
-	inline ElementType* operator->() const				  { return data; }
+	inline ElementType* operator->() const  throw()			 { return data; }
 
 	template <class CastType>
-	inline operator CastType*() const					   { return (CastType*) data; }
+	inline operator CastType*() const throw()				   { return (CastType*) data; }
 
 	template <typename IndexType>
-	inline ElementType& operator[] (IndexType index) const		  { return data [index]; }
+	inline ElementType& operator[] (IndexType index) const throw()	  { return data [index]; }
 
 	template <typename IndexType>
-	inline ElementType* operator+ (IndexType index) const		   { return data + index; }
+	inline ElementType* operator+ (IndexType index) const throw()	   { return data + index; }
 
-	inline ElementType** operator&() const				  { return (ElementType**) &data; }
+	inline ElementType** operator&() const throw()			  { return (ElementType**) &data; }
 
-	inline bool operator== (const ElementType* const otherPointer) const	{ return otherPointer == data; }
+	inline bool operator== (const ElementType* const otherPointer) const throw()	{ return otherPointer == data; }
 
-	inline bool operator!= (const ElementType* const otherPointer) const	{ return otherPointer != data; }
+	inline bool operator!= (const ElementType* const otherPointer) const throw()	{ return otherPointer != data; }
 
 	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
@@ -1545,7 +1545,7 @@ public:
 		data = 0;
 	}
 
-	void swapWith (HeapBlock <ElementType>& other)
+	void swapWith (HeapBlock <ElementType>& other) throw()
 	{
 		swapVariables (data, other.data);
 	}
@@ -1588,19 +1588,19 @@ public:
 		}
 	}
 
-	void ensureAllocatedSize (int minNumElements)
+	void ensureAllocatedSize (const int minNumElements)
 	{
 		if (minNumElements > numAllocated)
 			setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
 	}
 
-	void shrinkToNoMoreThan (int maxNumElements)
+	void shrinkToNoMoreThan (const int maxNumElements)
 	{
 		if (maxNumElements < numAllocated)
 			setAllocatedSize (maxNumElements);
 	}
 
-	void swapWith (ArrayAllocationBase <ElementType>& other)
+	void swapWith (ArrayAllocationBase <ElementType>& other) throw()
 	{
 		elements.swapWith (other.elements);
 		swapVariables (numAllocated, other.numAllocated);
@@ -1873,7 +1873,8 @@ public:
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
 /********* End of inlined file: juce_CriticalSection.h *********/
 
-template <class ElementType, class TypeOfCriticalSectionToUse = DummyCriticalSection>
+template <typename ElementType,
+		  typename TypeOfCriticalSectionToUse = DummyCriticalSection>
 class Array
 {
 public:
@@ -1883,7 +1884,7 @@ public:
 	{
 	}
 
-	Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other) throw()
+	Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other)
 	{
 		other.lockArray();
 		numUsed = other.numUsed;
@@ -1895,14 +1896,14 @@ public:
 		other.unlockArray();
 	}
 
-	Array (const ElementType* values) throw()
+	explicit Array (const ElementType* values)
 	   : numUsed (0)
 	{
 		while (*values != 0)
 			add (*values++);
 	}
 
-	Array (const ElementType* values, int numValues) throw()
+	Array (const ElementType* values, int numValues)
 	   : numUsed (numValues)
 	{
 		data.setAllocatedSize (numValues);
@@ -1911,50 +1912,25 @@ public:
 			new (data.elements + i) ElementType (values[i]);
 	}
 
-	~Array() throw()
+	~Array()
 	{
 		for (int i = 0; i < numUsed; ++i)
 			data.elements[i].~ElementType();
 	}
 
-	const Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+	Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other)
 	{
 		if (this != &other)
 		{
-			other.lockArray();
-			lock.enter();
-
-			if (other.size() > numUsed)
-			{
-				data.ensureAllocatedSize (other.size());
-
-				int i = 0;
-				for (; i < numUsed; ++i)
-					data.elements[i] = other.data.elements[i];
-
-				numUsed = other.size();
-				for (; i < numUsed; ++i)
-					new (data.elements + i) ElementType (other.data.elements[i]);
-			}
-			else
-			{
-				numUsed = other.size();
-
-				for (int i = 0; i < numUsed; ++i)
-					data.elements[i] = other.data.elements[i];
-
-				minimiseStorageOverheads();
-			}
-
-			lock.exit();
-			other.unlockArray();
+			Array<ElementType, TypeOfCriticalSectionToUse> otherCopy (other);
+			swapWithArray (otherCopy);
 		}
 
 		return *this;
 	}
 
 	template <class OtherArrayType>
-	bool operator== (const OtherArrayType& other) const throw()
+	bool operator== (const OtherArrayType& other) const
 	{
 		lock.enter();
 
@@ -1978,12 +1954,12 @@ public:
 	}
 
 	template <class OtherArrayType>
-	bool operator!= (const OtherArrayType& other) const throw()
+	bool operator!= (const OtherArrayType& other) const
 	{
 		return ! operator== (other);
 	}
 
-	void clear() throw()
+	void clear()
 	{
 		lock.enter();
 
@@ -1995,7 +1971,7 @@ public:
 		lock.exit();
 	}
 
-	void clearQuick() throw()
+	void clearQuick()
 	{
 		lock.enter();
 
@@ -2011,22 +1987,22 @@ public:
 		return numUsed;
 	}
 
-	inline ElementType operator[] (const int index) const throw()
+	inline ElementType operator[] (const int index) const
 	{
 		lock.enter();
-		const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
+		const ElementType result ((((unsigned int) index) < (unsigned int) numUsed)
 										? data.elements [index]
-										: ElementType();
+										: ElementType());
 		lock.exit();
 
 		return result;
 	}
 
-	inline ElementType getUnchecked (const int index) const throw()
+	inline const ElementType getUnchecked (const int index) const
 	{
 		lock.enter();
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		const ElementType result = data.elements [index];
+		const ElementType result (data.elements [index]);
 		lock.exit();
 
 		return result;
@@ -2041,27 +2017,27 @@ public:
 		return result;
 	}
 
-	inline ElementType getFirst() const throw()
+	inline ElementType getFirst() const
 	{
 		lock.enter();
-		const ElementType result = (numUsed > 0) ? data.elements [0]
-												 : ElementType();
+		const ElementType result ((numUsed > 0) ? data.elements [0]
+												: ElementType());
 		lock.exit();
 
 		return result;
 	}
 
-	inline ElementType getLast() const throw()
+	inline ElementType getLast() const
 	{
 		lock.enter();
-		const ElementType result = (numUsed > 0) ? data.elements [numUsed - 1]
-												 : ElementType();
+		const ElementType result ((numUsed > 0) ? data.elements [numUsed - 1]
+												: ElementType());
 		lock.exit();
 
 		return result;
 	}
 
-	int indexOf (const ElementType elementToLookFor) const throw()
+	int indexOf (const ElementType& elementToLookFor) const
 	{
 		int result = -1;
 
@@ -2083,27 +2059,12 @@ public:
 		return result;
 	}
 
-	bool contains (const ElementType elementToLookFor) const throw()
+	bool contains (const ElementType& elementToLookFor) const
 	{
 		lock.enter();
 
 		const ElementType* e = data.elements;
 		int num = numUsed;
-
-		while (num >= 4)
-		{
-			if (*e == elementToLookFor
-				 || *++e == elementToLookFor
-				 || *++e == elementToLookFor
-				 || *++e == elementToLookFor)
-			{
-				lock.exit();
-				return true;
-			}
-
-			num -= 4;
-			++e;
-		}
 
 		while (num > 0)
 		{
@@ -2121,7 +2082,7 @@ public:
 		return false;
 	}
 
-	void add (const ElementType newElement) throw()
+	void add (const ElementType& newElement)
 	{
 		lock.enter();
 		data.ensureAllocatedSize (numUsed + 1);
@@ -2129,7 +2090,7 @@ public:
 		lock.exit();
 	}
 
-	void insert (int indexToInsertAt, const ElementType newElement) throw()
+	void insert (int indexToInsertAt, const ElementType& newElement)
 	{
 		lock.enter();
 		data.ensureAllocatedSize (numUsed + 1);
@@ -2153,8 +2114,8 @@ public:
 		lock.exit();
 	}
 
-	void insertMultiple (int indexToInsertAt, const ElementType newElement,
-						 int numberOfTimesToInsertIt) throw()
+	void insertMultiple (int indexToInsertAt, const ElementType& newElement,
+						 int numberOfTimesToInsertIt)
 	{
 		if (numberOfTimesToInsertIt > 0)
 		{
@@ -2184,7 +2145,7 @@ public:
 
 	void insertArray (int indexToInsertAt,
 					  const ElementType* newElements,
-					  int numberOfElements) throw()
+					  int numberOfElements)
 	{
 		if (numberOfElements > 0)
 		{
@@ -2212,7 +2173,7 @@ public:
 		}
 	}
 
-	void addIfNotAlreadyThere (const ElementType newElement) throw()
+	void addIfNotAlreadyThere (const ElementType& newElement)
 	{
 		lock.enter();
 
@@ -2222,8 +2183,7 @@ public:
 		lock.exit();
 	}
 
-	void set (const int indexToChange,
-			  const ElementType newValue) throw()
+	void set (const int indexToChange, const ElementType& newValue)
 	{
 		jassert (indexToChange >= 0);
 
@@ -2242,8 +2202,7 @@ public:
 		lock.exit();
 	}
 
-	void setUnchecked (const int indexToChange,
-					   const ElementType newValue) throw()
+	void setUnchecked (const int indexToChange, const ElementType& newValue)
 	{
 		lock.enter();
 		jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
@@ -2251,8 +2210,7 @@ public:
 		lock.exit();
 	}
 
-	void addArray (const ElementType* elementsToAdd,
-				   int numElementsToAdd) throw()
+	void addArray (const ElementType* elementsToAdd, int numElementsToAdd)
 	{
 		lock.enter();
 
@@ -2280,7 +2238,7 @@ public:
 	template <class OtherArrayType>
 	void addArray (const OtherArrayType& arrayToAddFrom,
 				   int startIndex = 0,
-				   int numElementsToAdd = -1) throw()
+				   int numElementsToAdd = -1)
 	{
 		arrayToAddFrom.lockArray();
 		lock.enter();
@@ -2302,8 +2260,7 @@ public:
 	}
 
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator,
-					const ElementType newElement) throw()
+	void addSorted (ElementComparator& comparator, const ElementType& newElement)
 	{
 		lock.enter();
 		insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
@@ -2311,8 +2268,7 @@ public:
 	}
 
 	template <class ElementComparator>
-	int indexOfSorted (ElementComparator& comparator,
-					   const ElementType elementToLookFor) const throw()
+	int indexOfSorted (ElementComparator& comparator, const ElementType& elementToLookFor) const
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
@@ -2350,7 +2306,7 @@ public:
 		}
 	}
 
-	ElementType remove (const int indexToRemove) throw()
+	ElementType remove (const int indexToRemove)
 	{
 		lock.enter();
 
@@ -2379,7 +2335,7 @@ public:
 		}
 	}
 
-	void removeValue (const ElementType valueToRemove) throw()
+	void removeValue (const ElementType& valueToRemove)
 	{
 		lock.enter();
 		ElementType* e = data.elements;
@@ -2398,8 +2354,7 @@ public:
 		lock.exit();
 	}
 
-	void removeRange (int startIndex,
-					  int numberToRemove) throw()
+	void removeRange (int startIndex, int numberToRemove)
 	{
 		lock.enter();
 		const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -2426,7 +2381,7 @@ public:
 		lock.exit();
 	}
 
-	void removeLast (int howManyToRemove = 1) throw()
+	void removeLast (int howManyToRemove = 1)
 	{
 		lock.enter();
 
@@ -2445,7 +2400,7 @@ public:
 	}
 
 	template <class OtherArrayType>
-	void removeValuesIn (const OtherArrayType& otherArray) throw()
+	void removeValuesIn (const OtherArrayType& otherArray)
 	{
 		otherArray.lockArray();
 		lock.enter();
@@ -2469,7 +2424,7 @@ public:
 	}
 
 	template <class OtherArrayType>
-	void removeValuesNotIn (const OtherArrayType& otherArray) throw()
+	void removeValuesNotIn (const OtherArrayType& otherArray)
 	{
 		otherArray.lockArray();
 		lock.enter();
@@ -2493,7 +2448,7 @@ public:
 	}
 
 	void swap (const int index1,
-			   const int index2) throw()
+			   const int index2)
 	{
 		lock.enter();
 
@@ -2507,8 +2462,7 @@ public:
 		lock.exit();
 	}
 
-	void move (const int currentIndex,
-			   int newIndex) throw()
+	void move (const int currentIndex, int newIndex) throw()
 	{
 		if (currentIndex != newIndex)
 		{
@@ -2542,14 +2496,14 @@ public:
 		}
 	}
 
-	void minimiseStorageOverheads() throw()
+	void minimiseStorageOverheads()
 	{
 		lock.enter();
 		data.shrinkToNoMoreThan (numUsed);
 		lock.exit();
 	}
 
-	void ensureStorageAllocated (const int minNumElements) throw()
+	void ensureStorageAllocated (const int minNumElements)
 	{
 		lock.enter();
 		data.ensureAllocatedSize (minNumElements);
@@ -2558,7 +2512,7 @@ public:
 
 	template <class ElementComparator>
 	void sort (ElementComparator& comparator,
-			   const bool retainOrderOfEquivalentItems = false) const throw()
+			   const bool retainOrderOfEquivalentItems = false) const
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
@@ -2616,7 +2570,7 @@ public:
 
 	~BitArray() throw();
 
-	const BitArray& operator= (const BitArray& other) throw();
+	BitArray& operator= (const BitArray& other) throw();
 
 	bool operator== (const BitArray& other) const throw();
 	bool operator!= (const BitArray& other) const throw();
@@ -2741,7 +2695,7 @@ public:
 
 	~MemoryBlock() throw();
 
-	const MemoryBlock& operator= (const MemoryBlock& other) throw();
+	MemoryBlock& operator= (const MemoryBlock& other) throw();
 
 	bool operator== (const MemoryBlock& other) const throw();
 
@@ -2822,22 +2776,22 @@ class JUCE_API  ScopedPointer
 {
 public:
 
-	inline ScopedPointer()  : object (0)
+	inline ScopedPointer() throw()  : object (0)
 	{
 	}
 
-	inline ScopedPointer (ObjectType* const objectToTakePossessionOf)
+	inline ScopedPointer (ObjectType* const objectToTakePossessionOf) throw()
 		: object (objectToTakePossessionOf)
 	{
 	}
 
-	ScopedPointer (ScopedPointer& objectToTransferFrom)
+	ScopedPointer (ScopedPointer& objectToTransferFrom) throw()
 		: object (objectToTransferFrom.object)
 	{
 		objectToTransferFrom.object = 0;
 	}
 
-	inline ~ScopedPointer()						 { delete object; }
+	inline ~ScopedPointer()							 { delete object; }
 
 	const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
 	{
@@ -2868,24 +2822,24 @@ public:
 		return *this;
 	}
 
-	inline operator ObjectType*() const					 { return object; }
+	inline operator ObjectType*() const throw()					 { return object; }
 
-	inline ObjectType& operator*() const					{ return *object; }
+	inline ObjectType& operator*() const throw()					{ return *object; }
 
-	inline ObjectType* operator->() const				   { return object; }
+	inline ObjectType* operator->() const throw()				   { return object; }
 
 	template <class CastType>
-	inline operator CastType*() const					   { return static_cast <CastType*> (object); }
+	inline operator CastType*() const throw()					   { return static_cast <CastType*> (object); }
 
-	inline ObjectType** operator&() const				   { return (ObjectType**) &object; }
+	inline ObjectType** operator&() const throw()				   { return (ObjectType**) &object; }
 
-	ObjectType* release()						   { ObjectType* const o = object; object = 0; return o; }
+	ObjectType* release() throw()						   { ObjectType* const o = object; object = 0; return o; }
 
-	inline bool operator== (const ObjectType* const otherPointer) const	 { return otherPointer == object; }
+	inline bool operator== (const ObjectType* const otherPointer) const throw()	 { return otherPointer == object; }
 
-	inline bool operator!= (const ObjectType* const otherPointer) const	 { return otherPointer != object; }
+	inline bool operator!= (const ObjectType* const otherPointer) const throw()	 { return otherPointer != object; }
 
-	void swapWith (ScopedPointer <ObjectType>& other)
+	void swapWith (ScopedPointer <ObjectType>& other) throw()
 	{
 		// Two ScopedPointers should never be able to refer to the same object - if
 		// this happens, you must have done something dodgy!
@@ -2899,7 +2853,7 @@ private:
 	ObjectType* object;
 
 	// (Required as an alternative to the overloaded & operator).
-	ScopedPointer* getAddress()						 { return this; }
+	ScopedPointer* getAddress() const throw()					   { return this; }
 };
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
@@ -3409,88 +3363,85 @@ public:
 
 	StringArray() throw();
 
-	StringArray (const StringArray& other) throw();
+	StringArray (const StringArray& other);
 
 	StringArray (const juce_wchar** const strings,
-				 const int numberOfStrings) throw();
+				 const int numberOfStrings);
 
 	StringArray (const char** const strings,
-				 const int numberOfStrings) throw();
+				 const int numberOfStrings);
 
-	StringArray (const juce_wchar** const strings) throw();
+	explicit StringArray (const juce_wchar** const strings);
 
-	StringArray (const char** const strings) throw();
+	explicit StringArray (const char** const strings);
 
-	virtual ~StringArray() throw();
+	~StringArray();
 
-	const StringArray& operator= (const StringArray& other) throw();
+	const StringArray& operator= (const StringArray& other);
 
-	bool operator== (const StringArray& other) const throw();
+	bool operator== (const StringArray& other) const;
 
-	bool operator!= (const StringArray& other) const throw();
+	bool operator!= (const StringArray& other) const;
 
 	inline int size() const throw()					 { return strings.size(); };
 
 	const String& operator[] (const int index) const throw();
 
 	bool contains (const String& stringToLookFor,
-				   const bool ignoreCase = false) const throw();
+				   const bool ignoreCase = false) const;
 
 	int indexOf (const String& stringToLookFor,
 				 const bool ignoreCase = false,
-				 int startIndex = 0) const throw();
+				 int startIndex = 0) const;
 
-	void add (const String& stringToAdd) throw();
+	void add (const String& stringToAdd);
 
-	void insert (const int index,
-				 const String& stringToAdd) throw();
+	void insert (const int index, const String& stringToAdd);
 
-	void addIfNotAlreadyThere (const String& stringToAdd,
-							   const bool ignoreCase = false) throw();
+	void addIfNotAlreadyThere (const String& stringToAdd, const bool ignoreCase = false);
 
-	void set (const int index,
-			  const String& newString) throw();
+	void set (const int index, const String& newString);
 
 	void addArray (const StringArray& other,
 				   int startIndex = 0,
-				   int numElementsToAdd = -1) throw();
+				   int numElementsToAdd = -1);
 
 	int addTokens (const tchar* const stringToTokenise,
-				   const bool preserveQuotedStrings) throw();
+				   const bool preserveQuotedStrings);
 
 	int addTokens (const tchar* const stringToTokenise,
 				   const tchar* breakCharacters,
-				   const tchar* quoteCharacters) throw();
+				   const tchar* quoteCharacters);
 
-	int addLines (const tchar* stringToBreakUp) throw();
+	int addLines (const tchar* stringToBreakUp);
 
-	void clear() throw();
+	void clear();
 
-	void remove (const int index) throw();
+	void remove (const int index);
 
 	void removeString (const String& stringToRemove,
-					   const bool ignoreCase = false) throw();
+					   const bool ignoreCase = false);
 
-	void removeDuplicates (const bool ignoreCase) throw();
+	void removeDuplicates (const bool ignoreCase);
 
-	void removeEmptyStrings (const bool removeWhitespaceStrings = true) throw();
+	void removeEmptyStrings (const bool removeWhitespaceStrings = true);
 
 	void move (const int currentIndex, int newIndex) throw();
 
-	void trim() throw();
+	void trim();
 
 	void appendNumbersToDuplicates (const bool ignoreCaseWhenComparing,
 									const bool appendNumberToFirstInstance,
 									const tchar* const preNumberString = defaultPreNumberString,
-									const tchar* const postNumberString = defaultPostNumberString) throw();
+									const tchar* const postNumberString = defaultPostNumberString);
 
 	const String joinIntoString (const String& separatorString,
 								 int startIndex = 0,
-								 int numberOfElements = -1) const throw();
+								 int numberOfElements = -1) const;
 
-	void sort (const bool ignoreCase) throw();
+	void sort (const bool ignoreCase);
 
-	void minimiseStorageOverheads() throw();
+	void minimiseStorageOverheads();
 
 	juce_UseDebuggingNewOperator
 
@@ -4739,26 +4690,12 @@ public:
 		other.unlockArray();
 	}
 
-	const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+	ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
 	{
 		if (this != &other)
 		{
-			other.lockArray();
-			lock.enter();
-
-			clear();
-
-			data.ensureAllocatedSize (other.numUsed);
-			numUsed = other.numUsed;
-			memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
-			minimiseStorageOverheads();
-
-			for (int i = numUsed; --i >= 0;)
-				if (data.elements[i] != 0)
-					data.elements[i]->incReferenceCount();
-
-			lock.exit();
-			other.unlockArray();
+			ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
+			swapWithArray (other);
 		}
 
 		return *this;
@@ -5133,6 +5070,16 @@ public:
 		}
 	}
 
+	void swapWithArray (ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& otherArray) throw()
+	{
+		lock.enter();
+		otherArray.lock.enter();
+		data.swapWith (otherArray.data);
+		swapVariables (numUsed, otherArray.numUsed);
+		otherArray.lock.exit();
+		lock.exit();
+	}
+
 	bool operator== (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
 	{
 		other.lockArray();
@@ -5244,7 +5191,7 @@ public:
 	{
 	}
 
-	const SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+	SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
 	{
 		if (this != &other)
 		{
@@ -5918,33 +5865,35 @@ public:
 
 	~var();
 
-	var (const var& valueToCopy) throw();
+	var (const var& valueToCopy);
 	var (const int value) throw();
 	var (const bool value) throw();
 	var (const double value) throw();
-	var (const char* const value) throw();
-	var (const juce_wchar* const value) throw();
-	var (const String& value) throw();
-	var (DynamicObject* const object) throw();
+	var (const char* const value);
+	var (const juce_wchar* const value);
+	var (const String& value);
+	var (DynamicObject* const object);
 	var (MethodFunction method) throw();
 
-	const var& operator= (const var& valueToCopy) throw();
-	const var& operator= (const int value) throw();
-	const var& operator= (const bool value) throw();
-	const var& operator= (const double value) throw();
-	const var& operator= (const char* const value) throw();
-	const var& operator= (const juce_wchar* const value) throw();
-	const var& operator= (const String& value) throw();
-	const var& operator= (DynamicObject* const object) throw();
-	const var& operator= (MethodFunction method) throw();
+	var& operator= (const var& valueToCopy);
+	var& operator= (int value);
+	var& operator= (bool value);
+	var& operator= (double value);
+	var& operator= (const char* value);
+	var& operator= (const juce_wchar* value);
+	var& operator= (const String& value);
+	var& operator= (DynamicObject* object);
+	var& operator= (MethodFunction method);
 
-	operator int() const throw();
-	operator bool() const throw();
-	operator float() const throw();
-	operator double() const throw();
-	operator const String() const throw();
-	const String toString() const throw();
-	DynamicObject* getObject() const throw();
+	void swapWith (var& other) throw();
+
+	operator int() const;
+	operator bool() const;
+	operator float() const;
+	operator double() const;
+	operator const String() const;
+	const String toString() const;
+	DynamicObject* getObject() const;
 
 	bool isVoid() const throw()	 { return type == voidType; }
 	bool isInt() const throw()	  { return type == intType; }
@@ -5957,16 +5906,16 @@ public:
 	bool operator== (const var& other) const throw();
 	bool operator!= (const var& other) const throw();
 
-	void writeToStream (OutputStream& output) const throw();
+	void writeToStream (OutputStream& output) const;
 
-	static const var readFromStream (InputStream& input) throw();
+	static const var readFromStream (InputStream& input);
 
 	class JUCE_API  identifier
 	{
 	public:
-		identifier (const char* const name) throw();
-		identifier (const String& name) throw();
-		~identifier() throw();
+		identifier (const char* const name);
+		identifier (const String& name);
+		~identifier();
 
 		bool operator== (const identifier& other) const throw()
 		{
@@ -5978,7 +5927,7 @@ public:
 		int hashCode;
 	};
 
-	const var operator[] (const identifier& propertyName) const throw();
+	const var operator[] (const identifier& propertyName) const;
 
 	const var call (const identifier& method) const;
 	const var call (const identifier& method, const var& arg1) const;
@@ -6005,9 +5954,7 @@ private:
 		methodType
 	};
 
-	Type type;
-
-	union
+	union ValueUnion
 	{
 		int intValue;
 		bool boolValue;
@@ -6015,9 +5962,10 @@ private:
 		String* stringValue;
 		DynamicObject* objectValue;
 		MethodFunction methodValue;
-	} value;
+	};
 
-	void releaseValue() throw();
+	Type type;
+	ValueUnion value;
 };
 
 class JUCE_API  DynamicObject  : public ReferenceCountedObject
@@ -6857,6 +6805,18 @@ private:
 
 	ScopedAutoReleasePool (const ScopedAutoReleasePool&);
 	const ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
+};
+
+#endif
+
+#if JUCE_LINUX
+
+class ScopedXLock
+{
+public:
+	ScopedXLock();
+
+	~ScopedXLock();
 };
 
 #endif
@@ -16815,7 +16775,7 @@ public:
 
 	MidiMessageSequence (const MidiMessageSequence& other);
 
-	const MidiMessageSequence& operator= (const MidiMessageSequence& other);
+	MidiMessageSequence& operator= (const MidiMessageSequence& other);
 
 	~MidiMessageSequence();
 
@@ -16884,6 +16844,8 @@ public:
 	void createControllerUpdatesForTime (const int channelNumber,
 										 const double time,
 										 OwnedArray<MidiMessage>& resultMessages);
+
+	void swapWith (MidiMessageSequence& other) throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -22577,6 +22539,11 @@ public:
 	~FileChooserDialogBox();
 
 	bool show (int width = 0,int height = 0);
+
+	enum ColourIds
+	{
+		titleTextColourId	  = 0x1000850, /**< The colour to use to draw the box's title. */
+	};
 
 	void buttonClicked (Button* button);
 	void closeButtonPressed();

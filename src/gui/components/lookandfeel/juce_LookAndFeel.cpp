@@ -55,6 +55,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../filebrowser/juce_DirectoryContentsDisplayComponent.h"
 #include "../filebrowser/juce_FileSearchPathListComponent.h"
 #include "../filebrowser/juce_FileBrowserComponent.h"
+#include "../filebrowser/juce_FileChooserDialogBox.h"
 #include "../layout/juce_GroupComponent.h"
 #include "../properties/juce_PropertyComponent.h"
 #include "../juce_Desktop.h"
@@ -198,33 +199,35 @@ LookAndFeel::LookAndFeel()
         GroupComponent::outlineColourId,            0x66000000,
         GroupComponent::textColourId,               0xff000000,
 
-        DirectoryContentsDisplayComponent::highlightColourId,    textHighlightColour,
-        DirectoryContentsDisplayComponent::textColourId,         0xff000000,
+        DirectoryContentsDisplayComponent::highlightColourId,   textHighlightColour,
+        DirectoryContentsDisplayComponent::textColourId,        0xff000000,
 
-        0x1000440, /*LassoComponent::lassoFillColourId*/         0x66dddddd,
-        0x1000441, /*LassoComponent::lassoOutlineColourId*/      0x99111111,
+        0x1000440, /*LassoComponent::lassoFillColourId*/        0x66dddddd,
+        0x1000441, /*LassoComponent::lassoOutlineColourId*/     0x99111111,
 
-        MidiKeyboardComponent::whiteNoteColourId,                0xffffffff,
-        MidiKeyboardComponent::blackNoteColourId,                0xff000000,
-        MidiKeyboardComponent::keySeparatorLineColourId,         0x66000000,
-        MidiKeyboardComponent::mouseOverKeyOverlayColourId,      0x80ffff00,
-        MidiKeyboardComponent::keyDownOverlayColourId,           0xffb6b600,
-        MidiKeyboardComponent::textLabelColourId,                0xff000000,
-        MidiKeyboardComponent::upDownButtonBackgroundColourId,   0xffd3d3d3,
-        MidiKeyboardComponent::upDownButtonArrowColourId,        0xff000000,
+        MidiKeyboardComponent::whiteNoteColourId,               0xffffffff,
+        MidiKeyboardComponent::blackNoteColourId,               0xff000000,
+        MidiKeyboardComponent::keySeparatorLineColourId,        0x66000000,
+        MidiKeyboardComponent::mouseOverKeyOverlayColourId,     0x80ffff00,
+        MidiKeyboardComponent::keyDownOverlayColourId,          0xffb6b600,
+        MidiKeyboardComponent::textLabelColourId,               0xff000000,
+        MidiKeyboardComponent::upDownButtonBackgroundColourId,  0xffd3d3d3,
+        MidiKeyboardComponent::upDownButtonArrowColourId,       0xff000000,
 
-        CodeEditorComponent::backgroundColourId,    0xffffffff,
-        CodeEditorComponent::caretColourId,         0xff000000,
-        CodeEditorComponent::highlightColourId,     textHighlightColour,
-        CodeEditorComponent::defaultTextColourId,   0xff000000,
+        CodeEditorComponent::backgroundColourId,                0xffffffff,
+        CodeEditorComponent::caretColourId,                     0xff000000,
+        CodeEditorComponent::highlightColourId,                 textHighlightColour,
+        CodeEditorComponent::defaultTextColourId,               0xff000000,
 
-        ColourSelector::backgroundColourId,         0xffe5e5e5,
-        ColourSelector::labelTextColourId,          0xff000000,
+        ColourSelector::backgroundColourId,                     0xffe5e5e5,
+        ColourSelector::labelTextColourId,                      0xff000000,
 
-        KeyMappingEditorComponent::backgroundColourId,      0x00000000,
-        KeyMappingEditorComponent::textColourId,            0xff000000,
+        KeyMappingEditorComponent::backgroundColourId,          0x00000000,
+        KeyMappingEditorComponent::textColourId,                0xff000000,
 
-        FileSearchPathListComponent::backgroundColourId,    0xffffffff,
+        FileSearchPathListComponent::backgroundColourId,        0xffffffff,
+
+        FileChooserDialogBox::titleTextColourId,                0xff000000,
     };
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)

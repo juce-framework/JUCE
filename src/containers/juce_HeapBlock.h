@@ -78,7 +78,7 @@ public:
         After creation, you can resize the array using the malloc(), calloc(),
         or realloc() methods.
     */
-    HeapBlock()  : data (0)
+    HeapBlock() throw() : data (0)
     {
     }
 
@@ -108,54 +108,54 @@ public:
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator ElementType*() const                                    { return data; }
+    inline operator ElementType*() const throw()                            { return data; }
 
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const                                           { return (void*) data; }
+    inline operator void*() const throw()                                   { return (void*) data; }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
-    inline ElementType* operator->() const                                  { return data; }
+    inline ElementType* operator->() const  throw()                         { return data; }
 
     /** Returns a pointer to the data by casting it to any type you need.
     */
     template <class CastType>
-    inline operator CastType*() const                                       { return (CastType*) data; }
+    inline operator CastType*() const throw()                               { return (CastType*) data; }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
         has no idea of the size it currently has allocated.
     */
     template <typename IndexType>
-    inline ElementType& operator[] (IndexType index) const                  { return data [index]; }
+    inline ElementType& operator[] (IndexType index) const throw()          { return data [index]; }
 
     /** Returns a pointer to a data element at an offset from the start of the array.
         This is the same as doing pointer arithmetic on the raw pointer itself.
     */
     template <typename IndexType>
-    inline ElementType* operator+ (IndexType index) const                   { return data + index; }
+    inline ElementType* operator+ (IndexType index) const throw()           { return data + index; }
 
     /** Returns a reference to the raw data pointer.
         Beware that the pointer returned here will become invalid as soon as you call
         any of the allocator methods on this object!
     */
-    inline ElementType** operator&() const                                  { return (ElementType**) &data; }
+    inline ElementType** operator&() const throw()                          { return (ElementType**) &data; }
 
     //==============================================================================
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator== (const ElementType* const otherPointer) const    { return otherPointer == data; }
+    inline bool operator== (const ElementType* const otherPointer) const throw()    { return otherPointer == data; }
 
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator!= (const ElementType* const otherPointer) const    { return otherPointer != data; }
+    inline bool operator!= (const ElementType* const otherPointer) const throw()    { return otherPointer != data; }
 
     //==============================================================================
     /** Allocates a specified amount of memory.
@@ -224,7 +224,7 @@ public:
     /** Swaps this object's data with the data of another HeapBlock.
         The two objects simply exchange their data pointers.
     */
-    void swapWith (HeapBlock <ElementType>& other)
+    void swapWith (HeapBlock <ElementType>& other) throw()
     {
         swapVariables (data, other.data);
     }

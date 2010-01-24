@@ -309,7 +309,8 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y, float& mousePositionV
 
                 if (x >= kx && x < kx + kw)
                 {
-                    mousePositionVelocity = y / (float) getHeight();
+                    const int whiteNoteLength = (orientation == horizontalKeyboard) ? getHeight() : getWidth();
+                    mousePositionVelocity = y / (float) whiteNoteLength;
                     return note;
                 }
             }

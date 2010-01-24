@@ -77,13 +77,10 @@ public:
 
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the label.
+    /** A set of colour IDs to use to change the colour of various aspects of the list.
 
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
-
-        Note that you can also use the constants from TextEditor::ColourIds to change the
-        colour of the text editor that is opened when a label is editable.
 
         @see Component::setColour, Component::findColour, LookAndFeel::setColour, LookAndFeel::findColour
     */

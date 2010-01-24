@@ -44,17 +44,16 @@ MidiMessageSequence::MidiMessageSequence (const MidiMessageSequence& other)
         list.add (new MidiEventHolder (other.list.getUnchecked(i)->message));
 }
 
-const MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& other)
+MidiMessageSequence& MidiMessageSequence::operator= (const MidiMessageSequence& other)
 {
-    if (this != &other)
-    {
-        clear();
-
-        for (int i = 0; i < other.list.size(); ++i)
-            list.add (new MidiEventHolder (other.list.getUnchecked(i)->message));
-    }
-
+    MidiMessageSequence otherCopy (other);
+    swapWith (otherCopy);
     return *this;
+}
+
+void MidiMessageSequence::swapWith (MidiMessageSequence& other) throw()
+{
+    list.swapWithArray (other.list);
 }
 
 MidiMessageSequence::~MidiMessageSequence()

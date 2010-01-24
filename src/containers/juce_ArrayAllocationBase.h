@@ -83,7 +83,7 @@ public:
 
         @param minNumElements  the minimum number of elements that are needed
     */
-    void ensureAllocatedSize (int minNumElements)
+    void ensureAllocatedSize (const int minNumElements)
     {
         if (minNumElements > numAllocated)
             setAllocatedSize ((minNumElements + minNumElements / 2 + 8) & ~7);
@@ -92,14 +92,14 @@ public:
     /** Minimises the amount of storage allocated so that it's no more than
         the given number of elements.
     */
-    void shrinkToNoMoreThan (int maxNumElements)
+    void shrinkToNoMoreThan (const int maxNumElements)
     {
         if (maxNumElements < numAllocated)
             setAllocatedSize (maxNumElements);
     }
 
     /** Swap the contents of two objects. */
-    void swapWith (ArrayAllocationBase <ElementType>& other)
+    void swapWith (ArrayAllocationBase <ElementType>& other) throw()
     {
         elements.swapWith (other.elements);
         swapVariables (numAllocated, other.numAllocated);

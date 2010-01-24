@@ -735,7 +735,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
     const int numAtts = xml.getNumAttributes(); // xxx inefficient - should write an att iterator..
 
     for (int i = 0; i < numAtts; ++i)
-        v.setProperty (xml.getAttributeName (i), xml.getAttributeValue (i), 0);
+        v.setProperty (xml.getAttributeName (i), var (xml.getAttributeValue (i)), 0);
 
     forEachXmlChildElement (xml, e)
     {

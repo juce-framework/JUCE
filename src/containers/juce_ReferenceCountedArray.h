@@ -77,26 +77,12 @@ public:
 
         Any existing objects in this array will first be released.
     */
-    const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
+    ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
     {
         if (this != &other)
         {
-            other.lockArray();
-            lock.enter();
-
-            clear();
-
-            data.ensureAllocatedSize (other.numUsed);
-            numUsed = other.numUsed;
-            memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
-            minimiseStorageOverheads();
-
-            for (int i = numUsed; --i >= 0;)
-                if (data.elements[i] != 0)
-                    data.elements[i]->incReferenceCount();
-
-            lock.exit();
-            other.unlockArray();
+            ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
+            swapWithArray (other);
         }
 
         return *this;
@@ -640,6 +626,22 @@ public:
 
             lock.exit();
         }
+    }
+
+    //==============================================================================
+    /** This swaps the contents of this array with those of another array.
+
+        If you need to exchange two arrays, this is vastly quicker than using copy-by-value
+        because it just swaps their internal pointers.
+    */
+    void swapWithArray (ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& otherArray) throw()
+    {
+        lock.enter();
+        otherArray.lock.enter();
+        data.swapWith (otherArray.data);
+        swapVariables (numUsed, otherArray.numUsed);
+        otherArray.lock.exit();
+        lock.exit();
     }
 
     //==============================================================================

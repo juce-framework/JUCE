@@ -53,13 +53,21 @@ extern void juce_windowMessageReceive (XEvent* event);
 extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);
 
 //==============================================================================
+ScopedXLock::ScopedXLock()       { XLockDisplay (display); }
+ScopedXLock::~ScopedXLock()      { XUnlockDisplay (display); }
+
+//==============================================================================
 class InternalMessageQueue
 {
 public:
     InternalMessageQueue()
+        : bytesInSocket (0)
     {
         int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
         (void) ret; jassert (ret == 0);
+
+        setNonBlocking (fd[0]);
+        setNonBlocking (fd[1]);
     }
 
     ~InternalMessageQueue()
@@ -70,11 +78,20 @@ public:
 
     void postMessage (Message* msg)
     {
+        const int maxBytesInSocketQueue = 128;
+
         ScopedLock sl (lock);
         queue.add (msg);
 
-        const unsigned char x = 0xff;
-        write (fd[0], &x, 1);
+        if (bytesInSocket < maxBytesInSocketQueue)
+        {
+            ++bytesInSocket;
+
+            ScopedUnlock ul (lock);
+            const unsigned char x = 0xff;
+            size_t bytesWritten = write (fd[0], &x, 1);
+            (void) bytesWritten;
+        }
     }
 
     bool isEmpty() const
@@ -83,20 +100,22 @@ public:
         return queue.size() == 0;
     }
 
-    Message* popMessage()
+    Message* popNextMessage()
     {
-        Message* m = 0;
         ScopedLock sl (lock);
 
-        if (queue.size() != 0)
+        if (bytesInSocket > 0)
         {
-            unsigned char x;
-            read (fd[1], &x, 1);
+            --bytesInSocket;
 
-            m = queue.getUnchecked(0);
-            queue.remove (0, false /* deleteObject */);
+            ScopedUnlock ul (lock);
+            unsigned char x;
+            size_t numBytes = read (fd[1], &x, 1);
+            (void) numBytes;
         }
 
+        Message* m = queue[0];
+        queue.remove (0, false /* deleteObject */);
         return m;
     }
 
@@ -106,6 +125,19 @@ private:
     CriticalSection lock;
     OwnedArray <Message> queue;
     int fd[2];
+    int bytesInSocket;
+
+    static bool setNonBlocking (int handle)
+    {
+        int socketFlags = fcntl (handle, F_GETFL, 0);
+
+        if (socketFlags == -1)
+            return false;
+
+        socketFlags |= O_NONBLOCK;
+
+        return fcntl (handle, F_SETFL, socketFlags) == 0;
+    }
 };
 
 //==============================================================================
@@ -370,8 +402,15 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func
 // Wait for an event (either XEvent, or an internal Message)
 static bool juce_sleepUntilEvent (const int timeoutMs)
 {
-    if ((display != 0 && XPending (display)) || ! juce_internalMessageQueue->isEmpty())
+    if (! juce_internalMessageQueue->isEmpty())
         return true;
+
+    if (display != 0)
+    {
+        ScopedXLock xlock;
+        if (XPending (display))
+            return true;
+    }
 
     struct timeval tv;
     tv.tv_sec = 0;
@@ -385,23 +424,32 @@ static bool juce_sleepUntilEvent (const int timeoutMs)
 
     if (display != 0)
     {
+        ScopedXLock xlock;
         int fd1 = XConnectionNumber (display);
         FD_SET (fd1, &readset);
         fdmax = jmax (fd0, fd1);
     }
 
-    int ret = select (fdmax + 1, &readset, 0, 0, &tv);
+    const int ret = select (fdmax + 1, &readset, 0, 0, &tv);
     return (ret > 0); // ret <= 0 if error or timeout
 }
 
 // Handle next XEvent (if any)
 static bool juce_dispatchNextXEvent()
 {
-    if (display == 0 || ! XPending (display))
+    if (display == 0)
         return false;
 
     XEvent evt;
-    XNextEvent (display, &evt);
+
+    {
+        ScopedXLock xlock;
+
+        if (! XPending (display))
+            return false;
+
+        XNextEvent (display, &evt);
+    }
 
     if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
     {
@@ -418,10 +466,10 @@ static bool juce_dispatchNextXEvent()
 // Handle next internal Message (if any)
 static bool juce_dispatchNextInternalMessage()
 {
-    if (juce_internalMessageQueue->isEmpty())
-        return false;
+    ScopedPointer <Message> msg (juce_internalMessageQueue->popNextMessage());
 
-    ScopedPointer <Message> msg (juce_internalMessageQueue->popMessage());
+    if (msg == 0)
+        return false;
 
     if (msg->intParameter1 == MessageThreadFuncCall::uniqueID)
     {

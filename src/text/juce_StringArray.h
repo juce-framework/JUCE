@@ -50,7 +50,7 @@ public:
     StringArray() throw();
 
     /** Creates a copy of another string array */
-    StringArray (const StringArray& other) throw();
+    StringArray (const StringArray& other);
 
     /** Creates a copy of an array of string literals.
 
@@ -59,7 +59,7 @@ public:
         @param numberOfStrings  how many items there are in the array
     */
     StringArray (const juce_wchar** const strings,
-                 const int numberOfStrings) throw();
+                 const int numberOfStrings);
 
     /** Creates a copy of an array of string literals.
 
@@ -68,27 +68,27 @@ public:
         @param numberOfStrings  how many items there are in the array
     */
     StringArray (const char** const strings,
-                 const int numberOfStrings) throw();
+                 const int numberOfStrings);
 
     /** Creates a copy of a null-terminated array of string literals.
 
         Each item from the array passed-in is added, until it encounters a null pointer,
         at which point it stops.
     */
-    StringArray (const juce_wchar** const strings) throw();
+    explicit StringArray (const juce_wchar** const strings);
 
     /** Creates a copy of a null-terminated array of string literals.
 
         Each item from the array passed-in is added, until it encounters a null pointer,
         at which point it stops.
     */
-    StringArray (const char** const strings) throw();
+    explicit StringArray (const char** const strings);
 
     /** Destructor. */
-    virtual ~StringArray() throw();
+    ~StringArray();
 
     /** Copies the contents of another string array into this one */
-    const StringArray& operator= (const StringArray& other) throw();
+    const StringArray& operator= (const StringArray& other);
 
     //==============================================================================
     /** Compares two arrays.
@@ -97,7 +97,7 @@ public:
 
         @returns    true only if the other array contains exactly the same strings in the same order
     */
-    bool operator== (const StringArray& other) const throw();
+    bool operator== (const StringArray& other) const;
 
     /** Compares two arrays.
 
@@ -105,7 +105,7 @@ public:
 
         @returns    false if the other array contains exactly the same strings in the same order
     */
-    bool operator!= (const StringArray& other) const throw();
+    bool operator!= (const StringArray& other) const;
 
     //==============================================================================
     /** Returns the number of strings in the array */
@@ -127,7 +127,7 @@ public:
         @returns    true if the string is found inside the array
     */
     bool contains (const String& stringToLookFor,
-                   const bool ignoreCase = false) const throw();
+                   const bool ignoreCase = false) const;
 
     /** Searches for a string in the array.
 
@@ -141,11 +141,11 @@ public:
     */
     int indexOf (const String& stringToLookFor,
                  const bool ignoreCase = false,
-                 int startIndex = 0) const throw();
+                 int startIndex = 0) const;
 
     //==============================================================================
     /** Appends a string at the end of the array. */
-    void add (const String& stringToAdd) throw();
+    void add (const String& stringToAdd);
 
     /** Inserts a string into the array.
 
@@ -154,23 +154,20 @@ public:
         If the index is less than zero or greater than the size of the array,
         the new string will be added to the end of the array.
     */
-    void insert (const int index,
-                 const String& stringToAdd) throw();
+    void insert (const int index, const String& stringToAdd);
 
     /** Adds a string to the array as long as it's not already in there.
 
         The search can optionally be case-insensitive.
     */
-    void addIfNotAlreadyThere (const String& stringToAdd,
-                               const bool ignoreCase = false) throw();
+    void addIfNotAlreadyThere (const String& stringToAdd, const bool ignoreCase = false);
 
     /** Replaces one of the strings in the array with another one.
 
         If the index is higher than the array's size, the new string will be
         added to the end of the array; if it's less than zero nothing happens.
     */
-    void set (const int index,
-              const String& newString) throw();
+    void set (const int index, const String& newString);
 
     /** Appends some strings from another array to the end of this one.
 
@@ -181,7 +178,7 @@ public:
     */
     void addArray (const StringArray& other,
                    int startIndex = 0,
-                   int numElementsToAdd = -1) throw();
+                   int numElementsToAdd = -1);
 
     /** Breaks up a string into tokens and adds them to this array.
 
@@ -191,7 +188,7 @@ public:
         @returns    the number of tokens added
     */
     int addTokens (const tchar* const stringToTokenise,
-                   const bool preserveQuotedStrings) throw();
+                   const bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
 
@@ -208,7 +205,7 @@ public:
     */
     int addTokens (const tchar* const stringToTokenise,
                    const tchar* breakCharacters,
-                   const tchar* quoteCharacters) throw();
+                   const tchar* quoteCharacters);
 
     /** Breaks up a string into lines and adds them to this array.
 
@@ -216,17 +213,17 @@ public:
         to the array. Line-break characters are omitted from the strings that are added to
         the array.
     */
-    int addLines (const tchar* stringToBreakUp) throw();
+    int addLines (const tchar* stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */
-    void clear() throw();
+    void clear();
 
     /** Removes a string from the array.
 
         If the index is out-of-range, no action will be taken.
     */
-    void remove (const int index) throw();
+    void remove (const int index);
 
     /** Finds a string in the array and removes it.
 
@@ -234,7 +231,7 @@ public:
         comparison may be case-insensitive depending on the ignoreCase parameter.
     */
     void removeString (const String& stringToRemove,
-                       const bool ignoreCase = false) throw();
+                       const bool ignoreCase = false);
 
     /** Removes any duplicated elements from the array.
 
@@ -243,14 +240,14 @@ public:
 
         @param ignoreCase   whether to use a case-insensitive comparison
     */
-    void removeDuplicates (const bool ignoreCase) throw();
+    void removeDuplicates (const bool ignoreCase);
 
     /** Removes empty strings from the array.
 
         @param removeWhitespaceStrings  if true, strings that only contain whitespace
                                         characters will also be removed
     */
-    void removeEmptyStrings (const bool removeWhitespaceStrings = true) throw();
+    void removeEmptyStrings (const bool removeWhitespaceStrings = true);
 
     /** Moves one of the strings to a different position.
 
@@ -269,7 +266,7 @@ public:
     void move (const int currentIndex, int newIndex) throw();
 
     /** Deletes any whitespace characters from the starts and ends of all the strings. */
-    void trim() throw();
+    void trim();
 
     /** Adds numbers to the strings in the array, to make each string unique.
 
@@ -285,7 +282,7 @@ public:
     void appendNumbersToDuplicates (const bool ignoreCaseWhenComparing,
                                     const bool appendNumberToFirstInstance,
                                     const tchar* const preNumberString = defaultPreNumberString,
-                                    const tchar* const postNumberString = defaultPostNumberString) throw();
+                                    const tchar* const postNumberString = defaultPostNumberString);
 
     //==============================================================================
     /** Joins the strings in the array together into one string.
@@ -302,14 +299,14 @@ public:
     */
     const String joinIntoString (const String& separatorString,
                                  int startIndex = 0,
-                                 int numberOfElements = -1) const throw();
+                                 int numberOfElements = -1) const;
 
     //==============================================================================
     /** Sorts the array into alphabetical order.
 
         @param ignoreCase       if true, the comparisons used will be case-sensitive.
     */
-    void sort (const bool ignoreCase) throw();
+    void sort (const bool ignoreCase);
 
     //==============================================================================
     /** Reduces the amount of storage being used by the array.
@@ -318,7 +315,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() throw();
+    void minimiseStorageOverheads();
 
 
     //==============================================================================

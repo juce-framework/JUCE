@@ -50,12 +50,12 @@ class JUCE_API  ScopedPointer
 public:
     //==============================================================================
     /** Creates a ScopedPointer containing a null pointer. */
-    inline ScopedPointer()  : object (0)
+    inline ScopedPointer() throw()  : object (0)
     {
     }
 
     /** Creates a ScopedPointer that owns the specified object. */
-    inline ScopedPointer (ObjectType* const objectToTakePossessionOf)
+    inline ScopedPointer (ObjectType* const objectToTakePossessionOf) throw()
         : object (objectToTakePossessionOf)
     {
     }
@@ -66,7 +66,7 @@ public:
         the pointer from the other object to this one, and the other object is reset to
         be a null pointer.
     */
-    ScopedPointer (ScopedPointer& objectToTransferFrom)
+    ScopedPointer (ScopedPointer& objectToTransferFrom) throw()
         : object (objectToTransferFrom.object)
     {
         objectToTransferFrom.object = 0;
@@ -75,7 +75,7 @@ public:
     /** Destructor.
         This will delete the object that this ScopedPointer currently refers to.
     */
-    inline ~ScopedPointer()                                                 { delete object; }
+    inline ~ScopedPointer()                                                         { delete object; }
 
     /** Changes this ScopedPointer to point to a new object.
 
@@ -125,45 +125,45 @@ public:
     //==============================================================================
     /** Returns the object that this ScopedPointer refers to.
     */
-    inline operator ObjectType*() const                                     { return object; }
+    inline operator ObjectType*() const throw()                                     { return object; }
 
     /** Returns the object that this ScopedPointer refers to.
     */
-    inline ObjectType& operator*() const                                    { return *object; }
+    inline ObjectType& operator*() const throw()                                    { return *object; }
 
     /** Lets you access methods and properties of the object that this ScopedPointer refers to. */
-    inline ObjectType* operator->() const                                   { return object; }
+    inline ObjectType* operator->() const throw()                                   { return object; }
 
     /** Returns a pointer to the object by casting it to whatever type you need. */
     template <class CastType>
-    inline operator CastType*() const                                       { return static_cast <CastType*> (object); }
+    inline operator CastType*() const throw()                                       { return static_cast <CastType*> (object); }
 
     /** Returns a reference to the address of the object that this ScopedPointer refers to. */
-    inline ObjectType** operator&() const                                   { return (ObjectType**) &object; }
+    inline ObjectType** operator&() const throw()                                   { return (ObjectType**) &object; }
 
     //==============================================================================
     /** Removes the current object from this ScopedPointer without deleting it.
 
         This will return the current object, and set the ScopedPointer to a null pointer.
     */
-    ObjectType* release()                                                   { ObjectType* const o = object; object = 0; return o; }
+    ObjectType* release() throw()                                                   { ObjectType* const o = object; object = 0; return o; }
 
     //==============================================================================
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator== (const ObjectType* const otherPointer) const     { return otherPointer == object; }
+    inline bool operator== (const ObjectType* const otherPointer) const throw()     { return otherPointer == object; }
 
     /** Compares the pointer with another pointer.
         This can be handy for checking whether this is a null pointer.
     */
-    inline bool operator!= (const ObjectType* const otherPointer) const     { return otherPointer != object; }
+    inline bool operator!= (const ObjectType* const otherPointer) const throw()     { return otherPointer != object; }
 
     //==============================================================================
     /** Swaps this object with that of another ScopedPointer.
         The two objects simply exchange their pointers.
     */
-    void swapWith (ScopedPointer <ObjectType>& other)
+    void swapWith (ScopedPointer <ObjectType>& other) throw()
     {
         // Two ScopedPointers should never be able to refer to the same object - if
         // this happens, you must have done something dodgy!
@@ -177,7 +177,7 @@ private:
     ObjectType* object;
 
     // (Required as an alternative to the overloaded & operator).
-    ScopedPointer* getAddress()                                             { return this; }
+    ScopedPointer* getAddress() const throw()                                       { return this; }
 };
 
 

@@ -45,6 +45,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Initialisation.h"
 #include "../threads/juce_Process.h"
 #include "../core/juce_PlatformUtilities.h"
+#include "../text/juce_LocalisedStrings.h"
 
 void juce_setCurrentThreadName (const String& name);
 
@@ -139,8 +140,8 @@ void JUCEApplication::getCommandInfo (const CommandID commandID, ApplicationComm
 {
     if (commandID == StandardApplicationCommandIDs::quit)
     {
-        result.setInfo ("Quit",
-                        "Quits the application",
+        result.setInfo (TRANS("Quit"),
+                        TRANS("Quits the application"),
                         "Application",
                         0);
 

@@ -196,9 +196,9 @@ public:
 };
 
 
+//==============================================================================
 #if JUCE_MAC || JUCE_IPHONE
 
-//==============================================================================
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
     using RAII.
 */
@@ -217,9 +217,33 @@ private:
 
 #endif
 
-#if JUCE_MAC
 
 //==============================================================================
+#if JUCE_LINUX
+
+/** A handy class that uses XLockDisplay and XUnlockDisplay to lock the X server
+    using an RAII approach.
+*/
+class ScopedXLock
+{
+public:
+    /** Creating a ScopedXLock object locks the X display.
+        This uses XLockDisplay() to grab the display that Juce is using.
+    */
+    ScopedXLock();
+
+    /** Deleting a ScopedXLock object unlocks the X display.
+        This calls XUnlockDisplay() to release the lock.
+    */
+    ~ScopedXLock();
+};
+
+#endif
+
+
+//==============================================================================
+#if JUCE_MAC
+
 /**
     A wrapper class for picking up events from an Apple IR remote control device.
 

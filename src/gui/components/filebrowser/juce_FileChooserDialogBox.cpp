@@ -156,7 +156,7 @@ FileChooserDialogBox::ContentComponent::~ContentComponent()
 
 void FileChooserDialogBox::ContentComponent::paint (Graphics& g)
 {
-    g.setColour (Colours::black);
+    g.setColour (getLookAndFeel().findColour (FileChooserDialogBox::titleTextColourId));
     text.draw (g);
 }
 

@@ -177,7 +177,9 @@ public:
                                               keyCode: 0];
 
         [menu performKeyEquivalent: f35Event];
-        [menu removeItem: item];
+
+        if ([menu indexOfItem: item] >= 0)
+            [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
     }
 
     static NSMenuItem* findMenuItem (NSMenu* const menu, const ApplicationCommandTarget::InvocationInfo& info)

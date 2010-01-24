@@ -59,33 +59,35 @@ public:
     /** Destructor. */
     ~var();
 
-    var (const var& valueToCopy) throw();
+    var (const var& valueToCopy);
     var (const int value) throw();
     var (const bool value) throw();
     var (const double value) throw();
-    var (const char* const value) throw();
-    var (const juce_wchar* const value) throw();
-    var (const String& value) throw();
-    var (DynamicObject* const object) throw();
+    var (const char* const value);
+    var (const juce_wchar* const value);
+    var (const String& value);
+    var (DynamicObject* const object);
     var (MethodFunction method) throw();
 
-    const var& operator= (const var& valueToCopy) throw();
-    const var& operator= (const int value) throw();
-    const var& operator= (const bool value) throw();
-    const var& operator= (const double value) throw();
-    const var& operator= (const char* const value) throw();
-    const var& operator= (const juce_wchar* const value) throw();
-    const var& operator= (const String& value) throw();
-    const var& operator= (DynamicObject* const object) throw();
-    const var& operator= (MethodFunction method) throw();
+    var& operator= (const var& valueToCopy);
+    var& operator= (int value);
+    var& operator= (bool value);
+    var& operator= (double value);
+    var& operator= (const char* value);
+    var& operator= (const juce_wchar* value);
+    var& operator= (const String& value);
+    var& operator= (DynamicObject* object);
+    var& operator= (MethodFunction method);
 
-    operator int() const throw();
-    operator bool() const throw();
-    operator float() const throw();
-    operator double() const throw();
-    operator const String() const throw();
-    const String toString() const throw();
-    DynamicObject* getObject() const throw();
+    void swapWith (var& other) throw();
+
+    operator int() const;
+    operator bool() const;
+    operator float() const;
+    operator double() const;
+    operator const String() const;
+    const String toString() const;
+    DynamicObject* getObject() const;
 
     bool isVoid() const throw()         { return type == voidType; }
     bool isInt() const throw()          { return type == intType; }
@@ -102,21 +104,21 @@ public:
     /** Writes a binary representation of this value to a stream.
         The data can be read back later using readFromStream().
     */
-    void writeToStream (OutputStream& output) const throw();
+    void writeToStream (OutputStream& output) const;
 
     /** Reads back a stored binary representation of a value.
         The data in the stream must have been written using writeToStream(), or this
         will have unpredictable results.
     */
-    static const var readFromStream (InputStream& input) throw();
+    static const var readFromStream (InputStream& input);
 
     //==============================================================================
     class JUCE_API  identifier
     {
     public:
-        identifier (const char* const name) throw();
-        identifier (const String& name) throw();
-        ~identifier() throw();
+        identifier (const char* const name);
+        identifier (const String& name);
+        ~identifier();
 
         bool operator== (const identifier& other) const throw()
         {
@@ -129,7 +131,7 @@ public:
     };
 
     /** If this variant is an object, this returns one of its properties. */
-    const var operator[] (const identifier& propertyName) const throw();
+    const var operator[] (const identifier& propertyName) const;
 
     //==============================================================================
     /** If this variant is an object, this invokes one of its methods with no arguments. */
@@ -167,9 +169,7 @@ private:
         methodType
     };
 
-    Type type;
-
-    union
+    union ValueUnion
     {
         int intValue;
         bool boolValue;
@@ -177,9 +177,10 @@ private:
         String* stringValue;
         DynamicObject* objectValue;
         MethodFunction methodValue;
-    } value;
+    };
 
-    void releaseValue() throw();
+    Type type;
+    ValueUnion value;
 };
 
 //==============================================================================

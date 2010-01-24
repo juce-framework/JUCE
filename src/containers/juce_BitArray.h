@@ -75,7 +75,7 @@ public:
 
     //==============================================================================
     /** Copies another BitArray onto this one. */
-    const BitArray& operator= (const BitArray& other) throw();
+    BitArray& operator= (const BitArray& other) throw();
 
     /** Two arrays are the same if the same bits are set. */
     bool operator== (const BitArray& other) const throw();

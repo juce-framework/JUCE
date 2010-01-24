@@ -88,7 +88,7 @@ public:
     /** Copies another set over this one.
         @param other    the set to copy
     */
-    const SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+    SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
     {
         if (this != &other)
         {

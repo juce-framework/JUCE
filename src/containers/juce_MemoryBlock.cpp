@@ -84,7 +84,7 @@ MemoryBlock::~MemoryBlock() throw()
     jassert (size == 0 || data != 0); // non-zero size but no data allocated?
 }
 
-const MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
+MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
 {
     if (this != &other)
     {

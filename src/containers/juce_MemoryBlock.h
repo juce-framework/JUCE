@@ -68,7 +68,7 @@ public:
 
         This block will be resized and copied to exactly match the other one.
     */
-    const MemoryBlock& operator= (const MemoryBlock& other) throw();
+    MemoryBlock& operator= (const MemoryBlock& other) throw();
 
     //==============================================================================
     /** Compares two memory blocks.

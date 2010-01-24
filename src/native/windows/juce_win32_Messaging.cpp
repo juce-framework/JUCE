@@ -149,17 +149,21 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
     if (returnIfNoPendingMessages && ! PeekMessage (&m, (HWND) 0, 0, 0, 0))
         return false;
 
-    if (GetMessage (&m, (HWND) 0, 0, 0) > 0)
+    if (GetMessage (&m, (HWND) 0, 0, 0) >= 0)
     {
-        if (m.message == specialId
-             && m.hwnd == juce_messageWindowHandle)
+        if (m.message == specialId && m.hwnd == juce_messageWindowHandle)
         {
             MessageManager::getInstance()->deliverMessage ((void*) m.lParam);
         }
+        else if (m.message == WM_QUIT)
+        {
+            if (JUCEApplication::getInstance())
+                JUCEApplication::getInstance()->systemRequestedQuit();
+        }
         else if (! isEventBlockedByModalComps (m))
         {
-            if (GetWindowLong (m.hwnd, GWLP_USERDATA) != improbableWindowNumber
-                 && (m.message == WM_LBUTTONDOWN || m.message == WM_RBUTTONDOWN))
+            if ((m.message == WM_LBUTTONDOWN || m.message == WM_RBUTTONDOWN)
+                 && GetWindowLong (m.hwnd, GWLP_USERDATA) != improbableWindowNumber)
             {
                 // if it's someone else's window being clicked on, and the focus is
                 // currently on a juce window, pass the kb focus over..

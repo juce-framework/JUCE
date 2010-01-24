@@ -37,7 +37,7 @@ var::var() throw()
     value.doubleValue = 0;
 }
 
-void var::releaseValue() throw()
+var::~var()
 {
     if (type == stringType)
         delete value.stringValue;
@@ -45,13 +45,8 @@ void var::releaseValue() throw()
         value.objectValue->decReferenceCount();
 }
 
-var::~var()
-{
-    releaseValue();
-}
-
 //==============================================================================
-var::var (const var& valueToCopy) throw()
+var::var (const var& valueToCopy)
    : type (valueToCopy.type),
      value (valueToCopy.value)
 {
@@ -79,25 +74,25 @@ var::var (const double value_) throw()
     value.doubleValue = value_;
 }
 
-var::var (const String& value_) throw()
+var::var (const String& value_)
    : type (stringType)
 {
     value.stringValue = new String (value_);
 }
 
-var::var (const char* const value_) throw()
+var::var (const char* const value_)
    : type (stringType)
 {
     value.stringValue = new String (value_);
 }
 
-var::var (const juce_wchar* const value_) throw()
+var::var (const juce_wchar* const value_)
    : type (stringType)
 {
     value.stringValue = new String (value_);
 }
 
-var::var (DynamicObject* const object) throw()
+var::var (DynamicObject* const object)
    : type (objectType)
 {
     value.objectValue = object;
@@ -113,131 +108,24 @@ var::var (MethodFunction method_) throw()
 }
 
 //==============================================================================
-const var& var::operator= (const var& valueToCopy) throw()
+void var::swapWith (var& other) throw()
 {
-    if (this != &valueToCopy)
-    {
-        if (type == valueToCopy.type)
-        {
-            switch (type)
-            {
-                case voidType:
-                    break;
-
-                case intType:
-                case boolType:
-                case doubleType:
-                    value = valueToCopy.value;
-                    break;
-
-                case stringType:
-                    *(value.stringValue) = *(valueToCopy.value.stringValue);
-                    break;
-
-                case objectType:
-                    if (valueToCopy.value.objectValue != 0)
-                        valueToCopy.value.objectValue->incReferenceCount();
-
-                    if (value.objectValue != 0)
-                        value.objectValue->decReferenceCount();
-
-                    value.objectValue = valueToCopy.value.objectValue;
-                    break;
-
-                default:
-                    jassertfalse;
-                    break;
-            }
-        }
-        else
-        {
-            releaseValue();
-            type = valueToCopy.type;
-
-            if (type == stringType)
-            {
-                value.stringValue = new String (*(valueToCopy.value.stringValue));
-            }
-            else
-            {
-                value = valueToCopy.value;
-
-                if (type == objectType && value.objectValue != 0)
-                    value.objectValue->incReferenceCount();
-            }
-        }
-    }
-
-    return *this;
+    swapVariables (type, other.type);
+    swapVariables (value, other.value);
 }
 
-const var& var::operator= (const int value_) throw()
-{
-    releaseValue();
-    type = intType;
-    value.intValue = value_;
-    return *this;
-}
-
-const var& var::operator= (const bool value_) throw()
-{
-    releaseValue();
-    type = boolType;
-    value.boolValue = value_;
-    return *this;
-}
-
-const var& var::operator= (const double value_) throw()
-{
-    releaseValue();
-    type = doubleType;
-    value.doubleValue = value_;
-    return *this;
-}
-
-const var& var::operator= (const char* const value_) throw()
-{
-    releaseValue();
-    type = stringType;
-    value.stringValue = new String (value_);
-    return *this;
-}
-
-const var& var::operator= (const juce_wchar* const value_) throw()
-{
-    releaseValue();
-    type = stringType;
-    value.stringValue = new String (value_);
-    return *this;
-}
-
-const var& var::operator= (const String& value_) throw()
-{
-    releaseValue();
-    type = stringType;
-    value.stringValue = new String (value_);
-    return *this;
-}
-
-const var& var::operator= (DynamicObject* const value_) throw()
-{
-    value_->incReferenceCount();
-    releaseValue();
-    type = objectType;
-    value.objectValue = value_;
-    return *this;
-}
-
-const var& var::operator= (MethodFunction method_) throw()
-{
-    releaseValue();
-    type = doubleType;
-    value.methodValue = method_;
-    return *this;
-}
+var& var::operator= (const var& value_)         { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (int value_)                { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (bool value_)               { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (double value_)             { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (const char* value_)        { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (const juce_wchar* value_)  { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (const String& value_)      { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (DynamicObject* value_)     { var newValue (value_); swapWith (newValue); return *this; }
+var& var::operator= (MethodFunction value_)     { var newValue (value_); swapWith (newValue); return *this; }
 
 //==============================================================================
-var::operator int() const throw()
+var::operator int() const
 {
     switch (type)
     {
@@ -253,7 +141,7 @@ var::operator int() const throw()
     return 0;
 }
 
-var::operator bool() const throw()
+var::operator bool() const
 {
     switch (type)
     {
@@ -271,12 +159,12 @@ var::operator bool() const throw()
     return false;
 }
 
-var::operator float() const throw()
+var::operator float() const
 {
     return (float) operator double();
 }
 
-var::operator double() const throw()
+var::operator double() const
 {
     switch (type)
     {
@@ -292,7 +180,7 @@ var::operator double() const throw()
     return 0.0;
 }
 
-const String var::toString() const throw()
+const String var::toString() const
 {
     switch (type)
     {
@@ -308,12 +196,12 @@ const String var::toString() const throw()
     return String::empty;
 }
 
-var::operator const String() const throw()
+var::operator const String() const
 {
     return toString();
 }
 
-DynamicObject* var::getObject() const throw()
+DynamicObject* var::getObject() const
 {
     return type == objectType ? value.objectValue : 0;
 }
@@ -339,7 +227,7 @@ bool var::operator!= (const var& other) const throw()
     return ! operator== (other);
 }
 
-void var::writeToStream (OutputStream& output) const throw()
+void var::writeToStream (OutputStream& output) const
 {
     switch (type)
     {
@@ -362,7 +250,7 @@ void var::writeToStream (OutputStream& output) const throw()
     }
 }
 
-const var var::readFromStream (InputStream& input) throw()
+const var var::readFromStream (InputStream& input)
 {
     const int numBytes = input.readCompressedInt();
 
@@ -388,7 +276,7 @@ const var var::readFromStream (InputStream& input) throw()
     return var();
 }
 
-const var var::operator[] (const var::identifier& propertyName) const throw()
+const var var::operator[] (const var::identifier& propertyName) const
 {
     if (type == objectType && value.objectValue != 0)
         return value.objectValue->getProperty (propertyName);
@@ -453,21 +341,21 @@ const var var::call (const var::identifier& method, const var& arg1, const var& 
 
 
 //==============================================================================
-var::identifier::identifier (const String& name_) throw()
+var::identifier::identifier (const String& name_)
     : name (name_),
       hashCode (name_.hashCode())
 {
     jassert (name_.isNotEmpty());
 }
 
-var::identifier::identifier (const char* const name_) throw()
+var::identifier::identifier (const char* const name_)
     : name (name_),
       hashCode (name.hashCode())
 {
     jassert (name.isNotEmpty());
 }
 
-var::identifier::~identifier() throw()
+var::identifier::~identifier()
 {
 }
 
@@ -531,13 +419,13 @@ const var DynamicObject::invokeMethod (const var::identifier& methodName,
                                        const var* parameters,
                                        int numParameters)
 {
-    return getProperty (methodName).invoke (this, parameters, numParameters);
+    return getProperty (methodName).invoke (var (this), parameters, numParameters);
 }
 
 void DynamicObject::setMethod (const var::identifier& name,
                                var::MethodFunction methodFunction)
 {
-    setProperty (name, methodFunction);
+    setProperty (name, var (methodFunction));
 }
 
 void DynamicObject::clear()

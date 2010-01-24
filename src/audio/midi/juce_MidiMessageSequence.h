@@ -50,7 +50,7 @@ public:
     MidiMessageSequence (const MidiMessageSequence& other);
 
     /** Replaces this sequence with another one. */
-    const MidiMessageSequence& operator= (const MidiMessageSequence& other);
+    MidiMessageSequence& operator= (const MidiMessageSequence& other);
 
     /** Destructor. */
     ~MidiMessageSequence();
@@ -264,6 +264,10 @@ public:
     void createControllerUpdatesForTime (const int channelNumber,
                                          const double time,
                                          OwnedArray<MidiMessage>& resultMessages);
+
+    //==============================================================================
+    /** Swaps this sequence with another one. */
+    void swapWith (MidiMessageSequence& other) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

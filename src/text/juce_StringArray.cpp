@@ -36,26 +36,26 @@ StringArray::StringArray() throw()
 {
 }
 
-StringArray::StringArray (const StringArray& other) throw()
+StringArray::StringArray (const StringArray& other)
+    : strings (other.strings)
 {
-    addArray (other);
 }
 
 StringArray::StringArray (const juce_wchar** const initialStrings,
-                          const int numberOfStrings) throw()
+                          const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
         add (initialStrings [i]);
 }
 
 StringArray::StringArray (const char** const initialStrings,
-                          const int numberOfStrings) throw()
+                          const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
         add (initialStrings [i]);
 }
 
-StringArray::StringArray (const juce_wchar** const initialStrings) throw()
+StringArray::StringArray (const juce_wchar** const initialStrings)
 {
     int i = 0;
 
@@ -63,7 +63,7 @@ StringArray::StringArray (const juce_wchar** const initialStrings) throw()
         add (initialStrings [i++]);
 }
 
-StringArray::StringArray (const char** const initialStrings) throw()
+StringArray::StringArray (const char** const initialStrings)
 {
     int i = 0;
 
@@ -71,23 +71,17 @@ StringArray::StringArray (const char** const initialStrings) throw()
         add (initialStrings [i++]);
 }
 
-const StringArray& StringArray::operator= (const StringArray& other) throw()
+const StringArray& StringArray::operator= (const StringArray& other)
 {
-    if (this != &other)
-    {
-        clear();
-        addArray (other);
-    }
-
+    strings = other.strings;
     return *this;
 }
 
-StringArray::~StringArray() throw()
+StringArray::~StringArray()
 {
-    clear();
 }
 
-bool StringArray::operator== (const StringArray& other) const throw()
+bool StringArray::operator== (const StringArray& other) const
 {
     if (other.size() != size())
         return false;
@@ -99,12 +93,12 @@ bool StringArray::operator== (const StringArray& other) const throw()
     return true;
 }
 
-bool StringArray::operator!= (const StringArray& other) const throw()
+bool StringArray::operator!= (const StringArray& other) const
 {
     return ! operator== (other);
 }
 
-void StringArray::clear() throw()
+void StringArray::clear()
 {
     strings.clear();
 }
@@ -117,27 +111,23 @@ const String& StringArray::operator[] (const int index) const throw()
     return String::empty;
 }
 
-void StringArray::add (const String& newString) throw()
+void StringArray::add (const String& newString)
 {
     strings.add (newString);
 }
 
-void StringArray::insert (const int index,
-                          const String& newString) throw()
+void StringArray::insert (const int index, const String& newString)
 {
     strings.insert (index, newString);
 }
 
-void StringArray::addIfNotAlreadyThere (const String& newString,
-                                        const bool ignoreCase) throw()
+void StringArray::addIfNotAlreadyThere (const String& newString, const bool ignoreCase)
 {
     if (! contains (newString, ignoreCase))
         add (newString);
 }
 
-void StringArray::addArray (const StringArray& otherArray,
-                            int startIndex,
-                            int numElementsToAdd) throw()
+void StringArray::addArray (const StringArray& otherArray, int startIndex, int numElementsToAdd)
 {
     if (startIndex < 0)
     {
@@ -152,14 +142,12 @@ void StringArray::addArray (const StringArray& otherArray,
         strings.add (otherArray.strings.getReference (startIndex++));
 }
 
-void StringArray::set (const int index,
-                       const String& newString) throw()
+void StringArray::set (const int index, const String& newString)
 {
     strings.set (index, newString);
 }
 
-bool StringArray::contains (const String& stringToLookFor,
-                            const bool ignoreCase) const throw()
+bool StringArray::contains (const String& stringToLookFor, const bool ignoreCase) const
 {
     if (ignoreCase)
     {
@@ -177,9 +165,7 @@ bool StringArray::contains (const String& stringToLookFor,
     return false;
 }
 
-int StringArray::indexOf (const String& stringToLookFor,
-                          const bool ignoreCase,
-                          int i) const throw()
+int StringArray::indexOf (const String& stringToLookFor, const bool ignoreCase, int i) const
 {
     if (i < 0)
         i = 0;
@@ -211,13 +197,13 @@ int StringArray::indexOf (const String& stringToLookFor,
 }
 
 //==============================================================================
-void StringArray::remove (const int index) throw()
+void StringArray::remove (const int index)
 {
     strings.remove (index);
 }
 
 void StringArray::removeString (const String& stringToRemove,
-                                const bool ignoreCase) throw()
+                                const bool ignoreCase)
 {
     if (ignoreCase)
     {
@@ -234,7 +220,7 @@ void StringArray::removeString (const String& stringToRemove,
 }
 
 //==============================================================================
-void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings) throw()
+void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings)
 {
     if (removeWhitespaceStrings)
     {
@@ -250,7 +236,7 @@ void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings) throw(
     }
 }
 
-void StringArray::trim() throw()
+void StringArray::trim()
 {
     for (int i = size(); --i >= 0;)
     {
@@ -272,7 +258,7 @@ public:
     static int compareElements (String& first, String& second)      { return first.compareIgnoreCase (second); }
 };
 
-void StringArray::sort (const bool ignoreCase) throw()
+void StringArray::sort (const bool ignoreCase)
 {
     if (ignoreCase)
     {
@@ -293,9 +279,7 @@ void StringArray::move (const int currentIndex, int newIndex) throw()
 
 
 //==============================================================================
-const String StringArray::joinIntoString (const String& separator,
-                                          int start,
-                                          int numberToJoin) const throw()
+const String StringArray::joinIntoString (const String& separator, int start, int numberToJoin) const
 {
     const int last = (numberToJoin < 0) ? size()
                                         : jmin (size(), start + numberToJoin);
@@ -343,17 +327,14 @@ const String StringArray::joinIntoString (const String& separator,
     return result;
 }
 
-int StringArray::addTokens (const tchar* const text,
-                            const bool preserveQuotedStrings) throw()
+int StringArray::addTokens (const tchar* const text, const bool preserveQuotedStrings)
 {
     return addTokens (text,
                       T(" \n\r\t"),
                       preserveQuotedStrings ? T("\"") : 0);
 }
 
-int StringArray::addTokens (const tchar* const text,
-                            const tchar* breakCharacters,
-                            const tchar* quoteCharacters) throw()
+int StringArray::addTokens (const tchar* const text, const tchar* breakCharacters, const tchar* quoteCharacters)
 {
     int num = 0;
 
@@ -437,7 +418,7 @@ int StringArray::addTokens (const tchar* const text,
     return num;
 }
 
-int StringArray::addLines (const tchar* text) throw()
+int StringArray::addLines (const tchar* text)
 {
     int numLines = 0;
 
@@ -484,7 +465,7 @@ int StringArray::addLines (const tchar* text) throw()
 }
 
 //==============================================================================
-void StringArray::removeDuplicates (const bool ignoreCase) throw()
+void StringArray::removeDuplicates (const bool ignoreCase)
 {
     for (int i = 0; i < size() - 1; ++i)
     {
@@ -507,7 +488,7 @@ void StringArray::removeDuplicates (const bool ignoreCase) throw()
 void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const bool appendNumberToFirstInstance,
                                              const tchar* const preNumberString,
-                                             const tchar* const postNumberString) throw()
+                                             const tchar* const postNumberString)
 {
     for (int i = 0; i < size() - 1; ++i)
     {
@@ -535,7 +516,7 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
     }
 }
 
-void StringArray::minimiseStorageOverheads() throw()
+void StringArray::minimiseStorageOverheads()
 {
     strings.minimiseStorageOverheads();
 }

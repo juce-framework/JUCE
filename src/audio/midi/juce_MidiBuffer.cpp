@@ -50,11 +50,8 @@ MidiBuffer::MidiBuffer (const MidiBuffer& other) throw()
 
 const MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
 {
-    if (this != &other)
-    {
-        bytesUsed = other.bytesUsed;
-        data = other.data;
-    }
+    bytesUsed = other.bytesUsed;
+    data = other.data;
 
     return *this;
 }

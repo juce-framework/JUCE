@@ -57,17 +57,14 @@ PositionedRectangle::PositionedRectangle (const PositionedRectangle& other) thro
 
 const PositionedRectangle& PositionedRectangle::operator= (const PositionedRectangle& other) throw()
 {
-    if (this != &other)
-    {
-        x = other.x;
-        y = other.y;
-        w = other.w;
-        h = other.h;
-        xMode = other.xMode;
-        yMode = other.yMode;
-        wMode = other.wMode;
-        hMode = other.hMode;
-    }
+    x = other.x;
+    y = other.y;
+    w = other.w;
+    h = other.h;
+    xMode = other.xMode;
+    yMode = other.yMode;
+    wMode = other.wMode;
+    hMode = other.hMode;
 
     return *this;
 }

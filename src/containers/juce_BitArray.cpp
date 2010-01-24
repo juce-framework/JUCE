@@ -90,7 +90,7 @@ BitArray::~BitArray() throw()
 {
 }
 
-const BitArray& BitArray::operator= (const BitArray& other) throw()
+BitArray& BitArray::operator= (const BitArray& other) throw()
 {
     if (this != &other)
     {
