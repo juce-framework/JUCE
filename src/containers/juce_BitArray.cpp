@@ -938,7 +938,7 @@ void BitArray::loadFromMemoryBlock (const MemoryBlock& data) throw()
 {
     clear();
 
-    for (size_t i = data.getSize(); --i >= 0;)
+    for (int i = (int) data.getSize(); --i >= 0;)
         this->setBitRangeAsInt ((int) (i << 3), 8, data [i]);
 }
 

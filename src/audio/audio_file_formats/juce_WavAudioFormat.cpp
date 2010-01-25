@@ -814,6 +814,7 @@ static bool juce_slowCopyOfWavFileWithNewMetadata (const File& file, const Strin
 
                 bool ok = writer->writeFromAudioReader (*reader, 0, -1);
                 writer = 0;
+                reader = 0;
 
                 return ok && tempFile.overwriteTargetFileWithTemporary();
             }
