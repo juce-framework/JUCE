@@ -31,8 +31,6 @@
 // this is used to disable OpenGL, and is defined in juce_Config.h
 #if JUCE_OPENGL || DOXYGEN
 
-class OpenGLComponentWatcher;
-
 
 //==============================================================================
 /**
@@ -333,8 +331,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class OpenGLComponentWatcher;
-    OpenGLComponentWatcher* componentWatcher;
+    class OpenGLComponentWatcher;
+    ScopedPointer <OpenGLComponentWatcher> componentWatcher;
 
     OpenGLContext* context;
     OpenGLContext* contextToShareListsWith;

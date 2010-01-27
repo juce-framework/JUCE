@@ -8642,10 +8642,11 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	const int numThreads, threadStopTimeout;
+	const int threadStopTimeout;
 	int priority;
-	HeapBlock <Thread*> threads;
-	VoidArray jobs;
+	class ThreadPoolThread;
+	OwnedArray <ThreadPoolThread> threads;
+	Array <ThreadPoolJob*> jobs;
 
 	CriticalSection lock;
 	uint32 lastJobEndTime;
@@ -25810,8 +25811,6 @@ private:
 // this is used to disable OpenGL, and is defined in juce_Config.h
 #if JUCE_OPENGL || DOXYGEN
 
-class OpenGLComponentWatcher;
-
 class JUCE_API  OpenGLPixelFormat
 {
 public:
@@ -25921,8 +25920,8 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	friend class OpenGLComponentWatcher;
-	OpenGLComponentWatcher* componentWatcher;
+	class OpenGLComponentWatcher;
+	ScopedPointer <OpenGLComponentWatcher> componentWatcher;
 
 	OpenGLContext* context;
 	OpenGLContext* contextToShareListsWith;

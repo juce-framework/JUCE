@@ -90,7 +90,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 
 
 //==============================================================================
-class OpenGLComponentWatcher  : public ComponentMovementWatcher
+class OpenGLComponent::OpenGLComponentWatcher  : public ComponentMovementWatcher
 {
 public:
     //==============================================================================
@@ -147,7 +147,7 @@ OpenGLComponent::OpenGLComponent()
 OpenGLComponent::~OpenGLComponent()
 {
     deleteContext();
-    delete componentWatcher;
+    componentWatcher = 0;
 }
 
 void OpenGLComponent::deleteContext()

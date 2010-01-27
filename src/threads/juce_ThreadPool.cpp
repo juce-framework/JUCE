@@ -66,14 +66,8 @@ void ThreadPoolJob::signalJobShouldExit()
 
 
 //==============================================================================
-class ThreadPoolThread  : public Thread
+class ThreadPool::ThreadPoolThread  : public Thread
 {
-    ThreadPool& pool;
-    bool volatile busy;
-
-    ThreadPoolThread (const ThreadPoolThread&);
-    const ThreadPoolThread& operator= (const ThreadPoolThread&);
-
 public:
     ThreadPoolThread (ThreadPool& pool_)
         : Thread (T("Pool")),
@@ -94,26 +88,30 @@ public:
                 wait (500);
         }
     }
+
+private:
+    ThreadPool& pool;
+    bool volatile busy;
+
+    ThreadPoolThread (const ThreadPoolThread&);
+    ThreadPoolThread& operator= (const ThreadPoolThread&);
 };
 
 //==============================================================================
-ThreadPool::ThreadPool (const int numThreads_,
+ThreadPool::ThreadPool (const int numThreads,
                         const bool startThreadsOnlyWhenNeeded,
                         const int stopThreadsWhenNotUsedTimeoutMs)
-    : numThreads (jmax (1, numThreads_)),
-      threadStopTimeout (stopThreadsWhenNotUsedTimeoutMs),
+    : threadStopTimeout (stopThreadsWhenNotUsedTimeoutMs),
       priority (5)
 {
-    jassert (numThreads_ > 0); // not much point having one of these with no threads in it.
+    jassert (numThreads > 0); // not much point having one of these with no threads in it.
 
-    threads.calloc (numThreads);
-
-    for (int i = numThreads; --i >= 0;)
-        threads[i] = new ThreadPoolThread (*this);
+    for (int i = jmax (1, numThreads); --i >= 0;)
+        threads.add (new ThreadPoolThread (*this));
 
     if (! startThreadsOnlyWhenNeeded)
-        for (int i = numThreads; --i >= 0;)
-            threads[i]->startThread (priority);
+        for (int i = threads.size(); --i >= 0;)
+            threads.getUnchecked(i)->startThread (priority);
 }
 
 ThreadPool::~ThreadPool()
@@ -121,14 +119,11 @@ ThreadPool::~ThreadPool()
     removeAllJobs (true, 4000);
 
     int i;
-    for (i = numThreads; --i >= 0;)
-        threads[i]->signalThreadShouldExit();
+    for (i = threads.size(); --i >= 0;)
+        threads.getUnchecked(i)->signalThreadShouldExit();
 
-    for (i = numThreads; --i >= 0;)
-    {
-        threads[i]->stopThread (500);
-        delete threads[i];
-    }
+    for (i = threads.size(); --i >= 0;)
+        threads.getUnchecked(i)->stopThread (500);
 }
 
 void ThreadPool::addJob (ThreadPoolJob* const job)
@@ -142,42 +137,41 @@ void ThreadPool::addJob (ThreadPoolJob* const job)
         job->shouldStop = false;
         job->isActive = false;
 
-        lock.enter();
-        jobs.add (job);
-
-        int numRunning = 0;
-
-        int i;
-        for (i = numThreads; --i >= 0;)
-            if (threads[i]->isThreadRunning() && ! threads[i]->threadShouldExit())
-                ++numRunning;
-
-        if (numRunning < numThreads)
         {
-            bool startedOne = false;
-            int n = 1000;
+            const ScopedLock sl (lock);
+            jobs.add (job);
 
-            while (--n >= 0 && ! startedOne)
+            int numRunning = 0;
+
+            for (int i = threads.size(); --i >= 0;)
+                if (threads.getUnchecked(i)->isThreadRunning() && ! threads.getUnchecked(i)->threadShouldExit())
+                    ++numRunning;
+
+            if (numRunning < threads.size())
             {
-                for (i = numThreads; --i >= 0;)
-                {
-                    if (! threads[i]->isThreadRunning())
-                    {
-                        threads[i]->startThread (priority);
-                        startedOne = true;
-                        break;
-                    }
-                }
+                bool startedOne = false;
+                int n = 1000;
 
-                if (! startedOne)
-                    Thread::sleep (2);
+                while (--n >= 0 && ! startedOne)
+                {
+                    for (int i = threads.size(); --i >= 0;)
+                    {
+                        if (! threads.getUnchecked(i)->isThreadRunning())
+                        {
+                            threads.getUnchecked(i)->startThread (priority);
+                            startedOne = true;
+                            break;
+                        }
+                    }
+
+                    if (! startedOne)
+                        Thread::sleep (2);
+                }
             }
         }
 
-        lock.exit();
-
-        for (i = numThreads; --i >= 0;)
-            threads[i]->notify();
+        for (int i = threads.size(); --i >= 0;)
+            threads.getUnchecked(i)->notify();
     }
 }
 
@@ -195,13 +189,13 @@ ThreadPoolJob* ThreadPool::getJob (const int index) const
 bool ThreadPool::contains (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
-    return jobs.contains ((void*) job);
+    return jobs.contains (const_cast <ThreadPoolJob*> (job));
 }
 
 bool ThreadPool::isJobRunning (const ThreadPoolJob* const job) const
 {
     const ScopedLock sl (lock);
-    return jobs.contains ((void*) job) && job->isActive;
+    return jobs.contains (const_cast <ThreadPoolJob*> (job)) && job->isActive;
 }
 
 bool ThreadPool::waitForJobToFinish (const ThreadPoolJob* const job,
@@ -261,32 +255,32 @@ bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,
 {
     Array <ThreadPoolJob*> jobsToWaitFor;
 
-    lock.enter();
-
-    for (int i = jobs.size(); --i >= 0;)
     {
-        ThreadPoolJob* const job = (ThreadPoolJob*) jobs.getUnchecked(i);
+        const ScopedLock sl (lock);
 
-        if (selectedJobsToRemove == 0 || selectedJobsToRemove->isJobSuitable (job))
+        for (int i = jobs.size(); --i >= 0;)
         {
-            if (job->isActive)
-            {
-                jobsToWaitFor.add (job);
+            ThreadPoolJob* const job = jobs.getUnchecked(i);
 
-                if (interruptRunningJobs)
-                    job->signalJobShouldExit();
-            }
-            else
+            if (selectedJobsToRemove == 0 || selectedJobsToRemove->isJobSuitable (job))
             {
-                jobs.remove (i);
+                if (job->isActive)
+                {
+                    jobsToWaitFor.add (job);
 
-                if (deleteInactiveJobs)
-                    delete job;
+                    if (interruptRunningJobs)
+                        job->signalJobShouldExit();
+                }
+                else
+                {
+                    jobs.remove (i);
+
+                    if (deleteInactiveJobs)
+                        delete job;
+                }
             }
         }
     }
-
-    lock.exit();
 
     const uint32 start = Time::getMillisecondCounter();
 
@@ -315,7 +309,7 @@ const StringArray ThreadPool::getNamesOfAllJobs (const bool onlyReturnActiveJobs
 
     for (int i = 0; i < jobs.size(); ++i)
     {
-        const ThreadPoolJob* const job = (const ThreadPoolJob*) jobs.getUnchecked(i);
+        const ThreadPoolJob* const job = jobs.getUnchecked(i);
         if (job->isActive || ! onlyReturnActiveJobs)
             s.add (job->getJobName());
     }
@@ -331,8 +325,8 @@ bool ThreadPool::setThreadPriorities (const int newPriority)
     {
         priority = newPriority;
 
-        for (int i = numThreads; --i >= 0;)
-            if (! threads[i]->setPriority (newPriority))
+        for (int i = threads.size(); --i >= 0;)
+            if (! threads.getUnchecked(i)->setPriority (newPriority))
                 ok = false;
     }
 
@@ -341,24 +335,28 @@ bool ThreadPool::setThreadPriorities (const int newPriority)
 
 bool ThreadPool::runNextJob()
 {
-    lock.enter();
     ThreadPoolJob* job = 0;
 
-    for (int i = 0; i < jobs.size(); ++i)
     {
-        job = (ThreadPoolJob*) jobs [i];
+        const ScopedLock sl (lock);
 
-        if (job != 0 && ! (job->isActive || job->shouldStop))
-            break;
+        for (int i = 0; i < jobs.size(); ++i)
+        {
+            job = jobs[i];
 
-        job = 0;
+            if (job != 0 && ! (job->isActive || job->shouldStop))
+                break;
+
+            job = 0;
+        }
+
+        if (job != 0)
+            job->isActive = true;
+
     }
 
     if (job != 0)
     {
-        job->isActive = true;
-        lock.exit();
-
         JUCE_TRY
         {
             ThreadPoolJob::JobStatus result = job->runJob();
@@ -392,24 +390,21 @@ bool ThreadPool::runNextJob()
 #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
         catch (...)
         {
-            lock.enter();
+            const ScopedLock sl (lock);
             jobs.removeValue (job);
-            lock.exit();
         }
 #endif
     }
     else
     {
-        lock.exit();
-
         if (threadStopTimeout > 0
              && Time::getApproximateMillisecondCounter() > lastJobEndTime + threadStopTimeout)
         {
             const ScopedLock sl (lock);
 
             if (jobs.size() == 0)
-                for (int i = numThreads; --i >= 0;)
-                    threads[i]->signalThreadShouldExit();
+                for (int i = threads.size(); --i >= 0;)
+                    threads.getUnchecked(i)->signalThreadShouldExit();
         }
         else
         {

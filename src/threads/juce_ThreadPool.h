@@ -29,8 +29,8 @@
 #include "juce_Thread.h"
 #include "juce_ScopedLock.h"
 #include "../text/juce_StringArray.h"
-#include "../containers/juce_VoidArray.h"
-#include "../containers/juce_HeapBlock.h"
+#include "../containers/juce_Array.h"
+#include "../containers/juce_OwnedArray.h"
 class ThreadPool;
 class ThreadPoolThread;
 
@@ -298,10 +298,11 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    const int numThreads, threadStopTimeout;
+    const int threadStopTimeout;
     int priority;
-    HeapBlock <Thread*> threads;
-    VoidArray jobs;
+    class ThreadPoolThread;
+    OwnedArray <ThreadPoolThread> threads;
+    Array <ThreadPoolJob*> jobs;
 
     CriticalSection lock;
     uint32 lastJobEndTime;

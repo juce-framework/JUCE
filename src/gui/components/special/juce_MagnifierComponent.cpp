@@ -268,15 +268,14 @@ void MagnifierComponent::paint (Graphics& g)
     Image temp (Image::ARGB, jmax (w, srcX + srcW), jmax (h, srcY + srcH), false);
     temp.clear (srcX, srcY, srcW, srcH);
 
-    Graphics g2 (temp);
-    g2.reduceClipRegion (srcX, srcY, srcW, srcH);
-    holderComp->paintEntireComponent (g2);
+    {
+        Graphics g2 (temp);
+        g2.reduceClipRegion (srcX, srcY, srcW, srcH);
+        holderComp->paintEntireComponent (g2);
+    }
 
     g.setImageResamplingQuality (quality);
-    g.drawImage (&temp,
-                 0, 0, (int) (w * scaleFactor), (int) (h * scaleFactor),
-                 0, 0, w, h,
-                 false);
+    g.drawImageTransformed (&temp, temp.getBounds(), AffineTransform::scale (scaleFactor, scaleFactor), false);
 }
 
 void MagnifierComponent::childBoundsChanged (Component* c)
