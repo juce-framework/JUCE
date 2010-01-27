@@ -44,17 +44,193 @@ class InternalTimerThread  : private Thread,
                              private DeletedAtShutdown,
                              private AsyncUpdater
 {
+public:
+    InternalTimerThread()
+        : Thread ("Juce Timer"),
+          firstTimer (0),
+          callbackNeeded (false)
+    {
+        triggerAsyncUpdate();
+    }
+
+    ~InternalTimerThread() throw()
+    {
+        stopThread (4000);
+
+        jassert (instance == this || instance == 0);
+        if (instance == this)
+            instance = 0;
+    }
+
+    void run()
+    {
+        uint32 lastTime = Time::getMillisecondCounter();
+
+        while (! threadShouldExit())
+        {
+            const uint32 now = Time::getMillisecondCounter();
+
+            if (now <= lastTime)
+            {
+                wait (2);
+                continue;
+            }
+
+            const int elapsed = now - lastTime;
+            lastTime = now;
+
+            lock.enter();
+            decrementAllCounters (elapsed);
+            const int timeUntilFirstTimer = (firstTimer != 0) ? firstTimer->countdownMs
+                                                              : 1000;
+            lock.exit();
+
+            if (timeUntilFirstTimer <= 0)
+            {
+                /* If we managed to set the atomic boolean to true then send a message, this is needed
+                   as a memory barrier so the message won't be sent before callbackNeeded is set to true,
+                   but if it fails it means the message-thread changed the value from under us so at least
+                   some processing is happenening and we can just loop around and try again
+                */
+                if (callbackNeeded.set (true))
+                {
+                    postMessage (new Message());
+
+                    /* Sometimes our message can get discarded by the OS (e.g. when running as an RTAS
+                       when the app has a modal loop), so this is how long to wait before assuming the
+                       message has been lost and trying again.
+                    */
+                    const uint32 messageDeliveryTimeout = now + 2000;
+
+                    while (callbackNeeded.get())
+                    {
+                        wait (4);
+
+                        if (threadShouldExit())
+                            return;
+
+                        if (Time::getMillisecondCounter() > messageDeliveryTimeout)
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                // don't wait for too long because running this loop also helps keep the
+                // Time::getApproximateMillisecondTimer value stay up-to-date
+                wait (jlimit (1, 50, timeUntilFirstTimer));
+            }
+        }
+    }
+
+    void handleMessage (const Message&)
+    {
+        const ScopedLock sl (lock);
+
+        while (firstTimer != 0 && firstTimer->countdownMs <= 0)
+        {
+            Timer* const t = firstTimer;
+            t->countdownMs = t->periodMs;
+
+            removeTimer (t);
+            addTimer (t);
+
+            const ScopedUnlock ul (lock);
+
+            JUCE_TRY
+            {
+                t->timerCallback();
+            }
+            JUCE_CATCH_EXCEPTION
+        }
+
+        /* This is needed as a memory barrier to make sure all processing of current timers is done
+           before the boolean is set. This set should never fail since if it was false in the first place,
+           we wouldn't get a message (so it can't be changed from false to true from under us), and if we
+           get a message then the value is true and the other thread can only  set  it to true again and
+           we will get another callback to set it to false.
+        */
+        callbackNeeded.set (false);
+    }
+
+    static void callAnyTimersSynchronously()
+    {
+        if (InternalTimerThread::instance != 0)
+        {
+            const Message m;
+            InternalTimerThread::instance->handleMessage (m);
+        }
+    }
+
+    static inline void add (Timer* const tim) throw()
+    {
+        if (instance == 0)
+            instance = new InternalTimerThread();
+
+        const ScopedLock sl (instance->lock);
+        instance->addTimer (tim);
+    }
+
+    static inline void remove (Timer* const tim) throw()
+    {
+        if (instance != 0)
+        {
+            const ScopedLock sl (instance->lock);
+            instance->removeTimer (tim);
+        }
+    }
+
+    static inline void resetCounter (Timer* const tim,
+                                     const int newCounter) throw()
+    {
+        if (instance != 0)
+        {
+            tim->countdownMs = newCounter;
+            tim->periodMs = newCounter;
+
+            if ((tim->next != 0 && tim->next->countdownMs < tim->countdownMs)
+                 || (tim->previous != 0 && tim->previous->countdownMs > tim->countdownMs))
+            {
+                const ScopedLock sl (instance->lock);
+                instance->removeTimer (tim);
+                instance->addTimer (tim);
+            }
+        }
+    }
+
 private:
     friend class Timer;
     static InternalTimerThread* instance;
     static CriticalSection lock;
-
     Timer* volatile firstTimer;
-    bool volatile callbackNeeded;
 
-    InternalTimerThread (const InternalTimerThread&);
-    const InternalTimerThread& operator= (const InternalTimerThread&);
+    //==============================================================================
+    class AtomicBool
+    {
+    public:
+        AtomicBool (const bool value) throw() : value (static_cast<int32> (value)) {}
+        ~AtomicBool() throw() {}
 
+        bool get() const throw()        { return value != 0; }
+        bool set (const bool newValue)  { return Atomic::compareAndExchange (value, newValue ? 1 : 0, value) != 0; }
+
+        /*bool setIfNotAlreadyThisValue (const bool newValue)
+        {
+            int32 valueNew = newValue ? 1 : 0;
+            int32 valueCurrent = 1 - valueNew;
+            return Atomic::compareAndExchange (value, valueNew, valueCurrent);
+        }*/
+
+    private:
+        int32 value;
+
+        AtomicBool (const AtomicBool&);
+        AtomicBool& operator= (const AtomicBool&);
+    };
+
+    AtomicBool callbackNeeded;
+
+    //==============================================================================
     void addTimer (Timer* const t) throw()
     {
 #ifdef JUCE_DEBUG
@@ -156,146 +332,8 @@ private:
         startThread (7);
     }
 
-public:
-    InternalTimerThread()
-        : Thread ("Juce Timer"),
-          firstTimer (0),
-          callbackNeeded (false)
-    {
-        triggerAsyncUpdate();
-    }
-
-    ~InternalTimerThread() throw()
-    {
-        stopThread (4000);
-
-        jassert (instance == this || instance == 0);
-        if (instance == this)
-            instance = 0;
-    }
-
-    void run()
-    {
-        uint32 lastTime = Time::getMillisecondCounter();
-
-        while (! threadShouldExit())
-        {
-            uint32 now = Time::getMillisecondCounter();
-
-            if (now <= lastTime)
-            {
-                wait (2);
-                continue;
-            }
-
-            const int elapsed = now - lastTime;
-            lastTime = now;
-
-            lock.enter();
-            decrementAllCounters (elapsed);
-            const int timeUntilFirstTimer = (firstTimer != 0) ? firstTimer->countdownMs
-                                                              : 1000;
-            lock.exit();
-
-            if (timeUntilFirstTimer <= 0)
-            {
-                callbackNeeded = true;
-                postMessage (new Message());
-
-                // sometimes, our message could get discarded by the OS (particularly when running as an RTAS when the app has a modal loop),
-                // so this is how long to wait before assuming the message has been lost and trying again.
-                const uint32 messageDeliveryTimeout = now + 2000;
-
-                while (callbackNeeded)
-                {
-                    wait (4);
-
-                    if (threadShouldExit())
-                        return;
-
-                    now = Time::getMillisecondCounter();
-
-                    if (now > messageDeliveryTimeout)
-                        break;
-                }
-            }
-            else
-            {
-                // don't wait for too long because running this loop also helps keep the
-                // Time::getApproximateMillisecondTimer value stay up-to-date
-                wait (jlimit (1, 50, timeUntilFirstTimer));
-            }
-        }
-    }
-
-    void handleMessage (const Message&)
-    {
-        const ScopedLock sl (lock);
-
-        while (firstTimer != 0 && firstTimer->countdownMs <= 0)
-        {
-            Timer* const t = firstTimer;
-            t->countdownMs = t->periodMs;
-
-            removeTimer (t);
-            addTimer (t);
-
-            const ScopedUnlock ul (lock);
-
-            JUCE_TRY
-            {
-                t->timerCallback();
-            }
-            JUCE_CATCH_EXCEPTION
-        }
-
-        callbackNeeded = false;
-    }
-
-    static void callAnyTimersSynchronously()
-    {
-        if (InternalTimerThread::instance != 0)
-        {
-            const Message m;
-            InternalTimerThread::instance->handleMessage (m);
-        }
-    }
-
-    static inline void add (Timer* const tim) throw()
-    {
-        if (instance == 0)
-            instance = new InternalTimerThread();
-
-        const ScopedLock sl (instance->lock);
-        instance->addTimer (tim);
-    }
-
-    static inline void remove (Timer* const tim) throw()
-    {
-        if (instance != 0)
-        {
-            const ScopedLock sl (instance->lock);
-            instance->removeTimer (tim);
-        }
-    }
-
-    static inline void resetCounter (Timer* const tim,
-                                     const int newCounter) throw()
-    {
-        if (instance != 0)
-        {
-            tim->countdownMs = newCounter;
-            tim->periodMs = newCounter;
-
-            if ((tim->next != 0 && tim->next->countdownMs < tim->countdownMs)
-                 || (tim->previous != 0 && tim->previous->countdownMs > tim->countdownMs))
-            {
-                const ScopedLock sl (instance->lock);
-                instance->removeTimer (tim);
-                instance->addTimer (tim);
-            }
-        }
-    }
+    InternalTimerThread (const InternalTimerThread&);
+    InternalTimerThread& operator= (const InternalTimerThread&);
 };
 
 InternalTimerThread* InternalTimerThread::instance = 0;

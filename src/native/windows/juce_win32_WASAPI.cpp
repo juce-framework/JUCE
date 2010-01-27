@@ -780,8 +780,26 @@ public:
         }
     }
 
+    void setMMThreadPriority()
+    {
+        DynamicLibraryLoader dll ("avrt.dll");
+        DynamicLibraryImport (AvSetMmThreadCharacteristics, avSetMmThreadCharacteristics, HANDLE, dll, (LPCTSTR, LPDWORD))
+        DynamicLibraryImport (AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, dll, (HANDLE, AVRT_PRIORITY))
+
+        if (avSetMmThreadCharacteristics != 0 && avSetMmThreadPriority != 0)
+        {
+            DWORD dummy = 0;
+            HANDLE h = avSetMmThreadCharacteristics (_T("Pro Audio"), &dummy);
+
+            if (h != 0)
+                avSetMmThreadPriority (h, AVRT_PRIORITY_NORMAL);
+        }
+    }
+
     void run()
     {
+        setMMThreadPriority();
+
         const int bufferSize = currentBufferSizeSamples;
 
         HANDLE events[2];

@@ -31,6 +31,17 @@
  extern HWND juce_messageWindowHandle;
 #endif
 
+//==============================================================================
+#if ! JUCE_USE_INTRINSICS
+// In newer compilers, the inline versions of these are used (in juce_Atomic.h), but in
+// older ones we have to actually call the ops as win32 functions..
+void  Atomic::increment (int32& variable)                { InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+int32 Atomic::incrementAndReturn (int32& variable)       { return InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+void  Atomic::decrement (int32& variable)                { InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+int32 Atomic::decrementAndReturn (int32& variable)       { return InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                         { return InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
+#endif
 
 //==============================================================================
 CriticalSection::CriticalSection() throw()

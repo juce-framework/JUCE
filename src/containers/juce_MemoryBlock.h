@@ -83,6 +83,10 @@ public:
     */
     bool operator!= (const MemoryBlock& other) const throw();
 
+    /** Returns true if the data in this MemoryBlock matches the raw bytes passed-in.
+    */
+    bool matches (const void* data, size_t dataSize) const throw();
+
     //==============================================================================
     /** Returns a pointer to the data, casting it to any type of primitive data required.
 

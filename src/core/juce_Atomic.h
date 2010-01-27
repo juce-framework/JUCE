@@ -34,174 +34,60 @@ class JUCE_API  Atomic
 {
 public:
     /** Increments an integer in a thread-safe way. */
-    static void increment (int& variable);
+    static void increment (int32& variable);
 
     /** Increments an integer in a thread-safe way and returns its new value. */
-    static int incrementAndReturn (int& variable);
+    static int32 incrementAndReturn (int32& variable);
 
     /** Decrements an integer in a thread-safe way. */
-    static void decrement (int& variable);
+    static void decrement (int32& variable);
 
     /** Decrements an integer in a thread-safe way and returns its new value. */
-    static int decrementAndReturn (int& variable);
+    static int32 decrementAndReturn (int32& variable);
+
+    /** If the current value of destination is equal to requiredCurrentValue, this
+        will set it to newValue; otherwise, it will leave it unchanged.
+        @returns the new value of destination
+    */
+    static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
 };
 
 
 //==============================================================================
 #if (JUCE_MAC || JUCE_IPHONE)           //  Mac and iPhone...
 
-#include <libkern/OSAtomic.h>
-inline void Atomic::increment (int& variable)               { OSAtomicIncrement32 ((int32_t*) &variable); }
-inline int  Atomic::incrementAndReturn (int& variable)      { return OSAtomicIncrement32 ((int32_t*) &variable); }
-inline void Atomic::decrement (int& variable)               { OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int  Atomic::decrementAndReturn (int& variable)      { return OSAtomicDecrement32 ((int32_t*) &variable); }
+inline void Atomic::increment (int32& variable)             { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::incrementAndReturn (int32& variable)  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline void Atomic::decrement (int32& variable)             { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::decrementAndReturn (int32& variable)  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                            { return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
 
-#elif JUCE_GCC
-
-//==============================================================================
-#if JUCE_USE_GCC_ATOMIC_INTRINSICS      //  Linux with intrinsics...
-
-inline void Atomic::increment (int& variable)               { __sync_add_and_fetch (&variable, 1); }
-inline int  Atomic::incrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, 1); }
-inline void Atomic::decrement (int& variable)               { __sync_add_and_fetch (&variable, -1); }
-inline int  Atomic::decrementAndReturn (int& variable)      { return __sync_add_and_fetch (&variable, -1); }
+#elif JUCE_GCC                          // Linux...
 
 //==============================================================================
-#else                                   //  Linux without intrinsics...
-
-inline void Atomic::increment (int& variable)
-{
-    __asm__ __volatile__ (
-    #if JUCE_64BIT
-        "lock incl (%%rax)"
-        :
-        : "a" (&variable)
-        : "cc", "memory");
-    #else
-        "lock incl %0"
-        : "=m" (variable)
-        : "m" (variable));
-    #endif
-}
-
-inline int Atomic::incrementAndReturn (int& variable)
-{
-    int result;
-
-    __asm__ __volatile__ (
-    #if JUCE_64BIT
-        "lock xaddl %%ebx, (%%rax) \n\
-         incl %%ebx"
-        : "=b" (result)
-        : "a" (&variable), "b" (1)
-        : "cc", "memory");
-    #else
-        "lock xaddl %%eax, (%%ecx) \n\
-         incl %%eax"
-        : "=a" (result)
-        : "c" (&variable), "a" (1)
-        : "memory");
-    #endif
-
-    return result;
-}
-
-inline void Atomic::decrement (int& variable)
-{
-    __asm__ __volatile__ (
-    #if JUCE_64BIT
-        "lock decl (%%rax)"
-        :
-        : "a" (&variable)
-        : "cc", "memory");
-    #else
-        "lock decl %0"
-        : "=m" (variable)
-        : "m" (variable));
-    #endif
-}
-
-inline int Atomic::decrementAndReturn (int& variable)
-{
-    int result;
-
-    __asm__ __volatile__ (
-    #if JUCE_64BIT
-        "lock xaddl %%ebx, (%%rax) \n\
-         decl %%ebx"
-        : "=b" (result)
-        : "a" (&variable), "b" (-1)
-        : "cc", "memory");
-    #else
-        "lock xaddl %%eax, (%%ecx) \n\
-         decl %%eax"
-        : "=a" (result)
-        : "c" (&variable), "a" (-1)
-        : "memory");
-    #endif
-    return result;
-}
-#endif
+inline void  Atomic::increment (int32& variable)            { __sync_add_and_fetch (&variable, 1); }
+inline int32 Atomic::incrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, 1); }
+inline void  Atomic::decrement (int32& variable)            { __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::decrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                            { return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
 
 //==============================================================================
-#elif JUCE_USE_INTRINSICS           // Windows with intrinsics...
+#elif JUCE_USE_INTRINSICS               // Windows...
 
+// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is
+// declared in juce_win32_Threads.cpp)
 #pragma intrinsic (_InterlockedIncrement)
 #pragma intrinsic (_InterlockedDecrement)
+#pragma intrinsic (_InterlockedCompareExchange)
 
-inline void Atomic::increment (int& variable)               { _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int  Atomic::incrementAndReturn (int& variable)      { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline void Atomic::decrement (int& variable)               { _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int  Atomic::decrementAndReturn (int& variable)      { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-
-//==============================================================================
-#else                               // Windows without intrinsics...
-
-inline void Atomic::increment (int& variable)
-{
-    __asm {
-        mov ecx, dword ptr [variable]
-        lock inc dword ptr [ecx]
-    }
-}
-
-inline int Atomic::incrementAndReturn (int& variable)
-{
-    int result;
-
-    __asm {
-        mov ecx, dword ptr [variable]
-        mov eax, 1
-        lock xadd dword ptr [ecx], eax
-        inc eax
-        mov result, eax
-    }
-
-    return result;
-}
-
-inline void Atomic::decrement (int& variable)
-{
-    __asm {
-        mov ecx, dword ptr [variable]
-        lock dec dword ptr [ecx]
-    }
-}
-
-inline int Atomic::decrementAndReturn (int& variable)
-{
-    int result;
-
-    __asm {
-        mov ecx, dword ptr [variable]
-        mov eax, -1
-        lock xadd dword ptr [ecx], eax
-        dec eax
-        mov result, eax
-    }
-
-    return result;
-}
+inline void  Atomic::increment (int32& variable)                { _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::incrementAndReturn (int32& variable)       { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline void  Atomic::decrement (int32& variable)                { _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::decrementAndReturn (int32& variable)       { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                                { return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
 
 #endif
 

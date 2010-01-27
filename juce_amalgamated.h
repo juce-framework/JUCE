@@ -1445,10 +1445,6 @@ BEGIN_JUCE_NAMESPACE
   #pragma warning (disable: 4786) // (old vc6 warning about long class names)
 #endif
 
-#if JUCE_MAC || JUCE_IPHONE
-  #pragma align=natural
-#endif
-
 // this is where all the class header files get brought in..
 
 /********* Start of inlined file: juce_core_includes.h *********/
@@ -2700,6 +2696,8 @@ public:
 	bool operator== (const MemoryBlock& other) const throw();
 
 	bool operator!= (const MemoryBlock& other) const throw();
+
+	bool matches (const void* data, size_t dataSize) const throw();
 
 	template <class DataType>
 	operator DataType*() const throw()				  { return (DataType*) data; }
@@ -4364,165 +4362,49 @@ private:
 class JUCE_API  Atomic
 {
 public:
-	static void increment (int& variable);
+	static void increment (int32& variable);
 
-	static int incrementAndReturn (int& variable);
+	static int32 incrementAndReturn (int32& variable);
 
-	static void decrement (int& variable);
+	static void decrement (int32& variable);
 
-	static int decrementAndReturn (int& variable);
+	static int32 decrementAndReturn (int32& variable);
+
+	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
 };
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
 
-#include <libkern/OSAtomic.h>
-inline void Atomic::increment (int& variable)		   { OSAtomicIncrement32 ((int32_t*) &variable); }
-inline int  Atomic::incrementAndReturn (int& variable)	  { return OSAtomicIncrement32 ((int32_t*) &variable); }
-inline void Atomic::decrement (int& variable)		   { OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int  Atomic::decrementAndReturn (int& variable)	  { return OSAtomicDecrement32 ((int32_t*) &variable); }
+inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::incrementAndReturn (int32& variable)  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::decrementAndReturn (int32& variable)  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+															{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
 
-#elif JUCE_GCC
+#elif JUCE_GCC			  // Linux...
 
-#if JUCE_USE_GCC_ATOMIC_INTRINSICS	  //  Linux with intrinsics...
+inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
+inline int32 Atomic::incrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, 1); }
+inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::decrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+															{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
 
-inline void Atomic::increment (int& variable)		   { __sync_add_and_fetch (&variable, 1); }
-inline int  Atomic::incrementAndReturn (int& variable)	  { return __sync_add_and_fetch (&variable, 1); }
-inline void Atomic::decrement (int& variable)		   { __sync_add_and_fetch (&variable, -1); }
-inline int  Atomic::decrementAndReturn (int& variable)	  { return __sync_add_and_fetch (&variable, -1); }
+#elif JUCE_USE_INTRINSICS		   // Windows...
 
-#else				   //  Linux without intrinsics...
-
-inline void Atomic::increment (int& variable)
-{
-	__asm__ __volatile__ (
-	#if JUCE_64BIT
-		"lock incl (%%rax)"
-		:
-		: "a" (&variable)
-		: "cc", "memory");
-	#else
-		"lock incl %0"
-		: "=m" (variable)
-		: "m" (variable));
-	#endif
-}
-
-inline int Atomic::incrementAndReturn (int& variable)
-{
-	int result;
-
-	__asm__ __volatile__ (
-	#if JUCE_64BIT
-		"lock xaddl %%ebx, (%%rax) \n\
-		 incl %%ebx"
-		: "=b" (result)
-		: "a" (&variable), "b" (1)
-		: "cc", "memory");
-	#else
-		"lock xaddl %%eax, (%%ecx) \n\
-		 incl %%eax"
-		: "=a" (result)
-		: "c" (&variable), "a" (1)
-		: "memory");
-	#endif
-
-	return result;
-}
-
-inline void Atomic::decrement (int& variable)
-{
-	__asm__ __volatile__ (
-	#if JUCE_64BIT
-		"lock decl (%%rax)"
-		:
-		: "a" (&variable)
-		: "cc", "memory");
-	#else
-		"lock decl %0"
-		: "=m" (variable)
-		: "m" (variable));
-	#endif
-}
-
-inline int Atomic::decrementAndReturn (int& variable)
-{
-	int result;
-
-	__asm__ __volatile__ (
-	#if JUCE_64BIT
-		"lock xaddl %%ebx, (%%rax) \n\
-		 decl %%ebx"
-		: "=b" (result)
-		: "a" (&variable), "b" (-1)
-		: "cc", "memory");
-	#else
-		"lock xaddl %%eax, (%%ecx) \n\
-		 decl %%eax"
-		: "=a" (result)
-		: "c" (&variable), "a" (-1)
-		: "memory");
-	#endif
-	return result;
-}
-#endif
-
-#elif JUCE_USE_INTRINSICS	   // Windows with intrinsics...
-
+// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is
+// declared in juce_win32_Threads.cpp)
 #pragma intrinsic (_InterlockedIncrement)
 #pragma intrinsic (_InterlockedDecrement)
+#pragma intrinsic (_InterlockedCompareExchange)
 
-inline void Atomic::increment (int& variable)		   { _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int  Atomic::incrementAndReturn (int& variable)	  { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline void Atomic::decrement (int& variable)		   { _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int  Atomic::decrementAndReturn (int& variable)	  { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-
-#else				   // Windows without intrinsics...
-
-inline void Atomic::increment (int& variable)
-{
-	__asm {
-		mov ecx, dword ptr [variable]
-		lock inc dword ptr [ecx]
-	}
-}
-
-inline int Atomic::incrementAndReturn (int& variable)
-{
-	int result;
-
-	__asm {
-		mov ecx, dword ptr [variable]
-		mov eax, 1
-		lock xadd dword ptr [ecx], eax
-		inc eax
-		mov result, eax
-	}
-
-	return result;
-}
-
-inline void Atomic::decrement (int& variable)
-{
-	__asm {
-		mov ecx, dword ptr [variable]
-		lock dec dword ptr [ecx]
-	}
-}
-
-inline int Atomic::decrementAndReturn (int& variable)
-{
-	int result;
-
-	__asm {
-		mov ecx, dword ptr [variable]
-		mov eax, -1
-		lock xadd dword ptr [ecx], eax
-		dec eax
-		mov result, eax
-	}
-
-	return result;
-}
+inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
 
 #endif
 
@@ -5118,7 +5000,7 @@ public:
 							// avoids getting warning messages about the parameter being unused
 
 		lock.enter();
-		sortArray (comparator, (ObjectClass*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
 		lock.exit();
 	}
 
@@ -25219,7 +25101,8 @@ protected:
 public:
 	ChoicePropertyComponent (const Value& valueToControl,
 							 const String& propertyName,
-							 const StringArray& choices);
+							 const StringArray& choices,
+							 const Array <int>* choiceIDs = 0);
 
 	~ChoicePropertyComponent();
 
@@ -25240,7 +25123,7 @@ protected:
 private:
 	ComboBox* comboBox;
 
-	void createComboBox();
+	void createComboBox (const Array <int>* choiceIDs);
 
 	ChoicePropertyComponent (const ChoicePropertyComponent&);
 	const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
@@ -27618,10 +27501,6 @@ public:
 #if JUCE_MSVC
   #pragma warning (pop)
   #pragma pack (pop)
-#endif
-
-#if JUCE_MAC || JUCE_IPHONE
-  #pragma align=reset
 #endif
 
 END_JUCE_NAMESPACE

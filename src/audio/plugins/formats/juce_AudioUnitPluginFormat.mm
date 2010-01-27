@@ -351,8 +351,8 @@ private:
         {
             for (int i = 0; i < supportedChannelsSize / sizeof (AUChannelInfo); ++i)
             {
-                numIns = jmax (numIns, supportedChannels[i].inChannels);
-                numOuts = jmax (numOuts, supportedChannels[i].outChannels);
+                numIns = jmax (numIns, (int) supportedChannels[i].inChannels);
+                numOuts = jmax (numOuts, (int) supportedChannels[i].outChannels);
             }
         }
         else

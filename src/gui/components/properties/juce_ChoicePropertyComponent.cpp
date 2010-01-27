@@ -39,12 +39,13 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                   const String& name,
-                                                  const StringArray& choices_)
+                                                  const StringArray& choices_,
+                                                  const Array <int>* choiceIDs)
     : PropertyComponent (name),
       choices (choices_),
       comboBox (0)
 {
-    createComboBox();
+    createComboBox (choiceIDs);
 
     comboBox->getSelectedIdAsValue().referTo (valueToControl);
 }
@@ -55,14 +56,18 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 }
 
 //==============================================================================
-void ChoicePropertyComponent::createComboBox()
+void ChoicePropertyComponent::createComboBox (const Array <int>* choiceIDs)
 {
+    // The array of IDs must contain the same number of values as the choices list!
+    jassert (choiceIDs == 0 || choiceIDs->size() == choices.size());
+
     addAndMakeVisible (comboBox = new ComboBox (String::empty));
 
     for (int i = 0; i < choices.size(); ++i)
     {
         if (choices[i].isNotEmpty())
-            comboBox->addItem (choices[i], i + 1);
+            comboBox->addItem (choices[i], choiceIDs == 0 ? (i + 1)
+                                                          : ((*choiceIDs)[i]));
         else
             comboBox->addSeparator();
     }
@@ -90,7 +95,7 @@ void ChoicePropertyComponent::refresh()
 {
     if (comboBox == 0)
     {
-        createComboBox();
+        createComboBox (0);
         comboBox->addListener (this);
     }
 

@@ -79,12 +79,6 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
             jassert (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
             jassert (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);
 
-            // quick test to make sure the run-time lib doesn't crash on freeing a null-pointer.
-            SystemStats* nullPointer = 0;
-            juce_free (nullPointer);
-            delete[] nullPointer;
-            delete nullPointer;
-
             // Some quick stream tests..
             int randomInt = Random::getSystemRandom().nextInt();
             int64 randomInt64 = Random::getSystemRandom().nextInt64();

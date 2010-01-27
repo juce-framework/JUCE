@@ -41,7 +41,7 @@
 
 //=============================================================================
 /** JUCE_FORCE_DEBUG: Normally, JUCE_DEBUG is set to 1 or 0 based on compiler and
-    project settings, but if you define this value, you can override this can force
+    project settings, but if you define this value, you can override this to force
     it to be true or false.
 */
 #ifndef JUCE_FORCE_DEBUG
@@ -123,7 +123,7 @@
   #define JUCE_USE_FLAC 1
 #endif
 
-/** JUCE_USE_OGGBORBIS: Enables the Ogg-Vorbis audio codec classes (available on all platforms).
+/** JUCE_USE_OGGVORBIS: Enables the Ogg-Vorbis audio codec classes (available on all platforms).
     If your app doesn't need to read Ogg-Vorbis files, you might want to disable this to
     reduce the size of your codebase and build time.
 */

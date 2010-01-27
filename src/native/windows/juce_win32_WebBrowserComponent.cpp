@@ -79,10 +79,18 @@ public:
         if (browser != 0)
         {
             LPSAFEARRAY sa = 0;
-            _variant_t flags, frame, postDataVar, headersVar;
+
+            VARIANT flags, frame, postDataVar, headersVar;  // (_variant_t isn't available in all compilers)
+            VariantInit (&flags);
+            VariantInit (&frame);
+            VariantInit (&postDataVar);
+            VariantInit (&headersVar);
 
             if (headers != 0)
-                headersVar = (const tchar*) headers->joinIntoString ("\r\n");
+            {
+                V_VT (&headersVar) = VT_BSTR;
+                V_BSTR (&headersVar) = SysAllocString ((const tchar*) headers->joinIntoString ("\r\n"));
+            }
 
             if (postData != 0 && postData->getSize() > 0)
             {
@@ -115,6 +123,11 @@ public:
 
             if (sa != 0)
                 SafeArrayDestroy (sa);
+
+            VariantClear (&flags);
+            VariantClear (&frame);
+            VariantClear (&postDataVar);
+            VariantClear (&headersVar);
         }
     }
 

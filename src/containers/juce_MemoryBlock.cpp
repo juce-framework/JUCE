@@ -98,13 +98,18 @@ MemoryBlock& MemoryBlock::operator= (const MemoryBlock& other) throw()
 //==============================================================================
 bool MemoryBlock::operator== (const MemoryBlock& other) const throw()
 {
-    return (size == other.size)
-            && (memcmp (data, other.data, size) == 0);
+    return matches (other.data, other.size);
 }
 
 bool MemoryBlock::operator!= (const MemoryBlock& other) const throw()
 {
     return ! operator== (other);
+}
+
+bool MemoryBlock::matches (const void* dataToCompare, size_t dataSize) const throw()
+{
+    return size == dataSize
+            && memcmp (data, dataToCompare, size) == 0;
 }
 
 //==============================================================================

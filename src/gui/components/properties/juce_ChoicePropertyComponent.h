@@ -63,12 +63,20 @@ protected:
 public:
     /** Creates the component.
 
-        Your subclass's constructor must add a list of options to the choices
-        member variable.
+        @param valueToControl   the value that the combo box will read and control
+        @param propertyName     the name of the property
+        @param choices          the list of possible values that the user can choose between
+        @param choiceIDs        if this is 0, then the value corresponding to each item in the
+                                'choices' StringArray is simply its index + 1. But if the
+                                choiceIDs parameter is specified, it lets you provide a set
+                                of IDs for each item in the choices list. If you use this
+                                parameter, it must contain the same number of elements as
+                                the choices list.
     */
     ChoicePropertyComponent (const Value& valueToControl,
                              const String& propertyName,
-                             const StringArray& choices);
+                             const StringArray& choices,
+                             const Array <int>* choiceIDs = 0);
 
     /** Destructor. */
     ~ChoicePropertyComponent();
@@ -113,7 +121,7 @@ protected:
 private:
     ComboBox* comboBox;
 
-    void createComboBox();
+    void createComboBox (const Array <int>* choiceIDs);
 
     ChoicePropertyComponent (const ChoicePropertyComponent&);
     const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
