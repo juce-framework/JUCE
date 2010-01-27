@@ -718,7 +718,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         lock.enter();
-        sortArray (comparator, (ObjectClass*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
         lock.exit();
     }
 
