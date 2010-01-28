@@ -30,6 +30,7 @@
 
 #include "juce_AudioFormatReader.h"
 #include "../../containers/juce_Array.h"
+#include "../../containers/juce_ScopedPointer.h"
 #include "../../text/juce_StringArray.h"
 #if JUCE_MAC
 #include "../../io/files/juce_File.h"
@@ -152,13 +153,13 @@ private:
 
 #if JUCE_MAC
     File volumeDir;
-    OwnedArray<File> tracks;
-    Array <int> trackStartSamples;
+    Array<File> tracks;
+    Array<int> trackStartSamples;
     int currentReaderTrack;
     ScopedPointer <AudioFormatReader> reader;
     AudioCDReader (const File& volume);
 public:
-    static int compareElements (const File* const, const File* const) throw();
+    static int compareElements (const File&, const File&);
 private:
 
 #elif JUCE_WINDOWS

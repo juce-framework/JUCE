@@ -79,7 +79,7 @@ using namespace JUCE_NAMESPACE;
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-void FileChooser::showPlatformDialog (OwnedArray<File>& results,
+void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
                                       const String& filter,
@@ -133,7 +133,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
     {
         if (isSaveDialogue)
         {
-            results.add (new File (nsStringToJuce ([panel filename])));
+            results.add (File (nsStringToJuce ([panel filename])));
         }
         else
         {
@@ -142,7 +142,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
             for (unsigned int i = 0; i < [urls count]; ++i)
             {
                 NSString* f = [urls objectAtIndex: i];
-                results.add (new File (nsStringToJuce (f)));
+                results.add (File (nsStringToJuce (f)));
             }
         }
     }
@@ -153,7 +153,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
 #else
 
 //==============================================================================
-void FileChooser::showPlatformDialog (OwnedArray<File>& results,
+void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
                                       const String& filter,

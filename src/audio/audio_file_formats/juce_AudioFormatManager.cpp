@@ -33,6 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_FlacAudioFormat.h"
 #include "juce_OggVorbisAudioFormat.h"
 #include "../../io/files/juce_FileInputStream.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 
 //==============================================================================

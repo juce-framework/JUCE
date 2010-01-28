@@ -28,7 +28,7 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-void FileChooser::showPlatformDialog (OwnedArray<File>& results,
+void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& file,
                                       const String& filters,
@@ -90,7 +90,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
             tokens.add (resultString);
 
         for (int i = 0; i < tokens.size(); i++)
-            results.add (new File (tokens[i]));
+            results.add (File (tokens[i]));
 
         return;
     }

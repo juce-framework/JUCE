@@ -78,6 +78,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_FlacAudioFormat.h"
 #include "../../text/juce_LocalisedStrings.h"
+#include "../../containers/juce_ScopedPointer.h"
 
 using namespace FlacNamespace;
 

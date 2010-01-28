@@ -212,7 +212,7 @@ private:
 
     int flags;
     File currentRoot;
-    OwnedArray <File> chosenFiles;
+    Array<File> chosenFiles;
     SortedSet <void*> listeners;
 
     DirectoryContentsDisplayComponent* fileListComponent;

@@ -126,7 +126,7 @@ int main (int argc, char* argv[])
               << " from files in " << (const char*) sourceDirectory.getFullPathName()
               << "..." << std::endl << std::endl;
 
-    OwnedArray <File> files;
+    Array <File> files;
     sourceDirectory.findChildFiles (files, File::findFiles, true,
                                     (argc > 4) ? argv[4] : "*");
 
@@ -171,7 +171,7 @@ int main (int argc, char* argv[])
 
     for (int i = 0; i < files.size(); ++i)
     {
-        const File file (*(files[i]));
+        const File file (files[i]);
 
         // (avoid source control files and hidden files..)
         if (! isHiddenFile (file, sourceDirectory))

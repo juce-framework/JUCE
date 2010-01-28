@@ -278,7 +278,6 @@ public:
 
 private:
     //==============================================================================
-    friend class MidiComparator;
     friend class MidiFile;
     OwnedArray <MidiEventHolder> list;
 

@@ -87,15 +87,10 @@ const File FileChooser::getResult() const
     // to retrieve all the files that were chosen.
     jassert (results.size() <= 1);
 
-    const File* const f = results.getFirst();
-
-    if (f != 0)
-        return *f;
-
-    return File::nonexistent;
+    return results.getFirst();
 }
 
-const OwnedArray <File>& FileChooser::getResults() const
+const Array<File>& FileChooser::getResults() const
 {
     return results;
 }
@@ -161,7 +156,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
         if (box.show())
         {
             for (int i = 0; i < browserComponent.getNumSelectedFiles(); ++i)
-                results.add (new File (browserComponent.getSelectedFile (i)));
+                results.add (browserComponent.getSelectedFile (i));
         }
     }
 

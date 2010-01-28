@@ -142,10 +142,9 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-    /** @internal */
-    class Token;
-
 private:
+    class Token;
+    friend class OwnedArray <Token>;
     OwnedArray <Token> tokens;
     int totalLines;
 };

@@ -101,8 +101,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    OwnedArray <File> filesFound;
-    OwnedArray <File> dirsFound;
+    Array <File> filesFound;
+    Array <File> dirsFound;
     String wildCard;
     int index;
     const int whatToLookFor;

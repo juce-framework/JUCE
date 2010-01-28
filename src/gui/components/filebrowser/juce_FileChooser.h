@@ -167,7 +167,7 @@ public:
 
         @see getResult
     */
-    const OwnedArray <File>& getResults() const;
+    const Array<File>& getResults() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -175,7 +175,7 @@ public:
 private:
     String title, filters;
     File startingFile;
-    OwnedArray <File> results;
+    Array<File> results;
     bool useNativeDialogBox;
 
     bool showDialog (const bool selectsDirectories,
@@ -185,7 +185,7 @@ private:
                      const bool selectMultipleFiles,
                      FilePreviewComponent* const previewComponent);
 
-    static void showPlatformDialog (OwnedArray<File>& results,
+    static void showPlatformDialog (Array<File>& results,
                                     const String& title,
                                     const File& file,
                                     const String& filters,

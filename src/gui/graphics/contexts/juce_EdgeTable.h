@@ -203,6 +203,7 @@ private:
     void addEdgePoint (const int x, const int y, const int winding) throw();
     void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
     void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
+    void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
     void sanitiseLevels (const bool useNonZeroWinding) throw();
 };
 

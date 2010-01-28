@@ -275,7 +275,9 @@ void MagnifierComponent::paint (Graphics& g)
     }
 
     g.setImageResamplingQuality (quality);
-    g.drawImageTransformed (&temp, temp.getBounds(), AffineTransform::scale (scaleFactor, scaleFactor), false);
+    g.drawImageTransformed (&temp, temp.getBounds(),
+                            AffineTransform::scale ((float) scaleFactor, (float) scaleFactor),
+                            false);
 }
 
 void MagnifierComponent::childBoundsChanged (Component* c)

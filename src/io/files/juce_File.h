@@ -26,7 +26,7 @@
 #ifndef __JUCE_FILE_JUCEHEADER__
 #define __JUCE_FILE_JUCEHEADER__
 
-#include "../../containers/juce_OwnedArray.h"
+#include "../../containers/juce_Array.h"
 #include "../../core/juce_Time.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_MemoryBlock.h"
@@ -529,7 +529,7 @@ public:
 
         @see getNumberOfChildFiles, DirectoryIterator
     */
-    int findChildFiles (OwnedArray<File>& results,
+    int findChildFiles (Array<File>& results,
                         const int whatToLookFor,
                         const bool searchRecursively,
                         const String& wildCardPattern = JUCE_T("*")) const;
@@ -671,7 +671,7 @@ public:
         to which ones are available. On the Mac/Linux, this will probably
         just add a single entry for "/".
     */
-    static void findFileSystemRoots (OwnedArray<File>& results);
+    static void findFileSystemRoots (Array<File>& results);
 
     /** Finds the name of the drive on which this file lives.
 

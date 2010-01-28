@@ -69,7 +69,7 @@ public:
 };
 
 //==============================================================================
-class CodeEditorLine
+class CodeEditorComponent::CodeEditorLine
 {
 public:
     CodeEditorLine() throw()
@@ -86,11 +86,12 @@ public:
                  const CodeDocument::Position& selectionStart,
                  const CodeDocument::Position& selectionEnd)
     {
-        OwnedArray <SyntaxToken> newTokens;
+        Array <SyntaxToken> newTokens;
+        newTokens.ensureStorageAllocated (8);
 
         if (analyser == 0)
         {
-            newTokens.add (new SyntaxToken (document.getLine (lineNum), -1));
+            newTokens.add (SyntaxToken (document.getLine (lineNum), -1));
         }
         else if (lineNum < document.getNumLines())
         {
@@ -128,7 +129,7 @@ public:
 
                 for (int i = newTokens.size(); --i >= 0;)
                 {
-                    if (*tokens.getUnchecked(i) != *newTokens.getUnchecked(i))
+                    if (tokens.getReference(i) != newTokens.getReference(i))
                     {
                         allTheSame = false;
                         break;
@@ -159,22 +160,22 @@ public:
 
         for (int i = 0; i < tokens.size(); ++i)
         {
-            SyntaxToken* const token = tokens.getUnchecked(i);
+            SyntaxToken& token = tokens.getReference(i);
 
-            if (lastType != token->tokenType)
+            if (lastType != token.tokenType)
             {
-                lastType = token->tokenType;
+                lastType = token.tokenType;
                 g.setColour (owner.getColourForTokenType (lastType));
             }
 
-            g.drawSingleLineText (token->text, roundToInt (x), y + baselineOffset);
+            g.drawSingleLineText (token.text, roundToInt (x), y + baselineOffset);
 
             if (i < tokens.size() - 1)
             {
-                if (token->width < 0)
-                    token->width = font.getStringWidthFloat (token->text);
+                if (token.width < 0)
+                    token.width = font.getStringWidthFloat (token.text);
 
-                x += token->width;
+                x += token.width;
             }
         }
     }
@@ -197,13 +198,13 @@ private:
         }
     };
 
-    OwnedArray <SyntaxToken> tokens;
+    Array <SyntaxToken> tokens;
     int highlightColumnStart, highlightColumnEnd;
 
     static void createTokens (int startPosition, const String& lineText,
                               CodeDocument::Iterator& source,
                               CodeTokeniser* analyser,
-                              OwnedArray <SyntaxToken>& newTokens)
+                              Array <SyntaxToken>& newTokens)
     {
         CodeDocument::Iterator lastIterator (source);
         const int lineLength = lineText.length();
@@ -222,8 +223,8 @@ private:
             if (tokenEnd > 0)
             {
                 tokenStart -= startPosition;
-                newTokens.add (new SyntaxToken (lineText.substring (jmax (0, tokenStart), tokenEnd),
-                                                tokenType));
+                newTokens.add (SyntaxToken (lineText.substring (jmax (0, tokenStart), tokenEnd),
+                                            tokenType));
 
                 if (tokenEnd >= lineLength)
                     break;
@@ -235,24 +236,24 @@ private:
         source = lastIterator;
     }
 
-    static void replaceTabsWithSpaces (OwnedArray <SyntaxToken>& tokens, const int spacesPerTab) throw()
+    static void replaceTabsWithSpaces (Array <SyntaxToken>& tokens, const int spacesPerTab) throw()
     {
         int x = 0;
         for (int i = 0; i < tokens.size(); ++i)
         {
-            SyntaxToken* const t = tokens.getUnchecked(i);
+            SyntaxToken& t = tokens.getReference(i);
 
             for (;;)
             {
-                int tabPos = t->text.indexOfChar (T('\t'));
+                int tabPos = t.text.indexOfChar (T('\t'));
                 if (tabPos < 0)
                     break;
 
                 const int spacesNeeded = spacesPerTab - ((tabPos + x) % spacesPerTab);
-                t->text = t->text.replaceSection (tabPos, 1, String::repeatedString (T(" "), spacesNeeded));
+                t.text = t.text.replaceSection (tabPos, 1, String::repeatedString (T(" "), spacesNeeded));
             }
 
-            x += t->text.length();
+            x += t.text.length();
         }
     }
 

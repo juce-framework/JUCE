@@ -332,6 +332,7 @@ public:
 
 private:
     class OpenGLComponentWatcher;
+    friend class ScopedPointer <OpenGLComponentWatcher>;
     ScopedPointer <OpenGLComponentWatcher> componentWatcher;
 
     OpenGLContext* context;

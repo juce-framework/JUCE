@@ -143,7 +143,7 @@ private:
 };
 
 //==============================================================================
-void FileChooser::showPlatformDialog (OwnedArray<File>& results,
+void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& currentFileOrDirectory,
                                       const String& filter,
@@ -234,7 +234,7 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
             {
                 const String stringFName (fname);
 
-                results.add (new File (File (stringFName).getSiblingFile (returnedString)));
+                results.add (File (stringFName).getSiblingFile (returnedString));
                 returnedString = String::empty;
 
                 return;
@@ -325,13 +325,13 @@ void FileChooser::showPlatformDialog (OwnedArray<File>& results,
         while (*filename != 0)
         {
             const String filepath (String (files) + T("\\") + String (filename));
-            results.add (new File (filepath));
+            results.add (File (filepath));
             filename += CharacterFunctions::length (filename) + 1;
         }
     }
     else if (files[0] != 0)
     {
-        results.add (new File (files));
+        results.add (File (files));
     }
 }
 

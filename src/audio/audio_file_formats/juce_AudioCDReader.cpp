@@ -39,36 +39,36 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/streams/juce_BufferedInputStream.h"
 
 
-static void findCDs (OwnedArray<File>& cds)
+static void findCDs (Array<File>& cds)
 {
     File volumes ("/Volumes");
     volumes.findChildFiles (cds, File::findDirectories, false);
 
     for (int i = cds.size(); --i >= 0;)
-        if (! cds[i]->getChildFile (".TOC.plist").exists())
+        if (! cds.getReference(i).getChildFile (".TOC.plist").exists())
             cds.remove (i);
 }
 
 const StringArray AudioCDReader::getAvailableCDNames()
 {
-    OwnedArray<File> cds;
+    Array<File> cds;
     findCDs (cds);
 
     StringArray names;
 
     for (int i = 0; i < cds.size(); ++i)
-        names.add (cds[i]->getFileName());
+        names.add (cds.getReference(i).getFileName());
 
     return names;
 }
 
 AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 {
-    OwnedArray<File> cds;
+    Array<File> cds;
     findCDs (cds);
 
-    if (cds[index] != 0)
-        return new AudioCDReader (*cds[index]);
+    if (cds[index] != File::nonexistent)
+        return new AudioCDReader (cds[index]);
     else
         return 0;
 }
@@ -98,10 +98,10 @@ static int getTrackNumber (const File& file)
                .getIntValue();
 }
 
-int AudioCDReader::compareElements (const File* const first, const File* const second) throw()
+int AudioCDReader::compareElements (const File& first, const File& second)
 {
-    const int firstTrack  = getTrackNumber (*first);
-    const int secondTrack = getTrackNumber (*second);
+    const int firstTrack  = getTrackNumber (first);
+    const int secondTrack = getTrackNumber (second);
 
     jassert (firstTrack > 0 && secondTrack > 0);
 
@@ -123,7 +123,7 @@ void AudioCDReader::refreshTrackLengths()
     {
         trackStartSamples.add (sample);
 
-        FileInputStream* const in = tracks[i]->createInputStream();
+        FileInputStream* const in = tracks.getReference(i).createInputStream();
 
         if (in != 0)
         {
@@ -161,22 +161,19 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
         {
             reader = 0;
 
-            if (tracks [track] != 0)
+            FileInputStream* const in = tracks [track].createInputStream();
+
+            if (in != 0)
             {
-                FileInputStream* const in = tracks [track]->createInputStream();
+                BufferedInputStream* const bin = new BufferedInputStream (in, 65536, true);
 
-                if (in != 0)
-                {
-                    BufferedInputStream* const bin = new BufferedInputStream (in, 65536, true);
+                AiffAudioFormat format;
+                reader = format.createReaderFor (bin, true);
 
-                    AiffAudioFormat format;
-                    reader = format.createReaderFor (bin, true);
-
-                    if (reader == 0)
-                        currentReaderTrack = -1;
-                    else
-                        currentReaderTrack = track;
-                }
+                if (reader == 0)
+                    currentReaderTrack = -1;
+                else
+                    currentReaderTrack = track;
             }
         }
 
@@ -212,7 +209,7 @@ int AudioCDReader::getPositionOfTrackStart (int trackNum) const
 
 bool AudioCDReader::isTrackAudio (int trackNum) const
 {
-    return tracks [trackNum] != 0;
+    return tracks [trackNum] != File::nonexistent;
 }
 
 void AudioCDReader::enableIndexScanning (bool b)

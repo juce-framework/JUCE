@@ -77,7 +77,7 @@ DirectoryIterator::DirectoryIterator (const File& directory,
                          && ((whatToLookFor_ & File::ignoreHiddenFiles) == 0
                               || ! isHidden))
                     {
-                        dirsFound.add (new File (path + filename, 0));
+                        dirsFound.add (File (path + filename, 0));
                     }
 
                     addToList = (whatToLookFor_ & File::findDirectories) != 0;
@@ -96,7 +96,7 @@ DirectoryIterator::DirectoryIterator (const File& directory,
                     addToList = ! isHidden;
 
                 if (addToList)
-                    filesFound.add (new File (path + filename, 0));
+                    filesFound.add (File (path + filename, 0));
             }
 
         } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
@@ -126,7 +126,7 @@ bool DirectoryIterator::next()
 
     if (index >= filesFound.size())
     {
-        subIterator = new DirectoryIterator (*(dirsFound [index - filesFound.size()]),
+        subIterator = new DirectoryIterator (dirsFound.getReference (index - filesFound.size()),
                                              true, wildCard, whatToLookFor);
         return next();
     }
@@ -139,10 +139,7 @@ const File DirectoryIterator::getFile() const
     if (subIterator != 0)
         return subIterator->getFile();
 
-    const File* const f = filesFound [index];
-
-    return (f != 0) ? *f
-                    : File::nonexistent;
+    return filesFound [index];
 }
 
 float DirectoryIterator::getEstimatedProgress() const

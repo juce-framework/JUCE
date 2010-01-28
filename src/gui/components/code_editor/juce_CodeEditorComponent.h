@@ -30,7 +30,6 @@
 #include "../layout/juce_ScrollBar.h"
 #include "juce_CodeDocument.h"
 #include "juce_CodeTokeniser.h"
-class CodeEditorLine;
 
 
 //==============================================================================
@@ -271,6 +270,7 @@ private:
     CodeTokeniser* codeTokeniser;
     Array <Colour> coloursForTokenCategories;
 
+    class CodeEditorLine;
     OwnedArray <CodeEditorLine> lines;
     void rebuildLineTokens();
 

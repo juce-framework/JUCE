@@ -130,7 +130,7 @@ public:
         @returns the number of files added to the array
         @see File::findChildFiles
     */
-    int findChildFiles (OwnedArray<File>& results,
+    int findChildFiles (Array<File>& results,
                         const int whatToLookFor,
                         const bool searchRecursively,
                         const String& wildCardPattern = JUCE_T("*")) const;

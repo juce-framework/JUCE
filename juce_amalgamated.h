@@ -3962,7 +3962,7 @@ public:
 		ignoreHiddenFiles	   = 4	 /**< Add this flag to avoid returning any hidden files in the results. */
 	};
 
-	int findChildFiles (OwnedArray<File>& results,
+	int findChildFiles (Array<File>& results,
 						const int whatToLookFor,
 						const bool searchRecursively,
 						const String& wildCardPattern = JUCE_T("*")) const;
@@ -3994,7 +3994,7 @@ public:
 						  const bool asUnicode = false,
 						  const bool writeUnicodeHeaderBytes = false) const;
 
-	static void findFileSystemRoots (OwnedArray<File>& results);
+	static void findFileSystemRoots (Array<File>& results);
 
 	const String getVolumeLabel() const;
 
@@ -7281,8 +7281,8 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	OwnedArray <File> filesFound;
-	OwnedArray <File> dirsFound;
+	Array <File> filesFound;
+	Array <File> dirsFound;
 	String wildCard;
 	int index;
 	const int whatToLookFor;
@@ -7414,7 +7414,7 @@ public:
 
 	void removeNonExistentPaths();
 
-	int findChildFiles (OwnedArray<File>& results,
+	int findChildFiles (Array<File>& results,
 						const int whatToLookFor,
 						const bool searchRecursively,
 						const String& wildCardPattern = JUCE_T("*")) const;
@@ -9655,6 +9655,7 @@ private:
 	void addEdgePoint (const int x, const int y, const int winding) throw();
 	void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
 	void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
+	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
 	void sanitiseLevels (const bool useNonZeroWinding) throw();
 };
 
@@ -9873,7 +9874,6 @@ private:
 /********* End of inlined file: juce_Path.h *********/
 
 class Font;
-class CustomTypefaceGlyphInfo;
 
 class JUCE_API  Typeface  : public ReferenceCountedObject
 {
@@ -9952,14 +9952,16 @@ protected:
 
 private:
 
-	OwnedArray <CustomTypefaceGlyphInfo> glyphs;
+	class GlyphInfo;
+	friend class OwnedArray<GlyphInfo>;
+	OwnedArray <GlyphInfo> glyphs;
 	short lookupTable [128];
 
 	CustomTypeface (const CustomTypeface&);
 	const CustomTypeface& operator= (const CustomTypeface&);
 
-	CustomTypefaceGlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
-	CustomTypefaceGlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
+	GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
+	GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
@@ -13420,13 +13422,13 @@ private:
 
 #if JUCE_MAC
 	File volumeDir;
-	OwnedArray<File> tracks;
-	Array <int> trackStartSamples;
+	Array<File> tracks;
+	Array<int> trackStartSamples;
 	int currentReaderTrack;
 	ScopedPointer <AudioFormatReader> reader;
 	AudioCDReader (const File& volume);
 public:
-	static int compareElements (const File* const, const File* const) throw();
+	static int compareElements (const File&, const File&);
 private:
 
 #elif JUCE_WINDOWS
@@ -16737,7 +16739,6 @@ public:
 
 private:
 
-	friend class MidiComparator;
 	friend class MidiFile;
 	OwnedArray <MidiEventHolder> list;
 
@@ -20109,8 +20110,6 @@ public:
 #endif   // __JUCE_CODETOKENISER_JUCEHEADER__
 /********* End of inlined file: juce_CodeTokeniser.h *********/
 
-class CodeEditorLine;
-
 class JUCE_API  CodeEditorComponent   : public Component,
 										public Timer,
 										public ScrollBarListener,
@@ -20251,6 +20250,7 @@ private:
 	CodeTokeniser* codeTokeniser;
 	Array <Colour> coloursForTokenCategories;
 
+	class CodeEditorLine;
 	OwnedArray <CodeEditorLine> lines;
 	void rebuildLineTokens();
 
@@ -21763,7 +21763,7 @@ private:
 
 	int flags;
 	File currentRoot;
-	OwnedArray <File> chosenFiles;
+	Array<File> chosenFiles;
 	SortedSet <void*> listeners;
 
 	DirectoryContentsDisplayComponent* fileListComponent;
@@ -21817,14 +21817,14 @@ public:
 
 	const File getResult() const;
 
-	const OwnedArray <File>& getResults() const;
+	const Array<File>& getResults() const;
 
 	juce_UseDebuggingNewOperator
 
 private:
 	String title, filters;
 	File startingFile;
-	OwnedArray <File> results;
+	Array<File> results;
 	bool useNativeDialogBox;
 
 	bool showDialog (const bool selectsDirectories,
@@ -21834,7 +21834,7 @@ private:
 					 const bool selectMultipleFiles,
 					 FilePreviewComponent* const previewComponent);
 
-	static void showPlatformDialog (OwnedArray<File>& results,
+	static void showPlatformDialog (Array<File>& results,
 									const String& title,
 									const File& file,
 									const String& filters,
@@ -23862,9 +23862,9 @@ public:
 
 	juce_UseDebuggingNewOperator
 
-	class Token;
-
 private:
+	class Token;
+	friend class OwnedArray <Token>;
 	OwnedArray <Token> tokens;
 	int totalLines;
 };
@@ -25921,6 +25921,7 @@ public:
 
 private:
 	class OpenGLComponentWatcher;
+	friend class ScopedPointer <OpenGLComponentWatcher>;
 	ScopedPointer <OpenGLComponentWatcher> componentWatcher;
 
 	OpenGLContext* context;

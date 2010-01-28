@@ -32,7 +32,6 @@
 #include "../../../io/streams/juce_OutputStream.h"
 #include "../geometry/juce_Path.h"
 class Font;
-class CustomTypefaceGlyphInfo;
 
 
 //==============================================================================
@@ -220,14 +219,16 @@ protected:
 
 private:
     //==============================================================================
-    OwnedArray <CustomTypefaceGlyphInfo> glyphs;
+    class GlyphInfo;
+    friend class OwnedArray<GlyphInfo>;
+    OwnedArray <GlyphInfo> glyphs;
     short lookupTable [128];
 
     CustomTypeface (const CustomTypeface&);
     const CustomTypeface& operator= (const CustomTypeface&);
 
-    CustomTypefaceGlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
-    CustomTypefaceGlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
+    GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
+    GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__

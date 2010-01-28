@@ -198,11 +198,11 @@ void KnownPluginList::scanAndAddDragAndDroppedFiles (const StringArray& files,
                 StringArray s;
 
                 {
-                    OwnedArray <File> subFiles;
+                    Array<File> subFiles;
                     f.findChildFiles (subFiles, File::findFilesAndDirectories, false);
 
                     for (int j = 0; j < subFiles.size(); ++j)
-                        s.add (subFiles.getUnchecked (j)->getFullPathName());
+                        s.add (subFiles.getReference(j).getFullPathName());
                 }
 
                 scanAndAddDragAndDroppedFiles (s, typesFound);

@@ -66,7 +66,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     }
     else
     {
-        chosenFiles.add (new File (initialFileOrDirectory));
+        chosenFiles.add (initialFileOrDirectory);
         currentRoot = initialFileOrDirectory.getParentDirectory();
         filename = initialFileOrDirectory.getFileName();
     }
@@ -182,7 +182,7 @@ const File FileBrowserComponent::getSelectedFile (int index) const throw()
     if (! filenameBox->isReadOnly())
         return currentRoot.getChildFile (filenameBox->getText());
     else
-        return chosenFiles[index] != 0 ? *chosenFiles[index] : File::nonexistent;
+        return chosenFiles[index];
 }
 
 bool FileBrowserComponent::currentFileIsValid() const
@@ -337,7 +337,7 @@ void FileBrowserComponent::selectionChanged()
                 resetChosenFiles = false;
             }
 
-            chosenFiles.add (new File (f));
+            chosenFiles.add (f);
             newFilenames.add (f.getRelativePathFrom (getRoot()));
         }
     }
@@ -422,7 +422,7 @@ void FileBrowserComponent::textEditorReturnKeyPressed (TextEditor&)
         {
             setRoot (f.getParentDirectory());
             chosenFiles.clear();
-            chosenFiles.add (new File (f));
+            chosenFiles.add (f);
             filenameBox->setText (f.getFileName());
         }
     }
@@ -490,27 +490,27 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
     BitArray separators;
 
 #if JUCE_WINDOWS
-    OwnedArray<File> roots;
+    Array<File> roots;
     File::findFileSystemRoots (roots);
     rootPaths.clear();
 
     for (int i = 0; i < roots.size(); ++i)
     {
-        const File* const drive = roots.getUnchecked(i);
+        const File& drive = roots.getReference(i);
 
-        String name (drive->getFullPathName());
+        String name (drive.getFullPathName());
         rootPaths.add (name);
 
-        if (drive->isOnHardDisk())
+        if (drive.isOnHardDisk())
         {
-            String volume (drive->getVolumeLabel());
+            String volume (drive.getVolumeLabel());
 
             if (volume.isEmpty())
                 volume = TRANS("Hard Drive");
 
-            name << " [" << drive->getVolumeLabel() << ']';
+            name << " [" << drive.getVolumeLabel() << ']';
         }
-        else if (drive->isOnCDRomDrive())
+        else if (drive.isOnCDRomDrive())
         {
             name << TRANS(" [CD/DVD drive]");
         }
@@ -536,18 +536,18 @@ const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArr
 
     separators.setBit (rootPaths.size());
 
-    OwnedArray <File> volumes;
+    Array <File> volumes;
     File vol ("/Volumes");
     vol.findChildFiles (volumes, File::findDirectories, false);
 
     for (int i = 0; i < volumes.size(); ++i)
     {
-        const File* const volume = volumes.getUnchecked(i);
+        const File& volume = volumes.getReference(i);
 
-        if (volume->isDirectory() && ! volume->getFileName().startsWithChar (T('.')))
+        if (volume.isDirectory() && ! volume.getFileName().startsWithChar (T('.')))
         {
-            rootPaths.add (volume->getFullPathName());
-            rootNames.add (volume->getFileName());
+            rootPaths.add (volume.getFullPathName());
+            rootNames.add (volume.getFileName());
         }
     }
 #endif
