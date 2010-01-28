@@ -483,7 +483,7 @@
   #include <intrin.h>
 #endif
 
-#if JUCE_MAC
+#if JUCE_MAC || JUCE_IPHONE
   #include <libkern/OSAtomic.h>
 #endif
 
