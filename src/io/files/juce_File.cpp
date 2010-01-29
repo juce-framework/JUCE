@@ -206,6 +206,11 @@ File::File (const String& path, int)
 {
 }
 
+const File File::createFileWithoutCheckingPath (const String& path)
+{
+    return File (path, 0);
+}
+
 File::File (const File& other)
     : fullPath (other.fullPath)
 {

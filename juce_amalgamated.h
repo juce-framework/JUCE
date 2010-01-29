@@ -3101,20 +3101,20 @@ public:
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
 
 inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::incrementAndReturn (int32& variable)  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::incrementAndReturn (int32& variable)	  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
 inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::decrementAndReturn (int32& variable)  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::decrementAndReturn (int32& variable)	  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
 inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-															{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
+																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
 
 #elif JUCE_GCC			  // Linux...
 
 inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
-inline int32 Atomic::incrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, 1); }
+inline int32 Atomic::incrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, 1); }
 inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
-inline int32 Atomic::decrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::decrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, -1); }
 inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-															{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+																{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
 
 #elif JUCE_USE_INTRINSICS		   // Windows...
 
@@ -4479,6 +4479,8 @@ public:
 	static bool areFileNamesCaseSensitive();
 
 	static bool isAbsolutePath (const String& path);
+
+	static const File createFileWithoutCheckingPath (const String& path);
 
 	juce_UseDebuggingNewOperator
 
@@ -18106,7 +18108,7 @@ public:
 
 		AudioProcessor* const processor;
 
-		PropertySet properties;
+		NamedValueSet properties;
 
 		typedef ReferenceCountedObjectPtr <Node> Ptr;
 

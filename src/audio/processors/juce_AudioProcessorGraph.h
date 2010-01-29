@@ -29,7 +29,7 @@
 #include "juce_AudioProcessor.h"
 #include "../plugins/juce_AudioPluginFormatManager.h"
 #include "../plugins/juce_KnownPluginList.h"
-#include "../../containers/juce_PropertySet.h"
+#include "../../containers/juce_NamedValueSet.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 
 
@@ -91,7 +91,7 @@ public:
             useful. For example, you might store an x and y position if your application
             is displaying the nodes on-screen.
         */
-        PropertySet properties;
+        NamedValueSet properties;
 
         //==============================================================================
         /** A convenient typedef for referring to a pointer to a node object.

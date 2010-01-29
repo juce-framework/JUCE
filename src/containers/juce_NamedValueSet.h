@@ -76,7 +76,7 @@ public:
     */
     bool set (const var::identifier& name, const var& newValue);
 
-    /** Returns true if the node contains an item with the specified name. */
+    /** Returns true if the set contains an item with the specified name. */
     bool contains (const var::identifier& name) const;
 
     /** Removes a value from the set.

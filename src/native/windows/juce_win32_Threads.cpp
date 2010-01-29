@@ -32,7 +32,7 @@
 #endif
 
 //==============================================================================
-#if ! JUCE_USE_INTRINSICS
+#if ! (JUCE_USE_INTRINSICS || JUCE_GCC)
 // In newer compilers, the inline versions of these are used (in juce_Atomic.h), but in
 // older ones we have to actually call the ops as win32 functions..
 void  Atomic::increment (int32& variable)                { InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }

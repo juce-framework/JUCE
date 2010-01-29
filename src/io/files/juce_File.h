@@ -896,6 +896,13 @@ public:
     */
     static bool isAbsolutePath (const String& path);
 
+    /** Creates a file that simply contains this string, without doing the sanity-checking
+        that the normal constructors do.
+
+        Best to avoid this unless you really know what you're doing.
+    */
+    static const File createFileWithoutCheckingPath (const String& path);
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

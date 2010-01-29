@@ -81,9 +81,9 @@ public:
           ok (false),
           movie (0),
           trackNum (trackNum_),
-          extractor (0),
           lastSampleRead (0),
           lastThreadId (0),
+          extractor (0),
           dataHandle (0)
     {
         bufferList.calloc (256, 1);
