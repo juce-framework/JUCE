@@ -131,7 +131,7 @@ MultiDocumentPanel::~MultiDocumentPanel()
 //==============================================================================
 static bool shouldDeleteComp (Component* const c)
 {
-    return c->getComponentPropertyBool (T("mdiDocumentDelete_"), false);
+    return c->getProperties() ["mdiDocumentDelete_"];
 }
 
 bool MultiDocumentPanel::closeAllDocuments (const bool checkItsOkToCloseFirst)
@@ -155,7 +155,9 @@ void MultiDocumentPanel::addWindow (Component* component)
     dw->setResizable (true, false);
     dw->setContentComponent (component, false, true);
     dw->setName (component->getName());
-    dw->setBackgroundColour (component->getComponentPropertyColour (T("mdiDocumentBkg_"), false, backgroundColour));
+
+    const var bkg (component->getProperties() ["mdiDocumentBkg_"]);
+    dw->setBackgroundColour (bkg.isVoid() ? backgroundColour : Colour ((int) bkg));
 
     int x = 4;
     Component* const topComp = getChildComponent (getNumChildComponents() - 1);
@@ -165,8 +167,9 @@ void MultiDocumentPanel::addWindow (Component* component)
 
     dw->setTopLeftPosition (x, x);
 
-    if (component->getComponentProperty (T("mdiDocumentPos_"), false, String::empty).isNotEmpty())
-        dw->restoreWindowStateFromString (component->getComponentProperty (T("mdiDocumentPos_"), false, String::empty));
+    const var pos (component->getProperties() ["mdiDocumentPos_"]);
+    if (pos.toString().isNotEmpty())
+        dw->restoreWindowStateFromString (pos.toString());
 
     addAndMakeVisible (dw);
     dw->toFront (true);
@@ -184,8 +187,8 @@ bool MultiDocumentPanel::addDocument (Component* const component,
         return false;
 
     components.add (component);
-    component->setComponentProperty (T("mdiDocumentDelete_"), deleteWhenRemoved);
-    component->setComponentProperty (T("mdiDocumentBkg_"), docColour);
+    component->getProperties().set ("mdiDocumentDelete_", deleteWhenRemoved);
+    component->getProperties().set ("mdiDocumentBkg_", (int) docColour.getARGB());
     component->addComponentListener (this);
 
     if (mode == FloatingWindows)
@@ -249,8 +252,8 @@ bool MultiDocumentPanel::closeDocument (Component* component,
         component->removeComponentListener (this);
 
         const bool shouldDelete = shouldDeleteComp (component);
-        component->removeComponentProperty (T("mdiDocumentDelete_"));
-        component->removeComponentProperty (T("mdiDocumentBkg_"));
+        component->getProperties().remove ("mdiDocumentDelete_");
+        component->getProperties().remove ("mdiDocumentBkg_");
 
         if (mode == FloatingWindows)
         {
@@ -417,7 +420,7 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
 
                 if (dw != 0)
                 {
-                    dw->getContentComponent()->setComponentProperty (T("mdiDocumentPos_"), dw->getWindowStateAsString());
+                    dw->getContentComponent()->getProperties().set ("mdiDocumentPos_", dw->getWindowStateAsString());
                     dw->setContentComponent (0, false);
                     delete dw;
                 }
@@ -432,8 +435,9 @@ void MultiDocumentPanel::setLayoutMode (const LayoutMode newLayoutMode)
         for (int i = 0; i < tempComps.size(); ++i)
         {
             Component* const c = tempComps.getUnchecked(i);
+
             addDocument (c,
-                         c->getComponentPropertyColour (T("mdiDocumentBkg_"), false, Colours::white),
+                         Colour ((int) c->getProperties().getWithDefault ("mdiDocumentBkg_", (int) Colours::white.getARGB())),
                          shouldDeleteComp (c));
         }
     }

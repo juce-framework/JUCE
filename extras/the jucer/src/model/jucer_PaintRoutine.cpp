@@ -460,8 +460,8 @@ void PaintRoutine::startDragging (const Rectangle& parentArea)
 
         Rectangle r (c->getCurrentBounds (parentArea));
 
-        c->setComponentProperty (T("xDragStart"), r.getX());
-        c->setComponentProperty (T("yDragStart"), r.getY());
+        c->getProperties().set ("xDragStart", r.getX());
+        c->getProperties().set ("yDragStart", r.getY());
     }
 
     getDocument()->getUndoManager().beginNewTransaction();
@@ -481,8 +481,8 @@ void PaintRoutine::dragSelectedComps (int dx, int dy, const Rectangle& parentAre
     {
         PaintElement* const c = selectedElements.getSelectedItem (i);
 
-        const int startX = c->getComponentPropertyInt (T("xDragStart"), false);
-        const int startY = c->getComponentPropertyInt (T("yDragStart"), false);
+        const int startX = c->getProperties() ["xDragStart"];
+        const int startY = c->getProperties() ["yDragStart"];
 
         Rectangle r (c->getCurrentBounds (parentArea));
 

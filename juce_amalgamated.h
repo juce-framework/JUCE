@@ -2663,13 +2663,27 @@ private:
 /********* End of inlined file: juce_BitArray.h *********/
 
 #endif
-#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+#ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+/********* Start of inlined file: juce_DynamicObject.h *********/
+#ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
+#define __JUCE_DYNAMICOBJECT_JUCEHEADER__
 
-#endif
-#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+/********* Start of inlined file: juce_NamedValueSet.h *********/
+#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
+#define __JUCE_NAMEDVALUESET_JUCEHEADER__
+
+/********* Start of inlined file: juce_Variant.h *********/
+#ifndef __JUCE_VARIANT_JUCEHEADER__
+#define __JUCE_VARIANT_JUCEHEADER__
+
+/********* Start of inlined file: juce_OutputStream.h *********/
+#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
+#define __JUCE_OUTPUTSTREAM_JUCEHEADER__
+
+/********* Start of inlined file: juce_InputStream.h *********/
+#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
+#define __JUCE_INPUTSTREAM_JUCEHEADER__
 
 /********* Start of inlined file: juce_MemoryBlock.h *********/
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
@@ -2757,6 +2771,555 @@ private:
 
 #endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
 /********* End of inlined file: juce_MemoryBlock.h *********/
+
+class JUCE_API  InputStream
+{
+public:
+	virtual ~InputStream()  {}
+
+	virtual int64 getTotalLength() = 0;
+
+	virtual bool isExhausted() = 0;
+
+	virtual int read (void* destBuffer,
+					  int maxBytesToRead) = 0;
+
+	virtual char readByte();
+
+	virtual bool readBool();
+
+	virtual short readShort();
+
+	virtual short readShortBigEndian();
+
+	virtual int readInt();
+
+	virtual int readIntBigEndian();
+
+	virtual int64 readInt64();
+
+	virtual int64 readInt64BigEndian();
+
+	virtual float readFloat();
+
+	virtual float readFloatBigEndian();
+
+	virtual double readDouble();
+
+	virtual double readDoubleBigEndian();
+
+	virtual int readCompressedInt();
+
+	virtual const String readNextLine();
+
+	virtual const String readString();
+
+	virtual const String readEntireStreamAsString();
+
+	virtual int readIntoMemoryBlock (MemoryBlock& destBlock,
+									 int maxNumBytesToRead = -1);
+
+	virtual int64 getPosition() = 0;
+
+	virtual bool setPosition (int64 newPosition) = 0;
+
+	virtual void skipNextBytes (int64 numBytesToSkip);
+
+	juce_UseDebuggingNewOperator
+
+protected:
+
+	InputStream() throw()  {}
+};
+
+#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
+/********* End of inlined file: juce_InputStream.h *********/
+
+class JUCE_API  OutputStream
+{
+public:
+	virtual ~OutputStream();
+
+	virtual void flush() = 0;
+
+	virtual bool setPosition (int64 newPosition) = 0;
+
+	virtual int64 getPosition() = 0;
+
+	virtual bool write (const void* dataToWrite,
+						int howManyBytes) = 0;
+
+	virtual void writeByte (char byte);
+
+	virtual void writeBool (bool boolValue);
+
+	virtual void writeShort (short value);
+
+	virtual void writeShortBigEndian (short value);
+
+	virtual void writeInt (int value);
+
+	virtual void writeIntBigEndian (int value);
+
+	virtual void writeInt64 (int64 value);
+
+	virtual void writeInt64BigEndian (int64 value);
+
+	virtual void writeFloat (float value);
+
+	virtual void writeFloatBigEndian (float value);
+
+	virtual void writeDouble (double value);
+
+	virtual void writeDoubleBigEndian (double value);
+
+	virtual void writeCompressedInt (int value);
+
+	virtual void writeString (const String& text);
+
+	virtual void writeText (const String& text,
+							const bool asUnicode,
+							const bool writeUnicodeHeaderBytes);
+
+	virtual void printf (const char* format, ...);
+
+	virtual int writeFromInputStream (InputStream& source,
+									  int maxNumBytesToWrite);
+
+	virtual OutputStream& operator<< (const int number);
+
+	virtual OutputStream& operator<< (const double number);
+
+	virtual OutputStream& operator<< (const char character);
+
+	virtual OutputStream& operator<< (const char* const text);
+
+	virtual OutputStream& operator<< (const juce_wchar* const text);
+
+	virtual OutputStream& operator<< (const String& text);
+
+	juce_UseDebuggingNewOperator
+
+protected:
+
+	OutputStream() throw();
+};
+
+#endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
+/********* End of inlined file: juce_OutputStream.h *********/
+
+class JUCE_API  DynamicObject;
+
+class JUCE_API  var
+{
+public:
+
+	typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
+
+	var() throw();
+
+	~var() throw();
+
+	static const var null;
+
+	var (const var& valueToCopy);
+	var (const int value) throw();
+	var (const bool value) throw();
+	var (const double value) throw();
+	var (const char* const value);
+	var (const juce_wchar* const value);
+	var (const String& value);
+	var (DynamicObject* const object);
+	var (MethodFunction method) throw();
+
+	var& operator= (const var& valueToCopy);
+	var& operator= (int value);
+	var& operator= (bool value);
+	var& operator= (double value);
+	var& operator= (const char* value);
+	var& operator= (const juce_wchar* value);
+	var& operator= (const String& value);
+	var& operator= (DynamicObject* object);
+	var& operator= (MethodFunction method);
+
+	void swapWith (var& other) throw();
+
+	operator int() const;
+	operator bool() const;
+	operator float() const;
+	operator double() const;
+	operator const String() const;
+	const String toString() const;
+	DynamicObject* getObject() const;
+
+	bool isVoid() const throw()	 { return type == voidType; }
+	bool isInt() const throw()	  { return type == intType; }
+	bool isBool() const throw()	 { return type == boolType; }
+	bool isDouble() const throw()	   { return type == doubleType; }
+	bool isString() const throw()	   { return type == stringType; }
+	bool isObject() const throw()	   { return type == objectType; }
+	bool isMethod() const throw()	   { return type == methodType; }
+
+	bool operator== (const var& other) const throw();
+	bool operator!= (const var& other) const throw();
+
+	void writeToStream (OutputStream& output) const;
+
+	static const var readFromStream (InputStream& input);
+
+	class JUCE_API  identifier
+	{
+	public:
+		identifier() throw();
+		identifier (const char* const name);
+		identifier (const String& name);
+		~identifier();
+
+		bool operator== (const identifier& other) const throw()
+		{
+			jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
+			return hashCode == other.hashCode;
+		}
+
+		String name;
+		int hashCode;
+	};
+
+	const var operator[] (const identifier& propertyName) const;
+
+	const var call (const identifier& method) const;
+	const var call (const identifier& method, const var& arg1) const;
+	const var call (const identifier& method, const var& arg1, const var& arg2) const;
+	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
+	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
+
+	const var invoke (const identifier& method, const var* arguments, int numArguments) const;
+
+	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
+
+	juce_UseDebuggingNewOperator
+
+private:
+	enum Type
+	{
+		voidType = 0,
+		intType,
+		boolType,
+		doubleType,
+		stringType,
+		objectType,
+		methodType
+	};
+
+	union ValueUnion
+	{
+		int intValue;
+		bool boolValue;
+		double doubleValue;
+		String* stringValue;
+		DynamicObject* objectValue;
+		MethodFunction methodValue;
+	};
+
+	Type type;
+	ValueUnion value;
+};
+
+#endif   // __JUCE_VARIANT_JUCEHEADER__
+/********* End of inlined file: juce_Variant.h *********/
+
+class JUCE_API  NamedValueSet
+{
+public:
+	NamedValueSet() throw();
+
+	NamedValueSet (const NamedValueSet& other);
+
+	NamedValueSet& operator= (const NamedValueSet& other);
+
+	~NamedValueSet();
+
+	int size() const throw();
+
+	const var& operator[] (const var::identifier& name) const;
+
+	const var getWithDefault (const var::identifier& name, const var& defaultReturnValue) const;
+
+	var* getItem (const var::identifier& name) const;
+
+	bool set (const var::identifier& name, const var& newValue);
+
+	bool contains (const var::identifier& name) const;
+
+	bool remove (const var::identifier& name);
+
+	const var::identifier getName (int index) const;
+
+	void clear();
+
+	juce_UseDebuggingNewOperator
+
+private:
+	struct NamedValue
+	{
+		NamedValue() throw();
+		NamedValue (const var::identifier& name, const var& value);
+
+		var::identifier name;
+		var value;
+	};
+
+	Array <NamedValue> values;
+};
+
+#endif   // __JUCE_NAMEDVALUESET_JUCEHEADER__
+/********* End of inlined file: juce_NamedValueSet.h *********/
+
+/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
+#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+
+/********* Start of inlined file: juce_Atomic.h *********/
+#ifndef __JUCE_ATOMIC_JUCEHEADER__
+#define __JUCE_ATOMIC_JUCEHEADER__
+
+class JUCE_API  Atomic
+{
+public:
+	static void increment (int32& variable);
+
+	static int32 incrementAndReturn (int32& variable);
+
+	static void decrement (int32& variable);
+
+	static int32 decrementAndReturn (int32& variable);
+
+	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
+};
+
+#if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
+
+inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::incrementAndReturn (int32& variable)  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
+inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::decrementAndReturn (int32& variable)  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+															{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
+
+#elif JUCE_GCC			  // Linux...
+
+inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
+inline int32 Atomic::incrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, 1); }
+inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::decrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, -1); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+															{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+
+#elif JUCE_USE_INTRINSICS		   // Windows...
+
+// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is
+// declared in juce_win32_Threads.cpp)
+#pragma intrinsic (_InterlockedIncrement)
+#pragma intrinsic (_InterlockedDecrement)
+#pragma intrinsic (_InterlockedCompareExchange)
+
+inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
+
+#endif
+
+#endif   // __JUCE_ATOMIC_JUCEHEADER__
+/********* End of inlined file: juce_Atomic.h *********/
+
+class JUCE_API  ReferenceCountedObject
+{
+public:
+
+	inline void incReferenceCount() throw()
+	{
+		Atomic::increment (refCounts);
+
+		jassert (refCounts > 0);
+	}
+
+	inline void decReferenceCount() throw()
+	{
+		jassert (refCounts > 0);
+
+		if (Atomic::decrementAndReturn (refCounts) == 0)
+			delete this;
+	}
+
+	inline int getReferenceCount() const throw()
+	{
+		return refCounts;
+	}
+
+protected:
+
+	ReferenceCountedObject()
+		: refCounts (0)
+	{
+	}
+
+	virtual ~ReferenceCountedObject()
+	{
+		// it's dangerous to delete an object that's still referenced by something else!
+		jassert (refCounts == 0);
+	}
+
+private:
+
+	int refCounts;
+};
+
+template <class ReferenceCountedObjectClass>
+class ReferenceCountedObjectPtr
+{
+public:
+
+	inline ReferenceCountedObjectPtr() throw()
+		: referencedObject (0)
+	{
+	}
+
+	inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
+		: referencedObject (refCountedObject)
+	{
+		if (refCountedObject != 0)
+			refCountedObject->incReferenceCount();
+	}
+
+	inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
+		: referencedObject (other.referencedObject)
+	{
+		if (referencedObject != 0)
+			referencedObject->incReferenceCount();
+	}
+
+	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+	{
+		ReferenceCountedObjectClass* const newObject = other.referencedObject;
+
+		if (newObject != referencedObject)
+		{
+			if (newObject != 0)
+				newObject->incReferenceCount();
+
+			ReferenceCountedObjectClass* const oldObject = referencedObject;
+			referencedObject = newObject;
+
+			if (oldObject != 0)
+				oldObject->decReferenceCount();
+		}
+
+		return *this;
+	}
+
+	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
+	{
+		if (referencedObject != newObject)
+		{
+			if (newObject != 0)
+				newObject->incReferenceCount();
+
+			ReferenceCountedObjectClass* const oldObject = referencedObject;
+			referencedObject = newObject;
+
+			if (oldObject != 0)
+				oldObject->decReferenceCount();
+		}
+
+		return *this;
+	}
+
+	inline ~ReferenceCountedObjectPtr()
+	{
+		if (referencedObject != 0)
+			referencedObject->decReferenceCount();
+	}
+
+	inline operator ReferenceCountedObjectClass*() const throw()
+	{
+		return referencedObject;
+	}
+
+	inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
+	{
+		return referencedObject == object;
+	}
+
+	inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
+	{
+		return referencedObject != object;
+	}
+
+	// the -> operator is called on the referenced object
+	inline ReferenceCountedObjectClass* operator->() const throw()
+	{
+		return referencedObject;
+	}
+
+private:
+
+	ReferenceCountedObjectClass* referencedObject;
+};
+
+#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
+/********* End of inlined file: juce_ReferenceCountedObject.h *********/
+
+class JUCE_API  DynamicObject  : public ReferenceCountedObject
+{
+public:
+
+	DynamicObject();
+
+	virtual ~DynamicObject();
+
+	virtual bool hasProperty (const var::identifier& propertyName) const;
+
+	virtual const var getProperty (const var::identifier& propertyName) const;
+
+	virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+
+	virtual void removeProperty (const var::identifier& propertyName);
+
+	virtual bool hasMethod (const var::identifier& methodName) const;
+
+	virtual const var invokeMethod (const var::identifier& methodName,
+									const var* parameters,
+									int numParameters);
+
+	void setMethod (const var::identifier& methodName,
+					var::MethodFunction methodFunction);
+
+	void clear();
+
+	juce_UseDebuggingNewOperator
+
+private:
+	NamedValueSet properties;
+};
+
+#endif   // __JUCE_DYNAMICOBJECT_JUCEHEADER__
+/********* End of inlined file: juce_DynamicObject.h *********/
+
+#endif
+#ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
@@ -3507,150 +4070,6 @@ private:
 #ifndef __JUCE_XMLELEMENT_JUCEHEADER__
 #define __JUCE_XMLELEMENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_OutputStream.h *********/
-#ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
-#define __JUCE_OUTPUTSTREAM_JUCEHEADER__
-
-/********* Start of inlined file: juce_InputStream.h *********/
-#ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
-#define __JUCE_INPUTSTREAM_JUCEHEADER__
-
-class JUCE_API  InputStream
-{
-public:
-	virtual ~InputStream()  {}
-
-	virtual int64 getTotalLength() = 0;
-
-	virtual bool isExhausted() = 0;
-
-	virtual int read (void* destBuffer,
-					  int maxBytesToRead) = 0;
-
-	virtual char readByte();
-
-	virtual bool readBool();
-
-	virtual short readShort();
-
-	virtual short readShortBigEndian();
-
-	virtual int readInt();
-
-	virtual int readIntBigEndian();
-
-	virtual int64 readInt64();
-
-	virtual int64 readInt64BigEndian();
-
-	virtual float readFloat();
-
-	virtual float readFloatBigEndian();
-
-	virtual double readDouble();
-
-	virtual double readDoubleBigEndian();
-
-	virtual int readCompressedInt();
-
-	virtual const String readNextLine();
-
-	virtual const String readString();
-
-	virtual const String readEntireStreamAsString();
-
-	virtual int readIntoMemoryBlock (MemoryBlock& destBlock,
-									 int maxNumBytesToRead = -1);
-
-	virtual int64 getPosition() = 0;
-
-	virtual bool setPosition (int64 newPosition) = 0;
-
-	virtual void skipNextBytes (int64 numBytesToSkip);
-
-	juce_UseDebuggingNewOperator
-
-protected:
-
-	InputStream() throw()  {}
-};
-
-#endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_InputStream.h *********/
-
-class JUCE_API  OutputStream
-{
-public:
-	virtual ~OutputStream();
-
-	virtual void flush() = 0;
-
-	virtual bool setPosition (int64 newPosition) = 0;
-
-	virtual int64 getPosition() = 0;
-
-	virtual bool write (const void* dataToWrite,
-						int howManyBytes) = 0;
-
-	virtual void writeByte (char byte);
-
-	virtual void writeBool (bool boolValue);
-
-	virtual void writeShort (short value);
-
-	virtual void writeShortBigEndian (short value);
-
-	virtual void writeInt (int value);
-
-	virtual void writeIntBigEndian (int value);
-
-	virtual void writeInt64 (int64 value);
-
-	virtual void writeInt64BigEndian (int64 value);
-
-	virtual void writeFloat (float value);
-
-	virtual void writeFloatBigEndian (float value);
-
-	virtual void writeDouble (double value);
-
-	virtual void writeDoubleBigEndian (double value);
-
-	virtual void writeCompressedInt (int value);
-
-	virtual void writeString (const String& text);
-
-	virtual void writeText (const String& text,
-							const bool asUnicode,
-							const bool writeUnicodeHeaderBytes);
-
-	virtual void printf (const char* format, ...);
-
-	virtual int writeFromInputStream (InputStream& source,
-									  int maxNumBytesToWrite);
-
-	virtual OutputStream& operator<< (const int number);
-
-	virtual OutputStream& operator<< (const double number);
-
-	virtual OutputStream& operator<< (const char character);
-
-	virtual OutputStream& operator<< (const char* const text);
-
-	virtual OutputStream& operator<< (const juce_wchar* const text);
-
-	virtual OutputStream& operator<< (const String& text);
-
-	juce_UseDebuggingNewOperator
-
-protected:
-
-	OutputStream() throw();
-};
-
-#endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_OutputStream.h *********/
-
 /********* Start of inlined file: juce_File.h *********/
 #ifndef __JUCE_FILE_JUCEHEADER__
 #define __JUCE_FILE_JUCEHEADER__
@@ -4106,24 +4525,24 @@ public:
 	const String createDocument (const String& dtdToUse,
 								 const bool allOnOneLine = false,
 								 const bool includeXmlHeader = true,
-								 const tchar* const encodingType = JUCE_T("UTF-8"),
+								 const String& encodingType = JUCE_T("UTF-8"),
 								 const int lineWrapLength = 60) const throw();
 
 	void writeToStream (OutputStream& output,
 						const String& dtdToUse,
 						const bool allOnOneLine = false,
 						const bool includeXmlHeader = true,
-						const tchar* const encodingType = JUCE_T("UTF-8"),
+						const String& encodingType = JUCE_T("UTF-8"),
 						const int lineWrapLength = 60) const throw();
 
 	bool writeToFile (const File& destinationFile,
 					  const String& dtdToUse,
-					  const tchar* const encodingType = JUCE_T("UTF-8"),
+					  const String& encodingType = JUCE_T("UTF-8"),
 					  const int lineWrapLength = 60) const throw();
 
 	inline const String& getTagName() const throw()  { return tagName; }
 
-	bool hasTagName (const tchar* const possibleTagName) const throw();
+	bool hasTagName (const String& possibleTagName) const throw();
 
 	int getNumAttributes() const throw();
 
@@ -4133,37 +4552,34 @@ public:
 
 	// Attribute-handling methods..
 
-	bool hasAttribute (const tchar* const attributeName) const throw();
+	bool hasAttribute (const String& attributeName) const throw();
 
-	const String getStringAttribute (const tchar* const attributeName,
-									 const tchar* const defaultReturnValue = 0) const throw();
+	const String getStringAttribute (const String& attributeName,
+									 const String& defaultReturnValue = String::empty) const throw();
 
-	bool compareAttribute (const tchar* const attributeName,
-						   const tchar* const stringToCompareAgainst,
+	bool compareAttribute (const String& attributeName,
+						   const String& stringToCompareAgainst,
 						   const bool ignoreCase = false) const throw();
 
-	int getIntAttribute (const tchar* const attributeName,
+	int getIntAttribute (const String& attributeName,
 						 const int defaultReturnValue = 0) const throw();
 
-	double getDoubleAttribute (const tchar* const attributeName,
+	double getDoubleAttribute (const String& attributeName,
 							   const double defaultReturnValue = 0.0) const throw();
 
-	bool getBoolAttribute (const tchar* const attributeName,
+	bool getBoolAttribute (const String& attributeName,
 						   const bool defaultReturnValue = false) const throw();
 
-	void setAttribute (const tchar* const attributeName,
+	void setAttribute (const String& attributeName,
 					   const String& newValue) throw();
 
-	void setAttribute (const tchar* const attributeName,
-					   const tchar* const newValue) throw();
-
-	void setAttribute (const tchar* const attributeName,
+	void setAttribute (const String& attributeName,
 					   const int newValue) throw();
 
-	void setAttribute (const tchar* const attributeName,
+	void setAttribute (const String& attributeName,
 					   const double newValue) throw();
 
-	void removeAttribute (const tchar* const attributeName) throw();
+	void removeAttribute (const String& attributeName) throw();
 
 	void removeAllAttributes() throw();
 
@@ -4171,15 +4587,15 @@ public:
 
 	XmlElement* getFirstChildElement() const throw()	{ return firstChildElement; }
 
-	inline XmlElement* getNextElement() const throw()   { return nextElement; }
+	inline XmlElement* getNextElement() const throw()	   { return nextElement; }
 
-	XmlElement* getNextElementWithTagName (const tchar* const requiredTagName) const;
+	XmlElement* getNextElementWithTagName (const String& requiredTagName) const;
 
 	int getNumChildElements() const throw();
 
 	XmlElement* getChildElement (const int index) const throw();
 
-	XmlElement* getChildByName (const tchar* const tagNameToLookFor) const throw();
+	XmlElement* getChildByName (const String& tagNameToLookFor) const throw();
 
 	void addChildElement (XmlElement* const newChildElement) throw();
 
@@ -4194,7 +4610,7 @@ public:
 
 	void deleteAllChildElements() throw();
 
-	void deleteAllChildElementsWithTagName (const tchar* const tagName) throw();
+	void deleteAllChildElementsWithTagName (const String& tagName) throw();
 
 	bool containsChildElement (const XmlElement* const possibleChild) const throw();
 
@@ -4223,7 +4639,7 @@ public:
 
 	const String getAllSubText() const throw();
 
-	const String getChildElementAllSubText (const tchar* const childTagName,
+	const String getChildElementAllSubText (const String& childTagName,
 											const String& defaultReturnValue) const throw();
 
 	void addTextElement (const String& text) throw();
@@ -4256,7 +4672,6 @@ private:
 	XmlAttributeNode* attributes;
 
 	XmlElement (int) throw(); // for internal use
-	XmlElement (const tchar* const tagNameText, const int nameLen) throw();
 
 	void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
 
@@ -4350,203 +4765,6 @@ private:
 /********* Start of inlined file: juce_ReferenceCountedArray.h *********/
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-
-/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
-#ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-#define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-
-/********* Start of inlined file: juce_Atomic.h *********/
-#ifndef __JUCE_ATOMIC_JUCEHEADER__
-#define __JUCE_ATOMIC_JUCEHEADER__
-
-class JUCE_API  Atomic
-{
-public:
-	static void increment (int32& variable);
-
-	static int32 incrementAndReturn (int32& variable);
-
-	static void decrement (int32& variable);
-
-	static int32 decrementAndReturn (int32& variable);
-
-	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
-};
-
-#if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
-
-inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::incrementAndReturn (int32& variable)  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
-inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::decrementAndReturn (int32& variable)  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-															{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
-
-#elif JUCE_GCC			  // Linux...
-
-inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
-inline int32 Atomic::incrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, 1); }
-inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
-inline int32 Atomic::decrementAndReturn (int32& variable)   { return __sync_add_and_fetch (&variable, -1); }
-inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-															{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
-
-#elif JUCE_USE_INTRINSICS		   // Windows...
-
-// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is
-// declared in juce_win32_Threads.cpp)
-#pragma intrinsic (_InterlockedIncrement)
-#pragma intrinsic (_InterlockedDecrement)
-#pragma intrinsic (_InterlockedCompareExchange)
-
-inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
-
-#endif
-
-#endif   // __JUCE_ATOMIC_JUCEHEADER__
-/********* End of inlined file: juce_Atomic.h *********/
-
-class JUCE_API  ReferenceCountedObject
-{
-public:
-
-	inline void incReferenceCount() throw()
-	{
-		Atomic::increment (refCounts);
-
-		jassert (refCounts > 0);
-	}
-
-	inline void decReferenceCount() throw()
-	{
-		jassert (refCounts > 0);
-
-		if (Atomic::decrementAndReturn (refCounts) == 0)
-			delete this;
-	}
-
-	inline int getReferenceCount() const throw()
-	{
-		return refCounts;
-	}
-
-protected:
-
-	ReferenceCountedObject()
-		: refCounts (0)
-	{
-	}
-
-	virtual ~ReferenceCountedObject()
-	{
-		// it's dangerous to delete an object that's still referenced by something else!
-		jassert (refCounts == 0);
-	}
-
-private:
-
-	int refCounts;
-};
-
-template <class ReferenceCountedObjectClass>
-class ReferenceCountedObjectPtr
-{
-public:
-
-	inline ReferenceCountedObjectPtr() throw()
-		: referencedObject (0)
-	{
-	}
-
-	inline ReferenceCountedObjectPtr (ReferenceCountedObjectClass* const refCountedObject) throw()
-		: referencedObject (refCountedObject)
-	{
-		if (refCountedObject != 0)
-			refCountedObject->incReferenceCount();
-	}
-
-	inline ReferenceCountedObjectPtr (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other) throw()
-		: referencedObject (other.referencedObject)
-	{
-		if (referencedObject != 0)
-			referencedObject->incReferenceCount();
-	}
-
-	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
-	{
-		ReferenceCountedObjectClass* const newObject = other.referencedObject;
-
-		if (newObject != referencedObject)
-		{
-			if (newObject != 0)
-				newObject->incReferenceCount();
-
-			ReferenceCountedObjectClass* const oldObject = referencedObject;
-			referencedObject = newObject;
-
-			if (oldObject != 0)
-				oldObject->decReferenceCount();
-		}
-
-		return *this;
-	}
-
-	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
-	{
-		if (referencedObject != newObject)
-		{
-			if (newObject != 0)
-				newObject->incReferenceCount();
-
-			ReferenceCountedObjectClass* const oldObject = referencedObject;
-			referencedObject = newObject;
-
-			if (oldObject != 0)
-				oldObject->decReferenceCount();
-		}
-
-		return *this;
-	}
-
-	inline ~ReferenceCountedObjectPtr()
-	{
-		if (referencedObject != 0)
-			referencedObject->decReferenceCount();
-	}
-
-	inline operator ReferenceCountedObjectClass*() const throw()
-	{
-		return referencedObject;
-	}
-
-	inline bool operator== (ReferenceCountedObjectClass* const object) const throw()
-	{
-		return referencedObject == object;
-	}
-
-	inline bool operator!= (ReferenceCountedObjectClass* const object) const throw()
-	{
-		return referencedObject != object;
-	}
-
-	// the -> operator is called on the referenced object
-	inline ReferenceCountedObjectClass* operator->() const throw()
-	{
-		return referencedObject;
-	}
-
-private:
-
-	ReferenceCountedObjectClass* referencedObject;
-};
-
-#endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedObject.h *********/
 
 template <class ObjectClass, class TypeOfCriticalSectionToUse = DummyCriticalSection>
 class ReferenceCountedArray
@@ -5731,162 +5949,6 @@ private:
 #ifndef __JUCE_VALUE_JUCEHEADER__
 #define __JUCE_VALUE_JUCEHEADER__
 
-/********* Start of inlined file: juce_Variant.h *********/
-#ifndef __JUCE_VARIANT_JUCEHEADER__
-#define __JUCE_VARIANT_JUCEHEADER__
-
-class JUCE_API  DynamicObject;
-
-class JUCE_API  var
-{
-public:
-
-	typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
-
-	var() throw();
-
-	~var();
-
-	var (const var& valueToCopy);
-	var (const int value) throw();
-	var (const bool value) throw();
-	var (const double value) throw();
-	var (const char* const value);
-	var (const juce_wchar* const value);
-	var (const String& value);
-	var (DynamicObject* const object);
-	var (MethodFunction method) throw();
-
-	var& operator= (const var& valueToCopy);
-	var& operator= (int value);
-	var& operator= (bool value);
-	var& operator= (double value);
-	var& operator= (const char* value);
-	var& operator= (const juce_wchar* value);
-	var& operator= (const String& value);
-	var& operator= (DynamicObject* object);
-	var& operator= (MethodFunction method);
-
-	void swapWith (var& other) throw();
-
-	operator int() const;
-	operator bool() const;
-	operator float() const;
-	operator double() const;
-	operator const String() const;
-	const String toString() const;
-	DynamicObject* getObject() const;
-
-	bool isVoid() const throw()	 { return type == voidType; }
-	bool isInt() const throw()	  { return type == intType; }
-	bool isBool() const throw()	 { return type == boolType; }
-	bool isDouble() const throw()	   { return type == doubleType; }
-	bool isString() const throw()	   { return type == stringType; }
-	bool isObject() const throw()	   { return type == objectType; }
-	bool isMethod() const throw()	   { return type == methodType; }
-
-	bool operator== (const var& other) const throw();
-	bool operator!= (const var& other) const throw();
-
-	void writeToStream (OutputStream& output) const;
-
-	static const var readFromStream (InputStream& input);
-
-	class JUCE_API  identifier
-	{
-	public:
-		identifier (const char* const name);
-		identifier (const String& name);
-		~identifier();
-
-		bool operator== (const identifier& other) const throw()
-		{
-			jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
-			return hashCode == other.hashCode;
-		}
-
-		String name;
-		int hashCode;
-	};
-
-	const var operator[] (const identifier& propertyName) const;
-
-	const var call (const identifier& method) const;
-	const var call (const identifier& method, const var& arg1) const;
-	const var call (const identifier& method, const var& arg1, const var& arg2) const;
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
-
-	const var invoke (const identifier& method, const var* arguments, int numArguments) const;
-
-	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
-
-	juce_UseDebuggingNewOperator
-
-private:
-	enum Type
-	{
-		voidType = 0,
-		intType,
-		boolType,
-		doubleType,
-		stringType,
-		objectType,
-		methodType
-	};
-
-	union ValueUnion
-	{
-		int intValue;
-		bool boolValue;
-		double doubleValue;
-		String* stringValue;
-		DynamicObject* objectValue;
-		MethodFunction methodValue;
-	};
-
-	Type type;
-	ValueUnion value;
-};
-
-class JUCE_API  DynamicObject  : public ReferenceCountedObject
-{
-public:
-
-	DynamicObject();
-
-	virtual ~DynamicObject();
-
-	virtual bool hasProperty (const var::identifier& propertyName) const;
-
-	virtual const var getProperty (const var::identifier& propertyName) const;
-
-	virtual void setProperty (const var::identifier& propertyName, const var& newValue);
-
-	virtual void removeProperty (const var::identifier& propertyName);
-
-	virtual bool hasMethod (const var::identifier& methodName) const;
-
-	virtual const var invokeMethod (const var::identifier& methodName,
-									const var* parameters,
-									int numParameters);
-
-	void setMethod (const var::identifier& methodName,
-					var::MethodFunction methodFunction);
-
-	void clear();
-
-	juce_UseDebuggingNewOperator
-
-private:
-	Array <int> propertyIds;
-	OwnedArray <var> propertyValues;
-};
-
-#endif   // __JUCE_VARIANT_JUCEHEADER__
-/********* End of inlined file: juce_Variant.h *********/
-
 /********* Start of inlined file: juce_AsyncUpdater.h *********/
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
@@ -6330,9 +6392,9 @@ public:
 
 	bool hasType (const String& typeName) const;
 
-	const var getProperty (const var::identifier& name) const;
+	const var& getProperty (const var::identifier& name) const;
 
-	const var operator[] (const var::identifier& name) const;
+	const var& operator[] (const var::identifier& name) const;
 
 	void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
 
@@ -6406,16 +6468,8 @@ private:
 		SharedObject (const SharedObject& other);
 		~SharedObject();
 
-		struct Property
-		{
-			Property (const var::identifier& name, const var& value);
-
-			var::identifier name;
-			var value;
-		};
-
 		const String type;
-		OwnedArray <Property> properties;
+		NamedValueSet properties;
 		ReferenceCountedArray <SharedObject> children;
 		SortedSet <ValueTree*> valueTreesWithListeners;
 		SharedObject* parent;
@@ -6425,7 +6479,7 @@ private:
 		void sendChildChangeMessage();
 		void sendChildChangeMessage (ValueTree& tree);
 		void sendParentChangeMessage();
-		const var getProperty (const var::identifier& name) const;
+		const var& getProperty (const var::identifier& name) const;
 		void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
 		bool hasProperty (const var::identifier& name) const;
 		void removeProperty (const var::identifier& name, UndoManager* const undoManager);
@@ -12081,39 +12135,9 @@ public:
 
 	virtual void inputAttemptWhenModal();
 
-	const String getComponentProperty (const String& keyName,
-									   const bool useParentComponentIfNotFound,
-									   const String& defaultReturnValue = String::empty) const throw();
+	NamedValueSet& getProperties() throw()				  { return properties; }
 
-	int getComponentPropertyInt (const String& keyName,
-								 const bool useParentComponentIfNotFound,
-								 const int defaultReturnValue = 0) const throw();
-
-	double getComponentPropertyDouble (const String& keyName,
-									   const bool useParentComponentIfNotFound,
-									   const double defaultReturnValue = 0.0) const throw();
-
-	bool getComponentPropertyBool (const String& keyName,
-								   const bool useParentComponentIfNotFound,
-								   const bool defaultReturnValue = false) const throw();
-
-	const Colour getComponentPropertyColour (const String& keyName,
-											 const bool useParentComponentIfNotFound,
-											 const Colour& defaultReturnValue = Colours::black) const throw();
-
-	void setComponentProperty (const String& keyName, const String& value) throw();
-
-	void setComponentProperty (const String& keyName, const int value) throw();
-
-	void setComponentProperty (const String& keyName, const double value) throw();
-
-	void setComponentProperty (const String& keyName, const bool value) throw();
-
-	void setComponentProperty (const String& keyName, const Colour& newColour) throw();
-
-	void removeComponentProperty (const String& keyName) throw();
-
-	PropertySet* getComponentProperties() const throw()	   { return propertySet_; }
+	const NamedValueSet& getProperties() const throw()		  { return properties; }
 
 	const Colour findColour (const int colourId, const bool inheritFromParent = false) const throw();
 
@@ -12154,7 +12178,7 @@ private:
 	VoidArray* mouseListeners_;
 	VoidArray* keyListeners_;
 	VoidArray* componentListeners_;
-	PropertySet* propertySet_;
+	NamedValueSet properties;
 
 	struct ComponentFlags
 	{

@@ -27,6 +27,7 @@
 #define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 
 #include "../text/juce_StringArray.h"
+#include "../io/files/juce_File.h"
 
 
 //==============================================================================

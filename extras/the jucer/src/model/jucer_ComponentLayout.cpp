@@ -378,7 +378,7 @@ Component* ComponentLayout::addNewComponent (ComponentTypeHandler* const type, i
         c->setCentrePosition (x, y);
         updateStoredComponentPosition (c, false);
 
-        c->setComponentProperty (T("id"), nextCompUID++);
+        c->getProperties().set ("id", nextCompUID++);
 
         XmlElement* xml = type->createXmlFor (c, this);
         delete c;
@@ -472,8 +472,9 @@ Component* ComponentLayout::getComponentRelativePosTarget (Component* comp, int 
     }
     else
     {
-        return findComponentWithId (comp->getComponentProperty (String (T("relativeTo"))
-                                      + dimensionSuffixes [whichDimension], false).getHexValue64());
+        return findComponentWithId (comp->getProperties() [String (T("relativeTo"))
+                                                             + dimensionSuffixes [whichDimension]]
+                                        .toString().getHexValue64());
     }
 }
 
@@ -641,8 +642,8 @@ void ComponentLayout::startDragging()
     for (int i = 0; i < components.size(); ++i)
     {
         Component* const c = components[i];
-        c->setComponentProperty (T("xDragStart"), c->getX());
-        c->setComponentProperty (T("yDragStart"), c->getY());
+        c->getProperties().set ("xDragStart", c->getX());
+        c->getProperties().set ("yDragStart", c->getY());
     }
 
     jassert (document != 0);
@@ -661,8 +662,8 @@ void ComponentLayout::dragSelectedComps (int dx, int dy, const bool allowSnap)
     {
         Component* const c = selected.getSelectedItem (i);
 
-        const int startX = c->getComponentPropertyInt (T("xDragStart"), false);
-        const int startY = c->getComponentPropertyInt (T("yDragStart"), false);
+        const int startX = c->getProperties() ["xDragStart"];
+        const int startY = c->getProperties() ["yDragStart"];
 
         if (allowSnap && document != 0 && selected.getNumSelected() == 1)
         {
@@ -692,8 +693,8 @@ void ComponentLayout::endDragging()
         const int newX = c->getX();
         const int newY = c->getY();
 
-        const int startX = c->getComponentPropertyInt (T("xDragStart"), false);
-        const int startY = c->getComponentPropertyInt (T("yDragStart"), false);
+        const int startX = c->getProperties() ["xDragStart"];
+        const int startY = c->getProperties() ["yDragStart"];
 
         c->setTopLeftPosition (startX, startY);
         updateStoredComponentPosition (c, false);
@@ -774,7 +775,7 @@ const String ComponentLayout::getComponentMemberVariableName (Component* comp) c
     if (comp == 0)
         return String::empty;
 
-    String name (comp->getComponentProperty (T("memberName"), false));
+    String name (comp->getProperties() ["memberName"].toString());
 
     if (name.isEmpty())
         name = getUnusedMemberName (makeValidCppIdentifier (comp->getName(), true, true, false), comp);
@@ -786,10 +787,10 @@ void ComponentLayout::setComponentMemberVariableName (Component* comp, const Str
 {
     const String oldName (getComponentMemberVariableName (comp));
 
-    comp->setComponentProperty (T("memberName"), String::empty);
+    comp->getProperties().set ("memberName", String::empty);
 
     const String n (getUnusedMemberName (makeValidCppIdentifier (newName, false, true, false), comp));
-    comp->setComponentProperty (T("memberName"), n);
+    comp->getProperties().set ("memberName", n);
 
     if (n != oldName)
         changed();
@@ -811,7 +812,7 @@ const String ComponentLayout::getUnusedMemberName (String nameRoot, Component* c
         for (int i = 0; i < components.size(); ++i)
         {
             if (components[i] != comp
-                 && components[i]->getComponentProperty (T("memberName"), false) == n)
+                 && components[i]->getProperties() ["memberName"] == n)
             {
                 alreadyUsed = true;
                 break;
@@ -833,7 +834,7 @@ const String ComponentLayout::getComponentVirtualClassName (Component* comp) con
     if (comp == 0)
         return String::empty;
 
-    return comp->getComponentProperty (T("virtualName"), false);
+    return comp->getProperties() ["virtualName"];
 }
 
 void ComponentLayout::setComponentVirtualClassName (Component* comp, const String& newName)
@@ -842,7 +843,7 @@ void ComponentLayout::setComponentVirtualClassName (Component* comp, const Strin
 
     if (name != getComponentVirtualClassName (comp))
     {
-        comp->setComponentProperty (T("virtualName"), name);
+        comp->getProperties().set ("virtualName", name);
         changed();
     }
 }

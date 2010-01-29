@@ -353,7 +353,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
             }
         }
 
-        node = new XmlElement (input, tagLen);
+        node = new XmlElement (String (input, tagLen));
         input += tagLen;
         XmlElement::XmlAttributeNode* lastAttribute = 0;
 

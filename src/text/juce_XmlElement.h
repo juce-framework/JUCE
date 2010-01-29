@@ -192,7 +192,7 @@ public:
     const String createDocument (const String& dtdToUse,
                                  const bool allOnOneLine = false,
                                  const bool includeXmlHeader = true,
-                                 const tchar* const encodingType = JUCE_T("UTF-8"),
+                                 const String& encodingType = JUCE_T("UTF-8"),
                                  const int lineWrapLength = 60) const throw();
 
     /** Writes the document to a stream as UTF-8.
@@ -214,7 +214,7 @@ public:
                         const String& dtdToUse,
                         const bool allOnOneLine = false,
                         const bool includeXmlHeader = true,
-                        const tchar* const encodingType = JUCE_T("UTF-8"),
+                        const String& encodingType = JUCE_T("UTF-8"),
                         const int lineWrapLength = 60) const throw();
 
     /** Writes the element to a file as an XML document.
@@ -238,7 +238,7 @@ public:
     */
     bool writeToFile (const File& destinationFile,
                       const String& dtdToUse,
-                      const tchar* const encodingType = JUCE_T("UTF-8"),
+                      const String& encodingType = JUCE_T("UTF-8"),
                       const int lineWrapLength = 60) const throw();
 
     //==============================================================================
@@ -257,7 +257,7 @@ public:
 
         @see getTagName
     */
-    bool hasTagName (const tchar* const possibleTagName) const throw();
+    bool hasTagName (const String& possibleTagName) const throw();
 
     //==============================================================================
     /** Returns the number of XML attributes this element contains.
@@ -289,7 +289,7 @@ public:
     // Attribute-handling methods..
 
     /** Checks whether the element contains an attribute with a certain name. */
-    bool hasAttribute (const tchar* const attributeName) const throw();
+    bool hasAttribute (const String& attributeName) const throw();
 
     /** Returns the value of a named attribute.
 
@@ -297,8 +297,8 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
-    const String getStringAttribute (const tchar* const attributeName,
-                                     const tchar* const defaultReturnValue = 0) const throw();
+    const String getStringAttribute (const String& attributeName,
+                                     const String& defaultReturnValue = String::empty) const throw();
 
     /** Compares the value of a named attribute with a value passed-in.
 
@@ -308,8 +308,8 @@ public:
         @returns    true if the value of the attribute is the same as the string passed-in;
                     false if it's different (or if no such attribute exists)
     */
-    bool compareAttribute (const tchar* const attributeName,
-                           const tchar* const stringToCompareAgainst,
+    bool compareAttribute (const String& attributeName,
+                           const String& stringToCompareAgainst,
                            const bool ignoreCase = false) const throw();
 
     /** Returns the value of a named attribute as an integer.
@@ -320,9 +320,9 @@ public:
         @param attributeName        the name of the attribute to look up
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
-        @see setAttribute (const tchar* const, int)
+        @see setAttribute
     */
-    int getIntAttribute (const tchar* const attributeName,
+    int getIntAttribute (const String& attributeName,
                          const int defaultReturnValue = 0) const throw();
 
     /** Returns the value of a named attribute as floating-point.
@@ -333,9 +333,9 @@ public:
         @param attributeName        the name of the attribute to look up
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
-        @see setAttribute (const tchar* const, double)
+        @see setAttribute
     */
-    double getDoubleAttribute (const tchar* const attributeName,
+    double getDoubleAttribute (const String& attributeName,
                                const double defaultReturnValue = 0.0) const throw();
 
     /** Returns the value of a named attribute as a boolean.
@@ -348,7 +348,7 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
-    bool getBoolAttribute (const tchar* const attributeName,
+    bool getBoolAttribute (const String& attributeName,
                            const bool defaultReturnValue = false) const throw();
 
     /** Adds a named attribute to the element.
@@ -364,23 +364,8 @@ public:
         @param newValue             the value to set it to
         @see removeAttribute
     */
-    void setAttribute (const tchar* const attributeName,
+    void setAttribute (const String& attributeName,
                        const String& newValue) throw();
-
-    /** Adds a named attribute to the element.
-
-        If the element already contains an attribute with this name, it's value will
-        be updated to the new value. If there's no such attribute yet, a new one will
-        be added.
-
-        Note that there are other setAttribute() methods that take integers,
-        doubles, etc. to make it easy to store numbers.
-
-        @param attributeName        the name of the attribute to set
-        @param newValue             the value to set it to
-    */
-    void setAttribute (const tchar* const attributeName,
-                       const tchar* const newValue) throw();
 
     /** Adds a named attribute to the element, setting it to an integer value.
 
@@ -394,7 +379,7 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const tchar* const attributeName,
+    void setAttribute (const String& attributeName,
                        const int newValue) throw();
 
     /** Adds a named attribute to the element, setting it to a floating-point value.
@@ -409,7 +394,7 @@ public:
         @param attributeName        the name of the attribute to set
         @param newValue             the value to set it to
     */
-    void setAttribute (const tchar* const attributeName,
+    void setAttribute (const String& attributeName,
                        const double newValue) throw();
 
     /** Removes a named attribute from the element.
@@ -417,7 +402,7 @@ public:
         @param attributeName    the name of the attribute to remove
         @see removeAllAttributes
     */
-    void removeAttribute (const tchar* const attributeName) throw();
+    void removeAttribute (const String& attributeName) throw();
 
     /** Removes all attributes from this element.
     */
@@ -460,7 +445,7 @@ public:
 
         @see getNextElement, isTextElement, forEachXmlChildElement
     */
-    inline XmlElement* getNextElement() const throw()   { return nextElement; }
+    inline XmlElement* getNextElement() const throw()       { return nextElement; }
 
     /** Returns the next of this element's siblings which has the specified tag
         name.
@@ -470,7 +455,7 @@ public:
 
         @see getNextElement, forEachXmlChildElementWithTagName
     */
-    XmlElement* getNextElementWithTagName (const tchar* const requiredTagName) const;
+    XmlElement* getNextElementWithTagName (const String& requiredTagName) const;
 
     /** Returns the number of sub-elements in this element.
 
@@ -494,7 +479,7 @@ public:
         @returns the first element with this tag name, or 0 if none is found
         @see getNextElement, isTextElement, getChildElement
     */
-    XmlElement* getChildByName (const tchar* const tagNameToLookFor) const throw();
+    XmlElement* getChildByName (const String& tagNameToLookFor) const throw();
 
     //==============================================================================
     /** Appends an element to this element's list of children.
@@ -551,7 +536,7 @@ public:
 
         @see removeChildElement
     */
-    void deleteAllChildElementsWithTagName (const tchar* const tagName) throw();
+    void deleteAllChildElementsWithTagName (const String& tagName) throw();
 
     /** Returns true if the given element is a child of this one. */
     bool containsChildElement (const XmlElement* const possibleChild) const throw();
@@ -653,7 +638,7 @@ public:
 
         @see getAllSubText
     */
-    const String getChildElementAllSubText (const tchar* const childTagName,
+    const String getChildElementAllSubText (const String& childTagName,
                                             const String& defaultReturnValue) const throw();
 
     /** Appends a section of text to this element.
@@ -698,7 +683,6 @@ private:
     XmlAttributeNode* attributes;
 
     XmlElement (int) throw(); // for internal use
-    XmlElement (const tchar* const tagNameText, const int nameLen) throw();
 
     void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
 

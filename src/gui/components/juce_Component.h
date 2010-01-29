@@ -38,7 +38,7 @@
 #include "../../events/juce_MessageListener.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_VoidArray.h"
-#include "../../containers/juce_PropertySet.h"
+#include "../../containers/juce_NamedValueSet.h"
 class LookAndFeel;
 
 
@@ -1815,123 +1815,17 @@ public:
 
 
     //==============================================================================
-    /** Returns one of the component's properties as a string.
-
-        @param keyName                          the name of the property to retrieve
-        @param useParentComponentIfNotFound     if this is true and the key isn't present in this component's
-                                                properties, then it will check whether the parent component has
-                                                the key.
-        @param defaultReturnValue               a value to return if the named property doesn't actually exist
+    /** Returns the set of properties that belong to this component.
+        Each component has a NamedValueSet object which you can use to attach arbitrary
+        items of data to it.
     */
-    const String getComponentProperty (const String& keyName,
-                                       const bool useParentComponentIfNotFound,
-                                       const String& defaultReturnValue = String::empty) const throw();
+    NamedValueSet& getProperties() throw()                              { return properties; }
 
-    /** Returns one of the properties as an integer.
-
-        @param keyName                          the name of the property to retrieve
-        @param useParentComponentIfNotFound     if this is true and the key isn't present in this component's
-                                                properties, then it will check whether the parent component has
-                                                the key.
-        @param defaultReturnValue               a value to return if the named property doesn't actually exist
+    /** Returns the set of properties that belong to this component.
+        Each component has a NamedValueSet object which you can use to attach arbitrary
+        items of data to it.
     */
-    int getComponentPropertyInt (const String& keyName,
-                                 const bool useParentComponentIfNotFound,
-                                 const int defaultReturnValue = 0) const throw();
-
-    /** Returns one of the properties as an double.
-
-        @param keyName                          the name of the property to retrieve
-        @param useParentComponentIfNotFound     if this is true and the key isn't present in this component's
-                                                properties, then it will check whether the parent component has
-                                                the key.
-        @param defaultReturnValue               a value to return if the named property doesn't actually exist
-    */
-    double getComponentPropertyDouble (const String& keyName,
-                                       const bool useParentComponentIfNotFound,
-                                       const double defaultReturnValue = 0.0) const throw();
-
-    /** Returns one of the properties as an boolean.
-
-        The result will be true if the string found for this key name can be parsed as a non-zero
-        integer.
-
-        @param keyName                          the name of the property to retrieve
-        @param useParentComponentIfNotFound     if this is true and the key isn't present in this component's
-                                                properties, then it will check whether the parent component has
-                                                the key.
-        @param defaultReturnValue               a value to return if the named property doesn't actually exist
-    */
-    bool getComponentPropertyBool (const String& keyName,
-                                   const bool useParentComponentIfNotFound,
-                                   const bool defaultReturnValue = false) const throw();
-
-    /** Returns one of the properties as an colour.
-
-        @param keyName                          the name of the property to retrieve
-        @param useParentComponentIfNotFound     if this is true and the key isn't present in this component's
-                                                properties, then it will check whether the parent component has
-                                                the key.
-        @param defaultReturnValue               a colour to return if the named property doesn't actually exist
-    */
-    const Colour getComponentPropertyColour (const String& keyName,
-                                             const bool useParentComponentIfNotFound,
-                                             const Colour& defaultReturnValue = Colours::black) const throw();
-
-    /** Sets a named property as a string.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-        @see removeComponentProperty
-    */
-    void setComponentProperty (const String& keyName, const String& value) throw();
-
-    /** Sets a named property to an integer.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-        @see removeComponentProperty
-    */
-    void setComponentProperty (const String& keyName, const int value) throw();
-
-    /** Sets a named property to a double.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-        @see removeComponentProperty
-    */
-    void setComponentProperty (const String& keyName, const double value) throw();
-
-    /** Sets a named property to a boolean.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param value        the new value to set it to
-        @see removeComponentProperty
-    */
-    void setComponentProperty (const String& keyName, const bool value) throw();
-
-    /** Sets a named property to a colour.
-
-        @param keyName      the name of the property to set. (This mustn't be an empty string)
-        @param newColour    the new colour to set it to
-        @see removeComponentProperty
-    */
-    void setComponentProperty (const String& keyName, const Colour& newColour) throw();
-
-    /** Deletes a named component property.
-
-        @param keyName      the name of the property to delete. (This mustn't be an empty string)
-        @see setComponentProperty, getComponentProperty
-    */
-    void removeComponentProperty (const String& keyName) throw();
-
-    /** Returns the complete set of properties that have been set for this component.
-
-        If no properties have been set, this will return a null pointer.
-
-        @see getComponentProperty, setComponentProperty
-    */
-    PropertySet* getComponentProperties() const throw()           { return propertySet_; }
+    const NamedValueSet& getProperties() const throw()                  { return properties; }
 
     //==============================================================================
     /** Looks for a colour that has been registered with the given colour ID number.
@@ -2023,7 +1917,7 @@ private:
     VoidArray* mouseListeners_;
     VoidArray* keyListeners_;
     VoidArray* componentListeners_;
-    PropertySet* propertySet_;
+    NamedValueSet properties;
 
     struct ComponentFlags
     {

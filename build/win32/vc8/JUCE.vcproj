@@ -1082,6 +1082,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\containers\juce_DynamicObject.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_DynamicObject.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\containers\juce_ElementComparator.h"
 					>
 				</File>
@@ -1095,6 +1103,14 @@
 				</File>
 				<File
 					RelativePath="..\..\..\src\containers\juce_MemoryBlock.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_NamedValueSet.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\containers\juce_NamedValueSet.h"
 					>
 				</File>
 				<File

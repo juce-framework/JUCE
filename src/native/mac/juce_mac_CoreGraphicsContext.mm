@@ -67,7 +67,7 @@ public:
         {
             const Image::BitmapData srcData (juceImage, 0, 0, juceImage.getWidth(), juceImage.getHeight());
 
-            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.pixelStride, 0);
+            CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
 
             CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
                                                  8, srcData.pixelStride * 8, srcData.lineStride,

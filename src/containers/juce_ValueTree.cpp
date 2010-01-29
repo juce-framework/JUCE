@@ -142,16 +142,9 @@ ValueTree::SharedObject::SharedObject (const String& type_)
 }
 
 ValueTree::SharedObject::SharedObject (const SharedObject& other)
-    : type (other.type), parent (0)
+    : type (other.type), properties (other.properties), parent (0)
 {
-    int i;
-    for (i = 0; i < other.properties.size(); ++i)
-    {
-        const Property* const p = other.properties.getUnchecked(i);
-        properties.add (new Property (p->name, p->value));
-    }
-
-    for (i = 0; i < other.children.size(); ++i)
+    for (int i = 0; i < other.children.size(); ++i)
         children.add (new SharedObject (*other.children.getUnchecked(i)));
 }
 
@@ -166,11 +159,6 @@ ValueTree::SharedObject::~SharedObject()
         children.remove (i);
         c->sendParentChangeMessage();
     }
-}
-
-ValueTree::SharedObject::Property::Property (const var::identifier& name_, const var& value_)
-    : name (name_), value (value_)
-{
 }
 
 //==============================================================================
@@ -269,83 +257,50 @@ void ValueTree::SharedObject::sendParentChangeMessage()
 }
 
 //==============================================================================
-const var ValueTree::SharedObject::getProperty (const var::identifier& name) const
+const var& ValueTree::SharedObject::getProperty (const var::identifier& name) const
 {
-    for (int i = properties.size(); --i >= 0;)
-    {
-        const Property* const p = properties.getUnchecked(i);
-        if (p->name == name)
-            return p->value;
-    }
-
-    return var();
+    return properties [name];
 }
 
 void ValueTree::SharedObject::setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager)
 {
-    for (int i = properties.size(); --i >= 0;)
-    {
-        Property* const p = properties.getUnchecked(i);
-
-        if (p->name == name)
-        {
-            if (p->value != newValue)
-            {
-                if (undoManager == 0)
-                {
-                    p->value = newValue;
-                    sendPropertyChangeMessage (name);
-                }
-                else
-                {
-                    undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, false, false));
-                }
-            }
-
-            return;
-        }
-    }
-
     if (undoManager == 0)
     {
-        properties.add (new Property (name, newValue));
-        sendPropertyChangeMessage (name);
+        if (properties.set (name, newValue))
+            sendPropertyChangeMessage (name);
     }
     else
     {
-        undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, true, false));
+        var* const existingValue = properties.getItem (name);
+
+        if (existingValue != 0)
+        {
+            if (*existingValue != newValue)
+                undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, false, false));
+        }
+        else
+        {
+            undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, true, false));
+        }
     }
 }
 
 bool ValueTree::SharedObject::hasProperty (const var::identifier& name) const
 {
-    for (int i = properties.size(); --i >= 0;)
-        if (properties.getUnchecked(i)->name == name)
-            return true;
-
-    return false;
+    return properties.contains (name);
 }
 
 void ValueTree::SharedObject::removeProperty (const var::identifier& name, UndoManager* const undoManager)
 {
-    for (int i = properties.size(); --i >= 0;)
+    if (undoManager == 0)
     {
-        Property* const p = properties.getUnchecked(i);
-
-        if (p->name == name)
-        {
-            if (undoManager == 0)
-            {
-                properties.remove (i);
-                sendPropertyChangeMessage (name);
-            }
-            else
-            {
-                undoManager->perform (new ValueTreeSetPropertyAction (this, name, var(), false, true));
-            }
-
-            break;
-        }
+        if (properties.remove (name))
+            sendPropertyChangeMessage (name);
+    }
+    else
+    {
+        if (properties.contains (name))
+            undoManager->perform (new ValueTreeSetPropertyAction (this, name, var::null, false, true));
     }
 }
 
@@ -355,15 +310,15 @@ void ValueTree::SharedObject::removeAllProperties (UndoManager* const undoManage
     {
         while (properties.size() > 0)
         {
-            const var::identifier name (properties.getLast()->name);
-            properties.removeLast();
+            const var::identifier name (properties.getName (properties.size() - 1));
+            properties.remove (name);
             sendPropertyChangeMessage (name);
         }
     }
     else
     {
         for (int i = properties.size(); --i >= 0;)
-            undoManager->perform (new ValueTreeSetPropertyAction (this, properties.getUnchecked(i)->name, var(), false, true));
+            undoManager->perform (new ValueTreeSetPropertyAction (this, properties.getName(i), var::null, false, true));
     }
 }
 
@@ -534,14 +489,14 @@ ValueTree ValueTree::getParent() const
     return object != 0 ? ValueTree (object->parent) : ValueTree ((SharedObject*) 0);
 }
 
-const var ValueTree::operator[] (const var::identifier& name) const
+const var& ValueTree::operator[] (const var::identifier& name) const
 {
-    return object == 0 ? var() : object->getProperty (name);
+    return object == 0 ? var::null : object->getProperty (name);
 }
 
-const var ValueTree::getProperty (const var::identifier& name) const
+const var& ValueTree::getProperty (const var::identifier& name) const
 {
-    return object == 0 ? var() : object->getProperty (name);
+    return object == 0 ? var::null : object->getProperty (name);
 }
 
 void ValueTree::setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager)
@@ -576,8 +531,8 @@ int ValueTree::getNumProperties() const
 
 const var::identifier ValueTree::getPropertyName (int index) const
 {
-    const SharedObject::Property* const p = (object == 0) ? 0 : object->properties [index];
-    return p != 0 ? p->name : var::identifier (String::empty);
+    return (object == 0) ? var::identifier()
+                         : object->properties.getName (index);
 }
 
 //==============================================================================
@@ -710,11 +665,12 @@ XmlElement* ValueTree::SharedObject::createXml() const
     int i;
     for (i = 0; i < properties.size(); ++i)
     {
-        const Property* const p = properties.getUnchecked(i);
+        var::identifier name (properties.getName(i));
+        const var& v = properties [name];
 
-        jassert (! p->value.isObject()); // DynamicObjects can't be stored as XML!
+        jassert (! v.isObject()); // DynamicObjects can't be stored as XML!
 
-        xml->setAttribute (p->name.name, p->value.toString());
+        xml->setAttribute (name.name, v.toString());
     }
 
     for (i = 0; i < children.size(); ++i)

@@ -56,7 +56,7 @@ public:
         XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
         TextEditor* te = (TextEditor*) comp;
 
-        e->setAttribute (T("initialText"), comp->getComponentProperty (T("initialText"), false));
+        e->setAttribute (T("initialText"), comp->getProperties() ["initialText"].toString());
 
         e->setAttribute (T("multiline"), te->isMultiLine());
         e->setAttribute (T("retKeyStartsLine"), te->getReturnKeyStartsNewLine());
@@ -85,7 +85,7 @@ public:
 
         const String initialText (xml.getStringAttribute (T("initialText")));
         te->setText (initialText, false);
-        te->setComponentProperty (T("initialText"), initialText);
+        te->getProperties().set ("initialText", initialText);
         return true;
     }
 
@@ -126,7 +126,7 @@ public:
           << memberVariableName << "->setCaretVisible (" << boolToString (te->isCaretVisible()) << ");\n"
           << memberVariableName << "->setPopupMenuEnabled (" << boolToString (te->isPopupMenuEnabled()) << ");\n"
           << getColourIntialisationCode (component, memberVariableName)
-          << memberVariableName << "->setText (" << quotedString (te->getComponentProperty (T("initialText"), false)) << ");\n\n";
+          << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString()) << ");\n\n";
 
         code.constructorCode += s;
     }
@@ -405,7 +405,7 @@ private:
 
         const String getText() const
         {
-            return component->getComponentProperty (T("initialText"), false);
+            return component->getProperties() ["initialText"];
         }
 
     private:
@@ -416,14 +416,14 @@ private:
                 : ComponentUndoableAction <TextEditor> (comp, layout),
                   newState (newState_)
             {
-                oldState = comp->getComponentProperty (T("initialText"), false);
+                oldState = comp->getProperties() ["initialText"];
             }
 
             bool perform()
             {
                 showCorrectTab();
                 getComponent()->setText (newState, false);
-                getComponent()->setComponentProperty (T("initialText"), newState);
+                getComponent()->getProperties().set ("initialText", newState);
                 changed();
                 return true;
             }
@@ -432,7 +432,7 @@ private:
             {
                 showCorrectTab();
                 getComponent()->setText (oldState, false);
-                getComponent()->setComponentProperty (T("initialText"), oldState);
+                getComponent()->getProperties().set ("initialText", oldState);
                 changed();
                 return true;
             }

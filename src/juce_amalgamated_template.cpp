@@ -82,6 +82,8 @@
 #include "containers/juce_MemoryBlock.cpp"
 #include "containers/juce_PropertySet.cpp"
 #include "containers/juce_Variant.cpp"
+#include "containers/juce_NamedValueSet.cpp"
+#include "containers/juce_DynamicObject.cpp"
 #include "cryptography/juce_BlowFish.cpp"
 #include "cryptography/juce_MD5.cpp"
 #include "cryptography/juce_Primes.cpp"

@@ -247,7 +247,7 @@ public:
             }
             else
             {
-                button->setComponentProperty ("resource" + String ((int) role), newName);
+                button->getProperties().set ("resource" + String ((int) role), newName);
                 updateButtonImages (*layout.getDocument(), button);
                 layout.changed();
             }
@@ -257,7 +257,7 @@ public:
     static const String getImageResource (ImageButton* button, const ImageRole role)
     {
         jassert (role < 3);
-        return button->getComponentProperty ("resource" + String ((int) role), false);
+        return button->getProperties() ["resource" + String ((int) role)].toString();
     }
 
     //==============================================================================
@@ -295,7 +295,7 @@ public:
 
     static bool doesImageKeepProportions (ImageButton* button)
     {
-        return button->getComponentPropertyBool ("keepImageProp", false, true);
+        return button->getProperties().getWithDefault ("keepImageProp", true);
     }
 
     static void setImageKeepProportions (ComponentLayout& layout, ImageButton* button, const bool newState, const bool undoable)
@@ -306,7 +306,7 @@ public:
         }
         else
         {
-            button->setComponentProperty ("keepImageProp", newState);
+            button->getProperties().set ("keepImageProp", newState);
             updateButtonImages (*layout.getDocument(), button);
             layout.changed();
         }
@@ -375,7 +375,7 @@ public:
 
     static float getImageOpacity (ImageButton* button, const ImageRole role)
     {
-        return (float) button->getComponentPropertyDouble ("imageOpacity" + String ((int) role), false, 1.0f);
+        return (float) button->getProperties().getWithDefault ("imageOpacity" + String ((int) role), 1.0f);
     }
 
     static void setImageOpacity (ComponentLayout& layout, ImageButton* button, const ImageRole role, const float opacity, const bool undoable)
@@ -386,7 +386,7 @@ public:
         }
         else
         {
-            button->setComponentProperty ("imageOpacity" + String ((int) role), opacity);
+            button->getProperties().set ("imageOpacity" + String ((int) role), opacity);
             updateButtonImages (*layout.getDocument(), button);
             layout.changed();
         }
@@ -459,7 +459,7 @@ public:
 
     static const Colour getImageColour (ImageButton* button, const ImageRole role)
     {
-        return Colour::fromString (button->getComponentProperty ("imageColour" + String ((int) role), false, "0"));
+        return Colour::fromString (button->getProperties().getWithDefault ("imageColour" + String ((int) role), "0").toString());
     }
 
     static void setImageColour (ComponentLayout& layout, ImageButton* button, const ImageRole role, const Colour& colour, const bool undoable)
@@ -470,7 +470,7 @@ public:
         }
         else
         {
-            button->setComponentProperty ("imageColour" + String ((int) role), colour.toString());
+            button->getProperties().set ("imageColour" + String ((int) role), colour.toString());
             updateButtonImages (*layout.getDocument(), button);
             layout.changed();
         }

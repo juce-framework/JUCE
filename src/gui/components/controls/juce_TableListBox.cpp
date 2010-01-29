@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static const tchar* const tableColumnPropertyTag = T("_tableColumnID");
+static const char* const tableColumnPropertyTag = "_tableColumnID";
 
 class TableListRowComp   : public Component,
                            public TooltipClient
@@ -100,7 +100,7 @@ public:
         {
             jassert (row >= 0);
 
-            const tchar* const tagPropertyName = T("_tableLastUseNum");
+            const var::identifier tagPropertyName ("_tableLastUseNum");
             const int newTag = Random::getSystemRandom().nextInt();
 
             const TableHeaderComponent* const header = owner.getHeader();
@@ -122,8 +122,8 @@ public:
                     if (newComp != 0)
                     {
                         addAndMakeVisible (newComp);
-                        newComp->setComponentProperty (tagPropertyName, newTag);
-                        newComp->setComponentProperty (tableColumnPropertyTag, columnId);
+                        newComp->getProperties().set (tagPropertyName, newTag);
+                        newComp->getProperties().set (tableColumnPropertyTag, columnId);
 
                         const Rectangle columnRect (header->getColumnPosition (i));
                         newComp->setBounds (columnRect.getX(), 0, columnRect.getWidth(), getHeight());
@@ -137,7 +137,7 @@ public:
             {
                 Component* const c = getChildComponent (i);
 
-                if (c->getComponentPropertyInt (tagPropertyName, false, 0) != newTag)
+                if ((int) c->getProperties() [tagPropertyName] != newTag)
                     delete c;
             }
         }
@@ -154,7 +154,7 @@ public:
         {
             Component* const c = getChildComponent (i);
 
-            const int columnId = c->getComponentPropertyInt (tableColumnPropertyTag, false, 0);
+            const int columnId = c->getProperties() [tableColumnPropertyTag];
 
             if (columnId != 0)
             {
@@ -254,7 +254,7 @@ private:
         {
             Component* const c = getChildComponent (i);
 
-            if (c->getComponentPropertyInt (tableColumnPropertyTag, false, 0) == columnId)
+            if ((int) c->getProperties() [tableColumnPropertyTag] == columnId)
                 return c;
         }
 

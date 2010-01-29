@@ -384,7 +384,7 @@ const StringArray CameraDevice::getAvailableDevices()
     StringArray results;
     NSArray* devs = [QTCaptureDevice inputDevicesWithMediaType: QTMediaTypeVideo];
 
-    for (int i = 0; i < [devs count]; ++i)
+    for (int i = 0; i < (int) [devs count]; ++i)
     {
         QTCaptureDevice* dev = (QTCaptureDevice*) [devs objectAtIndex: i];
         results.add (nsStringToJuce ([dev localizedDisplayName]));

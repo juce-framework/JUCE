@@ -26,11 +26,12 @@
 #ifndef __JUCE_VALUETREE_JUCEHEADER__
 #define __JUCE_VALUETREE_JUCEHEADER__
 
-#include "juce_Variant.h"
+#include "juce_NamedValueSet.h"
 #include "juce_Value.h"
 #include "../utilities/juce_UndoManager.h"
 #include "../text/juce_XmlElement.h"
 #include "juce_ReferenceCountedArray.h"
+
 
 //==============================================================================
 /**
@@ -126,14 +127,14 @@ public:
         You can also use operator[] to get a property.
         @see var, setProperty, hasProperty
     */
-    const var getProperty (const var::identifier& name) const;
+    const var& getProperty (const var::identifier& name) const;
 
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as
         calling getProperty().
         @see getProperty
     */
-    const var operator[] (const var::identifier& name) const;
+    const var& operator[] (const var::identifier& name) const;
 
     /** Changes a named property of the node.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -354,16 +355,8 @@ private:
         SharedObject (const SharedObject& other);
         ~SharedObject();
 
-        struct Property
-        {
-            Property (const var::identifier& name, const var& value);
-
-            var::identifier name;
-            var value;
-        };
-
         const String type;
-        OwnedArray <Property> properties;
+        NamedValueSet properties;
         ReferenceCountedArray <SharedObject> children;
         SortedSet <ValueTree*> valueTreesWithListeners;
         SharedObject* parent;
@@ -373,7 +366,7 @@ private:
         void sendChildChangeMessage();
         void sendChildChangeMessage (ValueTree& tree);
         void sendParentChangeMessage();
-        const var getProperty (const var::identifier& name) const;
+        const var& getProperty (const var::identifier& name) const;
         void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
         bool hasProperty (const var::identifier& name) const;
         void removeProperty (const var::identifier& name, UndoManager* const undoManager);

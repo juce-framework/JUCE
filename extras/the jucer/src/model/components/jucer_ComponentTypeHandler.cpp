@@ -146,8 +146,8 @@ XmlElement* ComponentTypeHandler::createXmlFor (Component* comp, const Component
 
     e->setAttribute (T("name"), comp->getName());
     e->setAttribute (T("id"), String::toHexString (getComponentId (comp)));
-    e->setAttribute (T("memberName"), comp->getComponentProperty (T("memberName"), false));
-    e->setAttribute (T("virtualName"), comp->getComponentProperty (T("virtualName"), false));
+    e->setAttribute (T("memberName"), comp->getProperties() ["memberName"].toString());
+    e->setAttribute (T("virtualName"), comp->getProperties() ["virtualName"].toString());
     e->setAttribute (T("explicitFocusOrder"), comp->getExplicitFocusOrder());
 
     RelativePositionedRectangle pos (getComponentPosition (comp));
@@ -181,8 +181,8 @@ bool ComponentTypeHandler::restoreFromXml (const XmlElement& xml,
 
     comp->setName (xml.getStringAttribute (T("name"), comp->getName()));
     setComponentId (comp, xml.getStringAttribute (T("id")).getHexValue64());
-    comp->setComponentProperty (T("memberName"), xml.getStringAttribute (T("memberName")));
-    comp->setComponentProperty (T("virtualName"), xml.getStringAttribute (T("virtualName")));
+    comp->getProperties().set ("memberName", xml.getStringAttribute (T("memberName")));
+    comp->getProperties().set ("virtualName", xml.getStringAttribute (T("virtualName")));
     comp->setExplicitFocusOrder (xml.getIntAttribute (T("explicitFocusOrder")));
 
     RelativePositionedRectangle currentPos (getComponentPosition (comp));
@@ -218,7 +218,7 @@ int64 ComponentTypeHandler::getComponentId (Component* comp)
     if (comp == 0)
         return 0;
 
-    int64 compId = comp->getComponentProperty (T("jucerCompId"), false).getHexValue64();
+    int64 compId = comp->getProperties() ["jucerCompId"].toString().getHexValue64();
 
     if (compId == 0)
     {
@@ -233,17 +233,17 @@ void ComponentTypeHandler::setComponentId (Component* comp, const int64 newID)
 {
     jassert (comp != 0);
     if (newID != 0)
-        comp->setComponentProperty (T("jucerCompId"), String::toHexString (newID));
+        comp->getProperties().set ("jucerCompId", String::toHexString (newID));
 }
 
 const RelativePositionedRectangle ComponentTypeHandler::getComponentPosition (Component* comp)
 {
     RelativePositionedRectangle rp;
-    rp.rect = PositionedRectangle (comp->getComponentProperty (T("pos"), false));
-    rp.relativeToX = comp->getComponentProperty (T("relativeToX"), false).getHexValue64();
-    rp.relativeToY = comp->getComponentProperty (T("relativeToY"), false).getHexValue64();
-    rp.relativeToW = comp->getComponentProperty (T("relativeToW"), false).getHexValue64();
-    rp.relativeToH = comp->getComponentProperty (T("relativeToH"), false).getHexValue64();
+    rp.rect = PositionedRectangle (comp->getProperties() ["pos"]);
+    rp.relativeToX = comp->getProperties() ["relativeToX"].toString().getHexValue64();
+    rp.relativeToY = comp->getProperties() ["relativeToY"].toString().getHexValue64();
+    rp.relativeToW = comp->getProperties() ["relativeToW"].toString().getHexValue64();
+    rp.relativeToH = comp->getProperties() ["relativeToH"].toString().getHexValue64();
 
     return rp;
 }
@@ -252,11 +252,11 @@ void ComponentTypeHandler::setComponentPosition (Component* comp,
                                                  const RelativePositionedRectangle& newPos,
                                                  const ComponentLayout* layout)
 {
-    comp->setComponentProperty (T("pos"), newPos.rect.toString());
-    comp->setComponentProperty (T("relativeToX"), String::toHexString (newPos.relativeToX));
-    comp->setComponentProperty (T("relativeToY"), String::toHexString (newPos.relativeToY));
-    comp->setComponentProperty (T("relativeToW"), String::toHexString (newPos.relativeToW));
-    comp->setComponentProperty (T("relativeToH"), String::toHexString (newPos.relativeToH));
+    comp->getProperties().set ("pos", newPos.rect.toString());
+    comp->getProperties().set ("relativeToX", String::toHexString (newPos.relativeToX));
+    comp->getProperties().set ("relativeToY", String::toHexString (newPos.relativeToY));
+    comp->getProperties().set ("relativeToW", String::toHexString (newPos.relativeToW));
+    comp->getProperties().set ("relativeToH", String::toHexString (newPos.relativeToH));
 
     comp->setBounds (newPos.getRectangle (Rectangle (0, 0, comp->getParentWidth(), comp->getParentHeight()),
                                           layout));
@@ -507,7 +507,7 @@ void ComponentTypeHandler::fillInGeneratedCode (Component* component, GeneratedC
 
 void ComponentTypeHandler::fillInMemberVariableDeclarations (GeneratedCode& code, Component* component, const String& memberVariableName)
 {
-    const String virtualName (component->getComponentProperty (T("virtualName"), false));
+    const String virtualName (component->getProperties() ["virtualName"].toString());
 
     if (virtualName.isNotEmpty())
     {
@@ -550,7 +550,7 @@ const String ComponentTypeHandler::getCreationParameters (Component* component)
 void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* component, const String& memberVariableName)
 {
     String params (getCreationParameters (component));
-    const String virtualName (component->getComponentProperty (T("virtualName"), false));
+    const String virtualName (component->getProperties() ["virtualName"].toString());
 
     String s;
     s << "addAndMakeVisible (" << memberVariableName << " = new ";

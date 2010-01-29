@@ -205,56 +205,56 @@ public:
 
     static int getViewportContentType (Viewport* vp)
     {
-        return vp->getComponentPropertyInt (T("contentType"), false, 0);
+        return vp->getProperties() ["contentType"];
     }
 
     static void setViewportContentType (Viewport* vp, int newValue)
     {
         if (newValue != getViewportContentType (vp))
         {
-            vp->setComponentProperty (T("contentType"), newValue);
+            vp->getProperties().set ("contentType", newValue);
             updateViewportContentComp (vp);
         }
     }
 
     static const String getViewportJucerComponentFile (Viewport* vp)
     {
-        return vp->getComponentProperty (T("jucerFile"), false);
+        return vp->getProperties() ["jucerFile"].toString();
     }
 
     static void setViewportJucerComponentFile (Viewport* vp, const String& file)
     {
         if (file != getViewportJucerComponentFile (vp))
         {
-            vp->setComponentProperty (T("jucerFile"), file);
+            vp->getProperties().set ("jucerFile", file);
             updateViewportContentComp (vp);
         }
     }
 
     static const String getViewportGenericComponentClass (Viewport* vp)
     {
-        return vp->getComponentProperty (T("contentClass"), false);
+        return vp->getProperties() ["contentClass"].toString();
     }
 
     static void setViewportGenericComponentClass (Viewport* vp, const String& className)
     {
         if (className != getViewportGenericComponentClass (vp))
         {
-            vp->setComponentProperty (T("contentClass"), className);
+            vp->getProperties().set ("contentClass", className);
             updateViewportContentComp (vp);
         }
     }
 
     static const String getViewportConstructorParams (Viewport* vp)
     {
-        return vp->getComponentProperty (T("constructorParams"), false);
+        return vp->getProperties() ["constructorParams"].toString();
     }
 
     static void setViewportConstructorParams (Viewport* vp, const String& newParams)
     {
         if (newParams != getViewportConstructorParams (vp))
         {
-            vp->setComponentProperty (T("constructorParams"), newParams);
+            vp->getProperties().set ("constructorParams", newParams);
             updateViewportContentComp (vp);
         }
     }

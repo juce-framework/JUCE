@@ -29,6 +29,7 @@
 #include "juce_AudioProcessor.h"
 #include "../plugins/juce_AudioPluginFormatManager.h"
 #include "../plugins/juce_KnownPluginList.h"
+#include "../../containers/juce_PropertySet.h"
 #include "../../containers/juce_ReferenceCountedArray.h"
 
 

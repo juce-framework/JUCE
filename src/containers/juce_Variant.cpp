@@ -28,7 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Variant.h"
-
+#include "juce_DynamicObject.h"
 
 //==============================================================================
 var::var() throw()
@@ -37,13 +37,15 @@ var::var() throw()
     value.doubleValue = 0;
 }
 
-var::~var()
+var::~var() throw()
 {
     if (type == stringType)
         delete value.stringValue;
     else if (type == objectType && value.objectValue != 0)
         value.objectValue->decReferenceCount();
 }
+
+const var var::null;
 
 //==============================================================================
 var::var (const var& valueToCopy)
@@ -190,6 +192,7 @@ const String var::toString() const
         case doubleType:    return String (value.doubleValue);
         case stringType:    return *(value.stringValue);
         case objectType:    return "Object 0x" + String::toHexString ((int) (pointer_sized_int) value.objectValue);
+        case methodType:    return "Method";
         default:            jassertfalse; break;
     }
 
@@ -216,6 +219,7 @@ bool var::operator== (const var& other) const throw()
         case doubleType:    return value.doubleValue == (double) other;
         case stringType:    return (*(value.stringValue)) == other.toString();
         case objectType:    return value.objectValue == other.getObject();
+        case methodType:    return value.methodValue == other.value.methodValue && other.isMethod();
         default:            jassertfalse; break;
     }
 
@@ -245,7 +249,8 @@ void var::writeToStream (OutputStream& output) const
             output.write (temp, len);
             break;
         }
-        case objectType:    output.writeCompressedInt (0); jassertfalse; break; // Can't write an object to a stream!
+        case objectType:
+        case methodType:    output.writeCompressedInt (0); jassertfalse; break; // Can't write an object to a stream!
         default:            jassertfalse; break; // Is this a corrupted object?
     }
 }
@@ -273,7 +278,7 @@ const var var::readFromStream (InputStream& input)
         }
     }
 
-    return var();
+    return var::null;
 }
 
 const var var::operator[] (const var::identifier& propertyName) const
@@ -281,7 +286,7 @@ const var var::operator[] (const var::identifier& propertyName) const
     if (type == objectType && value.objectValue != 0)
         return value.objectValue->getProperty (propertyName);
 
-    return var();
+    return var::null;
 }
 
 const var var::invoke (const var::identifier& method, const var* arguments, int numArguments) const
@@ -289,7 +294,7 @@ const var var::invoke (const var::identifier& method, const var* arguments, int 
     if (type == objectType && value.objectValue != 0)
         return value.objectValue->invokeMethod (method, arguments, numArguments);
 
-    return var();
+    return var::null;
 }
 
 const var var::invoke (const var& targetObject, const var* arguments, int numArguments) const
@@ -302,7 +307,7 @@ const var var::invoke (const var& targetObject, const var* arguments, int numArg
             return (target->*(value.methodValue)) (arguments, numArguments);
     }
 
-    return var();
+    return var::null;
 }
 
 const var var::call (const var::identifier& method) const
@@ -341,6 +346,11 @@ const var var::call (const var::identifier& method, const var& arg1, const var& 
 
 
 //==============================================================================
+var::identifier::identifier() throw()
+    : hashCode (0)
+{
+}
+
 var::identifier::identifier (const String& name_)
     : name (name_),
       hashCode (name_.hashCode())
@@ -359,79 +369,5 @@ var::identifier::~identifier()
 {
 }
 
-//==============================================================================
-//==============================================================================
-DynamicObject::DynamicObject()
-{
-}
-
-DynamicObject::~DynamicObject()
-{
-}
-
-bool DynamicObject::hasProperty (const var::identifier& propertyName) const
-{
-    const int index = propertyIds.indexOf (propertyName.hashCode);
-    return index >= 0 && ! propertyValues.getUnchecked (index)->isMethod();
-}
-
-const var DynamicObject::getProperty (const var::identifier& propertyName) const
-{
-    const int index = propertyIds.indexOf (propertyName.hashCode);
-    if (index >= 0)
-        return *propertyValues.getUnchecked (index);
-
-    return var();
-}
-
-void DynamicObject::setProperty (const var::identifier& propertyName, const var& newValue)
-{
-    const int index = propertyIds.indexOf (propertyName.hashCode);
-
-    if (index >= 0)
-    {
-        propertyValues.set (index, new var (newValue));
-    }
-    else
-    {
-        propertyIds.add (propertyName.hashCode);
-        propertyValues.add (new var (newValue));
-    }
-}
-
-void DynamicObject::removeProperty (const var::identifier& propertyName)
-{
-    const int index = propertyIds.indexOf (propertyName.hashCode);
-
-    if (index >= 0)
-    {
-        propertyIds.remove (index);
-        propertyValues.remove (index);
-    }
-}
-
-bool DynamicObject::hasMethod (const var::identifier& methodName) const
-{
-    return getProperty (methodName).isMethod();
-}
-
-const var DynamicObject::invokeMethod (const var::identifier& methodName,
-                                       const var* parameters,
-                                       int numParameters)
-{
-    return getProperty (methodName).invoke (var (this), parameters, numParameters);
-}
-
-void DynamicObject::setMethod (const var::identifier& name,
-                               var::MethodFunction methodFunction)
-{
-    setProperty (name, var (methodFunction));
-}
-
-void DynamicObject::clear()
-{
-    propertyIds.clear();
-    propertyValues.clear();
-}
 
 END_JUCE_NAMESPACE

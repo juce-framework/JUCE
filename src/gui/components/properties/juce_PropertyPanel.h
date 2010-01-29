@@ -28,6 +28,7 @@
 
 #include "juce_PropertyComponent.h"
 #include "../layout/juce_Viewport.h"
+#include "../../../text/juce_XmlElement.h"
 
 
 //==============================================================================

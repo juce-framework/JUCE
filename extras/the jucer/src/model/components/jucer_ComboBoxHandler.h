@@ -53,7 +53,7 @@ public:
 
         e->setAttribute (T("editable"), c->isTextEditable());
         e->setAttribute (T("layout"), c->getJustificationType().getFlags());
-        e->setAttribute (T("items"), c->getComponentProperty (T("items"), false));
+        e->setAttribute (T("items"), c->getProperties() ["items"].toString());
         e->setAttribute (T("textWhenNonSelected"), c->getTextWhenNothingSelected());
         e->setAttribute (T("textWhenNoItems"), c->getTextWhenNoChoicesAvailable());
 
@@ -72,7 +72,7 @@ public:
 
         c->setEditableText (xml.getBoolAttribute (T("editable"), defaultBox.isTextEditable()));
         c->setJustificationType (Justification (xml.getIntAttribute (T("layout"), defaultBox.getJustificationType().getFlags())));
-        c->setComponentProperty (T("items"), xml.getStringAttribute (T("items"), String::empty));
+        c->getProperties().set ("items", xml.getStringAttribute (T("items"), String::empty));
         c->setTextWhenNothingSelected (xml.getStringAttribute (T("textWhenNonSelected"), defaultBox.getTextWhenNothingSelected()));
         c->setTextWhenNoChoicesAvailable (xml.getStringAttribute (T("textWhenNoItems"), defaultBox.getTextWhenNoChoicesAvailable()));
 
@@ -114,7 +114,7 @@ public:
           << memberVariableName << "->setTextWhenNoChoicesAvailable (" << quotedString (c->getTextWhenNoChoicesAvailable()) << ");\n";
 
         StringArray lines;
-        lines.addLines (c->getComponentProperty (T("items"), false));
+        lines.addLines (c->getProperties() ["items"].toString());
         int itemId = 1;
 
         for (int i = 0; i < lines.size(); ++i)
@@ -160,7 +160,7 @@ public:
     static void updateItems (ComboBox* c)
     {
         StringArray lines;
-        lines.addLines (c->getComponentProperty (T("items"), false));
+        lines.addLines (c->getProperties() ["items"].toString());
 
         c->clear();
         int itemId = 1;
@@ -306,7 +306,7 @@ private:
 
         const String getText() const
         {
-            return component->getComponentProperty (T("items"), false);
+            return component->getProperties() ["items"];
         }
 
     private:
@@ -317,13 +317,13 @@ private:
                 : ComponentUndoableAction <ComboBox> (comp, layout),
                   newState (newState_)
             {
-                oldState = comp->getComponentProperty (T("items"), false);
+                oldState = comp->getProperties() ["items"];
             }
 
             bool perform()
             {
                 showCorrectTab();
-                getComponent()->setComponentProperty (T("items"), newState);
+                getComponent()->getProperties().set ("items", newState);
                 ComboBoxHandler::updateItems (getComponent());
                 changed();
                 return true;
@@ -332,7 +332,7 @@ private:
             bool undo()
             {
                 showCorrectTab();
-                getComponent()->setComponentProperty (T("items"), oldState);
+                getComponent()->getProperties().set ("items", oldState);
                 ComboBoxHandler::updateItems (getComponent());
                 changed();
                 return true;

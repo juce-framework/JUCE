@@ -66,7 +66,7 @@ public:
         e->setAttribute (T("editableDoubleClick"), l->isEditableOnDoubleClick());
         e->setAttribute (T("focusDiscardsChanges"), l->doesLossOfFocusDiscardChanges());
 
-        e->setAttribute (T("fontname"), l->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont));
+        e->setAttribute (T("fontname"), l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont).toString());
         e->setAttribute (T("fontsize"), roundToInt (l->getFont().getHeight() * 100.0) / 100.0);
         e->setAttribute (T("bold"), l->getFont().isBold());
         e->setAttribute (T("italic"), l->getFont().isItalic());
@@ -90,7 +90,7 @@ public:
         font.setItalic (xml.getBoolAttribute (T("italic"), false));
         l->setFont (font);
 
-        l->setComponentProperty (T("typefaceName"), xml.getStringAttribute (T("fontname"), FontPropertyComponent::defaultFont));
+        l->getProperties().set ("typefaceName", xml.getStringAttribute (T("fontname"), FontPropertyComponent::defaultFont));
         updateLabelFont (l);
 
         l->setJustificationType (Justification (xml.getIntAttribute (T("justification"), Justification::centred)));
@@ -107,7 +107,7 @@ public:
     static void updateLabelFont (Label* label)
     {
         Font f (label->getFont());
-        f = FontPropertyComponent::applyNameToFont (label->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont), f);
+        f = FontPropertyComponent::applyNameToFont (label->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont), f);
         label->setFont (f);
     }
 
@@ -129,7 +129,7 @@ public:
         String s;
 
         s << memberVariableName << "->setFont ("
-          << FontPropertyComponent::getCompleteFontCode (l->getFont(), l->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont))
+          << FontPropertyComponent::getCompleteFontCode (l->getFont(), l->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont))
           << ");\n"
           << memberVariableName << "->setJustificationType ("
           << justificationToCode (l->getJustificationType())
@@ -463,7 +463,7 @@ private:
 
         const String getTypefaceName() const
         {
-            return label->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont);
+            return label->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont);
         }
 
         void changeListenerCallback (void*)                     { refresh(); }
@@ -479,13 +479,13 @@ private:
                 : ComponentUndoableAction <Label> (comp, layout),
                   newState (newState_)
             {
-                oldState = comp->getComponentProperty (T("typefaceName"), false, FontPropertyComponent::defaultFont);
+                oldState = comp->getProperties().getWithDefault ("typefaceName", FontPropertyComponent::defaultFont);
             }
 
             bool perform()
             {
                 showCorrectTab();
-                getComponent()->setComponentProperty (T("typefaceName"), newState);
+                getComponent()->getProperties().set ("typefaceName", newState);
                 LabelHandler::updateLabelFont (getComponent());
                 changed();
                 return true;
@@ -494,7 +494,7 @@ private:
             bool undo()
             {
                 showCorrectTab();
-                getComponent()->setComponentProperty (T("typefaceName"), oldState);
+                getComponent()->getProperties().set ("typefaceName", oldState);
                 LabelHandler::updateLabelFont (getComponent());
                 changed();
                 return true;

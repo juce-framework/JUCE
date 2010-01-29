@@ -26,10 +26,6 @@
 #ifndef __JUCE_VARIANT_JUCEHEADER__
 #define __JUCE_VARIANT_JUCEHEADER__
 
-#include "juce_ReferenceCountedObject.h"
-#include "juce_OwnedArray.h"
-#include "../text/juce_StringArray.h"
-#include "../containers/juce_Array.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/streams/juce_InputStream.h"
 
@@ -57,7 +53,10 @@ public:
     var() throw();
 
     /** Destructor. */
-    ~var();
+    ~var() throw();
+
+    /** A static var object that can be used where you need an empty variant object. */
+    static const var null;
 
     var (const var& valueToCopy);
     var (const int value) throw();
@@ -116,6 +115,7 @@ public:
     class JUCE_API  identifier
     {
     public:
+        identifier() throw();
         identifier (const char* const name);
         identifier (const String& name);
         ~identifier();
@@ -182,91 +182,6 @@ private:
     Type type;
     ValueUnion value;
 };
-
-//==============================================================================
-/**
-    Represents a dynamically implemented object.
-
-    An instance of this class can be used to store named properties, and
-    by subclassing hasMethod() and invokeMethod(), you can give your object
-    methods.
-
-    This is intended for use as a wrapper for scripting language objects.
-*/
-class JUCE_API  DynamicObject  : public ReferenceCountedObject
-{
-public:
-    //==============================================================================
-    DynamicObject();
-
-    /** Destructor. */
-    virtual ~DynamicObject();
-
-    //==============================================================================
-    /** Returns true if the object has a property with this name.
-        Note that if the property is actually a method, this will return false.
-    */
-    virtual bool hasProperty (const var::identifier& propertyName) const;
-
-    /** Returns a named property.
-
-        This returns a void if no such property exists.
-    */
-    virtual const var getProperty (const var::identifier& propertyName) const;
-
-    /** Sets a named property. */
-    virtual void setProperty (const var::identifier& propertyName, const var& newValue);
-
-    /** Removes a named property. */
-    virtual void removeProperty (const var::identifier& propertyName);
-
-    //==============================================================================
-    /** Checks whether this object has the specified method.
-
-        The default implementation of this just checks whether there's a property
-        with this name that's actually a method, but this can be overridden for
-        building objects with dynamic invocation.
-    */
-    virtual bool hasMethod (const var::identifier& methodName) const;
-
-    /** Invokes a named method on this object.
-
-        The default implementation looks up the named property, and if it's a method
-        call, then it invokes it.
-
-        This method is virtual to allow more dynamic invocation to used for objects
-        where the methods may not already be set as properies.
-    */
-    virtual const var invokeMethod (const var::identifier& methodName,
-                                    const var* parameters,
-                                    int numParameters);
-
-    /** Sets up a method.
-
-        This is basically the same as calling setProperty (methodName, (var::MethodFunction) myFunction), but
-        helps to avoid accidentally invoking the wrong type of var constructor. It also makes
-        the code easier to read,
-
-        The compiler will probably force you to use an explicit cast your method to a (var::MethodFunction), e.g.
-        @code
-        setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
-        @endcode
-    */
-    void setMethod (const var::identifier& methodName,
-                    var::MethodFunction methodFunction);
-
-    //==============================================================================
-    /** Removes all properties and methods from the object. */
-    void clear();
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-
-private:
-    Array <int> propertyIds;
-    OwnedArray <var> propertyValues;
-};
-
 
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__

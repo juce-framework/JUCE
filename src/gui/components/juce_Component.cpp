@@ -114,7 +114,6 @@ Component::Component() throw()
     mouseListeners_ (0),
     keyListeners_ (0),
     componentListeners_ (0),
-    propertySet_ (0),
     componentFlags_ (0)
 {
 }
@@ -130,7 +129,6 @@ Component::Component (const String& name) throw()
     mouseListeners_ (0),
     keyListeners_ (0),
     componentListeners_ (0),
-    propertySet_ (0),
     componentFlags_ (0)
 {
 }
@@ -162,7 +160,6 @@ Component::~Component()
     delete mouseListeners_;
     delete keyListeners_;
     delete componentListeners_;
-    delete propertySet_;
 }
 
 //==============================================================================
@@ -1904,7 +1901,7 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-static const String getColourPropertyName (const int colourId) throw()
+static const var::identifier getColourPropertyId (const int colourId)
 {
     String s;
     s.preallocateStorage (18);
@@ -1914,62 +1911,49 @@ static const String getColourPropertyName (const int colourId) throw()
 
 const Colour Component::findColour (const int colourId, const bool inheritFromParent) const throw()
 {
-    const String customColour (getComponentProperty (getColourPropertyName (colourId),
-                                                     inheritFromParent,
-                                                     String::empty));
+    var* v = properties.getItem (getColourPropertyId (colourId));
 
-    if (customColour.isNotEmpty())
-        return Colour (customColour.getIntValue());
+    if (v != 0)
+        return Colour ((int) *v);
+
+    if (inheritFromParent && parentComponent_ != 0)
+        return parentComponent_->findColour (colourId, true);
 
     return getLookAndFeel().findColour (colourId);
 }
 
 bool Component::isColourSpecified (const int colourId) const throw()
 {
-    return getComponentProperty (getColourPropertyName (colourId),
-                                 false,
-                                 String::empty).isNotEmpty();
+    return properties.contains (getColourPropertyId (colourId));
 }
 
 void Component::removeColour (const int colourId)
 {
-    if (isColourSpecified (colourId))
-    {
-        removeComponentProperty (getColourPropertyName (colourId));
+    if (properties.remove (getColourPropertyId (colourId)))
         colourChanged();
-    }
 }
 
 void Component::setColour (const int colourId, const Colour& colour)
 {
-    const String colourName (getColourPropertyName (colourId));
-    const String customColour (getComponentProperty (colourName, false, String::empty));
-
-    if (customColour.isEmpty() || Colour (customColour.getIntValue()) != colour)
-    {
-        setComponentProperty (colourName, colour);
+    if (properties.set (getColourPropertyId (colourId), (int) colour.getARGB()))
         colourChanged();
-    }
 }
 
 void Component::copyAllExplicitColoursTo (Component& target) const throw()
 {
-    if (propertySet_ != 0)
+    bool changed = false;
+
+    for (int i = properties.size(); --i >= 0;)
     {
-        const StringPairArray& props = propertySet_->getAllProperties();
-        const StringArray& keys = props.getAllKeys();
+        const var::identifier name (properties.getName(i));
 
-        for (int i = 0; i < keys.size(); ++i)
-        {
-            if (keys[i].startsWith (T("jcclr_")))
-            {
-                target.setComponentProperty (keys[i],
-                                             props.getAllValues() [i]);
-            }
-        }
-
-        target.colourChanged();
+        if (name.name.startsWith (T("jcclr_")))
+            if (target.properties.set (name, properties [name]))
+                changed = true;
     }
+
+    if (changed)
+        target.colourChanged();
 }
 
 void Component::colourChanged()
@@ -3242,12 +3226,12 @@ bool Component::isFocusContainer() const throw()
 
 int Component::getExplicitFocusOrder() const throw()
 {
-    return getComponentPropertyInt (T("_jexfo"), false, 0);
+    return properties ["_jexfo"];
 }
 
 void Component::setExplicitFocusOrder (const int newFocusOrderIndex) throw()
 {
-    setComponentProperty (T("_jexfo"), newFocusOrderIndex);
+    properties.set ("_jexfo", newFocusOrderIndex);
 }
 
 KeyboardFocusTraverser* Component::createFocusTraverser()
@@ -3550,111 +3534,6 @@ ComponentPeer* Component::getPeer() const throw()
         return parentComponent_->getPeer();
     else
         return 0;
-}
-
-//==============================================================================
-const String Component::getComponentProperty (const String& keyName,
-                                              const bool useParentComponentIfNotFound,
-                                              const String& defaultReturnValue) const throw()
-{
-    if (propertySet_ != 0 && ((! useParentComponentIfNotFound) || propertySet_->containsKey (keyName)))
-        return propertySet_->getValue (keyName, defaultReturnValue);
-
-    if (useParentComponentIfNotFound && (parentComponent_ != 0))
-        return parentComponent_->getComponentProperty (keyName, true, defaultReturnValue);
-
-    return defaultReturnValue;
-}
-
-int Component::getComponentPropertyInt (const String& keyName,
-                                        const bool useParentComponentIfNotFound,
-                                        const int defaultReturnValue) const throw()
-{
-    if (propertySet_ != 0 && ((! useParentComponentIfNotFound) || propertySet_->containsKey (keyName)))
-        return propertySet_->getIntValue (keyName, defaultReturnValue);
-
-    if (useParentComponentIfNotFound && (parentComponent_ != 0))
-        return parentComponent_->getComponentPropertyInt (keyName, true, defaultReturnValue);
-
-    return defaultReturnValue;
-}
-
-double Component::getComponentPropertyDouble (const String& keyName,
-                                              const bool useParentComponentIfNotFound,
-                                              const double defaultReturnValue) const throw()
-{
-    if (propertySet_ != 0 && ((! useParentComponentIfNotFound) || propertySet_->containsKey (keyName)))
-        return propertySet_->getDoubleValue (keyName, defaultReturnValue);
-
-    if (useParentComponentIfNotFound && (parentComponent_ != 0))
-        return parentComponent_->getComponentPropertyDouble (keyName, true, defaultReturnValue);
-
-    return defaultReturnValue;
-}
-
-bool Component::getComponentPropertyBool (const String& keyName,
-                                          const bool useParentComponentIfNotFound,
-                                          const bool defaultReturnValue) const throw()
-{
-    if (propertySet_ != 0 && ((! useParentComponentIfNotFound) || propertySet_->containsKey (keyName)))
-        return propertySet_->getBoolValue (keyName, defaultReturnValue);
-
-    if (useParentComponentIfNotFound && (parentComponent_ != 0))
-        return parentComponent_->getComponentPropertyBool (keyName, true, defaultReturnValue);
-
-    return defaultReturnValue;
-}
-
-const Colour Component::getComponentPropertyColour (const String& keyName,
-                                                    const bool useParentComponentIfNotFound,
-                                                    const Colour& defaultReturnValue) const throw()
-{
-    return Colour ((uint32) getComponentPropertyInt (keyName,
-                                                     useParentComponentIfNotFound,
-                                                     defaultReturnValue.getARGB()));
-}
-
-void Component::setComponentProperty (const String& keyName, const String& value) throw()
-{
-    if (propertySet_ == 0)
-        propertySet_ = new PropertySet();
-
-    propertySet_->setValue (keyName, value);
-}
-
-void Component::setComponentProperty (const String& keyName, const int value) throw()
-{
-    if (propertySet_ == 0)
-        propertySet_ = new PropertySet();
-
-    propertySet_->setValue (keyName, value);
-}
-
-void Component::setComponentProperty (const String& keyName, const double value) throw()
-{
-    if (propertySet_ == 0)
-        propertySet_ = new PropertySet();
-
-    propertySet_->setValue (keyName, value);
-}
-
-void Component::setComponentProperty (const String& keyName, const bool value) throw()
-{
-    if (propertySet_ == 0)
-        propertySet_ = new PropertySet();
-
-    propertySet_->setValue (keyName, value);
-}
-
-void Component::setComponentProperty (const String& keyName, const Colour& colour) throw()
-{
-    setComponentProperty (keyName, (int) colour.getARGB());
-}
-
-void Component::removeComponentProperty (const String& keyName) throw()
-{
-    if (propertySet_ != 0)
-        propertySet_->removeValue (keyName);
 }
 
 //==============================================================================

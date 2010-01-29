@@ -29,6 +29,7 @@
 #include "juce_AudioProcessorEditor.h"
 #include "../dsp/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
+#include "../../text/juce_XmlElement.h"
 #include "../../containers/juce_BitArray.h"
 #include "juce_AudioProcessorListener.h"
 #include "juce_AudioPlayHead.h"

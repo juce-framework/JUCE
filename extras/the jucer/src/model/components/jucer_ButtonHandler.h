@@ -169,12 +169,12 @@ public:
 
     static bool needsButtonListener (Component* button)
     {
-        return button->getComponentPropertyBool (T("generateListenerCallback"), false, true);
+        return button->getProperties().getWithDefault ("generateListenerCallback", true);
     }
 
     static void setNeedsButtonListener (Component* button, const bool shouldDoCallback)
     {
-        button->setComponentProperty (T("generateListenerCallback"), shouldDoCallback);
+        button->getProperties().set ("generateListenerCallback", shouldDoCallback);
     }
 
     //==============================================================================

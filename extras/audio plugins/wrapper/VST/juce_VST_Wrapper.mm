@@ -65,7 +65,7 @@ static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, v
 static void updateComponentPos (Component* const comp)
 {
     HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                            comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
+                            comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
 
     HIRect r;
     HIViewGetFrame (dummyView, &r);
@@ -128,12 +128,12 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     HIRect r = { {0, 0}, {comp->getWidth(), comp->getHeight()} };
     HIViewSetFrame (dummyView, &r);
     HIViewAddSubview (parentView, dummyView);
-    comp->setComponentProperty ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
+    comp->getProperties().set ("dummyViewRef", String::toHexString ((pointer_sized_int) (void*) dummyView));
 
     EventHandlerRef ref;
     const EventTypeSpec kControlBoundsChangedEvent = { kEventClassControl, kEventControlBoundsChanged };
     InstallEventHandler (GetControlEventTarget (dummyView), NewEventHandlerUPP (viewBoundsChangedEvent), 1, &kControlBoundsChangedEvent, (void*) comp, &ref);
-    comp->setComponentProperty ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+    comp->getProperties().set ("boundsEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 
     updateComponentPos (comp);
 
@@ -168,7 +168,7 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
                                NewEventHandlerUPP (windowVisibilityBodge),
                                GetEventTypeCount (eventsToCatch), eventsToCatch,
                                (void*) hostWindow, &ref);
-    comp->setComponentProperty ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+    comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
 #endif
 
     return hostWindow;
@@ -180,17 +180,17 @@ void detachComponentFromWindowRef (Component* comp, void* nsWindow)
         const ScopedAutoReleasePool pool;
 
         EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                                    comp->getComponentProperty ("boundsEventRef", false, String::empty).getHexValue64();
+                                    comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
 
 #if ADD_CARBON_BODGE
         ref = (EventHandlerRef) (void*) (pointer_sized_int)
-                  comp->getComponentProperty ("carbonEventRef", false, String::empty).getHexValue64();
+                  comp->getProperties() ["carbonEventRef"].toString().getHexValue64();
         RemoveEventHandler (ref);
 #endif
 
         HIViewRef dummyView = (HIViewRef) (void*) (pointer_sized_int)
-                                comp->getComponentProperty ("dummyViewRef", false, String::empty).getHexValue64();
+                                comp->getProperties() ["dummyViewRef"].toString().getHexValue64();
 
         if (HIViewIsValid (dummyView))
             CFRelease (dummyView);
