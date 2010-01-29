@@ -3100,14 +3100,14 @@ public:
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
 
-inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::incrementAndReturn (int32& variable)	  { return OSAtomicIncrement32 ((volatile int32_t*) &variable); }
-inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((volatile int32_t*) &variable); }
-inline int32  Atomic::decrementAndReturn (int32& variable)	  { return OSAtomicDecrement32 ((volatile int32_t*) &variable); }
+inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((int32_t*) &variable); }
+inline int32  Atomic::incrementAndReturn (int32& variable)	  { return OSAtomicIncrement32 ((int32_t*) &variable); }
+inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((int32_t*) &variable); }
+inline int32  Atomic::decrementAndReturn (int32& variable)	  { return OSAtomicDecrement32 ((int32_t*) &variable); }
 inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (volatile int32_t*) &destination); }
+																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (int32_t*) &destination); }
 
-#elif JUCE_GCC			  // Linux...
+#elif JUCE_LINUX			// Linux...
 
 inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
 inline int32 Atomic::incrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, 1); }

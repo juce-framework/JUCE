@@ -115,6 +115,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
     [panel setDelegate: delegate];
 
+    if (isSaveDialogue || selectsDirectory)
+        [panel setCanCreateDirectories: YES];
+
     String directory, filename;
 
     if (currentFileOrDirectory.isDirectory())

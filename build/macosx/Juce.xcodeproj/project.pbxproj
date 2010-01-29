@@ -21,6 +21,10 @@
 		8414DE8511122A8D00DAF75A /* juce_DynamicObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 8414DE8311122A8D00DAF75A /* juce_DynamicObject.h */; };
 		843D4A3B10D3C54500624BA6 /* juce_ValueTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 843D4A3910D3C54500624BA6 /* juce_ValueTree.cpp */; };
 		843D4A3C10D3C54500624BA6 /* juce_ValueTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */; };
+		843E5C6F1113949F006F959F /* juce_NamedValueSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8414DE76111229B300DAF75A /* juce_NamedValueSet.cpp */; };
+		843E5C701113949F006F959F /* juce_NamedValueSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 8414DE77111229B300DAF75A /* juce_NamedValueSet.h */; };
+		843E5C71111394A2006F959F /* juce_DynamicObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8414DE8211122A8D00DAF75A /* juce_DynamicObject.cpp */; };
+		843E5C72111394A3006F959F /* juce_DynamicObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 8414DE8311122A8D00DAF75A /* juce_DynamicObject.h */; };
 		844BB95B10C5578800DF5536 /* juce_TargetPlatform.h in Headers */ = {isa = PBXBuildFile; fileRef = 8481730E10832513008FEC33 /* juce_TargetPlatform.h */; };
 		844BB95C10C5579A00DF5536 /* juce_FillType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F29A9D10C2EFA5005014DF /* juce_FillType.cpp */; };
 		844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
@@ -3244,6 +3248,8 @@
 				84AF419B10F0008E0035D74F /* juce_ScopedPointer.h in Headers */,
 				84842F9610F6559400490977 /* juce_Value.h in Headers */,
 				84CAC0C1110478D50088D64D /* juce_TemporaryFile.h in Headers */,
+				843E5C701113949F006F959F /* juce_NamedValueSet.h in Headers */,
+				843E5C72111394A3006F959F /* juce_DynamicObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3923,6 +3929,8 @@
 				84B2053F10D535EC008B4A79 /* juce_ValueTree.cpp in Sources */,
 				84842F9510F6559300490977 /* juce_Value.cpp in Sources */,
 				84CAC0C0110478D50088D64D /* juce_TemporaryFile.cpp in Sources */,
+				843E5C6F1113949F006F959F /* juce_NamedValueSet.cpp in Sources */,
+				843E5C71111394A2006F959F /* juce_DynamicObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
