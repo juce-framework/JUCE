@@ -43,7 +43,8 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
 
         while (cursor != 0 && numResults < maxNum)
         {
-            if (cursor->ifa_addr->sa_family == AF_LINK)
+            sockaddr_storage* sto = (sockaddr_storage*) cursor->ifa_addr;
+            if (sto->ss_family == AF_LINK)
             {
                 const sockaddr_dl* const sadd = (const sockaddr_dl*) cursor->ifa_addr;
 

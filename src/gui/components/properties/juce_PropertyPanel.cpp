@@ -387,6 +387,8 @@ XmlElement* PropertyPanel::getOpennessState() const
 {
     XmlElement* const xml = new XmlElement (T("PROPERTYPANELSTATE"));
 
+    xml->setAttribute ("scrollPos", viewport->getViewPositionY());
+
     const StringArray sections (getSectionNames());
 
     for (int i = 0; i < sections.size(); ++i)
@@ -414,6 +416,9 @@ void PropertyPanel::restoreOpennessState (const XmlElement& xml)
             setSectionOpen (sections.indexOf (e->getStringAttribute (T("name"))),
                             e->getBoolAttribute (T("open")));
         }
+
+        viewport->setViewPosition (viewport->getViewPositionX(),
+                                   xml.getIntAttribute ("scrollPos", viewport->getViewPositionY()));
     }
 }
 

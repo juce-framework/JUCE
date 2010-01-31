@@ -9,6 +9,7 @@
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "wininet.lib")
 #pragma comment(lib, "ole32.lib")
+#pragma comment(lib, "oleaut32.lib")
 #pragma comment(lib, "advapi32.lib")
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "comsupp.lib")

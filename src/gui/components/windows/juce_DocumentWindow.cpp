@@ -34,6 +34,34 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+class DocumentWindow::ButtonListenerProxy  : public ButtonListener
+{
+public:
+    ButtonListenerProxy (DocumentWindow& owner_)
+        : owner (owner_)
+    {
+    }
+
+    void buttonClicked (Button* button)
+    {
+        if (button == owner.getMinimiseButton())
+            owner.minimiseButtonPressed();
+        else if (button == owner.getMaximiseButton())
+            owner.maximiseButtonPressed();
+        else if (button == owner.getCloseButton())
+            owner.closeButtonPressed();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    DocumentWindow& owner;
+
+    ButtonListenerProxy (const ButtonListenerProxy&);
+    ButtonListenerProxy& operator= (const ButtonListenerProxy&);
+};
+
+//==============================================================================
 DocumentWindow::DocumentWindow (const String& title,
                                 const Colour& backgroundColour,
                                 const int requiredButtons_,
@@ -310,8 +338,10 @@ void DocumentWindow::lookAndFeelChanged()
         {
             if (titleBarButtons[i] != 0)
             {
-                buttonListener.owner = this;
-                titleBarButtons[i]->addButtonListener (&buttonListener);
+                if (buttonListener == 0)
+                    buttonListener = new ButtonListenerProxy (*this);
+
+                titleBarButtons[i]->addButtonListener (buttonListener);
                 titleBarButtons[i]->setWantsKeyboardFocus (false);
 
                 // (call the Component method directly to avoid the assertion in ResizableWindow)
@@ -363,27 +393,6 @@ void DocumentWindow::mouseDoubleClick (const MouseEvent& e)
 void DocumentWindow::userTriedToCloseWindow()
 {
     closeButtonPressed();
-}
-
-//==============================================================================
-DocumentWindow::ButtonListenerProxy::ButtonListenerProxy()
-{
-}
-
-void DocumentWindow::ButtonListenerProxy::buttonClicked (Button* button)
-{
-    if (button == owner->getMinimiseButton())
-    {
-        owner->minimiseButtonPressed();
-    }
-    else if (button == owner->getMaximiseButton())
-    {
-        owner->maximiseButtonPressed();
-    }
-    else if (button == owner->getCloseButton())
-    {
-        owner->closeButtonPressed();
-    }
 }
 
 

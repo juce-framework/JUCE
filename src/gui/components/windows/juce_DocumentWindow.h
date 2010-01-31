@@ -253,15 +253,9 @@ private:
     ScopedPointer <MenuBarComponent> menuBar;
     MenuBarModel* menuBarModel;
 
-    class ButtonListenerProxy   : public ButtonListener
-    {
-    public:
-        ButtonListenerProxy();
-        void buttonClicked (Button* button);
-
-        DocumentWindow* owner;
-
-    } buttonListener;
+    class ButtonListenerProxy;
+    friend class ButtonListenerProxy;
+    ScopedPointer <ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();
 
