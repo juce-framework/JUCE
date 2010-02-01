@@ -32,7 +32,6 @@
 #include "../../../containers/juce_SortedSet.h"
 #include "../../../containers/juce_Value.h"
 #include "../windows/juce_TooltipWindow.h"
-#include "../../../events/juce_Timer.h"
 class Button;
 
 
@@ -91,13 +90,13 @@ public:
 
         @see getButtonText
     */
-    void setButtonText (const String& newText) throw();
+    void setButtonText (const String& newText);
 
     /** Returns the text displayed in the button.
 
         @see setButtonText
     */
-    const String getButtonText() const throw()                  { return text; }
+    const String getButtonText() const                      { return text; }
 
     //==============================================================================
     /** Returns true if the button is currently being held down by the mouse.
@@ -198,13 +197,13 @@ public:
 
         @see removeButtonListener
     */
-    void addButtonListener (ButtonListener* const newListener) throw();
+    void addButtonListener (ButtonListener* const newListener);
 
     /** Removes a previously-registered button listener
 
         @see addButtonListener
     */
-    void removeButtonListener (ButtonListener* const listener) throw();
+    void removeButtonListener (ButtonListener* const listener);
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
@@ -261,7 +260,7 @@ public:
 
         @see addShortcut
     */
-    bool isRegisteredForShortcut (const KeyPress& key) const throw();
+    bool isRegisteredForShortcut (const KeyPress& key) const;
 
     //==============================================================================
     /** Sets an auto-repeat speed for the button when it is held down.
@@ -334,7 +333,7 @@ public:
         LookAndFeel can choose to ignore it if it's not relevent for this type of
         button.
     */
-    void setConnectedEdges (const int connectedEdgeFlags) throw();
+    void setConnectedEdges (const int connectedEdgeFlags);
 
     /** Returns the set of flags passed into setConnectedEdges(). */
     int getConnectedEdgeFlags() const throw()                   { return connectedEdgeFlags; }
@@ -474,8 +473,9 @@ private:
     String text;
     SortedSet <void*> buttonListeners;
 
-    friend class InternalButtonRepeatTimer;
-    ScopedPointer <Timer> repeatTimer;
+    class RepeatTimer;
+    friend class ScopedPointer <RepeatTimer>;
+    ScopedPointer <RepeatTimer> repeatTimer;
     uint32 buttonPressTime, lastTimeCallbackTime;
     ApplicationCommandManager* commandManagerToUse;
     int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
@@ -491,14 +491,14 @@ private:
     bool triggerOnMouseDown : 1;
     bool generateTooltip : 1;
 
-    void repeatTimerCallback() throw();
-    Timer& getRepeatTimer() throw();
+    void repeatTimerCallback();
+    RepeatTimer& getRepeatTimer();
 
-    ButtonState updateState (const MouseEvent* const e) throw();
-    bool isShortcutPressed() const throw();
+    ButtonState updateState (const MouseEvent* const e);
+    bool isShortcutPressed() const;
     void turnOffOtherButtonsInGroup (const bool sendChangeNotification);
 
-    void flashButtonState() throw();
+    void flashButtonState();
     void sendClickMessage (const ModifierKeys& modifiers);
     void sendStateMessage();
 

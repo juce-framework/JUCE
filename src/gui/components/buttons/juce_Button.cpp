@@ -31,7 +31,24 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_ComponentDeletionWatcher.h"
 #include "../keyboard/juce_KeyPressMappingSet.h"
 #include "../../../text/juce_LocalisedStrings.h"
+#include "../../../events/juce_Timer.h"
 
+
+//==============================================================================
+class Button::RepeatTimer  : public Timer
+{
+public:
+    RepeatTimer (Button& owner_) : owner (owner_)   {}
+    void timerCallback()    { owner.repeatTimerCallback(); }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    Button& owner;
+
+    RepeatTimer (const RepeatTimer&);
+    RepeatTimer& operator= (const RepeatTimer&);
+};
 
 //==============================================================================
 Button::Button (const String& name)
@@ -72,7 +89,7 @@ Button::~Button()
 }
 
 //==============================================================================
-void Button::setButtonText (const String& newText) throw()
+void Button::setButtonText (const String& newText)
 {
     if (text != newText)
     {
@@ -113,7 +130,7 @@ const String Button::getTooltip()
     return SettableTooltipClient::getTooltip();
 }
 
-void Button::setConnectedEdges (const int connectedEdgeFlags_) throw()
+void Button::setConnectedEdges (const int connectedEdgeFlags_)
 {
     if (connectedEdgeFlags != connectedEdgeFlags_)
     {
@@ -210,7 +227,7 @@ void Button::enablementChanged()
     repaint();
 }
 
-Button::ButtonState Button::updateState (const MouseEvent* const e) throw()
+Button::ButtonState Button::updateState (const MouseEvent* const e)
 {
     ButtonState state = buttonNormal;
 
@@ -309,7 +326,7 @@ void Button::internalClickCallback (const ModifierKeys& modifiers)
     sendClickMessage (modifiers);
 }
 
-void Button::flashButtonState() throw()
+void Button::flashButtonState()
 {
     if (isEnabled())
     {
@@ -336,7 +353,7 @@ void Button::handleCommandMessage (int commandId)
 }
 
 //==============================================================================
-void Button::addButtonListener (ButtonListener* const newListener) throw()
+void Button::addButtonListener (ButtonListener* const newListener)
 {
     jassert (newListener != 0);
     jassert (! buttonListeners.contains (newListener)); // trying to add a listener to the list twice!
@@ -345,7 +362,7 @@ void Button::addButtonListener (ButtonListener* const newListener) throw()
         buttonListeners.add (newListener);
 }
 
-void Button::removeButtonListener (ButtonListener* const listener) throw()
+void Button::removeButtonListener (ButtonListener* const listener)
 {
     jassert (buttonListeners.contains (listener)); // trying to remove a listener that isn't on the list!
 
@@ -582,7 +599,7 @@ void Button::clearShortcuts()
     parentHierarchyChanged();
 }
 
-bool Button::isShortcutPressed() const throw()
+bool Button::isShortcutPressed() const
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -594,7 +611,7 @@ bool Button::isShortcutPressed() const throw()
     return false;
 }
 
-bool Button::isRegisteredForShortcut (const KeyPress& key) const throw()
+bool Button::isRegisteredForShortcut (const KeyPress& key) const
 {
     for (int i = shortcuts.size(); --i >= 0;)
         if (key == shortcuts.getReference(i))
@@ -654,7 +671,7 @@ void Button::setRepeatSpeed (const int initialDelayMillisecs,
     autoRepeatMinimumDelay = jmin (autoRepeatSpeed, minimumDelayInMillisecs);
 }
 
-void Button::repeatTimerCallback() throw()
+void Button::repeatTimerCallback()
 {
     if (needsRepainting)
     {
@@ -699,34 +716,10 @@ void Button::repeatTimerCallback() throw()
     }
 }
 
-class InternalButtonRepeatTimer  : public Timer
-{
-public:
-    InternalButtonRepeatTimer (Button& owner_) throw()
-        : owner (owner_)
-    {
-    }
-
-    ~InternalButtonRepeatTimer()
-    {
-    }
-
-    void timerCallback()
-    {
-        owner.repeatTimerCallback();
-    }
-
-private:
-    Button& owner;
-
-    InternalButtonRepeatTimer (const InternalButtonRepeatTimer&);
-    const InternalButtonRepeatTimer& operator= (const InternalButtonRepeatTimer&);
-};
-
-Timer& Button::getRepeatTimer() throw()
+Button::RepeatTimer& Button::getRepeatTimer()
 {
     if (repeatTimer == 0)
-        repeatTimer = new InternalButtonRepeatTimer (*this);
+        repeatTimer = new RepeatTimer (*this);
 
     return *repeatTimer;
 }

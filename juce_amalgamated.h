@@ -15272,9 +15272,9 @@ protected:
 public:
 	virtual ~Button();
 
-	void setButtonText (const String& newText) throw();
+	void setButtonText (const String& newText);
 
-	const String getButtonText() const throw()		  { return text; }
+	const String getButtonText() const			  { return text; }
 
 	bool isDown() const throw();
 
@@ -15295,9 +15295,9 @@ public:
 
 	int getRadioGroupId() const throw()			 { return radioGroupId; }
 
-	void addButtonListener (ButtonListener* const newListener) throw();
+	void addButtonListener (ButtonListener* const newListener);
 
-	void removeButtonListener (ButtonListener* const listener) throw();
+	void removeButtonListener (ButtonListener* const listener);
 
 	virtual void triggerClick();
 
@@ -15311,7 +15311,7 @@ public:
 
 	void clearShortcuts();
 
-	bool isRegisteredForShortcut (const KeyPress& key) const throw();
+	bool isRegisteredForShortcut (const KeyPress& key) const;
 
 	void setRepeatSpeed (const int initialDelayInMillisecs,
 						 const int repeatDelayInMillisecs,
@@ -15336,7 +15336,7 @@ public:
 		ConnectedOnBottom = 8
 	};
 
-	void setConnectedEdges (const int connectedEdgeFlags) throw();
+	void setConnectedEdges (const int connectedEdgeFlags);
 
 	int getConnectedEdgeFlags() const throw()		   { return connectedEdgeFlags; }
 
@@ -15397,8 +15397,9 @@ private:
 	String text;
 	SortedSet <void*> buttonListeners;
 
-	friend class InternalButtonRepeatTimer;
-	ScopedPointer <Timer> repeatTimer;
+	class RepeatTimer;
+	friend class ScopedPointer <RepeatTimer>;
+	ScopedPointer <RepeatTimer> repeatTimer;
 	uint32 buttonPressTime, lastTimeCallbackTime;
 	ApplicationCommandManager* commandManagerToUse;
 	int autoRepeatDelay, autoRepeatSpeed, autoRepeatMinimumDelay;
@@ -15414,14 +15415,14 @@ private:
 	bool triggerOnMouseDown : 1;
 	bool generateTooltip : 1;
 
-	void repeatTimerCallback() throw();
-	Timer& getRepeatTimer() throw();
+	void repeatTimerCallback();
+	RepeatTimer& getRepeatTimer();
 
-	ButtonState updateState (const MouseEvent* const e) throw();
-	bool isShortcutPressed() const throw();
+	ButtonState updateState (const MouseEvent* const e);
+	bool isShortcutPressed() const;
 	void turnOffOtherButtonsInGroup (const bool sendChangeNotification);
 
-	void flashButtonState() throw();
+	void flashButtonState();
 	void sendClickMessage (const ModifierKeys& modifiers);
 	void sendStateMessage();
 
@@ -23530,7 +23531,7 @@ private:
 	MenuBarModel* menuBarModel;
 
 	class ButtonListenerProxy;
-	friend class ButtonListenerProxy;
+	friend class ScopedPointer <ButtonListenerProxy>;
 	ScopedPointer <ButtonListenerProxy> buttonListener;
 
 	void repaintTitleBar();

@@ -254,7 +254,7 @@ private:
     MenuBarModel* menuBarModel;
 
     class ButtonListenerProxy;
-    friend class ButtonListenerProxy;
+    friend class ScopedPointer <ButtonListenerProxy>;
     ScopedPointer <ButtonListenerProxy> buttonListener;
 
     void repaintTitleBar();
