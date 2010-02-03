@@ -17,7 +17,7 @@
 #define __JUCE_STANDARDHEADER_JUCEHEADER__
 
 #define JUCE_MAJOR_VERSION	  1
-#define JUCE_MINOR_VERSION	  50
+#define JUCE_MINOR_VERSION	  51
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8))
 
@@ -8951,6 +8951,8 @@ public:
 
 	inline bool testFlags (const int flagsToTest) const throw()	 { return (flags & flagsToTest) != 0; }
 
+	int getNumMouseButtonsDown() const throw();
+
 	static const ModifierKeys getCurrentModifiers() throw();
 
 	static const ModifierKeys getCurrentModifiersRealtime() throw();
@@ -12215,7 +12217,7 @@ private:
 
 	void internalMouseEnter (int x, int y, const int64 time);
 	void internalMouseExit  (int x, int y, const int64 time);
-	void internalMouseDown  (int x, int y);
+	void internalMouseDown  (int x, int y, const int64 time);
 	void internalMouseUp	(const int oldModifiers, int x, int y, const int64 time);
 	void internalMouseDrag  (int x, int y, const int64 time);
 	void internalMouseMove  (int x, int y, const int64 time);
@@ -12683,7 +12685,24 @@ private:
 	~Desktop() throw();
 
 	Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
-	int lastMouseX, lastMouseY;
+
+	int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
+	bool mouseMovedSignificantlySincePressed;
+
+	struct RecentMouseDown
+	{
+		int x, y;
+		int64 time;
+		Component* component;
+	};
+
+	RecentMouseDown mouseDowns[4];
+
+	void incrementMouseClickCounter() throw();
+	void registerMouseDown (int x, int y, int64 time, Component* component) throw();
+	void registerMouseDrag (int x, int y) throw();
+	const Time getLastMouseDownTime() const throw();
+	int getNumberOfMultipleClicks() const throw();
 
 	Component* kioskModeComponent;
 	Rectangle kioskComponentOriginalBounds;

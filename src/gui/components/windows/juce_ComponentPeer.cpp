@@ -41,18 +41,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-// these are over in juce_component.cpp
-extern int64 juce_recentMouseDownTimes[4];
-extern int juce_recentMouseDownX [4];
-extern int juce_recentMouseDownY [4];
-extern Component* juce_recentMouseDownComponent [4];
-extern int juce_LastMousePosX;
-extern int juce_LastMousePosY;
-extern int juce_MouseClickCounter;
-extern bool juce_MouseHasMovedSignificantlySincePressed;
-
 static const int fakeMouseMoveMessage = 0x7fff00ff;
-
 static VoidArray heavyweightPeers;
 
 
@@ -199,46 +188,17 @@ void ComponentPeer::handleMouseMove (int x, int y, const int64 time)
 
 void ComponentPeer::handleMouseDown (int x, int y, const int64 time)
 {
-    ++juce_MouseClickCounter;
-
+    Desktop::getInstance().incrementMouseClickCounter();
     updateCurrentModifiers();
 
-    int numMouseButtonsDown = 0;
-
-    if (ModifierKeys::getCurrentModifiers().isLeftButtonDown())
-        ++numMouseButtonsDown;
-
-    if (ModifierKeys::getCurrentModifiers().isRightButtonDown())
-        ++numMouseButtonsDown;
-
-    if (ModifierKeys::getCurrentModifiers().isMiddleButtonDown())
-        ++numMouseButtonsDown;
-
-    if (numMouseButtonsDown == 1)
+    if (ModifierKeys::getCurrentModifiers().getNumMouseButtonsDown() == 1)
     {
         Component::componentUnderMouse = component->getComponentAt (x, y);
 
         if (Component::componentUnderMouse != 0)
         {
-            // can't set these in the mouseDownInt() method, because it's re-entrant, so do it here..
-
-            for (int i = numElementsInArray (juce_recentMouseDownTimes); --i > 0;)
-            {
-                juce_recentMouseDownTimes [i] = juce_recentMouseDownTimes [i - 1];
-                juce_recentMouseDownX [i] = juce_recentMouseDownX [i - 1];
-                juce_recentMouseDownY [i] = juce_recentMouseDownY [i - 1];
-                juce_recentMouseDownComponent [i] = juce_recentMouseDownComponent [i - 1];
-            }
-
-            juce_recentMouseDownTimes[0] = time;
-            juce_recentMouseDownX[0] = x;
-            juce_recentMouseDownY[0] = y;
-            juce_recentMouseDownComponent[0] = Component::componentUnderMouse;
-            relativePositionToGlobal (juce_recentMouseDownX[0], juce_recentMouseDownY[0]);
-            juce_MouseHasMovedSignificantlySincePressed = false;
-
             component->relativePositionToOtherComponent (Component::componentUnderMouse, x, y);
-            Component::componentUnderMouse->internalMouseDown (x, y);
+            Component::componentUnderMouse->internalMouseDown (x, y, time);
         }
     }
 }
@@ -250,7 +210,6 @@ void ComponentPeer::handleMouseDrag (int x, int y, const int64 time)
     if (Component::componentUnderMouse != 0)
     {
         component->relativePositionToOtherComponent (Component::componentUnderMouse, x, y);
-
         Component::componentUnderMouse->internalMouseDrag (x, y, time);
     }
 }
@@ -259,18 +218,7 @@ void ComponentPeer::handleMouseUp (const int oldModifiers, int x, int y, const i
 {
     updateCurrentModifiers();
 
-    int numMouseButtonsDown = 0;
-
-    if ((oldModifiers & ModifierKeys::leftButtonModifier) != 0)
-        ++numMouseButtonsDown;
-
-    if ((oldModifiers & ModifierKeys::rightButtonModifier) != 0)
-        ++numMouseButtonsDown;
-
-    if ((oldModifiers & ModifierKeys::middleButtonModifier) != 0)
-        ++numMouseButtonsDown;
-
-    if (numMouseButtonsDown == 1)
+    if (ModifierKeys (oldModifiers).getNumMouseButtonsDown() == 1)
     {
         const ComponentDeletionWatcher deletionChecker (component);
         Component* c = component->getComponentAt (x, y);

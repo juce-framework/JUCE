@@ -54,4 +54,16 @@ const ModifierKeys ModifierKeys::getCurrentModifiers() throw()
     return ModifierKeys (currentModifierFlags);
 }
 
+int ModifierKeys::getNumMouseButtonsDown() const throw()
+{
+    int num = 0;
+
+    if (isLeftButtonDown())     ++num;
+    if (isRightButtonDown())    ++num;
+    if (isMiddleButtonDown())   ++num;
+
+    return num;
+}
+
+
 END_JUCE_NAMESPACE

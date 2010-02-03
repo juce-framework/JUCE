@@ -248,7 +248,24 @@ private:
     ~Desktop() throw();
 
     Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
-    int lastMouseX, lastMouseY;
+    
+    int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
+    bool mouseMovedSignificantlySincePressed;
+
+    struct RecentMouseDown
+    {
+        int x, y;
+        int64 time;
+        Component* component;
+    };
+    
+    RecentMouseDown mouseDowns[4];
+
+    void incrementMouseClickCounter() throw();
+    void registerMouseDown (int x, int y, int64 time, Component* component) throw();
+    void registerMouseDrag (int x, int y) throw();
+    const Time getLastMouseDownTime() const throw();
+    int getNumberOfMultipleClicks() const throw();
 
     Component* kioskModeComponent;
     Rectangle kioskComponentOriginalBounds;

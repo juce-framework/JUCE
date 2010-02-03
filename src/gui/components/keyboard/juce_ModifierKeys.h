@@ -159,6 +159,9 @@ public:
     /** Tests a combination of flags and returns true if any of them are set. */
     inline bool testFlags (const int flagsToTest) const throw()         { return (flags & flagsToTest) != 0; }
 
+    /** Returns the total number of mouse buttons that are down. */
+    int getNumMouseButtonsDown() const throw();
+
     //==============================================================================
     /** Creates a ModifierKeys object to represent the last-known state of the
         keyboard and mouse buttons.

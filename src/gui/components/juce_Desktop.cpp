@@ -32,18 +32,17 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ComponentDeletionWatcher.h"
 #include "../graphics/geometry/juce_RectangleList.h"
 
-extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
-                                         const bool clipToWorkArea);
-
-
 //==============================================================================
 static Desktop* juce_desktopInstance = 0;
 
 Desktop::Desktop() throw()
-    : lastMouseX (0),
-      lastMouseY (0),
+    : lastFakeMouseMoveX (0),
+      lastFakeMouseMoveY (0),
+      mouseClickCounter (0),
+      mouseMovedSignificantlySincePressed (false),
       kioskModeComponent (0)
 {
+    zerostruct (mouseDowns);
     refreshMonitorSizes();
 }
 
@@ -66,6 +65,9 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 }
 
 //==============================================================================
+extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
+                                         const bool clipToWorkArea);
+
 void Desktop::refreshMonitorSizes() throw()
 {
     const Array <Rectangle> oldClipped (monitorCoordsClipped);
@@ -206,20 +208,75 @@ void Desktop::componentBroughtToFront (Component* const c) throw()
 }
 
 //==============================================================================
-// from Component.cpp
-extern int juce_recentMouseDownX [4];
-extern int juce_recentMouseDownY [4];
-extern int juce_MouseClickCounter;
-
 void Desktop::getLastMouseDownPosition (int& x, int& y) throw()
 {
-    x = juce_recentMouseDownX [0];
-    y = juce_recentMouseDownY [0];
+    const Desktop& d = getInstance();
+    x = d.mouseDowns[0].x;
+    y = d.mouseDowns[0].y;
 }
 
 int Desktop::getMouseButtonClickCounter() throw()
 {
-    return juce_MouseClickCounter;
+    return getInstance().mouseClickCounter;
+}
+
+void Desktop::incrementMouseClickCounter() throw()
+{
+    ++mouseClickCounter;
+}
+
+const Time Desktop::getLastMouseDownTime() const throw()
+{
+    return Time (mouseDowns[0].time);
+}
+
+void Desktop::registerMouseDown (int x, int y, int64 time, Component* component) throw()
+{
+    for (int i = numElementsInArray (mouseDowns); --i > 0;)
+        mouseDowns[i] = mouseDowns[i - 1];
+
+    mouseDowns[0].x = x;
+    mouseDowns[0].y = y;
+    mouseDowns[0].time = time;
+    mouseDowns[0].component = component;
+    mouseMovedSignificantlySincePressed = false;
+}
+
+void Desktop::registerMouseDrag (int x, int y) throw()
+{
+    mouseMovedSignificantlySincePressed 
+        = mouseMovedSignificantlySincePressed
+           || abs (mouseDowns[0].x - x) >= 4
+           || abs (mouseDowns[0].y - y) >= 4;
+}
+
+int Desktop::getNumberOfMultipleClicks() const throw()
+{
+    int numClicks = 0;
+
+    if (mouseDowns[0].time != 0)
+    {
+        if (! mouseMovedSignificantlySincePressed)
+            ++numClicks;
+
+        for (int i = 1; i < numElementsInArray (mouseDowns); ++i)
+        {
+            if (mouseDowns[0].time - mouseDowns[i].time
+                    < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
+                && abs (mouseDowns[0].x - mouseDowns[i].x) < 8
+                && abs (mouseDowns[0].y - mouseDowns[i].y) < 8
+                && mouseDowns[0].component == mouseDowns[i].component)
+            {
+                ++numClicks;
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    return numClicks;
 }
 
 //==============================================================================
@@ -274,7 +331,7 @@ void Desktop::timerCallback()
     int x, y;
     getMousePosition (x, y);
 
-    if (lastMouseX != x || lastMouseY != y)
+    if (lastFakeMouseMoveX != x || lastFakeMouseMoveY != y)
         sendMouseMove();
 }
 
@@ -286,8 +343,8 @@ void Desktop::sendMouseMove()
 
         int x, y;
         getMousePosition (x, y);
-        lastMouseX = x;
-        lastMouseY = y;
+        lastFakeMouseMoveX = x;
+        lastFakeMouseMoveY = y;
 
         Component* const target = findComponentAt (x, y);
 
@@ -328,7 +385,7 @@ void Desktop::resetTimer() throw()
     else
         startTimer (100);
 
-    getMousePosition (lastMouseX, lastMouseY);
+    getMousePosition (lastFakeMouseMoveX, lastFakeMouseMoveY);
 }
 
 //==============================================================================

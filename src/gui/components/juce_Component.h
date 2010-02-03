@@ -1953,7 +1953,7 @@ private:
     //==============================================================================
     void internalMouseEnter (int x, int y, const int64 time);
     void internalMouseExit  (int x, int y, const int64 time);
-    void internalMouseDown  (int x, int y);
+    void internalMouseDown  (int x, int y, const int64 time);
     void internalMouseUp    (const int oldModifiers, int x, int y, const int64 time);
     void internalMouseDrag  (int x, int y, const int64 time);
     void internalMouseMove  (int x, int y, const int64 time);
