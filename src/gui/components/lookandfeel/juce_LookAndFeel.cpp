@@ -411,7 +411,7 @@ void LookAndFeel::drawButtonText (Graphics& g, TextButton& button,
 
 void LookAndFeel::drawTickBox (Graphics& g,
                                Component& component,
-                               int x, int y, int w, int h,
+                               float x, float y, float w, float h,
                                const bool ticked,
                                const bool isEnabled,
                                const bool isMouseOverButton,
@@ -419,7 +419,7 @@ void LookAndFeel::drawTickBox (Graphics& g,
 {
     const float boxSize = w * 0.7f;
 
-    drawGlassSphere (g, (float) x, y + (h - boxSize) * 0.5f, boxSize,
+    drawGlassSphere (g, x, y + (h - boxSize) * 0.5f, boxSize,
                      createBaseColour (component.findColour (TextButton::buttonColourId)
                                                 .withMultipliedAlpha (isEnabled ? 1.0f : 0.5f),
                                        true,
@@ -437,7 +437,7 @@ void LookAndFeel::drawTickBox (Graphics& g,
         g.setColour (isEnabled ? Colours::black : Colours::grey);
 
         const AffineTransform trans (AffineTransform::scale (w / 9.0f, h / 9.0f)
-                                         .translated ((float) x, (float) y));
+                                         .translated (x, y));
 
         g.strokePath (tick, PathStrokeType (2.5f), trans);
     }
@@ -454,9 +454,10 @@ void LookAndFeel::drawToggleButton (Graphics& g,
         g.drawRect (0, 0, button.getWidth(), button.getHeight());
     }
 
-    const int tickWidth = jmin (20, button.getHeight() - 4);
+    float fontSize = jmin (15.0f, button.getHeight() * 0.75f);
+    const float tickWidth = fontSize * 1.1f;
 
-    drawTickBox (g, button, 4, (button.getHeight() - tickWidth) / 2,
+    drawTickBox (g, button, 4.0f, (button.getHeight() - tickWidth) * 0.5f,
                  tickWidth, tickWidth,
                  button.getToggleState(),
                  button.isEnabled(),
@@ -464,7 +465,7 @@ void LookAndFeel::drawToggleButton (Graphics& g,
                  isButtonDown);
 
     g.setColour (button.findColour (ToggleButton::textColourId));
-    g.setFont (jmin (15.0f, button.getHeight() * 0.6f));
+    g.setFont (fontSize);
 
     if (! button.isEnabled())
         g.setOpacity (0.5f);
@@ -472,8 +473,8 @@ void LookAndFeel::drawToggleButton (Graphics& g,
     const int textX = tickWidth + 5;
 
     g.drawFittedText (button.getButtonText(),
-                      textX, 4,
-                      button.getWidth() - textX - 2, button.getHeight() - 8,
+                      textX, 0,
+                      button.getWidth() - textX - 2, button.getHeight(),
                       Justification::centredLeft, 10);
 }
 

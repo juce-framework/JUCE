@@ -171,7 +171,7 @@ public:
 
     virtual void drawTickBox (Graphics& g,
                               Component& component,
-                              int x, int y, int w, int h,
+                              float x, float y, float w, float h,
                               const bool ticked,
                               const bool isEnabled,
                               const bool isMouseOverButton,
@@ -634,16 +634,6 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-
-protected:
-    // xxx the following methods are only here to cause a compiler error, because they've been
-    // deprecated or their parameters have changed. Hopefully these definitions should cause an
-    // error if you try to build a subclass with the old versions.
-    virtual int drawTickBox (Graphics&, int, int, int, int, bool, const bool, const bool, const bool) { return 0; }
-    virtual int drawProgressBar (Graphics&, int, int, int, int, float) { return 0; }
-    virtual int drawProgressBar (Graphics&, ProgressBar&, int, int, int, int, float) { return 0; }
-    virtual void getTabButtonBestWidth (int, const String&, int) {}
-    virtual int drawTreeviewPlusMinusBox (Graphics&, int, int, int, int, bool) { return 0; }
 
 private:
     friend void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI();

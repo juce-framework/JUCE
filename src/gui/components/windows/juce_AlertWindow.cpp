@@ -369,28 +369,32 @@ void AlertWindow::paint (Graphics& g)
     int i;
     for (i = textBoxes.size(); --i >= 0;)
     {
-        if (textboxNames[i].isNotEmpty())
-        {
-            const TextEditor* const te = (TextEditor*) textBoxes[i];
+        const TextEditor* const te = (TextEditor*) textBoxes[i];
 
-            g.drawFittedText (textboxNames[i],
-                              te->getX(), te->getY() - 14,
-                              te->getWidth(), 14,
-                              Justification::centredLeft, 1);
-        }
+        g.drawFittedText (textboxNames[i],
+                          te->getX(), te->getY() - 14,
+                          te->getWidth(), 14,
+                          Justification::centredLeft, 1);
     }
 
     for (i = comboBoxNames.size(); --i >= 0;)
     {
-        if (comboBoxNames[i].isNotEmpty())
-        {
-            const ComboBox* const cb = (ComboBox*) comboBoxes[i];
+        const ComboBox* const cb = (ComboBox*) comboBoxes[i];
 
-            g.drawFittedText (comboBoxNames[i],
-                              cb->getX(), cb->getY() - 14,
-                              cb->getWidth(), 14,
-                              Justification::centredLeft, 1);
-        }
+        g.drawFittedText (comboBoxNames[i],
+                          cb->getX(), cb->getY() - 14,
+                          cb->getWidth(), 14,
+                          Justification::centredLeft, 1);
+    }
+
+    for (i = customComps.size(); --i >= 0;)
+    {
+        const Component* const c = (Component*) customComps[i];
+
+        g.drawFittedText (c->getName(),
+                          c->getX(), c->getY() - 14,
+                          c->getWidth(), 14,
+                          Justification::centredLeft, 1);
     }
 }
 
@@ -402,6 +406,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     const int sw = (int) sqrt (font.getHeight() * wid);
     int w = jmin (300 + sw * 2, (int) (getParentWidth() * 0.7f));
     const int edgeGap = 10;
+    const int labelHeight = 18;
     int iconSpace;
 
     if (alertIconType == NoIcon)
@@ -436,8 +441,12 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 
     for (i = customComps.size(); --i >= 0;)
     {
-        w = jmax (w, ((Component*) customComps[i])->getWidth() + 40);
-        h += 10 + ((Component*) customComps[i])->getHeight();
+        Component* c = (Component*) customComps[i];
+        w = jmax (w, (c->getWidth() * 100) / 80);
+        h += 10 + c->getHeight();
+
+        if (c->getName().isNotEmpty())
+            h += labelHeight;
     }
 
     for (i = textBlocks.size(); --i >= 0;)
@@ -506,27 +515,35 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     for (i = 0; i < allComps.size(); ++i)
     {
         Component* const c = (Component*) allComps[i];
-
-        const int h = 22;
+        int h = 22;
 
         const int comboIndex = comboBoxes.indexOf (c);
         if (comboIndex >= 0 && comboBoxNames [comboIndex].isNotEmpty())
-            y += 18;
+            y += labelHeight;
 
         const int tbIndex = textBoxes.indexOf (c);
         if (tbIndex >= 0 && textboxNames[tbIndex].isNotEmpty())
-            y += 18;
+            y += labelHeight;
 
-        if (customComps.contains (c) || textBlocks.contains (c))
+        if (customComps.contains (c))
+        {
+            if (c->getName().isNotEmpty())
+                y += labelHeight;
+
+            c->setTopLeftPosition (proportionOfWidth (0.1f), y);
+            h = c->getHeight();
+        }
+        else if (textBlocks.contains (c))
         {
             c->setTopLeftPosition ((getWidth() - c->getWidth()) / 2, y);
-            y += c->getHeight() + 10;
+            h = c->getHeight();
         }
         else
         {
             c->setBounds (proportionOfWidth (0.1f), y, proportionOfWidth (0.8f), h);
-            y += h + 10;
         }
+
+        y += h + 10;
     }
 
     setWantsKeyboardFocus (getNumChildComponents() == 0);

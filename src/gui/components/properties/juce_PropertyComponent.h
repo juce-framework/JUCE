@@ -76,6 +76,7 @@ public:
     */
     int getPreferredHeight() const throw()                  { return preferredHeight; }
 
+    void setPreferredHeight (int newHeight) throw()         { preferredHeight = newHeight; }
 
     //==============================================================================
     /** Updates the property component if the item it refers to has changed.

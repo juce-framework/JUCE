@@ -34,12 +34,12 @@ class Component;
 /**
     Represents a type of audio driver, such as DirectSound, ASIO, CoreAudio, etc.
 
-    To get a list of available audio driver types, use the createDeviceTypes()
+    To get a list of available audio driver types, use the AudioDeviceManager::createAudioDeviceTypes()
     method. Each of the objects returned can then be used to list the available
     devices of that type. E.g.
     @code
     OwnedArray <AudioIODeviceType> types;
-    AudioIODeviceType::createDeviceTypes (types);
+    myAudioDeviceManager.createAudioDeviceTypes (types);
 
     for (int i = 0; i < types.size(); ++i)
     {

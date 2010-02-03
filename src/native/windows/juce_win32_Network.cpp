@@ -48,6 +48,48 @@ struct ConnectionAndRequestStruct
 
 static HINTERNET sessionHandle = 0;
 
+#ifndef WORKAROUND_TIMEOUT_BUG
+ //#define WORKAROUND_TIMEOUT_BUG 1
+#endif
+
+#if WORKAROUND_TIMEOUT_BUG
+// Required because of a Microsoft bug in setting a timeout
+class InternetConnectThread  : public Thread
+{
+public:
+    InternetConnectThread (URL_COMPONENTS& uc_, HINTERNET& connection_, const bool isFtp_)
+        : Thread ("Internet"), uc (uc_), connection (connection_), isFtp (isFtp_)
+    {
+        startThread();
+    }
+
+    ~InternetConnectThread()
+    {
+        stopThread (60000);
+    }
+
+    void run()
+    {
+        connection = InternetConnect (sessionHandle, uc.lpszHostName,
+                                      uc.nPort, _T(""), _T(""),
+                                      isFtp ? INTERNET_SERVICE_FTP
+                                            : INTERNET_SERVICE_HTTP,
+                                      0, 0);
+        notify();
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    URL_COMPONENTS& uc;
+    HINTERNET& connection;
+    const bool isFtp;
+
+    InternetConnectThread (const InternetConnectThread&);
+    InternetConnectThread& operator= (const InternetConnectThread&);
+};
+#endif
+
 void* juce_openInternetFile (const String& url,
                              const String& headers,
                              const MemoryBlock& postData,
@@ -77,6 +119,9 @@ void* juce_openInternetFile (const String& url,
 
         if (InternetCrackUrl (url, 0, 0, &uc))
         {
+            int disable = 1;
+            InternetSetOption (sessionHandle, INTERNET_OPTION_DISABLE_AUTODIAL, &disable, sizeof (disable));
+
             if (timeOutMs == 0)
                 timeOutMs = 30000;
             else if (timeOutMs < 0)
@@ -86,6 +131,20 @@ void* juce_openInternetFile (const String& url,
 
             const bool isFtp = url.startsWithIgnoreCase (T("ftp:"));
 
+#if WORKAROUND_TIMEOUT_BUG
+            HINTERNET connection = 0;
+
+            {
+                InternetConnectThread connectThread (uc, connection, isFtp);
+                connectThread.wait (timeOutMs);
+
+                if (connection == 0)
+                {
+                    InternetCloseHandle (sessionHandle);
+                    sessionHandle = 0;
+                }
+            }
+#else
             HINTERNET connection = InternetConnect (sessionHandle,
                                                     uc.lpszHostName,
                                                     uc.nPort,
@@ -93,6 +152,7 @@ void* juce_openInternetFile (const String& url,
                                                     isFtp ? INTERNET_SERVICE_FTP
                                                           : INTERNET_SERVICE_HTTP,
                                                     0, 0);
+#endif
 
             if (connection != 0)
             {

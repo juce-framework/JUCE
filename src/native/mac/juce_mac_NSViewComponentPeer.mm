@@ -1200,6 +1200,9 @@ bool NSViewComponentPeer::redirectKeyUp (NSEvent* ev)
 
 void NSViewComponentPeer::redirectModKeyChange (NSEvent* ev)
 {
+    keysCurrentlyDown.clear();
+    handleKeyUpOrDown (true);
+
     updateModifiers (ev);
     handleModifierKeysChange();
 }
