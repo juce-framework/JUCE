@@ -2735,11 +2735,11 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
 
         x += unboundedMouseOffsetX;
         y += unboundedMouseOffsetY;
-        
+
         int gx = x, gy = y;
         relativePositionToGlobal (gx, gy);
         desktop.registerMouseDrag (gx, gy);
-        
+
         const ComponentDeletionWatcher deletionChecker (this);
 
         int mdx, mdy;
@@ -2747,7 +2747,7 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
         globalPositionToRelative (mdx, mdy);
 
         const Time lastMouseDownTime (desktop.getLastMouseDownTime());
-        
+
         const MouseEvent me (x, y,
                              ModifierKeys::getCurrentModifiers(),
                              this,

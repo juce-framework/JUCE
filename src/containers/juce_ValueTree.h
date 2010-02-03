@@ -342,6 +342,41 @@ public:
     void removeListener (Listener* listener);
 
     //==============================================================================
+    /** This method uses a comparator object to sort the tree's children into order.
+
+        The object provided must have a method of the form:
+        @code
+        int compareElements (const ValueTree& first, const ValueTree& second);
+        @endcode
+
+        ..and this method must return:
+          - a value of < 0 if the first comes before the second
+          - a value of 0 if the two objects are equivalent
+          - a value of > 0 if the second comes before the first
+
+        To improve performance, the compareElements() method can be declared as static or const.
+
+        @param comparator   the comparator to use for comparing elements.
+        @param retainOrderOfEquivalentItems     if this is true, then items
+                            which the comparator says are equivalent will be
+                            kept in the order in which they currently appear
+                            in the array. This is slower to perform, but may
+                            be important in some cases. If it's false, a faster
+                            algorithm is used, but equivalent elements may be
+                            rearranged.
+    */
+    template <typename ElementComparator>
+    void sort (ElementComparator& comparator, const bool retainOrderOfEquivalentItems = false)
+    {
+        if (object != 0)
+        {
+            ComparatorAdapter <ElementComparator> adapter (comparator);
+            object->children.sort (adapter, retainOrderOfEquivalentItems);
+            object->sendChildChangeMessage();
+        }
+    }
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -383,6 +418,21 @@ private:
 
     private:
         const SharedObject& operator= (const SharedObject&);
+    };
+
+    template <typename ElementComparator>
+    class ComparatorAdapter
+    {
+    public:
+        ComparatorAdapter (ElementComparator& comparator_) throw()  : comparator (comparator_) {}
+
+        int compareElements (SharedObject* const first, SharedObject* const second)
+        {
+            return comparator.compareElements (ValueTree (first), ValueTree (second));
+        }
+
+    private:
+        ElementComparator& comparator;
     };
 
     friend class SharedObject;

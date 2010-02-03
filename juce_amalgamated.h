@@ -6457,6 +6457,17 @@ public:
 
 	void removeListener (Listener* listener);
 
+	template <typename ElementComparator>
+	void sort (ElementComparator& comparator, const bool retainOrderOfEquivalentItems = false)
+	{
+		if (object != 0)
+		{
+			ComparatorAdapter <ElementComparator> adapter (comparator);
+			object->children.sort (adapter, retainOrderOfEquivalentItems);
+			object->sendChildChangeMessage();
+		}
+	}
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -6498,6 +6509,21 @@ private:
 
 	private:
 		const SharedObject& operator= (const SharedObject&);
+	};
+
+	template <typename ElementComparator>
+	class ComparatorAdapter
+	{
+	public:
+		ComparatorAdapter (ElementComparator& comparator_) throw()  : comparator (comparator_) {}
+
+		int compareElements (SharedObject* const first, SharedObject* const second)
+		{
+			return comparator.compareElements (ValueTree (first), ValueTree (second));
+		}
+
+	private:
+		ElementComparator& comparator;
 	};
 
 	friend class SharedObject;

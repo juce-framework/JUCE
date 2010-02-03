@@ -244,7 +244,7 @@ void Desktop::registerMouseDown (int x, int y, int64 time, Component* component)
 
 void Desktop::registerMouseDrag (int x, int y) throw()
 {
-    mouseMovedSignificantlySincePressed 
+    mouseMovedSignificantlySincePressed
         = mouseMovedSignificantlySincePressed
            || abs (mouseDowns[0].x - x) >= 4
            || abs (mouseDowns[0].y - y) >= 4;

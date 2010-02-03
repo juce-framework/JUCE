@@ -248,7 +248,7 @@ private:
     ~Desktop() throw();
 
     Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
-    
+
     int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
     bool mouseMovedSignificantlySincePressed;
 
@@ -258,7 +258,7 @@ private:
         int64 time;
         Component* component;
     };
-    
+
     RecentMouseDown mouseDowns[4];
 
     void incrementMouseClickCounter() throw();
