@@ -91,7 +91,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
     ProcessContext context;
 
     if (numBytesToRead < 0)
-        numBytesToRead = INT_MAX;
+        numBytesToRead = std::numeric_limits<int64>::max();
 
     while (numBytesToRead > 0)
     {

@@ -806,7 +806,7 @@ void XmlElement::insertChildElement (XmlElement* const newNode,
             else
             {
                 if (indexToInsertAt < 0)
-                    indexToInsertAt = INT_MAX;
+                    indexToInsertAt = std::numeric_limits<int>::max();
 
                 XmlElement* child = firstChildElement;
 

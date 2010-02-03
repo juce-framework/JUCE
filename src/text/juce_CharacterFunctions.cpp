@@ -518,7 +518,7 @@ double juce_atof (const CharType* const original) throw()
             }
             else
             {
-                const double maxAccumulatorValue = (double) ((UINT_MAX - 9) / 10);
+                const double maxAccumulatorValue = (double) ((std::numeric_limits<unsigned int>::max() - 9) / 10);
                 if (accumulator [decPointIndex] > maxAccumulatorValue)
                 {
                     result [decPointIndex] = juce_mulexp10 (result [decPointIndex], exponentAccumulator [decPointIndex])

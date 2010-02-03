@@ -52,11 +52,11 @@ public:
     {
         int explicitOrder1 = first->getExplicitFocusOrder();
         if (explicitOrder1 <= 0)
-            explicitOrder1 = INT_MAX / 2;
+            explicitOrder1 = std::numeric_limits<int>::max() / 2;
 
         int explicitOrder2 = second->getExplicitFocusOrder();
         if (explicitOrder2 <= 0)
-            explicitOrder2 = INT_MAX / 2;
+            explicitOrder2 = std::numeric_limits<int>::max() / 2;
 
         if (explicitOrder1 != explicitOrder2)
             return explicitOrder1 - explicitOrder2;

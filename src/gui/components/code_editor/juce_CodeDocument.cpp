@@ -436,7 +436,7 @@ void CodeDocument::Position::setPositionMaintained (const bool isMaintained) thr
 
 //==============================================================================
 CodeDocument::CodeDocument()
-    : undoManager (INT_MAX, 10000),
+    : undoManager (std::numeric_limits<int>::max(), 10000),
       currentActionIndex (0),
       indexOfSavedState (-1),
       maximumLineLength (-1),

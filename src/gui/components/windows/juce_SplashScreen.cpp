@@ -90,7 +90,7 @@ void SplashScreen::show (const String& title,
 
     originalClickCounter = removeOnMouseClick
                                 ? Desktop::getMouseButtonClickCounter()
-                                : INT_MAX;
+                                : std::numeric_limits<int>::max();
 
     earliestTimeToDelete = Time::getCurrentTime() + RelativeTime::milliseconds (minimumTimeToDisplayFor);
 

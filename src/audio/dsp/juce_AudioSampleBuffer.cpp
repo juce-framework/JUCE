@@ -676,11 +676,11 @@ void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
                         const double samp = src[i];
 
                         if (samp <= -1.0)
-                            dest[i] = INT_MIN;
+                            dest[i] = std::numeric_limits<int>::min();
                         else if (samp >= 1.0)
-                            dest[i] = INT_MAX;
+                            dest[i] = std::numeric_limits<int>::max();
                         else
-                            dest[i] = roundToInt (INT_MAX * samp);
+                            dest[i] = roundToInt (std::numeric_limits<int>::max() * samp);
                     }
                 }
             }

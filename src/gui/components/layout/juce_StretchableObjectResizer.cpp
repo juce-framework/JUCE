@@ -43,7 +43,8 @@ void StretchableObjectResizer::addItem (const double size,
                                         const double minSize, const double maxSize,
                                         const int order)
 {
-    jassert (order >= 0 && order < INT_MAX); // the order must be >= 0 and less than INT_MAX
+    // the order must be >= 0 but less than the maximum integer value.
+    jassert (order >= 0 && order < std::numeric_limits<int>::max());
 
     Item* const item = new Item();
     item->size = size;
@@ -69,7 +70,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
         double minSize = 0;
         double maxSize = 0;
 
-        int nextHighestOrder = INT_MAX;
+        int nextHighestOrder = std::numeric_limits<int>::max();
 
         for (int i = 0; i < items.size(); ++i)
         {
@@ -120,7 +121,7 @@ void StretchableObjectResizer::resizeToFit (const double targetSize)
             }
         }
 
-        if (nextHighestOrder < INT_MAX)
+        if (nextHighestOrder < std::numeric_limits<int>::max())
             order = nextHighestOrder;
         else
             break;

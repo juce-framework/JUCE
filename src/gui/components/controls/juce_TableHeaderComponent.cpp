@@ -146,7 +146,7 @@ void TableHeaderComponent::addColumn (const String& columnName,
     ci->minimumWidth = minimumWidth;
     ci->maximumWidth = maximumWidth;
     if (ci->maximumWidth < 0)
-        ci->maximumWidth = INT_MAX;
+        ci->maximumWidth = std::numeric_limits<int>::max();
     jassert (ci->maximumWidth >= ci->minimumWidth);
     ci->propertyFlags = propertyFlags;
 

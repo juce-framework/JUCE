@@ -2222,7 +2222,7 @@ const String String::fromUTF8 (const uint8* const buffer, int bufferSizeBytes) t
         return empty;
 
     if (bufferSizeBytes < 0)
-        bufferSizeBytes = INT_MAX;
+        bufferSizeBytes = std::numeric_limits<int>::max();
 
     size_t numBytes;
     for (numBytes = 0; numBytes < (size_t) bufferSizeBytes; ++numBytes)

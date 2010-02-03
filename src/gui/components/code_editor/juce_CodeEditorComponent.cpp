@@ -156,7 +156,7 @@ public:
                         roundToInt ((highlightColumnEnd - highlightColumnStart) * owner.getCharWidth()), lineHeight);
         }
 
-        int lastType = INT_MIN;
+        int lastType = std::numeric_limits<int>::min();
 
         for (int i = 0; i < tokens.size(); ++i)
         {
@@ -695,7 +695,7 @@ void CodeEditorComponent::cursorDown (const bool selecting)
     newTransaction();
 
     if (caretPos.getLineNumber() == document.getNumLines() - 1)
-        moveCaretTo (CodeDocument::Position (&document, INT_MAX, INT_MAX), selecting);
+        moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
     else
         moveCaretTo (caretPos.movedByLines (1), selecting);
 }
@@ -776,13 +776,13 @@ void CodeEditorComponent::goToStartOfLine (const bool selecting)
 void CodeEditorComponent::goToEndOfDocument (const bool selecting)
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (&document, INT_MAX, INT_MAX), selecting);
+    moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
 }
 
 void CodeEditorComponent::goToEndOfLine (const bool selecting)
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (&document, caretPos.getLineNumber(), INT_MAX), selecting);
+    moveCaretTo (CodeDocument::Position (&document, caretPos.getLineNumber(), std::numeric_limits<int>::max()), selecting);
 }
 
 void CodeEditorComponent::backspace (const bool moveInWholeWordSteps)
@@ -822,7 +822,7 @@ void CodeEditorComponent::deleteForward (const bool moveInWholeWordSteps)
 void CodeEditorComponent::selectAll()
 {
     newTransaction();
-    moveCaretTo (CodeDocument::Position (&document, INT_MAX, INT_MAX), false);
+    moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), false);
     moveCaretTo (CodeDocument::Position (&document, 0, 0), true);
 }
 

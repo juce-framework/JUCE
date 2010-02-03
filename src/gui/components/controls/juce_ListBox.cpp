@@ -426,7 +426,7 @@ void ListBox::updateContent()
 
     if (selected [selected.size() - 1] >= totalItems)
     {
-        selected.removeRange (totalItems, INT_MAX - totalItems);
+        selected.removeRange (totalItems, std::numeric_limits<int>::max() - totalItems);
         lastRowSelected = getSelectedRow (0);
         selectionChanged = true;
     }
@@ -525,7 +525,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const bool sendNotificationEventToModel)
 {
     selected = setOfRowsToBeSelected;
-    selected.removeRange (totalItems, INT_MAX - totalItems);
+    selected.removeRange (totalItems, std::numeric_limits<int>::max() - totalItems);
 
     if (! isRowSelected (lastRowSelected))
         lastRowSelected = getSelectedRow (0);
@@ -769,7 +769,7 @@ bool ListBox::keyPressed (const KeyPress& key)
     }
     else if (multiple && key == KeyPress (T('a'), ModifierKeys::commandModifier, 0))
     {
-        selectRangeOfRows (0, INT_MAX);
+        selectRangeOfRows (0, std::numeric_limits<int>::max());
     }
     else
     {

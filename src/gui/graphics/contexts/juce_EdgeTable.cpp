@@ -460,7 +460,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) t
 
     int destIndex = 0, destTotal = 0;
     int level1 = 0, level2 = 0;
-    int lastX = INT_MIN, lastLevel = 0;
+    int lastX = std::numeric_limits<int>::min(), lastLevel = 0;
 
     while (srcNum1 > 0 && srcNum2 > 0)
     {
@@ -535,7 +535,7 @@ void EdgeTable::intersectWithEdgeTableLine (const int y, const int* otherLine) t
     dest[0] = destTotal;
 
 #if JUCE_DEBUG
-    int last = INT_MIN;
+    int last = std::numeric_limits<int>::min();
     for (int i = 0; i < dest[0]; ++i)
     {
         jassert (dest[i * 2 + 1] > last);
@@ -640,7 +640,10 @@ void EdgeTable::excludeRectangle (const Rectangle& r) throw()
 
         //XXX optimise here by shortening the table if it fills top or bottom
 
-        const int rectLine[] = { 4, INT_MIN, 255, clipped.getX() << 8, 0, clipped.getRight() << 8, 255, INT_MAX, 0 };
+        const int rectLine[] = { 4, std::numeric_limits<int>::min(), 255, 
+                                 clipped.getX() << 8, 0, 
+                                 clipped.getRight() << 8, 255,
+                                 std::numeric_limits<int>::max(), 0 };
 
         for (int i = top; i < bottom; ++i)
             intersectWithEdgeTableLine (i, rectLine);

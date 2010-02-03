@@ -192,10 +192,10 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
     }
     else
     {
-        int lmax = INT_MIN;
-        int lmin = INT_MAX;
-        int rmax = INT_MIN;
-        int rmin = INT_MAX;
+        int lmax = std::numeric_limits<int>::min();
+        int lmin = std::numeric_limits<int>::max();
+        int rmax = std::numeric_limits<int>::min();
+        int rmin = std::numeric_limits<int>::max();
 
         while (numSamples > 0)
         {
@@ -207,8 +207,8 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
 
             for (int j = numChannels; --j >= 0;)
             {
-                int bufMax = INT_MIN;
-                int bufMin = INT_MAX;
+                int bufMax = std::numeric_limits<int>::min();
+                int bufMin = std::numeric_limits<int>::max();
 
                 const int* const b = tempBuffer[j];
 
@@ -242,10 +242,10 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             rmin = lmin;
         }
 
-        lowestLeft = lmin / (float)INT_MAX;
-        highestLeft = lmax / (float)INT_MAX;
-        lowestRight = rmin / (float)INT_MAX;
-        highestRight = rmax / (float)INT_MAX;
+        lowestLeft = lmin / (float) std::numeric_limits<int>::max();
+        highestLeft = lmax / (float) std::numeric_limits<int>::max();
+        lowestRight = rmin / (float) std::numeric_limits<int>::max();
+        highestRight = rmax / (float) std::numeric_limits<int>::max();
     }
 }
 
@@ -271,8 +271,8 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
     jassert (magnitudeRangeMaximum > magnitudeRangeMinimum);
 
-    const double doubleMin = jlimit (0.0, (double) INT_MAX, magnitudeRangeMinimum * INT_MAX);
-    const double doubleMax = jlimit (doubleMin, (double) INT_MAX, magnitudeRangeMaximum * INT_MAX);
+    const double doubleMin = jlimit (0.0, (double) std::numeric_limits<int>::max(), magnitudeRangeMinimum * std::numeric_limits<int>::max());
+    const double doubleMax = jlimit (doubleMin, (double) std::numeric_limits<int>::max(), magnitudeRangeMaximum * std::numeric_limits<int>::max());
     const int intMagnitudeRangeMinimum = roundToInt (doubleMin);
     const int intMagnitudeRangeMaximum = roundToInt (doubleMax);
 
@@ -421,10 +421,10 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                 if (isFloatingPoint())
                 {
                     // int -> float
-                    const double factor = 1.0 / INT_MAX;
+                    const double factor = 1.0 / std::numeric_limits<int>::max();
 
                     for (int i = 0; i < numToDo; ++i)
-                        ((float*)b)[i] = (float) (factor * b[i]);
+                        ((float*) b)[i] = (float) (factor * b[i]);
                 }
                 else
                 {
@@ -434,11 +434,11 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                         const double samp = *(const float*) b;
 
                         if (samp <= -1.0)
-                            *b++ = INT_MIN;
+                            *b++ = std::numeric_limits<int>::min();
                         else if (samp >= 1.0)
-                            *b++ = INT_MAX;
+                            *b++ = std::numeric_limits<int>::max();
                         else
-                            *b++ = roundToInt (INT_MAX * samp);
+                            *b++ = roundToInt (std::numeric_limits<int>::max() * samp);
                     }
                 }
             }
@@ -495,11 +495,11 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
                     const double samp = *(const float*) b;
 
                     if (samp <= -1.0)
-                        *b++ = INT_MIN;
+                        *b++ = std::numeric_limits<int>::min();
                     else if (samp >= 1.0)
-                        *b++ = INT_MAX;
+                        *b++ = std::numeric_limits<int>::max();
                     else
-                        *b++ = roundToInt (INT_MAX * samp);
+                        *b++ = roundToInt (std::numeric_limits<int>::max() * samp);
                 }
             }
         }

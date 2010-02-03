@@ -374,7 +374,7 @@ public:
         }
 
         int replaceIndex = 0;
-        int bestLastUsageCount = INT_MAX;
+        int bestLastUsageCount = std::numeric_limits<int>::max();
 
         for (i = faces.size(); --i >= 0;)
         {
