@@ -36,26 +36,20 @@ class CodeDocumentLine
 public:
     CodeDocumentLine (const String& line_,
                       const int lineLength_,
-                      const int lineStartInFile_) throw()
+                      const int numNewLineChars,
+                      const int lineStartInFile_)
         : line (line_),
           lineStartInFile (lineStartInFile_),
-          lineLength (lineLength_)
+          lineLength (lineLength_),
+          lineLengthWithoutNewLines (lineLength_ - numNewLineChars)
     {
-        lineLengthWithoutNewLines = lineLength;
-
-        while (lineLengthWithoutNewLines > 0
-                && (line [lineLengthWithoutNewLines - 1] == '\n'
-                    || line [lineLengthWithoutNewLines - 1] == '\r'))
-        {
-            --lineLengthWithoutNewLines;
-        }
     }
 
     ~CodeDocumentLine() throw()
     {
     }
 
-    static void createLines (Array <CodeDocumentLine*>& newLines, const String& text) throw()
+    static void createLines (Array <CodeDocumentLine*>& newLines, const String& text)
     {
         const tchar* const t = (const tchar*) text;
         int pos = 0;
@@ -63,20 +57,27 @@ public:
         while (t [pos] != 0)
         {
             const int startOfLine = pos;
+            int numNewLineChars = 0;
 
             while (t[pos] != 0)
             {
                 if (t[pos] == T('\r'))
                 {
+                    ++numNewLineChars;
                     ++pos;
+
                     if (t[pos] == T('\n'))
+                    {
+                        ++numNewLineChars;
                         ++pos;
+                    }
 
                     break;
                 }
 
                 if (t[pos] == T('\n'))
                 {
+                    ++numNewLineChars;
                     ++pos;
                     break;
                 }
@@ -85,7 +86,7 @@ public:
             }
 
             newLines.add (new CodeDocumentLine (String (t + startOfLine, pos - startOfLine),
-                                                pos - startOfLine,
+                                                pos - startOfLine, numNewLineChars,
                                                 startOfLine));
         }
 
@@ -114,17 +115,19 @@ public:
 };
 
 //==============================================================================
-CodeDocument::Iterator::Iterator (CodeDocument* const document_) throw()
+CodeDocument::Iterator::Iterator (CodeDocument* const document_)
     : document (document_),
       line (0),
-      position (0)
+      position (0),
+      currentLine (document_->lines[0])
 {
 }
 
 CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
     : document (other.document),
       line (other.line),
-      position (other.position)
+      position (other.position),
+      currentLine (other.currentLine)
 {
 }
 
@@ -133,6 +136,7 @@ const CodeDocument::Iterator& CodeDocument::Iterator::operator= (const CodeDocum
     document = other.document;
     line = other.line;
     position = other.position;
+    currentLine = other.currentLine;
 
     return *this;
 }
@@ -141,73 +145,63 @@ CodeDocument::Iterator::~Iterator() throw()
 {
 }
 
-juce_wchar CodeDocument::Iterator::nextChar() throw()
+juce_wchar CodeDocument::Iterator::nextChar()
 {
-    if (line >= document->lines.size())
+    if (currentLine == 0)
         return 0;
 
-    const CodeDocumentLine* const currentLine = document->lines.getUnchecked (line);
+    jassert (currentLine == document->lines.getUnchecked (line));
     const juce_wchar result = currentLine->line [position - currentLine->lineStartInFile];
-
-    if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
-        ++line;
-
+    skip();
     return result;
 }
 
-void CodeDocument::Iterator::skip() throw()
+void CodeDocument::Iterator::skip()
 {
-    if (line < document->lines.size())
+    if (currentLine != 0)
     {
-        const CodeDocumentLine* const currentLine = document->lines.getUnchecked (line);
+        jassert (currentLine == document->lines.getUnchecked (line));
 
         if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
-            ++line;
-    }
-}
-
-juce_wchar CodeDocument::Iterator::peekNextChar() const throw()
-{
-    if (line >= document->lines.size())
-        return 0;
-
-    const CodeDocumentLine* const currentLine = document->lines.getUnchecked (line);
-    return currentLine->line [position - currentLine->lineStartInFile];
-}
-
-void CodeDocument::Iterator::skipWhitespace()
-{
-    while (line < document->lines.size())
-    {
-        const CodeDocumentLine* const currentLine = document->lines.getUnchecked (line);
-
-        for (;;)
         {
-            if (! CharacterFunctions::isWhitespace (currentLine->line [position - currentLine->lineStartInFile]))
-                return;
-
-            if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
-            {
-                ++line;
-                break;
-            }
+            ++line;
+            currentLine = document->lines [line];
         }
     }
 }
 
 void CodeDocument::Iterator::skipToEndOfLine()
 {
-    if (line < document->lines.size())
+    if (currentLine != 0)
     {
-        const CodeDocumentLine* const currentLine = document->lines.getUnchecked (line);
-        position = currentLine->lineStartInFile + currentLine->lineLength;
+        jassert (currentLine == document->lines.getUnchecked (line));
+
         ++line;
+        currentLine = document->lines [line];
+
+        if (currentLine != 0)
+            position = currentLine->lineStartInFile;
     }
+}
+
+juce_wchar CodeDocument::Iterator::peekNextChar() const
+{
+    if (currentLine == 0)
+        return 0;
+
+    jassert (currentLine == document->lines.getUnchecked (line));
+    return currentLine->line [position - currentLine->lineStartInFile];
+}
+
+void CodeDocument::Iterator::skipWhitespace()
+{
+    while (CharacterFunctions::isWhitespace (peekNextChar()))
+        skip();
 }
 
 bool CodeDocument::Iterator::isEOF() const throw()
 {
-    return position >= document->getNumCharacters();
+    return currentLine == 0;
 }
 
 //==============================================================================
@@ -661,6 +655,24 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
     return p;
 }
 
+void CodeDocument::checkLastLineStatus()
+{
+    while (lines.size() > 0
+            && lines.getLast()->lineLength == 0
+            && (lines.size() == 1 || ! lines.getUnchecked (lines.size() - 2)->endsWithLineBreak()))
+    {
+        // remove any empty lines at the end if the preceding line doesn't end in a newline.
+        lines.removeLast();
+    }
+
+    const CodeDocumentLine* const lastLine = lines.getLast();
+
+    if (lastLine != 0 && lastLine->endsWithLineBreak())
+    {
+        // check that there's an empty line at the end if the preceding one ends in a newline..
+        lines.add (new CodeDocumentLine (String::empty, 0, 0, lastLine->lineStartInFile + lastLine->lineLength));
+    }
+}
 
 //==============================================================================
 void CodeDocument::addListener (CodeDocument::Listener* const listener) throw()
@@ -778,6 +790,8 @@ void CodeDocument::insert (const String& text, const int insertPos, const bool u
             lineStart += l->lineLength;
         }
 
+        checkLastLineStatus();
+
         const int newTextLength = text.length();
         for (i = 0; i < positionsToMaintain.size(); ++i)
         {
@@ -878,6 +892,8 @@ void CodeDocument::remove (const int startPos, const int endPos, const bool undo
             const CodeDocumentLine* const previousLine = lines.getUnchecked (i - 1);
             l->lineStartInFile = previousLine->lineStartInFile + previousLine->lineLength;
         }
+
+        checkLastLineStatus();
 
         const int totalChars = getNumCharacters();
 

@@ -20101,16 +20101,16 @@ public:
 	class Iterator
 	{
 	public:
-		Iterator (CodeDocument* const document) throw();
+		Iterator (CodeDocument* const document);
 		Iterator (const Iterator& other);
 		const Iterator& operator= (const Iterator& other) throw();
 		~Iterator() throw();
 
-		juce_wchar nextChar() throw();
+		juce_wchar nextChar();
 
-		juce_wchar peekNextChar() const throw();
+		juce_wchar peekNextChar() const;
 
-		void skip() throw();
+		void skip();
 
 		int getPosition() const throw()	 { return position; }
 
@@ -20124,6 +20124,7 @@ public:
 
 	private:
 		CodeDocument* document;
+		CodeDocumentLine* currentLine;
 		int line, position;
 	};
 
@@ -20147,6 +20148,7 @@ private:
 
 	void insert (const String& text, const int insertPos, const bool undoable);
 	void remove (const int startPos, const int endPos, const bool undoable);
+	void checkLastLineStatus();
 
 	CodeDocument (const CodeDocument&);
 	const CodeDocument& operator= (const CodeDocument&);

@@ -329,7 +329,7 @@ public:
     class Iterator
     {
     public:
-        Iterator (CodeDocument* const document) throw();
+        Iterator (CodeDocument* const document);
         Iterator (const Iterator& other);
         const Iterator& operator= (const Iterator& other) throw();
         ~Iterator() throw();
@@ -337,13 +337,13 @@ public:
         /** Reads the next character and returns it.
             @see peekNextChar
         */
-        juce_wchar nextChar() throw();
+        juce_wchar nextChar();
 
         /** Reads the next character without advancing the current position. */
-        juce_wchar peekNextChar() const throw();
+        juce_wchar peekNextChar() const;
 
         /** Advances the position by one character. */
-        void skip() throw();
+        void skip();
 
         /** Returns the position of the next character as its position within the
             whole document.
@@ -364,6 +364,7 @@ public:
 
     private:
         CodeDocument* document;
+        CodeDocumentLine* currentLine;
         int line, position;
     };
 
@@ -388,6 +389,7 @@ private:
 
     void insert (const String& text, const int insertPos, const bool undoable);
     void remove (const int startPos, const int endPos, const bool undoable);
+    void checkLastLineStatus();
 
     CodeDocument (const CodeDocument&);
     const CodeDocument& operator= (const CodeDocument&);

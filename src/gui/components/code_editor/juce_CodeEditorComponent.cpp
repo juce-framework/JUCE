@@ -1132,12 +1132,12 @@ const Colour CodeEditorComponent::getColourForTokenType (const int tokenType) co
 
 void CodeEditorComponent::clearCachedIterators (const int firstLineToBeInvalid) throw()
 {
-    for (int i = cachedIterators.size(); --i >= 0;)
-        if (cachedIterators.getUnchecked (i)->getLine() >= firstLineToBeInvalid)
-            cachedIterators.remove (i);
+    int i;
+    for (i = cachedIterators.size(); --i >= 0;)
+        if (cachedIterators.getUnchecked (i)->getLine() < firstLineToBeInvalid)
+            break;
 
-    // need to also clear the one before the invalid line
-    cachedIterators.removeLast();
+    cachedIterators.removeRange (jmax (0, i - 1), cachedIterators.size());
 }
 
 void CodeEditorComponent::updateCachedIterators (int maxLineNum)
