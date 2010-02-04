@@ -122,7 +122,7 @@ public:
             bool enabled = deviceManager.isMidiInputEnabled (item);
 
             const int x = getTickX();
-            const int tickW = height - height / 4;
+            const float tickW = height * 0.75f;
 
             getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
                                           enabled, true, true, false);
@@ -783,7 +783,7 @@ public:
                 }
 
                 const int x = getTickX();
-                const int tickW = height - height / 4;
+                const float tickW = height * 0.75f;
 
                 getLookAndFeel().drawTickBox (g, *this, x - tickW, (height - tickW) / 2, tickW, tickW,
                                               enabled, true, true, false);

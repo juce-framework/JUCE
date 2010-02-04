@@ -55,6 +55,9 @@
 //==============================================================================
 #define DONT_SET_USING_JUCE_NAMESPACE 1
 
+#undef max
+#undef min
+
 #include "../juce_amalgamated.h"
 
 #define NO_DUMMY_DECL

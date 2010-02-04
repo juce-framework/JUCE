@@ -71,6 +71,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <climits>
+#include <limits>
 #include <cmath>
 #include <cwchar>
 #include <stdexcept>
