@@ -20305,7 +20305,7 @@ private:
 	int firstLineOnScreen, gutter, spacesPerTab;
 	float charWidth;
 	int lineHeight, linesOnScreen, columnsOnScreen;
-	int scrollbarThickness;
+	int scrollbarThickness, columnToTryToMaintain;
 	bool useSpacesForTabs;
 	double xOffset;
 
@@ -20335,6 +20335,7 @@ private:
 	void clearCachedIterators (const int firstLineToBeInvalid) throw();
 	void updateCachedIterators (int maxLineNum);
 	void getIteratorForPosition (int position, CodeDocument::Iterator& result);
+	void moveLineDelta (const int delta, const bool selecting);
 
 	void updateScrollBars();
 	void scrollToLineInternal (int line);
