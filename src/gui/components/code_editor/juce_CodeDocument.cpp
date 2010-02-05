@@ -34,18 +34,18 @@ BEGIN_JUCE_NAMESPACE
 class CodeDocumentLine
 {
 public:
-    CodeDocumentLine (const String& line_,
+    CodeDocumentLine (const tchar* const line_,
                       const int lineLength_,
                       const int numNewLineChars,
                       const int lineStartInFile_)
-        : line (line_),
+        : line (line_, lineLength_),
           lineStartInFile (lineStartInFile_),
           lineLength (lineLength_),
           lineLengthWithoutNewLines (lineLength_ - numNewLineChars)
     {
     }
 
-    ~CodeDocumentLine() throw()
+    ~CodeDocumentLine()
     {
     }
 
@@ -85,9 +85,8 @@ public:
                 ++pos;
             }
 
-            newLines.add (new CodeDocumentLine (String (t + startOfLine, pos - startOfLine),
-                                                pos - startOfLine, numNewLineChars,
-                                                startOfLine));
+            newLines.add (new CodeDocumentLine (t + startOfLine, pos - startOfLine,
+                                                numNewLineChars, startOfLine));
         }
 
         jassert (pos == text.length());

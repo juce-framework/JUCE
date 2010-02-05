@@ -285,6 +285,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
       linesOnScreen (0),
       columnsOnScreen (0),
       scrollbarThickness (16),
+      columnToTryToMaintain (-1),
       useSpacesForTabs (false),
       xOffset (0),
       codeTokeniser (codeTokeniser_)
@@ -348,6 +349,7 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
     triggerAsyncUpdate();
 
     ((CaretComponent*) caret)->updatePosition (*this);
+    columnToTryToMaintain = -1;
 
     if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
          && affectedTextStart.getPosition() <= selectionEnd.getPosition())
@@ -462,6 +464,7 @@ void CodeEditorComponent::rebuildLineTokens()
 void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, const bool highlighting)
 {
     caretPos = newPos;
+    columnToTryToMaintain = -1;
 
     if (highlighting)
     {
@@ -690,6 +693,21 @@ void CodeEditorComponent::cursorRight (const bool moveInWholeWordSteps, const bo
         moveCaretTo (caretPos.movedBy (1), selecting);
 }
 
+void CodeEditorComponent::moveLineDelta (const int delta, const bool selecting)
+{
+    CodeDocument::Position pos (caretPos);
+    const int newLineNum = pos.getLineNumber() + delta;
+
+    if (columnToTryToMaintain < 0)
+        columnToTryToMaintain = indexToColumn (pos.getLineNumber(), pos.getIndexInLine());
+
+    pos.setLineAndIndex (newLineNum, columnToIndex (newLineNum, columnToTryToMaintain));
+
+    const int colToMaintain = columnToTryToMaintain;
+    moveCaretTo (pos, selecting);
+    columnToTryToMaintain = colToMaintain;
+}
+
 void CodeEditorComponent::cursorDown (const bool selecting)
 {
     newTransaction();
@@ -697,7 +715,7 @@ void CodeEditorComponent::cursorDown (const bool selecting)
     if (caretPos.getLineNumber() == document.getNumLines() - 1)
         moveCaretTo (CodeDocument::Position (&document, std::numeric_limits<int>::max(), std::numeric_limits<int>::max()), selecting);
     else
-        moveCaretTo (caretPos.movedByLines (1), selecting);
+        moveLineDelta (1, selecting);
 }
 
 void CodeEditorComponent::cursorUp (const bool selecting)
@@ -707,7 +725,7 @@ void CodeEditorComponent::cursorUp (const bool selecting)
     if (caretPos.getLineNumber() == 0)
         moveCaretTo (CodeDocument::Position (&document, 0, 0), selecting);
     else
-        moveCaretTo (caretPos.movedByLines (-1), selecting);
+        moveLineDelta (-1, selecting);
 }
 
 void CodeEditorComponent::pageDown (const bool selecting)
@@ -715,7 +733,7 @@ void CodeEditorComponent::pageDown (const bool selecting)
     newTransaction();
 
     scrollBy (jlimit (0, linesOnScreen, 1 + document.getNumLines() - firstLineOnScreen - linesOnScreen));
-    moveCaretTo (caretPos.movedByLines (linesOnScreen), selecting);
+    moveLineDelta (linesOnScreen, selecting);
 }
 
 void CodeEditorComponent::pageUp (const bool selecting)
@@ -723,7 +741,7 @@ void CodeEditorComponent::pageUp (const bool selecting)
     newTransaction();
 
     scrollBy (-linesOnScreen);
-    moveCaretTo (caretPos.movedByLines (-linesOnScreen), selecting);
+    moveLineDelta (-linesOnScreen, selecting);
 }
 
 void CodeEditorComponent::scrollUp()
@@ -732,7 +750,7 @@ void CodeEditorComponent::scrollUp()
     scrollBy (1);
 
     if (caretPos.getLineNumber() < firstLineOnScreen)
-        moveCaretTo (caretPos.movedByLines (1), false);
+        moveLineDelta (1, false);
 }
 
 void CodeEditorComponent::scrollDown()
@@ -741,7 +759,7 @@ void CodeEditorComponent::scrollDown()
     scrollBy (-1);
 
     if (caretPos.getLineNumber() >= firstLineOnScreen + linesOnScreen)
-        moveCaretTo (caretPos.movedByLines (-1), false);
+        moveLineDelta (-1, false);
 }
 
 void CodeEditorComponent::goToStartOfDocument (const bool selecting)
