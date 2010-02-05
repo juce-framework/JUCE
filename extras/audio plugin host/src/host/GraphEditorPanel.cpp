@@ -45,8 +45,8 @@ PluginWindow::PluginWindow (Component* const uiComp,
 
     setContentComponent (uiComp, true, true);
 
-    setTopLeftPosition (owner->properties.getIntValue ("uiLastX", Random::getSystemRandom().nextInt (500)),
-                        owner->properties.getIntValue ("uiLastY", Random::getSystemRandom().nextInt (500)));
+    setTopLeftPosition (owner->properties.getWithDefault ("uiLastX", Random::getSystemRandom().nextInt (500)),
+                        owner->properties.getWithDefault ("uiLastY", Random::getSystemRandom().nextInt (500)));
     setVisible (true);
 
     activePluginWindows.add (this);
@@ -109,8 +109,8 @@ PluginWindow::~PluginWindow()
 
 void PluginWindow::moved()
 {
-    owner->properties.setValue ("uiLastX", getX());
-    owner->properties.setValue ("uiLastY", getY());
+    owner->properties.set ("uiLastX", getX());
+    owner->properties.set ("uiLastY", getY());
 }
 
 void PluginWindow::closeButtonPressed()

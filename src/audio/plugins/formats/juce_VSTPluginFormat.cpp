@@ -2059,7 +2059,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             MemoryBlock chunk;
             getChunkData (chunk, false, maxSizeMB);
 
-            const int totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
+            const size_t totalLen = sizeof (fxChunkSet) + chunk.getSize() - 8;
             dest.setSize (totalLen, true);
 
             fxChunkSet* const set = (fxChunkSet*) dest.getData();
@@ -2070,7 +2070,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             set->fxID = vst_swap (getUID());
             set->fxVersion = vst_swap (getVersionNumber());
             set->numPrograms = vst_swap (numPrograms);
-            set->chunkSize = vst_swap (chunk.getSize());
+            set->chunkSize = vst_swap ((long) chunk.getSize());
 
             chunk.copyTo (set->chunk, 0, chunk.getSize());
         }
@@ -2079,7 +2079,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             MemoryBlock chunk;
             getChunkData (chunk, true, maxSizeMB);
 
-            const int totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
+            const size_t totalLen = sizeof (fxProgramSet) + chunk.getSize() - 8;
             dest.setSize (totalLen, true);
 
             fxProgramSet* const set = (fxProgramSet*) dest.getData();
@@ -2090,7 +2090,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             set->fxID = vst_swap (getUID());
             set->fxVersion = vst_swap (getVersionNumber());
             set->numPrograms = vst_swap (numPrograms);
-            set->chunkSize = vst_swap (chunk.getSize());
+            set->chunkSize = vst_swap ((long) chunk.getSize());
 
             getCurrentProgramName().copyToBuffer (set->name, sizeof (set->name) - 1);
             chunk.copyTo (set->chunk, 0, chunk.getSize());

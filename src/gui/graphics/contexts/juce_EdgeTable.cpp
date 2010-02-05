@@ -573,7 +573,7 @@ void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2)
         while (lastItem[0] > x1)
             lastItem -= 2;
 
-        const int itemsRemoved = (lastItem - (dest + 1)) / 2;
+        const int itemsRemoved = (int) (lastItem - (dest + 1)) / 2;
 
         if (itemsRemoved > 0)
         {
