@@ -12705,6 +12705,8 @@ public:
 
 private:
 
+	static Desktop* instance;
+
 	friend class Component;
 	friend class ComponentPeer;
 	SortedSet <void*> mouseListeners, focusListeners;
@@ -15676,38 +15678,7 @@ private:
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
 #define __JUCE_POPUPMENU_JUCEHEADER__
 
-/********* Start of inlined file: juce_PopupMenuCustomComponent.h *********/
-#ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-#define __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-
-class JUCE_API  PopupMenuCustomComponent  : public Component
-{
-public:
-	~PopupMenuCustomComponent();
-
-	virtual void getIdealSize (int& idealWidth,
-							   int& idealHeight) = 0;
-
-	void triggerMenuItem();
-
-	bool isItemHighlighted() const throw()		   { return isHighlighted; }
-
-protected:
-	PopupMenuCustomComponent (const bool isTriggeredAutomatically = true);
-
-private:
-	friend class MenuItemInfo;
-	friend class MenuItemComponent;
-	friend class PopupMenuWindow;
-	int refCount_;
-	bool isHighlighted, isTriggeredAutomatically;
-
-	PopupMenuCustomComponent (const PopupMenuCustomComponent&);
-	const PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
-};
-
-#endif   // __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_PopupMenuCustomComponent.h *********/
+class PopupMenuCustomComponent;
 
 class JUCE_API  PopupMenu
 {
@@ -15758,11 +15729,11 @@ public:
 
 	void addSectionHeader (const String& title);
 
-	int getNumItems() const;
+	int getNumItems() const throw();
 
 	bool containsCommandItem (const int commandID) const;
 
-	bool containsAnyActiveItems() const;
+	bool containsAnyActiveItems() const throw();
 
 	int show (const int itemIdThatMustBeVisible = 0,
 			  const int minimumWidth = 0,
@@ -15834,9 +15805,18 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	friend class PopupMenuWindow;
+	class Item;
+	class ItemComponent;
+	class Window;
+
 	friend class MenuItemIterator;
-	VoidArray items;
+	friend class ItemComponent;
+	friend class Window;
+	friend class PopupMenuCustomComponent;
+	friend class OwnedArray <Item>;
+	friend class ScopedPointer <Window>;
+
+	OwnedArray <Item> items;
 	LookAndFeel* lookAndFeel;
 	bool separatorPending;
 
@@ -24687,6 +24667,39 @@ private:
 
 #endif
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
+
+/********* Start of inlined file: juce_PopupMenuCustomComponent.h *********/
+#ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
+#define __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
+
+class JUCE_API  PopupMenuCustomComponent  : public Component,
+											public ReferenceCountedObject
+{
+public:
+	~PopupMenuCustomComponent();
+
+	virtual void getIdealSize (int& idealWidth,
+							   int& idealHeight) = 0;
+
+	void triggerMenuItem();
+
+	bool isItemHighlighted() const throw()		   { return isHighlighted; }
+
+protected:
+	PopupMenuCustomComponent (const bool isTriggeredAutomatically = true);
+
+private:
+	friend class PopupMenu;
+	friend class PopupMenu::ItemComponent;
+	friend class PopupMenu::Window;
+	bool isHighlighted, isTriggeredAutomatically;
+
+	PopupMenuCustomComponent (const PopupMenuCustomComponent&);
+	PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
+};
+
+#endif   // __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
+/********* End of inlined file: juce_PopupMenuCustomComponent.h *********/
 
 #endif
 #ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__

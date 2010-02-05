@@ -33,8 +33,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../graphics/geometry/juce_RectangleList.h"
 
 //==============================================================================
-static Desktop* juce_desktopInstance = 0;
-
 Desktop::Desktop() throw()
     : lastFakeMouseMoveX (0),
       lastFakeMouseMoveY (0),
@@ -48,8 +46,8 @@ Desktop::Desktop() throw()
 
 Desktop::~Desktop() throw()
 {
-    jassert (juce_desktopInstance == this);
-    juce_desktopInstance = 0;
+    jassert (instance == this);
+    instance = 0;
 
     // doh! If you don't delete all your windows before exiting, you're going to
     // be leaking memory!
@@ -58,11 +56,13 @@ Desktop::~Desktop() throw()
 
 Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 {
-    if (juce_desktopInstance == 0)
-        juce_desktopInstance = new Desktop();
+    if (instance == 0)
+        instance = new Desktop();
 
-    return *juce_desktopInstance;
+    return *instance;
 }
+
+Desktop* Desktop::instance = 0;
 
 //==============================================================================
 extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,

@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ToolbarItemFactory.h"
 #include "juce_ToolbarItemPalette.h"
 #include "../menus/juce_PopupMenu.h"
+#include "../menus/juce_PopupMenuCustomComponent.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../layout/juce_StretchableObjectResizer.h"
 #include "../windows/juce_DialogWindow.h"

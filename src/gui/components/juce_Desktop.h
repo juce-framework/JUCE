@@ -237,6 +237,8 @@ public:
 
 private:
     //==============================================================================
+    static Desktop* instance;
+
     friend class Component;
     friend class ComponentPeer;
     SortedSet <void*> mouseListeners, focusListeners;

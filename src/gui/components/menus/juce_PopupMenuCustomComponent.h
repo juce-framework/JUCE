@@ -26,7 +26,9 @@
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 #define __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 
+#include "juce_PopupMenu.h"
 #include "../juce_Component.h"
+#include "../../../containers/juce_ReferenceCountedObject.h"
 
 
 //==============================================================================
@@ -34,7 +36,8 @@
 
     @see PopupMenu::addCustomItem
 */
-class JUCE_API  PopupMenuCustomComponent  : public Component
+class JUCE_API  PopupMenuCustomComponent  : public Component,
+                                            public ReferenceCountedObject
 {
 public:
     /** Destructor. */
@@ -75,14 +78,13 @@ protected:
 
 
 private:
-    friend class MenuItemInfo;
-    friend class MenuItemComponent;
-    friend class PopupMenuWindow;
-    int refCount_;
+    friend class PopupMenu;
+    friend class PopupMenu::ItemComponent;
+    friend class PopupMenu::Window;
     bool isHighlighted, isTriggeredAutomatically;
 
     PopupMenuCustomComponent (const PopupMenuCustomComponent&);
-    const PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
+    PopupMenuCustomComponent& operator= (const PopupMenuCustomComponent&);
 };
 
 

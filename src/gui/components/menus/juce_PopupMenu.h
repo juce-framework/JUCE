@@ -26,8 +26,8 @@
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
 #define __JUCE_POPUPMENU_JUCEHEADER__
 
-#include "juce_PopupMenuCustomComponent.h"
 #include "../../../application/juce_ApplicationCommandManager.h"
+class PopupMenuCustomComponent;
 
 
 //==============================================================================
@@ -207,13 +207,13 @@ public:
 
         (This doesn't count separators).
     */
-    int getNumItems() const;
+    int getNumItems() const throw();
 
     /** Returns true if the menu contains a command item that triggers the given command. */
     bool containsCommandItem (const int commandID) const;
 
     /** Returns true if the menu contains any items that can be used. */
-    bool containsAnyActiveItems() const;
+    bool containsAnyActiveItems() const throw();
 
     //==============================================================================
     /** Displays the menu and waits for the user to pick something.
@@ -376,9 +376,18 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    friend class PopupMenuWindow;
+    class Item;
+    class ItemComponent;
+    class Window;
+
     friend class MenuItemIterator;
-    VoidArray items;
+    friend class ItemComponent;
+    friend class Window;
+    friend class PopupMenuCustomComponent;
+    friend class OwnedArray <Item>;
+    friend class ScopedPointer <Window>;
+
+    OwnedArray <Item> items;
     LookAndFeel* lookAndFeel;
     bool separatorPending;
 
