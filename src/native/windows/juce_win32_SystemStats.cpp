@@ -390,4 +390,20 @@ int SystemStats::getPageSize() throw()
     return systemInfo.dwPageSize;
 }
 
+//==============================================================================
+const String SystemStats::getLogonName()
+{
+    TCHAR text [256];
+    DWORD len = numElementsInArray (text) - 2;
+    zerostruct (text);
+    GetUserName (text, &len);
+    return String (text, len);
+}
+
+const String SystemStats::getFullUserName()
+{
+    return getLogonName();
+}
+
+
 #endif

@@ -214,6 +214,25 @@ int SystemStats::getNumCpus() throw()
     return lastCpu + 1;
 }
 
+//==============================================================================
+const String SystemStats::getLogonName()
+{
+    const char* user = getenv ("USER");
+
+    if (user == 0)
+    {
+        struct passwd* const pw = getpwuid (getuid());
+        if (pw != 0)
+            user = pw->pw_name;
+    }
+
+    return String::fromUTF8 ((const uint8*) user);
+}
+
+const String SystemStats::getFullUserName()
+{
+    return getLogonName();
+}
 
 //==============================================================================
 void SystemStats::initialiseStats() throw()

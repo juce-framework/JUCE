@@ -87,6 +87,18 @@ public:
     static bool isOperatingSystem64Bit() throw();
 
     //==============================================================================
+    /** Returns the current user's name, if available.
+        @see getFullUserName()
+    */
+    static const String getLogonName();
+
+    /** Returns the current user's full name, if available.
+        On some OSes, this may just return the same value as getLogonName().
+        @see getLogonName()
+    */
+    static const String getFullUserName();
+
+    //==============================================================================
     // CPU and memory information..
 
     /** Returns the approximate CPU speed.

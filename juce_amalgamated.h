@@ -7088,6 +7088,10 @@ public:
 
 	static bool isOperatingSystem64Bit() throw();
 
+	static const String getLogonName();
+
+	static const String getFullUserName();
+
 	// CPU and memory information..
 
 	static int getCpuSpeedInMegaherz() throw();

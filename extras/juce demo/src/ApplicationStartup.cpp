@@ -119,16 +119,18 @@ private:
         String systemInfo;
 
         systemInfo
-          << T("Time and date: ") << Time::getCurrentTime().toString (true, true)
-          << T("\nOperating system: ") << SystemStats::getOperatingSystemName()
-          << T("\nCPU vendor: ") << SystemStats::getCpuVendor()
-          << T("\nCPU speed: ") << SystemStats::getCpuSpeedInMegaherz() << T("MHz\n")
-          << T("\nNumber of CPUs: ") << SystemStats::getNumCpus()
-          << T("\nCPU has MMX: ") << (SystemStats::hasMMX() ? T("yes") : T("no"))
-          << T("\nCPU has SSE: ") << (SystemStats::hasSSE() ? T("yes") : T("no"))
-          << T("\nCPU has SSE2: ") << (SystemStats::hasSSE2() ? T("yes") : T("no"))
-          << T("\nCPU has 3DNOW: ") << (SystemStats::has3DNow() ? T("yes") : T("no"))
-          << T("\nMemory size: ") << SystemStats::getMemorySizeInMegabytes() << T("MB\n");
+          << "Time and date: " << Time::getCurrentTime().toString (true, true)
+          << "\nUser logon name: " << SystemStats::getLogonName()
+          << "\nFull user name: " << SystemStats::getFullUserName()
+          << "\nOperating system: " << SystemStats::getOperatingSystemName()
+          << "\nCPU vendor: " << SystemStats::getCpuVendor()
+          << "\nCPU speed: " << SystemStats::getCpuSpeedInMegaherz() << "MHz\n"
+          << "\nNumber of CPUs: " << SystemStats::getNumCpus()
+          << "\nCPU has MMX: " << (SystemStats::hasMMX() ? "yes" : "no")
+          << "\nCPU has SSE: " << (SystemStats::hasSSE() ? "yes" : "no")
+          << "\nCPU has SSE2: " << (SystemStats::hasSSE2() ? "yes" : "no")
+          << "\nCPU has 3DNOW: " << (SystemStats::has3DNow() ? "yes" : "no")
+          << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB\n";
 
         int64 macAddresses[8];
         const int numAddresses = SystemStats::getMACAddresses (macAddresses, 8, false);
@@ -136,7 +138,7 @@ private:
         for (int i = 0; i < numAddresses; ++i)
         {
             systemInfo
-              << T("Found network card MAC address: ")
+              << "Found network card MAC address: "
               << String::formatted (T("%02x-%02x-%02x-%02x-%02x-%02x\n"),
                                     0xff & (int) (macAddresses [i] >> 40),
                                     0xff & (int) (macAddresses [i] >> 32),
@@ -147,21 +149,21 @@ private:
         }
 
         systemInfo
-          << T("Current executable file: ")
+          << "Current executable file: "
           << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
-          << T("\nCurrent application file: ")
+          << "\nCurrent application file: "
           << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
-          << T("\nUser home directory: ")
+          << "\nUser home directory: "
           << File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
-          << T("\nUser documents directory: ")
+          << "\nUser documents directory: "
           << File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName()
-          << T("\nUser application data directory: ")
+          << "\nUser application data directory: "
           << File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
-          << T("\nCommon application data directory: ")
+          << "\nCommon application data directory: "
           << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName()
-          << T("\nTemp directory: ")
+          << "\nTemp directory: "
           << File::getSpecialLocation (File::tempDirectory).getFullPathName()
-          << T("\n\n");
+          << "\n\n";
 
         return systemInfo;
     }

@@ -219,6 +219,17 @@ int SystemStats::getNumCpus() throw()
 }
 
 //==============================================================================
+const String SystemStats::getLogonName()
+{
+    return nsStringToJuce (NSUserName());
+}
+
+const String SystemStats::getFullUserName()
+{
+    return nsStringToJuce (NSFullUserName());
+}
+
+//==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
     return (uint32) (mach_absolute_time() * highResTimerToMillisecRatio);

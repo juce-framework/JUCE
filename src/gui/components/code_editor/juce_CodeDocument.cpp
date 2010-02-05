@@ -116,26 +116,26 @@ public:
 //==============================================================================
 CodeDocument::Iterator::Iterator (CodeDocument* const document_)
     : document (document_),
+      currentLine (document_->lines[0]),
       line (0),
-      position (0),
-      currentLine (document_->lines[0])
+      position (0)
 {
 }
 
 CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
     : document (other.document),
+      currentLine (other.currentLine),
       line (other.line),
-      position (other.position),
-      currentLine (other.currentLine)
+      position (other.position)
 {
 }
 
 const CodeDocument::Iterator& CodeDocument::Iterator::operator= (const CodeDocument::Iterator& other) throw()
 {
     document = other.document;
+    currentLine = other.currentLine;
     line = other.line;
     position = other.position;
-    currentLine = other.currentLine;
 
     return *this;
 }
