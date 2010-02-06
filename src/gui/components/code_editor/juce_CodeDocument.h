@@ -29,6 +29,8 @@
 #include "../../../utilities/juce_UndoManager.h"
 #include "../../graphics/colour/juce_Colour.h"
 #include "../../../containers/juce_VoidArray.h"
+#include "../../../io/streams/juce_InputStream.h"
+#include "../../../io/streams/juce_OutputStream.h"
 class CodeDocumentLine;
 
 
@@ -224,6 +226,14 @@ public:
         might want to also call clearUndoHistory() and setSavePoint() after using this method.
     */
     void replaceAllContent (const String& newContent);
+
+    /** Replaces the editor's contents with the contents of a stream.
+        This will also reset the undo history and save point marker.
+    */
+    bool loadFromStream (InputStream& stream);
+
+    /** Writes the editor's current contents to a stream. */
+    bool writeToStream (OutputStream& stream);
 
     //==============================================================================
     /** Returns the preferred new-line characters for the document.

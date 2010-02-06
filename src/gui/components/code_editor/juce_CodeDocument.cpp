@@ -532,6 +532,28 @@ void CodeDocument::replaceAllContent (const String& newContent)
     insert (newContent, 0, true);
 }
 
+bool CodeDocument::loadFromStream (InputStream& stream)
+{
+    replaceAllContent (stream.readEntireStreamAsString());
+    setSavePoint();
+    clearUndoHistory();
+    return true;
+}
+
+bool CodeDocument::writeToStream (OutputStream& stream)
+{
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        String temp (lines.getUnchecked(i)->line); // use a copy to avoid bloating the memory footprint of the stored string.
+        const char* utf8 = temp.toUTF8();
+
+        if (! stream.write (utf8, strlen (utf8)))
+            return false;
+    }
+
+    return true;
+}
+
 void CodeDocument::setNewLineCharacters (const String& newLine) throw()
 {
     jassert (newLine == T("\r\n") || newLine == T("\n") || newLine == T("\r"));

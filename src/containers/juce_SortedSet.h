@@ -93,14 +93,14 @@ public:
         if (this != &other)
         {
             other.lockSet();
-            lock.enter();
+            data.enter();
 
             data.ensureAllocatedSize (other.size());
             numUsed = other.numUsed;
             memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
             minimiseStorageOverheads();
 
-            lock.exit();
+            data.exit();
             other.unlockSet();
         }
 
@@ -117,11 +117,11 @@ public:
     */
     bool operator== (const SortedSet<ElementType>& other) const throw()
     {
-        lock.enter();
+        data.enter();
 
         if (numUsed != other.numUsed)
         {
-            lock.exit();
+            data.exit();
             return false;
         }
 
@@ -129,12 +129,12 @@ public:
         {
             if (data.elements [i] != other.data.elements [i])
             {
-                lock.exit();
+                data.exit();
                 return false;
             }
         }
 
-        lock.exit();
+        data.exit();
         return true;
     }
 
@@ -161,10 +161,10 @@ public:
     */
     void clear() throw()
     {
-        lock.enter();
+        data.enter();
         data.setAllocatedSize (0);
         numUsed = 0;
-        lock.exit();
+        data.exit();
     }
 
     /** Removes all elements from the set without freeing the array's allocated storage.
@@ -173,9 +173,9 @@ public:
     */
     void clearQuick() throw()
     {
-        lock.enter();
+        data.enter();
         numUsed = 0;
-        lock.exit();
+        data.exit();
     }
 
     //==============================================================================
@@ -199,11 +199,11 @@ public:
     */
     inline ElementType operator[] (const int index) const throw()
     {
-        lock.enter();
+        data.enter();
         const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
                                         ? data.elements [index]
                                         : (ElementType) 0;
-        lock.exit();
+        data.exit();
 
         return result;
     }
@@ -218,10 +218,10 @@ public:
     */
     inline ElementType getUnchecked (const int index) const throw()
     {
-        lock.enter();
+        data.enter();
         jassert (((unsigned int) index) < (unsigned int) numUsed);
         const ElementType result = data.elements [index];
-        lock.exit();
+        data.exit();
 
         return result;
     }
@@ -232,10 +232,10 @@ public:
     */
     inline ElementType getFirst() const throw()
     {
-        lock.enter();
+        data.enter();
         const ElementType result = (numUsed > 0) ? data.elements [0]
                                                  : (ElementType) 0;
-        lock.exit();
+        data.exit();
 
         return result;
     }
@@ -246,10 +246,10 @@ public:
     */
     inline ElementType getLast() const throw()
     {
-        lock.enter();
+        data.enter();
         const ElementType result = (numUsed > 0) ? data.elements [numUsed - 1]
                                                  : (ElementType) 0;
-        lock.exit();
+        data.exit();
 
         return result;
     }
@@ -265,7 +265,7 @@ public:
     */
     int indexOf (const ElementType elementToLookFor) const throw()
     {
-        lock.enter();
+        data.enter();
 
         int start = 0;
         int end = numUsed;
@@ -274,12 +274,12 @@ public:
         {
             if (start >= end)
             {
-                lock.exit();
+                data.exit();
                 return -1;
             }
             else if (elementToLookFor == data.elements [start])
             {
-                lock.exit();
+                data.exit();
                 return start;
             }
             else
@@ -288,7 +288,7 @@ public:
 
                 if (halfway == start)
                 {
-                    lock.exit();
+                    data.exit();
                     return -1;
                 }
                 else if (elementToLookFor >= data.elements [halfway])
@@ -306,7 +306,7 @@ public:
     */
     bool contains (const ElementType elementToLookFor) const throw()
     {
-        lock.enter();
+        data.enter();
 
         int start = 0;
         int end = numUsed;
@@ -315,12 +315,12 @@ public:
         {
             if (start >= end)
             {
-                lock.exit();
+                data.exit();
                 return false;
             }
             else if (elementToLookFor == data.elements [start])
             {
-                lock.exit();
+                data.exit();
                 return true;
             }
             else
@@ -329,7 +329,7 @@ public:
 
                 if (halfway == start)
                 {
-                    lock.exit();
+                    data.exit();
                     return false;
                 }
                 else if (elementToLookFor >= data.elements [halfway])
@@ -348,7 +348,7 @@ public:
     */
     void add (const ElementType newElement) throw()
     {
-        lock.enter();
+        data.enter();
 
         int start = 0;
         int end = numUsed;
@@ -385,7 +385,7 @@ public:
             }
         }
 
-        lock.exit();
+        data.exit();
     }
 
     /** Adds elements from an array to this set.
@@ -397,12 +397,12 @@ public:
     void addArray (const ElementType* elementsToAdd,
                    int numElementsToAdd) throw()
     {
-        lock.enter();
+        data.enter();
 
         while (--numElementsToAdd >= 0)
             add (*elementsToAdd++);
 
-        lock.exit();
+        data.exit();
     }
 
     /** Adds elements from another set to this one.
@@ -420,7 +420,7 @@ public:
                  int numElementsToAdd = -1) throw()
     {
         setToAddFrom.lockSet();
-        lock.enter();
+        data.enter();
         jassert (this != &setToAddFrom);
 
         if (this != &setToAddFrom)
@@ -437,7 +437,7 @@ public:
             addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
         }
 
-        lock.exit();
+        data.exit();
         setToAddFrom.unlockSet();
     }
 
@@ -454,7 +454,7 @@ public:
     */
     ElementType remove (const int indexToRemove) throw()
     {
-        lock.enter();
+        data.enter();
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
@@ -470,12 +470,12 @@ public:
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
 
-            lock.exit();
+            data.exit();
             return removed;
         }
         else
         {
-            lock.exit();
+            data.exit();
             return 0;
         }
     }
@@ -489,9 +489,9 @@ public:
     */
     void removeValue (const ElementType valueToRemove) throw()
     {
-        lock.enter();
+        data.enter();
         remove (indexOf (valueToRemove));
-        lock.exit();
+        data.exit();
     }
 
     /** Removes any elements which are also in another set.
@@ -503,7 +503,7 @@ public:
     void removeValuesIn (const OtherSetType& otherSet) throw()
     {
         otherSet.lockSet();
-        lock.enter();
+        data.enter();
 
         if (this == &otherSet)
         {
@@ -519,7 +519,7 @@ public:
             }
         }
 
-        lock.exit();
+        data.exit();
         otherSet.unlockSet();
     }
 
@@ -534,7 +534,7 @@ public:
     void removeValuesNotIn (const OtherSetType& otherSet) throw()
     {
         otherSet.lockSet();
-        lock.enter();
+        data.enter();
 
         if (this != &otherSet)
         {
@@ -550,7 +550,7 @@ public:
             }
         }
 
-        lock.exit();
+        data.exit();
         otherSet.lockSet();
     }
 
@@ -563,9 +563,9 @@ public:
     */
     void minimiseStorageOverheads() throw()
     {
-        lock.enter();
+        data.enter();
         data.shrinkToNoMoreThan (numUsed);
-        lock.exit();
+        data.exit();
     }
 
     //==============================================================================
@@ -578,7 +578,7 @@ public:
     */
     void lockSet() const throw()
     {
-        lock.enter();
+        data.enter();
     }
 
     /** Unlocks the set's CriticalSection.
@@ -590,7 +590,7 @@ public:
     */
     void unlockSet() const throw()
     {
-        lock.exit();
+        data.exit();
     }
 
 
@@ -598,9 +598,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    ArrayAllocationBase <ElementType> data;
+    ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse> data;
     int numUsed;
-    TypeOfCriticalSectionToUse lock;
 
     void insertInternal (const int indexToInsertAt, const ElementType newElement) throw()
     {

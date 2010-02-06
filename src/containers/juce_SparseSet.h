@@ -340,7 +340,7 @@ public:
 
 private:
     // alternating start/end values of ranges of values that are present.
-    Array<Type> values;
+    Array<Type, DummyCriticalSection> values;
 
     void simplify() throw()
     {

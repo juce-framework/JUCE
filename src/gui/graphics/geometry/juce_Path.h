@@ -632,7 +632,7 @@ public:
 private:
     friend class PathFlatteningIterator;
     friend class Path::Iterator;
-    ArrayAllocationBase <float> data;
+    ArrayAllocationBase <float, DummyCriticalSection> data;
     int numElements;
     float pathXMin, pathXMax, pathYMin, pathYMax;
     bool useNonZeroWinding;

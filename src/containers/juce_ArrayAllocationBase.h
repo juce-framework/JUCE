@@ -36,10 +36,13 @@
     This class isn't really for public use - it's used by the other
     array classes, but might come in handy for some purposes.
 
+    It inherits from a critical section class to allow the arrays to use
+    the "empty base class optimisation" pattern to reduce their footprint.
+
     @see Array, OwnedArray, ReferenceCountedArray
 */
-template <class ElementType>
-class ArrayAllocationBase
+template <class ElementType, class TypeOfCriticalSectionToUse>
+class ArrayAllocationBase  : public TypeOfCriticalSectionToUse
 {
 public:
     //==============================================================================
@@ -99,7 +102,7 @@ public:
     }
 
     /** Swap the contents of two objects. */
-    void swapWith (ArrayAllocationBase <ElementType>& other) throw()
+    void swapWith (ArrayAllocationBase <ElementType, TypeOfCriticalSectionToUse>& other) throw()
     {
         elements.swapWith (other.elements);
         swapVariables (numAllocated, other.numAllocated);
@@ -111,7 +114,7 @@ public:
 
 private:
     ArrayAllocationBase (const ArrayAllocationBase&);
-    const ArrayAllocationBase& operator= (const ArrayAllocationBase&);
+    ArrayAllocationBase& operator= (const ArrayAllocationBase&);
 };
 
 
