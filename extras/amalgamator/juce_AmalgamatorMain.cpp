@@ -273,7 +273,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
 
     TemporaryFile temp (targetFile);
     ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream (1024 * 128));
-                                          
+
     if (out == 0)
     {
         std::cout << "\n!! ERROR - couldn't write to the target file: "

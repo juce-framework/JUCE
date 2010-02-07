@@ -72,12 +72,12 @@ OBJECTS := \
 	$(OBJDIR)/juce_MemoryInputStream.o \
 	$(OBJDIR)/juce_OutputStream.o \
 	$(OBJDIR)/juce_FileInputSource.o \
-	$(OBJDIR)/juce_MemoryOutputStream.o \
 	$(OBJDIR)/juce_BufferedInputStream.o \
 	$(OBJDIR)/juce_SubregionStream.o \
 	$(OBJDIR)/juce_GZIPDecompressorInputStream.o \
 	$(OBJDIR)/juce_GZIPCompressorOutputStream.o \
 	$(OBJDIR)/juce_InputStream.o \
+	$(OBJDIR)/juce_MemoryOutputStream.o \
 	$(OBJDIR)/juce_StringArray.o \
 	$(OBJDIR)/juce_StringPairArray.o \
 	$(OBJDIR)/juce_LocalisedStrings.o \
@@ -165,10 +165,10 @@ OBJECTS := \
 	$(OBJDIR)/juce_ColourGradient.o \
 	$(OBJDIR)/juce_Justification.o \
 	$(OBJDIR)/juce_RectanglePlacement.o \
-	$(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o \
 	$(OBJDIR)/juce_EdgeTable.o \
 	$(OBJDIR)/juce_FillType.o \
 	$(OBJDIR)/juce_LowLevelGraphicsPostScriptRenderer.o \
+	$(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o \
 	$(OBJDIR)/juce_Graphics.o \
 	$(OBJDIR)/juce_DrawableComposite.o \
 	$(OBJDIR)/juce_SVGParser.o \
@@ -183,9 +183,9 @@ OBJECTS := \
 	$(OBJDIR)/juce_GlyphArrangement.o \
 	$(OBJDIR)/juce_Typeface.o \
 	$(OBJDIR)/juce_Font.o \
+	$(OBJDIR)/juce_Path.o \
 	$(OBJDIR)/juce_BorderSize.o \
 	$(OBJDIR)/juce_Line.o \
-	$(OBJDIR)/juce_Path.o \
 	$(OBJDIR)/juce_AffineTransform.o \
 	$(OBJDIR)/juce_PathIterator.o \
 	$(OBJDIR)/juce_PathStrokeType.o \
@@ -295,7 +295,6 @@ OBJECTS := \
 	$(OBJDIR)/juce_ResizableWindow.o \
 	$(OBJDIR)/juce_TopLevelWindow.o \
 	$(OBJDIR)/juce_linux_Midi.o \
-	$(OBJDIR)/juce_linux_Windowing.o \
 	$(OBJDIR)/juce_linux_Fonts.o \
 	$(OBJDIR)/juce_linux_Audio.o \
 	$(OBJDIR)/juce_linux_WebBrowserComponent.o \
@@ -307,6 +306,7 @@ OBJECTS := \
 	$(OBJDIR)/juce_linux_SystemStats.o \
 	$(OBJDIR)/juce_linux_FileChooser.o \
 	$(OBJDIR)/juce_linux_Network.o \
+	$(OBJDIR)/juce_linux_Windowing.o \
 	$(OBJDIR)/juce_linux_Messaging.o \
 	$(OBJDIR)/juce_linux_NativeCode.o \
 
@@ -515,11 +515,6 @@ $(OBJDIR)/juce_FileInputSource.o: ../../src/io/streams/juce_FileInputSource.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_MemoryOutputStream.o: ../../src/io/streams/juce_MemoryOutputStream.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_BufferedInputStream.o: ../../src/io/streams/juce_BufferedInputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -541,6 +536,11 @@ $(OBJDIR)/juce_GZIPCompressorOutputStream.o: ../../src/io/streams/juce_GZIPCompr
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_InputStream.o: ../../src/io/streams/juce_InputStream.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_MemoryOutputStream.o: ../../src/io/streams/juce_MemoryOutputStream.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -980,11 +980,6 @@ $(OBJDIR)/juce_RectanglePlacement.o: ../../src/gui/graphics/contexts/juce_Rectan
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o: ../../src/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_EdgeTable.o: ../../src/gui/graphics/contexts/juce_EdgeTable.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -996,6 +991,11 @@ $(OBJDIR)/juce_FillType.o: ../../src/gui/graphics/contexts/juce_FillType.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LowLevelGraphicsPostScriptRenderer.o: ../../src/gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o: ../../src/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1070,17 +1070,17 @@ $(OBJDIR)/juce_Font.o: ../../src/gui/graphics/fonts/juce_Font.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/juce_Path.o: ../../src/gui/graphics/geometry/juce_Path.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/juce_BorderSize.o: ../../src/gui/graphics/geometry/juce_BorderSize.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Line.o: ../../src/gui/graphics/geometry/juce_Line.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Path.o: ../../src/gui/graphics/geometry/juce_Path.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1630,11 +1630,6 @@ $(OBJDIR)/juce_linux_Midi.o: ../../src/native/linux/juce_linux_Midi.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_linux_Windowing.o: ../../src/native/linux/juce_linux_Windowing.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/juce_linux_Fonts.o: ../../src/native/linux/juce_linux_Fonts.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -1686,6 +1681,11 @@ $(OBJDIR)/juce_linux_FileChooser.o: ../../src/native/linux/juce_linux_FileChoose
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Network.o: ../../src/native/linux/juce_linux_Network.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_linux_Windowing.o: ../../src/native/linux/juce_linux_Windowing.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

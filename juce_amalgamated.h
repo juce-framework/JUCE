@@ -1,10 +1,35 @@
+/*
+  ==============================================================================
+
+   This file is part of the JUCE library - "Jules' Utility Class Extensions"
+   Copyright 2004-9 by Raw Material Software Ltd.
+
+  ------------------------------------------------------------------------------
+
+   JUCE can be redistributed and/or modified under the terms of the GNU General
+   Public License (Version 2), as published by the Free Software Foundation.
+   A copy of the license is included in the JUCE distribution, or can be found
+   online at www.gnu.org/licenses.
+
+   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  ------------------------------------------------------------------------------
+
+   To release a closed-source product which uses JUCE, commercial licenses are
+   available: visit www.rawmaterialsoftware.com/juce for more information.
+
+  ==============================================================================
+*/
 
 #ifndef __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
 #define __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__
 
 #define DONT_AUTOLINK_TO_JUCE_LIBRARY 1
 
-/********* Start of inlined file: juce.h *********/
+
+/*** Start of inlined file: juce.h ***/
 #ifndef __JUCE_JUCEHEADER__
 #define __JUCE_JUCEHEADER__
 
@@ -12,7 +37,7 @@
 
 // (this includes things that need defining outside of the JUCE namespace)
 
-/********* Start of inlined file: juce_StandardHeader.h *********/
+/*** Start of inlined file: juce_StandardHeader.h ***/
 #ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
 #define __JUCE_STANDARDHEADER_JUCEHEADER__
 
@@ -21,7 +46,8 @@
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8))
 
-/********* Start of inlined file: juce_TargetPlatform.h *********/
+
+/*** Start of inlined file: juce_TargetPlatform.h ***/
 #ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
 #define __JUCE_TARGETPLATFORM_JUCEHEADER__
 
@@ -146,11 +172,12 @@
 #endif
 
 #endif   // __JUCE_TARGETPLATFORM_JUCEHEADER__
-/********* End of inlined file: juce_TargetPlatform.h *********/
+/*** End of inlined file: juce_TargetPlatform.h ***/
 
   // (sets up the various JUCE_WINDOWS, JUCE_MAC, etc flags)
 
-/********* Start of inlined file: juce_Config.h *********/
+
+/*** Start of inlined file: juce_Config.h ***/
 #ifndef __JUCE_CONFIG_JUCEHEADER__
 #define __JUCE_CONFIG_JUCEHEADER__
 
@@ -297,7 +324,7 @@
 #endif
 
 #endif
-/********* End of inlined file: juce_Config.h *********/
+/*** End of inlined file: juce_Config.h ***/
 
 #ifdef JUCE_NAMESPACE
   #define BEGIN_JUCE_NAMESPACE	namespace JUCE_NAMESPACE {
@@ -307,7 +334,8 @@
   #define END_JUCE_NAMESPACE
 #endif
 
-/********* Start of inlined file: juce_PlatformDefs.h *********/
+
+/*** Start of inlined file: juce_PlatformDefs.h ***/
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
 #define __JUCE_PLATFORMDEFS_JUCEHEADER__
 
@@ -460,7 +488,7 @@
 #endif
 
 #endif   // __JUCE_PLATFORMDEFS_JUCEHEADER__
-/********* End of inlined file: juce_PlatformDefs.h *********/
+/*** End of inlined file: juce_PlatformDefs.h ***/
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
@@ -535,7 +563,8 @@ extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
   extern void JUCE_API juce_LogAssertion (const char* filename, const int lineNum) throw();
 #endif
 
-/********* Start of inlined file: juce_Memory.h *********/
+
+/*** Start of inlined file: juce_Memory.h ***/
 #ifndef __JUCE_MEMORY_JUCEHEADER__
 #define __JUCE_MEMORY_JUCEHEADER__
 
@@ -642,9 +671,10 @@ template <typename Type>
 inline void deleteAndZero (Type& pointer)			   { delete pointer; pointer = 0; }
 
 #endif   // __JUCE_MEMORY_JUCEHEADER__
-/********* End of inlined file: juce_Memory.h *********/
+/*** End of inlined file: juce_Memory.h ***/
 
-/********* Start of inlined file: juce_MathsFunctions.h *********/
+
+/*** Start of inlined file: juce_MathsFunctions.h ***/
 #ifndef __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 #define __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 
@@ -791,9 +821,10 @@ inline int roundFloatToInt (const float value) throw()
 }
 
 #endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
-/********* End of inlined file: juce_MathsFunctions.h *********/
+/*** End of inlined file: juce_MathsFunctions.h ***/
 
-/********* Start of inlined file: juce_ByteOrder.h *********/
+
+/*** Start of inlined file: juce_ByteOrder.h ***/
 #ifndef __JUCE_BYTEORDER_JUCEHEADER__
 #define __JUCE_BYTEORDER_JUCEHEADER__
 
@@ -913,17 +944,20 @@ inline void ByteOrder::littleEndian24BitToChars (const int value, char* const de
 inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destBytes)	   { destBytes[0] = (char)((value >> 16) & 0xff); destBytes[1] = (char)((value >> 8) & 0xff); destBytes[2] = (char)(value & 0xff); }
 
 #endif   // __JUCE_BYTEORDER_JUCEHEADER__
-/********* End of inlined file: juce_ByteOrder.h *********/
+/*** End of inlined file: juce_ByteOrder.h ***/
 
-/********* Start of inlined file: juce_Logger.h *********/
+
+/*** Start of inlined file: juce_Logger.h ***/
 #ifndef __JUCE_LOGGER_JUCEHEADER__
 #define __JUCE_LOGGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_String.h *********/
+
+/*** Start of inlined file: juce_String.h ***/
 #ifndef __JUCE_STRING_JUCEHEADER__
 #define __JUCE_STRING_JUCEHEADER__
 
-/********* Start of inlined file: juce_CharacterFunctions.h *********/
+
+/*** Start of inlined file: juce_CharacterFunctions.h ***/
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 #define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
@@ -1036,7 +1070,7 @@ public:
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
-/********* End of inlined file: juce_CharacterFunctions.h *********/
+/*** End of inlined file: juce_CharacterFunctions.h ***/
 
 class JUCE_API  String
 {
@@ -1405,7 +1439,7 @@ const String JUCE_PUBLIC_FUNCTION   operator+ (const juce_wchar* const string1,
 											   const String& string2) throw();
 
 #endif   // __JUCE_STRING_JUCEHEADER__
-/********* End of inlined file: juce_String.h *********/
+/*** End of inlined file: juce_String.h ***/
 
 class JUCE_API  Logger
 {
@@ -1430,12 +1464,13 @@ protected:
 };
 
 #endif   // __JUCE_LOGGER_JUCEHEADER__
-/********* End of inlined file: juce_Logger.h *********/
+/*** End of inlined file: juce_Logger.h ***/
 
 END_JUCE_NAMESPACE
 
 #endif   // __JUCE_STANDARDHEADER_JUCEHEADER__
-/********* End of inlined file: juce_StandardHeader.h *********/
+/*** End of inlined file: juce_StandardHeader.h ***/
+
 
 BEGIN_JUCE_NAMESPACE
 
@@ -1448,21 +1483,23 @@ BEGIN_JUCE_NAMESPACE
 
 // this is where all the class header files get brought in..
 
-/********* Start of inlined file: juce_core_includes.h *********/
+/*** Start of inlined file: juce_core_includes.h ***/
 #ifndef __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_CORE_INCLUDES_INCLUDEFILES__
 
 #ifndef __JUCE_ARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_Array.h *********/
+/*** Start of inlined file: juce_Array.h ***/
 #ifndef __JUCE_ARRAY_JUCEHEADER__
 #define __JUCE_ARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_ArrayAllocationBase.h *********/
+
+/*** Start of inlined file: juce_ArrayAllocationBase.h ***/
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 #define __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
-/********* Start of inlined file: juce_HeapBlock.h *********/
+
+/*** Start of inlined file: juce_HeapBlock.h ***/
 #ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
 #define __JUCE_HEAPBLOCK_JUCEHEADER__
 
@@ -1556,7 +1593,7 @@ private:
 };
 
 #endif   // __JUCE_HEAPBLOCK_JUCEHEADER__
-/********* End of inlined file: juce_HeapBlock.h *********/
+/*** End of inlined file: juce_HeapBlock.h ***/
 
 template <class ElementType, class TypeOfCriticalSectionToUse>
 class ArrayAllocationBase  : public TypeOfCriticalSectionToUse
@@ -1612,9 +1649,10 @@ private:
 };
 
 #endif   // __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
-/********* End of inlined file: juce_ArrayAllocationBase.h *********/
+/*** End of inlined file: juce_ArrayAllocationBase.h ***/
 
-/********* Start of inlined file: juce_ElementComparator.h *********/
+
+/*** Start of inlined file: juce_ElementComparator.h ***/
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
 #define __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
 
@@ -1816,9 +1854,10 @@ public:
 };
 
 #endif   // __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
-/********* End of inlined file: juce_ElementComparator.h *********/
+/*** End of inlined file: juce_ElementComparator.h ***/
 
-/********* Start of inlined file: juce_CriticalSection.h *********/
+
+/*** Start of inlined file: juce_CriticalSection.h ***/
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
@@ -1868,7 +1907,7 @@ public:
 };
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
-/********* End of inlined file: juce_CriticalSection.h *********/
+/*** End of inlined file: juce_CriticalSection.h ***/
 
 template <typename ElementType,
 		  typename TypeOfCriticalSectionToUse = DummyCriticalSection>
@@ -2536,7 +2575,8 @@ private:
 };
 
 #endif   // __JUCE_ARRAY_JUCEHEADER__
-/********* End of inlined file: juce_Array.h *********/
+/*** End of inlined file: juce_Array.h ***/
+
 
 #endif
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
@@ -2544,7 +2584,7 @@ private:
 #endif
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_BitArray.h *********/
+/*** Start of inlined file: juce_BitArray.h ***/
 #ifndef __JUCE_BITARRAY_JUCEHEADER__
 #define __JUCE_BITARRAY_JUCEHEADER__
 
@@ -2660,32 +2700,38 @@ private:
 };
 
 #endif   // __JUCE_BITARRAY_JUCEHEADER__
-/********* End of inlined file: juce_BitArray.h *********/
+/*** End of inlined file: juce_BitArray.h ***/
+
 
 #endif
 #ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DynamicObject.h *********/
+/*** Start of inlined file: juce_DynamicObject.h ***/
 #ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
 #define __JUCE_DYNAMICOBJECT_JUCEHEADER__
 
-/********* Start of inlined file: juce_NamedValueSet.h *********/
+
+/*** Start of inlined file: juce_NamedValueSet.h ***/
 #ifndef __JUCE_NAMEDVALUESET_JUCEHEADER__
 #define __JUCE_NAMEDVALUESET_JUCEHEADER__
 
-/********* Start of inlined file: juce_Variant.h *********/
+
+/*** Start of inlined file: juce_Variant.h ***/
 #ifndef __JUCE_VARIANT_JUCEHEADER__
 #define __JUCE_VARIANT_JUCEHEADER__
 
-/********* Start of inlined file: juce_OutputStream.h *********/
+
+/*** Start of inlined file: juce_OutputStream.h ***/
 #ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_OUTPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_InputStream.h *********/
+
+/*** Start of inlined file: juce_InputStream.h ***/
 #ifndef __JUCE_INPUTSTREAM_JUCEHEADER__
 #define __JUCE_INPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_MemoryBlock.h *********/
+
+/*** Start of inlined file: juce_MemoryBlock.h ***/
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
 #define __JUCE_MEMORYBLOCK_JUCEHEADER__
 
@@ -2770,7 +2816,7 @@ private:
 };
 
 #endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
-/********* End of inlined file: juce_MemoryBlock.h *********/
+/*** End of inlined file: juce_MemoryBlock.h ***/
 
 class JUCE_API  InputStream
 {
@@ -2833,7 +2879,7 @@ protected:
 };
 
 #endif   // __JUCE_INPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_InputStream.h *********/
+/*** End of inlined file: juce_InputStream.h ***/
 
 class JUCE_API  OutputStream
 {
@@ -2906,7 +2952,7 @@ protected:
 };
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_OutputStream.h *********/
+/*** End of inlined file: juce_OutputStream.h ***/
 
 class JUCE_API  DynamicObject;
 
@@ -3027,7 +3073,7 @@ private:
 };
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__
-/********* End of inlined file: juce_Variant.h *********/
+/*** End of inlined file: juce_Variant.h ***/
 
 class JUCE_API  NamedValueSet
 {
@@ -3074,13 +3120,15 @@ private:
 };
 
 #endif   // __JUCE_NAMEDVALUESET_JUCEHEADER__
-/********* End of inlined file: juce_NamedValueSet.h *********/
+/*** End of inlined file: juce_NamedValueSet.h ***/
 
-/********* Start of inlined file: juce_ReferenceCountedObject.h *********/
+
+/*** Start of inlined file: juce_ReferenceCountedObject.h ***/
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
 
-/********* Start of inlined file: juce_Atomic.h *********/
+
+/*** Start of inlined file: juce_Atomic.h ***/
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
 #define __JUCE_ATOMIC_JUCEHEADER__
 
@@ -3134,7 +3182,7 @@ inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int
 #endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
-/********* End of inlined file: juce_Atomic.h *********/
+/*** End of inlined file: juce_Atomic.h ***/
 
 class JUCE_API  ReferenceCountedObject
 {
@@ -3271,7 +3319,7 @@ private:
 };
 
 #endif   // __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedObject.h *********/
+/*** End of inlined file: juce_ReferenceCountedObject.h ***/
 
 class JUCE_API  DynamicObject  : public ReferenceCountedObject
 {
@@ -3307,7 +3355,8 @@ private:
 };
 
 #endif   // __JUCE_DYNAMICOBJECT_JUCEHEADER__
-/********* End of inlined file: juce_DynamicObject.h *********/
+/*** End of inlined file: juce_DynamicObject.h ***/
+
 
 #endif
 #ifndef __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__
@@ -3324,11 +3373,12 @@ private:
 #endif
 #ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_OwnedArray.h *********/
+/*** Start of inlined file: juce_OwnedArray.h ***/
 #ifndef __JUCE_OWNEDARRAY_JUCEHEADER__
 #define __JUCE_OWNEDARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_ScopedPointer.h *********/
+
+/*** Start of inlined file: juce_ScopedPointer.h ***/
 #ifndef __JUCE_SCOPEDPOINTER_JUCEHEADER__
 #define __JUCE_SCOPEDPOINTER_JUCEHEADER__
 
@@ -3418,7 +3468,7 @@ private:
 };
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
-/********* End of inlined file: juce_ScopedPointer.h *********/
+/*** End of inlined file: juce_ScopedPointer.h ***/
 
 template <class ObjectClass,
 		  class TypeOfCriticalSectionToUse = DummyCriticalSection>
@@ -3894,20 +3944,23 @@ private:
 };
 
 #endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_OwnedArray.h *********/
+/*** End of inlined file: juce_OwnedArray.h ***/
+
 
 #endif
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
 
-/********* Start of inlined file: juce_PropertySet.h *********/
+/*** Start of inlined file: juce_PropertySet.h ***/
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
 #define __JUCE_PROPERTYSET_JUCEHEADER__
 
-/********* Start of inlined file: juce_StringPairArray.h *********/
+
+/*** Start of inlined file: juce_StringPairArray.h ***/
 #ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
 #define __JUCE_STRINGPAIRARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_StringArray.h *********/
+
+/*** Start of inlined file: juce_StringArray.h ***/
 #ifndef __JUCE_STRINGARRAY_JUCEHEADER__
 #define __JUCE_STRINGARRAY_JUCEHEADER__
 
@@ -4010,7 +4063,7 @@ private:
 };
 
 #endif   // __JUCE_STRINGARRAY_JUCEHEADER__
-/********* End of inlined file: juce_StringArray.h *********/
+/*** End of inlined file: juce_StringArray.h ***/
 
 class JUCE_API  StringPairArray
 {
@@ -4063,21 +4116,25 @@ private:
 };
 
 #endif   // __JUCE_STRINGPAIRARRAY_JUCEHEADER__
-/********* End of inlined file: juce_StringPairArray.h *********/
+/*** End of inlined file: juce_StringPairArray.h ***/
 
-/********* Start of inlined file: juce_XmlElement.h *********/
+
+/*** Start of inlined file: juce_XmlElement.h ***/
 #ifndef __JUCE_XMLELEMENT_JUCEHEADER__
 #define __JUCE_XMLELEMENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_File.h *********/
+
+/*** Start of inlined file: juce_File.h ***/
 #ifndef __JUCE_FILE_JUCEHEADER__
 #define __JUCE_FILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_Time.h *********/
+
+/*** Start of inlined file: juce_Time.h ***/
 #ifndef __JUCE_TIME_JUCEHEADER__
 #define __JUCE_TIME_JUCEHEADER__
 
-/********* Start of inlined file: juce_RelativeTime.h *********/
+
+/*** Start of inlined file: juce_RelativeTime.h ***/
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
 #define __JUCE_RELATIVETIME_JUCEHEADER__
 
@@ -4147,7 +4204,7 @@ private:
 };
 
 #endif   // __JUCE_RELATIVETIME_JUCEHEADER__
-/********* End of inlined file: juce_RelativeTime.h *********/
+/*** End of inlined file: juce_RelativeTime.h ***/
 
 class JUCE_API  Time
 {
@@ -4265,7 +4322,7 @@ private:
 };
 
 #endif   // __JUCE_TIME_JUCEHEADER__
-/********* End of inlined file: juce_Time.h *********/
+/*** End of inlined file: juce_Time.h ***/
 
 class FileInputStream;
 class FileOutputStream;
@@ -4494,7 +4551,7 @@ private:
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__
-/********* End of inlined file: juce_File.h *********/
+/*** End of inlined file: juce_File.h ***/
 
 #define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
 \
@@ -4603,6 +4660,8 @@ public:
 	void insertChildElement (XmlElement* const newChildNode,
 							 int indexToInsertAt) throw();
 
+	XmlElement* createNewChildElement (const String& tagName);
+
 	bool replaceChildElement (XmlElement* const currentChildElement,
 							  XmlElement* const newChildNode) throw();
 
@@ -4685,7 +4744,7 @@ private:
 };
 
 #endif   // __JUCE_XMLELEMENT_JUCEHEADER__
-/********* End of inlined file: juce_XmlElement.h *********/
+/*** End of inlined file: juce_XmlElement.h ***/
 
 class JUCE_API  PropertySet
 {
@@ -4758,12 +4817,13 @@ private:
 };
 
 #endif   // __JUCE_PROPERTYSET_JUCEHEADER__
-/********* End of inlined file: juce_PropertySet.h *********/
+/*** End of inlined file: juce_PropertySet.h ***/
+
 
 #endif
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_ReferenceCountedArray.h *********/
+/*** Start of inlined file: juce_ReferenceCountedArray.h ***/
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 #define __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
 
@@ -5248,7 +5308,8 @@ private:
 };
 
 #endif   // __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_ReferenceCountedArray.h *********/
+/*** End of inlined file: juce_ReferenceCountedArray.h ***/
+
 
 #endif
 #ifndef __JUCE_REFERENCECOUNTEDOBJECT_JUCEHEADER__
@@ -5259,7 +5320,7 @@ private:
 #endif
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
 
-/********* Start of inlined file: juce_SortedSet.h *********/
+/*** Start of inlined file: juce_SortedSet.h ***/
 #ifndef __JUCE_SORTEDSET_JUCEHEADER__
 #define __JUCE_SORTEDSET_JUCEHEADER__
 
@@ -5677,12 +5738,13 @@ private:
 #endif
 
 #endif   // __JUCE_SORTEDSET_JUCEHEADER__
-/********* End of inlined file: juce_SortedSet.h *********/
+/*** End of inlined file: juce_SortedSet.h ***/
+
 
 #endif
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
 
-/********* Start of inlined file: juce_SparseSet.h *********/
+/*** Start of inlined file: juce_SparseSet.h ***/
 #ifndef __JUCE_SPARSESET_JUCEHEADER__
 #define __JUCE_SPARSESET_JUCEHEADER__
 
@@ -5939,24 +6001,28 @@ private:
 };
 
 #endif   // __JUCE_SPARSESET_JUCEHEADER__
-/********* End of inlined file: juce_SparseSet.h *********/
+/*** End of inlined file: juce_SparseSet.h ***/
+
 
 #endif
 #ifndef __JUCE_VALUE_JUCEHEADER__
 
-/********* Start of inlined file: juce_Value.h *********/
+/*** Start of inlined file: juce_Value.h ***/
 #ifndef __JUCE_VALUE_JUCEHEADER__
 #define __JUCE_VALUE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AsyncUpdater.h *********/
+
+/*** Start of inlined file: juce_AsyncUpdater.h ***/
 #ifndef __JUCE_ASYNCUPDATER_JUCEHEADER__
 #define __JUCE_ASYNCUPDATER_JUCEHEADER__
 
-/********* Start of inlined file: juce_MessageListener.h *********/
+
+/*** Start of inlined file: juce_MessageListener.h ***/
 #ifndef __JUCE_MESSAGELISTENER_JUCEHEADER__
 #define __JUCE_MESSAGELISTENER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Message.h *********/
+
+/*** Start of inlined file: juce_Message.h ***/
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
 #define __JUCE_MESSAGE_JUCEHEADER__
 
@@ -5996,7 +6062,7 @@ private:
 };
 
 #endif   // __JUCE_MESSAGE_JUCEHEADER__
-/********* End of inlined file: juce_Message.h *********/
+/*** End of inlined file: juce_Message.h ***/
 
 class JUCE_API  MessageListener
 {
@@ -6016,7 +6082,7 @@ public:
 };
 
 #endif   // __JUCE_MESSAGELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_MessageListener.h *********/
+/*** End of inlined file: juce_MessageListener.h ***/
 
 class JUCE_API  AsyncUpdater
 {
@@ -6056,7 +6122,7 @@ private:
 };
 
 #endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
-/********* End of inlined file: juce_AsyncUpdater.h *********/
+/*** End of inlined file: juce_AsyncUpdater.h ***/
 
 class JUCE_API  Value
 {
@@ -6143,28 +6209,33 @@ private:
 };
 
 #endif   // __JUCE_VALUE_JUCEHEADER__
-/********* End of inlined file: juce_Value.h *********/
+/*** End of inlined file: juce_Value.h ***/
+
 
 #endif
 #ifndef __JUCE_VALUETREE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ValueTree.h *********/
+/*** Start of inlined file: juce_ValueTree.h ***/
 #ifndef __JUCE_VALUETREE_JUCEHEADER__
 #define __JUCE_VALUETREE_JUCEHEADER__
 
-/********* Start of inlined file: juce_UndoManager.h *********/
+
+/*** Start of inlined file: juce_UndoManager.h ***/
 #ifndef __JUCE_UNDOMANAGER_JUCEHEADER__
 #define __JUCE_UNDOMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChangeBroadcaster.h *********/
+
+/*** Start of inlined file: juce_ChangeBroadcaster.h ***/
 #ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 #define __JUCE_CHANGEBROADCASTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChangeListenerList.h *********/
+
+/*** Start of inlined file: juce_ChangeListenerList.h ***/
 #ifndef __JUCE_CHANGELISTENERLIST_JUCEHEADER__
 #define __JUCE_CHANGELISTENERLIST_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChangeListener.h *********/
+
+/*** Start of inlined file: juce_ChangeListener.h ***/
 #ifndef __JUCE_CHANGELISTENER_JUCEHEADER__
 #define __JUCE_CHANGELISTENER_JUCEHEADER__
 
@@ -6177,9 +6248,10 @@ public:
 };
 
 #endif   // __JUCE_CHANGELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_ChangeListener.h *********/
+/*** End of inlined file: juce_ChangeListener.h ***/
 
-/********* Start of inlined file: juce_ScopedLock.h *********/
+
+/*** Start of inlined file: juce_ScopedLock.h ***/
 #ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
 #define __JUCE_SCOPEDLOCK_JUCEHEADER__
 
@@ -6216,7 +6288,7 @@ private:
 };
 
 #endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedLock.h *********/
+/*** End of inlined file: juce_ScopedLock.h ***/
 
 class JUCE_API  ChangeListenerList  : public MessageListener
 {
@@ -6253,7 +6325,7 @@ private:
 };
 
 #endif   // __JUCE_CHANGELISTENERLIST_JUCEHEADER__
-/********* End of inlined file: juce_ChangeListenerList.h *********/
+/*** End of inlined file: juce_ChangeListenerList.h ***/
 
 class JUCE_API  ChangeBroadcaster
 {
@@ -6284,9 +6356,10 @@ private:
 };
 
 #endif   // __JUCE_CHANGEBROADCASTER_JUCEHEADER__
-/********* End of inlined file: juce_ChangeBroadcaster.h *********/
+/*** End of inlined file: juce_ChangeBroadcaster.h ***/
 
-/********* Start of inlined file: juce_UndoableAction.h *********/
+
+/*** Start of inlined file: juce_UndoableAction.h ***/
 #ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
 #define __JUCE_UNDOABLEACTION_JUCEHEADER__
 
@@ -6306,7 +6379,7 @@ public:
 };
 
 #endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
-/********* End of inlined file: juce_UndoableAction.h *********/
+/*** End of inlined file: juce_UndoableAction.h ***/
 
 class JUCE_API  UndoManager  : public ChangeBroadcaster
 {
@@ -6365,7 +6438,7 @@ private:
 };
 
 #endif   // __JUCE_UNDOMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_UndoManager.h *********/
+/*** End of inlined file: juce_UndoManager.h ***/
 
 class JUCE_API  ValueTree
 {
@@ -6538,7 +6611,8 @@ private:
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
-/********* End of inlined file: juce_ValueTree.h *********/
+/*** End of inlined file: juce_ValueTree.h ***/
+
 
 #endif
 #ifndef __JUCE_VARIANT_JUCEHEADER__
@@ -6546,14 +6620,15 @@ private:
 #endif
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 
-/********* Start of inlined file: juce_VoidArray.h *********/
+/*** Start of inlined file: juce_VoidArray.h ***/
 #ifndef __JUCE_VOIDARRAY_JUCEHEADER__
 #define __JUCE_VOIDARRAY_JUCEHEADER__
 
 typedef Array <void*> VoidArray;
 
 #endif   // __JUCE_VOIDARRAY_JUCEHEADER__
-/********* End of inlined file: juce_VoidArray.h *********/
+/*** End of inlined file: juce_VoidArray.h ***/
+
 
 #endif
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
@@ -6564,7 +6639,7 @@ typedef Array <void*> VoidArray;
 #endif
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileLogger.h *********/
+/*** Start of inlined file: juce_FileLogger.h ***/
 #ifndef __JUCE_FILELOGGER_JUCEHEADER__
 #define __JUCE_FILELOGGER_JUCEHEADER__
 
@@ -6599,12 +6674,13 @@ private:
 };
 
 #endif   // __JUCE_FILELOGGER_JUCEHEADER__
-/********* End of inlined file: juce_FileLogger.h *********/
+/*** End of inlined file: juce_FileLogger.h ***/
+
 
 #endif
 #ifndef __JUCE_INITIALISATION_JUCEHEADER__
 
-/********* Start of inlined file: juce_Initialisation.h *********/
+/*** Start of inlined file: juce_Initialisation.h ***/
 #ifndef __JUCE_INITIALISATION_JUCEHEADER__
 #define __JUCE_INITIALISATION_JUCEHEADER__
 
@@ -6617,7 +6693,8 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
 void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__
-/********* End of inlined file: juce_Initialisation.h *********/
+/*** End of inlined file: juce_Initialisation.h ***/
+
 
 #endif
 #ifndef __JUCE_LOGGER_JUCEHEADER__
@@ -6631,7 +6708,7 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 #endif
 #ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_PerformanceCounter.h *********/
+/*** Start of inlined file: juce_PerformanceCounter.h ***/
 #ifndef __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 #define __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
 
@@ -6663,7 +6740,8 @@ private:
 };
 
 #endif   // __JUCE_PERFORMANCECOUNTER_JUCEHEADER__
-/********* End of inlined file: juce_PerformanceCounter.h *********/
+/*** End of inlined file: juce_PerformanceCounter.h ***/
+
 
 #endif
 #ifndef __JUCE_PLATFORMDEFS_JUCEHEADER__
@@ -6671,7 +6749,7 @@ private:
 #endif
 #ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 
-/********* Start of inlined file: juce_PlatformUtilities.h *********/
+/*** Start of inlined file: juce_PlatformUtilities.h ***/
 #ifndef __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 #define __JUCE_PLATFORMUTILITIES_JUCEHEADER__
 
@@ -6834,12 +6912,13 @@ private:
 #endif
 
 #endif   // __JUCE_PLATFORMUTILITIES_JUCEHEADER__
-/********* End of inlined file: juce_PlatformUtilities.h *********/
+/*** End of inlined file: juce_PlatformUtilities.h ***/
+
 
 #endif
 #ifndef __JUCE_RANDOM_JUCEHEADER__
 
-/********* Start of inlined file: juce_Random.h *********/
+/*** Start of inlined file: juce_Random.h ***/
 #ifndef __JUCE_RANDOM_JUCEHEADER__
 #define __JUCE_RANDOM_JUCEHEADER__
 
@@ -6880,7 +6959,8 @@ private:
 };
 
 #endif   // __JUCE_RANDOM_JUCEHEADER__
-/********* End of inlined file: juce_Random.h *********/
+/*** End of inlined file: juce_Random.h ***/
+
 
 #endif
 #ifndef __JUCE_RELATIVETIME_JUCEHEADER__
@@ -6888,7 +6968,7 @@ private:
 #endif
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
 
-/********* Start of inlined file: juce_Singleton.h *********/
+/*** Start of inlined file: juce_Singleton.h ***/
 #ifndef __JUCE_SINGLETON_JUCEHEADER__
 #define __JUCE_SINGLETON_JUCEHEADER__
 
@@ -7038,7 +7118,8 @@ private:
 	classname* classname::_singletonInstance = 0;
 
 #endif   // __JUCE_SINGLETON_JUCEHEADER__
-/********* End of inlined file: juce_Singleton.h *********/
+/*** End of inlined file: juce_Singleton.h ***/
+
 
 #endif
 #ifndef __JUCE_STANDARDHEADER_JUCEHEADER__
@@ -7046,7 +7127,7 @@ private:
 #endif
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
 
-/********* Start of inlined file: juce_SystemStats.h *********/
+/*** Start of inlined file: juce_SystemStats.h ***/
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
 #define __JUCE_SYSTEMSTATS_JUCEHEADER__
 
@@ -7122,7 +7203,8 @@ public:
 };
 
 #endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__
-/********* End of inlined file: juce_SystemStats.h *********/
+/*** End of inlined file: juce_SystemStats.h ***/
+
 
 #endif
 #ifndef __JUCE_TARGETPLATFORM_JUCEHEADER__
@@ -7133,7 +7215,7 @@ public:
 #endif
 #ifndef __JUCE_UUID_JUCEHEADER__
 
-/********* Start of inlined file: juce_Uuid.h *********/
+/*** Start of inlined file: juce_Uuid.h ***/
 #ifndef __JUCE_UUID_JUCEHEADER__
 #define __JUCE_UUID_JUCEHEADER__
 
@@ -7180,12 +7262,13 @@ private:
 };
 
 #endif   // __JUCE_UUID_JUCEHEADER__
-/********* End of inlined file: juce_Uuid.h *********/
+/*** End of inlined file: juce_Uuid.h ***/
+
 
 #endif
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
 
-/********* Start of inlined file: juce_BlowFish.h *********/
+/*** Start of inlined file: juce_BlowFish.h ***/
 #ifndef __JUCE_BLOWFISH_JUCEHEADER__
 #define __JUCE_BLOWFISH_JUCEHEADER__
 
@@ -7215,12 +7298,13 @@ private:
 };
 
 #endif   // __JUCE_BLOWFISH_JUCEHEADER__
-/********* End of inlined file: juce_BlowFish.h *********/
+/*** End of inlined file: juce_BlowFish.h ***/
+
 
 #endif
 #ifndef __JUCE_MD5_JUCEHEADER__
 
-/********* Start of inlined file: juce_MD5.h *********/
+/*** Start of inlined file: juce_MD5.h ***/
 #ifndef __JUCE_MD5_JUCEHEADER__
 #define __JUCE_MD5_JUCEHEADER__
 
@@ -7276,12 +7360,13 @@ private:
 };
 
 #endif   // __JUCE_MD5_JUCEHEADER__
-/********* End of inlined file: juce_MD5.h *********/
+/*** End of inlined file: juce_MD5.h ***/
+
 
 #endif
 #ifndef __JUCE_PRIMES_JUCEHEADER__
 
-/********* Start of inlined file: juce_Primes.h *********/
+/*** Start of inlined file: juce_Primes.h ***/
 #ifndef __JUCE_PRIMES_JUCEHEADER__
 #define __JUCE_PRIMES_JUCEHEADER__
 
@@ -7299,12 +7384,13 @@ public:
 };
 
 #endif   // __JUCE_PRIMES_JUCEHEADER__
-/********* End of inlined file: juce_Primes.h *********/
+/*** End of inlined file: juce_Primes.h ***/
+
 
 #endif
 #ifndef __JUCE_RSAKEY_JUCEHEADER__
 
-/********* Start of inlined file: juce_RSAKey.h *********/
+/*** Start of inlined file: juce_RSAKey.h ***/
 #ifndef __JUCE_RSAKEY_JUCEHEADER__
 #define __JUCE_RSAKEY_JUCEHEADER__
 
@@ -7335,12 +7421,13 @@ protected:
 };
 
 #endif   // __JUCE_RSAKEY_JUCEHEADER__
-/********* End of inlined file: juce_RSAKey.h *********/
+/*** End of inlined file: juce_RSAKey.h ***/
+
 
 #endif
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_DirectoryIterator.h *********/
+/*** Start of inlined file: juce_DirectoryIterator.h ***/
 #ifndef __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 #define __JUCE_DIRECTORYITERATOR_JUCEHEADER__
 
@@ -7376,7 +7463,8 @@ private:
 };
 
 #endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__
-/********* End of inlined file: juce_DirectoryIterator.h *********/
+/*** End of inlined file: juce_DirectoryIterator.h ***/
+
 
 #endif
 #ifndef __JUCE_FILE_JUCEHEADER__
@@ -7384,7 +7472,7 @@ private:
 #endif
 #ifndef __JUCE_FILEINPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileInputStream.h *********/
+/*** Start of inlined file: juce_FileInputStream.h ***/
 #ifndef __JUCE_FILEINPUTSTREAM_JUCEHEADER__
 #define __JUCE_FILEINPUTSTREAM_JUCEHEADER__
 
@@ -7417,12 +7505,13 @@ private:
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_FileInputStream.h *********/
+/*** End of inlined file: juce_FileInputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileOutputStream.h *********/
+/*** Start of inlined file: juce_FileOutputStream.h ***/
 #ifndef __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
 
@@ -7455,12 +7544,13 @@ private:
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_FileOutputStream.h *********/
+/*** End of inlined file: juce_FileOutputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_FILESEARCHPATH_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileSearchPath.h *********/
+/*** Start of inlined file: juce_FileSearchPath.h ***/
 #ifndef __JUCE_FILESEARCHPATH_JUCEHEADER__
 #define __JUCE_FILESEARCHPATH_JUCEHEADER__
 
@@ -7514,12 +7604,13 @@ private:
 };
 
 #endif   // __JUCE_FILESEARCHPATH_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPath.h *********/
+/*** End of inlined file: juce_FileSearchPath.h ***/
+
 
 #endif
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
 
-/********* Start of inlined file: juce_NamedPipe.h *********/
+/*** Start of inlined file: juce_NamedPipe.h ***/
 #ifndef __JUCE_NAMEDPIPE_JUCEHEADER__
 #define __JUCE_NAMEDPIPE_JUCEHEADER__
 
@@ -7561,12 +7652,13 @@ private:
 };
 
 #endif   // __JUCE_NAMEDPIPE_JUCEHEADER__
-/********* End of inlined file: juce_NamedPipe.h *********/
+/*** End of inlined file: juce_NamedPipe.h ***/
+
 
 #endif
 #ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_TemporaryFile.h *********/
+/*** Start of inlined file: juce_TemporaryFile.h ***/
 #ifndef __JUCE_TEMPORARYFILE_JUCEHEADER__
 #define __JUCE_TEMPORARYFILE_JUCEHEADER__
 
@@ -7610,16 +7702,18 @@ private:
 };
 
 #endif   // __JUCE_TEMPORARYFILE_JUCEHEADER__
-/********* End of inlined file: juce_TemporaryFile.h *********/
+/*** End of inlined file: juce_TemporaryFile.h ***/
+
 
 #endif
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ZipFile.h *********/
+/*** Start of inlined file: juce_ZipFile.h ***/
 #ifndef __JUCE_ZIPFILE_JUCEHEADER__
 #define __JUCE_ZIPFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_InputSource.h *********/
+
+/*** Start of inlined file: juce_InputSource.h ***/
 #ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
 #define __JUCE_INPUTSOURCE_JUCEHEADER__
 
@@ -7641,7 +7735,7 @@ public:
 };
 
 #endif   // __JUCE_INPUTSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_InputSource.h *********/
+/*** End of inlined file: juce_InputSource.h ***/
 
 class JUCE_API  ZipFile
 {
@@ -7706,12 +7800,13 @@ private:
 };
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__
-/********* End of inlined file: juce_ZipFile.h *********/
+/*** End of inlined file: juce_ZipFile.h ***/
+
 
 #endif
 #ifndef __JUCE_SOCKET_JUCEHEADER__
 
-/********* Start of inlined file: juce_Socket.h *********/
+/*** Start of inlined file: juce_Socket.h ***/
 #ifndef __JUCE_SOCKET_JUCEHEADER__
 #define __JUCE_SOCKET_JUCEHEADER__
 
@@ -7812,12 +7907,13 @@ private:
 };
 
 #endif   // __JUCE_SOCKET_JUCEHEADER__
-/********* End of inlined file: juce_Socket.h *********/
+/*** End of inlined file: juce_Socket.h ***/
+
 
 #endif
 #ifndef __JUCE_URL_JUCEHEADER__
 
-/********* Start of inlined file: juce_URL.h *********/
+/*** Start of inlined file: juce_URL.h ***/
 #ifndef __JUCE_URL_JUCEHEADER__
 #define __JUCE_URL_JUCEHEADER__
 
@@ -7898,12 +7994,13 @@ private:
 };
 
 #endif   // __JUCE_URL_JUCEHEADER__
-/********* End of inlined file: juce_URL.h *********/
+/*** End of inlined file: juce_URL.h ***/
+
 
 #endif
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_BufferedInputStream.h *********/
+/*** Start of inlined file: juce_BufferedInputStream.h ***/
 #ifndef __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 #define __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
 
@@ -7939,12 +8036,13 @@ private:
 };
 
 #endif   // __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_BufferedInputStream.h *********/
+/*** End of inlined file: juce_BufferedInputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileInputSource.h *********/
+/*** Start of inlined file: juce_FileInputSource.h ***/
 #ifndef __JUCE_FILEINPUTSOURCE_JUCEHEADER__
 #define __JUCE_FILEINPUTSOURCE_JUCEHEADER__
 
@@ -7969,12 +8067,13 @@ private:
 };
 
 #endif   // __JUCE_FILEINPUTSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_FileInputSource.h *********/
+/*** End of inlined file: juce_FileInputSource.h ***/
+
 
 #endif
 #ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_GZIPCompressorOutputStream.h *********/
+/*** Start of inlined file: juce_GZIPCompressorOutputStream.h ***/
 #ifndef __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
 
@@ -8010,12 +8109,13 @@ private:
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_GZIPCompressorOutputStream.h *********/
+/*** End of inlined file: juce_GZIPCompressorOutputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_GZIPDecompressorInputStream.h *********/
+/*** Start of inlined file: juce_GZIPDecompressorInputStream.h ***/
 #ifndef __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 #define __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
 
@@ -8056,7 +8156,8 @@ private:
 };
 
 #endif   // __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_GZIPDecompressorInputStream.h *********/
+/*** End of inlined file: juce_GZIPDecompressorInputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_INPUTSOURCE_JUCEHEADER__
@@ -8067,7 +8168,7 @@ private:
 #endif
 #ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_MemoryInputStream.h *********/
+/*** Start of inlined file: juce_MemoryInputStream.h ***/
 #ifndef __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
 #define __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
 
@@ -8096,12 +8197,13 @@ private:
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_MemoryInputStream.h *********/
+/*** End of inlined file: juce_MemoryInputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_MemoryOutputStream.h *********/
+/*** Start of inlined file: juce_MemoryOutputStream.h ***/
 #ifndef __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 
@@ -8115,7 +8217,7 @@ public:
 
 	~MemoryOutputStream() throw();
 
-	const char* getData() throw();
+	const char* getData() const throw();
 
 	size_t getDataSize() const throw();
 
@@ -8135,7 +8237,8 @@ private:
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_MemoryOutputStream.h *********/
+/*** End of inlined file: juce_MemoryOutputStream.h ***/
+
 
 #endif
 #ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
@@ -8143,7 +8246,7 @@ private:
 #endif
 #ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
 
-/********* Start of inlined file: juce_SubregionStream.h *********/
+/*** Start of inlined file: juce_SubregionStream.h ***/
 #ifndef __JUCE_SUBREGIONSTREAM_JUCEHEADER__
 #define __JUCE_SUBREGIONSTREAM_JUCEHEADER__
 
@@ -8176,7 +8279,8 @@ private:
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
-/********* End of inlined file: juce_SubregionStream.h *********/
+/*** End of inlined file: juce_SubregionStream.h ***/
+
 
 #endif
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
@@ -8184,7 +8288,7 @@ private:
 #endif
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 
-/********* Start of inlined file: juce_LocalisedStrings.h *********/
+/*** Start of inlined file: juce_LocalisedStrings.h ***/
 #ifndef __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 #define __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
 
@@ -8228,7 +8332,8 @@ private:
 };
 
 #endif   // __JUCE_LOCALISEDSTRINGS_JUCEHEADER__
-/********* End of inlined file: juce_LocalisedStrings.h *********/
+/*** End of inlined file: juce_LocalisedStrings.h ***/
+
 
 #endif
 #ifndef __JUCE_STRING_JUCEHEADER__
@@ -8242,7 +8347,7 @@ private:
 #endif
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_XmlDocument.h *********/
+/*** Start of inlined file: juce_XmlDocument.h ***/
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
 #define __JUCE_XMLDOCUMENT_JUCEHEADER__
 
@@ -8296,7 +8401,8 @@ private:
 };
 
 #endif   // __JUCE_XMLDOCUMENT_JUCEHEADER__
-/********* End of inlined file: juce_XmlDocument.h *********/
+/*** End of inlined file: juce_XmlDocument.h ***/
+
 
 #endif
 #ifndef __JUCE_XMLELEMENT_JUCEHEADER__
@@ -8307,7 +8413,7 @@ private:
 #endif
 #ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_InterProcessLock.h *********/
+/*** Start of inlined file: juce_InterProcessLock.h ***/
 #ifndef __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 #define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 
@@ -8343,12 +8449,13 @@ private:
 };
 
 #endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
-/********* End of inlined file: juce_InterProcessLock.h *********/
+/*** End of inlined file: juce_InterProcessLock.h ***/
+
 
 #endif
 #ifndef __JUCE_PROCESS_JUCEHEADER__
 
-/********* Start of inlined file: juce_Process.h *********/
+/*** Start of inlined file: juce_Process.h ***/
 #ifndef __JUCE_PROCESS_JUCEHEADER__
 #define __JUCE_PROCESS_JUCEHEADER__
 
@@ -8378,16 +8485,18 @@ public:
 };
 
 #endif   // __JUCE_PROCESS_JUCEHEADER__
-/********* End of inlined file: juce_Process.h *********/
+/*** End of inlined file: juce_Process.h ***/
+
 
 #endif
 #ifndef __JUCE_READWRITELOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_ReadWriteLock.h *********/
+/*** Start of inlined file: juce_ReadWriteLock.h ***/
 #ifndef __JUCE_READWRITELOCK_JUCEHEADER__
 #define __JUCE_READWRITELOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_WaitableEvent.h *********/
+
+/*** Start of inlined file: juce_WaitableEvent.h ***/
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
 #define __JUCE_WAITABLEEVENT_JUCEHEADER__
 
@@ -8415,9 +8524,10 @@ private:
 };
 
 #endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
-/********* End of inlined file: juce_WaitableEvent.h *********/
+/*** End of inlined file: juce_WaitableEvent.h ***/
 
-/********* Start of inlined file: juce_Thread.h *********/
+
+/*** Start of inlined file: juce_Thread.h ***/
 #ifndef __JUCE_THREAD_JUCEHEADER__
 #define __JUCE_THREAD_JUCEHEADER__
 
@@ -8499,7 +8609,7 @@ private:
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__
-/********* End of inlined file: juce_Thread.h *********/
+/*** End of inlined file: juce_Thread.h ***/
 
 class JUCE_API  ReadWriteLock
 {
@@ -8534,7 +8644,8 @@ private:
 };
 
 #endif   // __JUCE_READWRITELOCK_JUCEHEADER__
-/********* End of inlined file: juce_ReadWriteLock.h *********/
+/*** End of inlined file: juce_ReadWriteLock.h ***/
+
 
 #endif
 #ifndef __JUCE_SCOPEDLOCK_JUCEHEADER__
@@ -8542,7 +8653,7 @@ private:
 #endif
 #ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_ScopedReadLock.h *********/
+/*** Start of inlined file: juce_ScopedReadLock.h ***/
 #ifndef __JUCE_SCOPEDREADLOCK_JUCEHEADER__
 #define __JUCE_SCOPEDREADLOCK_JUCEHEADER__
 
@@ -8563,12 +8674,13 @@ private:
 };
 
 #endif   // __JUCE_SCOPEDREADLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedReadLock.h *********/
+/*** End of inlined file: juce_ScopedReadLock.h ***/
+
 
 #endif
 #ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_ScopedTryLock.h *********/
+/*** Start of inlined file: juce_ScopedTryLock.h ***/
 #ifndef __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
 #define __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
 
@@ -8592,12 +8704,13 @@ private:
 };
 
 #endif   // __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedTryLock.h *********/
+/*** End of inlined file: juce_ScopedTryLock.h ***/
+
 
 #endif
 #ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
 
-/********* Start of inlined file: juce_ScopedWriteLock.h *********/
+/*** Start of inlined file: juce_ScopedWriteLock.h ***/
 #ifndef __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
 #define __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
 
@@ -8618,7 +8731,8 @@ private:
 };
 
 #endif   // __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
-/********* End of inlined file: juce_ScopedWriteLock.h *********/
+/*** End of inlined file: juce_ScopedWriteLock.h ***/
+
 
 #endif
 #ifndef __JUCE_THREAD_JUCEHEADER__
@@ -8626,7 +8740,7 @@ private:
 #endif
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
 
-/********* Start of inlined file: juce_ThreadPool.h *********/
+/*** Start of inlined file: juce_ThreadPool.h ***/
 #ifndef __JUCE_THREADPOOL_JUCEHEADER__
 #define __JUCE_THREADPOOL_JUCEHEADER__
 
@@ -8743,12 +8857,13 @@ private:
 };
 
 #endif   // __JUCE_THREADPOOL_JUCEHEADER__
-/********* End of inlined file: juce_ThreadPool.h *********/
+/*** End of inlined file: juce_ThreadPool.h ***/
+
 
 #endif
 #ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
 
-/********* Start of inlined file: juce_TimeSliceThread.h *********/
+/*** Start of inlined file: juce_TimeSliceThread.h ***/
 #ifndef __JUCE_TIMESLICETHREAD_JUCEHEADER__
 #define __JUCE_TIMESLICETHREAD_JUCEHEADER__
 
@@ -8792,7 +8907,8 @@ private:
 };
 
 #endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
-/********* End of inlined file: juce_TimeSliceThread.h *********/
+/*** End of inlined file: juce_TimeSliceThread.h ***/
+
 
 #endif
 #ifndef __JUCE_WAITABLEEVENT_JUCEHEADER__
@@ -8800,31 +8916,35 @@ private:
 #endif
 
 #endif
-/********* End of inlined file: juce_core_includes.h *********/
+/*** End of inlined file: juce_core_includes.h ***/
+
 
 // if you're compiling a command-line app, you might want to just include the core headers,
 // so you can set this macro before including juce.h
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
-/********* Start of inlined file: juce_app_includes.h *********/
+/*** Start of inlined file: juce_app_includes.h ***/
 #ifndef __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
 #define __JUCE_JUCE_APP_INCLUDES_INCLUDEFILES__
 
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
 
-/********* Start of inlined file: juce_Application.h *********/
+/*** Start of inlined file: juce_Application.h ***/
 #ifndef __JUCE_APPLICATION_JUCEHEADER__
 #define __JUCE_APPLICATION_JUCEHEADER__
 
-/********* Start of inlined file: juce_ApplicationCommandTarget.h *********/
+
+/*** Start of inlined file: juce_ApplicationCommandTarget.h ***/
 #ifndef __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
 #define __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
 
-/********* Start of inlined file: juce_Component.h *********/
+
+/*** Start of inlined file: juce_Component.h ***/
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
 #define __JUCE_COMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MouseCursor.h *********/
+
+/*** Start of inlined file: juce_MouseCursor.h ***/
 #ifndef __JUCE_MOUSECURSOR_JUCEHEADER__
 #define __JUCE_MOUSECURSOR_JUCEHEADER__
 
@@ -8899,19 +9019,21 @@ private:
 };
 
 #endif   // __JUCE_MOUSECURSOR_JUCEHEADER__
-/********* End of inlined file: juce_MouseCursor.h *********/
+/*** End of inlined file: juce_MouseCursor.h ***/
 
-/********* Start of inlined file: juce_MouseListener.h *********/
+
+/*** Start of inlined file: juce_MouseListener.h ***/
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
 #define __JUCE_MOUSELISTENER_JUCEHEADER__
 
-/********* Start of inlined file: juce_MouseEvent.h *********/
+
+/*** Start of inlined file: juce_MouseEvent.h ***/
 #ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
 #define __JUCE_MOUSEEVENT_JUCEHEADER__
 
 class Component;
 
-/********* Start of inlined file: juce_ModifierKeys.h *********/
+/*** Start of inlined file: juce_ModifierKeys.h ***/
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
 #define __JUCE_MODIFIERKEYS_JUCEHEADER__
 
@@ -8995,7 +9117,8 @@ private:
 };
 
 #endif   // __JUCE_MODIFIERKEYS_JUCEHEADER__
-/********* End of inlined file: juce_ModifierKeys.h *********/
+/*** End of inlined file: juce_ModifierKeys.h ***/
+
 
 class JUCE_API  MouseEvent
 {
@@ -9065,7 +9188,7 @@ private:
 };
 
 #endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
-/********* End of inlined file: juce_MouseEvent.h *********/
+/*** End of inlined file: juce_MouseEvent.h ***/
 
 class JUCE_API  MouseListener
 {
@@ -9092,9 +9215,10 @@ public:
 };
 
 #endif   // __JUCE_MOUSELISTENER_JUCEHEADER__
-/********* End of inlined file: juce_MouseListener.h *********/
+/*** End of inlined file: juce_MouseListener.h ***/
 
-/********* Start of inlined file: juce_ComponentListener.h *********/
+
+/*** Start of inlined file: juce_ComponentListener.h ***/
 #ifndef __JUCE_COMPONENTLISTENER_JUCEHEADER__
 #define __JUCE_COMPONENTLISTENER_JUCEHEADER__
 
@@ -9121,13 +9245,15 @@ public:
 };
 
 #endif   // __JUCE_COMPONENTLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentListener.h *********/
+/*** End of inlined file: juce_ComponentListener.h ***/
 
-/********* Start of inlined file: juce_KeyListener.h *********/
+
+/*** Start of inlined file: juce_KeyListener.h ***/
 #ifndef __JUCE_KEYLISTENER_JUCEHEADER__
 #define __JUCE_KEYLISTENER_JUCEHEADER__
 
-/********* Start of inlined file: juce_KeyPress.h *********/
+
+/*** Start of inlined file: juce_KeyPress.h ***/
 #ifndef __JUCE_KEYPRESS_JUCEHEADER__
 #define __JUCE_KEYPRESS_JUCEHEADER__
 
@@ -9246,7 +9372,7 @@ private:
 };
 
 #endif   // __JUCE_KEYPRESS_JUCEHEADER__
-/********* End of inlined file: juce_KeyPress.h *********/
+/*** End of inlined file: juce_KeyPress.h ***/
 
 class Component;
 
@@ -9262,9 +9388,10 @@ public:
 };
 
 #endif   // __JUCE_KEYLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_KeyListener.h *********/
+/*** End of inlined file: juce_KeyListener.h ***/
 
-/********* Start of inlined file: juce_KeyboardFocusTraverser.h *********/
+
+/*** Start of inlined file: juce_KeyboardFocusTraverser.h ***/
 #ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
 #define __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
 
@@ -9285,29 +9412,35 @@ public:
 };
 
 #endif   // __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
-/********* End of inlined file: juce_KeyboardFocusTraverser.h *********/
+/*** End of inlined file: juce_KeyboardFocusTraverser.h ***/
 
-/********* Start of inlined file: juce_ImageEffectFilter.h *********/
+
+/*** Start of inlined file: juce_ImageEffectFilter.h ***/
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 #define __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Graphics.h *********/
+
+/*** Start of inlined file: juce_Graphics.h ***/
 #ifndef __JUCE_GRAPHICS_JUCEHEADER__
 #define __JUCE_GRAPHICS_JUCEHEADER__
 
-/********* Start of inlined file: juce_Font.h *********/
+
+/*** Start of inlined file: juce_Font.h ***/
 #ifndef __JUCE_FONT_JUCEHEADER__
 #define __JUCE_FONT_JUCEHEADER__
 
-/********* Start of inlined file: juce_Typeface.h *********/
+
+/*** Start of inlined file: juce_Typeface.h ***/
 #ifndef __JUCE_TYPEFACE_JUCEHEADER__
 #define __JUCE_TYPEFACE_JUCEHEADER__
 
-/********* Start of inlined file: juce_Path.h *********/
+
+/*** Start of inlined file: juce_Path.h ***/
 #ifndef __JUCE_PATH_JUCEHEADER__
 #define __JUCE_PATH_JUCEHEADER__
 
-/********* Start of inlined file: juce_AffineTransform.h *********/
+
+/*** Start of inlined file: juce_AffineTransform.h ***/
 #ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
 #define __JUCE_AFFINETRANSFORM_JUCEHEADER__
 
@@ -9389,9 +9522,10 @@ private:
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
-/********* End of inlined file: juce_AffineTransform.h *********/
+/*** End of inlined file: juce_AffineTransform.h ***/
 
-/********* Start of inlined file: juce_Point.h *********/
+
+/*** Start of inlined file: juce_Point.h ***/
 #ifndef __JUCE_POINT_JUCEHEADER__
 #define __JUCE_POINT_JUCEHEADER__
 
@@ -9435,9 +9569,10 @@ private:
 };
 
 #endif   // __JUCE_POINT_JUCEHEADER__
-/********* End of inlined file: juce_Point.h *********/
+/*** End of inlined file: juce_Point.h ***/
 
-/********* Start of inlined file: juce_Rectangle.h *********/
+
+/*** Start of inlined file: juce_Rectangle.h ***/
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
 #define __JUCE_RECTANGLE_JUCEHEADER__
 
@@ -9777,9 +9912,10 @@ private:
 };
 
 #endif   // __JUCE_RECTANGLE_JUCEHEADER__
-/********* End of inlined file: juce_Rectangle.h *********/
+/*** End of inlined file: juce_Rectangle.h ***/
 
-/********* Start of inlined file: juce_Justification.h *********/
+
+/*** Start of inlined file: juce_Justification.h ***/
 #ifndef __JUCE_JUSTIFICATION_JUCEHEADER__
 #define __JUCE_JUSTIFICATION_JUCEHEADER__
 
@@ -9848,9 +9984,10 @@ private:
 };
 
 #endif   // __JUCE_JUSTIFICATION_JUCEHEADER__
-/********* End of inlined file: juce_Justification.h *********/
+/*** End of inlined file: juce_Justification.h ***/
 
-/********* Start of inlined file: juce_EdgeTable.h *********/
+
+/*** Start of inlined file: juce_EdgeTable.h ***/
 #ifndef __JUCE_EDGETABLE_JUCEHEADER__
 #define __JUCE_EDGETABLE_JUCEHEADER__
 
@@ -9986,7 +10123,7 @@ private:
 };
 
 #endif   // __JUCE_EDGETABLE_JUCEHEADER__
-/********* End of inlined file: juce_EdgeTable.h *********/
+/*** End of inlined file: juce_EdgeTable.h ***/
 
 class Image;
 
@@ -10194,7 +10331,7 @@ private:
 };
 
 #endif   // __JUCE_PATH_JUCEHEADER__
-/********* End of inlined file: juce_Path.h *********/
+/*** End of inlined file: juce_Path.h ***/
 
 class Font;
 
@@ -10288,7 +10425,7 @@ private:
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
-/********* End of inlined file: juce_Typeface.h *********/
+/*** End of inlined file: juce_Typeface.h ***/
 
 class LowLevelGraphicsContext;
 
@@ -10414,9 +10551,10 @@ private:
 };
 
 #endif   // __JUCE_FONT_JUCEHEADER__
-/********* End of inlined file: juce_Font.h *********/
+/*** End of inlined file: juce_Font.h ***/
 
-/********* Start of inlined file: juce_PathStrokeType.h *********/
+
+/*** Start of inlined file: juce_PathStrokeType.h ***/
 #ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
 #define __JUCE_PATHSTROKETYPE_JUCEHEADER__
 
@@ -10486,9 +10624,10 @@ private:
 };
 
 #endif   // __JUCE_PATHSTROKETYPE_JUCEHEADER__
-/********* End of inlined file: juce_PathStrokeType.h *********/
+/*** End of inlined file: juce_PathStrokeType.h ***/
 
-/********* Start of inlined file: juce_Line.h *********/
+
+/*** Start of inlined file: juce_Line.h ***/
 #ifndef __JUCE_LINE_JUCEHEADER__
 #define __JUCE_LINE_JUCEHEADER__
 
@@ -10581,17 +10720,20 @@ private:
 };
 
 #endif   // __JUCE_LINE_JUCEHEADER__
-/********* End of inlined file: juce_Line.h *********/
+/*** End of inlined file: juce_Line.h ***/
 
-/********* Start of inlined file: juce_Colours.h *********/
+
+/*** Start of inlined file: juce_Colours.h ***/
 #ifndef __JUCE_COLOURS_JUCEHEADER__
 #define __JUCE_COLOURS_JUCEHEADER__
 
-/********* Start of inlined file: juce_Colour.h *********/
+
+/*** Start of inlined file: juce_Colour.h ***/
 #ifndef __JUCE_COLOUR_JUCEHEADER__
 #define __JUCE_COLOUR_JUCEHEADER__
 
-/********* Start of inlined file: juce_PixelFormats.h *********/
+
+/*** Start of inlined file: juce_PixelFormats.h ***/
 #ifndef __JUCE_PIXELFORMATS_JUCEHEADER__
 #define __JUCE_PIXELFORMATS_JUCEHEADER__
 
@@ -11019,7 +11161,7 @@ forcedinline void PixelARGB::blend (const PixelAlpha& src) throw()
 #undef PACKED
 
 #endif   // __JUCE_PIXELFORMATS_JUCEHEADER__
-/********* End of inlined file: juce_PixelFormats.h *********/
+/*** End of inlined file: juce_PixelFormats.h ***/
 
 class JUCE_API  Colour
 {
@@ -11159,7 +11301,7 @@ private:
 };
 
 #endif   // __JUCE_COLOUR_JUCEHEADER__
-/********* End of inlined file: juce_Colour.h *********/
+/*** End of inlined file: juce_Colour.h ***/
 
 class Colours
 {
@@ -11222,13 +11364,15 @@ private:
 };
 
 #endif   // __JUCE_COLOURS_JUCEHEADER__
-/********* End of inlined file: juce_Colours.h *********/
+/*** End of inlined file: juce_Colours.h ***/
 
-/********* Start of inlined file: juce_FillType.h *********/
+
+/*** Start of inlined file: juce_FillType.h ***/
 #ifndef __JUCE_FILLTYPE_JUCEHEADER__
 #define __JUCE_FILLTYPE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ColourGradient.h *********/
+
+/*** Start of inlined file: juce_ColourGradient.h ***/
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 #define __JUCE_COLOURGRADIENT_JUCEHEADER__
 
@@ -11284,7 +11428,7 @@ private:
 };
 
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
-/********* End of inlined file: juce_ColourGradient.h *********/
+/*** End of inlined file: juce_ColourGradient.h ***/
 
 class Image;
 
@@ -11333,9 +11477,10 @@ public:
 };
 
 #endif   // __JUCE_FILLTYPE_JUCEHEADER__
-/********* End of inlined file: juce_FillType.h *********/
+/*** End of inlined file: juce_FillType.h ***/
 
-/********* Start of inlined file: juce_RectanglePlacement.h *********/
+
+/*** Start of inlined file: juce_RectanglePlacement.h ***/
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 #define __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
 
@@ -11405,7 +11550,7 @@ private:
 };
 
 #endif   // __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
-/********* End of inlined file: juce_RectanglePlacement.h *********/
+/*** End of inlined file: juce_RectanglePlacement.h ***/
 
 class LowLevelGraphicsContext;
 class Image;
@@ -11677,7 +11822,7 @@ private:
 };
 
 #endif   // __JUCE_GRAPHICS_JUCEHEADER__
-/********* End of inlined file: juce_Graphics.h *********/
+/*** End of inlined file: juce_Graphics.h ***/
 
 class JUCE_API  ImageEffectFilter
 {
@@ -11691,9 +11836,10 @@ public:
 };
 
 #endif   // __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
-/********* End of inlined file: juce_ImageEffectFilter.h *********/
+/*** End of inlined file: juce_ImageEffectFilter.h ***/
 
-/********* Start of inlined file: juce_RectangleList.h *********/
+
+/*** Start of inlined file: juce_RectangleList.h ***/
 #ifndef __JUCE_RECTANGLELIST_JUCEHEADER__
 #define __JUCE_RECTANGLELIST_JUCEHEADER__
 
@@ -11786,9 +11932,10 @@ private:
 };
 
 #endif   // __JUCE_RECTANGLELIST_JUCEHEADER__
-/********* End of inlined file: juce_RectangleList.h *********/
+/*** End of inlined file: juce_RectangleList.h ***/
 
-/********* Start of inlined file: juce_BorderSize.h *********/
+
+/*** Start of inlined file: juce_BorderSize.h ***/
 #ifndef __JUCE_BORDERSIZE_JUCEHEADER__
 #define __JUCE_BORDERSIZE_JUCEHEADER__
 
@@ -11847,9 +11994,10 @@ private:
 };
 
 #endif   // __JUCE_BORDERSIZE_JUCEHEADER__
-/********* End of inlined file: juce_BorderSize.h *********/
+/*** End of inlined file: juce_BorderSize.h ***/
 
-/********* Start of inlined file: juce_ComponentPeer.h *********/
+
+/*** Start of inlined file: juce_ComponentPeer.h ***/
 #ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
 #define __JUCE_COMPONENTPEER_JUCEHEADER__
 
@@ -12045,7 +12193,7 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentPeer.h *********/
+/*** End of inlined file: juce_ComponentPeer.h ***/
 
 class LookAndFeel;
 
@@ -12544,13 +12692,15 @@ protected:
 };
 
 #endif   // __JUCE_COMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_Component.h *********/
+/*** End of inlined file: juce_Component.h ***/
 
-/********* Start of inlined file: juce_ApplicationCommandInfo.h *********/
+
+/*** Start of inlined file: juce_ApplicationCommandInfo.h ***/
 #ifndef __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
 #define __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
 
-/********* Start of inlined file: juce_ApplicationCommandID.h *********/
+
+/*** Start of inlined file: juce_ApplicationCommandID.h ***/
 #ifndef __JUCE_APPLICATIONCOMMANDID_JUCEHEADER__
 #define __JUCE_APPLICATIONCOMMANDID_JUCEHEADER__
 
@@ -12574,7 +12724,7 @@ namespace StandardApplicationCommandIDs
 }
 
 #endif   // __JUCE_APPLICATIONCOMMANDID_JUCEHEADER__
-/********* End of inlined file: juce_ApplicationCommandID.h *********/
+/*** End of inlined file: juce_ApplicationCommandID.h ***/
 
 struct JUCE_API  ApplicationCommandInfo
 {
@@ -12622,7 +12772,7 @@ struct JUCE_API  ApplicationCommandInfo
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDINFO_JUCEHEADER__
-/********* End of inlined file: juce_ApplicationCommandInfo.h *********/
+/*** End of inlined file: juce_ApplicationCommandInfo.h ***/
 
 class JUCE_API  ApplicationCommandTarget
 {
@@ -12710,9 +12860,10 @@ private:
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
-/********* End of inlined file: juce_ApplicationCommandTarget.h *********/
+/*** End of inlined file: juce_ApplicationCommandTarget.h ***/
 
-/********* Start of inlined file: juce_ActionListener.h *********/
+
+/*** Start of inlined file: juce_ActionListener.h ***/
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
 #define __JUCE_ACTIONLISTENER_JUCEHEADER__
 
@@ -12725,7 +12876,7 @@ public:
 };
 
 #endif   // __JUCE_ACTIONLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_ActionListener.h *********/
+/*** End of inlined file: juce_ActionListener.h ***/
 
 class JUCE_API  JUCEApplication  : public ApplicationCommandTarget,
 								   private ActionListener
@@ -12798,7 +12949,8 @@ public:
 };
 
 #endif   // __JUCE_APPLICATION_JUCEHEADER__
-/********* End of inlined file: juce_Application.h *********/
+/*** End of inlined file: juce_Application.h ***/
+
 
 #endif
 #ifndef __JUCE_APPLICATIONCOMMANDID_JUCEHEADER__
@@ -12809,15 +12961,17 @@ public:
 #endif
 #ifndef __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ApplicationCommandManager.h *********/
+/*** Start of inlined file: juce_ApplicationCommandManager.h ***/
 #ifndef __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
 #define __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Desktop.h *********/
+
+/*** Start of inlined file: juce_Desktop.h ***/
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
 #define __JUCE_DESKTOP_JUCEHEADER__
 
-/********* Start of inlined file: juce_DeletedAtShutdown.h *********/
+
+/*** Start of inlined file: juce_DeletedAtShutdown.h ***/
 #ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
 #define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
 
@@ -12837,9 +12991,10 @@ private:
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-/********* End of inlined file: juce_DeletedAtShutdown.h *********/
+/*** End of inlined file: juce_DeletedAtShutdown.h ***/
 
-/********* Start of inlined file: juce_Timer.h *********/
+
+/*** Start of inlined file: juce_Timer.h ***/
 #ifndef __JUCE_TIMER_JUCEHEADER__
 #define __JUCE_TIMER_JUCEHEADER__
 
@@ -12877,7 +13032,7 @@ private:
 };
 
 #endif   // __JUCE_TIMER_JUCEHEADER__
-/********* End of inlined file: juce_Timer.h *********/
+/*** End of inlined file: juce_Timer.h ***/
 
 class JUCE_API  FocusChangeListener
 {
@@ -12995,7 +13150,7 @@ private:
 };
 
 #endif   // __JUCE_DESKTOP_JUCEHEADER__
-/********* End of inlined file: juce_Desktop.h *********/
+/*** End of inlined file: juce_Desktop.h ***/
 
 class KeyPressMappingSet;
 class ApplicationCommandManagerListener;
@@ -13086,7 +13241,8 @@ public:
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_ApplicationCommandManager.h *********/
+/*** End of inlined file: juce_ApplicationCommandManager.h ***/
+
 
 #endif
 #ifndef __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
@@ -13094,11 +13250,12 @@ public:
 #endif
 #ifndef __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
 
-/********* Start of inlined file: juce_ApplicationProperties.h *********/
+/*** Start of inlined file: juce_ApplicationProperties.h ***/
 #ifndef __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
 #define __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
 
-/********* Start of inlined file: juce_PropertiesFile.h *********/
+
+/*** Start of inlined file: juce_PropertiesFile.h ***/
 #ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
 #define __JUCE_PROPERTIESFILE_JUCEHEADER__
 
@@ -13161,7 +13318,7 @@ private:
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__
-/********* End of inlined file: juce_PropertiesFile.h *********/
+/*** End of inlined file: juce_PropertiesFile.h ***/
 
 class JUCE_API  ApplicationProperties   : public DeletedAtShutdown
 {
@@ -13208,20 +13365,23 @@ private:
 };
 
 #endif   // __JUCE_APPLICATIONPROPERTIES_JUCEHEADER__
-/********* End of inlined file: juce_ApplicationProperties.h *********/
+/*** End of inlined file: juce_ApplicationProperties.h ***/
+
 
 #endif
 #ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AiffAudioFormat.h *********/
+/*** Start of inlined file: juce_AiffAudioFormat.h ***/
 #ifndef __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioFormat.h *********/
+
+/*** Start of inlined file: juce_AudioFormat.h ***/
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
 #define __JUCE_AUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioFormatReader.h *********/
+
+/*** Start of inlined file: juce_AudioFormatReader.h ***/
 #ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
 #define __JUCE_AUDIOFORMATREADER_JUCEHEADER__
 
@@ -13288,17 +13448,20 @@ private:
 };
 
 #endif   // __JUCE_AUDIOFORMATREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormatReader.h *********/
+/*** End of inlined file: juce_AudioFormatReader.h ***/
 
-/********* Start of inlined file: juce_AudioFormatWriter.h *********/
+
+/*** Start of inlined file: juce_AudioFormatWriter.h ***/
 #ifndef __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
 #define __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioSource.h *********/
+
+/*** Start of inlined file: juce_AudioSource.h ***/
 #ifndef __JUCE_AUDIOSOURCE_JUCEHEADER__
 #define __JUCE_AUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioSampleBuffer.h *********/
+
+/*** Start of inlined file: juce_AudioSampleBuffer.h ***/
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 #define __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
 
@@ -13464,7 +13627,7 @@ private:
 };
 
 #endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSampleBuffer.h *********/
+/*** End of inlined file: juce_AudioSampleBuffer.h ***/
 
 struct JUCE_API  AudioSourceChannelInfo
 {
@@ -13499,7 +13662,7 @@ public:
 };
 
 #endif   // __JUCE_AUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_AudioSource.h *********/
+/*** End of inlined file: juce_AudioSource.h ***/
 
 class JUCE_API  AudioFormatWriter
 {
@@ -13553,7 +13716,7 @@ private:
 };
 
 #endif   // __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormatWriter.h *********/
+/*** End of inlined file: juce_AudioFormatWriter.h ***/
 
 class JUCE_API  AudioFormat
 {
@@ -13600,7 +13763,7 @@ private:
 };
 
 #endif   // __JUCE_AUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormat.h *********/
+/*** End of inlined file: juce_AudioFormat.h ***/
 
 class JUCE_API  AiffAudioFormat  : public AudioFormat
 {
@@ -13632,12 +13795,13 @@ public:
 };
 
 #endif   // __JUCE_AIFFAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AiffAudioFormat.h *********/
+/*** End of inlined file: juce_AiffAudioFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioCDBurner.h *********/
+/*** Start of inlined file: juce_AudioCDBurner.h ***/
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
 #define __JUCE_AUDIOCDBURNER_JUCEHEADER__
 
@@ -13682,12 +13846,13 @@ private:
 
 #endif
 #endif   // __JUCE_AUDIOCDBURNER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDBurner.h *********/
+/*** End of inlined file: juce_AudioCDBurner.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioCDReader.h *********/
+/*** Start of inlined file: juce_AudioCDReader.h ***/
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 #define __JUCE_AUDIOCDREADER_JUCEHEADER__
 
@@ -13766,7 +13931,8 @@ private:
 
 #endif
 #endif   // __JUCE_AUDIOCDREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioCDReader.h *********/
+/*** End of inlined file: juce_AudioCDReader.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOFORMAT_JUCEHEADER__
@@ -13774,7 +13940,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioFormatManager.h *********/
+/*** Start of inlined file: juce_AudioFormatManager.h ***/
 #ifndef __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
 #define __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
 
@@ -13817,7 +13983,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIOFORMATMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormatManager.h *********/
+/*** End of inlined file: juce_AudioFormatManager.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOFORMATREADER_JUCEHEADER__
@@ -13828,7 +13995,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioSubsectionReader.h *********/
+/*** Start of inlined file: juce_AudioSubsectionReader.h ***/
 #ifndef __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
 #define __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
 
@@ -13865,12 +14032,13 @@ private:
 };
 
 #endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSubsectionReader.h *********/
+/*** End of inlined file: juce_AudioSubsectionReader.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioThumbnail.h *********/
+/*** Start of inlined file: juce_AudioThumbnail.h ***/
 #ifndef __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 #define __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
 
@@ -13951,12 +14119,13 @@ private:
 };
 
 #endif   // __JUCE_AUDIOTHUMBNAIL_JUCEHEADER__
-/********* End of inlined file: juce_AudioThumbnail.h *********/
+/*** End of inlined file: juce_AudioThumbnail.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioThumbnailCache.h *********/
+/*** Start of inlined file: juce_AudioThumbnailCache.h ***/
 #ifndef __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 #define __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
 
@@ -13989,12 +14158,13 @@ private:
 };
 
 #endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
-/********* End of inlined file: juce_AudioThumbnailCache.h *********/
+/*** End of inlined file: juce_AudioThumbnailCache.h ***/
+
 
 #endif
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FlacAudioFormat.h *********/
+/*** Start of inlined file: juce_FlacAudioFormat.h ***/
 #ifndef __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
 
@@ -14028,12 +14198,13 @@ public:
 
 #endif
 #endif   // __JUCE_FLACAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_FlacAudioFormat.h *********/
+/*** End of inlined file: juce_FlacAudioFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_OggVorbisAudioFormat.h *********/
+/*** Start of inlined file: juce_OggVorbisAudioFormat.h ***/
 #ifndef __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
 
@@ -14070,12 +14241,13 @@ public:
 
 #endif
 #endif   // __JUCE_OGGVORBISAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_OggVorbisAudioFormat.h *********/
+/*** End of inlined file: juce_OggVorbisAudioFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_QuickTimeAudioFormat.h *********/
+/*** Start of inlined file: juce_QuickTimeAudioFormat.h ***/
 #ifndef __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
 
@@ -14109,12 +14281,13 @@ public:
 
 #endif
 #endif   // __JUCE_QUICKTIMEAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeAudioFormat.h *********/
+/*** End of inlined file: juce_QuickTimeAudioFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_WavAudioFormat.h *********/
+/*** Start of inlined file: juce_WavAudioFormat.h ***/
 #ifndef __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 #define __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
 
@@ -14168,16 +14341,18 @@ public:
 };
 
 #endif   // __JUCE_WAVAUDIOFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_WavAudioFormat.h *********/
+/*** End of inlined file: juce_WavAudioFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioFormatReaderSource.h *********/
+/*** Start of inlined file: juce_AudioFormatReaderSource.h ***/
 #ifndef __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
 #define __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_PositionableAudioSource.h *********/
+
+/*** Start of inlined file: juce_PositionableAudioSource.h ***/
 #ifndef __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
 
@@ -14200,7 +14375,7 @@ public:
 };
 
 #endif   // __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_PositionableAudioSource.h *********/
+/*** End of inlined file: juce_PositionableAudioSource.h ***/
 
 class JUCE_API  AudioFormatReaderSource  : public PositionableAudioSource
 {
@@ -14245,7 +14420,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_AudioFormatReaderSource.h *********/
+/*** End of inlined file: juce_AudioFormatReaderSource.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOSOURCE_JUCEHEADER__
@@ -14253,11 +14429,12 @@ private:
 #endif
 #ifndef __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioSourcePlayer.h *********/
+/*** Start of inlined file: juce_AudioSourcePlayer.h ***/
 #ifndef __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
 #define __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioIODevice.h *********/
+
+/*** Start of inlined file: juce_AudioIODevice.h ***/
 #ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
 #define __JUCE_AUDIOIODEVICE_JUCEHEADER__
 
@@ -14345,7 +14522,7 @@ protected:
 };
 
 #endif   // __JUCE_AUDIOIODEVICE_JUCEHEADER__
-/********* End of inlined file: juce_AudioIODevice.h *********/
+/*** End of inlined file: juce_AudioIODevice.h ***/
 
 class JUCE_API  AudioSourcePlayer  : public AudioIODeviceCallback
 {
@@ -14390,16 +14567,18 @@ private:
 };
 
 #endif   // __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
-/********* End of inlined file: juce_AudioSourcePlayer.h *********/
+/*** End of inlined file: juce_AudioSourcePlayer.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioTransportSource.h *********/
+/*** Start of inlined file: juce_AudioTransportSource.h ***/
 #ifndef __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
 #define __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_BufferingAudioSource.h *********/
+
+/*** Start of inlined file: juce_BufferingAudioSource.h ***/
 #ifndef __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
 
@@ -14449,9 +14628,10 @@ private:
 };
 
 #endif   // __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_BufferingAudioSource.h *********/
+/*** End of inlined file: juce_BufferingAudioSource.h ***/
 
-/********* Start of inlined file: juce_ResamplingAudioSource.h *********/
+
+/*** Start of inlined file: juce_ResamplingAudioSource.h ***/
 #ifndef __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
 
@@ -14502,7 +14682,7 @@ private:
 };
 
 #endif   // __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_ResamplingAudioSource.h *********/
+/*** End of inlined file: juce_ResamplingAudioSource.h ***/
 
 class JUCE_API  AudioTransportSource  : public PositionableAudioSource,
 										public ChangeBroadcaster
@@ -14568,7 +14748,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_AudioTransportSource.h *********/
+/*** End of inlined file: juce_AudioTransportSource.h ***/
+
 
 #endif
 #ifndef __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
@@ -14576,7 +14757,7 @@ private:
 #endif
 #ifndef __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChannelRemappingAudioSource.h *********/
+/*** Start of inlined file: juce_ChannelRemappingAudioSource.h ***/
 #ifndef __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
 
@@ -14630,16 +14811,18 @@ private:
 };
 
 #endif   // __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_ChannelRemappingAudioSource.h *********/
+/*** End of inlined file: juce_ChannelRemappingAudioSource.h ***/
+
 
 #endif
 #ifndef __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_IIRFilterAudioSource.h *********/
+/*** Start of inlined file: juce_IIRFilterAudioSource.h ***/
 #ifndef __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_IIRFilter.h *********/
+
+/*** Start of inlined file: juce_IIRFilter.h ***/
 #ifndef __JUCE_IIRFILTER_JUCEHEADER__
 #define __JUCE_IIRFILTER_JUCEHEADER__
 
@@ -14702,7 +14885,7 @@ protected:
 };
 
 #endif   // __JUCE_IIRFILTER_JUCEHEADER__
-/********* End of inlined file: juce_IIRFilter.h *********/
+/*** End of inlined file: juce_IIRFilter.h ***/
 
 class JUCE_API  IIRFilterAudioSource  : public AudioSource
 {
@@ -14732,12 +14915,13 @@ private:
 };
 
 #endif   // __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_IIRFilterAudioSource.h *********/
+/*** End of inlined file: juce_IIRFilterAudioSource.h ***/
+
 
 #endif
 #ifndef __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_MixerAudioSource.h *********/
+/*** Start of inlined file: juce_MixerAudioSource.h ***/
 #ifndef __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
 
@@ -14779,7 +14963,8 @@ private:
 };
 
 #endif   // __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_MixerAudioSource.h *********/
+/*** End of inlined file: juce_MixerAudioSource.h ***/
+
 
 #endif
 #ifndef __JUCE_POSITIONABLEAUDIOSOURCE_JUCEHEADER__
@@ -14790,7 +14975,7 @@ private:
 #endif
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToneGeneratorAudioSource.h *********/
+/*** Start of inlined file: juce_ToneGeneratorAudioSource.h ***/
 #ifndef __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 #define __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
 
@@ -14825,16 +15010,18 @@ private:
 };
 
 #endif   // __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
-/********* End of inlined file: juce_ToneGeneratorAudioSource.h *********/
+/*** End of inlined file: juce_ToneGeneratorAudioSource.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioDeviceManager.h *********/
+/*** Start of inlined file: juce_AudioDeviceManager.h ***/
 #ifndef __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 #define __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioIODeviceType.h *********/
+
+/*** Start of inlined file: juce_AudioIODeviceType.h ***/
 #ifndef __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 #define __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
 
@@ -14881,13 +15068,15 @@ private:
 };
 
 #endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
-/********* End of inlined file: juce_AudioIODeviceType.h *********/
+/*** End of inlined file: juce_AudioIODeviceType.h ***/
 
-/********* Start of inlined file: juce_MidiInput.h *********/
+
+/*** Start of inlined file: juce_MidiInput.h ***/
 #ifndef __JUCE_MIDIINPUT_JUCEHEADER__
 #define __JUCE_MIDIINPUT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiMessage.h *********/
+
+/*** Start of inlined file: juce_MidiMessage.h ***/
 #ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
 #define __JUCE_MIDIMESSAGE_JUCEHEADER__
 
@@ -15189,7 +15378,7 @@ private:
 };
 
 #endif   // __JUCE_MIDIMESSAGE_JUCEHEADER__
-/********* End of inlined file: juce_MidiMessage.h *********/
+/*** End of inlined file: juce_MidiMessage.h ***/
 
 class MidiInput;
 
@@ -15248,13 +15437,15 @@ protected:
 };
 
 #endif   // __JUCE_MIDIINPUT_JUCEHEADER__
-/********* End of inlined file: juce_MidiInput.h *********/
+/*** End of inlined file: juce_MidiInput.h ***/
 
-/********* Start of inlined file: juce_MidiOutput.h *********/
+
+/*** Start of inlined file: juce_MidiOutput.h ***/
 #ifndef __JUCE_MIDIOUTPUT_JUCEHEADER__
 #define __JUCE_MIDIOUTPUT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiBuffer.h *********/
+
+/*** Start of inlined file: juce_MidiBuffer.h ***/
 #ifndef __JUCE_MIDIBUFFER_JUCEHEADER__
 #define __JUCE_MIDIBUFFER_JUCEHEADER__
 
@@ -15337,7 +15528,7 @@ private:
 };
 
 #endif   // __JUCE_MIDIBUFFER_JUCEHEADER__
-/********* End of inlined file: juce_MidiBuffer.h *********/
+/*** End of inlined file: juce_MidiBuffer.h ***/
 
 class JUCE_API  MidiOutput  : private Thread
 {
@@ -15400,17 +15591,20 @@ protected:
 };
 
 #endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
-/********* End of inlined file: juce_MidiOutput.h *********/
+/*** End of inlined file: juce_MidiOutput.h ***/
 
-/********* Start of inlined file: juce_ComboBox.h *********/
+
+/*** Start of inlined file: juce_ComboBox.h ***/
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
 #define __JUCE_COMBOBOX_JUCEHEADER__
 
-/********* Start of inlined file: juce_Label.h *********/
+
+/*** Start of inlined file: juce_Label.h ***/
 #ifndef __JUCE_LABEL_JUCEHEADER__
 #define __JUCE_LABEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_ComponentDeletionWatcher.h *********/
+
+/*** Start of inlined file: juce_ComponentDeletionWatcher.h ***/
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 #define __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 
@@ -15437,29 +15631,35 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentDeletionWatcher.h *********/
+/*** End of inlined file: juce_ComponentDeletionWatcher.h ***/
 
-/********* Start of inlined file: juce_TextEditor.h *********/
+
+/*** Start of inlined file: juce_TextEditor.h ***/
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 #define __JUCE_TEXTEDITOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_Viewport.h *********/
+
+/*** Start of inlined file: juce_Viewport.h ***/
 #ifndef __JUCE_VIEWPORT_JUCEHEADER__
 #define __JUCE_VIEWPORT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ScrollBar.h *********/
+
+/*** Start of inlined file: juce_ScrollBar.h ***/
 #ifndef __JUCE_SCROLLBAR_JUCEHEADER__
 #define __JUCE_SCROLLBAR_JUCEHEADER__
 
-/********* Start of inlined file: juce_Button.h *********/
+
+/*** Start of inlined file: juce_Button.h ***/
 #ifndef __JUCE_BUTTON_JUCEHEADER__
 #define __JUCE_BUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_TooltipWindow.h *********/
+
+/*** Start of inlined file: juce_TooltipWindow.h ***/
 #ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
 #define __JUCE_TOOLTIPWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_TooltipClient.h *********/
+
+/*** Start of inlined file: juce_TooltipClient.h ***/
 #ifndef __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 #define __JUCE_TOOLTIPCLIENT_JUCEHEADER__
 
@@ -15488,7 +15688,7 @@ protected:
 };
 
 #endif   // __JUCE_TOOLTIPCLIENT_JUCEHEADER__
-/********* End of inlined file: juce_TooltipClient.h *********/
+/*** End of inlined file: juce_TooltipClient.h ***/
 
 class JUCE_API  TooltipWindow  : public Component,
 								 private Timer
@@ -15533,7 +15733,7 @@ private:
 };
 
 #endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_TooltipWindow.h *********/
+/*** End of inlined file: juce_TooltipWindow.h ***/
 
 class Button;
 
@@ -15719,7 +15919,7 @@ private:
 };
 
 #endif   // __JUCE_BUTTON_JUCEHEADER__
-/********* End of inlined file: juce_Button.h *********/
+/*** End of inlined file: juce_Button.h ***/
 
 class ScrollBar;
 
@@ -15825,7 +16025,7 @@ private:
 };
 
 #endif   // __JUCE_SCROLLBAR_JUCEHEADER__
-/********* End of inlined file: juce_ScrollBar.h *********/
+/*** End of inlined file: juce_ScrollBar.h ***/
 
 class JUCE_API  Viewport  : public Component,
 							private ComponentListener,
@@ -15908,9 +16108,10 @@ private:
 };
 
 #endif   // __JUCE_VIEWPORT_JUCEHEADER__
-/********* End of inlined file: juce_Viewport.h *********/
+/*** End of inlined file: juce_Viewport.h ***/
 
-/********* Start of inlined file: juce_PopupMenu.h *********/
+
+/*** Start of inlined file: juce_PopupMenu.h ***/
 #ifndef __JUCE_POPUPMENU_JUCEHEADER__
 #define __JUCE_POPUPMENU_JUCEHEADER__
 
@@ -16079,7 +16280,7 @@ private:
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
-/********* End of inlined file: juce_PopupMenu.h *********/
+/*** End of inlined file: juce_PopupMenu.h ***/
 
 class TextEditor;
 class TextHolderComponent;
@@ -16386,7 +16587,7 @@ private:
 };
 
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
-/********* End of inlined file: juce_TextEditor.h *********/
+/*** End of inlined file: juce_TextEditor.h ***/
 
 class Label;
 
@@ -16528,7 +16729,7 @@ private:
 };
 
 #endif   // __JUCE_LABEL_JUCEHEADER__
-/********* End of inlined file: juce_Label.h *********/
+/*** End of inlined file: juce_Label.h ***/
 
 class ComboBox;
 
@@ -16673,7 +16874,7 @@ private:
 };
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__
-/********* End of inlined file: juce_ComboBox.h *********/
+/*** End of inlined file: juce_ComboBox.h ***/
 
 class JUCE_API  AudioDeviceManager  : public ChangeBroadcaster
 {
@@ -16848,7 +17049,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_AudioDeviceManager.h *********/
+/*** End of inlined file: juce_AudioDeviceManager.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOIODEVICE_JUCEHEADER__
@@ -16865,7 +17067,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioDataConverters.h *********/
+/*** Start of inlined file: juce_AudioDataConverters.h ***/
 #ifndef __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
 #define __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
 
@@ -16923,7 +17125,8 @@ public:
 };
 
 #endif   // __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
-/********* End of inlined file: juce_AudioDataConverters.h *********/
+/*** End of inlined file: juce_AudioDataConverters.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
@@ -16937,11 +17140,12 @@ public:
 #endif
 #ifndef __JUCE_MIDIFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiFile.h *********/
+/*** Start of inlined file: juce_MidiFile.h ***/
 #ifndef __JUCE_MIDIFILE_JUCEHEADER__
 #define __JUCE_MIDIFILE_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiMessageSequence.h *********/
+
+/*** Start of inlined file: juce_MidiMessageSequence.h ***/
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
 #define __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
 
@@ -17039,7 +17243,7 @@ private:
 };
 
 #endif   // __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
-/********* End of inlined file: juce_MidiMessageSequence.h *********/
+/*** End of inlined file: juce_MidiMessageSequence.h ***/
 
 class JUCE_API  MidiFile
 {
@@ -17093,12 +17297,13 @@ private:
 };
 
 #endif   // __JUCE_MIDIFILE_JUCEHEADER__
-/********* End of inlined file: juce_MidiFile.h *********/
+/*** End of inlined file: juce_MidiFile.h ***/
+
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiKeyboardState.h *********/
+/*** Start of inlined file: juce_MidiKeyboardState.h ***/
 #ifndef __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
 #define __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
 
@@ -17164,7 +17369,8 @@ private:
 };
 
 #endif   // __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
-/********* End of inlined file: juce_MidiKeyboardState.h *********/
+/*** End of inlined file: juce_MidiKeyboardState.h ***/
+
 
 #endif
 #ifndef __JUCE_MIDIMESSAGE_JUCEHEADER__
@@ -17172,7 +17378,7 @@ private:
 #endif
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiMessageCollector.h *********/
+/*** Start of inlined file: juce_MidiMessageCollector.h ***/
 #ifndef __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 #define __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
 
@@ -17209,7 +17415,8 @@ private:
 };
 
 #endif   // __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
-/********* End of inlined file: juce_MidiMessageCollector.h *********/
+/*** End of inlined file: juce_MidiMessageCollector.h ***/
+
 
 #endif
 #ifndef __JUCE_MIDIMESSAGESEQUENCE_JUCEHEADER__
@@ -17217,23 +17424,27 @@ private:
 #endif
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioUnitPluginFormat.h *********/
+/*** Start of inlined file: juce_AudioUnitPluginFormat.h ***/
 #ifndef __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioPluginFormat.h *********/
+
+/*** Start of inlined file: juce_AudioPluginFormat.h ***/
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioPluginInstance.h *********/
+
+/*** Start of inlined file: juce_AudioPluginInstance.h ***/
 #ifndef __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
 #define __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioProcessor.h *********/
+
+/*** Start of inlined file: juce_AudioProcessor.h ***/
 #ifndef __JUCE_AUDIOPROCESSOR_JUCEHEADER__
 #define __JUCE_AUDIOPROCESSOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioProcessorEditor.h *********/
+
+/*** Start of inlined file: juce_AudioProcessorEditor.h ***/
 #ifndef __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
 #define __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
 
@@ -17256,9 +17467,10 @@ private:
 };
 
 #endif   // __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
-/********* End of inlined file: juce_AudioProcessorEditor.h *********/
+/*** End of inlined file: juce_AudioProcessorEditor.h ***/
 
-/********* Start of inlined file: juce_AudioProcessorListener.h *********/
+
+/*** Start of inlined file: juce_AudioProcessorListener.h ***/
 #ifndef __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
 #define __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
 
@@ -17284,9 +17496,10 @@ public:
 };
 
 #endif   // __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_AudioProcessorListener.h *********/
+/*** End of inlined file: juce_AudioProcessorListener.h ***/
 
-/********* Start of inlined file: juce_AudioPlayHead.h *********/
+
+/*** Start of inlined file: juce_AudioPlayHead.h ***/
 #ifndef __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
 #define __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
 
@@ -17336,7 +17549,7 @@ public:
 };
 
 #endif   // __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
-/********* End of inlined file: juce_AudioPlayHead.h *********/
+/*** End of inlined file: juce_AudioPlayHead.h ***/
 
 class JUCE_API  AudioProcessor
 {
@@ -17486,9 +17699,10 @@ private:
 };
 
 #endif   // __JUCE_AUDIOPROCESSOR_JUCEHEADER__
-/********* End of inlined file: juce_AudioProcessor.h *********/
+/*** End of inlined file: juce_AudioProcessor.h ***/
 
-/********* Start of inlined file: juce_PluginDescription.h *********/
+
+/*** Start of inlined file: juce_PluginDescription.h ***/
 #ifndef __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
 #define __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
 
@@ -17535,7 +17749,7 @@ public:
 };
 
 #endif   // __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
-/********* End of inlined file: juce_PluginDescription.h *********/
+/*** End of inlined file: juce_PluginDescription.h ***/
 
 class JUCE_API  AudioPluginInstance   : public AudioProcessor
 {
@@ -17555,7 +17769,7 @@ protected:
 };
 
 #endif   // __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
-/********* End of inlined file: juce_AudioPluginInstance.h *********/
+/*** End of inlined file: juce_AudioPluginInstance.h ***/
 
 class PluginDescription;
 
@@ -17593,7 +17807,7 @@ protected:
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AudioPluginFormat.h *********/
+/*** End of inlined file: juce_AudioPluginFormat.h ***/
 
 #if JUCE_PLUGINHOST_AU && JUCE_MAC
 
@@ -17623,12 +17837,13 @@ private:
 #endif
 
 #endif   // __JUCE_AUDIOUNITPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_AudioUnitPluginFormat.h *********/
+/*** End of inlined file: juce_AudioUnitPluginFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DirectXPluginFormat.h *********/
+/*** Start of inlined file: juce_DirectXPluginFormat.h ***/
 #ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 
@@ -17660,12 +17875,13 @@ private:
 #endif
 
 #endif   // __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_DirectXPluginFormat.h *********/
+/*** End of inlined file: juce_DirectXPluginFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_LADSPAPluginFormat.h *********/
+/*** Start of inlined file: juce_LADSPAPluginFormat.h ***/
 #ifndef __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
 
@@ -17697,12 +17913,13 @@ private:
 #endif
 
 #endif   // __JUCE_LADSPAPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_LADSPAPluginFormat.h *********/
+/*** End of inlined file: juce_LADSPAPluginFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
 
-/********* Start of inlined file: juce_VSTMidiEventList.h *********/
+/*** Start of inlined file: juce_VSTMidiEventList.h ***/
 #ifdef __aeffect__
 
 #ifndef __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
@@ -17854,12 +18071,13 @@ private:
 
 #endif   // __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
 #endif   // __JUCE_VSTMIDIEVENTLIST_JUCEHEADER__
-/********* End of inlined file: juce_VSTMidiEventList.h *********/
+/*** End of inlined file: juce_VSTMidiEventList.h ***/
+
 
 #endif
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_VSTPluginFormat.h *********/
+/*** Start of inlined file: juce_VSTPluginFormat.h ***/
 #ifndef __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
 
@@ -17892,7 +18110,8 @@ private:
 
 #endif
 #endif   // __JUCE_VSTPLUGINFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_VSTPluginFormat.h *********/
+/*** End of inlined file: juce_VSTPluginFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
@@ -17900,7 +18119,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioPluginFormatManager.h *********/
+/*** Start of inlined file: juce_AudioPluginFormatManager.h ***/
 #ifndef __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
 #define __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
 
@@ -17937,7 +18156,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_AudioPluginFormatManager.h *********/
+/*** End of inlined file: juce_AudioPluginFormatManager.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
@@ -17945,7 +18165,7 @@ private:
 #endif
 #ifndef __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
 
-/********* Start of inlined file: juce_KnownPluginList.h *********/
+/*** Start of inlined file: juce_KnownPluginList.h ***/
 #ifndef __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
 #define __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
 
@@ -18011,7 +18231,8 @@ private:
 };
 
 #endif   // __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
-/********* End of inlined file: juce_KnownPluginList.h *********/
+/*** End of inlined file: juce_KnownPluginList.h ***/
+
 
 #endif
 #ifndef __JUCE_PLUGINDESCRIPTION_JUCEHEADER__
@@ -18019,7 +18240,7 @@ private:
 #endif
 #ifndef __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
 
-/********* Start of inlined file: juce_PluginDirectoryScanner.h *********/
+/*** Start of inlined file: juce_PluginDirectoryScanner.h ***/
 #ifndef __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
 #define __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
 
@@ -18062,16 +18283,18 @@ private:
 };
 
 #endif   // __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
-/********* End of inlined file: juce_PluginDirectoryScanner.h *********/
+/*** End of inlined file: juce_PluginDirectoryScanner.h ***/
+
 
 #endif
 #ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_PluginListComponent.h *********/
+/*** Start of inlined file: juce_PluginListComponent.h ***/
 #ifndef __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
 #define __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ListBox.h *********/
+
+/*** Start of inlined file: juce_ListBox.h ***/
 #ifndef __JUCE_LISTBOX_JUCEHEADER__
 #define __JUCE_LISTBOX_JUCEHEADER__
 
@@ -18253,9 +18476,10 @@ private:
 };
 
 #endif   // __JUCE_LISTBOX_JUCEHEADER__
-/********* End of inlined file: juce_ListBox.h *********/
+/*** End of inlined file: juce_ListBox.h ***/
 
-/********* Start of inlined file: juce_TextButton.h *********/
+
+/*** Start of inlined file: juce_TextButton.h ***/
 #ifndef __JUCE_TEXTBUTTON_JUCEHEADER__
 #define __JUCE_TEXTBUTTON_JUCEHEADER__
 
@@ -18296,7 +18520,7 @@ private:
 };
 
 #endif   // __JUCE_TEXTBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_TextButton.h *********/
+/*** End of inlined file: juce_TextButton.h ***/
 
 class JUCE_API  PluginListComponent   : public Component,
 										public ListBoxModel,
@@ -18339,7 +18563,8 @@ private:
 };
 
 #endif   // __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_PluginListComponent.h *********/
+/*** End of inlined file: juce_PluginListComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOPLAYHEAD_JUCEHEADER__
@@ -18353,7 +18578,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioProcessorGraph.h *********/
+/*** Start of inlined file: juce_AudioProcessorGraph.h ***/
 #ifndef __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 #define __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
 
@@ -18591,7 +18816,8 @@ private:
 };
 
 #endif   // __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
-/********* End of inlined file: juce_AudioProcessorGraph.h *********/
+/*** End of inlined file: juce_AudioProcessorGraph.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIOPROCESSORLISTENER_JUCEHEADER__
@@ -18599,7 +18825,7 @@ private:
 #endif
 #ifndef __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioProcessorPlayer.h *********/
+/*** Start of inlined file: juce_AudioProcessorPlayer.h ***/
 #ifndef __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
 #define __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
 
@@ -18648,20 +18874,23 @@ private:
 };
 
 #endif   // __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
-/********* End of inlined file: juce_AudioProcessorPlayer.h *********/
+/*** End of inlined file: juce_AudioProcessorPlayer.h ***/
+
 
 #endif
 #ifndef __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_GenericAudioProcessorEditor.h *********/
+/*** Start of inlined file: juce_GenericAudioProcessorEditor.h ***/
 #ifndef __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
 #define __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_PropertyPanel.h *********/
+
+/*** Start of inlined file: juce_PropertyPanel.h ***/
 #ifndef __JUCE_PROPERTYPANEL_JUCEHEADER__
 #define __JUCE_PROPERTYPANEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_PropertyComponent.h *********/
+
+/*** Start of inlined file: juce_PropertyComponent.h ***/
 #ifndef __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
 
@@ -18696,7 +18925,7 @@ protected:
 };
 
 #endif   // __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_PropertyComponent.h *********/
+/*** End of inlined file: juce_PropertyComponent.h ***/
 
 class JUCE_API  PropertyPanel  : public Component
 {
@@ -18747,7 +18976,7 @@ private:
 };
 
 #endif   // __JUCE_PROPERTYPANEL_JUCEHEADER__
-/********* End of inlined file: juce_PropertyPanel.h *********/
+/*** End of inlined file: juce_PropertyPanel.h ***/
 
 class JUCE_API  GenericAudioProcessorEditor	  : public AudioProcessorEditor
 {
@@ -18769,16 +18998,18 @@ private:
 };
 
 #endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
-/********* End of inlined file: juce_GenericAudioProcessorEditor.h *********/
+/*** End of inlined file: juce_GenericAudioProcessorEditor.h ***/
+
 
 #endif
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Sampler.h *********/
+/*** Start of inlined file: juce_Sampler.h ***/
 #ifndef __JUCE_SAMPLER_JUCEHEADER__
 #define __JUCE_SAMPLER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Synthesiser.h *********/
+
+/*** Start of inlined file: juce_Synthesiser.h ***/
 #ifndef __JUCE_SYNTHESISER_JUCEHEADER__
 #define __JUCE_SYNTHESISER_JUCEHEADER__
 
@@ -18941,7 +19172,7 @@ private:
 };
 
 #endif   // __JUCE_SYNTHESISER_JUCEHEADER__
-/********* End of inlined file: juce_Synthesiser.h *********/
+/*** End of inlined file: juce_Synthesiser.h ***/
 
 class JUCE_API  SamplerSound	: public SynthesiserSound
 {
@@ -19010,7 +19241,8 @@ private:
 };
 
 #endif   // __JUCE_SAMPLER_JUCEHEADER__
-/********* End of inlined file: juce_Sampler.h *********/
+/*** End of inlined file: juce_Sampler.h ***/
+
 
 #endif
 #ifndef __JUCE_SYNTHESISER_JUCEHEADER__
@@ -19018,11 +19250,12 @@ private:
 #endif
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ActionBroadcaster.h *********/
+/*** Start of inlined file: juce_ActionBroadcaster.h ***/
 #ifndef __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 #define __JUCE_ACTIONBROADCASTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ActionListenerList.h *********/
+
+/*** Start of inlined file: juce_ActionListenerList.h ***/
 #ifndef __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
 #define __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
 
@@ -19055,7 +19288,7 @@ private:
 };
 
 #endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
-/********* End of inlined file: juce_ActionListenerList.h *********/
+/*** End of inlined file: juce_ActionListenerList.h ***/
 
 class JUCE_API  ActionBroadcaster
 {
@@ -19082,7 +19315,8 @@ private:
 };
 
 #endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
-/********* End of inlined file: juce_ActionBroadcaster.h *********/
+/*** End of inlined file: juce_ActionBroadcaster.h ***/
+
 
 #endif
 #ifndef __JUCE_ACTIONLISTENER_JUCEHEADER__
@@ -19096,7 +19330,7 @@ private:
 #endif
 #ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 
-/********* Start of inlined file: juce_CallbackMessage.h *********/
+/*** Start of inlined file: juce_CallbackMessage.h ***/
 #ifndef __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 #define __JUCE_CALLBACKMESSAGE_JUCEHEADER__
 
@@ -19120,7 +19354,8 @@ private:
 };
 
 #endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
-/********* End of inlined file: juce_CallbackMessage.h *********/
+/*** End of inlined file: juce_CallbackMessage.h ***/
+
 
 #endif
 #ifndef __JUCE_CHANGEBROADCASTER_JUCEHEADER__
@@ -19134,7 +19369,7 @@ private:
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
-/********* Start of inlined file: juce_InterprocessConnection.h *********/
+/*** Start of inlined file: juce_InterprocessConnection.h ***/
 #ifndef __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 #define __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
 
@@ -19208,12 +19443,13 @@ private:
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
-/********* End of inlined file: juce_InterprocessConnection.h *********/
+/*** End of inlined file: juce_InterprocessConnection.h ***/
+
 
 #endif
 #ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
 
-/********* Start of inlined file: juce_InterprocessConnectionServer.h *********/
+/*** Start of inlined file: juce_InterprocessConnectionServer.h ***/
 #ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
 #define __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
 
@@ -19246,7 +19482,8 @@ private:
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
-/********* End of inlined file: juce_InterprocessConnectionServer.h *********/
+/*** End of inlined file: juce_InterprocessConnectionServer.h ***/
+
 
 #endif
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
@@ -19257,7 +19494,7 @@ private:
 #endif
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_MessageManager.h *********/
+/*** Start of inlined file: juce_MessageManager.h ***/
 #ifndef __JUCE_MESSAGEMANAGER_JUCEHEADER__
 #define __JUCE_MESSAGEMANAGER_JUCEHEADER__
 
@@ -19359,12 +19596,13 @@ private:
 };
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_MessageManager.h *********/
+/*** End of inlined file: juce_MessageManager.h ***/
+
 
 #endif
 #ifndef __JUCE_MULTITIMER_JUCEHEADER__
 
-/********* Start of inlined file: juce_MultiTimer.h *********/
+/*** Start of inlined file: juce_MultiTimer.h ***/
 #ifndef __JUCE_MULTITIMER_JUCEHEADER__
 #define __JUCE_MULTITIMER_JUCEHEADER__
 
@@ -19399,7 +19637,8 @@ private:
 };
 
 #endif   // __JUCE_MULTITIMER_JUCEHEADER__
-/********* End of inlined file: juce_MultiTimer.h *********/
+/*** End of inlined file: juce_MultiTimer.h ***/
+
 
 #endif
 #ifndef __JUCE_TIMER_JUCEHEADER__
@@ -19407,11 +19646,12 @@ private:
 #endif
 #ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ArrowButton.h *********/
+/*** Start of inlined file: juce_ArrowButton.h ***/
 #ifndef __JUCE_ARROWBUTTON_JUCEHEADER__
 #define __JUCE_ARROWBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_DropShadowEffect.h *********/
+
+/*** Start of inlined file: juce_DropShadowEffect.h ***/
 #ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
 #define __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
 
@@ -19438,7 +19678,7 @@ private:
 };
 
 #endif   // __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
-/********* End of inlined file: juce_DropShadowEffect.h *********/
+/*** End of inlined file: juce_DropShadowEffect.h ***/
 
 class JUCE_API  ArrowButton  : public Button
 {
@@ -19471,7 +19711,8 @@ private:
 };
 
 #endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ArrowButton.h *********/
+/*** End of inlined file: juce_ArrowButton.h ***/
+
 
 #endif
 #ifndef __JUCE_BUTTON_JUCEHEADER__
@@ -19479,11 +19720,12 @@ private:
 #endif
 #ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableButton.h *********/
+/*** Start of inlined file: juce_DrawableButton.h ***/
 #ifndef __JUCE_DRAWABLEBUTTON_JUCEHEADER__
 #define __JUCE_DRAWABLEBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_Drawable.h *********/
+
+/*** Start of inlined file: juce_Drawable.h ***/
 #ifndef __JUCE_DRAWABLE_JUCEHEADER__
 #define __JUCE_DRAWABLE_JUCEHEADER__
 
@@ -19559,7 +19801,7 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLE_JUCEHEADER__
-/********* End of inlined file: juce_Drawable.h *********/
+/*** End of inlined file: juce_Drawable.h ***/
 
 class JUCE_API  DrawableButton  : public Button
 {
@@ -19623,12 +19865,13 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_DrawableButton.h *********/
+/*** End of inlined file: juce_DrawableButton.h ***/
+
 
 #endif
 #ifndef __JUCE_HYPERLINKBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_HyperlinkButton.h *********/
+/*** Start of inlined file: juce_HyperlinkButton.h ***/
 #ifndef __JUCE_HYPERLINKBUTTON_JUCEHEADER__
 #define __JUCE_HYPERLINKBUTTON_JUCEHEADER__
 
@@ -19678,12 +19921,13 @@ private:
 };
 
 #endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_HyperlinkButton.h *********/
+/*** End of inlined file: juce_HyperlinkButton.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGEBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ImageButton.h *********/
+/*** Start of inlined file: juce_ImageButton.h ***/
 #ifndef __JUCE_IMAGEBUTTON_JUCEHEADER__
 #define __JUCE_IMAGEBUTTON_JUCEHEADER__
 
@@ -19742,12 +19986,13 @@ private:
 };
 
 #endif   // __JUCE_IMAGEBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ImageButton.h *********/
+/*** End of inlined file: juce_ImageButton.h ***/
+
 
 #endif
 #ifndef __JUCE_SHAPEBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ShapeButton.h *********/
+/*** Start of inlined file: juce_ShapeButton.h ***/
 #ifndef __JUCE_SHAPEBUTTON_JUCEHEADER__
 #define __JUCE_SHAPEBUTTON_JUCEHEADER__
 
@@ -19793,7 +20038,8 @@ private:
 };
 
 #endif   // __JUCE_SHAPEBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ShapeButton.h *********/
+/*** End of inlined file: juce_ShapeButton.h ***/
+
 
 #endif
 #ifndef __JUCE_TEXTBUTTON_JUCEHEADER__
@@ -19801,7 +20047,7 @@ private:
 #endif
 #ifndef __JUCE_TOGGLEBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToggleButton.h *********/
+/*** Start of inlined file: juce_ToggleButton.h ***/
 #ifndef __JUCE_TOGGLEBUTTON_JUCEHEADER__
 #define __JUCE_TOGGLEBUTTON_JUCEHEADER__
 
@@ -19836,28 +20082,33 @@ private:
 };
 
 #endif   // __JUCE_TOGGLEBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ToggleButton.h *********/
+/*** End of inlined file: juce_ToggleButton.h ***/
+
 
 #endif
 #ifndef __JUCE_TOOLBARBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToolbarButton.h *********/
+/*** Start of inlined file: juce_ToolbarButton.h ***/
 #ifndef __JUCE_TOOLBARBUTTON_JUCEHEADER__
 #define __JUCE_TOOLBARBUTTON_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToolbarItemComponent.h *********/
+
+/*** Start of inlined file: juce_ToolbarItemComponent.h ***/
 #ifndef __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 #define __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_Toolbar.h *********/
+
+/*** Start of inlined file: juce_Toolbar.h ***/
 #ifndef __JUCE_TOOLBAR_JUCEHEADER__
 #define __JUCE_TOOLBAR_JUCEHEADER__
 
-/********* Start of inlined file: juce_DragAndDropContainer.h *********/
+
+/*** Start of inlined file: juce_DragAndDropContainer.h ***/
 #ifndef __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
 #define __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
 
-/********* Start of inlined file: juce_DragAndDropTarget.h *********/
+
+/*** Start of inlined file: juce_DragAndDropTarget.h ***/
 #ifndef __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
 #define __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
 
@@ -19891,7 +20142,7 @@ public:
 };
 
 #endif   // __JUCE_DRAGANDDROPTARGET_JUCEHEADER__
-/********* End of inlined file: juce_DragAndDropTarget.h *********/
+/*** End of inlined file: juce_DragAndDropTarget.h ***/
 
 class JUCE_API  DragAndDropContainer
 {
@@ -19932,9 +20183,10 @@ private:
 };
 
 #endif   // __JUCE_DRAGANDDROPCONTAINER_JUCEHEADER__
-/********* End of inlined file: juce_DragAndDropContainer.h *********/
+/*** End of inlined file: juce_DragAndDropContainer.h ***/
 
-/********* Start of inlined file: juce_ComponentAnimator.h *********/
+
+/*** Start of inlined file: juce_ComponentAnimator.h ***/
 #ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
 #define __JUCE_COMPONENTANIMATOR_JUCEHEADER__
 
@@ -19973,7 +20225,7 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTANIMATOR_JUCEHEADER__
-/********* End of inlined file: juce_ComponentAnimator.h *********/
+/*** End of inlined file: juce_ComponentAnimator.h ***/
 
 class ToolbarItemComponent;
 class ToolbarItemFactory;
@@ -20100,7 +20352,7 @@ private:
 };
 
 #endif   // __JUCE_TOOLBAR_JUCEHEADER__
-/********* End of inlined file: juce_Toolbar.h *********/
+/*** End of inlined file: juce_Toolbar.h ***/
 
 class ItemDragAndDropOverlayComponent;
 
@@ -20172,7 +20424,7 @@ private:
 };
 
 #endif   // __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemComponent.h *********/
+/*** End of inlined file: juce_ToolbarItemComponent.h ***/
 
 class JUCE_API  ToolbarButton   : public ToolbarItemComponent
 {
@@ -20200,12 +20452,13 @@ private:
 };
 
 #endif   // __JUCE_TOOLBARBUTTON_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarButton.h *********/
+/*** End of inlined file: juce_ToolbarButton.h ***/
+
 
 #endif
 #ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_CodeDocument.h *********/
+/*** Start of inlined file: juce_CodeDocument.h ***/
 #ifndef __JUCE_CODEDOCUMENT_JUCEHEADER__
 #define __JUCE_CODEDOCUMENT_JUCEHEADER__
 
@@ -20380,16 +20633,18 @@ private:
 };
 
 #endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
-/********* End of inlined file: juce_CodeDocument.h *********/
+/*** End of inlined file: juce_CodeDocument.h ***/
+
 
 #endif
 #ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_CodeEditorComponent.h *********/
+/*** Start of inlined file: juce_CodeEditorComponent.h ***/
 #ifndef __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 #define __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_CodeTokeniser.h *********/
+
+/*** Start of inlined file: juce_CodeTokeniser.h ***/
 #ifndef __JUCE_CODETOKENISER_JUCEHEADER__
 #define __JUCE_CODETOKENISER_JUCEHEADER__
 
@@ -20409,7 +20664,7 @@ public:
 };
 
 #endif   // __JUCE_CODETOKENISER_JUCEHEADER__
-/********* End of inlined file: juce_CodeTokeniser.h *********/
+/*** End of inlined file: juce_CodeTokeniser.h ***/
 
 class JUCE_API  CodeEditorComponent   : public Component,
 										public Timer,
@@ -20574,7 +20829,8 @@ private:
 };
 
 #endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_CodeEditorComponent.h *********/
+/*** End of inlined file: juce_CodeEditorComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_CODETOKENISER_JUCEHEADER__
@@ -20582,7 +20838,7 @@ private:
 #endif
 #ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
 
-/********* Start of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
+/*** Start of inlined file: juce_CPlusPlusCodeTokeniser.h ***/
 #ifndef __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
 #define __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
 
@@ -20616,7 +20872,8 @@ public:
 };
 
 #endif   // __JUCE_CPLUSPLUSCODETOKENISER_JUCEHEADER__
-/********* End of inlined file: juce_CPlusPlusCodeTokeniser.h *********/
+/*** End of inlined file: juce_CPlusPlusCodeTokeniser.h ***/
+
 
 #endif
 #ifndef __JUCE_COMBOBOX_JUCEHEADER__
@@ -20630,7 +20887,7 @@ public:
 #endif
 #ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
 
-/********* Start of inlined file: juce_ProgressBar.h *********/
+/*** Start of inlined file: juce_ProgressBar.h ***/
 #ifndef __JUCE_PROGRESSBAR_JUCEHEADER__
 #define __JUCE_PROGRESSBAR_JUCEHEADER__
 
@@ -20677,16 +20934,18 @@ private:
 };
 
 #endif   // __JUCE_PROGRESSBAR_JUCEHEADER__
-/********* End of inlined file: juce_ProgressBar.h *********/
+/*** End of inlined file: juce_ProgressBar.h ***/
+
 
 #endif
 #ifndef __JUCE_SLIDER_JUCEHEADER__
 
-/********* Start of inlined file: juce_Slider.h *********/
+/*** Start of inlined file: juce_Slider.h ***/
 #ifndef __JUCE_SLIDER_JUCEHEADER__
 #define __JUCE_SLIDER_JUCEHEADER__
 
-/********* Start of inlined file: juce_SliderListener.h *********/
+
+/*** Start of inlined file: juce_SliderListener.h ***/
 #ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
 #define __JUCE_SLIDERLISTENER_JUCEHEADER__
 
@@ -20706,7 +20965,7 @@ public:
 };
 
 #endif   // __JUCE_SLIDERLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_SliderListener.h *********/
+/*** End of inlined file: juce_SliderListener.h ***/
 
 class JUCE_API  Slider  : public Component,
 						  public SettableTooltipClient,
@@ -20991,7 +21250,8 @@ private:
 };
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__
-/********* End of inlined file: juce_Slider.h *********/
+/*** End of inlined file: juce_Slider.h ***/
+
 
 #endif
 #ifndef __JUCE_SLIDERLISTENER_JUCEHEADER__
@@ -20999,7 +21259,7 @@ private:
 #endif
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_TableHeaderComponent.h *********/
+/*** Start of inlined file: juce_TableHeaderComponent.h ***/
 #ifndef __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 #define __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
 
@@ -21168,12 +21428,13 @@ private:
 };
 
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_TableHeaderComponent.h *********/
+/*** End of inlined file: juce_TableHeaderComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
 
-/********* Start of inlined file: juce_TableListBox.h *********/
+/*** Start of inlined file: juce_TableListBox.h ***/
 #ifndef __JUCE_TABLELISTBOX_JUCEHEADER__
 #define __JUCE_TABLELISTBOX_JUCEHEADER__
 
@@ -21288,7 +21549,8 @@ private:
 };
 
 #endif   // __JUCE_TABLELISTBOX_JUCEHEADER__
-/********* End of inlined file: juce_TableListBox.h *********/
+/*** End of inlined file: juce_TableListBox.h ***/
+
 
 #endif
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
@@ -21302,7 +21564,7 @@ private:
 #endif
 #ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToolbarItemFactory.h *********/
+/*** Start of inlined file: juce_ToolbarItemFactory.h ***/
 #ifndef __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
 #define __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
 
@@ -21332,12 +21594,13 @@ public:
 };
 
 #endif   // __JUCE_TOOLBARITEMFACTORY_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemFactory.h *********/
+/*** End of inlined file: juce_ToolbarItemFactory.h ***/
+
 
 #endif
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ToolbarItemPalette.h *********/
+/*** Start of inlined file: juce_ToolbarItemPalette.h ***/
 #ifndef __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 #define __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
 
@@ -21368,16 +21631,18 @@ private:
 };
 
 #endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
-/********* End of inlined file: juce_ToolbarItemPalette.h *********/
+/*** End of inlined file: juce_ToolbarItemPalette.h ***/
+
 
 #endif
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
 
-/********* Start of inlined file: juce_TreeView.h *********/
+/*** Start of inlined file: juce_TreeView.h ***/
 #ifndef __JUCE_TREEVIEW_JUCEHEADER__
 #define __JUCE_TREEVIEW_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileDragAndDropTarget.h *********/
+
+/*** Start of inlined file: juce_FileDragAndDropTarget.h ***/
 #ifndef __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
 #define __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
 
@@ -21398,7 +21663,7 @@ public:
 };
 
 #endif   // __JUCE_FILEDRAGANDDROPTARGET_JUCEHEADER__
-/********* End of inlined file: juce_FileDragAndDropTarget.h *********/
+/*** End of inlined file: juce_FileDragAndDropTarget.h ***/
 
 class TreeView;
 
@@ -21648,20 +21913,23 @@ private:
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__
-/********* End of inlined file: juce_TreeView.h *********/
+/*** End of inlined file: juce_TreeView.h ***/
+
 
 #endif
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
+/*** Start of inlined file: juce_DirectoryContentsDisplayComponent.h ***/
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 #define __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DirectoryContentsList.h *********/
+
+/*** Start of inlined file: juce_DirectoryContentsList.h ***/
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 #define __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileFilter.h *********/
+
+/*** Start of inlined file: juce_FileFilter.h ***/
 #ifndef __JUCE_FILEFILTER_JUCEHEADER__
 #define __JUCE_FILEFILTER_JUCEHEADER__
 
@@ -21685,9 +21953,10 @@ protected:
 };
 
 #endif   // __JUCE_FILEFILTER_JUCEHEADER__
-/********* End of inlined file: juce_FileFilter.h *********/
+/*** End of inlined file: juce_FileFilter.h ***/
 
-/********* Start of inlined file: juce_Image.h *********/
+
+/*** Start of inlined file: juce_Image.h ***/
 #ifndef __JUCE_IMAGE_JUCEHEADER__
 #define __JUCE_IMAGE_JUCEHEADER__
 
@@ -21801,7 +22070,7 @@ private:
 };
 
 #endif   // __JUCE_IMAGE_JUCEHEADER__
-/********* End of inlined file: juce_Image.h *********/
+/*** End of inlined file: juce_Image.h ***/
 
 class JUCE_API  DirectoryContentsList   : public ChangeBroadcaster,
 										  public TimeSliceClient
@@ -21884,9 +22153,10 @@ private:
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
-/********* End of inlined file: juce_DirectoryContentsList.h *********/
+/*** End of inlined file: juce_DirectoryContentsList.h ***/
 
-/********* Start of inlined file: juce_FileBrowserListener.h *********/
+
+/*** Start of inlined file: juce_FileBrowserListener.h ***/
 #ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
 #define __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
 
@@ -21904,7 +22174,7 @@ public:
 };
 
 #endif   // __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
-/********* End of inlined file: juce_FileBrowserListener.h *********/
+/*** End of inlined file: juce_FileBrowserListener.h ***/
 
 class JUCE_API  DirectoryContentsDisplayComponent
 {
@@ -21945,7 +22215,8 @@ protected:
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_DirectoryContentsDisplayComponent.h *********/
+/*** End of inlined file: juce_DirectoryContentsDisplayComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
@@ -21953,11 +22224,12 @@ protected:
 #endif
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileBrowserComponent.h *********/
+/*** Start of inlined file: juce_FileBrowserComponent.h ***/
 #ifndef __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FilePreviewComponent.h *********/
+
+/*** Start of inlined file: juce_FilePreviewComponent.h ***/
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
 #define __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
 
@@ -21979,7 +22251,7 @@ private:
 };
 
 #endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilePreviewComponent.h *********/
+/*** End of inlined file: juce_FilePreviewComponent.h ***/
 
 class JUCE_API  FileBrowserComponent  : public Component,
 										public ChangeBroadcaster,
@@ -22084,7 +22356,8 @@ private:
 };
 
 #endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileBrowserComponent.h *********/
+/*** End of inlined file: juce_FileBrowserComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_FILEBROWSERLISTENER_JUCEHEADER__
@@ -22092,7 +22365,7 @@ private:
 #endif
 #ifndef __JUCE_FILECHOOSER_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileChooser.h *********/
+/*** Start of inlined file: juce_FileChooser.h ***/
 #ifndef __JUCE_FILECHOOSER_JUCEHEADER__
 #define __JUCE_FILECHOOSER_JUCEHEADER__
 
@@ -22149,24 +22422,28 @@ private:
 };
 
 #endif   // __JUCE_FILECHOOSER_JUCEHEADER__
-/********* End of inlined file: juce_FileChooser.h *********/
+/*** End of inlined file: juce_FileChooser.h ***/
+
 
 #endif
 #ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileChooserDialogBox.h *********/
+/*** Start of inlined file: juce_FileChooserDialogBox.h ***/
 #ifndef __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 #define __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
 
-/********* Start of inlined file: juce_ResizableWindow.h *********/
+
+/*** Start of inlined file: juce_ResizableWindow.h ***/
 #ifndef __JUCE_RESIZABLEWINDOW_JUCEHEADER__
 #define __JUCE_RESIZABLEWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_TopLevelWindow.h *********/
+
+/*** Start of inlined file: juce_TopLevelWindow.h ***/
 #ifndef __JUCE_TOPLEVELWINDOW_JUCEHEADER__
 #define __JUCE_TOPLEVELWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_DropShadower.h *********/
+
+/*** Start of inlined file: juce_DropShadower.h ***/
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
 #define __JUCE_DROPSHADOWER_JUCEHEADER__
 
@@ -22215,7 +22492,7 @@ private:
 };
 
 #endif   // __JUCE_DROPSHADOWER_JUCEHEADER__
-/********* End of inlined file: juce_DropShadower.h *********/
+/*** End of inlined file: juce_DropShadower.h ***/
 
 class JUCE_API  TopLevelWindow  : public Component
 {
@@ -22269,13 +22546,15 @@ private:
 };
 
 #endif   // __JUCE_TOPLEVELWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_TopLevelWindow.h *********/
+/*** End of inlined file: juce_TopLevelWindow.h ***/
 
-/********* Start of inlined file: juce_ComponentDragger.h *********/
+
+/*** Start of inlined file: juce_ComponentDragger.h ***/
 #ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
 #define __JUCE_COMPONENTDRAGGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ComponentBoundsConstrainer.h *********/
+
+/*** Start of inlined file: juce_ComponentBoundsConstrainer.h ***/
 #ifndef __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
 #define __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
 
@@ -22359,7 +22638,7 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentBoundsConstrainer.h *********/
+/*** End of inlined file: juce_ComponentBoundsConstrainer.h ***/
 
 class JUCE_API  ComponentDragger
 {
@@ -22383,9 +22662,10 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentDragger.h *********/
+/*** End of inlined file: juce_ComponentDragger.h ***/
 
-/********* Start of inlined file: juce_ResizableBorderComponent.h *********/
+
+/*** Start of inlined file: juce_ResizableBorderComponent.h ***/
 #ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
 #define __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
 
@@ -22427,9 +22707,10 @@ private:
 };
 
 #endif   // __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ResizableBorderComponent.h *********/
+/*** End of inlined file: juce_ResizableBorderComponent.h ***/
 
-/********* Start of inlined file: juce_ResizableCornerComponent.h *********/
+
+/*** Start of inlined file: juce_ResizableCornerComponent.h ***/
 #ifndef __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
 #define __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
 
@@ -22462,7 +22743,7 @@ private:
 };
 
 #endif   // __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ResizableCornerComponent.h *********/
+/*** End of inlined file: juce_ResizableCornerComponent.h ***/
 
 class JUCE_API  ResizableWindow  : public TopLevelWindow
 {
@@ -22574,9 +22855,10 @@ private:
 };
 
 #endif   // __JUCE_RESIZABLEWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_ResizableWindow.h *********/
+/*** End of inlined file: juce_ResizableWindow.h ***/
 
-/********* Start of inlined file: juce_GlyphArrangement.h *********/
+
+/*** Start of inlined file: juce_GlyphArrangement.h ***/
 #ifndef __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
 #define __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
 
@@ -22707,7 +22989,7 @@ private:
 };
 
 #endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
-/********* End of inlined file: juce_GlyphArrangement.h *********/
+/*** End of inlined file: juce_GlyphArrangement.h ***/
 
 class JUCE_API  FileChooserDialogBox : public ResizableWindow,
 									   public ButtonListener,
@@ -22765,7 +23047,8 @@ private:
 };
 
 #endif   // __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
-/********* End of inlined file: juce_FileChooserDialogBox.h *********/
+/*** End of inlined file: juce_FileChooserDialogBox.h ***/
+
 
 #endif
 #ifndef __JUCE_FILEFILTER_JUCEHEADER__
@@ -22773,7 +23056,7 @@ private:
 #endif
 #ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileListComponent.h *********/
+/*** Start of inlined file: juce_FileListComponent.h ***/
 #ifndef __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 #define __JUCE_FILELISTCOMPONENT_JUCEHEADER__
 
@@ -22812,12 +23095,13 @@ private:
 };
 
 #endif   // __JUCE_FILELISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileListComponent.h *********/
+/*** End of inlined file: juce_FileListComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FilenameComponent.h *********/
+/*** Start of inlined file: juce_FilenameComponent.h ***/
 #ifndef __JUCE_FILENAMECOMPONENT_JUCEHEADER__
 #define __JUCE_FILENAMECOMPONENT_JUCEHEADER__
 
@@ -22907,7 +23191,8 @@ private:
 };
 
 #endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FilenameComponent.h *********/
+/*** End of inlined file: juce_FilenameComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
@@ -22915,7 +23200,7 @@ private:
 #endif
 #ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileSearchPathListComponent.h *********/
+/*** Start of inlined file: juce_FileSearchPathListComponent.h ***/
 #ifndef __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 #define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 
@@ -22977,12 +23262,13 @@ private:
 };
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileSearchPathListComponent.h *********/
+/*** End of inlined file: juce_FileSearchPathListComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileTreeComponent.h *********/
+/*** Start of inlined file: juce_FileTreeComponent.h ***/
 #ifndef __JUCE_FILETREECOMPONENT_JUCEHEADER__
 #define __JUCE_FILETREECOMPONENT_JUCEHEADER__
 
@@ -23015,12 +23301,13 @@ private:
 };
 
 #endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_FileTreeComponent.h *********/
+/*** End of inlined file: juce_FileTreeComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ImagePreviewComponent.h *********/
+/*** Start of inlined file: juce_ImagePreviewComponent.h ***/
 #ifndef __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
 #define __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
 
@@ -23051,12 +23338,13 @@ private:
 };
 
 #endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ImagePreviewComponent.h *********/
+/*** End of inlined file: juce_ImagePreviewComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 
-/********* Start of inlined file: juce_WildcardFileFilter.h *********/
+/*** Start of inlined file: juce_WildcardFileFilter.h ***/
 #ifndef __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 #define __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
 
@@ -23084,7 +23372,8 @@ private:
 };
 
 #endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
-/********* End of inlined file: juce_WildcardFileFilter.h *********/
+/*** End of inlined file: juce_WildcardFileFilter.h ***/
+
 
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
@@ -23107,11 +23396,12 @@ private:
 #endif
 #ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_KeyMappingEditorComponent.h *********/
+/*** Start of inlined file: juce_KeyMappingEditorComponent.h ***/
 #ifndef __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
 #define __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_KeyPressMappingSet.h *********/
+
+/*** Start of inlined file: juce_KeyPressMappingSet.h ***/
 #ifndef __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
 #define __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
 
@@ -23196,7 +23486,7 @@ private:
 };
 
 #endif   // __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
-/********* End of inlined file: juce_KeyPressMappingSet.h *********/
+/*** End of inlined file: juce_KeyPressMappingSet.h ***/
 
 class JUCE_API  KeyMappingEditorComponent  : public Component,
 											 public TreeViewItem,
@@ -23253,7 +23543,8 @@ private:
 };
 
 #endif   // __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_KeyMappingEditorComponent.h *********/
+/*** End of inlined file: juce_KeyMappingEditorComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_KEYPRESS_JUCEHEADER__
@@ -23273,7 +23564,7 @@ private:
 #endif
 #ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
 
-/********* Start of inlined file: juce_ComponentMovementWatcher.h *********/
+/*** Start of inlined file: juce_ComponentMovementWatcher.h ***/
 #ifndef __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
 #define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
 
@@ -23313,12 +23604,13 @@ private:
 };
 
 #endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
-/********* End of inlined file: juce_ComponentMovementWatcher.h *********/
+/*** End of inlined file: juce_ComponentMovementWatcher.h ***/
+
 
 #endif
 #ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_GroupComponent.h *********/
+/*** Start of inlined file: juce_GroupComponent.h ***/
 #ifndef __JUCE_GROUPCOMPONENT_JUCEHEADER__
 #define __JUCE_GROUPCOMPONENT_JUCEHEADER__
 
@@ -23358,20 +23650,23 @@ private:
 };
 
 #endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_GroupComponent.h *********/
+/*** End of inlined file: juce_GroupComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_MultiDocumentPanel.h *********/
+/*** Start of inlined file: juce_MultiDocumentPanel.h ***/
 #ifndef __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 #define __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_TabbedComponent.h *********/
+
+/*** Start of inlined file: juce_TabbedComponent.h ***/
 #ifndef __JUCE_TABBEDCOMPONENT_JUCEHEADER__
 #define __JUCE_TABBEDCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_TabbedButtonBar.h *********/
+
+/*** Start of inlined file: juce_TabbedButtonBar.h ***/
 #ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
 #define __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
 
@@ -23502,7 +23797,7 @@ private:
 };
 
 #endif   // __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
-/********* End of inlined file: juce_TabbedButtonBar.h *********/
+/*** End of inlined file: juce_TabbedButtonBar.h ***/
 
 class JUCE_API  TabbedComponent  : public Component
 {
@@ -23598,17 +23893,20 @@ private:
 };
 
 #endif   // __JUCE_TABBEDCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_TabbedComponent.h *********/
+/*** End of inlined file: juce_TabbedComponent.h ***/
 
-/********* Start of inlined file: juce_DocumentWindow.h *********/
+
+/*** Start of inlined file: juce_DocumentWindow.h ***/
 #ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
 #define __JUCE_DOCUMENTWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_MenuBarComponent.h *********/
+
+/*** Start of inlined file: juce_MenuBarComponent.h ***/
 #ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
 #define __JUCE_MENUBARCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MenuBarModel.h *********/
+
+/*** Start of inlined file: juce_MenuBarModel.h ***/
 #ifndef __JUCE_MENUBARMODEL_JUCEHEADER__
 #define __JUCE_MENUBARMODEL_JUCEHEADER__
 
@@ -23673,7 +23971,7 @@ private:
 };
 
 #endif   // __JUCE_MENUBARMODEL_JUCEHEADER__
-/********* End of inlined file: juce_MenuBarModel.h *********/
+/*** End of inlined file: juce_MenuBarModel.h ***/
 
 class JUCE_API  MenuBarComponent  : public Component,
 									private MenuBarModelListener,
@@ -23727,7 +24025,7 @@ private:
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_MenuBarComponent.h *********/
+/*** End of inlined file: juce_MenuBarComponent.h ***/
 
 class JUCE_API  DocumentWindow   : public ResizableWindow
 {
@@ -23816,7 +24114,7 @@ private:
 };
 
 #endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_DocumentWindow.h *********/
+/*** End of inlined file: juce_DocumentWindow.h ***/
 
 class MultiDocumentPanel;
 class MDITabbedComponentInternal;
@@ -23916,7 +24214,8 @@ private:
 };
 
 #endif   // __JUCE_MULTIDOCUMENTPANEL_JUCEHEADER__
-/********* End of inlined file: juce_MultiDocumentPanel.h *********/
+/*** End of inlined file: juce_MultiDocumentPanel.h ***/
+
 
 #endif
 #ifndef __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
@@ -23930,7 +24229,7 @@ private:
 #endif
 #ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
 
-/********* Start of inlined file: juce_StretchableLayoutManager.h *********/
+/*** Start of inlined file: juce_StretchableLayoutManager.h ***/
 #ifndef __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
 #define __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
 
@@ -24003,12 +24302,13 @@ private:
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
-/********* End of inlined file: juce_StretchableLayoutManager.h *********/
+/*** End of inlined file: juce_StretchableLayoutManager.h ***/
+
 
 #endif
 #ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
 
-/********* Start of inlined file: juce_StretchableLayoutResizerBar.h *********/
+/*** Start of inlined file: juce_StretchableLayoutResizerBar.h ***/
 #ifndef __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
 #define __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
 
@@ -24040,12 +24340,13 @@ private:
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
-/********* End of inlined file: juce_StretchableLayoutResizerBar.h *********/
+/*** End of inlined file: juce_StretchableLayoutResizerBar.h ***/
+
 
 #endif
 #ifndef __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
 
-/********* Start of inlined file: juce_StretchableObjectResizer.h *********/
+/*** Start of inlined file: juce_StretchableObjectResizer.h ***/
 #ifndef __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
 #define __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
 
@@ -24086,7 +24387,8 @@ private:
 };
 
 #endif   // __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
-/********* End of inlined file: juce_StretchableObjectResizer.h *********/
+/*** End of inlined file: juce_StretchableObjectResizer.h ***/
+
 
 #endif
 #ifndef __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
@@ -24100,15 +24402,17 @@ private:
 #endif
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_LookAndFeel.h *********/
+/*** Start of inlined file: juce_LookAndFeel.h ***/
 #ifndef __JUCE_LOOKANDFEEL_JUCEHEADER__
 #define __JUCE_LOOKANDFEEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_AlertWindow.h *********/
+
+/*** Start of inlined file: juce_AlertWindow.h ***/
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
 #define __JUCE_ALERTWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_TextLayout.h *********/
+
+/*** Start of inlined file: juce_TextLayout.h ***/
 #ifndef __JUCE_TEXTLAYOUT_JUCEHEADER__
 #define __JUCE_TEXTLAYOUT_JUCEHEADER__
 
@@ -24166,7 +24470,7 @@ private:
 };
 
 #endif   // __JUCE_TEXTLAYOUT_JUCEHEADER__
-/********* End of inlined file: juce_TextLayout.h *********/
+/*** End of inlined file: juce_TextLayout.h ***/
 
 class JUCE_API  AlertWindow  : public TopLevelWindow,
 							   private ButtonListener
@@ -24297,7 +24601,7 @@ private:
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_AlertWindow.h *********/
+/*** End of inlined file: juce_AlertWindow.h ***/
 
 class ToggleButton;
 class TextButton;
@@ -24776,12 +25080,13 @@ private:
 };
 
 #endif   // __JUCE_LOOKANDFEEL_JUCEHEADER__
-/********* End of inlined file: juce_LookAndFeel.h *********/
+/*** End of inlined file: juce_LookAndFeel.h ***/
+
 
 #endif
 #ifndef __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_OldSchoolLookAndFeel.h *********/
+/*** Start of inlined file: juce_OldSchoolLookAndFeel.h ***/
 #ifndef __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
 #define __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
 
@@ -24894,7 +25199,8 @@ private:
 };
 
 #endif   // __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
-/********* End of inlined file: juce_OldSchoolLookAndFeel.h *********/
+/*** End of inlined file: juce_OldSchoolLookAndFeel.h ***/
+
 
 #endif
 #ifndef __JUCE_MENUBARCOMPONENT_JUCEHEADER__
@@ -24908,7 +25214,7 @@ private:
 #endif
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_PopupMenuCustomComponent.h *********/
+/*** Start of inlined file: juce_PopupMenuCustomComponent.h ***/
 #ifndef __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 #define __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
 
@@ -24939,7 +25245,8 @@ private:
 };
 
 #endif   // __JUCE_POPUPMENUCUSTOMCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_PopupMenuCustomComponent.h *********/
+/*** End of inlined file: juce_PopupMenuCustomComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_COMPONENTDRAGGER_JUCEHEADER__
@@ -24956,11 +25263,12 @@ private:
 #endif
 #ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_LassoComponent.h *********/
+/*** Start of inlined file: juce_LassoComponent.h ***/
 #ifndef __JUCE_LASSOCOMPONENT_JUCEHEADER__
 #define __JUCE_LASSOCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_SelectedItemSet.h *********/
+
+/*** Start of inlined file: juce_SelectedItemSet.h ***/
 #ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
 #define __JUCE_SELECTEDITEMSET_JUCEHEADER__
 
@@ -25136,7 +25444,7 @@ private:
 };
 
 #endif   // __JUCE_SELECTEDITEMSET_JUCEHEADER__
-/********* End of inlined file: juce_SelectedItemSet.h *********/
+/*** End of inlined file: juce_SelectedItemSet.h ***/
 
 template <class SelectableItemType>
 class LassoSource
@@ -25248,7 +25556,8 @@ private:
 };
 
 #endif   // __JUCE_LASSOCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_LassoComponent.h *********/
+/*** End of inlined file: juce_LassoComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_MOUSECURSOR_JUCEHEADER__
@@ -25259,7 +25568,7 @@ private:
 #endif
 #ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_MouseHoverDetector.h *********/
+/*** Start of inlined file: juce_MouseHoverDetector.h ***/
 #ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
 #define __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
 
@@ -25315,7 +25624,8 @@ private:
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
-/********* End of inlined file: juce_MouseHoverDetector.h *********/
+/*** End of inlined file: juce_MouseHoverDetector.h ***/
+
 
 #endif
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
@@ -25326,7 +25636,7 @@ private:
 #endif
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_BooleanPropertyComponent.h *********/
+/*** Start of inlined file: juce_BooleanPropertyComponent.h ***/
 #ifndef __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
 
@@ -25367,12 +25677,13 @@ private:
 };
 
 #endif   // __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_BooleanPropertyComponent.h *********/
+/*** End of inlined file: juce_BooleanPropertyComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ButtonPropertyComponent.h *********/
+/*** Start of inlined file: juce_ButtonPropertyComponent.h ***/
 #ifndef __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
 
@@ -25403,12 +25714,13 @@ private:
 };
 
 #endif   // __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ButtonPropertyComponent.h *********/
+/*** End of inlined file: juce_ButtonPropertyComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ChoicePropertyComponent.h *********/
+/*** Start of inlined file: juce_ChoicePropertyComponent.h ***/
 #ifndef __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
 
@@ -25450,7 +25762,8 @@ private:
 };
 
 #endif   // __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ChoicePropertyComponent.h *********/
+/*** End of inlined file: juce_ChoicePropertyComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_PROPERTYCOMPONENT_JUCEHEADER__
@@ -25461,7 +25774,7 @@ private:
 #endif
 #ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_SliderPropertyComponent.h *********/
+/*** Start of inlined file: juce_SliderPropertyComponent.h ***/
 #ifndef __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
 
@@ -25506,12 +25819,13 @@ protected:
 };
 
 #endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SliderPropertyComponent.h *********/
+/*** End of inlined file: juce_SliderPropertyComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_TextPropertyComponent.h *********/
+/*** Start of inlined file: juce_TextPropertyComponent.h ***/
 #ifndef __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
 #define __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
 
@@ -25550,12 +25864,13 @@ private:
 };
 
 #endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_TextPropertyComponent.h *********/
+/*** End of inlined file: juce_TextPropertyComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ActiveXControlComponent.h *********/
+/*** Start of inlined file: juce_ActiveXControlComponent.h ***/
 #ifndef __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 #define __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
 
@@ -25601,12 +25916,13 @@ private:
 #endif
 
 #endif   // __JUCE_ACTIVEXCONTROLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_ActiveXControlComponent.h *********/
+/*** End of inlined file: juce_ActiveXControlComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_AudioDeviceSelectorComponent.h *********/
+/*** Start of inlined file: juce_AudioDeviceSelectorComponent.h ***/
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
 #define __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
 
@@ -25659,12 +25975,13 @@ private:
 };
 
 #endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_AudioDeviceSelectorComponent.h *********/
+/*** End of inlined file: juce_AudioDeviceSelectorComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_BUBBLECOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_BubbleComponent.h *********/
+/*** Start of inlined file: juce_BubbleComponent.h ***/
 #ifndef __JUCE_BUBBLECOMPONENT_JUCEHEADER__
 #define __JUCE_BUBBLECOMPONENT_JUCEHEADER__
 
@@ -25717,12 +26034,13 @@ private:
 };
 
 #endif   // __JUCE_BUBBLECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_BubbleComponent.h *********/
+/*** End of inlined file: juce_BubbleComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_BubbleMessageComponent.h *********/
+/*** Start of inlined file: juce_BubbleMessageComponent.h ***/
 #ifndef __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
 #define __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
 
@@ -25768,12 +26086,13 @@ private:
 };
 
 #endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_BubbleMessageComponent.h *********/
+/*** End of inlined file: juce_BubbleMessageComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_ColourSelector.h *********/
+/*** Start of inlined file: juce_ColourSelector.h ***/
 #ifndef __JUCE_COLOURSELECTOR_JUCEHEADER__
 #define __JUCE_COLOURSELECTOR_JUCEHEADER__
 
@@ -25847,7 +26166,8 @@ private:
 };
 
 #endif   // __JUCE_COLOURSELECTOR_JUCEHEADER__
-/********* End of inlined file: juce_ColourSelector.h *********/
+/*** End of inlined file: juce_ColourSelector.h ***/
+
 
 #endif
 #ifndef __JUCE_DROPSHADOWER_JUCEHEADER__
@@ -25855,7 +26175,7 @@ private:
 #endif
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MagnifierComponent.h *********/
+/*** Start of inlined file: juce_MagnifierComponent.h ***/
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 #define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 
@@ -25904,12 +26224,13 @@ private:
 };
 
 #endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_MagnifierComponent.h *********/
+/*** End of inlined file: juce_MagnifierComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_MidiKeyboardComponent.h *********/
+/*** Start of inlined file: juce_MidiKeyboardComponent.h ***/
 #ifndef __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
 #define __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
 
@@ -26076,12 +26397,13 @@ private:
 };
 
 #endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_MidiKeyboardComponent.h *********/
+/*** End of inlined file: juce_MidiKeyboardComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_NSViewComponent.h *********/
+/*** Start of inlined file: juce_NSViewComponent.h ***/
 #ifndef __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
 #define __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
 
@@ -26118,12 +26440,13 @@ private:
 #endif
 
 #endif   // __JUCE_NSVIEWCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_NSViewComponent.h *********/
+/*** End of inlined file: juce_NSViewComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_OpenGLComponent.h *********/
+/*** Start of inlined file: juce_OpenGLComponent.h ***/
 #ifndef __JUCE_OPENGLCOMPONENT_JUCEHEADER__
 #define __JUCE_OPENGLCOMPONENT_JUCEHEADER__
 
@@ -26260,12 +26583,13 @@ private:
 
 #endif
 #endif   // __JUCE_OPENGLCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_OpenGLComponent.h *********/
+/*** End of inlined file: juce_OpenGLComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_PREFERENCESPANEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_PreferencesPanel.h *********/
+/*** Start of inlined file: juce_PreferencesPanel.h ***/
 #ifndef __JUCE_PREFERENCESPANEL_JUCEHEADER__
 #define __JUCE_PREFERENCESPANEL_JUCEHEADER__
 
@@ -26313,12 +26637,13 @@ private:
 };
 
 #endif   // __JUCE_PREFERENCESPANEL_JUCEHEADER__
-/********* End of inlined file: juce_PreferencesPanel.h *********/
+/*** End of inlined file: juce_PreferencesPanel.h ***/
+
 
 #endif
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_QuickTimeMovieComponent.h *********/
+/*** Start of inlined file: juce_QuickTimeMovieComponent.h ***/
 #ifndef __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 #define __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
 
@@ -26416,12 +26741,13 @@ private:
 
 #endif
 #endif   // __JUCE_QUICKTIMEMOVIECOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_QuickTimeMovieComponent.h *********/
+/*** End of inlined file: juce_QuickTimeMovieComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_SystemTrayIconComponent.h *********/
+/*** Start of inlined file: juce_SystemTrayIconComponent.h ***/
 #ifndef __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 #define __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
 
@@ -26453,12 +26779,13 @@ private:
 
 #endif
 #endif   // __JUCE_SYSTEMTRAYICONCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_SystemTrayIconComponent.h *********/
+/*** End of inlined file: juce_SystemTrayIconComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_WebBrowserComponent.h *********/
+/*** Start of inlined file: juce_WebBrowserComponent.h ***/
 #ifndef __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 #define __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
 
@@ -26513,7 +26840,8 @@ private:
 
 #endif
 #endif   // __JUCE_WEBBROWSERCOMPONENT_JUCEHEADER__
-/********* End of inlined file: juce_WebBrowserComponent.h *********/
+/*** End of inlined file: juce_WebBrowserComponent.h ***/
+
 
 #endif
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -26524,7 +26852,7 @@ private:
 #endif
 #ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_DialogWindow.h *********/
+/*** Start of inlined file: juce_DialogWindow.h ***/
 #ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__
 #define __JUCE_DIALOGWINDOW_JUCEHEADER__
 
@@ -26560,7 +26888,8 @@ private:
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_DialogWindow.h *********/
+/*** End of inlined file: juce_DialogWindow.h ***/
+
 
 #endif
 #ifndef __JUCE_DOCUMENTWINDOW_JUCEHEADER__
@@ -26571,7 +26900,7 @@ private:
 #endif
 #ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
 
-/********* Start of inlined file: juce_SplashScreen.h *********/
+/*** Start of inlined file: juce_SplashScreen.h ***/
 #ifndef __JUCE_SPLASHSCREEN_JUCEHEADER__
 #define __JUCE_SPLASHSCREEN_JUCEHEADER__
 
@@ -26613,12 +26942,13 @@ private:
 };
 
 #endif   // __JUCE_SPLASHSCREEN_JUCEHEADER__
-/********* End of inlined file: juce_SplashScreen.h *********/
+/*** End of inlined file: juce_SplashScreen.h ***/
+
 
 #endif
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
-/********* Start of inlined file: juce_ThreadWithProgressWindow.h *********/
+/*** Start of inlined file: juce_ThreadWithProgressWindow.h ***/
 #ifndef __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 #define __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
 
@@ -26659,7 +26989,8 @@ private:
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
-/********* End of inlined file: juce_ThreadWithProgressWindow.h *********/
+/*** End of inlined file: juce_ThreadWithProgressWindow.h ***/
+
 
 #endif
 #ifndef __JUCE_TOOLTIPWINDOW_JUCEHEADER__
@@ -26694,7 +27025,7 @@ private:
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 
-/********* Start of inlined file: juce_LowLevelGraphicsContext.h *********/
+/*** Start of inlined file: juce_LowLevelGraphicsContext.h ***/
 #ifndef __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
 
@@ -26744,12 +27075,13 @@ public:
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSCONTEXT_JUCEHEADER__
-/********* End of inlined file: juce_LowLevelGraphicsContext.h *********/
+/*** End of inlined file: juce_LowLevelGraphicsContext.h ***/
+
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
 
-/********* Start of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
+/*** Start of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h ***/
 #ifndef __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
 
@@ -26836,12 +27168,13 @@ protected:
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
-/********* End of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h *********/
+/*** End of inlined file: juce_LowLevelGraphicsPostScriptRenderer.h ***/
+
 
 #endif
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
-/********* Start of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h *********/
+/*** Start of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h ***/
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
@@ -26905,7 +27238,8 @@ protected:
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
-/********* End of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h *********/
+/*** End of inlined file: juce_LowLevelGraphicsSoftwareRenderer.h ***/
+
 
 #endif
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
@@ -26916,7 +27250,7 @@ protected:
 #endif
 #ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableComposite.h *********/
+/*** Start of inlined file: juce_DrawableComposite.h ***/
 #ifndef __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 #define __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
 
@@ -26964,12 +27298,13 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
-/********* End of inlined file: juce_DrawableComposite.h *********/
+/*** End of inlined file: juce_DrawableComposite.h ***/
+
 
 #endif
 #ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableImage.h *********/
+/*** Start of inlined file: juce_DrawableImage.h ***/
 #ifndef __JUCE_DRAWABLEIMAGE_JUCEHEADER__
 #define __JUCE_DRAWABLEIMAGE_JUCEHEADER__
 
@@ -27018,12 +27353,13 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLEIMAGE_JUCEHEADER__
-/********* End of inlined file: juce_DrawableImage.h *********/
+/*** End of inlined file: juce_DrawableImage.h ***/
+
 
 #endif
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawablePath.h *********/
+/*** Start of inlined file: juce_DrawablePath.h ***/
 #ifndef __JUCE_DRAWABLEPATH_JUCEHEADER__
 #define __JUCE_DRAWABLEPATH_JUCEHEADER__
 
@@ -27074,12 +27410,13 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
-/********* End of inlined file: juce_DrawablePath.h *********/
+/*** End of inlined file: juce_DrawablePath.h ***/
+
 
 #endif
 #ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
 
-/********* Start of inlined file: juce_DrawableText.h *********/
+/*** Start of inlined file: juce_DrawableText.h ***/
 #ifndef __JUCE_DRAWABLETEXT_JUCEHEADER__
 #define __JUCE_DRAWABLETEXT_JUCEHEADER__
 
@@ -27119,7 +27456,8 @@ private:
 };
 
 #endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
-/********* End of inlined file: juce_DrawableText.h *********/
+/*** End of inlined file: juce_DrawableText.h ***/
+
 
 #endif
 #ifndef __JUCE_DROPSHADOWEFFECT_JUCEHEADER__
@@ -27127,7 +27465,7 @@ private:
 #endif
 #ifndef __JUCE_GLOWEFFECT_JUCEHEADER__
 
-/********* Start of inlined file: juce_GlowEffect.h *********/
+/*** Start of inlined file: juce_GlowEffect.h ***/
 #ifndef __JUCE_GLOWEFFECT_JUCEHEADER__
 #define __JUCE_GLOWEFFECT_JUCEHEADER__
 
@@ -27152,7 +27490,8 @@ private:
 };
 
 #endif   // __JUCE_GLOWEFFECT_JUCEHEADER__
-/********* End of inlined file: juce_GlowEffect.h *********/
+/*** End of inlined file: juce_GlowEffect.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
@@ -27160,7 +27499,7 @@ private:
 #endif
 #ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ReduceOpacityEffect.h *********/
+/*** Start of inlined file: juce_ReduceOpacityEffect.h ***/
 #ifndef __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
 #define __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
 
@@ -27183,7 +27522,8 @@ private:
 };
 
 #endif   // __JUCE_REDUCEOPACITYEFFECT_JUCEHEADER__
-/********* End of inlined file: juce_ReduceOpacityEffect.h *********/
+/*** End of inlined file: juce_ReduceOpacityEffect.h ***/
+
 
 #endif
 #ifndef __JUCE_FONT_JUCEHEADER__
@@ -27212,7 +27552,7 @@ private:
 #endif
 #ifndef __JUCE_PATHITERATOR_JUCEHEADER__
 
-/********* Start of inlined file: juce_PathIterator.h *********/
+/*** Start of inlined file: juce_PathIterator.h ***/
 #ifndef __JUCE_PATHITERATOR_JUCEHEADER__
 #define __JUCE_PATHITERATOR_JUCEHEADER__
 
@@ -27259,7 +27599,8 @@ private:
 };
 
 #endif   // __JUCE_PATHITERATOR_JUCEHEADER__
-/********* End of inlined file: juce_PathIterator.h *********/
+/*** End of inlined file: juce_PathIterator.h ***/
+
 
 #endif
 #ifndef __JUCE_PATHSTROKETYPE_JUCEHEADER__
@@ -27270,7 +27611,7 @@ private:
 #endif
 #ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
 
-/********* Start of inlined file: juce_PositionedRectangle.h *********/
+/*** Start of inlined file: juce_PositionedRectangle.h ***/
 #ifndef __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
 #define __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
 
@@ -27392,7 +27733,8 @@ private:
 };
 
 #endif   // __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
-/********* End of inlined file: juce_PositionedRectangle.h *********/
+/*** End of inlined file: juce_PositionedRectangle.h ***/
+
 
 #endif
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
@@ -27403,7 +27745,7 @@ private:
 #endif
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
 
-/********* Start of inlined file: juce_CameraDevice.h *********/
+/*** Start of inlined file: juce_CameraDevice.h ***/
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
 #define __JUCE_CAMERADEVICE_JUCEHEADER__
 
@@ -27461,7 +27803,8 @@ private:
 
 #endif
 #endif   // __JUCE_CAMERADEVICE_JUCEHEADER__
-/********* End of inlined file: juce_CameraDevice.h *********/
+/*** End of inlined file: juce_CameraDevice.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGE_JUCEHEADER__
@@ -27469,7 +27812,7 @@ private:
 #endif
 #ifndef __JUCE_IMAGECACHE_JUCEHEADER__
 
-/********* Start of inlined file: juce_ImageCache.h *********/
+/*** Start of inlined file: juce_ImageCache.h ***/
 #ifndef __JUCE_IMAGECACHE_JUCEHEADER__
 #define __JUCE_IMAGECACHE_JUCEHEADER__
 
@@ -27516,12 +27859,13 @@ private:
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__
-/********* End of inlined file: juce_ImageCache.h *********/
+/*** End of inlined file: juce_ImageCache.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
 
-/********* Start of inlined file: juce_ImageConvolutionKernel.h *********/
+/*** Start of inlined file: juce_ImageConvolutionKernel.h ***/
 #ifndef __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
 #define __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
 
@@ -27568,12 +27912,13 @@ private:
 };
 
 #endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
-/********* End of inlined file: juce_ImageConvolutionKernel.h *********/
+/*** End of inlined file: juce_ImageConvolutionKernel.h ***/
+
 
 #endif
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
 
-/********* Start of inlined file: juce_ImageFileFormat.h *********/
+/*** Start of inlined file: juce_ImageFileFormat.h ***/
 #ifndef __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
 #define __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
 
@@ -27643,7 +27988,8 @@ private:
 };
 
 #endif   // __JUCE_IMAGEFILEFORMAT_JUCEHEADER__
-/********* End of inlined file: juce_ImageFileFormat.h *********/
+/*** End of inlined file: juce_ImageFileFormat.h ***/
+
 
 #endif
 #ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
@@ -27651,7 +27997,7 @@ private:
 #endif
 #ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
 
-/********* Start of inlined file: juce_FileBasedDocument.h *********/
+/*** Start of inlined file: juce_FileBasedDocument.h ***/
 #ifndef __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
 #define __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
 
@@ -27726,7 +28072,8 @@ private:
 };
 
 #endif   // __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__
-/********* End of inlined file: juce_FileBasedDocument.h *********/
+/*** End of inlined file: juce_FileBasedDocument.h ***/
+
 
 #endif
 #ifndef __JUCE_PROPERTIESFILE_JUCEHEADER__
@@ -27734,7 +28081,7 @@ private:
 #endif
 #ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
 
-/********* Start of inlined file: juce_RecentlyOpenedFilesList.h *********/
+/*** Start of inlined file: juce_RecentlyOpenedFilesList.h ***/
 #ifndef __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
 #define __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
 
@@ -27781,7 +28128,8 @@ private:
 };
 
 #endif   // __JUCE_RECENTLYOPENEDFILESLIST_JUCEHEADER__
-/********* End of inlined file: juce_RecentlyOpenedFilesList.h *********/
+/*** End of inlined file: juce_RecentlyOpenedFilesList.h ***/
+
 
 #endif
 #ifndef __JUCE_SELECTEDITEMSET_JUCEHEADER__
@@ -27789,7 +28137,7 @@ private:
 #endif
 #ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
 
-/********* Start of inlined file: juce_SystemClipboard.h *********/
+/*** Start of inlined file: juce_SystemClipboard.h ***/
 #ifndef __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
 #define __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
 
@@ -27802,7 +28150,8 @@ public:
 };
 
 #endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__
-/********* End of inlined file: juce_SystemClipboard.h *********/
+/*** End of inlined file: juce_SystemClipboard.h ***/
+
 
 #endif
 #ifndef __JUCE_UNDOABLEACTION_JUCEHEADER__
@@ -27813,7 +28162,8 @@ public:
 #endif
 
 #endif
-/********* End of inlined file: juce_app_includes.h *********/
+/*** End of inlined file: juce_app_includes.h ***/
+
 
 #endif
 
@@ -27879,7 +28229,7 @@ END_JUCE_NAMESPACE
 	// Auto-link the other win32 libs that are needed by library calls..
 	#if ! (defined (DONT_AUTOLINK_TO_WIN32_LIBRARIES) || defined (JUCE_DLL))
 
-/********* Start of inlined file: juce_win32_AutoLinkLibraries.h *********/
+/*** Start of inlined file: juce_win32_AutoLinkLibraries.h ***/
 // Auto-links to various win32 libs that are needed by library calls..
 #pragma comment(lib, "kernel32.lib")
 #pragma comment(lib, "user32.lib")
@@ -27908,7 +28258,8 @@ END_JUCE_NAMESPACE
 #if JUCE_USE_CAMERA
  #pragma comment (lib, "Strmiids.lib")
 #endif
-/********* End of inlined file: juce_win32_AutoLinkLibraries.h *********/
+/*** End of inlined file: juce_win32_AutoLinkLibraries.h ***/
+
 
 	#endif
 
@@ -27954,6 +28305,6 @@ END_JUCE_NAMESPACE
 #endif
 
 #endif   // __JUCE_JUCEHEADER__
-/********* End of inlined file: juce.h *********/
+/*** End of inlined file: juce.h ***/
 
 #endif   // __JUCE_AMALGAMATED_TEMPLATE_JUCEHEADER__

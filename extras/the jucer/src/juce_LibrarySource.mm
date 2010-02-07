@@ -17,4 +17,4 @@
    the amalgamated file can be slow or impossible for the debugger. But if you use the following line
    instead of the one above, then it makes it a lot easier..
 */
-//#include "../../../src/juce_amalgamated_template.cpp"
+//#include "../../../amalgamation/juce_amalgamated_template.cpp"
