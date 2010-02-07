@@ -820,6 +820,13 @@ void XmlElement::insertChildElement (XmlElement* const newNode,
     }
 }
 
+XmlElement* XmlElement::createNewChildElement (const String& tagName)
+{
+    XmlElement* const newElement = new XmlElement (tagName);
+    addChildElement (newElement);
+    return newElement;
+}
+
 bool XmlElement::replaceChildElement (XmlElement* const currentChildElement,
                                       XmlElement* const newNode) throw()
 {

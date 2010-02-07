@@ -507,6 +507,22 @@ public:
     void insertChildElement (XmlElement* const newChildNode,
                              int indexToInsertAt) throw();
 
+    /** Creates a new element with the given name and returns it, after adding it
+        as a child element.
+
+        This is a handy method that means that instead of writing this:
+        @code
+        XmlElement* newElement = new XmlElement ("foobar");
+        myParentElement->addChildElement (newElement);
+        @endcode
+
+        ..you could just write this:
+        @code
+        XmlElement* newElement = myParentElement->createNewChildElement ("foobar");
+        @endcode
+    */
+    XmlElement* createNewChildElement (const String& tagName);
+
     /** Replaces one of this element's children with another node.
 
         If the current element passed-in isn't actually a child of this element,

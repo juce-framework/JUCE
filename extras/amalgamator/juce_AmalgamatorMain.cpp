@@ -28,6 +28,8 @@
 
 
 //==============================================================================
+static const char* newLine = "\n";
+
 static bool matchesWildcard (const String& filename, const StringArray& wildcards)
 {
     for (int i = wildcards.size(); --i >= 0;)
@@ -67,16 +69,44 @@ static bool canFileBeReincluded (const File& f)
     return true;
 }
 
+static int64 calculateStreamHashCode (InputStream& in)
+{
+    int64 t = 0;
+
+    const int bufferSize = 4096;
+    HeapBlock <uint8> buffer;
+    buffer.malloc (bufferSize);
+
+    for (;;)
+    {
+        const int num = in.read (buffer, bufferSize);
+
+        if (num <= 0)
+            break;
+
+        for (int i = 0; i < num; ++i)
+            t = t * 65599 + buffer[i];
+    }
+
+    return t;
+}
+
+static int64 calculateFileHashCode (const File& file)
+{
+    ScopedPointer <FileInputStream> stream (file.createInputStream());
+    return stream != 0 ? calculateStreamHashCode (*stream) : 0;
+}
+
+
 //==============================================================================
 static bool parseFile (const File& rootFolder,
                        const File& newTargetFile,
-                       StringArray& dest,
+                       OutputStream& dest,
                        const File& file,
                        StringArray& alreadyIncludedFiles,
                        const StringArray& includesToIgnore,
                        const StringArray& wildcards,
-                       const bool isOuterFile,
-                       const bool stripUnnecessaryStuff)
+                       const bool isOuterFile)
 {
     if (! file.exists())
     {
@@ -84,30 +114,27 @@ static bool parseFile (const File& rootFolder,
         return false;
     }
 
-    String content (file.loadFileAsString());
+    StringArray lines;
+    lines.addLines (file.loadFileAsString());
 
-    if (stripUnnecessaryStuff && ! isOuterFile)
+    if (lines.size() == 0)
     {
-        if (content.startsWith (T("/*")))
-            content = content.fromFirstOccurrenceOf (T("*/"), false, false).trimStart();
-
-        content = content.replace (T("\r\n\r\n\r\n"), T("\r\n\r\n"));
+        std::cout << "!! ERROR - input file was empty: " << (const char*) file.getFullPathName();
+        return false;
     }
 
-    StringArray lines;
-    lines.addLines (content);
-    while (lines.size() > 0 && lines[0].trim().isEmpty())
-        lines.remove (0);
+    bool lastLineWasBlank = true;
 
     for (int i = 0; i < lines.size(); ++i)
     {
         String line (lines[i]);
+        String trimmed (line.trimStart());
 
-        if ((! isOuterFile) && line.contains (T("//================================================================")))
+        if ((! isOuterFile) && trimmed.startsWith (T("//================================================================")))
             line = String::empty;
 
-        if (line.trimStart().startsWithChar (T('#'))
-             && line.removeCharacters (T(" \t")).startsWithIgnoreCase (T("#include\"")))
+        if (trimmed.startsWithChar (T('#'))
+             && trimmed.removeCharacters (T(" \t")).startsWithIgnoreCase (T("#include\"")))
         {
             const int endOfInclude = line.indexOfChar (line.indexOfChar (T('\"')) + 1, T('\"')) + 1;
             const String lineUpToEndOfInclude (line.substring (0, endOfInclude));
@@ -117,8 +144,7 @@ static bool parseFile (const File& rootFolder,
                                        .upToLastOccurrenceOf (T("\""), false, false));
             const File targetFile (file.getSiblingFile (filename));
 
-            if (targetFile.exists()
-                 && targetFile.isAChildOf (rootFolder))
+            if (targetFile.exists() && targetFile.isAChildOf (rootFolder))
             {
                 if (matchesWildcard (filename.replaceCharacter (T('\\'), T('/')), wildcards)
                      && ! includesToIgnore.contains (targetFile.getFileName()))
@@ -129,45 +155,36 @@ static bool parseFile (const File& rootFolder,
                         if (! canFileBeReincluded (targetFile))
                             alreadyIncludedFiles.add (targetFile.getFullPathName());
 
-                        dest.add (String::empty);
-                        dest.add (T("/********* Start of inlined file: ")
-                                    + targetFile.getFileName()
-                                    + T(" *********/"));
+                        dest << newLine << "/*** Start of inlined file: " << targetFile.getFileName() << " ***/" << newLine;
 
                         if (! parseFile (rootFolder, newTargetFile,
                                          dest, targetFile, alreadyIncludedFiles, includesToIgnore,
-                                         wildcards, false, stripUnnecessaryStuff))
+                                         wildcards, false))
                         {
                             return false;
                         }
 
-                        dest.add (T("/********* End of inlined file: ")
-                                    + targetFile.getFileName()
-                                    + T(" *********/"));
-                        dest.add (String::empty);
+                        dest << "/*** End of inlined file: " << targetFile.getFileName() << " ***/" << newLine << newLine;
 
                         line = lineAfterInclude;
                     }
                     else
                     {
-                        if (stripUnnecessaryStuff)
-                            line = String::empty;
-                        else
-                            line = T("/* ") + lineUpToEndOfInclude + T(" */") + lineAfterInclude;
+                        line = String::empty;
                     }
                 }
                 else
                 {
                     line = lineUpToEndOfInclude.upToFirstOccurrenceOf (T("\""), true, false)
-                        + targetFile.getRelativePathFrom (newTargetFile.getParentDirectory())
-                                    .replaceCharacter (T('\\'), T('/'))
-                        + T("\"")
-                        + lineAfterInclude;
+                            + targetFile.getRelativePathFrom (newTargetFile.getParentDirectory())
+                                        .replaceCharacter (T('\\'), T('/'))
+                            + T("\"")
+                            + lineAfterInclude;
                 }
             }
         }
 
-        if (line.trimStart().startsWith (T("/*")))
+        if (trimmed.startsWith (T("/*")) && (i > 10 || ! isOuterFile))
         {
             int originalI = i;
             String originalLine = line;
@@ -228,7 +245,10 @@ static bool parseFile (const File& rootFolder,
             }
         }
 
-        dest.add (line);
+        if (line.isNotEmpty() || ! lastLineWasBlank)
+            dest << line << newLine;
+
+        lastLineWasBlank = line.isEmpty();
     }
 
     return true;
@@ -236,8 +256,7 @@ static bool parseFile (const File& rootFolder,
 
 //==============================================================================
 static bool munge (const File& templateFile, const File& targetFile, const String& wildcard,
-                   const bool stripUnnecessaryStuff, StringArray& alreadyIncludedFiles,
-                   const StringArray& includesToIgnore)
+                   StringArray& alreadyIncludedFiles, const StringArray& includesToIgnore)
 {
     if (! templateFile.existsAsFile())
     {
@@ -245,45 +264,43 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
         return false;
     }
 
-    StringArray lines, wildcards;
+    StringArray wildcards;
     wildcards.addTokens (wildcard, T(";,"), T("'\""));
     wildcards.trim();
     wildcards.removeEmptyStrings();
 
+    std::cout << "Building: " << (const char*) targetFile.getFullPathName() << "...\n";
+
+    TemporaryFile temp (targetFile);
+    ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream (1024 * 128));
+                                          
+    if (out == 0)
+    {
+        std::cout << "\n!! ERROR - couldn't write to the target file: "
+                  << (const char*) temp.getFile().getFullPathName() << "\n\n";
+        return false;
+    }
+
     if (! parseFile (targetFile.getParentDirectory(),
                      targetFile,
-                     lines, templateFile,
+                     *out, templateFile,
                      alreadyIncludedFiles,
                      includesToIgnore,
                      wildcards,
-                     true, stripUnnecessaryStuff))
+                     true))
     {
         return false;
     }
 
-    std::cout << "Building: " << (const char*) targetFile.getFullPathName() << "...\n";
+    out = 0;
 
-    for (int i = 0; i < lines.size() - 2; ++i)
+    if (calculateFileHashCode (targetFile) == calculateFileHashCode (temp.getFile()))
     {
-        if (lines[i].isEmpty() && lines[i + 1].isEmpty())
-        {
-            lines.remove (i + 1);
-            --i;
-        }
-    }
-
-    MemoryBlock newData, oldData;
-    const String newText (lines.joinIntoString (T("\n")) + T("\n"));
-    newData.append ((const char*) newText, (int) strlen ((const char*) newText));
-    targetFile.loadFileAsData (oldData);
-
-    if (oldData == newData)
-    {
-        std::cout << "(No need to write - new file is identical)\n";
+        std::cout << " -- No need to write - new file is identical\n";
         return true;
     }
 
-    if (! targetFile.replaceWithData (newData.getData(), newData.getSize()))
+    if (! temp.overwriteTargetFileWithTemporary())
     {
         std::cout << "\n!! ERROR - couldn't write to the target file: "
                   << (const char*) targetFile.getFullPathName() << "\n\n";
@@ -328,16 +345,15 @@ static void mungeJuce (const File& juceFolder)
         return;
     }
 
-    const File hppTemplate (juceFolder.getChildFile (T("src/juce_amalgamated_template.h")));
-    const File cppTemplate (juceFolder.getChildFile (T("src/juce_amalgamated_template.cpp")));
+    const File hppTemplate (juceFolder.getChildFile (T("amalgamation/juce_amalgamated_template.h")));
+    const File cppTemplate (juceFolder.getChildFile (T("amalgamation/juce_amalgamated_template.cpp")));
 
     const File hppTarget (juceFolder.getChildFile (T("juce_amalgamated.h")));
     const File cppTarget (juceFolder.getChildFile (T("juce_amalgamated.cpp")));
 
     StringArray alreadyIncludedFiles, includesToIgnore;
 
-    if (! munge (hppTemplate, hppTarget,
-                 "*.h", true, alreadyIncludedFiles, includesToIgnore))
+    if (! munge (hppTemplate, hppTarget, "*.h", alreadyIncludedFiles, includesToIgnore))
     {
         return;
     }
@@ -345,9 +361,7 @@ static void mungeJuce (const File& juceFolder)
     findAllFilesIncludedIn (hppTemplate, alreadyIncludedFiles);
     includesToIgnore.add (hppTarget.getFileName());
 
-    munge (cppTemplate, cppTarget,
-           "*.cpp;*.c;*.h;*.mm;*.m", true, alreadyIncludedFiles,
-           includesToIgnore);
+    munge (cppTemplate, cppTarget, "*.cpp;*.c;*.h;*.mm;*.m", alreadyIncludedFiles, includesToIgnore);
 }
 
 //==============================================================================
@@ -366,7 +380,7 @@ int main (int argc, char* argv[])
         const String wildcard (String (argv[3]).unquoted());
         StringArray alreadyIncludedFiles, includesToIgnore;
 
-        munge (templateFile, targetFile, wildcard, false, alreadyIncludedFiles, includesToIgnore);
+        munge (templateFile, targetFile, wildcard, alreadyIncludedFiles, includesToIgnore);
     }
     else if (argc == 2)
     {

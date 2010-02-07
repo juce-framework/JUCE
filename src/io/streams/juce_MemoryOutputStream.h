@@ -65,7 +65,7 @@ public:
 
         @see getDataSize
     */
-    const char* getData() throw();
+    const char* getData() const throw();
 
     /** Returns the number of bytes of data that have been written to the stream.
 

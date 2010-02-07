@@ -86,7 +86,7 @@ bool MemoryOutputStream::write (const void* buffer, int howMany)
     return true;
 }
 
-const char* MemoryOutputStream::getData() throw()
+const char* MemoryOutputStream::getData() const throw()
 {
     if (data->getSize() > size)
         ((char*) data->getData()) [size] = 0;
