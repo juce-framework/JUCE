@@ -340,7 +340,7 @@ public:
             break;
         }
 
-        Rectangle parentArea;
+        Rectangle<int> parentArea;
 
         if (component->findParentComponentOfClass ((ComponentLayoutEditor*) 0) != 0)
         {
@@ -362,13 +362,13 @@ public:
         PositionedRectangle whRect (p);
 
         xyRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                         Rectangle (x, y, xw, yh));
+                         Rectangle<int> (x, y, xw, yh));
 
         whRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                         Rectangle (x, y, w, h));
+                         Rectangle<int> (x, y, w, h));
 
         p.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                    Rectangle (x, y, xw, yh));
+                    Rectangle<int> (x, y, xw, yh));
 
         p.setX (xyRect.getX());
         p.setY (xyRect.getY());
@@ -384,7 +384,7 @@ public:
 
     void resized()
     {
-        const Rectangle r (getLookAndFeel().getPropertyComponentContentPosition (*this));
+        const Rectangle<int> r (getLookAndFeel().getPropertyComponentContentPosition (*this));
 
         button->changeWidthToFitText (r.getHeight());
         button->setTopRightPosition (r.getRight(), r.getY());

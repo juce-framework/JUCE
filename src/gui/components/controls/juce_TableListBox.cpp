@@ -71,7 +71,7 @@ public:
                 if (! columnsWithComponents [i])
                 {
                     const int columnId = header->getColumnIdOfIndex (i, true);
-                    Rectangle columnRect (header->getColumnPosition (i));
+                    Rectangle<int> columnRect (header->getColumnPosition (i));
                     columnRect.setSize (columnRect.getWidth(), getHeight());
 
                     g.saveState();
@@ -125,7 +125,7 @@ public:
                         newComp->getProperties().set (tagPropertyName, newTag);
                         newComp->getProperties().set (tableColumnPropertyTag, columnId);
 
-                        const Rectangle columnRect (header->getColumnPosition (i));
+                        const Rectangle<int> columnRect (header->getColumnPosition (i));
                         newComp->setBounds (columnRect.getX(), 0, columnRect.getWidth(), getHeight());
 
                         columnsWithComponents.setBit (i);
@@ -158,7 +158,7 @@ public:
 
             if (columnId != 0)
             {
-                const Rectangle columnRect (owner.getHeader()->getColumnPosition (owner.getHeader()->getIndexOfColumnId (columnId, true)));
+                const Rectangle<int> columnRect (owner.getHeader()->getColumnPosition (owner.getHeader()->getIndexOfColumnId (columnId, true)));
                 c->setBounds (columnRect.getX(), 0, columnRect.getWidth(), getHeight());
             }
         }
@@ -380,19 +380,19 @@ bool TableListBox::isAutoSizeMenuOptionShown() const
     return autoSizeOptionsShown;
 }
 
-const Rectangle TableListBox::getCellPosition (const int columnId,
-                                               const int rowNumber,
-                                               const bool relativeToComponentTopLeft) const
+const Rectangle<int> TableListBox::getCellPosition (const int columnId,
+                                                    const int rowNumber,
+                                                    const bool relativeToComponentTopLeft) const
 {
-    Rectangle headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+    Rectangle<int> headerCell (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
     if (relativeToComponentTopLeft)
         headerCell.translate (header->getX(), 0);
 
-    const Rectangle row (getRowPosition (rowNumber, relativeToComponentTopLeft));
+    const Rectangle<int> row (getRowPosition (rowNumber, relativeToComponentTopLeft));
 
-    return Rectangle (headerCell.getX(), row.getY(),
-                      headerCell.getWidth(), row.getHeight());
+    return Rectangle<int> (headerCell.getX(), row.getY(),
+                           headerCell.getWidth(), row.getHeight());
 }
 
 void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
@@ -401,7 +401,7 @@ void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)
 
     if (scrollbar != 0)
     {
-        const Rectangle pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
+        const Rectangle<int> pos (header->getColumnPosition (header->getIndexOfColumnId (columnId, true)));
 
         double x = scrollbar->getCurrentRangeStart();
         const double w = scrollbar->getCurrentRangeSize();

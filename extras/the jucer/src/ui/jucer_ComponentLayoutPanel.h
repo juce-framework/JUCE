@@ -43,7 +43,7 @@ public:
     ComponentLayout& getLayout() const throw()          { return layout;}
 
     void updatePropertiesList();
-    const Rectangle getComponentArea() const;
+    const Rectangle<int> getComponentArea() const;
 
     Image* createComponentSnapshot() const;
 

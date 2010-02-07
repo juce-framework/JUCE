@@ -174,10 +174,10 @@ public:
     virtual bool isFullScreen() const = 0;
 
     /** Sets the size to restore to if fullscreen mode is turned off. */
-    void setNonFullScreenBounds (const Rectangle& newBounds) throw();
+    void setNonFullScreenBounds (const Rectangle<int>& newBounds) throw();
 
     /** Returns the size to restore to if fullscreen mode is turned off. */
-    const Rectangle& getNonFullScreenBounds() const throw();
+    const Rectangle<int>& getNonFullScreenBounds() const throw();
 
     /** Attempts to change the icon associated with this window.
     */
@@ -365,7 +365,7 @@ protected:
     Component* const component;
     const int styleFlags;
     RectangleList maskedRegion;
-    Rectangle lastNonFullscreenBounds;
+    Rectangle<int> lastNonFullscreenBounds;
     uint32 lastPaintTime;
     ComponentBoundsConstrainer* constrainer;
 

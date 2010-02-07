@@ -68,9 +68,9 @@ public:
         return 0;
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
-        const Rectangle r (position.getRectangle (parentArea, layout));
+        const Rectangle<int> r (position.getRectangle (parentArea, layout));
 
         const Drawable* const image = getDrawable();
 
@@ -306,14 +306,12 @@ public:
 
         if (image != 0 && getParentComponent() != 0)
         {
-            const Rectangle parentArea (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+            const Rectangle<int> parentArea (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
-            Rectangle r (getCurrentBounds (parentArea));
+            Rectangle<int> r (getCurrentBounds (parentArea));
+            Rectangle<float> bounds (image->getBounds());
 
-            float x, y, w, h;
-            image->getBounds (x, y, w, h);
-
-            r.setSize ((int) (w + 1.0f), (int) (h + 1.0f));
+            r.setSize ((int) (bounds.getWidth() + 1.0f), (int) (bounds.getHeight() + 1.0f));
 
             setCurrentBounds (r, parentArea, true);
         }

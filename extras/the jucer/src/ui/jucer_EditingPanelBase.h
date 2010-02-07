@@ -53,7 +53,7 @@ public:
 
     virtual void updatePropertiesList() = 0;
 
-    virtual const Rectangle getComponentArea() const = 0;
+    virtual const Rectangle<int> getComponentArea() const = 0;
 
     double getZoom() const;
     void setZoom (double newScale);

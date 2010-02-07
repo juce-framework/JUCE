@@ -180,8 +180,8 @@ void ComponentOverlayComponent::resizeEnd()
 }
 
 void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
-                                             const Rectangle& previousBounds,
-                                             const Rectangle& limits,
+                                             const Rectangle<int>& previousBounds,
+                                             const Rectangle<int>& limits,
                                              const bool isStretchingTop,
                                              const bool isStretchingLeft,
                                              const bool isStretchingBottom,
@@ -234,7 +234,7 @@ void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
 
 void ComponentOverlayComponent::applyBoundsToComponent (Component* component, int x, int y, int w, int h)
 {
-    if (component->getBounds() != Rectangle (x, y, w, h))
+    if (component->getBounds() != Rectangle<int> (x, y, w, h))
     {
         layout.getDocument()->getUndoManager().undoCurrentTransactionOnly();
 

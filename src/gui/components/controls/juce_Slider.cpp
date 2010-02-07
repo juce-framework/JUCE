@@ -938,7 +938,7 @@ void Slider::resized()
 
     if (style == IncDecButtons)
     {
-        Rectangle buttonRect (sliderRect);
+        Rectangle<int> buttonRect (sliderRect);
 
         if (textBoxPos == TextBoxLeft || textBoxPos == TextBoxRight)
             buttonRect.expand (-2, 0);

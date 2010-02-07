@@ -53,13 +53,13 @@ public:
         @param pathToAdd                the path to add to the table
         @param transform                a transform to apply to the path being added
     */
-    EdgeTable (const Rectangle& clipLimits,
+    EdgeTable (const Rectangle<int>& clipLimits,
                const Path& pathToAdd,
                const AffineTransform& transform) throw();
 
     /** Creates an edge table containing a rectangle.
     */
-    EdgeTable (const Rectangle& rectangleToAdd) throw();
+    EdgeTable (const Rectangle<int>& rectangleToAdd) throw();
 
     /** Creates an edge table containing a rectangle list.
     */
@@ -80,12 +80,12 @@ public:
     ~EdgeTable() throw();
 
     //==============================================================================
-    void clipToRectangle (const Rectangle& r) throw();
-    void excludeRectangle (const Rectangle& r) throw();
+    void clipToRectangle (const Rectangle<int>& r) throw();
+    void excludeRectangle (const Rectangle<int>& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
     void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
     bool isEmpty() throw();
-    const Rectangle& getMaximumBounds() const throw()       { return bounds; }
+    const Rectangle<int>& getMaximumBounds() const throw()       { return bounds; }
     void translate (float dx, int dy) throw();
 
     /** Reduces the amount of space the table has allocated.
@@ -195,8 +195,8 @@ public:
 
 private:
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-    HeapBlock <int> table;
-    Rectangle bounds;
+    HeapBlock<int> table;
+    Rectangle<int> bounds;
     int maxEdgesPerLine, lineStrideElements;
     bool needToCheckEmptinesss;
 

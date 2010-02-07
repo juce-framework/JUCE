@@ -439,7 +439,7 @@ l    */
         The rectangle returned is relative to the component's top-left corner.
         @see scrollEditorToPositionCaret
     */
-    const Rectangle getCaretRectangle();
+    const Rectangle<int> getCaretRectangle();
 
     /** Selects a section of the text.
     */

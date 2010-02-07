@@ -77,19 +77,15 @@ void ShapeButton::setShape (const Path& newShape,
 
     if (resizeNowToFitThisShape)
     {
-        float x, y, w, h;
-        shape.getBounds (x, y, w, h);
-        shape.applyTransform (AffineTransform::translation (-x, -y));
+        Rectangle<float> bounds (shape.getBounds());
 
         if (hasShadow)
-        {
-            w += 4.0f;
-            h += 4.0f;
-            shape.applyTransform (AffineTransform::translation (2.0f, 2.0f));
-        }
+            bounds.expand (4.0f, 4.0f);
 
-        setSize (1 + (int) (w + outlineWidth),
-                 1 + (int) (h + outlineWidth));
+        shape.applyTransform (AffineTransform::translation (-bounds.getX(), -bounds.getY()));
+
+        setSize (1 + (int) (bounds.getWidth() + outlineWidth),
+                 1 + (int) (bounds.getHeight() + outlineWidth));
     }
 }
 

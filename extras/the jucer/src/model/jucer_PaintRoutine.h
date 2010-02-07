@@ -66,7 +66,7 @@ public:
     void setBackgroundColour (const Colour& newColour) throw();
 
     void fillWithBackground (Graphics& g, const bool drawOpaqueBackground);
-    void drawElements (Graphics& g, const Rectangle& relativeTo);
+    void drawElements (Graphics& g, const Rectangle<int>& relativeTo);
 
     void dropImageAt (const File& f, int x, int y);
 
@@ -86,11 +86,11 @@ public:
     void groupSelected();
     void ungroupSelected();
 
-    void startDragging (const Rectangle& parentArea);
-    void dragSelectedComps (int dxFromDragStart, int dyFromDragStart, const Rectangle& parentArea);
+    void startDragging (const Rectangle<int>& parentArea);
+    void dragSelectedComps (int dxFromDragStart, int dyFromDragStart, const Rectangle<int>& parentArea);
     void endDragging();
 
-    void bringLostItemsBackOnScreen (const Rectangle& parentArea);
+    void bringLostItemsBackOnScreen (const Rectangle<int>& parentArea);
 
     //==============================================================================
     void setDocument (JucerDocument* const document_)                       { document = document_; }

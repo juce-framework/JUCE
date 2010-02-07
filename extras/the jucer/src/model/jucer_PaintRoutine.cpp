@@ -436,13 +436,13 @@ void PaintRoutine::ungroupSelected()
     }
 }
 
-void PaintRoutine::bringLostItemsBackOnScreen (const Rectangle& parentArea)
+void PaintRoutine::bringLostItemsBackOnScreen (const Rectangle<int>& parentArea)
 {
     for (int i = 0; i < elements.size(); ++i)
     {
         PaintElement* const c = elements[i];
 
-        Rectangle r (c->getCurrentBounds (parentArea));
+        Rectangle<int> r (c->getCurrentBounds (parentArea));
 
         if (! r.intersects (parentArea))
         {
@@ -452,13 +452,13 @@ void PaintRoutine::bringLostItemsBackOnScreen (const Rectangle& parentArea)
     }
 }
 
-void PaintRoutine::startDragging (const Rectangle& parentArea)
+void PaintRoutine::startDragging (const Rectangle<int>& parentArea)
 {
     for (int i = 0; i < elements.size(); ++i)
     {
         PaintElement* const c = elements[i];
 
-        Rectangle r (c->getCurrentBounds (parentArea));
+        Rectangle<int> r (c->getCurrentBounds (parentArea));
 
         c->getProperties().set ("xDragStart", r.getX());
         c->getProperties().set ("yDragStart", r.getY());
@@ -467,7 +467,7 @@ void PaintRoutine::startDragging (const Rectangle& parentArea)
     getDocument()->getUndoManager().beginNewTransaction();
 }
 
-void PaintRoutine::dragSelectedComps (int dx, int dy, const Rectangle& parentArea)
+void PaintRoutine::dragSelectedComps (int dx, int dy, const Rectangle<int>& parentArea)
 {
     getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -484,7 +484,7 @@ void PaintRoutine::dragSelectedComps (int dx, int dy, const Rectangle& parentAre
         const int startX = c->getProperties() ["xDragStart"];
         const int startY = c->getProperties() ["yDragStart"];
 
-        Rectangle r (c->getCurrentBounds (parentArea));
+        Rectangle<int> r (c->getCurrentBounds (parentArea));
 
         if (document != 0 && selectedElements.getNumSelected() == 1)
         {
@@ -524,7 +524,7 @@ void PaintRoutine::fillWithBackground (Graphics& g, const bool drawOpaqueBackgro
     }
 }
 
-void PaintRoutine::drawElements (Graphics& g, const Rectangle& relativeTo)
+void PaintRoutine::drawElements (Graphics& g, const Rectangle<int>& relativeTo)
 {
     Component temp;
     temp.setBounds (relativeTo);
@@ -540,8 +540,7 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
 
     if (d != 0)
     {
-        float ix, iy, iw, ih;
-        d->getBounds (ix, iy, iw, ih);
+        Rectangle<float> bounds (d->getBounds());
         delete d;
 
         PaintElement* newElement
@@ -569,8 +568,8 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
 
             pei->setResource (resourceName, true);
 
-            const int imageW = (int) (ix + iw + 1.0f);
-            const int imageH = (int) (iy + ih + 1.0f);
+            const int imageW = (int) (bounds.getRight() + 1.0f);
+            const int imageH = (int) (bounds.getBottom() + 1.0f);
 
             RelativePositionedRectangle pr;
             pr.rect.setX (x - imageW / 2);

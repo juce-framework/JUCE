@@ -312,6 +312,9 @@ public:
     */
     int getRight() const throw()                            { return bounds_.getRight(); }
 
+    /** Returns the component's top-left position as a Point. */
+    const Point<int> getPosition() const throw()            { return bounds_.getPosition(); }
+
     /** Returns the y co-ordinate of the bottom edge of this component.
 
         This is a distance in pixels from the top edge of the component's parent.
@@ -322,7 +325,7 @@ public:
 
         The rectangle returned is relative to the top-left of the component's parent.
     */
-    const Rectangle& getBounds() const throw()              { return bounds_; }
+    const Rectangle<int>& getBounds() const throw()         { return bounds_; }
 
     /** Returns the region of this component that's not obscured by other, opaque components.
 
@@ -411,7 +414,7 @@ public:
 
         @see setBounds
     */
-    void setBounds (const Rectangle& newBounds);
+    void setBounds (const Rectangle<int>& newBounds);
 
     /** Changes the component's position and size in terms of fractions of its parent's size.
 
@@ -501,7 +504,7 @@ public:
         monitors, it will return the area of the monitor that contains the component's
         centre.
     */
-    const Rectangle getParentMonitorArea() const throw();
+    const Rectangle<int> getParentMonitorArea() const throw();
 
     //==============================================================================
     /** Returns the number of child components that this component contains.
@@ -835,7 +838,7 @@ public:
 
         @see paintEntireComponent
     */
-    Image* createComponentSnapshot (const Rectangle& areaToGrab,
+    Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
                                     const bool clipImageToComponentBounds = true);
 
     /** Draws this component and all its subcomponents onto the specified graphics
@@ -1907,7 +1910,7 @@ private:
     String componentName_;
     Component* parentComponent_;
     uint32 componentUID;
-    Rectangle bounds_;
+    Rectangle<int> bounds_;
     int numDeepMouseListeners;
     Array <Component*> childComponentList_;
     LookAndFeel* lookAndFeel_;
@@ -1978,13 +1981,13 @@ private:
     static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result,
                                   const int deltaX, const int deltaY,
-                                  const Rectangle& clipRect,
+                                  const Rectangle<int>& clipRect,
                                   const Component* const compToAvoid) const throw();
-    void clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
+    void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
                               const int deltaX, const int deltaY) const throw();
 
     // how much of the component is not off the edges of its parents
-    const Rectangle getUnclippedArea() const;
+    const Rectangle<int> getUnclippedArea() const;
     void sendVisibilityChangeMessage();
 
     //==============================================================================

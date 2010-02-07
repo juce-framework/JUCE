@@ -533,8 +533,8 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
         int w = (int) r.size.width;
         int h = (int) r.size.height;
 
-        Rectangle original ((int) current.origin.x, (int) current.origin.y,
-                            (int) current.size.width, (int) current.size.height);
+        Rectangle<int> original ((int) current.origin.x, (int) current.origin.y,
+                                 (int) current.size.width, (int) current.size.height);
 
         constrainer->checkBounds (x, y, w, h,
                                   original,
@@ -567,7 +567,7 @@ void UIViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 {
     if (! isSharedWindow)
     {
-        Rectangle r (lastNonFullscreenBounds);
+        Rectangle<int> r (lastNonFullscreenBounds);
 
         setMinimised (false);
 
@@ -773,9 +773,9 @@ class AsyncRepaintMessage  : public CallbackMessage
 {
 public:
     UIViewComponentPeer* const peer;
-    const Rectangle rect;
+    const Rectangle<int> rect;
 
-    AsyncRepaintMessage (UIViewComponentPeer* const peer_, const Rectangle& rect_)
+    AsyncRepaintMessage (UIViewComponentPeer* const peer_, const Rectangle<int>& rect_)
         : peer (peer_), rect (rect_)
     {
     }
@@ -791,7 +791,7 @@ void UIViewComponentPeer::repaint (int x, int y, int w, int h)
 {
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
     {
-        (new AsyncRepaintMessage (this, Rectangle (x, y, w, h)))->post();
+        (new AsyncRepaintMessage (this, Rectangle<int> (x, y, w, h)))->post();
     }
     else
     {

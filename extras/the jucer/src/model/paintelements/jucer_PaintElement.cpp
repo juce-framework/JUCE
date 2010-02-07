@@ -134,13 +134,13 @@ void PaintElement::setPosition (const RelativePositionedRectangle& newPosition, 
 }
 
 //==============================================================================
-const Rectangle PaintElement::getCurrentBounds (const Rectangle& parentArea) const
+const Rectangle<int> PaintElement::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
     return position.getRectangle (parentArea, getDocument()->getComponentLayout());
 }
 
-void PaintElement::setCurrentBounds (const Rectangle& newBounds,
-                                     const Rectangle& parentArea,
+void PaintElement::setCurrentBounds (const Rectangle<int>& newBounds,
+                                     const Rectangle<int>& parentArea,
                                      const bool undoable)
 {
     RelativePositionedRectangle pr (position);
@@ -148,7 +148,7 @@ void PaintElement::setCurrentBounds (const Rectangle& newBounds,
                    newBounds.getY() - parentArea.getY(),
                    jmax (1, newBounds.getWidth()),
                    jmax (1, newBounds.getHeight()),
-                   Rectangle (0, 0, parentArea.getWidth(), parentArea.getHeight()),
+                   Rectangle<int> (0, 0, parentArea.getWidth(), parentArea.getHeight()),
                    getDocument()->getComponentLayout());
 
     setPosition (pr, undoable);
@@ -156,7 +156,7 @@ void PaintElement::setCurrentBounds (const Rectangle& newBounds,
     updateBounds (parentArea);
 }
 
-void PaintElement::updateBounds (const Rectangle& parentArea)
+void PaintElement::updateBounds (const Rectangle<int>& parentArea)
 {
     if (! parentArea.isEmpty())
     {
@@ -236,13 +236,13 @@ void PaintElement::parentHierarchyChanged()
 }
 
 //==============================================================================
-void PaintElement::drawExtraEditorGraphics (Graphics& g, const Rectangle& relativeTo)
+void PaintElement::drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo)
 {
 }
 
 void PaintElement::paint (Graphics& g)
 {
-    Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
     g.saveState();
     g.setOrigin (area.getX() - getX(), area.getY() - getY());
@@ -298,7 +298,7 @@ void PaintElement::mouseDrag (const MouseEvent& e)
     if (! e.mods.isPopupMenu())
     {
         jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0);
-        const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
         if (selected && ! dragging)
         {
@@ -337,8 +337,8 @@ void PaintElement::resizeEnd()
 }
 
 void PaintElement::checkBounds (int& x, int& y, int& w, int& h,
-                                const Rectangle& previousBounds,
-                                const Rectangle& limits,
+                                const Rectangle<int>& previousBounds,
+                                const Rectangle<int>& limits,
                                 const bool isStretchingTop,
                                 const bool isStretchingLeft,
                                 const bool isStretchingBottom,
@@ -356,7 +356,7 @@ void PaintElement::checkBounds (int& x, int& y, int& w, int& h,
     if (document != 0 && document->isSnapActive (true))
     {
         jassert (getParentComponent() != 0);
-        const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
         x += borderThickness - area.getX();
         y += borderThickness - area.getY();
@@ -387,23 +387,23 @@ void PaintElement::checkBounds (int& x, int& y, int& w, int& h,
 
 void PaintElement::applyBoundsToComponent (Component* component, int x, int y, int w, int h)
 {
-    if (getBounds() != Rectangle (x, y, w, h))
+    if (getBounds() != Rectangle<int> (x, y, w, h))
     {
         getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
         jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0);
 
-        setCurrentBounds (Rectangle (x, y, w, h)
+        setCurrentBounds (Rectangle<int> (x, y, w, h)
                             .expanded (-borderThickness, -borderThickness),
                           ((PaintRoutineEditor*) getParentComponent())->getComponentArea(),
                           true);
     }
 }
 
-const Rectangle PaintElement::getCurrentAbsoluteBounds() const
+const Rectangle<int> PaintElement::getCurrentAbsoluteBounds() const
 {
     jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0);
-    const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
     return position.getRectangle (area, getDocument()->getComponentLayout());
 }
@@ -411,7 +411,7 @@ const Rectangle PaintElement::getCurrentAbsoluteBounds() const
 void PaintElement::getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const
 {
     jassert (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0);
-    const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
     position.getRectangleDouble (x, y, w, h, area, getDocument()->getComponentLayout());
 }

@@ -302,7 +302,7 @@ void TabbedComponent::resized()
         indents.setRight (tabDepth + edgeIndent);
     }
 
-    const Rectangle bounds (indents.subtractedFrom (Rectangle (0, 0, getWidth(), getHeight())));
+    const Rectangle<int> bounds (indents.subtractedFrom (Rectangle<int> (0, 0, getWidth(), getHeight())));
 
     for (int i = contentComponents.size(); --i >= 0;)
         if (contentComponents.getUnchecked (i) != 0)

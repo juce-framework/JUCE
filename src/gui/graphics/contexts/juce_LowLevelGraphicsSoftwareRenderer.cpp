@@ -184,7 +184,7 @@ public:
         if (! transform.isIdentity())
         {
             const Line l (x2, y2, x1, y1);
-            const Point p3 = l.getPointAlongLine (0.0f, 100.0f);
+            const Point<float> p3 = l.getPointAlongLine (0.0f, 100.0f);
             float x3 = p3.getX();
             float y3 = p3.getY();
 
@@ -194,7 +194,7 @@ public:
 
             const Line l2 (x2, y2, x3, y3);
             const float prop = l2.findNearestPointTo (x1, y1);
-            const Point newP2 (l2.getPointAlongLineProportionally (prop));
+            const Point<float> newP2 (l2.getPointAlongLineProportionally (prop));
 
             x2 = newP2.getX();
             y2 = newP2.getY();
@@ -901,7 +901,7 @@ private:
 class LLGCSavedState
 {
 public:
-    LLGCSavedState (const Rectangle& clip_, const int xOffset_, const int yOffset_,
+    LLGCSavedState (const Rectangle<int>& clip_, const int xOffset_, const int yOffset_,
                     const Font& font_, const FillType& fillType_,
                     const Graphics::ResamplingQuality interpolationQuality_) throw()
         : edgeTable (new EdgeTableHolder (EdgeTable (clip_))),
@@ -922,7 +922,7 @@ public:
     {
     }
 
-    bool clipToRectangle (const Rectangle& r) throw()
+    bool clipToRectangle (const Rectangle<int>& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
         edgeTable->edgeTable.clipToRectangle (r.translated (xOffset, yOffset));
@@ -940,7 +940,7 @@ public:
         return ! edgeTable->edgeTable.isEmpty();
     }
 
-    bool excludeClipRectangle (const Rectangle& r) throw()
+    bool excludeClipRectangle (const Rectangle<int>& r) throw()
     {
         dupeEdgeTableIfMultiplyReferenced();
         edgeTable->edgeTable.excludeRectangle (r.translated (xOffset, yOffset));
@@ -1009,7 +1009,7 @@ public:
     }
 
     //==============================================================================
-    void renderImage (Image& destImage, const Image& sourceImage, const Rectangle& srcClip,
+    void renderImage (Image& destImage, const Image& sourceImage, const Rectangle<int>& srcClip,
                       const AffineTransform& t, const EdgeTable* const tiledFillClipRegion) throw()
     {
         const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
@@ -1036,7 +1036,7 @@ public:
                 }
                 else
                 {
-                    EdgeTable et (Rectangle (tx, ty, srcClip.getWidth(), srcClip.getHeight()).getIntersection (destImage.getBounds()));
+                    EdgeTable et (Rectangle<int> (tx, ty, srcClip.getWidth(), srcClip.getHeight()).getIntersection (destImage.getBounds()));
                     et.clipToEdgeTable (edgeTable->edgeTable);
 
                     if (! et.isEmpty())
@@ -1068,7 +1068,7 @@ public:
     }
 
     //==============================================================================
-    void clipToImageAlpha (const Image& image, const Rectangle& srcClip, const AffineTransform& t) throw()
+    void clipToImageAlpha (const Image& image, const Rectangle<int>& srcClip, const AffineTransform& t) throw()
     {
         if (! image.hasAlphaChannel())
         {
@@ -1107,7 +1107,7 @@ public:
 
         if (transform.isSingularity())
         {
-            et.clipToRectangle (Rectangle());
+            et.clipToRectangle (Rectangle<int>());
             return;
         }
 
@@ -1140,7 +1140,7 @@ public:
     template <class SrcPixelType>
     void straightClipImage (EdgeTable& et, const Image::BitmapData& srcData, int imageX, int imageY, const SrcPixelType *) throw()
     {
-        Rectangle r (imageX, imageY, srcData.width, srcData.height);
+        Rectangle<int> r (imageX, imageY, srcData.width, srcData.height);
         et.clipToRectangle (r);
 
         ImageFillEdgeTableRenderer <SrcPixelType, SrcPixelType, false> renderer (srcData, srcData, 255, imageX, imageY);
@@ -1363,7 +1363,7 @@ void LowLevelGraphicsSoftwareRenderer::setOrigin (int x, int y)
     currentState->yOffset += y;
 }
 
-bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle& r)
+bool LowLevelGraphicsSoftwareRenderer::clipToRectangle (const Rectangle<int>& r)
 {
     return currentState->clipToRectangle (r);
 }
@@ -1373,7 +1373,7 @@ bool LowLevelGraphicsSoftwareRenderer::clipToRectangleList (const RectangleList&
     return currentState->clipToRectangleList (clipRegion);
 }
 
-void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle& r)
+void LowLevelGraphicsSoftwareRenderer::excludeClipRectangle (const Rectangle<int>& r)
 {
     currentState->excludeClipRectangle (r);
 }
@@ -1383,18 +1383,18 @@ void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const Affin
     currentState->clipToPath (path, transform);
 }
 
-void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform)
+void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform)
 {
     currentState->clipToImageAlpha (sourceImage, srcClip, transform);
 }
 
-bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle& r)
+bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle<int>& r)
 {
     return currentState->edgeTable->edgeTable.getMaximumBounds()
                 .intersects (r.translated (currentState->xOffset, currentState->yOffset));
 }
 
-const Rectangle LowLevelGraphicsSoftwareRenderer::getClipBounds() const
+const Rectangle<int> LowLevelGraphicsSoftwareRenderer::getClipBounds() const
 {
     return currentState->edgeTable->edgeTable.getMaximumBounds().translated (-currentState->xOffset, -currentState->yOffset);
 }
@@ -1442,10 +1442,10 @@ void LowLevelGraphicsSoftwareRenderer::setInterpolationQuality (Graphics::Resamp
 }
 
 //==============================================================================
-void LowLevelGraphicsSoftwareRenderer::fillRect (const Rectangle& r, const bool replaceExistingContents)
+void LowLevelGraphicsSoftwareRenderer::fillRect (const Rectangle<int>& r, const bool replaceExistingContents)
 {
-    const Rectangle& totalClip = currentState->edgeTable->edgeTable.getMaximumBounds();
-    const Rectangle clipped (totalClip.getIntersection (r.translated (currentState->xOffset, currentState->yOffset)));
+    const Rectangle<int>& totalClip = currentState->edgeTable->edgeTable.getMaximumBounds();
+    const Rectangle<int> clipped (totalClip.getIntersection (r.translated (currentState->xOffset, currentState->yOffset)));
 
     if (! clipped.isEmpty())
     {
@@ -1463,7 +1463,7 @@ void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineT
     currentState->fillEdgeTable (image, et);
 }
 
-void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const Rectangle& srcClip,
+void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                                                   const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
     jassert (sourceImage.getBounds().contains (srcClip));
@@ -1590,15 +1590,11 @@ public:
             if (! glyphPath.isEmpty())
             {
                 const float fontHeight = font.getHeight();
-                const AffineTransform transform (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight));
+                const AffineTransform transform (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
+                                                                 .translated (0.0f, -0.5f));
 
-                float px, py, pw, ph;
-                glyphPath.getBoundsTransformed (transform.translated (0.0f, -0.5f), px, py, pw, ph);
-
-                Rectangle clip ((int) floorf (px), (int) floorf (py),
-                                roundToInt (pw) + 2, roundToInt (ph) + 2);
-
-                edgeTable = new EdgeTable (clip, glyphPath, transform);
+                edgeTable = new EdgeTable (glyphPath.getBoundsTransformed (transform).getSmallestIntegerContainer().expanded (1, 0),
+                                           glyphPath, transform);
             }
         }
 

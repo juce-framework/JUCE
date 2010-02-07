@@ -110,7 +110,7 @@ void JucerFillType::reset()
 }
 
 //==============================================================================
-void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, const Rectangle& parentArea)
+void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, const Rectangle<int>& parentArea)
 {
     if (mode == solidColour)
     {
@@ -123,7 +123,7 @@ void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, con
     {
         loadImage (document);
 
-        Rectangle r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));
+        Rectangle<int> r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));
 
         g.setTiledImageFill (*image, r.getX(), r.getY(), (float) imageOpacity);
     }
@@ -132,8 +132,8 @@ void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, con
         ImageCache::release (image);
         image = 0;
 
-        Rectangle r1 (gradPos1.getRectangle (parentArea, document->getComponentLayout()));
-        Rectangle r2 (gradPos2.getRectangle (parentArea, document->getComponentLayout()));
+        Rectangle<int> r1 (gradPos1.getRectangle (parentArea, document->getComponentLayout()));
+        Rectangle<int> r2 (gradPos2.getRectangle (parentArea, document->getComponentLayout()));
 
         g.setGradientFill (ColourGradient (gradCol1, (float) r1.getX(), (float) r1.getY(),
                                            gradCol2, (float) r2.getX(), (float) r2.getY(),

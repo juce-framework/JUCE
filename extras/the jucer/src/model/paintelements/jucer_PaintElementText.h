@@ -55,14 +55,14 @@ public:
     }
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
         fillType.setFillType (g, getDocument(), parentArea);
 
         font = FontPropertyComponent::applyNameToFont (typefaceName, font);
         g.setFont (font);
 
-        const Rectangle r (position.getRectangle (parentArea, layout));
+        const Rectangle<int> r (position.getRectangle (parentArea, layout));
         g.drawText (replaceStringTranslations (text, owner->getDocument()),
                     r.getX(), r.getY(), r.getWidth(), r.getHeight(),
                     justification, true);
@@ -338,7 +338,7 @@ public:
     {
         font = FontPropertyComponent::applyNameToFont (typefaceName, font);
 
-        const Rectangle r (getCurrentAbsoluteBounds());
+        const Rectangle<int> r (getCurrentAbsoluteBounds());
 
         GlyphArrangement arr;
         arr.addCurtailedLineOfText (font, text,

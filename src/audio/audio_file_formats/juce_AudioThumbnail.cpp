@@ -500,7 +500,7 @@ void AudioThumbnail::drawChannel (Graphics& g,
         const float midY = topY + h * 0.5f;
         const float vscale = verticalZoomFactor * h / 256.0f;
 
-        const Rectangle clip (g.getClipBounds());
+        const Rectangle<int> clip (g.getClipBounds());
         const int skipLeft = jlimit (0, w, clip.getX() - x);
         w -= skipLeft;
         x += skipLeft;

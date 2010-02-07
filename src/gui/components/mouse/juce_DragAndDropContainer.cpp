@@ -345,7 +345,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                                           Component* sourceComponent,
                                           Image* dragImage_,
                                           const bool allowDraggingToExternalWindows,
-                                          const Point* imageOffsetFromMouse)
+                                          const Point<int>* imageOffsetFromMouse)
 {
     ScopedPointer <Image> dragImage (dragImage_);
 
@@ -361,7 +361,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
 
             if (dragImage == 0)
             {
-                dragImage = sourceComponent->createComponentSnapshot (Rectangle (0, 0, sourceComponent->getWidth(), sourceComponent->getHeight()));
+                dragImage = sourceComponent->createComponentSnapshot (Rectangle<int> (0, 0, sourceComponent->getWidth(), sourceComponent->getHeight()));
 
                 if (dragImage->getFormat() != Image::ARGB)
                 {
@@ -414,8 +414,8 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                 }
                 else
                 {
-                    imageX = (int) imageOffsetFromMouse->getX();
-                    imageY = (int) imageOffsetFromMouse->getY();
+                    imageX = imageOffsetFromMouse->getX();
+                    imageY = imageOffsetFromMouse->getY();
                 }
             }
 

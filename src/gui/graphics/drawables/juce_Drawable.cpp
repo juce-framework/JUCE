@@ -76,11 +76,10 @@ void Drawable::drawWithin (Graphics& g,
 {
     if (destW > 0 && destH > 0)
     {
-        float x, y, w, h;
-        getBounds (x, y, w, h);
+        Rectangle<float> bounds (getBounds());
 
         draw (g, opacity,
-              placement.getTransformToFit (x, y, w, h,
+              placement.getTransformToFit (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
                                            (float) destX, (float) destY,
                                            (float) destW, (float) destH));
     }

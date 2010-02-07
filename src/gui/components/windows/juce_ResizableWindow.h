@@ -345,7 +345,7 @@ private:
     ScopedPointer <Component> contentComponent;
     bool resizeToFitContent, fullscreen;
     ComponentDragger dragger;
-    Rectangle lastNonFullScreenPos;
+    Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer;
     #ifdef JUCE_DEBUG

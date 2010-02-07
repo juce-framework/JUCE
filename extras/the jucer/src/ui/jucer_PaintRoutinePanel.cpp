@@ -188,7 +188,7 @@ void PaintRoutinePanel::updatePropertiesList()
     ((GraphicsPropsPanel*) propsPanel)->updateList();
 }
 
-const Rectangle PaintRoutinePanel::getComponentArea() const
+const Rectangle<int> PaintRoutinePanel::getComponentArea() const
 {
     return ((PaintRoutineEditor*) editor)->getComponentArea();
 }

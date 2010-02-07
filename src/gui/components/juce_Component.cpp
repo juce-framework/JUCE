@@ -264,7 +264,7 @@ public:
          alpha (1.0f),
          scale (1.0f)
     {
-        image = comp->createComponentSnapshot (Rectangle (0, 0, comp->getWidth(), comp->getHeight()));
+        image = comp->createComponentSnapshot (Rectangle<int> (0, 0, comp->getWidth(), comp->getHeight()));
         setBounds (comp->getBounds());
         comp->getParentComponent()->addAndMakeVisible (this);
         toBehind (comp);
@@ -418,7 +418,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
         bool wasFullscreen = false;
         bool wasMinimised = false;
         ComponentBoundsConstrainer* currentConstainer = 0;
-        Rectangle oldNonFullScreenBounds;
+        Rectangle<int> oldNonFullScreenBounds;
 
         if (peer != 0)
         {
@@ -928,7 +928,7 @@ void Component::setTopRightPosition (const int x, const int y)
     setTopLeftPosition (x - getWidth(), y);
 }
 
-void Component::setBounds (const Rectangle& r)
+void Component::setBounds (const Rectangle<int>& r)
 {
     setBounds (r.getX(),
                r.getY(),
@@ -1777,13 +1777,13 @@ void Component::paintEntireComponent (Graphics& originalContext)
 }
 
 //==============================================================================
-Image* Component::createComponentSnapshot (const Rectangle& areaToGrab,
+Image* Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
                                            const bool clipImageToComponentBounds)
 {
-    Rectangle r (areaToGrab);
+    Rectangle<int> r (areaToGrab);
 
     if (clipImageToComponentBounds)
-        r = r.getIntersection (Rectangle (0, 0, getWidth(), getHeight()));
+        r = r.getIntersection (Rectangle<int> (0, 0, getWidth(), getHeight()));
 
     Image* const componentImage = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
                                                             jmax (1, r.getWidth()),
@@ -1922,7 +1922,7 @@ void Component::colourChanged()
 }
 
 //==============================================================================
-const Rectangle Component::getUnclippedArea() const
+const Rectangle<int> Component::getUnclippedArea() const
 {
     int x = 0, y = 0, w = getWidth(), h = getHeight();
 
@@ -1932,18 +1932,18 @@ const Rectangle Component::getUnclippedArea() const
 
     while (p != 0)
     {
-        if (! Rectangle::intersectRectangles (x, y, w, h, -px, -py, p->getWidth(), p->getHeight()))
-            return Rectangle();
+        if (! Rectangle<int>::intersectRectangles (x, y, w, h, -px, -py, p->getWidth(), p->getHeight()))
+            return Rectangle<int>();
 
         px += p->getX();
         py += p->getY();
         p = p->parentComponent_;
     }
 
-    return Rectangle (x, y, w, h);
+    return Rectangle<int> (x, y, w, h);
 }
 
-void Component::clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
+void Component::clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
                                      const int deltaX, const int deltaY) const throw()
 {
     for (int i = childComponentList_.size(); --i >= 0;)
@@ -1952,7 +1952,7 @@ void Component::clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
 
         if (c->isVisible())
         {
-            Rectangle newClip (clipRect.getIntersection (c->bounds_));
+            Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
 
             if (! newClip.isEmpty())
             {
@@ -1979,7 +1979,7 @@ void Component::getVisibleArea (RectangleList& result,
                                 const bool includeSiblings) const
 {
     result.clear();
-    const Rectangle unclipped (getUnclippedArea());
+    const Rectangle<int> unclipped (getUnclippedArea());
 
     if (! unclipped.isEmpty())
     {
@@ -1993,7 +1993,7 @@ void Component::getVisibleArea (RectangleList& result,
             c->relativePositionToOtherComponent (this, x, y);
 
             c->subtractObscuredRegions (result, x, y,
-                                        Rectangle (0, 0, c->getWidth(), c->getHeight()),
+                                        Rectangle<int> (0, 0, c->getWidth(), c->getHeight()),
                                         this);
         }
 
@@ -2005,7 +2005,7 @@ void Component::getVisibleArea (RectangleList& result,
 void Component::subtractObscuredRegions (RectangleList& result,
                                          const int deltaX,
                                          const int deltaY,
-                                         const Rectangle& clipRect,
+                                         const Rectangle<int>& clipRect,
                                          const Component* const compToAvoid) const throw()
 {
     for (int i = childComponentList_.size(); --i >= 0;)
@@ -2016,14 +2016,14 @@ void Component::subtractObscuredRegions (RectangleList& result,
         {
             if (c->isOpaque())
             {
-                Rectangle childBounds (c->bounds_.getIntersection (clipRect));
+                Rectangle<int> childBounds (c->bounds_.getIntersection (clipRect));
                 childBounds.translate (deltaX, deltaY);
 
                 result.subtract (childBounds);
             }
             else
             {
-                Rectangle newClip (clipRect.getIntersection (c->bounds_));
+                Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
                 newClip.translate (-c->getX(), -c->getY());
 
                 c->subtractObscuredRegions (result,
@@ -2453,7 +2453,7 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
 
     int gx = x, gy = y;
     relativePositionToGlobal (gx, gy);
-    desktop.registerMouseDown (gx, gy, time, this);
+    desktop.registerMouseDown (Point<int> (gx, gy), time, this);
 
     const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2596,7 +2596,7 @@ void Component::internalMouseUp (const int oldModifiers, int x, int y, const int
 
         int gx = x, gy = y;
         relativePositionToGlobal (gx, gy);
-        desktop.registerMouseDrag (gx, gy);
+        desktop.registerMouseDrag (Point<int> (gx, gy));
 
         const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2738,7 +2738,7 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
 
         int gx = x, gy = y;
         relativePositionToGlobal (gx, gy);
-        desktop.registerMouseDrag (gx, gy);
+        desktop.registerMouseDrag (Point<int> (gx, gy));
 
         const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2811,7 +2811,7 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
         {
             if (isUnboundedMouseModeOn)
             {
-                Rectangle screenArea (getParentMonitorArea().expanded (-2, -2));
+                Rectangle<int> screenArea (getParentMonitorArea().expanded (-2, -2));
 
                 int mx, my;
                 Desktop::getMousePosition (mx, my);
@@ -3451,7 +3451,7 @@ Component* JUCE_CALLTYPE Component::getComponentUnderMouse() throw()
 }
 
 //==============================================================================
-const Rectangle Component::getParentMonitorArea() const throw()
+const Rectangle<int> Component::getParentMonitorArea() const throw()
 {
     int centreX = getWidth() / 2;
     int centreY = getHeight() / 2;

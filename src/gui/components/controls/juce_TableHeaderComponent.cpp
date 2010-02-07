@@ -253,7 +253,7 @@ int TableHeaderComponent::getColumnIdOfIndex (int index, const bool onlyCountVis
     return (ci != 0) ? ci->id : 0;
 }
 
-const Rectangle TableHeaderComponent::getColumnPosition (const int index) const
+const Rectangle<int> TableHeaderComponent::getColumnPosition (const int index) const
 {
     int x = 0, width = 0, n = 0;
 
@@ -274,7 +274,7 @@ const Rectangle TableHeaderComponent::getColumnPosition (const int index) const
         }
     }
 
-    return Rectangle (x, 0, width, getHeight());
+    return Rectangle<int> (x, 0, width, getHeight());
 }
 
 int TableHeaderComponent::getColumnIdAtX (const int xToFind) const
@@ -537,7 +537,7 @@ void TableHeaderComponent::paint (Graphics& g)
 
     lf.drawTableHeaderBackground (g, *this);
 
-    const Rectangle clip (g.getClipBounds());
+    const Rectangle<int> clip (g.getClipBounds());
 
     int x = 0;
     for (int i = 0; i < columns.size(); ++i)
@@ -646,7 +646,7 @@ void TableHeaderComponent::mouseDrag (const MouseEvent& e)
                     if (columns.getUnchecked (i)->isVisible())
                         minWidthOnRight += columns.getUnchecked (i)->minimumWidth;
 
-                const Rectangle currentPos (getColumnPosition (getIndexOfColumnId (columnIdBeingResized, true)));
+                const Rectangle<int> currentPos (getColumnPosition (getIndexOfColumnId (columnIdBeingResized, true)));
                 w = jmax (ci->minimumWidth, jmin (w, getWidth() - minWidthOnRight - currentPos.getX()));
             }
 
@@ -740,7 +740,7 @@ void TableHeaderComponent::beginDrag (const MouseEvent& e)
         {
             draggingColumnOriginalIndex = getIndexOfColumnId (columnIdBeingDragged, true);
 
-            const Rectangle columnRect (getColumnPosition (draggingColumnOriginalIndex));
+            const Rectangle<int> columnRect (getColumnPosition (draggingColumnOriginalIndex));
 
             const int temp = columnIdBeingDragged;
             columnIdBeingDragged = 0;

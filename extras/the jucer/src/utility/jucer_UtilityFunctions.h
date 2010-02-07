@@ -48,17 +48,17 @@ struct RelativePositionedRectangle
     bool operator== (const RelativePositionedRectangle& other) const throw();
     bool operator!= (const RelativePositionedRectangle& other) const throw();
 
-    const Rectangle getRectangle (const Rectangle& parentArea, const ComponentLayout* layout) const;
+    const Rectangle<int> getRectangle (const Rectangle<int>& parentArea, const ComponentLayout* layout) const;
     void getRectangleDouble (double& x, double& y, double& w, double& h,
-                             const Rectangle& parentArea, const ComponentLayout* layout) const;
+                             const Rectangle<int>& parentArea, const ComponentLayout* layout) const;
     void updateFromComponent (const Component& comp, const ComponentLayout* layout);
     void updateFrom (double newX, double newY, double newW, double newH,
-                     const Rectangle& parentArea, const ComponentLayout* layout);
+                     const Rectangle<int>& parentArea, const ComponentLayout* layout);
 
     void applyToXml (XmlElement& e) const;
     void restoreFromXml (const XmlElement& e, const RelativePositionedRectangle& defaultPos);
 
-    void getRelativeTargetBounds (const Rectangle& parentArea,
+    void getRelativeTargetBounds (const Rectangle<int>& parentArea,
                                   const ComponentLayout* layout,
                                   int& x, int& xw, int& y, int& yh, int& w, int& h) const;
 };
@@ -96,7 +96,7 @@ const String positionToString (const RelativePositionedRectangle& pos);
 
 void positionToXY (const RelativePositionedRectangle& position,
                    double& x, double& y,
-                   const Rectangle& parentArea,
+                   const Rectangle<int>& parentArea,
                    const ComponentLayout* layout);
 
 void positionToCode (const RelativePositionedRectangle& position,

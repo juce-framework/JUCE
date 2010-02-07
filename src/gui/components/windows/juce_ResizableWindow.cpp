@@ -382,7 +382,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
             if (peer != 0)
             {
                 // keep a copy of this intact in case the real one gets messed-up while we're un-maximising
-                const Rectangle lastPos (lastNonFullScreenPos);
+                const Rectangle<int> lastPos (lastNonFullScreenPos);
 
                 peer->setFullScreen (shouldBeFullScreen);
 
@@ -478,15 +478,15 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     if (tokens.size() != 4 + n)
         return false;
 
-    Rectangle r (tokens[n].getIntValue(),
-                 tokens[n + 1].getIntValue(),
-                 tokens[n + 2].getIntValue(),
-                 tokens[n + 3].getIntValue());
+    Rectangle<int> r (tokens[n].getIntValue(),
+                      tokens[n + 1].getIntValue(),
+                      tokens[n + 2].getIntValue(),
+                      tokens[n + 3].getIntValue());
 
     if (r.isEmpty())
         return false;
 
-    const Rectangle screen (Desktop::getInstance().getMonitorAreaContaining (r.getX(), r.getY()));
+    const Rectangle<int> screen (Desktop::getInstance().getMonitorAreaContaining (r.getX(), r.getY()));
 
     if (! screen.contains (r))
     {

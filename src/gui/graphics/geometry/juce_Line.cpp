@@ -136,8 +136,8 @@ Line::Line (const float startX_, const float startY_,
 {
 }
 
-Line::Line (const Point& start,
-            const Point& end) throw()
+Line::Line (const Point<float>& start,
+            const Point<float>& end) throw()
     : startX (start.getX()),
       startY (start.getY()),
       endX (end.getX()),
@@ -160,14 +160,14 @@ Line::~Line() throw()
 }
 
 //==============================================================================
-const Point Line::getStart() const throw()
+const Point<float> Line::getStart() const throw()
 {
-    return Point (startX, startY);
+    return Point<float> (startX, startY);
 }
 
-const Point Line::getEnd() const throw()
+const Point<float> Line::getEnd() const throw()
 {
-    return Point (endX, endY);
+    return Point<float> (endX, endY);
 }
 
 void Line::setStart (const float newStartX,
@@ -177,7 +177,7 @@ void Line::setStart (const float newStartX,
     startY = newStartY;
 }
 
-void Line::setStart (const Point& newStart) throw()
+void Line::setStart (const Point<float>& newStart) throw()
 {
     startX = newStart.getX();
     startY = newStart.getY();
@@ -190,7 +190,7 @@ void Line::setEnd (const float newEndX,
     endY = newEndY;
 }
 
-void Line::setEnd (const Point& newEnd) throw()
+void Line::setEnd (const Point<float>& newEnd) throw()
 {
     endX = newEnd.getX();
     endY = newEnd.getY();
@@ -232,32 +232,32 @@ float Line::getAngle() const throw()
                    endY - startY);
 }
 
-const Point Line::getPointAlongLine (const float distanceFromStart) const throw()
+const Point<float> Line::getPointAlongLine (const float distanceFromStart) const throw()
 {
     const float alpha = distanceFromStart / getLength();
 
-    return Point (startX + (endX - startX) * alpha,
-                  startY + (endY - startY) * alpha);
+    return Point<float> (startX + (endX - startX) * alpha,
+                         startY + (endY - startY) * alpha);
 }
 
-const Point Line::getPointAlongLine (const float offsetX,
-                                     const float offsetY) const throw()
+const Point<float> Line::getPointAlongLine (const float offsetX,
+                                            const float offsetY) const throw()
 {
     const float dx = endX - startX;
     const float dy = endY - startY;
     const double length = juce_hypot (dx, dy);
 
     if (length == 0)
-        return Point (startX, startY);
+        return Point<float> (startX, startY);
     else
-        return Point (startX + (float) (((dx * offsetX) - (dy * offsetY)) / length),
-                      startY + (float) (((dy * offsetX) + (dx * offsetY)) / length));
+        return Point<float> (startX + (float) (((dx * offsetX) - (dy * offsetY)) / length),
+                             startY + (float) (((dy * offsetX) + (dx * offsetY)) / length));
 }
 
-const Point Line::getPointAlongLineProportionally (const float alpha) const throw()
+const Point<float> Line::getPointAlongLineProportionally (const float alpha) const throw()
 {
-    return Point (startX + (endX - startX) * alpha,
-                  startY + (endY - startY) * alpha);
+    return Point<float> (startX + (endX - startX) * alpha,
+                         startY + (endY - startY) * alpha);
 }
 
 float Line::getDistanceFromLine (const float x,

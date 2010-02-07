@@ -3890,7 +3890,7 @@ private:
 
 	// disallow copy constructor and assignment
 	OwnedArray (const OwnedArray&);
-	const OwnedArray& operator= (const OwnedArray&);
+	OwnedArray& operator= (const OwnedArray&);
 };
 
 #endif   // __JUCE_OWNEDARRAY_JUCEHEADER__
@@ -9395,33 +9395,43 @@ private:
 #ifndef __JUCE_POINT_JUCEHEADER__
 #define __JUCE_POINT_JUCEHEADER__
 
-class JUCE_API  Point
+template <typename ValueType>
+class Point
 {
 public:
 
-	Point() throw();
+	Point() throw()  : x (0), y (0) {}
 
-	Point (const Point& other) throw();
+	Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
 
-	Point (const float x, const float y) throw();
+	Point (const ValueType initialX, const ValueType initialY) throw()  : x (initialX), y (initialY) {}
 
-	const Point& operator= (const Point& other) throw();
+	~Point() throw() {}
 
-	~Point() throw();
+	Point& operator= (const Point& other) throw()			   { x = other.x; y = other.y; return *this; }
 
-	inline float getX() const throw()		   { return x; }
+	inline ValueType getX() const throw()				   { return x; }
 
-	inline float getY() const throw()		   { return y; }
+	inline ValueType getY() const throw()				   { return y; }
 
-	void setXY (const float x,
-				const float y) throw();
+	void setXY (const ValueType newX, const ValueType newY) throw()	 { x = newX; y = newY; }
 
-	void applyTransform (const AffineTransform& transform) throw();
+	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
+
+	const Point operator+ (const Point& other) const throw()		{ return Point (x + other.x, y + other.y); }
+
+	Point& operator+= (const Point& other) throw()			  { x += other.x; y += other.y; return *this; }
+
+	const Point operator- (const Point& other) const throw()		{ return Point (x - other.x, y - other.y); }
+
+	Point& operator-= (const Point& other) throw()			  { x -= other.x; y -= other.y; return *this; }
+
+	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
 
 	juce_UseDebuggingNewOperator
 
 private:
-	float x, y;
+	ValueType x, y;
 };
 
 #endif   // __JUCE_POINT_JUCEHEADER__
@@ -9431,108 +9441,339 @@ private:
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
 #define __JUCE_RECTANGLE_JUCEHEADER__
 
-class JUCE_API  Rectangle
+class RectangleList;
+
+template <typename ValueType>
+class Rectangle
 {
 public:
 
-	Rectangle() throw();
+	Rectangle() throw()
+	  : x (0), y (0), w (0), h (0)
+	{
+	}
 
-	Rectangle (const Rectangle& other) throw();
+	Rectangle (const Rectangle& other) throw()
+	  : x (other.x), y (other.y),
+		w (other.w), h (other.h)
+	{
+	}
 
-	Rectangle (const int x, const int y,
-			   const int width, const int height) throw();
+	Rectangle (const ValueType initialX, const ValueType initialY,
+			   const ValueType width, const ValueType height) throw()
+	  : x (initialX), y (initialY),
+		w (width), h (height)
+	{
+	}
 
-	Rectangle (const int width, const int height) throw();
+	Rectangle (const ValueType width, const ValueType height) throw()
+	  : x (0), y (0), w (width), h (height)
+	{
+	}
 
-	~Rectangle() throw();
+	Rectangle& operator= (const Rectangle& other) throw()
+	{
+		x = other.x; y = other.y;
+		w = other.w; h = other.h;
+		return *this;
+	}
 
-	inline int getX() const throw()			 { return x; }
+	~Rectangle() throw() {}
 
-	inline int getY() const throw()			 { return y; }
+	inline ValueType getX() const throw()			   { return x; }
 
-	inline int getWidth() const throw()			 { return w; }
+	inline ValueType getY() const throw()			   { return y; }
 
-	inline int getHeight() const throw()			{ return h; }
+	inline ValueType getWidth() const throw()			   { return w; }
 
-	inline int getRight() const throw()			 { return x + w; }
+	inline ValueType getHeight() const throw()			  { return h; }
 
-	inline int getBottom() const throw()			{ return y + h; }
+	inline ValueType getRight() const throw()			   { return x + w; }
 
-	inline int getCentreX() const throw()		   { return x + (w >> 1); }
+	inline ValueType getBottom() const throw()			  { return y + h; }
 
-	inline int getCentreY() const throw()		   { return y + (h >> 1); }
+	inline ValueType getCentreX() const throw()			 { return x + w / (ValueType) 2; }
 
-	bool isEmpty() const throw();
+	inline ValueType getCentreY() const throw()			 { return y + h / (ValueType) 2; }
 
-	void setPosition (const int x, const int y) throw();
+	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
 
-	void setSize (const int w, const int h) throw();
+	const Point<ValueType> getPosition() const throw()		  { return Point<ValueType> (x, y); }
 
-	void setBounds (const int newX, const int newY,
-					const int newWidth, const int newHeight) throw();
+	void setPosition (const ValueType newX, const ValueType newY) throw()	   { x = newX; y = newY; }
 
-	void setWidth (const int newWidth) throw();
+	void setSize (const ValueType newWidth, const ValueType newHeight) throw()  { w = newWidth; h = newHeight; }
 
-	void setHeight (const int newHeight) throw();
+	void setBounds (const ValueType newX, const ValueType newY,
+					const ValueType newWidth, const ValueType newHeight) throw()
+	{
+		x = newX; y = newY; w = newWidth; h = newHeight;
+	}
 
-	void setLeft (const int newLeft) throw();
+	void setWidth (const ValueType newWidth) throw()		{ w = newWidth; }
 
-	void setTop (const int newTop) throw();
+	void setHeight (const ValueType newHeight) throw()		  { h = newHeight; }
 
-	void setRight (const int newRight) throw();
+	void setLeft (const ValueType newLeft) throw()
+	{
+		w = jmax (ValueType(), x + w - newLeft);
+		x = newLeft;
+	}
 
-	void setBottom (const int newBottom) throw();
+	void setTop (const ValueType newTop) throw()
+	{
+		h = jmax (ValueType(), y + h - newTop);
+		y = newTop;
+	}
 
-	void translate (const int deltaX,
-					const int deltaY) throw();
+	void setRight (const ValueType newRight) throw()
+	{
+		x = jmin (x, newRight);
+		w = newRight - x;
+	}
 
-	const Rectangle translated (const int deltaX,
-								const int deltaY) const throw();
+	void setBottom (const ValueType newBottom) throw()
+	{
+		y = jmin (y, newBottom);
+		h = newBottom - y;
+	}
 
-	void expand (const int deltaX,
-				 const int deltaY) throw();
+	void translate (const ValueType deltaX,
+					const ValueType deltaY) throw()
+	{
+		x += deltaX;
+		y += deltaY;
+	}
 
-	const Rectangle expanded (const int deltaX,
-							  const int deltaY) const throw();
+	const Rectangle translated (const ValueType deltaX,
+								const ValueType deltaY) const throw()
+	{
+		return Rectangle (x + deltaX, y + deltaY, w, h);
+	}
 
-	void reduce (const int deltaX,
-				 const int deltaY) throw();
+	void expand (const ValueType deltaX,
+				 const ValueType deltaY) throw()
+	{
+		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
+		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
+		setBounds (x - deltaX, y - deltaY, nw, nh);
+	}
 
-	const Rectangle reduced (const int deltaX,
-							 const int deltaY) const throw();
+	const Rectangle expanded (const ValueType deltaX,
+							  const ValueType deltaY) const throw()
+	{
+		const ValueType nw = jmax (ValueType(), w + deltaX * 2);
+		const ValueType nh = jmax (ValueType(), h + deltaY * 2);
+		return Rectangle (x - deltaX, y - deltaY, nw, nh);
+	}
 
-	bool operator== (const Rectangle& other) const throw();
+	void reduce (const ValueType deltaX,
+				 const ValueType deltaY) throw()
+	{
+		expand (-deltaX, -deltaY);
+	}
 
-	bool operator!= (const Rectangle& other) const throw();
+	const Rectangle reduced (const ValueType deltaX,
+							 const ValueType deltaY) const throw()
+	{
+		return expanded (-deltaX, -deltaY);
+	}
 
-	bool contains (const int x, const int y) const throw();
+	bool operator== (const Rectangle& other) const throw()
+	{
+		return x == other.x && y == other.y
+			&& w == other.w && h == other.h;
+	}
 
-	bool contains (const Rectangle& other) const throw();
+	bool operator!= (const Rectangle& other) const throw()
+	{
+		return x != other.x || y != other.y
+			|| w != other.w || h != other.h;
+	}
 
-	bool intersects (const Rectangle& other) const throw();
+	bool contains (const ValueType xCoord, const ValueType yCoord) const throw()
+	{
+		return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
+	}
 
-	const Rectangle getIntersection (const Rectangle& other) const throw();
+	bool contains (const Rectangle& other) const throw()
+	{
+		return x <= other.x && y <= other.y
+			&& x + w >= other.x + other.w && y + h >= other.y + other.h;
+	}
 
-	bool intersectRectangle (int& x, int& y, int& w, int& h) const throw();
+	bool intersects (const Rectangle& other) const throw()
+	{
+		return x + w > other.x
+			&& y + h > other.y
+			&& x < other.x + other.w
+			&& y < other.y + other.h
+			&& w > ValueType() && h > ValueType();
+	}
 
-	const Rectangle getUnion (const Rectangle& other) const throw();
+	const Rectangle getIntersection (const Rectangle& other) const throw()
+	{
+		const ValueType nx = jmax (x, other.x);
+		const ValueType ny = jmax (y, other.y);
+		const ValueType nw = jmin (x + w, other.x + other.w) - nx;
+		const ValueType nh = jmin (y + h, other.y + other.h) - ny;
 
-	bool enlargeIfAdjacent (const Rectangle& other) throw();
+		if (nw >= ValueType() && nh >= ValueType())
+			return Rectangle (nx, ny, nw, nh);
 
-	bool reduceIfPartlyContainedIn (const Rectangle& other) throw();
+		return Rectangle();
+	}
 
-	static bool intersectRectangles (int& x1, int& y1, int& w1, int& h1,
-									 int x2, int y2, int w2, int h2) throw();
+	bool intersectRectangle (ValueType& otherX, ValueType& otherY, ValueType& otherW, ValueType& otherH) const throw()
+	{
+		const int maxX = jmax (otherX, x);
+		otherW = jmin (otherX + otherW, x + w) - maxX;
 
-	const String toString() const throw();
+		if (otherW > 0)
+		{
+			const int maxY = jmax (otherY, y);
+			otherH = jmin (otherY + otherH, y + h) - maxY;
 
-	static const Rectangle fromString (const String& stringVersion);
+			if (otherH > 0)
+			{
+				otherX = maxX; otherY = maxY;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	const Rectangle getUnion (const Rectangle& other) const throw()
+	{
+		const ValueType newX = jmin (x, other.x);
+		const ValueType newY = jmin (y, other.y);
+
+		return Rectangle (newX, newY,
+						  jmax (x + w, other.x + other.w) - newX,
+						  jmax (y + h, other.y + other.h) - newY);
+	}
+
+	bool enlargeIfAdjacent (const Rectangle& other) throw()
+	{
+		if (x == other.x && getRight() == other.getRight()
+			 && (other.getBottom() >= y && other.y <= getBottom()))
+		{
+			const ValueType newY = jmin (y, other.y);
+			h = jmax (getBottom(), other.getBottom()) - newY;
+			y = newY;
+			return true;
+		}
+		else if (y == other.y && getBottom() == other.getBottom()
+				  && (other.getRight() >= x && other.x <= getRight()))
+		{
+			const ValueType newX = jmin (x, other.x);
+			w = jmax (getRight(), other.getRight()) - newX;
+			x = newX;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool reduceIfPartlyContainedIn (const Rectangle& other) throw()
+	{
+		int inside = 0;
+		const int otherR = other.getRight();
+		if (x >= other.x && x < otherR) inside = 1;
+		const int otherB = other.getBottom();
+		if (y >= other.y && y < otherB) inside |= 2;
+		const int r = x + w;
+		if (r >= other.x && r < otherR) inside |= 4;
+		const int b = y + h;
+		if (b >= other.y && b < otherB) inside |= 8;
+
+		switch (inside)
+		{
+			case 1 + 2 + 8:	 w = r - otherR; x = otherR; return true;
+			case 1 + 2 + 4:	 h = b - otherB; y = otherB; return true;
+			case 2 + 4 + 8:	 w = other.x - x; return true;
+			case 1 + 4 + 8:	 h = other.y - y; return true;
+		}
+
+		return false;
+	}
+
+	const Rectangle<ValueType> transformed (const AffineTransform& transform) const throw()
+	{
+		float x1 = x,	 y1 = y;
+		float x2 = x + w, y2 = y;
+		float x3 = x,	 y3 = y + h;
+		float x4 = x2,	y4 = y3;
+
+		transform.transformPoint (x1, y1);
+		transform.transformPoint (x2, y2);
+		transform.transformPoint (x3, y3);
+		transform.transformPoint (x4, y4);
+
+		const float x = jmin (x1, x2, x3, x4);
+		const float y = jmin (y1, y2, y3, y4);
+
+		return Rectangle (x, y,
+						  jmax (x1, x2, x3, x4) - x,
+						  jmax (y1, y2, y3, y4) - y);
+	}
+
+	const Rectangle<int> getSmallestIntegerContainer() const throw()
+	{
+		const int x1 = (int) floorf ((float) x);
+		const int y1 = (int) floorf ((float) y);
+		const int x2 = (int) floorf ((float) (x + w + 0.9999f));
+		const int y2 = (int) floorf ((float) (y + h + 0.9999f));
+
+		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+	}
+
+	static bool intersectRectangles (ValueType& x1, ValueType& y1, ValueType& w1, ValueType& h1,
+									 const ValueType x2, const ValueType y2, const ValueType w2, const ValueType h2) throw()
+	{
+		const ValueType x = jmax (x1, x2);
+		w1 = jmin (x1 + w1, x2 + w2) - x;
+
+		if (w1 > 0)
+		{
+			const ValueType y = jmax (y1, y2);
+			h1 = jmin (y1 + h1, y2 + h2) - y;
+
+			if (h1 > 0)
+			{
+				x1 = x; y1 = y;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	const String toString() const
+	{
+		String s;
+		s.preallocateStorage (16);
+		s << x << T(' ') << y << T(' ') << w << T(' ') << h;
+		return s;
+	}
+
+	static const Rectangle fromString (const String& stringVersion)
+	{
+		StringArray toks;
+		toks.addTokens (stringVersion.trim(), T(",; \t\r\n"), 0);
+
+		return Rectangle (toks[0].trim().getIntValue(),
+						  toks[1].trim().getIntValue(),
+						  toks[2].trim().getIntValue(),
+						  toks[3].trim().getIntValue());
+	}
 
 	juce_UseDebuggingNewOperator
 
 private:
 	friend class RectangleList;
-	int x, y, w, h;
+	ValueType x, y, w, h;
 };
 
 #endif   // __JUCE_RECTANGLE_JUCEHEADER__
@@ -9621,11 +9862,11 @@ class JUCE_API  EdgeTable
 {
 public:
 
-	EdgeTable (const Rectangle& clipLimits,
+	EdgeTable (const Rectangle<int>& clipLimits,
 			   const Path& pathToAdd,
 			   const AffineTransform& transform) throw();
 
-	EdgeTable (const Rectangle& rectangleToAdd) throw();
+	EdgeTable (const Rectangle<int>& rectangleToAdd) throw();
 
 	EdgeTable (const RectangleList& rectanglesToAdd) throw();
 
@@ -9638,12 +9879,12 @@ public:
 
 	~EdgeTable() throw();
 
-	void clipToRectangle (const Rectangle& r) throw();
-	void excludeRectangle (const Rectangle& r) throw();
+	void clipToRectangle (const Rectangle<int>& r) throw();
+	void excludeRectangle (const Rectangle<int>& r) throw();
 	void clipToEdgeTable (const EdgeTable& other);
 	void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
 	bool isEmpty() throw();
-	const Rectangle& getMaximumBounds() const throw()	   { return bounds; }
+	const Rectangle<int>& getMaximumBounds() const throw()	   { return bounds; }
 	void translate (float dx, int dy) throw();
 
 	void optimiseTable() throw();
@@ -9732,8 +9973,8 @@ public:
 
 private:
 	// table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-	HeapBlock <int> table;
-	Rectangle bounds;
+	HeapBlock<int> table;
+	Rectangle<int> bounds;
 	int maxEdgesPerLine, lineStrideElements;
 	bool needToCheckEmptinesss;
 
@@ -9763,12 +10004,9 @@ public:
 
 	bool isEmpty() const throw();
 
-	void getBounds (float& x, float& y,
-					float& w, float& h) const throw();
+	const Rectangle<float> getBounds() const throw();
 
-	void getBoundsTransformed (const AffineTransform& transform,
-							   float& x, float& y,
-							   float& w, float& h) const throw();
+	const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const throw();
 
 	bool contains (const float x,
 				   const float y,
@@ -9800,12 +10038,12 @@ public:
 				  const float endPointX,
 				  const float endPointY) throw();
 
-	const Point getCurrentPosition() const;
+	const Point<float> getCurrentPosition() const;
 
 	void addRectangle (const float x, const float y,
 					   const float w, const float h) throw();
 
-	void addRectangle (const Rectangle& rectangle) throw();
+	void addRectangle (const Rectangle<int>& rectangle) throw();
 
 	void addRoundedRectangle (const float x, const float y,
 							  const float w, const float h,
@@ -10267,8 +10505,8 @@ public:
 		  const float endX,
 		  const float endY) throw();
 
-	Line (const Point& start,
-		  const Point& end) throw();
+	Line (const Point<float>& start,
+		  const Point<float>& end) throw();
 
 	const Line& operator= (const Line& other) throw();
 
@@ -10282,9 +10520,9 @@ public:
 
 	inline float getEndY() const throw()				{ return endY; }
 
-	const Point getStart() const throw();
+	const Point<float> getStart() const throw();
 
-	const Point getEnd() const throw();
+	const Point<float> getEnd() const throw();
 
 	void setStart (const float newStartX,
 				   const float newStartY) throw();
@@ -10292,9 +10530,9 @@ public:
 	void setEnd (const float newEndX,
 				 const float newEndY) throw();
 
-	void setStart (const Point& newStart) throw();
+	void setStart (const Point<float>& newStart) throw();
 
-	void setEnd (const Point& newEnd) throw();
+	void setEnd (const Point<float>& newEnd) throw();
 
 	void applyTransform (const AffineTransform& transform) throw();
 
@@ -10314,12 +10552,12 @@ public:
 					 float& intersectionX,
 					 float& intersectionY) const throw();
 
-	const Point getPointAlongLine (const float distanceFromStart) const throw();
+	const Point<float> getPointAlongLine (const float distanceFromStart) const throw();
 
-	const Point getPointAlongLine (const float distanceFromStart,
-								   const float perpendicularDistance) const throw();
+	const Point<float> getPointAlongLine (const float distanceFromStart,
+										  const float perpendicularDistance) const throw();
 
-	const Point getPointAlongLineProportionally (const float proportionOfLength) const throw();
+	const Point<float> getPointAlongLineProportionally (const float proportionOfLength) const throw();
 
 	float getDistanceFromLine (const float x,
 							   const float y) const throw();
@@ -11237,7 +11475,7 @@ public:
 				   int width,
 				   int height) const throw();
 
-	void fillRect (const Rectangle& rectangle) const throw();
+	void fillRect (const Rectangle<int>& rectangle) const throw();
 
 	void fillRect (const float x,
 				   const float y,
@@ -11250,7 +11488,7 @@ public:
 							   const float height,
 							   const float cornerSize) const throw();
 
-	void fillRoundedRectangle (const Rectangle& rectangle,
+	void fillRoundedRectangle (const Rectangle<int>& rectangle,
 							   const float cornerSize) const throw();
 
 	void fillCheckerBoard (int x, int y,
@@ -11272,7 +11510,7 @@ public:
 				   const float height,
 				   const float lineThickness = 1.0f) const throw();
 
-	void drawRect (const Rectangle& rectangle,
+	void drawRect (const Rectangle<int>& rectangle,
 				   const int lineThickness = 1) const throw();
 
 	void drawRoundedRectangle (const float x,
@@ -11282,7 +11520,7 @@ public:
 							   const float cornerSize,
 							   const float lineThickness) const throw();
 
-	void drawRoundedRectangle (const Rectangle& rectangle,
+	void drawRoundedRectangle (const Rectangle<int>& rectangle,
 							   const float cornerSize,
 							   const float lineThickness) const throw();
 
@@ -11378,7 +11616,7 @@ public:
 					const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
 	void drawImageTransformed (const Image* const imageToDraw,
-							   const Rectangle& imageSubRegion,
+							   const Rectangle<int>& imageSubRegion,
 							   const AffineTransform& transform,
 							   const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
@@ -11390,7 +11628,7 @@ public:
 						  const RectanglePlacement& placementWithinTarget,
 						  const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
-	const Rectangle getClipBounds() const throw();
+	const Rectangle<int> getClipBounds() const throw();
 
 	bool clipRegionIntersects (const int x, const int y, const int width, const int height) const throw();
 
@@ -11401,7 +11639,7 @@ public:
 
 	bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity) throw();
 
-	bool reduceClipRegion (const Image& image, const Rectangle& sourceClipRegion,
+	bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
 						   const AffineTransform& transform) throw();
 
 	void excludeClipRegion (const int x, const int y,
@@ -11467,7 +11705,7 @@ public:
 
 	RectangleList (const RectangleList& other) throw();
 
-	RectangleList (const Rectangle& rect) throw();
+	RectangleList (const Rectangle<int>& rect) throw();
 
 	const RectangleList& operator= (const RectangleList& other) throw();
 
@@ -11477,40 +11715,40 @@ public:
 
 	int getNumRectangles() const throw()			{ return rects.size(); }
 
-	const Rectangle getRectangle (const int index) const throw();
+	const Rectangle<int> getRectangle (const int index) const throw();
 
 	void clear() throw();
 
 	void add (const int x, const int y,
 			  const int w, const int h) throw();
 
-	void add (const Rectangle& rect) throw();
+	void add (const Rectangle<int>& rect) throw();
 
-	void addWithoutMerging (const Rectangle& rect) throw();
+	void addWithoutMerging (const Rectangle<int>& rect) throw();
 
 	void add (const RectangleList& other) throw();
 
-	void subtract (const Rectangle& rect) throw();
+	void subtract (const Rectangle<int>& rect) throw();
 
 	void subtract (const RectangleList& otherList) throw();
 
-	bool clipTo (const Rectangle& rect) throw();
+	bool clipTo (const Rectangle<int>& rect) throw();
 
 	bool clipTo (const RectangleList& other) throw();
 
-	bool getIntersectionWith (const Rectangle& rect, RectangleList& destRegion) const throw();
+	bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw();
 
 	void swapWith (RectangleList& otherList) throw();
 
 	bool containsPoint (const int x, const int y) const throw();
 
-	bool containsRectangle (const Rectangle& rectangleToCheck) const throw();
+	bool containsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
-	bool intersectsRectangle (const Rectangle& rectangleToCheck) const throw();
+	bool intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
 	bool intersects (const RectangleList& other) const throw();
 
-	const Rectangle getBounds() const throw();
+	const Rectangle<int> getBounds() const throw();
 
 	void consolidate() throw();
 
@@ -11527,12 +11765,12 @@ public:
 
 		bool next() throw();
 
-		const Rectangle* getRectangle() const throw()	   { return current; }
+		const Rectangle<int>* getRectangle() const throw()	   { return current; }
 
 		juce_UseDebuggingNewOperator
 
 	private:
-		const Rectangle* current;
+		const Rectangle<int>* current;
 		const RectangleList& owner;
 		int index;
 
@@ -11544,7 +11782,7 @@ public:
 
 private:
 	friend class Iterator;
-	Array <Rectangle> rects;
+	Array <Rectangle<int> > rects;
 };
 
 #endif   // __JUCE_RECTANGLELIST_JUCEHEADER__
@@ -11591,13 +11829,13 @@ public:
 
 	void setRight (const int newRightGap) throw();
 
-	const Rectangle subtractedFrom (const Rectangle& original) const throw();
+	const Rectangle<int> subtractedFrom (const Rectangle<int>& original) const throw();
 
-	void subtractFrom (Rectangle& rectangle) const throw();
+	void subtractFrom (Rectangle<int>& rectangle) const throw();
 
-	const Rectangle addedTo (const Rectangle& original) const throw();
+	const Rectangle<int> addedTo (const Rectangle<int>& original) const throw();
 
-	void addTo (Rectangle& original) const throw();
+	void addTo (Rectangle<int>& original) const throw();
 
 	bool operator== (const BorderSize& other) const throw();
 	bool operator!= (const BorderSize& other) const throw();
@@ -11694,9 +11932,9 @@ public:
 
 	virtual bool isFullScreen() const = 0;
 
-	void setNonFullScreenBounds (const Rectangle& newBounds) throw();
+	void setNonFullScreenBounds (const Rectangle<int>& newBounds) throw();
 
-	const Rectangle& getNonFullScreenBounds() const throw();
+	const Rectangle<int>& getNonFullScreenBounds() const throw();
 
 	virtual void setIcon (const Image& newIcon) = 0;
 
@@ -11782,7 +12020,7 @@ protected:
 	Component* const component;
 	const int styleFlags;
 	RectangleList maskedRegion;
-	Rectangle lastNonFullscreenBounds;
+	Rectangle<int> lastNonFullscreenBounds;
 	uint32 lastPaintTime;
 	ComponentBoundsConstrainer* constrainer;
 
@@ -11874,9 +12112,11 @@ public:
 
 	int getRight() const throw()				{ return bounds_.getRight(); }
 
+	const Point<int> getPosition() const throw()		{ return bounds_.getPosition(); }
+
 	int getBottom() const throw()			   { return bounds_.getBottom(); }
 
-	const Rectangle& getBounds() const throw()		  { return bounds_; }
+	const Rectangle<int>& getBounds() const throw()	 { return bounds_; }
 
 	void getVisibleArea (RectangleList& result,
 						 const bool includeSiblings) const;
@@ -11900,7 +12140,7 @@ public:
 
 	void setBounds (int x, int y, int width, int height);
 
-	void setBounds (const Rectangle& newBounds);
+	void setBounds (const Rectangle<int>& newBounds);
 
 	void setBoundsRelative (const float proportionalX, const float proportionalY,
 							const float proportionalWidth, const float proportionalHeight);
@@ -11925,7 +12165,7 @@ public:
 
 	int getParentHeight() const throw();
 
-	const Rectangle getParentMonitorArea() const throw();
+	const Rectangle<int> getParentMonitorArea() const throw();
 
 	int getNumChildComponents() const throw();
 
@@ -11996,7 +12236,7 @@ public:
 
 	void setBufferedToImage (const bool shouldBeBuffered) throw();
 
-	Image* createComponentSnapshot (const Rectangle& areaToGrab,
+	Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
 									const bool clipImageToComponentBounds = true);
 
 	void paintEntireComponent (Graphics& context);
@@ -12199,7 +12439,7 @@ private:
 	String componentName_;
 	Component* parentComponent_;
 	uint32 componentUID;
-	Rectangle bounds_;
+	Rectangle<int> bounds_;
 	int numDeepMouseListeners;
 	Array <Component*> childComponentList_;
 	LookAndFeel* lookAndFeel_;
@@ -12269,13 +12509,13 @@ private:
 	static void bringModalComponentToFront();
 	void subtractObscuredRegions (RectangleList& result,
 								  const int deltaX, const int deltaY,
-								  const Rectangle& clipRect,
+								  const Rectangle<int>& clipRect,
 								  const Component* const compToAvoid) const throw();
-	void clipObscuredRegions (Graphics& g, const Rectangle& clipRect,
+	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
 							  const int deltaX, const int deltaY) const throw();
 
 	// how much of the component is not off the edges of its parents
-	const Rectangle getUnclippedArea() const;
+	const Rectangle<int> getUnclippedArea() const;
 	void sendVisibilityChangeMessage();
 
 	// This is included here just to cause a compile error if your code is still handling
@@ -12657,9 +12897,9 @@ public:
 
 	const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const throw();
 
-	const Rectangle getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
+	const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
 
-	const Rectangle getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
+	const Rectangle<int> getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
 
 	static void getMousePosition (int& x, int& y) throw();
 
@@ -12713,14 +12953,14 @@ private:
 	Desktop() throw();
 	~Desktop() throw();
 
-	Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
+	Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
 	int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
 	bool mouseMovedSignificantlySincePressed;
 
 	struct RecentMouseDown
 	{
-		int x, y;
+		Point<int> position;
 		int64 time;
 		Component* component;
 	};
@@ -12728,20 +12968,20 @@ private:
 	RecentMouseDown mouseDowns[4];
 
 	void incrementMouseClickCounter() throw();
-	void registerMouseDown (int x, int y, int64 time, Component* component) throw();
-	void registerMouseDrag (int x, int y) throw();
+	void registerMouseDown (const Point<int>& position, int64 time, Component* component) throw();
+	void registerMouseDrag (const Point<int>& position) throw();
 	const Time getLastMouseDownTime() const throw();
 	int getNumberOfMultipleClicks() const throw();
 
 	Component* kioskModeComponent;
-	Rectangle kioskComponentOriginalBounds;
+	Rectangle<int> kioskComponentOriginalBounds;
 
 	void timerCallback();
 	void sendMouseMove();
 	void resetTimer() throw();
 
 	int getNumDisplayMonitors() const throw();
-	const Rectangle getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
+	const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
 
 	void addDesktopComponent (Component* const c) throw();
 	void removeDesktopComponent (Component* const c) throw();
@@ -15980,7 +16220,7 @@ public:
 	void scrollEditorToPositionCaret (const int desiredCaretX,
 									  const int desiredCaretY);
 
-	const Rectangle getCaretRectangle();
+	const Rectangle<int> getCaretRectangle();
 
 	void setHighlightedRegion (int startIndex,
 							   int numberOfCharactersToHighlight);
@@ -17935,8 +18175,8 @@ public:
 
 	int getInsertionIndexForPosition (const int x, const int y) const throw();
 
-	const Rectangle getRowPosition (const int rowNumber,
-									const bool relativeToComponentTopLeft) const throw();
+	const Rectangle<int> getRowPosition (const int rowNumber,
+										 const bool relativeToComponentTopLeft) const throw();
 
 	Component* getComponentForRowNumber (const int rowNumber) const throw();
 
@@ -19289,7 +19529,7 @@ public:
 
 	virtual void render (const RenderingContext& context) const = 0;
 
-	virtual void getBounds (float& x, float& y, float& width, float& height) const = 0;
+	virtual const Rectangle<float> getBounds() const = 0;
 
 	virtual bool hitTest (float x, float y) const = 0;
 
@@ -19665,7 +19905,7 @@ public:
 						Component* sourceComponent,
 						Image* dragImage = 0,
 						const bool allowDraggingToOtherJuceWindows = false,
-						const Point* imageOffsetFromMouse = 0);
+						const Point<int>* imageOffsetFromMouse = 0);
 
 	bool isDragAndDropActive() const;
 
@@ -19708,7 +19948,7 @@ public:
 	~ComponentAnimator();
 
 	void animateComponent (Component* const component,
-						   const Rectangle& finalPosition,
+						   const Rectangle<int>& finalPosition,
 						   const int millisecondsToSpendMoving,
 						   const double startSpeed = 1.0,
 						   const double endSpeed = 1.0);
@@ -19718,7 +19958,7 @@ public:
 
 	void cancelAllAnimations (const bool moveComponentsToTheirFinalPositions);
 
-	const Rectangle getComponentDestination (Component* const component);
+	const Rectangle<int> getComponentDestination (Component* const component);
 
 	bool isAnimating (Component* component) const;
 
@@ -19884,7 +20124,7 @@ public:
 
 	virtual void setStyle (const Toolbar::ToolbarItemStyle& newStyle);
 
-	const Rectangle getContentArea() const throw()			  { return contentArea; }
+	const Rectangle<int> getContentArea() const throw()		 { return contentArea; }
 
 	virtual bool getToolbarItemSizes (int toolbarThickness,
 									  bool isToolbarVertical,
@@ -19896,7 +20136,7 @@ public:
 								  int width, int height,
 								  bool isMouseOver, bool isMouseDown) = 0;
 
-	virtual void contentAreaChanged (const Rectangle& newBounds) = 0;
+	virtual void contentAreaChanged (const Rectangle<int>& newBounds) = 0;
 
 	enum ToolbarEditingMode
 	{
@@ -19925,7 +20165,7 @@ private:
 	ScopedPointer <Component> overlayComp;
 	int dragOffsetX, dragOffsetY;
 	bool isActive, isBeingDragged, isBeingUsedAsAButton;
-	Rectangle contentArea;
+	Rectangle<int> contentArea;
 
 	ToolbarItemComponent (const ToolbarItemComponent&);
 	const ToolbarItemComponent& operator= (const ToolbarItemComponent&);
@@ -19948,7 +20188,7 @@ public:
 	bool getToolbarItemSizes (int toolbarDepth, bool isToolbarVertical, int& preferredSize,
 							  int& minSize, int& maxSize);
 	void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown);
-	void contentAreaChanged (const Rectangle& newBounds);
+	void contentAreaChanged (const Rectangle<int>& newBounds);
 
 	juce_UseDebuggingNewOperator
 
@@ -20200,7 +20440,7 @@ public:
 
 	void moveCaretTo (const CodeDocument::Position& newPos, const bool selecting);
 
-	const Rectangle getCharacterBounds (const CodeDocument::Position& pos) const throw();
+	const Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const throw();
 
 	const CodeDocument::Position getPositionAt (int x, int y);
 
@@ -20718,7 +20958,7 @@ private:
 	int sliderRegionStart, sliderRegionSize;
 	int sliderBeingDragged;
 	int pixelsForFullDragExtent;
-	Rectangle sliderRect;
+	Rectangle<int> sliderRect;
 	String textSuffix;
 
 	SliderStyle style;
@@ -20853,7 +21093,7 @@ public:
 
 	int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const;
 
-	const Rectangle getColumnPosition (const int index) const;
+	const Rectangle<int> getColumnPosition (const int index) const;
 
 	int getColumnIdAtX (const int xToFind) const;
 
@@ -21013,9 +21253,9 @@ public:
 
 	bool isAutoSizeMenuOptionShown() const;
 
-	const Rectangle getCellPosition (const int columnId,
-									 const int rowNumber,
-									 const bool relativeToComponentTopLeft) const;
+	const Rectangle<int> getCellPosition (const int columnId,
+										  const int rowNumber,
+										  const bool relativeToComponentTopLeft) const;
 
 	void scrollToEnsureColumnIsOnscreen (const int columnId);
 
@@ -21195,7 +21435,7 @@ public:
 	void setSelected (const bool shouldBeSelected,
 					  const bool deselectOtherItemsFirst);
 
-	const Rectangle getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
+	const Rectangle<int> getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
 
 	void treeHasChanged() const throw();
 
@@ -21480,7 +21720,7 @@ public:
 
 	int getHeight() const throw()		   { return imageHeight; }
 
-	const Rectangle getBounds() const throw()	   { return Rectangle (0, 0, imageWidth, imageHeight); }
+	const Rectangle<int> getBounds() const throw()  { return Rectangle<int> (0, 0, imageWidth, imageHeight); }
 
 	PixelFormat getFormat() const throw()	   { return format; }
 
@@ -22084,8 +22324,8 @@ public:
 	double getFixedAspectRatio() const throw();
 
 	virtual void checkBounds (int& x, int& y, int& w, int& h,
-							  const Rectangle& previousBounds,
-							  const Rectangle& limits,
+							  const Rectangle<int>& previousBounds,
+							  const Rectangle<int>& limits,
 							  const bool isStretchingTop,
 							  const bool isStretchingLeft,
 							  const bool isStretchingBottom,
@@ -22314,7 +22554,7 @@ private:
 	ScopedPointer <Component> contentComponent;
 	bool resizeToFitContent, fullscreen;
 	ComponentDragger dragger;
-	Rectangle lastNonFullScreenPos;
+	Rectangle<int> lastNonFullScreenPos;
 	ComponentBoundsConstrainer defaultConstrainer;
 	ComponentBoundsConstrainer* constrainer;
 	#ifdef JUCE_DEBUG
@@ -23553,7 +23793,7 @@ public:
 	void activeWindowStatusChanged();
 	int getDesktopWindowStyleFlags() const;
 	void parentHierarchyChanged();
-	const Rectangle getTitleBarArea();
+	const Rectangle<int> getTitleBarArea();
 
 	juce_UseDebuggingNewOperator
 
@@ -24042,7 +24282,7 @@ private:
 	AlertIconType alertIconType;
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
-	Rectangle textArea;
+	Rectangle<int> textArea;
 	VoidArray buttons, textBoxes, comboBoxes;
 	VoidArray progressBars, customComps, textBlocks, allComps;
 	StringArray textboxNames, comboBoxNames;
@@ -24148,7 +24388,7 @@ public:
 
 	virtual void drawAlertBox (Graphics& g,
 							   AlertWindow& alert,
-							   const Rectangle& textArea,
+							   const Rectangle<int>& textArea,
 							   TextLayout& textLayout);
 
 	virtual int getAlertBoxWindowFlags();
@@ -24481,7 +24721,7 @@ public:
 	virtual void drawPropertyComponentLabel (Graphics& g, int width, int height,
 											 PropertyComponent& component);
 
-	virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
+	virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
 	virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
 
@@ -25354,7 +25594,7 @@ private:
 	ActiveXControlComponent (const ActiveXControlComponent&);
 	const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 
-	void setControlBounds (const Rectangle& bounds) const;
+	void setControlBounds (const Rectangle<int>& bounds) const;
 	void setControlVisible (const bool b) const;
 };
 
@@ -25452,7 +25692,7 @@ public:
 	void setPosition (const int arrowTipX,
 					  const int arrowTipY);
 
-	void setPosition (const Rectangle& rectangleToPointTo);
+	void setPosition (const Rectangle<int>& rectangleToPointTo);
 
 protected:
 
@@ -25467,7 +25707,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Rectangle content;
+	Rectangle<int> content;
 	int side, allowablePlacements;
 	float arrowTipX, arrowTipY;
 	DropShadowEffect shadow;
@@ -26124,7 +26364,7 @@ public:
 
 	void getMovieNormalSize (int& width, int& height) const;
 
-	void setBoundsWithCorrectAspectRatio (const Rectangle& spaceToFitWithin,
+	void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
 										  const RectanglePlacement& placement);
 
 	void play();
@@ -26471,14 +26711,14 @@ public:
 
 	virtual void setOrigin (int x, int y) = 0;
 
-	virtual bool clipToRectangle (const Rectangle& r) = 0;
+	virtual bool clipToRectangle (const Rectangle<int>& r) = 0;
 	virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
-	virtual void excludeClipRectangle (const Rectangle& r) = 0;
+	virtual void excludeClipRectangle (const Rectangle<int>& r) = 0;
 	virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
-	virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform) = 0;
+	virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform) = 0;
 
-	virtual bool clipRegionIntersects (const Rectangle& r) = 0;
-	virtual const Rectangle getClipBounds() const = 0;
+	virtual bool clipRegionIntersects (const Rectangle<int>& r) = 0;
+	virtual const Rectangle<int> getClipBounds() const = 0;
 	virtual bool isClipEmpty() const = 0;
 
 	virtual void saveState() = 0;
@@ -26488,10 +26728,10 @@ public:
 	virtual void setOpacity (float newOpacity) = 0;
 	virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
-	virtual void fillRect (const Rectangle& r, const bool replaceExistingContents) = 0;
+	virtual void fillRect (const Rectangle<int>& r, const bool replaceExistingContents) = 0;
 	virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-	virtual void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+	virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 							const AffineTransform& transform, const bool fillEntireClipAsTiles) = 0;
 
 	virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
@@ -26527,27 +26767,27 @@ public:
 	bool isVectorDevice() const;
 	void setOrigin (int x, int y);
 
-	bool clipToRectangle (const Rectangle& r);
+	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);
-	void excludeClipRectangle (const Rectangle& r);
+	void excludeClipRectangle (const Rectangle<int>& r);
 	void clipToPath (const Path& path, const AffineTransform& transform);
-	void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
+	void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
 
 	void saveState();
 	void restoreState();
 
-	bool clipRegionIntersects (const Rectangle& r);
-	const Rectangle getClipBounds() const;
+	bool clipRegionIntersects (const Rectangle<int>& r);
+	const Rectangle<int> getClipBounds() const;
 	bool isClipEmpty() const;
 
 	void setFill (const FillType& fillType);
 	void setOpacity (float opacity);
 	void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-	void fillRect (const Rectangle& r, const bool replaceExistingContents);
+	void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
-	void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 					const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
 	void drawLine (double x1, double y1, double x2, double y2);
@@ -26618,14 +26858,14 @@ public:
 
 	void setOrigin (int x, int y);
 
-	bool clipToRectangle (const Rectangle& r);
+	bool clipToRectangle (const Rectangle<int>& r);
 	bool clipToRectangleList (const RectangleList& clipRegion);
-	void excludeClipRectangle (const Rectangle& r);
+	void excludeClipRectangle (const Rectangle<int>& r);
 	void clipToPath (const Path& path, const AffineTransform& transform);
-	void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
+	void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
 
-	bool clipRegionIntersects (const Rectangle& r);
-	const Rectangle getClipBounds() const;
+	bool clipRegionIntersects (const Rectangle<int>& r);
+	const Rectangle<int> getClipBounds() const;
 	bool isClipEmpty() const;
 
 	void saveState();
@@ -26635,10 +26875,10 @@ public:
 	void setOpacity (float opacity);
 	void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-	void fillRect (const Rectangle& r, const bool replaceExistingContents);
+	void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
-	void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 					const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
 	void drawLine (double x1, double y1, double x2, double y2);
@@ -26707,7 +26947,7 @@ public:
 	void bringToFront (const int index);
 
 	void render (const Drawable::RenderingContext& context) const;
-	void getBounds (float& x, float& y, float& width, float& height) const;
+	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
 	ValueTree createValueTree() const throw();
@@ -26759,7 +26999,7 @@ public:
 	const Colour& getOverlayColour() const throw()		  { return overlayColour; }
 
 	void render (const Drawable::RenderingContext& context) const;
-	void getBounds (float& x, float& y, float& width, float& height) const;
+	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
 	ValueTree createValueTree() const throw();
@@ -26814,7 +27054,7 @@ public:
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
 	void render (const Drawable::RenderingContext& context) const;
-	void getBounds (float& x, float& y, float& width, float& height) const;
+	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
 	ValueTree createValueTree() const throw();
@@ -26862,7 +27102,7 @@ public:
 	const Colour& getColour() const throw()		 { return colour; }
 
 	void render (const Drawable::RenderingContext& context) const;
-	void getBounds (float& x, float& y, float& width, float& height) const;
+	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
 	ValueTree createValueTree() const throw();
@@ -27050,9 +27290,9 @@ public:
 
 	const String toString() const throw();
 
-	const Rectangle getRectangle (const Rectangle& targetSpaceToBeRelativeTo) const throw();
+	const Rectangle<int> getRectangle (const Rectangle<int>& targetSpaceToBeRelativeTo) const throw();
 
-	void getRectangleDouble (const Rectangle& targetSpaceToBeRelativeTo,
+	void getRectangleDouble (const Rectangle<int>& targetSpaceToBeRelativeTo,
 							 double& x,
 							 double& y,
 							 double& width,
@@ -27060,12 +27300,12 @@ public:
 
 	void applyToComponent (Component& comp) const throw();
 
-	void updateFrom (const Rectangle& newPosition,
-					 const Rectangle& targetSpaceToBeRelativeTo) throw();
+	void updateFrom (const Rectangle<int>& newPosition,
+					 const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
 	void updateFromDouble (const double x, const double y,
 						   const double width, const double height,
-						   const Rectangle& targetSpaceToBeRelativeTo) throw();
+						   const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
 	void updateFromComponent (const Component& comp) throw();
 
@@ -27097,7 +27337,7 @@ public:
 				   const PositionMode yPositionMode,
 				   const SizeMode widthMode,
 				   const SizeMode heightMode,
-				   const Rectangle& targetSpaceToBeRelativeTo) throw();
+				   const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
 	AnchorPoint getAnchorPointX() const throw();
 

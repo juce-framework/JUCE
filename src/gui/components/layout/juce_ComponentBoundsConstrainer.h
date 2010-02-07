@@ -145,8 +145,8 @@ public:
         @param isStretchingRight    whether the right edge of the component is being resized
     */
     virtual void checkBounds (int& x, int& y, int& w, int& h,
-                              const Rectangle& previousBounds,
-                              const Rectangle& limits,
+                              const Rectangle<int>& previousBounds,
+                              const Rectangle<int>& limits,
                               const bool isStretchingTop,
                               const bool isStretchingLeft,
                               const bool isStretchingBottom,

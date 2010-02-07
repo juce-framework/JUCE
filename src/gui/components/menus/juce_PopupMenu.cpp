@@ -758,7 +758,7 @@ private:
     ApplicationCommandManager** managerOfChosenCommand;
     Component* componentAttachedTo;
     ScopedPointer <ComponentDeletionWatcher> attachedCompWatcher;
-    Rectangle windowPos;
+    Rectangle<int> windowPos;
     int lastMouseX, lastMouseY;
     int minimumWidth, maximumNumColumns, standardItemHeight;
     bool isOver, hasBeenOver, isDown, needsToScroll;
@@ -769,7 +769,7 @@ private:
     double scrollAcceleration;
 
     //==============================================================================
-    bool overlaps (const Rectangle& r) const
+    bool overlaps (const Rectangle<int>& r) const
     {
         return r.intersects (getBounds())
                 || (owner != 0 && owner->overlaps (r));
@@ -822,13 +822,13 @@ private:
                              const int minY, const int maxY,
                              const bool alignToRectangle)
     {
-        const Rectangle mon (Desktop::getInstance()
-                                .getMonitorAreaContaining ((minX + maxX) / 2,
-                                                           (minY + maxY) / 2,
+        const Rectangle<int> mon (Desktop::getInstance()
+                                     .getMonitorAreaContaining ((minX + maxX) / 2,
+                                                                (minY + maxY) / 2,
 #if JUCE_MAC
-                                                           true));
+                                                                true));
 #else
-                                                           false)); // on windows, don't stop the menu overlapping the taskbar
+                                                                false)); // on windows, don't stop the menu overlapping the taskbar
 #endif
 
         int x, y, widthToUse, heightToUse;
@@ -995,10 +995,10 @@ private:
                                                 windowPos.getHeight() - (PopupMenuSettings::scrollZone + m->getHeight())),
                                           currentY);
 
-                    const Rectangle mon (Desktop::getInstance()
-                                         .getMonitorAreaContaining (windowPos.getX(),
-                                                                    windowPos.getY(),
-                                                                    true));
+                    const Rectangle<int> mon (Desktop::getInstance()
+                                              .getMonitorAreaContaining (windowPos.getX(),
+                                                                         windowPos.getY(),
+                                                                         true));
 
                     int deltaY = wantedY - currentY;
 
@@ -1021,7 +1021,7 @@ private:
 
     void resizeToBestWindowPos()
     {
-        Rectangle r (windowPos);
+        Rectangle<int> r (windowPos);
 
         if (childYOffset < 0)
         {

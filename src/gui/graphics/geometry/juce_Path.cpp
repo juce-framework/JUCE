@@ -153,40 +153,17 @@ bool Path::isEmpty() const throw()
     return true;
 }
 
-void Path::getBounds (float& x, float& y,
-                      float& w, float& h) const throw()
+const Rectangle<float> Path::getBounds () const throw()
 {
-    x = pathXMin;
-    y = pathYMin;
-    w = pathXMax - pathXMin;
-    h = pathYMax - pathYMin;
+    return Rectangle<float> (pathXMin, pathYMin,
+                             pathXMax - pathXMin,
+                             pathYMax - pathYMin);
 }
 
 
-void Path::getBoundsTransformed (const AffineTransform& transform,
-                                 float& x, float& y,
-                                 float& w, float& h) const throw()
+const Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const throw()
 {
-    float x1 = pathXMin;
-    float y1 = pathYMin;
-    transform.transformPoint (x1, y1);
-
-    float x2 = pathXMax;
-    float y2 = pathYMin;
-    transform.transformPoint (x2, y2);
-
-    float x3 = pathXMin;
-    float y3 = pathYMax;
-    transform.transformPoint (x3, y3);
-
-    float x4 = pathXMax;
-    float y4 = pathYMax;
-    transform.transformPoint (x4, y4);
-
-    x = jmin (x1, x2, x3, x4);
-    y = jmin (y1, y2, y3, y4);
-    w = jmax (x1, x2, x3, x4) - x;
-    h = jmax (y1, y2, y3, y4) - y;
+    return getBounds().transformed (transform);
 }
 
 //==============================================================================
@@ -294,7 +271,7 @@ void Path::closeSubPath() throw()
     }
 }
 
-const Point Path::getCurrentPosition() const
+const Point<float> Path::getCurrentPosition() const
 {
     int i = numElements - 1;
 
@@ -313,9 +290,9 @@ const Point Path::getCurrentPosition() const
     }
 
     if (i > 0)
-        return Point (data.elements [i - 1], data.elements [i]);
+        return Point<float> (data.elements [i - 1], data.elements [i]);
 
-    return Point (0.0f, 0.0f);
+    return Point<float>();
 }
 
 void Path::addRectangle (const float x, const float y,
@@ -361,7 +338,7 @@ void Path::addRectangle (const float x, const float y,
     data.elements [numElements++] = closeSubPathMarker;
 }
 
-void Path::addRectangle (const Rectangle& rectangle) throw()
+void Path::addRectangle (const Rectangle<int>& rectangle) throw()
 {
     addRectangle ((float) rectangle.getX(), (float) rectangle.getY(),
                   (float) rectangle.getWidth(), (float) rectangle.getHeight());
@@ -979,16 +956,15 @@ const AffineTransform Path::getTransformToScaleToFit (const float x, const float
                                                       const bool preserveProportions,
                                                       const Justification& justification) const throw()
 {
-    float sx, sy, sw, sh;
-    getBounds (sx, sy, sw, sh);
+    Rectangle<float> bounds (getBounds());
 
     if (preserveProportions)
     {
-        if (w <= 0 || h <= 0 || sw <= 0 || sh <= 0)
+        if (w <= 0 || h <= 0 || bounds.isEmpty())
             return AffineTransform::identity;
 
         float newW, newH;
-        const float srcRatio = sh / sw;
+        const float srcRatio = bounds.getHeight() / bounds.getWidth();
 
         if (srcRatio > h / w)
         {
@@ -1018,14 +994,15 @@ const AffineTransform Path::getTransformToScaleToFit (const float x, const float
         else
             newYCentre += h * 0.5f;
 
-        return AffineTransform::translation (sw * -0.5f - sx, sh * -0.5f - sy)
-                    .scaled (newW / sw, newH / sh)
+        return AffineTransform::translation (bounds.getWidth() * -0.5f - bounds.getX(),
+                                             bounds.getHeight() * -0.5f - bounds.getY())
+                    .scaled (newW / bounds.getWidth(), newH / bounds.getHeight())
                     .translated (newXCentre, newYCentre);
     }
     else
     {
-        return AffineTransform::translation (-sx, -sy)
-                    .scaled (w / sw, h / sh)
+        return AffineTransform::translation (-bounds.getX(), -bounds.getY())
+                    .scaled (w / bounds.getWidth(), h / bounds.getHeight())
                     .translated (x, y);
     }
 }

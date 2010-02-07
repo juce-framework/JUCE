@@ -29,8 +29,7 @@
 #include <AudioToolbox/AudioUnitUtilities.h>
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
-#include "../juce_PluginHeaders.h"
-#include "../juce_PluginHostType.h"
+#include "../juce_IncludeCharacteristics.h"
 
 #if JucePlugin_Build_AU
 
@@ -47,6 +46,9 @@
  #include "AUCarbonViewBase.h"
  class JuceAUView;
 #endif
+
+#include "../juce_PluginHeaders.h"
+#include "../juce_PluginHostType.h"
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9

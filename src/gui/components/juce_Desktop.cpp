@@ -65,13 +65,13 @@ Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
 Desktop* Desktop::instance = 0;
 
 //==============================================================================
-extern void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords,
+extern void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords,
                                          const bool clipToWorkArea);
 
 void Desktop::refreshMonitorSizes() throw()
 {
-    const Array <Rectangle> oldClipped (monitorCoordsClipped);
-    const Array <Rectangle> oldUnclipped (monitorCoordsUnclipped);
+    const Array <Rectangle<int> > oldClipped (monitorCoordsClipped);
+    const Array <Rectangle<int> > oldUnclipped (monitorCoordsUnclipped);
 
     monitorCoordsClipped.clear();
     monitorCoordsUnclipped.clear();
@@ -97,7 +97,7 @@ int Desktop::getNumDisplayMonitors() const throw()
     return monitorCoordsClipped.size();
 }
 
-const Rectangle Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw()
 {
     return clippedToWorkArea ? monitorCoordsClipped [index]
                              : monitorCoordsUnclipped [index];
@@ -113,19 +113,19 @@ const RectangleList Desktop::getAllMonitorDisplayAreas (const bool clippedToWork
     return rl;
 }
 
-const Rectangle Desktop::getMainMonitorArea (const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) const throw()
 {
     return getDisplayMonitorCoordinates (0, clippedToWorkArea);
 }
 
-const Rectangle Desktop::getMonitorAreaContaining (int cx, int cy, const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getMonitorAreaContaining (int cx, int cy, const bool clippedToWorkArea) const throw()
 {
-    Rectangle best (getMainMonitorArea (clippedToWorkArea));
+    Rectangle<int> best (getMainMonitorArea (clippedToWorkArea));
     double bestDistance = 1.0e10;
 
     for (int i = getNumDisplayMonitors(); --i >= 0;)
     {
-        const Rectangle rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
+        const Rectangle<int> rect (getDisplayMonitorCoordinates (i, clippedToWorkArea));
 
         if (rect.contains (cx, cy))
             return rect;
@@ -211,8 +211,8 @@ void Desktop::componentBroughtToFront (Component* const c) throw()
 void Desktop::getLastMouseDownPosition (int& x, int& y) throw()
 {
     const Desktop& d = getInstance();
-    x = d.mouseDowns[0].x;
-    y = d.mouseDowns[0].y;
+    x = d.mouseDowns[0].position.getX();
+    y = d.mouseDowns[0].position.getY();
 }
 
 int Desktop::getMouseButtonClickCounter() throw()
@@ -230,24 +230,23 @@ const Time Desktop::getLastMouseDownTime() const throw()
     return Time (mouseDowns[0].time);
 }
 
-void Desktop::registerMouseDown (int x, int y, int64 time, Component* component) throw()
+void Desktop::registerMouseDown (const Point<int>& position, int64 time, Component* component) throw()
 {
     for (int i = numElementsInArray (mouseDowns); --i > 0;)
         mouseDowns[i] = mouseDowns[i - 1];
 
-    mouseDowns[0].x = x;
-    mouseDowns[0].y = y;
+    mouseDowns[0].position = position;
     mouseDowns[0].time = time;
     mouseDowns[0].component = component;
     mouseMovedSignificantlySincePressed = false;
 }
 
-void Desktop::registerMouseDrag (int x, int y) throw()
+void Desktop::registerMouseDrag (const Point<int>& position) throw()
 {
     mouseMovedSignificantlySincePressed
         = mouseMovedSignificantlySincePressed
-           || abs (mouseDowns[0].x - x) >= 4
-           || abs (mouseDowns[0].y - y) >= 4;
+           || abs (mouseDowns[0].position.getX() - position.getX()) >= 4
+           || abs (mouseDowns[0].position.getY() - position.getY()) >= 4;
 }
 
 int Desktop::getNumberOfMultipleClicks() const throw()
@@ -263,8 +262,8 @@ int Desktop::getNumberOfMultipleClicks() const throw()
         {
             if (mouseDowns[0].time - mouseDowns[i].time
                     < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
-                && abs (mouseDowns[0].x - mouseDowns[i].x) < 8
-                && abs (mouseDowns[0].y - mouseDowns[i].y) < 8
+                && abs (mouseDowns[0].position.getX() - mouseDowns[i].position.getX()) < 8
+                && abs (mouseDowns[0].position.getY() - mouseDowns[i].position.getY()) < 8
                 && mouseDowns[0].component == mouseDowns[i].component)
             {
                 ++numClicks;

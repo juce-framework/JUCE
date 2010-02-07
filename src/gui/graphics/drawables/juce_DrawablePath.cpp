@@ -102,12 +102,12 @@ void DrawablePath::updateOutline()
     strokeType.createStrokedPath (stroke, path, AffineTransform::identity, 4.0f);
 }
 
-void DrawablePath::getBounds (float& x, float& y, float& width, float& height) const
+const Rectangle<float> DrawablePath::getBounds() const
 {
     if (strokeType.getStrokeThickness() > 0.0f)
-        stroke.getBounds (x, y, width, height);
+        return stroke.getBounds();
     else
-        path.getBounds (x, y, width, height);
+        return path.getBounds();
 }
 
 bool DrawablePath::hitTest (float x, float y) const

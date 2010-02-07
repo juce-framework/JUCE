@@ -1414,13 +1414,13 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
     viewport->setViewPosition (vx, vy);
 }
 
-const Rectangle TextEditor::getCaretRectangle()
+const Rectangle<int> TextEditor::getCaretRectangle()
 {
     updateCaretPosition();
 
-    return Rectangle (roundToInt (cursorX) - viewport->getX(),
-                      roundToInt (cursorY) - viewport->getY(),
-                      1, roundToInt (cursorHeight));
+    return Rectangle<int> (roundToInt (cursorX) - viewport->getX(),
+                           roundToInt (cursorY) - viewport->getY(),
+                           1, roundToInt (cursorHeight));
 }
 
 //==============================================================================
@@ -1677,7 +1677,7 @@ void TextEditor::drawContent (Graphics& g)
     if (wordWrapWidth > 0)
     {
         g.setOrigin (leftIndent, topIndent);
-        const Rectangle clip (g.getClipBounds());
+        const Rectangle<int> clip (g.getClipBounds());
         Colour selectedTextColour;
 
         TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);

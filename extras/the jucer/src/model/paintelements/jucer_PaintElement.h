@@ -50,13 +50,13 @@ public:
     //==============================================================================
     virtual void setInitialBounds (int parentWidth, int parentHeight);
 
-    virtual const Rectangle getCurrentBounds (const Rectangle& activeArea) const;
-    virtual void setCurrentBounds (const Rectangle& newBounds, const Rectangle& activeArea, const bool undoable);
+    virtual const Rectangle<int> getCurrentBounds (const Rectangle<int>& activeArea) const;
+    virtual void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& activeArea, const bool undoable);
 
     const RelativePositionedRectangle& getPosition() const;
     void setPosition (const RelativePositionedRectangle& newPosition, const bool undoable);
 
-    void updateBounds (const Rectangle& activeArea);
+    void updateBounds (const Rectangle<int>& activeArea);
 
     const String& getTypeName() const throw()                   { return typeName; }
     PaintRoutine* getOwner() const throw()                      { return owner; }
@@ -64,9 +64,9 @@ public:
     //==============================================================================
     virtual void draw (Graphics& g,
                        const ComponentLayout* layout,
-                       const Rectangle& parentArea) = 0;
+                       const Rectangle<int>& parentArea) = 0;
 
-    virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle& relativeTo);
+    virtual void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
     virtual void getEditableProperties (Array <PropertyComponent*>& properties);
 
@@ -103,8 +103,8 @@ protected:
     void resizeStart();
     void resizeEnd();
     void checkBounds (int& x, int& y, int& w, int& h,
-                      const Rectangle& previousBounds,
-                      const Rectangle& limits,
+                      const Rectangle<int>& previousBounds,
+                      const Rectangle<int>& limits,
                       const bool isStretchingTop,
                       const bool isStretchingLeft,
                       const bool isStretchingBottom,
@@ -112,7 +112,7 @@ protected:
 
     void applyBoundsToComponent (Component* component, int x, int y, int w, int h);
 
-    const Rectangle getCurrentAbsoluteBounds() const;
+    const Rectangle<int> getCurrentAbsoluteBounds() const;
     void getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const;
 
     virtual void selectionChanged (const bool isSelected);

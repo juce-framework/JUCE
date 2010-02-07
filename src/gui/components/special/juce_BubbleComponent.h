@@ -125,7 +125,7 @@ public:
         on where there's the most space, honouring any restrictions that were set
         with setAllowedPlacement().
     */
-    void setPosition (const Rectangle& rectangleToPointTo);
+    void setPosition (const Rectangle<int>& rectangleToPointTo);
 
 
 protected:
@@ -151,7 +151,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Rectangle content;
+    Rectangle<int> content;
     int side, allowablePlacements;
     float arrowTipX, arrowTipY;
     DropShadowEffect shadow;

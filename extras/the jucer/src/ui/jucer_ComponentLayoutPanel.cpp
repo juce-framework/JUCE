@@ -115,7 +115,7 @@ void ComponentLayoutPanel::updatePropertiesList()
     ((LayoutPropsPanel*) propsPanel)->updateList();
 }
 
-const Rectangle ComponentLayoutPanel::getComponentArea() const
+const Rectangle<int> ComponentLayoutPanel::getComponentArea() const
 {
     return ((ComponentLayoutEditor*) editor)->getComponentArea();
 }

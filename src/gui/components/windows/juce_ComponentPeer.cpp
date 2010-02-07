@@ -582,12 +582,12 @@ void ComponentPeer::handleScreenSizeChange()
     handleMovedOrResized();
 }
 
-void ComponentPeer::setNonFullScreenBounds (const Rectangle& newBounds) throw()
+void ComponentPeer::setNonFullScreenBounds (const Rectangle<int>& newBounds) throw()
 {
     lastNonFullscreenBounds = newBounds;
 }
 
-const Rectangle& ComponentPeer::getNonFullScreenBounds() const throw()
+const Rectangle<int>& ComponentPeer::getNonFullScreenBounds() const throw()
 {
     return lastNonFullscreenBounds;
 }

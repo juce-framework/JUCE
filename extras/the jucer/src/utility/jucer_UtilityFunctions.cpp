@@ -333,7 +333,7 @@ const String positionToString (const RelativePositionedRectangle& pos)
 
 void positionToXY (const RelativePositionedRectangle& position,
                    double& x, double& y,
-                   const Rectangle& parentArea,
+                   const Rectangle<int>& parentArea,
                    const ComponentLayout* layout)
 {
     double w, h;
@@ -586,12 +586,12 @@ void drawResizableBorder (Graphics& g,
 
 void drawMouseOverCorners (Graphics& g, int w, int h)
 {
-    RectangleList r (Rectangle (0, 0, w, h));
-    r.subtract (Rectangle (1, 1, w - 2, h - 2));
+    RectangleList r (Rectangle<int> (0, 0, w, h));
+    r.subtract (Rectangle<int> (1, 1, w - 2, h - 2));
 
     const int size = jmin (w / 3, h / 3, 12);
-    r.subtract (Rectangle (size, 0, w - size - size, h));
-    r.subtract (Rectangle (0, size, w, h - size - size));
+    r.subtract (Rectangle<int> (size, 0, w - size - size, h));
+    r.subtract (Rectangle<int> (0, size, w, h - size - size));
 
     g.setColour (Colours::darkgrey);
 
@@ -648,7 +648,7 @@ bool RelativePositionedRectangle::operator!= (const RelativePositionedRectangle&
     return ! operator== (other);
 }
 
-void RelativePositionedRectangle::getRelativeTargetBounds (const Rectangle& parentArea,
+void RelativePositionedRectangle::getRelativeTargetBounds (const Rectangle<int>& parentArea,
                                                            const ComponentLayout* layout,
                                                            int& x, int& xw, int& y, int& yh,
                                                            int& w, int& h) const
@@ -674,44 +674,44 @@ void RelativePositionedRectangle::getRelativeTargetBounds (const Rectangle& pare
     yh = ry != 0 ? ry->getHeight() : parentArea.getHeight();
 }
 
-const Rectangle RelativePositionedRectangle::getRectangle (const Rectangle& parentArea,
-                                                           const ComponentLayout* layout) const
+const Rectangle<int> RelativePositionedRectangle::getRectangle (const Rectangle<int>& parentArea,
+                                                                const ComponentLayout* layout) const
 {
     int x, xw, y, yh, w, h;
     getRelativeTargetBounds (parentArea, layout, x, xw, y, yh, w, h);
 
-    const Rectangle xyRect ((xw <= 0 || yh <= 0) ? Rectangle()
-                                                 : rect.getRectangle (Rectangle (x, y, xw, yh)));
+    const Rectangle<int> xyRect ((xw <= 0 || yh <= 0) ? Rectangle<int>()
+                                                      : rect.getRectangle (Rectangle<int> (x, y, xw, yh)));
 
-    const Rectangle whRect ((w <= 0 || h <= 0) ? Rectangle()
-                                               : rect.getRectangle (Rectangle (x, y, w, h)));
+    const Rectangle<int> whRect ((w <= 0 || h <= 0) ? Rectangle<int>()
+                                                    : rect.getRectangle (Rectangle<int> (x, y, w, h)));
 
-    return Rectangle (xyRect.getX(), xyRect.getY(),
-                      whRect.getWidth(), whRect.getHeight());
+    return Rectangle<int> (xyRect.getX(), xyRect.getY(),
+                           whRect.getWidth(), whRect.getHeight());
 }
 
 void RelativePositionedRectangle::getRectangleDouble (double& x, double& y, double& w, double& h,
-                                                      const Rectangle& parentArea,
+                                                      const Rectangle<int>& parentArea,
                                                       const ComponentLayout* layout) const
 {
     int rx, rxw, ry, ryh, rw, rh;
     getRelativeTargetBounds (parentArea, layout, rx, rxw, ry, ryh, rw, rh);
 
     double dummy1, dummy2;
-    rect.getRectangleDouble (Rectangle (rx, ry, rxw, ryh), x, y, dummy1, dummy2);
-    rect.getRectangleDouble (Rectangle (rx, ry, rw, rh), dummy1, dummy2, w, h);
+    rect.getRectangleDouble (Rectangle<int> (rx, ry, rxw, ryh), x, y, dummy1, dummy2);
+    rect.getRectangleDouble (Rectangle<int> (rx, ry, rw, rh), dummy1, dummy2, w, h);
 }
 
 void RelativePositionedRectangle::updateFromComponent (const Component& comp,
                                                        const ComponentLayout* layout)
 {
     int x, xw, y, yh, w, h;
-    getRelativeTargetBounds (Rectangle (0, 0, comp.getParentWidth(), comp.getParentHeight()),
+    getRelativeTargetBounds (Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight()),
                              layout, x, xw, y, yh, w, h);
 
     PositionedRectangle xyRect (rect), whRect (rect);
-    xyRect.updateFrom (comp.getBounds(), Rectangle (x, y, xw, yh));
-    whRect.updateFrom (comp.getBounds(), Rectangle (x, y, w, h));
+    xyRect.updateFrom (comp.getBounds(), Rectangle<int> (x, y, xw, yh));
+    whRect.updateFrom (comp.getBounds(), Rectangle<int> (x, y, w, h));
 
     rect.setX (xyRect.getX());
     rect.setY (xyRect.getY());
@@ -720,14 +720,14 @@ void RelativePositionedRectangle::updateFromComponent (const Component& comp,
 }
 
 void RelativePositionedRectangle::updateFrom (double newX, double newY, double newW, double newH,
-                                              const Rectangle& parentArea, const ComponentLayout* layout)
+                                              const Rectangle<int>& parentArea, const ComponentLayout* layout)
 {
     int x, xw, y, yh, w, h;
     getRelativeTargetBounds (parentArea, layout, x, xw, y, yh, w, h);
 
     PositionedRectangle xyRect (rect), whRect (rect);
-    xyRect.updateFromDouble (newX, newY, newW, newH, Rectangle (x, y, xw, yh));
-    whRect.updateFromDouble (newX, newY, newW, newH, Rectangle (x, y, w, h));
+    xyRect.updateFromDouble (newX, newY, newW, newH, Rectangle<int> (x, y, xw, yh));
+    whRect.updateFromDouble (newX, newY, newW, newH, Rectangle<int> (x, y, w, h));
 
     rect.setX (xyRect.getX());
     rect.setY (xyRect.getY());

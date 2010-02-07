@@ -33,54 +33,68 @@
 /**
     A pair of (x, y) co-ordinates.
 
-    Uses 32-bit floating point accuracy.
+    The ValueType template should be a primitive type such as int, float, double,
+    rather than a class.
 
     @see Line, Path, AffineTransform
 */
-class JUCE_API  Point
+template <typename ValueType>
+class Point
 {
 public:
     //==============================================================================
     /** Creates a point with co-ordinates (0, 0). */
-    Point() throw();
+    Point() throw()  : x (0), y (0) {}
 
     /** Creates a copy of another point. */
-    Point (const Point& other) throw();
+    Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
 
     /** Creates a point from an (x, y) position. */
-    Point (const float x, const float y) throw();
-
-    /** Copies this point from another one.
-        @see setXY
-    */
-    const Point& operator= (const Point& other) throw();
+    Point (const ValueType initialX, const ValueType initialY) throw()  : x (initialX), y (initialY) {}
 
     /** Destructor. */
-    ~Point() throw();
+    ~Point() throw() {}
 
     //==============================================================================
+    /** Copies this point from another one. */
+    Point& operator= (const Point& other) throw()                       { x = other.x; y = other.y; return *this; }
+
     /** Returns the point's x co-ordinate. */
-    inline float getX() const throw()                   { return x; }
+    inline ValueType getX() const throw()                               { return x; }
 
     /** Returns the point's y co-ordinate. */
-    inline float getY() const throw()                   { return y; }
+    inline ValueType getY() const throw()                               { return y; }
 
     /** Changes the point's x and y co-ordinates. */
-    void setXY (const float x,
-                const float y) throw();
+    void setXY (const ValueType newX, const ValueType newY) throw()     { x = newX; y = newY; }
+
+    /** Adds a pair of co-ordinates to this value. */
+    void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
+
+    /** Adds two points together. */
+    const Point operator+ (const Point& other) const throw()            { return Point (x + other.x, y + other.y); }
+
+    /** Adds another point's co-ordinates to this one. */
+    Point& operator+= (const Point& other) throw()                      { x += other.x; y += other.y; return *this; }
+
+    /** Subtracts one points from another. */
+    const Point operator- (const Point& other) const throw()            { return Point (x - other.x, y - other.y); }
+
+    /** Subtracts another point's co-ordinates to this one. */
+    Point& operator-= (const Point& other) throw()                      { x -= other.x; y -= other.y; return *this; }
 
     /** Uses a transform to change the point's co-ordinates.
-
+        This will only compile if ValueType = float!
         @see AffineTransform::transformPoint
     */
-    void applyTransform (const AffineTransform& transform) throw();
+    void applyTransform (const AffineTransform& transform) throw()      { transform.transformPoint (x, y); }
 
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    float x, y;
+    ValueType x, y;
 };
 
 

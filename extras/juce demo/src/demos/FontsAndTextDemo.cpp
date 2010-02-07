@@ -90,17 +90,9 @@ public:
         horizontalScaleSlider->addListener (this);
         (new Label (String::empty, horizontalScaleSlider->getName()))->attachToComponent (horizontalScaleSlider, true);
 
-        for (int i = 0; i < fonts.size(); ++i)
-        {
-            if (fonts[i]->getTypefaceName().startsWithIgnoreCase (T("Arial")))
-            {
-                listBox->selectRow (i);
-                break;
-            }
-        }
-
         listBox->setColour (ListBox::outlineColourId, Colours::black.withAlpha (0.5f));
         listBox->setOutlineThickness (1);
+        listBox->selectRow (Random::getSystemRandom().nextInt (fonts.size()));
 
         // set up the layout and resizer bars..
 

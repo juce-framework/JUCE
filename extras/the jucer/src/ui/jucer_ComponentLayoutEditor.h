@@ -71,7 +71,7 @@ public:
 
     ComponentOverlayComponent* getOverlayCompFor (Component* comp) const;
 
-    const Rectangle getComponentArea() const;
+    const Rectangle<int> getComponentArea() const;
 
     Image* createComponentLayerSnapshot() const;
 

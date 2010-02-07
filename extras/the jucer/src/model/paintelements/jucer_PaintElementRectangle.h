@@ -45,24 +45,24 @@ public:
     {
     }
 
-    const Rectangle getCurrentBounds (const Rectangle& parentArea) const
+    const Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const
     {
         return PaintElement::getCurrentBounds (parentArea); // bypass the ColouredElement implementation
     }
 
-    void setCurrentBounds (const Rectangle& newBounds, const Rectangle& parentArea, const bool undoable)
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable)
     {
         PaintElement::setCurrentBounds (newBounds, parentArea, undoable); // bypass the ColouredElement implementation
     }
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
         Component parentComponent;
         parentComponent.setBounds (parentArea);
 
         fillType.setFillType (g, getDocument(), parentArea);
 
-        const Rectangle r (position.getRectangle (parentArea, layout));
+        const Rectangle<int> r (position.getRectangle (parentArea, layout));
         g.fillRect (r);
 
         if (isStrokePresent)
@@ -137,7 +137,7 @@ public:
 
     void convertToPath()
     {
-        const Rectangle r (getCurrentAbsoluteBounds());
+        const Rectangle<int> r (getCurrentAbsoluteBounds());
 
         Path path;
         path.addRectangle ((float) r.getX(), (float) r.getY(), (float) r.getWidth(), (float) r.getHeight());

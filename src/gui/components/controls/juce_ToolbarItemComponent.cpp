@@ -231,14 +231,14 @@ void ToolbarItemComponent::resized()
         const int indent = jmin (proportionOfWidth (0.08f),
                                  proportionOfHeight (0.08f));
 
-        contentArea = Rectangle (indent, indent,
-                                 getWidth() - indent * 2,
-                                 toolbarStyle == Toolbar::iconsWithText ? proportionOfHeight (0.55f)
-                                                                        : (getHeight() - indent * 2));
+        contentArea = Rectangle<int> (indent, indent,
+                                      getWidth() - indent * 2,
+                                      toolbarStyle == Toolbar::iconsWithText ? proportionOfHeight (0.55f)
+                                                                             : (getHeight() - indent * 2));
     }
     else
     {
-        contentArea = Rectangle();
+        contentArea = Rectangle<int>();
     }
 
     contentAreaChanged (contentArea);

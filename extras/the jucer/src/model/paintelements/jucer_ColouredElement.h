@@ -63,8 +63,8 @@ public:
     void setStrokeFill (const JucerFillType& newType, const bool undoable);
 
     //==============================================================================
-    const Rectangle getCurrentBounds (const Rectangle& parentArea) const;
-    void setCurrentBounds (const Rectangle& newBounds, const Rectangle& parentArea, const bool undoable);
+    const Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const;
+    void setCurrentBounds (const Rectangle<int>& newBounds, const Rectangle<int>& parentArea, const bool undoable);
 
     void createSiblingComponents();
 

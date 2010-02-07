@@ -279,7 +279,7 @@ public:
             {
                 for (RectangleList::Iterator i (maskedRegion); i.next();)
                 {
-                    const Rectangle& r = *i.getRectangle();
+                    const Rectangle<int>& r = *i.getRectangle();
                     ExcludeClipRect (hdc, r.getX(), r.getY(), r.getRight(), r.getBottom());
                 }
             }
@@ -296,7 +296,7 @@ public:
 
                 for (RectangleList::Iterator i (maskedRegion); i.next();)
                 {
-                    const Rectangle& r = *i.getRectangle();
+                    const Rectangle<int>& r = *i.getRectangle();
                     ExcludeClipRect (dc, r.getX(), r.getY(), r.getRight(), r.getBottom());
                 }
             }
@@ -648,7 +648,7 @@ public:
 
             if (! fullScreen)
             {
-                const Rectangle boundsCopy (lastNonFullscreenBounds);
+                const Rectangle<int> boundsCopy (lastNonFullscreenBounds);
 
                 if (hasTitleBar())
                     ShowWindow (hwnd, SW_SHOWNORMAL);
@@ -1215,7 +1215,7 @@ private:
 
                             if (cx + cw - x <= w && cy + ch - y <= h)
                             {
-                                contextClip.addWithoutMerging (Rectangle (cx - x, cy - y, cw, ch));
+                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, cy - y, cw, ch));
                             }
                             else
                             {
@@ -1232,7 +1232,7 @@ private:
             if (needToPaintAll)
             {
                 contextClip.clear();
-                contextClip.addWithoutMerging (Rectangle (0, 0, w, h));
+                contextClip.addWithoutMerging (Rectangle<int> (0, 0, w, h));
             }
 
             if (transparent)
@@ -1241,7 +1241,7 @@ private:
 
                 while (i.next())
                 {
-                    const Rectangle& r = *i.getRectangle();
+                    const Rectangle<int>& r = *i.getRectangle();
                     offscreenImage->clear (r.getX(), r.getY(), r.getWidth(), r.getHeight());
                 }
             }
@@ -1790,7 +1790,7 @@ private:
 
         if (fullScreen && ! isMinimised())
         {
-            const Rectangle r (component->getParentMonitorArea());
+            const Rectangle<int> r (component->getParentMonitorArea());
 
             SetWindowPos (hwnd, 0,
                           r.getX(), r.getY(), r.getWidth(), r.getHeight(),
@@ -1897,10 +1897,10 @@ private:
                         {
                             if (constrainer != 0)
                             {
-                                const Rectangle current (component->getX() - windowBorder.getLeft(),
-                                                         component->getY() - windowBorder.getTop(),
-                                                         component->getWidth() + windowBorder.getLeftAndRight(),
-                                                         component->getHeight() + windowBorder.getTopAndBottom());
+                                const Rectangle<int> current (component->getX() - windowBorder.getLeft(),
+                                                              component->getY() - windowBorder.getTop(),
+                                                              component->getWidth() + windowBorder.getLeftAndRight(),
+                                                              component->getHeight() + windowBorder.getTopAndBottom());
 
                                 constrainer->checkBounds (wp->x, wp->y, wp->cx, wp->cy,
                                                           current,
@@ -2416,14 +2416,14 @@ void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable
 //==============================================================================
 static BOOL CALLBACK enumMonitorsProc (HMONITOR, HDC, LPRECT r, LPARAM userInfo)
 {
-    Array <Rectangle>* const monitorCoords = (Array <Rectangle>*) userInfo;
+    Array <Rectangle<int> >* const monitorCoords = (Array <Rectangle<int> >*) userInfo;
 
-    monitorCoords->add (Rectangle (r->left, r->top, r->right - r->left, r->bottom - r->top));
+    monitorCoords->add (Rectangle<int> (r->left, r->top, r->right - r->left, r->bottom - r->top));
 
     return TRUE;
 }
 
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
+void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     EnumDisplayMonitors (0, 0, &enumMonitorsProc, (LPARAM) &monitorCoords);
 
@@ -2437,7 +2437,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
         RECT r;
         GetWindowRect (GetDesktopWindow(), &r);
 
-        monitorCoords.add (Rectangle (r.left, r.top, r.right - r.left, r.bottom - r.top));
+        monitorCoords.add (Rectangle<int> (r.left, r.top, r.right - r.left, r.bottom - r.top));
     }
 
     if (clipToWorkArea)
@@ -2446,7 +2446,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
         RECT r;
         SystemParametersInfo (SPI_GETWORKAREA, 0, &r, 0);
 
-        Rectangle& screen = monitorCoords.getReference (0);
+        Rectangle<int>& screen = monitorCoords.getReference (0);
 
         screen.setPosition (jmax (screen.getX(), (int) r.left),
                             jmax (screen.getY(), (int) r.top));

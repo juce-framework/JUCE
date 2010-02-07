@@ -88,7 +88,7 @@ public:
                                     animation, set both the start and end speeds to 1.0
     */
     void animateComponent (Component* const component,
-                           const Rectangle& finalPosition,
+                           const Rectangle<int>& finalPosition,
                            const int millisecondsToSpendMoving,
                            const double startSpeed = 1.0,
                            const double endSpeed = 1.0);
@@ -118,7 +118,7 @@ public:
         If the specified component isn't currently being animated, this method will just
         return its current position.
     */
-    const Rectangle getComponentDestination (Component* const component);
+    const Rectangle<int> getComponentDestination (Component* const component);
 
     /** Returns true if the specified component is currently being animated.
     */

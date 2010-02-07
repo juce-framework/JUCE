@@ -92,15 +92,15 @@ void BorderSize::setRight (const int newRightGap) throw()
 }
 
 //==============================================================================
-const Rectangle BorderSize::subtractedFrom (const Rectangle& r) const throw()
+const Rectangle<int> BorderSize::subtractedFrom (const Rectangle<int>& r) const throw()
 {
-    return Rectangle (r.getX() + left,
-                      r.getY() + top,
-                      r.getWidth() - (left + right),
-                      r.getHeight() - (top + bottom));
+    return Rectangle<int> (r.getX() + left,
+                           r.getY() + top,
+                           r.getWidth() - (left + right),
+                           r.getHeight() - (top + bottom));
 }
 
-void BorderSize::subtractFrom (Rectangle& r) const throw()
+void BorderSize::subtractFrom (Rectangle<int>& r) const throw()
 {
     r.setBounds (r.getX() + left,
                  r.getY() + top,
@@ -108,15 +108,15 @@ void BorderSize::subtractFrom (Rectangle& r) const throw()
                  r.getHeight() - (top + bottom));
 }
 
-const Rectangle BorderSize::addedTo (const Rectangle& r) const throw()
+const Rectangle<int> BorderSize::addedTo (const Rectangle<int>& r) const throw()
 {
-    return Rectangle (r.getX() - left,
-                      r.getY() - top,
-                      r.getWidth() + (left + right),
-                      r.getHeight() + (top + bottom));
+    return Rectangle<int> (r.getX() - left,
+                           r.getY() - top,
+                           r.getWidth() + (left + right),
+                           r.getHeight() + (top + bottom));
 }
 
-void BorderSize::addTo (Rectangle& r) const throw()
+void BorderSize::addTo (Rectangle<int>& r) const throw()
 {
     r.setBounds (r.getX() - left,
                  r.getY() - top,

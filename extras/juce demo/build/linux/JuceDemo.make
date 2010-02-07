@@ -41,9 +41,8 @@ endif
 OBJECTS := \
 	$(OBJDIR)/BinaryData.o \
 	$(OBJDIR)/juce_LibrarySource.o \
-	$(OBJDIR)/ApplicationStartup.o \
 	$(OBJDIR)/MainDemoWindow.o \
-	$(OBJDIR)/AudioDemoLatencyPage.o \
+	$(OBJDIR)/ApplicationStartup.o \
 	$(OBJDIR)/AudioDemoPlaybackPage.o \
 	$(OBJDIR)/AudioDemoSetupPage.o \
 	$(OBJDIR)/AudioDemoSynthPage.o \
@@ -55,12 +54,13 @@ OBJECTS := \
 	$(OBJDIR)/OpenGLDemo.o \
 	$(OBJDIR)/QuickTimeDemo.o \
 	$(OBJDIR)/TableDemo.o \
-	$(OBJDIR)/ThreadingDemo.o \
 	$(OBJDIR)/TreeViewDemo.o \
 	$(OBJDIR)/WebBrowserDemo.o \
 	$(OBJDIR)/CodeEditorDemo.o \
 	$(OBJDIR)/RenderingTestComponent.o \
 	$(OBJDIR)/AudioDemoRecordPage.o \
+	$(OBJDIR)/AudioDemoLatencyPage.o \
+	$(OBJDIR)/ThreadingDemo.o \
 	$(OBJDIR)/WidgetsDemo.o \
 
 MKDIR_TYPE := msdos
@@ -113,17 +113,12 @@ $(OBJDIR)/juce_LibrarySource.o: ../../src/juce_LibrarySource.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/MainDemoWindow.o: ../../src/MainDemoWindow.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoLatencyPage.o: ../../src/demos/AudioDemoLatencyPage.cpp
+$(OBJDIR)/ApplicationStartup.o: ../../src/ApplicationStartup.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -183,11 +178,6 @@ $(OBJDIR)/TableDemo.o: ../../src/demos/TableDemo.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
-	-@$(CMD_MKOBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/TreeViewDemo.o: ../../src/demos/TreeViewDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
@@ -209,6 +199,16 @@ $(OBJDIR)/RenderingTestComponent.o: ../../src/demos/RenderingTestComponent.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoRecordPage.o: ../../src/demos/AudioDemoRecordPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/AudioDemoLatencyPage.o: ../../src/demos/AudioDemoLatencyPage.cpp
+	-@$(CMD_MKOBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/ThreadingDemo.o: ../../src/demos/ThreadingDemo.cpp
 	-@$(CMD_MKOBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

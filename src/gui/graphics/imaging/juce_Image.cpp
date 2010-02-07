@@ -125,7 +125,7 @@ void Image::setPixelData (int x, int y, int w, int h,
 {
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= imageWidth && y + h <= imageHeight);
 
-    if (Rectangle::intersectRectangles (x, y, w, h, 0, 0, imageWidth, imageHeight))
+    if (Rectangle<int>::intersectRectangles (x, y, w, h, 0, 0, imageWidth, imageHeight))
     {
         const BitmapData dest (*this, x, y, w, h, true);
 
@@ -405,7 +405,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
                 int x, w;
 
                 if (pixelsOnRow.getRange (i, x, w))
-                    result.add (Rectangle (x, y, w, 1));
+                    result.add (Rectangle<int> (x, y, w, 1));
             }
 
             result.consolidate();

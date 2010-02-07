@@ -55,7 +55,7 @@ public:
     int getNumPoints() const;
 
     void changePointType (const Path::Iterator::PathElementType newType,
-                          const Rectangle& parentArea,
+                          const Rectangle<int>& parentArea,
                           const bool undoable);
 
     void deleteFromPath();
@@ -66,7 +66,7 @@ public:
 
 private:
     const PathPoint withChangedPointType (const Path::Iterator::PathElementType newType,
-                                          const Rectangle& parentArea) const;
+                                          const Rectangle<int>& parentArea) const;
 };
 
 
@@ -82,12 +82,12 @@ public:
 
     //==============================================================================
     void setInitialBounds (int parentWidth, int parentHeight);
-    const Rectangle getCurrentBounds (const Rectangle& parentArea) const;
-    void setCurrentBounds (const Rectangle& b, const Rectangle& parentArea, const bool undoable);
+    const Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const;
+    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable);
 
     //==============================================================================
-    bool getPoint (int index, int pointNumber, double& x, double& y, const Rectangle& parentArea) const;
-    void movePoint (int index, int pointNumber, double newX, double newY, const Rectangle& parentArea, const bool undoable);
+    bool getPoint (int index, int pointNumber, double& x, double& y, const Rectangle<int>& parentArea) const;
+    void movePoint (int index, int pointNumber, double newX, double newY, const Rectangle<int>& parentArea, const bool undoable);
 
     const RelativePositionedRectangle getPoint (int index, int pointNumber) const;
     void setPoint (int index, int pointNumber, const RelativePositionedRectangle& newPoint, const bool undoable);
@@ -123,8 +123,8 @@ public:
     void setToPath (const Path& p);
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea);
-    void drawExtraEditorGraphics (Graphics& g, const Rectangle& relativeTo);
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea);
+    void drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo);
 
     void resized();
     void parentSizeChanged();
@@ -145,19 +145,19 @@ private:
     OwnedArray <PathPoint> points;
     bool nonZeroWinding;
     mutable Path path;
-    mutable Rectangle lastPathBounds;
+    mutable Rectangle<int> lastPathBounds;
     int mouseDownOnSegment;
     bool mouseDownSelectSegmentStatus;
 
     const String pathToString() const;
     void restorePathFromString (const String& s);
-    void updateStoredPath (const ComponentLayout* layout, const Rectangle& parentArea) const;
+    void updateStoredPath (const ComponentLayout* layout, const Rectangle<int>& parentArea) const;
     int getBorderSize() const;
 
     void rescalePoint (RelativePositionedRectangle& pos, int dx, int dy,
                        double scaleX, double scaleY,
                        double scaleStartX, double scaleStartY,
-                       const Rectangle& parentArea) const;
+                       const Rectangle<int>& parentArea) const;
 };
 
 

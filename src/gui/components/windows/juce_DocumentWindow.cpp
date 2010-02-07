@@ -94,7 +94,7 @@ DocumentWindow::~DocumentWindow()
 //==============================================================================
 void DocumentWindow::repaintTitleBar()
 {
-    const Rectangle titleBarArea (getTitleBarArea());
+    const Rectangle<int> titleBarArea (getTitleBarArea());
     repaint (titleBarArea.getX(), titleBarArea.getY(),
              titleBarArea.getWidth(), titleBarArea.getHeight());
 }
@@ -205,7 +205,7 @@ void DocumentWindow::paint (Graphics& g)
         g.fillRect (0, getHeight() - border.getBottom(), getWidth(), border.getBottom());
     }
 
-    const Rectangle titleBarArea (getTitleBarArea());
+    const Rectangle<int> titleBarArea (getTitleBarArea());
     g.setOrigin (titleBarArea.getX(), titleBarArea.getY());
     g.reduceClipRegion (0, 0, titleBarArea.getWidth(), titleBarArea.getHeight());
 
@@ -239,7 +239,7 @@ void DocumentWindow::resized()
     if (titleBarButtons[1] != 0)
         titleBarButtons[1]->setToggleState (isFullScreen(), false);
 
-    const Rectangle titleBarArea (getTitleBarArea());
+    const Rectangle<int> titleBarArea (getTitleBarArea());
 
     getLookAndFeel()
         .positionDocumentWindowButtons (*this,
@@ -277,13 +277,13 @@ int DocumentWindow::getTitleBarHeight() const
     return isUsingNativeTitleBar() ? 0 : jmin (titleBarHeight, getHeight() - 4);
 }
 
-const Rectangle DocumentWindow::getTitleBarArea()
+const Rectangle<int> DocumentWindow::getTitleBarArea()
 {
     const BorderSize border (getBorderThickness());
 
-    return Rectangle (border.getLeft(), border.getTop(),
-                      getWidth() - border.getLeftAndRight(),
-                      getTitleBarHeight());
+    return Rectangle<int> (border.getLeft(), border.getTop(),
+                           getWidth() - border.getLeftAndRight(),
+                           getTitleBarHeight());
 }
 
 Button* DocumentWindow::getCloseButton() const throw()

@@ -254,7 +254,7 @@ public:
     {
         const float yScale = 1.0f / (getHeight() - edge * 2);
 
-        const Rectangle clip (g.getClipBounds());
+        const Rectangle<int> clip (g.getClipBounds());
 
         for (int y = jmin (clip.getBottom(), getHeight() - edge); --y >= jmax (edge, clip.getY());)
         {

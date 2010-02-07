@@ -55,9 +55,9 @@ public:
     {
         if (dynamic_cast <PaintRoutineEditor*> (getParentComponent()) != 0)
         {
-            const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+            const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
-            const Rectangle r (getPosition().getRectangle (area, owner->getDocument()->getComponentLayout()));
+            const Rectangle<int> r (getPosition().getRectangle (area, owner->getDocument()->getComponentLayout()));
 
             setCentrePosition (r.getX(), r.getY());
         }
@@ -76,14 +76,14 @@ public:
     //==============================================================================
     void mouseDown (const MouseEvent& e)
     {
-        const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
         dragX = getX() + getWidth() / 2 - area.getX();
         dragY = getY() + getHeight() / 2 - area.getY();
     }
 
     void mouseDrag (const MouseEvent& e)
     {
-        const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
         int x = dragX + e.getDistanceFromDragStartX();
         int y = dragY + e.getDistanceFromDragStartY();
 
@@ -98,12 +98,12 @@ public:
         const RelativePositionedRectangle original (getPosition());
         RelativePositionedRectangle pr (original);
 
-        Rectangle r (pr.getRectangle (Rectangle (0, 0, area.getWidth(), area.getHeight()),
-                                      document->getComponentLayout()));
+        Rectangle<int> r (pr.getRectangle (Rectangle<int> (0, 0, area.getWidth(), area.getHeight()),
+                                           document->getComponentLayout()));
         r.setPosition (x, y);
 
         pr.updateFrom (r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                       Rectangle (0, 0, area.getWidth(), area.getHeight()),
+                       Rectangle<int> (0, 0, area.getWidth(), area.getHeight()),
                        document->getComponentLayout());
 
         if (pr != original)

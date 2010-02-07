@@ -41,7 +41,7 @@ struct AnimationTask
 
     Component* component;
     ComponentDeletionWatcher watcher;
-    Rectangle destination;
+    Rectangle<int> destination;
     int msElapsed, msTotal;
     double startSpeed, midSpeed, endSpeed, lastProgress;
     double left, top, right, bottom;
@@ -68,10 +68,10 @@ struct AnimationTask
 
             if (delta < 1.0)
             {
-                const Rectangle newBounds (roundToInt (left),
-                                           roundToInt (top),
-                                           roundToInt (right - left),
-                                           roundToInt (bottom - top));
+                const Rectangle<int> newBounds (roundToInt (left),
+                                                roundToInt (top),
+                                                roundToInt (right - left),
+                                                roundToInt (bottom - top));
 
                 if (newBounds != destination)
                 {
@@ -123,7 +123,7 @@ void* ComponentAnimator::findTaskFor (Component* const component) const
 }
 
 void ComponentAnimator::animateComponent (Component* const component,
-                                          const Rectangle& finalPosition,
+                                          const Rectangle<int>& finalPosition,
                                           const int millisecondsToSpendMoving,
                                           const double startSpeed,
                                           const double endSpeed)
@@ -196,7 +196,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
     }
 }
 
-const Rectangle ComponentAnimator::getComponentDestination (Component* const component)
+const Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
     AnimationTask* const at = (AnimationTask*) findTaskFor (component);
 
@@ -205,7 +205,7 @@ const Rectangle ComponentAnimator::getComponentDestination (Component* const com
     else if (component != 0)
         return component->getBounds();
 
-    return Rectangle();
+    return Rectangle<int>();
 }
 
 bool ComponentAnimator::isAnimating (Component* component) const

@@ -76,7 +76,7 @@ public:
     /** @internal */
     void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown);
     /** @internal */
-    void contentAreaChanged (const Rectangle& newBounds);
+    void contentAreaChanged (const Rectangle<int>& newBounds);
 
     juce_UseDebuggingNewOperator
 

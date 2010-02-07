@@ -654,8 +654,8 @@ int ListBox::getRowNumberOfComponent (Component* const rowComponent) const throw
     return viewport->getRowNumberOfComponent (rowComponent);
 }
 
-const Rectangle ListBox::getRowPosition (const int rowNumber,
-                                         const bool relativeToComponentTopLeft) const throw()
+const Rectangle<int> ListBox::getRowPosition (const int rowNumber,
+                                              const bool relativeToComponentTopLeft) const throw()
 {
     const int rowHeight = getRowHeight();
     int y = viewport->getY() + rowHeight * rowNumber;
@@ -663,8 +663,8 @@ const Rectangle ListBox::getRowPosition (const int rowNumber,
     if (relativeToComponentTopLeft)
         y -= viewport->getViewPositionY();
 
-    return Rectangle (viewport->getX(), y,
-                      viewport->getViewedComponent()->getWidth(), rowHeight);
+    return Rectangle<int> (viewport->getX(), y,
+                           viewport->getViewedComponent()->getWidth(), rowHeight);
 }
 
 void ListBox::setVerticalPosition (const double proportion)
@@ -882,13 +882,13 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 
 void ListBox::repaintRow (const int rowNumber) throw()
 {
-    const Rectangle r (getRowPosition (rowNumber, true));
+    const Rectangle<int> r (getRowPosition (rowNumber, true));
     repaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
 }
 
 Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 {
-    Rectangle imageArea;
+    Rectangle<int> imageArea;
     const int firstRow = getRowContainingPosition (0, 0);
 
     int i;
@@ -901,7 +901,7 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
             int x = 0, y = 0;
             rowComp->relativePositionToOtherComponent (this, x, y);
 
-            const Rectangle rowRect (x, y, rowComp->getWidth(), rowComp->getHeight());
+            const Rectangle<int> rowRect (x, y, rowComp->getWidth(), rowComp->getHeight());
 
             if (imageArea.isEmpty())
                 imageArea = rowRect;
@@ -910,7 +910,7 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
         }
     }
 
-    imageArea = imageArea.getIntersection (Rectangle (0, 0, getWidth(), getHeight()));
+    imageArea = imageArea.getIntersection (Rectangle<int> (0, 0, getWidth(), getHeight()));
     imageX = imageArea.getX();
     imageY = imageArea.getY();
     Image* snapshot = Image::createNativeImage (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
@@ -946,7 +946,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
         dragImage->multiplyAllAlphas (0.6f);
 
         MouseEvent e2 (e.getEventRelativeTo (this));
-        const Point p ((float) (x - e2.x), (float) (y - e2.y));
+        const Point<int> p (x - e2.x, y - e2.y);
         dragContainer->startDragging (dragDescription, this, dragImage, true, &p);
     }
     else

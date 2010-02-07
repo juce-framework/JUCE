@@ -97,16 +97,16 @@ public:
 
     //==============================================================================
     /** Returns a rectangle with these borders removed from it. */
-    const Rectangle subtractedFrom (const Rectangle& original) const throw();
+    const Rectangle<int> subtractedFrom (const Rectangle<int>& original) const throw();
 
     /** Removes this border from a given rectangle. */
-    void subtractFrom (Rectangle& rectangle) const throw();
+    void subtractFrom (Rectangle<int>& rectangle) const throw();
 
     /** Returns a rectangle with these borders added around it. */
-    const Rectangle addedTo (const Rectangle& original) const throw();
+    const Rectangle<int> addedTo (const Rectangle<int>& original) const throw();
 
     /** Adds this border around a given rectangle. */
-    void addTo (Rectangle& original) const throw();
+    void addTo (Rectangle<int>& original) const throw();
 
     //==============================================================================
     bool operator== (const BorderSize& other) const throw();

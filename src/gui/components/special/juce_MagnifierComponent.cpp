@@ -252,7 +252,7 @@ void MagnifierComponent::paint (Graphics& g)
     if (w == 0 || h == 0)
         return;
 
-    const Rectangle r (g.getClipBounds());
+    const Rectangle<int> r (g.getClipBounds());
 
     const int srcX = (int) (r.getX() / scaleFactor);
     const int srcY = (int) (r.getY() / scaleFactor);

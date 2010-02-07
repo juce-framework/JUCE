@@ -240,7 +240,7 @@ public:
     /** @internal */
     void parentHierarchyChanged();
     /** @internal */
-    const Rectangle getTitleBarArea();
+    const Rectangle<int> getTitleBarArea();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

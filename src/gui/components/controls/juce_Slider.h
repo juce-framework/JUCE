@@ -763,7 +763,7 @@ private:
     int sliderRegionStart, sliderRegionSize;
     int sliderBeingDragged;
     int pixelsForFullDragExtent;
-    Rectangle sliderRect;
+    Rectangle<int> sliderRect;
     String textSuffix;
 
     SliderStyle style;

@@ -51,7 +51,7 @@ public:
     RectangleList (const RectangleList& other) throw();
 
     /** Creates a list containing just one rectangle. */
-    RectangleList (const Rectangle& rect) throw();
+    RectangleList (const Rectangle<int>& rect) throw();
 
     /** Copies this list from another one. */
     const RectangleList& operator= (const RectangleList& other) throw();
@@ -71,7 +71,7 @@ public:
         @returns    the rectangle at the index, or an empty rectangle if the
                     index is out-of-range.
     */
-    const Rectangle getRectangle (const int index) const throw();
+    const Rectangle<int> getRectangle (const int index) const throw();
 
 
     //==============================================================================
@@ -92,14 +92,14 @@ public:
         that overlap existing rectangles in the list, and adjacent rectangles will be
         merged into it.
     */
-    void add (const Rectangle& rect) throw();
+    void add (const Rectangle<int>& rect) throw();
 
     /** Dumbly adds a rectangle to the list without checking for overlaps.
 
         This simply adds the rectangle to the end, it doesn't merge it or remove
         any overlapping bits.
     */
-    void addWithoutMerging (const Rectangle& rect) throw();
+    void addWithoutMerging (const Rectangle<int>& rect) throw();
 
     /** Merges another rectangle list into this one.
 
@@ -113,7 +113,7 @@ public:
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
     */
-    void subtract (const Rectangle& rect) throw();
+    void subtract (const Rectangle<int>& rect) throw();
 
     /** Removes all areas in another RectangleList from this one.
 
@@ -131,7 +131,7 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const Rectangle& rect) throw();
+    bool clipTo (const Rectangle<int>& rect) throw();
 
     /** Removes any areas of the region that lie outside a given rectangle list.
 
@@ -153,7 +153,7 @@ public:
 
         @see clipTo
     */
-    bool getIntersectionWith (const Rectangle& rect, RectangleList& destRegion) const throw();
+    bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw();
 
     /** Swaps the contents of this and another list.
 
@@ -175,7 +175,7 @@ public:
                     defined by this object
         @see intersectsRectangle, containsPoint
     */
-    bool containsRectangle (const Rectangle& rectangleToCheck) const throw();
+    bool containsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
     /** Checks whether the region contains any part of a given rectangle.
 
@@ -183,7 +183,7 @@ public:
                     defined by this object
         @see containsRectangle
     */
-    bool intersectsRectangle (const Rectangle& rectangleToCheck) const throw();
+    bool intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
     /** Checks whether this region intersects any part of another one.
 
@@ -193,7 +193,7 @@ public:
 
     //==============================================================================
     /** Returns the smallest rectangle that can enclose the whole of this region. */
-    const Rectangle getBounds() const throw();
+    const Rectangle<int> getBounds() const throw();
 
     /** Optimises the list into a minimum number of constituent rectangles.
 
@@ -228,14 +228,14 @@ public:
         bool next() throw();
 
         /** Returns the current rectangle. */
-        const Rectangle* getRectangle() const throw()       { return current; }
+        const Rectangle<int>* getRectangle() const throw()       { return current; }
 
 
         //==============================================================================
         juce_UseDebuggingNewOperator
 
     private:
-        const Rectangle* current;
+        const Rectangle<int>* current;
         const RectangleList& owner;
         int index;
 
@@ -248,7 +248,7 @@ public:
 
 private:
     friend class Iterator;
-    Array <Rectangle> rects;
+    Array <Rectangle<int> > rects;
 };
 
 

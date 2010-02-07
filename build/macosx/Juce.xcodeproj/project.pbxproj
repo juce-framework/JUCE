@@ -542,7 +542,6 @@
 		8481706010809E00008FEC33 /* juce_PluginDirectoryScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E7D010403614006A1807 /* juce_PluginDirectoryScanner.cpp */; };
 		8481706110809E00008FEC33 /* juce_PluginListComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E7D210403614006A1807 /* juce_PluginListComponent.cpp */; };
 		8481706210809E00008FEC33 /* juce_PNGLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB7910403709006A1807 /* juce_PNGLoader.cpp */; };
-		8481706310809E00008FEC33 /* juce_Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6310403709006A1807 /* juce_Point.cpp */; };
 		8481706410809E00008FEC33 /* juce_PopupMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EACA10403709006A1807 /* juce_PopupMenu.cpp */; };
 		8481706510809E00008FEC33 /* juce_PositionedRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6510403709006A1807 /* juce_PositionedRectangle.cpp */; };
 		8481706610809E00008FEC33 /* juce_posix_NamedPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8484E9D7103C95A6008B7C6C /* juce_posix_NamedPipe.cpp */; };
@@ -557,7 +556,6 @@
 		8481706F10809E00008FEC33 /* juce_Random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E8FB10403681006A1807 /* juce_Random.cpp */; };
 		8481707010809E00008FEC33 /* juce_ReadWriteLock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E9DD104036D6006A1807 /* juce_ReadWriteLock.cpp */; };
 		8481707110809E00008FEC33 /* juce_RecentlyOpenedFilesList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1E9301040369C006A1807 /* juce_RecentlyOpenedFilesList.cpp */; };
-		8481707210809E00008FEC33 /* juce_Rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6710403709006A1807 /* juce_Rectangle.cpp */; };
 		8481707310809E00008FEC33 /* juce_RectangleList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6910403709006A1807 /* juce_RectangleList.cpp */; };
 		8481707410809E00008FEC33 /* juce_RectanglePlacement.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB3710403709006A1807 /* juce_RectanglePlacement.cpp */; };
 		8481707510809E00008FEC33 /* juce_ReduceOpacityEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB4B10403709006A1807 /* juce_ReduceOpacityEffect.cpp */; };
@@ -1206,11 +1204,9 @@
 		84F1ECD31040370A006A1807 /* juce_PathIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6010403709006A1807 /* juce_PathIterator.h */; };
 		84F1ECD41040370A006A1807 /* juce_PathStrokeType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6110403709006A1807 /* juce_PathStrokeType.cpp */; };
 		84F1ECD51040370A006A1807 /* juce_PathStrokeType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6210403709006A1807 /* juce_PathStrokeType.h */; };
-		84F1ECD61040370A006A1807 /* juce_Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6310403709006A1807 /* juce_Point.cpp */; };
 		84F1ECD71040370A006A1807 /* juce_Point.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6410403709006A1807 /* juce_Point.h */; };
 		84F1ECD81040370A006A1807 /* juce_PositionedRectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6510403709006A1807 /* juce_PositionedRectangle.cpp */; };
 		84F1ECD91040370A006A1807 /* juce_PositionedRectangle.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6610403709006A1807 /* juce_PositionedRectangle.h */; };
-		84F1ECDA1040370A006A1807 /* juce_Rectangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6710403709006A1807 /* juce_Rectangle.cpp */; };
 		84F1ECDB1040370A006A1807 /* juce_Rectangle.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6810403709006A1807 /* juce_Rectangle.h */; };
 		84F1ECDC1040370A006A1807 /* juce_RectangleList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EB6910403709006A1807 /* juce_RectangleList.cpp */; };
 		84F1ECDD1040370A006A1807 /* juce_RectangleList.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EB6A10403709006A1807 /* juce_RectangleList.h */; };
@@ -1823,11 +1819,9 @@
 		84F1EB6010403709006A1807 /* juce_PathIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_PathIterator.h; path = ../../src/gui/graphics/geometry/juce_PathIterator.h; sourceTree = SOURCE_ROOT; };
 		84F1EB6110403709006A1807 /* juce_PathStrokeType.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PathStrokeType.cpp; path = ../../src/gui/graphics/geometry/juce_PathStrokeType.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB6210403709006A1807 /* juce_PathStrokeType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_PathStrokeType.h; path = ../../src/gui/graphics/geometry/juce_PathStrokeType.h; sourceTree = SOURCE_ROOT; };
-		84F1EB6310403709006A1807 /* juce_Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Point.cpp; path = ../../src/gui/graphics/geometry/juce_Point.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB6410403709006A1807 /* juce_Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Point.h; path = ../../src/gui/graphics/geometry/juce_Point.h; sourceTree = SOURCE_ROOT; };
 		84F1EB6510403709006A1807 /* juce_PositionedRectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_PositionedRectangle.cpp; path = ../../src/gui/graphics/geometry/juce_PositionedRectangle.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB6610403709006A1807 /* juce_PositionedRectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_PositionedRectangle.h; path = ../../src/gui/graphics/geometry/juce_PositionedRectangle.h; sourceTree = SOURCE_ROOT; };
-		84F1EB6710403709006A1807 /* juce_Rectangle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Rectangle.cpp; path = ../../src/gui/graphics/geometry/juce_Rectangle.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB6810403709006A1807 /* juce_Rectangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Rectangle.h; path = ../../src/gui/graphics/geometry/juce_Rectangle.h; sourceTree = SOURCE_ROOT; };
 		84F1EB6910403709006A1807 /* juce_RectangleList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RectangleList.cpp; path = ../../src/gui/graphics/geometry/juce_RectangleList.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EB6A10403709006A1807 /* juce_RectangleList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_RectangleList.h; path = ../../src/gui/graphics/geometry/juce_RectangleList.h; sourceTree = SOURCE_ROOT; };
@@ -2877,11 +2871,9 @@
 				84F1EB6010403709006A1807 /* juce_PathIterator.h */,
 				84F1EB6110403709006A1807 /* juce_PathStrokeType.cpp */,
 				84F1EB6210403709006A1807 /* juce_PathStrokeType.h */,
-				84F1EB6310403709006A1807 /* juce_Point.cpp */,
 				84F1EB6410403709006A1807 /* juce_Point.h */,
 				84F1EB6510403709006A1807 /* juce_PositionedRectangle.cpp */,
 				84F1EB6610403709006A1807 /* juce_PositionedRectangle.h */,
-				84F1EB6710403709006A1807 /* juce_Rectangle.cpp */,
 				84F1EB6810403709006A1807 /* juce_Rectangle.h */,
 				84F1EB6910403709006A1807 /* juce_RectangleList.cpp */,
 				84F1EB6A10403709006A1807 /* juce_RectangleList.h */,
@@ -3842,7 +3834,6 @@
 				8481706010809E00008FEC33 /* juce_PluginDirectoryScanner.cpp in Sources */,
 				8481706110809E00008FEC33 /* juce_PluginListComponent.cpp in Sources */,
 				8481706210809E00008FEC33 /* juce_PNGLoader.cpp in Sources */,
-				8481706310809E00008FEC33 /* juce_Point.cpp in Sources */,
 				8481706410809E00008FEC33 /* juce_PopupMenu.cpp in Sources */,
 				8481706510809E00008FEC33 /* juce_PositionedRectangle.cpp in Sources */,
 				8481706610809E00008FEC33 /* juce_posix_NamedPipe.cpp in Sources */,
@@ -3857,7 +3848,6 @@
 				8481706F10809E00008FEC33 /* juce_Random.cpp in Sources */,
 				8481707010809E00008FEC33 /* juce_ReadWriteLock.cpp in Sources */,
 				8481707110809E00008FEC33 /* juce_RecentlyOpenedFilesList.cpp in Sources */,
-				8481707210809E00008FEC33 /* juce_Rectangle.cpp in Sources */,
 				8481707310809E00008FEC33 /* juce_RectangleList.cpp in Sources */,
 				8481707410809E00008FEC33 /* juce_RectanglePlacement.cpp in Sources */,
 				8481707510809E00008FEC33 /* juce_ReduceOpacityEffect.cpp in Sources */,
@@ -4201,9 +4191,7 @@
 				84F1ECD01040370A006A1807 /* juce_Path.cpp in Sources */,
 				84F1ECD21040370A006A1807 /* juce_PathIterator.cpp in Sources */,
 				84F1ECD41040370A006A1807 /* juce_PathStrokeType.cpp in Sources */,
-				84F1ECD61040370A006A1807 /* juce_Point.cpp in Sources */,
 				84F1ECD81040370A006A1807 /* juce_PositionedRectangle.cpp in Sources */,
-				84F1ECDA1040370A006A1807 /* juce_Rectangle.cpp in Sources */,
 				84F1ECDC1040370A006A1807 /* juce_RectangleList.cpp in Sources */,
 				84F1ECDF1040370A006A1807 /* juce_Image.cpp in Sources */,
 				84F1ECE11040370A006A1807 /* juce_ImageCache.cpp in Sources */,

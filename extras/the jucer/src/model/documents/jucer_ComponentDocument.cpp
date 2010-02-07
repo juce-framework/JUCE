@@ -118,7 +118,7 @@ public:
     void paint (Graphics& g)
     {
         document->getPaintRoutine (0)->fillWithBackground (g, alwaysFillBackground);
-        document->getPaintRoutine (0)->drawElements (g, Rectangle (0, 0, getWidth(), getHeight()));
+        document->getPaintRoutine (0)->drawElements (g, Rectangle<int> (0, 0, getWidth(), getHeight()));
     }
 
     void resized()
@@ -138,9 +138,9 @@ public:
 
                     if (type != 0)
                     {
-                        const Rectangle newBounds (type->getComponentPosition (comp)
-                                                    .getRectangle (Rectangle (0, 0, getWidth(), getHeight()),
-                                                                   document->getComponentLayout()));
+                        const Rectangle<int> newBounds (type->getComponentPosition (comp)
+                                                        .getRectangle (Rectangle<int> (0, 0, getWidth(), getHeight()),
+                                                                       document->getComponentLayout()));
 
                         anyCompsMoved = anyCompsMoved || (comp->getBounds() != newBounds);
                         comp->setBounds (newBounds);

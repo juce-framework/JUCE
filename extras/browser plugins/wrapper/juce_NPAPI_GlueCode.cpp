@@ -419,8 +419,8 @@ public:
         x -= frame.origin.x;
         y -= frame.origin.y;
 
-        Rectangle rr (frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
-        Rectangle rr2 (bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
+        Rectangle<int> rr (frame.origin.x, frame.origin.y, frame.size.width, frame.size.height);
+        Rectangle<int> rr2 (bounds.origin.x, bounds.origin.y, bounds.size.width, bounds.size.height);
         //log (String ((int) x) + ", " + String ((int) y) + " - " + nsStringToJuce([parent description]) + "   " + rr.toString() + "   " + rr2.toString());
 
         if (x >= 0 && x < frame.size.width && y >= 0 && y < frame.size.height)
@@ -479,11 +479,11 @@ public:
 #endif
             log ("window: " + nsStringToJuce ([win description]));
 
-            const Rectangle clip (window->clipRect.left, window->clipRect.top,
+            const Rectangle<int> clip (window->clipRect.left, window->clipRect.top,
                                   window->clipRect.right - window->clipRect.left,
                                   window->clipRect.bottom - window->clipRect.top);
-            const Rectangle target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
-            const Rectangle intersection (clip.getIntersection (target));
+            const Rectangle<int> target ((int) window->x, (int) window->y, (int) window->width, (int) window->height);
+            const Rectangle<int> intersection (clip.getIntersection (target));
 
             // in firefox the clip rect is usually out of step with the target rect, but in safari it matches
             log ("plugin window clip: " + clip.toString());
@@ -501,8 +501,8 @@ public:
                 NSRect v = [content convertRect: [content frame] toView: nil];
                 NSRect w = [win frame];
 
-                log ("wx: " + Rectangle (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
-                     + "   " + Rectangle (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
+                log ("wx: " + Rectangle<int> (v.origin.x, v.origin.y, v.size.width, v.size.height).toString()
+                     + "   " + Rectangle<int> (w.origin.x, w.origin.y, w.size.width, w.size.height).toString());
 
                 // adjust the requested window pos to deal with the content view's origin within the window
                 wy -= w.size.height - (v.origin.y + v.size.height);

@@ -43,11 +43,11 @@ public:
 
     ~PaintElementEllipse() {}
 
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
         fillType.setFillType (g, getDocument(), parentArea);
 
-        Rectangle r (position.getRectangle (parentArea, layout));
+        Rectangle<int> r (position.getRectangle (parentArea, layout));
         g.fillEllipse ((float) r.getX(), (float) r.getY(), (float) r.getWidth(), (float) r.getHeight());
 
         if (isStrokePresent)

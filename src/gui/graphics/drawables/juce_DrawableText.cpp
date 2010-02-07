@@ -65,11 +65,13 @@ void DrawableText::render (const Drawable::RenderingContext& context) const
     text.draw (context.g, context.transform);
 }
 
-void DrawableText::getBounds (float& x, float& y, float& width, float& height) const
+const Rectangle<float> DrawableText::getBounds() const
 {
-    text.getBoundingBox (0, -1, x, y, width, height, false); // (really returns top, left, bottom, right)
-    width -= x;
-    height -= y;
+    float x, y, w, h;
+    text.getBoundingBox (0, -1, x, y, w, h, false); // (really returns top, left, bottom, right)
+    w -= x;
+    h -= y;
+    return Rectangle<float> (x, y, w, h);
 }
 
 bool DrawableText::hitTest (float x, float y) const

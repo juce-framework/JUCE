@@ -139,7 +139,7 @@ public:
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
     */
-    const Rectangle getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
+    const Rectangle<int> getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
 
     /** Sends a signal to the treeview to make it refresh itself.
 

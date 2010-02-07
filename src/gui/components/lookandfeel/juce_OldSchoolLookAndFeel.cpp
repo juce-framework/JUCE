@@ -268,7 +268,7 @@ void OldSchoolLookAndFeel::drawScrollbar (Graphics& g,
 
     if (thumbSize > 0.0f)
     {
-        Rectangle thumb;
+        Rectangle<int> thumb;
 
         if (isScrollbarVertical)
         {

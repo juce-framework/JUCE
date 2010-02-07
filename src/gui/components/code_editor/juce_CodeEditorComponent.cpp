@@ -63,7 +63,7 @@ public:
         startTimer (400);
         setVisible (true);
 
-        const Rectangle pos (owner.getCharacterBounds (owner.getCaretPos()));
+        const Rectangle<int> pos (owner.getCharacterBounds (owner.getCaretPos()));
         setBounds (pos.getX(), pos.getY(), 2, pos.getHeight());
     }
 };
@@ -388,7 +388,7 @@ void CodeEditorComponent::paint (Graphics& g)
     const Colour defaultColour (findColour (CodeEditorComponent::defaultTextColourId));
     const Colour highlightColour (findColour (CodeEditorComponent::highlightColourId));
 
-    const Rectangle clip (g.getClipBounds());
+    const Rectangle<int> clip (g.getClipBounds());
     const int firstLineToDraw = jmax (0, clip.getY() / lineHeight);
     const int lastLineToDraw = jmin (lines.size(), clip.getBottom() / lineHeight + 1);
 
@@ -592,12 +592,12 @@ void CodeEditorComponent::scrollToKeepCaretOnScreen()
         scrollToColumn (column);
 }
 
-const Rectangle CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const throw()
+const Rectangle<int> CodeEditorComponent::getCharacterBounds (const CodeDocument::Position& pos) const throw()
 {
-    return Rectangle (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
-                      (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
-                      roundToInt (charWidth),
-                      lineHeight);
+    return Rectangle<int> (roundToInt ((gutter - xOffset * charWidth) + indexToColumn (pos.getLineNumber(), pos.getIndexInLine()) * charWidth),
+                           (pos.getLineNumber() - firstLineOnScreen) * lineHeight,
+                           roundToInt (charWidth),
+                           lineHeight);
 }
 
 const CodeDocument::Position CodeEditorComponent::getPositionAt (int x, int y)

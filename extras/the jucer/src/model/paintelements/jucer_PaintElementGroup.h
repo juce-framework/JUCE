@@ -124,9 +124,9 @@ public:
     {
     }
 
-    const Rectangle getCurrentBounds (const Rectangle& parentArea) const
+    const Rectangle<int> getCurrentBounds (const Rectangle<int>& parentArea) const
     {
-        Rectangle r;
+        Rectangle<int> r;
 
         if (subElements.size() > 0)
         {
@@ -139,13 +139,13 @@ public:
         return r;
     }
 
-    void setCurrentBounds (const Rectangle& b, const Rectangle& parentArea, const bool undoable)
+    void setCurrentBounds (const Rectangle<int>& b, const Rectangle<int>& parentArea, const bool undoable)
     {
-        Rectangle newBounds (b);
+        Rectangle<int> newBounds (b);
         newBounds.setSize (jmax (1, newBounds.getWidth()),
                            jmax (1, newBounds.getHeight()));
 
-        const Rectangle current (getCurrentBounds (parentArea));
+        const Rectangle<int> current (getCurrentBounds (parentArea));
 
         if (newBounds != current)
         {
@@ -161,7 +161,7 @@ public:
             {
                 PaintElement* const e = subElements.getUnchecked(i);
 
-                Rectangle pos (e->getCurrentBounds (parentArea));
+                Rectangle<int> pos (e->getCurrentBounds (parentArea));
 
                 const int newX = roundToInt ((pos.getX() - scaleStartX) * scaleX + scaleStartX + dx);
                 const int newY = roundToInt ((pos.getY() - scaleStartY) * scaleY + scaleStartY + dy);
@@ -176,7 +176,7 @@ public:
     }
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
         for (int i = 0; i < subElements.size(); ++i)
             subElements.getUnchecked(i)->draw (g, layout, parentArea);

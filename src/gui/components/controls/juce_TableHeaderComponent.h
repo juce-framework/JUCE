@@ -276,7 +276,7 @@ public:
         ones are not counted). It returns a rectangle showing the position of the column relative
         to this component's top-left. If the index is out-of-range, an empty rectangle is retrurned.
     */
-    const Rectangle getColumnPosition (const int index) const;
+    const Rectangle<int> getColumnPosition (const int index) const;
 
     /** Finds the column ID at a given x-position in the component.
 

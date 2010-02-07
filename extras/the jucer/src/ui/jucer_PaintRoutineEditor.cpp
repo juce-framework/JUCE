@@ -68,27 +68,27 @@ void PaintRoutineEditor::removeAllElementComps()
     }
 }
 
-const Rectangle PaintRoutineEditor::getComponentArea() const
+const Rectangle<int> PaintRoutineEditor::getComponentArea() const
 {
     if (document.isFixedSize())
     {
-        return Rectangle ((getWidth() - document.getInitialWidth()) / 2,
-                          (getHeight() - document.getInitialHeight()) / 2,
-                          document.getInitialWidth(),
-                          document.getInitialHeight());
+        return Rectangle<int> ((getWidth() - document.getInitialWidth()) / 2,
+                               (getHeight() - document.getInitialHeight()) / 2,
+                               document.getInitialWidth(),
+                               document.getInitialHeight());
     }
     else
     {
-        return Rectangle (editorEdgeGap, editorEdgeGap,
-                          getWidth() - editorEdgeGap * 2,
-                          getHeight() - editorEdgeGap * 2);
+        return Rectangle<int> (editorEdgeGap, editorEdgeGap,
+                               getWidth() - editorEdgeGap * 2,
+                               getHeight() - editorEdgeGap * 2);
     }
 }
 
 //==============================================================================
 void PaintRoutineEditor::paint (Graphics& g)
 {
-    const Rectangle clip (getComponentArea());
+    const Rectangle<int> clip (getComponentArea());
 
     g.setOrigin (clip.getX(), clip.getY());
     g.reduceClipRegion (0, 0, clip.getWidth(), clip.getHeight());
@@ -104,7 +104,7 @@ void PaintRoutineEditor::paintOverChildren (Graphics& g)
 
     if (componentOverlay != 0)
     {
-        const Rectangle clip (getComponentArea());
+        const Rectangle<int> clip (getComponentArea());
         g.drawImageAt (componentOverlay, clip.getX(), clip.getY());
     }
 }
@@ -120,7 +120,7 @@ void PaintRoutineEditor::resized()
 
 void PaintRoutineEditor::updateChildBounds()
 {
-    const Rectangle clip (getComponentArea());
+    const Rectangle<int> clip (getComponentArea());
 
     for (int i = 0; i < getNumChildComponents(); ++i)
     {
@@ -263,7 +263,7 @@ void PaintRoutineEditor::mouseUp (const MouseEvent& e)
 void PaintRoutineEditor::findLassoItemsInArea (Array <PaintElement*>& results,
                                                int x, int y, int w, int h)
 {
-    const Rectangle lasso (x, y, w, h);
+    const Rectangle<int> lasso (x, y, w, h);
 
     for (int i = 0; i < getNumChildComponents(); ++i)
     {

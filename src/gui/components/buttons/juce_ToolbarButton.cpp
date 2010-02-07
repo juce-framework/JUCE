@@ -83,7 +83,7 @@ void ToolbarButton::paintButtonArea (Graphics& g,
     }
 }
 
-void ToolbarButton::contentAreaChanged (const Rectangle&)
+void ToolbarButton::contentAreaChanged (const Rectangle<int>&)
 {
 }
 

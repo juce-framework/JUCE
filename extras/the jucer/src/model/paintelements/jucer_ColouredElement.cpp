@@ -959,7 +959,7 @@ void ColouredElement::createSiblingComponents()
     }
 }
 
-const Rectangle ColouredElement::getCurrentBounds (const Rectangle& parentArea) const
+const Rectangle<int> ColouredElement::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
     int border = 0;
 
@@ -970,11 +970,11 @@ const Rectangle ColouredElement::getCurrentBounds (const Rectangle& parentArea) 
                    .expanded (border, border);
 }
 
-void ColouredElement::setCurrentBounds (const Rectangle& newBounds,
-                                        const Rectangle& parentArea,
+void ColouredElement::setCurrentBounds (const Rectangle<int>& newBounds,
+                                        const Rectangle<int>& parentArea,
                                         const bool undoable)
 {
-    Rectangle r (newBounds);
+    Rectangle<int> r (newBounds);
 
     if (isStrokePresent)
     {
@@ -988,7 +988,7 @@ void ColouredElement::setCurrentBounds (const Rectangle& newBounds,
     pr.updateFrom (r.getX() - parentArea.getX(),
                    r.getY() - parentArea.getY(),
                    r.getWidth(), r.getHeight(),
-                   Rectangle (0, 0, parentArea.getWidth(), parentArea.getHeight()),
+                   Rectangle<int> (0, 0, parentArea.getWidth(), parentArea.getHeight()),
                    getDocument()->getComponentLayout());
     setPosition (pr, undoable);
 

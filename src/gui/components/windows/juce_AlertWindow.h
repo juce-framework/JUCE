@@ -358,7 +358,7 @@ private:
     AlertIconType alertIconType;
     ComponentBoundsConstrainer constrainer;
     ComponentDragger dragger;
-    Rectangle textArea;
+    Rectangle<int> textArea;
     VoidArray buttons, textBoxes, comboBoxes;
     VoidArray progressBars, customComps, textBlocks, allComps;
     StringArray textboxNames, comboBoxNames;

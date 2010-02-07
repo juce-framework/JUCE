@@ -166,30 +166,29 @@ int PaintElementPath::getBorderSize() const
                            : 0;
 }
 
-const Rectangle PaintElementPath::getCurrentBounds (const Rectangle& parentArea) const
+const Rectangle<int> PaintElementPath::getCurrentBounds (const Rectangle<int>& parentArea) const
 {
     updateStoredPath (getDocument()->getComponentLayout(), parentArea);
 
-    float x, y, w, h;
-    path.getBounds (x, y, w, h);
+    Rectangle<float> bounds (path.getBounds());
 
     const int borderSize = getBorderSize();
 
-    return Rectangle ((int) x - borderSize,
-                      (int) y - borderSize,
-                      (int) w + borderSize * 2,
-                      (int) h + borderSize * 2);
+    return Rectangle<int> ((int) bounds.getX() - borderSize,
+                           (int) bounds.getY() - borderSize,
+                           (int) bounds.getWidth() + borderSize * 2,
+                           (int) bounds.getHeight() + borderSize * 2);
 }
 
-void PaintElementPath::setCurrentBounds (const Rectangle& b,
-                                         const Rectangle& parentArea,
+void PaintElementPath::setCurrentBounds (const Rectangle<int>& b,
+                                         const Rectangle<int>& parentArea,
                                          const bool undoable)
 {
-    Rectangle newBounds (b);
+    Rectangle<int> newBounds (b);
     newBounds.setSize (jmax (1, newBounds.getWidth()),
                        jmax (1, newBounds.getHeight()));
 
-    const Rectangle current (getCurrentBounds (parentArea));
+    const Rectangle<int> current (getCurrentBounds (parentArea));
 
     if (newBounds != current)
     {
@@ -222,7 +221,7 @@ void PaintElementPath::setCurrentBounds (const Rectangle& b,
 void PaintElementPath::rescalePoint (RelativePositionedRectangle& pos, int dx, int dy,
                                      double scaleX, double scaleY,
                                      double scaleStartX, double scaleStartY,
-                                     const Rectangle& parentArea) const
+                                     const Rectangle<int>& parentArea) const
 {
     double x, y, w, h;
     pos.getRectangleDouble (x, y, w, h, parentArea, getDocument()->getComponentLayout());
@@ -240,7 +239,7 @@ static void drawArrow (Graphics& g, float x1, float y1, float x2, float y2)
     g.drawLine (x1 + (x2 - x1) * 0.49f, y1 + (y2 - y1) * 0.49f, x2, y2);
 }
 
-void PaintElementPath::draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+void PaintElementPath::draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
 {
     updateStoredPath (layout, parentArea);
     path.setUsingNonZeroWinding (nonZeroWinding);
@@ -255,7 +254,7 @@ void PaintElementPath::draw (Graphics& g, const ComponentLayout* layout, const R
     }
 }
 
-void PaintElementPath::drawExtraEditorGraphics (Graphics& g, const Rectangle& relativeTo)
+void PaintElementPath::drawExtraEditorGraphics (Graphics& g, const Rectangle<int>& relativeTo)
 {
     ComponentLayout* layout = getDocument()->getComponentLayout();
 
@@ -351,7 +350,7 @@ void PaintElementPath::mouseUp (const MouseEvent& e)
 void PaintElementPath::changed()
 {
     ColouredElement::changed();
-    lastPathBounds = Rectangle();
+    lastPathBounds = Rectangle<int>();
 }
 
 void PaintElementPath::pointListChanged()
@@ -687,7 +686,7 @@ void PaintElementPath::setToPath (const Path& p)
     }
 }
 
-void PaintElementPath::updateStoredPath (const ComponentLayout* layout, const Rectangle& relativeTo) const
+void PaintElementPath::updateStoredPath (const ComponentLayout* layout, const Rectangle<int>& relativeTo) const
 {
     if (lastPathBounds != relativeTo && ! relativeTo.isEmpty())
     {
@@ -889,7 +888,7 @@ PathPoint* PaintElementPath::addPoint (int pointIndexToAddItAfter, const bool un
         double x1 = 20.0, y1 = 20.0, x2, y2;
 
         ComponentLayout* layout = getDocument()->getComponentLayout();
-        const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
         if (points [pointIndexToAddItAfter] != 0)
             positionToXY (points [pointIndexToAddItAfter]->pos [points [pointIndexToAddItAfter]->getNumPoints() - 1], x1, y1,
@@ -1009,7 +1008,7 @@ void PaintElementPath::deletePoint (int pointIndex, const bool undoable)
 }
 
 //==============================================================================
-bool PaintElementPath::getPoint (int index, int pointNumber, double& x, double& y, const Rectangle& parentArea) const
+bool PaintElementPath::getPoint (int index, int pointNumber, double& x, double& y, const Rectangle<int>& parentArea) const
 {
     const PathPoint* const p = points [index];
 
@@ -1028,7 +1027,7 @@ int PaintElementPath::findSegmentAtXY (int x, int y) const
     double x1, y1, x2, y2, x3, y3, lastX = 0.0, lastY = 0.0, subPathStartX = 0.0, subPathStartY = 0.0;
 
     ComponentLayout* const layout = getDocument()->getComponentLayout();
-    const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
 
     int subpathStartIndex = 0;
 
@@ -1113,7 +1112,7 @@ int PaintElementPath::findSegmentAtXY (int x, int y) const
 //==============================================================================
 void PaintElementPath::movePoint (int index, int pointNumber,
                                   double newX, double newY,
-                                  const Rectangle& parentArea,
+                                  const Rectangle<int>& parentArea,
                                   const bool undoable)
 {
     PathPoint* const p = points [index];
@@ -1242,7 +1241,7 @@ public:
             break;
         }
 
-        const Rectangle area (((PaintRoutineEditor*) owner->getParentComponent())->getComponentArea());
+        const Rectangle<int> area (((PaintRoutineEditor*) owner->getParentComponent())->getComponentArea());
 
         owner->getPoint (index)->changePointType (type, area, true);
     }
@@ -1436,7 +1435,7 @@ int PathPoint::getNumPoints() const
 }
 
 const PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathElementType newType,
-                                                 const Rectangle& parentArea) const
+                                                 const Rectangle<int>& parentArea) const
 {
     PathPoint p (*this);
 
@@ -1486,7 +1485,7 @@ const PathPoint PathPoint::withChangedPointType (const Path::Iterator::PathEleme
 }
 
 void PathPoint::changePointType (const Path::Iterator::PathElementType newType,
-                                 const Rectangle& parentArea, const bool undoable)
+                                 const Rectangle<int>& parentArea, const bool undoable)
 {
     if (newType != type)
     {
@@ -1584,7 +1583,7 @@ PathPointComponent::~PathPointComponent()
 
 void PathPointComponent::updatePosition()
 {
-    const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+    const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
     jassert (getParentComponent() != 0);
 
     double x, y;
@@ -1647,7 +1646,7 @@ void PathPointComponent::mouseDrag (const MouseEvent& e)
 
         if (dragging)
         {
-            const Rectangle area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
+            const Rectangle<int> area (((PaintRoutineEditor*) getParentComponent())->getComponentArea());
             int x = dragX + e.getDistanceFromDragStartX() - area.getX();
             int y = dragY + e.getDistanceFromDragStartY() - area.getY();
 

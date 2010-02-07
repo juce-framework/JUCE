@@ -359,7 +359,7 @@ void ComponentLayout::bringLostItemsBackOnScreen (int width, int height)
     {
         Component* const c = components[i];
 
-        if (! c->getBounds().intersects (Rectangle (0, 0, width, height)))
+        if (! c->getBounds().intersects (Rectangle<int> (0, 0, width, height)))
         {
             c->setTopLeftPosition (width / 2, height / 2);
             updateStoredComponentPosition (c, false);
@@ -492,7 +492,7 @@ void ComponentLayout::setComponentRelativeTarget (Component* comp, int whichDime
     {
         const int64 compId = ComponentTypeHandler::getComponentId (compToBeRelativeTo);
 
-        Rectangle oldBounds (comp->getBounds());
+        Rectangle<int> oldBounds (comp->getBounds());
         RelativePositionedRectangle pos;
 
         if (pe != 0)

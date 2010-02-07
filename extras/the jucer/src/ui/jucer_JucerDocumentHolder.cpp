@@ -628,7 +628,7 @@ void JucerDocumentHolder::addElement (const int index)
         if (panel != 0)
         {
             PaintRoutine* const currentPaintRoutine = & (panel->getPaintRoutine());
-            const Rectangle area (panel->getComponentArea());
+            const Rectangle<int> area (panel->getComponentArea());
 
             document->getUndoManager().beginNewTransaction();
 
@@ -648,7 +648,7 @@ void JucerDocumentHolder::addElement (const int index)
 
                 panel->xyToTargetXY (x, y);
 
-                Rectangle r (e->getCurrentBounds (area));
+                Rectangle<int> r (e->getCurrentBounds (area));
                 r.setPosition (x, y);
                 e->setCurrentBounds (r, area, true);
 
@@ -669,7 +669,7 @@ void JucerDocumentHolder::addComponent (const int index)
 
         if (panel != 0)
         {
-            const Rectangle area (panel->getComponentArea());
+            const Rectangle<int> area (panel->getComponentArea());
 
             document->getUndoManager().beginNewTransaction (T("Add new ") + ObjectTypes::componentTypeHandlers [index]->getTypeName());
 

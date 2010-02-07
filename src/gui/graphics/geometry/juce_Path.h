@@ -91,15 +91,12 @@ public:
 
     /** Returns the smallest rectangle that contains all points within the path.
     */
-    void getBounds (float& x, float& y,
-                    float& w, float& h) const throw();
+    const Rectangle<float> getBounds() const throw();
 
     /** Returns the smallest rectangle that contains all points within the path
         after it's been transformed with the given tranasform matrix.
     */
-    void getBoundsTransformed (const AffineTransform& transform,
-                               float& x, float& y,
-                               float& w, float& h) const throw();
+    const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const throw();
 
     /** Checks whether a point lies within the path.
 
@@ -208,7 +205,7 @@ public:
 
     /** Returns the last point that was added to the path by one of the drawing methods.
     */
-    const Point getCurrentPosition() const;
+    const Point<float> getCurrentPosition() const;
 
     //==============================================================================
     /** Adds a rectangle to the path.
@@ -228,7 +225,7 @@ public:
 
         @see addRoundedRectangle, addTriangle
     */
-    void addRectangle (const Rectangle& rectangle) throw();
+    void addRectangle (const Rectangle<int>& rectangle) throw();
 
     /** Adds a rectangle with rounded corners to the path.
 

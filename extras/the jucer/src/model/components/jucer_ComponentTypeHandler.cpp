@@ -258,7 +258,7 @@ void ComponentTypeHandler::setComponentPosition (Component* comp,
     comp->getProperties().set ("relativeToW", String::toHexString (newPos.relativeToW));
     comp->getProperties().set ("relativeToH", String::toHexString (newPos.relativeToH));
 
-    comp->setBounds (newPos.getRectangle (Rectangle (0, 0, comp->getParentWidth(), comp->getParentHeight()),
+    comp->setBounds (newPos.getRectangle (Rectangle<int> (0, 0, comp->getParentWidth(), comp->getParentHeight()),
                                           layout));
 }
 

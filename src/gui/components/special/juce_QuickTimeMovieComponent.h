@@ -142,7 +142,7 @@ public:
         be aligned according to the justification value if this means there are gaps at
         the top or sides.
     */
-    void setBoundsWithCorrectAspectRatio (const Rectangle& spaceToFitWithin,
+    void setBoundsWithCorrectAspectRatio (const Rectangle<int>& spaceToFitWithin,
                                           const RectanglePlacement& placement);
 
     /** Starts the movie playing. */

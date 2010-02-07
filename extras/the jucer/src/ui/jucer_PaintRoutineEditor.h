@@ -66,7 +66,7 @@ public:
     bool isInterestedInFileDrag (const StringArray& files);
     void filesDropped (const StringArray& filenames, int x, int y);
 
-    const Rectangle getComponentArea() const;
+    const Rectangle<int> getComponentArea() const;
 
     //==============================================================================
     void refreshAllElements();

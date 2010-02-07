@@ -531,7 +531,7 @@ AlertWindow* LookAndFeel::createAlertWindow (const String& title,
 
 void LookAndFeel::drawAlertBox (Graphics& g,
                                 AlertWindow& alert,
-                                const Rectangle& textArea,
+                                const Rectangle<int>& textArea,
                                 TextLayout& textLayout)
 {
     g.fillAll (alert.findColour (AlertWindow::backgroundColourId));
@@ -545,8 +545,8 @@ void LookAndFeel::drawAlertBox (Graphics& g,
     if (alert.containsAnyExtraComponents() || alert.getNumButtons() > 2)
         iconSize = jmin (iconSize, textArea.getHeight() + 50);
 
-    const Rectangle iconRect (iconSize / -10, iconSize / -10,
-                              iconSize, iconSize);
+    const Rectangle<int> iconRect (iconSize / -10, iconSize / -10,
+                                   iconSize, iconSize);
 
     if (alert.getAlertType() != AlertWindow::NoIcon)
     {
@@ -2296,7 +2296,7 @@ void LookAndFeel::drawTabAreaBehindFrontButton (Graphics& g,
     const float shadowSize = 0.2f;
 
     float x1 = 0.0f, y1 = 0.0f, x2 = 0.0f, y2 = 0.0f;
-    Rectangle shadowRect;
+    Rectangle<int> shadowRect;
 
     if (orientation == TabbedButtonBar::TabsAtLeft)
     {
@@ -2517,17 +2517,17 @@ void LookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height,
 
     g.setFont (jmin (height, 24) * 0.65f);
 
-    const Rectangle r (getPropertyComponentContentPosition (component));
+    const Rectangle<int> r (getPropertyComponentContentPosition (component));
 
     g.drawFittedText (component.getName(),
                       3, r.getY(), r.getX() - 5, r.getHeight(),
                       Justification::centredLeft, 2);
 }
 
-const Rectangle LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
+const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
-    return Rectangle (component.getWidth() / 3, 1,
-                      component.getWidth() - component.getWidth() / 3 - 1, component.getHeight() - 3);
+    return Rectangle<int> (component.getWidth() / 3, 1,
+                           component.getWidth() - component.getWidth() / 3 - 1, component.getHeight() - 3);
 }
 
 //==============================================================================

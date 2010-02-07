@@ -111,7 +111,7 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
             // To correctly render a whole composite layer with an overall transparency,
             // we need to render everything opaquely into a temp buffer, then blend that
             // with the target opacity...
-            const Rectangle clipBounds (context.g.getClipBounds());
+            const Rectangle<int> clipBounds (context.g.getClipBounds());
             Image tempImage (Image::ARGB, clipBounds.getWidth(), clipBounds.getHeight(), true);
 
             {
@@ -127,29 +127,20 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
     }
 }
 
-void DrawableComposite::getBounds (float& x, float& y, float& width, float& height) const
+const Rectangle<float> DrawableComposite::getBounds() const
 {
-    Path totalPath;
+    Rectangle<float> bounds;
 
     for (int i = 0; i < drawables.size(); ++i)
     {
-        drawables.getUnchecked(i)->getBounds (x, y, width, height);
+        const Drawable* const d = drawables.getUnchecked(i);
+        const AffineTransform* const t = transforms.getUnchecked(i);
 
-        if (width > 0.0f && height > 0.0f)
-        {
-            Path outline;
-            outline.addRectangle (x, y, width, height);
-
-            const AffineTransform* const t = transforms.getUnchecked(i);
-
-            if (t == 0)
-                totalPath.addPath (outline);
-            else
-                totalPath.addPath (outline, *t);
-        }
+        bounds = bounds.getUnion (t == 0 ? d->getBounds()
+                                         : d->getBounds().transformed (*t));
     }
 
-    totalPath.getBounds (x, y, width, height);
+    return bounds;
 }
 
 bool DrawableComposite::hitTest (float x, float y) const

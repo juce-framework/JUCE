@@ -269,9 +269,9 @@ public:
         If relativeToComponentTopLeft is false, the co-ords are relative to the
         top-left of the table's top-left cell.
     */
-    const Rectangle getCellPosition (const int columnId,
-                                     const int rowNumber,
-                                     const bool relativeToComponentTopLeft) const;
+    const Rectangle<int> getCellPosition (const int columnId,
+                                          const int rowNumber,
+                                          const bool relativeToComponentTopLeft) const;
 
     /** Scrolls horizontally if necessary to make sure that a particular column is visible.
 

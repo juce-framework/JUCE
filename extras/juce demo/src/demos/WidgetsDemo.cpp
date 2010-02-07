@@ -605,10 +605,10 @@ public:
             if (getChildComponent (i) != animateButton)
             {
                 animator.animateComponent (getChildComponent (i),
-                                           Rectangle (Random::getSystemRandom().nextInt (getWidth() / 2),
-                                                      Random::getSystemRandom().nextInt (getHeight() / 2),
-                                                      60 + Random::getSystemRandom().nextInt (getWidth() / 3),
-                                                      16 + Random::getSystemRandom().nextInt (getHeight() / 6)),
+                                           Rectangle<int> (Random::getSystemRandom().nextInt (getWidth() / 2),
+                                                           Random::getSystemRandom().nextInt (getHeight() / 2),
+                                                           60 + Random::getSystemRandom().nextInt (getWidth() / 3),
+                                                           16 + Random::getSystemRandom().nextInt (getHeight() / 6)),
                                            500 + Random::getSystemRandom().nextInt (2000),
                                            Random::getSystemRandom().nextDouble(),
                                            Random::getSystemRandom().nextDouble());
@@ -920,7 +920,7 @@ private:
             {
             }
 
-            void contentAreaChanged (const Rectangle& contentArea)
+            void contentAreaChanged (const Rectangle<int>& contentArea)
             {
                 comboBox->setSize (contentArea.getWidth() - 2,
                                    jmin (contentArea.getHeight() - 2, 22));

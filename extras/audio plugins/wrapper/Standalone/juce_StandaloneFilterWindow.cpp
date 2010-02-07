@@ -45,8 +45,6 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 {
     setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
-    PropertySet* const globalSettings = getGlobalSettings();
-
     optionsButton = new TextButton (T("options"));
     Component::addAndMakeVisible (optionsButton);
     optionsButton->addButtonListener (this);
@@ -58,6 +56,8 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
         if (filter != 0)
         {
+            PropertySet* const globalSettings = getGlobalSettings();
+
             deviceManager = new AudioFilterStreamingDeviceManager();
             deviceManager->setFilter (filter);
 

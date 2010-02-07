@@ -110,7 +110,7 @@ public:
 
         @see contentAreaChanged
     */
-    const Rectangle getContentArea() const throw()                      { return contentArea; }
+    const Rectangle<int> getContentArea() const throw()                 { return contentArea; }
 
     //==============================================================================
     /** This method must return the size criteria for this item, based on a given toolbar
@@ -155,7 +155,7 @@ public:
 
         See getContentArea() for a description of what the area is.
     */
-    virtual void contentAreaChanged (const Rectangle& newBounds) = 0;
+    virtual void contentAreaChanged (const Rectangle<int>& newBounds) = 0;
 
 
     //==============================================================================
@@ -203,7 +203,7 @@ private:
     ScopedPointer <Component> overlayComp;
     int dragOffsetX, dragOffsetY;
     bool isActive, isBeingDragged, isBeingUsedAsAButton;
-    Rectangle contentArea;
+    Rectangle<int> contentArea;
 
     ToolbarItemComponent (const ToolbarItemComponent&);
     const ToolbarItemComponent& operator= (const ToolbarItemComponent&);

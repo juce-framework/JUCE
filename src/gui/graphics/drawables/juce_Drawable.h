@@ -130,7 +130,7 @@ public:
 
         Co-ordinates are relative to the object's own origin.
     */
-    virtual void getBounds (float& x, float& y, float& width, float& height) const = 0;
+    virtual const Rectangle<float> getBounds() const = 0;
 
     /** Returns true if the given point is somewhere inside this Drawable.
 

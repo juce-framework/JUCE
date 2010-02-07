@@ -196,7 +196,7 @@ private:
                                                    .scaled (bouncingNumber[2] + 4.0f, bouncingNumber[2] + 4.0f)
                                                    .translated (bouncingPointX[2], bouncingPointY[2]));
         g.reduceClipRegion (*argbImage,
-                            Rectangle (0, 0, argbImage->getWidth(), argbImage->getHeight()),
+                            Rectangle<int> (0, 0, argbImage->getWidth(), argbImage->getHeight()),
                             transform);
     }
 
@@ -352,13 +352,14 @@ private:
                 // to make our icon the right size, we'll put it inside a DrawableComposite, and apply
                 // a transform to get it to the size we want.
 
-                float x, y, w, h;
-                loadedSVG->getBounds (x, y, w, h);
-                const float scaleFactor = 300.0f / jmax (w, h);
+                Rectangle<float> bounds = loadedSVG->getBounds();
+                const float scaleFactor = 300.0f / jmax (bounds.getWidth(), bounds.getHeight());
 
                 svgDrawable = new DrawableComposite();
-                svgDrawable->insertDrawable (loadedSVG, AffineTransform::translation (-(x + w * 0.5f), -(y + h * 0.5f))
-                                                                        .scaled (scaleFactor, scaleFactor));
+                svgDrawable->insertDrawable (loadedSVG,
+                                             AffineTransform::translation (-bounds.getCentreX(),
+                                                                           -bounds.getCentreY())
+                                                             .scaled (scaleFactor, scaleFactor));
             }
         }
     }

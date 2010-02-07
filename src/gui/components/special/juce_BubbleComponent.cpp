@@ -106,19 +106,19 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
     else
         componentToPointTo->relativePositionToGlobal (tx, ty);
 
-    setPosition (Rectangle (tx, ty, componentToPointTo->getWidth(), componentToPointTo->getHeight()));
+    setPosition (Rectangle<int> (tx, ty, componentToPointTo->getWidth(), componentToPointTo->getHeight()));
 }
 
 void BubbleComponent::setPosition (const int arrowTipX_,
                                    const int arrowTipY_)
 {
-    setPosition (Rectangle (arrowTipX_, arrowTipY_, 1, 1));
+    setPosition (Rectangle<int> (arrowTipX_, arrowTipY_, 1, 1));
 }
 
 //==============================================================================
-void BubbleComponent::setPosition (const Rectangle& rectangleToPointTo)
+void BubbleComponent::setPosition (const Rectangle<int>& rectangleToPointTo)
 {
-    Rectangle availableSpace;
+    Rectangle<int> availableSpace;
 
     if (getParentComponent() != 0)
     {

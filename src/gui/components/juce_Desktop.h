@@ -81,7 +81,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
 
     /** Returns the position and size of the monitor which contains this co-ordinate.
 
@@ -91,7 +91,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
 
 
     //==============================================================================
@@ -249,14 +249,14 @@ private:
     Desktop() throw();
     ~Desktop() throw();
 
-    Array <Rectangle> monitorCoordsClipped, monitorCoordsUnclipped;
+    Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
     int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
     bool mouseMovedSignificantlySincePressed;
 
     struct RecentMouseDown
     {
-        int x, y;
+        Point<int> position;
         int64 time;
         Component* component;
     };
@@ -264,20 +264,20 @@ private:
     RecentMouseDown mouseDowns[4];
 
     void incrementMouseClickCounter() throw();
-    void registerMouseDown (int x, int y, int64 time, Component* component) throw();
-    void registerMouseDrag (int x, int y) throw();
+    void registerMouseDown (const Point<int>& position, int64 time, Component* component) throw();
+    void registerMouseDrag (const Point<int>& position) throw();
     const Time getLastMouseDownTime() const throw();
     int getNumberOfMultipleClicks() const throw();
 
     Component* kioskModeComponent;
-    Rectangle kioskComponentOriginalBounds;
+    Rectangle<int> kioskComponentOriginalBounds;
 
     void timerCallback();
     void sendMouseMove();
     void resetTimer() throw();
 
     int getNumDisplayMonitors() const throw();
-    const Rectangle getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
+    const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
 
     void addDesktopComponent (Component* const c) throw();
     void removeDesktopComponent (Component* const c) throw();

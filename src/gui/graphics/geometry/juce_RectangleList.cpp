@@ -36,7 +36,7 @@ RectangleList::RectangleList() throw()
 {
 }
 
-RectangleList::RectangleList (const Rectangle& rect) throw()
+RectangleList::RectangleList (const Rectangle<int>& rect) throw()
 {
     if (! rect.isEmpty())
         rects.add (rect);
@@ -63,12 +63,12 @@ void RectangleList::clear() throw()
     rects.clearQuick();
 }
 
-const Rectangle RectangleList::getRectangle (const int index) const throw()
+const Rectangle<int> RectangleList::getRectangle (const int index) const throw()
 {
     if (((unsigned int) index) < (unsigned int) rects.size())
         return rects.getReference (index);
 
-    return Rectangle();
+    return Rectangle<int>();
 }
 
 bool RectangleList::isEmpty() const throw()
@@ -101,7 +101,7 @@ bool RectangleList::Iterator::next() throw()
 
 
 //==============================================================================
-void RectangleList::add (const Rectangle& rect) throw()
+void RectangleList::add (const Rectangle<int>& rect) throw()
 {
     if (! rect.isEmpty())
     {
@@ -116,7 +116,7 @@ void RectangleList::add (const Rectangle& rect) throw()
             int i;
             for (i = rects.size(); --i >= 0;)
             {
-                Rectangle& ourRect = rects.getReference (i);
+                Rectangle<int>& ourRect = rects.getReference (i);
 
                 if (rect.intersects (ourRect))
                 {
@@ -133,7 +133,7 @@ void RectangleList::add (const Rectangle& rect) throw()
 
                 for (i = rects.size(); --i >= 0;)
                 {
-                    const Rectangle& ourRect = rects.getReference (i);
+                    const Rectangle<int>& ourRect = rects.getReference (i);
 
                     if (rect.intersects (ourRect))
                     {
@@ -155,7 +155,7 @@ void RectangleList::add (const Rectangle& rect) throw()
     }
 }
 
-void RectangleList::addWithoutMerging (const Rectangle& rect) throw()
+void RectangleList::addWithoutMerging (const Rectangle<int>& rect) throw()
 {
     rects.add (rect);
 }
@@ -165,11 +165,11 @@ void RectangleList::add (const int x, const int y, const int w, const int h) thr
     if (rects.size() == 0)
     {
         if (w > 0 && h > 0)
-            rects.add (Rectangle (x, y, w, h));
+            rects.add (Rectangle<int> (x, y, w, h));
     }
     else
     {
-        add (Rectangle (x, y, w, h));
+        add (Rectangle<int> (x, y, w, h));
     }
 }
 
@@ -179,7 +179,7 @@ void RectangleList::add (const RectangleList& other) throw()
         add (other.rects.getReference (i));
 }
 
-void RectangleList::subtract (const Rectangle& rect) throw()
+void RectangleList::subtract (const Rectangle<int>& rect) throw()
 {
     const int originalNumRects = rects.size();
 
@@ -192,7 +192,7 @@ void RectangleList::subtract (const Rectangle& rect) throw()
 
         for (int i = getNumRectangles(); --i >= 0;)
         {
-            Rectangle& r = rects.getReference (i);
+            Rectangle<int>& r = rects.getReference (i);
 
             const int rx1 = r.x;
             const int ry1 = r.y;
@@ -212,7 +212,7 @@ void RectangleList::subtract (const Rectangle& rect) throw()
                         r.x = x1;
                         r.w = rx2 - x1;
 
-                        rects.insert (i + 1, Rectangle (rx1, ry1, x1 - rx1,  ry2 - ry1));
+                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, x1 - rx1,  ry2 - ry1));
                         i += 2;
                     }
                 }
@@ -223,7 +223,7 @@ void RectangleList::subtract (const Rectangle& rect) throw()
 
                     if (y1 > ry1 || y2 < ry2 || x1 > rx1)
                     {
-                        rects.insert (i + 1, Rectangle (rx1, ry1, x2 - rx1,  ry2 - ry1));
+                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, x2 - rx1,  ry2 - ry1));
                         i += 2;
                     }
                 }
@@ -238,7 +238,7 @@ void RectangleList::subtract (const Rectangle& rect) throw()
                         r.y = y1;
                         r.h = ry2 - y1;
 
-                        rects.insert (i + 1, Rectangle (rx1, ry1, rx2 - rx1, y1 - ry1));
+                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, rx2 - rx1, y1 - ry1));
                         i += 2;
                     }
                 }
@@ -249,7 +249,7 @@ void RectangleList::subtract (const Rectangle& rect) throw()
 
                     if (x1 > rx1 || x2 < rx2 || y1 > ry1)
                     {
-                        rects.insert (i + 1, Rectangle (rx1, ry1, rx2 - rx1, y2 - ry1));
+                        rects.insert (i + 1, Rectangle<int> (rx1, ry1, rx2 - rx1, y2 - ry1));
                         i += 2;
                     }
                 }
@@ -271,7 +271,7 @@ void RectangleList::subtract (const RectangleList& otherList) throw()
         subtract (otherList.rects.getReference (i));
 }
 
-bool RectangleList::clipTo (const Rectangle& rect) throw()
+bool RectangleList::clipTo (const Rectangle<int>& rect) throw()
 {
     bool notEmpty = false;
 
@@ -283,7 +283,7 @@ bool RectangleList::clipTo (const Rectangle& rect) throw()
     {
         for (int i = rects.size(); --i >= 0;)
         {
-            Rectangle& r = rects.getReference (i);
+            Rectangle<int>& r = rects.getReference (i);
 
             if (! rect.intersectRectangle (r.x, r.y, r.w, r.h))
                 rects.remove (i);
@@ -304,11 +304,11 @@ bool RectangleList::clipTo (const RectangleList& other) throw()
 
     for (int j = 0; j < rects.size(); ++j)
     {
-        const Rectangle& rect = rects.getReference (j);
+        const Rectangle<int>& rect = rects.getReference (j);
 
         for (int i = other.rects.size(); --i >= 0;)
         {
-            Rectangle r (other.rects.getReference (i));
+            Rectangle<int> r (other.rects.getReference (i));
 
             if (rect.intersectRectangle (r.x, r.y, r.w, r.h))
                 result.rects.add (r);
@@ -320,7 +320,7 @@ bool RectangleList::clipTo (const RectangleList& other) throw()
     return ! isEmpty();
 }
 
-bool RectangleList::getIntersectionWith (const Rectangle& rect, RectangleList& destRegion) const throw()
+bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw()
 {
     destRegion.clear();
 
@@ -328,7 +328,7 @@ bool RectangleList::getIntersectionWith (const Rectangle& rect, RectangleList& d
     {
         for (int i = rects.size(); --i >= 0;)
         {
-            Rectangle r (rects.getReference (i));
+            Rectangle<int> r (rects.getReference (i));
 
             if (rect.intersectRectangle (r.x, r.y, r.w, r.h))
                 destRegion.rects.add (r);
@@ -350,7 +350,7 @@ void RectangleList::consolidate() throw()
     int i;
     for (i = 0; i < getNumRectangles() - 1; ++i)
     {
-        Rectangle& r = rects.getReference (i);
+        Rectangle<int>& r = rects.getReference (i);
         const int rx1 = r.x;
         const int ry1 = r.y;
         const int rx2 = rx1 + r.w;
@@ -358,7 +358,7 @@ void RectangleList::consolidate() throw()
 
         for (int j = rects.size(); --j > i;)
         {
-            Rectangle& r2 = rects.getReference (j);
+            Rectangle<int>& r2 = rects.getReference (j);
             const int jrx1 = r2.x;
             const int jry1 = r2.y;
             const int jrx2 = jrx1 + r2.w;
@@ -371,7 +371,7 @@ void RectangleList::consolidate() throw()
                 if (jry1 > ry1 && jry1 < ry2)
                 {
                     r.h = jry1 - ry1;
-                    rects.add (Rectangle (rx1, jry1, rx2 - rx1, ry2 - jry1));
+                    rects.add (Rectangle<int> (rx1, jry1, rx2 - rx1, ry2 - jry1));
                     i = -1;
                     break;
                 }
@@ -379,21 +379,21 @@ void RectangleList::consolidate() throw()
                 if (jry2 > ry1 && jry2 < ry2)
                 {
                     r.h = jry2 - ry1;
-                    rects.add (Rectangle (rx1, jry2, rx2 - rx1, ry2 - jry2));
+                    rects.add (Rectangle<int> (rx1, jry2, rx2 - rx1, ry2 - jry2));
                     i = -1;
                     break;
                 }
                 else if (ry1 > jry1 && ry1 < jry2)
                 {
                     r2.h = ry1 - jry1;
-                    rects.add (Rectangle (jrx1, ry1, jrx2 - jrx1, jry2 - ry1));
+                    rects.add (Rectangle<int> (jrx1, ry1, jrx2 - jrx1, jry2 - ry1));
                     i = -1;
                     break;
                 }
                 else if (ry2 > jry1 && ry2 < jry2)
                 {
                     r2.h = ry2 - jry1;
-                    rects.add (Rectangle (jrx1, ry2, jrx2 - jrx1, jry2 - ry2));
+                    rects.add (Rectangle<int> (jrx1, ry2, jrx2 - jrx1, jry2 - ry2));
                     i = -1;
                     break;
                 }
@@ -403,7 +403,7 @@ void RectangleList::consolidate() throw()
 
     for (i = 0; i < rects.size() - 1; ++i)
     {
-        Rectangle& r = rects.getReference (i);
+        Rectangle<int>& r = rects.getReference (i);
 
         for (int j = rects.size(); --j > i;)
         {
@@ -427,7 +427,7 @@ bool RectangleList::containsPoint (const int x, const int y) const throw()
     return false;
 }
 
-bool RectangleList::containsRectangle (const Rectangle& rectangleToCheck) const throw()
+bool RectangleList::containsRectangle (const Rectangle<int>& rectangleToCheck) const throw()
 {
     if (rects.size() > 1)
     {
@@ -449,7 +449,7 @@ bool RectangleList::containsRectangle (const Rectangle& rectangleToCheck) const 
     return false;
 }
 
-bool RectangleList::intersectsRectangle (const Rectangle& rectangleToCheck) const throw()
+bool RectangleList::intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw()
 {
     for (int i = rects.size(); --i >= 0;)
         if (rects.getReference (i).intersects (rectangleToCheck))
@@ -467,18 +467,18 @@ bool RectangleList::intersects (const RectangleList& other) const throw()
     return false;
 }
 
-const Rectangle RectangleList::getBounds() const throw()
+const Rectangle<int> RectangleList::getBounds() const throw()
 {
     if (rects.size() <= 1)
     {
         if (rects.size() == 0)
-            return Rectangle();
+            return Rectangle<int>();
         else
             return rects.getReference (0);
     }
     else
     {
-        const Rectangle& r = rects.getReference (0);
+        const Rectangle<int>& r = rects.getReference (0);
 
         int minX = r.x;
         int minY = r.y;
@@ -487,7 +487,7 @@ const Rectangle RectangleList::getBounds() const throw()
 
         for (int i = rects.size(); --i > 0;)
         {
-            const Rectangle& r2 = rects.getReference (i);
+            const Rectangle<int>& r2 = rects.getReference (i);
 
             minX = jmin (minX, r2.x);
             minY = jmin (minY, r2.y);
@@ -495,7 +495,7 @@ const Rectangle RectangleList::getBounds() const throw()
             maxY = jmax (maxY, r2.getBottom());
         }
 
-        return Rectangle (minX, minY, maxX - minX, maxY - minY);
+        return Rectangle<int> (minX, minY, maxX - minX, maxY - minY);
     }
 }
 
@@ -503,7 +503,7 @@ void RectangleList::offsetAll (const int dx, const int dy) throw()
 {
     for (int i = rects.size(); --i >= 0;)
     {
-        Rectangle& r = rects.getReference (i);
+        Rectangle<int>& r = rects.getReference (i);
 
         r.x += dx;
         r.y += dy;
@@ -517,7 +517,7 @@ const Path RectangleList::toPath() const throw()
 
     for (int i = rects.size(); --i >= 0;)
     {
-        const Rectangle& r = rects.getReference (i);
+        const Rectangle<int>& r = rects.getReference (i);
 
         p.addRectangle ((float) r.x,
                         (float) r.y,

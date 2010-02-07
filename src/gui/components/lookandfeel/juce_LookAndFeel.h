@@ -191,7 +191,7 @@ public:
 
     virtual void drawAlertBox (Graphics& g,
                                AlertWindow& alert,
-                               const Rectangle& textArea,
+                               const Rectangle<int>& textArea,
                                TextLayout& textLayout);
 
     virtual int getAlertBoxWindowFlags();
@@ -595,7 +595,7 @@ public:
     virtual void drawPropertyComponentLabel (Graphics& g, int width, int height,
                                              PropertyComponent& component);
 
-    virtual const Rectangle getPropertyComponentContentPosition (PropertyComponent& component);
+    virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
 
     //==============================================================================
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);

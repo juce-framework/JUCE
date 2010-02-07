@@ -81,7 +81,7 @@ void BooleanPropertyComponent::paint (Graphics& g)
 {
     PropertyComponent::paint (g);
 
-    const Rectangle r (button->getBounds());
+    const Rectangle<int> r (button->getBounds());
     g.setColour (Colours::white);
     g.fillRect (r);
 

@@ -289,7 +289,7 @@ public:
             int x = 0, y = 0;
             owner->relativePositionToOtherComponent (topComp, x, y);
 
-            owner->setControlBounds (Rectangle (x, y, owner->getWidth(), owner->getHeight()));
+            owner->setControlBounds (Rectangle<int> (x, y, owner->getWidth(), owner->getHeight()));
         }
     }
 
@@ -477,7 +477,7 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                 if (info->control->DoVerb (OLEIVERB_SHOW, 0, info->clientSite, 0, hwnd, &rect) == S_OK)
                 {
                     control = info.release();
-                    setControlBounds (Rectangle (x, y, getWidth(), getHeight()));
+                    setControlBounds (Rectangle<int> (x, y, getWidth(), getHeight()));
 
                     ((ActiveXControlData*) control)->controlHWND = getHWND (this);
 
@@ -521,7 +521,7 @@ void* ActiveXControlComponent::queryInterface (const void* iid) const
     return 0;
 }
 
-void ActiveXControlComponent::setControlBounds (const Rectangle& newBounds) const
+void ActiveXControlComponent::setControlBounds (const Rectangle<int>& newBounds) const
 {
     HWND hwnd = ((ActiveXControlData*) control)->controlHWND;
 

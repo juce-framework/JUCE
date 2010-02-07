@@ -119,7 +119,7 @@ const String PositionedRectangle::toString() const throw()
 }
 
 //==============================================================================
-const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) const throw()
+const Rectangle<int> PositionedRectangle::getRectangle (const Rectangle<int>& target) const throw()
 {
     jassert (! target.isEmpty());
 
@@ -127,11 +127,11 @@ const Rectangle PositionedRectangle::getRectangle (const Rectangle& target) cons
     applyPosAndSize (x_, w_, x, w, xMode, wMode, target.getX(), target.getWidth());
     applyPosAndSize (y_, h_, y, h, yMode, hMode, target.getY(), target.getHeight());
 
-    return Rectangle (roundToInt (x_), roundToInt (y_),
-                      roundToInt (w_), roundToInt (h_));
+    return Rectangle<int> (roundToInt (x_), roundToInt (y_),
+                           roundToInt (w_), roundToInt (h_));
 }
 
-void PositionedRectangle::getRectangleDouble (const Rectangle& target,
+void PositionedRectangle::getRectangleDouble (const Rectangle<int>& target,
                                               double& x_, double& y_,
                                               double& w_, double& h_) const throw()
 {
@@ -143,12 +143,12 @@ void PositionedRectangle::getRectangleDouble (const Rectangle& target,
 
 void PositionedRectangle::applyToComponent (Component& comp) const throw()
 {
-    comp.setBounds (getRectangle (Rectangle (0, 0, comp.getParentWidth(), comp.getParentHeight())));
+    comp.setBounds (getRectangle (Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight())));
 }
 
 //==============================================================================
-void PositionedRectangle::updateFrom (const Rectangle& rectangle,
-                                      const Rectangle& target) throw()
+void PositionedRectangle::updateFrom (const Rectangle<int>& rectangle,
+                                      const Rectangle<int>& target) throw()
 {
     updatePosAndSize (x, w, rectangle.getX(), rectangle.getWidth(), xMode, wMode, target.getX(), target.getWidth());
     updatePosAndSize (y, h, rectangle.getY(), rectangle.getHeight(), yMode, hMode, target.getY(), target.getHeight());
@@ -156,7 +156,7 @@ void PositionedRectangle::updateFrom (const Rectangle& rectangle,
 
 void PositionedRectangle::updateFromDouble (const double newX, const double newY,
                                             const double newW, const double newH,
-                                            const Rectangle& target) throw()
+                                            const Rectangle<int>& target) throw()
 {
     updatePosAndSize (x, w, newX, newW, xMode, wMode, target.getX(), target.getWidth());
     updatePosAndSize (y, h, newY, newH, yMode, hMode, target.getY(), target.getHeight());
@@ -165,9 +165,9 @@ void PositionedRectangle::updateFromDouble (const double newX, const double newY
 void PositionedRectangle::updateFromComponent (const Component& comp) throw()
 {
     if (comp.getParentComponent() == 0 && ! comp.isOnDesktop())
-        updateFrom (comp.getBounds(), Rectangle());
+        updateFrom (comp.getBounds(), Rectangle<int>());
     else
-        updateFrom (comp.getBounds(), Rectangle (0, 0, comp.getParentWidth(), comp.getParentHeight()));
+        updateFrom (comp.getBounds(), Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight()));
 }
 
 //==============================================================================
@@ -213,7 +213,7 @@ void PositionedRectangle::setModes (const AnchorPoint xAnchor,
                                     const PositionMode yMode_,
                                     const SizeMode widthMode,
                                     const SizeMode heightMode,
-                                    const Rectangle& target) throw()
+                                    const Rectangle<int>& target) throw()
 {
     if (xMode != (xAnchor | xMode_) || wMode != widthMode)
     {

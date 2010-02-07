@@ -134,7 +134,7 @@ public:
     /** @internal */
     void render (const Drawable::RenderingContext& context) const;
     /** @internal */
-    void getBounds (float& x, float& y, float& width, float& height) const;
+    const Rectangle<float> getBounds() const;
     /** @internal */
     bool hitTest (float x, float y) const;
     /** @internal */

@@ -56,8 +56,8 @@ public:
           const float endY) throw();
 
     /** Creates a line from its start and end points. */
-    Line (const Point& start,
-          const Point& end) throw();
+    Line (const Point<float>& start,
+          const Point<float>& end) throw();
 
     /** Copies a line from another one. */
     const Line& operator= (const Line& other) throw();
@@ -79,10 +79,10 @@ public:
     inline float getEndY() const throw()                                { return endY; }
 
     /** Returns the line's start point. */
-    const Point getStart() const throw();
+    const Point<float> getStart() const throw();
 
     /** Returns the line's end point. */
-    const Point getEnd() const throw();
+    const Point<float> getEnd() const throw();
 
     /** Changes this line's start point */
     void setStart (const float newStartX,
@@ -93,10 +93,10 @@ public:
                  const float newEndY) throw();
 
     /** Changes this line's start point */
-    void setStart (const Point& newStart) throw();
+    void setStart (const Point<float>& newStart) throw();
 
     /** Changes this line's end point */
-    void setEnd (const Point& newEnd) throw();
+    void setEnd (const Point<float>& newEnd) throw();
 
     /** Applies an affine transform to the line's start and end points. */
     void applyTransform (const AffineTransform& transform) throw();
@@ -151,7 +151,7 @@ public:
                                     than the line itself
         @see getPointAlongLineProportionally
     */
-    const Point getPointAlongLine (const float distanceFromStart) const throw();
+    const Point<float> getPointAlongLine (const float distanceFromStart) const throw();
 
     /** Returns a point which is a certain distance along and to the side of this line.
 
@@ -166,8 +166,8 @@ public:
                                     end, then a positive value here will move to the
                                     right, negative value move to the left.
     */
-    const Point getPointAlongLine (const float distanceFromStart,
-                                   const float perpendicularDistance) const throw();
+    const Point<float> getPointAlongLine (const float distanceFromStart,
+                                          const float perpendicularDistance) const throw();
 
     /** Returns the location of the point which is a given distance along this line
         proportional to the line's length.
@@ -179,7 +179,7 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    const Point getPointAlongLineProportionally (const float proportionOfLength) const throw();
+    const Point<float> getPointAlongLineProportionally (const float proportionOfLength) const throw();
 
     /** Returns the smallest distance between this line segment and a given point.
 

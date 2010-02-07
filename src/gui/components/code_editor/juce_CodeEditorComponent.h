@@ -102,7 +102,7 @@ public:
     /** Returns the on-screen position of a character in the document.
         The rectangle returned is relative to this component's top-left origin.
     */
-    const Rectangle getCharacterBounds (const CodeDocument::Position& pos) const throw();
+    const Rectangle<int> getCharacterBounds (const CodeDocument::Position& pos) const throw();
 
     /** Finds the character at a given on-screen position.
         The co-ordinates are relative to this component's top-left origin.

@@ -540,10 +540,10 @@ public:
         float x1, y1, x2, y2;
         getPoints (x1, y1, x2, y2);
 
-        const Rectangle newBounds ((int) jmin (x1, x2) - 4,
-                                   (int) jmin (y1, y2) - 4,
-                                   (int) fabsf (x1 - x2) + 8,
-                                   (int) fabsf (y1 - y2) + 8);
+        const Rectangle<int> newBounds ((int) jmin (x1, x2) - 4,
+                                        (int) jmin (y1, y2) - 4,
+                                        (int) fabsf (x1 - x2) + 8,
+                                        (int) fabsf (y1 - y2) + 8);
 
         if (newBounds != getBounds())
             setBounds (newBounds);

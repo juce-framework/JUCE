@@ -142,7 +142,7 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
 {
     jassert (component != 0);
 
-    Rectangle limits;
+    Rectangle<int> limits;
     Component* const p = component->getParentComponent();
 
     if (p == 0)
@@ -206,8 +206,8 @@ void ComponentBoundsConstrainer::resizeEnd()
 
 //==============================================================================
 void ComponentBoundsConstrainer::checkBounds (int& x, int& y, int& w, int& h,
-                                              const Rectangle& old,
-                                              const Rectangle& limits,
+                                              const Rectangle<int>& old,
+                                              const Rectangle<int>& limits,
                                               const bool isStretchingTop,
                                               const bool isStretchingLeft,
                                               const bool isStretchingBottom,

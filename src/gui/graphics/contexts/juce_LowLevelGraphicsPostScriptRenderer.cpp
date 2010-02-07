@@ -57,7 +57,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
       needToClip (true)
 {
     stateStack.add (new SavedState());
-    stateStack.getLast()->clip = Rectangle (0, 0, totalWidth_, totalHeight_);
+    stateStack.getLast()->clip = Rectangle<int> (0, 0, totalWidth_, totalHeight_);
 
     const float scale = jmin ((520.0f / totalWidth_), (750.0f / totalHeight));
 
@@ -112,7 +112,7 @@ void LowLevelGraphicsPostScriptRenderer::setOrigin (int x, int y)
     }
 }
 
-bool LowLevelGraphicsPostScriptRenderer::clipToRectangle (const Rectangle& r)
+bool LowLevelGraphicsPostScriptRenderer::clipToRectangle (const Rectangle<int>& r)
 {
     needToClip = true;
     return stateStack.getLast()->clip.clipTo (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
@@ -124,7 +124,7 @@ bool LowLevelGraphicsPostScriptRenderer::clipToRectangleList (const RectangleLis
     return stateStack.getLast()->clip.clipTo (clipRegion);
 }
 
-void LowLevelGraphicsPostScriptRenderer::excludeClipRectangle (const Rectangle& r)
+void LowLevelGraphicsPostScriptRenderer::excludeClipRectangle (const Rectangle<int>& r)
 {
     needToClip = true;
     stateStack.getLast()->clip.subtract (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
@@ -140,18 +140,18 @@ void LowLevelGraphicsPostScriptRenderer::clipToPath (const Path& path, const Aff
     out << "clip\n";
 }
 
-void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& /*sourceImage*/, const Rectangle& /*srcClip*/, const AffineTransform& /*transform*/)
+void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& /*sourceImage*/, const Rectangle<int>& /*srcClip*/, const AffineTransform& /*transform*/)
 {
     needToClip = true;
     jassertfalse // xxx
 }
 
-bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (const Rectangle& r)
+bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (const Rectangle<int>& r)
 {
     return stateStack.getLast()->clip.intersectsRectangle (r.translated (stateStack.getLast()->xOffset, stateStack.getLast()->yOffset));
 }
 
-const Rectangle LowLevelGraphicsPostScriptRenderer::getClipBounds() const
+const Rectangle<int> LowLevelGraphicsPostScriptRenderer::getClipBounds() const
 {
     return stateStack.getLast()->clip.getBounds().translated (-stateStack.getLast()->xOffset,
                                                               -stateStack.getLast()->yOffset);
@@ -205,7 +205,7 @@ void LowLevelGraphicsPostScriptRenderer::writeClip()
                 out << '\n';
             }
 
-            const Rectangle& r = *i.getRectangle();
+            const Rectangle<int>& r = *i.getRectangle();
 
             out << r.getX() << ' ' << -r.getY() << ' '
                 << r.getWidth() << ' ' << -r.getHeight() << " pr ";
@@ -333,14 +333,14 @@ void LowLevelGraphicsPostScriptRenderer::setInterpolationQuality (Graphics::Resa
 }
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle& r, const bool /*replaceExistingContents*/)
+void LowLevelGraphicsPostScriptRenderer::fillRect (const Rectangle<int>& r, const bool /*replaceExistingContents*/)
 {
     if (stateStack.getLast()->fillType.isColour())
     {
         writeClip();
         writeColour (stateStack.getLast()->fillType.colour);
 
-        Rectangle r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
+        Rectangle<int> r2 (r.translated (stateStack.getLast()->xOffset,  stateStack.getLast()->yOffset));
 
         out << r2.getX() << ' ' << -r2.getBottom() << ' ' << r2.getWidth() << ' ' << r2.getHeight() << " rectfill\n";
     }
@@ -385,7 +385,7 @@ void LowLevelGraphicsPostScriptRenderer::fillPath (const Path& path, const Affin
             out << "clip\n";
         }
 
-        const Rectangle bounds (stateStack.getLast()->clip.getBounds());
+        const Rectangle<int> bounds (stateStack.getLast()->clip.getBounds());
 
         // ideally this would draw lots of lines or ellipses to approximate the gradient, but for the
         // time-being, this just fills it with the average colour..
@@ -454,7 +454,7 @@ void LowLevelGraphicsPostScriptRenderer::writeImage (const Image& im,
     out << "\n>}\n";
 }
 
-void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const Rectangle& srcClip,
+void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                                                     const AffineTransform& transform, const bool /*fillEntireClipAsTiles*/)
 {
     const int w = jmin (sourceImage.getWidth(), srcClip.getRight());
@@ -481,7 +481,7 @@ void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, co
             itemsOnLine = 0;
         }
 
-        const Rectangle& r = *i.getRectangle();
+        const Rectangle<int>& r = *i.getRectangle();
 
         out << r.getX() << ' ' << r.getY() << ' ' << r.getWidth() << ' ' << r.getHeight() << " pr ";
     }

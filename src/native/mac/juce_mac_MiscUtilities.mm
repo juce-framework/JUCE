@@ -239,7 +239,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 #endif
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool clipToWorkArea)
+void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool clipToWorkArea)
 {
     const ScopedAutoReleasePool pool;
     monitorCoords.clear();
@@ -253,10 +253,10 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
         NSRect r = clipToWorkArea ? [s visibleFrame]
                                   : [s frame];
 
-        monitorCoords.add (Rectangle ((int) r.origin.x,
-                                      (int) (mainScreenBottom - (r.origin.y + r.size.height)),
-                                      (int) r.size.width,
-                                      (int) r.size.height));
+        monitorCoords.add (Rectangle<int> ((int) r.origin.x,
+                                           (int) (mainScreenBottom - (r.origin.y + r.size.height)),
+                                           (int) r.size.width,
+                                           (int) r.size.height));
     }
 
     jassert (monitorCoords.size() > 0);

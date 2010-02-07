@@ -45,7 +45,7 @@ public:
     ~PaintElementRoundedRectangle() {}
 
     //==============================================================================
-    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle& parentArea)
+    void draw (Graphics& g, const ComponentLayout* layout, const Rectangle<int>& parentArea)
     {
         double x, y, w, h;
         position.getRectangleDouble (x, y, w, h, parentArea, layout);

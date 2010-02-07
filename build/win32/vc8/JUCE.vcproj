@@ -2472,10 +2472,6 @@
 							>
 						</File>
 						<File
-							RelativePath="..\..\..\src\gui\graphics\geometry\juce_Point.cpp"
-							>
-						</File>
-						<File
 							RelativePath="..\..\..\src\gui\graphics\geometry\juce_Point.h"
 							>
 						</File>
@@ -2485,10 +2481,6 @@
 						</File>
 						<File
 							RelativePath="..\..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h"
-							>
-						</File>
-						<File
-							RelativePath="..\..\..\src\gui\graphics\geometry\juce_Rectangle.cpp"
 							>
 						</File>
 						<File

@@ -128,11 +128,11 @@ public:
 
         @see applyToComponent
     */
-    const Rectangle getRectangle (const Rectangle& targetSpaceToBeRelativeTo) const throw();
+    const Rectangle<int> getRectangle (const Rectangle<int>& targetSpaceToBeRelativeTo) const throw();
 
     /** Same as getRectangle(), but returning the values as doubles rather than ints.
     */
-    void getRectangleDouble (const Rectangle& targetSpaceToBeRelativeTo,
+    void getRectangleDouble (const Rectangle<int>& targetSpaceToBeRelativeTo,
                              double& x,
                              double& y,
                              double& width,
@@ -142,7 +142,7 @@ public:
 
         This is equivalent to writing:
         @code
-        comp.setBounds (getRectangle (Rectangle (0, 0, comp.getParentWidth(), comp.getParentHeight())));
+        comp.setBounds (getRectangle (Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight())));
         @endcode
 
         @see getRectangle, updateFromComponent
@@ -163,14 +163,14 @@ public:
         to re-calculate some proportional co-ordinates. In this case, those co-ordinates
         will not be changed.
     */
-    void updateFrom (const Rectangle& newPosition,
-                     const Rectangle& targetSpaceToBeRelativeTo) throw();
+    void updateFrom (const Rectangle<int>& newPosition,
+                     const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
     /** Same functionality as updateFrom(), but taking doubles instead of ints.
     */
     void updateFromDouble (const double x, const double y,
                            const double width, const double height,
-                           const Rectangle& targetSpaceToBeRelativeTo) throw();
+                           const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
     /** Updates this object's co-ordinates to match the bounds of this component.
 
@@ -222,7 +222,7 @@ public:
                    const PositionMode yPositionMode,
                    const SizeMode widthMode,
                    const SizeMode heightMode,
-                   const Rectangle& targetSpaceToBeRelativeTo) throw();
+                   const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
     /** Returns the anchoring mode for the x co-ordinate.
         To change any of the modes, use setModes().

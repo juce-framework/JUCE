@@ -902,8 +902,8 @@ NSRect NSViewComponentPeer::constrainRect (NSRect r)
         int w = (int) r.size.width;
         int h = (int) r.size.height;
 
-        Rectangle original ((int) current.origin.x, (int) current.origin.y,
-                            (int) current.size.width, (int) current.size.height);
+        Rectangle<int> original ((int) current.origin.x, (int) current.origin.y,
+                                 (int) current.size.width, (int) current.size.height);
 
         constrainer->checkBounds (x, y, w, h,
                                   original,
@@ -942,7 +942,7 @@ void NSViewComponentPeer::setFullScreen (bool shouldBeFullScreen)
 {
     if (! isSharedWindow)
     {
-        Rectangle r (lastNonFullscreenBounds);
+        Rectangle<int> r (lastNonFullscreenBounds);
 
         setMinimised (false);
 
@@ -1387,10 +1387,10 @@ void NSViewComponentPeer::drawRect (NSRect r)
         RectangleList clip;
         for (int i = 0; i < numRects; ++i)
         {
-            clip.addWithoutMerging (Rectangle (roundToInt (rects[i].origin.x),
-                                               roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
-                                               roundToInt (rects[i].size.width),
-                                               roundToInt (rects[i].size.height)));
+            clip.addWithoutMerging (Rectangle<int> (roundToInt (rects[i].origin.x),
+                                                    roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
+                                                    roundToInt (rects[i].size.width),
+                                                    roundToInt (rects[i].size.height)));
         }
 
         if (context.clipToRectangleList (clip))
@@ -1483,9 +1483,9 @@ class AsyncRepaintMessage  : public CallbackMessage
 {
 public:
     NSViewComponentPeer* const peer;
-    const Rectangle rect;
+    const Rectangle<int> rect;
 
-    AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle& rect_)
+    AsyncRepaintMessage (NSViewComponentPeer* const peer_, const Rectangle<int>& rect_)
         : peer (peer_), rect (rect_)
     {
     }
@@ -1501,7 +1501,7 @@ void NSViewComponentPeer::repaint (int x, int y, int w, int h)
 {
     if (insideDrawRect)
     {
-        (new AsyncRepaintMessage (this, Rectangle (x, y, w, h)))->post();
+        (new AsyncRepaintMessage (this, Rectangle<int> (x, y, w, h)))->post();
     }
     else
     {

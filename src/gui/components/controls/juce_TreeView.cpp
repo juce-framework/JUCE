@@ -58,7 +58,7 @@ public:
         isDragging = false;
         needSelectionOnMouseUp = false;
 
-        Rectangle pos;
+        Rectangle<int> pos;
         TreeViewItem* const item = findItemAt (e.y, pos);
 
         if (item == 0)
@@ -98,7 +98,7 @@ public:
 
         if (needSelectionOnMouseUp && e.mouseWasClicked())
         {
-            Rectangle pos;
+            Rectangle<int> pos;
             TreeViewItem* const item = findItemAt (e.y, pos);
 
             if (item != 0)
@@ -110,7 +110,7 @@ public:
     {
         if (e.getNumberOfClicks() != 3)  // ignore triple clicks
         {
-            Rectangle pos;
+            Rectangle<int> pos;
             TreeViewItem* const item = findItemAt (e.y, pos);
 
             if (item != 0 && (e.x >= pos.getX() || ! owner->openCloseButtonsVisible))
@@ -132,7 +132,7 @@ public:
         {
             isDragging = true;
 
-            Rectangle pos;
+            Rectangle<int> pos;
             TreeViewItem* const item = findItemAt (e.getMouseDownY(), pos);
 
             if (item != 0 && e.getMouseDownX() >= pos.getX())
@@ -150,7 +150,7 @@ public:
                         Image* dragImage = Component::createComponentSnapshot (pos, true);
                         dragImage->multiplyAllAlphas (0.6f);
 
-                        Point imageOffset ((float) (pos.getX() - e.x), (float) (pos.getY() - e.y));
+                        Point<int> imageOffset (pos.getX() - e.x, pos.getY() - e.y);
                         dragContainer->startDragging (dragDescription, owner, dragImage, true, &imageOffset);
                     }
                     else
@@ -175,7 +175,7 @@ public:
     }
 
     void paint (Graphics& g);
-    TreeViewItem* findItemAt (int y, Rectangle& itemPosition) const;
+    TreeViewItem* findItemAt (int y, Rectangle<int>& itemPosition) const;
 
     void updateComponents()
     {
@@ -228,7 +228,7 @@ public:
                 {
                     const TreeViewItem* const item = (TreeViewItem*) rowComponentItems.getUnchecked(i);
 
-                    Rectangle pos (item->getItemPosition (false));
+                    Rectangle<int> pos (item->getItemPosition (false));
                     pos.setSize (pos.getWidth(), item->itemHeight);
 
                     if (pos.getBottom() >= visibleTop && pos.getY() < visibleBottom)
@@ -264,7 +264,7 @@ public:
 
         if (owner->openCloseButtonsVisible)
         {
-            Rectangle pos;
+            Rectangle<int> pos;
             TreeViewItem* item = findItemAt (e.y, pos);
 
             if (item != 0 && e.x < pos.getX() && e.x >= pos.getX() - owner->getIndentSize())
@@ -280,7 +280,7 @@ public:
         {
             if (buttonUnderMouse != 0 && containsItem (buttonUnderMouse))
             {
-                const Rectangle r (buttonUnderMouse->getItemPosition (false));
+                const Rectangle<int> r (buttonUnderMouse->getItemPosition (false));
                 repaint (0, r.getY(), r.getX(), buttonUnderMouse->getItemHeight());
             }
 
@@ -288,7 +288,7 @@ public:
 
             if (buttonUnderMouse != 0)
             {
-                const Rectangle r (buttonUnderMouse->getItemPosition (false));
+                const Rectangle<int> r (buttonUnderMouse->getItemPosition (false));
                 repaint (0, r.getY(), r.getX(), buttonUnderMouse->getItemHeight());
             }
         }
@@ -308,7 +308,7 @@ public:
     {
         int x, y;
         getMouseXYRelative (x, y);
-        Rectangle pos;
+        Rectangle<int> pos;
 
         TreeViewItem* const item = findItemAt (y, pos);
 
@@ -559,7 +559,7 @@ TreeViewItem* TreeView::getItemAt (int y) const throw()
     TreeViewContentComponent* const tc = (TreeViewContentComponent*) viewport->getViewedComponent();
     int x;
     relativePositionToOtherComponent (tc, x, y);
-    Rectangle pos;
+    Rectangle<int> pos;
     return tc->findItemAt (y, pos);
 }
 
@@ -852,7 +852,7 @@ public:
 
     void setTargetPosition (TreeViewItem* const item) throw()
     {
-        Rectangle r (item->getItemPosition (true));
+        Rectangle<int> r (item->getItemPosition (true));
         r.setHeight (item->getItemHeight());
         setBounds (r);
     }
@@ -898,7 +898,7 @@ TreeViewItem* TreeView::getInsertPosition (int& x, int& y, int& insertIndex,
     if (item == 0)
         return 0;
 
-    Rectangle itemPos (item->getItemPosition (true));
+    Rectangle<int> itemPos (item->getItemPosition (true));
     insertIndex = item->getIndexInParent();
     const int oldY = y;
     y = itemPos.getY();
@@ -1055,7 +1055,7 @@ void TreeViewContentComponent::paint (Graphics& g)
     }
 }
 
-TreeViewItem* TreeViewContentComponent::findItemAt (int y, Rectangle& itemPosition) const
+TreeViewItem* TreeViewContentComponent::findItemAt (int y, Rectangle<int>& itemPosition) const
 {
     if (owner->rootItem != 0)
     {
@@ -1290,7 +1290,7 @@ void TreeViewItem::itemDropped (const String& /*sourceDescription*/, Component* 
 {
 }
 
-const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLeft) const throw()
+const Rectangle<int> TreeViewItem::getItemPosition (const bool relativeToTreeViewTopLeft) const throw()
 {
     const int indentX = getIndentX();
 
@@ -1299,7 +1299,7 @@ const Rectangle TreeViewItem::getItemPosition (const bool relativeToTreeViewTopL
     if (ownerView != 0 && width < 0)
         width = ownerView->viewport->getViewWidth() - indentX;
 
-    Rectangle r (indentX, y, jmax (0, width), totalHeight);
+    Rectangle<int> r (indentX, y, jmax (0, width), totalHeight);
 
     if (relativeToTreeViewTopLeft)
         r.setPosition (r.getX() - ownerView->viewport->getViewPositionX(),
@@ -1318,7 +1318,7 @@ void TreeViewItem::repaintItem() const
 {
     if (ownerView != 0 && areAllParentsOpen())
     {
-        const Rectangle r (getItemPosition (true));
+        const Rectangle<int> r (getItemPosition (true));
         ownerView->viewport->repaint (0, r.getY(), r.getRight(), r.getHeight());
     }
 }
@@ -1485,7 +1485,7 @@ void TreeViewItem::paintRecursively (Graphics& g, int width)
 
     if (isOpen())
     {
-        const Rectangle clip (g.getClipBounds());
+        const Rectangle<int> clip (g.getClipBounds());
 
         for (int i = 0; i < subItems.size(); ++i)
         {

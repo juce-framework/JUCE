@@ -163,7 +163,7 @@ public:
         CGContextTranslateCTM (context, x, -y);
     }
 
-    bool clipToRectangle (const Rectangle& r)
+    bool clipToRectangle (const Rectangle<int>& r)
     {
         CGContextClipToRect (context, CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()));
         return ! isClipEmpty();
@@ -183,7 +183,7 @@ public:
             HeapBlock <CGRect> rects (numRects);
             for (int i = 0; i < numRects; ++i)
             {
-                const Rectangle& r = clipRegion.getRectangle(i);
+                const Rectangle<int>& r = clipRegion.getRectangle(i);
                 rects[i] = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
             }
 
@@ -192,7 +192,7 @@ public:
         }
     }
 
-    void excludeClipRectangle (const Rectangle& r)
+    void excludeClipRectangle (const Rectangle<int>& r)
     {
         RectangleList remaining (getClipBounds());
         remaining.subtract (r);
@@ -205,7 +205,7 @@ public:
         CGContextClip (context);
     }
 
-    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform)
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform)
     {
         if (! transform.isSingularity())
         {
@@ -227,19 +227,19 @@ public:
         }
     }
 
-    bool clipRegionIntersects (const Rectangle& r)
+    bool clipRegionIntersects (const Rectangle<int>& r)
     {
         return getClipBounds().intersects (r);
     }
 
-    const Rectangle getClipBounds() const
+    const Rectangle<int> getClipBounds() const
     {
         CGRect bounds = CGRectIntegral (CGContextGetClipBoundingBox (context));
 
-        return Rectangle (roundToInt (bounds.origin.x),
-                          roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
-                          roundToInt (bounds.size.width),
-                          roundToInt (bounds.size.height));
+        return Rectangle<int> (roundToInt (bounds.origin.x),
+                               roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
+                               roundToInt (bounds.size.width),
+                               roundToInt (bounds.size.height));
     }
 
     bool isClipEmpty() const
@@ -298,7 +298,7 @@ public:
     }
 
     //==============================================================================
-    void fillRect (const Rectangle& r, const bool replaceExistingContents)
+    void fillRect (const Rectangle<int>& r, const bool replaceExistingContents)
     {
         CGRect cgRect = CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight());
 
@@ -374,7 +374,7 @@ public:
         CGContextRestoreGState (context);
     }
 
-    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+    void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                     const AffineTransform& transform, const bool fillEntireClipAsTiles)
     {
         jassert (sourceImage.getBounds().contains (srcClip));

@@ -163,7 +163,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     {
         // use a modal window as the parent for this dialog box
         // to block input from other app windows
-        const Rectangle mainMon (Desktop::getInstance().getMainMonitorArea());
+        const Rectangle<int> mainMon (Desktop::getInstance().getMainMonitorArea());
 
         Component w (String::empty);
         w.setBounds (mainMon.getX() + mainMon.getWidth() / 4,

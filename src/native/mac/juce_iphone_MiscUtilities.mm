@@ -189,10 +189,10 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool c
     CGRect r = clipToWorkArea ? [[UIScreen mainScreen] applicationFrame]
                               : [[UIScreen mainScreen] bounds];
 
-    monitorCoords.add (Rectangle ((int) r.origin.x,
-                                  (int) r.origin.y,
-                                  (int) r.size.width,
-                                  (int) r.size.height));
+    monitorCoords.add (Rectangle<int> ((int) r.origin.x,
+                                       (int) r.origin.y,
+                                       (int) r.size.width,
+                                       (int) r.size.height));
 }
 
 

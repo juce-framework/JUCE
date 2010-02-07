@@ -56,7 +56,7 @@ public:
             if (background != 0)
             {
                 background->fillWithBackground (g, false);
-                background->drawElements (g, Rectangle (0, 0, getWidth(), getHeight()));
+                background->drawElements (g, Rectangle<int> (0, 0, getWidth(), getHeight()));
             }
 
             grid.draw (g, background);
@@ -80,9 +80,9 @@ public:
 
                     if (type != 0)
                     {
-                        const Rectangle newBounds (type->getComponentPosition (comp)
-                                                    .getRectangle (Rectangle (0, 0, getWidth(), getHeight()),
-                                                                   document.getComponentLayout()));
+                        const Rectangle<int> newBounds (type->getComponentPosition (comp)
+                                                          .getRectangle (Rectangle<int> (0, 0, getWidth(), getHeight()),
+                                                                         document.getComponentLayout()));
 
                         anyCompsMoved = anyCompsMoved || (comp->getBounds() != newBounds);
                         comp->setBounds (newBounds);
@@ -167,27 +167,27 @@ void ComponentLayoutEditor::resized()
     updateOverlayPositions();
 }
 
-const Rectangle ComponentLayoutEditor::getComponentArea() const
+const Rectangle<int> ComponentLayoutEditor::getComponentArea() const
 {
     if (document.isFixedSize())
     {
-        return Rectangle ((getWidth() - document.getInitialWidth()) / 2,
-                          (getHeight() - document.getInitialHeight()) / 2,
-                          document.getInitialWidth(),
-                          document.getInitialHeight());
+        return Rectangle<int> ((getWidth() - document.getInitialWidth()) / 2,
+                               (getHeight() - document.getInitialHeight()) / 2,
+                               document.getInitialWidth(),
+                               document.getInitialHeight());
     }
     else
     {
-        return Rectangle (editorEdgeGap, editorEdgeGap,
-                          getWidth() - editorEdgeGap * 2,
-                          getHeight() - editorEdgeGap * 2);
+        return Rectangle<int> (editorEdgeGap, editorEdgeGap,
+                               getWidth() - editorEdgeGap * 2,
+                               getHeight() - editorEdgeGap * 2);
     }
 }
 
 Image* ComponentLayoutEditor::createComponentLayerSnapshot() const
 {
     ((SubComponentHolderComp*) subCompHolder)->dontFillBackground = true;
-    Image* const im = subCompHolder->createComponentSnapshot (Rectangle (0, 0, subCompHolder->getWidth(), subCompHolder->getHeight()));
+    Image* const im = subCompHolder->createComponentSnapshot (Rectangle<int> (0, 0, subCompHolder->getWidth(), subCompHolder->getHeight()));
     ((SubComponentHolderComp*) subCompHolder)->dontFillBackground = false;
 
     return im;
@@ -405,7 +405,7 @@ ComponentOverlayComponent* ComponentLayoutEditor::getOverlayCompFor (Component* 
 void ComponentLayoutEditor::findLassoItemsInArea (Array <Component*>& results,
                                                   int x, int y, int w, int h)
 {
-    const Rectangle lasso (x - subCompHolder->getX(), y - subCompHolder->getY(), w, h);
+    const Rectangle<int> lasso (x - subCompHolder->getX(), y - subCompHolder->getY(), w, h);
 
     for (int i = 0; i < subCompHolder->getNumChildComponents(); ++i)
     {

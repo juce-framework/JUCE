@@ -1296,7 +1296,7 @@ public:
 #if JUCE_LINUX
                 if (pluginWindow != 0)
                 {
-                    const Rectangle clip (g.getClipBounds());
+                    const Rectangle<int> clip (g.getClipBounds());
 
                     XEvent ev;
                     zerostruct (ev);

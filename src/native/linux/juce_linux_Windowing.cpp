@@ -864,7 +864,7 @@ public:
 
     void setFullScreen (const bool shouldBeFullScreen)
     {
-        Rectangle r (lastNonFullscreenBounds); // (get a copy of this before de-minimising)
+        Rectangle<int> r (lastNonFullscreenBounds); // (get a copy of this before de-minimising)
 
         setMinimised (false);
 
@@ -1097,10 +1097,10 @@ public:
 
     void repaint (int x, int y, int w, int h)
     {
-        if (Rectangle::intersectRectangles (x, y, w, h,
-                                            0, 0,
-                                            getComponent()->getWidth(),
-                                            getComponent()->getHeight()))
+        if (Rectangle<int>::intersectRectangles (x, y, w, h,
+                                                 0, 0,
+                                                 getComponent()->getWidth(),
+                                                 getComponent()->getHeight()))
         {
             repainter->repaint (x, y, w, h);
         }
@@ -1829,7 +1829,7 @@ private:
 
             RectangleList originalRepaintRegion (regionsNeedingRepaint);
             regionsNeedingRepaint.clear();
-            const Rectangle totalArea (originalRepaintRegion.getBounds());
+            const Rectangle<int> totalArea (originalRepaintRegion.getBounds());
 
             if (! totalArea.isEmpty())
             {
@@ -1866,7 +1866,7 @@ private:
 
                 for (RectangleList::Iterator i (originalRepaintRegion); i.next();)
                 {
-                    const Rectangle& r = *i.getRectangle();
+                    const Rectangle<int>& r = *i.getRectangle();
 
                     image->blitToWindow (peer->windowH,
                                          r.getX(), r.getY(), r.getWidth(), r.getHeight(),
@@ -2632,7 +2632,7 @@ void juce_windowMessageReceive (XEvent* event)
 }
 
 //==============================================================================
-void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /*clipToWorkArea*/)
+void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const bool /*clipToWorkArea*/)
 {
     if (display == 0)
         return;
@@ -2676,12 +2676,12 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
                     if (index >= 0)
                     {
                         while (monitorCoords.size() < index)
-                            monitorCoords.add (Rectangle (0, 0, 0, 0));
+                            monitorCoords.add (Rectangle<int>());
 
-                        monitorCoords.set (index, Rectangle (screens[i].x_org,
-                                                             screens[i].y_org,
-                                                             screens[i].width,
-                                                             screens[i].height));
+                        monitorCoords.set (index, Rectangle<int> (screens[i].x_org,
+                                                                  screens[i].y_org,
+                                                                  screens[i].width,
+                                                                  screens[i].height));
                     }
                 }
 
@@ -2715,8 +2715,8 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
                     const long* const position = (const long*) data;
 
                     if (actualType == XA_CARDINAL && actualFormat == 32 && nitems == 4)
-                        monitorCoords.add (Rectangle (position[0], position[1],
-                                                      position[2], position[3]));
+                        monitorCoords.add (Rectangle<int> (position[0], position[1],
+                                                           position[2], position[3]));
 
                     XFree (data);
                 }
@@ -2725,9 +2725,9 @@ void juce_updateMultiMonitorInfo (Array <Rectangle>& monitorCoords, const bool /
 
         if (monitorCoords.size() == 0)
         {
-            monitorCoords.add (Rectangle (0, 0,
-                                          DisplayWidth (display, DefaultScreen (display)),
-                                          DisplayHeight (display, DefaultScreen (display))));
+            monitorCoords.add (Rectangle<int> (0, 0,
+                                               DisplayWidth (display, DefaultScreen (display)),
+                                               DisplayHeight (display, DefaultScreen (display))));
         }
     }
 }

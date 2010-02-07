@@ -140,7 +140,7 @@ void DrawableButton::paintButton (Graphics& g,
                                   bool isMouseOverButton,
                                   bool isButtonDown)
 {
-    Rectangle imageSpace;
+    Rectangle<int> imageSpace;
 
     if (style == ImageOnButtonBackground)
     {

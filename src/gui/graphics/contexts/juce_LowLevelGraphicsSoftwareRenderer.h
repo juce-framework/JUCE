@@ -49,14 +49,14 @@ public:
     //==============================================================================
     void setOrigin (int x, int y);
 
-    bool clipToRectangle (const Rectangle& r);
+    bool clipToRectangle (const Rectangle<int>& r);
     bool clipToRectangleList (const RectangleList& clipRegion);
-    void excludeClipRectangle (const Rectangle& r);
+    void excludeClipRectangle (const Rectangle<int>& r);
     void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImageAlpha (const Image& sourceImage, const Rectangle& srcClip, const AffineTransform& transform);
+    void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
 
-    bool clipRegionIntersects (const Rectangle& r);
-    const Rectangle getClipBounds() const;
+    bool clipRegionIntersects (const Rectangle<int>& r);
+    const Rectangle<int> getClipBounds() const;
     bool isClipEmpty() const;
 
     void saveState();
@@ -68,10 +68,10 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillRect (const Rectangle& r, const bool replaceExistingContents);
+    void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void drawImage (const Image& sourceImage, const Rectangle& srcClip,
+    void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                     const AffineTransform& transform, const bool fillEntireClipAsTiles);
 
     void drawLine (double x1, double y1, double x2, double y2);

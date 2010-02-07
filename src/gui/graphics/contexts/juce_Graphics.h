@@ -240,7 +240,7 @@ public:
                    int height) const throw();
 
     /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle& rectangle) const throw();
+    void fillRect (const Rectangle<int>& rectangle) const throw();
 
     /** Fills a rectangle with the current colour or brush.
 
@@ -266,7 +266,7 @@ public:
 
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
-    void fillRoundedRectangle (const Rectangle& rectangle,
+    void fillRoundedRectangle (const Rectangle<int>& rectangle,
                                const float cornerSize) const throw();
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
@@ -311,7 +311,7 @@ public:
 
         @see fillRect
     */
-    void drawRect (const Rectangle& rectangle,
+    void drawRect (const Rectangle<int>& rectangle,
                    const int lineThickness = 1) const throw();
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
@@ -329,7 +329,7 @@ public:
 
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
-    void drawRoundedRectangle (const Rectangle& rectangle,
+    void drawRoundedRectangle (const Rectangle<int>& rectangle,
                                const float cornerSize,
                                const float lineThickness) const throw();
 
@@ -576,7 +576,7 @@ public:
         @see setImageResamplingQuality, drawImage
     */
     void drawImageTransformed (const Image* const imageToDraw,
-                               const Rectangle& imageSubRegion,
+                               const Rectangle<int>& imageSubRegion,
                                const AffineTransform& transform,
                                const bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
@@ -615,7 +615,7 @@ public:
 
         @see getClipRegion, clipRegionIntersects
     */
-    const Rectangle getClipBounds() const throw();
+    const Rectangle<int> getClipBounds() const throw();
 
     /** Checks whether a rectangle overlaps the context's clipping region.
 
@@ -661,7 +661,7 @@ public:
         @returns true if the resulting clipping region is non-zero in size
         @see reduceClipRegion
     */
-    bool reduceClipRegion (const Image& image, const Rectangle& sourceClipRegion,
+    bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
                            const AffineTransform& transform) throw();
 
     /** Excludes a rectangle to stop it being drawn into. */

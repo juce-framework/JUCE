@@ -46,7 +46,7 @@ static void copyEdgeTableData (int* dest, const int destLineStride, const int* s
 }
 
 //==============================================================================
-EdgeTable::EdgeTable (const Rectangle& bounds_,
+EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
                       const Path& path, const AffineTransform& transform) throw()
    : bounds (bounds_),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
@@ -121,7 +121,7 @@ EdgeTable::EdgeTable (const Rectangle& bounds_,
     sanitiseLevels (path.isUsingNonZeroWinding());
 }
 
-EdgeTable::EdgeTable (const Rectangle& rectangleToAdd) throw()
+EdgeTable::EdgeTable (const Rectangle<int>& rectangleToAdd) throw()
    : bounds (rectangleToAdd),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
@@ -162,7 +162,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
 
     for (RectangleList::Iterator iter (rectanglesToAdd); iter.next();)
     {
-        const Rectangle* const r = iter.getRectangle();
+        const Rectangle<int>* const r = iter.getRectangle();
 
         const int x1 = r->getX() << 8;
         const int x2 = r->getRight() << 8;
@@ -180,7 +180,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
 }
 
 EdgeTable::EdgeTable (const float x, const float y, const float w, const float h) throw()
-   : bounds (Rectangle ((int) floorf (x), roundToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
+   : bounds (Rectangle<int> ((int) floorf (x), roundToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
@@ -587,9 +587,9 @@ void EdgeTable::clipEdgeTableLineToRange (int* dest, const int x1, const int x2)
 
 
 //==============================================================================
-void EdgeTable::clipToRectangle (const Rectangle& r) throw()
+void EdgeTable::clipToRectangle (const Rectangle<int>& r) throw()
 {
-    const Rectangle clipped (r.getIntersection (bounds));
+    const Rectangle<int> clipped (r.getIntersection (bounds));
 
     if (clipped.isEmpty())
     {
@@ -629,9 +629,9 @@ void EdgeTable::clipToRectangle (const Rectangle& r) throw()
     }
 }
 
-void EdgeTable::excludeRectangle (const Rectangle& r) throw()
+void EdgeTable::excludeRectangle (const Rectangle<int>& r) throw()
 {
-    const Rectangle clipped (r.getIntersection (bounds));
+    const Rectangle<int> clipped (r.getIntersection (bounds));
 
     if (! clipped.isEmpty())
     {
@@ -654,7 +654,7 @@ void EdgeTable::excludeRectangle (const Rectangle& r) throw()
 
 void EdgeTable::clipToEdgeTable (const EdgeTable& other)
 {
-    const Rectangle clipped (other.bounds.getIntersection (bounds));
+    const Rectangle<int> clipped (other.bounds.getIntersection (bounds));
 
     if (clipped.isEmpty())
     {

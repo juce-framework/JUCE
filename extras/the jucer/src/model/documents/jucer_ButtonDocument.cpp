@@ -310,7 +310,7 @@ public:
         if (document->paintStatesEnabled [background])
         {
             document->paintRoutines [background]->fillWithBackground (g, alwaysFillBackground);
-            document->paintRoutines [background]->drawElements (g, Rectangle (0, 0, getWidth(), getHeight()));
+            document->paintRoutines [background]->drawElements (g, Rectangle<int> (0, 0, getWidth(), getHeight()));
         }
 
         const int stateIndex
@@ -323,7 +323,7 @@ public:
                                                      : normalOff));
 
         document->paintRoutines [stateIndex]->fillWithBackground (g, ! document->paintStatesEnabled [background]);
-        document->paintRoutines [stateIndex]->drawElements (g, Rectangle (0, 0, getWidth(), getHeight()));
+        document->paintRoutines [stateIndex]->drawElements (g, Rectangle<int> (0, 0, getWidth(), getHeight()));
     }
 
 private:

@@ -102,18 +102,12 @@ void DrawableImage::render (const Drawable::RenderingContext& context) const
     }
 }
 
-void DrawableImage::getBounds (float& x, float& y, float& width, float& height) const
+const Rectangle<float> DrawableImage::getBounds() const
 {
-    x = 0.0f;
-    y = 0.0f;
-    width = 0.0f;
-    height = 0.0f;
+    if (image == 0)
+        return Rectangle<float>();
 
-    if (image != 0)
-    {
-        width = (float) image->getWidth();
-        height = (float) image->getHeight();
-    }
+    return Rectangle<float> (0, 0, (float) image->getWidth(), (float) image->getHeight());
 }
 
 bool DrawableImage::hitTest (float x, float y) const

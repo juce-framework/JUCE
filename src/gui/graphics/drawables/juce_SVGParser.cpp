@@ -736,7 +736,13 @@ private:
                 const bool userSpace = fillXml->getStringAttribute (T("gradientUnits")).equalsIgnoreCase (T("userSpaceOnUse"));
 
                 if (! userSpace)
-                    path.getBounds (dx, dy, width, height);
+                {
+                    const Rectangle<float> bounds (path.getBounds());
+                    dx = bounds.getX();
+                    dy = bounds.getY();
+                    width = bounds.getWidth();
+                    height = bounds.getHeight();
+                }
 
                 if (gradient.isRadial)
                 {

@@ -46,7 +46,7 @@ public:
     PaintRoutine& getPaintRoutine() const throw()           { return routine; }
 
     void updatePropertiesList();
-    const Rectangle getComponentArea() const;
+    const Rectangle<int> getComponentArea() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

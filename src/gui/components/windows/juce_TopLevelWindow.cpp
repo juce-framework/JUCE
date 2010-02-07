@@ -295,7 +295,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
         int y = (c->getHeight() - height) / 2;
         c->relativePositionToGlobal (x, y);
 
-        Rectangle parentArea (c->getParentMonitorArea());
+        Rectangle<int> parentArea (c->getParentMonitorArea());
 
         if (getParentComponent() != 0)
         {
