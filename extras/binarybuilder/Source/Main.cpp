@@ -4,15 +4,12 @@
    Utility to turn a bunch of binary files into a .cpp file and .h file full of
    data so they can be built directly into an executable.
 
-   Copyright 2007 by Julian Storer.
-
    Use this code at your own risk! It carries no warranty!
 
   ==============================================================================
 */
 
-#include "juce_AppConfig.h"
-#include "../../juce_amalgamated.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
 
 //==============================================================================
@@ -70,12 +67,14 @@ static bool isHiddenFile (const File& f, const File& root)
          || (f.getParentDirectory() != root && isHiddenFile (f.getParentDirectory(), root));
 }
 
+
 //==============================================================================
 int main (int argc, char* argv[])
 {
-    // If you're running a command-line app, you need to initialise juce manually
-    // before calling any Juce functionality..
-    initialiseJuce_NonGUI();
+    // This object makes sure that Juce is initialised and shut down correctly
+    // for the scope of this function call. Make sure this declaration is the
+    // first statement of this function.
+    const ScopedJuceInitialiser_NonGUI juceSystemInitialiser;
 
     std::cout << "\n BinaryBuilder! Copyright 2007 by Julian Storer - www.rawmaterialsoftware.com\n\n";
 
@@ -200,8 +199,6 @@ int main (int argc, char* argv[])
     cpp = 0;
 
     std::cout << std::endl << " Total size of binary data: " << totalBytes << " bytes" << std::endl;
-
-    shutdownJuce_NonGUI();
 
     return 0;
 }
