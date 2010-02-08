@@ -1,0 +1,20 @@
+
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{D4CF920D-DA2B-1AAF-EF83-BB77BB696832}") = "Amalgamator", "Amalgamator.vcproj", "{8EBCACB6-792B-92FF-1C9B-34A5D310E725}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8EBCACB6-792B-92FF-1C9B-34A5D310E725}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8EBCACB6-792B-92FF-1C9B-34A5D310E725}.Debug|Win32.Build.0 = Debug|Win32
+		{8EBCACB6-792B-92FF-1C9B-34A5D310E725}.Release|Win32.ActiveCfg = Release|Win32
+		{8EBCACB6-792B-92FF-1C9B-34A5D310E725}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

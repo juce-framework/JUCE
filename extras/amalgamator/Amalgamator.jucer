@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="TVOT0ObQ" name="Amalgamator" projectType="2" juceLinkage="4"
+              juceFolder="../../../juce" jucerVersion="3.0">
+  <CONFIGURATIONS>
+    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="amalgamator"
+                   osxSDK="1" osxCompatibility="1"/>
+    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="amalgamator"
+                   osxSDK="1" osxCompatibility="1"/>
+  </CONFIGURATIONS>
+  <MAINGROUP id="JiHYwfc1Q" name="Amalgamator">
+    <GROUP id="0yiDjfWo" name="Source">
+      <FILE id="cCufo2f2" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_FORCE_DEBUG="3" JUCE_LOG_ASSERTIONS="3" JUCE_ASIO="3" JUCE_WASAPI="3"
+               JUCE_DIRECTSOUND="3" JUCE_ALSA="3" JUCE_QUICKTIME="3" JUCE_OPENGL="3"
+               JUCE_USE_FLAC="3" JUCE_USE_OGGVORBIS="3" JUCE_USE_CDBURNER="3"
+               JUCE_USE_CDREADER="3" JUCE_USE_CAMERA="3" JUCE_ENABLE_REPAINT_DEBUGGING="3"
+               JUCE_USE_XINERAMA="3" JUCE_USE_XSHM="3" JUCE_PLUGINHOST_VST="3"
+               JUCE_PLUGINHOST_AU="3" JUCE_ONLY_BUILD_CORE_LIBRARY="1" JUCE_WEB_BROWSER="3"
+               JUCE_SUPPORT_CARBON="3" JUCE_CHECK_MEMORY_LEAKS="3" JUCE_CATCH_UNHANDLED_EXCEPTIONS="3"
+               JUCE_STRINGS_ARE_UNICODE="3"/>
+</JUCERPROJECT>
