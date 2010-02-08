@@ -1424,7 +1424,6 @@ private:
 	// internal constructor that preallocates a certain amount of memory
 	String (const int numChars, const int dummyVariable) throw();
 
-	void deleteInternal() throw();
 	void createInternal (const int numChars) throw();
 	void createInternal (const tchar* const text, const tchar* const textEnd) throw();
 	void appendInternal (const tchar* const text, const int numExtraChars) throw();
@@ -3144,6 +3143,8 @@ public:
 	static int32 decrementAndReturn (int32& variable);
 
 	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
+
+	static void* swapPointers (void* volatile* value1, void* value2);
 };
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
@@ -3154,6 +3155,12 @@ inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((int32_
 inline int32  Atomic::decrementAndReturn (int32& variable)	  { return OSAtomicDecrement32 ((int32_t*) &variable); }
 inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
 																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (int32_t*) &destination); }
+inline void* Atomic::swapPointers (void* volatile* value1, void* volatile value2)
+{
+	void* currentVal = *value1;
+	while (! OSAtomicCompareAndSwapPtr (currentVal, value2, value1)) { currentVal = *value1; }
+	return currentVal;
+}
 
 #elif JUCE_LINUX			// Linux...
 
@@ -3163,6 +3170,12 @@ inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&varia
 inline int32 Atomic::decrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, -1); }
 inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
 																{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+inline void* Atomic::swapPointers (void* volatile* value1, void* volatile value2)
+{
+	void* currentVal = *value1;
+	while (! __sync_bool_compare_and_swap (&value1, currentVal, value2)) { currentVal = *value1; }
+	return currentVal;
+}
 
 #elif JUCE_USE_INTRINSICS		   // Windows...
 
@@ -6691,6 +6704,22 @@ void JUCE_PUBLIC_FUNCTION  shutdownJuce_GUI();
 void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
 
 void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
+
+class ScopedJuceInitialiser_NonGUI
+{
+public:
+	ScopedJuceInitialiser_NonGUI()	  { initialiseJuce_NonGUI(); }
+
+	~ScopedJuceInitialiser_NonGUI()	 { shutdownJuce_NonGUI(); }
+};
+
+class ScopedJuceInitialiser_GUI
+{
+public:
+	ScopedJuceInitialiser_GUI()	 { initialiseJuce_GUI(); }
+
+	~ScopedJuceInitialiser_GUI()	{ shutdownJuce_GUI(); }
+};
 
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__
 /*** End of inlined file: juce_Initialisation.h ***/
@@ -28181,7 +28210,7 @@ END_JUCE_NAMESPACE
   // defining DONT_SET_USING_JUCE_NAMESPACE, in case there are conflicts.
   using namespace JUCE_NAMESPACE;
 
-  #if JUCE_MAC && ! JUCE_DONT_DEFINE_MACROS
+  #if (JUCE_MAC || JUCE_IPHONE) && ! JUCE_DONT_DEFINE_MACROS
 	#define Component	   JUCE_NAMESPACE::Component
 	#define MemoryBlock	 JUCE_NAMESPACE::MemoryBlock
 	#define Point	   JUCE_NAMESPACE::Point

@@ -55,7 +55,7 @@ static HKEY findKeyForPath (String name,
 
         if (createForWriting)
         {
-            if (RegCreateKeyEx (rootKey, name, 0, L"", REG_OPTION_NON_VOLATILE,
+            if (RegCreateKeyEx (rootKey, name, 0, 0, REG_OPTION_NON_VOLATILE,
                                 (KEY_WRITE | KEY_QUERY_VALUE), 0, &key, &result) == ERROR_SUCCESS)
                 return key;
         }

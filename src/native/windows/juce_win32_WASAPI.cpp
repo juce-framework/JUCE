@@ -121,7 +121,7 @@ static void wasapi_copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX
 class WASAPIDeviceBase
 {
 public:
-    WASAPIDeviceBase (const ComSmartPtr <IMMDevice>& device_)
+    WASAPIDeviceBase (const ComSmartPtr <IMMDevice>& device_, const bool useExclusiveMode_)
         : device (device_),
           sampleRate (0),
           numChannels (0),
@@ -129,7 +129,8 @@ public:
           defaultSampleRate (0),
           minBufferSize (0),
           defaultBufferSize (0),
-          latencySamples (0)
+          latencySamples (0),
+          useExclusiveMode (useExclusiveMode_)
     {
         clientEvent = CreateEvent (0, false, false, _T("JuceWASAPI"));
 
@@ -166,7 +167,8 @@ public:
 
             format.Format.nSamplesPerSec = roundDoubleToInt (ratesToTest[i]);
 
-            if (SUCCEEDED (tempClient->IsFormatSupported (AUDCLNT_SHAREMODE_SHARED, (WAVEFORMATEX*) &format, 0)))
+            if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
+                                                          (WAVEFORMATEX*) &format, 0)))
                 if (! rates.contains (ratesToTest[i]))
                     rates.addSorted (comparator, ratesToTest[i]);
         }
@@ -227,6 +229,7 @@ public:
     double sampleRate, defaultSampleRate;
     int numChannels, actualNumChannels;
     int minBufferSize, defaultBufferSize, latencySamples;
+    const bool useExclusiveMode;
     Array <double> rates;
     HANDLE clientEvent;
     BitArray channels;
@@ -284,7 +287,8 @@ private:
 
         WAVEFORMATEXTENSIBLE* nearestFormat = 0;
 
-        HRESULT hr = client->IsFormatSupported (AUDCLNT_SHAREMODE_SHARED, (WAVEFORMATEX*) &format, (WAVEFORMATEX**) &nearestFormat);
+        HRESULT hr = client->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
+                                                (WAVEFORMATEX*) &format, useExclusiveMode ? 0 : (WAVEFORMATEX**) &nearestFormat);
         logFailure (hr);
 
         if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
@@ -295,10 +299,15 @@ private:
 
         CoTaskMemFree (nearestFormat);
 
+        REFERENCE_TIME defaultPeriod = 0, minPeriod = 0;
+        if (useExclusiveMode)
+            OK (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
+
         GUID session;
         if (hr == S_OK
-             && OK (client->Initialize (AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
-                                        0, 0, (WAVEFORMATEX*) &format, &session)))
+             && OK (client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
+                                        AUDCLNT_STREAMFLAGS_EVENTCALLBACK,
+                                        defaultPeriod, defaultPeriod, (WAVEFORMATEX*) &format, &session)))
         {
             actualNumChannels = format.Format.nChannels;
             const bool isFloat = format.Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format.SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
@@ -318,8 +327,8 @@ private:
 class WASAPIInputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIInputDevice (const ComSmartPtr <IMMDevice>& device_)
-        : WASAPIDeviceBase (device_),
+    WASAPIInputDevice (const ComSmartPtr <IMMDevice>& device_, const bool useExclusiveMode_)
+        : WASAPIDeviceBase (device_, useExclusiveMode_),
           reservoir (1, 1)
     {
     }
@@ -464,8 +473,8 @@ public:
 class WASAPIOutputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIOutputDevice (const ComSmartPtr <IMMDevice>& device_)
-        : WASAPIDeviceBase (device_)
+    WASAPIOutputDevice (const ComSmartPtr <IMMDevice>& device_, const bool useExclusiveMode_)
+        : WASAPIDeviceBase (device_, useExclusiveMode_)
     {
     }
 
@@ -499,7 +508,8 @@ public:
             if (! OK (client->GetCurrentPadding (&padding)))
                 return;
 
-            const int samplesToDo = jmin ((int) (actualBufferSize - padding), bufferSize);
+            int samplesToDo = useExclusiveMode ? bufferSize
+                                               : jmin ((int) (actualBufferSize - padding), bufferSize);
 
             if (samplesToDo <= 0)
             {
@@ -558,7 +568,8 @@ class WASAPIAudioIODevice  : public AudioIODevice,
 public:
     WASAPIAudioIODevice (const String& deviceName,
                          const String& outputDeviceId_,
-                         const String& inputDeviceId_)
+                         const String& inputDeviceId_,
+                         const bool useExclusiveMode_)
         : AudioIODevice (deviceName, "Windows Audio"),
           Thread ("Juce WASAPI"),
           isOpen_ (false),
@@ -567,6 +578,7 @@ public:
           outputDeviceId (outputDeviceId_),
           inputDevice (0),
           inputDeviceId (inputDeviceId_),
+          useExclusiveMode (useExclusiveMode_),
           currentBufferSizeSamples (0),
           currentSampleRate (0),
           callback (0)
@@ -820,8 +832,8 @@ public:
 
         while (! threadShouldExit())
         {
-            const DWORD result = WaitForMultipleObjects (numEvents, events, true, 1000);
-
+            const DWORD result = useExclusiveMode ? WaitForSingleObject (inputDevice->clientEvent, 1000)
+                                                  : WaitForMultipleObjects (numEvents, events, true, 1000);
             if (result == WAIT_TIMEOUT)
                 continue;
 
@@ -853,6 +865,9 @@ public:
                 }
             }
 
+            if (useExclusiveMode && WaitForSingleObject (outputDevice->clientEvent, 1000) == WAIT_TIMEOUT)
+                continue;
+
             if (outputDevice != 0)
                 outputDevice->copyBuffers ((const float**) outputBuffers, numOutputBuffers, bufferSize, *this);
         }
@@ -869,6 +884,7 @@ private:
     // Device stats...
     WASAPIInputDevice* inputDevice;
     WASAPIOutputDevice* outputDevice;
+    const bool useExclusiveMode;
     double defaultSampleRate;
     int minBufferSize, defaultBufferSize;
     int latencyIn, latencyOut;
@@ -911,9 +927,9 @@ private:
             const EDataFlow flow = wasapi_getDataFlow (device);
 
             if (deviceId == inputDeviceId && flow == eCapture)
-                inputDevice = new WASAPIInputDevice (device);
+                inputDevice = new WASAPIInputDevice (device, useExclusiveMode);
             else if (deviceId == outputDeviceId && flow == eRender)
-                outputDevice = new WASAPIOutputDevice (device);
+                outputDevice = new WASAPIOutputDevice (device, useExclusiveMode);
         }
 
         return (outputDeviceId.isEmpty() || (outputDevice != 0 && outputDevice->isOk()))
@@ -1043,6 +1059,7 @@ public:
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
+        const bool useExclusiveMode = false;
         WASAPIAudioIODevice* d = 0;
 
         const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
@@ -1053,7 +1070,8 @@ public:
             d = new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
                                                                        : inputDeviceName,
                                          outputDeviceIds [outputIndex],
-                                         inputDeviceIds [inputIndex]);
+                                         inputDeviceIds [inputIndex],
+                                         useExclusiveMode);
 
             if (! d->initialise())
                 deleteAndZero (d);

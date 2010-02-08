@@ -395,10 +395,9 @@ XmlElement* PropertyPanel::getOpennessState() const
     {
         if (sections[i].isNotEmpty())
         {
-            XmlElement* const e = new XmlElement (T("SECTION"));
-            e->setAttribute (T("name"), sections[i]);
-            e->setAttribute (T("open"), isSectionOpen (i) ? 1 : 0);
-            xml->addChildElement (e);
+            XmlElement* const e = xml->createNewChildElement ("SECTION");
+            e->setAttribute ("name", sections[i]);
+            e->setAttribute ("open", isSectionOpen (i) ? 1 : 0);
         }
     }
 

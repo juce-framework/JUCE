@@ -439,21 +439,19 @@ const String TableHeaderComponent::toString() const
 {
     String s;
 
-    XmlElement doc (T("TABLELAYOUT"));
+    XmlElement doc ("TABLELAYOUT");
 
-    doc.setAttribute (T("sortedCol"), getSortColumnId());
-    doc.setAttribute (T("sortForwards"), isSortedForwards());
+    doc.setAttribute ("sortedCol", getSortColumnId());
+    doc.setAttribute ("sortForwards", isSortedForwards());
 
     for (int i = 0; i < columns.size(); ++i)
     {
         const ColumnInfo* const ci = columns.getUnchecked (i);
 
-        XmlElement* const e = new XmlElement (T("COLUMN"));
-        doc.addChildElement (e);
-
-        e->setAttribute (T("id"), ci->id);
-        e->setAttribute (T("visible"), ci->isVisible());
-        e->setAttribute (T("width"), ci->width);
+        XmlElement* const e = doc.createNewChildElement ("COLUMN");
+        e->setAttribute ("id", ci->id);
+        e->setAttribute ("visible", ci->isVisible());
+        e->setAttribute ("width", ci->width);
     }
 
     return doc.createDocument (String::empty, true, false);
@@ -466,19 +464,19 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
 
     int index = 0;
 
-    if (storedXml != 0 && storedXml->hasTagName (T("TABLELAYOUT")))
+    if (storedXml != 0 && storedXml->hasTagName ("TABLELAYOUT"))
     {
         forEachXmlChildElement (*storedXml, col)
         {
-            const int tabId = col->getIntAttribute (T("id"));
+            const int tabId = col->getIntAttribute ("id");
 
             ColumnInfo* const ci = getInfoForId (tabId);
 
             if (ci != 0)
             {
                 columns.move (columns.indexOf (ci), index);
-                ci->width = col->getIntAttribute (T("width"));
-                setColumnVisible (tabId, col->getBoolAttribute (T("visible")));
+                ci->width = col->getIntAttribute ("width");
+                setColumnVisible (tabId, col->getBoolAttribute ("visible"));
             }
 
             ++index;
@@ -487,8 +485,8 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
         columnsResized = true;
         sendColumnsChanged();
 
-        setSortColumnId (storedXml->getIntAttribute (T("sortedCol")),
-                         storedXml->getBoolAttribute (T("sortForwards"), true));
+        setSortColumnId (storedXml->getIntAttribute ("sortedCol"),
+                         storedXml->getBoolAttribute ("sortForwards", true));
     }
 }
 

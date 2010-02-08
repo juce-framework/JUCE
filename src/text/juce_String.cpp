@@ -56,12 +56,6 @@ void juce_initialiseStrings()
 }
 
 //==============================================================================
-void String::deleteInternal() throw()
-{
-    if (Atomic::decrementAndReturn (text->refCount) == 0)
-        juce_free (text);
-}
-
 void String::createInternal (const int numChars) throw()
 {
     jassert (numChars > 0);
@@ -592,32 +586,7 @@ int64 String::hashCode64() const throw()
 //==============================================================================
 const String& String::operator= (const tchar* const otherText) throw()
 {
-    if (otherText != 0 && *otherText != 0)
-    {
-        const int otherLen = CharacterFunctions::length (otherText);
-
-        if (otherLen > 0)
-        {
-            // avoid resizing the memory block if the string is
-            // shrinking..
-            if (text->refCount > 1
-                || otherLen > text->allocatedNumChars
-                || otherLen <= (text->allocatedNumChars >> 1))
-            {
-                deleteInternal();
-                createInternal (otherLen);
-            }
-
-            memcpy (text->text, otherText, (otherLen + 1) * sizeof (tchar));
-
-            return *this;
-        }
-    }
-
-    deleteInternal();
-    text = &emptyString;
-    emptyString.refCount = safeEmptyStringRefCount;
-
+    operator= (String (otherText));
     return *this;
 }
 
@@ -625,12 +594,14 @@ const String& String::operator= (const String& other) throw()
 {
     if (this != &other)
     {
-        Atomic::increment (other.text->refCount);
+        InternalRefCountedStringHolder* newText = other.text;
+        Atomic::increment (newText->refCount);
 
-        if (Atomic::decrementAndReturn (text->refCount) == 0)
-            juce_free (text);
+        InternalRefCountedStringHolder* oldText
+            = (InternalRefCountedStringHolder*) Atomic::swapPointers ((void* volatile*) &text, newText);
 
-        text = other.text;
+        if (Atomic::decrementAndReturn (oldText->refCount) == 0)
+            juce_free (oldText);
     }
 
     return *this;
@@ -1282,47 +1253,36 @@ const String String::formatted (const tchar* const pf, ...) throw()
 //==============================================================================
 void String::vprintf (const tchar* const pf, va_list& args) throw()
 {
-    tchar stackBuf [256];
-    unsigned int bufSize = 256;
-    tchar* buf = stackBuf;
-
-    deleteInternal();
+    int bufferSize = 256;
+    String result (bufferSize, 0);
 
     do
     {
 #if JUCE_LINUX && JUCE_64BIT
         va_list tempArgs;
         va_copy (tempArgs, args);
-        const int num = CharacterFunctions::vprintf (buf, bufSize - 1, pf, tempArgs);
+        const int num = CharacterFunctions::vprintf (result.text->text, bufferSize - 1, pf, tempArgs);
         va_end (tempArgs);
 #else
-        const int num = CharacterFunctions::vprintf (buf, bufSize - 1, pf, args);
+        const int num = CharacterFunctions::vprintf (result.text->text, bufferSize - 1, pf, args);
 #endif
 
         if (num > 0)
         {
-            createInternal (num);
-            memcpy (text->text, buf, (num + 1) * sizeof (tchar));
+            *this = result;
             break;
         }
         else if (num == 0)
         {
-            text = &emptyString;
-            emptyString.refCount = safeEmptyStringRefCount;
+            *this = String::empty;
             break;
         }
 
-        if (buf != stackBuf)
-            juce_free (buf);
-
-        bufSize += 256;
-        buf = (tchar*) juce_malloc (bufSize * sizeof (tchar));
+        bufferSize += 256;
+        result.preallocateStorage (bufferSize);
     }
-    while (bufSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly
-                              // returns -1 because of an error rather than because it needs more space.
-
-    if (buf != stackBuf)
-        juce_free (buf);
+    while (bufferSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly
+                                 // returns -1 because of an error rather than because it needs more space.
 }
 
 //==============================================================================

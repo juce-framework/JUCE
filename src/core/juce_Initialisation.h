@@ -76,5 +76,55 @@ void JUCE_PUBLIC_FUNCTION  initialiseJuce_NonGUI();
 void JUCE_PUBLIC_FUNCTION  shutdownJuce_NonGUI();
 
 
+//==============================================================================
+/** A utility object that helps you initialise and shutdown Juce correctly
+    using an RAII pattern.
+
+    When an instance of this class is created, it calls initialiseJuce_NonGUI(),
+    and when it's deleted, it calls shutdownJuce_NonGUI(), which lets you easily
+    make sure that these functions are matched correctly.
+
+    This class is particularly handy to use at the beginning of a console app's
+    main() function, because it'll take care of shutting down whenever you return
+    from the main() call.
+
+    @see ScopedJuceInitialiser_GUI
+*/
+class ScopedJuceInitialiser_NonGUI
+{
+public:
+    /** The constructor simply calls initialiseJuce_NonGUI(). */
+    ScopedJuceInitialiser_NonGUI()      { initialiseJuce_NonGUI(); }
+
+    /** The destructor simply calls shutdownJuce_NonGUI(). */
+    ~ScopedJuceInitialiser_NonGUI()     { shutdownJuce_NonGUI(); }
+};
+
+
+//==============================================================================
+/** A utility object that helps you initialise and shutdown Juce correctly
+    using an RAII pattern.
+
+    When an instance of this class is created, it calls initialiseJuce_GUI(),
+    and when it's deleted, it calls shutdownJuce_GUI(), which lets you easily
+    make sure that these functions are matched correctly.
+
+    This class is particularly handy to use at the beginning of a console app's
+    main() function, because it'll take care of shutting down whenever you return
+    from the main() call.
+
+    @see ScopedJuceInitialiser_NonGUI
+*/
+class ScopedJuceInitialiser_GUI
+{
+public:
+    /** The constructor simply calls initialiseJuce_GUI(). */
+    ScopedJuceInitialiser_GUI()         { initialiseJuce_GUI(); }
+
+    /** The destructor simply calls shutdownJuce_GUI(). */
+    ~ScopedJuceInitialiser_GUI()        { shutdownJuce_GUI(); }
+};
+
+
 
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__

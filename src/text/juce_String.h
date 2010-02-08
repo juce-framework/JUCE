@@ -1117,7 +1117,6 @@ private:
     // internal constructor that preallocates a certain amount of memory
     String (const int numChars, const int dummyVariable) throw();
 
-    void deleteInternal() throw();
     void createInternal (const int numChars) throw();
     void createInternal (const tchar* const text, const tchar* const textEnd) throw();
     void appendInternal (const tchar* const text, const int numExtraChars) throw();

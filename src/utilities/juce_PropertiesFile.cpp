@@ -164,7 +164,7 @@ bool PropertiesFile::save()
 
         for (int i = 0; i < getAllProperties().size(); ++i)
         {
-            XmlElement* const e = new XmlElement (propertyTagName);
+            XmlElement* const e = doc.createNewChildElement (propertyTagName);
             e->setAttribute (T("name"), getAllProperties().getAllKeys() [i]);
 
             // if the value seems to contain xml, store it as such..
@@ -175,8 +175,6 @@ bool PropertiesFile::save()
                 e->addChildElement (childElement);
             else
                 e->setAttribute (T("val"), getAllProperties().getAllValues() [i]);
-
-            doc.addChildElement (e);
         }
 
         return doc.writeToFile (file, String::empty);

@@ -80,7 +80,7 @@ END_JUCE_NAMESPACE
      of 3rd party header files, you may need to use the juce_WithoutMacros.h file - see
      the comments in that file for more information.
   */
-  #if JUCE_MAC && ! JUCE_DONT_DEFINE_MACROS
+  #if (JUCE_MAC || JUCE_IPHONE) && ! JUCE_DONT_DEFINE_MACROS
     #define Component       JUCE_NAMESPACE::Component
     #define MemoryBlock     JUCE_NAMESPACE::MemoryBlock
     #define Point           JUCE_NAMESPACE::Point

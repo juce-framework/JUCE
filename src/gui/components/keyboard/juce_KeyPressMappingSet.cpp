@@ -298,13 +298,11 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
             if (defaultSet == 0
                  || ! defaultSet->containsMapping (cm->commandID, cm->keypresses.getReference (j)))
             {
-                XmlElement* const map = new XmlElement (T("MAPPING"));
+                XmlElement* const map = doc->createNewChildElement ("MAPPING");
 
                 map->setAttribute (T("commandId"), String::toHexString ((int) cm->commandID));
                 map->setAttribute (T("description"), commandManager->getDescriptionOfCommand (cm->commandID));
                 map->setAttribute (T("key"), cm->keypresses.getReference (j).getTextDescription());
-
-                doc->addChildElement (map);
             }
         }
     }
@@ -319,13 +317,11 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
             {
                 if (! containsMapping (cm->commandID, cm->keypresses.getReference (j)))
                 {
-                    XmlElement* const map = new XmlElement (T("UNMAPPING"));
+                    XmlElement* const map = doc->createNewChildElement ("UNMAPPING");
 
                     map->setAttribute (T("commandId"), String::toHexString ((int) cm->commandID));
                     map->setAttribute (T("description"), commandManager->getDescriptionOfCommand (cm->commandID));
                     map->setAttribute (T("key"), cm->keypresses.getReference (j).getTextDescription());
-
-                    doc->addChildElement (map);
                 }
             }
         }

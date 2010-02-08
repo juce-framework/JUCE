@@ -43,6 +43,8 @@ int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldV
                                                          { return InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
 #endif
 
+void* Atomic::swapPointers (void* volatile* value1, void* volatile value2)   { return InterlockedExchangePointer (value1, value2); }
+
 //==============================================================================
 CriticalSection::CriticalSection() throw()
 {

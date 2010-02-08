@@ -66,13 +66,13 @@ using namespace JUCE_NAMESPACE;
 
 - (BOOL) panel: (id) sender shouldShowFilename: (NSString*) filename
 {
-    const String fname (nsStringToJuce (filename));
+    const File f (nsStringToJuce (filename));
 
     for (int i = filters->size(); --i >= 0;)
-        if (fname.matchesWildcard ((*filters)[i], true))
+        if (f.getFileName().matchesWildcard ((*filters)[i], true))
             return true;
 
-    return File (fname).isDirectory();
+    return f.isDirectory();
 }
 @end
 

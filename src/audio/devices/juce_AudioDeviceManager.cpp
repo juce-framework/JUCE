@@ -548,32 +548,30 @@ void AudioDeviceManager::restartLastAudioDevice()
 
 void AudioDeviceManager::updateXml()
 {
-    lastExplicitSettings = new XmlElement (T("DEVICESETUP"));
+    lastExplicitSettings = new XmlElement ("DEVICESETUP");
 
-    lastExplicitSettings->setAttribute (T("deviceType"), currentDeviceType);
-    lastExplicitSettings->setAttribute (T("audioOutputDeviceName"), currentSetup.outputDeviceName);
-    lastExplicitSettings->setAttribute (T("audioInputDeviceName"), currentSetup.inputDeviceName);
+    lastExplicitSettings->setAttribute ("deviceType", currentDeviceType);
+    lastExplicitSettings->setAttribute ("audioOutputDeviceName", currentSetup.outputDeviceName);
+    lastExplicitSettings->setAttribute ("audioInputDeviceName", currentSetup.inputDeviceName);
 
     if (currentAudioDevice != 0)
     {
-        lastExplicitSettings->setAttribute (T("audioDeviceRate"), currentAudioDevice->getCurrentSampleRate());
+        lastExplicitSettings->setAttribute ("audioDeviceRate", currentAudioDevice->getCurrentSampleRate());
 
         if (currentAudioDevice->getDefaultBufferSize() != currentAudioDevice->getCurrentBufferSizeSamples())
-            lastExplicitSettings->setAttribute (T("audioDeviceBufferSize"), currentAudioDevice->getCurrentBufferSizeSamples());
+            lastExplicitSettings->setAttribute ("audioDeviceBufferSize", currentAudioDevice->getCurrentBufferSizeSamples());
 
         if (! currentSetup.useDefaultInputChannels)
-            lastExplicitSettings->setAttribute (T("audioDeviceInChans"), currentSetup.inputChannels.toString (2));
+            lastExplicitSettings->setAttribute ("audioDeviceInChans", currentSetup.inputChannels.toString (2));
 
         if (! currentSetup.useDefaultOutputChannels)
-            lastExplicitSettings->setAttribute (T("audioDeviceOutChans"), currentSetup.outputChannels.toString (2));
+            lastExplicitSettings->setAttribute ("audioDeviceOutChans", currentSetup.outputChannels.toString (2));
     }
 
     for (int i = 0; i < enabledMidiInputs.size(); ++i)
     {
-        XmlElement* const m = new XmlElement (T("MIDIINPUT"));
-        m->setAttribute (T("name"), enabledMidiInputs[i]->getName());
-
-        lastExplicitSettings->addChildElement (m);
+        XmlElement* const m = lastExplicitSettings->createNewChildElement ("MIDIINPUT");
+        m->setAttribute ("name", enabledMidiInputs[i]->getName());
     }
 
     if (midiInsFromXml.size() > 0)
@@ -586,16 +584,14 @@ void AudioDeviceManager::updateXml()
         {
             if (! availableMidiDevices.contains (midiInsFromXml[i], true))
             {
-                XmlElement* const m = new XmlElement (T("MIDIINPUT"));
-                m->setAttribute (T("name"), midiInsFromXml[i]);
-
-                lastExplicitSettings->addChildElement (m);
+                XmlElement* const m = lastExplicitSettings->createNewChildElement ("MIDIINPUT");
+                m->setAttribute ("name", midiInsFromXml[i]);
             }
         }
     }
 
     if (defaultMidiOutputName.isNotEmpty())
-        lastExplicitSettings->setAttribute (T("defaultMidiOutput"), defaultMidiOutputName);
+        lastExplicitSettings->setAttribute ("defaultMidiOutput", defaultMidiOutputName);
 }
 
 //==============================================================================

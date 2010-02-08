@@ -212,12 +212,9 @@ XmlElement* PropertySet::createXml (const String& nodeName) const throw()
 
     for (int i = 0; i < properties.getAllKeys().size(); ++i)
     {
-        XmlElement* const e = new XmlElement (T("VALUE"));
-
+        XmlElement* const e = xml->createNewChildElement ("VALUE");
         e->setAttribute (T("name"), properties.getAllKeys()[i]);
         e->setAttribute (T("val"), properties.getAllValues()[i]);
-
-        xml->addChildElement (e);
     }
 
     return xml;
