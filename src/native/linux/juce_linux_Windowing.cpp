@@ -1833,10 +1833,6 @@ private:
 
             if (! totalArea.isEmpty())
             {
-#if JUCE_USE_XSHM
-                shmCompletedDrawing = false;
-#endif
-
                 if (image == 0 || image->getWidth() < totalArea.getWidth()
                      || image->getHeight() < totalArea.getHeight())
                 {
@@ -1866,6 +1862,9 @@ private:
 
                 for (RectangleList::Iterator i (originalRepaintRegion); i.next();)
                 {
+#if JUCE_USE_XSHM
+                    shmCompletedDrawing = false;
+#endif
                     const Rectangle<int>& r = *i.getRectangle();
 
                     image->blitToWindow (peer->windowH,
