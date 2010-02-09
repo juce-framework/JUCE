@@ -104,6 +104,8 @@
 
   #if defined (__ppc__) || defined (__ppc64__)
 	#define JUCE_PPC 1
+	#undef MAC_OS_X_VERSION_MAX_ALLOWED
+	#define MAC_OS_X_VERSION_MAX_ALLOWED	MAC_OS_X_VERSION_10_4
   #else
 	#define JUCE_INTEL 1
   #endif
@@ -3173,7 +3175,7 @@ inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int
 inline void* Atomic::swapPointers (void* volatile* value1, void* volatile value2)
 {
 	void* currentVal = *value1;
-	while (! __sync_bool_compare_and_swap (&value1, currentVal, value2)) { currentVal = *value1; }
+	while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
 	return currentVal;
 }
 
@@ -3477,7 +3479,7 @@ private:
 	ObjectType* object;
 
 	// (Required as an alternative to the overloaded & operator).
-	ScopedPointer* getAddress() const throw()					   { return this; }
+	const ScopedPointer* getAddress() const throw()				 { return this; }
 };
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__

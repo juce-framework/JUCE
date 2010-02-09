@@ -177,7 +177,7 @@ private:
     ObjectType* object;
 
     // (Required as an alternative to the overloaded & operator).
-    ScopedPointer* getAddress() const throw()                                       { return this; }
+    const ScopedPointer* getAddress() const throw()                                 { return this; }
 };
 
 

@@ -451,7 +451,7 @@ public:
                     bufferSize -= samplesToDo;
                     offset += samplesToDo;
 
-                    if (samplesToDo < numSamplesAvailable)
+                    if (samplesToDo < (int) numSamplesAvailable)
                     {
                         reservoirSize = jmin ((int) (numSamplesAvailable - samplesToDo), reservoirCapacity);
                         memcpy ((uint8*) reservoir.getData(), inputData + bytesPerSample * actualNumChannels * samplesToDo,

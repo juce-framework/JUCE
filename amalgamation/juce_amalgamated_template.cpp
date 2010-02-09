@@ -362,12 +362,12 @@
  #include "../src/io/streams/juce_GZIPDecompressorInputStream.cpp"
 #endif
 
-#if JUCE_BUILD_MISC
+#if JUCE_BUILD_NATIVE
  #include "../src/audio/audio_file_formats/juce_FlacAudioFormat.cpp"
  #include "../src/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"
 #endif
 
-#if JUCE_BUILD_GUI
+#if JUCE_BUILD_CORE && ! JUCE_ONLY_BUILD_CORE_LIBRARY // do these in the core section to help balance the sizes
  #include "../src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp"
  #include "../src/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp"
 #endif

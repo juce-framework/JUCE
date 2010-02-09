@@ -84,7 +84,7 @@ inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int
 inline void* Atomic::swapPointers (void* volatile* value1, void* volatile value2)
 {
     void* currentVal = *value1;
-    while (! __sync_bool_compare_and_swap (&value1, currentVal, value2)) { currentVal = *value1; }
+    while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
     return currentVal;
 }
 
