@@ -23,7 +23,7 @@
 #define __JUCER_HEADER_MAINCOMPONENT_MAINCOMPONENT_D0F6CD31__
 
 //[Headers]     -- You can add your own extra header files here --
-#include "includes.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 //[/Headers]
 
 
