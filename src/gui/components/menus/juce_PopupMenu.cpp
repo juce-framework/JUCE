@@ -1002,6 +1002,9 @@ private:
 
                     int deltaY = wantedY - currentY;
 
+                    windowPos.setSize (jmin (windowPos.getWidth(), mon.getWidth()),
+                                       jmin (windowPos.getHeight(), mon.getHeight()));
+
                     const int newY = jlimit (mon.getY(),
                                              mon.getBottom() - windowPos.getHeight(),
                                              windowPos.getY() + deltaY);

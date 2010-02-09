@@ -79,7 +79,7 @@
 #define NO_DUMMY_DECL
 
 #if JUCE_BUILD_NATIVE
- #include "../src/../juce_amalgamated.h"
+ #include "../juce_amalgamated.h"  // FORCE_AMALGAMATOR_INCLUDE
 #endif
 
 #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
