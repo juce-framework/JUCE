@@ -88,7 +88,7 @@ void ResizableCornerComponent::mouseDrag (const MouseEvent& e)
     int h = originalH + e.getDistanceFromDragStartY();
 
     if (constrainer != 0)
-        constrainer->setBoundsForComponent (component, x, y, w, h,
+        constrainer->setBoundsForComponent (component, Rectangle<int> (x, y, w, h),
                                             false, false, true, true);
     else
         component->setBounds (x, y, w, h);

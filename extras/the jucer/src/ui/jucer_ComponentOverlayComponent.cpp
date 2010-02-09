@@ -179,7 +179,7 @@ void ComponentOverlayComponent::resizeEnd()
     layout.getDocument()->getUndoManager().beginNewTransaction();
 }
 
-void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
+void ComponentOverlayComponent::checkBounds (Rectangle<int>& bounds,
                                              const Rectangle<int>& previousBounds,
                                              const Rectangle<int>& limits,
                                              const bool isStretchingTop,
@@ -192,7 +192,7 @@ void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
     else
         setFixedAspectRatio (0.0);
 
-    ComponentBoundsConstrainer::checkBounds (x, y, w, h, previousBounds, limits, isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
+    ComponentBoundsConstrainer::checkBounds (bounds, previousBounds, limits, isStretchingTop, isStretchingLeft, isStretchingBottom, isStretchingRight);
 
     if (layout.getDocument()->isSnapActive (true))
     {
@@ -203,6 +203,11 @@ void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
         {
             const int dx = parent->getX();
             const int dy = parent->getY();
+
+            int x = bounds.getX();
+            int y = bounds.getY();
+            int w = bounds.getWidth();
+            int h = bounds.getHeight();
 
             x += borderThickness - dx;
             y += borderThickness - dy;
@@ -228,27 +233,29 @@ void ComponentOverlayComponent::checkBounds (int& x, int& y, int& w, int& h,
             h = (bottom - y) + borderThickness * 2;
             x -= borderThickness - dx;
             y -= borderThickness - dy;
+
+            bounds = Rectangle<int> (x, y, w, h);
         }
     }
 }
 
-void ComponentOverlayComponent::applyBoundsToComponent (Component* component, int x, int y, int w, int h)
+void ComponentOverlayComponent::applyBoundsToComponent (Component* component, const Rectangle<int>& bounds)
 {
-    if (component->getBounds() != Rectangle<int> (x, y, w, h))
+    if (component->getBounds() != bounds)
     {
         layout.getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
-        component->setBounds (x, y, w, h);
+        component->setBounds (bounds);
 
         Component* const parent = target->getParentComponent();
         jassert (parent != 0);
 
         if (parent != 0)
         {
-            target->setBounds (x + borderThickness - parent->getX(),
-                               y + borderThickness - parent->getY(),
-                               w - borderThickness * 2,
-                               h - borderThickness * 2);
+            target->setBounds (bounds.getX() + borderThickness - parent->getX(),
+                               bounds.getY() + borderThickness - parent->getY(),
+                               bounds.getWidth() - borderThickness * 2,
+                               bounds.getHeight() - borderThickness * 2);
         }
 
         layout.updateStoredComponentPosition (target, true);

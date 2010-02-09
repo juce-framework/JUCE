@@ -124,7 +124,7 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
 
     if (constrainer != 0)
         constrainer->setBoundsForComponent (component,
-                                            x, y, w, h,
+                                            Rectangle<int> (x, y, w, h),
                                             (mouseZone & zoneT) != 0,
                                             (mouseZone & zoneL) != 0,
                                             (mouseZone & zoneB) != 0,

@@ -102,7 +102,7 @@ protected:
 
     void resizeStart();
     void resizeEnd();
-    void checkBounds (int& x, int& y, int& w, int& h,
+    void checkBounds (Rectangle<int>& bounds,
                       const Rectangle<int>& previousBounds,
                       const Rectangle<int>& limits,
                       const bool isStretchingTop,
@@ -110,7 +110,7 @@ protected:
                       const bool isStretchingBottom,
                       const bool isStretchingRight);
 
-    void applyBoundsToComponent (Component* component, int x, int y, int w, int h);
+    void applyBoundsToComponent (Component* component, const Rectangle<int>& bounds);
 
     const Rectangle<int> getCurrentAbsoluteBounds() const;
     void getCurrentAbsoluteBoundsDouble (double& x, double& y, double& w, double& h) const;

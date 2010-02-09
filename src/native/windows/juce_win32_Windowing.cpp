@@ -1902,13 +1902,18 @@ private:
                                                               component->getWidth() + windowBorder.getLeftAndRight(),
                                                               component->getHeight() + windowBorder.getTopAndBottom());
 
-                                constrainer->checkBounds (wp->x, wp->y, wp->cx, wp->cy,
-                                                          current,
+                                Rectangle<int> pos (wp->x, wp->y, wp->cx, wp->cy);
+
+                                constrainer->checkBounds (pos, current,
                                                           Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                                          wp->y != current.getY() && wp->y + wp->cy == current.getBottom(),
-                                                          wp->x != current.getX() && wp->x + wp->cx == current.getRight(),
-                                                          wp->y == current.getY() && wp->y + wp->cy != current.getBottom(),
-                                                          wp->x == current.getX() && wp->x + wp->cx != current.getRight());
+                                                          pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
+                                                          pos.getX() != current.getX() && pos.getRight() == current.getRight(),
+                                                          pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
+                                                          pos.getX() == current.getX() && pos.getRight() != current.getRight());
+                                wp->x = pos.getX();
+                                wp->y = pos.getY();
+                                wp->cx = pos.getWidth();
+                                wp->cy = pos.getHeight();
                             }
                         }
                     }

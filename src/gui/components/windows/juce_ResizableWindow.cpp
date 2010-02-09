@@ -265,7 +265,7 @@ void ResizableWindow::setResizeLimits (const int newMinimumWidth,
     defaultConstrainer.setSizeLimits (newMinimumWidth, newMinimumHeight,
                                       newMaximumWidth, newMaximumHeight);
 
-    setBoundsConstrained (getX(), getY(), getWidth(), getHeight());
+    setBoundsConstrained (getBounds());
 }
 
 void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer)
@@ -288,12 +288,12 @@ void ResizableWindow::setConstrainer (ComponentBoundsConstrainer* newConstrainer
     }
 }
 
-void ResizableWindow::setBoundsConstrained (int x, int y, int w, int h)
+void ResizableWindow::setBoundsConstrained (const Rectangle<int>& bounds)
 {
     if (constrainer != 0)
-        constrainer->setBoundsForComponent (this, x, y, w, h, false, false, false, false);
+        constrainer->setBoundsForComponent (this, bounds, false, false, false, false);
     else
-        setBounds (x, y, w, h);
+        setBounds (bounds);
 }
 
 //==============================================================================
@@ -451,18 +451,7 @@ void ResizableWindow::parentSizeChanged()
 const String ResizableWindow::getWindowStateAsString()
 {
     updateLastPos();
-
-    String s;
-
-    if (isFullScreen())
-        s << "fs ";
-
-    s << lastNonFullScreenPos.getX() << T(' ')
-      << lastNonFullScreenPos.getY() << T(' ')
-      << lastNonFullScreenPos.getWidth() << T(' ')
-      << lastNonFullScreenPos.getHeight();
-
-    return s;
+    return (isFullScreen() ? "fs " : "") + lastNonFullScreenPos.toString();
 }
 
 bool ResizableWindow::restoreWindowStateFromString (const String& s)
@@ -473,47 +462,46 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     tokens.trim();
 
     const bool fs = tokens[0].startsWithIgnoreCase (T("fs"));
-    const int n = fs ? 1 : 0;
+    const int firstCoord = fs ? 1 : 0;
 
-    if (tokens.size() != 4 + n)
+    if (tokens.size() != firstCoord + 4)
         return false;
 
-    Rectangle<int> r (tokens[n].getIntValue(),
-                      tokens[n + 1].getIntValue(),
-                      tokens[n + 2].getIntValue(),
-                      tokens[n + 3].getIntValue());
+    Rectangle<int> newPos (tokens[firstCoord].getIntValue(),
+                           tokens[firstCoord + 1].getIntValue(),
+                           tokens[firstCoord + 2].getIntValue(),
+                           tokens[firstCoord + 3].getIntValue());
 
-    if (r.isEmpty())
+    if (newPos.isEmpty())
         return false;
 
-    const Rectangle<int> screen (Desktop::getInstance().getMonitorAreaContaining (r.getX(), r.getY()));
+    const Rectangle<int> screen (Desktop::getInstance().getMonitorAreaContaining (newPos.getCentreX(),
+                                                                                  newPos.getCentreY()));
 
-    if (! screen.contains (r))
+    ComponentPeer* const peer = isOnDesktop() ? getPeer() : 0;
+    if (peer != 0)
+        peer->getFrameSize().addTo (newPos);
+
+    if (! screen.contains (newPos))
     {
-        r.setSize (jmin (r.getWidth(), screen.getWidth()),
-                   jmin (r.getHeight(), screen.getHeight()));
+        newPos.setSize (jmin (newPos.getWidth(), screen.getWidth()),
+                        jmin (newPos.getHeight(), screen.getHeight()));
 
-        r.setPosition (jlimit (screen.getX(), screen.getRight() - r.getWidth(), r.getX()),
-                       jlimit (screen.getY(), screen.getBottom() - r.getHeight(), r.getY()));
+        newPos.setPosition (jlimit (screen.getX(), screen.getRight() - newPos.getWidth(), newPos.getX()),
+                            jlimit (screen.getY(), screen.getBottom() - newPos.getHeight(), newPos.getY()));
     }
 
-    lastNonFullScreenPos = r;
-
-    if (isOnDesktop())
+    if (peer != 0)
     {
-        ComponentPeer* const peer = getPeer();
-
-        if (peer != 0)
-            peer->setNonFullScreenBounds (r);
+        peer->getFrameSize().subtractFrom (newPos);
+        peer->setNonFullScreenBounds (newPos);
     }
 
+    lastNonFullScreenPos = newPos;
     setFullScreen (fs);
 
     if (! fs)
-        setBoundsConstrained (r.getX(),
-                              r.getY(),
-                              r.getWidth(),
-                              r.getHeight());
+        setBoundsConstrained (newPos);
 
     return true;
 }

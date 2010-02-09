@@ -133,18 +133,15 @@ public:
     /** This callback changes the given co-ordinates to impose whatever the current
         constraints are set to be.
 
-        @param x                the x position that should be examined and adjusted
-        @param y                the y position that should be examined and adjusted
-        @param w                the width that should be examined and adjusted
-        @param h                the height that should be examined and adjusted
-        @param previousBounds   the component's current size
-        @param limits           the region in which the component can be positioned
+        @param bounds               the target position that should be examined and adjusted
+        @param previousBounds       the component's current size
+        @param limits               the region in which the component can be positioned
         @param isStretchingTop      whether the top edge of the component is being resized
         @param isStretchingLeft     whether the left edge of the component is being resized
         @param isStretchingBottom   whether the bottom edge of the component is being resized
         @param isStretchingRight    whether the right edge of the component is being resized
     */
-    virtual void checkBounds (int& x, int& y, int& w, int& h,
+    virtual void checkBounds (Rectangle<int>& bounds,
                               const Rectangle<int>& previousBounds,
                               const Rectangle<int>& limits,
                               const bool isStretchingTop,
@@ -160,7 +157,7 @@ public:
 
     /** Checks the given bounds, and then sets the component to the corrected size. */
     void setBoundsForComponent (Component* const component,
-                                int x, int y, int w, int h,
+                                const Rectangle<int>& bounds,
                                 const bool isStretchingTop,
                                 const bool isStretchingLeft,
                                 const bool isStretchingBottom,
@@ -178,7 +175,7 @@ public:
         extremely cunning purposes.
     */
     virtual void applyBoundsToComponent (Component* component,
-                                         int x, int y, int w, int h);
+                                         const Rectangle<int>& bounds);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

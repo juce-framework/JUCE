@@ -134,7 +134,7 @@ double ComponentBoundsConstrainer::getFixedAspectRatio() const throw()
 }
 
 void ComponentBoundsConstrainer::setBoundsForComponent (Component* const component,
-                                                        int x, int y, int w, int h,
+                                                        const Rectangle<int>& targetBounds,
                                                         const bool isStretchingTop,
                                                         const bool isStretchingLeft,
                                                         const bool isStretchingBottom,
@@ -142,57 +142,47 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* const compone
 {
     jassert (component != 0);
 
-    Rectangle<int> limits;
-    Component* const p = component->getParentComponent();
+    Rectangle<int> limits, bounds (targetBounds);
+    BorderSize border;
 
-    if (p == 0)
-        limits = Desktop::getInstance().getAllMonitorDisplayAreas().getBounds();
-    else
-        limits.setSize (p->getWidth(), p->getHeight());
+    Component* const parent = component->getParentComponent();
 
-    if (component->isOnDesktop())
+    if (parent == 0)
     {
-        ComponentPeer* const peer = component->getPeer();
-        const BorderSize border (peer->getFrameSize());
+        ComponentPeer* peer = component->getPeer();
+        if (peer != 0)
+            border = peer->getFrameSize();
 
-        x -= border.getLeft();
-        y -= border.getTop();
-        w += border.getLeftAndRight();
-        h += border.getTopAndBottom();
-
-        checkBounds (x, y, w, h,
-                     border.addedTo (component->getBounds()), limits,
-                     isStretchingTop, isStretchingLeft,
-                     isStretchingBottom, isStretchingRight);
-
-        x += border.getLeft();
-        y += border.getTop();
-        w -= border.getLeftAndRight();
-        h -= border.getTopAndBottom();
+        limits = Desktop::getInstance().getMonitorAreaContaining (bounds.getCentreX(),
+                                                                  bounds.getCentreY());
     }
     else
     {
-        checkBounds (x, y, w, h,
-                     component->getBounds(), limits,
-                     isStretchingTop, isStretchingLeft,
-                     isStretchingBottom, isStretchingRight);
+        limits.setSize (parent->getWidth(), parent->getHeight());
     }
 
-    applyBoundsToComponent (component, x, y, w, h);
+    border.addTo (bounds);
+
+    checkBounds (bounds,
+                 border.addedTo (component->getBounds()), limits,
+                 isStretchingTop, isStretchingLeft,
+                 isStretchingBottom, isStretchingRight);
+
+    border.subtractFrom (bounds);
+
+    applyBoundsToComponent (component, bounds);
 }
 
 void ComponentBoundsConstrainer::checkComponentBounds (Component* component)
 {
-    setBoundsForComponent (component,
-                           component->getX(), component->getY(),
-                           component->getWidth(), component->getHeight(),
+    setBoundsForComponent (component, component->getBounds(),
                            false, false, false, false);
 }
 
 void ComponentBoundsConstrainer::applyBoundsToComponent (Component* component,
-                                                         int x, int y, int w, int h)
+                                                         const Rectangle<int>& bounds)
 {
-    component->setBounds (x, y, w, h);
+    component->setBounds (bounds);
 }
 
 //==============================================================================
@@ -205,7 +195,7 @@ void ComponentBoundsConstrainer::resizeEnd()
 }
 
 //==============================================================================
-void ComponentBoundsConstrainer::checkBounds (int& x, int& y, int& w, int& h,
+void ComponentBoundsConstrainer::checkBounds (Rectangle<int>& bounds,
                                               const Rectangle<int>& old,
                                               const Rectangle<int>& limits,
                                               const bool isStretchingTop,
@@ -213,6 +203,11 @@ void ComponentBoundsConstrainer::checkBounds (int& x, int& y, int& w, int& h,
                                               const bool isStretchingBottom,
                                               const bool isStretchingRight)
 {
+    int x = bounds.getX();
+    int y = bounds.getY();
+    int w = bounds.getWidth();
+    int h = bounds.getHeight();
+
     // constrain the size if it's being stretched..
     if (isStretchingLeft)
     {
@@ -353,7 +348,7 @@ void ComponentBoundsConstrainer::checkBounds (int& x, int& y, int& w, int& h,
     }
 
     jassert (w >= 0 && h >= 0);
-
+    bounds = Rectangle<int> (x, y, w, h);
 }
 
 

@@ -78,7 +78,7 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
         y += e.getDistanceFromDragStartY();
 
         if (constrainer != 0)
-            constrainer->setBoundsForComponent (componentToDrag, x, y, w, h,
+            constrainer->setBoundsForComponent (componentToDrag, Rectangle<int> (x, y, w, h),
                                                 false, false, false, false);
         else
             componentToDrag->setBounds (x, y, w, h);

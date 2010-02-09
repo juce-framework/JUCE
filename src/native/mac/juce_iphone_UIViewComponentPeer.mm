@@ -528,26 +528,23 @@ CGRect UIViewComponentPeer::constrainRect (CGRect r)
 
         r.origin.y = [[UIScreen mainScreen] bounds].size.height - r.origin.y - r.size.height;
 
-        int x = (int) r.origin.x;
-        int y = (int) r.origin.y;
-        int w = (int) r.size.width;
-        int h = (int) r.size.height;
+        Rectangle<int> pos ((int) r.origin.x, (int) r.origin.y,
+                            (int) r.size.width, (int) r.size.height);
 
         Rectangle<int> original ((int) current.origin.x, (int) current.origin.y,
                                  (int) current.size.width, (int) current.size.height);
 
-        constrainer->checkBounds (x, y, w, h,
-                                  original,
+        constrainer->checkBounds (pos, original,
                                   Desktop::getInstance().getAllMonitorDisplayAreas().getBounds(),
-                                  y != original.getY() && y + h == original.getBottom(),
-                                  x != original.getX() && x + w == original.getRight(),
-                                  y == original.getY() && y + h != original.getBottom(),
-                                  x == original.getX() && x + w != original.getRight());
+                                  pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
+                                  pos.getX() != original.getX() && pos.getRight() == original.getRight(),
+                                  pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
+                                  pos.getX() == original.getX() && pos.getRight() != original.getRight());
 
-        r.origin.x = x;
-        r.origin.y = [[UIScreen mainScreen] bounds].size.height - r.size.height - y;
-        r.size.width = w;
-        r.size.height = h;
+        r.origin.x = pos.getX();
+        r.origin.y = [[UIScreen mainScreen] bounds].size.height - r.size.height - pos.getY();
+        r.size.width = pos.getWidth();
+        r.size.height = pos.getHeight();
     }
 
     return r;

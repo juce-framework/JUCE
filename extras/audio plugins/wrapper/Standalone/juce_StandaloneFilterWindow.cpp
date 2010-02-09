@@ -90,7 +90,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
             const int y = globalSettings->getIntValue (T("windowY"), -100);
 
             if (x != -100 && y != -100)
-                setBoundsConstrained (x, y, getWidth(), getHeight());
+                setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
             else
                 centreWithSize (getWidth(), getHeight());
         }

@@ -168,7 +168,7 @@ public:
 
         @see setConstrainer
     */
-    void setBoundsConstrained (int x, int y, int width, int height);
+    void setBoundsConstrained (const Rectangle<int>& bounds);
 
 
     //==============================================================================

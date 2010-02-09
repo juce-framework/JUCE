@@ -22637,7 +22637,7 @@ public:
 
 	double getFixedAspectRatio() const throw();
 
-	virtual void checkBounds (int& x, int& y, int& w, int& h,
+	virtual void checkBounds (Rectangle<int>& bounds,
 							  const Rectangle<int>& previousBounds,
 							  const Rectangle<int>& limits,
 							  const bool isStretchingTop,
@@ -22650,7 +22650,7 @@ public:
 	virtual void resizeEnd();
 
 	void setBoundsForComponent (Component* const component,
-								int x, int y, int w, int h,
+								const Rectangle<int>& bounds,
 								const bool isStretchingTop,
 								const bool isStretchingLeft,
 								const bool isStretchingBottom,
@@ -22659,7 +22659,7 @@ public:
 	void checkComponentBounds (Component* component);
 
 	virtual void applyBoundsToComponent (Component* component,
-										 int x, int y, int w, int h);
+										 const Rectangle<int>& bounds);
 
 	juce_UseDebuggingNewOperator
 
@@ -22811,7 +22811,7 @@ public:
 
 	void setConstrainer (ComponentBoundsConstrainer* newConstrainer);
 
-	void setBoundsConstrained (int x, int y, int width, int height);
+	void setBoundsConstrained (const Rectangle<int>& bounds);
 
 	bool isFullScreen() const;
 
