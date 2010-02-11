@@ -362,7 +362,7 @@
  #include "../src/io/streams/juce_GZIPDecompressorInputStream.cpp"
 #endif
 
-#if JUCE_BUILD_NATIVE
+#if JUCE_BUILD_NATIVE && ! JUCE_ONLY_BUILD_CORE_LIBRARY
  #include "../src/audio/audio_file_formats/juce_FlacAudioFormat.cpp"
  #include "../src/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp"
 #endif

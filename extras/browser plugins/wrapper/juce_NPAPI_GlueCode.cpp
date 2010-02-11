@@ -355,6 +355,7 @@ private:
             return 1;
 
         case WM_WINDOWPOSCHANGING:
+        case WM_WINDOWPOSCHANGED:
             if ((((WINDOWPOS*) lParam)->flags & SWP_NOSIZE) == 0)
             {
                 BrowserPluginHolderComponent* const comp = (BrowserPluginHolderComponent*) GetWindowLongPtr (hWnd, GWL_USERDATA);

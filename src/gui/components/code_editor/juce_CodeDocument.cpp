@@ -180,6 +180,8 @@ void CodeDocument::Iterator::skipToEndOfLine()
 
         if (currentLine != 0)
             position = currentLine->lineStartInFile;
+        else
+            position = document->getNumCharacters();
     }
 }
 

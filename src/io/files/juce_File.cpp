@@ -427,6 +427,9 @@ const String File::getFileNameWithoutExtension() const
 
 bool File::isAChildOf (const File& potentialParent) const
 {
+    if (potentialParent == File::nonexistent)
+        return false;
+
     const String ourPath (getPathUpToLastSlash());
 
 #if NAMES_ARE_CASE_SENSITIVE
