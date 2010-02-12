@@ -327,12 +327,12 @@ void Font::getGlyphPositions (const String& text, Array <int>& glyphs, Array <fl
     }
 }
 
-void Font::findFonts (OwnedArray<Font>& destArray) throw()
+void Font::findFonts (Array<Font>& destArray) throw()
 {
     const StringArray names (findAllTypefaceNames());
 
     for (int i = 0; i < names.size(); ++i)
-        destArray.add (new Font (names[i], defaultFontHeight, Font::plain));
+        destArray.add (Font (names[i], defaultFontHeight, Font::plain));
 }
 
 

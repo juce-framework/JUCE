@@ -4947,6 +4947,11 @@ public:
 		return position >= start && position < end;
 	}
 
+	ValueType clipValue (const ValueType value) const throw()
+	{
+		return jlimit (start, end, value);
+	}
+
 	bool intersects (const Range& other) const throw()
 	{
 		return other.start < end && other.end > start;
@@ -10689,7 +10694,7 @@ public:
 
 	Typeface* getTypeface() const throw();
 
-	static void findFonts (OwnedArray<Font>& results) throw();
+	static void findFonts (Array<Font>& results) throw();
 
 	static const StringArray findAllTypefaceNames() throw();
 

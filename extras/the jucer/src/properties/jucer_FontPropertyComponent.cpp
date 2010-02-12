@@ -33,11 +33,11 @@ class FontList  : public DeletedAtShutdown
 public:
     FontList()
     {
-        OwnedArray<Font> fonts;
+        Array<Font> fonts;
         Font::findFonts (fonts);
 
         for (int i = 0; i < fonts.size(); ++i)
-            fontNames.add (fonts[i]->getTypefaceName());
+            fontNames.add (fonts[i].getTypefaceName());
     }
 
     ~FontList()

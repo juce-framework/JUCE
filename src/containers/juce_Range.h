@@ -166,6 +166,12 @@ public:
         return position >= start && position < end;
     }
 
+    /** Returns the nearest value to the one supplied, which lies within the range. */
+    ValueType clipValue (const ValueType value) const throw()
+    {
+        return jlimit (start, end, value);
+    }
+
     /** Returns true if the given range intersects this one. */
     bool intersects (const Range& other) const throw()
     {

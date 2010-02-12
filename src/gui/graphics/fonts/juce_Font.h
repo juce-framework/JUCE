@@ -322,7 +322,7 @@ public:
 
         @param results  the array to which new Font objects will be added.
     */
-    static void findFonts (OwnedArray<Font>& results) throw();
+    static void findFonts (Array<Font>& results) throw();
 
     /** Returns a list of all the available typeface names.
 
