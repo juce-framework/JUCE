@@ -207,7 +207,7 @@ void Label::showEditor()
         editor->setText (getText(), false);
         editor->addListener (this);
         editor->grabKeyboardFocus();
-        editor->setHighlightedRegion (0, textValue.toString().length());
+        editor->setHighlightedRegion (Range<int> (0, textValue.toString().length()));
         editor->addListener (this);
 
         resized();

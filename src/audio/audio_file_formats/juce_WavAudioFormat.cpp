@@ -173,28 +173,68 @@ struct SMPLChunk
 
     void copyTo (StringPairArray& values, const int totalSize) const
     {
-        values.set (T("Manufacturer"),      String (ByteOrder::swapIfBigEndian (manufacturer)));
-        values.set (T("Product"),           String (ByteOrder::swapIfBigEndian (product)));
-        values.set (T("SamplePeriod"),      String (ByteOrder::swapIfBigEndian (samplePeriod)));
-        values.set (T("MidiUnityNote"),     String (ByteOrder::swapIfBigEndian (midiUnityNote)));
-        values.set (T("MidiPitchFraction"), String (ByteOrder::swapIfBigEndian (midiPitchFraction)));
-        values.set (T("SmpteFormat"),       String (ByteOrder::swapIfBigEndian (smpteFormat)));
-        values.set (T("SmpteOffset"),       String (ByteOrder::swapIfBigEndian (smpteOffset)));
-        values.set (T("NumSampleLoops"),    String (ByteOrder::swapIfBigEndian (numSampleLoops)));
-        values.set (T("SamplerData"),       String (ByteOrder::swapIfBigEndian (samplerData)));
+        values.set ("Manufacturer",      String (ByteOrder::swapIfBigEndian (manufacturer)));
+        values.set ("Product",           String (ByteOrder::swapIfBigEndian (product)));
+        values.set ("SamplePeriod",      String (ByteOrder::swapIfBigEndian (samplePeriod)));
+        values.set ("MidiUnityNote",     String (ByteOrder::swapIfBigEndian (midiUnityNote)));
+        values.set ("MidiPitchFraction", String (ByteOrder::swapIfBigEndian (midiPitchFraction)));
+        values.set ("SmpteFormat",       String (ByteOrder::swapIfBigEndian (smpteFormat)));
+        values.set ("SmpteOffset",       String (ByteOrder::swapIfBigEndian (smpteOffset)));
+        values.set ("NumSampleLoops",    String (ByteOrder::swapIfBigEndian (numSampleLoops)));
+        values.set ("SamplerData",       String (ByteOrder::swapIfBigEndian (samplerData)));
 
         for (uint32 i = 0; i < numSampleLoops; ++i)
         {
             if ((uint8*) (loops + (i + 1)) > ((uint8*) this) + totalSize)
                 break;
 
-            values.set (String::formatted (T("Loop%dIdentifier"), i),   String (ByteOrder::swapIfBigEndian (loops[i].identifier)));
-            values.set (String::formatted (T("Loop%dType"), i),         String (ByteOrder::swapIfBigEndian (loops[i].type)));
-            values.set (String::formatted (T("Loop%dStart"), i),        String (ByteOrder::swapIfBigEndian (loops[i].start)));
-            values.set (String::formatted (T("Loop%dEnd"), i),          String (ByteOrder::swapIfBigEndian (loops[i].end)));
-            values.set (String::formatted (T("Loop%dFraction"), i),     String (ByteOrder::swapIfBigEndian (loops[i].fraction)));
-            values.set (String::formatted (T("Loop%dPlayCount"), i),    String (ByteOrder::swapIfBigEndian (loops[i].playCount)));
+            const String prefix ("Loop" + String(i));
+            values.set (prefix + "Identifier", String (ByteOrder::swapIfBigEndian (loops[i].identifier)));
+            values.set (prefix + "Type",       String (ByteOrder::swapIfBigEndian (loops[i].type)));
+            values.set (prefix + "Start",      String (ByteOrder::swapIfBigEndian (loops[i].start)));
+            values.set (prefix + "End",        String (ByteOrder::swapIfBigEndian (loops[i].end)));
+            values.set (prefix + "Fraction",   String (ByteOrder::swapIfBigEndian (loops[i].fraction)));
+            values.set (prefix + "PlayCount",  String (ByteOrder::swapIfBigEndian (loops[i].playCount)));
         }
+    }
+
+    static MemoryBlock createFrom (const StringPairArray& values)
+    {
+        const int numLoops = jmin (64, values.getValue ("NumSampleLoops", "0").getIntValue());
+
+        if (numLoops <= 0)
+            return MemoryBlock();
+
+        const size_t sizeNeeded = sizeof (SMPLChunk) + (numLoops - 1) * sizeof (SampleLoop);
+        MemoryBlock data ((sizeNeeded + 3) & ~3);
+        data.fillWith (0);
+
+        SMPLChunk* s = (SMPLChunk*) data.getData();
+
+        // Allow these calls to overwrite an extra byte at the end, which is fine as long
+        // as they get called in the right order..
+        s->manufacturer      = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("Manufacturer", "0").getIntValue());
+        s->product           = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("Product", "0").getIntValue());
+        s->samplePeriod      = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("SamplePeriod", "0").getIntValue());
+        s->midiUnityNote     = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("MidiUnityNote", "60").getIntValue());
+        s->midiPitchFraction = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("MidiPitchFraction", "0").getIntValue());
+        s->smpteFormat       = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("SmpteFormat", "0").getIntValue());
+        s->smpteOffset       = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("SmpteOffset", "0").getIntValue());
+        s->numSampleLoops    = ByteOrder::swapIfBigEndian ((uint32) numLoops);
+        s->samplerData       = ByteOrder::swapIfBigEndian ((uint32) values.getValue ("SamplerData", "0").getIntValue());
+
+        for (int i = 0; i < numLoops; ++i)
+        {
+            const String prefix ("Loop" + String(i));
+            s->loops[i].identifier = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Identifier", "0").getIntValue());
+            s->loops[i].type       = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Type", "0").getIntValue());
+            s->loops[i].start      = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Start", "0").getIntValue());
+            s->loops[i].end        = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "End", "0").getIntValue());
+            s->loops[i].fraction   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Fraction", "0").getIntValue());
+            s->loops[i].playCount  = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "PlayCount", "0").getIntValue());
+        }
+
+        return data;
     }
 } PACKED;
 
@@ -529,7 +569,7 @@ public:
 //==============================================================================
 class WavAudioFormatWriter  : public AudioFormatWriter
 {
-    MemoryBlock tempBlock, bwavChunk;
+    MemoryBlock tempBlock, bwavChunk, smplChunk;
     uint32 lengthInSamples, bytesWritten;
     int64 headerPosition;
     bool writeFailed;
@@ -571,6 +611,13 @@ class WavAudioFormatWriter  : public AudioFormatWriter
             output->write (bwavChunk.getData(), (int) bwavChunk.getSize());
         }
 
+        if (smplChunk.getSize() > 0)
+        {
+            output->writeInt (chunkName ("smpl"));
+            output->writeInt (smplChunk.getSize());
+            output->write (smplChunk.getData(), (int) smplChunk.getSize());
+        }
+
         output->writeInt (chunkName ("data"));
         output->writeInt (lengthInSamples * bytesPerFrame);
 
@@ -594,7 +641,10 @@ public:
           writeFailed (false)
     {
         if (metadataValues.size() > 0)
+        {
             bwavChunk = BWAVChunk::createFrom (metadataValues);
+            smplChunk = SMPLChunk::createFrom (metadataValues);
+        }
 
         headerPosition = out->getPosition();
         writeHeader();

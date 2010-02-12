@@ -355,14 +355,18 @@ var::identifier::identifier (const String& name_)
     : name (name_),
       hashCode (name_.hashCode())
 {
-    jassert (name_.isNotEmpty());
+    /* An identifier string must be suitable for use as a script variable or XML
+       attribute, so it can only contain this limited set of characters.. */
+    jassert (name.containsOnly (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")) && name.isNotEmpty());
 }
 
 var::identifier::identifier (const char* const name_)
     : name (name_),
       hashCode (name.hashCode())
 {
-    jassert (name.isNotEmpty());
+    /* An identifier string must be suitable for use as a script variable or XML
+       attribute, so it can only contain this limited set of characters.. */
+    jassert (name.containsOnly (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")) && name.isNotEmpty());
 }
 
 var::identifier::~identifier()

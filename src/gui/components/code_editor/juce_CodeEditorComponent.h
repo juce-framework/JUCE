@@ -28,6 +28,7 @@
 
 #include "../juce_Component.h"
 #include "../layout/juce_ScrollBar.h"
+#include "../keyboard/juce_TextInputTarget.h"
 #include "juce_CodeDocument.h"
 #include "juce_CodeTokeniser.h"
 
@@ -40,6 +41,7 @@
     files.
 */
 class JUCE_API  CodeEditorComponent   : public Component,
+                                        public TextInputTarget,
                                         public Timer,
                                         public ScrollBarListener,
                                         public CodeDocument::Listener,
@@ -144,6 +146,11 @@ public:
 
     void undo();
     void redo();
+
+    //==============================================================================
+    const Range<int> getHighlightedRegion() const;
+    void setHighlightedRegion (const Range<int>& newRange);
+    const String getTextInRange (const Range<int>& range) const;
 
     //==============================================================================
     /** Changes the current tab settings.

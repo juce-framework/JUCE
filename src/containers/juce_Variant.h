@@ -115,9 +115,22 @@ public:
     class JUCE_API  identifier
     {
     public:
+        /** Creates a null identifier. */
         identifier() throw();
+
+        /** Creates an identifier with a specified name.
+            Because this name may need to be used in contexts such as script variables or XML
+            tags, it must only contain ascii letters and digits, or the underscore character.
+        */
         identifier (const char* const name);
+
+        /** Creates an identifier with a specified name.
+            Because this name may need to be used in contexts such as script variables or XML
+            tags, it must only contain ascii letters and digits, or the underscore character.
+        */
         identifier (const String& name);
+
+        /** Destructor */
         ~identifier();
 
         bool operator== (const identifier& other) const throw()

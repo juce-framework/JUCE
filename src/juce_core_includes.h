@@ -56,6 +56,9 @@
 #ifndef __JUCE_PROPERTYSET_JUCEHEADER__
  #include "containers/juce_PropertySet.h"
 #endif
+#ifndef __JUCE_RANGE_JUCEHEADER__
+ #include "containers/juce_Range.h"
+#endif
 #ifndef __JUCE_REFERENCECOUNTEDARRAY_JUCEHEADER__
  #include "containers/juce_ReferenceCountedArray.h"
 #endif

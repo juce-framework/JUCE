@@ -27,11 +27,13 @@
 #define __JUCE_TEXTEDITOR_JUCEHEADER__
 
 #include "../juce_Component.h"
+#include "../../../containers/juce_Range.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../utilities/juce_UndoManager.h"
 #include "../layout/juce_Viewport.h"
 #include "../menus/juce_PopupMenu.h"
 #include "../../../containers/juce_Value.h"
+#include "../keyboard/juce_TextInputTarget.h"
 class TextEditor;
 class TextHolderComponent;
 
@@ -72,6 +74,7 @@ public:
     @see TextEditorListener, Label
 */
 class JUCE_API  TextEditor  : public Component,
+                              public TextInputTarget,
                               public SettableTooltipClient
 {
 public:
@@ -343,7 +346,7 @@ l    */
     const String getText() const;
 
     /** Returns a section of the contents of the editor. */
-    const String getTextSubstring (const int startCharacter, const int endCharacter) const;
+    const String getTextInRange (const Range<int>& textRange) const;
 
     /** Returns true if there are no characters in the editor.
 
@@ -384,7 +387,7 @@ l    */
 
         @see setCaretPosition, getCaretPosition, setHighlightedRegion
     */
-    void insertTextAtCursor (String textToInsert);
+    void insertTextAtCaret (const String& textToInsert);
 
     /** Deletes all the text from the editor. */
     void clear();
@@ -441,25 +444,14 @@ l    */
     */
     const Rectangle<int> getCaretRectangle();
 
-    /** Selects a section of the text.
+    /** Selects a section of the text. */
+    void setHighlightedRegion (const Range<int>& newSelection);
+
+    /** Returns the range of characters that are selected.
+        If nothing is selected, this will return an empty range.
+        @see setHighlightedRegion
     */
-    void setHighlightedRegion (int startIndex,
-                               int numberOfCharactersToHighlight);
-
-    /** Returns the first character that is selected.
-
-        If nothing is selected, this will still return a character index, but getHighlightedRegionLength()
-        will return 0.
-
-        @see setHighlightedRegion, getHighlightedRegionLength
-    */
-    int getHighlightedRegionStart() const                           { return selectionStart; }
-
-    /** Returns the number of characters that are selected.
-
-        @see setHighlightedRegion, getHighlightedRegionStart
-    */
-    int getHighlightedRegionLength() const                          { return jmax (0, selectionEnd - selectionStart); }
+    const Range<int> getHighlightedRegion() const                   { return selection; }
 
     /** Returns the section of text that is currently selected. */
     const String getHighlightedText() const;
@@ -640,7 +632,7 @@ private:
     UndoManager undoManager;
     float cursorX, cursorY, cursorHeight;
     int maxTextLength;
-    int selectionStart, selectionEnd;
+    Range<int> selection;
     int leftIndent, topIndent;
     unsigned int lastTransactionTime;
     Font currentFont;
@@ -680,8 +672,7 @@ private:
     void reinsert (const int insertIndex,
                    const VoidArray& sections);
 
-    void remove (const int startIndex,
-                 int endIndex,
+    void remove (const Range<int>& range,
                  UndoManager* const um,
                  const int caretPositionToMoveTo);
 
@@ -706,7 +697,7 @@ private:
     float getWordWrapWidth() const;
     void timerCallbackInt();
     void repaintCaret();
-    void repaintText (int textStartIndex, int textEndIndex);
+    void repaintText (const Range<int>& range);
 
     TextEditor (const TextEditor&);
     const TextEditor& operator= (const TextEditor&);

@@ -213,8 +213,7 @@ public:
     }
 
     void appendSubstring (String::Concatenator& concatenator,
-                          const int startCharacter,
-                          const int endCharacter) const
+                          const Range<int>& range) const
     {
         int index = 0;
         for (int i = 0; i < atoms.size(); ++i)
@@ -222,16 +221,15 @@ public:
             const TextAtom* const atom = getAtom (i);
             const int nextIndex = index + atom->numChars;
 
-            if (startCharacter < nextIndex)
+            if (range.getStart() < nextIndex)
             {
-                if (endCharacter <= index)
+                if (range.getEnd() <= index)
                     break;
 
-                const int start = jmax (0, startCharacter - index);
-                const int end = jmin (endCharacter - index, (int) atom->numChars);
+                const Range<int> r ((range - index).getIntersectionWith (Range<int> (0, (int) atom->numChars)));
 
-                if (start < end)
-                    concatenator.append (atom->atomText.substring (start, end));
+                if (! r.isEmpty())
+                    concatenator.append (atom->atomText.substring (r.getStart(), r.getEnd()));
             }
 
             index = nextIndex;
@@ -609,11 +607,10 @@ public:
     }
 
     void drawSelection (Graphics& g,
-                        const int selectionStart,
-                        const int selectionEnd) const
+                        const Range<int>& selection) const
     {
-        const int startX = roundToInt (indexToX (selectionStart));
-        const int endX   = roundToInt (indexToX (selectionEnd));
+        const int startX = roundToInt (indexToX (selection.getStart()));
+        const int endX   = roundToInt (indexToX (selection.getEnd()));
 
         const int y = roundToInt (lineY);
         const int nextY = roundToInt (lineY + lineHeight);
@@ -622,8 +619,7 @@ public:
     }
 
     void drawSelectedText (Graphics& g,
-                           const int selectionStart,
-                           const int selectionEnd,
+                           const Range<int>& selection,
                            const Colour& selectedTextColour) const
     {
         if (passwordCharacter != 0 || ! atom->isWhitespace())
@@ -634,21 +630,21 @@ public:
                               atomX,
                               (float) roundToInt (lineY + lineHeight - maxDescent));
 
-            if (selectionEnd < indexInText + atom->numChars)
+            if (selection.getEnd() < indexInText + atom->numChars)
             {
                 GlyphArrangement ga2 (ga);
-                ga2.removeRangeOfGlyphs (0, selectionEnd - indexInText);
-                ga.removeRangeOfGlyphs (selectionEnd - indexInText, -1);
+                ga2.removeRangeOfGlyphs (0, selection.getEnd() - indexInText);
+                ga.removeRangeOfGlyphs (selection.getEnd() - indexInText, -1);
 
                 g.setColour (currentSection->colour);
                 ga2.draw (g);
             }
 
-            if (selectionStart > indexInText)
+            if (selection.getStart() > indexInText)
             {
                 GlyphArrangement ga2 (ga);
-                ga2.removeRangeOfGlyphs (selectionStart - indexInText, -1);
-                ga.removeRangeOfGlyphs (0, selectionStart - indexInText);
+                ga2.removeRangeOfGlyphs (selection.getStart() - indexInText, -1);
+                ga.removeRangeOfGlyphs (0, selection.getStart() - indexInText);
 
                 g.setColour (currentSection->colour);
                 ga2.draw (g);
@@ -801,7 +797,7 @@ public:
 
     bool undo()
     {
-        owner.remove (insertIndex, insertIndex + text.length(), 0, oldCaretPos);
+        owner.remove (Range<int> (insertIndex, insertIndex + text.length()), 0, oldCaretPos);
         return true;
     }
 
@@ -815,7 +811,8 @@ public:
 class TextEditorRemoveAction  : public UndoableAction
 {
     TextEditor& owner;
-    const int startIndex, endIndex, oldCaretPos, newCaretPos;
+    const Range<int> range;
+    const int oldCaretPos, newCaretPos;
     VoidArray removedSections;
 
     TextEditorRemoveAction (const TextEditorRemoveAction&);
@@ -823,14 +820,12 @@ class TextEditorRemoveAction  : public UndoableAction
 
 public:
     TextEditorRemoveAction (TextEditor& owner_,
-                            const int startIndex_,
-                            const int endIndex_,
+                            const Range<int> range_,
                             const int oldCaretPos_,
                             const int newCaretPos_,
                             const VoidArray& removedSections_)
         : owner (owner_),
-          startIndex (startIndex_),
-          endIndex (endIndex_),
+          range (range_),
           oldCaretPos (oldCaretPos_),
           newCaretPos (newCaretPos_),
           removedSections (removedSections_)
@@ -849,13 +844,13 @@ public:
 
     bool perform()
     {
-        owner.remove (startIndex, endIndex, 0, newCaretPos);
+        owner.remove (range, 0, newCaretPos);
         return true;
     }
 
     bool undo()
     {
-        owner.reinsert (startIndex, removedSections);
+        owner.reinsert (range.getStart(), removedSections);
         owner.moveCursorTo (oldCaretPos, false);
         return true;
     }
@@ -988,8 +983,6 @@ TextEditor::TextEditor (const String& name,
       cursorY (0),
       cursorHeight (0),
       maxTextLength (0),
-      selectionStart (0),
-      selectionEnd (0),
       leftIndent (4),
       topIndent (4),
       lastTransactionTime (0),
@@ -1310,35 +1303,35 @@ void TextEditor::repaintCaret()
                  roundToInt (cursorHeight) + 2);
 }
 
-void TextEditor::repaintText (int textStartIndex, int textEndIndex)
+void TextEditor::repaintText (const Range<int>& range)
 {
-    if (textStartIndex > textEndIndex && textEndIndex > 0)
-        swapVariables (textStartIndex, textEndIndex);
-
-    float x = 0, y = 0, lh = currentFont.getHeight();
-
-    const float wordWrapWidth = getWordWrapWidth();
-
-    if (wordWrapWidth > 0)
+    if (! range.isEmpty())
     {
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+        float x = 0, y = 0, lh = currentFont.getHeight();
 
-        i.getCharPosition (textStartIndex, x, y, lh);
+        const float wordWrapWidth = getWordWrapWidth();
 
-        const int y1 = (int) y;
-        int y2;
-
-        if (textEndIndex >= 0)
+        if (wordWrapWidth > 0)
         {
-            i.getCharPosition (textEndIndex, x, y, lh);
-            y2 = (int) (y + lh * 2.0f);
-        }
-        else
-        {
-            y2 = textHolder->getHeight();
-        }
+            TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
 
-        textHolder->repaint (0, y1, textHolder->getWidth(), y2 - y1);
+            i.getCharPosition (range.getStart(), x, y, lh);
+
+            const int y1 = (int) y;
+            int y2;
+
+            if (range.getEnd() >= getTotalNumChars())
+            {
+                y2 = getHeight();
+            }
+            else
+            {
+                i.getCharPosition (range.getEnd(), x, y, lh);
+                y2 = (int) (y + lh * 2.0f);
+            }
+
+            textHolder->repaint (0, y1, textHolder->getWidth(), y2 - y1);
+        }
     }
 }
 
@@ -1542,12 +1535,11 @@ void TextEditor::moveCursorTo (const int newPosition,
     {
         moveCaret (newPosition);
 
-        const int oldSelStart = selectionStart;
-        const int oldSelEnd = selectionEnd;
+        const Range<int> oldSelection (selection);
 
         if (dragType == notDragging)
         {
-            if (abs (getCaretPosition() - selectionStart) < abs (getCaretPosition() - selectionEnd))
+            if (abs (getCaretPosition() - selection.getStart()) < abs (getCaretPosition() - selection.getEnd()))
                 dragType = draggingSelectionStart;
             else
                 dragType = draggingSelectionEnd;
@@ -1555,41 +1547,29 @@ void TextEditor::moveCursorTo (const int newPosition,
 
         if (dragType == draggingSelectionStart)
         {
-            selectionStart = getCaretPosition();
-
-            if (selectionEnd < selectionStart)
-            {
-                swapVariables (selectionStart, selectionEnd);
+            if (getCaretPosition() >= selection.getEnd())
                 dragType = draggingSelectionEnd;
-            }
+
+            selection = Range<int>::between (getCaretPosition(), selection.getEnd());
         }
         else
         {
-            selectionEnd = getCaretPosition();
-
-            if (selectionEnd < selectionStart)
-            {
-                swapVariables (selectionStart, selectionEnd);
+            if (getCaretPosition() < selection.getStart())
                 dragType = draggingSelectionStart;
-            }
+
+            selection = Range<int>::between (getCaretPosition(), selection.getStart());
         }
 
-        jassert (selectionStart <= selectionEnd);
-        jassert (oldSelStart <= oldSelEnd);
-
-        repaintText (jmin (oldSelStart, selectionStart),
-                     jmax (oldSelEnd, selectionEnd));
+        repaintText (selection.getUnionWith (oldSelection));
     }
     else
     {
         dragType = notDragging;
 
-        if (selectionEnd > selectionStart)
-            repaintText (selectionStart, selectionEnd);
+        repaintText (selection);
 
         moveCaret (newPosition);
-        selectionStart = getCaretPosition();
-        selectionEnd = getCaretPosition();
+        selection = Range<int>::emptyRange (getCaretPosition());
     }
 }
 
@@ -1600,8 +1580,10 @@ int TextEditor::getTextIndexAt (const int x,
                             (float) (y + viewport->getViewPositionY() - topIndent));
 }
 
-void TextEditor::insertTextAtCursor (String newText)
+void TextEditor::insertTextAtCaret (const String& newText_)
 {
+    String newText (newText_);
+
     if (allowedCharacters.isNotEmpty())
         newText = newText.retainCharacters (allowedCharacters);
 
@@ -1610,11 +1592,10 @@ void TextEditor::insertTextAtCursor (String newText)
     else
         newText = newText.replace (T("\r\n"), T("\n"));
 
-    const int newCaretPos = selectionStart + newText.length();
-    const int insertIndex = selectionStart;
+    const int newCaretPos = selection.getStart() + newText.length();
+    const int insertIndex = selection.getStart();
 
-    remove (selectionStart, selectionEnd,
-            &undoManager,
+    remove (selection, &undoManager,
             newText.isNotEmpty() ? newCaretPos - 1 : newCaretPos);
 
     if (maxTextLength > 0)
@@ -1631,10 +1612,10 @@ void TextEditor::insertTextAtCursor (String newText)
     textChanged();
 }
 
-void TextEditor::setHighlightedRegion (int startPos, int numChars)
+void TextEditor::setHighlightedRegion (const Range<int>& newSelection)
 {
-    moveCursorTo (startPos, false);
-    moveCursorTo (startPos + numChars, true);
+    moveCursorTo (newSelection.getStart(), false);
+    moveCursorTo (newSelection.getEnd(), true);
 }
 
 //==============================================================================
@@ -1642,7 +1623,7 @@ void TextEditor::copy()
 {
     if (passwordCharacter == 0)
     {
-        const String selection (getTextSubstring (selectionStart, selectionEnd));
+        const String selection (getHighlightedText());
 
         if (selection.isNotEmpty())
             SystemClipboard::copyTextToClipboard (selection);
@@ -1656,7 +1637,7 @@ void TextEditor::paste()
         const String clip (SystemClipboard::getTextFromClipboard());
 
         if (clip.isNotEmpty())
-            insertTextAtCursor (clip);
+            insertTextAtCaret (clip);
     }
 }
 
@@ -1664,8 +1645,8 @@ void TextEditor::cut()
 {
     if (! isReadOnly())
     {
-        moveCaret (selectionEnd);
-        insertTextAtCursor (String::empty);
+        moveCaret (selection.getEnd());
+        insertTextAtCaret (String::empty);
     }
 }
 
@@ -1685,7 +1666,7 @@ void TextEditor::drawContent (Graphics& g)
         while (i.lineY + 200.0 < clip.getY() && i.next())
         {}
 
-        if (selectionStart < selectionEnd)
+        if (! selection.isEmpty())
         {
             g.setColour (findColour (highlightColourId)
                             .withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
@@ -1697,10 +1678,9 @@ void TextEditor::drawContent (Graphics& g)
             while (i2.next() && i2.lineY < clip.getBottom())
             {
                 if (i2.lineY + i2.lineHeight >= clip.getY()
-                     && selectionEnd >= i2.indexInText
-                     && selectionStart <= i2.indexInText + i2.atom->numChars)
+                     && selection.intersects (Range<int> (i2.indexInText, i2.indexInText + i2.atom->numChars)))
                 {
-                    i2.drawSelection (g, selectionStart, selectionEnd);
+                    i2.drawSelection (g, selection);
                 }
             }
         }
@@ -1711,10 +1691,9 @@ void TextEditor::drawContent (Graphics& g)
         {
             if (i.lineY + i.lineHeight >= clip.getY())
             {
-                if (selectionEnd >= i.indexInText
-                     && selectionStart <= i.indexInText + i.atom->numChars)
+                if (selection.intersects (Range<int> (i.indexInText, i.indexInText + i.atom->numChars)))
                 {
-                    i.drawSelectedText (g, selectionStart, selectionEnd, selectedTextColour);
+                    i.drawSelectedText (g, selection, selectedTextColour);
                     lastSection = 0;
                 }
                 else
@@ -1972,8 +1951,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
         }
         else
         {
-            if (selectionStart == selectionEnd && selectionStart > 0)
-                --selectionStart;
+            if (selection.isEmpty() && selection.getStart() > 0)
+                selection.setStart (selection.getEnd() - 1);
         }
 
         cut();
@@ -1983,11 +1962,8 @@ bool TextEditor::keyPressed (const KeyPress& key)
         if (key.getModifiers().isShiftDown())
             copy();
 
-        if (selectionStart == selectionEnd
-             && selectionEnd < getTotalNumChars())
-        {
-            ++selectionEnd;
-        }
+        if (selection.isEmpty() && selection.getStart() < getTotalNumChars())
+            selection.setEnd (selection.getStart() + 1);
 
         cut();
     }
@@ -2030,7 +2006,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
         newTransaction();
 
         if (returnKeyStartsNewLine)
-            insertTextAtCursor (T("\n"));
+            insertTextAtCaret (T("\n"));
         else
             returnPressed();
     }
@@ -2043,7 +2019,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key.getTextCharacter() >= ' '
               || (tabKeyUsed && (key.getTextCharacter() == '\t')))
     {
-        insertTextAtCursor (String::charToString (key.getTextCharacter()));
+        insertTextAtCaret (String::charToString (key.getTextCharacter()));
 
         lastTransactionTime = Time::getApproximateMillisecondCounter();
     }
@@ -2079,7 +2055,7 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
     if (passwordCharacter == 0)
     {
         m.addItem (baseMenuItemID + 1, TRANS("cut"), writable);
-        m.addItem (baseMenuItemID + 2, TRANS("copy"), selectionStart < selectionEnd);
+        m.addItem (baseMenuItemID + 2, TRANS("copy"), ! selection.isEmpty());
         m.addItem (baseMenuItemID + 3, TRANS("paste"), writable);
     }
 
@@ -2233,7 +2209,7 @@ void TextEditor::enablementChanged()
 //==============================================================================
 void TextEditor::clearInternal (UndoManager* const um)
 {
-    remove (0, getTotalNumChars(), um, caretPosition);
+    remove (Range<int> (0, getTotalNumChars()), um, caretPosition);
 }
 
 void TextEditor::insert (const String& text,
@@ -2260,8 +2236,8 @@ void TextEditor::insert (const String& text,
         }
         else
         {
-            repaintText (insertIndex, -1); // must do this before and after changing the data, in case
-                                           // a line gets moved due to word wrap
+            repaintText (Range<int> (insertIndex, getTotalNumChars())); // must do this before and after changing the data, in case
+                                                                        // a line gets moved due to word wrap
 
             int index = 0;
             int nextIndex = 0;
@@ -2300,7 +2276,7 @@ void TextEditor::insert (const String& text,
 
             moveCursorTo (caretPositionToMoveTo, false);
 
-            repaintText (insertIndex, -1);
+            repaintText (Range<int> (insertIndex, getTotalNumChars()));
         }
     }
 }
@@ -2346,12 +2322,11 @@ void TextEditor::reinsert (const int insertIndex,
     valueTextNeedsUpdating = true;
 }
 
-void TextEditor::remove (const int startIndex,
-                         int endIndex,
+void TextEditor::remove (const Range<int>& range,
                          UndoManager* const um,
                          const int caretPositionToMoveTo)
 {
-    if (endIndex > startIndex)
+    if (! range.isEmpty())
     {
         int index = 0;
 
@@ -2359,21 +2334,21 @@ void TextEditor::remove (const int startIndex,
         {
             const int nextIndex = index + ((UniformTextSection*) sections[i])->getTotalLength();
 
-            if (startIndex > index && startIndex < nextIndex)
+            if (range.getStart() > index && range.getStart() < nextIndex)
             {
-                splitSection (i, startIndex - index);
+                splitSection (i, range.getStart() - index);
                 --i;
             }
-            else if (endIndex > index && endIndex < nextIndex)
+            else if (range.getEnd() > index && range.getEnd() < nextIndex)
             {
-                splitSection (i, endIndex - index);
+                splitSection (i, range.getEnd() - index);
                 --i;
             }
             else
             {
                 index = nextIndex;
 
-                if (index > endIndex)
+                if (index > range.getEnd())
                     break;
             }
         }
@@ -2386,14 +2361,14 @@ void TextEditor::remove (const int startIndex,
 
             for (int i = 0; i < sections.size(); ++i)
             {
-                if (endIndex <= startIndex)
+                if (range.getEnd() <= range.getStart())
                     break;
 
                 UniformTextSection* const section = (UniformTextSection*) sections.getUnchecked (i);
 
                 const int nextIndex = index + section->getTotalLength();
 
-                if (startIndex <= index && endIndex >= nextIndex)
+                if (range.getStart() <= index && range.getEnd() >= nextIndex)
                     removedSections.add (new UniformTextSection (*section));
 
                 index = nextIndex;
@@ -2403,29 +2378,31 @@ void TextEditor::remove (const int startIndex,
                 newTransaction();
 
             um->perform (new TextEditorRemoveAction (*this,
-                                                     startIndex,
-                                                     endIndex,
+                                                     range,
                                                      caretPosition,
                                                      caretPositionToMoveTo,
                                                      removedSections));
         }
         else
         {
+            Range<int> remainingRange (range);
+
             for (int i = 0; i < sections.size(); ++i)
             {
-                if (endIndex <= startIndex)
-                    break;
-
                 UniformTextSection* const section = (UniformTextSection*) sections.getUnchecked (i);
 
                 const int nextIndex = index + section->getTotalLength();
 
-                if (startIndex <= index && endIndex >= nextIndex)
+                if (remainingRange.getStart() <= index && remainingRange.getEnd() >= nextIndex)
                 {
                     sections.remove(i);
-                    endIndex -= (nextIndex - index);
                     section->clear();
                     delete section;
+
+                    remainingRange.setEnd (remainingRange.getEnd() - (nextIndex - index));
+                    if (remainingRange.isEmpty())
+                        break;
+
                     --i;
                 }
                 else
@@ -2440,7 +2417,7 @@ void TextEditor::remove (const int startIndex,
 
             moveCursorTo (caretPositionToMoveTo, false);
 
-            repaintText (startIndex, -1);
+            repaintText (Range<int> (range.getStart(), getTotalNumChars()));
         }
     }
 }
@@ -2458,13 +2435,13 @@ const String TextEditor::getText() const
     return t;
 }
 
-const String TextEditor::getTextSubstring (const int startCharacter, const int endCharacter) const
+const String TextEditor::getTextInRange (const Range<int>& range) const
 {
     String t;
 
-    if (endCharacter > startCharacter)
+    if (! range.isEmpty())
     {
-        t.preallocateStorage (jmin (getTotalNumChars(), endCharacter - startCharacter));
+        t.preallocateStorage (jmin (getTotalNumChars(), range.getLength()));
         String::Concatenator concatenator (t);
         int index = 0;
 
@@ -2473,14 +2450,12 @@ const String TextEditor::getTextSubstring (const int startCharacter, const int e
             const UniformTextSection* const s = (const UniformTextSection*) sections.getUnchecked(i);
             const int nextIndex = index + s->getTotalLength();
 
-            if (startCharacter < nextIndex)
+            if (range.getStart() < nextIndex)
             {
-                if (endCharacter <= index)
+                if (range.getEnd() <= index)
                     break;
 
-                s->appendSubstring (concatenator,
-                                    startCharacter - index,
-                                    endCharacter - index);
+                s->appendSubstring (concatenator, range - index);
             }
 
             index = nextIndex;
@@ -2492,7 +2467,7 @@ const String TextEditor::getTextSubstring (const int startCharacter, const int e
 
 const String TextEditor::getHighlightedText() const
 {
-    return getTextSubstring (selectionStart, selectionEnd);
+    return getTextInRange (selection);
 }
 
 int TextEditor::getTotalNumChars() const
@@ -2566,7 +2541,7 @@ static int getCharacterCategory (const tchar character)
 
 int TextEditor::findWordBreakAfter (const int position) const
 {
-    const String t (getTextSubstring (position, position + 512));
+    const String t (getTextInRange (Range<int> (position, position + 512)));
     const int totalLength = t.length();
     int i = 0;
 
@@ -2590,7 +2565,7 @@ int TextEditor::findWordBreakBefore (const int position) const
         return 0;
 
     const int startOfBuffer = jmax (0, position - 512);
-    const String t (getTextSubstring (startOfBuffer, position));
+    const String t (getTextInRange (Range<int> (startOfBuffer, position)));
 
     int i = position - startOfBuffer;
 

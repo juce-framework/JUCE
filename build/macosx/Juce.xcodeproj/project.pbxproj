@@ -30,6 +30,10 @@
 		844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
 		844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		844BB95F10C557A800DF5536 /* juce_Config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8456EC6508A2A6C80087C412 /* juce_Config.h */; };
+		8473E64A11249FD800D74E02 /* juce_TextInputTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E64911249FD800D74E02 /* juce_TextInputTarget.h */; };
+		8473E64B11249FD800D74E02 /* juce_TextInputTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E64911249FD800D74E02 /* juce_TextInputTarget.h */; };
+		8473E6531125974600D74E02 /* juce_Range.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E6521125974600D74E02 /* juce_Range.h */; };
+		8473E6541125974600D74E02 /* juce_Range.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E6521125974600D74E02 /* juce_Range.h */; };
 		84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
 		84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
 		84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */; };
@@ -1237,6 +1241,8 @@
 		843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_ValueTree.h; sourceTree = "<group>"; };
 		8456EC6508A2A6C80087C412 /* juce_Config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = juce_Config.h; path = ../../juce_Config.h; sourceTree = SOURCE_ROOT; };
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
+		8473E64911249FD800D74E02 /* juce_TextInputTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_TextInputTarget.h; sourceTree = "<group>"; };
+		8473E6521125974600D74E02 /* juce_Range.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_Range.h; sourceTree = "<group>"; };
 		84816E3510809B4F008FEC33 /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_iphone_Audio.cpp; sourceTree = "<group>"; };
 		84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_MessageManager.mm; sourceTree = "<group>"; };
@@ -2192,6 +2198,7 @@
 				8414DE77111229B300DAF75A /* juce_NamedValueSet.h */,
 				84F1E8D810403671006A1807 /* juce_PropertySet.cpp */,
 				84F1E8D910403671006A1807 /* juce_PropertySet.h */,
+				8473E6521125974600D74E02 /* juce_Range.h */,
 				84F1E8DA10403671006A1807 /* juce_ReferenceCountedArray.h */,
 				84F1E8DB10403671006A1807 /* juce_ReferenceCountedObject.h */,
 				84AF3FE710EF9FF30035D74F /* juce_ScopedPointer.h */,
@@ -2582,6 +2589,7 @@
 				84F1EAA010403709006A1807 /* juce_KeyPressMappingSet.h */,
 				84F1EAA110403709006A1807 /* juce_ModifierKeys.cpp */,
 				84F1EAA210403709006A1807 /* juce_ModifierKeys.h */,
+				8473E64911249FD800D74E02 /* juce_TextInputTarget.h */,
 			);
 			name = keyboard;
 			path = ../../src/gui/components/keyboard;
@@ -3242,6 +3250,8 @@
 				84CAC0C1110478D50088D64D /* juce_TemporaryFile.h in Headers */,
 				843E5C701113949F006F959F /* juce_NamedValueSet.h in Headers */,
 				843E5C72111394A3006F959F /* juce_DynamicObject.h in Headers */,
+				8473E64B11249FD800D74E02 /* juce_TextInputTarget.h in Headers */,
+				8473E6541125974600D74E02 /* juce_Range.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3572,6 +3582,8 @@
 				84CABF6A1101292D0088D64D /* juce_TemporaryFile.h in Headers */,
 				8414DE79111229B300DAF75A /* juce_NamedValueSet.h in Headers */,
 				8414DE8511122A8D00DAF75A /* juce_DynamicObject.h in Headers */,
+				8473E64A11249FD800D74E02 /* juce_TextInputTarget.h in Headers */,
+				8473E6531125974600D74E02 /* juce_Range.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

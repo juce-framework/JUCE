@@ -422,6 +422,9 @@
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
  #include "gui/components/keyboard/juce_ModifierKeys.h"
 #endif
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+ #include "gui/components/keyboard/juce_TextInputTarget.h"
+#endif
 #ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
  #include "gui/components/layout/juce_ComponentAnimator.h"
 #endif

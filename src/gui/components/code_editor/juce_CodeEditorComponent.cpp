@@ -869,6 +869,24 @@ void CodeEditorComponent::timerCallback()
 }
 
 //==============================================================================
+const Range<int> CodeEditorComponent::getHighlightedRegion() const
+{
+    return Range<int> (selectionStart.getPosition(), selectionEnd.getPosition());
+}
+
+void CodeEditorComponent::setHighlightedRegion (const Range<int>& newRange)
+{
+    moveCaretTo (CodeDocument::Position (&document, newRange.getStart()), false);
+    moveCaretTo (CodeDocument::Position (&document, newRange.getEnd()), true);
+}
+
+const String CodeEditorComponent::getTextInRange (const Range<int>& range) const
+{
+    return document.getTextBetween (CodeDocument::Position (&document, range.getStart()),
+                                    CodeDocument::Position (&document, range.getEnd()));
+}
+
+//==============================================================================
 bool CodeEditorComponent::keyPressed (const KeyPress& key)
 {
     const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();

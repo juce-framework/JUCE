@@ -3018,8 +3018,11 @@ public:
 	{
 	public:
 		identifier() throw();
+
 		identifier (const char* const name);
+
 		identifier (const String& name);
+
 		~identifier();
 
 		bool operator== (const identifier& other) const throw()
@@ -4837,6 +4840,138 @@ private:
 
 #endif   // __JUCE_PROPERTYSET_JUCEHEADER__
 /*** End of inlined file: juce_PropertySet.h ***/
+
+
+#endif
+#ifndef __JUCE_RANGE_JUCEHEADER__
+
+/*** Start of inlined file: juce_Range.h ***/
+#ifndef __JUCE_RANGE_JUCEHEADER__
+#define __JUCE_RANGE_JUCEHEADER__
+
+template <typename ValueType>
+class Range
+{
+public:
+
+	Range() throw()
+		: start (ValueType()), end (ValueType())
+	{
+	}
+
+	Range (const ValueType start_, const ValueType end_) throw()
+		: start (start_), end (jmax (start_, end_))
+	{
+	}
+
+	Range (const Range& other) throw()
+		: start (other.start), end (other.end)
+	{
+	}
+
+	Range& operator= (const Range& other) throw()
+	{
+		start = other.start;
+		end = other.end;
+		return *this;
+	}
+
+	~Range() throw()
+	{
+	}
+
+	static const Range between (const ValueType position1, const ValueType position2) throw()
+	{
+		return (position1 < position2) ? Range (position1, position2)
+									   : Range (position2, position1);
+	}
+
+	static const Range emptyRange (const ValueType start) throw()
+	{
+		return Range (start, start);
+	}
+
+	inline ValueType getStart() const throw()	   { return start; }
+
+	inline ValueType getLength() const throw()	  { return end - start; }
+
+	inline ValueType getEnd() const throw()		 { return end; }
+
+	inline bool isEmpty() const throw()		 { return start == end; }
+
+	void setStart (const ValueType newStart) throw()
+	{
+		start = newStart;
+		if (newStart > end)
+			end = newStart;
+	}
+
+	void setEnd (const ValueType newEnd) throw()
+	{
+		end = newEnd;
+		if (newEnd < start)
+			start = newEnd;
+	}
+
+	void setLength (const ValueType newLength) throw()
+	{
+		end = start + jmax (ValueType(), newLength);
+	}
+
+	inline const Range& operator+= (const ValueType amountToAdd) throw()
+	{
+		start += amountToAdd;
+		end += amountToAdd;
+		return *this;
+	}
+
+	inline const Range& operator-= (const ValueType amountToSubtract) throw()
+	{
+		start -= amountToSubtract;
+		end -= amountToSubtract;
+		return *this;
+	}
+
+	const Range operator+ (const ValueType amountToAdd) const throw()
+	{
+		return Range (start + amountToAdd, end + amountToAdd);
+	}
+
+	const Range operator- (const ValueType amountToSubtract) const throw()
+	{
+		return Range (start - amountToSubtract, end - amountToSubtract);
+	}
+
+	bool contains (const ValueType position) const throw()
+	{
+		return position >= start && position < end;
+	}
+
+	bool intersects (const Range& other) const throw()
+	{
+		return other.start < end && other.end > start;
+	}
+
+	const Range getIntersectionWith (const Range& other) const throw()
+	{
+		return Range (jmax (start, other.start),
+					  jmin (end, other.end));
+	}
+
+	const Range getUnionWith (const Range& other) const throw()
+	{
+		return Range (jmin (start, other.start),
+					  jmax (end, other.end));
+	}
+
+	juce_UseDebuggingNewOperator
+
+private:
+	ValueType start, end;
+};
+
+#endif   // __JUCE_RANGE_JUCEHEADER__
+/*** End of inlined file: juce_Range.h ***/
 
 
 #endif
@@ -6673,6 +6808,8 @@ public:
 	~FileLogger();
 
 	void logMessage (const String& message);
+
+	const File getLogFile() const		   { return logFile; }
 
 	static FileLogger* createDefaultAppLogger (const String& logFileSubDirectoryName,
 											   const String& logFileName,
@@ -16317,6 +16454,31 @@ private:
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
 /*** End of inlined file: juce_PopupMenu.h ***/
 
+
+/*** Start of inlined file: juce_TextInputTarget.h ***/
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+
+class JUCE_API  TextInputTarget
+{
+public:
+
+	TextInputTarget() {}
+
+	virtual ~TextInputTarget() {}
+
+	virtual const Range<int> getHighlightedRegion() const = 0;
+
+	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
+
+	virtual const String getTextInRange (const Range<int>& range) const = 0;
+
+	virtual void insertTextAtCaret (const String& textToInsert) = 0;
+};
+
+#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+/*** End of inlined file: juce_TextInputTarget.h ***/
+
 class TextEditor;
 class TextHolderComponent;
 
@@ -16335,6 +16497,7 @@ public:
 };
 
 class JUCE_API  TextEditor  : public Component,
+							  public TextInputTarget,
 							  public SettableTooltipClient
 {
 public:
@@ -16430,7 +16593,7 @@ public:
 
 	const String getText() const;
 
-	const String getTextSubstring (const int startCharacter, const int endCharacter) const;
+	const String getTextInRange (const Range<int>& textRange) const;
 
 	bool isEmpty() const;
 
@@ -16439,7 +16602,7 @@ public:
 
 	Value& getTextValue();
 
-	void insertTextAtCursor (String textToInsert);
+	void insertTextAtCaret (const String& textToInsert);
 
 	void clear();
 
@@ -16458,12 +16621,9 @@ public:
 
 	const Rectangle<int> getCaretRectangle();
 
-	void setHighlightedRegion (int startIndex,
-							   int numberOfCharactersToHighlight);
+	void setHighlightedRegion (const Range<int>& newSelection);
 
-	int getHighlightedRegionStart() const			   { return selectionStart; }
-
-	int getHighlightedRegionLength() const			  { return jmax (0, selectionEnd - selectionStart); }
+	const Range<int> getHighlightedRegion() const		   { return selection; }
 
 	const String getHighlightedText() const;
 
@@ -16549,7 +16709,7 @@ private:
 	UndoManager undoManager;
 	float cursorX, cursorY, cursorHeight;
 	int maxTextLength;
-	int selectionStart, selectionEnd;
+	Range<int> selection;
 	int leftIndent, topIndent;
 	unsigned int lastTransactionTime;
 	Font currentFont;
@@ -16589,8 +16749,7 @@ private:
 	void reinsert (const int insertIndex,
 				   const VoidArray& sections);
 
-	void remove (const int startIndex,
-				 int endIndex,
+	void remove (const Range<int>& range,
 				 UndoManager* const um,
 				 const int caretPositionToMoveTo);
 
@@ -16615,7 +16774,7 @@ private:
 	float getWordWrapWidth() const;
 	void timerCallbackInt();
 	void repaintCaret();
-	void repaintText (int textStartIndex, int textEndIndex);
+	void repaintText (const Range<int>& range);
 
 	TextEditor (const TextEditor&);
 	const TextEditor& operator= (const TextEditor&);
@@ -20702,6 +20861,7 @@ public:
 /*** End of inlined file: juce_CodeTokeniser.h ***/
 
 class JUCE_API  CodeEditorComponent   : public Component,
+										public TextInputTarget,
 										public Timer,
 										public ScrollBarListener,
 										public CodeDocument::Listener,
@@ -20768,6 +20928,10 @@ public:
 
 	void undo();
 	void redo();
+
+	const Range<int> getHighlightedRegion() const;
+	void setHighlightedRegion (const Range<int>& newRange);
+	const String getTextInRange (const Range<int>& range) const;
 
 	void setTabSize (const int numSpacesPerTab,
 					 const bool insertSpacesInsteadOfTabCharacters) throw();
@@ -23589,6 +23753,9 @@ private:
 
 #endif
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_COMPONENTANIMATOR_JUCEHEADER__
