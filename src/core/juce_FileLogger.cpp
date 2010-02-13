@@ -72,7 +72,7 @@ void FileLogger::logMessage (const String& message)
 {
     if (logStream != 0)
     {
-        Logger::outputDebugString (message);
+        DBG (message);
 
         const ScopedLock sl (logLock);
         (*logStream) << message << T("\r\n");
