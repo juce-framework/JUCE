@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="NTe0XB0ij" name="Plugin Host" projectType="guiapp" version="1.0.0"
+              juceLinkage="amalg_multi" juceFolder="../../../juce" buildVST="1"
+              buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4" vstFolderPC="c:\SDKs\vstsdk2.4"
+              rtasFolderMac="~/SDKs/PT_80_SDK" rtasFolderPC="c:\SDKs\PT_80_SDK"
+              pluginName="Juce Project" pluginDesc="Juce Project" pluginManufacturer="yourcompany"
+              pluginManufacturerCode="abcd" pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}"
+              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
+              pluginSilenceInIsSilenceOut="0" pluginTailLength="0" pluginEditorRequiresKeys="0"
+              pluginAUExportPrefix="JuceProjectAU" pluginAUViewClass="JuceProjectAU_V1"
+              pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.pluginhost"
+              jucerVersion="3.0.0">
+  <CONFIGURATIONS>
+    <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="Plugin Host"
+                   osxSDK="1" osxCompatibility="1"/>
+    <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="Plugin Host"
+                   osxSDK="1" osxCompatibility="1"/>
+  </CONFIGURATIONS>
+  <MAINGROUP id="YdWL7hi7p" name="Plugin Host">
+    <GROUP id="uhHLubiaQ" name="Source">
+      <FILE id="8tLeuntR4" name="FilterGraph.cpp" compile="1" resource="0"
+            file="Source/FilterGraph.cpp"/>
+      <FILE id="auGSxnlTU" name="FilterGraph.h" compile="0" resource="0"
+            file="Source/FilterGraph.h"/>
+      <FILE id="2b09bSUt" name="GraphEditorPanel.cpp" compile="1" resource="0"
+            file="Source/GraphEditorPanel.cpp"/>
+      <FILE id="sj8Yug8cu" name="GraphEditorPanel.h" compile="0" resource="0"
+            file="Source/GraphEditorPanel.h"/>
+      <FILE id="nehnGjkrX" name="HostStartup.cpp" compile="1" resource="0"
+            file="Source/HostStartup.cpp"/>
+      <FILE id="J6HWWSQP1" name="InternalFilters.cpp" compile="1" resource="0"
+            file="Source/InternalFilters.cpp"/>
+      <FILE id="AplCcJ0La" name="InternalFilters.h" compile="0" resource="0"
+            file="Source/InternalFilters.h"/>
+      <FILE id="mFVSjbHfN" name="MainHostWindow.cpp" compile="1" resource="0"
+            file="Source/MainHostWindow.cpp"/>
+      <FILE id="h1kpxyzHi" name="MainHostWindow.h" compile="0" resource="0"
+            file="Source/MainHostWindow.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
+               JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="enabled" JUCE_ALSA="enabled"
+               JUCE_QUICKTIME="default" JUCE_OPENGL="default" JUCE_USE_FLAC="default"
+               JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
+               JUCE_USE_CAMERA="default" JUCE_ENABLE_REPAINT_DEBUGGING="default"
+               JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="enabled"
+               JUCE_PLUGINHOST_AU="enabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
+               JUCE_WEB_BROWSER="default" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
+               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"/>
+</JUCERPROJECT>

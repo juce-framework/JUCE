@@ -1,0 +1,20 @@
+
+Microsoft Visual Studio Solution File, Format Version 8.00
+# Visual C++ Express 2005
+Project("{2C5B2BD0-DCDD-8F96-4518-F341656FE506}") = "Plugin Host", "Plugin Host.vcproj", "{4B76605A-510D-D729-CAC3-8E6F2C89BE71}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Debug|Win32.Build.0 = Debug|Win32
+		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Release|Win32.ActiveCfg = Release|Win32
+		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
