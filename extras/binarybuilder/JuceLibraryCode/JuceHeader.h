@@ -16,4 +16,11 @@
 #include "AppConfig.h"
 #include "../../../juce_amalgamated.h"
 
+namespace ProjectInfo
+{
+    const char* const  projectName    = "BinaryBuilder";
+    const char* const  versionString  = "1.0.0";
+    const int          versionNumber  = 0x10000;
+}
+
 #endif   // __APPHEADERFILE_AC205C4C__

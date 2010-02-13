@@ -118,7 +118,7 @@ public:
 
     const String getApplicationVersion()
     {
-        return T("1.0");
+        return ProjectInfo::versionString;
     }
 
     bool moreThanOneInstanceAllowed()

@@ -60,7 +60,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_BUILD_NATIVE || JUCE_BUILD_CORE
+#if JUCE_BUILD_NATIVE || JUCE_BUILD_CORE || (JUCE_BUILD_MISC && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU))
  #if JUCE_WINDOWS
   #include "../src/native/windows/juce_win32_NativeIncludes.h"
  #elif JUCE_LINUX

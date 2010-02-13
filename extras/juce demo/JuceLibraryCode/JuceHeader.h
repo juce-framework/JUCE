@@ -17,4 +17,11 @@
 #include "../../../juce_amalgamated.h"
 #include "BinaryData.h"
 
+namespace ProjectInfo
+{
+    const char* const  projectName    = "Juce Demo";
+    const char* const  versionString  = "1.0.0";
+    const int          versionNumber  = 0x10000;
+}
+
 #endif   // __APPHEADERFILE_77852E90__
