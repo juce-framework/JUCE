@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VisualStudioProject ProjectType="Visual C++"
+                     Version="8.00"
+                     Name="Juce Demo"
+                     ProjectGUID="{49CD629B-E99C-F915-A29E-7BE8278496F2}"
+                     TargetFrameworkVersion="131072">
+  <Platforms>
+    <Platform Name="Win32"/>
+  </Platforms>
+  <ToolFiles/>
+  <Configurations>
+    <Configuration Name="Debug&#124;Win32"
+                   OutputDirectory=".\Debug"
+                   IntermediateDirectory=".\Debug"
+                   ConfigurationType="1"
+                   UseOfMFC="0"
+                   ATLMinimizesCRunTimeLibraryUsage="false"
+                   CharacterSet="2">
+      <Tool Name="VCPreBuildEventTool"/>
+      <Tool Name="VCCustomBuildTool"/>
+      <Tool Name="VCXMLDataGeneratorTool"/>
+      <Tool Name="VCWebServiceProxyGeneratorTool"/>
+      <Tool Name="VCMIDLTool"
+            PreprocessorDefinitions="_DEBUG"
+            MkTypLibCompatible="true"
+            SuppressStartupBanner="true"
+            TargetEnvironment="1"
+            TypeLibraryName=".\Debug\JuceDemo.tlb"
+            HeaderFileName=""/>
+      <Tool Name="VCCLCompilerTool"
+            Optimization="0"
+            BufferSecurityCheck=""
+            DebugInformationFormat="4"
+            AdditionalIncludeDirectories=""
+            PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
+            RuntimeLibrary="1"
+            RuntimeTypeInfo="true"
+            UsePrecompiledHeader="0"
+            PrecompiledHeaderFile=".\Debug\JuceDemo.pch"
+            AssemblerListingLocation=".\Debug\"
+            ObjectFile=".\Debug\"
+            ProgramDataBaseFileName=".\Debug\"
+            WarningLevel="3"
+            SuppressStartupBanner="true"/>
+      <Tool Name="VCManagedResourceCompilerTool"/>
+      <Tool Name="VCResourceCompilerTool"
+            PreprocessorDefinitions="_DEBUG"/>
+      <Tool Name="VCPreLinkEventTool"/>
+      <Tool Name="VCLinkerTool"
+            OutputFile=".\Debug\JuceDemo.exe"
+            SuppressStartupBanner="true"
+            IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
+            GenerateDebugInformation="true"
+            ProgramDatabaseFile=".\Debug\JuceDemo.pdb"
+            SubSystem="2"
+            RandomizedBaseAddress="1"
+            DataExecutionPrevention="0"
+            TargetMachine="1"/>
+      <Tool Name="VCALinkTool"/>
+      <Tool Name="VCManifestTool"/>
+      <Tool Name="VCXDCMakeTool"/>
+      <Tool Name="VCBscMakeTool"
+            SuppressStartupBanner="true"
+            OutputFile=".\Debug\JuceDemo.bsc"/>
+      <Tool Name="VCFxCopTool"/>
+      <Tool Name="VCAppVerifierTool"/>
+      <Tool Name="VCPostBuildEventTool"/>
+    </Configuration>
+    <Configuration Name="Release&#124;Win32"
+                   OutputDirectory=".\Release"
+                   IntermediateDirectory=".\Release"
+                   ConfigurationType="1"
+                   UseOfMFC="0"
+                   ATLMinimizesCRunTimeLibraryUsage="false"
+                   CharacterSet="2"
+                   WholeProgramOptimization="1">
+      <Tool Name="VCPreBuildEventTool"/>
+      <Tool Name="VCCustomBuildTool"/>
+      <Tool Name="VCXMLDataGeneratorTool"/>
+      <Tool Name="VCWebServiceProxyGeneratorTool"/>
+      <Tool Name="VCMIDLTool"
+            PreprocessorDefinitions="NDEBUG"
+            MkTypLibCompatible="true"
+            SuppressStartupBanner="true"
+            TargetEnvironment="1"
+            TypeLibraryName=".\Release\JuceDemo.tlb"
+            HeaderFileName=""/>
+      <Tool Name="VCCLCompilerTool"
+            Optimization="2"
+            InlineFunctionExpansion="1"
+            StringPooling="true"
+            AdditionalIncludeDirectories=""
+            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+            RuntimeLibrary="0"
+            RuntimeTypeInfo="true"
+            UsePrecompiledHeader="0"
+            PrecompiledHeaderFile=".\Release\JuceDemo.pch"
+            AssemblerListingLocation=".\Release\"
+            ObjectFile=".\Release\"
+            ProgramDataBaseFileName=".\Release\"
+            WarningLevel="3"
+            SuppressStartupBanner="true"/>
+      <Tool Name="VCManagedResourceCompilerTool"/>
+      <Tool Name="VCResourceCompilerTool"
+            PreprocessorDefinitions="NDEBUG"/>
+      <Tool Name="VCPreLinkEventTool"/>
+      <Tool Name="VCLinkerTool"
+            OutputFile=".\Release\JuceDemo.exe"
+            SuppressStartupBanner="true"
+            IgnoreDefaultLibraryNames=""
+            GenerateDebugInformation="false"
+            ProgramDatabaseFile=".\Release\JuceDemo.pdb"
+            SubSystem="2"
+            GenerateManifest="false"
+            OptimizeReferences="2"
+            EnableCOMDATFolding="2"
+            RandomizedBaseAddress="1"
+            DataExecutionPrevention="0"
+            TargetMachine="1"/>
+      <Tool Name="VCALinkTool"/>
+      <Tool Name="VCManifestTool"/>
+      <Tool Name="VCXDCMakeTool"/>
+      <Tool Name="VCBscMakeTool"
+            SuppressStartupBanner="true"
+            OutputFile=".\Release\JuceDemo.bsc"/>
+      <Tool Name="VCFxCopTool"/>
+      <Tool Name="VCAppVerifierTool"/>
+      <Tool Name="VCPostBuildEventTool"/>
+    </Configuration>
+  </Configurations>
+  <References/>
+  <Files>
+    <Filter Name="Juce Demo">
+      <Filter Name="Source">
+        <File RelativePath="..\..\Source\ApplicationStartup.cpp"/>
+        <File RelativePath="..\..\Source\MainDemoWindow.cpp"/>
+        <File RelativePath="..\..\Source\MainDemoWindow.h"/>
+        <File RelativePath="..\..\Source\jucedemo_headers.h"/>
+        <Filter Name="Demos">
+          <File RelativePath="..\..\Source\demos\AudioDemoLatencyPage.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoLatencyPage.h"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoPlaybackPage.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoPlaybackPage.h"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoRecordPage.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoRecordPage.h"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoSetupPage.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoSetupPage.h"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoSynthPage.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoSynthPage.h"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoTabComponent.cpp"/>
+          <File RelativePath="..\..\Source\demos\AudioDemoTabComponent.h"/>
+          <File RelativePath="..\..\Source\demos\CameraDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\CodeEditorDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\DragAndDropDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\FontsAndTextDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\InterprocessCommsDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\OpenGLDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\QuickTimeDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\RenderingTestComponent.cpp"/>
+          <File RelativePath="..\..\Source\demos\RenderingTestComponent.h"/>
+          <File RelativePath="..\..\Source\demos\TableDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\ThreadingDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\TreeViewDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\WebBrowserDemo.cpp"/>
+          <File RelativePath="..\..\Source\demos\WidgetsDemo.cpp"/>
+        </Filter>
+        <Filter Name="Binary Data">
+          <File RelativePath="..\..\Binary Data\cello.wav">
+            <FileConfiguration Name="Debug&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\Binary Data\demo table data.xml">
+            <FileConfiguration Name="Debug&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\Binary Data\icons.zip">
+            <FileConfiguration Name="Debug&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\Binary Data\juce.png">
+            <FileConfiguration Name="Debug&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+          <File RelativePath="..\..\Binary Data\treedemo.xml">
+            <FileConfiguration Name="Debug&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+            <FileConfiguration Name="Release&#124;Win32"
+                               ExcludedFromBuild="true">
+              <Tool Name="VCCLCompilerTool"/>
+            </FileConfiguration>
+          </File>
+        </Filter>
+      </Filter>
+    </Filter>
+    <Filter Name="Juce Library Code">
+      <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
+      <File RelativePath="..\..\JuceLibraryCode\BinaryData.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\BinaryData.h"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode1.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
+    </Filter>
+  </Files>
+  <Globals/>
+</VisualStudioProject>
