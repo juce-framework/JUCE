@@ -136,24 +136,15 @@
         <File RelativePath="..\..\Source\Main.cpp"/>
         <File RelativePath="..\..\Source\MainComponent.cpp"/>
         <File RelativePath="..\..\Source\MainComponent.h"/>
-        <File RelativePath="..\..\readme.txt">
-          <FileConfiguration Name="Debug&#124;Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
       </Filter>
     </Filter>
     <Filter Name="Juce Library Code">
       <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
-      <File RelativePath="..\..\JuceLibraryCode\BinaryData.cpp"/>
-      <File RelativePath="..\..\JuceLibraryCode\BinaryData.h"/>
-      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode1.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
     </Filter>
   </Files>
   <Globals/>

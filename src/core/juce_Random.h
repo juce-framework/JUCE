@@ -105,6 +105,12 @@ public:
     /** Resets this Random object to a given seed value. */
     void setSeed (const int64 newSeed) throw();
 
+    /** Merges this object's seed with another value.
+        This sets the seed to be a value created by combining the current seed and this
+        new value.
+    */
+    void combineSeed (const int64 seedValue) throw();
+
     /** Reseeds this generator using a value generated from various semi-random system
         properties like the current time, etc.
 

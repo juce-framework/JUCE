@@ -46,13 +46,18 @@ void Random::setSeed (const int64 newSeed) throw()
     seed = newSeed;
 }
 
+void Random::combineSeed (const int64 seedValue) throw()
+{
+    seed ^= nextInt64() ^ seedValue;
+}
+
 void Random::setSeedRandomly()
 {
-    seed ^= (int64) (pointer_sized_int) this;
-    seed ^= nextInt64() ^ Time::getMillisecondCounter();
-    seed ^= nextInt64() ^ Time::getHighResolutionTicks();
-    seed ^= nextInt64() ^ Time::getHighResolutionTicksPerSecond();
-    seed ^= nextInt64() ^ Time::currentTimeMillis();
+    combineSeed ((int64) (pointer_sized_int) this);
+    combineSeed (Time::getMillisecondCounter());
+    combineSeed (Time::getHighResolutionTicks());
+    combineSeed (Time::getHighResolutionTicksPerSecond());
+    combineSeed (Time::currentTimeMillis());
 }
 
 //==============================================================================

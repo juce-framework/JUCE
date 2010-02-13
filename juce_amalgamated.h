@@ -7127,6 +7127,8 @@ public:
 
 	void setSeed (const int64 newSeed) throw();
 
+	void combineSeed (const int64 seedValue) throw();
+
 	void setSeedRandomly();
 
 	juce_UseDebuggingNewOperator

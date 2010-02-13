@@ -41,8 +41,7 @@
 				D7B573B9812F7B72BD4B4CAF,
 				EB740AE538D86C85837D57DE,
 				9519CEA83C2BD274A0305483 ); name = "Juce Library Code"; sourceTree = "<group>"; };
-		78D302C2D44FC9025738F347 = { isa = PBXGroup; children = (
-				F171DBD1E44152AAE93F2DAA ); name = Resources; sourceTree = "<group>"; };
+		78D302C2D44FC9025738F347 = { isa = PBXGroup; children = (  ); name = Resources; sourceTree = "<group>"; };
 		E48144B707BAD4CB5B26617C = { isa = PBXGroup; children = (
 				B98C60B57B831FE5215CDD21,
 				E4FB558EEF2604584B3F8103,
@@ -69,7 +68,7 @@
 				PREBINDING = NO;
 				ZERO_LINK = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
-				USER_HEADER_SEARCH_PATHS = " $(inherited)";
+				HEADER_SEARCH_PATHS = " $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				ONLY_ACTIVE_ARCH = YES;
 				COPY_PHASE_STRIP = NO;
@@ -82,7 +81,7 @@
 				PREBINDING = NO;
 				ZERO_LINK = NO;
 				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
-				USER_HEADER_SEARCH_PATHS = " $(inherited)";
+				HEADER_SEARCH_PATHS = " $(inherited)";
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -145,7 +144,7 @@
 		B824C4A447FB724196B914CE = { isa = PBXNativeTarget; buildConfigurationList = 9D9354DAA8B4F66302F44EB3; buildPhases = (
 				5203B474A9EC120E05FAFC7E,
 				26D5C1A755E31038E6AA5F65,
-				E0796C07FC7AE37755E690BD ); buildRules = ( ); dependencies = ( ); name = Amalgamator; productInstallPath = "$(HOME)/Applications"; productName = Amalgamator; productReference = CA1CAD166727F3F5EA4E2F00; productType = "com.apple.product-type.tool"; };
+				E0796C07FC7AE37755E690BD ); buildRules = ( ); dependencies = ( ); name = Amalgamator; productName = Amalgamator; productReference = CA1CAD166727F3F5EA4E2F00; productInstallPath = /usr/bin; productType = "com.apple.product-type.tool"; };
 		3F3EC7723ED2D70B1F2AA68A = { isa = PBXProject; buildConfigurationList = 2CFBFFDFB38FB5353DB13339; compatibilityVersion = "Xcode 3.0"; hasScannedForEncodings = 0; mainGroup = 7A94AFBB35D1BABFA6C9DF47; projectDirPath = ""; projectRoot = ""; targets = ( B824C4A447FB724196B914CE ); };
 	};
 	rootObject = 3F3EC7723ED2D70B1F2AA68A;

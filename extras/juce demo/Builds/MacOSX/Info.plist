@@ -8,7 +8,7 @@
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>
-    <string>com.yourcompany.JuceDemo</string>
+    <string>com.rawmaterialsoftware.jucedemo</string>
     <key>CFBundleName</key>
     <string>Juce Demo</string>
     <key>CFBundlePackageType</key>

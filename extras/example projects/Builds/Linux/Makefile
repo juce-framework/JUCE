@@ -40,8 +40,10 @@ endif
 OBJECTS := \
   $(OBJDIR)/Main.o \
   $(OBJDIR)/MainComponent.o \
-  $(OBJDIR)/BinaryData.o \
-  $(OBJDIR)/JuceLibraryCode.o \
+  $(OBJDIR)/JuceLibraryCode1.o \
+  $(OBJDIR)/JuceLibraryCode2.o \
+  $(OBJDIR)/JuceLibraryCode3.o \
+  $(OBJDIR)/JuceLibraryCode4.o \
 
 .PHONY: clean
 
@@ -68,12 +70,22 @@ $(OBJDIR)/MainComponent.o: ../../Source/MainComponent.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/BinaryData.o: ../../JuceLibraryCode/BinaryData.cpp
+$(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode.o: ../../JuceLibraryCode/JuceLibraryCode.cpp
+$(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

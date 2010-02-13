@@ -15,6 +15,5 @@
 
 #include "AppConfig.h"
 #include "../../../juce_amalgamated.h"
-#include "BinaryData.h"
 
 #endif   // __APPHEADERFILE_D9639818__

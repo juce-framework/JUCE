@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="SLvvV6j" name="Juce Demo" projectType="1" juceLinkage="5"
+<JUCERPROJECT id="SLvvV6j" name="Juce Demo" projectType="guiapp" juceLinkage="amalg_multi"
               juceFolder="../../../juce" jucerVersion="3.0" version="1.0.0"
               buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
               vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
@@ -9,7 +9,7 @@
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" bundleIdentifier="com.yourcompany.JuceDemo">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.jucedemo">
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
                    osxSDK="1" osxCompatibility="1"/>
@@ -90,12 +90,13 @@
       </GROUP>
     </GROUP>
   </MAINGROUP>
-  <JUCEOPTIONS JUCE_FORCE_DEBUG="3" JUCE_LOG_ASSERTIONS="3" JUCE_ASIO="3" JUCE_WASAPI="1"
-               JUCE_DIRECTSOUND="3" JUCE_ALSA="3" JUCE_QUICKTIME="3" JUCE_OPENGL="1"
-               JUCE_USE_FLAC="3" JUCE_USE_OGGVORBIS="3" JUCE_USE_CDBURNER="3"
-               JUCE_USE_CDREADER="3" JUCE_USE_CAMERA="1" JUCE_ENABLE_REPAINT_DEBUGGING="3"
-               JUCE_USE_XINERAMA="3" JUCE_USE_XSHM="3" JUCE_PLUGINHOST_VST="2"
-               JUCE_PLUGINHOST_AU="2" JUCE_ONLY_BUILD_CORE_LIBRARY="3" JUCE_WEB_BROWSER="1"
-               JUCE_SUPPORT_CARBON="3" JUCE_CHECK_MEMORY_LEAKS="3" JUCE_CATCH_UNHANDLED_EXCEPTIONS="3"
-               JUCE_STRINGS_ARE_UNICODE="3"/>
+  <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
+               JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="default" JUCE_ALSA="default"
+               JUCE_QUICKTIME="default" JUCE_OPENGL="enabled" JUCE_USE_FLAC="default"
+               JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
+               JUCE_USE_CAMERA="enabled" JUCE_ENABLE_REPAINT_DEBUGGING="default"
+               JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="disabled"
+               JUCE_PLUGINHOST_AU="disabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
+               JUCE_WEB_BROWSER="enabled" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
+               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"/>
 </JUCERPROJECT>
