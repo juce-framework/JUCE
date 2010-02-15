@@ -433,7 +433,7 @@ public:
             {
                 NSView* v = (NSView*) [[parent subviews] objectAtIndex: i];
 
-                if (v != (NSView*) getWindowHandle())
+                if (v != (NSView*) getWindowHandle() && ! [v isHidden])
                 {
                     NSView* found = findViewAt (v, x, y);
 
@@ -442,7 +442,8 @@ public:
                 }
             }
 
-            return parent;
+            if (isBrowserContentView (parent))
+                return parent;
         }
 
         return 0;

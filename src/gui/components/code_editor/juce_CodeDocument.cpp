@@ -372,10 +372,13 @@ void CodeDocument::Position::moveBy (int characterDelta) throw()
         setPosition (getPosition());
 
         // If moving right, make sure we don't get stuck between the \r and \n characters..
-        CodeDocumentLine* const l = owner->lines.getUnchecked (line);
-        if (indexInLine + characterDelta < l->lineLength
-             && indexInLine + characterDelta >= l->lineLengthWithoutNewLines + 1)
-            ++characterDelta;
+        if (line < owner->lines.size())
+        {
+            CodeDocumentLine* const l = owner->lines.getUnchecked (line);
+            if (indexInLine + characterDelta < l->lineLength
+                 && indexInLine + characterDelta >= l->lineLengthWithoutNewLines + 1)
+                ++characterDelta;
+        }
     }
 
     setPosition (characterPos + characterDelta);
