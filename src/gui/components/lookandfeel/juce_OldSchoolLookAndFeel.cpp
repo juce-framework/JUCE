@@ -110,7 +110,7 @@ void OldSchoolLookAndFeel::drawButtonBackground (Graphics& g,
 
 void OldSchoolLookAndFeel::drawTickBox (Graphics& g,
                                         Component& /*component*/,
-                                        int x, int y, int w, int h,
+                                        float x, float y, float w, float h,
                                         const bool ticked,
                                         const bool isEnabled,
                                         const bool /*isMouseOverButton*/,
@@ -122,8 +122,7 @@ void OldSchoolLookAndFeel::drawTickBox (Graphics& g,
     g.setColour (isEnabled ? Colours::blue.withAlpha (isButtonDown ? 0.3f : 0.1f)
                            : Colours::lightgrey.withAlpha (0.1f));
 
-    AffineTransform trans (AffineTransform::scale (w / 9.0f, h / 9.0f)
-                               .translated ((float) x, (float) y));
+    AffineTransform trans (AffineTransform::scale (w / 9.0f, h / 9.0f).translated (x, y));
 
     g.fillPath (box, trans);
 
@@ -155,8 +154,8 @@ void OldSchoolLookAndFeel::drawToggleButton (Graphics& g,
 
     const int tickWidth = jmin (20, button.getHeight() - 4);
 
-    drawTickBox (g, button, 4, (button.getHeight() - tickWidth) / 2,
-                 tickWidth, tickWidth,
+    drawTickBox (g, button, 4.0f, (button.getHeight() - tickWidth) * 0.5f,
+                 (float) tickWidth, (float) tickWidth,
                  button.getToggleState(),
                  button.isEnabled(),
                  isMouseOverButton,

@@ -2960,7 +2960,7 @@ public:
 
     HRESULT __stdcall GetData (FORMATETC __RPC_FAR* pFormatEtc, STGMEDIUM __RPC_FAR* pMedium)
     {
-        if (pFormatEtc->tymed == format->tymed
+        if ((pFormatEtc->tymed & format->tymed) != 0
              && pFormatEtc->cfFormat == format->cfFormat
              && pFormatEtc->dwAspect == format->dwAspect)
         {

@@ -25320,7 +25320,7 @@ public:
 
 	virtual void drawTickBox (Graphics& g,
 							  Component& component,
-							  int x, int y, int w, int h,
+							  float x, float y, float w, float h,
 							  const bool ticked,
 							  const bool isEnabled,
 							  const bool isMouseOverButton,
