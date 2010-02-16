@@ -2,19 +2,26 @@
 
 <JUCERPROJECT id="TVOT0ObQ" name="Amalgamator" projectType="consoleapp" juceLinkage="amalg_template"
               juceFolder="../../../juce" jucerVersion="3.0.0" version="1.0.0"
-              buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
-              vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
-              rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="Amalgamator" pluginDesc="Amalgamator"
-              pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
+              buildVST="1" buildRTAS="0" buildAU="1" pluginName="Amalgamator"
+              pluginDesc="Amalgamator" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{1, 1}, {2, 2}" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="AmalgamatorAU"
               pluginAUViewClass="AmalgamatorAU_V1" pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.amalgamator">
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
+               juceFolder="../../../juce"/>
+    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"/>
+  </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="amalgamator"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="default"/>
     <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="amalgamator"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="default"/>
   </CONFIGURATIONS>
   <MAINGROUP id="JiHYwfc1Q" name="Amalgamator">
     <GROUP id="0yiDjfWo" name="Source">

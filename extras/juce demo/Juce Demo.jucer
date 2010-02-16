@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="SLvvV6j" name="Juce Demo" projectType="guiapp" juceLinkage="amalg_multi"
-              juceFolder="../../../juce" jucerVersion="3.0.0" version="1.0.0"
-              buildVST="1" buildRTAS="0" buildAU="1" vstFolderMac="~/SDKs/vstsdk2.4"
-              vstFolderPC="c:\SDKs\vstsdk2.4" rtasFolderMac="~/SDKs/PT_80_SDK"
-              rtasFolderPC="c:\SDKs\PT_80_SDK" pluginName="Juce Demo" pluginDesc="Juce Demo"
-              pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
+              jucerVersion="3.0.0" version="1.0.0" bundleIdentifier="com.rawmaterialsoftware.jucedemo"
+              buildVST="1" buildRTAS="0" buildAU="1" pluginName="Juce Demo"
+              pluginDesc="Juce Demo" pluginManufacturer="yourcompany" pluginManufacturerCode="abcd"
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" bundleIdentifier="com.rawmaterialsoftware.jucedemo">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="">
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
+               juceFolder="../../../juce"/>
+    <XCODE_IPHONE targetFolder="Builds/iPhone" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
+                  juceFolder="../../../juce"/>
+    <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+    <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+    <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"/>
+  </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemo"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="default"/>
     <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="JuceDemo"
-                   osxSDK="1" osxCompatibility="1"/>
+                   osxSDK="default" osxCompatibility="default"/>
   </CONFIGURATIONS>
   <MAINGROUP id="0bU7ypLe" name="Juce Demo">
     <GROUP id="BEJsSEFfF" name="Source">
@@ -26,7 +35,7 @@
             file="Source/MainDemoWindow.h"/>
       <FILE id="2tLjAaxrV" name="jucedemo_headers.h" compile="0" resource="0"
             file="Source/jucedemo_headers.h"/>
-      <GROUP id="p0ZeP0Wn6" name="Demos" file="Source/demos">
+      <GROUP id="p0ZeP0Wn6" name="Demos">
         <FILE id="0K60nXdM0" name="AudioDemoLatencyPage.cpp" compile="1" resource="0"
               file="Source/demos/AudioDemoLatencyPage.cpp"/>
         <FILE id="gBbGRs0kH" name="AudioDemoLatencyPage.h" compile="0" resource="0"
@@ -80,7 +89,7 @@
         <FILE id="F6gqyNSim" name="WidgetsDemo.cpp" compile="1" resource="0"
               file="Source/demos/WidgetsDemo.cpp"/>
       </GROUP>
-      <GROUP id="BR14NOf0" name="Binary Data" file="Binary Data">
+      <GROUP id="BR14NOf0" name="Binary Data">
         <FILE id="X5sIZFkN" name="cello.wav" compile="0" resource="1" file="Binary Data/cello.wav"/>
         <FILE id="BAqnjOqfe" name="demo table data.xml" compile="0" resource="1"
               file="Binary Data/demo table data.xml"/>

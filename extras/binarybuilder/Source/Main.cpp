@@ -37,7 +37,7 @@ static int addFile (const File& file,
 
     cppStream << "static const unsigned char temp" << ++tempNum << "[] = {";
 
-    int i = 0;
+    size_t i = 0;
     const uint8* const data = (const uint8*) mb.getData();
 
     while (i < mb.getSize() - 1)
