@@ -279,9 +279,8 @@ void MenuBarComponent::showMenu (int index)
         if (prevCompDeletionChecker != 0 && ! prevCompDeletionChecker->hasBeenDeleted())
             prevFocused->grabKeyboardFocus();
 
-        int mx, my;
-        getMouseXYRelative (mx, my);
-        updateItemUnderMouse (mx, my);
+        const Point<int> mousePos (getMouseXYRelative());
+        updateItemUnderMouse (mousePos.getX(), mousePos.getY());
         repaint();
 
         if (result != 0)
@@ -320,10 +319,9 @@ void MenuBarComponent::mouseExit (const MouseEvent& e)
 
 void MenuBarComponent::mouseDown (const MouseEvent& e)
 {
-    const MouseEvent e2 (e.getEventRelativeTo (this));
-
     if (currentPopupIndex < 0)
     {
+        const MouseEvent e2 (e.getEventRelativeTo (this));
         updateItemUnderMouse (e2.x, e2.y);
 
         currentPopupIndex = -2;
@@ -440,9 +438,8 @@ void MenuBarComponent::timerCallback()
 {
     stopTimer();
 
-    int mx, my;
-    getMouseXYRelative (mx, my);
-    updateItemUnderMouse (mx, my);
+    const Point<int> mousePos (getMouseXYRelative());
+    updateItemUnderMouse (mousePos.getX(), mousePos.getY());
 }
 
 

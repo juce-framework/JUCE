@@ -65,6 +65,12 @@ public:
     /** Returns the point's y co-ordinate. */
     inline ValueType getY() const throw()                               { return y; }
 
+    inline bool operator== (const Point& other) const throw()           { return x == other.x && y == other.y; }
+    inline bool operator!= (const Point& other) const throw()           { return x != other.x || y != other.y; }
+
+    /** Returns true if the point is (0, 0). */
+    bool isOrigin() const throw()                                       { return x == ValueType() && y == ValueType(); }
+
     /** Changes the point's x and y co-ordinates. */
     void setXY (const ValueType newX, const ValueType newY) throw()     { x = newX; y = newY; }
 
@@ -83,12 +89,14 @@ public:
     /** Subtracts another point's co-ordinates to this one. */
     Point& operator-= (const Point& other) throw()                      { x -= other.x; y -= other.y; return *this; }
 
+    /** Returns the straight-line distance between this point and another one. */
+    ValueType getDistanceFrom (const Point& other) const throw()        { return (ValueType) juce_hypot (x - other.x, y - other.y); }
+
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!
         @see AffineTransform::transformPoint
     */
     void applyTransform (const AffineTransform& transform) throw()      { transform.transformPoint (x, y); }
-
 
     //==============================================================================
     juce_UseDebuggingNewOperator

@@ -98,15 +98,14 @@ void BubbleComponent::setPosition (Component* componentToPointTo)
 {
     jassert (componentToPointTo->isValidComponent());
 
-    int tx = 0;
-    int ty = 0;
+    Point<int> pos;
 
     if (getParentComponent() != 0)
-        componentToPointTo->relativePositionToOtherComponent (getParentComponent(), tx, ty);
+        pos = componentToPointTo->relativePositionToOtherComponent (getParentComponent(), pos);
     else
-        componentToPointTo->relativePositionToGlobal (tx, ty);
+        pos = componentToPointTo->relativePositionToGlobal (pos);
 
-    setPosition (Rectangle<int> (tx, ty, componentToPointTo->getWidth(), componentToPointTo->getHeight()));
+    setPosition (Rectangle<int> (pos.getX(), pos.getY(), componentToPointTo->getWidth(), componentToPointTo->getHeight()));
 }
 
 void BubbleComponent::setPosition (const int arrowTipX_,

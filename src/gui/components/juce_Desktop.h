@@ -91,7 +91,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const throw();
 
 
     //==============================================================================
@@ -99,17 +99,17 @@ public:
 
         The co-ordinates are relative to the top-left of the main monitor.
     */
-    static void getMousePosition (int& x, int& y) throw();
+    static const Point<int> getMousePosition();
 
     /** Makes the mouse pointer jump to a given location.
 
         The co-ordinates are relative to the top-left of the main monitor.
     */
-    static void setMousePosition (int x, int y) throw();
+    static void setMousePosition (const Point<int>& newPosition);
 
     /** Returns the last position at which a mouse button was pressed.
     */
-    static void getLastMouseDownPosition (int& x, int& y) throw();
+    static const Point<int> getLastMouseDownPosition() throw();
 
     /** Returns the number of times the mouse button has been clicked since the
         app started.
@@ -218,8 +218,7 @@ public:
 
         Returns 0 if the co-ordinates are inside a non-Juce window.
     */
-    Component* findComponentAt (const int screenX,
-                                const int screenY) const;
+    Component* findComponentAt (const Point<int>& screenPosition) const;
 
 
     //==============================================================================
@@ -251,7 +250,8 @@ private:
 
     Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
-    int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
+    Point<int> lastFakeMouseMove;
+    int mouseClickCounter;
     bool mouseMovedSignificantlySincePressed;
 
     struct RecentMouseDown

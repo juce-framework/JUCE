@@ -111,7 +111,7 @@ static const int eventMask = NoEventMask | KeyPressMask | KeyReleaseMask | Butto
 
 //==============================================================================
 static int pointerMap[5];
-static int lastMousePosX = 0, lastMousePosY = 0;
+static Point<int> lastMousePos;
 
 enum MouseButtons
 {
@@ -789,26 +789,19 @@ public:
         h = wh;
     }
 
-    int getScreenX() const
+    const Point<int> getScreenPosition() const
     {
-        return wx;
+        return Point<int> (wx, wy);
     }
 
-    int getScreenY() const
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
     {
-        return wy;
+        return relativePosition + getScreenPosition();
     }
 
-    void relativePositionToGlobal (int& x, int& y)
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
     {
-        x += wx;
-        y += wy;
-    }
-
-    void globalPositionToRelative (int& x, int& y)
-    {
-        x -= wx;
-        y -= wy;
+        return screenPosition - getScreenPosition();
     }
 
     void setMinimised (bool shouldBeMinimised)
@@ -1091,7 +1084,7 @@ public:
         }
     }
 
-    void textInputRequired (int /*x*/, int /*y*/)
+    void textInputRequired (const Point<int>&)
     {
     }
 
@@ -1352,7 +1345,7 @@ public:
                                       getEventTime (buttonPressEvent->time));
                 }
 
-                lastMousePosX = lastMousePosY = 0x100000;
+                lastMousePos = Point<int> (0x100000, 0x100000);
                 break;
             }
 
@@ -1376,7 +1369,7 @@ public:
                                buttonRelEvent->x, buttonRelEvent->y,
                                getEventTime (buttonRelEvent->time));
 
-                lastMousePosX = lastMousePosY = 0x100000;
+                lastMousePos = Point<int> (0x100000, 0x100000);
                 break;
             }
 
@@ -1386,13 +1379,11 @@ public:
 
                 updateKeyModifiers (movedEvent->state);
 
-                int x, y, mouseMods;
-                getMousePos (x, y, mouseMods);
+                Point<int> mousePos (Desktop::getMousePosition());
 
-                if (lastMousePosX != x || lastMousePosY != y)
+                if (lastMousePos != mousePos)
                 {
-                    lastMousePosX = x;
-                    lastMousePosY = y;
+                    lastMousePos = mousePos;
 
                     if (parentWindow != 0 && (styleFlags & windowHasTitleBar) == 0)
                     {
@@ -1411,26 +1402,23 @@ public:
                         {
                             parentWindow = wParent;
                             updateBounds();
-                            x -= getScreenX();
-                            y -= getScreenY();
+                            mousePos -= getScreenPosition();
                         }
                         else
                         {
                             parentWindow = 0;
-                            x -= getScreenX();
-                            y -= getScreenY();
+                            mousePos -= getScreenPosition();
                         }
                     }
                     else
                     {
-                        x -= getScreenX();
-                        y -= getScreenY();
+                        mousePos -= getScreenPosition();
                     }
 
                     if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0)
-                        handleMouseMove (x, y, getEventTime (movedEvent->time));
+                        handleMouseMove (mousePos.getX(), mousePos.getY(), getEventTime (movedEvent->time));
                     else
-                        handleMouseDrag (x, y, getEventTime (movedEvent->time));
+                        handleMouseDrag (mousePos.getX(), mousePos.getY(), getEventTime (movedEvent->time));
                 }
 
                 break;
@@ -1438,7 +1426,7 @@ public:
 
             case EnterNotify:
             {
-                lastMousePosX = lastMousePosY = 0x100000;
+                lastMousePos = Point<int> (0x100000, 0x100000);
                 const XEnterWindowEvent* const enterEvent = (const XEnterWindowEvent*) &event->xcrossing;
 
                 if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0
@@ -2336,7 +2324,7 @@ private:
     void resetDragAndDrop()
     {
         dragAndDropFiles.clear();
-        lastDropX = lastDropY = -1;
+        lastDropPos = Point<int> (-1, -1);
         dragAndDropCurrentMimeType = 0;
         dragAndDropSourceWindow = 0;
         srcMimeTypeAtomList.clear();
@@ -2401,14 +2389,13 @@ private:
 
         dragAndDropSourceWindow = clientMsg->data.l[0];
 
-        const int dropX = ((int) clientMsg->data.l[2] >> 16) - getScreenX();
-        const int dropY = ((int) clientMsg->data.l[2] & 0xffff) - getScreenY();
+        Point<int> dropPos ((int) clientMsg->data.l[2] >> 16,
+                            (int) clientMsg->data.l[2] & 0xffff);
+        dropPos -= getScreenPosition();
 
-        if (lastDropX != dropX || lastDropY != dropY)
+        if (lastDropPos != dropPos)
         {
-            lastDropX = dropX;
-            lastDropY = dropY;
-
+            lastDropPos = dropPos;
             dragAndDropTimestamp = clientMsg->data.l[3];
 
             Atom targetAction = XA_XdndActionCopy;
@@ -2428,7 +2415,7 @@ private:
                 updateDraggedFileList (clientMsg);
 
             if (dragAndDropFiles.size() > 0)
-                handleFileDragMove (dragAndDropFiles, dropX, dropY);
+                handleFileDragMove (dragAndDropFiles, dropPos.getX(), dropPos.getY());
         }
     }
 
@@ -2438,13 +2425,13 @@ private:
             updateDraggedFileList (clientMsg);
 
         const StringArray files (dragAndDropFiles);
-        const int lastX = lastDropX, lastY = lastDropY;
+        const Point<int> lastPos (lastDropPos);
 
         sendDragAndDropFinish();
         resetDragAndDrop();
 
         if (files.size() > 0)
-            handleFileDragDrop (files, lastX, lastY);
+            handleFileDragDrop (files, lastPos.getX(), lastPos.getY());
     }
 
     void handleDragAndDropEnter (const XClientMessageEvent* const clientMsg)
@@ -2578,7 +2565,8 @@ private:
     }
 
     StringArray dragAndDropFiles;
-    int dragAndDropTimestamp, lastDropX, lastDropY;
+    int dragAndDropTimestamp;
+    Point<int> lastDropPos;
 
     Atom XA_OtherMime, dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
@@ -2737,17 +2725,18 @@ bool Desktop::canUseSemiTransparentWindows() throw()
     return false;
 }
 
-void Desktop::getMousePosition (int& x, int& y) throw()
+const Point<int> Desktop::getMousePosition()
 {
-    int mouseMods;
+    int x, y, mouseMods;
     getMousePos (x, y, mouseMods);
+    return Point<int> (x, y);
 }
 
-void Desktop::setMousePosition (int x, int y) throw()
+void Desktop::setMousePosition (const Point<int>& newPosition)
 {
     ScopedXLock xlock;
     Window root = RootWindow (display, DefaultScreen (display));
-    XWarpPointer (display, None, root, 0, 0, 0, 0, x, y);
+    XWarpPointer (display, None, root, 0, 0, 0, 0, newPosition.getX(), newPosition.getY());
 }
 
 

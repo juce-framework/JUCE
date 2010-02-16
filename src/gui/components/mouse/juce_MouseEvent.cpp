@@ -32,24 +32,21 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MouseEvent::MouseEvent (const int x_,
-                        const int y_,
+MouseEvent::MouseEvent (const Point<int>& position,
                         const ModifierKeys& mods_,
                         Component* const originator,
                         const Time& eventTime_,
-                        const int mouseDownX_,
-                        const int mouseDownY_,
+                        const Point<int> mouseDownPos_,
                         const Time& mouseDownTime_,
                         const int numberOfClicks_,
                         const bool mouseWasDragged) throw()
-    : x (x_),
-      y (y_),
+    : x (position.getX()),
+      y (position.getY()),
       mods (mods_),
       eventComponent (originator),
       originalComponent (originator),
       eventTime (eventTime_),
-      mouseDownX (mouseDownX_),
-      mouseDownY (mouseDownY_),
+      mouseDownPos (mouseDownPos_),
       mouseDownTime (mouseDownTime_),
       numberOfClicks (numberOfClicks_),
       wasMovedSinceMouseDown (mouseWasDragged)
@@ -68,22 +65,27 @@ bool MouseEvent::mouseWasClicked() const throw()
 
 int MouseEvent::getMouseDownX() const throw()
 {
-    return mouseDownX;
+    return mouseDownPos.getX();
 }
 
 int MouseEvent::getMouseDownY() const throw()
 {
-    return mouseDownY;
+    return mouseDownPos.getY();
+}
+
+const Point<int> MouseEvent::getMouseDownPosition() const throw()
+{
+    return mouseDownPos;
 }
 
 int MouseEvent::getDistanceFromDragStartX() const throw()
 {
-    return x - mouseDownX;
+    return x - mouseDownPos.getX();
 }
 
 int MouseEvent::getDistanceFromDragStartY() const throw()
 {
-    return y - mouseDownY;
+    return y - mouseDownPos.getY();
 }
 
 int MouseEvent::getDistanceFromDragStart() const throw()
@@ -101,32 +103,39 @@ int MouseEvent::getLengthOfMousePress() const throw()
 }
 
 //==============================================================================
-int MouseEvent::getScreenX() const throw()
+const Point<int> MouseEvent::getPosition() const throw()
 {
-    int sx = x, sy = y;
-    eventComponent->relativePositionToGlobal (sx, sy);
-    return sx;
+    return Point<int> (x, y);
 }
 
-int MouseEvent::getScreenY() const throw()
+int MouseEvent::getScreenX() const
 {
-    int sx = x, sy = y;
-    eventComponent->relativePositionToGlobal (sx, sy);
-    return sy;
+    return getScreenPosition().getX();
 }
 
-int MouseEvent::getMouseDownScreenX() const throw()
+int MouseEvent::getScreenY() const
 {
-    int sx = mouseDownX, sy = mouseDownY;
-    eventComponent->relativePositionToGlobal (sx, sy);
-    return sx;
+    return getScreenPosition().getY();
 }
 
-int MouseEvent::getMouseDownScreenY() const throw()
+const Point<int> MouseEvent::getScreenPosition() const
 {
-    int sx = mouseDownX, sy = mouseDownY;
-    eventComponent->relativePositionToGlobal (sx, sy);
-    return sy;
+    return eventComponent->relativePositionToGlobal (Point<int> (x, y));
+}
+
+int MouseEvent::getMouseDownScreenX() const
+{
+    return getMouseDownScreenPosition().getX();
+}
+
+int MouseEvent::getMouseDownScreenY() const
+{
+    return getMouseDownScreenPosition().getY();
+}
+
+const Point<int> MouseEvent::getMouseDownScreenPosition() const
+{
+    return eventComponent->relativePositionToGlobal (mouseDownPos);
 }
 
 //==============================================================================
@@ -138,13 +147,14 @@ const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent
         return *this;
     }
 
-    MouseEvent me (*this);
-
-    eventComponent->relativePositionToOtherComponent (otherComponent, me.x, me.y);
-    eventComponent->relativePositionToOtherComponent (otherComponent, me.mouseDownX, me.mouseDownY);
-    me.eventComponent = otherComponent;
-
-    return me;
+    return MouseEvent (eventComponent->relativePositionToOtherComponent (otherComponent, Point<int> (x, y)),
+                       mods,
+                       originalComponent,
+                       eventTime,
+                       eventComponent->relativePositionToOtherComponent (otherComponent, mouseDownPos),
+                       mouseDownTime,
+                       numberOfClicks,
+                       wasMovedSinceMouseDown);
 }
 
 //==============================================================================

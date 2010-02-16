@@ -802,11 +802,7 @@ void ListBox::mouseMove (const MouseEvent& e)
     if (mouseMoveSelects)
     {
         const MouseEvent e2 (e.getEventRelativeTo (this));
-
         selectRow (getRowContainingPosition (e2.x, e2.y), true);
-
-        lastMouseX = e2.x;
-        lastMouseY = e2.y;
     }
 }
 
@@ -898,10 +894,8 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != 0 && isRowSelected (firstRow + i))
         {
-            int x = 0, y = 0;
-            rowComp->relativePositionToOtherComponent (this, x, y);
-
-            const Rectangle<int> rowRect (x, y, rowComp->getWidth(), rowComp->getHeight());
+            const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
+            const Rectangle<int> rowRect (pos.getX(), pos.getY(), rowComp->getWidth(), rowComp->getHeight());
 
             if (imageArea.isEmpty())
                 imageArea = rowRect;
@@ -921,11 +915,10 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 
         if (rowComp != 0 && isRowSelected (firstRow + i))
         {
-            int x = 0, y = 0;
-            rowComp->relativePositionToOtherComponent (this, x, y);
+            const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
 
             Graphics g (*snapshot);
-            g.setOrigin (x - imageX, y - imageY);
+            g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
             if (g.reduceClipRegion (0, 0, rowComp->getWidth(), rowComp->getHeight()))
                 rowComp->paintEntireComponent (g);
         }

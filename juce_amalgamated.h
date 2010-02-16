@@ -9299,16 +9299,154 @@ private:
 /*** End of inlined file: juce_ModifierKeys.h ***/
 
 
+
+/*** Start of inlined file: juce_Point.h ***/
+#ifndef __JUCE_POINT_JUCEHEADER__
+#define __JUCE_POINT_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_AffineTransform.h ***/
+#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
+#define __JUCE_AFFINETRANSFORM_JUCEHEADER__
+
+class JUCE_API  AffineTransform
+{
+public:
+
+	AffineTransform() throw();
+
+	AffineTransform (const AffineTransform& other) throw();
+
+	AffineTransform (const float mat00, const float mat01, const float mat02,
+					 const float mat10, const float mat11, const float mat12) throw();
+
+	const AffineTransform& operator= (const AffineTransform& other) throw();
+
+	bool operator== (const AffineTransform& other) const throw();
+
+	bool operator!= (const AffineTransform& other) const throw();
+
+	static const AffineTransform identity;
+
+	void transformPoint (float& x,
+						 float& y) const throw();
+
+	void transformPoint (double& x,
+						 double& y) const throw();
+
+	const AffineTransform translated (const float deltaX,
+									  const float deltaY) const throw();
+
+	static const AffineTransform translation (const float deltaX,
+											  const float deltaY) throw();
+
+	const AffineTransform rotated (const float angleInRadians) const throw();
+
+	const AffineTransform rotated (const float angleInRadians,
+								   const float pivotX,
+								   const float pivotY) const throw();
+
+	static const AffineTransform rotation (const float angleInRadians) throw();
+
+	static const AffineTransform rotation (const float angleInRadians,
+										   const float pivotX,
+										   const float pivotY) throw();
+
+	const AffineTransform scaled (const float factorX,
+								  const float factorY) const throw();
+
+	static const AffineTransform scale (const float factorX,
+										const float factorY) throw();
+
+	const AffineTransform sheared (const float shearX,
+								   const float shearY) const throw();
+
+	const AffineTransform inverted() const throw();
+
+	const AffineTransform followedBy (const AffineTransform& other) const throw();
+
+	bool isIdentity() const throw();
+
+	bool isSingularity() const throw();
+
+	bool isOnlyTranslation() const throw();
+
+	float getTranslationX() const throw()		   { return mat02; }
+
+	float getTranslationY() const throw()		   { return mat12; }
+
+	juce_UseDebuggingNewOperator
+
+	float mat00, mat01, mat02;
+	float mat10, mat11, mat12;
+
+private:
+
+	const AffineTransform followedBy (const float mat00, const float mat01, const float mat02,
+									  const float mat10, const float mat11, const float mat12) const throw();
+};
+
+#endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
+/*** End of inlined file: juce_AffineTransform.h ***/
+
+template <typename ValueType>
+class Point
+{
+public:
+
+	Point() throw()  : x (0), y (0) {}
+
+	Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
+
+	Point (const ValueType initialX, const ValueType initialY) throw()  : x (initialX), y (initialY) {}
+
+	~Point() throw() {}
+
+	Point& operator= (const Point& other) throw()			   { x = other.x; y = other.y; return *this; }
+
+	inline ValueType getX() const throw()				   { return x; }
+
+	inline ValueType getY() const throw()				   { return y; }
+
+	inline bool operator== (const Point& other) const throw()	   { return x == other.x && y == other.y; }
+	inline bool operator!= (const Point& other) const throw()	   { return x != other.x || y != other.y; }
+
+	bool isOrigin() const throw()					   { return x == ValueType() && y == ValueType(); }
+
+	void setXY (const ValueType newX, const ValueType newY) throw()	 { x = newX; y = newY; }
+
+	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
+
+	const Point operator+ (const Point& other) const throw()		{ return Point (x + other.x, y + other.y); }
+
+	Point& operator+= (const Point& other) throw()			  { x += other.x; y += other.y; return *this; }
+
+	const Point operator- (const Point& other) const throw()		{ return Point (x - other.x, y - other.y); }
+
+	Point& operator-= (const Point& other) throw()			  { x -= other.x; y -= other.y; return *this; }
+
+	ValueType getDistanceFrom (const Point& other) const throw()	{ return (ValueType) juce_hypot (x - other.x, y - other.y); }
+
+	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
+
+	juce_UseDebuggingNewOperator
+
+private:
+	ValueType x, y;
+};
+
+#endif   // __JUCE_POINT_JUCEHEADER__
+/*** End of inlined file: juce_Point.h ***/
+
 class JUCE_API  MouseEvent
 {
 public:
 
-	MouseEvent (const int x, const int y,
+	MouseEvent (const Point<int>& position,
 				const ModifierKeys& modifiers,
 				Component* const originator,
 				const Time& eventTime,
-				const int mouseDownX,
-				const int mouseDownY,
+				const Point<int> mouseDownPos,
 				const Time& mouseDownTime,
 				const int numberOfClicks,
 				const bool mouseWasDragged) throw();
@@ -9331,6 +9469,8 @@ public:
 
 	int getMouseDownY() const throw();
 
+	const Point<int> getMouseDownPosition() const throw();
+
 	int getDistanceFromDragStart() const throw();
 
 	int getDistanceFromDragStartX() const throw();
@@ -9343,13 +9483,19 @@ public:
 
 	int getLengthOfMousePress() const throw();
 
-	int getScreenX() const throw();
+	const Point<int> getPosition() const throw();
 
-	int getScreenY() const throw();
+	int getScreenX() const;
 
-	int getMouseDownScreenX() const throw();
+	int getScreenY() const;
 
-	int getMouseDownScreenY() const throw();
+	const Point<int> getScreenPosition() const;
+
+	int getMouseDownScreenX() const;
+
+	int getMouseDownScreenY() const;
+
+	const Point<int> getMouseDownScreenPosition() const;
 
 	const MouseEvent getEventRelativeTo (Component* const otherComponent) const throw();
 
@@ -9360,7 +9506,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	int mouseDownX, mouseDownY;
+	Point<int> mouseDownPos;
 	Time mouseDownTime;
 	int numberOfClicks;
 	bool wasMovedSinceMouseDown;
@@ -9619,138 +9765,6 @@ public:
 #define __JUCE_PATH_JUCEHEADER__
 
 
-/*** Start of inlined file: juce_AffineTransform.h ***/
-#ifndef __JUCE_AFFINETRANSFORM_JUCEHEADER__
-#define __JUCE_AFFINETRANSFORM_JUCEHEADER__
-
-class JUCE_API  AffineTransform
-{
-public:
-
-	AffineTransform() throw();
-
-	AffineTransform (const AffineTransform& other) throw();
-
-	AffineTransform (const float mat00, const float mat01, const float mat02,
-					 const float mat10, const float mat11, const float mat12) throw();
-
-	const AffineTransform& operator= (const AffineTransform& other) throw();
-
-	bool operator== (const AffineTransform& other) const throw();
-
-	bool operator!= (const AffineTransform& other) const throw();
-
-	static const AffineTransform identity;
-
-	void transformPoint (float& x,
-						 float& y) const throw();
-
-	void transformPoint (double& x,
-						 double& y) const throw();
-
-	const AffineTransform translated (const float deltaX,
-									  const float deltaY) const throw();
-
-	static const AffineTransform translation (const float deltaX,
-											  const float deltaY) throw();
-
-	const AffineTransform rotated (const float angleInRadians) const throw();
-
-	const AffineTransform rotated (const float angleInRadians,
-								   const float pivotX,
-								   const float pivotY) const throw();
-
-	static const AffineTransform rotation (const float angleInRadians) throw();
-
-	static const AffineTransform rotation (const float angleInRadians,
-										   const float pivotX,
-										   const float pivotY) throw();
-
-	const AffineTransform scaled (const float factorX,
-								  const float factorY) const throw();
-
-	static const AffineTransform scale (const float factorX,
-										const float factorY) throw();
-
-	const AffineTransform sheared (const float shearX,
-								   const float shearY) const throw();
-
-	const AffineTransform inverted() const throw();
-
-	const AffineTransform followedBy (const AffineTransform& other) const throw();
-
-	bool isIdentity() const throw();
-
-	bool isSingularity() const throw();
-
-	bool isOnlyTranslation() const throw();
-
-	float getTranslationX() const throw()		   { return mat02; }
-
-	float getTranslationY() const throw()		   { return mat12; }
-
-	juce_UseDebuggingNewOperator
-
-	float mat00, mat01, mat02;
-	float mat10, mat11, mat12;
-
-private:
-
-	const AffineTransform followedBy (const float mat00, const float mat01, const float mat02,
-									  const float mat10, const float mat11, const float mat12) const throw();
-};
-
-#endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
-/*** End of inlined file: juce_AffineTransform.h ***/
-
-
-/*** Start of inlined file: juce_Point.h ***/
-#ifndef __JUCE_POINT_JUCEHEADER__
-#define __JUCE_POINT_JUCEHEADER__
-
-template <typename ValueType>
-class Point
-{
-public:
-
-	Point() throw()  : x (0), y (0) {}
-
-	Point (const Point& other) throw()  : x (other.x), y (other.y)  {}
-
-	Point (const ValueType initialX, const ValueType initialY) throw()  : x (initialX), y (initialY) {}
-
-	~Point() throw() {}
-
-	Point& operator= (const Point& other) throw()			   { x = other.x; y = other.y; return *this; }
-
-	inline ValueType getX() const throw()				   { return x; }
-
-	inline ValueType getY() const throw()				   { return y; }
-
-	void setXY (const ValueType newX, const ValueType newY) throw()	 { x = newX; y = newY; }
-
-	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
-
-	const Point operator+ (const Point& other) const throw()		{ return Point (x + other.x, y + other.y); }
-
-	Point& operator+= (const Point& other) throw()			  { x += other.x; y += other.y; return *this; }
-
-	const Point operator- (const Point& other) const throw()		{ return Point (x - other.x, y - other.y); }
-
-	Point& operator-= (const Point& other) throw()			  { x -= other.x; y -= other.y; return *this; }
-
-	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
-
-	juce_UseDebuggingNewOperator
-
-private:
-	ValueType x, y;
-};
-
-#endif   // __JUCE_POINT_JUCEHEADER__
-/*** End of inlined file: juce_Point.h ***/
-
-
 /*** Start of inlined file: juce_Rectangle.h ***/
 #ifndef __JUCE_RECTANGLE_JUCEHEADER__
 #define __JUCE_RECTANGLE_JUCEHEADER__
@@ -9810,9 +9824,13 @@ public:
 
 	inline ValueType getCentreY() const throw()			 { return y + h / (ValueType) 2; }
 
+	inline const Point<ValueType> getCentre() const throw()	 { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
+
 	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
 
 	const Point<ValueType> getPosition() const throw()		  { return Point<ValueType> (x, y); }
+
+	void setPosition (const Point<ValueType>& newPos) throw()	   { x = newPos.getX(); y = newPos.getY(); }
 
 	void setPosition (const ValueType newX, const ValueType newY) throw()	   { x = newX; y = newY; }
 
@@ -9910,10 +9928,21 @@ public:
 		return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
 	}
 
+	bool contains (const Point<ValueType> point) const throw()
+	{
+		return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
+	}
+
 	bool contains (const Rectangle& other) const throw()
 	{
 		return x <= other.x && y <= other.y
 			&& x + w >= other.x + other.w && y + h >= other.y + other.h;
+	}
+
+	const Point<ValueType> getConstrainedPoint (const Point<ValueType>& point) const throw()
+	{
+		return Point<ValueType> (jlimit (x, x + w, point.getX()),
+								 jlimit (y, y + h, point.getY()));
 	}
 
 	bool intersects (const Rectangle& other) const throw()
@@ -12243,13 +12272,11 @@ public:
 
 	virtual void getBounds (int& x, int& y, int& w, int& h) const = 0;
 
-	virtual int getScreenX() const = 0;
+	virtual const Point<int> getScreenPosition() const = 0;
 
-	virtual int getScreenY() const = 0;
+	virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
 
-	virtual void relativePositionToGlobal (int& x, int& y) = 0;
-
-	virtual void globalPositionToRelative (int& x, int& y) = 0;
+	virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
 
 	virtual void setMinimised (bool shouldBeMinimised) = 0;
 
@@ -12291,7 +12318,7 @@ public:
 
 	virtual void grabFocus() = 0;
 
-	virtual void textInputRequired (int x, int y) = 0;
+	virtual void textInputRequired (const Point<int>& position) = 0;
 
 	void handleFocusGain();
 	void handleFocusLoss();
@@ -12448,16 +12475,18 @@ public:
 	void getVisibleArea (RectangleList& result,
 						 const bool includeSiblings) const;
 
-	int getScreenX() const throw();
+	int getScreenX() const;
 
-	int getScreenY() const throw();
+	int getScreenY() const;
 
-	void relativePositionToGlobal (int& x, int& y) const throw();
+	const Point<int> getScreenPosition() const;
 
-	void globalPositionToRelative (int& x, int& y) const throw();
+	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
-	void relativePositionToOtherComponent (const Component* const targetComponent,
-										   int& x, int& y) const throw();
+	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
+
+	const Point<int> relativePositionToOtherComponent (const Component* const targetComponent,
+													   const Point<int>& positionRelativeToThis) const;
 
 	void setTopLeftPosition (const int x, const int y);
 
@@ -12690,7 +12719,7 @@ public:
 
 	static bool JUCE_CALLTYPE isMouseButtonDownAnywhere() throw();
 
-	void getMouseXYRelative (int& x, int& y) const throw();
+	const Point<int> getMouseXYRelative() const;
 
 	static Component* JUCE_CALLTYPE getComponentUnderMouse() throw();
 
@@ -12834,8 +12863,7 @@ private:
 	void sendEnablementChangeMessage();
 	static void* runModalLoopCallback (void*);
 	static void bringModalComponentToFront();
-	void subtractObscuredRegions (RectangleList& result,
-								  const int deltaX, const int deltaY,
+	void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
 								  const Rectangle<int>& clipRect,
 								  const Component* const compToAvoid) const throw();
 	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
@@ -13233,13 +13261,13 @@ public:
 
 	const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
 
-	const Rectangle<int> getMonitorAreaContaining (int x, int y, const bool clippedToWorkArea = true) const throw();
+	const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const throw();
 
-	static void getMousePosition (int& x, int& y) throw();
+	static const Point<int> getMousePosition();
 
-	static void setMousePosition (int x, int y) throw();
+	static void setMousePosition (const Point<int>& newPosition);
 
-	static void getLastMouseDownPosition (int& x, int& y) throw();
+	static const Point<int> getLastMouseDownPosition() throw();
 
 	static int getMouseButtonClickCounter() throw();
 
@@ -13264,8 +13292,7 @@ public:
 
 	Component* getComponent (const int index) const throw();
 
-	Component* findComponentAt (const int screenX,
-								const int screenY) const;
+	Component* findComponentAt (const Point<int>& screenPosition) const;
 
 	juce_UseDebuggingNewOperator
 
@@ -13289,7 +13316,8 @@ private:
 
 	Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
-	int lastFakeMouseMoveX, lastFakeMouseMoveY, mouseClickCounter;
+	Point<int> lastFakeMouseMove;
+	int mouseClickCounter;
 	bool mouseMovedSignificantlySincePressed;
 
 	struct RecentMouseDown
@@ -15893,7 +15921,8 @@ public:
 private:
 
 	int millisecondsBeforeTipAppears;
-	int mouseX, mouseY, mouseClicks;
+	Point<int> lastMousePos;
+	int mouseClicks;
 	unsigned int lastCompChangeTime, lastHideTime;
 	Component* lastComponentUnderMouse;
 	bool changedCompsSinceShown;
@@ -18663,7 +18692,7 @@ private:
 	Component* headerComponent;
 	int totalItems, rowHeight, minimumRowWidth;
 	int outlineThickness;
-	int lastMouseX, lastMouseY, lastRowSelected;
+	int lastRowSelected;
 	bool mouseMoveSelects, multipleSelection, hasDoneInitialUpdate;
 	SparseSet <int> selected;
 
@@ -22864,7 +22893,7 @@ public:
 
 private:
 	ComponentBoundsConstrainer* constrainer;
-	int originalX, originalY;
+	Point<int> originalPos;
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__
@@ -23800,7 +23829,7 @@ private:
 	ComponentPeer* lastPeer;
 	VoidArray registeredParentComps;
 	bool reentrant;
-	int lastX, lastY, lastWidth, lastHeight;
+	Rectangle<int> lastBounds;
 #ifdef JUCE_DEBUG
 	ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
 #endif
@@ -26595,10 +26624,10 @@ private:
 	int octaveNumForMiddleC;
 
 	void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-	int xyToNote (int x, int y, float& mousePositionVelocity);
-	int remappedXYToNote (int x, int y, float& mousePositionVelocity) const;
+	int xyToNote (const Point<int>& pos, float& mousePositionVelocity);
+	int remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const;
 	void resetAnyKeysInUse();
-	void updateNoteUnderMouse (int x, int y);
+	void updateNoteUnderMouse (const Point<int>& pos);
 	void repaintNote (const int midiNoteNumber);
 
 	MidiKeyboardComponent (const MidiKeyboardComponent&);

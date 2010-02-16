@@ -229,10 +229,7 @@ public:
 
     const String getTooltip()
     {
-        int x, y;
-        getMouseXYRelative (x, y);
-
-        const int columnId = owner.getHeader()->getColumnIdAtX (x);
+        const int columnId = owner.getHeader()->getColumnIdAtX (getMouseXYRelative().getX());
 
         if (columnId != 0 && owner.getModel() != 0)
             return owner.getModel()->getCellTooltip (row, columnId);

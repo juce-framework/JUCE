@@ -2126,8 +2126,7 @@ void TextEditor::focusGained (FocusChangeType)
 
     ComponentPeer* const peer = getPeer();
     if (peer != 0 && ! isReadOnly())
-        peer->textInputRequired (getScreenX() - peer->getScreenX(),
-                                 getScreenY() - peer->getScreenY());
+        peer->textInputRequired (getScreenPosition() - peer->getScreenPosition());
 }
 
 void TextEditor::focusLost (FocusChangeType)

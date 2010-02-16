@@ -251,27 +251,29 @@ int MidiKeyboardComponent::getKeyStartPosition (const int midiNoteNumber) const
 static const uint8 whiteNotes[] = { 0, 2, 4, 5, 7, 9, 11 };
 static const uint8 blackNotes[] = { 1, 3, 6, 8, 10 };
 
-int MidiKeyboardComponent::xyToNote (int x, int y, float& mousePositionVelocity)
+int MidiKeyboardComponent::xyToNote (const Point<int>& pos, float& mousePositionVelocity)
 {
-    if (! reallyContains (x, y, false))
+    if (! reallyContains (pos.getX(), pos.getY(), false))
         return -1;
+
+    Point<int> p (pos);
 
     if (orientation != horizontalKeyboard)
     {
-        swapVariables (x, y);
+        p = Point<int> (p.getY(), p.getX());
 
         if (orientation == verticalKeyboardFacingLeft)
-            y = getWidth() - y;
+            p = Point<int> (p.getX(), getWidth() - p.getY());
         else
-            x = getHeight() - x;
+            p = Point<int> (getHeight() - p.getX(), p.getY());
     }
 
-    return remappedXYToNote (x + xOffset, y, mousePositionVelocity);
+    return remappedXYToNote (p + Point<int> (xOffset, 0), mousePositionVelocity);
 }
 
-int MidiKeyboardComponent::remappedXYToNote (int x, int y, float& mousePositionVelocity) const
+int MidiKeyboardComponent::remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const
 {
-    if (y < blackNoteLength)
+    if (pos.getY() < blackNoteLength)
     {
         for (int octaveStart = 12 * (rangeStart / 12); octaveStart <= rangeEnd; octaveStart += 12)
         {
@@ -285,9 +287,9 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y, float& mousePositionV
                     getKeyPos (note, kx, kw);
                     kx += xOffset;
 
-                    if (x >= kx && x < kx + kw)
+                    if (pos.getX() >= kx && pos.getX() < kx + kw)
                     {
-                        mousePositionVelocity = y / (float) blackNoteLength;
+                        mousePositionVelocity = pos.getY() / (float) blackNoteLength;
                         return note;
                     }
                 }
@@ -307,10 +309,10 @@ int MidiKeyboardComponent::remappedXYToNote (int x, int y, float& mousePositionV
                 getKeyPos (note, kx, kw);
                 kx += xOffset;
 
-                if (x >= kx && x < kx + kw)
+                if (pos.getX() >= kx && pos.getX() < kx + kw)
                 {
                     const int whiteNoteLength = (orientation == horizontalKeyboard) ? getHeight() : getWidth();
-                    mousePositionVelocity = y / (float) whiteNoteLength;
+                    mousePositionVelocity = pos.getY() / (float) whiteNoteLength;
                     return note;
                 }
             }
@@ -643,7 +645,7 @@ void MidiKeyboardComponent::resized()
 
             float mousePositionVelocity;
             const int spaceAvailable = w - scrollButtonW * 2;
-            const int lastStartKey = remappedXYToNote (endOfLastKey - spaceAvailable, 0, mousePositionVelocity) + 1;
+            const int lastStartKey = remappedXYToNote (Point<int> (endOfLastKey - spaceAvailable, 0), mousePositionVelocity) + 1;
 
             if (lastStartKey >= 0 && firstKey > lastStartKey)
             {
@@ -699,11 +701,11 @@ void MidiKeyboardComponent::resetAnyKeysInUse()
     }
 }
 
-void MidiKeyboardComponent::updateNoteUnderMouse (int x, int y)
+void MidiKeyboardComponent::updateNoteUnderMouse (const Point<int>& pos)
 {
     float mousePositionVelocity = 0.0f;
     const int newNote = (mouseDragging || isMouseOver())
-                            ? xyToNote (x, y, mousePositionVelocity) : -1;
+                            ? xyToNote (pos, mousePositionVelocity) : -1;
 
     if (noteUnderMouse != newNote)
     {
@@ -735,19 +737,19 @@ void MidiKeyboardComponent::updateNoteUnderMouse (int x, int y)
 
 void MidiKeyboardComponent::mouseMove (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.x, e.y);
+    updateNoteUnderMouse (e.getPosition());
     stopTimer();
 }
 
 void MidiKeyboardComponent::mouseDrag (const MouseEvent& e)
 {
     float mousePositionVelocity;
-    const int newNote = xyToNote (e.x, e.y, mousePositionVelocity);
+    const int newNote = xyToNote (e.getPosition(), mousePositionVelocity);
 
     if (newNote >= 0)
         mouseDraggedToKey (newNote, e);
 
-    updateNoteUnderMouse (e.x, e.y);
+    updateNoteUnderMouse (e.getPosition());
 }
 
 bool MidiKeyboardComponent::mouseDownOnKey (int /*midiNoteNumber*/, const MouseEvent&)
@@ -762,7 +764,7 @@ void MidiKeyboardComponent::mouseDraggedToKey (int /*midiNoteNumber*/, const Mou
 void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
 {
     float mousePositionVelocity;
-    const int newNote = xyToNote (e.x, e.y, mousePositionVelocity);
+    const int newNote = xyToNote (e.getPosition(), mousePositionVelocity);
     mouseDragging = false;
 
     if (newNote >= 0 && mouseDownOnKey (newNote, e))
@@ -771,7 +773,7 @@ void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
         noteUnderMouse = -1;
         mouseDragging = true;
 
-        updateNoteUnderMouse (e.x, e.y);
+        updateNoteUnderMouse (e.getPosition());
         startTimer (500);
     }
 }
@@ -779,19 +781,19 @@ void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
 void MidiKeyboardComponent::mouseUp (const MouseEvent& e)
 {
     mouseDragging = false;
-    updateNoteUnderMouse (e.x, e.y);
+    updateNoteUnderMouse (e.getPosition());
 
     stopTimer();
 }
 
 void MidiKeyboardComponent::mouseEnter (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.x, e.y);
+    updateNoteUnderMouse (e.getPosition());
 }
 
 void MidiKeyboardComponent::mouseExit (const MouseEvent& e)
 {
-    updateNoteUnderMouse (e.x, e.y);
+    updateNoteUnderMouse (e.getPosition());
 }
 
 void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, float ix, float iy)
@@ -801,10 +803,7 @@ void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, float ix, float i
 
 void MidiKeyboardComponent::timerCallback()
 {
-    int mx, my;
-    getMouseXYRelative (mx, my);
-
-    updateNoteUnderMouse (mx, my);
+    updateNoteUnderMouse (getMouseXYRelative());
 }
 
 //==============================================================================

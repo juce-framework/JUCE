@@ -33,9 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ComponentDragger::ComponentDragger()
-    : constrainer (0),
-      originalX (0),
-      originalY (0)
+    : constrainer (0)
 {
 }
 
@@ -52,9 +50,7 @@ void ComponentDragger::startDraggingComponent (Component* const componentToDrag,
     if (componentToDrag->isValidComponent())
     {
         constrainer = constrainer_;
-        originalX = 0;
-        originalY = 0;
-        componentToDrag->relativePositionToGlobal (originalX, originalY);
+        originalPos = componentToDrag->relativePositionToGlobal (Point<int>());
     }
 }
 
@@ -65,23 +61,22 @@ void ComponentDragger::dragComponent (Component* const componentToDrag, const Mo
 
     if (componentToDrag->isValidComponent())
     {
-        int x = originalX;
-        int y = originalY;
+        Point<int> pos (originalPos);
         int w = componentToDrag->getWidth();
         int h = componentToDrag->getHeight();
 
         const Component* const parentComp = componentToDrag->getParentComponent();
         if (parentComp != 0)
-            parentComp->globalPositionToRelative (x, y);
+            pos = parentComp->globalPositionToRelative (pos);
 
-        x += e.getDistanceFromDragStartX();
-        y += e.getDistanceFromDragStartY();
+        pos += Point<int> (e.getDistanceFromDragStartX(),
+                           e.getDistanceFromDragStartY());
 
         if (constrainer != 0)
-            constrainer->setBoundsForComponent (componentToDrag, Rectangle<int> (x, y, w, h),
+            constrainer->setBoundsForComponent (componentToDrag, Rectangle<int> (pos.getX(), pos.getY(), w, h),
                                                 false, false, false, false);
         else
-            componentToDrag->setBounds (x, y, w, h);
+            componentToDrag->setBounds (pos.getX(), pos.getY(), w, h);
     }
 }
 

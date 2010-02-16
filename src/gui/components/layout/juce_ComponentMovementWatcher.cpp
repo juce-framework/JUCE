@@ -98,17 +98,14 @@ void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMove
 
     if (wasMoved)
     {
-        int x = 0, y = 0;
-        component->relativePositionToOtherComponent (component->getTopLevelComponent(), x, y);
+        const Point<int> pos (component->relativePositionToOtherComponent (component->getTopLevelComponent(), Point<int>()));
 
-        wasMoved = (lastX != x || lastY != y);
-        lastX = x;
-        lastY = y;
+        wasMoved = lastBounds.getPosition() != pos;
+        lastBounds.setPosition (pos);
     }
 
-    wasResized = (lastWidth != component->getWidth() || lastHeight != component->getHeight());
-    lastWidth = component->getWidth();
-    lastHeight = component->getHeight();
+    wasResized = (lastBounds.getWidth() != component->getWidth() || lastBounds.getHeight() != component->getHeight());
+    lastBounds.setSize (component->getWidth(), component->getHeight());
 
     if (wasMoved || wasResized)
         componentMovedOrResized (wasMoved, wasResized);

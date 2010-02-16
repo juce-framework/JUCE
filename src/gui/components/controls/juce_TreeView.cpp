@@ -306,11 +306,8 @@ public:
 
     const String getTooltip()
     {
-        int x, y;
-        getMouseXYRelative (x, y);
         Rectangle<int> pos;
-
-        TreeViewItem* const item = findItemAt (y, pos);
+        TreeViewItem* const item = findItemAt (getMouseXYRelative().getY(), pos);
 
         if (item != 0)
             return item->getTooltip();
@@ -557,10 +554,8 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
 TreeViewItem* TreeView::getItemAt (int y) const throw()
 {
     TreeViewContentComponent* const tc = (TreeViewContentComponent*) viewport->getViewedComponent();
-    int x;
-    relativePositionToOtherComponent (tc, x, y);
     Rectangle<int> pos;
-    return tc->findItemAt (y, pos);
+    return tc->findItemAt (relativePositionToOtherComponent (tc, Point<int> (0, y)).getY(), pos);
 }
 
 TreeViewItem* TreeView::findItemFromIdentifierString (const String& identifierString) const

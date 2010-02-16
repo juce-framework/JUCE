@@ -53,8 +53,7 @@ static const int customCommandMessage   = 0x7fff0001;
 static const int exitModalStateMessage  = 0x7fff0002;
 
 //==============================================================================
-static int unboundedMouseOffsetX = 0;
-static int unboundedMouseOffsetY = 0;
+static Point<int> unboundedMouseOffset;
 static bool isUnboundedMouseModeOn = false;
 static bool isCursorVisibleUntilOffscreen;
 
@@ -412,8 +411,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                  jmax (1, getHeight()));
 #endif
 
-        int x = 0, y = 0;
-        relativePositionToGlobal (x, y);
+        const Point<int> topLeft (relativePositionToGlobal (Point<int> (0, 0)));
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
@@ -429,7 +427,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             removeFromDesktop();
 
-            setTopLeftPosition (x, y);
+            setTopLeftPosition (topLeft.getX(), topLeft.getY());
         }
 
         if (parentComponent_ != 0)
@@ -443,8 +441,8 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
             Desktop::getInstance().addDesktopComponent (this);
 
-            bounds_.setPosition (x, y);
-            peer->setBounds (x, y, getWidth(), getHeight(), false);
+            bounds_.setPosition (topLeft);
+            peer->setBounds (topLeft.getX(), topLeft.getY(), getWidth(), getHeight(), false);
 
             peer->setVisible (isVisible());
 
@@ -741,57 +739,60 @@ int Component::getParentHeight() const throw()
                                    : getParentMonitorArea().getHeight();
 }
 
-int Component::getScreenX() const throw()
+int Component::getScreenX() const
 {
-    return (parentComponent_ != 0) ? parentComponent_->getScreenX() + getX()
-                                   : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenX()
-                                                                   : getX());
+    return getScreenPosition().getX();
 }
 
-int Component::getScreenY() const throw()
+int Component::getScreenY() const
 {
-    return (parentComponent_ != 0) ? parentComponent_->getScreenY() + getY()
-                                   : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenY()
-                                                                   : getY());
+    return getScreenPosition().getY();
 }
 
-void Component::relativePositionToGlobal (int& x, int& y) const throw()
+const Point<int> Component::getScreenPosition() const
+{
+    return (parentComponent_ != 0) ? parentComponent_->getScreenPosition() + getPosition()
+                                   : (flags.hasHeavyweightPeerFlag ? getPeer()->getScreenPosition()
+                                                                   : getPosition());
+}
+
+const Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
 {
     const Component* c = this;
+    Point<int> p (relativePosition);
 
     do
     {
         if (c->flags.hasHeavyweightPeerFlag)
-        {
-            c->getPeer()->relativePositionToGlobal (x, y);
-            break;
-        }
+            return c->getPeer()->relativePositionToGlobal (p);
 
-        x += c->getX();
-        y += c->getY();
+        p += c->getPosition();
         c = c->parentComponent_;
     }
     while (c != 0);
+
+    return p;
 }
 
-void Component::globalPositionToRelative (int& x, int& y) const throw()
+const Point<int> Component::globalPositionToRelative (const Point<int>& screenPosition) const
 {
     if (flags.hasHeavyweightPeerFlag)
     {
-        getPeer()->globalPositionToRelative (x, y);
+        return getPeer()->globalPositionToRelative (screenPosition);
     }
     else
     {
         if (parentComponent_ != 0)
-            parentComponent_->globalPositionToRelative (x, y);
+            return parentComponent_->globalPositionToRelative (screenPosition) - getPosition();
 
-        x -= getX();
-        y -= getY();
+        return screenPosition - getPosition();
     }
 }
 
-void Component::relativePositionToOtherComponent (const Component* const targetComponent, int& x, int& y) const throw()
+const Point<int> Component::relativePositionToOtherComponent (const Component* const targetComponent, const Point<int>& positionRelativeToThis) const
 {
+    Point<int> p (positionRelativeToThis);
+
     if (targetComponent != 0)
     {
         const Component* c = this;
@@ -799,22 +800,23 @@ void Component::relativePositionToOtherComponent (const Component* const targetC
         do
         {
             if (c == targetComponent)
-                return;
+                return p;
 
             if (c->flags.hasHeavyweightPeerFlag)
             {
-                c->getPeer()->relativePositionToGlobal (x, y);
+                p = c->getPeer()->relativePositionToGlobal (p);
                 break;
             }
 
-            x += c->getX();
-            y += c->getY();
+            p += c->getPosition();
             c = c->parentComponent_;
         }
         while (c != 0);
 
-        targetComponent->globalPositionToRelative (x, y);
+        p = targetComponent->globalPositionToRelative (p);
     }
+
+    return p;
 }
 
 //==============================================================================
@@ -1546,10 +1548,9 @@ void Component::setMouseCursor (const MouseCursor& cursor) throw()
 
     if (flags.visibleFlag)
     {
-        int mx, my;
-        getMouseXYRelative (mx, my);
+        const Point<int> mousePos (getMouseXYRelative());
 
-        if (flags.draggingFlag || reallyContains (mx, my, false))
+        if (flags.draggingFlag || reallyContains (mousePos.getX(), mousePos.getY(), false))
         {
             internalUpdateMouseCursor (false);
         }
@@ -1574,9 +1575,8 @@ void Component::internalUpdateMouseCursor (bool forcedUpdate) throw()
     {
         MouseCursor mc (getLookAndFeel().getMouseCursorFor (*this));
 
-        if (isUnboundedMouseModeOn && (unboundedMouseOffsetX != 0
-                                        || unboundedMouseOffsetY != 0
-                                        || ! isCursorVisibleUntilOffscreen))
+        if (isUnboundedMouseModeOn
+             && ((! unboundedMouseOffset.isOrigin()) || ! isCursorVisibleUntilOffscreen))
         {
             mc = MouseCursor::NoCursor;
             forcedUpdate = true;
@@ -1989,22 +1989,18 @@ void Component::getVisibleArea (RectangleList& result,
         {
             const Component* const c = getTopLevelComponent();
 
-            int x = 0, y = 0;
-            c->relativePositionToOtherComponent (this, x, y);
-
-            c->subtractObscuredRegions (result, x, y,
+            c->subtractObscuredRegions (result, c->relativePositionToOtherComponent (this, Point<int>()),
                                         Rectangle<int> (0, 0, c->getWidth(), c->getHeight()),
                                         this);
         }
 
-        subtractObscuredRegions (result, 0, 0, unclipped, 0);
+        subtractObscuredRegions (result, Point<int>(), unclipped, 0);
         result.consolidate();
     }
 }
 
 void Component::subtractObscuredRegions (RectangleList& result,
-                                         const int deltaX,
-                                         const int deltaY,
+                                         const Point<int>& delta,
                                          const Rectangle<int>& clipRect,
                                          const Component* const compToAvoid) const throw()
 {
@@ -2017,7 +2013,7 @@ void Component::subtractObscuredRegions (RectangleList& result,
             if (c->isOpaque())
             {
                 Rectangle<int> childBounds (c->bounds_.getIntersection (clipRect));
-                childBounds.translate (deltaX, deltaY);
+                childBounds.translate (delta.getX(), delta.getY());
 
                 result.subtract (childBounds);
             }
@@ -2026,11 +2022,8 @@ void Component::subtractObscuredRegions (RectangleList& result,
                 Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
                 newClip.translate (-c->getX(), -c->getY());
 
-                c->subtractObscuredRegions (result,
-                                            c->getX() + deltaX,
-                                            c->getY() + deltaY,
-                                            newClip,
-                                            compToAvoid);
+                c->subtractObscuredRegions (result, c->getPosition() + delta,
+                                            newClip, compToAvoid);
             }
         }
     }
@@ -2253,11 +2246,11 @@ void Component::internalMouseEnter (int x, int y, int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              ModifierKeys::getCurrentModifiers(),
                              this,
                              Time (time),
-                             x, y,
+                             Point<int> (x, y),
                              Time (time),
                              0, false);
 
@@ -2338,11 +2331,11 @@ void Component::internalMouseExit (int x, int y, int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              ModifierKeys::getCurrentModifiers(),
                              this,
                              Time (time),
-                             x, y,
+                             Point<int> (x, y),
                              Time (time),
                              0, false);
         mouseExit (me);
@@ -2409,15 +2402,13 @@ public:
 
         if (c != 0 && c->isMouseButtonDown())
         {
-            int x, y;
-            c->getMouseXYRelative (x, y);
+            const Point<int> mousePos (c->getMouseXYRelative());
 
             // the offsets have been added on, so must be taken off before calling the
             // drag.. otherwise they'll be added twice
-            x -= unboundedMouseOffsetX;
-            y -= unboundedMouseOffsetY;
-
-            c->internalMouseDrag (x, y, Time::currentTimeMillis());
+            c->internalMouseDrag (mousePos.getX() - unboundedMouseOffset.getX(),
+                                  mousePos.getY() - unboundedMouseOffset.getY(),
+                                  Time::currentTimeMillis());
         }
     }
 
@@ -2451,9 +2442,7 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
 {
     Desktop& desktop = Desktop::getInstance();
 
-    int gx = x, gy = y;
-    relativePositionToGlobal (gx, gy);
-    desktop.registerMouseDown (Point<int> (gx, gy), time, this);
+    desktop.registerMouseDown (relativePositionToGlobal (Point<int> (x, y)), time, this);
 
     const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2469,11 +2458,11 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
             // allow blocked mouse-events to go to global listeners..
-            const MouseEvent me (x, y,
+            const MouseEvent me (Point<int> (x, y),
                                  ModifierKeys::getCurrentModifiers(),
                                  this,
                                  Time (time),
-                                 x, y,
+                                 Point<int> (x, y),
                                  desktop.getLastMouseDownTime(),
                                  desktop.getNumberOfMultipleClicks(),
                                  false);
@@ -2522,11 +2511,11 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              ModifierKeys::getCurrentModifiers(),
                              this,
                              desktop.getLastMouseDownTime(),
-                             x, y,
+                             Point<int> (x, y),
                              desktop.getLastMouseDownTime(),
                              desktop.getNumberOfMultipleClicks(),
                              false);
@@ -2591,29 +2580,24 @@ void Component::internalMouseUp (const int oldModifiers, int x, int y, const int
         flags.draggingFlag = false;
         deleteAndZero (dragRepeater);
 
-        x += unboundedMouseOffsetX;
-        y += unboundedMouseOffsetY;
+        x += unboundedMouseOffset.getX();
+        y += unboundedMouseOffset.getY();
 
-        int gx = x, gy = y;
-        relativePositionToGlobal (gx, gy);
-        desktop.registerMouseDrag (Point<int> (gx, gy));
+        desktop.registerMouseDrag (relativePositionToGlobal (Point<int> (x, y)));
 
         const ComponentDeletionWatcher deletionChecker (this);
 
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        int mdx, mdy;
-        Desktop::getLastMouseDownPosition (mdx, mdy);
-        globalPositionToRelative (mdx, mdy);
-
+        const Point<int> mouseDownPos (globalPositionToRelative (Desktop::getLastMouseDownPosition()));
         const Time lastMouseDownTime (desktop.getLastMouseDownTime());
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              oldModifiers,
                              this,
                              Time (time),
-                             mdx, mdy,
+                             mouseDownPos,
                              lastMouseDownTime,
                              desktop.getNumberOfMultipleClicks(),
                              desktop.mouseMovedSignificantlySincePressed
@@ -2733,26 +2717,21 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
 
         flags.mouseOverFlag = reallyContains (x, y, false);
 
-        x += unboundedMouseOffsetX;
-        y += unboundedMouseOffsetY;
+        x += unboundedMouseOffset.getX();
+        y += unboundedMouseOffset.getY();
 
-        int gx = x, gy = y;
-        relativePositionToGlobal (gx, gy);
-        desktop.registerMouseDrag (Point<int> (gx, gy));
+        desktop.registerMouseDrag (relativePositionToGlobal (Point<int> (x, y)));
 
         const ComponentDeletionWatcher deletionChecker (this);
 
-        int mdx, mdy;
-        Desktop::getLastMouseDownPosition (mdx, mdy);
-        globalPositionToRelative (mdx, mdy);
-
+        const Point<int> mouseDownPos (globalPositionToRelative (Desktop::getLastMouseDownPosition()));
         const Time lastMouseDownTime (desktop.getLastMouseDownTime());
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              ModifierKeys::getCurrentModifiers(),
                              this,
                              Time (time),
-                             mdx, mdy,
+                             mouseDownPos,
                              lastMouseDownTime,
                              desktop.getNumberOfMultipleClicks(),
                              desktop.mouseMovedSignificantlySincePressed
@@ -2812,37 +2791,30 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
             if (isUnboundedMouseModeOn)
             {
                 Rectangle<int> screenArea (getParentMonitorArea().expanded (-2, -2));
+                Point<int> mousePos (Desktop::getMousePosition());
 
-                int mx, my;
-                Desktop::getMousePosition (mx, my);
-
-                if (! screenArea.contains (mx, my))
+                if (! screenArea.contains (mousePos))
                 {
                     int deltaX = 0, deltaY = 0;
 
-                    if (mx <= screenArea.getX() || mx >= screenArea.getRight())
-                        deltaX = getScreenX() + getWidth() / 2 - mx;
+                    if (mousePos.getX() <= screenArea.getX() || mousePos.getX() >= screenArea.getRight())
+                        deltaX = getScreenX() + getWidth() / 2 - mousePos.getX();
 
-                    if (my <= screenArea.getY() || my >= screenArea.getBottom())
-                        deltaY = getScreenY() + getHeight() / 2 - my;
+                    if (mousePos.getY() <= screenArea.getY() || mousePos.getY() >= screenArea.getBottom())
+                        deltaY = getScreenY() + getHeight() / 2 - mousePos.getY();
 
-                    unboundedMouseOffsetX -= deltaX;
-                    unboundedMouseOffsetY -= deltaY;
+                    unboundedMouseOffset -= Point<int> (deltaX, deltaY);
 
-                    Desktop::setMousePosition (mx + deltaX,
-                                               my + deltaY);
+                    Desktop::setMousePosition (mousePos + Point<int> (deltaX, deltaY));
                 }
                 else if (isCursorVisibleUntilOffscreen
-                          && (unboundedMouseOffsetX != 0 || unboundedMouseOffsetY != 0)
-                          && screenArea.contains (mx + unboundedMouseOffsetX,
-                                                  my + unboundedMouseOffsetY))
+                          && (! unboundedMouseOffset.isOrigin())
+                          && screenArea.contains (mousePos + unboundedMouseOffset))
                 {
-                    mx += unboundedMouseOffsetX;
-                    my += unboundedMouseOffsetY;
-                    unboundedMouseOffsetX = 0;
-                    unboundedMouseOffsetY = 0;
+                    mousePos += unboundedMouseOffset;
+                    unboundedMouseOffset = Point<int>();
 
-                    Desktop::setMousePosition (mx, my);
+                    Desktop::setMousePosition (mousePos);
                 }
             }
 
@@ -2859,11 +2831,11 @@ void Component::internalMouseMove (const int x, const int y, const int64 time)
     {
         Desktop& desktop = Desktop::getInstance();
 
-        const MouseEvent me (x, y,
+        const MouseEvent me (Point<int> (x, y),
                              ModifierKeys::getCurrentModifiers(),
                              this,
                              Time (time),
-                             x, y,
+                             Point<int> (x, y),
                              Time (time),
                              0, false);
 
@@ -2939,14 +2911,13 @@ void Component::internalMouseWheel (const int intAmountX, const int intAmountY, 
     const float wheelIncrementX = intAmountX * (1.0f / 256.0f);
     const float wheelIncrementY = intAmountY * (1.0f / 256.0f);
 
-    int mx, my;
-    getMouseXYRelative (mx, my);
+    const Point<int> mousePos (getMouseXYRelative());
 
-    const MouseEvent me (mx, my,
+    const MouseEvent me (mousePos,
                          ModifierKeys::getCurrentModifiers(),
                          this,
                          Time (time),
-                         mx, my,
+                         mousePos,
                          Time (time),
                          0, false);
 
@@ -3403,13 +3374,9 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
     return ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown();
 }
 
-void Component::getMouseXYRelative (int& mx, int& my) const throw()
+const Point<int> Component::getMouseXYRelative() const
 {
-    Desktop::getMousePosition (mx, my);
-    globalPositionToRelative (mx, my);
-
-    mx += unboundedMouseOffsetX;
-    my += unboundedMouseOffsetY;
+    return globalPositionToRelative (Desktop::getMousePosition()) + unboundedMouseOffset;
 }
 
 void Component::enableUnboundedMouseMovement (bool enable,
@@ -3421,25 +3388,15 @@ void Component::enableUnboundedMouseMovement (bool enable,
     if (enable != isUnboundedMouseModeOn)
     {
         if ((! enable) && ((! isCursorVisibleUntilOffscreen)
-                            || unboundedMouseOffsetX != 0
-                            || unboundedMouseOffsetY != 0))
+                            || ! unboundedMouseOffset.isOrigin()))
         {
             // when released, return the mouse to within the component's bounds
-
-            int mx, my;
-            getMouseXYRelative (mx, my);
-
-            mx = jlimit (0, getWidth(), mx);
-            my = jlimit (0, getHeight(), my);
-
-            relativePositionToGlobal (mx, my);
-
-            Desktop::setMousePosition (mx, my);
+            Desktop::setMousePosition (relativePositionToGlobal (Rectangle<int> (0, 0, getWidth(), getHeight())
+                                                                    .getConstrainedPoint (getMouseXYRelative())));
         }
 
         isUnboundedMouseModeOn = enable;
-        unboundedMouseOffsetX = 0;
-        unboundedMouseOffsetY = 0;
+        unboundedMouseOffset = Point<int>();
 
         internalUpdateMouseCursor (true);
     }
@@ -3453,11 +3410,9 @@ Component* JUCE_CALLTYPE Component::getComponentUnderMouse() throw()
 //==============================================================================
 const Rectangle<int> Component::getParentMonitorArea() const throw()
 {
-    int centreX = getWidth() / 2;
-    int centreY = getHeight() / 2;
-    relativePositionToGlobal (centreX, centreY);
-
-    return Desktop::getInstance().getMonitorAreaContaining (centreX, centreY);
+    return Desktop::getInstance()
+            .getMonitorAreaContaining (relativePositionToGlobal (Point<int> (getWidth() / 2,
+                                                                             getHeight() / 2)));
 }
 
 //==============================================================================

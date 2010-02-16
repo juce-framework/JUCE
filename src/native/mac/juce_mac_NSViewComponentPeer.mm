@@ -135,10 +135,9 @@ public:
     void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
     void getBounds (int& x, int& y, int& w, int& h, const bool global) const;
     void getBounds (int& x, int& y, int& w, int& h) const;
-    int getScreenX() const;
-    int getScreenY() const;
-    void relativePositionToGlobal (int& x, int& y);
-    void globalPositionToRelative (int& x, int& y);
+    const Point<int> getScreenPosition() const;
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
@@ -199,7 +198,7 @@ public:
     virtual void viewFocusLoss();
     bool isFocused() const;
     void grabFocus();
-    void textInputRequired (int x, int y);
+    void textInputRequired (const Point<int>& position);
 
     //==============================================================================
     void repaint (int x, int y, int w, int h);
@@ -858,34 +857,21 @@ void NSViewComponentPeer::getBounds (int& x, int& y, int& w, int& h) const
     getBounds (x, y, w, h, ! isSharedWindow);
 }
 
-int NSViewComponentPeer::getScreenX() const
+const Point<int> NSViewComponentPeer::getScreenPosition() const
 {
     int x, y, w, h;
     getBounds (x, y, w, h, true);
-    return x;
+    return Point<int> (x, y);
 }
 
-int NSViewComponentPeer::getScreenY() const
+const Point<int> NSViewComponentPeer::relativePositionToGlobal (const Point<int>& relativePosition)
 {
-    int x, y, w, h;
-    getBounds (x, y, w, h, true);
-    return y;
+    return relativePosition + getScreenPosition();
 }
 
-void NSViewComponentPeer::relativePositionToGlobal (int& x, int& y)
+const Point<int> NSViewComponentPeer::globalPositionToRelative (const Point<int>& screenPosition)
 {
-    int wx, wy, ww, wh;
-    getBounds (wx, wy, ww, wh, true);
-    x += wx;
-    y += wy;
-}
-
-void NSViewComponentPeer::globalPositionToRelative (int& x, int& y)
-{
-    int wx, wy, ww, wh;
-    getBounds (wx, wy, ww, wh, true);
-    x -= wx;
-    y -= wy;
+    return screenPosition - getScreenPosition();
 }
 
 NSRect NSViewComponentPeer::constrainRect (NSRect r)
@@ -1125,7 +1111,7 @@ void NSViewComponentPeer::grabFocus()
     }
 }
 
-void NSViewComponentPeer::textInputRequired (int /*x*/, int /*y*/)
+void NSViewComponentPeer::textInputRequired (const Point<int>&)
 {
 }
 
@@ -1288,13 +1274,10 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 
 void NSViewComponentPeer::showArrowCursorIfNeeded()
 {
-    if (Component::getComponentUnderMouse() == 0)
+    if (Component::getComponentUnderMouse() == 0
+         && Desktop::getInstance().findComponentAt (Desktop::getInstance().getMousePosition()) == 0)
     {
-        int mx, my;
-        Desktop::getInstance().getMousePosition (mx, my);
-
-        if (Desktop::getInstance().findComponentAt (mx, my) == 0)
-            [[NSCursor arrowCursor] set];
+        [[NSCursor arrowCursor] set];
     }
 }
 

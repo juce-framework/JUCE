@@ -259,9 +259,8 @@ void OpenGLComponent::paint (Graphics&)
 
         if (peer != 0)
         {
-            peer->addMaskedRegion (getScreenX() - peer->getScreenX(),
-                                   getScreenY() - peer->getScreenY(),
-                                   getWidth(), getHeight());
+            const Point<int> topLeft (getScreenPosition() - peer->getScreenPosition());
+            peer->addMaskedRegion (topLeft.getX(), topLeft.getY(), getWidth(), getHeight());
         }
     }
 }

@@ -100,7 +100,8 @@ public:
 private:
     //==============================================================================
     int millisecondsBeforeTipAppears;
-    int mouseX, mouseY, mouseClicks;
+    Point<int> lastMousePos;
+    int mouseClicks;
     unsigned int lastCompChangeTime, lastHideTime;
     Component* lastComponentUnderMouse;
     bool changedCompsSinceShown;

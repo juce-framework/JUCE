@@ -343,33 +343,37 @@ public:
 
         @see getX, relativePositionToGlobal
     */
-    int getScreenX() const throw();
+    int getScreenX() const;
 
     /** Returns this component's y co-ordinate relative the the screen's top-left origin.
 
         @see getY, relativePositionToGlobal
     */
-    int getScreenY() const throw();
+    int getScreenY() const;
+
+    /** Returns the position of this component's top-left corner relative to the screen's top-left.
+    */
+    const Point<int> getScreenPosition() const;
 
     /** Converts a position relative to this component's top-left into a screen co-ordinate.
 
         @see globalPositionToRelative, relativePositionToOtherComponent
     */
-    void relativePositionToGlobal (int& x, int& y) const throw();
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
     /** Converts a screen co-ordinate into a position relative to this component's top-left.
 
         @see relativePositionToGlobal, relativePositionToOtherComponent
     */
-    void globalPositionToRelative (int& x, int& y) const throw();
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
     /** Converts a position relative to this component's top-left into a position
         relative to another component's top-left.
 
         @see relativePositionToGlobal, globalPositionToRelative
     */
-    void relativePositionToOtherComponent (const Component* const targetComponent,
-                                           int& x, int& y) const throw();
+    const Point<int> relativePositionToOtherComponent (const Component* const targetComponent,
+                                                       const Point<int>& positionRelativeToThis) const;
 
     //==============================================================================
     /** Moves the component to a new position.
@@ -1578,7 +1582,7 @@ public:
 
         The co-ordinates are relative to the component's top-left corner.
     */
-    void getMouseXYRelative (int& x, int& y) const throw();
+    const Point<int> getMouseXYRelative() const;
 
     /** Returns the component that's currently underneath the mouse.
 
@@ -1979,8 +1983,7 @@ private:
     void sendEnablementChangeMessage();
     static void* runModalLoopCallback (void*);
     static void bringModalComponentToFront();
-    void subtractObscuredRegions (RectangleList& result,
-                                  const int deltaX, const int deltaY,
+    void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
                                   const Rectangle<int>& clipRect,
                                   const Component* const compToAvoid) const throw();
     void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,

@@ -1150,34 +1150,32 @@ void Slider::restoreMouseIfHidden()
 
         if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
         {
-            int x, y, downX, downY;
-            Desktop::getMousePosition (x, y);
-            Desktop::getLastMouseDownPosition (downX, downY);
+            Point<int> mousePos (Desktop::getMousePosition());
+            const Point<int> lastMouseDown (Desktop::getLastMouseDownPosition());
 
             if (style == RotaryHorizontalDrag)
             {
                 const double posDiff = valueToProportionOfLength (pos) - valueToProportionOfLength (valueOnMouseDown);
-                x = roundToInt (pixelsForFullDragExtent * posDiff + downX);
-                y = downY;
+                mousePos = Point<int> (roundToInt (pixelsForFullDragExtent * posDiff + lastMouseDown.getX()),
+                                       lastMouseDown.getY());
             }
             else
             {
                 const double posDiff = valueToProportionOfLength (valueOnMouseDown) - valueToProportionOfLength (pos);
-                x = downX;
-                y = roundToInt (pixelsForFullDragExtent * posDiff + downY);
+                mousePos = Point<int> (lastMouseDown.getX(),
+                                       roundToInt (pixelsForFullDragExtent * posDiff + lastMouseDown.getY()));
             }
 
-            Desktop::setMousePosition (x, y);
+            Desktop::setMousePosition (mousePos);
         }
         else
         {
             const int pixelPos = (int) getLinearSliderPos (pos);
 
-            int x = isHorizontal() ? pixelPos : (getWidth() / 2);
-            int y = isVertical()   ? pixelPos : (getHeight() / 2);
+            const Point<int> pos (isHorizontal() ? pixelPos : (getWidth() / 2),
+                                  isVertical()   ? pixelPos : (getHeight() / 2));
 
-            relativePositionToGlobal (x, y);
-            Desktop::setMousePosition (x, y);
+            Desktop::setMousePosition (relativePositionToGlobal (pos));
         }
     }
 }

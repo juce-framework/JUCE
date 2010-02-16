@@ -93,10 +93,9 @@ public:
     void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
     void getBounds (int& x, int& y, int& w, int& h, const bool global) const;
     void getBounds (int& x, int& y, int& w, int& h) const;
-    int getScreenX() const;
-    int getScreenY() const;
-    void relativePositionToGlobal (int& x, int& y);
-    void globalPositionToRelative (int& x, int& y);
+    const Point<int> getScreenPosition() const;
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
     void setMinimised (bool shouldBeMinimised);
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
@@ -121,7 +120,7 @@ public:
     virtual void viewFocusLoss();
     bool isFocused() const;
     void grabFocus();
-    void textInputRequired (int x, int y);
+    void textInputRequired (const Point<int>& position);
 
     //==============================================================================
     void repaint (int x, int y, int w, int h);
@@ -717,7 +716,7 @@ void UIViewComponentPeer::grabFocus()
     }
 }
 
-void UIViewComponentPeer::textInputRequired (int /*x*/, int /*y*/)
+void UIViewComponentPeer::textInputRequired (const Point<int>&)
 {
 }
 
@@ -817,13 +816,12 @@ bool Desktop::canUseSemiTransparentWindows() throw()
     return true;
 }
 
-void Desktop::getMousePosition (int& x, int& y) throw()
+const Point<int> Desktop::getMousePosition()
 {
-    x = juce_lastMouseX;
-    y = juce_lastMouseY;
+    return Point<int> (juce_lastMouseX, juce_lastMouseY);
 }
 
-void Desktop::setMousePosition (int x, int y) throw()
+void Desktop::setMousePosition (const Point<int>&)
 {
 }
 

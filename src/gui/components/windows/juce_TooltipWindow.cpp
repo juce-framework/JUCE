@@ -40,8 +40,6 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
                               const int millisecondsBeforeTipAppears_)
     : Component ("tooltip"),
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
-      mouseX (0),
-      mouseY (0),
       lastHideTime (0),
       lastComponentUnderMouse (0),
       changedCompsSinceShown (true)
@@ -80,24 +78,23 @@ void TooltipWindow::showFor (const String& tip)
     jassert (tip.isNotEmpty());
     tipShowing = tip;
 
-    int mx, my;
-    Desktop::getMousePosition (mx, my);
+    Point<int> mousePos (Desktop::getMousePosition());
 
     if (getParentComponent() != 0)
-        getParentComponent()->globalPositionToRelative (mx, my);
+        mousePos = getParentComponent()->globalPositionToRelative (mousePos);
 
     int x, y, w, h;
     getLookAndFeel().getTooltipSize (tip, w, h);
 
-    if (mx > getParentWidth() / 2)
-        x = mx - (w + 12);
+    if (mousePos.getX() > getParentWidth() / 2)
+        x = mousePos.getX() - (w + 12);
     else
-        x = mx + 24;
+        x = mousePos.getX() + 24;
 
-    if (my > getParentHeight() / 2)
-        y = my - (h + 6);
+    if (mousePos.getY() > getParentHeight() / 2)
+        y = mousePos.getY() - (h + 6);
     else
-        y = my + 6;
+        y = mousePos.getY() + 6;
 
     setBounds (x, y, w, h);
     setVisible (true);
@@ -148,11 +145,9 @@ void TooltipWindow::timerCallback()
     const bool mouseWasClicked = clickCount > mouseClicks;
     mouseClicks = clickCount;
 
-    int mx, my;
-    Desktop::getMousePosition (mx, my);
-    const bool mouseMovedQuickly = (abs (mx - mouseX) + abs (my - mouseY) > 12);
-    mouseX = mx;
-    mouseY = my;
+    const Point<int> mousePos (Desktop::getMousePosition());
+    const bool mouseMovedQuickly = mousePos.getDistanceFrom (lastMousePos) > 12;
+    lastMousePos = mousePos;
 
     if (tipChanged || mouseWasClicked || mouseMovedQuickly)
         lastCompChangeTime = now;

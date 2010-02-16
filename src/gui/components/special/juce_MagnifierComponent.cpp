@@ -76,11 +76,11 @@ public:
             peer->grabFocus();
     }
 
-    void textInputRequired (int x, int y)
+    void textInputRequired (const Point<int>& position)
     {
         ComponentPeer* peer = magnifierComp->getPeer();
         if (peer != 0)
-            peer->textInputRequired (x, y);
+            peer->textInputRequired (position);
     }
 
     void getBounds (int& x, int& y, int& w, int& h) const
@@ -91,25 +91,25 @@ public:
         h = component->getHeight();
     }
 
-    int getScreenX() const                          { return magnifierComp->getScreenX(); }
-    int getScreenY() const                          { return magnifierComp->getScreenY(); }
-
-    void relativePositionToGlobal (int& x, int& y)
+    const Point<int> getScreenPosition() const
     {
-        const double zoom = magnifierComp->getScaleFactor();
-        x = roundToInt (x * zoom);
-        y = roundToInt (y * zoom);
-
-        magnifierComp->relativePositionToGlobal (x, y);
+        return magnifierComp->getScreenPosition();
     }
 
-    void globalPositionToRelative (int& x, int& y)
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
     {
-        magnifierComp->globalPositionToRelative (x, y);
-
         const double zoom = magnifierComp->getScaleFactor();
-        x = roundToInt (x / zoom);
-        y = roundToInt (y / zoom);
+        return magnifierComp->relativePositionToGlobal (Point<int> (roundToInt (relativePosition.getX() * zoom),
+                                                                    roundToInt (relativePosition.getY() * zoom)));
+    }
+
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
+    {
+        const Point<int> p (magnifierComp->globalPositionToRelative (screenPosition));
+        const double zoom = magnifierComp->getScaleFactor();
+
+        return Point<int> (roundToInt (p.getX() / zoom),
+                           roundToInt (p.getY() / zoom));
     }
 
     bool contains (int x, int y, bool) const

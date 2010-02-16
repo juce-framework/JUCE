@@ -29,6 +29,7 @@
 class Component;
 #include "../keyboard/juce_ModifierKeys.h"
 #include "../../../core/juce_Time.h"
+#include "../../graphics/geometry/juce_Point.h"
 
 
 //==============================================================================
@@ -46,29 +47,24 @@ public:
 
         Normally an application will never need to use this.
 
-        @param x                the x position of the mouse, relative to the component that is passed-in
-        @param y                the y position of the mouse, relative to the component that is passed-in
+        @param position         the position of the mouse, relative to the component that is passed-in
         @param modifiers        the key modifiers at the time of the event
         @param originator       the component that the mouse event applies to
         @param eventTime        the time the event happened
-        @param mouseDownX       the x position of the corresponding mouse-down event (relative to the component that is passed-in).
+        @param mouseDownPos     the position of the corresponding mouse-down event (relative to the component that is passed-in).
                                 If there isn't a corresponding mouse-down (e.g. for a mouse-move), this will just be
                                 the same as the current mouse-x position.
-        @param mouseDownY       the y position of the corresponding mouse-down event (relative to the component that is passed-in)
-                                If there isn't a corresponding mouse-down (e.g. for a mouse-move), this will just be
-                                the same as the current mouse-y position.
         @param mouseDownTime    the time at which the corresponding mouse-down event happened
                                 If there isn't a corresponding mouse-down (e.g. for a mouse-move), this will just be
                                 the same as the current mouse-event time.
         @param numberOfClicks   how many clicks, e.g. a double-click event will be 2, a triple-click will be 3, etc
         @param mouseWasDragged  whether the mouse has been dragged significantly since the previous mouse-down
     */
-    MouseEvent (const int x, const int y,
+    MouseEvent (const Point<int>& position,
                 const ModifierKeys& modifiers,
                 Component* const originator,
                 const Time& eventTime,
-                const int mouseDownX,
-                const int mouseDownY,
+                const Point<int> mouseDownPos,
                 const Time& mouseDownTime,
                 const int numberOfClicks,
                 const bool mouseWasDragged) throw();
@@ -146,6 +142,14 @@ public:
     */
     int getMouseDownY() const throw();
 
+    /** Returns the co-ordinates of the last place that a mouse was pressed.
+
+        The co-ordinates are relative to the component specified in MouseEvent::component.
+
+        @see getDistanceFromDragStart, getDistanceFromDragStartX, mouseWasClicked
+    */
+    const Point<int> getMouseDownPosition() const throw();
+
     /** Returns the straight-line distance between where the mouse is now and where it
         was the last time the button was pressed.
 
@@ -203,13 +207,20 @@ public:
     int getLengthOfMousePress() const throw();
 
     //==============================================================================
+    /** The position of the mouse when the event occurred.
+
+        This position is relative to the top-left of the component to which the
+        event applies (as indicated by the MouseEvent::eventComponent field).
+    */
+    const Point<int> getPosition() const throw();
+
     /** Returns the mouse x position of this event, in global screen co-ordinates.
 
         The co-ordinates are relative to the top-left of the main monitor.
 
         @see getMouseDownScreenX, Desktop::getMousePosition
     */
-    int getScreenX() const throw();
+    int getScreenX() const;
 
     /** Returns the mouse y position of this event, in global screen co-ordinates.
 
@@ -217,7 +228,15 @@ public:
 
         @see getMouseDownScreenY, Desktop::getMousePosition
     */
-    int getScreenY() const throw();
+    int getScreenY() const;
+
+    /** Returns the mouse position of this event, in global screen co-ordinates.
+
+        The co-ordinates are relative to the top-left of the main monitor.
+
+        @see getMouseDownScreenY, Desktop::getMousePosition
+    */
+    const Point<int> getScreenPosition() const;
 
     /** Returns the x co-ordinate at which the mouse button was last pressed.
 
@@ -225,7 +244,7 @@ public:
 
         @see getScreenX, Desktop::getMousePosition
     */
-    int getMouseDownScreenX() const throw();
+    int getMouseDownScreenX() const;
 
     /** Returns the y co-ordinate at which the mouse button was last pressed.
 
@@ -233,7 +252,15 @@ public:
 
         @see getScreenY, Desktop::getMousePosition
     */
-    int getMouseDownScreenY() const throw();
+    int getMouseDownScreenY() const;
+
+    /** Returns the co-ordinates at which the mouse button was last pressed.
+
+        The co-ordinates are relative to the top-left of the main monitor.
+
+        @see getScreenY, Desktop::getMousePosition
+    */
+    const Point<int> getMouseDownScreenPosition() const;
 
     //==============================================================================
     /** Creates a version of this event that is relative to a different component.
@@ -267,7 +294,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    int mouseDownX, mouseDownY;
+    Point<int> mouseDownPos;
     Time mouseDownTime;
     int numberOfClicks;
     bool wasMovedSinceMouseDown;

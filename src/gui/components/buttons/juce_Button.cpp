@@ -233,20 +233,14 @@ Button::ButtonState Button::updateState (const MouseEvent* const e)
 
     if (isEnabled() && isVisible() && ! isCurrentlyBlockedByAnotherModalComponent())
     {
-        int mx, my;
+        Point<int> mousePos;
 
         if (e == 0)
-        {
-            getMouseXYRelative (mx, my);
-        }
+            mousePos = getMouseXYRelative();
         else
-        {
-            const MouseEvent e2 (e->getEventRelativeTo (this));
-            mx = e2.x;
-            my = e2.y;
-        }
+            mousePos = e->getEventRelativeTo (this).getPosition();
 
-        const bool over = reallyContains (mx, my, true);
+        const bool over = reallyContains (mousePos.getX(), mousePos.getY(), true);
         const bool down = isMouseButtonDown();
 
         if ((down && (over || (triggerOnMouseDown && buttonState == buttonDown))) || isKeyDown)

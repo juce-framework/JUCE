@@ -405,10 +405,10 @@ private:
     int octaveNumForMiddleC;
 
     void getKeyPos (int midiNoteNumber, int& x, int& w) const;
-    int xyToNote (int x, int y, float& mousePositionVelocity);
-    int remappedXYToNote (int x, int y, float& mousePositionVelocity) const;
+    int xyToNote (const Point<int>& pos, float& mousePositionVelocity);
+    int remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const;
     void resetAnyKeysInUse();
-    void updateNoteUnderMouse (int x, int y);
+    void updateNoteUnderMouse (const Point<int>& pos);
     void repaintNote (const int midiNoteNumber);
 
     MidiKeyboardComponent (const MidiKeyboardComponent&);

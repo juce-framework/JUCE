@@ -98,7 +98,7 @@ public:
 
 private:
     ComponentBoundsConstrainer* constrainer;
-    int originalX, originalY;
+    Point<int> originalPos;
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__

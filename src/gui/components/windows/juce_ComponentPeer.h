@@ -150,16 +150,13 @@ public:
     virtual void getBounds (int& x, int& y, int& w, int& h) const = 0;
 
     /** Returns the x-position of this window, relative to the screen's origin. */
-    virtual int getScreenX() const = 0;
-
-    /** Returns the y-position of this window, relative to the screen's origin. */
-    virtual int getScreenY() const = 0;
+    virtual const Point<int> getScreenPosition() const = 0;
 
     /** Converts a position relative to the top-left of this component to screen co-ordinates. */
-    virtual void relativePositionToGlobal (int& x, int& y) = 0;
+    virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
 
     /** Converts a screen co-ordinate to a position relative to the top-left of this component. */
-    virtual void globalPositionToRelative (int& x, int& y) = 0;
+    virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
 
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;
@@ -255,7 +252,7 @@ public:
         This may cause things like a virtual on-screen keyboard to appear, depending
         on the OS.
     */
-    virtual void textInputRequired (int x, int y) = 0;
+    virtual void textInputRequired (const Point<int>& position) = 0;
 
     /** Called when the window gains keyboard focus. */
     void handleFocusGain();

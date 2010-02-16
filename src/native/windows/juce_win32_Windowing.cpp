@@ -590,36 +590,22 @@ public:
         h -= windowBorder.getTopAndBottom();
     }
 
-    int getScreenX() const
+    const Point<int> getScreenPosition() const
     {
         RECT r;
         GetWindowRect (hwnd, &r);
-        return r.left + windowBorder.getLeft();
+        return Point<int> (r.left + windowBorder.getLeft(),
+                           r.top + windowBorder.getTop());
     }
 
-    int getScreenY() const
+    const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
-        return r.top + windowBorder.getTop();
+        return relativePosition + getScreenPosition();
     }
 
-    void relativePositionToGlobal (int& x, int& y)
+    const Point<int> globalPositionToRelative (const Point<int>& screenPosition)
     {
-        RECT r;
-        GetWindowRect (hwnd, &r);
-
-        x += r.left + windowBorder.getLeft();
-        y += r.top + windowBorder.getTop();
-    }
-
-    void globalPositionToRelative (int& x, int& y)
-    {
-        RECT r;
-        GetWindowRect (hwnd, &r);
-
-        x -= r.left + windowBorder.getLeft();
-        y -= r.top + windowBorder.getTop();
+        return screenPosition - getScreenPosition();
     }
 
     void setMinimised (bool shouldBeMinimised)
@@ -779,7 +765,7 @@ public:
         shouldDeactivateTitleBar = oldDeactivate;
     }
 
-    void textInputRequired (int /*x*/, int /*y*/)
+    void textInputRequired (const Point<int>&)
     {
         if (! hasCreatedCaret)
         {
@@ -1691,9 +1677,8 @@ private:
         HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            int x = mousePos.x, y = mousePos.y;
-            owner->globalPositionToRelative (x, y);
-            owner->handleFileDragMove (files, x, y);
+            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragMove (files, pos.getX(), pos.getY());
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1706,9 +1691,8 @@ private:
 
         HRESULT __stdcall DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
-            int x = mousePos.x, y = mousePos.y;
-            owner->globalPositionToRelative (x, y);
-            owner->handleFileDragMove (files, x, y);
+            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragMove (files, pos.getX(), pos.getY());
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1716,9 +1700,8 @@ private:
         HRESULT __stdcall Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            int x = mousePos.x, y = mousePos.y;
-            owner->globalPositionToRelative (x, y);
-            owner->handleFileDragDrop (files, x, y);
+            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
+            owner->handleFileDragDrop (files, pos.getX(), pos.getY());
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -2001,9 +1984,8 @@ private:
                         if (LOWORD (wParam) == WA_CLICKACTIVE
                              && component->isCurrentlyBlockedByAnotherModalComponent())
                         {
-                            int mx, my;
-                            component->getMouseXYRelative (mx, my);
-                            Component* const underMouse = component->getComponentAt (mx, my);
+                            const Point<int> mousePos (component->getMouseXYRelative());
+                            Component* const underMouse = component->getComponentAt (mousePos.getX(), mousePos.getY());
 
                             if (underMouse != 0 && underMouse->isCurrentlyBlockedByAnotherModalComponent())
                                 Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
@@ -2072,8 +2054,8 @@ private:
                     {
                         const int oldModifiers = currentModifiers;
 
-                        MouseEvent e (0, 0, ModifierKeys::getCurrentModifiersRealtime(), component,
-                                      getMouseEventTime(), 0, 0, getMouseEventTime(), 1, false);
+                        MouseEvent e (Point<int>(), ModifierKeys::getCurrentModifiersRealtime(), component,
+                                      getMouseEventTime(), Point<int>(), getMouseEventTime(), 1, false);
 
                         if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
                             e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::leftButtonModifier);
@@ -2321,17 +2303,16 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 
 
 //==============================================================================
-void Desktop::getMousePosition (int& x, int& y) throw()
+const Point<int> Desktop::getMousePosition()
 {
     POINT mousePos;
     GetCursorPos (&mousePos);
-    x = mousePos.x;
-    y = mousePos.y;
+    return Point<int> (mousePos.x, mousePos.y);
 }
 
-void Desktop::setMousePosition (int x, int y) throw()
+void Desktop::setMousePosition (const Point<int>& newPosition)
 {
-    SetCursorPos (x, y);
+    SetCursorPos (newPosition.getX(), newPosition.getY());
 }
 
 //==============================================================================

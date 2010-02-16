@@ -81,7 +81,7 @@ private:
     ComponentPeer* lastPeer;
     VoidArray registeredParentComps;
     bool reentrant;
-    int lastX, lastY, lastWidth, lastHeight;
+    Rectangle<int> lastBounds;
 #ifdef JUCE_DEBUG
     ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
 #endif
