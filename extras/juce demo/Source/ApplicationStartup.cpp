@@ -153,6 +153,8 @@ private:
           << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
           << "\nCurrent application file: "
           << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
+          << "\nCurrent working directory: "
+          << File::getCurrentWorkingDirectory().getFullPathName()
           << "\nUser home directory: "
           << File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
           << "\nUser documents directory: "

@@ -238,6 +238,16 @@ struct SMPLChunk
     }
 } PACKED;
 
+
+struct ExtensibleWavSubFormat
+{
+    uint32 data1;
+    uint16 data2;
+    uint16 data3;
+    uint8  data4[8];
+} PACKED;
+
+
 #if JUCE_MSVC
   #pragma pack (pop)
 #endif
@@ -285,7 +295,7 @@ public:
                     if (chunkType == chunkName ("fmt "))
                     {
                         // read the format chunk
-                        const short format = input->readShort();
+                        const unsigned short format = input->readShort();
                         const short numChans = input->readShort();
                         sampleRate = input->readInt();
                         const int bytesPerSec = input->readInt();
@@ -295,9 +305,41 @@ public:
                         bitsPerSample = 8 * bytesPerFrame / numChans;
 
                         if (format == 3)
+                        {
                             usesFloatingPointData = true;
+                        }
+                        else if (format == 0xfffe /*WAVE_FORMAT_EXTENSIBLE*/)
+                        {
+                            if (length < 40) // too short
+                            {
+                                bytesPerFrame = 0;
+                            }
+                            else
+                            {
+                                input->skipNextBytes (12); // skip over blockAlign, bitsPerSample and speakerPosition mask
+                                ExtensibleWavSubFormat subFormat;
+                                subFormat.data1 = input->readInt();
+                                subFormat.data2 = input->readShort();
+                                subFormat.data3 = input->readShort();
+                                input->read (subFormat.data4, sizeof (subFormat.data4));
+
+                                const ExtensibleWavSubFormat pcmFormat
+                                    = { 0x00000001, 0x0000, 0x0010, { 0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71 } };
+
+                                if (memcmp (&subFormat, &pcmFormat, sizeof (subFormat)) != 0)
+                                {
+                                    const ExtensibleWavSubFormat ambisonicFormat
+                                        = { 0x00000001, 0x0721, 0x11d3, { 0x86, 0x44, 0xC8, 0xC1, 0xCA, 0x00, 0x00, 0x00 } };
+
+                                    if (memcmp (&subFormat, &ambisonicFormat, sizeof (subFormat)) != 0)
+                                        bytesPerFrame = 0;
+                                }
+                            }
+                        }
                         else if (format != 1)
+                        {
                             bytesPerFrame = 0;
+                        }
 
                         hasGotType = true;
                     }

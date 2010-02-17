@@ -162,6 +162,29 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 const tchar File::separator = T('/');
 const tchar* File::separatorString = T("/");
 
+//==============================================================================
+const File File::getCurrentWorkingDirectory()
+{
+    HeapBlock<char> heapBuffer;
+
+    char localBuffer [1024];
+    char* cwd = getcwd (localBuffer, sizeof (localBuffer) - 1);
+    int bufferSize = 4096;
+
+    while (cwd == 0 && errno == ERANGE)
+    {
+        heapBuffer.malloc (bufferSize);
+        cwd = getcwd (heapBuffer, bufferSize - 1);
+        bufferSize += 1024;
+    }
+
+    return File (String::fromUTF8 ((const uint8*) cwd));
+}
+
+bool File::setAsCurrentWorkingDirectory() const
+{
+    return chdir (getFullPathName().toUTF8()) == 0;
+}
 
 //==============================================================================
 bool juce_copyFile (const String& s, const String& d);

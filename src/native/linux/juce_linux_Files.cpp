@@ -238,19 +238,6 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     return File::nonexistent;
 }
 
-
-//==============================================================================
-const File File::getCurrentWorkingDirectory()
-{
-    char buf [2048];
-    return File (String::fromUTF8 ((const uint8*) getcwd (buf, sizeof (buf))));
-}
-
-bool File::setAsCurrentWorkingDirectory() const
-{
-    return chdir (getFullPathName().toUTF8()) == 0;
-}
-
 //==============================================================================
 const String File::getVersion() const
 {

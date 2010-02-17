@@ -262,20 +262,6 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 }
 
 //==============================================================================
-const File File::getCurrentWorkingDirectory()
-{
-    char buf [2048];
-    getcwd (buf, sizeof(buf));
-
-    return File (PlatformUtilities::convertToPrecomposedUnicode (buf));
-}
-
-bool File::setAsCurrentWorkingDirectory() const
-{
-    return chdir (getFullPathName().toUTF8()) == 0;
-}
-
-//==============================================================================
 const String File::getVersion() const
 {
     const ScopedAutoReleasePool pool;

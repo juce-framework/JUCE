@@ -113,10 +113,14 @@ static const String parseAbsolutePath (String path)
     {
         if (path[1] != File::separator)
         {
-            jassertfalse // using a filename that starts with a slash is a bit dodgy on
-                         // Windows, because it needs a drive letter, which in this case
-                         // we'll take from the CWD.. but this is a bit of an assumption that
-                         // could be wrong..
+            /*  When you supply a raw string to the File object constructor, it must be an absolute path.
+                If you're trying to parse a string that may be either a relative path or an absolute path,
+                you MUST provide a context against which the partial path can be evaluated - you can do
+                this by simply using File::getChildFile() instead of the File constructor. E.g. saying
+                "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
+                path if that's what was supplied, or would evaluate a partial path relative to the CWD.
+            */
+            jassertfalse
 
             path = File::getCurrentWorkingDirectory().getFullPathName().substring (0, 2) + path;
         }
@@ -126,10 +130,14 @@ static const String parseAbsolutePath (String path)
         if (path.isEmpty())
             return String::empty;
 
-        jassertfalse // using a partial filename is a bad way to initialise a file, because
-                     // we don't know what directory to put it in.
-                     // Here we'll assume it's in the CWD, but this might not be what was
-                     // intended..
+        /*  When you supply a raw string to the File object constructor, it must be an absolute path.
+            If you're trying to parse a string that may be either a relative path or an absolute path,
+            you MUST provide a context against which the partial path can be evaluated - you can do
+            this by simply using File::getChildFile() instead of the File constructor. E.g. saying
+            "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
+            path if that's what was supplied, or would evaluate a partial path relative to the CWD.
+        */
+        jassertfalse
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
@@ -168,16 +176,14 @@ static const String parseAbsolutePath (String path)
     }
     else if (! path.startsWithChar (File::separator))
     {
-        while (path.startsWith (T("./")))
-            path = path.substring (2);
-
-        if (path.isEmpty())
-            return String::empty;
-
-        jassertfalse // using a partial filename is a bad way to initialise a file, because
-                     // we don't know what directory to put it in.
-                     // Here we'll assume it's in the CWD, but this might not be what was
-                     // intended..
+        /*  When you supply a raw string to the File object constructor, it must be an absolute path.
+            If you're trying to parse a string that may be either a relative path or an absolute path,
+            you MUST provide a context against which the partial path can be evaluated - you can do
+            this by simply using File::getChildFile() instead of the File constructor. E.g. saying
+            "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
+            path if that's what was supplied, or would evaluate a partial path relative to the CWD.
+        */
+        jassert (path.startsWith (T("./"))); // (assume that a path "./xyz" is deliberately intended to be relative to the CWD)
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
