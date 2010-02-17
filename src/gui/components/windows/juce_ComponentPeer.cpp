@@ -102,38 +102,38 @@ void ComponentPeer::updateCurrentModifiers() throw()
 }
 
 //==============================================================================
-void ComponentPeer::handleMouseEnter (int x, int y, const int64 time)
+void ComponentPeer::handleMouseEnter (const Point<int>& position, const int64 time)
 {
     jassert (component->isValidComponent());
     updateCurrentModifiers();
 
-    Component* c = component->getComponentAt (x, y);
+    Component* c = component->getComponentAt (position);
     const ComponentDeletionWatcher deletionChecker (component);
 
     if (c != Component::componentUnderMouse && Component::componentUnderMouse != 0)
     {
         jassert (Component::componentUnderMouse->isValidComponent());
 
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
         Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
         Component::componentUnderMouse = 0;
 
         if (deletionChecker.hasBeenDeleted())
             return;
 
-        c = component->getComponentAt (x, y);
+        c = component->getComponentAt (position);
     }
 
     Component::componentUnderMouse = c;
 
     if (Component::componentUnderMouse != 0)
     {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
         Component::componentUnderMouse->internalMouseEnter (relPos.getX(), relPos.getY(), time);
     }
 }
 
-void ComponentPeer::handleMouseMove (int x, int y, const int64 time)
+void ComponentPeer::handleMouseMove (const Point<int>& position, const int64 time)
 {
     jassert (component->isValidComponent());
     updateCurrentModifiers();
@@ -141,27 +141,27 @@ void ComponentPeer::handleMouseMove (int x, int y, const int64 time)
     fakeMouseMessageSent = false;
 
     const ComponentDeletionWatcher deletionChecker (component);
-    Component* c = component->getComponentAt (x, y);
+    Component* c = component->getComponentAt (position);
 
     if (c != Component::componentUnderMouse)
     {
         if (Component::componentUnderMouse != 0)
         {
-            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
             Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
             Component::componentUnderMouse = 0;
 
             if (deletionChecker.hasBeenDeleted())
                 return; // if this window has just been deleted..
 
-            c = component->getComponentAt (x, y);
+            c = component->getComponentAt (position);
         }
 
         Component::componentUnderMouse = c;
 
         if (c != 0)
         {
-            const Point<int> relPos (component->relativePositionToOtherComponent (c, Point<int> (x, y)));
+            const Point<int> relPos (component->relativePositionToOtherComponent (c, position));
             c->internalMouseEnter (relPos.getX(), relPos.getY(), time);
 
             if (deletionChecker.hasBeenDeleted())
@@ -171,53 +171,53 @@ void ComponentPeer::handleMouseMove (int x, int y, const int64 time)
 
     if (Component::componentUnderMouse != 0)
     {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
         Component::componentUnderMouse->internalMouseMove (relPos.getX(), relPos.getY(), time);
     }
 }
 
-void ComponentPeer::handleMouseDown (int x, int y, const int64 time)
+void ComponentPeer::handleMouseDown (const Point<int>& position, const int64 time)
 {
     Desktop::getInstance().incrementMouseClickCounter();
     updateCurrentModifiers();
 
     if (ModifierKeys::getCurrentModifiers().getNumMouseButtonsDown() == 1)
     {
-        Component::componentUnderMouse = component->getComponentAt (x, y);
+        Component::componentUnderMouse = component->getComponentAt (position);
 
         if (Component::componentUnderMouse != 0)
         {
-            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
             Component::componentUnderMouse->internalMouseDown (relPos.getX(), relPos.getY(), time);
         }
     }
 }
 
-void ComponentPeer::handleMouseDrag (int x, int y, const int64 time)
+void ComponentPeer::handleMouseDrag (const Point<int>& position, const int64 time)
 {
     updateCurrentModifiers();
 
     if (Component::componentUnderMouse != 0)
     {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
         Component::componentUnderMouse->internalMouseDrag (relPos.getX(), relPos.getY(), time);
     }
 }
 
-void ComponentPeer::handleMouseUp (const int oldModifiers, int x, int y, const int64 time)
+void ComponentPeer::handleMouseUp (const int oldModifiers, const Point<int>& position, const int64 time)
 {
     updateCurrentModifiers();
 
     if (ModifierKeys (oldModifiers).getNumMouseButtonsDown() == 1)
     {
         const ComponentDeletionWatcher deletionChecker (component);
-        Component* c = component->getComponentAt (x, y);
+        Component* c = component->getComponentAt (position);
 
         if (c != Component::componentUnderMouse)
         {
             if (Component::componentUnderMouse != 0)
             {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
                 Component::componentUnderMouse->internalMouseUp (oldModifiers, relPos.getX(), relPos.getY(), time);
 
                 if (Component::componentUnderMouse != 0)
@@ -226,14 +226,14 @@ void ComponentPeer::handleMouseUp (const int oldModifiers, int x, int y, const i
                 if (deletionChecker.hasBeenDeleted())
                     return;
 
-                c = component->getComponentAt (x, y);
+                c = component->getComponentAt (position);
             }
 
             Component::componentUnderMouse = c;
 
             if (Component::componentUnderMouse != 0)
             {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
                 Component::componentUnderMouse->internalMouseEnter (relPos.getX(), relPos.getY(), time);
             }
         }
@@ -241,21 +241,21 @@ void ComponentPeer::handleMouseUp (const int oldModifiers, int x, int y, const i
         {
             if (Component::componentUnderMouse != 0)
             {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
                 Component::componentUnderMouse->internalMouseUp (oldModifiers, relPos.getX(), relPos.getY(), time);
             }
         }
     }
 }
 
-void ComponentPeer::handleMouseExit (int x, int y, const int64 time)
+void ComponentPeer::handleMouseExit (const Point<int>& position, const int64 time)
 {
     jassert (component->isValidComponent());
     updateCurrentModifiers();
 
     if (Component::componentUnderMouse != 0)
     {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, Point<int> (x, y)));
+        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
         Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
         Component::componentUnderMouse = 0;
     }
@@ -276,12 +276,7 @@ void ComponentPeer::sendFakeMouseMove() throw()
          && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
     {
         if (! isMinimised())
-        {
-            int realX, realY, realW, realH;
-            getBounds (realX, realY, realW, realH);
-
-            component->bounds_.setBounds (realX, realY, realW, realH);
-        }
+            component->bounds_ = getBounds();
 
         const Point<int> pos (component->getMouseXYRelative());
 
@@ -301,8 +296,7 @@ void ComponentPeer::handleMessage (const Message& message)
     if (message.intParameter1 == fakeMouseMoveMessage)
     {
         if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
-            handleMouseMove (message.intParameter2,
-                             message.intParameter3,
+            handleMouseMove (Point<int> (message.intParameter2, message.intParameter3),
                              Time::currentTimeMillis());
     }
 }
@@ -483,15 +477,13 @@ void ComponentPeer::handleMovedOrResized()
     {
         const ComponentDeletionWatcher deletionChecker (component);
 
-        int realX, realY, realW, realH;
-        getBounds (realX, realY, realW, realH);
-
-        const bool wasMoved   = (component->getX() != realX || component->getY() != realY);
-        const bool wasResized = (component->getWidth() != realW || component->getHeight() != realH);
+        const Rectangle<int> newBounds (getBounds());
+        const bool wasMoved   = (component->getPosition() != newBounds.getPosition());
+        const bool wasResized = (component->getWidth() != newBounds.getWidth() || component->getHeight() != newBounds.getHeight());
 
         if (wasMoved || wasResized)
         {
-            component->bounds_.setBounds (realX, realY, realW, realH);
+            component->bounds_ = newBounds;
 
             if (wasResized)
                 component->repaint();
@@ -593,7 +585,7 @@ static FileDragAndDropTarget* findDragAndDropTarget (Component* c,
     return 0;
 }
 
-void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
+void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<int>& position)
 {
     updateCurrentModifiers();
 
@@ -604,7 +596,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
 
     FileDragAndDropTarget* newTarget = 0;
 
-    Component* const compUnderMouse = component->getComponentAt (x, y);
+    Component* const compUnderMouse = component->getComponentAt (position);
 
     if (compUnderMouse != lastDragAndDropCompUnderMouse)
     {
@@ -621,7 +613,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
             if (newTarget != 0)
             {
                 Component* const targetComp = dynamic_cast <Component*> (newTarget);
-                const Point<int> pos (component->relativePositionToOtherComponent (targetComp, Point<int> (x, y)));
+                const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
 
                 dragAndDropTargetComponent = new ComponentDeletionWatcher (dynamic_cast <Component*> (newTarget));
                 newTarget->fileDragEnter (files, pos.getX(), pos.getY());
@@ -636,7 +628,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
     if (newTarget != 0)
     {
         Component* const targetComp = dynamic_cast <Component*> (newTarget);
-        const Point<int> pos (component->relativePositionToOtherComponent (targetComp, Point<int> (x, y)));
+        const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
 
         newTarget->fileDragMove (files, pos.getX(), pos.getY());
     }
@@ -644,15 +636,15 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, int x, int y)
 
 void ComponentPeer::handleFileDragExit (const StringArray& files)
 {
-    handleFileDragMove (files, -1, -1);
+    handleFileDragMove (files, Point<int> (-1, -1));
 
     jassert (dragAndDropTargetComponent == 0);
     lastDragAndDropCompUnderMouse = 0;
 }
 
-void ComponentPeer::handleFileDragDrop (const StringArray& files, int x, int y)
+void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<int>& position)
 {
-    handleFileDragMove (files, x, y);
+    handleFileDragMove (files, position);
 
     if (dragAndDropTargetComponent != 0 && ! dragAndDropTargetComponent->hasBeenDeleted())
     {
@@ -673,7 +665,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, int x, int y)
                     return;
             }
 
-            const Point<int> pos (component->relativePositionToOtherComponent (targetComp, Point<int> (x, y)));
+            const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
             target->filesDropped (files, pos.getX(), pos.getY());
         }
     }

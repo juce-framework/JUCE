@@ -208,25 +208,24 @@ void EditingPanelBase::setZoom (double newScale)
 
 void EditingPanelBase::setZoom (double newScale, int anchorX, int anchorY)
 {
-    const int oldAnchorX = anchorX;
-    const int oldAnchorY = anchorY;
-
-    viewport->relativePositionToOtherComponent (editor, anchorX, anchorY);
+    Point<int> anchor (viewport->relativePositionToOtherComponent (editor, Point<int> (anchorX, anchorY)));
 
     magnifier->setScaleFactor (newScale);
 
     resized();
-    editor->relativePositionToOtherComponent (viewport, anchorX, anchorY);
+    anchor = editor->relativePositionToOtherComponent (viewport, anchor);
 
     viewport->setViewPosition (jlimit (0, jmax (0, viewport->getViewedComponent()->getWidth() - viewport->getViewWidth()),
-                                       viewport->getViewPositionX() + anchorX - oldAnchorX),
+                                       viewport->getViewPositionX() + anchor.getX() - anchorX),
                                jlimit (0, jmax (0, viewport->getViewedComponent()->getHeight() - viewport->getViewHeight()),
-                                       viewport->getViewPositionY() + anchorY - oldAnchorY));
+                                       viewport->getViewPositionY() + anchor.getY() - anchorY));
 }
 
 void EditingPanelBase::xyToTargetXY (int& x, int& y) const
 {
-    relativePositionToOtherComponent (editor, x, y);
+    Point<int> pos (relativePositionToOtherComponent (editor, Point<int> (x, y)));
+    x = pos.getX();
+    y = pos.getY();
 }
 
 void EditingPanelBase::dragKeyHeldDown (bool isKeyDown)

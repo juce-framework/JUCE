@@ -110,9 +110,6 @@ static const int eventMask = NoEventMask | KeyPressMask | KeyReleaseMask | Butto
                              | ExposureMask | StructureNotifyMask | FocusChangeMask;
 
 //==============================================================================
-static int pointerMap[5];
-static Point<int> lastMousePos;
-
 enum MouseButtons
 {
     NoButton = 0,
@@ -123,10 +120,10 @@ enum MouseButtons
     WheelDown = 5
 };
 
-static void getMousePos (int& x, int& y, int& mouseMods) throw()
+static const Point<int> getMousePos (int& mouseMods) throw()
 {
     Window root, child;
-    int winx, winy;
+    int x, y, winx, winy;
     unsigned int mask;
 
     mouseMods = 0;
@@ -142,15 +139,12 @@ static void getMousePos (int& x, int& y, int& mouseMods) throw()
     }
     else
     {
-        if ((mask & Button1Mask) != 0)
-            mouseMods |= ModifierKeys::leftButtonModifier;
-
-        if ((mask & Button2Mask) != 0)
-            mouseMods |= ModifierKeys::middleButtonModifier;
-
-        if ((mask & Button3Mask) != 0)
-            mouseMods |= ModifierKeys::rightButtonModifier;
+        if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
+        if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
+        if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
     }
+
+    return Point<int> (x, y);
 }
 
 //==============================================================================
@@ -243,8 +237,8 @@ void ModifierKeys::updateCurrentModifiers() throw()
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
-    int x, y, mouseMods;
-    getMousePos (x, y, mouseMods);
+    int mouseMods;
+    getMousePos (mouseMods);
 
     currentModifiers &= ~ModifierKeys::allMouseButtonModifiers;
     currentModifiers |= mouseMods;
@@ -385,61 +379,6 @@ static bool isShmAvailable() throw()
     return isAvailable;
 }
 #endif
-
-//==============================================================================
-static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& image)
-{
-    ScopedXLock xlock;
-
-    const int width = image.getWidth();
-    const int height = image.getHeight();
-    HeapBlock <uint32> colour (width * height);
-    int index = 0;
-
-    for (int y = 0; y < height; ++y)
-        for (int x = 0; x < width; ++x)
-            colour[index++] = image.getPixelAt (x, y).getARGB();
-
-    XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                   0, (char*) colour, width, height, 32, 0);
-
-    Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
-                                   width, height, 24);
-
-    GC gc = XCreateGC (display, pixmap, 0, 0);
-    XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
-    XFreeGC (display, gc);
-
-    return pixmap;
-}
-
-static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& image)
-{
-    ScopedXLock xlock;
-
-    const int width = image.getWidth();
-    const int height = image.getHeight();
-    const int stride = (width + 7) >> 3;
-    HeapBlock <uint8> mask;
-    mask.calloc (stride * height);
-    const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
-
-    for (int y = 0; y < height; ++y)
-    {
-        for (int x = 0; x < width; ++x)
-        {
-            const uint8 bit = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
-            const int offset = y * stride + (x >> 3);
-
-            if (image.getPixelAt (x, y).getAlpha() >= 128)
-                mask[offset] |= bit;
-        }
-    }
-
-    return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                        (char*) mask, width, height, 1, 0, 1);
-}
-
 
 //==============================================================================
 class XBitmapImage  : public Image
@@ -781,18 +720,8 @@ public:
         }
     }
 
-    void getBounds (int& x, int& y, int& w, int& h) const
-    {
-        x = wx;
-        y = wy;
-        w = ww;
-        h = wh;
-    }
-
-    const Point<int> getScreenPosition() const
-    {
-        return Point<int> (wx, wy);
-    }
+    const Rectangle<int> getBounds() const      { return Rectangle<int> (wx, wy, ww, wh); }
+    const Point<int> getScreenPosition() const  { return Point<int> (wx, wy); }
 
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition)
     {
@@ -1104,6 +1033,59 @@ public:
         repainter->performAnyPendingRepaintsNow();
     }
 
+    static Pixmap juce_createColourPixmapFromImage (Display* display, const Image& image)
+    {
+        ScopedXLock xlock;
+
+        const int width = image.getWidth();
+        const int height = image.getHeight();
+        HeapBlock <uint32> colour (width * height);
+        int index = 0;
+
+        for (int y = 0; y < height; ++y)
+            for (int x = 0; x < width; ++x)
+                colour[index++] = image.getPixelAt (x, y).getARGB();
+
+        XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
+                                       0, (char*) colour, width, height, 32, 0);
+
+        Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
+                                       width, height, 24);
+
+        GC gc = XCreateGC (display, pixmap, 0, 0);
+        XPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+        XFreeGC (display, gc);
+
+        return pixmap;
+    }
+
+    static Pixmap juce_createMaskPixmapFromImage (Display* display, const Image& image)
+    {
+        ScopedXLock xlock;
+
+        const int width = image.getWidth();
+        const int height = image.getHeight();
+        const int stride = (width + 7) >> 3;
+        HeapBlock <uint8> mask;
+        mask.calloc (stride * height);
+        const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
+
+        for (int y = 0; y < height; ++y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                const uint8 bit = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+                const int offset = y * stride + (x >> 3);
+
+                if (image.getPixelAt (x, y).getAlpha() >= 128)
+                    mask[offset] |= bit;
+            }
+        }
+
+        return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
+                                            (char*) mask, width, height, 1, 0, 1);
+    }
+
     void setIcon (const Image& newIcon)
     {
         const int dataSize = newIcon.getWidth() * newIcon.getHeight() + 2;
@@ -1336,7 +1318,7 @@ public:
                 if (buttonMsg)
                 {
                     toFront (true);
-                    handleMouseDown (buttonPressEvent->x, buttonPressEvent->y,
+                    handleMouseDown (Point<int> (buttonPressEvent->x, buttonPressEvent->y),
                                      getEventTime (buttonPressEvent->time));
                 }
                 else if (wheelUpMsg || wheelDownMsg)
@@ -1345,7 +1327,7 @@ public:
                                       getEventTime (buttonPressEvent->time));
                 }
 
-                lastMousePos = Point<int> (0x100000, 0x100000);
+                clearLastMousePos();
                 break;
             }
 
@@ -1366,10 +1348,10 @@ public:
                 updateKeyModifiers (buttonRelEvent->state);
 
                 handleMouseUp (oldModifiers,
-                               buttonRelEvent->x, buttonRelEvent->y,
+                               Point<int> (buttonRelEvent->x, buttonRelEvent->y),
                                getEventTime (buttonRelEvent->time));
 
-                lastMousePos = Point<int> (0x100000, 0x100000);
+                clearLastMousePos();
                 break;
             }
 
@@ -1416,9 +1398,9 @@ public:
                     }
 
                     if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0)
-                        handleMouseMove (mousePos.getX(), mousePos.getY(), getEventTime (movedEvent->time));
+                        handleMouseMove (mousePos, getEventTime (movedEvent->time));
                     else
-                        handleMouseDrag (mousePos.getX(), mousePos.getY(), getEventTime (movedEvent->time));
+                        handleMouseDrag (mousePos, getEventTime (movedEvent->time));
                 }
 
                 break;
@@ -1426,7 +1408,7 @@ public:
 
             case EnterNotify:
             {
-                lastMousePos = Point<int> (0x100000, 0x100000);
+                clearLastMousePos();
                 const XEnterWindowEvent* const enterEvent = (const XEnterWindowEvent*) &event->xcrossing;
 
                 if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0
@@ -1434,7 +1416,7 @@ public:
                 {
                     updateKeyModifiers (enterEvent->state);
 
-                    handleMouseEnter (enterEvent->x, enterEvent->y, getEventTime (enterEvent->time));
+                    handleMouseEnter (Point<int> (enterEvent->x, enterEvent->y), getEventTime (enterEvent->time));
 
                     entered = true;
                 }
@@ -1455,7 +1437,7 @@ public:
                 {
                     updateKeyModifiers (leaveEvent->state);
 
-                    handleMouseExit (leaveEvent->x, leaveEvent->y, getEventTime (leaveEvent->time));
+                    handleMouseExit (Point<int> (leaveEvent->x, leaveEvent->y), getEventTime (leaveEvent->time));
 
                     entered = false;
                 }
@@ -2415,7 +2397,7 @@ private:
                 updateDraggedFileList (clientMsg);
 
             if (dragAndDropFiles.size() > 0)
-                handleFileDragMove (dragAndDropFiles, dropPos.getX(), dropPos.getY());
+                handleFileDragMove (dragAndDropFiles, dropPos);
         }
     }
 
@@ -2431,7 +2413,7 @@ private:
         resetDragAndDrop();
 
         if (files.size() > 0)
-            handleFileDragDrop (files, lastPos.getX(), lastPos.getY());
+            handleFileDragDrop (files, lastPos);
     }
 
     void handleDragAndDropEnter (const XClientMessageEvent* const clientMsg)
@@ -2571,10 +2553,22 @@ private:
     Atom XA_OtherMime, dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
 
-    unsigned int allowedActions [5];
-    unsigned int allowedMimeTypeAtoms [3];
+    unsigned int allowedActions[5];
+    unsigned int allowedMimeTypeAtoms[3];
     Array <Atom> srcMimeTypeAtomList;
+
+    static int pointerMap[5];
+    static Point<int> lastMousePos;
+
+    static void clearLastMousePos() throw()
+    {
+        lastMousePos = Point<int> (0x100000, 0x100000);
+    }
 };
+
+int LinuxComponentPeer::pointerMap[5];
+Point<int> LinuxComponentPeer::lastMousePos;
+
 
 //==============================================================================
 void juce_setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
@@ -2727,9 +2721,8 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 
 const Point<int> Desktop::getMousePosition()
 {
-    int x, y, mouseMods;
-    getMousePos (x, y, mouseMods);
-    return Point<int> (x, y);
+    int mouseMods;
+    return getMousePos (mouseMods);
 }
 
 void Desktop::setMousePosition (const Point<int>& newPosition)

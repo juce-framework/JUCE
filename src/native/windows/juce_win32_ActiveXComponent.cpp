@@ -342,8 +342,8 @@ static void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, 
     GetWindowRect (hwnd, &activeXRect);
     GetWindowRect ((HWND) peer->getNativeHandle(), &peerRect);
 
-    const int mx = GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left;
-    const int my = GET_Y_LPARAM (lParam) + activeXRect.top - peerRect.top;
+    const Point<int> mousePos (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left,
+                               GET_Y_LPARAM (lParam) + activeXRect.top - peerRect.top);
     const int64 mouseEventTime = getMouseEventTime();
 
     const int oldModifiers = currentModifiers;
@@ -353,21 +353,21 @@ static void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, 
     {
     case WM_MOUSEMOVE:
         if (ModifierKeys (currentModifiers).isAnyMouseButtonDown())
-            peer->handleMouseDrag (mx, my, mouseEventTime);
+            peer->handleMouseDrag (mousePos, mouseEventTime);
         else
-            peer->handleMouseMove (mx, my, mouseEventTime);
+            peer->handleMouseMove (mousePos, mouseEventTime);
         break;
 
     case WM_LBUTTONDOWN:
     case WM_MBUTTONDOWN:
     case WM_RBUTTONDOWN:
-        peer->handleMouseDown (mx, my, mouseEventTime);
+        peer->handleMouseDown (mousePos, mouseEventTime);
         break;
 
     case WM_LBUTTONUP:
     case WM_MBUTTONUP:
     case WM_RBUTTONUP:
-        peer->handleMouseUp (oldModifiers, mx, my, mouseEventTime);
+        peer->handleMouseUp (oldModifiers, mousePos, mouseEventTime);
         break;
 
     default:

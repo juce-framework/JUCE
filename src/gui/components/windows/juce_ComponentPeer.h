@@ -147,7 +147,7 @@ public:
         If the native window is contained in another window, then the co-ordinates are
         relative to the parent window's origin, not the screen origin.
     */
-    virtual void getBounds (int& x, int& y, int& w, int& h) const = 0;
+    virtual const Rectangle<int> getBounds() const = 0;
 
     /** Returns the x-position of this window, relative to the screen's origin. */
     virtual const Point<int> getScreenPosition() const = 0;
@@ -290,12 +290,12 @@ public:
     virtual void performAnyPendingRepaintsNow() = 0;
 
     //==============================================================================
-    void handleMouseEnter (int x, int y, const int64 time);
-    void handleMouseMove  (int x, int y, const int64 time);
-    void handleMouseDown  (int x, int y, const int64 time);
-    void handleMouseDrag  (int x, int y, const int64 time);
-    void handleMouseUp    (const int oldModifiers, int x, int y, const int64 time);
-    void handleMouseExit  (int x, int y, const int64 time);
+    void handleMouseEnter (const Point<int>& position, const int64 time);
+    void handleMouseMove  (const Point<int>& position, const int64 time);
+    void handleMouseDown  (const Point<int>& position, const int64 time);
+    void handleMouseDrag  (const Point<int>& position, const int64 time);
+    void handleMouseUp    (const int oldModifiers, const Point<int>& position, const int64 time);
+    void handleMouseExit  (const Point<int>& position, const int64 time);
     void handleMouseWheel (const int amountX, const int amountY, const int64 time);
 
     /** Causes a mouse-move callback to be made asynchronously. */
@@ -303,9 +303,9 @@ public:
 
     void handleUserClosingWindow();
 
-    void handleFileDragMove (const StringArray& files, int x, int y);
+    void handleFileDragMove (const StringArray& files, const Point<int>& position);
     void handleFileDragExit (const StringArray& files);
-    void handleFileDragDrop (const StringArray& files, int x, int y);
+    void handleFileDragDrop (const StringArray& files, const Point<int>& position);
 
     //==============================================================================
     /** Resets the masking region.

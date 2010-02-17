@@ -566,28 +566,21 @@ public:
         repaintNowIfTransparent();
     }
 
-    void getBounds (int& x, int& y, int& w, int& h) const
+    const Rectangle<int> getBounds() const
     {
         RECT r;
         GetWindowRect (hwnd, &r);
 
-        x = r.left;
-        y = r.top;
-        w = r.right - x;
-        h = r.bottom - y;
+        Rectangle<int> bounds (r.left, r.top, r.right - r.left, r.bottom - r.top);
 
         HWND parentH = GetParent (hwnd);
         if (parentH != 0)
         {
             GetWindowRect (parentH, &r);
-            x -= r.left;
-            y -= r.top;
+            bounds.translate (-r.left, -r.top);
         }
 
-        x += windowBorder.getLeft();
-        y += windowBorder.getTop();
-        w -= windowBorder.getLeftAndRight();
-        h -= windowBorder.getTopAndBottom();
+        return windowBorder.subtractedFrom (bounds);
     }
 
     const Point<int> getScreenPosition() const
@@ -1290,7 +1283,7 @@ private:
             }
 
             updateKeyModifiers();
-            handleMouseEnter (x, y, mouseEventTime);
+            handleMouseEnter (Point<int> (x, y), mouseEventTime);
         }
         else if (! isDragging)
         {
@@ -1311,7 +1304,7 @@ private:
                     if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
                     {
                         lastMouseTime = now;
-                        handleMouseMove (x, y, mouseEventTime);
+                        handleMouseMove (Point<int> (x, y), mouseEventTime);
                     }
                 }
             }
@@ -1323,7 +1316,7 @@ private:
             if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
             {
                 lastMouseTime = now;
-                handleMouseDrag (x, y, mouseEventTime);
+                handleMouseDrag (Point<int> (x, y), mouseEventTime);
             }
         }
     }
@@ -1349,7 +1342,7 @@ private:
         updateKeyModifiers();
         isDragging = true;
 
-        handleMouseDown (x, y, getMouseEventTime());
+        handleMouseDown (Point<int> (x, y), getMouseEventTime());
     }
 
     void doMouseUp (const int x, const int y, const WPARAM wParam)
@@ -1387,7 +1380,7 @@ private:
         if (numButtons == 0 && hwnd == GetCapture())
             ReleaseCapture();
 
-        handleMouseUp (oldModifiers, x, y, getMouseEventTime());
+        handleMouseUp (oldModifiers, Point<int> (x, y), getMouseEventTime());
     }
 
     void doCaptureChanged()
@@ -1415,8 +1408,8 @@ private:
 
             const DWORD mp = GetMessagePos();
 
-            handleMouseExit (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
-                             GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop(),
+            handleMouseExit (Point<int> (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
+                                         GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop()),
                              getMouseEventTime());
         }
     }
@@ -1677,8 +1670,7 @@ private:
         HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
-            owner->handleFileDragMove (files, pos.getX(), pos.getY());
+            owner->handleFileDragMove (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1691,8 +1683,7 @@ private:
 
         HRESULT __stdcall DragOver (DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
-            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
-            owner->handleFileDragMove (files, pos.getX(), pos.getY());
+            owner->handleFileDragMove (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }
@@ -1700,8 +1691,7 @@ private:
         HRESULT __stdcall Drop (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
             updateFileList (pDataObject);
-            const Point<int> pos (owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
-            owner->handleFileDragDrop (files, pos.getX(), pos.getY());
+            owner->handleFileDragDrop (files, owner->globalPositionToRelative (Point<int> (mousePos.x, mousePos.y)));
             *pdwEffect = DROPEFFECT_COPY;
             return S_OK;
         }

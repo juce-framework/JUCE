@@ -133,8 +133,8 @@ public:
     void setPosition (int x, int y);
     void setSize (int w, int h);
     void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
-    void getBounds (int& x, int& y, int& w, int& h, const bool global) const;
-    void getBounds (int& x, int& y, int& w, int& h) const;
+    const Rectangle<int> getBounds (const bool global) const;
+    const Rectangle<int> getBounds() const;
     const Point<int> getScreenPosition() const;
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
@@ -642,11 +642,10 @@ static int64 getMouseTime (NSEvent* e)
             + (int64) ([e timestamp] * 1000.0);
 }
 
-static void getMousePos (NSEvent* e, NSView* view, int& x, int& y)
+static const Point<int> getMousePos (NSEvent* e, NSView* view)
 {
     NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-    x = roundToInt (p.x);
-    y = roundToInt ([view frame].size.height - p.y);
+    return Point<int> (roundToInt (p.x), roundToInt ([view frame].size.height - p.y));
 }
 
 static int getModifierForButtonNumber (const NSInteger num)
@@ -829,7 +828,7 @@ void NSViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     }
 }
 
-void NSViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool global) const
+const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
 {
     NSRect r = [view frame];
 
@@ -839,29 +838,24 @@ void NSViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool 
         NSRect wr = [[view window] frame];
         r.origin.x += wr.origin.x;
         r.origin.y += wr.origin.y;
-
-        y = (int) ([[[NSScreen screens] objectAtIndex:0] frame].size.height - r.origin.y - r.size.height);
+        r.origin.y = [[[NSScreen screens] objectAtIndex: 0] frame].size.height - r.origin.y - r.size.height;
     }
     else
     {
-        y = (int) ([[view superview] frame].size.height - r.origin.y - r.size.height);
+        r.origin.y = [[view superview] frame].size.height - r.origin.y - r.size.height;
     }
 
-    x = (int) r.origin.x;
-    w = (int) r.size.width;
-    h = (int) r.size.height;
+    return Rectangle<int> ((int) r.origin.x, (int) r.size.width, (int) r.size.width, (int) r.size.height);
 }
 
-void NSViewComponentPeer::getBounds (int& x, int& y, int& w, int& h) const
+const Rectangle<int> NSViewComponentPeer::getBounds() const
 {
-    getBounds (x, y, w, h, ! isSharedWindow);
+    return getBounds (! isSharedWindow);
 }
 
 const Point<int> NSViewComponentPeer::getScreenPosition() const
 {
-    int x, y, w, h;
-    getBounds (x, y, w, h, true);
-    return Point<int> (x, y);
+    return getBounds (true).getPosition();
 }
 
 const Point<int> NSViewComponentPeer::relativePositionToGlobal (const Point<int>& relativePosition)
@@ -1207,10 +1201,7 @@ void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
 {
     updateModifiers (ev);
     currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseDown (x, y, getMouseTime (ev));
+    handleMouseDown (getMousePos (ev, view), getMouseTime (ev));
 }
 
 void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
@@ -1218,10 +1209,7 @@ void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
     const int oldMods = currentModifiers;
     updateModifiers (ev);
     currentModifiers &= ~getModifierForButtonNumber ([ev buttonNumber]);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseUp (oldMods, x, y, getMouseTime (ev));
+    handleMouseUp (oldMods, getMousePos (ev, view), getMouseTime (ev));
     showArrowCursorIfNeeded();
 }
 
@@ -1229,38 +1217,26 @@ void NSViewComponentPeer::redirectMouseDrag (NSEvent* ev)
 {
     updateModifiers (ev);
     currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseDrag (x, y, getMouseTime (ev));
+    handleMouseDrag (getMousePos (ev, view), getMouseTime (ev));
 }
 
 void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
 {
     updateModifiers (ev);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseMove (x, y, getMouseTime (ev));
+    handleMouseMove (getMousePos (ev, view), getMouseTime (ev));
     showArrowCursorIfNeeded();
 }
 
 void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
 {
     updateModifiers (ev);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseEnter (x, y, getMouseTime (ev));
+    handleMouseEnter (getMousePos (ev, view), getMouseTime (ev));
 }
 
 void NSViewComponentPeer::redirectMouseExit (NSEvent* ev)
 {
     updateModifiers (ev);
-    int x, y;
-    getMousePos (ev, view, x, y);
-
-    handleMouseExit (x, y, getMouseTime (ev));
+    handleMouseExit (getMousePos (ev, view), getMouseTime (ev));
 }
 
 void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
@@ -1291,8 +1267,7 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
         return false;
 
     NSPoint p = [view convertPoint: [sender draggingLocation] fromView: nil];
-    int x = (int) p.x;
-    int y = (int) ([view frame].size.height - p.y);
+    const Point<int> pos ((int) p.x, (int) ([view frame].size.height - p.y));
 
     StringArray files;
 
@@ -1312,11 +1287,11 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
         return false;
 
     if (type == 0)
-        handleFileDragMove (files, x, y);
+        handleFileDragMove (files, pos);
     else if (type == 1)
         handleFileDragExit (files);
     else if (type == 2)
-        handleFileDragDrop (files, x, y);
+        handleFileDragDrop (files, pos);
 
     return true;
 }

@@ -770,6 +770,17 @@ public:
     */
     Component* getComponentAt (const int x, const int y);
 
+    /** Returns the component at a certain point within this one.
+
+        @param position  the co-ordinates to test, relative to this component's top-left.
+        @returns    the component that is at this position - which may be 0, this component,
+                    or one of its children. Note that overlapping siblings that might actually
+                    be in the way are not taken into account by this method - to account for these,
+                    instead call getComponentAt on the top-level parent of this component.
+        @see hitTest, contains, reallyContains
+    */
+    Component* getComponentAt (const Point<int>& position);
+
     //==============================================================================
     /** Marks the whole component as needing to be redrawn.
 

@@ -1106,6 +1106,11 @@ bool Component::reallyContains (int x, int y, const bool returnTrueIfWithinAChil
     return (c == this) || (returnTrueIfWithinAChild && isParentOf (c));
 }
 
+Component* Component::getComponentAt (const Point<int>& position)
+{
+    return getComponentAt (position.getX(), position.getY());
+}
+
 Component* Component::getComponentAt (const int x, const int y)
 {
     if (flags.visibleFlag

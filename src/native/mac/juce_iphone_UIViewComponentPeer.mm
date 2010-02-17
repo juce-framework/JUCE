@@ -91,8 +91,9 @@ public:
     void setPosition (int x, int y);
     void setSize (int w, int h);
     void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
-    void getBounds (int& x, int& y, int& w, int& h, const bool global) const;
-    void getBounds (int& x, int& y, int& w, int& h) const;
+
+    const Rectangle<int> getBounds() const;
+    const Rectangle<int> getBounds (const bool global) const;
     const Point<int> getScreenPosition() const;
     const Point<int> relativePositionToGlobal (const Point<int>& relativePosition);
     const Point<int> globalPositionToRelative (const Point<int>& screenPosition);
@@ -191,7 +192,7 @@ static int64 getMouseTime (UIEvent* e)
             + (int64) ([e timestamp] * 1000.0);
 }
 
-int juce_lastMouseX = 0, juce_lastMouseY = 0;
+JUCE_NAMESPACE::Point<int> juce_lastMousePos;
 
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
@@ -206,17 +207,14 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
         case 1:     // One finger..
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
+            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
             currentModifiers |= getModifierForButtonNumber (0);
+            juce_lastMousePos = pos + owner->getScreenPosition();
 
-            int x, y, w, h;
-            owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = x + (int) p.x;
-            juce_lastMouseY = y + (int) p.y;
-
-            owner->handleMouseMove ((int) p.x, (int) p.y, getMouseTime (event));
+            owner->handleMouseMove (pos, getMouseTime (event));
 
             if (owner != 0)
-                owner->handleMouseDown ((int) p.x, (int) p.y, getMouseTime (event));
+                owner->handleMouseDown (pos, getMouseTime (event));
         }
 
         default:
@@ -237,13 +235,10 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
         case 1:     // One finger..
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
+            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
+            juce_lastMousePos = pos + owner->getScreenPosition();
 
-            int x, y, w, h;
-            owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = x + (int) p.x;
-            juce_lastMouseY = y + (int) p.y;
-
-            owner->handleMouseDrag ((int) p.x, (int) p.y, getMouseTime (event));
+            owner->handleMouseDrag (pos, getMouseTime (event));
         }
 
         default:
@@ -264,15 +259,12 @@ int juce_lastMouseX = 0, juce_lastMouseY = 0;
         case 1:     // One finger..
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
-
-            int x, y, w, h;
-            owner->getBounds (x, y, w, h, true);
-            juce_lastMouseX = x + (int) p.x;
-            juce_lastMouseY = y + (int) p.y;
+            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
+            juce_lastMousePos = pos + owner->getScreenPosition();
 
             const int oldMods = currentModifiers;
             currentModifiers &= ~getModifierForButtonNumber (0);
-            owner->handleMouseUp (oldMods, (int) p.x, (int) p.y, getMouseTime (event));
+            owner->handleMouseUp (oldMods, pos, getMouseTime (event));
         }
 
         default:
@@ -465,7 +457,7 @@ void UIViewComponentPeer::setBounds (int x, int y, int w, int h, const bool isNo
     }
 }
 
-void UIViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool global) const
+const Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
 {
     CGRect r = [view frame];
 
@@ -477,45 +469,28 @@ void UIViewComponentPeer::getBounds (int& x, int& y, int& w, int& h, const bool 
         r.origin.y += wr.origin.y;
     }
 
-    x = (int) r.origin.x;
-    y = (int) r.origin.y;
-    w = (int) r.size.width;
-    h = (int) r.size.height;
+    return Rectangle<int> ((int) r.origin.x, (int) r.origin.y,
+                           (int) r.size.width, (int) r.size.height);
 }
 
-void UIViewComponentPeer::getBounds (int& x, int& y, int& w, int& h) const
+const Rectangle<int> UIViewComponentPeer::getBounds() const
 {
-    getBounds (x, y, w, h, ! isSharedWindow);
+    return getBounds (! isSharedWindow);
 }
 
-int UIViewComponentPeer::getScreenX() const
+const Point<int> UIViewComponentPeer::getScreenPosition() const
 {
-    int x, y, w, h;
-    getBounds (x, y, w, h, true);
-    return x;
+    return getBounds (true).getPosition();
 }
 
-int UIViewComponentPeer::getScreenY() const
+const Point<int> UIViewComponentPeer::relativePositionToGlobal (const Point<int>& relativePosition)
 {
-    int x, y, w, h;
-    getBounds (x, y, w, h, true);
-    return y;
+    return relativePosition + getScreenPosition();
 }
 
-void UIViewComponentPeer::relativePositionToGlobal (int& x, int& y)
+const Point<int> UIViewComponentPeer::globalPositionToRelative (const Point<int>& screenPosition)
 {
-    int wx, wy, ww, wh;
-    getBounds (wx, wy, ww, wh, true);
-    x += wx;
-    y += wy;
-}
-
-void UIViewComponentPeer::globalPositionToRelative (int& x, int& y)
-{
-    int wx, wy, ww, wh;
-    getBounds (wx, wy, ww, wh, true);
-    x -= wx;
-    y -= wy;
+    return screenPosition + getScreenPosition();
 }
 
 CGRect UIViewComponentPeer::constrainRect (CGRect r)
@@ -818,7 +793,7 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 
 const Point<int> Desktop::getMousePosition()
 {
-    return Point<int> (juce_lastMouseX, juce_lastMouseY);
+    return juce_lastMousePos;
 }
 
 void Desktop::setMousePosition (const Point<int>&)
