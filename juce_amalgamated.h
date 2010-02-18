@@ -4377,7 +4377,7 @@ public:
 
 	static const String descriptionOfSizeInBytes (const int64 bytes);
 
-	const String& getFullPathName() const		   { return fullPath; }
+	const String& getFullPathName() const throw()	   { return fullPath; }
 
 	const String getFileName() const;
 
@@ -14016,7 +14016,7 @@ public:
 
 #if JUCE_USE_CDBURNER
 
-class AudioCDBurner
+class AudioCDBurner	 : public ChangeBroadcaster
 {
 public:
 
@@ -14026,7 +14026,27 @@ public:
 
 	~AudioCDBurner();
 
+	enum DiskState
+	{
+		unknown,		/**< An error condition, if the device isn't responding. */
+		trayOpen,		   /**< The drive is currently open. Note that a slot-loading drive
+									 may seem to be permanently open. */
+		noDisc,		 /**< The drive has no disk in it. */
+		writableDiskPresent,	/**< The drive contains a writeable disk. */
+		readOnlyDiskPresent	 /**< The drive contains a read-only disk. */
+	};
+
+	DiskState getDiskState() const;
+
 	bool isDiskPresent() const;
+
+	bool openTray();
+
+	DiskState waitUntilStateChange (int timeOutMilliseconds);
+
+	const Array<int> getAvailableWriteSpeeds() const;
+
+	bool setBufferUnderrunProtection (const bool shouldBeEnabled);
 
 	int getNumAvailableAudioBlocks() const;
 
@@ -14042,15 +14062,20 @@ public:
 	};
 
 	const String burn (BurnProgressListener* listener,
-					   const bool ejectDiscAfterwards,
-					   const bool peformFakeBurnForTesting);
+					   bool ejectDiscAfterwards,
+					   bool performFakeBurnForTesting,
+					   int writeSpeed);
+
+	void abortBurn();
 
 	juce_UseDebuggingNewOperator
 
 private:
 	AudioCDBurner (const int deviceIndex);
 
-	void* internal;
+	class Pimpl;
+	friend class ScopedPointer<Pimpl>;
+	ScopedPointer<Pimpl> pimpl;
 };
 
 #endif

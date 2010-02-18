@@ -28,24 +28,25 @@
 #if JUCE_INCLUDED_FILE && JUCE_USE_CDBURNER
 
 //==============================================================================
+const int kilobytesPerSecond1x = 176;
+
 END_JUCE_NAMESPACE
 
 #define OpenDiskDevice MakeObjCClassName(OpenDiskDevice)
 
 @interface OpenDiskDevice   : NSObject
 {
+@public
     DRDevice* device;
-
     NSMutableArray* tracks;
+    bool underrunProtection;
 }
 
-- (OpenDiskDevice*) initWithDevice: (DRDevice*) device;
+- (OpenDiskDevice*) initWithDRDevice: (DRDevice*) device;
 - (void) dealloc;
-- (bool) isDiskPresent;
-- (int) getNumAvailableAudioBlocks;
 - (void) addSourceTrack: (JUCE_NAMESPACE::AudioSource*) source numSamples: (int) numSamples_;
 - (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener  errorString: (JUCE_NAMESPACE::String*) error
-         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting;
+         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed;
 @end
 
 //==============================================================================
@@ -87,12 +88,13 @@ END_JUCE_NAMESPACE
 //==============================================================================
 @implementation OpenDiskDevice
 
-- (OpenDiskDevice*) initWithDevice: (DRDevice*) device_
+- (OpenDiskDevice*) initWithDRDevice: (DRDevice*) device_
 {
     [super init];
 
     device = device_;
     tracks = [[NSMutableArray alloc] init];
+    underrunProtection = true;
     return self;
 }
 
@@ -100,19 +102,6 @@ END_JUCE_NAMESPACE
 {
     [tracks release];
     [super dealloc];
-}
-
-- (bool) isDiskPresent
-{
-    return [device isValid]
-             && [[[device status] objectForKey: DRDeviceMediaStateKey]
-                    isEqualTo: DRDeviceMediaStateMediaPresent];
-}
-
-- (int) getNumAvailableAudioBlocks
-{
-    return [[[[device status] objectForKey: DRDeviceMediaInfoKey]
-                              objectForKey: DRDeviceMediaBlocksFreeKey] intValue];
 }
 
 - (void) addSourceTrack: (JUCE_NAMESPACE::AudioSource*) source_ numSamples: (int) numSamples_
@@ -128,7 +117,7 @@ END_JUCE_NAMESPACE
 }
 
 - (void) burn: (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener*) listener errorString: (JUCE_NAMESPACE::String*) error
-         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting
+         ejectAfterwards: (bool) shouldEject isFake: (bool) peformFakeBurnForTesting speed: (int) burnSpeed
 {
     DRBurn* burn = [DRBurn burnForDevice: device];
 
@@ -144,8 +133,14 @@ END_JUCE_NAMESPACE
     [d autorelease];
     [d setObject: [NSNumber numberWithBool: peformFakeBurnForTesting] forKey: DRBurnTestingKey];
     [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnVerifyDiscKey];
-    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount)
-          forKey: DRBurnCompletionActionKey];
+    [d setObject: (shouldEject ? DRBurnCompletionActionEject : DRBurnCompletionActionMount) forKey: DRBurnCompletionActionKey];
+
+    if (burnSpeed > 0)
+        [d setObject: [NSNumber numberWithFloat: burnSpeed * JUCE_NAMESPACE::kilobytesPerSecond1x] forKey: DRBurnRequestedSpeedKey];
+
+    if (! underrunProtection)
+        [d setObject: [NSNumber numberWithBool: false] forKey: DRBurnUnderrunProtectionKey];
+
     [burn setProperties: d];
 
     [burn writeLayout: tracks];
@@ -320,27 +315,124 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-AudioCDBurner::AudioCDBurner (const int deviceIndex)
-    : internal (0)
+class AudioCDBurner::Pimpl  : public Timer
 {
-    OpenDiskDevice* dev = [[OpenDiskDevice alloc] initWithDevice: [[DRDevice devices] objectAtIndex: deviceIndex]];
+public:
+    Pimpl (AudioCDBurner& owner_, const int deviceIndex)
+        : device (0), owner (owner_)
+    {
+        DRDevice* dev = [[DRDevice devices] objectAtIndex: deviceIndex];
+        if (dev != 0)
+        {
+            device = [[OpenDiskDevice alloc] initWithDRDevice: dev];
+            lastState = getDiskState();
+            startTimer (1000);
+        }
+    }
 
-    internal = (void*) dev;
+    ~Pimpl()
+    {
+        stopTimer();
+        [device release];
+    }
+
+    void timerCallback()
+    {
+        const DiskState state = getDiskState();
+
+        if (state != lastState)
+        {
+            lastState = state;
+            owner.sendChangeMessage (&owner);
+        }
+    }
+
+    DiskState getDiskState() const
+    {
+        if ([device->device isValid])
+        {
+            NSDictionary* status = [device->device status];
+
+            NSString* state = [status objectForKey: DRDeviceMediaStateKey];
+
+            if ([state isEqualTo: DRDeviceMediaStateNone])
+            {
+                if ([[status objectForKey: DRDeviceIsTrayOpenKey] boolValue])
+                    return trayOpen;
+
+                return noDisc;
+            }
+
+            if ([state isEqualTo: DRDeviceMediaStateMediaPresent])
+            {
+                if ([[[status objectForKey: DRDeviceMediaInfoKey] objectForKey: DRDeviceMediaBlocksFreeKey] intValue] > 0)
+                    return writableDiskPresent;
+                else
+                    return readOnlyDiskPresent;
+            }
+        }
+
+        return unknown;
+    }
+
+    bool openTray() { return [device->device isValid] && [device->device ejectMedia]; }
+
+    const Array<int> getAvailableWriteSpeeds() const
+    {
+        Array<int> results;
+
+        if ([device->device isValid])
+        {
+            NSArray* speeds = [[[device->device status] objectForKey: DRDeviceMediaInfoKey] objectForKey: DRDeviceBurnSpeedsKey];
+            for (unsigned int i = 0; i < [speeds count]; ++i)
+            {
+                const int kbPerSec = [[speeds objectAtIndex: i] intValue];
+                results.add (kbPerSec / kilobytesPerSecond1x);
+            }
+        }
+
+        return results;
+    }
+
+    bool setBufferUnderrunProtection (const bool shouldBeEnabled)
+    {
+        if ([device->device isValid])
+        {
+            device->underrunProtection = shouldBeEnabled;
+            return shouldBeEnabled && [[[device->device status] objectForKey: DRDeviceCanUnderrunProtectCDKey] boolValue];
+        }
+
+        return false;
+    }
+
+    int getNumAvailableAudioBlocks() const
+    {
+        return [[[[device->device status] objectForKey: DRDeviceMediaInfoKey]
+                                          objectForKey: DRDeviceMediaBlocksFreeKey] intValue];
+    }
+
+    OpenDiskDevice* device;
+
+private:
+    DiskState lastState;
+    AudioCDBurner& owner;
+};
+
+//==============================================================================
+AudioCDBurner::AudioCDBurner (const int deviceIndex)
+{
+    pimpl = new Pimpl (*this, deviceIndex);
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
-    OpenDiskDevice* dev = (OpenDiskDevice*) internal;
-
-    if (dev != 0)
-        [dev release];
 }
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
     ScopedPointer <AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
-    if (b->internal == 0)
+    if (b->pimpl->device == 0)
         b = 0;
 
     return b.release();
@@ -378,27 +470,56 @@ const StringArray AudioCDBurner::findAvailableDevices()
     return s;
 }
 
+AudioCDBurner::DiskState AudioCDBurner::getDiskState() const
+{
+    return pimpl->getDiskState();
+}
+
 bool AudioCDBurner::isDiskPresent() const
 {
-    OpenDiskDevice* dev = (OpenDiskDevice*) internal;
+    return getDiskState() == writableDiskPresent;
+}
 
-    return dev != 0 && [dev isDiskPresent];
+bool AudioCDBurner::openTray()
+{
+    return pimpl->openTray();
+}
+
+AudioCDBurner::DiskState AudioCDBurner::waitUntilStateChange (int timeOutMilliseconds)
+{
+    const int64 timeout = Time::currentTimeMillis() + timeOutMilliseconds;
+    DiskState oldState = getDiskState();
+    DiskState newState = oldState;
+
+    while (newState == oldState && Time::currentTimeMillis() < timeout)
+    {
+        newState = getDiskState();
+        Thread::sleep (100);
+    }
+
+    return newState;
+}
+
+const Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
+{
+    return pimpl->getAvailableWriteSpeeds();
+}
+
+bool AudioCDBurner::setBufferUnderrunProtection (const bool shouldBeEnabled)
+{
+    return pimpl->setBufferUnderrunProtection (shouldBeEnabled);
 }
 
 int AudioCDBurner::getNumAvailableAudioBlocks() const
 {
-    OpenDiskDevice* dev = (OpenDiskDevice*) internal;
-
-    return [dev getNumAvailableAudioBlocks];
+    return pimpl->getNumAvailableAudioBlocks();
 }
 
 bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 {
-    OpenDiskDevice* dev = (OpenDiskDevice*) internal;
-
-    if (dev != 0)
+    if ([pimpl->device->device isValid])
     {
-        [dev addSourceTrack: source numSamples: numSamps];
+        [pimpl->device addSourceTrack: source numSamples: numSamps];
         return true;
     }
 
@@ -406,32 +527,35 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamps)
 }
 
 const String AudioCDBurner::burn (JUCE_NAMESPACE::AudioCDBurner::BurnProgressListener* listener,
-                                  const bool ejectDiscAfterwards,
-                                  const bool peformFakeBurnForTesting)
+                                  bool ejectDiscAfterwards,
+                                  bool performFakeBurnForTesting,
+                                  int writeSpeed)
 {
     String error ("Couldn't open or write to the CD device");
 
-    OpenDiskDevice* dev = (OpenDiskDevice*) internal;
-
-    if (dev != 0)
+    if ([pimpl->device->device isValid])
     {
         error = String::empty;
-        [dev burn: listener
-             errorString: &error
+
+        [pimpl->device  burn: listener
+                 errorString: &error
              ejectAfterwards: ejectDiscAfterwards
-             isFake: peformFakeBurnForTesting];
+                      isFake: performFakeBurnForTesting
+                       speed: writeSpeed];
     }
 
     return error;
 }
 
+#endif
 
 //==============================================================================
+#if JUCE_INCLUDED_FILE && JUCE_USE_CDREADER
+
 void AudioCDReader::ejectDisk()
 {
     const ScopedAutoReleasePool p;
     [[NSWorkspace sharedWorkspace] unmountAndEjectDeviceAtPath: juceStringToNS (volumeDir.getFullPathName())];
 }
-
 
 #endif

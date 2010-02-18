@@ -35,7 +35,7 @@
 //==============================================================================
 /**
 */
-class AudioCDBurner
+class AudioCDBurner     : public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -55,10 +55,53 @@ public:
     ~AudioCDBurner();
 
     //==============================================================================
-    /** Returns true if there's a writable disk in the drive.
+    enum DiskState
+    {
+        unknown,                /**< An error condition, if the device isn't responding. */
+        trayOpen,               /**< The drive is currently open. Note that a slot-loading drive
+                                     may seem to be permanently open. */
+        noDisc,                 /**< The drive has no disk in it. */
+        writableDiskPresent,    /**< The drive contains a writeable disk. */
+        readOnlyDiskPresent     /**< The drive contains a read-only disk. */
+    };
+
+    /** Returns the current status of the device.
+
+        To get informed when the drive's status changes, attach a ChangeListener to
+        the AudioCDBurner.
     */
+    DiskState getDiskState() const;
+
+    /** Returns true if there's a writable disk in the drive. */
     bool isDiskPresent() const;
 
+    /** Sends an eject signal to the drive.
+        The eject will happen asynchronously, so you can use getDiskState() and
+        waitUntilStateChange() to monitor its progress.
+    */
+    bool openTray();
+
+    /** Blocks the current thread until the drive's state changes, or until the timeout expires.
+        @returns    the device's new state
+    */
+    DiskState waitUntilStateChange (int timeOutMilliseconds);
+
+    //==============================================================================
+    /** Returns the set of possible write speeds that the device can handle.
+        These are as a multiple of 'normal' speed, so e.g. '24x' returns 24, etc.
+        Note that if there's no media present in the drive, this value may be unavailable!
+        @see setWriteSpeed, getWriteSpeed
+    */
+    const Array<int> getAvailableWriteSpeeds() const;
+
+    //==============================================================================
+    /** Tries to enable or disable buffer underrun safety on devices that support it.
+        @returns    true if it's now enabled. If the device doesn't support it, this
+                    will always return false.
+    */
+    bool setBufferUnderrunProtection (const bool shouldBeEnabled);
+
+    //==============================================================================
     /** Returns the number of free blocks on the disk.
 
         There are 75 blocks per second, at 44100Hz.
@@ -75,9 +118,9 @@ public:
     */
     bool addAudioTrack (AudioSource* source, int numSamples);
 
-    /**
-
-        Return true to cancel the current burn operation
+    //==============================================================================
+    /** Receives progress callbacks during a cd-burn operation.
+        @see AudioCDBurner::burn()
     */
     class BurnProgressListener
     {
@@ -87,14 +130,32 @@ public:
 
         /** Called at intervals to report on the progress of the AudioCDBurner.
 
-            To cancel the burn, return true from this.
+            To cancel the burn, return true from this method.
         */
         virtual bool audioCDBurnProgress (float proportionComplete) = 0;
     };
 
+    /** Runs the burn process.
+        This method will block until the operation is complete.
+
+        @param listener             the object to receive callbacks about progress
+        @param ejectDiscAfterwards  whether to eject the disk after the burn completes
+        @param performFakeBurnForTesting    if true, no data will actually be written to the disk
+        @param writeSpeed           one of the write speeds from getAvailableWriteSpeeds(), or
+                                    0 or less to mean the fastest speed.
+    */
     const String burn (BurnProgressListener* listener,
-                       const bool ejectDiscAfterwards,
-                       const bool peformFakeBurnForTesting);
+                       bool ejectDiscAfterwards,
+                       bool performFakeBurnForTesting,
+                       int writeSpeed);
+
+    /** If a burn operation is currently in progress, this tells it to stop
+        as soon as possible.
+
+        It's also possible to stop the burn process by returning true from
+        BurnProgressListener::audioCDBurnProgress()
+    */
+    void abortBurn();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -102,7 +163,9 @@ public:
 private:
     AudioCDBurner (const int deviceIndex);
 
-    void* internal;
+    class Pimpl;
+    friend class ScopedPointer<Pimpl>;
+    ScopedPointer<Pimpl> pimpl;
 };
 
 

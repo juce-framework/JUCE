@@ -295,7 +295,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             const String name (resources[i]->name);
             const MemoryBlock& mb = resources[i]->data;
 
-            defs << "// JUCER_RESOURCE: " << name << ", " << mb.getSize()
+            defs << "// JUCER_RESOURCE: " << name << ", " << (int) mb.getSize()
                 << ", \""
                 << File (resources[i]->originalFilename)
                     .getRelativePathFrom (code.document->getFile())
@@ -311,7 +311,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             MemoryOutputStream out (65536, 16384);
             int charsOnLine = line1.length();
 
-            for (int j = 0; j < mb.getSize(); ++j)
+            for (size_t j = 0; j < mb.getSize(); ++j)
             {
                 const int num = ((int) (unsigned char) mb[j]);
                 out << num << ',';
@@ -338,7 +338,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
               << " = (const char*) resource_" << code.className << "_" << name
               << ";\nconst int "
               << code.className << "::" << name << "Size = "
-              << mb.getSize()
+              << (int) mb.getSize()
               << ";\n\n";
         }
 

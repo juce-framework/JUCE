@@ -2141,28 +2141,24 @@ const StringArray AudioCDBurner::findAvailableDevices()
 
 AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
 {
-    AudioCDBurner* b = new AudioCDBurner (deviceIndex);
+    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
 
-    if (b->internal == 0)
-        deleteAndZero (b);
+    if (b->pimpl == 0)
+        b = 0;
 
-    return b;
+    return b.release();
 }
 
-class CDBurnerInfo  : public IDiscMasterProgressEvents
+//==============================================================================
+class AudioCDBurner::Pimpl  : public IDiscMasterProgressEvents
 {
 public:
-    CDBurnerInfo()
-        : refCount (1),
-          progress (0),
-          shouldCancel (false),
-          listener (0)
+    Pimpl()
+      : listener (0), progress (0), shouldCancel (false), refCount (1)
     {
     }
 
-    ~CDBurnerInfo()
-    {
-    }
+    ~Pimpl()  {}
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
     {
@@ -2209,6 +2205,50 @@ public:
     HRESULT __stdcall NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
     HRESULT __stdcall NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
 
+    int getIntProperty (const LPOLESTR name, const int defaultReturn) const
+    {
+        ComSmartPtr<IPropertyStorage> prop;
+        if (FAILED (discRecorder->GetRecorderProperties (&prop)))
+            return defaultReturn;
+
+        PROPSPEC iPropSpec;
+        iPropSpec.ulKind = PRSPEC_LPWSTR;
+        iPropSpec.lpwstr = name;
+
+        PROPVARIANT iPropVariant;
+        return FAILED (prop->ReadMultiple (1, &iPropSpec, &iPropVariant))
+                   ? defaultReturn : (int) iPropVariant.lVal;
+    }
+
+    bool setIntProperty (const LPOLESTR name, const int value) const
+    {
+        ComSmartPtr<IPropertyStorage> prop;
+        if (FAILED (discRecorder->GetRecorderProperties (&prop)))
+            return false;
+
+        PROPSPEC iPropSpec;
+        iPropSpec.ulKind = PRSPEC_LPWSTR;
+        iPropSpec.lpwstr = name;
+
+        PROPVARIANT iPropVariant;
+        if (FAILED (prop->ReadMultiple (1, &iPropSpec, &iPropVariant)))
+            return false;
+
+        iPropVariant.lVal = (long) value;
+        return SUCCEEDED (prop->WriteMultiple (1, &iPropSpec, &iPropVariant, iPropVariant.vt))
+                && SUCCEEDED (discRecorder->SetRecorderProperties (prop));
+    }
+
+    class DiskOpener
+    {
+    public:
+        DiskOpener (Pimpl& p) : pimpl (p) { pimpl.discRecorder->OpenExclusive(); }
+        ~DiskOpener()                     { pimpl.discRecorder->Close(); }
+
+    private:
+        Pimpl& pimpl;
+    };
+
     IDiscMaster* discMaster;
     IDiscRecorder* discRecorder;
     IRedbookDiscMaster* redbook;
@@ -2220,8 +2260,8 @@ private:
     int refCount;
 };
 
+//==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
-    : internal (0)
 {
     IDiscMaster* discMaster;
     IDiscRecorder* dr = enumCDBurners (0, deviceIndex, &discMaster);
@@ -2230,69 +2270,115 @@ AudioCDBurner::AudioCDBurner (const int deviceIndex)
     {
         IRedbookDiscMaster* redbook;
         HRESULT hr = discMaster->SetActiveDiscMasterFormat (IID_IRedbookDiscMaster, (void**) &redbook);
-
         hr = discMaster->SetActiveDiscRecorder (dr);
 
-        CDBurnerInfo* const info = new CDBurnerInfo();
-        internal = info;
-
-        info->discMaster = discMaster;
-        info->discRecorder = dr;
-        info->redbook = redbook;
+        pimpl = new Pimpl();
+        pimpl->discMaster = discMaster;
+        pimpl->discRecorder = dr;
+        pimpl->redbook = redbook;
     }
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
-
-    if (info != 0)
+    if (pimpl != 0)
     {
-        info->discRecorder->Close();
-        info->redbook->Release();
-        info->discRecorder->Release();
-        info->discMaster->Release();
+        pimpl->discRecorder->Close();
+        pimpl->redbook->Release();
+        pimpl->discRecorder->Release();
+        pimpl->discMaster->Release();
 
-        info->Release();
+        pimpl.release()->Release();
     }
+}
+
+AudioCDBurner::DiskState AudioCDBurner::getDiskState() const
+{
+    const Pimpl::DiskOpener opener (*pimpl);
+
+    long type, flags;
+    HRESULT hr = pimpl->discRecorder->QueryMediaType (&type, &flags);
+
+    if (FAILED (hr))
+        return unknown;
+
+    if (type != 0 && (flags & MEDIA_WRITABLE) != 0)
+        return writableDiskPresent;
+
+    if (type == 0)
+        return noDisc;
+    else
+        return readOnlyDiskPresent;
 }
 
 bool AudioCDBurner::isDiskPresent() const
 {
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+    return getDiskState() == writableDiskPresent;
+}
 
-    HRESULT hr = info->discRecorder->OpenExclusive();
+bool AudioCDBurner::openTray()
+{
+    const Pimpl::DiskOpener opener (*pimpl);
+    return pimpl->discRecorder->Eject() == S_OK;
+}
 
-    long type, flags;
-    hr = info->discRecorder->QueryMediaType (&type, &flags);
+AudioCDBurner::DiskState AudioCDBurner::waitUntilStateChange (int timeOutMilliseconds)
+{
+    const int64 timeout = Time::currentTimeMillis() + timeOutMilliseconds;
+    DiskState oldState = getDiskState();
+    DiskState newState = oldState;
 
-    info->discRecorder->Close();
-    return hr == S_OK && type != 0 && (flags & MEDIA_WRITABLE) != 0;
+    while (newState == oldState && Time::currentTimeMillis() < timeout)
+    {
+        newState = getDiskState();
+        Thread::sleep (jmin (250, (int) (timeout - Time::currentTimeMillis())));
+    }
+
+    return newState;
+}
+
+const Array<int> AudioCDBurner::getAvailableWriteSpeeds() const
+{
+    Array<int> results;
+    const int maxSpeed = pimpl->getIntProperty (L"MaxWriteSpeed", 1);
+    const int speeds[] = { 1, 2, 4, 8, 12, 16, 20, 24, 32, 40, 64, 80 };
+
+    for (int i = 0; i < numElementsInArray (speeds); ++i)
+        if (speeds[i] <= maxSpeed)
+            results.add (speeds[i]);
+
+    results.addIfNotAlreadyThere (maxSpeed);
+    return results;
+}
+
+bool AudioCDBurner::setBufferUnderrunProtection (const bool shouldBeEnabled)
+{
+    if (pimpl->getIntProperty (L"BufferUnderrunFreeCapable", 0) == 0)
+        return false;
+
+    pimpl->setIntProperty (L"EnableBufferUnderrunFree", shouldBeEnabled ? -1 : 0);
+    return pimpl->getIntProperty (L"EnableBufferUnderrunFree", 0) != 0;
 }
 
 int AudioCDBurner::getNumAvailableAudioBlocks() const
 {
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
     long blocksFree = 0;
-    info->redbook->GetAvailableAudioTrackBlocks (&blocksFree);
+    pimpl->redbook->GetAvailableAudioTrackBlocks (&blocksFree);
     return blocksFree;
 }
 
-const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
-                                  const bool ejectDiscAfterwards,
-                                  const bool performFakeBurnForTesting)
+const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener, bool ejectDiscAfterwards,
+                                  bool performFakeBurnForTesting, int writeSpeed)
 {
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
-
-    info->listener = listener;
-    info->progress = 0;
-    info->shouldCancel = false;
+    pimpl->listener = listener;
+    pimpl->progress = 0;
+    pimpl->shouldCancel = false;
 
     UINT_PTR cookie;
-    HRESULT hr = info->discMaster->ProgressAdvise (info, &cookie);
+    HRESULT hr = pimpl->discMaster->ProgressAdvise ((AudioCDBurner::Pimpl*) pimpl, &cookie);
 
-    hr = info->discMaster->RecordDisc (performFakeBurnForTesting,
-                                       ejectDiscAfterwards);
+    hr = pimpl->discMaster->RecordDisc (performFakeBurnForTesting,
+                                        ejectDiscAfterwards);
 
     String error;
     if (hr != S_OK)
@@ -2307,29 +2393,28 @@ const String AudioCDBurner::burn (AudioCDBurner::BurnProgressListener* listener,
         error = e;
     }
 
-    info->discMaster->ProgressUnadvise (cookie);
-    info->listener = 0;
+    pimpl->discMaster->ProgressUnadvise (cookie);
+    pimpl->listener = 0;
 
     return error;
 }
 
-bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
+bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
 {
-    if (source == 0)
+    if (audioSource == 0)
         return false;
 
-    CDBurnerInfo* const info = (CDBurnerInfo*) internal;
+    ScopedPointer<AudioSource> source (audioSource);
 
     long bytesPerBlock;
-    HRESULT hr = info->redbook->GetAudioBlockSize (&bytesPerBlock);
+    HRESULT hr = pimpl->redbook->GetAudioBlockSize (&bytesPerBlock);
 
     const int samplesPerBlock = bytesPerBlock / 4;
     bool ok = true;
 
-    hr = info->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
+    hr = pimpl->redbook->CreateAudioTrack ((long) numSamples / (bytesPerBlock * 4));
 
     HeapBlock <byte> buffer (bytesPerBlock);
-
     AudioSampleBuffer sourceBuffer (2, samplesPerBlock);
     int samplesDone = 0;
 
@@ -2355,9 +2440,9 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
         AudioDataConverters::convertFloatToInt16LE (sourceBuffer.getSampleData (1, 0),
                                                     buffer + 2, samplesPerBlock, 4);
 
-        hr = info->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
+        hr = pimpl->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
 
-        if (hr != S_OK)
+        if (FAILED (hr))
             ok = false;
 
         samplesDone += samplesPerBlock;
@@ -2366,10 +2451,7 @@ bool AudioCDBurner::addAudioTrack (AudioSource* source, int numSamples)
             break;
     }
 
-    hr = info->redbook->CloseAudioTrack();
-
-    delete source;
-
+    hr = pimpl->redbook->CloseAudioTrack();
     return ok && hr == S_OK;
 }
 
