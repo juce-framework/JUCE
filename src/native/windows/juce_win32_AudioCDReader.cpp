@@ -2132,33 +2132,35 @@ static IDiscRecorder* enumCDBurners (StringArray* list, int indexToOpen, IDiscMa
     return result;
 }
 
-const StringArray AudioCDBurner::findAvailableDevices()
-{
-    StringArray devs;
-    enumCDBurners (&devs, -1, 0);
-    return devs;
-}
-
-AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
-{
-    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
-
-    if (b->pimpl == 0)
-        b = 0;
-
-    return b.release();
-}
-
 //==============================================================================
-class AudioCDBurner::Pimpl  : public IDiscMasterProgressEvents
+class AudioCDBurner::Pimpl  : public IDiscMasterProgressEvents,
+                              public Timer
 {
 public:
-    Pimpl()
-      : listener (0), progress (0), shouldCancel (false), refCount (1)
+    Pimpl (AudioCDBurner& owner_, IDiscMaster* discMaster_, IDiscRecorder* discRecorder_)
+      : owner (owner_), discMaster (discMaster_), discRecorder (discRecorder_), redbook (0),
+        listener (0), progress (0), shouldCancel (false), refCount (1)
     {
+        HRESULT hr = discMaster->SetActiveDiscMasterFormat (IID_IRedbookDiscMaster, (void**) &redbook);
+        jassert (SUCCEEDED (hr));
+        hr = discMaster->SetActiveDiscRecorder (discRecorder);
+        //jassert (SUCCEEDED (hr));
+
+        lastState = getDiskState();
+        startTimer (2000);
     }
 
     ~Pimpl()  {}
+
+    void releaseObjects()
+    {
+        discRecorder->Close();
+        if (redbook != 0)
+            redbook->Release();
+        discRecorder->Release();
+        discMaster->Release();
+        Release();
+    }
 
     HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
     {
@@ -2205,6 +2207,35 @@ public:
     HRESULT __stdcall NotifyBurnComplete (HRESULT /*status*/)               { return E_NOTIMPL; }
     HRESULT __stdcall NotifyEraseComplete (HRESULT /*status*/)              { return E_NOTIMPL; }
 
+    class ScopedDiscOpener
+    {
+    public:
+        ScopedDiscOpener (Pimpl& p) : pimpl (p) { pimpl.discRecorder->OpenExclusive(); }
+        ~ScopedDiscOpener()                     { pimpl.discRecorder->Close(); }
+
+    private:
+        Pimpl& pimpl;
+    };
+
+    DiskState getDiskState()
+    {
+        const ScopedDiscOpener opener (*this);
+
+        long type, flags;
+        HRESULT hr = discRecorder->QueryMediaType (&type, &flags);
+
+        if (FAILED (hr))
+            return unknown;
+
+        if (type != 0 && (flags & MEDIA_WRITABLE) != 0)
+            return writableDiskPresent;
+
+        if (type == 0)
+            return noDisc;
+        else
+            return readOnlyDiskPresent;
+    }
+
     int getIntProperty (const LPOLESTR name, const int defaultReturn) const
     {
         ComSmartPtr<IPropertyStorage> prop;
@@ -2239,16 +2270,19 @@ public:
                 && SUCCEEDED (discRecorder->SetRecorderProperties (prop));
     }
 
-    class DiskOpener
+    void timerCallback()
     {
-    public:
-        DiskOpener (Pimpl& p) : pimpl (p) { pimpl.discRecorder->OpenExclusive(); }
-        ~DiskOpener()                     { pimpl.discRecorder->Close(); }
+        const DiskState state = getDiskState();
 
-    private:
-        Pimpl& pimpl;
-    };
+        if (state != lastState)
+        {
+            lastState = state;
+            owner.sendChangeMessage (&owner);
+        }
+    }
 
+    AudioCDBurner& owner;
+    DiskState lastState;
     IDiscMaster* discMaster;
     IDiscRecorder* discRecorder;
     IRedbookDiscMaster* redbook;
@@ -2263,52 +2297,39 @@ private:
 //==============================================================================
 AudioCDBurner::AudioCDBurner (const int deviceIndex)
 {
-    IDiscMaster* discMaster;
-    IDiscRecorder* dr = enumCDBurners (0, deviceIndex, &discMaster);
+    IDiscMaster* discMaster = 0;
+    IDiscRecorder* discRecorder = enumCDBurners (0, deviceIndex, &discMaster);
 
-    if (dr != 0)
-    {
-        IRedbookDiscMaster* redbook;
-        HRESULT hr = discMaster->SetActiveDiscMasterFormat (IID_IRedbookDiscMaster, (void**) &redbook);
-        hr = discMaster->SetActiveDiscRecorder (dr);
-
-        pimpl = new Pimpl();
-        pimpl->discMaster = discMaster;
-        pimpl->discRecorder = dr;
-        pimpl->redbook = redbook;
-    }
+    if (discRecorder != 0)
+        pimpl = new Pimpl (*this, discMaster, discRecorder);
 }
 
 AudioCDBurner::~AudioCDBurner()
 {
     if (pimpl != 0)
-    {
-        pimpl->discRecorder->Close();
-        pimpl->redbook->Release();
-        pimpl->discRecorder->Release();
-        pimpl->discMaster->Release();
+        pimpl.release()->releaseObjects();
+}
 
-        pimpl.release()->Release();
-    }
+const StringArray AudioCDBurner::findAvailableDevices()
+{
+    StringArray devs;
+    enumCDBurners (&devs, -1, 0);
+    return devs;
+}
+
+AudioCDBurner* AudioCDBurner::openDevice (const int deviceIndex)
+{
+    ScopedPointer<AudioCDBurner> b (new AudioCDBurner (deviceIndex));
+
+    if (b->pimpl == 0)
+        b = 0;
+
+    return b.release();
 }
 
 AudioCDBurner::DiskState AudioCDBurner::getDiskState() const
 {
-    const Pimpl::DiskOpener opener (*pimpl);
-
-    long type, flags;
-    HRESULT hr = pimpl->discRecorder->QueryMediaType (&type, &flags);
-
-    if (FAILED (hr))
-        return unknown;
-
-    if (type != 0 && (flags & MEDIA_WRITABLE) != 0)
-        return writableDiskPresent;
-
-    if (type == 0)
-        return noDisc;
-    else
-        return readOnlyDiskPresent;
+    return pimpl->getDiskState();
 }
 
 bool AudioCDBurner::isDiskPresent() const
@@ -2318,8 +2339,8 @@ bool AudioCDBurner::isDiskPresent() const
 
 bool AudioCDBurner::openTray()
 {
-    const Pimpl::DiskOpener opener (*pimpl);
-    return pimpl->discRecorder->Eject() == S_OK;
+    const Pimpl::ScopedDiscOpener opener (*pimpl);
+    return SUCCEEDED (pimpl->discRecorder->Eject());
 }
 
 AudioCDBurner::DiskState AudioCDBurner::waitUntilStateChange (int timeOutMilliseconds)
