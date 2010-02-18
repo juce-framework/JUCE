@@ -114,16 +114,22 @@ public:
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */
-    const Point<ValueType> getPosition() const throw()              { return Point<ValueType> (x, y); }
+    const Point<ValueType> getPosition() const throw()                                              { return Point<ValueType> (x, y); }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const Point<ValueType>& newPos) throw()       { x = newPos.getX(); y = newPos.getY(); }
+    void setPosition (const Point<ValueType>& newPos) throw()                                       { x = newPos.getX(); y = newPos.getY(); }
 
     /** Changes the position of the rectangle's top-left corner (leaving its size unchanged). */
-    void setPosition (const ValueType newX, const ValueType newY) throw()       { x = newX; y = newY; }
+    void setPosition (const ValueType newX, const ValueType newY) throw()                           { x = newX; y = newY; }
+
+    /** Returns a rectangle with the same size as this one, but a new position. */
+    const Rectangle withPosition (const Point<ValueType>& newPos) const throw()                     { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
 
     /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
-    void setSize (const ValueType newWidth, const ValueType newHeight) throw()  { w = newWidth; h = newHeight; }
+    void setSize (const ValueType newWidth, const ValueType newHeight) throw()                      { w = newWidth; h = newHeight; }
+
+    /** Returns a rectangle with the same position as this one, but a new size. */
+    const Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const throw()    { return Rectangle (x, y, newWidth, newHeight); }
 
     /** Changes all the rectangle's co-ordinates. */
     void setBounds (const ValueType newX, const ValueType newY,

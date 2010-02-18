@@ -340,20 +340,24 @@ public:
 
     //==============================================================================
     /** Returns this component's x co-ordinate relative the the screen's top-left origin.
-
         @see getX, relativePositionToGlobal
     */
     int getScreenX() const;
 
     /** Returns this component's y co-ordinate relative the the screen's top-left origin.
-
         @see getY, relativePositionToGlobal
     */
     int getScreenY() const;
 
     /** Returns the position of this component's top-left corner relative to the screen's top-left.
+        @see getScreenBounds
     */
     const Point<int> getScreenPosition() const;
+
+    /** Returns the bounds of this component, relative to the screen's top-left.
+        @see getScreenPosition
+    */
+    const Rectangle<int> getScreenBounds() const;
 
     /** Converts a position relative to this component's top-left into a screen co-ordinate.
 

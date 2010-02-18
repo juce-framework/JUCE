@@ -4906,6 +4906,11 @@ public:
 			end = newStart;
 	}
 
+	const Range withStart (const ValueType newStart) const throw()
+	{
+		return Range (newStart, jmax (newStart, end));
+	}
+
 	void setEnd (const ValueType newEnd) throw()
 	{
 		end = newEnd;
@@ -4913,9 +4918,19 @@ public:
 			start = newEnd;
 	}
 
+	const Range withEnd (const ValueType newEnd) const throw()
+	{
+		return Range (jmin (start, newEnd), newEnd);
+	}
+
 	void setLength (const ValueType newLength) throw()
 	{
 		end = start + jmax (ValueType(), newLength);
+	}
+
+	const Range withLength (const ValueType newLength) const throw()
+	{
+		return Range (start, start + newLength);
 	}
 
 	inline const Range& operator+= (const ValueType amountToAdd) throw()
@@ -9828,13 +9843,17 @@ public:
 
 	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
 
-	const Point<ValueType> getPosition() const throw()		  { return Point<ValueType> (x, y); }
+	const Point<ValueType> getPosition() const throw()						  { return Point<ValueType> (x, y); }
 
-	void setPosition (const Point<ValueType>& newPos) throw()	   { x = newPos.getX(); y = newPos.getY(); }
+	void setPosition (const Point<ValueType>& newPos) throw()					   { x = newPos.getX(); y = newPos.getY(); }
 
-	void setPosition (const ValueType newX, const ValueType newY) throw()	   { x = newX; y = newY; }
+	void setPosition (const ValueType newX, const ValueType newY) throw()			   { x = newX; y = newY; }
 
-	void setSize (const ValueType newWidth, const ValueType newHeight) throw()  { w = newWidth; h = newHeight; }
+	const Rectangle withPosition (const Point<ValueType>& newPos) const throw()			 { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
+
+	void setSize (const ValueType newWidth, const ValueType newHeight) throw()			  { w = newWidth; h = newHeight; }
+
+	const Rectangle withSize (const ValueType newWidth, const ValueType newHeight) const throw()	{ return Rectangle (x, y, newWidth, newHeight); }
 
 	void setBounds (const ValueType newX, const ValueType newY,
 					const ValueType newWidth, const ValueType newHeight) throw()
@@ -12212,6 +12231,31 @@ private:
 class Component;
 class Graphics;
 
+
+/*** Start of inlined file: juce_TextInputTarget.h ***/
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+
+class JUCE_API  TextInputTarget
+{
+public:
+
+	TextInputTarget() {}
+
+	virtual ~TextInputTarget() {}
+
+	virtual const Range<int> getHighlightedRegion() const = 0;
+
+	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
+
+	virtual const String getTextInRange (const Range<int>& range) const = 0;
+
+	virtual void insertTextAtCaret (const String& textToInsert) = 0;
+};
+
+#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+/*** End of inlined file: juce_TextInputTarget.h ***/
+
 class ComponentBoundsConstrainer;
 class ComponentDeletionWatcher;
 
@@ -12331,6 +12375,8 @@ public:
 	bool handleKeyUpOrDown (const bool isKeyDown);
 
 	void handleModifierKeysChange();
+
+	TextInputTarget* findCurrentTextInputTarget();
 
 	virtual void repaint (int x, int y, int w, int h) = 0;
 
@@ -12480,6 +12526,8 @@ public:
 	int getScreenY() const;
 
 	const Point<int> getScreenPosition() const;
+
+	const Rectangle<int> getScreenBounds() const;
 
 	const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) const;
 
@@ -16516,31 +16564,6 @@ private:
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
 /*** End of inlined file: juce_PopupMenu.h ***/
-
-
-/*** Start of inlined file: juce_TextInputTarget.h ***/
-#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-
-class JUCE_API  TextInputTarget
-{
-public:
-
-	TextInputTarget() {}
-
-	virtual ~TextInputTarget() {}
-
-	virtual const Range<int> getHighlightedRegion() const = 0;
-
-	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
-
-	virtual const String getTextInRange (const Range<int>& range) const = 0;
-
-	virtual void insertTextAtCaret (const String& textToInsert) = 0;
-};
-
-#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-/*** End of inlined file: juce_TextInputTarget.h ***/
 
 class TextEditor;
 class TextHolderComponent;

@@ -29,9 +29,11 @@
 class Component;
 class Graphics;
 #include "../mouse/juce_MouseCursor.h"
+#include "../keyboard/juce_TextInputTarget.h"
 #include "../../../events/juce_MessageListener.h"
 #include "../../../text/juce_StringArray.h"
 #include "../../graphics/geometry/juce_RectangleList.h"
+
 class ComponentBoundsConstrainer;
 class ComponentDeletionWatcher;
 
@@ -276,6 +278,9 @@ public:
 
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();
+
+    /** Returns the currently focused TextInputTarget, or null if none is found. */
+    TextInputTarget* findCurrentTextInputTarget();
 
     //==============================================================================
     /** Invalidates a region of the window to be repainted asynchronously. */

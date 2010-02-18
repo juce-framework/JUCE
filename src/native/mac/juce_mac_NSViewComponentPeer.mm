@@ -34,11 +34,12 @@ END_JUCE_NAMESPACE
 
 #define JuceNSView MakeObjCClassName(JuceNSView)
 
-@interface JuceNSView : NSView
+@interface JuceNSView : NSView<NSTextInput>
 {
 @public
     NSViewComponentPeer* owner;
     NSNotificationCenter* notificationCenter;
+    String* stringBeingComposed;
 }
 
 - (JuceNSView*) initWithOwner: (NSViewComponentPeer*) owner withFrame: (NSRect) frame;
@@ -68,6 +69,22 @@ END_JUCE_NAMESPACE
 
 - (void) keyDown: (NSEvent*) ev;
 - (void) keyUp: (NSEvent*) ev;
+
+// Textinput Methods
+- (void) insertText:(id)aString; // instead of keyDown: aString can be NSString or NSAttributedString
+- (void) doCommandBySelector:(SEL)aSelector;
+- (void) setMarkedText:(id)aString selectedRange:(NSRange)selRange;
+- (void) unmarkText;
+- (BOOL) hasMarkedText;
+- (long) conversationIdentifier;
+- (NSAttributedString *) attributedSubstringFromRange:(NSRange)theRange;
+- (NSRange) markedRange;
+- (NSRange) selectedRange;
+- (NSRect) firstRectForCharacterRange:(NSRange)theRange;
+- (unsigned int)characterIndexForPoint:(NSPoint)thePoint;
+- (NSArray*) validAttributesForMarkedText;
+
+
 - (void) flagsChanged: (NSEvent*) ev;
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 - (BOOL) performKeyEquivalent: (NSEvent*) ev;
@@ -222,6 +239,7 @@ END_JUCE_NAMESPACE
 {
     [super initWithFrame: frame];
     owner = owner_;
+    stringBeingComposed = 0;
 
     notificationCenter = [NSNotificationCenter defaultCenter];
 
@@ -246,6 +264,7 @@ END_JUCE_NAMESPACE
 - (void) dealloc
 {
     [notificationCenter removeObserver: self];
+    delete stringBeingComposed;
     [super dealloc];
 }
 
@@ -386,7 +405,14 @@ END_JUCE_NAMESPACE
 //==============================================================================
 - (void) keyDown: (NSEvent*) ev
 {
-    if (owner == 0 || ! owner->redirectKeyDown (ev))
+    TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+    if (target != 0)
+        [self interpretKeyEvents: [NSArray arrayWithObject: ev]];
+    else
+        deleteAndZero (stringBeingComposed);
+
+    if (stringBeingComposed == 0 && (owner == 0 || ! owner->redirectKeyDown (ev)))
         [super keyDown: ev];
 }
 
@@ -396,6 +422,127 @@ END_JUCE_NAMESPACE
         [super keyUp: ev];
 }
 
+//==============================================================================
+- (void) insertText: (id) aString
+{
+    // This commits multi-byte text when return is pressed, or after every keypress for western keyboards
+    if ([aString length] > 0)
+    {
+        TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+        if (target != 0)
+            target->insertTextAtCaret (nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString));
+    }
+
+    deleteAndZero (stringBeingComposed);
+}
+
+- (void) doCommandBySelector: (SEL) aSelector
+{
+}
+
+- (void) setMarkedText: (id) aString selectedRange: (NSRange) selectionRange
+{
+    if (stringBeingComposed == 0)
+        stringBeingComposed = new String();
+
+    *stringBeingComposed = nsStringToJuce ([aString isKindOfClass:[NSAttributedString class]] ? [aString string] : aString);
+
+    TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        const Range<int> currentHighlight (target->getHighlightedRegion());
+        target->insertTextAtCaret (*stringBeingComposed);
+        target->setHighlightedRegion (currentHighlight.withLength (stringBeingComposed->length()));
+    }
+}
+
+- (void) unmarkText
+{
+    if (stringBeingComposed != 0)
+    {
+        TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+        if (target != 0)
+            target->insertTextAtCaret (*stringBeingComposed);
+    }
+
+    deleteAndZero (stringBeingComposed);
+}
+
+- (BOOL) hasMarkedText
+{
+    return stringBeingComposed != 0;
+}
+
+- (long) conversationIdentifier
+{
+    return (long) (pointer_sized_int) self;
+}
+
+- (NSAttributedString*) attributedSubstringFromRange: (NSRange) theRange
+{
+    TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        const Range<int> r ((int) theRange.location,
+                            (int) (theRange.location + theRange.length));
+
+        return [[[NSAttributedString alloc] initWithString: juceStringToNS (target->getTextInRange (r))] autorelease];
+    }
+
+    return nil;
+}
+
+- (NSRange) markedRange
+{
+    return stringBeingComposed != 0 ? NSMakeRange (0, stringBeingComposed->length())
+                                    : NSMakeRange (NSNotFound, 0);
+}
+
+- (NSRange) selectedRange
+{
+    TextInputTarget* const target = owner->findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        const Range<int> highlight (target->getHighlightedRegion());
+
+        if (! highlight.isEmpty())
+            return NSMakeRange (highlight.getStart(), highlight.getLength());
+    }
+
+    return NSMakeRange (NSNotFound, 0);
+}
+
+- (NSRect) firstRectForCharacterRange: (NSRange) theRange
+{
+    JUCE_NAMESPACE::Component* const comp = dynamic_cast <JUCE_NAMESPACE::Component*> (owner->findCurrentTextInputTarget());
+
+    if (comp == 0)
+        return NSMakeRect (0, 0, 0, 0);
+
+    const Rectangle<int> bounds (comp->getScreenBounds());
+
+    return NSMakeRect (bounds.getX(),
+                       [[[NSScreen screens] objectAtIndex: 0] frame].size.height - bounds.getY(),
+                       bounds.getWidth(),
+                       bounds.getHeight());
+}
+
+- (unsigned int) characterIndexForPoint: (NSPoint) thePoint
+{
+    return NSNotFound;
+}
+
+- (NSArray*) validAttributesForMarkedText
+{
+    return [NSArray array];
+}
+
+//==============================================================================
 - (void) flagsChanged: (NSEvent*) ev
 {
     if (owner != 0)
@@ -845,7 +992,7 @@ const Rectangle<int> NSViewComponentPeer::getBounds (const bool global) const
         r.origin.y = [[view superview] frame].size.height - r.origin.y - r.size.height;
     }
 
-    return Rectangle<int> ((int) r.origin.x, (int) r.size.width, (int) r.size.width, (int) r.size.height);
+    return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
 }
 
 const Rectangle<int> NSViewComponentPeer::getBounds() const

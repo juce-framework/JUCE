@@ -452,6 +452,15 @@ void ComponentPeer::handleModifierKeysChange()
         target->internalModifierKeysChanged();
 }
 
+TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
+{
+    Component* const c = Component::getCurrentlyFocusedComponent();
+    if (component->isParentOf (c))
+        return dynamic_cast <TextInputTarget*> (c);
+
+    return 0;
+}
+
 //==============================================================================
 void ComponentPeer::handleBroughtToFront()
 {

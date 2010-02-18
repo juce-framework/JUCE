@@ -108,6 +108,15 @@ public:
             end = newStart;
     }
 
+    /** Returns a range with the same end as this one, but a different start.
+        If the new start position is higher than the current end of the range, the end point
+        will be pushed along to equal it, returning an empty range at the new position.
+    */
+    const Range withStart (const ValueType newStart) const throw()
+    {
+        return Range (newStart, jmax (newStart, end));
+    }
+
     /** Changes the end position of the range, leaving the start unchanged.
         If the new end position is below the current start of the range, the start point
         will be pushed back to equal the new end point.
@@ -119,12 +128,29 @@ public:
             start = newEnd;
     }
 
+    /** Returns a range with the same start position as this one, but a different end.
+        If the new end position is below the current start of the range, the start point
+        will be pushed back to equal the new end point.
+    */
+    const Range withEnd (const ValueType newEnd) const throw()
+    {
+        return Range (jmin (start, newEnd), newEnd);
+    }
+
     /** Changes the length of the range.
         Lengths less than zero are treated as zero.
     */
     void setLength (const ValueType newLength) throw()
     {
         end = start + jmax (ValueType(), newLength);
+    }
+
+    /** Returns a range with the same start as this one, but a different length.
+        Lengths less than zero are treated as zero.
+    */
+    const Range withLength (const ValueType newLength) const throw()
+    {
+        return Range (start, start + newLength);
     }
 
     //==============================================================================

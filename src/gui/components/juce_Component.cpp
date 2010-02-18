@@ -756,6 +756,11 @@ const Point<int> Component::getScreenPosition() const
                                                                    : getPosition());
 }
 
+const Rectangle<int> Component::getScreenBounds() const
+{
+    return bounds_.withPosition (getScreenPosition());
+}
+
 const Point<int> Component::relativePositionToGlobal (const Point<int>& relativePosition) const
 {
     const Component* c = this;
