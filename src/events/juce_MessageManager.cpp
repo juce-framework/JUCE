@@ -200,9 +200,16 @@ bool MessageManager::isThisTheMessageThread() const throw()
     return Thread::getCurrentThreadId() == messageThreadId;
 }
 
-void MessageManager::setCurrentMessageThread (const Thread::ThreadID threadId) throw()
+void MessageManager::setCurrentThreadAsMessageThread()
 {
-    messageThreadId = threadId;
+    if (messageThreadId != Thread::getCurrentThreadId())
+    {
+        messageThreadId = Thread::getCurrentThreadId();
+
+        // This is needed on windows to make sure the message window is created by this thread
+        doPlatformSpecificShutdown();
+        doPlatformSpecificInitialisation();
+    }
 }
 
 bool MessageManager::currentThreadHasLockedMessageManager() const throw()

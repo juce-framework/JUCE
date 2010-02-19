@@ -111,12 +111,12 @@ public:
     /** Returns true if the caller-thread is the message thread. */
     bool isThisTheMessageThread() const throw();
 
-    /** Called to tell the manager which thread is the one that's running the dispatch loop.
+    /** Called to tell the manager that the current thread is the one that's running the dispatch loop.
 
         (Best to ignore this method unless you really know what you're doing..)
         @see getCurrentMessageThread
     */
-    void setCurrentMessageThread (const Thread::ThreadID threadId) throw();
+    void setCurrentThreadAsMessageThread();
 
     /** Returns the ID of the current message thread, as set by setCurrentMessageThread().
 

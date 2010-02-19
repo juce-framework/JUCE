@@ -236,19 +236,14 @@ public:
 
     void run()
     {
-        MessageManager* const messageManager = MessageManager::getInstance();
-
-        const Thread::ThreadID originalThreadId = messageManager->getCurrentMessageThread();
-        messageManager->setCurrentMessageThread (Thread::getCurrentThreadId());
-
         initialiseJuce_GUI();
         initialised = true;
 
-        while ((! threadShouldExit()) && messageManager->runDispatchLoopUntil (250))
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+
+        while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
         {
         }
-
-        messageManager->setCurrentMessageThread (originalThreadId);
     }
 
     juce_DeclareSingleton (SharedMessageThread, false)
@@ -455,7 +450,9 @@ public:
     {
         if (editorComp == 0)
         {
+            checkWhetherWavelabHasChangedThread();
             const MessageManagerLock mmLock;
+
             AudioProcessorEditor* const ed = filter->createEditorIfNeeded();
 
             if (ed != 0)
@@ -472,7 +469,7 @@ public:
 
     void close()
     {
-        const MessageManagerLock mmLock;
+        const NonWavelabMMLock mmLock;
         jassert (! recursionCheck);
 
         stopTimer();
@@ -1252,6 +1249,7 @@ public:
         }
         else if (opCode == effEditOpen)
         {
+            checkWhetherWavelabHasChangedThread();
             const MessageManagerLock mmLock;
             jassert (! recursionCheck);
 
@@ -1287,12 +1285,14 @@ public:
         }
         else if (opCode == effEditClose)
         {
+            checkWhetherWavelabHasChangedThread();
             const MessageManagerLock mmLock;
             deleteEditor (true);
             return 0;
         }
         else if (opCode == effEditGetRect)
         {
+            checkWhetherWavelabHasChangedThread();
             const MessageManagerLock mmLock;
             createEditorComp();
 
@@ -1419,6 +1419,35 @@ private:
     bool hasCreatedTempChannels;
     bool shouldDeleteEditor;
 
+    //==============================================================================
+    static PluginHostType& getHostType()
+    {
+        static PluginHostType hostType;
+        return hostType;
+    }
+
+#if JUCE_WINDOWS   // Workarounds for Wavelab's happy-go-lucky use of threads.
+    class NonWavelabMMLock
+    {
+    public:
+        NonWavelabMMLock() : mm (getHostType().isWavelab() ? 0 : new MessageManagerLock())  {}
+        ~NonWavelabMMLock() {}
+
+    private:
+        ScopedPointer <MessageManagerLock> mm;
+    };
+
+    static void checkWhetherWavelabHasChangedThread()
+    {
+        if (getHostType().isWavelab())
+            MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+    }
+#else
+    typedef MessageManagerLock NonWavelabMMLock;
+    static void checkWhetherWavelabHasChangedThread() {}
+#endif
+
+    //==============================================================================
     void deleteTempChannels()
     {
         for (int i = tempChannels.size(); --i >= 0;)

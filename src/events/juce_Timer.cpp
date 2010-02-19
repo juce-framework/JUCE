@@ -123,7 +123,7 @@ public:
         }
     }
 
-    void handleMessage (const Message&)
+    void callTimers()
     {
         const ScopedLock sl (lock);
 
@@ -153,13 +153,28 @@ public:
         callbackNeeded.set (false);
     }
 
+    void handleMessage (const Message&)
+    {
+        callTimers();
+    }
+
+    void callTimersSynchronously()
+    {
+        if (! isThreadRunning())
+        {
+            // (This is relied on by some plugins in cases where the MM has
+            // had to restart and the async callback never started)
+            cancelPendingUpdate();
+            triggerAsyncUpdate();
+        }
+
+        callTimers();
+    }
+
     static void callAnyTimersSynchronously()
     {
         if (InternalTimerThread::instance != 0)
-        {
-            const Message m;
-            InternalTimerThread::instance->handleMessage (m);
-        }
+            InternalTimerThread::instance->callTimersSynchronously();
     }
 
     static inline void add (Timer* const tim) throw()
@@ -213,13 +228,6 @@ private:
 
         bool get() const throw()        { return value != 0; }
         bool set (const bool newValue)  { return Atomic::compareAndExchange (value, newValue ? 1 : 0, value) != 0; }
-
-        /*bool setIfNotAlreadyThisValue (const bool newValue)
-        {
-            int32 valueNew = newValue ? 1 : 0;
-            int32 valueCurrent = 1 - valueNew;
-            return Atomic::compareAndExchange (value, valueNew, valueCurrent);
-        }*/
 
     private:
         int32 value;

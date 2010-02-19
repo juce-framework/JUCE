@@ -19802,7 +19802,7 @@ public:
 
 	bool isThisTheMessageThread() const throw();
 
-	void setCurrentMessageThread (const Thread::ThreadID threadId) throw();
+	void setCurrentThreadAsMessageThread();
 
 	Thread::ThreadID getCurrentMessageThread() const throw()		 { return messageThreadId; }
 

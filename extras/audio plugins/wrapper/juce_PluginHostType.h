@@ -54,6 +54,7 @@ public:
         SteinbergCubase4,
         SteinbergCubase5,
         SteinbergCubaseGeneric,
+        SteinbergWavelabGeneric
     };
 
     const HostType type;
@@ -77,6 +78,11 @@ public:
     bool isSonar() const throw()
     {
         return type == CakewalkSonar8 || type == CakewalkSonarGeneric;
+    }
+
+    bool isWavelab() const throw()
+    {
+        return type == SteinbergWavelabGeneric;
     }
 
     //==============================================================================
@@ -109,6 +115,7 @@ private:
         if (hostFilename.containsIgnoreCase (T("Cubase4")))    return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase (T("Cubase5")))    return SteinbergCubase5;
         if (hostFilename.containsIgnoreCase (T("Cubase")))     return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase (T("Wavelab")))    return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase (T("reaper")))     return Reaper;
 
 #elif JUCE_LINUX
@@ -122,18 +129,20 @@ private:
     static const String getHostPath() throw()
     {
         unsigned int size = 8192;
-        MemoryBlock buffer (size + 8);
-        buffer.fillWith (0);
+        HeapBlock<char> buffer;
+        buffer.calloc (size + 8);
 
 #if JUCE_WINDOWS
-        GetModuleFileNameW (0, (WCHAR*) buffer.getData(), size / sizeof (WCHAR));
+        GetModuleFileNameW (0, (WCHAR*) buffer, size / sizeof (WCHAR));
+        return String ((const WCHAR*) buffer, size);
 #elif JUCE_MAC
-        _NSGetExecutablePath ((char*) buffer.getData(), &size);
+        _NSGetExecutablePath ((char*) buffer, &size);
+        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer, size);
 #elif JUCE_LINUX
-        readlink ("/proc/self/exe", (char*) buffer.getData(), size);
+        readlink ("/proc/self/exe", (char*) buffer, size);
+        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer, size);
 #else
         #error
 #endif
-        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer.getData(), size);
     }
 };
