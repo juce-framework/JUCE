@@ -495,11 +495,13 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
         knownPluginList.scanAndAddDragAndDroppedFiles (files, typesFound);
 
         GraphDocumentComponent* const graphEditor = getGraphEditor();
+
+        Point<int> pos (x, y);
         if (graphEditor != 0)
-            relativePositionToOtherComponent (graphEditor, x, y);
+            pos = relativePositionToOtherComponent (graphEditor, pos);
 
         for (int i = 0; i < jmin (5, typesFound.size()); ++i)
-            createPlugin (typesFound.getUnchecked(i), x, y);
+            createPlugin (typesFound.getUnchecked(i), pos.getX(), pos.getY());
     }
 }
 

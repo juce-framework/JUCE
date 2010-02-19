@@ -1218,19 +1218,18 @@ public:
 
         if (topComp->getPeer() != 0)
         {
-            int x = 0, y = 0;
-            relativePositionToOtherComponent (topComp, x, y);
+            const Point<int> pos (relativePositionToOtherComponent (topComp, Point<int>()));
 
             recursiveResize = true;
 
 #if JUCE_WIN32
             if (pluginHWND != 0)
-                MoveWindow (pluginHWND, x, y, getWidth(), getHeight(), TRUE);
+                MoveWindow (pluginHWND, pos.getX(), pos.getY(), getWidth(), getHeight(), TRUE);
 #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
                 XResizeWindow (display, pluginWindow, getWidth(), getHeight());
-                XMoveWindow (display, pluginWindow, x, y);
+                XMoveWindow (display, pluginWindow, pos.getX(), pos.getY());
                 XMapRaised (display, pluginWindow);
             }
 #endif
@@ -1289,9 +1288,8 @@ public:
 
             if (peer != 0)
             {
-                peer->addMaskedRegion (getScreenX() - peer->getScreenX(),
-                                       getScreenY() - peer->getScreenY(),
-                                       getWidth(), getHeight());
+                const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
+                peer->addMaskedRegion (pos.getX(), pos.getY(), getWidth(), getHeight());
 
 #if JUCE_LINUX
                 if (pluginWindow != 0)

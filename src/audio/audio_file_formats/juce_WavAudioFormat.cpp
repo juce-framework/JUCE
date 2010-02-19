@@ -656,7 +656,7 @@ class WavAudioFormatWriter  : public AudioFormatWriter
         if (smplChunk.getSize() > 0)
         {
             output->writeInt (chunkName ("smpl"));
-            output->writeInt (smplChunk.getSize());
+            output->writeInt ((int) smplChunk.getSize());
             output->write (smplChunk.getData(), (int) smplChunk.getSize());
         }
 

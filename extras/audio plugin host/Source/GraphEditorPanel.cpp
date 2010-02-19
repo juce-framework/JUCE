@@ -221,8 +221,6 @@ public:
           numInputs (0),
           numOutputs (0),
           pinSize (16),
-          originalX (0),
-          originalY (0),
           font (13.0f, Font::bold),
           numIns (0),
           numOuts (0)
@@ -240,9 +238,7 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
-        originalX = 0;
-        originalY = 0;
-        relativePositionToGlobal (originalX, originalY);
+        originalPos = relativePositionToGlobal (Point<int>());
 
         toFront (true);
 
@@ -285,15 +281,14 @@ public:
     {
         if (! e.mods.isPopupMenu())
         {
-            int x = originalX + e.getDistanceFromDragStartX();
-            int y = originalY + e.getDistanceFromDragStartY();
+            Point<int> pos (originalPos + Point<int> (e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY()));
 
             if (getParentComponent() != 0)
-                getParentComponent()->globalPositionToRelative (x, y);
+                pos = getParentComponent()->globalPositionToRelative (pos);
 
             graph.setNodePosition (filterID,
-                                   (x + getWidth() / 2) / (double) getParentWidth(),
-                                   (y + getHeight() / 2) / (double) getParentHeight());
+                                   (pos.getX() + getWidth() / 2) / (double) getParentWidth(),
+                                   (pos.getY() + getHeight() / 2) / (double) getParentHeight());
 
             getGraphPanel()->updateComponents();
         }
@@ -450,7 +445,7 @@ public:
 
 private:
     int pinSize;
-    int originalX, originalY;
+    Point<int> originalPos;
     int numIns, numOuts;
     DropShadowEffect shadow;
     Font font;
