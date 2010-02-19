@@ -220,6 +220,7 @@ private:
         float lastX = 0, lastY = 0;
         float lastX2 = 0, lastY2 = 0;
         tchar lastCommandChar = 0;
+        bool isRelative = true;
         bool carryOn = true;
 
         const String validCommandChars (T("MmLlHhVvCcSsQqTtAaZz"));
@@ -227,10 +228,12 @@ private:
         for (;;)
         {
             float x, y, x2, y2, x3, y3;
-            const bool isRelative = (d[index] >= 'a' && d[index] <= 'z');
 
             if (validCommandChars.containsChar (d[index]))
+            {
                 lastCommandChar = d [index++];
+                isRelative = (lastCommandChar >= 'a' && lastCommandChar <= 'z');
+            }
 
             switch (lastCommandChar)
             {
@@ -1154,22 +1157,23 @@ private:
             }
             else if (t.startsWithIgnoreCase (T("translate")))
             {
-                trans = trans.translated (numbers[0], numbers[1]);
+                jassert (tokens.size() == 2);
+                trans = AffineTransform::translation (numbers[0], numbers[1]);
             }
             else if (t.startsWithIgnoreCase (T("scale")))
             {
                 if (tokens.size() == 1)
-                    trans = trans.scaled (numbers[0], numbers[0]);
+                    trans = AffineTransform::scale (numbers[0], numbers[0]);
                 else
-                    trans = trans.scaled (numbers[0], numbers[1]);
+                    trans = AffineTransform::scale (numbers[0], numbers[1]);
             }
             else if (t.startsWithIgnoreCase (T("rotate")))
             {
                 if (tokens.size() != 3)
-                    trans = trans.rotated (numbers[0] / (180.0f / float_Pi));
+                    trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi));
                 else
-                    trans = trans.rotated (numbers[0] / (180.0f / float_Pi),
-                                           numbers[1], numbers[2]);
+                    trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi),
+                                                       numbers[1], numbers[2]);
             }
             else if (t.startsWithIgnoreCase (T("skewX")))
             {
