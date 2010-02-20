@@ -219,52 +219,38 @@ void MD5::ProcessContext::finish (uint8* const result)
 }
 
 //==============================================================================
-#define S11 7
-#define S12 12
-#define S13 17
-#define S14 22
-#define S21 5
-#define S22 9
-#define S23 14
-#define S24 20
-#define S31 4
-#define S32 11
-#define S33 16
-#define S34 23
-#define S41 6
-#define S42 10
-#define S43 15
-#define S44 21
-
-static inline uint32 F (const uint32 x, const uint32 y, const uint32 z)   { return (x & y) | (~x & z); }
-static inline uint32 G (const uint32 x, const uint32 y, const uint32 z)   { return (x & z) | (y & ~z); }
-static inline uint32 H (const uint32 x, const uint32 y, const uint32 z)   { return x ^ y ^ z; }
-static inline uint32 I (const uint32 x, const uint32 y, const uint32 z)   { return y ^ (x | ~z); }
-
-static inline uint32 rotateLeft (const uint32 x, const uint32 n)          { return (x << n) | (x >> (32 - n)); }
-
-static inline void FF (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac)
+namespace MD5Functions
 {
-    a += F (b, c, d) + x + ac;
-    a = rotateLeft (a, s) + b;
-}
+    static inline uint32 F (const uint32 x, const uint32 y, const uint32 z) throw()   { return (x & y) | (~x & z); }
+    static inline uint32 G (const uint32 x, const uint32 y, const uint32 z) throw()   { return (x & z) | (y & ~z); }
+    static inline uint32 H (const uint32 x, const uint32 y, const uint32 z) throw()   { return x ^ y ^ z; }
+    static inline uint32 I (const uint32 x, const uint32 y, const uint32 z) throw()   { return y ^ (x | ~z); }
 
-static inline void GG (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac)
-{
-    a += G (b, c, d) + x + ac;
-    a = rotateLeft (a, s) + b;
-}
+    static inline uint32 rotateLeft (const uint32 x, const uint32 n) throw()  { return (x << n) | (x >> (32 - n)); }
 
-static inline void HH (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac)
-{
-    a += H (b, c, d) + x + ac;
-    a = rotateLeft (a, s) + b;
-}
+    static void FF (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    {
+        a += F (b, c, d) + x + ac;
+        a = rotateLeft (a, s) + b;
+    }
 
-static inline void II (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac)
-{
-    a += I (b, c, d) + x + ac;
-    a = rotateLeft (a, s) + b;
+    static void GG (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    {
+        a += G (b, c, d) + x + ac;
+        a = rotateLeft (a, s) + b;
+    }
+
+    static void HH (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    {
+        a += H (b, c, d) + x + ac;
+        a = rotateLeft (a, s) + b;
+    }
+
+    static void II (uint32& a, const uint32 b, const uint32 c, const uint32 d, const uint32 x, const uint32 s, const uint32 ac) throw()
+    {
+        a += I (b, c, d) + x + ac;
+        a = rotateLeft (a, s) + b;
+    }
 }
 
 void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
@@ -277,6 +263,13 @@ void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
 
     decode (x, bufferToTransform, 64);
 
+    enum Constants
+    {
+        S11 = 7, S12 = 12, S13 = 17, S14 = 22, S21 = 5, S22 = 9, S23 = 14, S24 = 20,
+        S31 = 4, S32 = 11, S33 = 16, S34 = 23, S41 = 6, S42 = 10, S43 = 15, S44 = 21
+    };
+
+    using namespace MD5Functions;
     FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
     FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
     FF (c, d, a, b, x[ 2], S13, 0x242070db); /* 3 */
@@ -350,7 +343,7 @@ void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
     state[2] += c;
     state[3] += d;
 
-    zeromem (x, sizeof (x));
+    zerostruct (x);
 }
 
 //==============================================================================

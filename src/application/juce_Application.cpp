@@ -230,7 +230,7 @@ int JUCEApplication::shutdownAppAndClearUp()
     ScopedPointer<JUCEApplication> app (appInstance);
     int returnValue = 0;
 
-    MessageManager::getInstance()->deregisterBroadcastListener (app);
+    MessageManager::getInstance()->deregisterBroadcastListener ((JUCEApplication*) app);
 
     static bool reentrancyCheck = false;
 
