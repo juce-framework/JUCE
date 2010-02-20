@@ -304,7 +304,7 @@ const String CameraDevice::getFileExtension()
     return ".mov";
 }
 
-void CameraDevice::startRecordingToFile (const File& file)
+void CameraDevice::startRecordingToFile (const File& file, int quality)
 {
     stopRecording();
 
@@ -330,7 +330,9 @@ void CameraDevice::startRecordingToFile (const File& file)
         NSString* mediaType = [connection mediaType];
 
         if ([mediaType isEqualToString: QTMediaTypeVideo])
-            options = [QTCompressionOptions compressionOptionsWithIdentifier: @"QTCompressionOptionsSD480SizeH264Video"];
+            options = [QTCompressionOptions compressionOptionsWithIdentifier:
+                            quality >= 1 ? @"QTCompressionOptionsSD480SizeH264Video"
+                                         : @"QTCompressionOptions240SizeH264Video"];
         else if ([mediaType isEqualToString: QTMediaTypeSound])
             options = [QTCompressionOptions compressionOptionsWithIdentifier: @"QTCompressionOptionsHighQualityAACAudio"];
 

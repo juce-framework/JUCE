@@ -105,8 +105,11 @@ public:
         This method may not start recording instantly, so if you need to know the
         exact time at which the file begins, you can call getTimeOfFirstRecordedFrame()
         after the recording has finished.
+
+        The quality parameter can be 0, 1, or 2, to indicate low, medium, or high. It may
+        or may not be used, depending on the driver.
     */
-    void startRecordingToFile (const File& file);
+    void startRecordingToFile (const File& file, int quality = 2);
 
     /** Stops recording, after a call to startRecordingToFile().
     */

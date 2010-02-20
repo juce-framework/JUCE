@@ -1877,10 +1877,11 @@ private:
 
             if (peer != 0)
             {
+                const Point<int> pos (getScreenPosition() - peer->getScreenPosition());
                 ERect r;
-                r.left = getScreenX() - peer->getScreenX();
+                r.left = pos.getX();
                 r.right = r.left + getWidth();
-                r.top = getScreenY() - peer->getScreenY();
+                r.top = pos.getY();
                 r.bottom = r.top + getHeight();
 
                 owner->dispatch (effEditDraw, 0, 0, &r, 0);
@@ -2193,12 +2194,11 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
 
             if (getActiveEditor() != 0)
             {
-                int x = 0, y = 0;
-                getActiveEditor()->relativePositionToOtherComponent (getActiveEditor()->getTopLevelComponent(), x, y);
+                const Point<int> pos (getActiveEditor()->relativePositionToOtherComponent (getActiveEditor()->getTopLevelComponent(), Point<int>()));
 
                 GetPort (&oldPort);
                 SetPortWindowPort ((WindowRef) getActiveEditor()->getWindowHandle());
-                SetOrigin (-x, -y);
+                SetOrigin (-pos.getX(), -pos.getY());
             }
 #endif
 
@@ -2217,8 +2217,6 @@ int VSTPluginInstance::dispatch (const int opcode, const int index, const int va
     }
     catch (...)
     {
-        //char s[512];
-        //sprintf (s, "dispatcher (%d, %d, %d, %x, %f)", opcode, index, value, (int)ptr, opt);
     }
 
     --insideVSTCallback;

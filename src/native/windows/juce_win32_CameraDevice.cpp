@@ -695,7 +695,7 @@ const String CameraDevice::getFileExtension()
     return ".avi";
 }
 
-void CameraDevice::startRecordingToFile (const File& file)
+void CameraDevice::startRecordingToFile (const File& file, int /*quality*/)
 {
     stopRecording();
 

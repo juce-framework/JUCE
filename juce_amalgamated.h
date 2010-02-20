@@ -28063,7 +28063,7 @@ public:
 
 	Component* createViewerComponent();
 
-	void startRecordingToFile (const File& file);
+	void startRecordingToFile (const File& file, int quality = 2);
 
 	void stopRecording();
 
