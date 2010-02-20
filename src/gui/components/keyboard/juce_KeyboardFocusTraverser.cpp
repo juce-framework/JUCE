@@ -41,58 +41,61 @@ KeyboardFocusTraverser::~KeyboardFocusTraverser()
 }
 
 //==============================================================================
-// This will sort a set of components, so that they are ordered in terms of
-// left-to-right and then top-to-bottom.
-class ScreenPositionComparator
+namespace KeyboardFocusHelpers
 {
-public:
-    ScreenPositionComparator() {}
-
-    static int compareElements (const Component* const first, const Component* const second) throw()
+    // This will sort a set of components, so that they are ordered in terms of
+    // left-to-right and then top-to-bottom.
+    class ScreenPositionComparator
     {
-        int explicitOrder1 = first->getExplicitFocusOrder();
-        if (explicitOrder1 <= 0)
-            explicitOrder1 = std::numeric_limits<int>::max() / 2;
+    public:
+        ScreenPositionComparator() {}
 
-        int explicitOrder2 = second->getExplicitFocusOrder();
-        if (explicitOrder2 <= 0)
-            explicitOrder2 = std::numeric_limits<int>::max() / 2;
-
-        if (explicitOrder1 != explicitOrder2)
-            return explicitOrder1 - explicitOrder2;
-
-        const int diff = first->getY() - second->getY();
-
-        return (diff == 0) ? first->getX() - second->getX()
-                           : diff;
-    }
-};
-
-static void findAllFocusableComponents (Component* const parent, Array <Component*>& comps)
-{
-    if (parent->getNumChildComponents() > 0)
-    {
-        Array <Component*> localComps;
-        ScreenPositionComparator comparator;
-
-        int i;
-        for (i = parent->getNumChildComponents(); --i >= 0;)
+        static int compareElements (const Component* const first, const Component* const second) throw()
         {
-            Component* const c = parent->getChildComponent (i);
+            int explicitOrder1 = first->getExplicitFocusOrder();
+            if (explicitOrder1 <= 0)
+                explicitOrder1 = std::numeric_limits<int>::max() / 2;
 
-            if (c->isVisible() && c->isEnabled())
-                localComps.addSorted (comparator, c);
+            int explicitOrder2 = second->getExplicitFocusOrder();
+            if (explicitOrder2 <= 0)
+                explicitOrder2 = std::numeric_limits<int>::max() / 2;
+
+            if (explicitOrder1 != explicitOrder2)
+                return explicitOrder1 - explicitOrder2;
+
+            const int diff = first->getY() - second->getY();
+
+            return (diff == 0) ? first->getX() - second->getX()
+                               : diff;
         }
+    };
 
-        for (i = 0; i < localComps.size(); ++i)
+    static void findAllFocusableComponents (Component* const parent, Array <Component*>& comps)
+    {
+        if (parent->getNumChildComponents() > 0)
         {
-            Component* const c = localComps.getUnchecked (i);
+            Array <Component*> localComps;
+            ScreenPositionComparator comparator;
 
-            if (c->getWantsKeyboardFocus())
-                comps.add (c);
+            int i;
+            for (i = parent->getNumChildComponents(); --i >= 0;)
+            {
+                Component* const c = parent->getChildComponent (i);
 
-            if (! c->isFocusContainer())
-                findAllFocusableComponents (c, comps);
+                if (c->isVisible() && c->isEnabled())
+                    localComps.addSorted (comparator, c);
+            }
+
+            for (i = 0; i < localComps.size(); ++i)
+            {
+                Component* const c = localComps.getUnchecked (i);
+
+                if (c->getWantsKeyboardFocus())
+                    comps.add (c);
+
+                if (! c->isFocusContainer())
+                    findAllFocusableComponents (c, comps);
+            }
         }
     }
 }
@@ -109,7 +112,7 @@ static Component* getIncrementedComponent (Component* const current, const int d
         if (focusContainer != 0)
         {
             Array <Component*> comps;
-            findAllFocusableComponents (focusContainer, comps);
+            KeyboardFocusHelpers::findAllFocusableComponents (focusContainer, comps);
 
             if (comps.size() > 0)
             {
@@ -137,7 +140,7 @@ Component* KeyboardFocusTraverser::getDefaultComponent (Component* parentCompone
     Array <Component*> comps;
 
     if (parentComponent != 0)
-        findAllFocusableComponents (parentComponent, comps);
+        KeyboardFocusHelpers::findAllFocusableComponents (parentComponent, comps);
 
     return comps.getFirst();
 }

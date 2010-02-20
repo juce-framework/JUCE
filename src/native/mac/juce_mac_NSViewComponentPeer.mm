@@ -209,6 +209,40 @@ public:
     virtual NSRect constrainRect (NSRect r);
 
     static void showArrowCursorIfNeeded();
+    static void updateModifiers (NSEvent* e);
+    static void updateKeysDown (NSEvent* ev, bool isKeyDown);
+
+    static int getKeyCodeFromEvent (NSEvent* ev)
+    {
+        const String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
+        int keyCode = unmodified[0];
+
+        if (keyCode == 0x19) // (backwards-tab)
+            keyCode = '\t';
+        else if (keyCode == 0x03) // (enter)
+            keyCode = '\r';
+
+        return keyCode;
+    }
+
+    static int64 getMouseTime (NSEvent* e)
+    {
+        return (Time::currentTimeMillis() - Time::getMillisecondCounter())
+                + (int64) ([e timestamp] * 1000.0);
+    }
+
+    static const Point<int> getMousePos (NSEvent* e, NSView* view)
+    {
+        NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
+        return Point<int> (roundToInt (p.x), roundToInt ([view frame].size.height - p.y));
+    }
+
+    static int getModifierForButtonNumber (const NSInteger num)
+    {
+        return num == 0 ? ModifierKeys::leftButtonModifier
+                    : (num == 1 ? ModifierKeys::rightButtonModifier
+                                : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
+    }
 
     //==============================================================================
     virtual void viewFocusGain();
@@ -724,22 +758,9 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
     return false;
 }
 
-static int getKeyCodeFromEvent (NSEvent* ev)
-{
-    const String unmodified (nsStringToJuce ([ev charactersIgnoringModifiers]));
-    int keyCode = unmodified[0];
-
-    if (keyCode == 0x19) // (backwards-tab)
-        keyCode = '\t';
-    else if (keyCode == 0x03) // (enter)
-        keyCode = '\r';
-
-    return keyCode;
-}
-
 static int currentModifiers = 0;
 
-static void updateModifiers (NSEvent* e)
+void NSViewComponentPeer::updateModifiers (NSEvent* e)
 {
     int m = currentModifiers & ~(ModifierKeys::shiftModifier | ModifierKeys::ctrlModifier
                                   | ModifierKeys::altModifier | ModifierKeys::commandModifier);
@@ -759,7 +780,7 @@ static void updateModifiers (NSEvent* e)
     currentModifiers = m;
 }
 
-static void updateKeysDown (NSEvent* ev, bool isKeyDown)
+void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
 {
     updateModifiers (ev);
     int keyCode = getKeyCodeFromEvent (ev);
@@ -781,25 +802,6 @@ const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 void ModifierKeys::updateCurrentModifiers() throw()
 {
     currentModifierFlags = currentModifiers;
-}
-
-static int64 getMouseTime (NSEvent* e)
-{
-    return (Time::currentTimeMillis() - Time::getMillisecondCounter())
-            + (int64) ([e timestamp] * 1000.0);
-}
-
-static const Point<int> getMousePos (NSEvent* e, NSView* view)
-{
-    NSPoint p = [view convertPoint: [e locationInWindow] fromView: nil];
-    return Point<int> (roundToInt (p.x), roundToInt ([view frame].size.height - p.y));
-}
-
-static int getModifierForButtonNumber (const NSInteger num)
-{
-    return num == 0 ? ModifierKeys::leftButtonModifier
-                : (num == 1 ? ModifierKeys::rightButtonModifier
-                            : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
 }
 
 //==============================================================================

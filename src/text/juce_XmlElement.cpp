@@ -150,106 +150,114 @@ XmlElement::~XmlElement() throw()
 }
 
 //==============================================================================
-static bool isLegalXmlChar (const juce_wchar character)
+namespace XmlOutputFunctions
 {
-    if ((character >= 'a' && character <= 'z')
-         || (character >= 'A' && character <= 'Z')
-            || (character >= '0' && character <= '9'))
-        return true;
-
-    const char* t = " .,;:-()_+=?!'#@[]/\\*%~{}";
-
-    do
+    /*static bool isLegalXmlCharSlow (const juce_wchar character) throw()
     {
-        if (((juce_wchar) (uint8) *t) == character)
+        if ((character >= 'a' && character <= 'z')
+             || (character >= 'A' && character <= 'Z')
+                || (character >= '0' && character <= '9'))
             return true;
+
+        const char* t = " .,;:-()_+=?!'#@[]/\\*%~{}";
+
+        do
+        {
+            if (((juce_wchar) (uint8) *t) == character)
+                return true;
+        }
+        while (*++t != 0);
+
+        return false;
     }
-    while (*++t != 0);
 
-    return false;
-}
-
-static void escapeIllegalXmlChars (OutputStream& outputStream,
-                                   const String& text,
-                                   const bool changeNewLines) throw()
-{
-    const juce_wchar* t = (const juce_wchar*) text;
-
-    for (;;)
+    static void generateLegalCharConstants()
     {
-        const juce_wchar character = *t++;
+        uint8 n[32];
+        zerostruct (n);
+        for (int i = 0; i < 256; ++i)
+            if (isLegalXmlCharSlow (i))
+                n[i >> 3] |= (1 << (i & 7));
 
-        if (character == 0)
+        String s;
+        for (int i = 0; i < 32; ++i)
+            s << (int) n[i] << ", ";
+
+        DBG (s);
+    }*/
+
+    static bool isLegalXmlChar (const uint32 c) throw()
+    {
+        static const unsigned char legalChars[] = { 0, 0, 0, 0, 171, 255, 255, 175, 255, 255, 255, 191, 254, 255, 255, 111 };
+
+        return c < sizeof (legalChars) * 8
+                 && (legalChars [c >> 3] & (1 << (c & 7))) != 0;
+    }
+
+    static void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
+    {
+        const juce_wchar* t = (const juce_wchar*) text;
+
+        for (;;)
         {
-            break;
-        }
-        else if (isLegalXmlChar (character))
-        {
-            outputStream.writeByte ((char) character);
-        }
-        else
-        {
-            switch (character)
+            const juce_wchar character = *t++;
+
+            if (character == 0)
             {
-            case '&':
-                outputStream.write ("&amp;", 5);
                 break;
-
-            case '"':
-                outputStream.write ("&quot;", 6);
-                break;
-
-            case '>':
-                outputStream.write ("&gt;", 4);
-                break;
-
-            case '<':
-                outputStream.write ("&lt;", 4);
-                break;
-
-            case '\n':
-                if (changeNewLines)
-                    outputStream.write ("&#10;", 5);
-                else
-                    outputStream.writeByte ((char) character);
-
-                break;
-
-            case '\r':
-                if (changeNewLines)
-                    outputStream.write ("&#13;", 5);
-                else
-                    outputStream.writeByte ((char) character);
-
-                break;
-
-            default:
+            }
+            else if (isLegalXmlChar ((uint32) character))
+            {
+                outputStream << (char) character;
+            }
+            else
+            {
+                switch (character)
                 {
-                    String encoded (T("&#"));
-                    encoded << String ((int) (unsigned int) character).trim()
-                            << T(';');
+                case '&':   outputStream << "&amp;"; break;
+                case '"':   outputStream << "&quot;"; break;
+                case '>':   outputStream << "&gt;"; break;
+                case '<':   outputStream << "&lt;"; break;
 
-                    outputStream.write ((const char*) encoded, encoded.length());
+                case '\n':
+                    if (changeNewLines)
+                        outputStream << "&#10;";
+                    else
+                        outputStream << (char) character;
+
+                    break;
+
+                case '\r':
+                    if (changeNewLines)
+                        outputStream << "&#13;";
+                    else
+                        outputStream << (char) character;
+
+                    break;
+
+                default:
+                    outputStream << "&#" << ((int) (unsigned int) character) << ';';
+                    break;
                 }
             }
         }
     }
-}
 
-static void writeSpaces (OutputStream& out, int numSpaces) throw()
-{
-    if (numSpaces > 0)
+    static void writeSpaces (OutputStream& out, int numSpaces) throw()
     {
-        const char* const blanks = "                        ";
-        const int blankSize = (int) sizeof (blanks) - 1;
-
-        while (numSpaces > blankSize)
+        if (numSpaces > 0)
         {
-            out.write (blanks, blankSize);
-            numSpaces -= blankSize;
-        }
+            const char* const blanks = "                        ";
+            const int blankSize = (int) sizeof (blanks) - 1;
 
-        out.write (blanks, numSpaces);
+            while (numSpaces > blankSize)
+            {
+                out.write (blanks, blankSize);
+                numSpaces -= blankSize;
+            }
+
+            out.write (blanks, numSpaces);
+        }
     }
 }
 
@@ -257,6 +265,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                                      const int indentationLevel,
                                      const int lineWrapLength) const throw()
 {
+    using namespace XmlOutputFunctions;
     writeSpaces (outputStream, indentationLevel);
 
     if (! isTextElement())

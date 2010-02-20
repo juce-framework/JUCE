@@ -10068,6 +10068,7 @@ private:
 	void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
 	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
 	void sanitiseLevels (const bool useNonZeroWinding) throw();
+	static void copyEdgeTableData (int* dest, const int destLineStride, const int* src, const int srcLineStride, int numLines) throw();
 };
 
 #endif   // __JUCE_EDGETABLE_JUCEHEADER__
@@ -10543,14 +10544,14 @@ public:
 	void createStrokedPath (Path& destPath,
 							const Path& sourcePath,
 							const AffineTransform& transform = AffineTransform::identity,
-							const float extraAccuracy = 1.0f) const throw();
+							const float extraAccuracy = 1.0f) const;
 
 	void createDashedStroke (Path& destPath,
 							 const Path& sourcePath,
 							 const float* dashLengths,
 							 int numDashLengths,
 							 const AffineTransform& transform = AffineTransform::identity,
-							 const float extraAccuracy = 1.0f) const throw();
+							 const float extraAccuracy = 1.0f) const;
 
 	float getStrokeThickness() const throw()			{ return thickness; }
 

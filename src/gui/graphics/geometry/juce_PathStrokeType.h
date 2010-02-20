@@ -104,7 +104,7 @@ public:
     void createStrokedPath (Path& destPath,
                             const Path& sourcePath,
                             const AffineTransform& transform = AffineTransform::identity,
-                            const float extraAccuracy = 1.0f) const throw();
+                            const float extraAccuracy = 1.0f) const;
 
 
     //==============================================================================
@@ -135,7 +135,7 @@ public:
                              const float* dashLengths,
                              int numDashLengths,
                              const AffineTransform& transform = AffineTransform::identity,
-                             const float extraAccuracy = 1.0f) const throw();
+                             const float extraAccuracy = 1.0f) const;
 
     //==============================================================================
     /** Returns the stroke thickness. */

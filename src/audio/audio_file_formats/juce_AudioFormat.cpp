@@ -110,19 +110,16 @@ bool AudioFormatReader::read (int** destSamples,
     return true;
 }
 
-static void findMaxMin (const float* src, const int num,
-                        float& maxVal, float& minVal)
+static void findAudioBufferMaxMin (const float* const buffer, const int num, float& maxVal, float& minVal) throw()
 {
-    float mn = src[0];
+    float mn = buffer[0];
     float mx = mn;
 
     for (int i = 1; i < num; ++i)
     {
-        const float s = src[i];
-        if (s > mx)
-            mx = s;
-        if (s < mn)
-            mn = s;
+        const float s = buffer[i];
+        if (s > mx)  mx = s;
+        if (s < mn)  mn = s;
     }
 
     maxVal = mx;
@@ -167,13 +164,13 @@ void AudioFormatReader::readMaxLevels (int64 startSampleInFile,
             startSampleInFile += numToDo;
 
             float bufmin, bufmax;
-            findMaxMin ((float*) tempBuffer[0], numToDo, bufmax, bufmin);
+            findAudioBufferMaxMin ((float*) tempBuffer[0], numToDo, bufmax, bufmin);
             lmin = jmin (lmin, bufmin);
             lmax = jmax (lmax, bufmax);
 
             if (numChannels > 1)
             {
-                findMaxMin ((float*) tempBuffer[1], numToDo, bufmax, bufmin);
+                findAudioBufferMaxMin ((float*) tempBuffer[1], numToDo, bufmax, bufmin);
                 rmin = jmin (rmin, bufmin);
                 rmax = jmax (rmax, bufmax);
             }

@@ -33,85 +33,88 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static void createSmallSieve (const int numBits, BitArray& result) throw()
+namespace PrimesHelpers
 {
-    result.setBit (numBits);
-    result.clearBit (numBits); // to enlarge the array
-
-    result.setBit (0);
-    int n = 2;
-
-    do
+    static void createSmallSieve (const int numBits, BitArray& result) throw()
     {
-        for (int i = n + n; i < numBits; i += n)
-            result.setBit (i);
+        result.setBit (numBits);
+        result.clearBit (numBits); // to enlarge the array
 
-        n = result.findNextClearBit (n + 1);
-    }
-    while (n <= (numBits >> 1));
-}
+        result.setBit (0);
+        int n = 2;
 
-static void bigSieve (const BitArray& base,
-                      const int numBits,
-                      BitArray& result,
-                      const BitArray& smallSieve,
-                      const int smallSieveSize) throw()
-{
-    jassert (! base[0]); // must be even!
-
-    result.setBit (numBits);
-    result.clearBit (numBits);  // to enlarge the array
-
-    int index = smallSieve.findNextClearBit (0);
-
-    do
-    {
-        const int prime = (index << 1) + 1;
-
-        BitArray r (base);
-        BitArray remainder;
-        r.divideBy (prime, remainder);
-
-        int i = prime - remainder.getBitRangeAsInt (0, 32);
-
-        if (r.isEmpty())
-            i += prime;
-
-        if ((i & 1) == 0)
-            i += prime;
-
-        i = (i - 1) >> 1;
-
-        while (i < numBits)
+        do
         {
-            result.setBit (i);
-            i += prime;
+            for (int i = n + n; i < numBits; i += n)
+                result.setBit (i);
+
+            n = result.findNextClearBit (n + 1);
+        }
+        while (n <= (numBits >> 1));
+    }
+
+    static void bigSieve (const BitArray& base,
+                          const int numBits,
+                          BitArray& result,
+                          const BitArray& smallSieve,
+                          const int smallSieveSize) throw()
+    {
+        jassert (! base[0]); // must be even!
+
+        result.setBit (numBits);
+        result.clearBit (numBits);  // to enlarge the array
+
+        int index = smallSieve.findNextClearBit (0);
+
+        do
+        {
+            const int prime = (index << 1) + 1;
+
+            BitArray r (base);
+            BitArray remainder;
+            r.divideBy (prime, remainder);
+
+            int i = prime - remainder.getBitRangeAsInt (0, 32);
+
+            if (r.isEmpty())
+                i += prime;
+
+            if ((i & 1) == 0)
+                i += prime;
+
+            i = (i - 1) >> 1;
+
+            while (i < numBits)
+            {
+                result.setBit (i);
+                i += prime;
+            }
+
+            index = smallSieve.findNextClearBit (index + 1);
+        }
+        while (index < smallSieveSize);
+    }
+
+    static bool findCandidate (const BitArray& base,
+                               const BitArray& sieve,
+                               const int numBits,
+                               BitArray& result,
+                               const int certainty) throw()
+    {
+        for (int i = 0; i < numBits; ++i)
+        {
+            if (! sieve[i])
+            {
+                result = base;
+                result.add (BitArray ((unsigned int) ((i << 1) + 1)));
+
+                if (Primes::isProbablyPrime (result, certainty))
+                    return true;
+            }
         }
 
-        index = smallSieve.findNextClearBit (index + 1);
+        return false;
     }
-    while (index < smallSieveSize);
-}
-
-static bool findCandidate (const BitArray& base,
-                           const BitArray& sieve,
-                           const int numBits,
-                           BitArray& result,
-                           const int certainty) throw()
-{
-    for (int i = 0; i < numBits; ++i)
-    {
-        if (! sieve[i])
-        {
-            result = base;
-            result.add (BitArray ((unsigned int) ((i << 1) + 1)));
-
-            if (Primes::isProbablyPrime (result, certainty))
-                return true;
-        }
-    }
-
-    return false;
 }
 
 //==============================================================================
@@ -120,6 +123,7 @@ const BitArray Primes::createProbablePrime (const int bitLength,
                                             const int* randomSeeds,
                                             int numRandomSeeds) throw()
 {
+    using namespace PrimesHelpers;
     int defaultSeeds [16];
 
     if (numRandomSeeds <= 0)
@@ -178,6 +182,8 @@ const BitArray Primes::createProbablePrime (const int bitLength,
 
 static bool passesMillerRabin (const BitArray& n, int iterations) throw()
 {
+    using namespace PrimesHelpers;
+
     const BitArray one (1);
     const BitArray two (2);
 

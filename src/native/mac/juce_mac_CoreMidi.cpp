@@ -412,68 +412,66 @@ struct MidiPortAndCallback
     int pendingBytes;
     double pendingDataTime;
     bool active;
-};
 
-static CriticalSection callbackLock;
-static VoidArray activeCallbacks;
-
-static void processSysex (MidiPortAndCallback* const mpc, const uint8*& d, int& size, const double time)
-{
-    if (*d == 0xf0)
+    void processSysex (const uint8*& d, int& size, const double time)
     {
-        mpc->pendingBytes = 0;
-        mpc->pendingDataTime = time;
-    }
-
-    mpc->pendingData.ensureSize (mpc->pendingBytes + size, false);
-    uint8* totalMessage = (uint8*) mpc->pendingData.getData();
-
-    uint8* dest = totalMessage + mpc->pendingBytes;
-
-    while (size > 0)
-    {
-        if (mpc->pendingBytes > 0 && *d >= 0x80)
+        if (*d == 0xf0)
         {
-            if (*d >= 0xfa || *d == 0xf8)
+            pendingBytes = 0;
+            pendingDataTime = time;
+        }
+
+        pendingData.ensureSize (pendingBytes + size, false);
+        uint8* totalMessage = (uint8*) pendingData.getData();
+
+        uint8* dest = totalMessage + pendingBytes;
+
+        while (size > 0)
+        {
+            if (pendingBytes > 0 && *d >= 0x80)
             {
-                mpc->callback->handleIncomingMidiMessage (mpc->input, MidiMessage (*d, time));
-                ++d;
-                --size;
+                if (*d >= 0xfa || *d == 0xf8)
+                {
+                    callback->handleIncomingMidiMessage (input, MidiMessage (*d, time));
+                    ++d;
+                    --size;
+                }
+                else
+                {
+                    if (*d == 0xf7)
+                    {
+                        *dest++ = *d++;
+                        pendingBytes++;
+                        --size;
+                    }
+
+                    break;
+                }
             }
             else
             {
-                if (*d == 0xf7)
-                {
-                    *dest++ = *d++;
-                    mpc->pendingBytes++;
-                    --size;
-                }
-
-                break;
+                *dest++ = *d++;
+                pendingBytes++;
+                --size;
             }
+        }
+
+        if (totalMessage [pendingBytes - 1] == 0xf7)
+        {
+            callback->handleIncomingMidiMessage (input, MidiMessage (totalMessage, pendingBytes, pendingDataTime));
+            pendingBytes = 0;
         }
         else
         {
-            *dest++ = *d++;
-            mpc->pendingBytes++;
-            --size;
+            callback->handlePartialSysexMessage (input, totalMessage, pendingBytes, pendingDataTime);
         }
     }
+};
 
-    if (totalMessage [mpc->pendingBytes - 1] == 0xf7)
-    {
-        mpc->callback->handleIncomingMidiMessage (mpc->input, MidiMessage (totalMessage,
-                                                                           mpc->pendingBytes,
-                                                                           mpc->pendingDataTime));
-        mpc->pendingBytes = 0;
-    }
-    else
-    {
-        mpc->callback->handlePartialSysexMessage (mpc->input,
-                                                  totalMessage,
-                                                  mpc->pendingBytes,
-                                                  mpc->pendingDataTime);
-    }
+namespace CoreMidiCallbacks
+{
+    static CriticalSection callbackLock;
+    static VoidArray activeCallbacks;
 }
 
 static void midiInputProc (const MIDIPacketList* pktlist,
@@ -484,9 +482,9 @@ static void midiInputProc (const MIDIPacketList* pktlist,
     const double originalTime = time;
 
     MidiPortAndCallback* const mpc = (MidiPortAndCallback*) readProcRefCon;
-    const ScopedLock sl (callbackLock);
+    const ScopedLock sl (CoreMidiCallbacks::callbackLock);
 
-    if (activeCallbacks.contains (mpc) && mpc->active)
+    if (CoreMidiCallbacks::activeCallbacks.contains (mpc) && mpc->active)
     {
         const MIDIPacket* packet = &pktlist->packet[0];
 
@@ -501,7 +499,7 @@ static void midiInputProc (const MIDIPacketList* pktlist,
 
                 if (mpc->pendingBytes > 0 || d[0] == 0xf0)
                 {
-                    processSysex (mpc, d, size, time);
+                    mpc->processSysex (d, size, time);
                 }
                 else
                 {
@@ -564,8 +562,8 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
                             mpc->input = mi;
                             mi->internal = (void*) mpc;
 
-                            const ScopedLock sl (callbackLock);
-                            activeCallbacks.add (mpc.release());
+                            const ScopedLock sl (CoreMidiCallbacks::callbackLock);
+                            CoreMidiCallbacks::activeCallbacks.add (mpc.release());
                         }
                         else
                         {
@@ -604,8 +602,8 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
             mpc->input = mi;
             mi->internal = (void*) mpc;
 
-            const ScopedLock sl (callbackLock);
-            activeCallbacks.add (mpc.release());
+            const ScopedLock sl (CoreMidiCallbacks::callbackLock);
+            CoreMidiCallbacks::activeCallbacks.add (mpc.release());
         }
 
         CFRelease (name);
@@ -625,8 +623,8 @@ MidiInput::~MidiInput()
     mpc->active = false;
 
     {
-        const ScopedLock sl (callbackLock);
-        activeCallbacks.removeValue (mpc);
+        const ScopedLock sl (CoreMidiCallbacks::callbackLock);
+        CoreMidiCallbacks::activeCallbacks.removeValue (mpc);
     }
 
     if (mpc->portAndEndpoint->port != 0)
@@ -638,13 +636,13 @@ MidiInput::~MidiInput()
 
 void MidiInput::start()
 {
-    const ScopedLock sl (callbackLock);
+    const ScopedLock sl (CoreMidiCallbacks::callbackLock);
     ((MidiPortAndCallback*) internal)->active = true;
 }
 
 void MidiInput::stop()
 {
-    const ScopedLock sl (callbackLock);
+    const ScopedLock sl (CoreMidiCallbacks::callbackLock);
     ((MidiPortAndCallback*) internal)->active = false;
 }
 

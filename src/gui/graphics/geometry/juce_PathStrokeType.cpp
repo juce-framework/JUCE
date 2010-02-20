@@ -191,283 +191,286 @@ static bool lineIntersection (const float x1, const float y1,
     return true;
 }
 
-// part of stroke drawing stuff
-static void addEdgeAndJoint (Path& destPath,
-                             const PathStrokeType::JointStyle style,
-                             const float maxMiterExtensionSquared, const float width,
-                             const float x1, const float y1,
-                             const float x2, const float y2,
-                             const float x3, const float y3,
-                             const float x4, const float y4,
-                             const float midX, const float midY) throw()
+namespace PathFunctions
 {
-    if (style == PathStrokeType::beveled
-        || (x3 == x4 && y3 == y4)
-        || (x1 == x2 && y1 == y2))
+    // part of stroke drawing stuff
+    static void addEdgeAndJoint (Path& destPath,
+                                 const PathStrokeType::JointStyle style,
+                                 const float maxMiterExtensionSquared, const float width,
+                                 const float x1, const float y1,
+                                 const float x2, const float y2,
+                                 const float x3, const float y3,
+                                 const float x4, const float y4,
+                                 const float midX, const float midY)
     {
-        destPath.lineTo (x2, y2);
-        destPath.lineTo (x3, y3);
-    }
-    else
-    {
-        float jx, jy, distanceBeyondLine1EndSquared;
-
-        // if they intersect, use this point..
-        if (lineIntersection (x1, y1, x2, y2,
-                              x3, y3, x4, y4,
-                              jx, jy, distanceBeyondLine1EndSquared))
+        if (style == PathStrokeType::beveled
+            || (x3 == x4 && y3 == y4)
+            || (x1 == x2 && y1 == y2))
         {
-            destPath.lineTo (jx, jy);
+            destPath.lineTo (x2, y2);
+            destPath.lineTo (x3, y3);
         }
         else
         {
-            if (style == PathStrokeType::mitered)
+            float jx, jy, distanceBeyondLine1EndSquared;
+
+            // if they intersect, use this point..
+            if (lineIntersection (x1, y1, x2, y2,
+                                  x3, y3, x4, y4,
+                                  jx, jy, distanceBeyondLine1EndSquared))
             {
-                if (distanceBeyondLine1EndSquared < maxMiterExtensionSquared
-                    && distanceBeyondLine1EndSquared > 0.0f)
-                {
-                    destPath.lineTo (jx, jy);
-                }
-                else
-                {
-                    // the end sticks out too far, so just use a blunt joint
-                    destPath.lineTo (x2, y2);
-                    destPath.lineTo (x3, y3);
-                }
+                destPath.lineTo (jx, jy);
             }
             else
             {
-                // curved joints
-                float angle1 = atan2f (x2 - midX, y2 - midY);
-                float angle2 = atan2f (x3 - midX, y3 - midY);
-                const float angleIncrement = 0.1f;
-
-                destPath.lineTo (x2, y2);
-
-                if (fabs (angle1 - angle2) > angleIncrement)
+                if (style == PathStrokeType::mitered)
                 {
-                    if (angle2 > angle1 + float_Pi
-                         || (angle2 < angle1 && angle2 >= angle1 - float_Pi))
+                    if (distanceBeyondLine1EndSquared < maxMiterExtensionSquared
+                        && distanceBeyondLine1EndSquared > 0.0f)
                     {
-                        if (angle2 > angle1)
-                            angle2 -= float_Pi * 2.0f;
-
-                        jassert (angle1 <= angle2 + float_Pi);
-
-                        angle1 -= angleIncrement;
-                        while (angle1 > angle2)
-                        {
-                            destPath.lineTo (midX + width * sinf (angle1),
-                                             midY + width * cosf (angle1));
-
-                            angle1 -= angleIncrement;
-                        }
+                        destPath.lineTo (jx, jy);
                     }
                     else
                     {
-                        if (angle1 > angle2)
-                            angle1 -= float_Pi * 2.0f;
-
-                        jassert (angle1 >= angle2 - float_Pi);
-
-                        angle1 += angleIncrement;
-                        while (angle1 < angle2)
-                        {
-                            destPath.lineTo (midX + width * sinf (angle1),
-                                             midY + width * cosf (angle1));
-
-                            angle1 += angleIncrement;
-                        }
+                        // the end sticks out too far, so just use a blunt joint
+                        destPath.lineTo (x2, y2);
+                        destPath.lineTo (x3, y3);
                     }
                 }
+                else
+                {
+                    // curved joints
+                    float angle1 = atan2f (x2 - midX, y2 - midY);
+                    float angle2 = atan2f (x3 - midX, y3 - midY);
+                    const float angleIncrement = 0.1f;
 
-                destPath.lineTo (x3, y3);
+                    destPath.lineTo (x2, y2);
+
+                    if (fabs (angle1 - angle2) > angleIncrement)
+                    {
+                        if (angle2 > angle1 + float_Pi
+                             || (angle2 < angle1 && angle2 >= angle1 - float_Pi))
+                        {
+                            if (angle2 > angle1)
+                                angle2 -= float_Pi * 2.0f;
+
+                            jassert (angle1 <= angle2 + float_Pi);
+
+                            angle1 -= angleIncrement;
+                            while (angle1 > angle2)
+                            {
+                                destPath.lineTo (midX + width * sinf (angle1),
+                                                 midY + width * cosf (angle1));
+
+                                angle1 -= angleIncrement;
+                            }
+                        }
+                        else
+                        {
+                            if (angle1 > angle2)
+                                angle1 -= float_Pi * 2.0f;
+
+                            jassert (angle1 >= angle2 - float_Pi);
+
+                            angle1 += angleIncrement;
+                            while (angle1 < angle2)
+                            {
+                                destPath.lineTo (midX + width * sinf (angle1),
+                                                 midY + width * cosf (angle1));
+
+                                angle1 += angleIncrement;
+                            }
+                        }
+                    }
+
+                    destPath.lineTo (x3, y3);
+                }
             }
         }
     }
-}
 
-static inline void addLineEnd (Path& destPath,
-                               const PathStrokeType::EndCapStyle style,
-                               const float x1, const float y1,
-                               const float x2, const float y2,
-                               const float width) throw()
-{
-    if (style == PathStrokeType::butt)
+    static void addLineEnd (Path& destPath,
+                            const PathStrokeType::EndCapStyle style,
+                            const float x1, const float y1,
+                            const float x2, const float y2,
+                            const float width)
     {
-        destPath.lineTo (x2, y2);
-    }
-    else
-    {
-        float offx1, offy1, offx2, offy2;
-
-        float dx = x2 - x1;
-        float dy = y2 - y1;
-        const float len = juce_hypotf (dx, dy);
-
-        if (len == 0)
+        if (style == PathStrokeType::butt)
         {
-            offx1 = offx2 = x1;
-            offy1 = offy2 = y1;
-        }
-        else
-        {
-            const float offset = width / len;
-            dx *= offset;
-            dy *= offset;
-
-            offx1 = x1 + dy;
-            offy1 = y1 - dx;
-            offx2 = x2 + dy;
-            offy2 = y2 - dx;
-        }
-
-        if (style == PathStrokeType::square)
-        {
-            // sqaure ends
-            destPath.lineTo (offx1, offy1);
-            destPath.lineTo (offx2, offy2);
             destPath.lineTo (x2, y2);
         }
         else
         {
-            // rounded ends
-            const float midx = (offx1 + offx2) * 0.5f;
-            const float midy = (offy1 + offy2) * 0.5f;
+            float offx1, offy1, offx2, offy2;
 
-            destPath.cubicTo (x1 + (offx1 - x1) * 0.55f, y1 + (offy1 - y1) * 0.55f,
-                              offx1 + (midx - offx1) * 0.45f, offy1 + (midy - offy1) * 0.45f,
-                              midx, midy);
+            float dx = x2 - x1;
+            float dy = y2 - y1;
+            const float len = juce_hypotf (dx, dy);
 
-            destPath.cubicTo (midx + (offx2 - midx) * 0.55f, midy + (offy2 - midy) * 0.55f,
-                              offx2 + (x2 - offx2) * 0.45f, offy2 + (y2 - offy2) * 0.45f,
-                              x2, y2);
+            if (len == 0)
+            {
+                offx1 = offx2 = x1;
+                offy1 = offy2 = y1;
+            }
+            else
+            {
+                const float offset = width / len;
+                dx *= offset;
+                dy *= offset;
+
+                offx1 = x1 + dy;
+                offy1 = y1 - dx;
+                offx2 = x2 + dy;
+                offy2 = y2 - dx;
+            }
+
+            if (style == PathStrokeType::square)
+            {
+                // sqaure ends
+                destPath.lineTo (offx1, offy1);
+                destPath.lineTo (offx2, offy2);
+                destPath.lineTo (x2, y2);
+            }
+            else
+            {
+                // rounded ends
+                const float midx = (offx1 + offx2) * 0.5f;
+                const float midy = (offy1 + offy2) * 0.5f;
+
+                destPath.cubicTo (x1 + (offx1 - x1) * 0.55f, y1 + (offy1 - y1) * 0.55f,
+                                  offx1 + (midx - offx1) * 0.45f, offy1 + (midy - offy1) * 0.45f,
+                                  midx, midy);
+
+                destPath.cubicTo (midx + (offx2 - midx) * 0.55f, midy + (offy2 - midy) * 0.55f,
+                                  offx2 + (x2 - offx2) * 0.45f, offy2 + (y2 - offy2) * 0.45f,
+                                  x2, y2);
+            }
         }
     }
-}
 
-struct LineSection
-{
-    LineSection()           {}
-    LineSection (int)       {}
-
-    float x1, y1, x2, y2;      // original line
-    float lx1, ly1, lx2, ly2;  // the left-hand stroke
-    float rx1, ry1, rx2, ry2;  // the right-hand stroke
-};
-
-static void addSubPath (Path& destPath, const Array <LineSection>& subPath,
-                        const bool isClosed,
-                        const float width, const float maxMiterExtensionSquared,
-                        const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle) throw()
-{
-    jassert (subPath.size() > 0);
-
-    const LineSection& firstLine = subPath.getReference (0);
-
-    float lastX1 = firstLine.lx1;
-    float lastY1 = firstLine.ly1;
-    float lastX2 = firstLine.lx2;
-    float lastY2 = firstLine.ly2;
-
-    if (isClosed)
+    struct LineSection
     {
-        destPath.startNewSubPath (lastX1, lastY1);
-    }
-    else
+        LineSection()           {}
+        LineSection (int)       {}
+
+        float x1, y1, x2, y2;      // original line
+        float lx1, ly1, lx2, ly2;  // the left-hand stroke
+        float rx1, ry1, rx2, ry2;  // the right-hand stroke
+    };
+
+    static void addSubPath (Path& destPath, const Array <LineSection>& subPath,
+                            const bool isClosed,
+                            const float width, const float maxMiterExtensionSquared,
+                            const PathStrokeType::JointStyle jointStyle, const PathStrokeType::EndCapStyle endStyle)
     {
-        destPath.startNewSubPath (firstLine.rx2, firstLine.ry2);
+        jassert (subPath.size() > 0);
 
-        addLineEnd (destPath, endStyle,
-                    firstLine.rx2, firstLine.ry2,
-                    lastX1, lastY1,
-                    width);
-    }
+        const LineSection& firstLine = subPath.getReference (0);
 
-    int i;
-    for (i = 1; i < subPath.size(); ++i)
-    {
-        const LineSection& l = subPath.getReference (i);
+        float lastX1 = firstLine.lx1;
+        float lastY1 = firstLine.ly1;
+        float lastX2 = firstLine.lx2;
+        float lastY2 = firstLine.ly2;
 
-        addEdgeAndJoint (destPath, jointStyle,
-                         maxMiterExtensionSquared, width,
-                         lastX1, lastY1, lastX2, lastY2,
-                         l.lx1, l.ly1, l.lx2, l.ly2,
-                         l.x1, l.y1);
+        if (isClosed)
+        {
+            destPath.startNewSubPath (lastX1, lastY1);
+        }
+        else
+        {
+            destPath.startNewSubPath (firstLine.rx2, firstLine.ry2);
 
-        lastX1 = l.lx1;
-        lastY1 = l.ly1;
-        lastX2 = l.lx2;
-        lastY2 = l.ly2;
-    }
+            addLineEnd (destPath, endStyle,
+                        firstLine.rx2, firstLine.ry2,
+                        lastX1, lastY1,
+                        width);
+        }
 
-    const LineSection& lastLine = subPath.getReference (subPath.size() - 1);
+        int i;
+        for (i = 1; i < subPath.size(); ++i)
+        {
+            const LineSection& l = subPath.getReference (i);
 
-    if (isClosed)
-    {
-        const LineSection& l = subPath.getReference (0);
+            addEdgeAndJoint (destPath, jointStyle,
+                             maxMiterExtensionSquared, width,
+                             lastX1, lastY1, lastX2, lastY2,
+                             l.lx1, l.ly1, l.lx2, l.ly2,
+                             l.x1, l.y1);
 
-        addEdgeAndJoint (destPath, jointStyle,
-                         maxMiterExtensionSquared, width,
-                         lastX1, lastY1, lastX2, lastY2,
-                         l.lx1, l.ly1, l.lx2, l.ly2,
-                         l.x1, l.y1);
+            lastX1 = l.lx1;
+            lastY1 = l.ly1;
+            lastX2 = l.lx2;
+            lastY2 = l.ly2;
+        }
+
+        const LineSection& lastLine = subPath.getReference (subPath.size() - 1);
+
+        if (isClosed)
+        {
+            const LineSection& l = subPath.getReference (0);
+
+            addEdgeAndJoint (destPath, jointStyle,
+                             maxMiterExtensionSquared, width,
+                             lastX1, lastY1, lastX2, lastY2,
+                             l.lx1, l.ly1, l.lx2, l.ly2,
+                             l.x1, l.y1);
+
+            destPath.closeSubPath();
+            destPath.startNewSubPath (lastLine.rx1, lastLine.ry1);
+        }
+        else
+        {
+            destPath.lineTo (lastX2, lastY2);
+
+            addLineEnd (destPath, endStyle,
+                        lastX2, lastY2,
+                        lastLine.rx1, lastLine.ry1,
+                        width);
+        }
+
+        lastX1 = lastLine.rx1;
+        lastY1 = lastLine.ry1;
+        lastX2 = lastLine.rx2;
+        lastY2 = lastLine.ry2;
+
+        for (i = subPath.size() - 1; --i >= 0;)
+        {
+            const LineSection& l = subPath.getReference (i);
+
+            addEdgeAndJoint (destPath, jointStyle,
+                             maxMiterExtensionSquared, width,
+                             lastX1, lastY1, lastX2, lastY2,
+                             l.rx1, l.ry1, l.rx2, l.ry2,
+                             l.x2, l.y2);
+
+            lastX1 = l.rx1;
+            lastY1 = l.ry1;
+            lastX2 = l.rx2;
+            lastY2 = l.ry2;
+        }
+
+        if (isClosed)
+        {
+            addEdgeAndJoint (destPath, jointStyle,
+                             maxMiterExtensionSquared, width,
+                             lastX1, lastY1, lastX2, lastY2,
+                             lastLine.rx1, lastLine.ry1, lastLine.rx2, lastLine.ry2,
+                             lastLine.x2, lastLine.y2);
+        }
+        else
+        {
+            // do the last line
+            destPath.lineTo (lastX2, lastY2);
+        }
 
         destPath.closeSubPath();
-        destPath.startNewSubPath (lastLine.rx1, lastLine.ry1);
     }
-    else
-    {
-        destPath.lineTo (lastX2, lastY2);
-
-        addLineEnd (destPath, endStyle,
-                    lastX2, lastY2,
-                    lastLine.rx1, lastLine.ry1,
-                    width);
-    }
-
-    lastX1 = lastLine.rx1;
-    lastY1 = lastLine.ry1;
-    lastX2 = lastLine.rx2;
-    lastY2 = lastLine.ry2;
-
-    for (i = subPath.size() - 1; --i >= 0;)
-    {
-        const LineSection& l = subPath.getReference (i);
-
-        addEdgeAndJoint (destPath, jointStyle,
-                         maxMiterExtensionSquared, width,
-                         lastX1, lastY1, lastX2, lastY2,
-                         l.rx1, l.ry1, l.rx2, l.ry2,
-                         l.x2, l.y2);
-
-        lastX1 = l.rx1;
-        lastY1 = l.ry1;
-        lastX2 = l.rx2;
-        lastY2 = l.ry2;
-    }
-
-    if (isClosed)
-    {
-        addEdgeAndJoint (destPath, jointStyle,
-                         maxMiterExtensionSquared, width,
-                         lastX1, lastY1, lastX2, lastY2,
-                         lastLine.rx1, lastLine.ry1, lastLine.rx2, lastLine.ry2,
-                         lastLine.x2, lastLine.y2);
-    }
-    else
-    {
-        // do the last line
-        destPath.lineTo (lastX2, lastY2);
-    }
-
-    destPath.closeSubPath();
 }
 
 void PathStrokeType::createStrokedPath (Path& destPath,
                                         const Path& source,
                                         const AffineTransform& transform,
-                                        const float extraAccuracy) const throw()
+                                        const float extraAccuracy) const
 {
     if (thickness <= 0)
     {
@@ -497,6 +500,7 @@ void PathStrokeType::createStrokedPath (Path& destPath,
     // left/right-hand lines along either side of it...
     PathFlatteningIterator it (*sourcePath, transform, 9.0f / extraAccuracy);
 
+    using namespace PathFunctions;
     Array <LineSection> subPath;
     LineSection l;
     l.x1 = 0;
@@ -576,7 +580,7 @@ void PathStrokeType::createDashedStroke (Path& destPath,
                                          const float* dashLengths,
                                          int numDashLengths,
                                          const AffineTransform& transform,
-                                         const float extraAccuracy) const throw()
+                                         const float extraAccuracy) const
 {
     if (thickness <= 0)
         return;

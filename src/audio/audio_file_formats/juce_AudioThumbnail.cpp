@@ -45,26 +45,25 @@ struct AudioThumbnailDataFormat
     int sampleRate;
     char future[16];
     char data[1];
+
+    void swapEndiannessIfNeeded() throw()
+    {
+      #if JUCE_BIG_ENDIAN
+        flip (samplesPerThumbSample);
+        flip (totalSamples);
+        flip (numFinishedSamples);
+        flip (numThumbnailSamples);
+        flip (numChannels);
+        flip (sampleRate);
+      #endif
+    }
+
+private:
+  #if JUCE_BIG_ENDIAN
+    static void flip (int& n)   { n = (int) ByteOrder::swap ((uint32) n); }
+    static void flip (int64& n) { n = (int64) ByteOrder::swap ((uint64) n); }
+  #endif
 };
-
-#if JUCE_BIG_ENDIAN
- static void swap (int& n)   { n = (int) ByteOrder::swap ((uint32) n); }
- static void swap (int64& n) { n = (int64) ByteOrder::swap ((uint64) n); }
-#endif
-
-static void swapEndiannessIfNeeded (AudioThumbnailDataFormat* const d)
-{
-    (void) d;
-
-#if JUCE_BIG_ENDIAN
-    swap (d->samplesPerThumbSample);
-    swap (d->totalSamples);
-    swap (d->numFinishedSamples);
-    swap (d->numThumbnailSamples);
-    swap (d->numChannels);
-    swap (d->sampleRate);
-#endif
-}
 
 //==============================================================================
 AudioThumbnail::AudioThumbnail (const int orginalSamplesPerThumbnailSample_,
@@ -197,7 +196,7 @@ void AudioThumbnail::loadFrom (InputStream& input)
     input.readIntoMemoryBlock (data);
 
     AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    swapEndiannessIfNeeded (d);
+    d->swapEndiannessIfNeeded();
 
     if (! (d->thumbnailMagic[0] == 'j'
              && d->thumbnailMagic[1] == 'a'
@@ -214,9 +213,9 @@ void AudioThumbnail::loadFrom (InputStream& input)
 void AudioThumbnail::saveTo (OutputStream& output) const
 {
     AudioThumbnailDataFormat* const d = (AudioThumbnailDataFormat*) data.getData();
-    swapEndiannessIfNeeded (d);
+    d->swapEndiannessIfNeeded();
     output.write (data.getData(), (int) data.getSize());
-    swapEndiannessIfNeeded (d);
+    d->swapEndiannessIfNeeded();
 }
 
 bool AudioThumbnail::initialiseFromAudioFile (AudioFormatReader& fileReader)
