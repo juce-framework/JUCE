@@ -490,7 +490,7 @@ const Point<int> UIViewComponentPeer::relativePositionToGlobal (const Point<int>
 
 const Point<int> UIViewComponentPeer::globalPositionToRelative (const Point<int>& screenPosition)
 {
-    return screenPosition + getScreenPosition();
+    return screenPosition - getScreenPosition();
 }
 
 CGRect UIViewComponentPeer::constrainRect (CGRect r)
