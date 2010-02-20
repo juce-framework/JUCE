@@ -538,9 +538,10 @@ public:
 
     void stop (bool leaveInterruptRunning)
     {
-        callbackLock.enter();
-        callback = 0;
-        callbackLock.exit();
+        {
+            const ScopedLock sl (callbackLock);
+            callback = 0;
+        }
 
         if (started
              && (deviceID != 0)
@@ -556,8 +557,7 @@ public:
 #endif
             started = false;
 
-            callbackLock.enter();
-            callbackLock.exit();
+            { const ScopedLock sl (callbackLock); }
 
             // wait until it's definately stopped calling back..
             for (int i = 40; --i >= 0;)
@@ -578,8 +578,7 @@ public:
                     break;
             }
 
-            callbackLock.enter();
-            callbackLock.exit();
+            const ScopedLock sl (callbackLock);
         }
 
         if (inputDevice != 0)

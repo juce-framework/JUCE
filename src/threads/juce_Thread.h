@@ -28,6 +28,7 @@
 
 #include "juce_WaitableEvent.h"
 #include "juce_CriticalSection.h"
+#include "../containers/juce_Array.h"
 
 
 //==============================================================================
@@ -281,6 +282,8 @@ private:
 
     friend void JUCE_API juce_threadEntryPoint (void*);
     static void threadEntryPoint (Thread* thread);
+    static Array<Thread*> runningThreads;
+    static CriticalSection runningThreadsLock;
 
     Thread (const Thread&);
     const Thread& operator= (const Thread&);

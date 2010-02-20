@@ -79,11 +79,15 @@ public:
             const int elapsed = now - lastTime;
             lastTime = now;
 
-            lock.enter();
-            decrementAllCounters (elapsed);
-            const int timeUntilFirstTimer = (firstTimer != 0) ? firstTimer->countdownMs
-                                                              : 1000;
-            lock.exit();
+            int timeUntilFirstTimer = 1000;
+
+            {
+                const ScopedLock sl (lock);
+                decrementAllCounters (elapsed);
+
+                if (firstTimer != 0)
+                    timeUntilFirstTimer = firstTimer->countdownMs;
+            }
 
             if (timeUntilFirstTimer <= 0)
             {

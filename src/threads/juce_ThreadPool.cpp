@@ -221,9 +221,11 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
                             const bool interruptIfRunning,
                             const int timeOutMs)
 {
+    bool dontWait = true;
+
     if (job != 0)
     {
-        lock.enter();
+        const ScopedLock sl (lock);
 
         if (jobs.contains (job))
         {
@@ -232,20 +234,16 @@ bool ThreadPool::removeJob (ThreadPoolJob* const job,
                 if (interruptIfRunning)
                     job->signalJobShouldExit();
 
-                lock.exit();
-
-                return waitForJobToFinish (job, timeOutMs);
+                dontWait = false;
             }
             else
             {
                 jobs.removeValue (job);
             }
         }
-
-        lock.exit();
     }
 
-    return true;
+    return dontWait || waitForJobToFinish (job, timeOutMs);
 }
 
 bool ThreadPool::removeAllJobs (const bool interruptRunningJobs,

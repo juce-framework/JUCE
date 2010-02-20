@@ -61,11 +61,14 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
             processorToPlay->prepareToPlay (sampleRate, blockSize);
         }
 
-        lock.enter();
-        AudioProcessor* const oldOne = isPrepared ? processor : 0;
-        processor = processorToPlay;
-        isPrepared = true;
-        lock.exit();
+        AudioProcessor* oldOne;
+
+        {
+            const ScopedLock sl (lock);
+            oldOne = isPrepared ? processor : 0;
+            processor = processorToPlay;
+            isPrepared = true;
+        }
 
         if (oldOne != 0)
             oldOne->releaseResources();

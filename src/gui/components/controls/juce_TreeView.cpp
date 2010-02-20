@@ -1168,16 +1168,19 @@ void TreeViewItem::addSubItem (TreeViewItem* const newItem, const int insertPosi
 void TreeViewItem::removeSubItem (const int index, const bool deleteItem)
 {
     if (ownerView != 0)
-        ownerView->nodeAlterationLock.enter();
+    {
+        const ScopedLock sl (ownerView->nodeAlterationLock);
 
-    if (((unsigned int) index) < (unsigned int) subItems.size())
+        if (((unsigned int) index) < (unsigned int) subItems.size())
+        {
+            subItems.remove (index, deleteItem);
+            treeHasChanged();
+        }
+    }
+    else
     {
         subItems.remove (index, deleteItem);
-        treeHasChanged();
     }
-
-    if (ownerView != 0)
-        ownerView->nodeAlterationLock.exit();
 }
 
 bool TreeViewItem::isOpen() const throw()

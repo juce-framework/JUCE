@@ -31,7 +31,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Thread.h"
 #include "juce_ScopedLock.h"
 #include "../core/juce_Time.h"
-#include "../containers/juce_VoidArray.h"
 
 // these functions are implemented in the platform-specific code.
 void* juce_createThread (void* userData);
@@ -42,9 +41,6 @@ void juce_setCurrentThreadName (const String& name);
 void juce_CloseThreadHandle (void* handle);
 #endif
 
-//==============================================================================
-static VoidArray runningThreads;
-static CriticalSection runningThreadsLock;
 
 //==============================================================================
 void Thread::threadEntryPoint (Thread* const thread)
@@ -251,7 +247,7 @@ Thread* Thread::getCurrentThread()
 
     for (int i = runningThreads.size(); --i >= 0;)
     {
-        Thread* const t = (Thread*) runningThreads.getUnchecked(i);
+        Thread* const t = runningThreads.getUnchecked(i);
 
         if (t->threadId_ == thisId)
             return t;
@@ -266,20 +262,27 @@ void Thread::stopAllThreads (const int timeOutMilliseconds)
         const ScopedLock sl (runningThreadsLock);
 
         for (int i = runningThreads.size(); --i >= 0;)
-            ((Thread*) runningThreads.getUnchecked(i))->signalThreadShouldExit();
+            runningThreads.getUnchecked(i)->signalThreadShouldExit();
     }
 
     for (;;)
     {
-        runningThreadsLock.enter();
-        Thread* const t = (Thread*) runningThreads[0];
-        runningThreadsLock.exit();
+        Thread* firstThread;
 
-        if (t == 0)
+        {
+            const ScopedLock sl (runningThreadsLock);
+            firstThread = runningThreads.getFirst();
+        }
+
+        if (firstThread == 0)
             break;
 
-        t->stopThread (timeOutMilliseconds);
+        firstThread->stopThread (timeOutMilliseconds);
     }
 }
+
+Array<Thread*> Thread::runningThreads;
+CriticalSection Thread::runningThreadsLock;
+
 
 END_JUCE_NAMESPACE

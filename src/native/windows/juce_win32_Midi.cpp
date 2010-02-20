@@ -82,24 +82,25 @@ public:
             return;
 
         const int numBytes = MidiMessage::getMessageLengthFromFirstByte ((uint8) byte);
-
         const double time = timeStampToTime (timeStamp);
 
-        lock.enter();
-        if (pendingLength < midiBufferSize - 12)
         {
-            char* const p = pending + pendingLength;
-            *(double*) p = time;
-            *(uint32*) (p + 8) = numBytes;
-            *(uint32*) (p + 12) = message;
-            pendingLength += 12 + numBytes;
-        }
-        else
-        {
-            jassertfalse // midi buffer overflow! You might need to increase the size..
+            const ScopedLock sl (lock);
+
+            if (pendingLength < midiBufferSize - 12)
+            {
+                char* const p = pending + pendingLength;
+                *(double*) p = time;
+                *(uint32*) (p + 8) = numBytes;
+                *(uint32*) (p + 12) = message;
+                pendingLength += 12 + numBytes;
+            }
+            else
+            {
+                jassertfalse // midi buffer overflow! You might need to increase the size..
+            }
         }
 
-        lock.exit();
         notify();
     }
 
@@ -111,22 +112,23 @@ public:
         {
             const double time = timeStampToTime (timeStamp);
 
-            lock.enter();
-
-            if (pendingLength < midiBufferSize - (8 + num))
             {
-                char* const p = pending + pendingLength;
-                *(double*) p = time;
-                *(uint32*) (p + 8) = num;
-                memcpy (p + 12, hdr->lpData, num);
-                pendingLength += 12 + num;
-            }
-            else
-            {
-                jassertfalse // midi buffer overflow! You might need to increase the size..
+                const ScopedLock sl (lock);
+
+                if (pendingLength < midiBufferSize - (8 + num))
+                {
+                    char* const p = pending + pendingLength;
+                    *(double*) p = time;
+                    *(uint32*) (p + 8) = num;
+                    memcpy (p + 12, hdr->lpData, num);
+                    pendingLength += 12 + num;
+                }
+                else
+                {
+                    jassertfalse // midi buffer overflow! You might need to increase the size..
+                }
             }
 
-            lock.exit();
             notify();
         }
     }
@@ -157,20 +159,22 @@ public:
                 }
             }
 
-            lock.enter();
+            int len;
 
-            int len = pendingLength;
-
-            if (len > 0)
             {
-                pendingCopy.ensureSize (len);
-                pendingCopy.copyFrom (pending, 0, len);
-                pendingLength = 0;
+                const ScopedLock sl (lock);
+
+                len = pendingLength;
+
+                if (len > 0)
+                {
+                    pendingCopy.ensureSize (len);
+                    pendingCopy.copyFrom (pending, 0, len);
+                    pendingLength = 0;
+                }
             }
 
-            lock.exit();
-
-//xxx needs to figure out if blocks are broken up or not
+            //xxx needs to figure out if blocks are broken up or not
 
             if (len == 0)
             {
@@ -234,8 +238,7 @@ public:
 
             activeMidiThreads.removeValue (this);
 
-            lock.enter();
-            lock.exit();
+            { const ScopedLock sl (lock); }
 
             for (int i = numInHeaders; --i >= 0;)
             {

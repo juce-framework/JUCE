@@ -269,45 +269,47 @@ void BufferingAudioSource::setNextReadPosition (int newPosition)
 
 bool BufferingAudioSource::readNextBufferChunk()
 {
-    bufferStartPosLock.enter();
+    int newBVS, newBVE, sectionToReadStart, sectionToReadEnd;
 
-    if (wasSourceLooping != isLooping())
     {
-        wasSourceLooping = isLooping();
-        bufferValidStart = 0;
-        bufferValidEnd = 0;
+        const ScopedLock sl (bufferStartPosLock);
+
+        if (wasSourceLooping != isLooping())
+        {
+            wasSourceLooping = isLooping();
+            bufferValidStart = 0;
+            bufferValidEnd = 0;
+        }
+
+        newBVS = jmax (0, nextPlayPos);
+        newBVE = newBVS + buffer.getNumSamples() - 4;
+        sectionToReadStart = 0;
+        sectionToReadEnd = 0;
+
+        const int maxChunkSize = 2048;
+
+        if (newBVS < bufferValidStart || newBVS >= bufferValidEnd)
+        {
+            newBVE = jmin (newBVE, newBVS + maxChunkSize);
+
+            sectionToReadStart = newBVS;
+            sectionToReadEnd = newBVE;
+
+            bufferValidStart = 0;
+            bufferValidEnd = 0;
+        }
+        else if (abs (newBVS - bufferValidStart) > 512
+                    || abs (newBVE - bufferValidEnd) > 512)
+        {
+            newBVE = jmin (newBVE, bufferValidEnd + maxChunkSize);
+
+            sectionToReadStart = bufferValidEnd;
+            sectionToReadEnd = newBVE;
+
+            bufferValidStart = newBVS;
+            bufferValidEnd = jmin (bufferValidEnd, newBVE);
+        }
     }
-
-    int newBVS = jmax (0, nextPlayPos);
-    int newBVE = newBVS + buffer.getNumSamples() - 4;
-    int sectionToReadStart = 0;
-    int sectionToReadEnd = 0;
-
-    const int maxChunkSize = 2048;
-
-    if (newBVS < bufferValidStart || newBVS >= bufferValidEnd)
-    {
-        newBVE = jmin (newBVE, newBVS + maxChunkSize);
-
-        sectionToReadStart = newBVS;
-        sectionToReadEnd = newBVE;
-
-        bufferValidStart = 0;
-        bufferValidEnd = 0;
-    }
-    else if (abs (newBVS - bufferValidStart) > 512
-                || abs (newBVE - bufferValidEnd) > 512)
-    {
-        newBVE = jmin (newBVE, bufferValidEnd + maxChunkSize);
-
-        sectionToReadStart = bufferValidEnd;
-        sectionToReadEnd = newBVE;
-
-        bufferValidStart = newBVS;
-        bufferValidEnd = jmin (bufferValidEnd, newBVE);
-    }
-
-    bufferStartPosLock.exit();
 
     if (sectionToReadStart != sectionToReadEnd)
     {

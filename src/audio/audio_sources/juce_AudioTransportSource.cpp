@@ -128,11 +128,12 @@ void AudioTransportSource::start()
 {
     if ((! playing) && masterSource != 0)
     {
-        callbackLock.enter();
-        playing = true;
-        stopped = false;
-        inputStreamEOF = false;
-        callbackLock.exit();
+        {
+            const ScopedLock sl (callbackLock);
+            playing = true;
+            stopped = false;
+            inputStreamEOF = false;
+        }
 
         sendChangeMessage (this);
     }
@@ -142,9 +143,10 @@ void AudioTransportSource::stop()
 {
     if (playing)
     {
-        callbackLock.enter();
-        playing = false;
-        callbackLock.exit();
+        {
+            const ScopedLock sl (callbackLock);
+            playing = false;
+        }
 
         int n = 500;
         while (--n >= 0 && ! stopped)

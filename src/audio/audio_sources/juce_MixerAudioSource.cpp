@@ -49,10 +49,14 @@ void MixerAudioSource::addInputSource (AudioSource* input, const bool deleteWhen
 {
     if (input != 0 && ! inputs.contains (input))
     {
-        lock.enter();
-        double localRate = currentSampleRate;
-        int localBufferSize = bufferSizeExpected;
-        lock.exit();
+        double localRate;
+        int localBufferSize;
+
+        {
+            const ScopedLock sl (lock);
+            localRate = currentSampleRate;
+            localBufferSize = bufferSizeExpected;
+        }
 
         if (localRate != 0.0)
             input->prepareToPlay (localBufferSize, localRate);
@@ -68,16 +72,19 @@ void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteI
 {
     if (input != 0)
     {
-        lock.enter();
-        const int index = inputs.indexOf ((void*) input);
+        int index;
 
-        if (index >= 0)
         {
-            inputsToDelete.shiftBits (index, 1);
-            inputs.remove (index);
-        }
+            const ScopedLock sl (lock);
 
-        lock.exit();
+            index = inputs.indexOf ((void*) input);
+
+            if (index >= 0)
+            {
+                inputsToDelete.shiftBits (index, 1);
+                inputs.remove (index);
+            }
+        }
 
         if (index >= 0)
         {
@@ -91,11 +98,14 @@ void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteI
 
 void MixerAudioSource::removeAllInputs()
 {
-    lock.enter();
-    VoidArray inputsCopy (inputs);
-    BitArray inputsToDeleteCopy (inputsToDelete);
-    inputs.clear();
-    lock.exit();
+    VoidArray inputsCopy;
+    BitArray inputsToDeleteCopy;
+
+    {
+        const ScopedLock sl (lock);
+        inputsCopy = inputs;
+        inputsToDeleteCopy = inputsToDelete;
+    }
 
     for (int i = inputsCopy.size(); --i >= 0;)
         if (inputsToDeleteCopy[i])

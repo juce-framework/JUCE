@@ -1862,6 +1862,9 @@ public:
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
+class JUCE_API  ScopedLock;
+class JUCE_API  ScopedUnlock;
+
 class JUCE_API  CriticalSection
 {
 public:
@@ -1875,6 +1878,10 @@ public:
 	bool tryEnter() const throw();
 
 	void exit() const throw();
+
+	typedef ScopedLock	  ScopedLockType;
+
+	typedef ScopedUnlock	ScopedUnlockType;
 
 	juce_UseDebuggingNewOperator
 
@@ -1894,7 +1901,7 @@ private:
 #endif
 
 	CriticalSection (const CriticalSection&);
-	const CriticalSection& operator= (const CriticalSection&);
+	CriticalSection& operator= (const CriticalSection&);
 };
 
 class JUCE_API  DummyCriticalSection
@@ -1905,6 +1912,13 @@ public:
 
 	inline void enter() const throw()		 {}
 	inline void exit() const throw()		  {}
+
+	struct ScopedLockType
+	{
+		ScopedLockType (const DummyCriticalSection&) throw() {}
+	};
+
+	typedef ScopedLockType ScopedUnlockType;
 };
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
@@ -1923,14 +1937,12 @@ public:
 
 	Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other)
 	{
-		other.lockArray();
+		const ScopedLockType lock (other.getLock());
 		numUsed = other.numUsed;
 		data.setAllocatedSize (other.numUsed);
 
 		for (int i = 0; i < numUsed; ++i)
 			new (data.elements + i) ElementType (other.data.elements[i]);
-
-		other.unlockArray();
 	}
 
 	explicit Array (const ElementType* values)
@@ -1955,7 +1967,7 @@ public:
 			data.elements[i].~ElementType();
 	}
 
-	Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other)
+	Array& operator= (const Array& other)
 	{
 		if (this != &other)
 		{
@@ -1969,24 +1981,15 @@ public:
 	template <class OtherArrayType>
 	bool operator== (const OtherArrayType& other) const
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (numUsed != other.numUsed)
-		{
-			data.exit();
 			return false;
-		}
 
 		for (int i = numUsed; --i >= 0;)
-		{
 			if (data.elements [i] != other.data.elements [i])
-			{
-				data.exit();
 				return false;
-			}
-		}
 
-		data.exit();
 		return true;
 	}
 
@@ -1998,25 +2001,23 @@ public:
 
 	void clear()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		for (int i = 0; i < numUsed; ++i)
 			data.elements[i].~ElementType();
 
 		data.setAllocatedSize (0);
 		numUsed = 0;
-		data.exit();
 	}
 
 	void clearQuick()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		for (int i = 0; i < numUsed; ++i)
 			data.elements[i].~ElementType();
 
 		numUsed = 0;
-		data.exit();
 	}
 
 	inline int size() const throw()
@@ -2026,110 +2027,83 @@ public:
 
 	inline ElementType operator[] (const int index) const
 	{
-		data.enter();
-		const ElementType result ((((unsigned int) index) < (unsigned int) numUsed)
-										? data.elements [index]
-										: ElementType());
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
+																 : ElementType();
 	}
 
 	inline const ElementType getUnchecked (const int index) const
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		const ElementType result (data.elements [index]);
-		data.exit();
-
-		return result;
+		return data.elements [index];
 	}
 
 	inline ElementType& getReference (const int index) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		ElementType& result = data.elements [index];
-		data.exit();
-		return result;
+		return data.elements [index];
 	}
 
 	inline ElementType getFirst() const
 	{
-		data.enter();
-		const ElementType result ((numUsed > 0) ? data.elements [0]
-												: ElementType());
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return (numUsed > 0) ? data.elements [0]
+							 : ElementType();
 	}
 
 	inline ElementType getLast() const
 	{
-		data.enter();
-		const ElementType result ((numUsed > 0) ? data.elements [numUsed - 1]
-												: ElementType());
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return (numUsed > 0) ? data.elements [numUsed - 1]
+							 : ElementType();
 	}
 
 	int indexOf (const ElementType& elementToLookFor) const
 	{
-		int result = -1;
-
-		data.enter();
+		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
 		{
 			if (elementToLookFor == *e)
-			{
-				result = (int) (e - data.elements);
-				break;
-			}
+				return (int) (e - data.elements);
 
 			++e;
 		}
 
-		data.exit();
-		return result;
+		return -1;
 	}
 
 	bool contains (const ElementType& elementToLookFor) const
 	{
-		data.enter();
-
+		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements;
 		int num = numUsed;
 
 		while (num > 0)
 		{
 			if (elementToLookFor == *e)
-			{
-				data.exit();
 				return true;
-			}
 
 			--num;
 			++e;
 		}
 
-		data.exit();
 		return false;
 	}
 
 	void add (const ElementType& newElement)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 		new (data.elements + numUsed++) ElementType (newElement);
-		data.exit();
 	}
 
 	void insert (int indexToInsertAt, const ElementType& newElement)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 
 		if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
@@ -2147,8 +2121,6 @@ public:
 		{
 			new (data.elements + numUsed++) ElementType (newElement);
 		}
-
-		data.exit();
 	}
 
 	void insertMultiple (int indexToInsertAt, const ElementType& newElement,
@@ -2156,7 +2128,7 @@ public:
 	{
 		if (numberOfTimesToInsertIt > 0)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 			data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
 			ElementType* insertPos;
 
@@ -2175,8 +2147,6 @@ public:
 
 			while (--numberOfTimesToInsertIt >= 0)
 				new (insertPos++) ElementType (newElement);
-
-			data.exit();
 		}
 	}
 
@@ -2186,7 +2156,7 @@ public:
 	{
 		if (numberOfElements > 0)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 			data.ensureAllocatedSize (numUsed + numberOfElements);
 			ElementType* insertPos;
 
@@ -2205,26 +2175,21 @@ public:
 
 			while (--numberOfElements >= 0)
 				new (insertPos++) ElementType (*newElements++);
-
-			data.exit();
 		}
 	}
 
 	void addIfNotAlreadyThere (const ElementType& newElement)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (! contains (newElement))
 			add (newElement);
-
-		data.exit();
 	}
 
 	void set (const int indexToChange, const ElementType& newValue)
 	{
 		jassert (indexToChange >= 0);
-
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) indexToChange) < (unsigned int) numUsed)
 		{
@@ -2235,21 +2200,18 @@ public:
 			data.ensureAllocatedSize (numUsed + 1);
 			new (data.elements + numUsed++) ElementType (newValue);
 		}
-
-		data.exit();
 	}
 
 	void setUnchecked (const int indexToChange, const ElementType& newValue)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
 		data.elements [indexToChange] = newValue;
-		data.exit();
 	}
 
 	void addArray (const ElementType* elementsToAdd, int numElementsToAdd)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (numElementsToAdd > 0)
 		{
@@ -2258,18 +2220,15 @@ public:
 			while (--numElementsToAdd >= 0)
 				new (data.elements + numUsed++) ElementType (*elementsToAdd++);
 		}
-
-		data.exit();
 	}
 
-	void swapWithArray (Array <ElementType>& otherArray) throw()
+	void swapWithArray (Array& otherArray) throw()
 	{
-		data.enter();
-		otherArray.data.enter();
+		const ScopedLockType lock1 (getLock());
+		const ScopedLockType lock2 (otherArray.getLock());
+
 		data.swapWith (otherArray.data);
 		swapVariables (numUsed, otherArray.numUsed);
-		otherArray.data.exit();
-		data.exit();
 	}
 
 	template <class OtherArrayType>
@@ -2277,8 +2236,8 @@ public:
 				   int startIndex = 0,
 				   int numElementsToAdd = -1)
 	{
-		arrayToAddFrom.lockArray();
-		data.enter();
+		const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+		const ScopedLockType lock2 (getLock());
 
 		if (startIndex < 0)
 		{
@@ -2291,17 +2250,13 @@ public:
 
 		while (--numElementsToAdd >= 0)
 			add (arrayToAddFrom.getUnchecked (startIndex++));
-
-		data.exit();
-		arrayToAddFrom.unlockArray();
 	}
 
 	template <class ElementComparator>
 	void addSorted (ElementComparator& comparator, const ElementType& newElement)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
-		data.exit();
 	}
 
 	template <class ElementComparator>
@@ -2309,8 +2264,8 @@ public:
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
-		data.enter();
 
+		const ScopedLockType lock (getLock());
 		int start = 0;
 		int end = numUsed;
 
@@ -2318,12 +2273,10 @@ public:
 		{
 			if (start >= end)
 			{
-				data.exit();
 				return -1;
 			}
 			else if (comparator.compareElements (elementToLookFor, data.elements [start]) == 0)
 			{
-				data.exit();
 				return start;
 			}
 			else
@@ -2331,10 +2284,7 @@ public:
 				const int halfway = (start + end) >> 1;
 
 				if (halfway == start)
-				{
-					data.exit();
 					return -1;
-				}
 				else if (comparator.compareElements (elementToLookFor, data.elements [halfway]) >= 0)
 					start = halfway;
 				else
@@ -2345,7 +2295,7 @@ public:
 
 	ElementType remove (const int indexToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
 		{
@@ -2362,19 +2312,17 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 
-			data.exit();
 			return removed;
 		}
 		else
 		{
-			data.exit();
 			return ElementType();
 		}
 	}
 
 	void removeValue (const ElementType& valueToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		ElementType* e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
@@ -2387,13 +2335,11 @@ public:
 
 			++e;
 		}
-
-		data.exit();
 	}
 
 	void removeRange (int startIndex, int numberToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
 		startIndex = jlimit (0, numUsed, startIndex);
 
@@ -2414,13 +2360,11 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
-
-		data.exit();
 	}
 
 	void removeLast (int howManyToRemove = 1)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (howManyToRemove > numUsed)
 			howManyToRemove = numUsed;
@@ -2432,15 +2376,13 @@ public:
 
 		if ((numUsed << 1) < data.numAllocated)
 			minimiseStorageOverheads();
-
-		data.exit();
 	}
 
 	template <class OtherArrayType>
 	void removeValuesIn (const OtherArrayType& otherArray)
 	{
-		otherArray.lockArray();
-		data.enter();
+		const typename OtherArrayType::ScopedLockType lock1 (otherArray.getLock());
+		const ScopedLockType lock2 (getLock());
 
 		if (this == &otherArray)
 		{
@@ -2455,16 +2397,13 @@ public:
 						remove (i);
 			}
 		}
-
-		data.exit();
-		otherArray.unlockArray();
 	}
 
 	template <class OtherArrayType>
 	void removeValuesNotIn (const OtherArrayType& otherArray)
 	{
-		otherArray.lockArray();
-		data.enter();
+		const typename OtherArrayType::ScopedLockType lock1 (otherArray.getLock());
+		const ScopedLockType lock2 (getLock());
 
 		if (this != &otherArray)
 		{
@@ -2479,15 +2418,12 @@ public:
 						remove (i);
 			}
 		}
-
-		data.exit();
-		otherArray.unlockArray();
 	}
 
 	void swap (const int index1,
 			   const int index2)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) index1) < (unsigned int) numUsed
 			&& ((unsigned int) index2) < (unsigned int) numUsed)
@@ -2495,15 +2431,13 @@ public:
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
 		}
-
-		data.exit();
 	}
 
 	void move (const int currentIndex, int newIndex) throw()
 	{
 		if (currentIndex != newIndex)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
 			{
@@ -2528,45 +2462,34 @@ public:
 
 				memcpy (data.elements + newIndex, tempCopy, sizeof (ElementType));
 			}
-
-			data.exit();
 		}
 	}
 
 	void minimiseStorageOverheads()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.shrinkToNoMoreThan (numUsed);
-		data.exit();
 	}
 
 	void ensureStorageAllocated (const int minNumElements)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (minNumElements);
-		data.exit();
 	}
 
 	template <class ElementComparator>
 	void sort (ElementComparator& comparator,
 			   const bool retainOrderOfEquivalentItems = false) const
 	{
+		const ScopedLockType lock (getLock());
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
-		data.enter();
 		sortArray (comparator, (ElementType*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
-		data.exit();
 	}
 
-	void lockArray() const throw()
-	{
-		data.enter();
-	}
+	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
 
-	void unlockArray() const throw()
-	{
-		data.exit();
-	}
+	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 	juce_UseDebuggingNewOperator
 
@@ -3511,7 +3434,7 @@ public:
 
 	void clear (const bool deleteObjects = true)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (deleteObjects)
 		{
@@ -3521,7 +3444,6 @@ public:
 
 		data.setAllocatedSize (0);
 		numUsed = 0;
-		data.exit();
 	}
 
 	inline int size() const throw()
@@ -3531,70 +3453,51 @@ public:
 
 	inline ObjectClass* operator[] (const int index) const throw()
 	{
-		data.enter();
-		ObjectClass* const result = (((unsigned int) index) < (unsigned int) numUsed)
-											? data.elements [index]
-											: (ObjectClass*) 0;
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
+																 : (ObjectClass*) 0;
 	}
 
 	inline ObjectClass* getUnchecked (const int index) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		ObjectClass* const result = data.elements [index];
-		data.exit();
-
-		return result;
+		return data.elements [index];
 	}
 
 	inline ObjectClass* getFirst() const throw()
 	{
-		data.enter();
-		ObjectClass* const result = (numUsed > 0) ? data.elements [0]
-												  : (ObjectClass*) 0;
-		data.exit();
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [0]
+						   : (ObjectClass*) 0;
 	}
 
 	inline ObjectClass* getLast() const throw()
 	{
-		data.enter();
-		ObjectClass* const result = (numUsed > 0) ? data.elements [numUsed - 1]
-												  : (ObjectClass*) 0;
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [numUsed - 1]
+						   : (ObjectClass*) 0;
 	}
 
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
 	{
-		int result = -1;
-
-		data.enter();
+		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
 		{
 			if (objectToLookFor == *e)
-			{
-				result = (int) (e - data.elements);
-				break;
-			}
+				return (int) (e - data.elements);
 
 			++e;
 		}
 
-		data.exit();
-		return result;
+		return -1;
 	}
 
 	bool contains (const ObjectClass* const objectToLookFor) const throw()
 	{
-		data.enter();
-
+		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements;
 		int i = numUsed;
 
@@ -3605,7 +3508,6 @@ public:
 				 || objectToLookFor == *++e
 				 || objectToLookFor == *++e)
 			{
-				data.exit();
 				return true;
 			}
 
@@ -3616,25 +3518,20 @@ public:
 		while (i > 0)
 		{
 			if (objectToLookFor == *e)
-			{
-				data.exit();
 				return true;
-			}
 
 			--i;
 			++e;
 		}
 
-		data.exit();
 		return false;
 	}
 
 	void add (const ObjectClass* const newObject) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 		data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
-		data.exit();
 	}
 
 	void insert (int indexToInsertAt,
@@ -3642,7 +3539,7 @@ public:
 	{
 		if (indexToInsertAt >= 0)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (indexToInsertAt > numUsed)
 				indexToInsertAt = numUsed;
@@ -3657,8 +3554,6 @@ public:
 
 			*e = const_cast <ObjectClass*> (newObject);
 			++numUsed;
-
-			data.exit();
 		}
 		else
 		{
@@ -3668,12 +3563,10 @@ public:
 
 	void addIfNotAlreadyThere (const ObjectClass* const newObject) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (! contains (newObject))
 			add (newObject);
-
-		data.exit();
 	}
 
 	void set (const int indexToChange,
@@ -3683,7 +3576,7 @@ public:
 		if (indexToChange >= 0)
 		{
 			ScopedPointer <ObjectClass> toDelete;
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (indexToChange < numUsed)
 			{
@@ -3702,8 +3595,6 @@ public:
 				data.ensureAllocatedSize (numUsed + 1);
 				data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
 			}
-
-			data.exit();
 		}
 	}
 
@@ -3713,9 +3604,8 @@ public:
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
-		data.enter();
+		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
-		data.exit();
 	}
 
 	template <class ElementComparator>
@@ -3724,7 +3614,7 @@ public:
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		int start = 0;
 		int end = numUsed;
@@ -3733,12 +3623,10 @@ public:
 		{
 			if (start >= end)
 			{
-				data.exit();
 				return -1;
 			}
 			else if (comparator.compareElements (objectToLookFor, data.elements [start]) == 0)
 			{
-				data.exit();
 				return start;
 			}
 			else
@@ -3746,10 +3634,7 @@ public:
 				const int halfway = (start + end) >> 1;
 
 				if (halfway == start)
-				{
-					data.exit();
 					return -1;
-				}
 				else if (comparator.compareElements (objectToLookFor, data.elements [halfway]) >= 0)
 					start = halfway;
 				else
@@ -3762,7 +3647,7 @@ public:
 				 const bool deleteObject = true)
 	{
 		ScopedPointer <ObjectClass> toDelete;
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
 		{
@@ -3780,14 +3665,12 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
-
-		data.exit();
 	}
 
 	void removeObject (const ObjectClass* const objectToRemove,
 					   const bool deleteObject = true)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
@@ -3800,15 +3683,13 @@ public:
 
 			++e;
 		}
-
-		data.exit();
 	}
 
 	void removeRange (int startIndex,
 					  const int numberToRemove,
 					  const bool deleteObjects = true)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
 		startIndex = jlimit (0, numUsed, startIndex);
 
@@ -3837,14 +3718,12 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
-
-		data.exit();
 	}
 
 	void removeLast (int howManyToRemove = 1,
 					 const bool deleteObjects = true)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (howManyToRemove >= numUsed)
 		{
@@ -3855,14 +3734,12 @@ public:
 			while (--howManyToRemove >= 0)
 				remove (numUsed - 1, deleteObjects);
 		}
-
-		data.exit();
 	}
 
 	void swap (const int index1,
 			   const int index2) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) index1) < (unsigned int) numUsed
 			 && ((unsigned int) index2) < (unsigned int) numUsed)
@@ -3870,8 +3747,6 @@ public:
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
 		}
-
-		data.exit();
 	}
 
 	void move (const int currentIndex,
@@ -3879,7 +3754,7 @@ public:
 	{
 		if (currentIndex != newIndex)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
 			{
@@ -3903,33 +3778,28 @@ public:
 
 				data.elements [newIndex] = value;
 			}
-
-			data.exit();
 		}
 	}
 
-	void swapWithArray (OwnedArray <ObjectClass>& otherArray) throw()
+	void swapWithArray (OwnedArray& otherArray) throw()
 	{
-		data.enter();
-		otherArray.data.enter();
+		const ScopedLockType lock1 (getLock());
+		const ScopedLockType lock2 (otherArray.getLock());
+
 		data.swapWith (otherArray.data);
 		swapVariables (numUsed, otherArray.numUsed);
-		otherArray.data.exit();
-		data.exit();
 	}
 
 	void minimiseStorageOverheads() throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.shrinkToNoMoreThan (numUsed);
-		data.exit();
 	}
 
 	void ensureStorageAllocated (const int minNumElements) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (minNumElements);
-		data.exit();
 	}
 
 	template <class ElementComparator>
@@ -3939,20 +3809,13 @@ public:
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 
-		data.enter();
+		const ScopedLockType lock (getLock());
 		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
-		data.exit();
 	}
 
-	void lockArray() const throw()
-	{
-		data.enter();
-	}
+	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
 
-	void unlockArray() const throw()
-	{
-		data.exit();
-	}
+	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 	juce_UseDebuggingNewOperator
 
@@ -5013,7 +4876,7 @@ public:
 
 	ReferenceCountedArray (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
 	{
-		other.lockArray();
+		const ScopedLockType lock (other.getLock());
 		numUsed = other.numUsed;
 		data.setAllocatedSize (numUsed);
 		memcpy (data.elements, other.data.elements, numUsed * sizeof (ObjectClass*));
@@ -5021,8 +4884,6 @@ public:
 		for (int i = numUsed; --i >= 0;)
 			if (data.elements[i] != 0)
 				data.elements[i]->incReferenceCount();
-
-		other.unlockArray();
 	}
 
 	ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& operator= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) throw()
@@ -5043,7 +4904,7 @@ public:
 
 	void clear()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		while (numUsed > 0)
 			if (data.elements [--numUsed] != 0)
@@ -5051,8 +4912,6 @@ public:
 
 		jassert (numUsed == 0);
 		data.setAllocatedSize (0);
-
-		data.exit();
 	}
 
 	inline int size() const throw()
@@ -5062,95 +4921,72 @@ public:
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> operator[] (const int index) const throw()
 	{
-		data.enter();
-		const ReferenceCountedObjectPtr<ObjectClass> result ((((unsigned int) index) < (unsigned int) numUsed)
-																? data.elements [index]
-																: (ObjectClass*) 0);
-		data.exit();
-		return result;
+		const ScopedLockType lock (getLock());
+		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
+																 : (ObjectClass*) 0;
 	}
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		const ReferenceCountedObjectPtr<ObjectClass> result (data.elements [index]);
-		data.exit();
-		return result;
+		return data.elements [index];
 	}
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> getFirst() const throw()
 	{
-		data.enter();
-		const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? data.elements [0]
-																		   : (ObjectClass*) 0);
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [0]
+						   : (ObjectClass*) 0;
 	}
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
 	{
-		data.enter();
-		const ReferenceCountedObjectPtr<ObjectClass> result ((numUsed > 0) ? data.elements [numUsed - 1]
-																		   : (ObjectClass*) 0);
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [numUsed - 1]
+						   : (ObjectClass*) 0;
 	}
 
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
 	{
-		int result = -1;
-
-		data.enter();
+		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
 		{
 			if (objectToLookFor == *e)
-			{
-				result = (int) (e - data.elements);
-				break;
-			}
+				return (int) (e - data.elements);
 
 			++e;
 		}
 
-		data.exit();
-		return result;
+		return -1;
 	}
 
 	bool contains (const ObjectClass* const objectToLookFor) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements;
 
 		for (int i = numUsed; --i >= 0;)
 		{
 			if (objectToLookFor == *e)
-			{
-				data.exit();
 				return true;
-			}
 
 			++e;
 		}
 
-		data.exit();
 		return false;
 	}
 
 	void add (ObjectClass* const newObject) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 		data.elements [numUsed++] = newObject;
 
 		if (newObject != 0)
 			newObject->incReferenceCount();
-
-		data.exit();
 	}
 
 	void insert (int indexToInsertAt,
@@ -5158,7 +4994,7 @@ public:
 	{
 		if (indexToInsertAt >= 0)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (indexToInsertAt > numUsed)
 				indexToInsertAt = numUsed;
@@ -5177,7 +5013,6 @@ public:
 				newObject->incReferenceCount();
 
 			++numUsed;
-			data.exit();
 		}
 		else
 		{
@@ -5187,12 +5022,9 @@ public:
 
 	void addIfNotAlreadyThere (ObjectClass* const newObject) throw()
 	{
-		data.enter();
-
+		const ScopedLockType lock (getLock());
 		if (! contains (newObject))
 			add (newObject);
-
-		data.exit();
 	}
 
 	void set (const int indexToChange,
@@ -5200,7 +5032,7 @@ public:
 	{
 		if (indexToChange >= 0)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (newObject != 0)
 				newObject->incReferenceCount();
@@ -5217,8 +5049,6 @@ public:
 				data.ensureAllocatedSize (numUsed + 1);
 				data.elements [numUsed++] = newObject;
 			}
-
-			data.exit();
 		}
 	}
 
@@ -5227,7 +5057,7 @@ public:
 				   int numElementsToAdd = -1) throw()
 	{
 		arrayToAddFrom.lockArray();
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (startIndex < 0)
 		{
@@ -5246,7 +5076,6 @@ public:
 				add (arrayToAddFrom.getUnchecked (startIndex++));
 		}
 
-		data.exit();
 		arrayToAddFrom.unlockArray();
 	}
 
@@ -5254,29 +5083,26 @@ public:
 	void addSorted (ElementComparator& comparator,
 					ObjectClass* newObject) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
-		data.exit();
 	}
 
 	template <class ElementComparator>
 	void addOrReplaceSorted (ElementComparator& comparator,
 							 ObjectClass* newObject) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		const int index = findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed);
 
 		if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
 			set (index - 1, newObject); // replace an existing object that matches
 		else
 			insert (index, newObject);  // no match, so insert the new one
-
-		data.exit();
 	}
 
 	void remove (const int indexToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
 		{
@@ -5294,21 +5120,18 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
-
-		data.exit();
 	}
 
 	void removeObject (ObjectClass* const objectToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		remove (indexOf (objectToRemove));
-		data.exit();
 	}
 
 	void removeRange (const int startIndex,
 					  const int numberToRemove)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		const int start = jlimit (0, numUsed, startIndex);
 		const int end   = jlimit (0, numUsed, startIndex + numberToRemove);
@@ -5339,27 +5162,23 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 		}
-
-		data.exit();
 	}
 
 	void removeLast (int howManyToRemove = 1)
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (howManyToRemove > numUsed)
 			howManyToRemove = numUsed;
 
 		while (--howManyToRemove >= 0)
 			remove (numUsed - 1);
-
-		data.exit();
 	}
 
 	void swap (const int index1,
 			   const int index2) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) index1) < (unsigned int) numUsed
 			 && ((unsigned int) index2) < (unsigned int) numUsed)
@@ -5367,8 +5186,6 @@ public:
 			swapVariables (data.elements [index1],
 						   data.elements [index2]);
 		}
-
-		data.exit();
 	}
 
 	void move (const int currentIndex,
@@ -5376,7 +5193,7 @@ public:
 	{
 		if (currentIndex != newIndex)
 		{
-			data.enter();
+			const ScopedLockType lock (getLock());
 
 			if (((unsigned int) currentIndex) < (unsigned int) numUsed)
 			{
@@ -5400,44 +5217,31 @@ public:
 
 				data.elements [newIndex] = value;
 			}
-
-			data.exit();
 		}
 	}
 
-	void swapWithArray (ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& otherArray) throw()
+	void swapWithArray (ReferenceCountedArray& otherArray) throw()
 	{
-		data.enter();
-		otherArray.data.enter();
+		const ScopedLockType lock1 (getLock());
+		const ScopedLockType lock2 (otherArray.getLock());
+
 		data.swapWith (otherArray.data);
 		swapVariables (numUsed, otherArray.numUsed);
-		otherArray.data.exit();
-		data.exit();
 	}
 
-	bool operator== (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
+	bool operator== (const ReferenceCountedArray& other) const throw()
 	{
-		other.lockArray();
-		data.enter();
+		const ScopedLockType lock2 (other.getLock());
+		const ScopedLockType lock1 (getLock());
 
-		bool result = numUsed == other.numUsed;
+		if (numUsed != other.numUsed)
+			return false;
 
-		if (result)
-		{
-			for (int i = numUsed; --i >= 0;)
-			{
-				if (data.elements [i] != other.data.elements [i])
-				{
-					result = false;
-					break;
-				}
-			}
-		}
+		for (int i = numUsed; --i >= 0;)
+			if (data.elements [i] != other.data.elements [i])
+				return false;
 
-		data.exit();
-		other.unlockArray();
-
-		return result;
+		return true;
 	}
 
 	bool operator!= (const ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse>& other) const throw()
@@ -5452,27 +5256,19 @@ public:
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 
-		data.enter();
+		const ScopedLockType lock (getLock());
 		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
-		data.exit();
 	}
 
 	void minimiseStorageOverheads() throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.shrinkToNoMoreThan (numUsed);
-		data.exit();
 	}
 
-	void lockArray() const throw()
-	{
-		data.enter();
-	}
+	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
 
-	void unlockArray() const throw()
-	{
-		data.exit();
-	}
+	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 	juce_UseDebuggingNewOperator
 
@@ -5513,33 +5309,29 @@ public:
 	{
 	}
 
-	SortedSet (const SortedSet<ElementType, TypeOfCriticalSectionToUse>& other) throw()
+	SortedSet (const SortedSet& other) throw()
 	{
-		other.lockSet();
+		const ScopedLockType lock (other.getLock());
 		numUsed = other.numUsed;
 		data.setAllocatedSize (other.numUsed);
 		memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
-		other.unlockSet();
 	}
 
 	~SortedSet() throw()
 	{
 	}
 
-	SortedSet <ElementType, TypeOfCriticalSectionToUse>& operator= (const SortedSet <ElementType, TypeOfCriticalSectionToUse>& other) throw()
+	SortedSet& operator= (const SortedSet& other) throw()
 	{
 		if (this != &other)
 		{
-			other.lockSet();
-			data.enter();
+			const ScopedLockType lock1 (other.getLock());
+			const ScopedLockType lock2 (getLock());
 
 			data.ensureAllocatedSize (other.size());
 			numUsed = other.numUsed;
 			memcpy (data.elements, other.data.elements, numUsed * sizeof (ElementType));
 			minimiseStorageOverheads();
-
-			data.exit();
-			other.unlockSet();
 		}
 
 		return *this;
@@ -5547,24 +5339,15 @@ public:
 
 	bool operator== (const SortedSet<ElementType>& other) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (numUsed != other.numUsed)
-		{
-			data.exit();
 			return false;
-		}
 
 		for (int i = numUsed; --i >= 0;)
-		{
-			if (data.elements [i] != other.data.elements [i])
-			{
-				data.exit();
+			if (data.elements[i] != other.data.elements[i])
 				return false;
-			}
-		}
 
-		data.exit();
 		return true;
 	}
 
@@ -5575,17 +5358,15 @@ public:
 
 	void clear() throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.setAllocatedSize (0);
 		numUsed = 0;
-		data.exit();
 	}
 
 	void clearQuick() throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		numUsed = 0;
-		data.exit();
 	}
 
 	inline int size() const throw()
@@ -5595,48 +5376,33 @@ public:
 
 	inline ElementType operator[] (const int index) const throw()
 	{
-		data.enter();
-		const ElementType result = (((unsigned int) index) < (unsigned int) numUsed)
-										? data.elements [index]
-										: (ElementType) 0;
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
+																 : ElementType();
 	}
 
 	inline ElementType getUnchecked (const int index) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) index) < (unsigned int) numUsed);
-		const ElementType result = data.elements [index];
-		data.exit();
-
-		return result;
+		return data.elements [index];
 	}
 
 	inline ElementType getFirst() const throw()
 	{
-		data.enter();
-		const ElementType result = (numUsed > 0) ? data.elements [0]
-												 : (ElementType) 0;
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [0] : ElementType();
 	}
 
 	inline ElementType getLast() const throw()
 	{
-		data.enter();
-		const ElementType result = (numUsed > 0) ? data.elements [numUsed - 1]
-												 : (ElementType) 0;
-		data.exit();
-
-		return result;
+		const ScopedLockType lock (getLock());
+		return numUsed > 0 ? data.elements [numUsed - 1] : ElementType();
 	}
 
 	int indexOf (const ElementType elementToLookFor) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		int start = 0;
 		int end = numUsed;
@@ -5645,12 +5411,10 @@ public:
 		{
 			if (start >= end)
 			{
-				data.exit();
 				return -1;
 			}
 			else if (elementToLookFor == data.elements [start])
 			{
-				data.exit();
 				return start;
 			}
 			else
@@ -5658,10 +5422,7 @@ public:
 				const int halfway = (start + end) >> 1;
 
 				if (halfway == start)
-				{
-					data.exit();
 					return -1;
-				}
 				else if (elementToLookFor >= data.elements [halfway])
 					start = halfway;
 				else
@@ -5672,7 +5433,7 @@ public:
 
 	bool contains (const ElementType elementToLookFor) const throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		int start = 0;
 		int end = numUsed;
@@ -5681,12 +5442,10 @@ public:
 		{
 			if (start >= end)
 			{
-				data.exit();
 				return false;
 			}
 			else if (elementToLookFor == data.elements [start])
 			{
-				data.exit();
 				return true;
 			}
 			else
@@ -5694,10 +5453,7 @@ public:
 				const int halfway = (start + end) >> 1;
 
 				if (halfway == start)
-				{
-					data.exit();
 					return false;
-				}
 				else if (elementToLookFor >= data.elements [halfway])
 					start = halfway;
 				else
@@ -5708,7 +5464,7 @@ public:
 
 	void add (const ElementType newElement) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		int start = 0;
 		int end = numUsed;
@@ -5744,19 +5500,15 @@ public:
 					end = halfway;
 			}
 		}
-
-		data.exit();
 	}
 
 	void addArray (const ElementType* elementsToAdd,
 				   int numElementsToAdd) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		while (--numElementsToAdd >= 0)
 			add (*elementsToAdd++);
-
-		data.exit();
 	}
 
 	template <class OtherSetType>
@@ -5764,8 +5516,8 @@ public:
 				 int startIndex = 0,
 				 int numElementsToAdd = -1) throw()
 	{
-		setToAddFrom.lockSet();
-		data.enter();
+		const typename OtherSetType::ScopedLockType lock1 (setToAddFrom.getLock());
+		const ScopedLockType lock2 (getLock());
 		jassert (this != &setToAddFrom);
 
 		if (this != &setToAddFrom)
@@ -5781,14 +5533,11 @@ public:
 
 			addArray (setToAddFrom.elements + startIndex, numElementsToAdd);
 		}
-
-		data.exit();
-		setToAddFrom.unlockSet();
 	}
 
 	ElementType remove (const int indexToRemove) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 
 		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
 		{
@@ -5804,28 +5553,23 @@ public:
 			if ((numUsed << 1) < data.numAllocated)
 				minimiseStorageOverheads();
 
-			data.exit();
 			return removed;
 		}
-		else
-		{
-			data.exit();
-			return 0;
-		}
+
+		return 0;
 	}
 
 	void removeValue (const ElementType valueToRemove) throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		remove (indexOf (valueToRemove));
-		data.exit();
 	}
 
 	template <class OtherSetType>
 	void removeValuesIn (const OtherSetType& otherSet) throw()
 	{
-		otherSet.lockSet();
-		data.enter();
+		const typename OtherSetType::ScopedLockType lock1 (otherSet.getLock());
+		const ScopedLockType lock2 (getLock());
 
 		if (this == &otherSet)
 		{
@@ -5840,16 +5584,13 @@ public:
 						remove (i);
 			}
 		}
-
-		data.exit();
-		otherSet.unlockSet();
 	}
 
 	template <class OtherSetType>
 	void removeValuesNotIn (const OtherSetType& otherSet) throw()
 	{
-		otherSet.lockSet();
-		data.enter();
+		const typename OtherSetType::ScopedLockType lock1 (otherSet.getLock());
+		const ScopedLockType lock2 (getLock());
 
 		if (this != &otherSet)
 		{
@@ -5864,27 +5605,17 @@ public:
 						remove (i);
 			}
 		}
-
-		data.exit();
-		otherSet.lockSet();
 	}
 
 	void minimiseStorageOverheads() throw()
 	{
-		data.enter();
+		const ScopedLockType lock (getLock());
 		data.shrinkToNoMoreThan (numUsed);
-		data.exit();
 	}
 
-	void lockSet() const throw()
-	{
-		data.enter();
-	}
+	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
 
-	void unlockSet() const throw()
-	{
-		data.exit();
-	}
+	typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
 	juce_UseDebuggingNewOperator
 
@@ -8797,6 +8528,8 @@ private:
 
 	friend void JUCE_API juce_threadEntryPoint (void*);
 	static void threadEntryPoint (Thread* thread);
+	static Array<Thread*> runningThreads;
+	static CriticalSection runningThreadsLock;
 
 	Thread (const Thread&);
 	const Thread& operator= (const Thread&);
@@ -19866,13 +19599,15 @@ public:
 	bool lockWasGained() const throw()			  { return locked; }
 
 private:
-	bool locked, needsUnlocking;
-	void* sharedEvents;
+	class SharedEvents;
+	class BlockingMessage;
+	SharedEvents* sharedEvents;
+	bool locked;
 
 	void init (Thread* const thread, ThreadPoolJob* const job) throw();
 
 	MessageManagerLock (const MessageManagerLock&);
-	const MessageManagerLock& operator= (const MessageManagerLock&);
+	MessageManagerLock& operator= (const MessageManagerLock&);
 };
 
 #endif   // __JUCE_MESSAGEMANAGER_JUCEHEADER__

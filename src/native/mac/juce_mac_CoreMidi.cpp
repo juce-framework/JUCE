@@ -624,9 +624,10 @@ MidiInput::~MidiInput()
     MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
     mpc->active = false;
 
-    callbackLock.enter();
-    activeCallbacks.removeValue (mpc);
-    callbackLock.exit();
+    {
+        const ScopedLock sl (callbackLock);
+        activeCallbacks.removeValue (mpc);
+    }
 
     if (mpc->portAndEndpoint->port != 0)
         OK (MIDIPortDisconnectSource (mpc->portAndEndpoint->port, mpc->portAndEndpoint->endPoint));
@@ -637,16 +638,14 @@ MidiInput::~MidiInput()
 
 void MidiInput::start()
 {
-    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
     const ScopedLock sl (callbackLock);
-    mpc->active = true;
+    ((MidiPortAndCallback*) internal)->active = true;
 }
 
 void MidiInput::stop()
 {
-    MidiPortAndCallback* const mpc = (MidiPortAndCallback*) internal;
     const ScopedLock sl (callbackLock);
-    mpc->active = false;
+    ((MidiPortAndCallback*) internal)->active = false;
 }
 
 #undef log

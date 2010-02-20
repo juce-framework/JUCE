@@ -919,10 +919,13 @@ void AudioDeviceManager::CallbackHandler::handleIncomingMidiMessage (MidiInput* 
 //==============================================================================
 void AudioDeviceManager::playTestSound()
 {
-    {
-        audioCallbackLock.enter();
-        ScopedPointer <AudioSampleBuffer> oldSound (testSound);
-        audioCallbackLock.exit();
+    { // cunningly nested to swap, unlock and delete in that order.
+        ScopedPointer <AudioSampleBuffer> oldSound;
+
+        {
+            const ScopedLock sl (audioCallbackLock);
+            oldSound = testSound;
+        }
     }
 
     testSoundPosition = 0;

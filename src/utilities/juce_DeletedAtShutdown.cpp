@@ -54,9 +54,12 @@ void DeletedAtShutdown::deleteAll()
 {
     // make a local copy of the array, so it can't get into a loop if something
     // creates another DeletedAtShutdown object during its destructor.
-    lock.enter();
-    const VoidArray localCopy (objectsToDelete);
-    lock.exit();
+    VoidArray localCopy;
+
+    {
+        const ScopedLock sl (lock);
+        localCopy = objectsToDelete;
+    }
 
     for (int i = localCopy.size(); --i >= 0;)
     {

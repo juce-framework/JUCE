@@ -29,7 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_OutputStream.h"
-#include "../../threads/juce_CriticalSection.h"
+#include "../../threads/juce_ScopedLock.h"
 #include "../../containers/juce_VoidArray.h"
 
 
@@ -54,18 +54,16 @@ void juce_CheckForDanglingStreams()
 OutputStream::OutputStream() throw()
 {
 #if JUCE_DEBUG
-    activeStreamLock.enter();
+    const ScopedLock sl (activeStreamLock);
     activeStreams.add (this);
-    activeStreamLock.exit();
 #endif
 }
 
 OutputStream::~OutputStream()
 {
 #if JUCE_DEBUG
-    activeStreamLock.enter();
+    const ScopedLock sl (activeStreamLock);
     activeStreams.removeValue (this);
-    activeStreamLock.exit();
 #endif
 }
 

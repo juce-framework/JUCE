@@ -26,6 +26,9 @@
 #ifndef __JUCE_CRITICALSECTION_JUCEHEADER__
 #define __JUCE_CRITICALSECTION_JUCEHEADER__
 
+class JUCE_API  ScopedLock;
+class JUCE_API  ScopedUnlock;
+
 
 //==============================================================================
 /**
@@ -85,6 +88,13 @@ public:
 
 
     //==============================================================================
+    /** Provides the type of scoped lock to use with this type of critical section object. */
+    typedef ScopedLock      ScopedLockType;
+
+    /** Provides the type of scoped unlocker to use with this type of critical section object. */
+    typedef ScopedUnlock    ScopedUnlockType;
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -103,7 +113,7 @@ private:
 #endif
 
     CriticalSection (const CriticalSection&);
-    const CriticalSection& operator= (const CriticalSection&);
+    CriticalSection& operator= (const CriticalSection&);
 };
 
 
@@ -111,7 +121,7 @@ private:
 /**
     A class that can be used in place of a real CriticalSection object.
 
-    This is currently used by some templated array classes, and should get
+    This is currently used by some templated classes, and should get
     optimised out by the compiler.
 
     @see Array, OwnedArray, ReferenceCountedArray
@@ -124,6 +134,16 @@ public:
 
     inline void enter() const throw()             {}
     inline void exit() const throw()              {}
+
+    //==============================================================================
+    /** A dummy scoped-lock type to use with a dummy critical section. */
+    struct ScopedLockType
+    {
+        ScopedLockType (const DummyCriticalSection&) throw() {}
+    };
+
+    /** A dummy scoped-unlocker type to use with a dummy critical section. */
+    typedef ScopedLockType ScopedUnlockType;
 };
 
 

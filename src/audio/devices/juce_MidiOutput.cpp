@@ -123,25 +123,27 @@ void MidiOutput::run()
         uint32 eventTime = 0;
         uint32 timeToWait = 500;
 
-        lock.enter();
-        PendingMessage* message = firstMessage;
+        PendingMessage* message;
 
-        if (message != 0)
         {
-            eventTime = roundToInt (message->message.getTimeStamp());
+            const ScopedLock sl (lock);
+            message = firstMessage;
 
-            if (eventTime > now + 20)
+            if (message != 0)
             {
-                timeToWait = eventTime - (now + 20);
-                message = 0;
-            }
-            else
-            {
-                firstMessage = message->next;
+                eventTime = roundToInt (message->message.getTimeStamp());
+
+                if (eventTime > now + 20)
+                {
+                    timeToWait = eventTime - (now + 20);
+                    message = 0;
+                }
+                else
+                {
+                    firstMessage = message->next;
+                }
             }
         }
-
-        lock.exit();
 
         if (message != 0)
         {

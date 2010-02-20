@@ -72,14 +72,12 @@ public:
     */
     Array (const Array<ElementType, TypeOfCriticalSectionToUse>& other)
     {
-        other.lockArray();
+        const ScopedLockType lock (other.getLock());
         numUsed = other.numUsed;
         data.setAllocatedSize (other.numUsed);
 
         for (int i = 0; i < numUsed; ++i)
             new (data.elements + i) ElementType (other.data.elements[i]);
-
-        other.unlockArray();
     }
 
     /** Initalises from a null-terminated C array of values.
@@ -117,7 +115,7 @@ public:
     /** Copies another array.
         @param other    the array to copy
     */
-    Array <ElementType, TypeOfCriticalSectionToUse>& operator= (const Array <ElementType, TypeOfCriticalSectionToUse>& other)
+    Array& operator= (const Array& other)
     {
         if (this != &other)
         {
@@ -137,24 +135,15 @@ public:
     template <class OtherArrayType>
     bool operator== (const OtherArrayType& other) const
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (numUsed != other.numUsed)
-        {
-            data.exit();
             return false;
-        }
 
         for (int i = numUsed; --i >= 0;)
-        {
             if (data.elements [i] != other.data.elements [i])
-            {
-                data.exit();
                 return false;
-            }
-        }
 
-        data.exit();
         return true;
     }
 
@@ -179,14 +168,13 @@ public:
     */
     void clear()
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         for (int i = 0; i < numUsed; ++i)
             data.elements[i].~ElementType();
 
         data.setAllocatedSize (0);
         numUsed = 0;
-        data.exit();
     }
 
     /** Removes all elements from the array without freeing the array's allocated storage.
@@ -195,13 +183,12 @@ public:
     */
     void clearQuick()
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         for (int i = 0; i < numUsed; ++i)
             data.elements[i].~ElementType();
 
         numUsed = 0;
-        data.exit();
     }
 
     //==============================================================================
@@ -224,13 +211,9 @@ public:
     */
     inline ElementType operator[] (const int index) const
     {
-        data.enter();
-        const ElementType result ((((unsigned int) index) < (unsigned int) numUsed)
-                                        ? data.elements [index]
-                                        : ElementType());
-        data.exit();
-
-        return result;
+        const ScopedLockType lock (getLock());
+        return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
+                                                                 : ElementType();
     }
 
     /** Returns one of the elements in the array, without checking the index passed in.
@@ -244,12 +227,9 @@ public:
     */
     inline const ElementType getUnchecked (const int index) const
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        const ElementType result (data.elements [index]);
-        data.exit();
-
-        return result;
+        return data.elements [index];
     }
 
     /** Returns a direct reference to one of the elements in the array, without checking the index passed in.
@@ -263,11 +243,9 @@ public:
     */
     inline ElementType& getReference (const int index) const throw()
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         jassert (((unsigned int) index) < (unsigned int) numUsed);
-        ElementType& result = data.elements [index];
-        data.exit();
-        return result;
+        return data.elements [index];
     }
 
     /** Returns the first element in the array, or 0 if the array is empty.
@@ -276,12 +254,9 @@ public:
     */
     inline ElementType getFirst() const
     {
-        data.enter();
-        const ElementType result ((numUsed > 0) ? data.elements [0]
-                                                : ElementType());
-        data.exit();
-
-        return result;
+        const ScopedLockType lock (getLock());
+        return (numUsed > 0) ? data.elements [0]
+                             : ElementType();
     }
 
     /** Returns the last element in the array, or 0 if the array is empty.
@@ -290,12 +265,9 @@ public:
     */
     inline ElementType getLast() const
     {
-        data.enter();
-        const ElementType result ((numUsed > 0) ? data.elements [numUsed - 1]
-                                                : ElementType());
-        data.exit();
-
-        return result;
+        const ScopedLockType lock (getLock());
+        return (numUsed > 0) ? data.elements [numUsed - 1]
+                             : ElementType();
     }
 
     //==============================================================================
@@ -309,24 +281,18 @@ public:
     */
     int indexOf (const ElementType& elementToLookFor) const
     {
-        int result = -1;
-
-        data.enter();
+        const ScopedLockType lock (getLock());
         const ElementType* e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
         {
             if (elementToLookFor == *e)
-            {
-                result = (int) (e - data.elements);
-                break;
-            }
+                return (int) (e - data.elements);
 
             ++e;
         }
 
-        data.exit();
-        return result;
+        return -1;
     }
 
     /** Returns true if the array contains at least one occurrence of an object.
@@ -336,24 +302,19 @@ public:
     */
     bool contains (const ElementType& elementToLookFor) const
     {
-        data.enter();
-
+        const ScopedLockType lock (getLock());
         const ElementType* e = data.elements;
         int num = numUsed;
 
         while (num > 0)
         {
             if (elementToLookFor == *e)
-            {
-                data.exit();
                 return true;
-            }
 
             --num;
             ++e;
         }
 
-        data.exit();
         return false;
     }
 
@@ -365,10 +326,9 @@ public:
     */
     void add (const ElementType& newElement)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
         new (data.elements + numUsed++) ElementType (newElement);
-        data.exit();
     }
 
     /** Inserts a new element into the array at a given position.
@@ -385,7 +345,7 @@ public:
     */
     void insert (int indexToInsertAt, const ElementType& newElement)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
 
         if (((unsigned int) indexToInsertAt) < (unsigned int) numUsed)
@@ -403,8 +363,6 @@ public:
         {
             new (data.elements + numUsed++) ElementType (newElement);
         }
-
-        data.exit();
     }
 
     /** Inserts multiple copies of an element into the array at a given position.
@@ -424,7 +382,7 @@ public:
     {
         if (numberOfTimesToInsertIt > 0)
         {
-            data.enter();
+            const ScopedLockType lock (getLock());
             data.ensureAllocatedSize (numUsed + numberOfTimesToInsertIt);
             ElementType* insertPos;
 
@@ -443,8 +401,6 @@ public:
 
             while (--numberOfTimesToInsertIt >= 0)
                 new (insertPos++) ElementType (newElement);
-
-            data.exit();
         }
     }
 
@@ -466,7 +422,7 @@ public:
     {
         if (numberOfElements > 0)
         {
-            data.enter();
+            const ScopedLockType lock (getLock());
             data.ensureAllocatedSize (numUsed + numberOfElements);
             ElementType* insertPos;
 
@@ -485,8 +441,6 @@ public:
 
             while (--numberOfElements >= 0)
                 new (insertPos++) ElementType (*newElements++);
-
-            data.exit();
         }
     }
 
@@ -500,12 +454,10 @@ public:
     */
     void addIfNotAlreadyThere (const ElementType& newElement)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (! contains (newElement))
             add (newElement);
-
-        data.exit();
     }
 
     /** Replaces an element with a new value.
@@ -520,8 +472,7 @@ public:
     void set (const int indexToChange, const ElementType& newValue)
     {
         jassert (indexToChange >= 0);
-
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (((unsigned int) indexToChange) < (unsigned int) numUsed)
         {
@@ -532,8 +483,6 @@ public:
             data.ensureAllocatedSize (numUsed + 1);
             new (data.elements + numUsed++) ElementType (newValue);
         }
-
-        data.exit();
     }
 
     /** Replaces an element with a new value without doing any bounds-checking.
@@ -547,10 +496,9 @@ public:
     */
     void setUnchecked (const int indexToChange, const ElementType& newValue)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
         data.elements [indexToChange] = newValue;
-        data.exit();
     }
 
     /** Adds elements from an array to the end of this array.
@@ -561,7 +509,7 @@ public:
     */
     void addArray (const ElementType* elementsToAdd, int numElementsToAdd)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (numElementsToAdd > 0)
         {
@@ -570,8 +518,6 @@ public:
             while (--numElementsToAdd >= 0)
                 new (data.elements + numUsed++) ElementType (*elementsToAdd++);
         }
-
-        data.exit();
     }
 
     /** This swaps the contents of this array with those of another array.
@@ -579,14 +525,13 @@ public:
         If you need to exchange two arrays, this is vastly quicker than using copy-by-value
         because it just swaps their internal pointers.
     */
-    void swapWithArray (Array <ElementType>& otherArray) throw()
+    void swapWithArray (Array& otherArray) throw()
     {
-        data.enter();
-        otherArray.data.enter();
+        const ScopedLockType lock1 (getLock());
+        const ScopedLockType lock2 (otherArray.getLock());
+
         data.swapWith (otherArray.data);
         swapVariables (numUsed, otherArray.numUsed);
-        otherArray.data.exit();
-        data.exit();
     }
 
     /** Adds elements from another array to the end of this array.
@@ -603,8 +548,8 @@ public:
                    int startIndex = 0,
                    int numElementsToAdd = -1)
     {
-        arrayToAddFrom.lockArray();
-        data.enter();
+        const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+        const ScopedLockType lock2 (getLock());
 
         if (startIndex < 0)
         {
@@ -617,9 +562,6 @@ public:
 
         while (--numElementsToAdd >= 0)
             add (arrayToAddFrom.getUnchecked (startIndex++));
-
-        data.exit();
-        arrayToAddFrom.unlockArray();
     }
 
     /** Inserts a new element into the array, assuming that the array is sorted.
@@ -636,9 +578,8 @@ public:
     template <class ElementComparator>
     void addSorted (ElementComparator& comparator, const ElementType& newElement)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
-        data.exit();
     }
 
     /** Finds the index of an element in the array, assuming that the array is sorted.
@@ -658,8 +599,8 @@ public:
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
-        data.enter();
 
+        const ScopedLockType lock (getLock());
         int start = 0;
         int end = numUsed;
 
@@ -667,12 +608,10 @@ public:
         {
             if (start >= end)
             {
-                data.exit();
                 return -1;
             }
             else if (comparator.compareElements (elementToLookFor, data.elements [start]) == 0)
             {
-                data.exit();
                 return start;
             }
             else
@@ -680,10 +619,7 @@ public:
                 const int halfway = (start + end) >> 1;
 
                 if (halfway == start)
-                {
-                    data.exit();
                     return -1;
-                }
                 else if (comparator.compareElements (elementToLookFor, data.elements [halfway]) >= 0)
                     start = halfway;
                 else
@@ -705,7 +641,7 @@ public:
     */
     ElementType remove (const int indexToRemove)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
         {
@@ -722,12 +658,10 @@ public:
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
 
-            data.exit();
             return removed;
         }
         else
         {
-            data.exit();
             return ElementType();
         }
     }
@@ -742,7 +676,7 @@ public:
     */
     void removeValue (const ElementType& valueToRemove)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         ElementType* e = data.elements;
 
         for (int i = numUsed; --i >= 0;)
@@ -755,8 +689,6 @@ public:
 
             ++e;
         }
-
-        data.exit();
     }
 
     /** Removes a range of elements from the array.
@@ -773,7 +705,7 @@ public:
     */
     void removeRange (int startIndex, int numberToRemove)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         const int endIndex = jlimit (0, numUsed, startIndex + numberToRemove);
         startIndex = jlimit (0, numUsed, startIndex);
 
@@ -794,8 +726,6 @@ public:
             if ((numUsed << 1) < data.numAllocated)
                 minimiseStorageOverheads();
         }
-
-        data.exit();
     }
 
     /** Removes the last n elements from the array.
@@ -805,7 +735,7 @@ public:
     */
     void removeLast (int howManyToRemove = 1)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (howManyToRemove > numUsed)
             howManyToRemove = numUsed;
@@ -817,8 +747,6 @@ public:
 
         if ((numUsed << 1) < data.numAllocated)
             minimiseStorageOverheads();
-
-        data.exit();
     }
 
     /** Removes any elements which are also in another array.
@@ -829,8 +757,8 @@ public:
     template <class OtherArrayType>
     void removeValuesIn (const OtherArrayType& otherArray)
     {
-        otherArray.lockArray();
-        data.enter();
+        const typename OtherArrayType::ScopedLockType lock1 (otherArray.getLock());
+        const ScopedLockType lock2 (getLock());
 
         if (this == &otherArray)
         {
@@ -845,9 +773,6 @@ public:
                         remove (i);
             }
         }
-
-        data.exit();
-        otherArray.unlockArray();
     }
 
     /** Removes any elements which are not found in another array.
@@ -860,8 +785,8 @@ public:
     template <class OtherArrayType>
     void removeValuesNotIn (const OtherArrayType& otherArray)
     {
-        otherArray.lockArray();
-        data.enter();
+        const typename OtherArrayType::ScopedLockType lock1 (otherArray.getLock());
+        const ScopedLockType lock2 (getLock());
 
         if (this != &otherArray)
         {
@@ -876,9 +801,6 @@ public:
                         remove (i);
             }
         }
-
-        data.exit();
-        otherArray.unlockArray();
     }
 
     /** Swaps over two elements in the array.
@@ -892,7 +814,7 @@ public:
     void swap (const int index1,
                const int index2)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
 
         if (((unsigned int) index1) < (unsigned int) numUsed
             && ((unsigned int) index2) < (unsigned int) numUsed)
@@ -900,8 +822,6 @@ public:
             swapVariables (data.elements [index1],
                            data.elements [index2]);
         }
-
-        data.exit();
     }
 
     /** Moves one of the values to a different position.
@@ -922,7 +842,7 @@ public:
     {
         if (currentIndex != newIndex)
         {
-            data.enter();
+            const ScopedLockType lock (getLock());
 
             if (((unsigned int) currentIndex) < (unsigned int) numUsed)
             {
@@ -947,8 +867,6 @@ public:
 
                 memcpy (data.elements + newIndex, tempCopy, sizeof (ElementType));
             }
-
-            data.exit();
         }
     }
 
@@ -961,9 +879,8 @@ public:
     */
     void minimiseStorageOverheads()
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         data.shrinkToNoMoreThan (numUsed);
-        data.exit();
     }
 
     /** Increases the array's internal storage to hold a minimum number of elements.
@@ -974,9 +891,8 @@ public:
     */
     void ensureStorageAllocated (const int minNumElements)
     {
-        data.enter();
+        const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (minNumElements);
-        data.exit();
     }
 
     //==============================================================================
@@ -1010,38 +926,21 @@ public:
     void sort (ElementComparator& comparator,
                const bool retainOrderOfEquivalentItems = false) const
     {
+        const ScopedLockType lock (getLock());
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
-        data.enter();
         sortArray (comparator, (ElementType*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
-        data.exit();
     }
 
     //==============================================================================
-    /** Locks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see unlockArray
+    /** Returns the CriticalSection that locks this array.
+        To lock, you can call getLock().enter() and getLock().exit(), or preferably use
+        an object of ScopedLockType as an RAII lock for it.
     */
-    void lockArray() const throw()
-    {
-        data.enter();
-    }
+    inline const TypeOfCriticalSectionToUse& getLock() const throw()       { return data; }
 
-    /** Unlocks the array's CriticalSection.
-
-        Of course if the type of section used is a DummyCriticalSection, this won't
-        have any effect.
-
-        @see lockArray
-    */
-    void unlockArray() const throw()
-    {
-        data.exit();
-    }
-
+    /** Returns the type of scoped lock to use for locking this array */
+    typedef typename TypeOfCriticalSectionToUse::ScopedLockType ScopedLockType;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

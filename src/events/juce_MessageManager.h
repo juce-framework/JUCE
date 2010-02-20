@@ -305,13 +305,15 @@ public:
 
 
 private:
-    bool locked, needsUnlocking;
-    void* sharedEvents;
+    class SharedEvents;
+    class BlockingMessage;
+    SharedEvents* sharedEvents;
+    bool locked;
 
     void init (Thread* const thread, ThreadPoolJob* const job) throw();
 
     MessageManagerLock (const MessageManagerLock&);
-    const MessageManagerLock& operator= (const MessageManagerLock&);
+    MessageManagerLock& operator= (const MessageManagerLock&);
 };
 
 
