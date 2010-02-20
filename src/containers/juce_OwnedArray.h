@@ -160,8 +160,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements;
+        ObjectClass* const* const end = e + numUsed;
 
-        for (int i = numUsed; --i >= 0;)
+        while (e != end)
         {
             if (objectToLookFor == *e)
                 return (int) (e - data.elements);
@@ -181,28 +182,13 @@ public:
     {
         const ScopedLockType lock (getLock());
         ObjectClass* const* e = data.elements;
-        int i = numUsed;
+        ObjectClass* const* const end = e + numUsed;
 
-        while (i >= 4)
-        {
-            if (objectToLookFor == *e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e
-                 || objectToLookFor == *++e)
-            {
-                return true;
-            }
-
-            i -= 4;
-            ++e;
-        }
-
-        while (i > 0)
+        while (e != end)
         {
             if (objectToLookFor == *e)
                 return true;
 
-            --i;
             ++e;
         }
 

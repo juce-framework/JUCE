@@ -57,6 +57,7 @@ ComboBox::~ComboBox()
     if (menuActive)
         PopupMenu::dismissAllActiveMenus();
 
+    label = 0;
     deleteAllChildren();
 }
 
@@ -441,7 +442,6 @@ void ComboBox::lookAndFeelChanged()
         newLabel->setText (label->getText(), false);
     }
 
-    delete label;
     label = newLabel;
 
     addAndMakeVisible (newLabel);

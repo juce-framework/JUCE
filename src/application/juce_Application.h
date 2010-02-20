@@ -289,7 +289,7 @@ private:
     String commandLineParameters;
     int appReturnValue;
     bool stillInitialising;
-    InterProcessLock* appLock;
+    ScopedPointer<InterProcessLock> appLock;
 
     JUCEApplication (const JUCEApplication&);
     const JUCEApplication& operator= (const JUCEApplication&);

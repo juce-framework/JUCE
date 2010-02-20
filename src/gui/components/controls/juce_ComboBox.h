@@ -393,7 +393,7 @@ private:
     int lastCurrentId;
     bool isButtonDown, separatorPending, menuActive, textIsCustom;
     SortedSet <void*> listeners;
-    Label* label;
+    ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
 
     void showPopup();

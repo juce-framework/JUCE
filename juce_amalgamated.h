@@ -2064,8 +2064,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements;
+		const ElementType* const end = e + numUsed;
 
-		for (int i = numUsed; --i >= 0;)
+		while (e != end)
 		{
 			if (elementToLookFor == *e)
 				return (int) (e - data.elements);
@@ -2080,14 +2081,13 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements;
-		int num = numUsed;
+		const ElementType* const end = e + numUsed;
 
-		while (num > 0)
+		while (e != end)
 		{
 			if (elementToLookFor == *e)
 				return true;
 
-			--num;
 			++e;
 		}
 
@@ -3483,8 +3483,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements;
+		ObjectClass* const* const end = e + numUsed;
 
-		for (int i = numUsed; --i >= 0;)
+		while (e != end)
 		{
 			if (objectToLookFor == *e)
 				return (int) (e - data.elements);
@@ -3499,28 +3500,13 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass* const* e = data.elements;
-		int i = numUsed;
+		ObjectClass* const* const end = e + numUsed;
 
-		while (i >= 4)
-		{
-			if (objectToLookFor == *e
-				 || objectToLookFor == *++e
-				 || objectToLookFor == *++e
-				 || objectToLookFor == *++e)
-			{
-				return true;
-			}
-
-			i -= 4;
-			++e;
-		}
-
-		while (i > 0)
+		while (e != end)
 		{
 			if (objectToLookFor == *e)
 				return true;
 
-			--i;
 			++e;
 		}
 
@@ -4951,8 +4937,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements;
+		ObjectClass** const end = e + numUsed;
 
-		for (int i = numUsed; --i >= 0;)
+		while (e != end)
 		{
 			if (objectToLookFor == *e)
 				return (int) (e - data.elements);
@@ -4967,8 +4954,9 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		ObjectClass** e = data.elements;
+		ObjectClass** const end = e + numUsed;
 
-		for (int i = numUsed; --i >= 0;)
+		while (e != end)
 		{
 			if (objectToLookFor == *e)
 				return true;
@@ -12928,7 +12916,7 @@ private:
 	String commandLineParameters;
 	int appReturnValue;
 	bool stillInitialising;
-	InterProcessLock* appLock;
+	ScopedPointer<InterProcessLock> appLock;
 
 	JUCEApplication (const JUCEApplication&);
 	const JUCEApplication& operator= (const JUCEApplication&);
@@ -16874,7 +16862,7 @@ private:
 	int lastCurrentId;
 	bool isButtonDown, separatorPending, menuActive, textIsCustom;
 	SortedSet <void*> listeners;
-	Label* label;
+	ScopedPointer<Label> label;
 	String textWhenNothingSelected, noChoicesMessage;
 
 	void showPopup();

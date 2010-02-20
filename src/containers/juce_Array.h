@@ -283,8 +283,9 @@ public:
     {
         const ScopedLockType lock (getLock());
         const ElementType* e = data.elements;
+        const ElementType* const end = e + numUsed;
 
-        for (int i = numUsed; --i >= 0;)
+        while (e != end)
         {
             if (elementToLookFor == *e)
                 return (int) (e - data.elements);
@@ -304,14 +305,13 @@ public:
     {
         const ScopedLockType lock (getLock());
         const ElementType* e = data.elements;
-        int num = numUsed;
+        const ElementType* const end = e + numUsed;
 
-        while (num > 0)
+        while (e != end)
         {
             if (elementToLookFor == *e)
                 return true;
 
-            --num;
             ++e;
         }
 

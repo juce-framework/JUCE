@@ -55,8 +55,7 @@ static JUCEApplication* appInstance = 0;
 //==============================================================================
 JUCEApplication::JUCEApplication()
     : appReturnValue (0),
-      stillInitialising (true),
-      appLock (0)
+      stillInitialising (true)
 {
 }
 
@@ -65,7 +64,7 @@ JUCEApplication::~JUCEApplication()
     if (appLock != 0)
     {
         appLock->exit();
-        delete appLock;
+        appLock = 0;
     }
 }
 
@@ -228,7 +227,7 @@ bool JUCEApplication::initialiseApp (String& commandLine)
 int JUCEApplication::shutdownAppAndClearUp()
 {
     jassert (appInstance != 0);
-    JUCEApplication* const app = appInstance;
+    ScopedPointer<JUCEApplication> app (appInstance);
     int returnValue = 0;
 
     MessageManager::getInstance()->deregisterBroadcastListener (app);
@@ -262,7 +261,7 @@ int JUCEApplication::shutdownAppAndClearUp()
             returnValue = app->getApplicationReturnValue();
 
             appInstance = 0;
-            delete app;
+            app = 0;
         }
         JUCE_CATCH_ALL_ASSERT
 

@@ -43,22 +43,6 @@ bool juce_performDragDropText (const String& text, bool& shouldStop);
 class DragImageComponent  : public Component,
                             public Timer
 {
-private:
-    ScopedPointer <Image> image;
-    Component* const source;
-    DragAndDropContainer* const owner;
-
-    ScopedPointer <ComponentDeletionWatcher> sourceWatcher, mouseDragSourceWatcher, currentlyOverWatcher;
-    Component* mouseDragSource;
-    DragAndDropTarget* currentlyOver;
-
-    String dragDesc;
-    const Point<int> imageOffset;
-    bool hasCheckedForExternalDrag, drawImage;
-
-    DragImageComponent (const DragImageComponent&);
-    const DragImageComponent& operator= (const DragImageComponent&);
-
 public:
     DragImageComponent (Image* const im,
                         const String& desc,
@@ -318,6 +302,22 @@ public:
             delete this;
         }
     }
+
+private:
+    ScopedPointer<Image> image;
+    Component* const source;
+    DragAndDropContainer* const owner;
+
+    ScopedPointer<ComponentDeletionWatcher> sourceWatcher, mouseDragSourceWatcher, currentlyOverWatcher;
+    Component* mouseDragSource;
+    DragAndDropTarget* currentlyOver;
+
+    String dragDesc;
+    const Point<int> imageOffset;
+    bool hasCheckedForExternalDrag, drawImage;
+
+    DragImageComponent (const DragImageComponent&);
+    DragImageComponent& operator= (const DragImageComponent&);
 };
 
 
