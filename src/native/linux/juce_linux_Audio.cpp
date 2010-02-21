@@ -61,31 +61,31 @@ static void getDeviceNumChannels (snd_pcm_t* handle, unsigned int* minChans, uns
     }
 }
 
-static void getDeviceProperties (const String& id,
+static void getDeviceProperties (const String& deviceID,
                                  unsigned int& minChansOut,
                                  unsigned int& maxChansOut,
                                  unsigned int& minChansIn,
                                  unsigned int& maxChansIn,
                                  Array <int>& rates)
 {
-    if (id.isEmpty())
+    if (deviceID.isEmpty())
         return;
 
     snd_ctl_t* handle;
 
-    if (snd_ctl_open (&handle, id.upToLastOccurrenceOf (T(","), false, false), SND_CTL_NONBLOCK) >= 0)
+    if (snd_ctl_open (&handle, deviceID.upToLastOccurrenceOf (T(","), false, false).toUTF8(), SND_CTL_NONBLOCK) >= 0)
     {
         snd_pcm_info_t* info;
         snd_pcm_info_alloca (&info);
 
         snd_pcm_info_set_stream (info, SND_PCM_STREAM_PLAYBACK);
-        snd_pcm_info_set_device (info, id.fromLastOccurrenceOf (T(","), false, false).getIntValue());
+        snd_pcm_info_set_device (info, deviceID.fromLastOccurrenceOf (T(","), false, false).getIntValue());
         snd_pcm_info_set_subdevice (info, 0);
 
         if (snd_ctl_pcm_info (handle, info) >= 0)
         {
             snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, id, SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
+            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_PLAYBACK, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
             {
                 getDeviceNumChannels (pcmHandle, &minChansOut, &maxChansOut);
                 getDeviceSampleRates (pcmHandle, rates);
@@ -99,7 +99,7 @@ static void getDeviceProperties (const String& id,
         if (snd_ctl_pcm_info (handle, info) >= 0)
         {
             snd_pcm_t* pcmHandle;
-            if (snd_pcm_open (&pcmHandle, id, SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
+            if (snd_pcm_open (&pcmHandle, deviceID.toUTF8(), SND_PCM_STREAM_CAPTURE, SND_PCM_ASYNC | SND_PCM_NONBLOCK ) >= 0)
             {
                 getDeviceNumChannels (pcmHandle, &minChansIn, &maxChansIn);
 
@@ -118,7 +118,7 @@ static void getDeviceProperties (const String& id,
 class ALSADevice
 {
 public:
-    ALSADevice (const String& id,
+    ALSADevice (const String& deviceID,
                 const bool forInput)
         : handle (0),
           bitDepth (16),
@@ -126,7 +126,7 @@ public:
           isInput (forInput),
           sampleFormat (AudioDataConverters::int16LE)
     {
-        failed (snd_pcm_open (&handle, id,
+        failed (snd_pcm_open (&handle, deviceID.toUTF8(),
                               forInput ? SND_PCM_STREAM_CAPTURE : SND_PCM_STREAM_PLAYBACK,
                               SND_PCM_ASYNC));
     }
@@ -861,7 +861,7 @@ public:
             if (cardNum < 0)
                 break;
 
-            if (snd_ctl_open (&handle, T("hw:") + String (cardNum), SND_CTL_NONBLOCK) >= 0)
+            if (snd_ctl_open (&handle, ("hw:" + String (cardNum)).toUTF8(), SND_CTL_NONBLOCK) >= 0)
             {
                 if (snd_ctl_card_info (handle, info) >= 0)
                 {

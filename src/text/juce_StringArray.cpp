@@ -302,7 +302,7 @@ const String StringArray::joinIntoString (const String& separator, int start, in
     String result;
     result.preallocateStorage (charsNeeded);
 
-    tchar* dest = (tchar*) (const tchar*) result;
+    juce_wchar* dest = (juce_wchar*) result;
 
     while (start < last)
     {
@@ -311,13 +311,13 @@ const String StringArray::joinIntoString (const String& separator, int start, in
 
         if (len > 0)
         {
-            s.copyToBuffer (dest, len);
+            s.copyToUnicode (dest, len);
             dest += len;
         }
 
         if (++start < last && separatorLen > 0)
         {
-            separator.copyToBuffer (dest, separatorLen);
+            separator.copyToUnicode (dest, separatorLen);
             dest += separatorLen;
         }
     }

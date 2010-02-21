@@ -839,7 +839,7 @@ public:
         if (taskBarIcon != 0)
         {
             taskBarIcon->uFlags = NIF_TIP;
-            toolTip.copyToBuffer (taskBarIcon->szTip, sizeof (taskBarIcon->szTip) - 1);
+            toolTip.copyToUnicode (taskBarIcon->szTip, sizeof (taskBarIcon->szTip) - 1);
             Shell_NotifyIcon (NIM_MODIFY, taskBarIcon);
         }
     }
@@ -2561,8 +2561,8 @@ Image* juce_createIconForFile (const File& file)
 {
     Image* image = 0;
 
-    TCHAR filename [1024];
-    file.getFullPathName().copyToBuffer (filename, 1023);
+    WCHAR filename [1024];
+    file.getFullPathName().copyToUnicode (filename, 1023);
     WORD iconNum = 0;
 
     HICON icon = ExtractAssociatedIcon ((HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle(),
@@ -3018,7 +3018,7 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
 
         for (int i = 0; i < fileNames.size(); ++i)
         {
-            fileNames[i].copyToBuffer (fname, 2048);
+            fileNames[i].copyToUnicode (fname, 2048);
             fname += fileNames[i].length() + 1;
         }
 
@@ -3065,7 +3065,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
     medium.hGlobal = GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT, (numChars + 2) * sizeof (WCHAR));
     char* d = (char*) GlobalLock (medium.hGlobal);
 
-    text.copyToBuffer ((WCHAR*) d, numChars + 1);
+    text.copyToUnicode ((WCHAR*) d, numChars + 1);
     format.cfFormat = CF_UNICODETEXT;
 
     GlobalUnlock (medium.hGlobal);

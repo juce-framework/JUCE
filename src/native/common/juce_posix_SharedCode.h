@@ -178,7 +178,7 @@ const File File::getCurrentWorkingDirectory()
         bufferSize += 1024;
     }
 
-    return File (String::fromUTF8 ((const uint8*) cwd));
+    return File (String::fromUTF8 (cwd));
 }
 
 bool File::setAsCurrentWorkingDirectory() const
@@ -338,7 +338,7 @@ const File juce_getExecutableFile()
 {
     Dl_info exeInfo;
     dladdr ((const void*) juce_getExecutableFile, &exeInfo);
-    return File (String::fromUTF8 ((const uint8*) exeInfo.dli_fname));
+    return File (String::fromUTF8 (exeInfo.dli_fname));
 }
 
 //==============================================================================
@@ -401,7 +401,7 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
         if (getattrlist ((const char*) f.getFullPathName().toUTF8(),
                          &attrList, &attrBuf, sizeof(attrBuf), 0) == 0)
         {
-            return String::fromUTF8 (((const uint8*) &attrBuf.mountPointRef) + attrBuf.mountPointRef.attr_dataoffset,
+            return String::fromUTF8 (((const char*) &attrBuf.mountPointRef) + attrBuf.mountPointRef.attr_dataoffset,
                                      (int) attrBuf.mountPointRef.attr_length);
         }
 

@@ -28,36 +28,16 @@
 
 
 //==============================================================================
-/* The String class can either use wchar_t unicode characters, or 8-bit characters
-   (in the default system encoding) as its internal representation.
+#define JUCE_T(stringLiteral)     (L##stringLiteral)
+typedef juce_wchar                tchar;
 
-   To use unicode, define the JUCE_STRINGS_ARE_UNICODE macro in juce_Config.h
-
-   Be sure to use "tchar" for characters rather than "char", and always wrap string
-   literals in the T("abcd") macro, so that it all works nicely either way round.
-*/
-#if JUCE_STRINGS_ARE_UNICODE
-
-  #define JUCE_T(stringLiteral)     (L##stringLiteral)
-  typedef juce_wchar                tchar;
-  #define juce_tcharToWideChar(c)   (c)
-
-#else
-
-  #define JUCE_T(stringLiteral)     (stringLiteral)
-  typedef char                      tchar;
-  #define juce_tcharToWideChar(c)   ((juce_wchar) (unsigned char) (c))
-
-#endif
 
 #if ! JUCE_DONT_DEFINE_MACROS
 
-/** The 'T' macro allows a literal string to be compiled using either 8-bit characters
-    or unicode.
+/** The 'T' macro allows a literal string to be compiled as unicode.
 
-    If you write your string literals in the form T("xyz"), this will either be compiled
-    as "xyz" for non-unicode builds, or L"xyz" for unicode builds, depending on whether the
-    JUCE_STRINGS_ARE_UNICODE macro has been set in juce_Config.h
+    If you write your string literals in the form T("xyz"), it will be compiled as L"xyz"
+    or "xyz", depending on which representation is best for the String class to work with.
 
     Because the 'T' symbol is occasionally used inside 3rd-party library headers which you
     may need to include after juce.h, you can use the juce_withoutMacros.h file (in
@@ -97,6 +77,8 @@ public:
 
     static int compare (const char* const s1, const char* const s2) throw();
     static int compare (const juce_wchar* s1, const juce_wchar* s2) throw();
+    static int compare (const juce_wchar* s1, const char* s2) throw();
+    static int compare (const char* s1, const juce_wchar* s2) throw();
 
     static int compare (const char* const s1, const char* const s2, const int maxChars) throw();
     static int compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
@@ -163,7 +145,7 @@ public:
     /** Returns 0 to 16 for '0' to 'F", or -1 for characters that aren't a legel
         hex digit.
     */
-    static int getHexDigitValue (const tchar digit) throw();
+    static int getHexDigitValue (const juce_wchar digit) throw();
 
     //==============================================================================
     static int printf (char* const dest, const int maxLength, const char* const format, ...) throw();

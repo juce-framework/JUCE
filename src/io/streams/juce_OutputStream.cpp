@@ -167,11 +167,10 @@ void OutputStream::writeDoubleBigEndian (double value)
 
 void OutputStream::writeString (const String& text)
 {
-    const int numBytes = text.copyToUTF8 (0);
+    const int numBytes = text.getNumBytesAsUTF8() + 1;
     HeapBlock <uint8> temp (numBytes);
-
-    text.copyToUTF8 (temp);
-    write (temp, numBytes); // (numBytes includes the terminating null).
+    text.copyToUTF8 (temp, numBytes);
+    write (temp, numBytes);
 }
 
 void OutputStream::printf (const char* pf, ...)
@@ -206,14 +205,14 @@ void OutputStream::printf (const char* pf, ...)
 OutputStream& OutputStream::operator<< (const int number)
 {
     const String s (number);
-    write ((const char*) s, s.length());
+    write (s.toUTF8(), s.getNumBytesAsUTF8());
     return *this;
 }
 
 OutputStream& OutputStream::operator<< (const double number)
 {
     const String s (number);
-    write ((const char*) s, s.length());
+    write (s.toUTF8(), s.getNumBytesAsUTF8());
     return *this;
 }
 
@@ -229,18 +228,9 @@ OutputStream& OutputStream::operator<< (const char* const text)
     return *this;
 }
 
-OutputStream& OutputStream::operator<< (const juce_wchar* const text)
-{
-    const String s (text);
-    write ((const char*) s, s.length());
-    return *this;
-}
-
 OutputStream& OutputStream::operator<< (const String& text)
 {
-    write ((const char*) text,
-           text.length());
-
+    write (text.toUTF8(), text.getNumBytesAsUTF8());
     return *this;
 }
 
@@ -267,7 +257,7 @@ void OutputStream::writeText (const String& text,
     }
     else
     {
-        const char* src = (const char*) text;
+        const char* src = text.toUTF8();
         const char* t = src;
 
         for (;;)

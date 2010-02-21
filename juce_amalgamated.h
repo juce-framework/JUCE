@@ -43,8 +43,9 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
+#define JUCE_BUILDNUMBER	0
 
-#define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8))
+#define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
 
 /*** Start of inlined file: juce_TargetPlatform.h ***/
@@ -301,10 +302,6 @@
 
 #ifndef JUCE_CATCH_UNHANDLED_EXCEPTIONS
   #define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
-#endif
-
-#ifndef JUCE_STRINGS_ARE_UNICODE
-  #define JUCE_STRINGS_ARE_UNICODE 1
 #endif
 
 // If only building the core classes, we can explicitly turn off some features to avoid including them:
@@ -963,19 +960,8 @@ inline void ByteOrder::bigEndian24BitToChars (const int value, char* const destB
 #ifndef __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 #define __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 
-#if JUCE_STRINGS_ARE_UNICODE
-
-  #define JUCE_T(stringLiteral)	 (L##stringLiteral)
-  typedef juce_wchar		tchar;
-  #define juce_tcharToWideChar(c)   (c)
-
-#else
-
-  #define JUCE_T(stringLiteral)	 (stringLiteral)
-  typedef char			  tchar;
-  #define juce_tcharToWideChar(c)   ((juce_wchar) (unsigned char) (c))
-
-#endif
+#define JUCE_T(stringLiteral)	 (L##stringLiteral)
+typedef juce_wchar		tchar;
 
 #if ! JUCE_DONT_DEFINE_MACROS
 
@@ -1001,6 +987,8 @@ public:
 
 	static int compare (const char* const s1, const char* const s2) throw();
 	static int compare (const juce_wchar* s1, const juce_wchar* s2) throw();
+	static int compare (const juce_wchar* s1, const char* s2) throw();
+	static int compare (const char* s1, const juce_wchar* s2) throw();
 
 	static int compare (const char* const s1, const char* const s2, const int maxChars) throw();
 	static int compare (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
@@ -1062,7 +1050,7 @@ public:
 	static bool isLetterOrDigit (const char character) throw();
 	static bool isLetterOrDigit (const juce_wchar character) throw();
 
-	static int getHexDigitValue (const tchar digit) throw();
+	static int getHexDigitValue (const juce_wchar digit) throw();
 
 	static int printf (char* const dest, const int maxLength, const char* const format, ...) throw();
 	static int printf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, ...) throw();
@@ -1092,7 +1080,7 @@ public:
 	String (const juce_wchar* const unicodeText,
 			const size_t maxChars) throw();
 
-	static const String charToString (const tchar character) throw();
+	static const String charToString (const juce_wchar character) throw();
 
 	~String() throw();
 
@@ -1106,37 +1094,17 @@ public:
 
 	// Assignment and concatenation operators..
 
-	const String& operator= (const tchar* const other) throw();
-
 	const String& operator= (const String& other) throw();
 
-	const String& operator+= (const tchar* const textToAppend) throw();
-	const String& operator+= (const String& stringToAppend) throw();
-	const String& operator+= (const char characterToAppend) throw();
-	const String& operator+= (const juce_wchar characterToAppend) throw();
+	String& operator+= (const tchar* const textToAppend);
+	String& operator+= (const String& stringToAppend);
+	String& operator+= (const char characterToAppend);
+	String& operator+= (const juce_wchar characterToAppend);
+	String& operator+= (const int numberToAppend);
+	String& operator+= (const unsigned int numberToAppend);
 
 	void append (const tchar* const textToAppend,
-				 const int maxCharsToTake) throw();
-
-	const String operator+ (const String& stringToAppend) const throw();
-
-	const String operator+ (const tchar* const textToAppend) const throw();
-
-	const String operator+ (const tchar characterToAppend) const throw();
-
-	String& operator<< (const char n) throw();
-	String& operator<< (const juce_wchar n) throw();
-	String& operator<< (const char* const text) throw();
-	String& operator<< (const juce_wchar* const text) throw();
-	String& operator<< (const String& text) throw();
-
-	String& operator<< (const short number) throw();
-	String& operator<< (const int number) throw();
-	String& operator<< (const unsigned int number) throw();
-	String& operator<< (const long number) throw();
-	String& operator<< (const unsigned long number) throw();
-	String& operator<< (const float number) throw();
-	String& operator<< (const double number) throw();
+				 const int maxCharsToTake);
 
 	// Comparison methods..
 
@@ -1144,26 +1112,18 @@ public:
 
 	inline bool isNotEmpty() const throw()		  { return text->text[0] != 0; }
 
-	bool operator== (const String& other) const throw();
-	bool operator== (const tchar* const other) const throw();
-
-	bool operator!= (const String& other) const throw();
-	bool operator!= (const tchar* const other) const throw();
-
 	bool equalsIgnoreCase (const String& other) const throw();
 	bool equalsIgnoreCase (const tchar* const other) const throw();
 
-	bool operator> (const String& other) const throw();
-	bool operator< (const tchar* const other) const throw();
+	int compare (const String& other) const throw();
 
-	bool operator>= (const String& other) const throw();
-	bool operator<= (const tchar* const other) const throw();
+	int compare (const char* other) const throw();
 
-	int compare (const tchar* const other) const throw();
+	int compare (const juce_wchar* other) const throw();
 
-	int compareIgnoreCase (const tchar* const other) const throw();
+	int compareIgnoreCase (const String& other) const throw();
 
-	int compareLexicographically (const tchar* const other) const throw();
+	int compareLexicographically (const String& other) const throw();
 
 	bool startsWith (const tchar* const text) const throw();
 
@@ -1234,11 +1194,11 @@ public:
 
 		No checks are made to see if the index is within a valid range, so be careful!
 	*/
-	inline const tchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
+	inline const juce_wchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
 
-	tchar& operator[] (const int index) throw();
+	juce_wchar& operator[] (const int index) throw();
 
-	tchar getLastCharacter() const throw();
+	juce_wchar getLastCharacter() const throw();
 
 	const String substring (int startIndex,
 							int endIndex) const throw();
@@ -1361,30 +1321,25 @@ public:
 									 const int size,
 									 const int groupSize = 1) throw();
 
-	// Casting to character arrays..
-
-#if JUCE_STRINGS_ARE_UNICODE
-	operator const char*() const throw();
-
 	inline operator const juce_wchar*() const throw()   { return text->text; }
-#else
-	inline operator const char*() const throw()	 { return text->text; }
 
-	operator const juce_wchar*() const throw();
-#endif
+	inline operator juce_wchar*() throw()		   { return text->text; }
 
-	void copyToBuffer (char* const destBuffer,
-					   const int maxCharsToCopy) const throw();
+	const char* toUTF8() const;
 
-	void copyToBuffer (juce_wchar* const destBuffer,
-					   const int maxCharsToCopy) const throw();
+	static const String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
 
-	int copyToUTF8 (uint8* const destBuffer, const int maxBufferSizeBytes = 0x7fffffff) const throw();
+	int getNumBytesAsUTF8() const throw();
 
-	const char* toUTF8() const throw();
+	int copyToUTF8 (char* destBuffer, const int maxBufferSizeBytes) const throw();
 
-	static const String fromUTF8 (const uint8* const utf8buffer,
-								  int bufferSizeBytes = -1) throw();
+	const char* toCString() const;
+
+	int getNumBytesAsCString() const throw();
+
+	int copyToCString (char* destBuffer, const int maxBufferSizeBytes) const throw();
+
+	void copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw();
 
 	void preallocateStorage (const size_t numCharsNeeded) throw();
 
@@ -1412,12 +1367,7 @@ private:
 	{
 		int refCount;
 		int allocatedNumChars;
-
-#if JUCE_STRINGS_ARE_UNICODE
-		  wchar_t text[1];
-#else
-		  char text[1];
-#endif
+		wchar_t text[1];
 	};
 
 	InternalRefCountedStringHolder* text;
@@ -1433,11 +1383,47 @@ private:
 	void dupeInternalIfMultiplyReferenced() throw();
 };
 
-const String JUCE_PUBLIC_FUNCTION   operator+ (const char* const string1,
-											   const String& string2) throw();
+const String JUCE_PUBLIC_FUNCTION   operator+  (const char* string1,	   const String& string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (const juce_wchar* string1, const String& string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (char string1,		  const String& string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (juce_wchar string1,	const String& string2);
 
-const String JUCE_PUBLIC_FUNCTION   operator+ (const juce_wchar* const string1,
-											   const String& string2) throw();
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const String& string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const char* string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const juce_wchar* string2);
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, char characterToAppend);
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, juce_wchar characterToAppend);
+
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const char characterToAppend);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const juce_wchar characterToAppend);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const char* const string2);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const juce_wchar* const string2);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const String& string2);
+
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const short number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const int number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const unsigned int number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const long number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const unsigned long number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const float number);
+String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const double number);
+
+template <class charT, class traits>
+std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+{
+	return stream << stringToWrite.toUTF8();
+}
+
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const char* string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const char* string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator>  (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -2864,8 +2850,6 @@ public:
 
 	virtual OutputStream& operator<< (const char* const text);
 
-	virtual OutputStream& operator<< (const juce_wchar* const text);
-
 	virtual OutputStream& operator<< (const String& text);
 
 	juce_UseDebuggingNewOperator
@@ -3355,7 +3339,7 @@ public:
 		{
 			// Two ScopedPointers should never be able to refer to the same object - if
 			// this happens, you must have done something dodgy!
-			jassert (object != objectToTransferFrom.object);
+			jassert (object == 0 || object != objectToTransferFrom.object);
 
 			ObjectType* const oldObject = object;
 			object = objectToTransferFrom.object;
@@ -9161,6 +9145,8 @@ public:
 
 	Point& operator-= (const Point& other) throw()			  { x -= other.x; y -= other.y; return *this; }
 
+	const Point operator-() const throw()				   { return Point (-x, -y); }
+
 	ValueType getDistanceFrom (const Point& other) const throw()	{ return (ValueType) juce_hypot (x - other.x, y - other.y); }
 
 	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
@@ -12900,7 +12886,7 @@ public:
 	// These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
 	static int main (String& commandLine, JUCEApplication* const newApp);
-	static int main (int argc, char* argv[], JUCEApplication* const newApp);
+	static int main (int argc, const char* argv[], JUCEApplication* const newApp);
 
 	static void sendUnhandledException (const std::exception* const e,
 										const char* const sourceFile,
@@ -28284,7 +28270,7 @@ END_JUCE_NAMESPACE
   #define START_JUCE_APPLICATION(AppClass) \
 	int main (int argc, char* argv[]) \
 	{ \
-		return JUCE_NAMESPACE::JUCEApplication::main (argc, argv, new AppClass()); \
+		return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
 	}
 
 #elif JUCE_WINDOWS

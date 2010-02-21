@@ -137,10 +137,10 @@ private:
         return String ((const WCHAR*) buffer, size);
 #elif JUCE_MAC
         _NSGetExecutablePath ((char*) buffer, &size);
-        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer, size);
+        return String::fromUTF8 (buffer, size);
 #elif JUCE_LINUX
         readlink ("/proc/self/exe", (char*) buffer, size);
-        return String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) buffer, size);
+        return String::fromUTF8 (buffer, size);
 #else
         #error
 #endif

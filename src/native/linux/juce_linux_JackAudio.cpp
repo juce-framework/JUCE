@@ -86,7 +86,7 @@ JUCE_DECL_JACK_FUNCTION (int, jack_port_connected_to, (const jack_port_t* port, 
 #if JACK_LOGGING_ENABLED
 static void jack_Log (const String& s)
 {
-    puts (s);
+    std::cerr << s << std::endl;
 }
 
 static void dumpJackErrorMessage (const jack_status_t status) throw()
@@ -148,9 +148,9 @@ public:
             for (int i = 0; i < inputChannels.size(); i++)
             {
                 String inputName;
-                inputName << "in_" << (++totalNumberOfInputChannels);
+                inputName << "in_" << ++totalNumberOfInputChannels;
 
-                inputPorts.add (JUCE_NAMESPACE::jack_port_register (client, (const char*) inputName,
+                inputPorts.add (JUCE_NAMESPACE::jack_port_register (client, inputName.toUTF8(),
                                                                     JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
             }
 
@@ -159,9 +159,9 @@ public:
             for (int i = 0; i < outputChannels.size (); i++)
             {
                 String outputName;
-                outputName << "out_" << (++totalNumberOfOutputChannels);
+                outputName << "out_" << ++totalNumberOfOutputChannels;
 
-                outputPorts.add (JUCE_NAMESPACE::jack_port_register (client, (const char*) outputName,
+                outputPorts.add (JUCE_NAMESPACE::jack_port_register (client, outputName.toUTF8(),
                                                                      JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
             }
 

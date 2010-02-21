@@ -241,11 +241,11 @@ void var::writeToStream (OutputStream& output) const
         case doubleType:    output.writeCompressedInt (9); output.writeByte (4); output.writeDouble (value.doubleValue); break;
         case stringType:
         {
-            const int len = value.stringValue->copyToUTF8 (0);
+            const int len = value.stringValue->getNumBytesAsUTF8() + 1;
             output.writeCompressedInt (len + 1);
             output.writeByte (5);
             HeapBlock <uint8> temp (len);
-            value.stringValue->copyToUTF8 (temp);
+            value.stringValue->copyToUTF8 (temp, len);
             output.write (temp, len);
             break;
         }
@@ -271,7 +271,7 @@ const var var::readFromStream (InputStream& input)
             {
                 MemoryBlock mb;
                 input.readIntoMemoryBlock (mb, numBytes - 1);
-                return var (String::fromUTF8 ((const uint8*) mb.getData(), (int) mb.getSize()));
+                return var (String::fromUTF8 ((const char*) mb.getData(), (int) mb.getSize()));
             }
 
             default:    input.skipNextBytes (numBytes - 1); break;

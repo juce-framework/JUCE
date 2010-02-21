@@ -183,12 +183,8 @@ static int errorHandler (Display* display, XErrorEvent* event)
 
     XGetErrorText (display, event->error_code, errorStr, 64);
 
-    XGetErrorDatabaseText (display,
-                           "XRequest",
-                           (const char*) String (event->request_code),
-                           "Unknown",
-                           requestStr,
-                           64);
+    XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toCString(),
+                           "Unknown", requestStr, 64);
 
     DBG (T("ERROR: X returned ") + String (errorStr) + T(" for operation ") + String (requestStr));
 #endif
@@ -279,9 +275,9 @@ void MessageManager::doPlatformSpecificInitialisation()
     // Try to connect to a display
     String displayName (getenv ("DISPLAY"));
     if (displayName.isEmpty())
-        displayName = T(":0.0");
+        displayName = ":0.0";
 
-    display = XOpenDisplay (displayName);
+    display = XOpenDisplay (displayName.toCString());
 
     if (display == 0)
     {

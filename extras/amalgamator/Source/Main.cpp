@@ -118,7 +118,7 @@ static bool parseFile (const File& rootFolder,
 
     if (lines.size() == 0)
     {
-        std::cout << "!! ERROR - input file was empty: " << (const char*) file.getFullPathName();
+        std::cout << "!! ERROR - input file was empty: " << file.getFullPathName();
         return false;
     }
 
@@ -268,7 +268,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
     wildcards.trim();
     wildcards.removeEmptyStrings();
 
-    std::cout << "Building: " << (const char*) targetFile.getFullPathName() << "...\n";
+    std::cout << "Building: " << targetFile.getFullPathName() << "...\n";
 
     TemporaryFile temp (targetFile);
     ScopedPointer <FileOutputStream> out (temp.getFile().createOutputStream (1024 * 128));
@@ -276,7 +276,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
     if (out == 0)
     {
         std::cout << "\n!! ERROR - couldn't write to the target file: "
-                  << (const char*) temp.getFile().getFullPathName() << "\n\n";
+                  << temp.getFile().getFullPathName() << "\n\n";
         return false;
     }
 
@@ -302,7 +302,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
     if (! temp.overwriteTargetFileWithTemporary())
     {
         std::cout << "\n!! ERROR - couldn't write to the target file: "
-                  << (const char*) targetFile.getFullPathName() << "\n\n";
+                  << targetFile.getFullPathName() << "\n\n";
         return false;
     }
 

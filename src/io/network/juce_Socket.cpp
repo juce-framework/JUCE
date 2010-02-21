@@ -243,7 +243,7 @@ static bool connectSocket (int volatile& handle,
                            const int portNumber,
                            const int timeOutMillisecs) throw()
 {
-    struct hostent* const hostEnt = gethostbyname (hostName);
+    struct hostent* const hostEnt = gethostbyname (hostName.toUTF8());
 
     if (hostEnt == 0)
         return false;

@@ -94,7 +94,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
             }
             else
             {
-                textToParse = String::fromUTF8 ((const uint8*) data.getData(), (int) data.getSize());
+                textToParse = String::fromUTF8 ((const char*) data.getData(), (int) data.getSize());
             }
 
             if (! onlyReadOuterDocumentElement)

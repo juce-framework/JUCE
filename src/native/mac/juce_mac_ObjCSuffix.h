@@ -40,6 +40,6 @@
  #define JUCE_ObjCExtraSuffix 3
 #endif
 
-#define appendMacro1(a, b, c, d) a ## _ ## b ## _ ## c ## _ ## d
-#define appendMacro2(a, b, c, d) appendMacro1(a, b, c, d)
-#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_ObjCExtraSuffix)
+#define appendMacro1(a, b, c, d, e) a ## _ ## b ## _ ## c ## _ ## d ## _ ## e
+#define appendMacro2(a, b, c, d, e) appendMacro1(a, b, c, d, e)
+#define MakeObjCClassName(rootName)  appendMacro2 (rootName, JUCE_MAJOR_VERSION, JUCE_MINOR_VERSION, JUCE_BUILDNUMBER, JUCE_ObjCExtraSuffix)

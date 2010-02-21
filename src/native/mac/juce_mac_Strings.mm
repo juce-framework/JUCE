@@ -30,12 +30,12 @@
 //==============================================================================
 static const String nsStringToJuce (NSString* s)
 {
-    return String::fromUTF8 ((uint8*) [s UTF8String]);
+    return String::fromUTF8 ([s UTF8String]);
 }
 
 static NSString* juceStringToNS (const String& s)
 {
-    return [NSString stringWithUTF8String: (const char*) s.toUTF8()];
+    return [NSString stringWithUTF8String: s.toUTF8()];
 }
 
 
@@ -56,18 +56,11 @@ const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
 
     if (cfString != 0)
     {
-#if JUCE_STRINGS_ARE_UNICODE
         CFRange range = { 0, CFStringGetLength (cfString) };
         HeapBlock <UniChar> u (range.length + 1);
         CFStringGetCharacters (cfString, range, u);
         u[range.length] = 0;
         result = convertUTF16ToString (u);
-#else
-        const int len = CFStringGetLength (cfString);
-        HeapBlock <char> buffer (len + 1);
-        CFStringGetCString (cfString, buffer, len + 1, CFStringGetSystemEncoding());
-        result = buffer;
-#endif
     }
 
     return result;
@@ -75,7 +68,6 @@ const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
 
 CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 {
-#if JUCE_STRINGS_ARE_UNICODE
     const int len = s.length();
     const juce_wchar* t = (const juce_wchar*) s;
     HeapBlock <UniChar> temp (len + 2);
@@ -84,12 +76,6 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
         temp[i] = t[i];
 
     return CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
-
-#else
-    return CFStringCreateWithCString (kCFAllocatorDefault,
-                                      (const char*) s,
-                                      CFStringGetSystemEncoding());
-#endif
 }
 
 const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)

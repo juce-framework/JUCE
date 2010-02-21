@@ -111,6 +111,31 @@ int CharacterFunctions::compare (const juce_wchar* s1, const juce_wchar* s2, int
     return wcsncmp (s1, s2, maxChars);
 }
 
+int CharacterFunctions::compare (const juce_wchar* s1, const char* s2) throw()
+{
+    jassert (s1 != 0 && s2 != 0);
+
+    for (;;)
+    {
+        const int diff = (int) (*s1 - (juce_wchar) (unsigned char) *s2);
+
+        if (diff != 0)
+            return diff;
+        else if (*s1 == 0)
+            break;
+
+        ++s1;
+        ++s2;
+    }
+
+    return 0;
+}
+
+int CharacterFunctions::compare (const char* s1, const juce_wchar* s2) throw()
+{
+    return -compare (s2, s1);
+}
+
 int CharacterFunctions::compareIgnoreCase (const char* const s1, const char* const s2) throw()
 {
     jassert (s1 != 0 && s2 != 0);
@@ -481,7 +506,7 @@ double juce_atof (const CharType* const original) throw()
     }
 
     if (*s == 'n' || *s == 'N' || *s == 'i' || *s == 'I')
-        return atof (String (original)); // Let the c library deal with NAN and INF
+        return atof (String (original).toUTF8()); // Let the c library deal with NAN and INF
 
     for (;;)
     {
@@ -734,14 +759,14 @@ bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
     return iswalnum (character) != 0;
 }
 
-int CharacterFunctions::getHexDigitValue (const tchar digit) throw()
+int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
 {
-    if (digit >= T('0') && digit <= T('9'))
-        return digit - T('0');
-    else if (digit >= T('a') && digit <= T('f'))
-        return digit - (T('a') - 10);
-    else if (digit >= T('A') && digit <= T('F'))
-        return digit - (T('A') - 10);
+    if (digit >= '0' && digit <= '9')
+        return digit - '0';
+    else if (digit >= 'a' && digit <= 'f')
+        return digit - ('a' - 10);
+    else if (digit >= 'A' && digit <= 'F')
+        return digit - ('A' - 10);
 
     return -1;
 }

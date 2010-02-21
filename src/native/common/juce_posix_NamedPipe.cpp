@@ -74,8 +74,8 @@ void NamedPipe::close()
 
         if (intern->createdPipe)
         {
-            unlink (intern->pipeInName);
-            unlink (intern->pipeOutName);
+            unlink (intern->pipeInName.toUTF8());
+            unlink (intern->pipeOutName.toUTF8());
         }
 
         delete intern;
@@ -104,8 +104,8 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
 
     if (createPipe)
     {
-        if ((mkfifo (intern->pipeInName, 0666) && errno != EEXIST)
-            || (mkfifo (intern->pipeOutName, 0666) && errno != EEXIST))
+        if ((mkfifo (intern->pipeInName.toUTF8(), 0666) && errno != EEXIST)
+            || (mkfifo (intern->pipeOutName.toUTF8(), 0666) && errno != EEXIST))
         {
             delete intern;
             internal = 0;
@@ -129,9 +129,9 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int /*timeOutMillisec
         if (intern->pipeIn == -1)
         {
             if (intern->createdPipe)
-                intern->pipeIn = ::open (intern->pipeInName, O_RDWR);
+                intern->pipeIn = ::open (intern->pipeInName.toUTF8(), O_RDWR);
             else
-                intern->pipeIn = ::open (intern->pipeOutName, O_RDWR);
+                intern->pipeIn = ::open (intern->pipeOutName.toUTF8(), O_RDWR);
 
             if (intern->pipeIn == -1)
             {
@@ -175,9 +175,9 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
         if (intern->pipeOut == -1)
         {
             if (intern->createdPipe)
-                intern->pipeOut = ::open (intern->pipeOutName, O_WRONLY);
+                intern->pipeOut = ::open (intern->pipeOutName.toUTF8(), O_WRONLY);
             else
-                intern->pipeOut = ::open (intern->pipeInName, O_WRONLY);
+                intern->pipeOut = ::open (intern->pipeInName.toUTF8(), O_WRONLY);
 
             if (intern->pipeOut == -1)
             {

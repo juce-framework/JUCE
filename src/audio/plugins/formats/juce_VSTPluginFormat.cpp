@@ -2040,7 +2040,7 @@ void VSTPluginInstance::setParamsInProgramBlock (fxProgram* const prog) throw()
     prog->fxVersion = vst_swap (getVersionNumber());
     prog->numParams = vst_swap (numParams);
 
-    getCurrentProgramName().copyToBuffer (prog->prgName, sizeof (prog->prgName) - 1);
+    getCurrentProgramName().copyToCString (prog->prgName, sizeof (prog->prgName) - 1);
 
     for (int i = 0; i < numParams; ++i)
         prog->params[i] = vst_swapFloat (getParameter (i));
@@ -2091,7 +2091,7 @@ bool VSTPluginInstance::saveToFXBFile (MemoryBlock& dest, bool isFXB, int maxSiz
             set->numPrograms = vst_swap (numPrograms);
             set->chunkSize = vst_swap ((long) chunk.getSize());
 
-            getCurrentProgramName().copyToBuffer (set->name, sizeof (set->name) - 1);
+            getCurrentProgramName().copyToCString (set->name, sizeof (set->name) - 1);
             chunk.copyTo (set->chunk, 0, chunk.getSize());
         }
     }
@@ -2275,7 +2275,7 @@ static VstIntPtr handleGeneralCallback (VstInt32 opcode, VstInt32 index, VstInt3
             if (JUCEApplication::getInstance() != 0)
                 hostName = JUCEApplication::getInstance()->getApplicationName();
 
-            hostName.copyToBuffer ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
+            hostName.copyToCString ((char*) ptr, jmin (kVstMaxVendorStrLen, kVstMaxProductStrLen) - 1);
         }
         break;
 
@@ -2373,7 +2373,7 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
       #if JUCE_MAC
         return (VstIntPtr) (void*) &module->parentDirFSSpec;
       #else
-        return (VstIntPtr) (pointer_sized_uint) (const char*) module->fullParentDirectoryPathName;
+        return (VstIntPtr) (pointer_sized_uint) module->fullParentDirectoryPathName.toUTF8();
       #endif
 
     case audioMasterGetAutomationState:
@@ -2621,7 +2621,7 @@ void VSTPluginInstance::createTempParameterStore (MemoryBlock& dest)
     dest.setSize (64 + 4 * getNumParameters());
     dest.fillWith (0);
 
-    getCurrentProgramName().copyToBuffer ((char*) dest.getData(), 63);
+    getCurrentProgramName().copyToCString ((char*) dest.getData(), 63);
 
     float* const p = (float*) (((char*) dest.getData()) + 64);
     for (int i = 0; i < getNumParameters(); ++i)
@@ -2671,7 +2671,7 @@ void VSTPluginInstance::changeProgramName (int index, const String& newName)
     if (index == getCurrentProgram())
     {
         if (getNumPrograms() > 0 && newName != getCurrentProgramName())
-            dispatch (effSetProgramName, 0, 0, (void*) (const char*) newName.substring (0, 24), 0.0f);
+            dispatch (effSetProgramName, 0, 0, (void*) newName.substring (0, 24).toCString(), 0.0f);
     }
     else
     {

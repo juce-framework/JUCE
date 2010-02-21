@@ -5,6 +5,11 @@ ifndef CONFIG
   CONFIG=Debug
 endif
 
+ifeq ($(TARGET_ARCH),)
+  TARGET_ARCH := -march=native
+endif
+
+# (this disables dependency generation if multiple architectures are set)
 DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)
 
 ifeq ($(CONFIG),Debug)

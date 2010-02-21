@@ -178,10 +178,8 @@ public:
 
                 do
                 {
-                    if (FT_New_Face (ftLib,
-                                     possible.getFullPathName(),
-                                     faceIndex,
-                                     &face) == 0)
+                    if (FT_New_Face (ftLib, possible.getFullPathName().toUTF8(),
+                                     faceIndex, &face) == 0)
                     {
                         if (faceIndex == 0)
                             numFaces = face->num_faces;
@@ -276,7 +274,7 @@ public:
                     }
                 }
 
-                if (! FT_New_Face (ftLib, (const char*) fileName, faceIndex, &lastFace))
+                if (! FT_New_Face (ftLib, fileName.toUTF8(), faceIndex, &lastFace))
                 {
                     face = lastFace;
 

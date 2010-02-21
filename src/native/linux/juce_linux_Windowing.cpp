@@ -1162,7 +1162,7 @@ public:
                 KeySym sym;
                 XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
 
-                const juce_wchar unicodeChar = *(const juce_wchar*) String::fromUTF8 ((const uint8*) utf8, sizeof (utf8) - 1);
+                const juce_wchar unicodeChar = *(const juce_wchar*) String::fromUTF8 (utf8, sizeof (utf8) - 1);
                 int keyCode = (int) unicodeChar;
 
                 if (keyCode < 0x20)
@@ -1667,7 +1667,7 @@ public:
 
         String screenAtom ("_NET_SYSTEM_TRAY_S");
         screenAtom << screenNumber;
-        Atom selectionAtom = XInternAtom (display, (const char*) screenAtom, false);
+        Atom selectionAtom = XInternAtom (display, screenAtom.toUTF8(), false);
 
         XGrabServer (display);
         Window managerWin = XGetSelectionOwner (display, selectionAtom);
@@ -2231,10 +2231,10 @@ private:
         return eventTimeOffset + thisMessageTime;
     }
 
-    static void setWindowTitle (Window xwin, const char* const title) throw()
+    static void setWindowTitle (Window xwin, const String& title)
     {
         XTextProperty nameProperty;
-        char* strings[] = { (char*) title };
+        char* strings[] = { const_cast <char*> (title.toUTF8()) };
         ScopedXLock xlock;
 
         if (XStringListToTextProperty (strings, 1, &nameProperty))

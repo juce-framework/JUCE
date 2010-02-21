@@ -172,7 +172,7 @@ END_JUCE_NAMESPACE
 
         if ([err length] > 0)
         {
-            *error = JUCE_NAMESPACE::String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [err UTF8String]);
+            *error = JUCE_NAMESPACE::String::fromUTF8 ([err UTF8String]);
             break;
         }
     }
@@ -465,7 +465,7 @@ const StringArray AudioCDBurner::findAvailableDevices()
     StringArray s;
 
     for (unsigned int i = 0; i < [names count]; ++i)
-        s.add (String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [[names objectAtIndex: i] UTF8String]));
+        s.add (String::fromUTF8 ([[names objectAtIndex: i] UTF8String]));
 
     return s;
 }

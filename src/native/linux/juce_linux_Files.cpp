@@ -188,7 +188,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
                 homeDir = pw->pw_dir;
         }
 
-        return File (String::fromUTF8 ((const uint8*) homeDir));
+        return File (String::fromUTF8 (homeDir));
     }
 
     case userDocumentsDirectory:
@@ -223,7 +223,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case invokedExecutableFile:
         if (juce_Argv0 != 0)
-            return File (String::fromUTF8 ((const uint8*) juce_Argv0));
+            return File (String::fromUTF8 (juce_Argv0));
         // deliberate fall-through...
 
     case currentExecutableFile:
@@ -248,11 +248,11 @@ const String File::getVersion() const
 const File File::getLinkedTarget() const
 {
     char buffer [4096];
-    size_t numChars = readlink ((const char*) getFullPathName().toUTF8(),
+    size_t numChars = readlink (getFullPathName().toUTF8(),
                                 buffer, sizeof (buffer));
 
     if (numChars > 0 && numChars <= sizeof (buffer))
-        return File (String::fromUTF8 ((const uint8*) buffer, (int) numChars));
+        return File (String::fromUTF8 (buffer, (int) numChars));
 
     return *this;
 }
@@ -295,7 +295,7 @@ struct FindFileStruct
 
             if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
             {
-                result = String::fromUTF8 ((const uint8*) de->d_name);
+                result = String::fromUTF8 (de->d_name);
 
                 const String path (parentDir + result);
 

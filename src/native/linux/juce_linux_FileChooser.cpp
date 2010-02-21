@@ -81,7 +81,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
     if (status == 0)
     {
-        String resultString (String::fromUTF8 ((const uint8*) result.getData(), result.getDataSize()));
+        String resultString (String::fromUTF8 ((const char*) result.getData(), result.getDataSize()));
         StringArray tokens;
 
         if (selectMultipleFiles)

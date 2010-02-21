@@ -92,7 +92,7 @@ public:
         {
             // Two ScopedPointers should never be able to refer to the same object - if
             // this happens, you must have done something dodgy!
-            jassert (object != objectToTransferFrom.object);
+            jassert (object == 0 || object != objectToTransferFrom.object);
 
             ObjectType* const oldObject = object;
             object = objectToTransferFrom.object;

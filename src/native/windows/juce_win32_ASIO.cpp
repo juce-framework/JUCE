@@ -1843,38 +1843,30 @@ private:
         HKEY hk = 0;
         bool ok = false;
 
-        if (RegOpenKeyA (HKEY_CLASSES_ROOT, "clsid", &hk) == ERROR_SUCCESS)
+        if (RegOpenKey (HKEY_CLASSES_ROOT, _T("clsid"), &hk) == ERROR_SUCCESS)
         {
             int index = 0;
 
             for (;;)
             {
-                char buf [512];
+                WCHAR buf [512];
 
-                if (RegEnumKeyA (hk, index++, buf, 512) == ERROR_SUCCESS)
+                if (RegEnumKey (hk, index++, buf, 512) == ERROR_SUCCESS)
                 {
                     if (classId.equalsIgnoreCase (buf))
                     {
                         HKEY subKey, pathKey;
 
-                        if (RegOpenKeyExA (hk, buf, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
+                        if (RegOpenKeyEx (hk, buf, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
                         {
-                            if (RegOpenKeyExA (subKey, "InprocServer32", 0, KEY_READ, &pathKey) == ERROR_SUCCESS)
+                            if (RegOpenKeyEx (subKey, _T("InprocServer32"), 0, KEY_READ, &pathKey) == ERROR_SUCCESS)
                             {
-                                char pathName [600];
+                                WCHAR pathName [1024];
                                 DWORD dtype = REG_SZ;
                                 DWORD dsize = sizeof (pathName);
 
-                                if (RegQueryValueExA (pathKey, 0, 0, &dtype,
-                                                      (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
-                                {
-                                    OFSTRUCT of;
-                                    zerostruct (of);
-
-                                    of.cBytes = sizeof (of);
-
-                                    ok = (OpenFile (String (pathName), &of, OF_EXIST) != 0);
-                                }
+                                if (RegQueryValueEx (pathKey, 0, 0, &dtype, (LPBYTE) pathName, &dsize) == ERROR_SUCCESS)
+                                    ok = File (pathName).exists();
 
                                 RegCloseKey (pathKey);
                             }
@@ -1902,29 +1894,25 @@ private:
     {
         HKEY subKey;
 
-        if (RegOpenKeyExA (hk, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
+        if (RegOpenKeyEx (hk, keyName, 0, KEY_READ, &subKey) == ERROR_SUCCESS)
         {
-            char buf [256];
+            WCHAR buf [256];
+            zerostruct (buf);
             DWORD dtype = REG_SZ;
             DWORD dsize = sizeof (buf);
-            zeromem (buf, dsize);
 
-            if (RegQueryValueExA (subKey, "clsid", 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
+            if (RegQueryValueEx (subKey, _T("clsid"), 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
             {
                 if (dsize > 0 && checkClassIsOk (buf))
                 {
-                    wchar_t classIdStr [130];
-                    MultiByteToWideChar (CP_ACP, 0, buf, -1, classIdStr, 128);
-
-                    String deviceName;
                     CLSID classId;
-
-                    if (CLSIDFromString ((LPOLESTR) classIdStr, &classId) == S_OK)
+                    if (CLSIDFromString ((LPOLESTR) buf, &classId) == S_OK)
                     {
                         dtype = REG_SZ;
                         dsize = sizeof (buf);
+                        String deviceName;
 
-                        if (RegQueryValueExA (subKey, "description", 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
+                        if (RegQueryValueEx (subKey, _T("description"), 0, &dtype, (LPBYTE) buf, &dsize) == ERROR_SUCCESS)
                             deviceName = buf;
                         else
                             deviceName = keyName;

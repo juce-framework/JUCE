@@ -33,6 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      51
+#define JUCE_BUILDNUMBER        0
 
 /** Current Juce version number.
 
@@ -42,7 +43,7 @@
 
     See also SystemStats::getJUCEVersion() for a string version.
 */
-#define JUCE_VERSION            ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8))
+#define JUCE_VERSION            ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
 
 //==============================================================================

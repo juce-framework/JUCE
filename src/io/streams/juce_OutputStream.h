@@ -235,13 +235,8 @@ public:
     /** Writes a null-terminated string to the stream. */
     virtual OutputStream& operator<< (const char* const text);
 
-    /** Writes a null-terminated unicode text string to the stream, converting it
-        to 8-bit characters in the default system encoding. */
-    virtual OutputStream& operator<< (const juce_wchar* const text);
-
-    /** Writes a string to the stream as 8-bit characters in the default system encoding. */
+    /** Writes a null-terminated text string to the stream, converting it to UTF8. */
     virtual OutputStream& operator<< (const String& text);
-
 
     //==============================================================================
     juce_UseDebuggingNewOperator

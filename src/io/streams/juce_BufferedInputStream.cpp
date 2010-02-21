@@ -171,8 +171,7 @@ const String BufferedInputStream::readString()
             if (src[i] == 0)
             {
                 position += i + 1;
-
-                return String::fromUTF8 ((const uint8*) src, i);
+                return String::fromUTF8 (src, i);
             }
         }
     }

@@ -43,9 +43,10 @@ void juce_initialiseStrings();
 //==============================================================================
 const String SystemStats::getJUCEVersion() throw()
 {
-    return "JUCE v" + String (JUCE_MAJOR_VERSION) + "." + String (JUCE_MINOR_VERSION);
+    return "JUCE v" + String (JUCE_MAJOR_VERSION)
+              + "." + String (JUCE_MINOR_VERSION)
+              + "." + String (JUCE_BUILDNUMBER);
 }
-
 
 //==============================================================================
 static bool juceInitialisedNonGUI = false;

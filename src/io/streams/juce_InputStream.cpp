@@ -157,7 +157,7 @@ double InputStream::readDoubleBigEndian()
 const String InputStream::readString()
 {
     MemoryBlock buffer (256);
-    uint8* data = (uint8*) buffer.getData();
+    char* data = (char*) buffer.getData();
     size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
@@ -165,7 +165,7 @@ const String InputStream::readString()
         if (++i >= buffer.getSize())
         {
             buffer.setSize (buffer.getSize() + 512);
-            data = (uint8*) buffer.getData();
+            data = (char*) buffer.getData();
         }
     }
 
@@ -175,7 +175,7 @@ const String InputStream::readString()
 const String InputStream::readNextLine()
 {
     MemoryBlock buffer (256);
-    uint8* data = (uint8*) buffer.getData();
+    char* data = (char*) buffer.getData();
     size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
@@ -196,7 +196,7 @@ const String InputStream::readNextLine()
         if (++i >= buffer.getSize())
         {
             buffer.setSize (buffer.getSize() + 512);
-            data = (uint8*) buffer.getData();
+            data = (char*) buffer.getData();
         }
     }
 

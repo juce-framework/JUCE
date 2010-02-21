@@ -266,13 +266,6 @@
   #define JUCE_CATCH_UNHANDLED_EXCEPTIONS 1
 #endif
 
-/** JUCE_STRINGS_ARE_UNICODE: If this macro is set, the Juce String class will use
-    unicode as its internal representation. If disabled, it'll use ANSI.
-*/
-#ifndef JUCE_STRINGS_ARE_UNICODE
-  #define JUCE_STRINGS_ARE_UNICODE 1
-#endif
-
 //=============================================================================
 // If only building the core classes, we can explicitly turn off some features to avoid including them:
 #if JUCE_ONLY_BUILD_CORE_LIBRARY

@@ -44,8 +44,8 @@ void SystemClipboard::copyTextToClipboard (const String& text) throw()
 
                 if (bufH != 0)
                 {
-                    wchar_t* const data = (wchar_t*) GlobalLock (bufH);
-                    text.copyToBuffer (data, len);
+                    WCHAR* const data = (WCHAR*) GlobalLock (bufH);
+                    text.copyToUnicode (data, len);
                     GlobalUnlock (bufH);
 
                     SetClipboardData (CF_UNICODETEXT, bufH);

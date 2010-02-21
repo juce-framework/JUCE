@@ -272,15 +272,14 @@ int JUCEApplication::shutdownAppAndClearUp()
 }
 
 #if JUCE_IPHONE
- extern int juce_IPhoneMain (int argc, char* argv[], JUCEApplication* app);
+ extern int juce_IPhoneMain (int argc, const char* argv[], JUCEApplication* app);
 #endif
 
 #if ! JUCE_WINDOWS
 extern const char* juce_Argv0;
 #endif
 
-int JUCEApplication::main (int argc, char* argv[],
-                           JUCEApplication* const newApp)
+int JUCEApplication::main (int argc, const char* argv[], JUCEApplication* const newApp)
 {
 #if ! JUCE_WINDOWS
     juce_Argv0 = argv[0];
@@ -297,7 +296,7 @@ int JUCEApplication::main (int argc, char* argv[],
 
     String cmd;
     for (int i = 1; i < argc; ++i)
-        cmd << String::fromUTF8 ((const uint8*) argv[i]) << T(' ');
+        cmd << argv[i] << ' ';
 
     return JUCEApplication::main (cmd, newApp);
 #endif

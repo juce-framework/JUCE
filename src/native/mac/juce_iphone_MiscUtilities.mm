@@ -61,10 +61,10 @@ END_JUCE_NAMESPACE
 
 BEGIN_JUCE_NAMESPACE
 
-int juce_IPhoneMain (int argc, char* argv[], JUCEApplication* app)
+int juce_IPhoneMain (int argc, const char* argv[], JUCEApplication* app)
 {
     juce_intialisingApp = app;
-    return UIApplicationMain (argc, argv, nil, @"JuceAppStartupDelegate");
+    return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
 }
 
 //==============================================================================

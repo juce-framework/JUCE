@@ -127,8 +127,7 @@ static snd_seq_t* createDevice (const bool forInput,
                                                       : SND_SEQ_OPEN_OUTPUT, 0) == 0)
     {
         snd_seq_set_client_name (seqHandle,
-                                 (const char*) (forInput ? (deviceNameToOpen + T(" Input"))
-                                                         : (deviceNameToOpen + T(" Output"))));
+                                 (deviceNameToOpen + (forInput ? " Input" : " Output")).toCString());
 
         const int portId
             = snd_seq_create_simple_port (seqHandle,

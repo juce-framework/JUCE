@@ -158,7 +158,7 @@ void juce_setCurrentThreadName (const String& name)
     } info;
 
     info.dwType = 0x1000;
-    info.szName = name;
+    info.szName = name.toCString();
     info.dwThreadID = GetCurrentThreadId();
     info.dwFlags = 0;
 
@@ -348,8 +348,7 @@ void PlatformUtilities::freeDynamicLibrary (void* h)
 
 void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 {
-    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name)
-                    : 0;
+    return (h != 0) ? (void*) GetProcAddress ((HMODULE) h, name.toCString()) : 0;
 }
 
 

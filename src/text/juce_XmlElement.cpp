@@ -271,10 +271,9 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
     if (! isTextElement())
     {
         outputStream.writeByte ('<');
-        const int nameLen = tagName.length();
-        outputStream.write ((const char*) tagName, nameLen);
+        outputStream << tagName;
 
-        const int attIndent = indentationLevel + nameLen + 1;
+        const int attIndent = indentationLevel + tagName.length() + 1;
         int lineLen = 0;
 
         const XmlAttributeNode* att = attributes;
@@ -287,13 +286,13 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
                 lineLen = 0;
             }
 
-            const int attNameLen = att->name.length();
+            const int64 startPos = outputStream.getPosition();
             outputStream.writeByte (' ');
-            outputStream.write ((const char*) (att->name), attNameLen);
+            outputStream << att->name;
             outputStream.write ("=\"", 2);
             escapeIllegalXmlChars (outputStream, att->value, true);
             outputStream.writeByte ('"');
-            lineLen += 4 + attNameLen + att->value.length();
+            lineLen += (int) (outputStream.getPosition() - startPos);
 
             att = att->next;
         }
@@ -356,7 +355,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
             }
 
             outputStream.write ("</", 2);
-            outputStream.write ((const char*) tagName, nameLen);
+            outputStream << tagName;
 
             if (indentationLevel >= 0)
                 outputStream.write (">\r\n", 3);

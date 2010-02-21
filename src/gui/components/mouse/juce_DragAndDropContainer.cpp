@@ -390,7 +390,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                     }
                 }
 
-                imageOffset = Point<int>() - clipped;
+                imageOffset = -clipped;
             }
             else
             {

@@ -234,7 +234,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case invokedExecutableFile:
         if (juce_Argv0 != 0)
-            return File (String::fromUTF8 ((const uint8*) juce_Argv0));
+            return File (String::fromUTF8 (juce_Argv0));
         // deliberate fall-through...
 
     case currentExecutableFile:
@@ -255,7 +255,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         break;
     }
 
-    if (resultPath != 0)
+    if (resultPath.isNotEmpty())
         return File (PlatformUtilities::convertToPrecomposedUnicode (resultPath));
 
     return File::nonexistent;
@@ -421,7 +421,7 @@ void juce_findFileClose (void* handle)
 //==============================================================================
 bool juce_launchExecutable (const String& pathAndArguments)
 {
-    const char* const argv[4] = { "/bin/sh", "-c", (const char*) pathAndArguments, 0 };
+    const char* const argv[4] = { "/bin/sh", "-c", pathAndArguments.toUTF8(), 0 };
 
     const int cpid = fork();
 
@@ -502,15 +502,13 @@ bool PlatformUtilities::makeFSRefFromPath (FSRef* destFSRef, const String& path)
 
 const String PlatformUtilities::makePathFromFSRef (FSRef* file)
 {
-    uint8 path [2048];
-    zeromem (path, sizeof (path));
-
-    String result;
+    char path [2048];
+    zerostruct (path);
 
     if (FSRefMakePath (file, (UInt8*) path, sizeof (path) - 1) == noErr)
-        result = String::fromUTF8 (path);
+        return PlatformUtilities::convertToPrecomposedUnicode (String::fromUTF8 (path));
 
-    return PlatformUtilities::convertToPrecomposedUnicode (result);
+    return String::empty;
 }
 #endif
 

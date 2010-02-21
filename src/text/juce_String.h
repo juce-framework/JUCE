@@ -78,7 +78,7 @@ public:
             const size_t maxChars) throw();
 
     /** Creates a string from a single character. */
-    static const String charToString (const tchar character) throw();
+    static const String charToString (const juce_wchar character) throw();
 
     /** Destructor. */
     ~String() throw();
@@ -105,19 +105,20 @@ public:
     // Assignment and concatenation operators..
 
     /** Replaces this string's contents with another string. */
-    const String& operator= (const tchar* const other) throw();
-
-    /** Replaces this string's contents with another string. */
     const String& operator= (const String& other) throw();
 
     /** Appends another string at the end of this one. */
-    const String& operator+= (const tchar* const textToAppend) throw();
+    String& operator+= (const tchar* const textToAppend);
     /** Appends another string at the end of this one. */
-    const String& operator+= (const String& stringToAppend) throw();
+    String& operator+= (const String& stringToAppend);
     /** Appends a character at the end of this string. */
-    const String& operator+= (const char characterToAppend) throw();
+    String& operator+= (const char characterToAppend);
     /** Appends a character at the end of this string. */
-    const String& operator+= (const juce_wchar characterToAppend) throw();
+    String& operator+= (const juce_wchar characterToAppend);
+    /** Appends a decimal number at the end of this string. */
+    String& operator+= (const int numberToAppend);
+    /** Appends a decimal number at the end of this string. */
+    String& operator+= (const unsigned int numberToAppend);
 
     /** Appends a string at the end of this one.
 
@@ -125,48 +126,7 @@ public:
         @param maxCharsToTake   the maximum number of characters to take from the string passed in
     */
     void append (const tchar* const textToAppend,
-                 const int maxCharsToTake) throw();
-
-    /** Appends a string at the end of this one.
-        @returns     the concatenated string
-    */
-    const String operator+ (const String& stringToAppend) const throw();
-
-    /** Appends a string at the end of this one.
-        @returns     the concatenated string
-    */
-    const String operator+ (const tchar* const textToAppend) const throw();
-
-    /** Appends a character at the end of this one.
-        @returns     the concatenated string
-    */
-    const String operator+ (const tchar characterToAppend) const throw();
-
-    /** Appends a character at the end of this string. */
-    String& operator<< (const char n) throw();
-    /** Appends a character at the end of this string. */
-    String& operator<< (const juce_wchar n) throw();
-    /** Appends another string at the end of this one. */
-    String& operator<< (const char* const text) throw();
-    /** Appends another string at the end of this one. */
-    String& operator<< (const juce_wchar* const text) throw();
-    /** Appends another string at the end of this one. */
-    String& operator<< (const String& text) throw();
-
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const short number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const int number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const unsigned int number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const long number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const unsigned long number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const float number) throw();
-    /** Appends a decimal number at the end of this string. */
-    String& operator<< (const double number) throw();
+                 const int maxCharsToTake);
 
     //==============================================================================
     // Comparison methods..
@@ -187,44 +147,38 @@ public:
     */
     inline bool isNotEmpty() const throw()                  { return text->text[0] != 0; }
 
-    /** Case-sensitive comparison with another string. */
-    bool operator== (const String& other) const throw();
-    /** Case-sensitive comparison with another string. */
-    bool operator== (const tchar* const other) const throw();
-
-    /** Case-sensitive comparison with another string. */
-    bool operator!= (const String& other) const throw();
-    /** Case-sensitive comparison with another string. */
-    bool operator!= (const tchar* const other) const throw();
-
     /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const String& other) const throw();
     /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const tchar* const other) const throw();
-
-    /** Case-sensitive comparison with another string. */
-    bool operator> (const String& other) const throw();
-    /** Case-sensitive comparison with another string. */
-    bool operator< (const tchar* const other) const throw();
-
-    /** Case-sensitive comparison with another string. */
-    bool operator>= (const String& other) const throw();
-    /** Case-sensitive comparison with another string. */
-    bool operator<= (const tchar* const other) const throw();
 
     /** Case-sensitive comparison with another string.
         @returns     0 if the two strings are identical; negative if this string
                      comes before the other one alphabetically, or positive if it
                      comes after it.
     */
-    int compare (const tchar* const other) const throw();
+    int compare (const String& other) const throw();
+
+    /** Case-sensitive comparison with another string.
+        @returns     0 if the two strings are identical; negative if this string
+                     comes before the other one alphabetically, or positive if it
+                     comes after it.
+    */
+    int compare (const char* other) const throw();
+
+    /** Case-sensitive comparison with another string.
+        @returns     0 if the two strings are identical; negative if this string
+                     comes before the other one alphabetically, or positive if it
+                     comes after it.
+    */
+    int compare (const juce_wchar* other) const throw();
 
     /** Case-insensitive comparison with another string.
         @returns     0 if the two strings are identical; negative if this string
                      comes before the other one alphabetically, or positive if it
                      comes after it.
     */
-    int compareIgnoreCase (const tchar* const other) const throw();
+    int compareIgnoreCase (const String& other) const throw();
 
     /** Lexicographic comparison with another string.
 
@@ -235,58 +189,49 @@ public:
                      comes before the other one alphabetically, or positive if it
                      comes after it.
     */
-    int compareLexicographically (const tchar* const other) const throw();
+    int compareLexicographically (const String& other) const throw();
 
     /** Tests whether the string begins with another string.
-
         Uses a case-sensitive comparison.
     */
     bool startsWith (const tchar* const text) const throw();
 
     /** Tests whether the string begins with a particular character.
-
         Uses a case-sensitive comparison.
     */
     bool startsWithChar (const tchar character) const throw();
 
     /** Tests whether the string begins with another string.
-
         Uses a case-insensitive comparison.
     */
     bool startsWithIgnoreCase (const tchar* const text) const throw();
 
     /** Tests whether the string ends with another string.
-
         Uses a case-sensitive comparison.
     */
     bool endsWith (const tchar* const text) const throw();
 
     /** Tests whether the string ends with a particular character.
-
         Uses a case-sensitive comparison.
     */
     bool endsWithChar (const tchar character) const throw();
 
     /** Tests whether the string ends with another string.
-
         Uses a case-insensitive comparison.
     */
     bool endsWithIgnoreCase (const tchar* const text) const throw();
 
     /** Tests whether the string contains another substring.
-
         Uses a case-sensitive comparison.
     */
     bool contains (const tchar* const text) const throw();
 
     /** Tests whether the string contains a particular character.
-
         Uses a case-sensitive comparison.
     */
     bool containsChar (const tchar character) const throw();
 
     /** Tests whether the string contains another substring.
-
         Uses a case-insensitive comparison.
     */
     bool containsIgnoreCase (const tchar* const text) const throw();
@@ -488,7 +433,7 @@ public:
 
         No checks are made to see if the index is within a valid range, so be careful!
     */
-    inline const tchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
+    inline const juce_wchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
 
     /** Returns a character from the string such that it can also be altered.
 
@@ -497,13 +442,13 @@ public:
         Note that the index passed-in is not checked to see whether it's in-range, so
         be careful when using this.
     */
-    tchar& operator[] (const int index) throw();
+    juce_wchar& operator[] (const int index) throw();
 
     /** Returns the final character of the string.
 
         If the string is empty this will return 0.
     */
-    tchar getLastCharacter() const throw();
+    juce_wchar getLastCharacter() const throw();
 
     //==============================================================================
     /** Returns a subsection of the string.
@@ -962,63 +907,46 @@ public:
                                      const int groupSize = 1) throw();
 
     //==============================================================================
-    // Casting to character arrays..
-
-#if JUCE_STRINGS_ARE_UNICODE
-    /** Returns a version of this string using the default 8-bit system encoding.
-
-        Because it returns a reference to the string's internal data, the pointer
-        that is returned must not be stored anywhere, as it can be deleted whenever the
-        string changes.
-    */
-    operator const char*() const throw();
-
     /** Returns a unicode version of this string.
 
         Because it returns a reference to the string's internal data, the pointer
-        that is returned must not be stored anywhere, as it can be deleted whenever the
-        string changes.
+        that is returned must not be stored anywhere, as it can become invalid whenever
+        any string methods (even some const ones!) are called.
     */
     inline operator const juce_wchar*() const throw()   { return text->text; }
-#else
-    /** Returns a version of this string using the default 8-bit system encoding.
 
-        Because it returns a reference to the string's internal data, the pointer
-        that is returned must not be stored anywhere, as it can be deleted whenever the
-        string changes.
-    */
-    inline operator const char*() const throw()         { return text->text; }
-
+    //==============================================================================
     /** Returns a unicode version of this string.
 
         Because it returns a reference to the string's internal data, the pointer
-        that is returned must not be stored anywhere, as it can be deleted whenever the
-        string changes.
+        that is returned must not be stored anywhere, as it can become invalid whenever
+        any string methods (even some const ones!) are called.
     */
-    operator const juce_wchar*() const throw();
-#endif
-
-    /** Copies the string to a buffer.
-
-        @param destBuffer       the place to copy it to
-        @param maxCharsToCopy   the maximum number of characters to copy to the buffer,
-                                not including the tailing zero, so this shouldn't be
-                                larger than the size of your destination buffer - 1
-    */
-    void copyToBuffer (char* const destBuffer,
-                       const int maxCharsToCopy) const throw();
-
-    /** Copies the string to a unicode buffer.
-
-        @param destBuffer       the place to copy it to
-        @param maxCharsToCopy   the maximum number of characters to copy to the buffer,
-                                not including the tailing zero, so this shouldn't be
-                                larger than the size of your destination buffer - 1
-    */
-    void copyToBuffer (juce_wchar* const destBuffer,
-                       const int maxCharsToCopy) const throw();
+    inline operator juce_wchar*() throw()               { return text->text; }
 
     //==============================================================================
+    /** Returns a pointer to a UTF-8 version of this string.
+
+        Because it returns a reference to the string's internal data, the pointer
+        that is returned must not be stored anywhere, as it can be deleted whenever the
+        string changes.
+
+        @see getNumBytesAsUTF8, fromUTF8, copyToUTF8, toCString
+    */
+    const char* toUTF8() const;
+
+    /** Creates a String from a UTF-8 encoded buffer.
+
+        If the size is < 0, it'll keep reading until it hits a zero.
+    */
+    static const String fromUTF8 (const char* utf8buffer, int bufferSizeBytes = -1);
+
+    /** Returns the number of bytes required to represent this string as UTF8.
+        The number returned does NOT include the trailing zero.
+        @see toUTF8, copyToUTF8
+    */
+    int getNumBytesAsUTF8() const throw();
+
     /** Copies the string to a buffer as UTF-8 characters.
 
         Returns the number of bytes copied to the buffer, including the terminating null
@@ -1029,26 +957,48 @@ public:
                                 (including the terminating null character).
         @param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
                                 string won't fit, it'll put in as many as it can while
-                                still allowing for a terminating null char at the end,
-                                and will return the number of bytes that were actually
-                                used. If this value is < 0, no limit is used.
+                                still allowing for a terminating null char at the end, and
+                                will return the number of bytes that were actually used.
     */
-    int copyToUTF8 (uint8* const destBuffer, const int maxBufferSizeBytes = 0x7fffffff) const throw();
+    int copyToUTF8 (char* destBuffer, const int maxBufferSizeBytes) const throw();
 
-    /** Returns a pointer to a UTF-8 version of this string.
+    //==============================================================================
+    /** Returns a version of this string using the default 8-bit multi-byte system encoding.
 
         Because it returns a reference to the string's internal data, the pointer
         that is returned must not be stored anywhere, as it can be deleted whenever the
         string changes.
-    */
-    const char* toUTF8() const throw();
 
-    /** Creates a String from a UTF-8 encoded buffer.
-
-        If the size is < 0, it'll keep reading until it hits a zero.
+        @see getNumBytesAsCString, copyToCString, toUTF8
     */
-    static const String fromUTF8 (const uint8* const utf8buffer,
-                                  int bufferSizeBytes = -1) throw();
+    const char* toCString() const;
+
+    /** Returns the number of bytes
+    */
+    int getNumBytesAsCString() const throw();
+
+    /** Copies the string to a buffer.
+
+        @param destBuffer       the place to copy it to; if this is a null pointer,
+                                the method just returns the number of bytes required
+                                (including the terminating null character).
+        @param maxBufferSizeBytes  the size of the destination buffer, in bytes. If the
+                                string won't fit, it'll put in as many as it can while
+                                still allowing for a terminating null char at the end, and
+                                will return the number of bytes that were actually used.
+    */
+    int copyToCString (char* destBuffer, const int maxBufferSizeBytes) const throw();
+
+    //==============================================================================
+    /** Copies the string to a unicode buffer.
+
+        @param destBuffer       the place to copy it to
+        @param maxCharsToCopy   the maximum number of characters to copy to the buffer,
+                                not including the tailing zero, so this shouldn't be
+                                larger than the size of your destination buffer - 1
+    */
+    void copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw();
+
 
     //==============================================================================
     /** Increases the string's internally allocated storage.
@@ -1102,12 +1052,7 @@ private:
     {
         int refCount;
         int allocatedNumChars;
-
-#if JUCE_STRINGS_ARE_UNICODE
-          wchar_t text[1];
-#else
-          char text[1];
-#endif
+        wchar_t text[1];
     };
 
     InternalRefCountedStringHolder* text;
@@ -1125,25 +1070,81 @@ private:
 };
 
 //==============================================================================
-/** Global operator to allow a String to be appended to a string literal.
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (const char* string1,       const String& string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (const juce_wchar* string1, const String& string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (char string1,              const String& string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (juce_wchar string1,        const String& string2);
 
-    This allows the use of expressions such as "abc" + String (x)
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const String& string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const char* string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const juce_wchar* string2);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, char characterToAppend);
+/** Concatenates two strings. */
+const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, juce_wchar characterToAppend);
 
-    @see String
- */
-const String JUCE_PUBLIC_FUNCTION   operator+ (const char* const string1,
-                                               const String& string2) throw();
+/** Appends a character at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const char characterToAppend);
+/** Appends a character at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const juce_wchar characterToAppend);
+/** Appends a string to the end of the first one. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const char* const string2);
+/** Appends a string to the end of the first one. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const juce_wchar* const string2);
+/** Appends a string to the end of the first one. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const String& string2);
 
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const short number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const int number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const unsigned int number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const long number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const unsigned long number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const float number);
+/** Appends a decimal number at the end of a string. */
+String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const double number);
 
-//==============================================================================
-/** Global operator to allow a String to be appended to a string literal.
+/** This streaming override allows you to pass a juce String directly into std output streams.
+    This is very handy for writing strings to std::cout, std::cerr, etc.
+*/
+template <class charT, class traits>
+std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+{
+    return stream << stringToWrite.toUTF8();
+}
 
-    This allows the use of expressions such as "abc" + String (x)
-
-    @see String
- */
-const String JUCE_PUBLIC_FUNCTION   operator+ (const juce_wchar* const string1,
-                                               const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const char* string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const juce_wchar* string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const char* string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const juce_wchar* string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator>  (const String& string1, const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
+/** Case-sensitive comparison of two strings. */
+bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
 
 
 #endif   // __JUCE_STRING_JUCEHEADER__

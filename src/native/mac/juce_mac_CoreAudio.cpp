@@ -153,7 +153,7 @@ public:
                         String name;
 
                         {
-                            uint8 channelName [256];
+                            char channelName [256];
                             zerostruct (channelName);
                             UInt32 nameSize = sizeof (channelName);
                             UInt32 channelNum = chanNum + 1;
@@ -1160,7 +1160,7 @@ public:
 
                     if (OK (AudioObjectGetPropertyData (devs[i], &pa, 0, 0, &size, name)))
                     {
-                        const String nameString (String::fromUTF8 ((const uint8*) name, (int) strlen (name)));
+                        const String nameString (String::fromUTF8 (name, (int) strlen (name)));
 
                         if (! alreadyLogged)
                             log (T("CoreAudio device: ") + nameString);

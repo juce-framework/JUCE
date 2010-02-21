@@ -311,7 +311,7 @@ void ZipFile::init()
                         break;
 
                     ZipEntryInfo* const zei = new ZipEntryInfo();
-                    zei->entry.filename = String::fromUTF8 ((const uint8*) buffer + 46, fileNameLen);
+                    zei->entry.filename = String::fromUTF8 (buffer + 46, fileNameLen);
 
                     const int time = ByteOrder::littleEndianShort (buffer + 12);
                     const int date = ByteOrder::littleEndianShort (buffer + 14);

@@ -165,7 +165,7 @@ END_JUCE_NAMESPACE
   #define START_JUCE_APPLICATION(AppClass) \
     int main (int argc, char* argv[]) \
     { \
-        return JUCE_NAMESPACE::JUCEApplication::main (argc, argv, new AppClass()); \
+        return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
     }
 
 #elif JUCE_WINDOWS

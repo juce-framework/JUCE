@@ -265,7 +265,7 @@ public:
     /** @internal */
     static int main (String& commandLine, JUCEApplication* const newApp);
     /** @internal */
-    static int main (int argc, char* argv[], JUCEApplication* const newApp);
+    static int main (int argc, const char* argv[], JUCEApplication* const newApp);
 
     /** @internal */
     static void sendUnhandledException (const std::exception* const e,

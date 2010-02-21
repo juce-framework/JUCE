@@ -184,7 +184,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         }
         else
         {
-            currentFileOrDirectory.getFileName().copyToBuffer (fname, numCharsAvailable);
+            currentFileOrDirectory.getFileName().copyToUnicode (fname, numCharsAvailable);
 
             initialDir = currentFileOrDirectory.getParentDirectory().getFullPathName();
         }
@@ -266,9 +266,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             {
                 WCHAR filters [1024];
                 zeromem (filters, sizeof (filters));
-                filter.copyToBuffer (filters, 1024);
-                filter.copyToBuffer (filters + filter.length() + 1,
-                                     1022 - filter.length());
+                filter.copyToUnicode (filters, 1024);
+                filter.copyToUnicode (filters + filter.length() + 1,
+                                      1022 - filter.length());
 
                 OPENFILENAMEW of;
                 zerostruct (of);
