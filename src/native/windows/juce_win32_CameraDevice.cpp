@@ -507,16 +507,16 @@ private:
                           const int minWidth, const int minHeight,
                           const int maxWidth, const int maxHeight)
     {
-        int count = 0, size = 0;
+        int count = 0, size = 0, bestArea = 0, bestIndex = -1;
         streamConfig->GetNumberOfCapabilities (&count, &size);
 
         if (size == sizeof (VIDEO_STREAM_CONFIG_CAPS))
         {
+            AM_MEDIA_TYPE* config;
+            VIDEO_STREAM_CONFIG_CAPS scc;
+
             for (int i = 0; i < count; ++i)
             {
-                VIDEO_STREAM_CONFIG_CAPS scc;
-                AM_MEDIA_TYPE* config;
-
                 HRESULT hr = streamConfig->GetStreamCaps (i, &config, (BYTE*) &scc);
 
                 if (SUCCEEDED (hr))
@@ -526,13 +526,25 @@ private:
                          && scc.InputSize.cx <= maxWidth
                          && scc.InputSize.cy <= maxHeight)
                     {
-                        hr = streamConfig->SetFormat (config);
-                        deleteMediaType (config);
-                        return SUCCEEDED (hr);
+                        int area = scc.InputSize.cx * scc.InputSize.cy;
+                        if (area > bestArea)
+                        {
+                            bestIndex = i;
+                            bestArea = area;
+                        }
                     }
 
                     deleteMediaType (config);
                 }
+            }
+
+            if (bestIndex >= 0)
+            {
+                HRESULT hr = streamConfig->GetStreamCaps (bestIndex, &config, (BYTE*) &scc);
+
+                hr = streamConfig->SetFormat (config);
+                deleteMediaType (config);
+                return SUCCEEDED (hr);
             }
         }
 
