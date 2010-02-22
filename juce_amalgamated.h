@@ -1062,6 +1062,8 @@ public:
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
 /*** End of inlined file: juce_CharacterFunctions.h ***/
 
+class OutputStream;
+
 class JUCE_API  String
 {
 public:
@@ -1408,12 +1410,6 @@ String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const unsigned long nu
 String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const float number);
 String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const double number);
 
-template <class charT, class traits>
-std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
-{
-	return stream << stringToWrite.toUTF8();
-}
-
 bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
 bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const char* string2) throw();
 bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const juce_wchar* string2) throw();
@@ -1424,6 +1420,14 @@ bool JUCE_PUBLIC_FUNCTION  operator>  (const String& string1, const String& stri
 bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& string2) throw();
 bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
 bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
+
+template <class charT, class traits>
+std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+{
+	return stream << stringToWrite.toUTF8();
+}
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const String& text);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -2793,6 +2797,10 @@ protected:
 
 class JUCE_API  OutputStream
 {
+protected:
+
+	OutputStream();
+
 public:
 	virtual ~OutputStream();
 
@@ -2837,27 +2845,18 @@ public:
 							const bool asUnicode,
 							const bool writeUnicodeHeaderBytes);
 
-	virtual void printf (const char* format, ...);
-
-	virtual int writeFromInputStream (InputStream& source,
-									  int maxNumBytesToWrite);
-
-	virtual OutputStream& operator<< (const int number);
-
-	virtual OutputStream& operator<< (const double number);
-
-	virtual OutputStream& operator<< (const char character);
-
-	virtual OutputStream& operator<< (const char* const text);
-
-	virtual OutputStream& operator<< (const String& text);
+	virtual int writeFromInputStream (InputStream& source, int maxNumBytesToWrite);
 
 	juce_UseDebuggingNewOperator
-
-protected:
-
-	OutputStream() throw();
 };
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const int number);
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const double number);
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char character);
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char* const text);
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/

@@ -27,6 +27,7 @@
 #define __JUCE_STRING_JUCEHEADER__
 
 #include "juce_CharacterFunctions.h"
+class OutputStream;
 
 
 //==============================================================================
@@ -1090,6 +1091,7 @@ const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, char characterTo
 /** Concatenates two strings. */
 const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, juce_wchar characterToAppend);
 
+//==============================================================================
 /** Appends a character at the end of a string. */
 String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const char characterToAppend);
 /** Appends a character at the end of a string. */
@@ -1116,15 +1118,7 @@ String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const float num
 /** Appends a decimal number at the end of a string. */
 String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const double number);
 
-/** This streaming override allows you to pass a juce String directly into std output streams.
-    This is very handy for writing strings to std::cout, std::cerr, etc.
-*/
-template <class charT, class traits>
-std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
-{
-    return stream << stringToWrite.toUTF8();
-}
-
+//==============================================================================
 /** Case-sensitive comparison of two strings. */
 bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
@@ -1145,6 +1139,19 @@ bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& stri
 bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
 bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
+
+//==============================================================================
+/** This streaming override allows you to pass a juce String directly into std output streams.
+    This is very handy for writing strings to std::cout, std::cerr, etc.
+*/
+template <class charT, class traits>
+std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+{
+    return stream << stringToWrite.toUTF8();
+}
+
+/** Writes a string to an OutputStream as UTF8. */
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const String& text);
 
 
 #endif   // __JUCE_STRING_JUCEHEADER__

@@ -39,6 +39,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_String.h"
 #include "../core/juce_Atomic.h"
+#include "../io/streams/juce_OutputStream.h"
 
 #ifdef _MSC_VER
   #pragma warning (pop)
@@ -769,6 +770,17 @@ String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const float number)
 String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const double number)
 {
     return string1 += String (number);
+}
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const String& text)
+{
+    // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
+    // if lots of large, persistent strings were to be written to streams).
+    const int numBytes = text.getNumBytesAsUTF8();
+    HeapBlock <uint8> temp (numBytes);
+    text.copyToUTF8 (temp, numBytes);
+    stream.write (temp, numBytes);
+    return stream;
 }
 
 //==============================================================================

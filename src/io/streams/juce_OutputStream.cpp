@@ -51,7 +51,7 @@ void juce_CheckForDanglingStreams()
 #endif
 
 //==============================================================================
-OutputStream::OutputStream() throw()
+OutputStream::OutputStream()
 {
 #if JUCE_DEBUG
     const ScopedLock sl (activeStreamLock);
@@ -167,75 +167,15 @@ void OutputStream::writeDoubleBigEndian (double value)
 
 void OutputStream::writeString (const String& text)
 {
+    // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
+    // if lots of large, persistent strings were to be written to streams).
     const int numBytes = text.getNumBytesAsUTF8() + 1;
     HeapBlock <uint8> temp (numBytes);
     text.copyToUTF8 (temp, numBytes);
     write (temp, numBytes);
 }
 
-void OutputStream::printf (const char* pf, ...)
-{
-    unsigned int bufSize = 256;
-    HeapBlock <char> buf (bufSize);
-
-    for (;;)
-    {
-        va_list list;
-        va_start (list, pf);
-
-        const int num = CharacterFunctions::vprintf (buf, bufSize, pf, list);
-
-        va_end (list);
-
-        if (num > 0)
-        {
-            write (buf, num);
-            break;
-        }
-        else if (num == 0)
-        {
-            break;
-        }
-
-        bufSize += 256;
-        buf.malloc (bufSize);
-    }
-}
-
-OutputStream& OutputStream::operator<< (const int number)
-{
-    const String s (number);
-    write (s.toUTF8(), s.getNumBytesAsUTF8());
-    return *this;
-}
-
-OutputStream& OutputStream::operator<< (const double number)
-{
-    const String s (number);
-    write (s.toUTF8(), s.getNumBytesAsUTF8());
-    return *this;
-}
-
-OutputStream& OutputStream::operator<< (const char character)
-{
-    writeByte (character);
-    return *this;
-}
-
-OutputStream& OutputStream::operator<< (const char* const text)
-{
-    write (text, (int) strlen (text));
-    return *this;
-}
-
-OutputStream& OutputStream::operator<< (const String& text)
-{
-    write (text.toUTF8(), text.getNumBytesAsUTF8());
-    return *this;
-}
-
-void OutputStream::writeText (const String& text,
-                              const bool asUnicode,
+void OutputStream::writeText (const String& text, const bool asUnicode,
                               const bool writeUnicodeHeaderBytes)
 {
     if (asUnicode)
@@ -288,8 +228,7 @@ void OutputStream::writeText (const String& text,
     }
 }
 
-int OutputStream::writeFromInputStream (InputStream& source,
-                                        int numBytesToWrite)
+int OutputStream::writeFromInputStream (InputStream& source, int numBytesToWrite)
 {
     if (numBytesToWrite < 0)
         numBytesToWrite = 0x7fffffff;
@@ -312,6 +251,29 @@ int OutputStream::writeFromInputStream (InputStream& source,
     }
 
     return numWritten;
+}
+
+//==============================================================================
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const int number)
+{
+    return stream << String (number);
+}
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const double number)
+{
+    return stream << String (number);
+}
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char character)
+{
+    stream.writeByte (character);
+    return stream;
+}
+
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char* const text)
+{
+    stream.write (text, (int) strlen (text));
+    return stream;
 }
 
 

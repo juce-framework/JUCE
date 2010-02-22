@@ -41,6 +41,10 @@
 */
 class JUCE_API  OutputStream
 {
+protected:
+    //==============================================================================
+    OutputStream();
+
 public:
     /** Destructor.
 
@@ -88,87 +92,69 @@ public:
     */
     virtual void writeByte (char byte);
 
-    /** Writes a boolean to the stream.
-
-        This is encoded as a byte - either 1 or 0.
-
+    /** Writes a boolean to the stream as a single byte.
+        This is encoded as a binary byte (not as text) with a value of 1 or 0.
         @see InputStream::readBool
     */
     virtual void writeBool (bool boolValue);
 
     /** Writes a 16-bit integer to the stream in a little-endian byte order.
-
         This will write two bytes to the stream: (value & 0xff), then (value >> 8).
-
         @see InputStream::readShort
     */
     virtual void writeShort (short value);
 
     /** Writes a 16-bit integer to the stream in a big-endian byte order.
-
         This will write two bytes to the stream: (value >> 8), then (value & 0xff).
-
         @see InputStream::readShortBigEndian
     */
     virtual void writeShortBigEndian (short value);
 
     /** Writes a 32-bit integer to the stream in a little-endian byte order.
-
         @see InputStream::readInt
     */
     virtual void writeInt (int value);
 
     /** Writes a 32-bit integer to the stream in a big-endian byte order.
-
         @see InputStream::readIntBigEndian
     */
     virtual void writeIntBigEndian (int value);
 
     /** Writes a 64-bit integer to the stream in a little-endian byte order.
-
         @see InputStream::readInt64
     */
     virtual void writeInt64 (int64 value);
 
     /** Writes a 64-bit integer to the stream in a big-endian byte order.
-
         @see InputStream::readInt64BigEndian
     */
     virtual void writeInt64BigEndian (int64 value);
 
-    /** Writes a 32-bit floating point value to the stream.
-
+    /** Writes a 32-bit floating point value to the stream in a binary format.
         The binary 32-bit encoding of the float is written as a little-endian int.
-
         @see InputStream::readFloat
     */
     virtual void writeFloat (float value);
 
-    /** Writes a 32-bit floating point value to the stream.
-
+    /** Writes a 32-bit floating point value to the stream in a binary format.
         The binary 32-bit encoding of the float is written as a big-endian int.
-
         @see InputStream::readFloatBigEndian
     */
     virtual void writeFloatBigEndian (float value);
 
-    /** Writes a 64-bit floating point value to the stream.
-
+    /** Writes a 64-bit floating point value to the stream in a binary format.
         The eight raw bytes of the double value are written out as a little-endian 64-bit int.
-
         @see InputStream::readDouble
     */
     virtual void writeDouble (double value);
 
-    /** Writes a 64-bit floating point value to the stream.
-
+    /** Writes a 64-bit floating point value to the stream in a binary format.
         The eight raw bytes of the double value are written out as a big-endian 64-bit int.
-
         @see InputStream::readDoubleBigEndian
     */
     virtual void writeDoubleBigEndian (double value);
 
-    /** Writes a condensed encoding of a 32-bit integer.
+    /** Writes a condensed binary encoding of a 32-bit integer.
 
         If you're storing a lot of integers which are unlikely to have very large values,
         this can save a lot of space, because values under 0xff will only take up 2 bytes,
@@ -180,23 +166,23 @@ public:
     */
     virtual void writeCompressedInt (int value);
 
-    /** Stores a string in the stream.
+    /** Stores a string in the stream in a binary format.
 
         This isn't the method to use if you're trying to append text to the end of a
-        text-file! It's intended for storing a string for later retrieval
-        by InputStream::readString.
+        text-file! It's intended for storing a string so that it can be retrieved later
+        by InputStream::readString().
 
-        It writes the string to the stream as UTF8, with a null character terminating it.
+        It writes the string to the stream as UTF8, including the null termination character.
 
-        For appending text to a file, instead use writeText, printf, or operator<<
+        For appending text to a file, instead use writeText, or operator<<
 
-        @see InputStream::readString, writeText, printf, operator<<
+        @see InputStream::readString, writeText, operator<<
     */
     virtual void writeString (const String& text);
 
     /** Writes a string of text to the stream.
 
-        It can either write it as 8-bit system-encoded characters, or as unicode, and
+        It can either write it as UTF8 characters or as unicode, and
         can also add unicode header bytes (0xff, 0xfe) to indicate the endianness (this
         should only be done at the start of a file).
 
@@ -206,12 +192,6 @@ public:
                             const bool asUnicode,
                             const bool writeUnicodeHeaderBytes);
 
-    /** Writes a string of text to the stream.
-
-        @see writeText
-    */
-    virtual void printf (const char* format, ...);
-
     /** Reads data from an input stream and writes it to this stream.
 
         @param source               the stream to read from
@@ -219,32 +199,25 @@ public:
                                     less than zero, it will keep reading until the input
                                     is exhausted)
     */
-    virtual int writeFromInputStream (InputStream& source,
-                                      int maxNumBytesToWrite);
-
-    //==============================================================================
-    /** Writes a number to the stream as 8-bit characters in the default system encoding. */
-    virtual OutputStream& operator<< (const int number);
-
-    /** Writes a number to the stream as 8-bit characters in the default system encoding. */
-    virtual OutputStream& operator<< (const double number);
-
-    /** Writes a character to the stream. */
-    virtual OutputStream& operator<< (const char character);
-
-    /** Writes a null-terminated string to the stream. */
-    virtual OutputStream& operator<< (const char* const text);
-
-    /** Writes a null-terminated text string to the stream, converting it to UTF8. */
-    virtual OutputStream& operator<< (const String& text);
+    virtual int writeFromInputStream (InputStream& source, int maxNumBytesToWrite);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
-
-
-protected:
-    //==============================================================================
-    OutputStream() throw();
 };
+
+//==============================================================================
+/** Writes a number to a stream as 8-bit characters in the default system encoding. */
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const int number);
+
+/** Writes a number to a stream as 8-bit characters in the default system encoding. */
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const double number);
+
+/** Writes a character to a stream. */
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char character);
+
+/** Writes a null-terminated text string to a stream. */
+OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char* const text);
+
+
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
