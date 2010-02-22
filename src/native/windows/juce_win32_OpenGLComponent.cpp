@@ -494,7 +494,7 @@ private:
     }
 
     WindowedGLContext (const WindowedGLContext&);
-    const WindowedGLContext& operator= (const WindowedGLContext&);
+    WindowedGLContext& operator= (const WindowedGLContext&);
 };
 
 //==============================================================================

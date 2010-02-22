@@ -328,7 +328,7 @@ public:
 
 private:
     WindowsBitmapImage (const WindowsBitmapImage&);
-    const WindowsBitmapImage& operator= (const WindowsBitmapImage&);
+    WindowsBitmapImage& operator= (const WindowsBitmapImage&);
 };
 
 //==============================================================================
@@ -904,7 +904,7 @@ private:
         WindowsBitmapImage* image;
 
         TemporaryImage (const TemporaryImage&);
-        const TemporaryImage& operator= (const TemporaryImage&);
+        TemporaryImage& operator= (const TemporaryImage&);
     };
 
     TemporaryImage offscreenImageGenerator;
@@ -1754,7 +1754,7 @@ private:
         }
 
         JuceDropTarget (const JuceDropTarget&);
-        const JuceDropTarget& operator= (const JuceDropTarget&);
+        JuceDropTarget& operator= (const JuceDropTarget&);
     };
 
     void doSettingChange()
@@ -2213,7 +2213,7 @@ private:
     }
 
     Win32ComponentPeer (const Win32ComponentPeer&);
-    const Win32ComponentPeer& operator= (const Win32ComponentPeer&);
+    Win32ComponentPeer& operator= (const Win32ComponentPeer&);
 };
 
 ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
@@ -2884,7 +2884,7 @@ private:
     }
 
     JuceEnumFormatEtc (const JuceEnumFormatEtc&);
-    const JuceEnumFormatEtc& operator= (const JuceEnumFormatEtc&);
+    JuceEnumFormatEtc& operator= (const JuceEnumFormatEtc&);
 };
 
 class JuceDataObject  : public IDataObject
@@ -2895,7 +2895,7 @@ class JuceDataObject  : public IDataObject
     int refCount;
 
     JuceDataObject (const JuceDataObject&);
-    const JuceDataObject& operator= (const JuceDataObject&);
+    JuceDataObject& operator= (const JuceDataObject&);
 
 public:
     JuceDataObject (JuceDropSource* const dropSource_,

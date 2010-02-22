@@ -242,7 +242,7 @@ private:
     bool bold, italic;
 
     FontDCHolder (const FontDCHolder&);
-    const FontDCHolder& operator= (const FontDCHolder&);
+    FontDCHolder& operator= (const FontDCHolder&);
 };
 
 juce_ImplementSingleton_SingleThreaded (FontDCHolder);

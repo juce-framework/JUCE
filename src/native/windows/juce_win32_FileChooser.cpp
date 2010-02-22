@@ -139,7 +139,7 @@ public:
 
 private:
     FPComponentHolder (const FPComponentHolder&);
-    const FPComponentHolder& operator= (const FPComponentHolder&);
+    FPComponentHolder& operator= (const FPComponentHolder&);
 };
 
 //==============================================================================

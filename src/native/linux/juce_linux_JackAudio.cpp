@@ -594,7 +594,7 @@ private:
     bool hasScanned;
 
     JackAudioIODeviceType (const JackAudioIODeviceType&);
-    const JackAudioIODeviceType& operator= (const JackAudioIODeviceType&);
+    JackAudioIODeviceType& operator= (const JackAudioIODeviceType&);
 };
 
 //==============================================================================

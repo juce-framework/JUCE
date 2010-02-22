@@ -41,7 +41,7 @@ public:
     //==============================================================================
     PathPoint (PaintElementPath* const owner);
     PathPoint (const PathPoint& other);
-    const PathPoint& operator= (const PathPoint& other);
+    PathPoint& operator= (const PathPoint& other);
     ~PathPoint();
 
     //==============================================================================

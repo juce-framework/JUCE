@@ -226,7 +226,7 @@ private:
         int refCount;
 
         EventHandler (const EventHandler&);
-        const EventHandler& operator= (const EventHandler&);
+        EventHandler& operator= (const EventHandler&);
     };
 };
 

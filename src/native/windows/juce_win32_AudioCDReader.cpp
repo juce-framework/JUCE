@@ -1559,7 +1559,7 @@ class DeinitialiseTimer  : private Timer,
                            private DeletedAtShutdown
 {
     DeinitialiseTimer (const DeinitialiseTimer&);
-    const DeinitialiseTimer& operator= (const DeinitialiseTimer&);
+    DeinitialiseTimer& operator= (const DeinitialiseTimer&);
 
 public:
     DeinitialiseTimer()

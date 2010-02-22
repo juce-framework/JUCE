@@ -985,7 +985,7 @@ private:
     }
 
     ALSAAudioIODeviceType (const ALSAAudioIODeviceType&);
-    const ALSAAudioIODeviceType& operator= (const ALSAAudioIODeviceType&);
+    ALSAAudioIODeviceType& operator= (const ALSAAudioIODeviceType&);
 };
 
 //==============================================================================

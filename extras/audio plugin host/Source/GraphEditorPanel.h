@@ -72,7 +72,7 @@ private:
     ConnectorComponent* draggingConnector;
 
     GraphEditorPanel (const GraphEditorPanel&);
-    const GraphEditorPanel& operator= (const GraphEditorPanel&);
+    GraphEditorPanel& operator= (const GraphEditorPanel&);
 };
 
 

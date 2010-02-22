@@ -210,7 +210,7 @@ public:
 private:
     const int columnId, direction;
     ResourceSorter (const ResourceSorter&);
-    const ResourceSorter& operator= (const ResourceSorter&);
+    ResourceSorter& operator= (const ResourceSorter&);
 };
 
 void ResourceEditorPanel::sortOrderChanged (int newSortColumnId, const bool isForwards)

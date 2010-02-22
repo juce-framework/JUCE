@@ -59,7 +59,7 @@ private:
     TextEditor* addressTextBox;
 
     DemoBrowserComponent (DemoBrowserComponent&);
-    const DemoBrowserComponent& operator= (const DemoBrowserComponent&);
+    DemoBrowserComponent& operator= (const DemoBrowserComponent&);
 };
 
 

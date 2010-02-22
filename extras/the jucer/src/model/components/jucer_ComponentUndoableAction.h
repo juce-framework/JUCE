@@ -86,7 +86,7 @@ protected:
 
 private:
     ComponentUndoableAction (const ComponentUndoableAction&);
-    const ComponentUndoableAction& operator= (const ComponentUndoableAction&);
+    ComponentUndoableAction& operator= (const ComponentUndoableAction&);
 };
 
 

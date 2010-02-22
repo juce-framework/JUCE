@@ -619,7 +619,7 @@ RelativePositionedRectangle::RelativePositionedRectangle (const RelativePosition
 {
 }
 
-const RelativePositionedRectangle& RelativePositionedRectangle::operator= (const RelativePositionedRectangle& other)
+RelativePositionedRectangle& RelativePositionedRectangle::operator= (const RelativePositionedRectangle& other)
 {
     rect = other.rect;
     relativeToX = other.relativeToX;

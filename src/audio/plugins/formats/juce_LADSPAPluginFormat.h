@@ -58,7 +58,7 @@ public:
 
 private:
     LADSPAPluginFormat (const LADSPAPluginFormat&);
-    const LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
+    LADSPAPluginFormat& operator= (const LADSPAPluginFormat&);
 };
 
 #endif

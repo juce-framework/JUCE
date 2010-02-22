@@ -670,7 +670,7 @@ private:
         DShowCameraDeviceInteral& owner;
 
         GrabberCallback (const GrabberCallback&);
-        const GrabberCallback& operator= (const GrabberCallback&);
+        GrabberCallback& operator= (const GrabberCallback&);
     };
 
     ComSmartPtr <GrabberCallback> callback;
@@ -679,7 +679,7 @@ private:
 
     //==============================================================================
     DShowCameraDeviceInteral (const DShowCameraDeviceInteral&);
-    const DShowCameraDeviceInteral& operator= (const DShowCameraDeviceInteral&);
+    DShowCameraDeviceInteral& operator= (const DShowCameraDeviceInteral&);
 };
 
 

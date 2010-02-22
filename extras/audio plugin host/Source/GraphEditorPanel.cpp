@@ -202,7 +202,7 @@ private:
     FilterGraph& graph;
 
     PinComponent (const PinComponent&);
-    const PinComponent& operator= (const PinComponent&);
+    PinComponent& operator= (const PinComponent&);
 
     GraphEditorPanel* getGraphPanel() const throw()
     {
@@ -456,7 +456,7 @@ private:
     }
 
     FilterComponent (const FilterComponent&);
-    const FilterComponent& operator= (const FilterComponent&);
+    FilterComponent& operator= (const FilterComponent&);
 };
 
 //==============================================================================
@@ -705,7 +705,7 @@ private:
     }
 
     ConnectorComponent (const ConnectorComponent&);
-    const ConnectorComponent& operator= (const ConnectorComponent&);
+    ConnectorComponent& operator= (const ConnectorComponent&);
 };
 
 

@@ -1929,7 +1929,7 @@ private:
     }
 
     ASIOAudioIODeviceType (const ASIOAudioIODeviceType&);
-    const ASIOAudioIODeviceType& operator= (const ASIOAudioIODeviceType&);
+    ASIOAudioIODeviceType& operator= (const ASIOAudioIODeviceType&);
 };
 
 AudioIODeviceType* juce_createAudioIODeviceType_ASIO()

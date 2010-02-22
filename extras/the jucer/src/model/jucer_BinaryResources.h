@@ -41,7 +41,7 @@ public:
     BinaryResources();
     ~BinaryResources();
 
-    const BinaryResources& operator= (const BinaryResources& other);
+    BinaryResources& operator= (const BinaryResources& other);
 
     void loadFromCpp (const File& cppFileLocation, const String& cpp);
 

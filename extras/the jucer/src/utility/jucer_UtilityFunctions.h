@@ -41,7 +41,7 @@ struct RelativePositionedRectangle
     //==============================================================================
     RelativePositionedRectangle();
     RelativePositionedRectangle (const RelativePositionedRectangle&);
-    const RelativePositionedRectangle& operator= (const RelativePositionedRectangle&);
+    RelativePositionedRectangle& operator= (const RelativePositionedRectangle&);
     ~RelativePositionedRectangle();
 
     //==============================================================================

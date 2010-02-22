@@ -123,7 +123,7 @@ private:
     }
 
     AddCompAction (const AddCompAction&);
-    const AddCompAction& operator= (const AddCompAction&);
+    AddCompAction& operator= (const AddCompAction&);
 };
 
 //==============================================================================

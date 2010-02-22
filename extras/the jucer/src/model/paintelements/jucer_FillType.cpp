@@ -48,7 +48,7 @@ JucerFillType::JucerFillType (const JucerFillType& other)
     imageAnchor = other.imageAnchor;
 }
 
-const JucerFillType& JucerFillType::operator= (const JucerFillType& other)
+JucerFillType& JucerFillType::operator= (const JucerFillType& other)
 {
     ImageCache::release (image);
     image = 0;

@@ -65,7 +65,7 @@ private:
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     AudioDemoSetupPage (const AudioDemoSetupPage&);
-    const AudioDemoSetupPage& operator= (const AudioDemoSetupPage&);
+    AudioDemoSetupPage& operator= (const AudioDemoSetupPage&);
 };
 
 

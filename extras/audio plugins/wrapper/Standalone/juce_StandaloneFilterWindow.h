@@ -84,7 +84,7 @@ private:
     void deleteFilter();
 
     StandaloneFilterWindow (const StandaloneFilterWindow&);
-    const StandaloneFilterWindow& operator= (const StandaloneFilterWindow&);
+    StandaloneFilterWindow& operator= (const StandaloneFilterWindow&);
 };
 
 #endif   // __JUCE_STANDALONEFILTERWINDOW_JUCEHEADER__

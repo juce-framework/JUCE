@@ -168,7 +168,7 @@ private:
     OwnedArray <var::identifier> knownIdentifiers;
 
     IDispatchHelper (const IDispatchHelper&);
-    const IDispatchHelper& operator= (const IDispatchHelper&);
+    IDispatchHelper& operator= (const IDispatchHelper&);
 };
 
 //==============================================================================
@@ -750,7 +750,7 @@ private:
     IDispatchHelper iDispatchHelper;
 
     JuceActiveXObject (const JuceActiveXObject&);
-    const JuceActiveXObject& operator= (const JuceActiveXObject&);
+    JuceActiveXObject& operator= (const JuceActiveXObject&);
 };
 
 //==============================================================================
@@ -790,7 +790,7 @@ private:
     int refCount;
 
     JuceActiveXObjectFactory (const JuceActiveXObjectFactory&);
-    const JuceActiveXObjectFactory& operator= (const JuceActiveXObjectFactory&);
+    JuceActiveXObjectFactory& operator= (const JuceActiveXObjectFactory&);
 };
 
 //==============================================================================

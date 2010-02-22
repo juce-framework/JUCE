@@ -878,7 +878,7 @@ private:
         const int index;
 
         JucePluginControl (const JucePluginControl&);
-        const JucePluginControl& operator= (const JucePluginControl&);
+        JucePluginControl& operator= (const JucePluginControl&);
     };
 };
 

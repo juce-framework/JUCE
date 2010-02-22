@@ -96,7 +96,7 @@ private:
     int suffix;
 
     GeneratedCode (const GeneratedCode&);
-    const GeneratedCode& operator= (const GeneratedCode&);
+    GeneratedCode& operator= (const GeneratedCode&);
 };
 
 

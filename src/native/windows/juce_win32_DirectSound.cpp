@@ -1174,7 +1174,7 @@ private:
     CriticalSection startStopLock;
 
     DSoundAudioIODevice (const DSoundAudioIODevice&);
-    const DSoundAudioIODevice& operator= (const DSoundAudioIODevice&);
+    DSoundAudioIODevice& operator= (const DSoundAudioIODevice&);
 
     const String openDevice (const BitArray& inputChannels,
                              const BitArray& outputChannels,
@@ -1493,7 +1493,7 @@ private:
 
     //==============================================================================
     DSoundAudioIODeviceType (const DSoundAudioIODeviceType&);
-    const DSoundAudioIODeviceType& operator= (const DSoundAudioIODeviceType&);
+    DSoundAudioIODeviceType& operator= (const DSoundAudioIODeviceType&);
 };
 
 //==============================================================================

@@ -1861,7 +1861,7 @@ private:
         bool useARGBImagesForRendering, shmCompletedDrawing;
 #endif
         LinuxRepaintManager (const LinuxRepaintManager&);
-        const LinuxRepaintManager& operator= (const LinuxRepaintManager&);
+        LinuxRepaintManager& operator= (const LinuxRepaintManager&);
     };
 
     ScopedPointer <LinuxRepaintManager> repainter;
@@ -3141,7 +3141,7 @@ private:
 
     //==============================================================================
     WindowedGLContext (const WindowedGLContext&);
-    const WindowedGLContext& operator= (const WindowedGLContext&);
+    WindowedGLContext& operator= (const WindowedGLContext&);
 };
 
 //==============================================================================

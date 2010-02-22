@@ -1406,7 +1406,7 @@ PathPoint::PathPoint (const PathPoint& other)
     pos [2] = other.pos [2];
 }
 
-const PathPoint& PathPoint::operator= (const PathPoint& other)
+PathPoint& PathPoint::operator= (const PathPoint& other)
 {
     owner = other.owner;
     type = other.type;

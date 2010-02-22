@@ -140,7 +140,7 @@ protected:
 
 private:
     ComponentTypeHandler (const ComponentTypeHandler&);
-    const ComponentTypeHandler& operator= (const ComponentTypeHandler&);
+    ComponentTypeHandler& operator= (const ComponentTypeHandler&);
 };
 
 

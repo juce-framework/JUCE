@@ -58,7 +58,7 @@ public:
 
 private:
     DirectXPluginFormat (const DirectXPluginFormat&);
-    const DirectXPluginFormat& operator= (const DirectXPluginFormat&);
+    DirectXPluginFormat& operator= (const DirectXPluginFormat&);
 };
 
 #endif

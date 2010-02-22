@@ -68,7 +68,7 @@ private:
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     MainComponent (const MainComponent&);
-    const MainComponent& operator= (const MainComponent&);
+    MainComponent& operator= (const MainComponent&);
 };
 
 

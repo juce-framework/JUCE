@@ -136,7 +136,7 @@ private:
     }
 
     AddXmlElementAction (const AddXmlElementAction&);
-    const AddXmlElementAction& operator= (const AddXmlElementAction&);
+    AddXmlElementAction& operator= (const AddXmlElementAction&);
 };
 
 PaintElement* PaintRoutine::addElementFromXml (const XmlElement& xml, const int index, const bool undoable)

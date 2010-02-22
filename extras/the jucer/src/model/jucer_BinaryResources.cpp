@@ -36,7 +36,7 @@ BinaryResources::~BinaryResources()
 {
 }
 
-const BinaryResources& BinaryResources::operator= (const BinaryResources& other)
+BinaryResources& BinaryResources::operator= (const BinaryResources& other)
 {
     for (int i = 0; i < other.resources.size(); ++i)
         add (other.resources[i]->name,

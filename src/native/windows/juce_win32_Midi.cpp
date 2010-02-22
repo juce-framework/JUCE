@@ -291,7 +291,7 @@ private:
     }
 
     MidiInThread (const MidiInThread&);
-    const MidiInThread& operator= (const MidiInThread&);
+    MidiInThread& operator= (const MidiInThread&);
 };
 
 static void CALLBACK midiInCallback (HMIDIIN,

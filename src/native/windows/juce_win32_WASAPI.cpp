@@ -938,7 +938,7 @@ private:
 
     //==============================================================================
     WASAPIAudioIODevice (const WASAPIAudioIODevice&);
-    const WASAPIAudioIODevice& operator= (const WASAPIAudioIODevice&);
+    WASAPIAudioIODevice& operator= (const WASAPIAudioIODevice&);
 };
 
 
@@ -1112,7 +1112,7 @@ private:
 
     //==============================================================================
     WASAPIAudioIODeviceType (const WASAPIAudioIODeviceType&);
-    const WASAPIAudioIODeviceType& operator= (const WASAPIAudioIODeviceType&);
+    WASAPIAudioIODeviceType& operator= (const WASAPIAudioIODeviceType&);
 };
 
 //==============================================================================

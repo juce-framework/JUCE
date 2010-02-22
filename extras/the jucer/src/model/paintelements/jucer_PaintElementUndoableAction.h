@@ -146,7 +146,7 @@ private:
     }
 
     PaintElementUndoableAction (const PaintElementUndoableAction&);
-    const PaintElementUndoableAction& operator= (const PaintElementUndoableAction&);
+    PaintElementUndoableAction& operator= (const PaintElementUndoableAction&);
 };
 
 

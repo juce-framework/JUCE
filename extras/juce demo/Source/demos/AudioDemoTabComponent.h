@@ -52,7 +52,7 @@ private:
     float accumulator;
 
     LiveAudioInputDisplayComp (const LiveAudioInputDisplayComp&);
-    const LiveAudioInputDisplayComp& operator= (const LiveAudioInputDisplayComp&);
+    LiveAudioInputDisplayComp& operator= (const LiveAudioInputDisplayComp&);
 };
 
 //[/Headers]

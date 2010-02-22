@@ -121,7 +121,7 @@ private:
     bool mouseEventsAllowed;
 
     ActiveXControlComponent (const ActiveXControlComponent&);
-    const ActiveXControlComponent& operator= (const ActiveXControlComponent&);
+    ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 
     void setControlBounds (const Rectangle<int>& bounds) const;
     void setControlVisible (const bool b) const;

@@ -272,7 +272,7 @@ private:
     }
 
     LatencyTester (const LatencyTester&);
-    const LatencyTester& operator= (const LatencyTester&);
+    LatencyTester& operator= (const LatencyTester&);
 };
 
 

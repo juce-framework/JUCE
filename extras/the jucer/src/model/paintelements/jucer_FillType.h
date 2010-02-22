@@ -39,7 +39,7 @@ public:
     //==============================================================================
     JucerFillType();
     JucerFillType (const JucerFillType& other);
-    const JucerFillType& operator= (const JucerFillType& other);
+    JucerFillType& operator= (const JucerFillType& other);
     ~JucerFillType();
 
     bool operator== (const JucerFillType& other) const throw();

@@ -56,7 +56,7 @@ public:
 private:
     FilterGraph& owner;
 
-    const FilterConnection& operator= (const FilterConnection&);
+    FilterConnection& operator= (const FilterConnection&);
 };
 
 
@@ -116,7 +116,7 @@ private:
                       const OwnedArray <FilterConnection>& connections);
 
     FilterInGraph (const FilterInGraph&);
-    const FilterInGraph& operator= (const FilterInGraph&);
+    FilterInGraph& operator= (const FilterInGraph&);
 };
 */
 
@@ -202,7 +202,7 @@ private:
     void createNodeFromXml (const XmlElement& xml);
 
     FilterGraph (const FilterGraph&);
-    const FilterGraph& operator= (const FilterGraph&);
+    FilterGraph& operator= (const FilterGraph&);
 };
 
 
@@ -269,7 +269,7 @@ private:
     void update();
 
     FilterGraphPlayer (const FilterGraphPlayer&);
-    const FilterGraphPlayer& operator= (const FilterGraphPlayer&);
+    FilterGraphPlayer& operator= (const FilterGraphPlayer&);
 };
 */
 
