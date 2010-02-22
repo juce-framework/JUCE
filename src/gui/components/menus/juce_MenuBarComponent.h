@@ -118,7 +118,7 @@ private:
     void repaintMenuItem (int index);
 
     MenuBarComponent (const MenuBarComponent&);
-    const MenuBarComponent& operator= (const MenuBarComponent&);
+    MenuBarComponent& operator= (const MenuBarComponent&);
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__

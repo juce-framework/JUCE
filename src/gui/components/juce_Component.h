@@ -2020,7 +2020,7 @@ private:
     // this one to avoid compiler warnings.
     Component (const Component&);
 
-    const Component& operator= (const Component&);
+    Component& operator= (const Component&);
 
     // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
     // subclass to use the new parameters to keyStateChanged)

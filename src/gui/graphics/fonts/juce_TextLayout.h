@@ -66,7 +66,7 @@ public:
     ~TextLayout() throw();
 
     /** Copies another layout onto this one. */
-    const TextLayout& operator= (const TextLayout& layoutToCopy) throw();
+    TextLayout& operator= (const TextLayout& layoutToCopy) throw();
 
     //==============================================================================
     /** Clears the layout, removing all its text. */

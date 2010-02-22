@@ -84,7 +84,7 @@ private:
     ScopedPointer <Drawable> normalImage, toggledOnImage;
 
     ToolbarButton (const ToolbarButton&);
-    const ToolbarButton& operator= (const ToolbarButton&);
+    ToolbarButton& operator= (const ToolbarButton&);
 };
 
 

@@ -153,7 +153,7 @@ private:
     InputStream* inputStream;
 
     ZipInputStream (const ZipInputStream&);
-    const ZipInputStream& operator= (const ZipInputStream&);
+    ZipInputStream& operator= (const ZipInputStream&);
 };
 
 

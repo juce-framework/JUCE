@@ -52,7 +52,7 @@ public:
     RelativeTime (const RelativeTime& other) throw();
 
     /** Copies another relative time. */
-    const RelativeTime& operator= (const RelativeTime& other) throw();
+    RelativeTime& operator= (const RelativeTime& other) throw();
 
     /** Destructor. */
     ~RelativeTime() throw();

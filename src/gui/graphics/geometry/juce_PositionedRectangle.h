@@ -86,7 +86,7 @@ public:
     PositionedRectangle (const PositionedRectangle& other) throw();
 
     /** Copies another PositionedRectangle. */
-    const PositionedRectangle& operator= (const PositionedRectangle& other) throw();
+    PositionedRectangle& operator= (const PositionedRectangle& other) throw();
 
     /** Destructor. */
     ~PositionedRectangle() throw();
@@ -318,10 +318,10 @@ public:
 
     //==============================================================================
     /** Compares two objects. */
-    const bool operator== (const PositionedRectangle& other) const throw();
+    bool operator== (const PositionedRectangle& other) const throw();
 
     /** Compares two objects. */
-    const bool operator!= (const PositionedRectangle& other) const throw();
+    bool operator!= (const PositionedRectangle& other) const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator

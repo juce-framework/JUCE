@@ -95,7 +95,7 @@ private:
     void createButton();
 
     BooleanPropertyComponent (const BooleanPropertyComponent&);
-    const BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
+    BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
 };
 
 

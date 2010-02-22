@@ -164,7 +164,7 @@ private:
     OwnedArray <PluginDescription> types;
 
     KnownPluginList (const KnownPluginList&);
-    const KnownPluginList& operator= (const KnownPluginList&);
+    KnownPluginList& operator= (const KnownPluginList&);
 };
 
 

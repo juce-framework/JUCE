@@ -114,7 +114,7 @@ private:
     int scaleInt (const int n) const;
 
     MagnifierComponent (const MagnifierComponent&);
-    const MagnifierComponent& operator= (const MagnifierComponent&);
+    MagnifierComponent& operator= (const MagnifierComponent&);
 };
 
 

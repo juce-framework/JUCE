@@ -137,7 +137,7 @@ private:
     MagnifierComponent* const magnifierComp;
 
     MagnifyingPeer (const MagnifyingPeer&);
-    const MagnifyingPeer& operator= (const MagnifyingPeer&);
+    MagnifyingPeer& operator= (const MagnifyingPeer&);
 };
 
 
@@ -182,7 +182,7 @@ private:
     MagnifierComponent* const magnifierComp;
 
     PeerHolderComp (const PeerHolderComp&);
-    const PeerHolderComp& operator= (const PeerHolderComp&);
+    PeerHolderComp& operator= (const PeerHolderComp&);
 };
 
 

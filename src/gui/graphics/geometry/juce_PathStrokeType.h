@@ -80,7 +80,7 @@ public:
     PathStrokeType (const PathStrokeType& other) throw();
 
     /** Copies another stroke onto this one. */
-    const PathStrokeType& operator= (const PathStrokeType& other) throw();
+    PathStrokeType& operator= (const PathStrokeType& other) throw();
 
     /** Destructor. */
     ~PathStrokeType() throw();

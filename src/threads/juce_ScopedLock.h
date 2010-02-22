@@ -83,7 +83,7 @@ private:
     const CriticalSection& lock_;
 
     ScopedLock (const ScopedLock&);
-    const ScopedLock& operator= (const ScopedLock&);
+    ScopedLock& operator= (const ScopedLock&);
 };
 
 
@@ -156,7 +156,7 @@ private:
     const CriticalSection& lock_;
 
     ScopedUnlock (const ScopedLock&);
-    const ScopedUnlock& operator= (const ScopedUnlock&);
+    ScopedUnlock& operator= (const ScopedUnlock&);
 };
 
 

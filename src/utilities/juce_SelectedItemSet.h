@@ -67,7 +67,7 @@ public:
     }
 
     /** Creates a copy of another set. */
-    const SelectedItemSet& operator= (const SelectedItemSet& other)
+    SelectedItemSet& operator= (const SelectedItemSet& other)
     {
         if (selectedItems != other.selectedItems)
         {

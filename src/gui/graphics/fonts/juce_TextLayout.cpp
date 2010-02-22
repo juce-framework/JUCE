@@ -112,7 +112,7 @@ TextLayout::TextLayout (const TextLayout& other) throw()
     *this = other;
 }
 
-const TextLayout& TextLayout::operator= (const TextLayout& other) throw()
+TextLayout& TextLayout::operator= (const TextLayout& other) throw()
 {
     if (this != &other)
     {

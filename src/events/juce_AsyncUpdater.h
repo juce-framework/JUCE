@@ -105,7 +105,7 @@ private:
 
     private:
         AsyncUpdaterInternal (const AsyncUpdaterInternal&);
-        const AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
+        AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
     };
 
     AsyncUpdaterInternal internalAsyncHandler;

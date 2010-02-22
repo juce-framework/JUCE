@@ -267,7 +267,7 @@ private:
     void updatePrefSizesToMatchCurrentPositions();
 
     StretchableLayoutManager (const StretchableLayoutManager&);
-    const StretchableLayoutManager& operator= (const StretchableLayoutManager&);
+    StretchableLayoutManager& operator= (const StretchableLayoutManager&);
 };
 
 

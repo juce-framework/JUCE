@@ -1096,7 +1096,7 @@ public:
 
 	// Assignment and concatenation operators..
 
-	const String& operator= (const String& other) throw();
+	String& operator= (const String& other) throw();
 
 	String& operator+= (const tchar* const textToAppend);
 	String& operator+= (const String& stringToAppend);
@@ -1358,7 +1358,7 @@ public:
 		int nextIndex;
 
 		Concatenator (const Concatenator&);
-		const Concatenator& operator= (const Concatenator&);
+		Concatenator& operator= (const Concatenator&);
 	};
 
 	juce_UseDebuggingNewOperator // (adds debugging info to find leaked objects)
@@ -1580,7 +1580,7 @@ private:
 	ElementType* data;
 
 	HeapBlock (const HeapBlock&);
-	const HeapBlock& operator= (const HeapBlock&);
+	HeapBlock& operator= (const HeapBlock&);
 };
 
 #endif   // __JUCE_HEAPBLOCK_JUCEHEADER__
@@ -3178,7 +3178,7 @@ public:
 			referencedObject->incReferenceCount();
 	}
 
-	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
+	ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& other)
 	{
 		ReferenceCountedObjectClass* const newObject = other.referencedObject;
 
@@ -3197,7 +3197,7 @@ public:
 		return *this;
 	}
 
-	const ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
+	ReferenceCountedObjectPtr<ReferenceCountedObjectClass>& operator= (ReferenceCountedObjectClass* const newObject)
 	{
 		if (referencedObject != newObject)
 		{
@@ -3332,7 +3332,7 @@ public:
 
 	inline ~ScopedPointer()							 { delete object; }
 
-	const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
+	ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
 	{
 		if (this != objectToTransferFrom.getAddress())
 		{
@@ -3349,7 +3349,7 @@ public:
 		return *this;
 	}
 
-	const ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
+	ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
 	{
 		if (object != newObjectToTakePossessionOf)
 		{
@@ -3844,7 +3844,7 @@ public:
 
 	~StringArray();
 
-	const StringArray& operator= (const StringArray& other);
+	StringArray& operator= (const StringArray& other);
 
 	bool operator== (const StringArray& other) const;
 
@@ -3929,7 +3929,7 @@ public:
 
 	~StringPairArray() throw();
 
-	const StringPairArray& operator= (const StringPairArray& other) throw();
+	StringPairArray& operator= (const StringPairArray& other) throw();
 
 	bool operator== (const StringPairArray& other) const throw();
 
@@ -4000,7 +4000,7 @@ public:
 
 	RelativeTime (const RelativeTime& other) throw();
 
-	const RelativeTime& operator= (const RelativeTime& other) throw();
+	RelativeTime& operator= (const RelativeTime& other) throw();
 
 	~RelativeTime() throw();
 
@@ -4081,7 +4081,7 @@ public:
 
 	~Time() throw();
 
-	const Time& operator= (const Time& other) throw();
+	Time& operator= (const Time& other) throw();
 
 	static const Time JUCE_CALLTYPE getCurrentTime() throw();
 
@@ -4193,9 +4193,9 @@ public:
 
 	~File()  {}
 
-	const File& operator= (const String& newFilePath);
+	File& operator= (const String& newFilePath);
 
-	const File& operator= (const File& otherFile);
+	File& operator= (const File& otherFile);
 
 	static const File nonexistent;
 
@@ -4427,7 +4427,7 @@ public:
 
 	XmlElement (const XmlElement& other) throw();
 
-	const XmlElement& operator= (const XmlElement& other) throw();
+	XmlElement& operator= (const XmlElement& other) throw();
 
 	~XmlElement() throw();
 
@@ -4580,7 +4580,7 @@ private:
 		XmlAttributeNode* next;
 
 	private:
-		const XmlAttributeNode& operator= (const XmlAttributeNode&);
+		XmlAttributeNode& operator= (const XmlAttributeNode&);
 	};
 
 	XmlAttributeNode* attributes;
@@ -4608,7 +4608,7 @@ public:
 
 	PropertySet (const PropertySet& other) throw();
 
-	const PropertySet& operator= (const PropertySet& other) throw();
+	PropertySet& operator= (const PropertySet& other) throw();
 
 	virtual ~PropertySet();
 
@@ -5934,7 +5934,7 @@ private:
 	MessageListener* messageRecipient;
 
 	Message (const Message&);
-	const Message& operator= (const Message&);
+	Message& operator= (const Message&);
 };
 
 #endif   // __JUCE_MESSAGE_JUCEHEADER__
@@ -5990,7 +5990,7 @@ private:
 
 	private:
 		AsyncUpdaterInternal (const AsyncUpdaterInternal&);
-		const AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
+		AsyncUpdaterInternal& operator= (const AsyncUpdaterInternal&);
 	};
 
 	AsyncUpdaterInternal internalAsyncHandler;
@@ -6020,7 +6020,7 @@ public:
 
 	void setValue (const var& newValue);
 
-	const Value& operator= (const var& newValue);
+	Value& operator= (const var& newValue);
 
 	void referTo (const Value& valueToReferTo);
 
@@ -6064,7 +6064,7 @@ public:
 		void handleAsyncUpdate();
 
 		ValueSource (const ValueSource&);
-		const ValueSource& operator= (const ValueSource&);
+		ValueSource& operator= (const ValueSource&);
 	};
 
 	explicit Value (ValueSource* const valueSource);
@@ -6081,7 +6081,7 @@ private:
 
 	// This is disallowed to avoid confusion about whether it should
 	// do a by-value or by-reference copy.
-	const Value& operator= (const Value& other);
+	Value& operator= (const Value& other);
 };
 
 #endif   // __JUCE_VALUE_JUCEHEADER__
@@ -6144,7 +6144,7 @@ private:
 	const CriticalSection& lock_;
 
 	ScopedLock (const ScopedLock&);
-	const ScopedLock& operator= (const ScopedLock&);
+	ScopedLock& operator= (const ScopedLock&);
 };
 
 class ScopedUnlock
@@ -6160,7 +6160,7 @@ private:
 	const CriticalSection& lock_;
 
 	ScopedUnlock (const ScopedLock&);
-	const ScopedUnlock& operator= (const ScopedUnlock&);
+	ScopedUnlock& operator= (const ScopedUnlock&);
 };
 
 #endif   // __JUCE_SCOPEDLOCK_JUCEHEADER__
@@ -6197,7 +6197,7 @@ private:
 	bool messagePending;
 
 	ChangeListenerList (const ChangeListenerList&);
-	const ChangeListenerList& operator= (const ChangeListenerList&);
+	ChangeListenerList& operator= (const ChangeListenerList&);
 };
 
 #endif   // __JUCE_CHANGELISTENERLIST_JUCEHEADER__
@@ -6228,7 +6228,7 @@ private:
 	ChangeListenerList changeListenerList;
 
 	ChangeBroadcaster (const ChangeBroadcaster&);
-	const ChangeBroadcaster& operator= (const ChangeBroadcaster&);
+	ChangeBroadcaster& operator= (const ChangeBroadcaster&);
 };
 
 #endif   // __JUCE_CHANGEBROADCASTER_JUCEHEADER__
@@ -6310,7 +6310,7 @@ private:
 
 	// disallow copy constructor
 	UndoManager (const UndoManager&);
-	const UndoManager& operator= (const UndoManager&);
+	UndoManager& operator= (const UndoManager&);
 };
 
 #endif   // __JUCE_UNDOMANAGER_JUCEHEADER__
@@ -6324,7 +6324,7 @@ public:
 
 	ValueTree (const ValueTree& other);
 
-	const ValueTree& operator= (const ValueTree& other);
+	ValueTree& operator= (const ValueTree& other);
 
 	~ValueTree();
 
@@ -6454,7 +6454,7 @@ private:
 		juce_UseDebuggingNewOperator
 
 	private:
-		const SharedObject& operator= (const SharedObject&);
+		SharedObject& operator= (const SharedObject&);
 	};
 
 	template <typename ElementComparator>
@@ -6548,7 +6548,7 @@ private:
 	void trimFileSize (int maxFileSizeBytes) const;
 
 	FileLogger (const FileLogger&);
-	const FileLogger& operator= (const FileLogger&);
+	FileLogger& operator= (const FileLogger&);
 };
 
 #endif   // __JUCE_FILELOGGER_JUCEHEADER__
@@ -6737,7 +6737,7 @@ private:
 	void* pool;
 
 	ScopedAutoReleasePool (const ScopedAutoReleasePool&);
-	const ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
+	ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
 
 #endif
@@ -6800,7 +6800,7 @@ private:
 	bool open (const bool openInExclusiveMode);
 
 	AppleRemoteDevice (const AppleRemoteDevice&);
-	const AppleRemoteDevice& operator= (const AppleRemoteDevice&);
+	AppleRemoteDevice& operator= (const AppleRemoteDevice&);
 };
 
 #endif
@@ -7176,7 +7176,7 @@ public:
 
 	BlowFish (const BlowFish& other);
 
-	const BlowFish& operator= (const BlowFish& other);
+	BlowFish& operator= (const BlowFish& other);
 
 	~BlowFish();
 
@@ -7212,7 +7212,7 @@ public:
 
 	MD5 (const MD5& other);
 
-	const MD5& operator= (const MD5& other);
+	MD5& operator= (const MD5& other);
 
 	MD5 (const MemoryBlock& data);
 
@@ -7355,7 +7355,7 @@ private:
 	ScopedPointer <DirectoryIterator> subIterator;
 
 	DirectoryIterator (const DirectoryIterator&);
-	const DirectoryIterator& operator= (const DirectoryIterator&);
+	DirectoryIterator& operator= (const DirectoryIterator&);
 };
 
 #endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__
@@ -7397,7 +7397,7 @@ private:
 	bool needToSeek;
 
 	FileInputStream (const FileInputStream&);
-	const FileInputStream& operator= (const FileInputStream&);
+	FileInputStream& operator= (const FileInputStream&);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__
@@ -7462,7 +7462,7 @@ public:
 
 	~FileSearchPath();
 
-	const FileSearchPath& operator= (const String& path);
+	FileSearchPath& operator= (const String& path);
 
 	int getNumPaths() const;
 
@@ -7542,7 +7542,7 @@ private:
 	String currentPipeName;
 
 	NamedPipe (const NamedPipe&);
-	const NamedPipe& operator= (const NamedPipe&);
+	NamedPipe& operator= (const NamedPipe&);
 
 	bool openInternal (const String& pipeName, const bool createPipe);
 };
@@ -7594,7 +7594,7 @@ private:
 	void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
 
 	TemporaryFile (const TemporaryFile&);
-	const TemporaryFile& operator= (const TemporaryFile&);
+	TemporaryFile& operator= (const TemporaryFile&);
 };
 
 #endif   // __JUCE_TEMPORARYFILE_JUCEHEADER__
@@ -7692,7 +7692,7 @@ private:
 	static int compareElements (const ZipEntryInfo* first, const ZipEntryInfo* second);
 
 	ZipFile (const ZipFile&);
-	const ZipFile& operator= (const ZipFile&);
+	ZipFile& operator= (const ZipFile&);
 };
 
 #endif   // __JUCE_ZIPFILE_JUCEHEADER__
@@ -7751,7 +7751,7 @@ private:
 
 	StreamingSocket (const String& hostname, const int portNumber, const int handle);
 	StreamingSocket (const StreamingSocket&);
-	const StreamingSocket& operator= (const StreamingSocket&);
+	StreamingSocket& operator= (const StreamingSocket&);
 };
 
 class JUCE_API  DatagramSocket
@@ -7799,7 +7799,7 @@ private:
 
 	DatagramSocket (const String& hostname, const int portNumber, const int handle, const int localPortNumber);
 	DatagramSocket (const DatagramSocket&);
-	const DatagramSocket& operator= (const DatagramSocket&);
+	DatagramSocket& operator= (const DatagramSocket&);
 };
 
 #endif   // __JUCE_SOCKET_JUCEHEADER__
@@ -7825,7 +7825,7 @@ public:
 
 	~URL();
 
-	const URL& operator= (const URL& other);
+	URL& operator= (const URL& other);
 
 	const String toString (const bool includeGetParameters) const;
 
@@ -7928,7 +7928,7 @@ private:
 	void ensureBuffered();
 
 	BufferedInputStream (const BufferedInputStream&);
-	const BufferedInputStream& operator= (const BufferedInputStream&);
+	BufferedInputStream& operator= (const BufferedInputStream&);
 };
 
 #endif   // __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__
@@ -7959,7 +7959,7 @@ private:
 	const File file;
 
 	FileInputSource (const FileInputSource&);
-	const FileInputSource& operator= (const FileInputSource&);
+	FileInputSource& operator= (const FileInputSource&);
 };
 
 #endif   // __JUCE_FILEINPUTSOURCE_JUCEHEADER__
@@ -8001,7 +8001,7 @@ private:
 	bool doNextBlock();
 
 	GZIPCompressorOutputStream (const GZIPCompressorOutputStream&);
-	const GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
+	GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__
@@ -8048,7 +8048,7 @@ private:
 	ScopedPointer <GZIPDecompressHelper> helper;
 
 	GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
-	const GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
+	GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
 };
 
 #endif   // __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__
@@ -8171,7 +8171,7 @@ private:
 	const int64 startPositionInSourceStream, lengthOfSourceStream;
 
 	SubregionStream (const SubregionStream&);
-	const SubregionStream& operator= (const SubregionStream&);
+	SubregionStream& operator= (const SubregionStream&);
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__
@@ -8341,7 +8341,7 @@ private:
 	int reentrancyLevel;
 
 	InterProcessLock (const InterProcessLock&);
-	const InterProcessLock& operator= (const InterProcessLock&);
+	InterProcessLock& operator= (const InterProcessLock&);
 };
 
 #endif   // __JUCE_INTERPROCESSLOCK_JUCEHEADER__
@@ -8416,7 +8416,7 @@ private:
 	void* internal;
 
 	WaitableEvent (const WaitableEvent&);
-	const WaitableEvent& operator= (const WaitableEvent&);
+	WaitableEvent& operator= (const WaitableEvent&);
 };
 
 #endif   // __JUCE_WAITABLEEVENT_JUCEHEADER__
@@ -8503,7 +8503,7 @@ private:
 	static CriticalSection runningThreadsLock;
 
 	Thread (const Thread&);
-	const Thread& operator= (const Thread&);
+	Thread& operator= (const Thread&);
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__
@@ -8538,7 +8538,7 @@ private:
 	mutable Array <Thread::ThreadID> readerThreads;
 
 	ReadWriteLock (const ReadWriteLock&);
-	const ReadWriteLock& operator= (const ReadWriteLock&);
+	ReadWriteLock& operator= (const ReadWriteLock&);
 };
 
 #endif   // __JUCE_READWRITELOCK_JUCEHEADER__
@@ -8568,7 +8568,7 @@ private:
 	const ReadWriteLock& lock_;
 
 	ScopedReadLock (const ScopedReadLock&);
-	const ScopedReadLock& operator= (const ScopedReadLock&);
+	ScopedReadLock& operator= (const ScopedReadLock&);
 };
 
 #endif   // __JUCE_SCOPEDREADLOCK_JUCEHEADER__
@@ -8598,7 +8598,7 @@ private:
 	const bool lockWasSuccessful;
 
 	ScopedTryLock (const ScopedTryLock&);
-	const ScopedTryLock& operator= (const ScopedTryLock&);
+	ScopedTryLock& operator= (const ScopedTryLock&);
 };
 
 #endif   // __JUCE_SCOPEDTRYLOCK_JUCEHEADER__
@@ -8625,7 +8625,7 @@ private:
 	const ReadWriteLock& lock_;
 
 	ScopedWriteLock (const ScopedWriteLock&);
-	const ScopedWriteLock& operator= (const ScopedWriteLock&);
+	ScopedWriteLock& operator= (const ScopedWriteLock&);
 };
 
 #endif   // __JUCE_SCOPEDWRITELOCK_JUCEHEADER__
@@ -8687,7 +8687,7 @@ private:
 	bool shouldStop, isActive, shouldBeDeleted;
 
 	ThreadPoolJob (const ThreadPoolJob&);
-	const ThreadPoolJob& operator= (const ThreadPoolJob&);
+	ThreadPoolJob& operator= (const ThreadPoolJob&);
 };
 
 class JUCE_API  ThreadPool
@@ -8751,7 +8751,7 @@ private:
 	bool runNextJob();
 
 	ThreadPool (const ThreadPool&);
-	const ThreadPool& operator= (const ThreadPool&);
+	ThreadPool& operator= (const ThreadPool&);
 };
 
 #endif   // __JUCE_THREADPOOL_JUCEHEADER__
@@ -8801,7 +8801,7 @@ private:
 	bool clientsChanged;
 
 	TimeSliceThread (const TimeSliceThread&);
-	const TimeSliceThread& operator= (const TimeSliceThread&);
+	TimeSliceThread& operator= (const TimeSliceThread&);
 };
 
 #endif   // __JUCE_TIMESLICETHREAD_JUCEHEADER__
@@ -8893,7 +8893,7 @@ public:
 
 	MouseCursor (const MouseCursor& other) throw();
 
-	const MouseCursor& operator= (const MouseCursor& other) throw();
+	MouseCursor& operator= (const MouseCursor& other) throw();
 
 	~MouseCursor() throw();
 
@@ -8943,7 +8943,7 @@ public:
 
 	ModifierKeys (const ModifierKeys& other) throw();
 
-	const ModifierKeys& operator= (const ModifierKeys& other) throw();
+	ModifierKeys& operator= (const ModifierKeys& other) throw();
 
 	inline bool isCommandDown() const throw()	   { return (flags & commandModifier) != 0; }
 
@@ -9039,7 +9039,7 @@ public:
 	AffineTransform (const float mat00, const float mat01, const float mat02,
 					 const float mat10, const float mat11, const float mat12) throw();
 
-	const AffineTransform& operator= (const AffineTransform& other) throw();
+	AffineTransform& operator= (const AffineTransform& other) throw();
 
 	bool operator== (const AffineTransform& other) const throw();
 
@@ -9317,7 +9317,7 @@ public:
 
 	KeyPress (const KeyPress& other) throw();
 
-	const KeyPress& operator= (const KeyPress& other) throw();
+	KeyPress& operator= (const KeyPress& other) throw();
 
 	bool operator== (const KeyPress& other) const throw();
 
@@ -9860,7 +9860,7 @@ public:
 
 	Justification (const Justification& other) throw();
 
-	const Justification& operator= (const Justification& other) throw();
+	Justification& operator= (const Justification& other) throw();
 
 	inline int getFlags() const throw()				 { return flags; }
 
@@ -9945,7 +9945,7 @@ public:
 
 	EdgeTable (const EdgeTable& other) throw();
 
-	const EdgeTable& operator= (const EdgeTable& other) throw();
+	EdgeTable& operator= (const EdgeTable& other) throw();
 
 	~EdgeTable() throw();
 
@@ -10071,7 +10071,7 @@ public:
 
 	~Path() throw();
 
-	const Path& operator= (const Path& other) throw();
+	Path& operator= (const Path& other) throw();
 
 	bool isEmpty() const throw();
 
@@ -10233,7 +10233,7 @@ public:
 		int index;
 
 		Iterator (const Iterator&);
-		const Iterator& operator= (const Iterator&);
+		Iterator& operator= (const Iterator&);
 	};
 
 	void loadPathFromStream (InputStream& source);
@@ -10300,7 +10300,7 @@ protected:
 
 private:
 	Typeface (const Typeface&);
-	const Typeface& operator= (const Typeface&);
+	Typeface& operator= (const Typeface&);
 };
 
 class JUCE_API  CustomTypeface  : public Typeface
@@ -10352,7 +10352,7 @@ private:
 	short lookupTable [128];
 
 	CustomTypeface (const CustomTypeface&);
-	const CustomTypeface& operator= (const CustomTypeface&);
+	CustomTypeface& operator= (const CustomTypeface&);
 
 	GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
 	GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
@@ -10388,7 +10388,7 @@ public:
 
 	Font() throw();
 
-	const Font& operator= (const Font& other) throw();
+	Font& operator= (const Font& other) throw();
 
 	bool operator== (const Font& other) const throw();
 	bool operator!= (const Font& other) const throw();
@@ -10522,7 +10522,7 @@ public:
 
 	PathStrokeType (const PathStrokeType& other) throw();
 
-	const PathStrokeType& operator= (const PathStrokeType& other) throw();
+	PathStrokeType& operator= (const PathStrokeType& other) throw();
 
 	~PathStrokeType() throw();
 
@@ -10581,7 +10581,7 @@ public:
 	Line (const Point<float>& start,
 		  const Point<float>& end) throw();
 
-	const Line& operator= (const Line& other) throw();
+	Line& operator= (const Line& other) throw();
 
 	~Line() throw();
 
@@ -11152,7 +11152,7 @@ public:
 
 	~Colour() throw();
 
-	const Colour& operator= (const Colour& other) throw();
+	Colour& operator= (const Colour& other) throw();
 
 	bool operator== (const Colour& other) const throw();
 	bool operator!= (const Colour& other) const throw();
@@ -11379,7 +11379,7 @@ public:
 
 	FillType (const FillType& other) throw();
 
-	const FillType& operator= (const FillType& other) throw();
+	FillType& operator= (const FillType& other) throw();
 
 	~FillType() throw();
 
@@ -11426,7 +11426,7 @@ public:
 
 	RectanglePlacement (const RectanglePlacement& other) throw();
 
-	const RectanglePlacement& operator= (const RectanglePlacement& other) throw();
+	RectanglePlacement& operator= (const RectanglePlacement& other) throw();
 
 	enum
 	{
@@ -11751,8 +11751,8 @@ private:
 	bool saveStatePending;
 	void saveStateIfPending() throw();
 
-	const Graphics& operator= (const Graphics& other);
 	Graphics (const Graphics&);
+	Graphics& operator= (const Graphics& other);
 };
 
 #endif   // __JUCE_GRAPHICS_JUCEHEADER__
@@ -11787,7 +11787,7 @@ public:
 
 	RectangleList (const Rectangle<int>& rect) throw();
 
-	const RectangleList& operator= (const RectangleList& other) throw();
+	RectangleList& operator= (const RectangleList& other) throw();
 
 	~RectangleList() throw();
 
@@ -11855,7 +11855,7 @@ public:
 		int index;
 
 		Iterator (const Iterator&);
-		const Iterator& operator= (const Iterator&);
+		Iterator& operator= (const Iterator&);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -12148,7 +12148,7 @@ private:
 	void setLastDragDropTarget (Component* comp);
 
 	ComponentPeer (const ComponentPeer&);
-	const ComponentPeer& operator= (const ComponentPeer&);
+	ComponentPeer& operator= (const ComponentPeer&);
 };
 
 #endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
@@ -12641,7 +12641,7 @@ private:
 	// this one to avoid compiler warnings.
 	Component (const Component&);
 
-	const Component& operator= (const Component&);
+	Component& operator= (const Component&);
 
 	// (dummy method to cause a deliberate compile error - if you hit this, you need to update your
 	// subclass to use the new parameters to keyStateChanged)
@@ -12811,7 +12811,7 @@ private:
 		ApplicationCommandTarget* const owner;
 
 		CommandTargetMessageInvoker (const CommandTargetMessageInvoker&);
-		const CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
+		CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
 	};
 
 	ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
@@ -12820,7 +12820,7 @@ private:
 	bool tryToInvoke (const InvocationInfo& info, const bool async);
 
 	ApplicationCommandTarget (const ApplicationCommandTarget&);
-	const ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
+	ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
 };
 
 #endif   // __JUCE_APPLICATIONCOMMANDTARGET_JUCEHEADER__
@@ -12905,7 +12905,7 @@ private:
 	ScopedPointer<InterProcessLock> appLock;
 
 	JUCEApplication (const JUCEApplication&);
-	const JUCEApplication& operator= (const JUCEApplication&);
+	JUCEApplication& operator= (const JUCEApplication&);
 
 public:
 	bool initialiseApp (String& commandLine);
@@ -12951,7 +12951,7 @@ public:
 
 private:
 	DeletedAtShutdown (const DeletedAtShutdown&);
-	const DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+	DeletedAtShutdown& operator= (const DeletedAtShutdown&);
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
@@ -12992,7 +12992,7 @@ private:
 	Timer* previous;
 	Timer* next;
 
-	const Timer& operator= (const Timer&);
+	Timer& operator= (const Timer&);
 };
 
 #endif   // __JUCE_TIMER_JUCEHEADER__
@@ -13110,7 +13110,7 @@ private:
 	void handleAsyncUpdate();
 
 	Desktop (const Desktop&);
-	const Desktop& operator= (const Desktop&);
+	Desktop& operator= (const Desktop&);
 };
 
 #endif   // __JUCE_DESKTOP_JUCEHEADER__
@@ -13278,7 +13278,7 @@ private:
 	void timerCallback();
 
 	PropertiesFile (const PropertiesFile&);
-	const PropertiesFile& operator= (const PropertiesFile&);
+	PropertiesFile& operator= (const PropertiesFile&);
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__
@@ -13323,7 +13323,7 @@ private:
 	int commonSettingsAreReadOnly;
 
 	ApplicationProperties (const ApplicationProperties&);
-	const ApplicationProperties& operator= (const ApplicationProperties&);
+	ApplicationProperties& operator= (const ApplicationProperties&);
 
 	void openFiles() throw();
 };
@@ -13408,7 +13408,7 @@ private:
 	String formatName;
 
 	AudioFormatReader (const AudioFormatReader&);
-	const AudioFormatReader& operator= (const AudioFormatReader&);
+	AudioFormatReader& operator= (const AudioFormatReader&);
 };
 
 #endif   // __JUCE_AUDIOFORMATREADER_JUCEHEADER__
@@ -13445,7 +13445,7 @@ public:
 
 	AudioSampleBuffer (const AudioSampleBuffer& other) throw();
 
-	const AudioSampleBuffer& operator= (const AudioSampleBuffer& other) throw();
+	AudioSampleBuffer& operator= (const AudioSampleBuffer& other) throw();
 
 	virtual ~AudioSampleBuffer() throw();
 
@@ -13915,7 +13915,7 @@ private:
 #endif
 
 	AudioCDReader (const AudioCDReader&);
-	const AudioCDReader& operator= (const AudioCDReader&);
+	AudioCDReader& operator= (const AudioCDReader&);
 };
 
 #endif
@@ -14017,7 +14017,7 @@ private:
 	const bool deleteSourceWhenDeleted;
 
 	AudioSubsectionReader (const AudioSubsectionReader&);
-	const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+	AudioSubsectionReader& operator= (const AudioSubsectionReader&);
 };
 
 #endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__
@@ -14405,7 +14405,7 @@ private:
 	void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
 
 	AudioFormatReaderSource (const AudioFormatReaderSource&);
-	const AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
+	AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
 };
 
 #endif   // __JUCE_AUDIOFORMATREADERSOURCE_JUCEHEADER__
@@ -14552,7 +14552,7 @@ private:
 	float lastGain, gain;
 
 	AudioSourcePlayer (const AudioSourcePlayer&);
-	const AudioSourcePlayer& operator= (const AudioSourcePlayer&);
+	AudioSourcePlayer& operator= (const AudioSourcePlayer&);
 };
 
 #endif   // __JUCE_AUDIOSOURCEPLAYER_JUCEHEADER__
@@ -14613,7 +14613,7 @@ private:
 	void readBufferSection (int start, int length, int bufferOffset);
 
 	BufferingAudioSource (const BufferingAudioSource&);
-	const BufferingAudioSource& operator= (const BufferingAudioSource&);
+	BufferingAudioSource& operator= (const BufferingAudioSource&);
 };
 
 #endif   // __JUCE_BUFFERINGAUDIOSOURCE_JUCEHEADER__
@@ -14667,7 +14667,7 @@ private:
 	void applyFilter (float* samples, int num, FilterState& fs);
 
 	ResamplingAudioSource (const ResamplingAudioSource&);
-	const ResamplingAudioSource& operator= (const ResamplingAudioSource&);
+	ResamplingAudioSource& operator= (const ResamplingAudioSource&);
 };
 
 #endif   // __JUCE_RESAMPLINGAUDIOSOURCE_JUCEHEADER__
@@ -14733,7 +14733,7 @@ private:
 	bool isPrepared, inputStreamEOF;
 
 	AudioTransportSource (const AudioTransportSource&);
-	const AudioTransportSource& operator= (const AudioTransportSource&);
+	AudioTransportSource& operator= (const AudioTransportSource&);
 };
 
 #endif   // __JUCE_AUDIOTRANSPORTSOURCE_JUCEHEADER__
@@ -14796,7 +14796,7 @@ private:
 	CriticalSection lock;
 
 	ChannelRemappingAudioSource (const ChannelRemappingAudioSource&);
-	const ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
+	ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
 };
 
 #endif   // __JUCE_CHANNELREMAPPINGAUDIOSOURCE_JUCEHEADER__
@@ -14870,7 +14870,7 @@ protected:
 	float x1, x2, y1, y2;
 
 	// (use the copyCoefficientsFrom() method instead of this operator)
-	const IIRFilter& operator= (const IIRFilter&);
+	IIRFilter& operator= (const IIRFilter&);
 };
 
 #endif   // __JUCE_IIRFILTER_JUCEHEADER__
@@ -14900,7 +14900,7 @@ private:
 	OwnedArray <IIRFilter> iirFilters;
 
 	IIRFilterAudioSource (const IIRFilterAudioSource&);
-	const IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
+	IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
 };
 
 #endif   // __JUCE_IIRFILTERAUDIOSOURCE_JUCEHEADER__
@@ -14948,7 +14948,7 @@ private:
 	int bufferSizeExpected;
 
 	MixerAudioSource (const MixerAudioSource&);
-	const MixerAudioSource& operator= (const MixerAudioSource&);
+	MixerAudioSource& operator= (const MixerAudioSource&);
 };
 
 #endif   // __JUCE_MIXERAUDIOSOURCE_JUCEHEADER__
@@ -14995,7 +14995,7 @@ private:
 	float amplitude;
 
 	ToneGeneratorAudioSource (const ToneGeneratorAudioSource&);
-	const ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
+	ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
 };
 
 #endif   // __JUCE_TONEGENERATORAUDIOSOURCE_JUCEHEADER__
@@ -15053,7 +15053,7 @@ private:
 	String typeName;
 
 	AudioIODeviceType (const AudioIODeviceType&);
-	const AudioIODeviceType& operator= (const AudioIODeviceType&);
+	AudioIODeviceType& operator= (const AudioIODeviceType&);
 };
 
 #endif   // __JUCE_AUDIOIODEVICETYPE_JUCEHEADER__
@@ -15102,7 +15102,7 @@ public:
 
 	~MidiMessage() throw();
 
-	const MidiMessage& operator= (const MidiMessage& other) throw();
+	MidiMessage& operator= (const MidiMessage& other) throw();
 
 	uint8* getRawData() const throw()			   { return data; }
 
@@ -15448,7 +15448,7 @@ public:
 
 	MidiBuffer (const MidiBuffer& other) throw();
 
-	const MidiBuffer& operator= (const MidiBuffer& other) throw();
+	MidiBuffer& operator= (const MidiBuffer& other) throw();
 
 	~MidiBuffer() throw();
 
@@ -15503,7 +15503,7 @@ public:
 		const uint8* data;
 
 		Iterator (const Iterator&);
-		const Iterator& operator= (const Iterator&);
+		Iterator& operator= (const Iterator&);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -15616,7 +15616,7 @@ private:
 	const uint32 componentUID;
 
 	ComponentDeletionWatcher (const ComponentDeletionWatcher&);
-	const ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
+	ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
 };
 
 #endif   // __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
@@ -15719,7 +15719,7 @@ private:
 	void hide();
 
 	TooltipWindow (const TooltipWindow&);
-	const TooltipWindow& operator= (const TooltipWindow&);
+	TooltipWindow& operator= (const TooltipWindow&);
 };
 
 #endif   // __JUCE_TOOLTIPWINDOW_JUCEHEADER__
@@ -15905,7 +15905,7 @@ private:
 	void sendStateMessage();
 
 	Button (const Button&);
-	const Button& operator= (const Button&);
+	Button& operator= (const Button&);
 };
 
 #endif   // __JUCE_BUTTON_JUCEHEADER__
@@ -16011,7 +16011,7 @@ private:
 	void timerCallback();
 
 	ScrollBar (const ScrollBar&);
-	const ScrollBar& operator= (const ScrollBar&);
+	ScrollBar& operator= (const ScrollBar&);
 };
 
 #endif   // __JUCE_SCROLLBAR_JUCEHEADER__
@@ -16094,7 +16094,7 @@ private:
 
 	void updateVisibleRegion();
 	Viewport (const Viewport&);
-	const Viewport& operator= (const Viewport&);
+	Viewport& operator= (const Viewport&);
 };
 
 #endif   // __JUCE_VIEWPORT_JUCEHEADER__
@@ -16117,7 +16117,7 @@ public:
 
 	~PopupMenu();
 
-	const PopupMenu& operator= (const PopupMenu& other);
+	PopupMenu& operator= (const PopupMenu& other);
 
 	void clear();
 
@@ -16226,7 +16226,7 @@ public:
 		int index;
 
 		MenuItemIterator (const MenuItemIterator&);
-		const MenuItemIterator& operator= (const MenuItemIterator&);
+		MenuItemIterator& operator= (const MenuItemIterator&);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -16570,7 +16570,7 @@ private:
 	void repaintText (const Range<int>& range);
 
 	TextEditor (const TextEditor&);
-	const TextEditor& operator= (const TextEditor&);
+	TextEditor& operator= (const TextEditor&);
 };
 
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__
@@ -16712,7 +16712,7 @@ private:
 	void callChangeListeners();
 
 	Label (const Label&);
-	const Label& operator= (const Label&);
+	Label& operator= (const Label&);
 };
 
 #endif   // __JUCE_LABEL_JUCEHEADER__
@@ -16857,7 +16857,7 @@ private:
 	ItemInfo* getItemForIndex (const int index) const throw();
 
 	ComboBox (const ComboBox&);
-	const ComboBox& operator= (const ComboBox&);
+	ComboBox& operator= (const ComboBox&);
 };
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__
@@ -17032,7 +17032,7 @@ private:
 	AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
 	AudioDeviceManager (const AudioDeviceManager&);
-	const AudioDeviceManager& operator= (const AudioDeviceManager&);
+	AudioDeviceManager& operator= (const AudioDeviceManager&);
 };
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__
@@ -17277,7 +17277,7 @@ private:
 	short timeFormat;
 
 	MidiFile (const MidiFile&);
-	const MidiFile& operator= (const MidiFile&);
+	MidiFile& operator= (const MidiFile&);
 
 	void readNextTrack (const char* data, int size);
 	void writeTrack (OutputStream& mainOut, const int trackNum);
@@ -17352,7 +17352,7 @@ private:
 	void noteOffInternal  (const int midiChannel, const int midiNoteNumber);
 
 	MidiKeyboardState (const MidiKeyboardState&);
-	const MidiKeyboardState& operator= (const MidiKeyboardState&);
+	MidiKeyboardState& operator= (const MidiKeyboardState&);
 };
 
 #endif   // __JUCE_MIDIKEYBOARDSTATE_JUCEHEADER__
@@ -17398,7 +17398,7 @@ private:
 	double sampleRate;
 
 	MidiMessageCollector (const MidiMessageCollector&);
-	const MidiMessageCollector& operator= (const MidiMessageCollector&);
+	MidiMessageCollector& operator= (const MidiMessageCollector&);
 };
 
 #endif   // __JUCE_MIDIMESSAGECOLLECTOR_JUCEHEADER__
@@ -17682,7 +17682,7 @@ private:
 #endif
 
 	AudioProcessor (const AudioProcessor&);
-	const AudioProcessor& operator= (const AudioProcessor&);
+	AudioProcessor& operator= (const AudioProcessor&);
 };
 
 #endif   // __JUCE_AUDIOPROCESSOR_JUCEHEADER__
@@ -17699,7 +17699,7 @@ public:
 
 	PluginDescription() throw();
 	PluginDescription (const PluginDescription& other) throw();
-	const PluginDescription& operator= (const PluginDescription& other) throw();
+	PluginDescription& operator= (const PluginDescription& other) throw();
 	~PluginDescription() throw();
 
 	String name;
@@ -17752,7 +17752,7 @@ protected:
 	AudioPluginInstance();
 
 	AudioPluginInstance (const AudioPluginInstance&);
-	const AudioPluginInstance& operator= (const AudioPluginInstance&);
+	AudioPluginInstance& operator= (const AudioPluginInstance&);
 };
 
 #endif   // __JUCE_AUDIOPLUGININSTANCE_JUCEHEADER__
@@ -17790,7 +17790,7 @@ protected:
 	AudioPluginFormat() throw();
 
 	AudioPluginFormat (const AudioPluginFormat&);
-	const AudioPluginFormat& operator= (const AudioPluginFormat&);
+	AudioPluginFormat& operator= (const AudioPluginFormat&);
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMAT_JUCEHEADER__
@@ -17818,7 +17818,7 @@ public:
 
 private:
 	AudioUnitPluginFormat (const AudioUnitPluginFormat&);
-	const AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
+	AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
 };
 
 #endif
@@ -18090,7 +18090,7 @@ public:
 
 private:
 	VSTPluginFormat (const VSTPluginFormat&);
-	const VSTPluginFormat& operator= (const VSTPluginFormat&);
+	VSTPluginFormat& operator= (const VSTPluginFormat&);
 
 	void recursiveFileSearch (StringArray& results, const File& dir, const bool recursive);
 };
@@ -18139,7 +18139,7 @@ private:
 	OwnedArray <AudioPluginFormat> formats;
 
 	AudioPluginFormatManager (const AudioPluginFormatManager&);
-	const AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
+	AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
 };
 
 #endif   // __JUCE_AUDIOPLUGINFORMATMANAGER_JUCEHEADER__
@@ -18214,7 +18214,7 @@ private:
 	OwnedArray <PluginDescription> types;
 
 	KnownPluginList (const KnownPluginList&);
-	const KnownPluginList& operator= (const KnownPluginList&);
+	KnownPluginList& operator= (const KnownPluginList&);
 };
 
 #endif   // __JUCE_KNOWNPLUGINLIST_JUCEHEADER__
@@ -18266,7 +18266,7 @@ private:
 	void setDeadMansPedalFile (const StringArray& newContents) throw();
 
 	PluginDirectoryScanner (const PluginDirectoryScanner&);
-	const PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
+	PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
 };
 
 #endif   // __JUCE_PLUGINDIRECTORYSCANNER_JUCEHEADER__
@@ -18459,7 +18459,7 @@ private:
 							bool isMouseClick);
 
 	ListBox (const ListBox&);
-	const ListBox& operator= (const ListBox&);
+	ListBox& operator= (const ListBox&);
 };
 
 #endif   // __JUCE_LISTBOX_JUCEHEADER__
@@ -18503,7 +18503,7 @@ protected:
 
 private:
 	TextButton (const TextButton&);
-	const TextButton& operator= (const TextButton&);
+	TextButton& operator= (const TextButton&);
 };
 
 #endif   // __JUCE_TEXTBUTTON_JUCEHEADER__
@@ -18546,7 +18546,7 @@ private:
 	void scanFor (AudioPluginFormat* format);
 
 	PluginListComponent (const PluginListComponent&);
-	const PluginListComponent& operator= (const PluginListComponent&);
+	PluginListComponent& operator= (const PluginListComponent&);
 };
 
 #endif   // __JUCE_PLUGINLISTCOMPONENT_JUCEHEADER__
@@ -18604,7 +18604,7 @@ public:
 		void unprepare();
 
 		Node (const Node&);
-		const Node& operator= (const Node&);
+		Node& operator= (const Node&);
 	};
 
 	struct JUCE_API  Connection
@@ -18735,7 +18735,7 @@ public:
 		AudioProcessorGraph* graph;
 
 		AudioGraphIOProcessor (const AudioGraphIOProcessor&);
-		const AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
+		AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
 	};
 
 	// AudioProcessor methods:
@@ -18799,7 +18799,7 @@ private:
 					  const int recursionCheck) const;
 
 	AudioProcessorGraph (const AudioProcessorGraph&);
-	const AudioProcessorGraph& operator= (const AudioProcessorGraph&);
+	AudioProcessorGraph& operator= (const AudioProcessorGraph&);
 };
 
 #endif   // __JUCE_AUDIOPROCESSORGRAPH_JUCEHEADER__
@@ -18857,7 +18857,7 @@ private:
 	MidiMessageCollector messageCollector;
 
 	AudioProcessorPlayer (const AudioProcessorPlayer&);
-	const AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
+	AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
 };
 
 #endif   // __JUCE_AUDIOPROCESSORPLAYER_JUCEHEADER__
@@ -18981,7 +18981,7 @@ private:
 	PropertyPanel* panel;
 
 	GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
-	const GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
+	GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
 };
 
 #endif   // __JUCE_GENERICAUDIOPROCESSOREDITOR_JUCEHEADER__
@@ -19155,7 +19155,7 @@ private:
 	bool shouldStealNotes;
 
 	Synthesiser (const Synthesiser&);
-	const Synthesiser& operator= (const Synthesiser&);
+	Synthesiser& operator= (const Synthesiser&);
 };
 
 #endif   // __JUCE_SYNTHESISER_JUCEHEADER__
@@ -19271,7 +19271,7 @@ private:
 	CriticalSection actionListenerLock_;
 
 	ActionListenerList (const ActionListenerList&);
-	const ActionListenerList& operator= (const ActionListenerList&);
+	ActionListenerList& operator= (const ActionListenerList&);
 };
 
 #endif   // __JUCE_ACTIONLISTENERLIST_JUCEHEADER__
@@ -19298,7 +19298,7 @@ private:
 	ActionListenerList actionListenerList;
 
 	ActionBroadcaster (const ActionBroadcaster&);
-	const ActionBroadcaster& operator= (const ActionBroadcaster&);
+	ActionBroadcaster& operator= (const ActionBroadcaster&);
 };
 
 #endif   // __JUCE_ACTIONBROADCASTER_JUCEHEADER__
@@ -19337,7 +19337,7 @@ public:
 
 private:
 	CallbackMessage (const CallbackMessage&);
-	const CallbackMessage& operator= (const CallbackMessage&);
+	CallbackMessage& operator= (const CallbackMessage&);
 };
 
 #endif   // __JUCE_CALLBACKMESSAGE_JUCEHEADER__
@@ -19426,7 +19426,7 @@ private:
 	void run();
 
 	InterprocessConnection (const InterprocessConnection&);
-	const InterprocessConnection& operator= (const InterprocessConnection&);
+	InterprocessConnection& operator= (const InterprocessConnection&);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__
@@ -19465,7 +19465,7 @@ private:
 	void run();
 
 	InterprocessConnectionServer (const InterprocessConnectionServer&);
-	const InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
+	InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
@@ -19557,7 +19557,7 @@ private:
 	CriticalSection lockingLock;
 
 	MessageManager (const MessageManager&);
-	const MessageManager& operator= (const MessageManager&);
+	MessageManager& operator= (const MessageManager&);
 };
 
 class JUCE_API MessageManagerLock
@@ -19622,7 +19622,7 @@ private:
 	CriticalSection timerListLock;
 	OwnedArray <MultiTimerCallback> timers;
 
-	const MultiTimer& operator= (const MultiTimer&);
+	MultiTimer& operator= (const MultiTimer&);
 };
 
 #endif   // __JUCE_MULTITIMER_JUCEHEADER__
@@ -19696,7 +19696,7 @@ private:
 	int offset;
 
 	ArrowButton (const ArrowButton&);
-	const ArrowButton& operator= (const ArrowButton&);
+	ArrowButton& operator= (const ArrowButton&);
 };
 
 #endif   // __JUCE_ARROWBUTTON_JUCEHEADER__
@@ -19755,7 +19755,7 @@ public:
 		float opacity;
 
 	private:
-		const RenderingContext& operator= (const RenderingContext&);
+		RenderingContext& operator= (const RenderingContext&);
 	};
 
 	virtual void render (const RenderingContext& context) const = 0;
@@ -19784,7 +19784,7 @@ public:
 
 private:
 	Drawable (const Drawable&);
-	const Drawable& operator= (const Drawable&);
+	Drawable& operator= (const Drawable&);
 
 	String name;
 };
@@ -19850,7 +19850,7 @@ private:
 
 	void deleteImages();
 	DrawableButton (const DrawableButton&);
-	const DrawableButton& operator= (const DrawableButton&);
+	DrawableButton& operator= (const DrawableButton&);
 };
 
 #endif   // __JUCE_DRAWABLEBUTTON_JUCEHEADER__
@@ -19906,7 +19906,7 @@ private:
 	const Font getFontToUse() const;
 
 	HyperlinkButton (const HyperlinkButton&);
-	const HyperlinkButton& operator= (const HyperlinkButton&);
+	HyperlinkButton& operator= (const HyperlinkButton&);
 };
 
 #endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__
@@ -19971,7 +19971,7 @@ private:
 	void deleteImages();
 
 	ImageButton (const ImageButton&);
-	const ImageButton& operator= (const ImageButton&);
+	ImageButton& operator= (const ImageButton&);
 };
 
 #endif   // __JUCE_IMAGEBUTTON_JUCEHEADER__
@@ -20023,7 +20023,7 @@ private:
 	float outlineWidth;
 
 	ShapeButton (const ShapeButton&);
-	const ShapeButton& operator= (const ShapeButton&);
+	ShapeButton& operator= (const ShapeButton&);
 };
 
 #endif   // __JUCE_SHAPEBUTTON_JUCEHEADER__
@@ -20067,7 +20067,7 @@ protected:
 private:
 
 	ToggleButton (const ToggleButton&);
-	const ToggleButton& operator= (const ToggleButton&);
+	ToggleButton& operator= (const ToggleButton&);
 };
 
 #endif   // __JUCE_TOGGLEBUTTON_JUCEHEADER__
@@ -20337,7 +20337,7 @@ private:
 	ToolbarItemComponent* getNextActiveComponent (int index, const int delta) const;
 
 	Toolbar (const Toolbar&);
-	const Toolbar& operator= (const Toolbar&);
+	Toolbar& operator= (const Toolbar&);
 };
 
 #endif   // __JUCE_TOOLBAR_JUCEHEADER__
@@ -20409,7 +20409,7 @@ private:
 	Rectangle<int> contentArea;
 
 	ToolbarItemComponent (const ToolbarItemComponent&);
-	const ToolbarItemComponent& operator= (const ToolbarItemComponent&);
+	ToolbarItemComponent& operator= (const ToolbarItemComponent&);
 };
 
 #endif   // __JUCE_TOOLBARITEMCOMPONENT_JUCEHEADER__
@@ -20437,7 +20437,7 @@ private:
 	ScopedPointer <Drawable> normalImage, toggledOnImage;
 
 	ToolbarButton (const ToolbarButton&);
-	const ToolbarButton& operator= (const ToolbarButton&);
+	ToolbarButton& operator= (const ToolbarButton&);
 };
 
 #endif   // __JUCE_TOOLBARBUTTON_JUCEHEADER__
@@ -20475,7 +20475,7 @@ public:
 
 		~Position() throw();
 
-		const Position& operator= (const Position& other) throw();
+		Position& operator= (const Position& other) throw();
 		bool operator== (const Position& other) const throw();
 		bool operator!= (const Position& other) const throw();
 
@@ -20570,7 +20570,7 @@ public:
 	public:
 		Iterator (CodeDocument* const document);
 		Iterator (const Iterator& other);
-		const Iterator& operator= (const Iterator& other) throw();
+		Iterator& operator= (const Iterator& other) throw();
 		~Iterator() throw();
 
 		juce_wchar nextChar();
@@ -20618,7 +20618,7 @@ private:
 	void checkLastLineStatus();
 
 	CodeDocument (const CodeDocument&);
-	const CodeDocument& operator= (const CodeDocument&);
+	CodeDocument& operator= (const CodeDocument&);
 };
 
 #endif   // __JUCE_CODEDOCUMENT_JUCEHEADER__
@@ -20819,7 +20819,7 @@ private:
 	int columnToIndex (int line, int column) const throw();
 
 	CodeEditorComponent (const CodeEditorComponent&);
-	const CodeEditorComponent& operator= (const CodeEditorComponent&);
+	CodeEditorComponent& operator= (const CodeEditorComponent&);
 };
 
 #endif   // __JUCE_CODEEDITORCOMPONENT_JUCEHEADER__
@@ -20924,7 +20924,7 @@ private:
 	void timerCallback();
 
 	ProgressBar (const ProgressBar&);
-	const ProgressBar& operator= (const ProgressBar&);
+	ProgressBar& operator= (const ProgressBar&);
 };
 
 #endif   // __JUCE_PROGRESSBAR_JUCEHEADER__
@@ -21240,7 +21240,7 @@ private:
 	bool incDecDragDirectionIsHorizontal() const;
 
 	Slider (const Slider&);
-	const Slider& operator= (const Slider&);
+	Slider& operator= (const Slider&);
 };
 
 #endif   // __JUCE_SLIDER_JUCEHEADER__
@@ -21418,7 +21418,7 @@ private:
 	void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
 	TableHeaderComponent (const TableHeaderComponent&);
-	const TableHeaderComponent operator= (const TableHeaderComponent&);
+	TableHeaderComponent operator= (const TableHeaderComponent&);
 };
 
 #endif   // __JUCE_TABLEHEADERCOMPONENT_JUCEHEADER__
@@ -21539,7 +21539,7 @@ private:
 	void updateColumnComponents() const;
 
 	TableListBox (const TableListBox&);
-	const TableListBox& operator= (const TableListBox&);
+	TableListBox& operator= (const TableListBox&);
 };
 
 #endif   // __JUCE_TABLELISTBOX_JUCEHEADER__
@@ -21621,7 +21621,7 @@ private:
 	void replaceComponent (ToolbarItemComponent* const comp);
 
 	ToolbarItemPalette (const ToolbarItemPalette&);
-	const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+	ToolbarItemPalette& operator= (const ToolbarItemPalette&);
 };
 
 #endif   // __JUCE_TOOLBARITEMPALETTE_JUCEHEADER__
@@ -21787,7 +21787,7 @@ private:
 	TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
 	TreeViewItem (const TreeViewItem&);
-	const TreeViewItem& operator= (const TreeViewItem&);
+	TreeViewItem& operator= (const TreeViewItem&);
 };
 
 class JUCE_API  TreeView  : public Component,
@@ -21903,7 +21903,7 @@ private:
 									 Component* sourceComponent) const throw();
 
 	TreeView (const TreeView&);
-	const TreeView& operator= (const TreeView&);
+	TreeView& operator= (const TreeView&);
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__
@@ -22028,7 +22028,7 @@ public:
 
 	private:
 		BitmapData (const BitmapData&);
-		const BitmapData& operator= (const BitmapData&);
+		BitmapData& operator= (const BitmapData&);
 	};
 
 	virtual void setPixelData (int destX, int destY, int destW, int destH,
@@ -22060,7 +22060,7 @@ protected:
 
 private:
 
-	const Image& operator= (const Image&);
+	Image& operator= (const Image&);
 };
 
 #endif   // __JUCE_IMAGE_JUCEHEADER__
@@ -22143,7 +22143,7 @@ private:
 				  const Time& creationTime, const bool isReadOnly);
 
 	DirectoryContentsList (const DirectoryContentsList&);
-	const DirectoryContentsList& operator= (const DirectoryContentsList&);
+	DirectoryContentsList& operator= (const DirectoryContentsList&);
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSLIST_JUCEHEADER__
@@ -22205,7 +22205,7 @@ protected:
 	SortedSet <void*> listeners;
 
 	DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
-	const DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
+	DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
 };
 
 #endif   // __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
@@ -22241,7 +22241,7 @@ public:
 
 private:
 	FilePreviewComponent (const FilePreviewComponent&);
-	const FilePreviewComponent& operator= (const FilePreviewComponent&);
+	FilePreviewComponent& operator= (const FilePreviewComponent&);
 };
 
 #endif   // __JUCE_FILEPREVIEWCOMPONENT_JUCEHEADER__
@@ -22346,7 +22346,7 @@ private:
 	bool isFileOrDirSuitable (const File& f) const;
 
 	FileBrowserComponent (const FileBrowserComponent&);
-	const FileBrowserComponent& operator= (const FileBrowserComponent&);
+	FileBrowserComponent& operator= (const FileBrowserComponent&);
 };
 
 #endif   // __JUCE_FILEBROWSERCOMPONENT_JUCEHEADER__
@@ -22482,7 +22482,7 @@ private:
 	void deleteShadowWindows();
 
 	DropShadower (const DropShadower&);
-	const DropShadower& operator= (const DropShadower&);
+	DropShadower& operator= (const DropShadower&);
 };
 
 #endif   // __JUCE_DROPSHADOWER_JUCEHEADER__
@@ -22536,7 +22536,7 @@ private:
 	void setWindowActive (const bool isNowActive) throw();
 
 	TopLevelWindow (const TopLevelWindow&);
-	const TopLevelWindow& operator= (const TopLevelWindow&);
+	TopLevelWindow& operator= (const TopLevelWindow&);
 };
 
 #endif   // __JUCE_TOPLEVELWINDOW_JUCEHEADER__
@@ -22628,7 +22628,7 @@ private:
 	double aspectRatio;
 
 	ComponentBoundsConstrainer (const ComponentBoundsConstrainer&);
-	const ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
+	ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
 };
 
 #endif   // __JUCE_COMPONENTBOUNDSCONSTRAINER_JUCEHEADER__
@@ -22697,7 +22697,7 @@ private:
 	void updateMouseZone (const MouseEvent& e) throw();
 
 	ResizableBorderComponent (const ResizableBorderComponent&);
-	const ResizableBorderComponent& operator= (const ResizableBorderComponent&);
+	ResizableBorderComponent& operator= (const ResizableBorderComponent&);
 };
 
 #endif   // __JUCE_RESIZABLEBORDERCOMPONENT_JUCEHEADER__
@@ -22733,7 +22733,7 @@ private:
 	int originalX, originalY, originalW, originalH;
 
 	ResizableCornerComponent (const ResizableCornerComponent&);
-	const ResizableCornerComponent& operator= (const ResizableCornerComponent&);
+	ResizableCornerComponent& operator= (const ResizableCornerComponent&);
 };
 
 #endif   // __JUCE_RESIZABLECORNERCOMPONENT_JUCEHEADER__
@@ -22839,7 +22839,7 @@ private:
 	void updateLastPos();
 
 	ResizableWindow (const ResizableWindow&);
-	const ResizableWindow& operator= (const ResizableWindow&);
+	ResizableWindow& operator= (const ResizableWindow&);
 
 	// (xxx remove these eventually)
 	// temporarily here to stop old code compiling, as the parameters for these methods have changed..
@@ -22901,7 +22901,7 @@ public:
 
 	GlyphArrangement (const GlyphArrangement& other);
 
-	const GlyphArrangement& operator= (const GlyphArrangement& other);
+	GlyphArrangement& operator= (const GlyphArrangement& other);
 
 	~GlyphArrangement();
 
@@ -23037,7 +23037,7 @@ private:
 	const bool warnAboutOverwritingExistingFiles;
 
 	FileChooserDialogBox (const FileChooserDialogBox&);
-	const FileChooserDialogBox& operator= (const FileChooserDialogBox&);
+	FileChooserDialogBox& operator= (const FileChooserDialogBox&);
 };
 
 #endif   // __JUCE_FILECHOOSERDIALOGBOX_JUCEHEADER__
@@ -23083,7 +23083,7 @@ public:
 
 private:
 	FileListComponent (const FileListComponent&);
-	const FileListComponent& operator= (const FileListComponent&);
+	FileListComponent& operator= (const FileListComponent&);
 
 	File lastDirectory;
 };
@@ -23181,7 +23181,7 @@ private:
 	void handleAsyncUpdate();
 
 	FilenameComponent (const FilenameComponent&);
-	const FilenameComponent& operator= (const FilenameComponent&);
+	FilenameComponent& operator= (const FilenameComponent&);
 };
 
 #endif   // __JUCE_FILENAMECOMPONENT_JUCEHEADER__
@@ -23252,7 +23252,7 @@ private:
 	void updateButtons() throw();
 
 	FileSearchPathListComponent (const FileSearchPathListComponent&);
-	const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+	FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
 };
 
 #endif   // __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
@@ -23291,7 +23291,7 @@ private:
 	String dragAndDropDescription;
 
 	FileTreeComponent (const FileTreeComponent&);
-	const FileTreeComponent& operator= (const FileTreeComponent&);
+	FileTreeComponent& operator= (const FileTreeComponent&);
 };
 
 #endif   // __JUCE_FILETREECOMPONENT_JUCEHEADER__
@@ -23328,7 +23328,7 @@ private:
 	void getThumbSize (int& w, int& h) const;
 
 	ImagePreviewComponent (const ImagePreviewComponent&);
-	const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+	ImagePreviewComponent& operator= (const ImagePreviewComponent&);
 };
 
 #endif   // __JUCE_IMAGEPREVIEWCOMPONENT_JUCEHEADER__
@@ -23476,7 +23476,7 @@ private:
 						const int millisecsSinceKeyPressed,
 						Component* const originatingComponent) const;
 
-	const KeyPressMappingSet& operator= (const KeyPressMappingSet&);
+	KeyPressMappingSet& operator= (const KeyPressMappingSet&);
 };
 
 #endif   // __JUCE_KEYPRESSMAPPINGSET_JUCEHEADER__
@@ -23533,7 +23533,7 @@ private:
 	void assignNewKey (const CommandID commandID, int index);
 
 	KeyMappingEditorComponent (const KeyMappingEditorComponent&);
-	const KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
+	KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
 };
 
 #endif   // __JUCE_KEYMAPPINGEDITORCOMPONENT_JUCEHEADER__
@@ -23597,7 +23597,7 @@ private:
 	void registerWithParentComps() throw();
 
 	ComponentMovementWatcher (const ComponentMovementWatcher&);
-	const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+	ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
 };
 
 #endif   // __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
@@ -23643,7 +23643,7 @@ private:
 	Justification justification;
 
 	GroupComponent (const GroupComponent&);
-	const GroupComponent& operator= (const GroupComponent&);
+	GroupComponent& operator= (const GroupComponent&);
 };
 
 #endif   // __JUCE_GROUPCOMPONENT_JUCEHEADER__
@@ -23697,7 +23697,7 @@ protected:
 
 private:
 	TabBarButton (const TabBarButton&);
-	const TabBarButton& operator= (const TabBarButton&);
+	TabBarButton& operator= (const TabBarButton&);
 };
 
 class JUCE_API  TabbedButtonBar  : public Component,
@@ -23790,7 +23790,7 @@ private:
 	Button* extraTabsButton;
 
 	TabbedButtonBar (const TabbedButtonBar&);
-	const TabbedButtonBar& operator= (const TabbedButtonBar&);
+	TabbedButtonBar& operator= (const TabbedButtonBar&);
 };
 
 #endif   // __JUCE_TABBEDBUTTONBAR_JUCEHEADER__
@@ -23886,7 +23886,7 @@ private:
 	void changeCallback (const int newCurrentTabIndex, const String& newTabName);
 
 	TabbedComponent (const TabbedComponent&);
-	const TabbedComponent& operator= (const TabbedComponent&);
+	TabbedComponent& operator= (const TabbedComponent&);
 };
 
 #endif   // __JUCE_TABBEDCOMPONENT_JUCEHEADER__
@@ -23964,7 +23964,7 @@ private:
 	SortedSet <void*> listeners;
 
 	MenuBarModel (const MenuBarModel&);
-	const MenuBarModel& operator= (const MenuBarModel&);
+	MenuBarModel& operator= (const MenuBarModel&);
 };
 
 #endif   // __JUCE_MENUBARMODEL_JUCEHEADER__
@@ -24018,7 +24018,7 @@ private:
 	void repaintMenuItem (int index);
 
 	MenuBarComponent (const MenuBarComponent&);
-	const MenuBarComponent& operator= (const MenuBarComponent&);
+	MenuBarComponent& operator= (const MenuBarComponent&);
 };
 
 #endif   // __JUCE_MENUBARCOMPONENT_JUCEHEADER__
@@ -24107,7 +24107,7 @@ private:
 	void repaintTitleBar();
 
 	DocumentWindow (const DocumentWindow&);
-	const DocumentWindow& operator= (const DocumentWindow&);
+	DocumentWindow& operator= (const DocumentWindow&);
 };
 
 #endif   // __JUCE_DOCUMENTWINDOW_JUCEHEADER__
@@ -24295,7 +24295,7 @@ private:
 	void updatePrefSizesToMatchCurrentPositions();
 
 	StretchableLayoutManager (const StretchableLayoutManager&);
-	const StretchableLayoutManager& operator= (const StretchableLayoutManager&);
+	StretchableLayoutManager& operator= (const StretchableLayoutManager&);
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTMANAGER_JUCEHEADER__
@@ -24333,7 +24333,7 @@ private:
 	bool isVertical;
 
 	StretchableLayoutResizerBar (const StretchableLayoutResizerBar&);
-	const StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
+	StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
 };
 
 #endif   // __JUCE_STRETCHABLELAYOUTRESIZERBAR_JUCEHEADER__
@@ -24380,7 +24380,7 @@ private:
 	OwnedArray <Item> items;
 
 	StretchableObjectResizer (const StretchableObjectResizer&);
-	const StretchableObjectResizer& operator= (const StretchableObjectResizer&);
+	StretchableObjectResizer& operator= (const StretchableObjectResizer&);
 };
 
 #endif   // __JUCE_STRETCHABLEOBJECTRESIZER_JUCEHEADER__
@@ -24427,7 +24427,7 @@ public:
 
 	~TextLayout() throw();
 
-	const TextLayout& operator= (const TextLayout& layoutToCopy) throw();
+	TextLayout& operator= (const TextLayout& layoutToCopy) throw();
 
 	void clear() throw();
 
@@ -24594,7 +24594,7 @@ private:
 
 	// disable copy constructor
 	AlertWindow (const AlertWindow&);
-	const AlertWindow& operator= (const AlertWindow&);
+	AlertWindow& operator= (const AlertWindow&);
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__
@@ -25073,7 +25073,7 @@ private:
 							   const bool flatOnBottom) throw();
 
 	LookAndFeel (const LookAndFeel&);
-	const LookAndFeel& operator= (const LookAndFeel&);
+	LookAndFeel& operator= (const LookAndFeel&);
 };
 
 #endif   // __JUCE_LOOKANDFEEL_JUCEHEADER__
@@ -25192,7 +25192,7 @@ private:
 	DropShadowEffect scrollbarShadow;
 
 	OldSchoolLookAndFeel (const OldSchoolLookAndFeel&);
-	const OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
+	OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
 };
 
 #endif   // __JUCE_OLDSCHOOLLOOKANDFEEL_JUCEHEADER__
@@ -25288,7 +25288,7 @@ public:
 	{
 	}
 
-	const SelectedItemSet& operator= (const SelectedItemSet& other)
+	SelectedItemSet& operator= (const SelectedItemSet& other)
 	{
 		if (selectedItems != other.selectedItems)
 		{
@@ -25617,7 +25617,7 @@ private:
 	void checkJustHoveredCallback();
 
 	MouseHoverDetector (const MouseHoverDetector&);
-	const MouseHoverDetector& operator= (const MouseHoverDetector&);
+	MouseHoverDetector& operator= (const MouseHoverDetector&);
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
@@ -25670,7 +25670,7 @@ private:
 	void createButton();
 
 	BooleanPropertyComponent (const BooleanPropertyComponent&);
-	const BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
+	BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
 };
 
 #endif   // __JUCE_BOOLEANPROPERTYCOMPONENT_JUCEHEADER__
@@ -25707,7 +25707,7 @@ private:
 	TextButton* button;
 
 	ButtonPropertyComponent (const ButtonPropertyComponent&);
-	const ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
+	ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
 };
 
 #endif   // __JUCE_BUTTONPROPERTYCOMPONENT_JUCEHEADER__
@@ -25755,7 +25755,7 @@ private:
 	void createComboBox (const Array <int>* choiceIDs);
 
 	ChoicePropertyComponent (const ChoicePropertyComponent&);
-	const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
+	ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
 };
 
 #endif   // __JUCE_CHOICEPROPERTYCOMPONENT_JUCEHEADER__
@@ -25812,7 +25812,7 @@ protected:
 	Slider* slider;
 
 	SliderPropertyComponent (const SliderPropertyComponent&);
-	const SliderPropertyComponent& operator= (const SliderPropertyComponent&);
+	SliderPropertyComponent& operator= (const SliderPropertyComponent&);
 };
 
 #endif   // __JUCE_SLIDERPROPERTYCOMPONENT_JUCEHEADER__
@@ -25857,7 +25857,7 @@ private:
 	void createEditor (const int maxNumChars, const bool isMultiLine);
 
 	TextPropertyComponent (const TextPropertyComponent&);
-	const TextPropertyComponent& operator= (const TextPropertyComponent&);
+	TextPropertyComponent& operator= (const TextPropertyComponent&);
 };
 
 #endif   // __JUCE_TEXTPROPERTYCOMPONENT_JUCEHEADER__
@@ -25968,7 +25968,7 @@ private:
 	Label* midiOutputLabel;
 
 	AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
-	const AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
+	AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
 };
 
 #endif   // __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
@@ -26027,7 +26027,7 @@ private:
 	DropShadowEffect shadow;
 
 	BubbleComponent (const BubbleComponent&);
-	const BubbleComponent& operator= (const BubbleComponent&);
+	BubbleComponent& operator= (const BubbleComponent&);
 };
 
 #endif   // __JUCE_BUBBLECOMPONENT_JUCEHEADER__
@@ -26079,7 +26079,7 @@ private:
 			   const bool deleteSelfAfterUse);
 
 	BubbleMessageComponent (const BubbleMessageComponent&);
-	const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+	BubbleMessageComponent& operator= (const BubbleMessageComponent&);
 };
 
 #endif   // __JUCE_BUBBLEMESSAGECOMPONENT_JUCEHEADER__
@@ -26154,7 +26154,7 @@ private:
 	void resized();
 
 	ColourSelector (const ColourSelector&);
-	const ColourSelector& operator= (const ColourSelector&);
+	ColourSelector& operator= (const ColourSelector&);
 
 	// this constructor is here temporarily to prevent old code compiling, because the parameters
 	// have changed - if you get an error here, update your code to use the new constructor instead..
@@ -26217,7 +26217,7 @@ private:
 	int scaleInt (const int n) const;
 
 	MagnifierComponent (const MagnifierComponent&);
-	const MagnifierComponent& operator= (const MagnifierComponent&);
+	MagnifierComponent& operator= (const MagnifierComponent&);
 };
 
 #endif   // __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
@@ -26390,7 +26390,7 @@ private:
 	void repaintNote (const int midiNoteNumber);
 
 	MidiKeyboardComponent (const MidiKeyboardComponent&);
-	const MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+	MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
 };
 
 #endif   // __JUCE_MIDIKEYBOARDCOMPONENT_JUCEHEADER__
@@ -26431,7 +26431,7 @@ private:
 	ScopedPointer <NSViewComponentInternal> info;
 
 	NSViewComponent (const NSViewComponent&);
-	const NSViewComponent& operator= (const NSViewComponent&);
+	NSViewComponent& operator= (const NSViewComponent&);
 };
 
 #endif
@@ -26575,7 +26575,7 @@ private:
 	void internalRepaint (int x, int y, int w, int h);
 
 	OpenGLComponent (const OpenGLComponent&);
-	const OpenGLComponent& operator= (const OpenGLComponent&);
+	OpenGLComponent& operator= (const OpenGLComponent&);
 };
 
 #endif
@@ -26630,7 +26630,7 @@ private:
 	int buttonSize;
 
 	PreferencesPanel (const PreferencesPanel&);
-	const PreferencesPanel& operator= (const PreferencesPanel&);
+	PreferencesPanel& operator= (const PreferencesPanel&);
 };
 
 #endif   // __JUCE_PREFERENCESPANEL_JUCEHEADER__
@@ -26733,7 +26733,7 @@ private:
 #endif
 
 	QuickTimeMovieComponent (const QuickTimeMovieComponent&);
-	const QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
+	QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
 };
 
 #endif
@@ -26771,7 +26771,7 @@ public:
 private:
 
 	SystemTrayIconComponent (const SystemTrayIconComponent&);
-	const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+	SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
 };
 
 #endif
@@ -26832,7 +26832,7 @@ private:
 	void checkWindowAssociation();
 
 	WebBrowserComponent (const WebBrowserComponent&);
-	const WebBrowserComponent& operator= (const WebBrowserComponent&);
+	WebBrowserComponent& operator= (const WebBrowserComponent&);
 };
 
 #endif
@@ -26881,7 +26881,7 @@ private:
 	bool escapeKeyTriggersCloseButton;
 
 	DialogWindow (const DialogWindow&);
-	const DialogWindow& operator= (const DialogWindow&);
+	DialogWindow& operator= (const DialogWindow&);
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__
@@ -26935,7 +26935,7 @@ private:
 	int originalClickCounter;
 
 	SplashScreen (const SplashScreen&);
-	const SplashScreen& operator= (const SplashScreen&);
+	SplashScreen& operator= (const SplashScreen&);
 };
 
 #endif   // __JUCE_SPLASHSCREEN_JUCEHEADER__
@@ -26982,7 +26982,7 @@ private:
 	const int timeOutMsWhenCancelling;
 
 	ThreadWithProgressWindow (const ThreadWithProgressWindow&);
-	const ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
+	ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__
@@ -27148,7 +27148,7 @@ protected:
 		Font font;
 
 	private:
-		const SavedState& operator= (const SavedState&);
+		SavedState& operator= (const SavedState&);
 	};
 
 	OwnedArray <SavedState> stateStack;
@@ -27161,7 +27161,7 @@ protected:
 	void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
 
 	LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
-	const LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
+	LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSPOSTSCRIPTRENDERER_JUCEHEADER__
@@ -27231,7 +27231,7 @@ protected:
 	OwnedArray <LLGCSavedState> stateStack;
 
 	LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
-	const LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
+	LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
 };
 
 #endif   // __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
@@ -27291,7 +27291,7 @@ private:
 	OwnedArray <AffineTransform> transforms;
 
 	DrawableComposite (const DrawableComposite&);
-	const DrawableComposite& operator= (const DrawableComposite&);
+	DrawableComposite& operator= (const DrawableComposite&);
 };
 
 #endif   // __JUCE_DRAWABLECOMPOSITE_JUCEHEADER__
@@ -27346,7 +27346,7 @@ private:
 	Colour overlayColour;
 
 	DrawableImage (const DrawableImage&);
-	const DrawableImage& operator= (const DrawableImage&);
+	DrawableImage& operator= (const DrawableImage&);
 };
 
 #endif   // __JUCE_DRAWABLEIMAGE_JUCEHEADER__
@@ -27403,7 +27403,7 @@ private:
 	void updateOutline();
 
 	DrawablePath (const DrawablePath&);
-	const DrawablePath& operator= (const DrawablePath&);
+	DrawablePath& operator= (const DrawablePath&);
 };
 
 #endif   // __JUCE_DRAWABLEPATH_JUCEHEADER__
@@ -27449,7 +27449,7 @@ private:
 	Colour colour;
 
 	DrawableText (const DrawableText&);
-	const DrawableText& operator= (const DrawableText&);
+	DrawableText& operator= (const DrawableText&);
 };
 
 #endif   // __JUCE_DRAWABLETEXT_JUCEHEADER__
@@ -27592,7 +27592,7 @@ private:
 	int index, stackSize;
 
 	PathFlatteningIterator (const PathFlatteningIterator&);
-	const PathFlatteningIterator& operator= (const PathFlatteningIterator&);
+	PathFlatteningIterator& operator= (const PathFlatteningIterator&);
 };
 
 #endif   // __JUCE_PATHITERATOR_JUCEHEADER__
@@ -27622,7 +27622,7 @@ public:
 
 	PositionedRectangle (const PositionedRectangle& other) throw();
 
-	const PositionedRectangle& operator= (const PositionedRectangle& other) throw();
+	PositionedRectangle& operator= (const PositionedRectangle& other) throw();
 
 	~PositionedRectangle() throw();
 
@@ -27707,9 +27707,9 @@ public:
 
 	bool isPositionAbsolute() const throw();
 
-	const bool operator== (const PositionedRectangle& other) const throw();
+	bool operator== (const PositionedRectangle& other) const throw();
 
-	const bool operator!= (const PositionedRectangle& other) const throw();
+	bool operator!= (const PositionedRectangle& other) const throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -27795,7 +27795,7 @@ private:
 	String name;
 
 	CameraDevice (const CameraDevice&);
-	const CameraDevice& operator= (const CameraDevice&);
+	CameraDevice& operator= (const CameraDevice&);
 };
 
 #endif
@@ -27849,7 +27849,7 @@ private:
 
 	ImageCache();
 	ImageCache (const ImageCache&);
-	const ImageCache& operator= (const ImageCache&);
+	ImageCache& operator= (const ImageCache&);
 	~ImageCache();
 
 	void timerCallback();
@@ -27905,7 +27905,7 @@ private:
 
 	// no reason not to implement these one day..
 	ImageConvolutionKernel (const ImageConvolutionKernel&);
-	const ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
+	ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
 };
 
 #endif   // __JUCE_IMAGECONVOLUTIONKERNEL_JUCEHEADER__
@@ -28065,7 +28065,7 @@ private:
 	String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
 	FileBasedDocument (const FileBasedDocument&);
-	const FileBasedDocument& operator= (const FileBasedDocument&);
+	FileBasedDocument& operator= (const FileBasedDocument&);
 };
 
 #endif   // __JUCE_FILEBASEDDOCUMENT_JUCEHEADER__

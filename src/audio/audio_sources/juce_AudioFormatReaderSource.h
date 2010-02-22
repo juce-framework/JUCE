@@ -105,7 +105,7 @@ private:
     void readBufferSection (int start, int length, AudioSampleBuffer& buffer, int startSample);
 
     AudioFormatReaderSource (const AudioFormatReaderSource&);
-    const AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
+    AudioFormatReaderSource& operator= (const AudioFormatReaderSource&);
 };
 
 

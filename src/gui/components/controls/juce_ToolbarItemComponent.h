@@ -206,7 +206,7 @@ private:
     Rectangle<int> contentArea;
 
     ToolbarItemComponent (const ToolbarItemComponent&);
-    const ToolbarItemComponent& operator= (const ToolbarItemComponent&);
+    ToolbarItemComponent& operator= (const ToolbarItemComponent&);
 };
 
 

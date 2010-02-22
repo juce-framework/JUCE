@@ -402,7 +402,7 @@ private:
     ItemInfo* getItemForIndex (const int index) const throw();
 
     ComboBox (const ComboBox&);
-    const ComboBox& operator= (const ComboBox&);
+    ComboBox& operator= (const ComboBox&);
 };
 
 #endif   // __JUCE_COMBOBOX_JUCEHEADER__

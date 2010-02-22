@@ -100,7 +100,7 @@ private:
     OwnedArray <Item> items;
 
     StretchableObjectResizer (const StretchableObjectResizer&);
-    const StretchableObjectResizer& operator= (const StretchableObjectResizer&);
+    StretchableObjectResizer& operator= (const StretchableObjectResizer&);
 };
 
 

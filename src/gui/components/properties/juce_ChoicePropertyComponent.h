@@ -124,7 +124,7 @@ private:
     void createComboBox (const Array <int>* choiceIDs);
 
     ChoicePropertyComponent (const ChoicePropertyComponent&);
-    const ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
+    ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);
 };
 
 

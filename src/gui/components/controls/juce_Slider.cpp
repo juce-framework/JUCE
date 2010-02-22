@@ -85,7 +85,7 @@ private:
     String text;
 
     SliderPopupDisplayComponent (const SliderPopupDisplayComponent&);
-    const SliderPopupDisplayComponent& operator= (const SliderPopupDisplayComponent&);
+    SliderPopupDisplayComponent& operator= (const SliderPopupDisplayComponent&);
 };
 
 //==============================================================================

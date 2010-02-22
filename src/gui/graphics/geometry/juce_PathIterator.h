@@ -115,7 +115,7 @@ private:
     int index, stackSize;
 
     PathFlatteningIterator (const PathFlatteningIterator&);
-    const PathFlatteningIterator& operator= (const PathFlatteningIterator&);
+    PathFlatteningIterator& operator= (const PathFlatteningIterator&);
 };
 
 

@@ -173,7 +173,7 @@ Time::~Time() throw()
 {
 }
 
-const Time& Time::operator= (const Time& other) throw()
+Time& Time::operator= (const Time& other) throw()
 {
     millisSinceEpoch = other.millisSinceEpoch;
     return *this;

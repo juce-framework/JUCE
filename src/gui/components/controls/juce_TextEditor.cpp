@@ -328,7 +328,7 @@ private:
         }
     }
 
-    const UniformTextSection& operator= (const UniformTextSection& other);
+    UniformTextSection& operator= (const UniformTextSection& other);
 };
 
 //==============================================================================
@@ -732,7 +732,7 @@ private:
     const tchar passwordCharacter;
     TextAtom tempAtom;
 
-    const TextEditorIterator& operator= (const TextEditorIterator&);
+    TextEditorIterator& operator= (const TextEditorIterator&);
 
     void moveToEndOfLastAtom()
     {
@@ -765,7 +765,7 @@ class TextEditorInsertAction  : public UndoableAction
     const Colour colour;
 
     TextEditorInsertAction (const TextEditorInsertAction&);
-    const TextEditorInsertAction& operator= (const TextEditorInsertAction&);
+    TextEditorInsertAction& operator= (const TextEditorInsertAction&);
 
 public:
     TextEditorInsertAction (TextEditor& owner_,
@@ -816,7 +816,7 @@ class TextEditorRemoveAction  : public UndoableAction
     VoidArray removedSections;
 
     TextEditorRemoveAction (const TextEditorRemoveAction&);
-    const TextEditorRemoveAction& operator= (const TextEditorRemoveAction&);
+    TextEditorRemoveAction& operator= (const TextEditorRemoveAction&);
 
 public:
     TextEditorRemoveAction (TextEditor& owner_,
@@ -877,7 +877,7 @@ class TextHolderComponent  : public Component,
     TextEditor& owner;
 
     TextHolderComponent (const TextHolderComponent&);
-    const TextHolderComponent& operator= (const TextHolderComponent&);
+    TextHolderComponent& operator= (const TextHolderComponent&);
 
 public:
     TextHolderComponent (TextEditor& owner_)
@@ -922,7 +922,7 @@ class TextEditorViewport  : public Viewport
     float lastWordWrapWidth;
 
     TextEditorViewport (const TextEditorViewport&);
-    const TextEditorViewport& operator= (const TextEditorViewport&);
+    TextEditorViewport& operator= (const TextEditorViewport&);
 
 public:
     TextEditorViewport (TextEditor* const owner_)

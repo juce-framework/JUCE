@@ -57,7 +57,7 @@ public:
 
     /** Copies another PropertySet over this one.
     */
-    const PropertySet& operator= (const PropertySet& other) throw();
+    PropertySet& operator= (const PropertySet& other) throw();
 
     /** Destructor. */
     virtual ~PropertySet();

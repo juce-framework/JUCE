@@ -494,7 +494,7 @@ private:
     AudioIODeviceType* findType (const String& inputName, const String& outputName);
 
     AudioDeviceManager (const AudioDeviceManager&);
-    const AudioDeviceManager& operator= (const AudioDeviceManager&);
+    AudioDeviceManager& operator= (const AudioDeviceManager&);
 };
 
 #endif   // __JUCE_AUDIODEVICEMANAGER_JUCEHEADER__

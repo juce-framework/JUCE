@@ -156,7 +156,7 @@ private:
     const bool warnAboutOverwritingExistingFiles;
 
     FileChooserDialogBox (const FileChooserDialogBox&);
-    const FileChooserDialogBox& operator= (const FileChooserDialogBox&);
+    FileChooserDialogBox& operator= (const FileChooserDialogBox&);
 };
 
 

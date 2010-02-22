@@ -253,7 +253,7 @@ private:
 
     void updateVisibleRegion();
     Viewport (const Viewport&);
-    const Viewport& operator= (const Viewport&);
+    Viewport& operator= (const Viewport&);
 };
 
 

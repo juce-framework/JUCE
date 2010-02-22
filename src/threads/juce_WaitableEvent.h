@@ -93,7 +93,7 @@ private:
     void* internal;
 
     WaitableEvent (const WaitableEvent&);
-    const WaitableEvent& operator= (const WaitableEvent&);
+    WaitableEvent& operator= (const WaitableEvent&);
 };
 
 

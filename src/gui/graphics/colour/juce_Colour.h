@@ -131,7 +131,7 @@ public:
     ~Colour() throw();
 
     /** Copies another Colour object. */
-    const Colour& operator= (const Colour& other) throw();
+    Colour& operator= (const Colour& other) throw();
 
     /** Compares two colours. */
     bool operator== (const Colour& other) const throw();

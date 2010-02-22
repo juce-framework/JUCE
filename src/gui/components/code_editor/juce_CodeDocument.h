@@ -105,7 +105,7 @@ public:
         /** Destructor. */
         ~Position() throw();
 
-        const Position& operator= (const Position& other) throw();
+        Position& operator= (const Position& other) throw();
         bool operator== (const Position& other) const throw();
         bool operator!= (const Position& other) const throw();
 
@@ -341,7 +341,7 @@ public:
     public:
         Iterator (CodeDocument* const document);
         Iterator (const Iterator& other);
-        const Iterator& operator= (const Iterator& other) throw();
+        Iterator& operator= (const Iterator& other) throw();
         ~Iterator() throw();
 
         /** Reads the next character and returns it.
@@ -402,7 +402,7 @@ private:
     void checkLastLineStatus();
 
     CodeDocument (const CodeDocument&);
-    const CodeDocument& operator= (const CodeDocument&);
+    CodeDocument& operator= (const CodeDocument&);
 };
 
 

@@ -159,7 +159,7 @@ private:
     const int timeOutMsWhenCancelling;
 
     ThreadWithProgressWindow (const ThreadWithProgressWindow&);
-    const ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
+    ThreadWithProgressWindow& operator= (const ThreadWithProgressWindow&);
 };
 
 #endif   // __JUCE_THREADWITHPROGRESSWINDOW_JUCEHEADER__

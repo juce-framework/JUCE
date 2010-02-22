@@ -262,7 +262,7 @@ private:
                         const int millisecsSinceKeyPressed,
                         Component* const originatingComponent) const;
 
-    const KeyPressMappingSet& operator= (const KeyPressMappingSet&);
+    KeyPressMappingSet& operator= (const KeyPressMappingSet&);
 };
 
 

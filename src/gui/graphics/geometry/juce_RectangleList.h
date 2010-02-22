@@ -54,7 +54,7 @@ public:
     RectangleList (const Rectangle<int>& rect) throw();
 
     /** Copies this list from another one. */
-    const RectangleList& operator= (const RectangleList& other) throw();
+    RectangleList& operator= (const RectangleList& other) throw();
 
     /** Destructor. */
     ~RectangleList() throw();
@@ -240,7 +240,7 @@ public:
         int index;
 
         Iterator (const Iterator&);
-        const Iterator& operator= (const Iterator&);
+        Iterator& operator= (const Iterator&);
     };
 
     //==============================================================================

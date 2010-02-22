@@ -75,7 +75,7 @@ private:
     int offset;
 
     ArrowButton (const ArrowButton&);
-    const ArrowButton& operator= (const ArrowButton&);
+    ArrowButton& operator= (const ArrowButton&);
 };
 
 

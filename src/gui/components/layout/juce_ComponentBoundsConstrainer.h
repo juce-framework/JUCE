@@ -186,7 +186,7 @@ private:
     double aspectRatio;
 
     ComponentBoundsConstrainer (const ComponentBoundsConstrainer&);
-    const ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
+    ComponentBoundsConstrainer& operator= (const ComponentBoundsConstrainer&);
 };
 
 

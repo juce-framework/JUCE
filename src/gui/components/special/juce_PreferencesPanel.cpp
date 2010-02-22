@@ -103,7 +103,7 @@ public:
 
 private:
     PrefsDialogWindow (const PrefsDialogWindow&);
-    const PrefsDialogWindow& operator= (const PrefsDialogWindow&);
+    PrefsDialogWindow& operator= (const PrefsDialogWindow&);
 };
 
 //==============================================================================

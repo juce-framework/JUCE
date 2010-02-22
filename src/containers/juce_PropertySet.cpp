@@ -48,7 +48,7 @@ PropertySet::PropertySet (const PropertySet& other) throw()
 {
 }
 
-const PropertySet& PropertySet::operator= (const PropertySet& other) throw()
+PropertySet& PropertySet::operator= (const PropertySet& other) throw()
 {
     properties = other.properties;
     fallbackProperties = other.fallbackProperties;

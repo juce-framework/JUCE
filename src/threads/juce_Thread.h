@@ -286,7 +286,7 @@ private:
     static CriticalSection runningThreadsLock;
 
     Thread (const Thread&);
-    const Thread& operator= (const Thread&);
+    Thread& operator= (const Thread&);
 };
 
 #endif   // __JUCE_THREAD_JUCEHEADER__

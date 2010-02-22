@@ -310,7 +310,7 @@ private:
     ToolbarItemComponent* getNextActiveComponent (int index, const int delta) const;
 
     Toolbar (const Toolbar&);
-    const Toolbar& operator= (const Toolbar&);
+    Toolbar& operator= (const Toolbar&);
 };
 
 

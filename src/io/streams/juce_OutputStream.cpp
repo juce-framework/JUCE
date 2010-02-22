@@ -170,7 +170,7 @@ void OutputStream::writeString (const String& text)
     // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
     // if lots of large, persistent strings were to be written to streams).
     const int numBytes = text.getNumBytesAsUTF8() + 1;
-    HeapBlock <uint8> temp (numBytes);
+    HeapBlock<char> temp (numBytes);
     text.copyToUTF8 (temp, numBytes);
     write (temp, numBytes);
 }

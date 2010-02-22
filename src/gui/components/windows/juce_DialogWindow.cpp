@@ -81,7 +81,7 @@ public:
 
 private:
     TempDialogWindow (const TempDialogWindow&);
-    const TempDialogWindow& operator= (const TempDialogWindow&);
+    TempDialogWindow& operator= (const TempDialogWindow&);
 
 };
 

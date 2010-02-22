@@ -146,7 +146,7 @@ private:
     int originalClickCounter;
 
     SplashScreen (const SplashScreen&);
-    const SplashScreen& operator= (const SplashScreen&);
+    SplashScreen& operator= (const SplashScreen&);
 };
 
 

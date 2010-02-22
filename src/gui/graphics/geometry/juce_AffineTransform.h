@@ -60,7 +60,7 @@ public:
                      const float mat10, const float mat11, const float mat12) throw();
 
     /** Copies from another AffineTransform object */
-    const AffineTransform& operator= (const AffineTransform& other) throw();
+    AffineTransform& operator= (const AffineTransform& other) throw();
 
     /** Compares two transforms. */
     bool operator== (const AffineTransform& other) const throw();

@@ -1291,7 +1291,7 @@ private:
         return 0;
     }
 
-    const SVGState& operator= (const SVGState&);
+    SVGState& operator= (const SVGState&);
 };
 
 

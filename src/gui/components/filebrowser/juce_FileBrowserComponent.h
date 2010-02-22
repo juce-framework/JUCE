@@ -227,7 +227,7 @@ private:
     bool isFileOrDirSuitable (const File& f) const;
 
     FileBrowserComponent (const FileBrowserComponent&);
-    const FileBrowserComponent& operator= (const FileBrowserComponent&);
+    FileBrowserComponent& operator= (const FileBrowserComponent&);
 };
 
 

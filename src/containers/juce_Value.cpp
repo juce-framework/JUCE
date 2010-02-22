@@ -96,7 +96,7 @@ private:
     var value;
 
     SimpleValueSource (const SimpleValueSource&);
-    const SimpleValueSource& operator= (const SimpleValueSource&);
+    SimpleValueSource& operator= (const SimpleValueSource&);
 };
 
 
@@ -122,7 +122,7 @@ Value::Value (const Value& other)
 {
 }
 
-const Value& Value::operator= (const Value& other)
+Value& Value::operator= (const Value& other)
 {
     value = other.value;
     return *this;
@@ -150,7 +150,7 @@ const String Value::toString() const
     return value->getValue().toString();
 }
 
-const Value& Value::operator= (const var& newValue)
+Value& Value::operator= (const var& newValue)
 {
     value->setValue (newValue);
     return *this;

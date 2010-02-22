@@ -116,7 +116,7 @@ protected:
 
 private:
     Typeface (const Typeface&);
-    const Typeface& operator= (const Typeface&);
+    Typeface& operator= (const Typeface&);
 };
 
 //==============================================================================
@@ -225,7 +225,7 @@ private:
     short lookupTable [128];
 
     CustomTypeface (const CustomTypeface&);
-    const CustomTypeface& operator= (const CustomTypeface&);
+    CustomTypeface& operator= (const CustomTypeface&);
 
     GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
     GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();

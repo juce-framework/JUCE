@@ -155,7 +155,7 @@ private:
     DropShadowEffect scrollbarShadow;
 
     OldSchoolLookAndFeel (const OldSchoolLookAndFeel&);
-    const OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
+    OldSchoolLookAndFeel& operator= (const OldSchoolLookAndFeel&);
 };
 
 

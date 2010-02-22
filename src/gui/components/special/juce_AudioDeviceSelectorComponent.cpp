@@ -198,7 +198,7 @@ private:
     }
 
     MidiInputSelectorComponentListBox (const MidiInputSelectorComponentListBox&);
-    const MidiInputSelectorComponentListBox& operator= (const MidiInputSelectorComponentListBox&);
+    MidiInputSelectorComponentListBox& operator= (const MidiInputSelectorComponentListBox&);
 };
 
 
@@ -928,7 +928,7 @@ public:
         }
 
         ChannelSelectorListBox (const ChannelSelectorListBox&);
-        const ChannelSelectorListBox& operator= (const ChannelSelectorListBox&);
+        ChannelSelectorListBox& operator= (const ChannelSelectorListBox&);
     };
 
 private:
@@ -936,7 +936,7 @@ private:
     ChannelSelectorListBox* outputChanList;
 
     AudioDeviceSettingsPanel (const AudioDeviceSettingsPanel&);
-    const AudioDeviceSettingsPanel& operator= (const AudioDeviceSettingsPanel&);
+    AudioDeviceSettingsPanel& operator= (const AudioDeviceSettingsPanel&);
 };
 
 

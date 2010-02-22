@@ -112,7 +112,7 @@ private:
     bool messagePending;
 
     ChangeListenerList (const ChangeListenerList&);
-    const ChangeListenerList& operator= (const ChangeListenerList&);
+    ChangeListenerList& operator= (const ChangeListenerList&);
 };
 
 

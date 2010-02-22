@@ -98,7 +98,7 @@ public:
         If there are any listeners registered, they will be notified of the
         change asynchronously.
     */
-    const Value& operator= (const var& newValue);
+    Value& operator= (const var& newValue);
 
     /** Makes this object refer to the same underlying ValueSource as another one.
 
@@ -202,7 +202,7 @@ public:
         void handleAsyncUpdate();
 
         ValueSource (const ValueSource&);
-        const ValueSource& operator= (const ValueSource&);
+        ValueSource& operator= (const ValueSource&);
     };
 
 
@@ -223,7 +223,7 @@ private:
 
     // This is disallowed to avoid confusion about whether it should
     // do a by-value or by-reference copy.
-    const Value& operator= (const Value& other);
+    Value& operator= (const Value& other);
 };
 
 

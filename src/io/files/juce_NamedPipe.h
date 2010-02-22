@@ -106,7 +106,7 @@ private:
     String currentPipeName;
 
     NamedPipe (const NamedPipe&);
-    const NamedPipe& operator= (const NamedPipe&);
+    NamedPipe& operator= (const NamedPipe&);
 
     bool openInternal (const String& pipeName, const bool createPipe);
 };

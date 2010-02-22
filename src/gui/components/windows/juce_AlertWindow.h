@@ -369,7 +369,7 @@ private:
 
     // disable copy constructor
     AlertWindow (const AlertWindow&);
-    const AlertWindow& operator= (const AlertWindow&);
+    AlertWindow& operator= (const AlertWindow&);
 };
 
 #endif   // __JUCE_ALERTWINDOW_JUCEHEADER__

@@ -81,7 +81,7 @@ URL::URL (const URL& other)
 {
 }
 
-const URL& URL::operator= (const URL& other)
+URL& URL::operator= (const URL& other)
 {
     url = other.url;
     postData = other.postData;
@@ -443,7 +443,7 @@ private:
     }
 
     WebInputStream (const WebInputStream&);
-    const WebInputStream& operator= (const WebInputStream&);
+    WebInputStream& operator= (const WebInputStream&);
 };
 
 InputStream* URL::createInputStream (const bool usePostCommand,

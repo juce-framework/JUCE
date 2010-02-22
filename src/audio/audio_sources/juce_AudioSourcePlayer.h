@@ -107,7 +107,7 @@ private:
     float lastGain, gain;
 
     AudioSourcePlayer (const AudioSourcePlayer&);
-    const AudioSourcePlayer& operator= (const AudioSourcePlayer&);
+    AudioSourcePlayer& operator= (const AudioSourcePlayer&);
 };
 
 

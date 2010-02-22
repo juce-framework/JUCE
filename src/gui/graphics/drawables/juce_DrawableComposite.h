@@ -152,7 +152,7 @@ private:
     OwnedArray <AffineTransform> transforms;
 
     DrawableComposite (const DrawableComposite&);
-    const DrawableComposite& operator= (const DrawableComposite&);
+    DrawableComposite& operator= (const DrawableComposite&);
 };
 
 

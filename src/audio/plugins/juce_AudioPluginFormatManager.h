@@ -99,7 +99,7 @@ private:
     OwnedArray <AudioPluginFormat> formats;
 
     AudioPluginFormatManager (const AudioPluginFormatManager&);
-    const AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
+    AudioPluginFormatManager& operator= (const AudioPluginFormatManager&);
 };
 
 

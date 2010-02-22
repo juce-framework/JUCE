@@ -82,7 +82,7 @@ private:
     void ensureBuffered();
 
     BufferedInputStream (const BufferedInputStream&);
-    const BufferedInputStream& operator= (const BufferedInputStream&);
+    BufferedInputStream& operator= (const BufferedInputStream&);
 };
 
 #endif   // __JUCE_BUFFEREDINPUTSTREAM_JUCEHEADER__

@@ -48,7 +48,7 @@ public:
     RectanglePlacement (const RectanglePlacement& other) throw();
 
     /** Copies another Justification object. */
-    const RectanglePlacement& operator= (const RectanglePlacement& other) throw();
+    RectanglePlacement& operator= (const RectanglePlacement& other) throw();
 
     //==============================================================================
     /** Flag values that can be combined and used in the constructor. */

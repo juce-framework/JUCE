@@ -186,7 +186,7 @@ private:
     short timeFormat;
 
     MidiFile (const MidiFile&);
-    const MidiFile& operator= (const MidiFile&);
+    MidiFile& operator= (const MidiFile&);
 
     void readNextTrack (const char* data, int size);
     void writeTrack (OutputStream& mainOut, const int trackNum);

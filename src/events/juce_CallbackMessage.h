@@ -75,7 +75,7 @@ public:
 
 private:
     CallbackMessage (const CallbackMessage&);
-    const CallbackMessage& operator= (const CallbackMessage&);
+    CallbackMessage& operator= (const CallbackMessage&);
 };
 
 

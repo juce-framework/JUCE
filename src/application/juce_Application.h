@@ -292,7 +292,7 @@ private:
     ScopedPointer<InterProcessLock> appLock;
 
     JUCEApplication (const JUCEApplication&);
-    const JUCEApplication& operator= (const JUCEApplication&);
+    JUCEApplication& operator= (const JUCEApplication&);
 
 public:
     /** @internal */

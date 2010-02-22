@@ -105,7 +105,7 @@ private:
     void trimFileSize (int maxFileSizeBytes) const;
 
     FileLogger (const FileLogger&);
-    const FileLogger& operator= (const FileLogger&);
+    FileLogger& operator= (const FileLogger&);
 };
 
 

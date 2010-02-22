@@ -124,7 +124,7 @@ private:
     void updateButtons() throw();
 
     FileSearchPathListComponent (const FileSearchPathListComponent&);
-    const FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
+    FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
 };
 
 

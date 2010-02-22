@@ -1285,7 +1285,7 @@ PopupMenu::PopupMenu (const PopupMenu& other)
         items.add (new Item (*other.items.getUnchecked(i)));
 }
 
-const PopupMenu& PopupMenu::operator= (const PopupMenu& other)
+PopupMenu& PopupMenu::operator= (const PopupMenu& other)
 {
     if (this != &other)
     {
@@ -1431,7 +1431,7 @@ private:
     const int width, height;
 
     NormalComponentWrapper (const NormalComponentWrapper&);
-    const NormalComponentWrapper& operator= (const NormalComponentWrapper&);
+    NormalComponentWrapper& operator= (const NormalComponentWrapper&);
 };
 
 void PopupMenu::addCustomItem (const int itemResultId,

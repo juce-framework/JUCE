@@ -63,7 +63,7 @@ public:
         This search path is cleared and the semicolon- or comma-separated folders
         in this string are added instead. e.g. "/foo/bar;/foo/moose;/fish/moose"
     */
-    const FileSearchPath& operator= (const String& path);
+    FileSearchPath& operator= (const String& path);
 
     //==============================================================================
     /** Returns the number of folders in this search path.

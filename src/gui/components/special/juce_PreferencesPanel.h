@@ -141,7 +141,7 @@ private:
     int buttonSize;
 
     PreferencesPanel (const PreferencesPanel&);
-    const PreferencesPanel& operator= (const PreferencesPanel&);
+    PreferencesPanel& operator= (const PreferencesPanel&);
 };
 
 

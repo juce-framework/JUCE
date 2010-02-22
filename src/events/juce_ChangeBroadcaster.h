@@ -91,7 +91,7 @@ private:
     ChangeListenerList changeListenerList;
 
     ChangeBroadcaster (const ChangeBroadcaster&);
-    const ChangeBroadcaster& operator= (const ChangeBroadcaster&);
+    ChangeBroadcaster& operator= (const ChangeBroadcaster&);
 };
 
 

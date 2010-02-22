@@ -493,7 +493,7 @@ private:
     TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
     TreeViewItem (const TreeViewItem&);
-    const TreeViewItem& operator= (const TreeViewItem&);
+    TreeViewItem& operator= (const TreeViewItem&);
 };
 
 
@@ -778,7 +778,7 @@ private:
                                      Component* sourceComponent) const throw();
 
     TreeView (const TreeView&);
-    const TreeView& operator= (const TreeView&);
+    TreeView& operator= (const TreeView&);
 };
 
 #endif   // __JUCE_TREEVIEW_JUCEHEADER__

@@ -105,7 +105,7 @@ protected:
     Slider* slider;
 
     SliderPropertyComponent (const SliderPropertyComponent&);
-    const SliderPropertyComponent& operator= (const SliderPropertyComponent&);
+    SliderPropertyComponent& operator= (const SliderPropertyComponent&);
 };
 
 

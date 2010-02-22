@@ -52,7 +52,7 @@ public:
 
 private:
     ActionMessage (const ActionMessage&);
-    const ActionMessage& operator= (const ActionMessage&);
+    ActionMessage& operator= (const ActionMessage&);
 };
 
 //==============================================================================

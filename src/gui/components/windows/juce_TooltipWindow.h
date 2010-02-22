@@ -116,7 +116,7 @@ private:
     void hide();
 
     TooltipWindow (const TooltipWindow&);
-    const TooltipWindow& operator= (const TooltipWindow&);
+    TooltipWindow& operator= (const TooltipWindow&);
 };
 
 

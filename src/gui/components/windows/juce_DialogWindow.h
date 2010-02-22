@@ -131,7 +131,7 @@ private:
     bool escapeKeyTriggersCloseButton;
 
     DialogWindow (const DialogWindow&);
-    const DialogWindow& operator= (const DialogWindow&);
+    DialogWindow& operator= (const DialogWindow&);
 };
 
 #endif   // __JUCE_DIALOGWINDOW_JUCEHEADER__

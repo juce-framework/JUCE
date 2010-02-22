@@ -98,7 +98,7 @@ Font::Font (const Font& other) throw()
 {
 }
 
-const Font& Font::operator= (const Font& other) throw()
+Font& Font::operator= (const Font& other) throw()
 {
     font = other.font;
     return *this;
@@ -417,7 +417,7 @@ private:
     OwnedArray <CachedFace> faces;
 
     TypefaceCache (const TypefaceCache&);
-    const TypefaceCache& operator= (const TypefaceCache&);
+    TypefaceCache& operator= (const TypefaceCache&);
 };
 
 juce_ImplementSingleton_SingleThreaded (TypefaceCache)

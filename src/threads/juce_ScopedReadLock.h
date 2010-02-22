@@ -83,7 +83,7 @@ private:
     const ReadWriteLock& lock_;
 
     ScopedReadLock (const ScopedReadLock&);
-    const ScopedReadLock& operator= (const ScopedReadLock&);
+    ScopedReadLock& operator= (const ScopedReadLock&);
 };
 
 

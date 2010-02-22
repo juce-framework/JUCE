@@ -86,7 +86,7 @@ public:
         If this ScopedPointer already points to an object, that object
         will first be deleted.
     */
-    const ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
+    ScopedPointer& operator= (ScopedPointer& objectToTransferFrom)
     {
         if (this != objectToTransferFrom.getAddress())
         {
@@ -110,7 +110,7 @@ public:
 
         The pointer that you pass is may be null.
     */
-    const ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
+    ScopedPointer& operator= (ObjectType* const newObjectToTakePossessionOf)
     {
         if (object != newObjectToTakePossessionOf)
         {

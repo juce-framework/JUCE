@@ -98,7 +98,7 @@ private:
     const bool lockWasSuccessful;
 
     ScopedTryLock (const ScopedTryLock&);
-    const ScopedTryLock& operator= (const ScopedTryLock&);
+    ScopedTryLock& operator= (const ScopedTryLock&);
 };
 
 

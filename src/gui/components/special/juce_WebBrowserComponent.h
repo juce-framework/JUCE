@@ -125,7 +125,7 @@ private:
     void checkWindowAssociation();
 
     WebBrowserComponent (const WebBrowserComponent&);
-    const WebBrowserComponent& operator= (const WebBrowserComponent&);
+    WebBrowserComponent& operator= (const WebBrowserComponent&);
 };
 
 

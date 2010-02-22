@@ -129,7 +129,7 @@ private:
     }
 
     TopLevelWindowManager (const TopLevelWindowManager&);
-    const TopLevelWindowManager& operator= (const TopLevelWindowManager&);
+    TopLevelWindowManager& operator= (const TopLevelWindowManager&);
 };
 
 juce_ImplementSingleton_SingleThreaded (TopLevelWindowManager)

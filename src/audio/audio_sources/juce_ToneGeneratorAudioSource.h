@@ -73,7 +73,7 @@ private:
     float amplitude;
 
     ToneGeneratorAudioSource (const ToneGeneratorAudioSource&);
-    const ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
+    ToneGeneratorAudioSource& operator= (const ToneGeneratorAudioSource&);
 };
 
 

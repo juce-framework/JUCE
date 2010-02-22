@@ -655,7 +655,7 @@ private:
                                const bool flatOnBottom) throw();
 
     LookAndFeel (const LookAndFeel&);
-    const LookAndFeel& operator= (const LookAndFeel&);
+    LookAndFeel& operator= (const LookAndFeel&);
 };
 
 

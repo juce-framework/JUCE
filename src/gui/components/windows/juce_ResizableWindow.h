@@ -355,7 +355,7 @@ private:
     void updateLastPos();
 
     ResizableWindow (const ResizableWindow&);
-    const ResizableWindow& operator= (const ResizableWindow&);
+    ResizableWindow& operator= (const ResizableWindow&);
 
     // (xxx remove these eventually)
     // temporarily here to stop old code compiling, as the parameters for these methods have changed..

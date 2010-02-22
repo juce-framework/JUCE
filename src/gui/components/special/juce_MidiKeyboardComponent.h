@@ -412,7 +412,7 @@ private:
     void repaintNote (const int midiNoteNumber);
 
     MidiKeyboardComponent (const MidiKeyboardComponent&);
-    const MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
+    MidiKeyboardComponent& operator= (const MidiKeyboardComponent&);
 };
 
 

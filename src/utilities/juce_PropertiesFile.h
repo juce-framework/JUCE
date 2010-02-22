@@ -177,7 +177,7 @@ private:
     void timerCallback();
 
     PropertiesFile (const PropertiesFile&);
-    const PropertiesFile& operator= (const PropertiesFile&);
+    PropertiesFile& operator= (const PropertiesFile&);
 };
 
 #endif   // __JUCE_PROPERTIESFILE_JUCEHEADER__

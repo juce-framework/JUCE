@@ -72,7 +72,7 @@ public:
 
 private:
     AlertWindowTextEditor (const AlertWindowTextEditor&);
-    const AlertWindowTextEditor& operator= (const AlertWindowTextEditor&);
+    AlertWindowTextEditor& operator= (const AlertWindowTextEditor&);
 };
 
 #if JUCE_LINUX
@@ -255,11 +255,6 @@ ComboBox* AlertWindow::getComboBoxComponent (const String& nameOfList) const
 //==============================================================================
 class AlertTextComp : public TextEditor
 {
-    AlertTextComp (const AlertTextComp&);
-    const AlertTextComp& operator= (const AlertTextComp&);
-
-    int bestWidth;
-
 public:
     AlertTextComp (const String& message,
                    const Font& font)
@@ -294,6 +289,12 @@ public:
         text.layout (width - 8, Justification::topLeft, true);
         setSize (width, jmin (width, text.getHeight() + (int) getFont().getHeight()));
     }
+
+private:
+    int bestWidth;
+
+    AlertTextComp (const AlertTextComp&);
+    AlertTextComp& operator= (const AlertTextComp&);
 };
 
 void AlertWindow::addTextBlock (const String& text)

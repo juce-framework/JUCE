@@ -74,7 +74,7 @@ public:
     EdgeTable (const EdgeTable& other) throw();
 
     /** Copies from another edge table. */
-    const EdgeTable& operator= (const EdgeTable& other) throw();
+    EdgeTable& operator= (const EdgeTable& other) throw();
 
     /** Destructor. */
     ~EdgeTable() throw();

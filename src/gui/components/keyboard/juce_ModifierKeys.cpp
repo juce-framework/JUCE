@@ -41,7 +41,7 @@ ModifierKeys::ModifierKeys (const ModifierKeys& other) throw()
 {
 }
 
-const ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) throw()
+ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) throw()
 {
     flags = other.flags;
     return *this;

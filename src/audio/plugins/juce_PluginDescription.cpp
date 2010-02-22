@@ -59,7 +59,7 @@ PluginDescription::PluginDescription (const PluginDescription& other) throw()
 {
 }
 
-const PluginDescription& PluginDescription::operator= (const PluginDescription& other) throw()
+PluginDescription& PluginDescription::operator= (const PluginDescription& other) throw()
 {
     name = other.name;
     pluginFormatName = other.pluginFormatName;

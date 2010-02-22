@@ -165,7 +165,7 @@ private:
     void setWindowActive (const bool isNowActive) throw();
 
     TopLevelWindow (const TopLevelWindow&);
-    const TopLevelWindow& operator= (const TopLevelWindow&);
+    TopLevelWindow& operator= (const TopLevelWindow&);
 };
 
 

@@ -87,7 +87,7 @@ private:
     const bool deleteSourceWhenDeleted;
 
     AudioSubsectionReader (const AudioSubsectionReader&);
-    const AudioSubsectionReader& operator= (const AudioSubsectionReader&);
+    AudioSubsectionReader& operator= (const AudioSubsectionReader&);
 };
 
 #endif   // __JUCE_AUDIOSUBSECTIONREADER_JUCEHEADER__

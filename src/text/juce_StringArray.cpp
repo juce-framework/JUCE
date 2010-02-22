@@ -71,7 +71,7 @@ StringArray::StringArray (const char** const initialStrings)
         add (initialStrings [i++]);
 }
 
-const StringArray& StringArray::operator= (const StringArray& other)
+StringArray& StringArray::operator= (const StringArray& other)
 {
     strings = other.strings;
     return *this;

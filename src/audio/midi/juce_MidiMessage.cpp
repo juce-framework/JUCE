@@ -252,7 +252,7 @@ MidiMessage::MidiMessage (const uint8* src,
     }
 }
 
-const MidiMessage& MidiMessage::operator= (const MidiMessage& other) throw()
+MidiMessage& MidiMessage::operator= (const MidiMessage& other) throw()
 {
     if (this != &other)
     {

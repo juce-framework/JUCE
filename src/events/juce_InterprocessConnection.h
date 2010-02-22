@@ -210,7 +210,7 @@ private:
     void run();
 
     InterprocessConnection (const InterprocessConnection&);
-    const InterprocessConnection& operator= (const InterprocessConnection&);
+    InterprocessConnection& operator= (const InterprocessConnection&);
 };
 
 #endif   // __JUCE_INTERPROCESSCONNECTION_JUCEHEADER__

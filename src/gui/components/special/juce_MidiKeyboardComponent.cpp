@@ -73,7 +73,7 @@ private:
     const int delta;
 
     MidiKeyboardUpDownButton (const MidiKeyboardUpDownButton&);
-    const MidiKeyboardUpDownButton& operator= (const MidiKeyboardUpDownButton&);
+    MidiKeyboardUpDownButton& operator= (const MidiKeyboardUpDownButton&);
 };
 
 //==============================================================================

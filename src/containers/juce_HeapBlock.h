@@ -235,7 +235,7 @@ private:
     ElementType* data;
 
     HeapBlock (const HeapBlock&);
-    const HeapBlock& operator= (const HeapBlock&);
+    HeapBlock& operator= (const HeapBlock&);
 };
 
 

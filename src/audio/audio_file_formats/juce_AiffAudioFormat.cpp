@@ -501,7 +501,7 @@ public:
 
 private:
     AiffAudioFormatReader (const AiffAudioFormatReader&);
-    const AiffAudioFormatReader& operator= (const AiffAudioFormatReader&);
+    AiffAudioFormatReader& operator= (const AiffAudioFormatReader&);
 
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 };
@@ -517,7 +517,7 @@ class AiffAudioFormatWriter  : public AudioFormatWriter
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
     AiffAudioFormatWriter (const AiffAudioFormatWriter&);
-    const AiffAudioFormatWriter& operator= (const AiffAudioFormatWriter&);
+    AiffAudioFormatWriter& operator= (const AiffAudioFormatWriter&);
 
     void writeHeader()
     {

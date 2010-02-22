@@ -74,7 +74,7 @@ private:
     void replaceComponent (ToolbarItemComponent* const comp);
 
     ToolbarItemPalette (const ToolbarItemPalette&);
-    const ToolbarItemPalette& operator= (const ToolbarItemPalette&);
+    ToolbarItemPalette& operator= (const ToolbarItemPalette&);
 };
 
 

@@ -163,7 +163,7 @@ private:
     void deleteImages();
 
     ImageButton (const ImageButton&);
-    const ImageButton& operator= (const ImageButton&);
+    ImageButton& operator= (const ImageButton&);
 };
 
 

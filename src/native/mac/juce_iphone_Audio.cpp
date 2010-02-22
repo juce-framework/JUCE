@@ -519,7 +519,7 @@ private:
     }
 
     IPhoneAudioIODevice (const IPhoneAudioIODevice&);
-    const IPhoneAudioIODevice& operator= (const IPhoneAudioIODevice&);
+    IPhoneAudioIODevice& operator= (const IPhoneAudioIODevice&);
 };
 
 
@@ -578,7 +578,7 @@ public:
 
 private:
     IPhoneAudioIODeviceType (const IPhoneAudioIODeviceType&);
-    const IPhoneAudioIODeviceType& operator= (const IPhoneAudioIODeviceType&);
+    IPhoneAudioIODeviceType& operator= (const IPhoneAudioIODeviceType&);
 };
 
 //==============================================================================

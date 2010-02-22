@@ -60,7 +60,7 @@ public:
           const Point<float>& end) throw();
 
     /** Copies a line from another one. */
-    const Line& operator= (const Line& other) throw();
+    Line& operator= (const Line& other) throw();
 
     /** Destructor. */
     ~Line() throw();

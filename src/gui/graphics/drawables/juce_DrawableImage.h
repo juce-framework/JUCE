@@ -122,7 +122,7 @@ private:
     Colour overlayColour;
 
     DrawableImage (const DrawableImage&);
-    const DrawableImage& operator= (const DrawableImage&);
+    DrawableImage& operator= (const DrawableImage&);
 };
 
 

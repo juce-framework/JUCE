@@ -87,7 +87,7 @@ private:
     ScopedPointer <GZIPDecompressHelper> helper;
 
     GZIPDecompressorInputStream (const GZIPDecompressorInputStream&);
-    const GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
+    GZIPDecompressorInputStream& operator= (const GZIPDecompressorInputStream&);
 };
 
 #endif   // __JUCE_GZIPDECOMPRESSORINPUTSTREAM_JUCEHEADER__

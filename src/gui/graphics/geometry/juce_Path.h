@@ -83,7 +83,7 @@ public:
     ~Path() throw();
 
     /** Copies this path from another one. */
-    const Path& operator= (const Path& other) throw();
+    Path& operator= (const Path& other) throw();
 
     //==============================================================================
     /** Returns true if the path doesn't contain any lines or curves. */
@@ -577,7 +577,7 @@ public:
         int index;
 
         Iterator (const Iterator&);
-        const Iterator& operator= (const Iterator&);
+        Iterator& operator= (const Iterator&);
     };
 
     //==============================================================================

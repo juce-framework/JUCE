@@ -93,7 +93,7 @@ private:
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
 
-    const SharedMouseCursorInternal& operator= (const SharedMouseCursorInternal&);
+    SharedMouseCursorInternal& operator= (const SharedMouseCursorInternal&);
 };
 
 
@@ -125,7 +125,7 @@ MouseCursor::~MouseCursor() throw()
 {
 }
 
-const MouseCursor& MouseCursor::operator= (const MouseCursor& other) throw()
+MouseCursor& MouseCursor::operator= (const MouseCursor& other) throw()
 {
     cursorHandle = other.cursorHandle;
     return *this;

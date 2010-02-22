@@ -48,11 +48,10 @@ StringPairArray::~StringPairArray() throw()
 {
 }
 
-const StringPairArray& StringPairArray::operator= (const StringPairArray& other) throw()
+StringPairArray& StringPairArray::operator= (const StringPairArray& other) throw()
 {
     keys = other.keys;
     values = other.values;
-
     return *this;
 }
 

@@ -57,7 +57,7 @@ public:
 
 private:
     VSTPluginFormat (const VSTPluginFormat&);
-    const VSTPluginFormat& operator= (const VSTPluginFormat&);
+    VSTPluginFormat& operator= (const VSTPluginFormat&);
 
     void recursiveFileSearch (StringArray& results, const File& dir, const bool recursive);
 };

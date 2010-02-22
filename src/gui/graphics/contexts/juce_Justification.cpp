@@ -37,7 +37,7 @@ Justification::Justification (const Justification& other) throw()
 {
 }
 
-const Justification& Justification::operator= (const Justification& other) throw()
+Justification& Justification::operator= (const Justification& other) throw()
 {
     flags = other.flags;
     return *this;

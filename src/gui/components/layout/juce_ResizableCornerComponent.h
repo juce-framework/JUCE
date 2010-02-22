@@ -90,7 +90,7 @@ private:
     int originalX, originalY, originalW, originalH;
 
     ResizableCornerComponent (const ResizableCornerComponent&);
-    const ResizableCornerComponent& operator= (const ResizableCornerComponent&);
+    ResizableCornerComponent& operator= (const ResizableCornerComponent&);
 };
 
 

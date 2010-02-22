@@ -70,20 +70,19 @@ END_JUCE_NAMESPACE
 - (void) keyDown: (NSEvent*) ev;
 - (void) keyUp: (NSEvent*) ev;
 
-// Textinput Methods
-- (void) insertText:(id)aString; // instead of keyDown: aString can be NSString or NSAttributedString
-- (void) doCommandBySelector:(SEL)aSelector;
-- (void) setMarkedText:(id)aString selectedRange:(NSRange)selRange;
+// NSTextInput Methods
+- (void) insertText: (id) aString;
+- (void) doCommandBySelector: (SEL) aSelector;
+- (void) setMarkedText: (id) aString selectedRange: (NSRange) selRange;
 - (void) unmarkText;
 - (BOOL) hasMarkedText;
 - (long) conversationIdentifier;
-- (NSAttributedString *) attributedSubstringFromRange:(NSRange)theRange;
+- (NSAttributedString*) attributedSubstringFromRange: (NSRange) theRange;
 - (NSRange) markedRange;
 - (NSRange) selectedRange;
-- (NSRect) firstRectForCharacterRange:(NSRange)theRange;
-- (unsigned int)characterIndexForPoint:(NSPoint)thePoint;
+- (NSRect) firstRectForCharacterRange: (NSRange) theRange;
+- (unsigned int) characterIndexForPoint: (NSPoint) thePoint;
 - (NSArray*) validAttributesForMarkedText;
-
 
 - (void) flagsChanged: (NSEvent*) ev;
 #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5

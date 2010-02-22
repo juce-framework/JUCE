@@ -73,7 +73,7 @@ private:
     static inline int makeWord (const uint8 a, const uint8 b)    { return (b << 8) | a; }
 
     GIFLoader (const GIFLoader&);
-    const GIFLoader& operator= (const GIFLoader&);
+    GIFLoader& operator= (const GIFLoader&);
 };
 
 #endif   // DOXYGEN

@@ -151,7 +151,7 @@ public:
     XmlElement (const XmlElement& other) throw();
 
     /** Creates a (deep) copy of another element. */
-    const XmlElement& operator= (const XmlElement& other) throw();
+    XmlElement& operator= (const XmlElement& other) throw();
 
     /** Deleting an XmlElement will also delete all its child elements. */
     ~XmlElement() throw();
@@ -693,7 +693,7 @@ private:
         XmlAttributeNode* next;
 
     private:
-        const XmlAttributeNode& operator= (const XmlAttributeNode&);
+        XmlAttributeNode& operator= (const XmlAttributeNode&);
     };
 
     XmlAttributeNode* attributes;

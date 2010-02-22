@@ -54,7 +54,7 @@ private:
     const File file;
 
     FileInputSource (const FileInputSource&);
-    const FileInputSource& operator= (const FileInputSource&);
+    FileInputSource& operator= (const FileInputSource&);
 };
 
 

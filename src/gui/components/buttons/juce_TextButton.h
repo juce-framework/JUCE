@@ -101,7 +101,7 @@ protected:
 
 private:
     TextButton (const TextButton&);
-    const TextButton& operator= (const TextButton&);
+    TextButton& operator= (const TextButton&);
 };
 
 

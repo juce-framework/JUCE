@@ -49,7 +49,7 @@ public:
     ~StringPairArray() throw();
 
     /** Copies the contents of another string array into this one */
-    const StringPairArray& operator= (const StringPairArray& other) throw();
+    StringPairArray& operator= (const StringPairArray& other) throw();
 
     //==============================================================================
     /** Compares two arrays.

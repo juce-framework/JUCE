@@ -117,7 +117,7 @@ public:
 
         To add another arrangement without clearing this one, use addGlyphArrangement().
     */
-    const GlyphArrangement& operator= (const GlyphArrangement& other);
+    GlyphArrangement& operator= (const GlyphArrangement& other);
 
     /** Destructor. */
     ~GlyphArrangement();

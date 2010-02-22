@@ -72,7 +72,7 @@ private:
     OwnedArray <IIRFilter> iirFilters;
 
     IIRFilterAudioSource (const IIRFilterAudioSource&);
-    const IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
+    IIRFilterAudioSource& operator= (const IIRFilterAudioSource&);
 };
 
 

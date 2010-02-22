@@ -109,7 +109,7 @@ private:
     ScopedPointer <DirectoryIterator> subIterator;
 
     DirectoryIterator (const DirectoryIterator&);
-    const DirectoryIterator& operator= (const DirectoryIterator&);
+    DirectoryIterator& operator= (const DirectoryIterator&);
 };
 
 #endif   // __JUCE_DIRECTORYITERATOR_JUCEHEADER__

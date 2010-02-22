@@ -61,7 +61,7 @@ KeyPress::KeyPress (const KeyPress& other) throw()
 {
 }
 
-const KeyPress& KeyPress::operator= (const KeyPress& other) throw()
+KeyPress& KeyPress::operator= (const KeyPress& other) throw()
 {
     keyCode = other.keyCode;
     mods = other.mods;

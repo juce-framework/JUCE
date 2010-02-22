@@ -389,7 +389,7 @@ private:
     void setLastDragDropTarget (Component* comp);
 
     ComponentPeer (const ComponentPeer&);
-    const ComponentPeer& operator= (const ComponentPeer&);
+    ComponentPeer& operator= (const ComponentPeer&);
 };
 
 

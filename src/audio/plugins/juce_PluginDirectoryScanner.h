@@ -116,7 +116,7 @@ private:
     void setDeadMansPedalFile (const StringArray& newContents) throw();
 
     PluginDirectoryScanner (const PluginDirectoryScanner&);
-    const PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
+    PluginDirectoryScanner& operator= (const PluginDirectoryScanner&);
 };
 
 

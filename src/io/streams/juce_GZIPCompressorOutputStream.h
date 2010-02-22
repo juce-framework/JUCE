@@ -80,7 +80,7 @@ private:
     bool doNextBlock();
 
     GZIPCompressorOutputStream (const GZIPCompressorOutputStream&);
-    const GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
+    GZIPCompressorOutputStream& operator= (const GZIPCompressorOutputStream&);
 };
 
 #endif   // __JUCE_GZIPCOMPRESSOROUTPUTSTREAM_JUCEHEADER__

@@ -222,7 +222,7 @@ private:
     String formatName;
 
     AudioFormatReader (const AudioFormatReader&);
-    const AudioFormatReader& operator= (const AudioFormatReader&);
+    AudioFormatReader& operator= (const AudioFormatReader&);
 };
 
 

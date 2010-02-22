@@ -112,7 +112,7 @@ public:
         void unprepare();
 
         Node (const Node&);
-        const Node& operator= (const Node&);
+        Node& operator= (const Node&);
     };
 
     //==============================================================================
@@ -363,7 +363,7 @@ public:
         AudioProcessorGraph* graph;
 
         AudioGraphIOProcessor (const AudioGraphIOProcessor&);
-        const AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
+        AudioGraphIOProcessor& operator= (const AudioGraphIOProcessor&);
     };
 
     //==============================================================================
@@ -430,7 +430,7 @@ private:
                       const int recursionCheck) const;
 
     AudioProcessorGraph (const AudioProcessorGraph&);
-    const AudioProcessorGraph& operator= (const AudioProcessorGraph&);
+    AudioProcessorGraph& operator= (const AudioProcessorGraph&);
 };
 
 

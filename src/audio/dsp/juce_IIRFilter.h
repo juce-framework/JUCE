@@ -146,7 +146,7 @@ protected:
     float x1, x2, y1, y2;
 
     // (use the copyCoefficientsFrom() method instead of this operator)
-    const IIRFilter& operator= (const IIRFilter&);
+    IIRFilter& operator= (const IIRFilter&);
 };
 
 

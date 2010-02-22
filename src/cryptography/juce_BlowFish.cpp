@@ -360,7 +360,7 @@ BlowFish::BlowFish (const BlowFish& other)
     operator= (other);
 }
 
-const BlowFish& BlowFish::operator= (const BlowFish& other)
+BlowFish& BlowFish::operator= (const BlowFish& other)
 {
     memcpy (p, other.p, sizeof (p));
 

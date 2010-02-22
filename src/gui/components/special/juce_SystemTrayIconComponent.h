@@ -76,7 +76,7 @@ public:
 private:
     //==============================================================================
     SystemTrayIconComponent (const SystemTrayIconComponent&);
-    const SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
+    SystemTrayIconComponent& operator= (const SystemTrayIconComponent&);
 };
 
 

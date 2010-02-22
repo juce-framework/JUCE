@@ -119,7 +119,7 @@ private:
     int bufferSizeExpected;
 
     MixerAudioSource (const MixerAudioSource&);
-    const MixerAudioSource& operator= (const MixerAudioSource&);
+    MixerAudioSource& operator= (const MixerAudioSource&);
 };
 
 

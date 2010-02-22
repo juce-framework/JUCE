@@ -67,7 +67,7 @@ private:
     const uint32 componentUID;
 
     ComponentDeletionWatcher (const ComponentDeletionWatcher&);
-    const ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
+    ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
 };
 
 

@@ -98,7 +98,7 @@ private:
     Justification justification;
 
     GroupComponent (const GroupComponent&);
-    const GroupComponent& operator= (const GroupComponent&);
+    GroupComponent& operator= (const GroupComponent&);
 };
 
 

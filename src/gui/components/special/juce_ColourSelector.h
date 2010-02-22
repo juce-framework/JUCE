@@ -157,7 +157,7 @@ private:
     void resized();
 
     ColourSelector (const ColourSelector&);
-    const ColourSelector& operator= (const ColourSelector&);
+    ColourSelector& operator= (const ColourSelector&);
 
     // this constructor is here temporarily to prevent old code compiling, because the parameters
     // have changed - if you get an error here, update your code to use the new constructor instead..

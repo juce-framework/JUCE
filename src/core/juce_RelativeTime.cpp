@@ -178,7 +178,7 @@ const String RelativeTime::getDescription (const String& returnValueForZeroTime)
 }
 
 //==============================================================================
-const RelativeTime& RelativeTime::operator= (const RelativeTime& other) throw()
+RelativeTime& RelativeTime::operator= (const RelativeTime& other) throw()
 {
     seconds = other.seconds;
     return *this;

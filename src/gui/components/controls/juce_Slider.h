@@ -792,7 +792,7 @@ private:
     bool incDecDragDirectionIsHorizontal() const;
 
     Slider (const Slider&);
-    const Slider& operator= (const Slider&);
+    Slider& operator= (const Slider&);
 };
 
 

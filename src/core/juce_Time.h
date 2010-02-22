@@ -93,7 +93,7 @@ public:
     ~Time() throw();
 
     /** Copies this time from another one. */
-    const Time& operator= (const Time& other) throw();
+    Time& operator= (const Time& other) throw();
 
     //==============================================================================
     /** Returns a Time object that is set to the current system time.

@@ -175,7 +175,7 @@ private:
     SortedSet <void*> listeners;
 
     MenuBarModel (const MenuBarModel&);
-    const MenuBarModel& operator= (const MenuBarModel&);
+    MenuBarModel& operator= (const MenuBarModel&);
 };
 
 

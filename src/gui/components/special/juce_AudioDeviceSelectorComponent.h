@@ -110,7 +110,7 @@ private:
     Label* midiOutputLabel;
 
     AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
-    const AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
+    AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);
 };
 
 

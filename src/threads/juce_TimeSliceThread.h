@@ -130,7 +130,7 @@ private:
     bool clientsChanged;
 
     TimeSliceThread (const TimeSliceThread&);
-    const TimeSliceThread& operator= (const TimeSliceThread&);
+    TimeSliceThread& operator= (const TimeSliceThread&);
 };
 
 

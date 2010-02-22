@@ -264,7 +264,7 @@ class WavAudioFormatReader  : public AudioFormatReader
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
     WavAudioFormatReader (const WavAudioFormatReader&);
-    const WavAudioFormatReader& operator= (const WavAudioFormatReader&);
+    WavAudioFormatReader& operator= (const WavAudioFormatReader&);
 
 public:
     int64 bwavChunkStart, bwavSize;
@@ -619,7 +619,7 @@ class WavAudioFormatWriter  : public AudioFormatWriter
     static inline int chunkName (const char* const name)   { return (int) ByteOrder::littleEndianInt (name); }
 
     WavAudioFormatWriter (const WavAudioFormatWriter&);
-    const WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
+    WavAudioFormatWriter& operator= (const WavAudioFormatWriter&);
 
     void writeHeader()
     {

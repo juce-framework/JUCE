@@ -166,7 +166,7 @@ private:
 
     StreamingSocket (const String& hostname, const int portNumber, const int handle);
     StreamingSocket (const StreamingSocket&);
-    const StreamingSocket& operator= (const StreamingSocket&);
+    StreamingSocket& operator= (const StreamingSocket&);
 };
 
 
@@ -297,7 +297,7 @@ private:
 
     DatagramSocket (const String& hostname, const int portNumber, const int handle, const int localPortNumber);
     DatagramSocket (const DatagramSocket&);
-    const DatagramSocket& operator= (const DatagramSocket&);
+    DatagramSocket& operator= (const DatagramSocket&);
 };
 
 

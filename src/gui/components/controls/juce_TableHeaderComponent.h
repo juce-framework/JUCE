@@ -430,7 +430,7 @@ private:
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 
     TableHeaderComponent (const TableHeaderComponent&);
-    const TableHeaderComponent operator= (const TableHeaderComponent&);
+    TableHeaderComponent operator= (const TableHeaderComponent&);
 };
 
 

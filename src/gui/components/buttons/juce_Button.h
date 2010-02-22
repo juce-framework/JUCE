@@ -503,7 +503,7 @@ private:
     void sendStateMessage();
 
     Button (const Button&);
-    const Button& operator= (const Button&);
+    Button& operator= (const Button&);
 };
 
 

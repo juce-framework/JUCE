@@ -136,7 +136,7 @@ private:
     bool shouldStop, isActive, shouldBeDeleted;
 
     ThreadPoolJob (const ThreadPoolJob&);
-    const ThreadPoolJob& operator= (const ThreadPoolJob&);
+    ThreadPoolJob& operator= (const ThreadPoolJob&);
 };
 
 
@@ -312,7 +312,7 @@ private:
     bool runNextJob();
 
     ThreadPool (const ThreadPool&);
-    const ThreadPool& operator= (const ThreadPool&);
+    ThreadPool& operator= (const ThreadPool&);
 };
 
 

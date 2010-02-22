@@ -81,7 +81,7 @@ private:
     const bool isAddingNewProperty, isDeletingProperty;
 
     ValueTreeSetPropertyAction (const ValueTreeSetPropertyAction&);
-    const ValueTreeSetPropertyAction& operator= (const ValueTreeSetPropertyAction&);
+    ValueTreeSetPropertyAction& operator= (const ValueTreeSetPropertyAction&);
 };
 
 //==============================================================================
@@ -131,7 +131,7 @@ private:
     const bool isDeleting;
 
     ValueTreeChildChangeAction (const ValueTreeChildChangeAction&);
-    const ValueTreeChildChangeAction& operator= (const ValueTreeChildChangeAction&);
+    ValueTreeChildChangeAction& operator= (const ValueTreeChildChangeAction&);
 };
 
 
@@ -437,7 +437,7 @@ ValueTree::ValueTree (const ValueTree& other)
 {
 }
 
-const ValueTree& ValueTree::operator= (const ValueTree& other)
+ValueTree& ValueTree::operator= (const ValueTree& other)
 {
     if (listeners.size() > 0)
     {
@@ -579,7 +579,7 @@ private:
     const var::identifier property;
     UndoManager* const undoManager;
 
-    const ValueTreePropertyValueSource& operator= (const ValueTreePropertyValueSource&);
+    ValueTreePropertyValueSource& operator= (const ValueTreePropertyValueSource&);
 };
 
 Value ValueTree::getPropertyAsValue (const var::identifier& name, UndoManager* const undoManager) const

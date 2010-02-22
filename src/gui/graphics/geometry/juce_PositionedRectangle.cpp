@@ -55,7 +55,7 @@ PositionedRectangle::PositionedRectangle (const PositionedRectangle& other) thro
 {
 }
 
-const PositionedRectangle& PositionedRectangle::operator= (const PositionedRectangle& other) throw()
+PositionedRectangle& PositionedRectangle::operator= (const PositionedRectangle& other) throw()
 {
     x = other.x;
     y = other.y;
@@ -73,7 +73,7 @@ PositionedRectangle::~PositionedRectangle() throw()
 {
 }
 
-const bool PositionedRectangle::operator== (const PositionedRectangle& other) const throw()
+bool PositionedRectangle::operator== (const PositionedRectangle& other) const throw()
 {
     return x == other.x
         && y == other.y
@@ -85,7 +85,7 @@ const bool PositionedRectangle::operator== (const PositionedRectangle& other) co
         && hMode == other.hMode;
 }
 
-const bool PositionedRectangle::operator!= (const PositionedRectangle& other) const throw()
+bool PositionedRectangle::operator!= (const PositionedRectangle& other) const throw()
 {
     return ! operator== (other);
 }

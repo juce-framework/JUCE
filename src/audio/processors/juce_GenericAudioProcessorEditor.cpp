@@ -121,11 +121,11 @@ private:
         const int index;
 
         ParamSlider (const ParamSlider&);
-        const ParamSlider& operator= (const ParamSlider&);
+        ParamSlider& operator= (const ParamSlider&);
     };
 
     ProcessorParameterPropertyComp (const ProcessorParameterPropertyComp&);
-    const ProcessorParameterPropertyComp& operator= (const ProcessorParameterPropertyComp&);
+    ProcessorParameterPropertyComp& operator= (const ProcessorParameterPropertyComp&);
 };
 
 

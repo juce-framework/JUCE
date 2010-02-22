@@ -156,7 +156,7 @@ private:
     int commonSettingsAreReadOnly;
 
     ApplicationProperties (const ApplicationProperties&);
-    const ApplicationProperties& operator= (const ApplicationProperties&);
+    ApplicationProperties& operator= (const ApplicationProperties&);
 
     void openFiles() throw();
 };

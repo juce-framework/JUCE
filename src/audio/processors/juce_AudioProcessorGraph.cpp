@@ -375,7 +375,7 @@ private:
     const int channelNum;
 
     ClearChannelOp (const ClearChannelOp&);
-    const ClearChannelOp& operator= (const ClearChannelOp&);
+    ClearChannelOp& operator= (const ClearChannelOp&);
 };
 
 //==============================================================================
@@ -398,7 +398,7 @@ private:
     const int srcChannelNum, dstChannelNum;
 
     CopyChannelOp (const CopyChannelOp&);
-    const CopyChannelOp& operator= (const CopyChannelOp&);
+    CopyChannelOp& operator= (const CopyChannelOp&);
 };
 
 //==============================================================================
@@ -421,7 +421,7 @@ private:
     const int srcChannelNum, dstChannelNum;
 
     AddChannelOp (const AddChannelOp&);
-    const AddChannelOp& operator= (const AddChannelOp&);
+    AddChannelOp& operator= (const AddChannelOp&);
 };
 
 //==============================================================================
@@ -443,7 +443,7 @@ private:
     const int bufferNum;
 
     ClearMidiBufferOp (const ClearMidiBufferOp&);
-    const ClearMidiBufferOp& operator= (const ClearMidiBufferOp&);
+    ClearMidiBufferOp& operator= (const ClearMidiBufferOp&);
 };
 
 //==============================================================================
@@ -466,7 +466,7 @@ private:
     const int srcBufferNum, dstBufferNum;
 
     CopyMidiBufferOp (const CopyMidiBufferOp&);
-    const CopyMidiBufferOp& operator= (const CopyMidiBufferOp&);
+    CopyMidiBufferOp& operator= (const CopyMidiBufferOp&);
 };
 
 //==============================================================================
@@ -490,7 +490,7 @@ private:
     const int srcBufferNum, dstBufferNum;
 
     AddMidiBufferOp (const AddMidiBufferOp&);
-    const AddMidiBufferOp& operator= (const AddMidiBufferOp&);
+    AddMidiBufferOp& operator= (const AddMidiBufferOp&);
 };
 
 //==============================================================================
@@ -537,7 +537,7 @@ private:
     int midiBufferToUse;
 
     ProcessBufferOp (const ProcessBufferOp&);
-    const ProcessBufferOp& operator= (const ProcessBufferOp&);
+    ProcessBufferOp& operator= (const ProcessBufferOp&);
 };
 
 //==============================================================================
@@ -957,7 +957,7 @@ private:
     }
 
     RenderingOpSequenceCalculator (const RenderingOpSequenceCalculator&);
-    const RenderingOpSequenceCalculator& operator= (const RenderingOpSequenceCalculator&);
+    RenderingOpSequenceCalculator& operator= (const RenderingOpSequenceCalculator&);
 };
 
 }

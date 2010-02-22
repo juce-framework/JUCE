@@ -299,7 +299,7 @@ private:
     void timerCallback();
 
     ScrollBar (const ScrollBar&);
-    const ScrollBar& operator= (const ScrollBar&);
+    ScrollBar& operator= (const ScrollBar&);
 };
 
 

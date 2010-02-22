@@ -141,7 +141,7 @@ private:
     bool isDragging;
 
     ItemDragAndDropOverlayComponent (const ItemDragAndDropOverlayComponent&);
-    const ItemDragAndDropOverlayComponent& operator= (const ItemDragAndDropOverlayComponent&);
+    ItemDragAndDropOverlayComponent& operator= (const ItemDragAndDropOverlayComponent&);
 };
 
 

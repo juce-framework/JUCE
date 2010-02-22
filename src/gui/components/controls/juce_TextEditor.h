@@ -700,7 +700,7 @@ private:
     void repaintText (const Range<int>& range);
 
     TextEditor (const TextEditor&);
-    const TextEditor& operator= (const TextEditor&);
+    TextEditor& operator= (const TextEditor&);
 };
 
 #endif   // __JUCE_TEXTEDITOR_JUCEHEADER__

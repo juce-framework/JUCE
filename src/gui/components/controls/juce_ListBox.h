@@ -582,7 +582,7 @@ private:
                             bool isMouseClick);
 
     ListBox (const ListBox&);
-    const ListBox& operator= (const ListBox&);
+    ListBox& operator= (const ListBox&);
 };
 
 

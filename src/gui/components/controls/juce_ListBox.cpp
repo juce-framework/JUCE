@@ -167,7 +167,7 @@ private:
     bool selected, isDragging, selectRowOnMouseUp;
 
     ListBoxRowComponent (const ListBoxRowComponent&);
-    const ListBoxRowComponent& operator= (const ListBoxRowComponent&);
+    ListBoxRowComponent& operator= (const ListBoxRowComponent&);
 };
 
 
@@ -325,7 +325,7 @@ private:
     ListBox& owner;
 
     ListViewport (const ListViewport&);
-    const ListViewport& operator= (const ListViewport&);
+    ListViewport& operator= (const ListViewport&);
 };
 
 

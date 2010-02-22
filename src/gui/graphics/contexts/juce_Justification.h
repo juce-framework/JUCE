@@ -47,7 +47,7 @@ public:
     Justification (const Justification& other) throw();
 
     /** Copies another Justification object. */
-    const Justification& operator= (const Justification& other) throw();
+    Justification& operator= (const Justification& other) throw();
 
 
     //==============================================================================

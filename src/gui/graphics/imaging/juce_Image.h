@@ -244,7 +244,7 @@ public:
 
     private:
         BitmapData (const BitmapData&);
-        const BitmapData& operator= (const BitmapData&);
+        BitmapData& operator= (const BitmapData&);
     };
 
     /** Copies some pixel values to a rectangle of the image.
@@ -296,7 +296,7 @@ protected:
 
 private:
     //==============================================================================
-    const Image& operator= (const Image&);
+    Image& operator= (const Image&);
 };
 
 

@@ -48,7 +48,7 @@ public:
     BlowFish (const BlowFish& other);
 
     /** Copies another blowfish object. */
-    const BlowFish& operator= (const BlowFish& other);
+    BlowFish& operator= (const BlowFish& other);
 
     /** Destructor. */
     ~BlowFish();

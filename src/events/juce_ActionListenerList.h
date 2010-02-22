@@ -89,7 +89,7 @@ private:
     CriticalSection actionListenerLock_;
 
     ActionListenerList (const ActionListenerList&);
-    const ActionListenerList& operator= (const ActionListenerList&);
+    ActionListenerList& operator= (const ActionListenerList&);
 };
 
 

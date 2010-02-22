@@ -124,7 +124,7 @@ private:
     Timer* previous;
     Timer* next;
 
-    const Timer& operator= (const Timer&);
+    Timer& operator= (const Timer&);
 };
 
 #endif   // __JUCE_TIMER_JUCEHEADER__

@@ -102,7 +102,7 @@ private:
     double sampleRate;
 
     MidiMessageCollector (const MidiMessageCollector&);
-    const MidiMessageCollector& operator= (const MidiMessageCollector&);
+    MidiMessageCollector& operator= (const MidiMessageCollector&);
 };
 
 

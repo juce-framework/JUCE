@@ -105,7 +105,7 @@ private:
     void readBufferSection (int start, int length, int bufferOffset);
 
     BufferingAudioSource (const BufferingAudioSource&);
-    const BufferingAudioSource& operator= (const BufferingAudioSource&);
+    BufferingAudioSource& operator= (const BufferingAudioSource&);
 };
 
 

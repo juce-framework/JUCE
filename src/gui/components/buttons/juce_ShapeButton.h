@@ -106,7 +106,7 @@ private:
     float outlineWidth;
 
     ShapeButton (const ShapeButton&);
-    const ShapeButton& operator= (const ShapeButton&);
+    ShapeButton& operator= (const ShapeButton&);
 };
 
 

@@ -118,7 +118,7 @@ private:
     void timerCallback();
 
     ProgressBar (const ProgressBar&);
-    const ProgressBar& operator= (const ProgressBar&);
+    ProgressBar& operator= (const ProgressBar&);
 };
 
 

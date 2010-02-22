@@ -157,7 +157,7 @@ private:
     DropShadowEffect shadow;
 
     BubbleComponent (const BubbleComponent&);
-    const BubbleComponent& operator= (const BubbleComponent&);
+    BubbleComponent& operator= (const BubbleComponent&);
 };
 
 

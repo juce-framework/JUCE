@@ -85,7 +85,7 @@ private:
     int reentrancyLevel;
 
     InterProcessLock (const InterProcessLock&);
-    const InterProcessLock& operator= (const InterProcessLock&);
+    InterProcessLock& operator= (const InterProcessLock&);
 };
 
 

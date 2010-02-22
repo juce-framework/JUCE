@@ -82,7 +82,7 @@ private:
     ScopedPointer <NSViewComponentInternal> info;
 
     NSViewComponent (const NSViewComponent&);
-    const NSViewComponent& operator= (const NSViewComponent&);
+    NSViewComponent& operator= (const NSViewComponent&);
 };
 
 #endif

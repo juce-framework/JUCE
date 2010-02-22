@@ -88,10 +88,10 @@ public:
         On the Mac/Linux, the path can include "~" notation for referring to
         user home directories.
     */
-    const File& operator= (const String& newFilePath);
+    File& operator= (const String& newFilePath);
 
     /** Copies from another file object. */
-    const File& operator= (const File& otherFile);
+    File& operator= (const File& otherFile);
 
     //==============================================================================
     /** This static constant is used for referring to an 'invalid' file. */

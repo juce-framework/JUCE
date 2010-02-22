@@ -145,7 +145,7 @@ Line::Line (const Point<float>& start,
 {
 }
 
-const Line& Line::operator= (const Line& other) throw()
+Line& Line::operator= (const Line& other) throw()
 {
     startX = other.startX;
     startY = other.startY;

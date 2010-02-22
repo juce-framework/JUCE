@@ -125,7 +125,7 @@ private:
     void checkJustHoveredCallback();
 
     MouseHoverDetector (const MouseHoverDetector&);
-    const MouseHoverDetector& operator= (const MouseHoverDetector&);
+    MouseHoverDetector& operator= (const MouseHoverDetector&);
 };
 
 #endif   // __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__

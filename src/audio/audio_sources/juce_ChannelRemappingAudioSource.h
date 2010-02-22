@@ -149,7 +149,7 @@ private:
     CriticalSection lock;
 
     ChannelRemappingAudioSource (const ChannelRemappingAudioSource&);
-    const ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
+    ChannelRemappingAudioSource& operator= (const ChannelRemappingAudioSource&);
 };
 
 

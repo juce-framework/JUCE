@@ -117,7 +117,7 @@ public:
 
 private:
     NSViewComponentInternal (const NSViewComponentInternal&);
-    const NSViewComponentInternal& operator= (const NSViewComponentInternal&);
+    NSViewComponentInternal& operator= (const NSViewComponentInternal&);
 };
 
 //==============================================================================

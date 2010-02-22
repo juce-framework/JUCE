@@ -249,7 +249,7 @@ EdgeTable::EdgeTable (const EdgeTable& other) throw()
     operator= (other);
 }
 
-const EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
+EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
 {
     bounds = other.bounds;
     maxEdgesPerLine = other.maxEdgesPerLine;

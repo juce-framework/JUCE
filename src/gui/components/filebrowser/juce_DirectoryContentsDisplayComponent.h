@@ -106,7 +106,7 @@ protected:
     SortedSet <void*> listeners;
 
     DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
-    const DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
+    DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
 };
 
 

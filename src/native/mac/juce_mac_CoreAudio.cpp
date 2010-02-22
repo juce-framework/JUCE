@@ -795,7 +795,7 @@ private:
     HeapBlock <float*> tempInputBuffers, tempOutputBuffers;
 
     CoreAudioInternal (const CoreAudioInternal&);
-    const CoreAudioInternal& operator= (const CoreAudioInternal&);
+    CoreAudioInternal& operator= (const CoreAudioInternal&);
 
     //==============================================================================
     static OSStatus audioIOProc (AudioDeviceID inDevice,
@@ -1108,7 +1108,7 @@ private:
     }
 
     CoreAudioIODevice (const CoreAudioIODevice&);
-    const CoreAudioIODevice& operator= (const CoreAudioIODevice&);
+    CoreAudioIODevice& operator= (const CoreAudioIODevice&);
 };
 
 //==============================================================================
@@ -1310,7 +1310,7 @@ private:
     }
 
     CoreAudioIODeviceType (const CoreAudioIODeviceType&);
-    const CoreAudioIODeviceType& operator= (const CoreAudioIODeviceType&);
+    CoreAudioIODeviceType& operator= (const CoreAudioIODeviceType&);
 };
 
 //==============================================================================

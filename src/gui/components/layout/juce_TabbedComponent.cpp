@@ -74,7 +74,7 @@ private:
     TabbedComponent* const owner;
 
     TabCompButtonBar (const TabCompButtonBar&);
-    const TabCompButtonBar& operator= (const TabCompButtonBar&);
+    TabCompButtonBar& operator= (const TabCompButtonBar&);
 };
 
 

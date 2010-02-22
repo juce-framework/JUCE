@@ -59,7 +59,7 @@ private:
     PropertyPanel* panel;
 
     GenericAudioProcessorEditor (const GenericAudioProcessorEditor&);
-    const GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
+    GenericAudioProcessorEditor& operator= (const GenericAudioProcessorEditor&);
 };
 
 

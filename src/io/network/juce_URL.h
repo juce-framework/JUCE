@@ -55,7 +55,7 @@ public:
     ~URL();
 
     /** Copies this URL from another one. */
-    const URL& operator= (const URL& other);
+    URL& operator= (const URL& other);
 
     //==============================================================================
     /** Returns a string version of the URL.

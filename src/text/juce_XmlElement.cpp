@@ -78,7 +78,7 @@ XmlElement::XmlElement (const XmlElement& other) throw()
     copyChildrenAndAttributesFrom (other);
 }
 
-const XmlElement& XmlElement::operator= (const XmlElement& other) throw()
+XmlElement& XmlElement::operator= (const XmlElement& other) throw()
 {
     if (this != &other)
     {

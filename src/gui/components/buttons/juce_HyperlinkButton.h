@@ -114,7 +114,7 @@ private:
     const Font getFontToUse() const;
 
     HyperlinkButton (const HyperlinkButton&);
-    const HyperlinkButton& operator= (const HyperlinkButton&);
+    HyperlinkButton& operator= (const HyperlinkButton&);
 };
 
 #endif   // __JUCE_HYPERLINKBUTTON_JUCEHEADER__

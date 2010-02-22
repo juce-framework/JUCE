@@ -178,7 +178,7 @@ private:
 #endif
 
     AudioCDReader (const AudioCDReader&);
-    const AudioCDReader& operator= (const AudioCDReader&);
+    AudioCDReader& operator= (const AudioCDReader&);
 };
 
 #endif

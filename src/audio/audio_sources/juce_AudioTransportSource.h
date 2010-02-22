@@ -174,7 +174,7 @@ private:
     bool isPrepared, inputStreamEOF;
 
     AudioTransportSource (const AudioTransportSource&);
-    const AudioTransportSource& operator= (const AudioTransportSource&);
+    AudioTransportSource& operator= (const AudioTransportSource&);
 };
 
 

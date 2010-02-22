@@ -75,7 +75,7 @@ private:
     ScrollBar& owner;
 
     ScrollbarButton (const ScrollbarButton&);
-    const ScrollbarButton& operator= (const ScrollbarButton&);
+    ScrollbarButton& operator= (const ScrollbarButton&);
 };
 
 

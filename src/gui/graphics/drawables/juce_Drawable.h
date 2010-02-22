@@ -117,7 +117,7 @@ public:
         float opacity;
 
     private:
-        const RenderingContext& operator= (const RenderingContext&);
+        RenderingContext& operator= (const RenderingContext&);
     };
 
     /** Renders this Drawable object.
@@ -197,7 +197,7 @@ public:
 
 private:
     Drawable (const Drawable&);
-    const Drawable& operator= (const Drawable&);
+    Drawable& operator= (const Drawable&);
 
     String name;
 };

@@ -94,7 +94,7 @@ private:
     void createEditor (const int maxNumChars, const bool isMultiLine);
 
     TextPropertyComponent (const TextPropertyComponent&);
-    const TextPropertyComponent& operator= (const TextPropertyComponent&);
+    TextPropertyComponent& operator= (const TextPropertyComponent&);
 };
 
 

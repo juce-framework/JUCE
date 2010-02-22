@@ -130,7 +130,7 @@ CodeDocument::Iterator::Iterator (const CodeDocument::Iterator& other)
 {
 }
 
-const CodeDocument::Iterator& CodeDocument::Iterator::operator= (const CodeDocument::Iterator& other) throw()
+CodeDocument::Iterator& CodeDocument::Iterator::operator= (const CodeDocument::Iterator& other) throw()
 {
     document = other.document;
     currentLine = other.currentLine;
@@ -241,7 +241,7 @@ CodeDocument::Position::~Position() throw()
     setPositionMaintained (false);
 }
 
-const CodeDocument::Position& CodeDocument::Position::operator= (const Position& other) throw()
+CodeDocument::Position& CodeDocument::Position::operator= (const Position& other) throw()
 {
     if (this != &other)
     {
@@ -733,7 +733,7 @@ class CodeDocumentInsertAction   : public UndoableAction
     int insertPos;
 
     CodeDocumentInsertAction (const CodeDocumentInsertAction&);
-    const CodeDocumentInsertAction& operator= (const CodeDocumentInsertAction&);
+    CodeDocumentInsertAction& operator= (const CodeDocumentInsertAction&);
 
 public:
     CodeDocumentInsertAction (CodeDocument& owner_, const String& text_, const int insertPos_) throw()
@@ -839,7 +839,7 @@ class CodeDocumentDeleteAction  : public UndoableAction
     String removedText;
 
     CodeDocumentDeleteAction (const CodeDocumentDeleteAction&);
-    const CodeDocumentDeleteAction& operator= (const CodeDocumentDeleteAction&);
+    CodeDocumentDeleteAction& operator= (const CodeDocumentDeleteAction&);
 
 public:
     CodeDocumentDeleteAction (CodeDocument& owner_, const int startPos_, const int endPos_) throw()

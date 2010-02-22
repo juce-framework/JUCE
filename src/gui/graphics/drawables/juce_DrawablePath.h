@@ -122,7 +122,7 @@ private:
     void updateOutline();
 
     DrawablePath (const DrawablePath&);
-    const DrawablePath& operator= (const DrawablePath&);
+    DrawablePath& operator= (const DrawablePath&);
 };
 
 

@@ -1891,7 +1891,7 @@ private:
     Path normalShape, toggledShape;
 
     GlassWindowButton (const GlassWindowButton&);
-    const GlassWindowButton& operator= (const GlassWindowButton&);
+    GlassWindowButton& operator= (const GlassWindowButton&);
 };
 
 Button* LookAndFeel::createDocumentWindowButton (int buttonType)

@@ -106,7 +106,7 @@ public:
     // Assignment and concatenation operators..
 
     /** Replaces this string's contents with another string. */
-    const String& operator= (const String& other) throw();
+    String& operator= (const String& other) throw();
 
     /** Appends another string at the end of this one. */
     String& operator+= (const tchar* const textToAppend);
@@ -1041,7 +1041,7 @@ public:
         int nextIndex;
 
         Concatenator (const Concatenator&);
-        const Concatenator& operator= (const Concatenator&);
+        Concatenator& operator= (const Concatenator&);
     };
 
     //==============================================================================

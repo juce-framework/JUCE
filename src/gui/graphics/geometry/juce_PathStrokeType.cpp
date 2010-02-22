@@ -49,7 +49,7 @@ PathStrokeType::PathStrokeType (const PathStrokeType& other) throw()
 {
 }
 
-const PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) throw()
+PathStrokeType& PathStrokeType::operator= (const PathStrokeType& other) throw()
 {
     thickness = other.thickness;
     jointStyle = other.jointStyle;

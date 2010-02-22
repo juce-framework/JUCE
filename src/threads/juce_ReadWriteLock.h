@@ -133,7 +133,7 @@ private:
     mutable Array <Thread::ThreadID> readerThreads;
 
     ReadWriteLock (const ReadWriteLock&);
-    const ReadWriteLock& operator= (const ReadWriteLock&);
+    ReadWriteLock& operator= (const ReadWriteLock&);
 };
 
 

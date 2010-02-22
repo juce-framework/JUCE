@@ -111,7 +111,7 @@ public:
     ~MidiMessage() throw();
 
     /** Copies this message from another one. */
-    const MidiMessage& operator= (const MidiMessage& other) throw();
+    MidiMessage& operator= (const MidiMessage& other) throw();
 
     //==============================================================================
     /** Returns a pointer to the raw midi data.

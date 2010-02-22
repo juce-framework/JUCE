@@ -67,7 +67,7 @@ AffineTransform::AffineTransform (const float mat00_,
 {
 }
 
-const AffineTransform& AffineTransform::operator= (const AffineTransform& other) throw()
+AffineTransform& AffineTransform::operator= (const AffineTransform& other) throw()
 {
     mat00 = other.mat00;
     mat01 = other.mat01;

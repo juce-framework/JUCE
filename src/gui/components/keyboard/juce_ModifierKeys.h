@@ -52,7 +52,7 @@ public:
     ModifierKeys (const ModifierKeys& other) throw();
 
     /** Copies this object from another one. */
-    const ModifierKeys& operator= (const ModifierKeys& other) throw();
+    ModifierKeys& operator= (const ModifierKeys& other) throw();
 
     //==============================================================================
     /** Checks whether the 'command' key flag is set (or 'ctrl' on Windows/Linux).

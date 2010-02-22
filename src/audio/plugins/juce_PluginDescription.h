@@ -47,7 +47,7 @@ public:
     //==============================================================================
     PluginDescription() throw();
     PluginDescription (const PluginDescription& other) throw();
-    const PluginDescription& operator= (const PluginDescription& other) throw();
+    PluginDescription& operator= (const PluginDescription& other) throw();
     ~PluginDescription() throw();
 
     //==============================================================================

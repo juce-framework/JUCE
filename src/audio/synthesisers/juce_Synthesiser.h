@@ -477,7 +477,7 @@ private:
     bool shouldStealNotes;
 
     Synthesiser (const Synthesiser&);
-    const Synthesiser& operator= (const Synthesiser&);
+    Synthesiser& operator= (const Synthesiser&);
 };
 
 

@@ -93,7 +93,7 @@ private:
     void run();
 
     InterprocessConnectionServer (const InterprocessConnectionServer&);
-    const InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
+    InterprocessConnectionServer& operator= (const InterprocessConnectionServer&);
 };
 
 

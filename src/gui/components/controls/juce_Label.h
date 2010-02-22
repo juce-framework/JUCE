@@ -342,7 +342,7 @@ private:
     void callChangeListeners();
 
     Label (const Label&);
-    const Label& operator= (const Label&);
+    Label& operator= (const Label&);
 };
 
 

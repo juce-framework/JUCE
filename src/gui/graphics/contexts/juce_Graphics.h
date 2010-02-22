@@ -722,8 +722,8 @@ private:
     bool saveStatePending;
     void saveStateIfPending() throw();
 
-    const Graphics& operator= (const Graphics& other);
     Graphics (const Graphics&);
+    Graphics& operator= (const Graphics& other);
 };
 
 

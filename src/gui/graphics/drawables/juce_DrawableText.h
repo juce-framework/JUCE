@@ -90,7 +90,7 @@ private:
     Colour colour;
 
     DrawableText (const DrawableText&);
-    const DrawableText& operator= (const DrawableText&);
+    DrawableText& operator= (const DrawableText&);
 };
 
 

@@ -90,7 +90,7 @@ private:
     void registerWithParentComps() throw();
 
     ComponentMovementWatcher (const ComponentMovementWatcher&);
-    const ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
+    ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
 };
 
 

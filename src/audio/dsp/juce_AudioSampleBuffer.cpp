@@ -122,7 +122,7 @@ void AudioSampleBuffer::allocateChannels (float** const dataToReferTo)
     channels [numChannels] = 0;
 }
 
-const AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other) throw()
+AudioSampleBuffer& AudioSampleBuffer::operator= (const AudioSampleBuffer& other) throw()
 {
     if (this != &other)
     {

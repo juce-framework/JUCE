@@ -287,7 +287,7 @@ private:
     void handleAsyncUpdate();
 
     Desktop (const Desktop&);
-    const Desktop& operator= (const Desktop&);
+    Desktop& operator= (const Desktop&);
 };
 
 

@@ -347,7 +347,7 @@ private:
     void internalRepaint (int x, int y, int w, int h);
 
     OpenGLComponent (const OpenGLComponent&);
-    const OpenGLComponent& operator= (const OpenGLComponent&);
+    OpenGLComponent& operator= (const OpenGLComponent&);
 };
 
 

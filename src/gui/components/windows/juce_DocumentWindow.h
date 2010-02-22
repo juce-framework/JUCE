@@ -260,7 +260,7 @@ private:
     void repaintTitleBar();
 
     DocumentWindow (const DocumentWindow&);
-    const DocumentWindow& operator= (const DocumentWindow&);
+    DocumentWindow& operator= (const DocumentWindow&);
 };
 
 

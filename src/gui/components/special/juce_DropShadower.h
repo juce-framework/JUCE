@@ -101,7 +101,7 @@ private:
     void deleteShadowWindows();
 
     DropShadower (const DropShadower&);
-    const DropShadower& operator= (const DropShadower&);
+    DropShadower& operator= (const DropShadower&);
 };
 
 

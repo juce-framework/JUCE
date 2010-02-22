@@ -87,7 +87,7 @@ private:
     String dragAndDropDescription;
 
     FileTreeComponent (const FileTreeComponent&);
-    const FileTreeComponent& operator= (const FileTreeComponent&);
+    FileTreeComponent& operator= (const FileTreeComponent&);
 };
 
 

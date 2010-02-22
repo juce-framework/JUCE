@@ -153,7 +153,7 @@ private:
     void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
 
     TemporaryFile (const TemporaryFile&);
-    const TemporaryFile& operator= (const TemporaryFile&);
+    TemporaryFile& operator= (const TemporaryFile&);
 };
 
 #endif   // __JUCE_TEMPORARYFILE_JUCEHEADER__

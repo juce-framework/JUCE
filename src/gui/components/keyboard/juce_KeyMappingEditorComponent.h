@@ -144,7 +144,7 @@ private:
     void assignNewKey (const CommandID commandID, int index);
 
     KeyMappingEditorComponent (const KeyMappingEditorComponent&);
-    const KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
+    KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);
 };
 
 

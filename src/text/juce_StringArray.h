@@ -88,7 +88,7 @@ public:
     ~StringArray();
 
     /** Copies the contents of another string array into this one */
-    const StringArray& operator= (const StringArray& other);
+    StringArray& operator= (const StringArray& other);
 
     //==============================================================================
     /** Compares two arrays.

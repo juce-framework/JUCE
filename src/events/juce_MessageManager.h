@@ -196,7 +196,7 @@ private:
     CriticalSection lockingLock;
 
     MessageManager (const MessageManager&);
-    const MessageManager& operator= (const MessageManager&);
+    MessageManager& operator= (const MessageManager&);
 };
 
 

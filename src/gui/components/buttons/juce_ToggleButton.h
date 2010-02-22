@@ -88,7 +88,7 @@ protected:
 private:
     //==============================================================================
     ToggleButton (const ToggleButton&);
-    const ToggleButton& operator= (const ToggleButton&);
+    ToggleButton& operator= (const ToggleButton&);
 };
 
 

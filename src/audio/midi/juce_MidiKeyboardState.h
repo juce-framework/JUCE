@@ -207,7 +207,7 @@ private:
     void noteOffInternal  (const int midiChannel, const int midiNoteNumber);
 
     MidiKeyboardState (const MidiKeyboardState&);
-    const MidiKeyboardState& operator= (const MidiKeyboardState&);
+    MidiKeyboardState& operator= (const MidiKeyboardState&);
 };
 
 

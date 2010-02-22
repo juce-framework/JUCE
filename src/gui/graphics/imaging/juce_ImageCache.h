@@ -167,7 +167,7 @@ private:
 
     ImageCache();
     ImageCache (const ImageCache&);
-    const ImageCache& operator= (const ImageCache&);
+    ImageCache& operator= (const ImageCache&);
     ~ImageCache();
 
     void timerCallback();

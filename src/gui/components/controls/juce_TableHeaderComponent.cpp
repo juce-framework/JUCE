@@ -58,7 +58,7 @@ private:
     ScopedPointer <Image> image;
 
     DragOverlayComp (const DragOverlayComp&);
-    const DragOverlayComp& operator= (const DragOverlayComp&);
+    DragOverlayComp& operator= (const DragOverlayComp&);
 };
 
 

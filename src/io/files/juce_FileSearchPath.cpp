@@ -50,7 +50,7 @@ FileSearchPath::~FileSearchPath()
 {
 }
 
-const FileSearchPath& FileSearchPath::operator= (const String& path)
+FileSearchPath& FileSearchPath::operator= (const String& path)
 {
     init (path);
     return *this;

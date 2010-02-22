@@ -82,7 +82,7 @@ public:
 
         This buffer's size will be changed to that of the other buffer.
     */
-    const AudioSampleBuffer& operator= (const AudioSampleBuffer& other) throw();
+    AudioSampleBuffer& operator= (const AudioSampleBuffer& other) throw();
 
     /** Destructor.
 

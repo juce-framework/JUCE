@@ -79,7 +79,7 @@ public:
     KeyPress (const KeyPress& other) throw();
 
     /** Copies this KeyPress from another one. */
-    const KeyPress& operator= (const KeyPress& other) throw();
+    KeyPress& operator= (const KeyPress& other) throw();
 
     /** Compares two KeyPress objects. */
     bool operator== (const KeyPress& other) const throw();

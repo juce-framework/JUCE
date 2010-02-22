@@ -319,7 +319,7 @@ private:
     void updateColumnComponents() const;
 
     TableListBox (const TableListBox&);
-    const TableListBox& operator= (const TableListBox&);
+    TableListBox& operator= (const TableListBox&);
 };
 
 

@@ -221,13 +221,13 @@ File::File (const File& other)
 {
 }
 
-const File& File::operator= (const String& newPath)
+File& File::operator= (const String& newPath)
 {
     fullPath = parseAbsolutePath (newPath);
     return *this;
 }
 
-const File& File::operator= (const File& other)
+File& File::operator= (const File& other)
 {
     fullPath = other.fullPath;
     return *this;

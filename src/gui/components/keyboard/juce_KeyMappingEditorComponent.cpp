@@ -121,7 +121,7 @@ private:
     const int keyNum;
 
     KeyMappingChangeButton (const KeyMappingChangeButton&);
-    const KeyMappingChangeButton& operator= (const KeyMappingChangeButton&);
+    KeyMappingChangeButton& operator= (const KeyMappingChangeButton&);
 };
 
 //==============================================================================
@@ -192,7 +192,7 @@ private:
     const CommandID commandID;
 
     KeyMappingItemComponent (const KeyMappingItemComponent&);
-    const KeyMappingItemComponent& operator= (const KeyMappingItemComponent&);
+    KeyMappingItemComponent& operator= (const KeyMappingItemComponent&);
 };
 
 //==============================================================================
@@ -226,7 +226,7 @@ private:
     const CommandID commandID;
 
     KeyMappingTreeViewItem (const KeyMappingTreeViewItem&);
-    const KeyMappingTreeViewItem& operator= (const KeyMappingTreeViewItem&);
+    KeyMappingTreeViewItem& operator= (const KeyMappingTreeViewItem&);
 };
 
 
@@ -287,7 +287,7 @@ private:
     String categoryName;
 
     KeyCategoryTreeViewItem (const KeyCategoryTreeViewItem&);
-    const KeyCategoryTreeViewItem& operator= (const KeyCategoryTreeViewItem&);
+    KeyCategoryTreeViewItem& operator= (const KeyCategoryTreeViewItem&);
 };
 
 
@@ -462,7 +462,7 @@ private:
     KeyMappingEditorComponent* owner;
 
     KeyEntryWindow (const KeyEntryWindow&);
-    const KeyEntryWindow& operator= (const KeyEntryWindow&);
+    KeyEntryWindow& operator= (const KeyEntryWindow&);
 };
 
 

@@ -239,7 +239,7 @@ private:
     void changeCallback (const int newCurrentTabIndex, const String& newTabName);
 
     TabbedComponent (const TabbedComponent&);
-    const TabbedComponent& operator= (const TabbedComponent&);
+    TabbedComponent& operator= (const TabbedComponent&);
 };
 
 

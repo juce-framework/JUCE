@@ -65,7 +65,7 @@ public:
 
 private:
     FilePreviewComponent (const FilePreviewComponent&);
-    const FilePreviewComponent& operator= (const FilePreviewComponent&);
+    FilePreviewComponent& operator= (const FilePreviewComponent&);
 };
 
 

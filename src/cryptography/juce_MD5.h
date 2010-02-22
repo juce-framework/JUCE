@@ -51,7 +51,7 @@ public:
     MD5 (const MD5& other);
 
     /** Copies another MD5. */
-    const MD5& operator= (const MD5& other);
+    MD5& operator= (const MD5& other);
 
     //==============================================================================
     /** Creates a checksum for a block of binary data. */

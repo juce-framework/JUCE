@@ -116,7 +116,7 @@ public:
 
 private:
     ShadowWindow (const ShadowWindow&);
-    const ShadowWindow& operator= (const ShadowWindow&);
+    ShadowWindow& operator= (const ShadowWindow&);
 };
 
 

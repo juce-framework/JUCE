@@ -47,7 +47,7 @@ RectangleList::RectangleList (const RectangleList& other) throw()
 {
 }
 
-const RectangleList& RectangleList::operator= (const RectangleList& other) throw()
+RectangleList& RectangleList::operator= (const RectangleList& other) throw()
 {
     rects = other.rects;
     return *this;

@@ -48,7 +48,7 @@ MidiBuffer::MidiBuffer (const MidiBuffer& other) throw()
 {
 }
 
-const MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
+MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
 {
     bytesUsed = other.bytesUsed;
     data = other.data;

@@ -124,7 +124,7 @@ private:
 
     // no reason not to implement these one day..
     ImageConvolutionKernel (const ImageConvolutionKernel&);
-    const ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
+    ImageConvolutionKernel& operator= (const ImageConvolutionKernel&);
 };
 
 

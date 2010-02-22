@@ -222,7 +222,7 @@ private:
 #endif
 
     QuickTimeMovieComponent (const QuickTimeMovieComponent&);
-    const QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
+    QuickTimeMovieComponent& operator= (const QuickTimeMovieComponent&);
 };
 
 #endif

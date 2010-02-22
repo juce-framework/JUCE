@@ -98,7 +98,7 @@ public:
     MouseCursor (const MouseCursor& other) throw();
 
     /** Copies this cursor from another object. */
-    const MouseCursor& operator= (const MouseCursor& other) throw();
+    MouseCursor& operator= (const MouseCursor& other) throw();
 
     /** Destructor. */
     ~MouseCursor() throw();

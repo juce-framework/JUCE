@@ -50,7 +50,7 @@ Colour::Colour (const Colour& other) throw()
 {
 }
 
-const Colour& Colour::operator= (const Colour& other) throw()
+Colour& Colour::operator= (const Colour& other) throw()
 {
     argb = other.argb;
     return *this;

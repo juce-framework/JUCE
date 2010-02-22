@@ -259,7 +259,7 @@ private:
     }
 
     TableListRowComp (const TableListRowComp&);
-    const TableListRowComp& operator= (const TableListRowComp&);
+    TableListRowComp& operator= (const TableListRowComp&);
 };
 
 
@@ -310,7 +310,7 @@ private:
     TableListBox& owner;
 
     TableListBoxHeader (const TableListBoxHeader&);
-    const TableListBoxHeader& operator= (const TableListBoxHeader&);
+    TableListBoxHeader& operator= (const TableListBoxHeader&);
 };
 
 //==============================================================================

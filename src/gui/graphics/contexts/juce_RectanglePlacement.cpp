@@ -36,7 +36,7 @@ RectanglePlacement::RectanglePlacement (const RectanglePlacement& other) throw()
 {
 }
 
-const RectanglePlacement& RectanglePlacement::operator= (const RectanglePlacement& other) throw()
+RectanglePlacement& RectanglePlacement::operator= (const RectanglePlacement& other) throw()
 {
     flags = other.flags;
     return *this;

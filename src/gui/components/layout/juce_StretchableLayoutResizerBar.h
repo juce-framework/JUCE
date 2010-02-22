@@ -94,7 +94,7 @@ private:
     bool isVertical;
 
     StretchableLayoutResizerBar (const StretchableLayoutResizerBar&);
-    const StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
+    StretchableLayoutResizerBar& operator= (const StretchableLayoutResizerBar&);
 };
 
 

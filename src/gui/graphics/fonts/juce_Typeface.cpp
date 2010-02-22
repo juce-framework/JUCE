@@ -93,7 +93,7 @@ public:
 
 private:
     GlyphInfo (const GlyphInfo&);
-    const GlyphInfo& operator= (const GlyphInfo&);
+    GlyphInfo& operator= (const GlyphInfo&);
 };
 
 //==============================================================================

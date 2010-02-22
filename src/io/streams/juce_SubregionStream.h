@@ -87,7 +87,7 @@ private:
     const int64 startPositionInSourceStream, lengthOfSourceStream;
 
     SubregionStream (const SubregionStream&);
-    const SubregionStream& operator= (const SubregionStream&);
+    SubregionStream& operator= (const SubregionStream&);
 };
 
 #endif   // __JUCE_SUBREGIONSTREAM_JUCEHEADER__

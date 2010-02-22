@@ -113,7 +113,7 @@ protected:
     AudioPluginFormat() throw();
 
     AudioPluginFormat (const AudioPluginFormat&);
-    const AudioPluginFormat& operator= (const AudioPluginFormat&);
+    AudioPluginFormat& operator= (const AudioPluginFormat&);
 };
 
 

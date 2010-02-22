@@ -138,7 +138,7 @@ private:
     String typeName;
 
     AudioIODeviceType (const AudioIODeviceType&);
-    const AudioIODeviceType& operator= (const AudioIODeviceType&);
+    AudioIODeviceType& operator= (const AudioIODeviceType&);
 };
 
 

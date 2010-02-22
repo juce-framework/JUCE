@@ -94,7 +94,7 @@ private:
     void scanFor (AudioPluginFormat* format);
 
     PluginListComponent (const PluginListComponent&);
-    const PluginListComponent& operator= (const PluginListComponent&);
+    PluginListComponent& operator= (const PluginListComponent&);
 };
 
 

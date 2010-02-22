@@ -44,7 +44,7 @@ MD5::MD5 (const MD5& other)
     memcpy (result, other.result, sizeof (result));
 }
 
-const MD5& MD5::operator= (const MD5& other)
+MD5& MD5::operator= (const MD5& other)
 {
     memcpy (result, other.result, sizeof (result));
     return *this;

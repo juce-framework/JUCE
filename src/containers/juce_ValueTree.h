@@ -82,7 +82,7 @@ public:
     ValueTree (const ValueTree& other);
 
     /** Makes this object reference another node. */
-    const ValueTree& operator= (const ValueTree& other);
+    ValueTree& operator= (const ValueTree& other);
 
     /** Destructor. */
     ~ValueTree();
@@ -417,7 +417,7 @@ private:
         juce_UseDebuggingNewOperator
 
     private:
-        const SharedObject& operator= (const SharedObject&);
+        SharedObject& operator= (const SharedObject&);
     };
 
     template <typename ElementComparator>

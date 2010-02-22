@@ -64,7 +64,7 @@ public:
 
 private:
     DeletedAtShutdown (const DeletedAtShutdown&);
-    const DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+    DeletedAtShutdown& operator= (const DeletedAtShutdown&);
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__

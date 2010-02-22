@@ -106,7 +106,7 @@ private:
     MidiMessageCollector messageCollector;
 
     AudioProcessorPlayer (const AudioProcessorPlayer&);
-    const AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
+    AudioProcessorPlayer& operator= (const AudioProcessorPlayer&);
 };
 
 

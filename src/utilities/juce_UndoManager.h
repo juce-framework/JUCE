@@ -228,7 +228,7 @@ private:
 
     // disallow copy constructor
     UndoManager (const UndoManager&);
-    const UndoManager& operator= (const UndoManager&);
+    UndoManager& operator= (const UndoManager&);
 };
 
 

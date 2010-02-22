@@ -66,7 +66,7 @@ public:
     FillType (const FillType& other) throw();
 
     /** Makes a copy of another FillType. */
-    const FillType& operator= (const FillType& other) throw();
+    FillType& operator= (const FillType& other) throw();
 
     /** Destructor. */
     ~FillType() throw();

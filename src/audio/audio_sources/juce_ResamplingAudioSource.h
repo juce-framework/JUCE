@@ -99,7 +99,7 @@ private:
     void applyFilter (float* samples, int num, FilterState& fs);
 
     ResamplingAudioSource (const ResamplingAudioSource&);
-    const ResamplingAudioSource& operator= (const ResamplingAudioSource&);
+    ResamplingAudioSource& operator= (const ResamplingAudioSource&);
 };
 
 

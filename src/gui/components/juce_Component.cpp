@@ -345,7 +345,7 @@ private:
     float scale, scaleChangePerMs;
 
     FadeOutProxyComponent (const FadeOutProxyComponent&);
-    const FadeOutProxyComponent& operator= (const FadeOutProxyComponent&);
+    FadeOutProxyComponent& operator= (const FadeOutProxyComponent&);
 };
 
 void Component::fadeOutComponent (const int millisecondsToFade,

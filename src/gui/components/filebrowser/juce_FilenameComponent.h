@@ -217,7 +217,7 @@ private:
     void handleAsyncUpdate();
 
     FilenameComponent (const FilenameComponent&);
-    const FilenameComponent& operator= (const FilenameComponent&);
+    FilenameComponent& operator= (const FilenameComponent&);
 };
 
 

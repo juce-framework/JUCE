@@ -76,7 +76,7 @@ private:
     ActionListenerList actionListenerList;
 
     ActionBroadcaster (const ActionBroadcaster&);
-    const ActionBroadcaster& operator= (const ActionBroadcaster&);
+    ActionBroadcaster& operator= (const ActionBroadcaster&);
 };
 
 

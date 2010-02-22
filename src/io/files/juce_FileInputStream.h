@@ -71,7 +71,7 @@ private:
     bool needToSeek;
 
     FileInputStream (const FileInputStream&);
-    const FileInputStream& operator= (const FileInputStream&);
+    FileInputStream& operator= (const FileInputStream&);
 };
 
 #endif   // __JUCE_FILEINPUTSTREAM_JUCEHEADER__

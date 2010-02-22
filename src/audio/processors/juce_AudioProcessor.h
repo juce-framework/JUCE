@@ -583,7 +583,7 @@ private:
 #endif
 
     AudioProcessor (const AudioProcessor&);
-    const AudioProcessor& operator= (const AudioProcessor&);
+    AudioProcessor& operator= (const AudioProcessor&);
 };
 
 

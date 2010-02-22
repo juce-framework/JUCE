@@ -85,7 +85,7 @@ protected:
 
 private:
     TabBarButton (const TabBarButton&);
-    const TabBarButton& operator= (const TabBarButton&);
+    TabBarButton& operator= (const TabBarButton&);
 };
 
 
@@ -289,7 +289,7 @@ private:
     Button* extraTabsButton;
 
     TabbedButtonBar (const TabbedButtonBar&);
-    const TabbedButtonBar& operator= (const TabbedButtonBar&);
+    TabbedButtonBar& operator= (const TabbedButtonBar&);
 };
 
 

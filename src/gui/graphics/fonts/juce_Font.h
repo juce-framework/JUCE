@@ -98,7 +98,7 @@ public:
     Font() throw();
 
     /** Copies this font from another one. */
-    const Font& operator= (const Font& other) throw();
+    Font& operator= (const Font& other) throw();
 
     bool operator== (const Font& other) const throw();
     bool operator!= (const Font& other) const throw();

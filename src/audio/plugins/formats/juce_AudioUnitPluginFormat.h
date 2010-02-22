@@ -56,7 +56,7 @@ public:
 
 private:
     AudioUnitPluginFormat (const AudioUnitPluginFormat&);
-    const AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
+    AudioUnitPluginFormat& operator= (const AudioUnitPluginFormat&);
 };
 
 #endif

@@ -77,7 +77,7 @@ Path::Path (const Path& other) throw()
     }
 }
 
-const Path& Path::operator= (const Path& other) throw()
+Path& Path::operator= (const Path& other) throw()
 {
     if (this != &other)
     {

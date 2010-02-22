@@ -213,7 +213,7 @@ private:
     void* pool;
 
     ScopedAutoReleasePool (const ScopedAutoReleasePool&);
-    const ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
+    ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
 
 #endif
@@ -327,7 +327,7 @@ private:
     bool open (const bool openInExclusiveMode);
 
     AppleRemoteDevice (const AppleRemoteDevice&);
-    const AppleRemoteDevice& operator= (const AppleRemoteDevice&);
+    AppleRemoteDevice& operator= (const AppleRemoteDevice&);
 };
 
 #endif

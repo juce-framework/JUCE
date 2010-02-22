@@ -153,7 +153,7 @@ private:
     String name;
 
     CameraDevice (const CameraDevice&);
-    const CameraDevice& operator= (const CameraDevice&);
+    CameraDevice& operator= (const CameraDevice&);
 };
 
 

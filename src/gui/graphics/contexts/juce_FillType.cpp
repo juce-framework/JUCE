@@ -59,7 +59,7 @@ FillType::FillType (const FillType& other) throw()
 {
 }
 
-const FillType& FillType::operator= (const FillType& other) throw()
+FillType& FillType::operator= (const FillType& other) throw()
 {
     if (this != &other)
     {

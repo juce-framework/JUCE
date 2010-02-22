@@ -213,7 +213,7 @@ private:
                   const Time& creationTime, const bool isReadOnly);
 
     DirectoryContentsList (const DirectoryContentsList&);
-    const DirectoryContentsList& operator= (const DirectoryContentsList&);
+    DirectoryContentsList& operator= (const DirectoryContentsList&);
 };
 
 

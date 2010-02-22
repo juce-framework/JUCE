@@ -63,7 +63,7 @@ protected:
     AudioPluginInstance();
 
     AudioPluginInstance (const AudioPluginInstance&);
-    const AudioPluginInstance& operator= (const AudioPluginInstance&);
+    AudioPluginInstance& operator= (const AudioPluginInstance&);
 };
 
 

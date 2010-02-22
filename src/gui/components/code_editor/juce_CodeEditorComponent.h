@@ -297,7 +297,7 @@ private:
     int columnToIndex (int line, int column) const throw();
 
     CodeEditorComponent (const CodeEditorComponent&);
-    const CodeEditorComponent& operator= (const CodeEditorComponent&);
+    CodeEditorComponent& operator= (const CodeEditorComponent&);
 };
 
 

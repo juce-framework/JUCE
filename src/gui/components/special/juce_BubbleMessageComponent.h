@@ -131,7 +131,7 @@ private:
                const bool deleteSelfAfterUse);
 
     BubbleMessageComponent (const BubbleMessageComponent&);
-    const BubbleMessageComponent& operator= (const BubbleMessageComponent&);
+    BubbleMessageComponent& operator= (const BubbleMessageComponent&);
 };
 
 

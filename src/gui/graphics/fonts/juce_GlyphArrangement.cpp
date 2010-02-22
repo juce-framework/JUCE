@@ -118,7 +118,7 @@ GlyphArrangement::GlyphArrangement (const GlyphArrangement& other)
     addGlyphArrangement (other);
 }
 
-const GlyphArrangement& GlyphArrangement::operator= (const GlyphArrangement& other)
+GlyphArrangement& GlyphArrangement::operator= (const GlyphArrangement& other)
 {
     if (this != &other)
     {

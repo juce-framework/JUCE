@@ -66,7 +66,7 @@ private:
     void getThumbSize (int& w, int& h) const;
 
     ImagePreviewComponent (const ImagePreviewComponent&);
-    const ImagePreviewComponent& operator= (const ImagePreviewComponent&);
+    ImagePreviewComponent& operator= (const ImagePreviewComponent&);
 };
 
 

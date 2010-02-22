@@ -115,7 +115,7 @@ private:
     }
 
     SharedBufferingAudioSourceThread (const SharedBufferingAudioSourceThread&);
-    const SharedBufferingAudioSourceThread& operator= (const SharedBufferingAudioSourceThread&);
+    SharedBufferingAudioSourceThread& operator= (const SharedBufferingAudioSourceThread&);
 };
 
 juce_ImplementSingleton (SharedBufferingAudioSourceThread)

@@ -328,7 +328,7 @@ private:
     bool isDragging, needSelectionOnMouseUp;
 
     TreeViewContentComponent (const TreeViewContentComponent&);
-    const TreeViewContentComponent& operator= (const TreeViewContentComponent&);
+    TreeViewContentComponent& operator= (const TreeViewContentComponent&);
 
     void selectBasedOnModifiers (TreeViewItem* const item, const ModifierKeys& modifiers)
     {
@@ -396,7 +396,7 @@ public:
 
 private:
     TreeViewport (const TreeViewport&);
-    const TreeViewport& operator= (const TreeViewport&);
+    TreeViewport& operator= (const TreeViewport&);
 };
 
 

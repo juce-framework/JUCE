@@ -92,7 +92,7 @@ public:
     ~PopupMenu();
 
     /** Copies this menu from another one. */
-    const PopupMenu& operator= (const PopupMenu& other);
+    PopupMenu& operator= (const PopupMenu& other);
 
     //==============================================================================
     /** Resets the menu, removing all its items. */
@@ -369,7 +369,7 @@ public:
         int index;
 
         MenuItemIterator (const MenuItemIterator&);
-        const MenuItemIterator& operator= (const MenuItemIterator&);
+        MenuItemIterator& operator= (const MenuItemIterator&);
     };
 
     //==============================================================================

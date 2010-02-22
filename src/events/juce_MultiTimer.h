@@ -126,7 +126,7 @@ private:
     CriticalSection timerListLock;
     OwnedArray <MultiTimerCallback> timers;
 
-    const MultiTimer& operator= (const MultiTimer&);
+    MultiTimer& operator= (const MultiTimer&);
 };
 
 #endif   // __JUCE_MULTITIMER_JUCEHEADER__

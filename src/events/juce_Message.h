@@ -80,7 +80,7 @@ private:
     MessageListener* messageRecipient;
 
     Message (const Message&);
-    const Message& operator= (const Message&);
+    Message& operator= (const Message&);
 };
 
 

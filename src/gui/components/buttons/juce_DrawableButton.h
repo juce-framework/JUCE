@@ -172,7 +172,7 @@ private:
 
     void deleteImages();
     DrawableButton (const DrawableButton&);
-    const DrawableButton& operator= (const DrawableButton&);
+    DrawableButton& operator= (const DrawableButton&);
 };
 
 

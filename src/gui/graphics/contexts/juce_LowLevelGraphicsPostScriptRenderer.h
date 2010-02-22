@@ -106,7 +106,7 @@ protected:
         Font font;
 
     private:
-        const SavedState& operator= (const SavedState&);
+        SavedState& operator= (const SavedState&);
     };
 
     OwnedArray <SavedState> stateStack;
@@ -119,7 +119,7 @@ protected:
     void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
 
     LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
-    const LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
+    LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
 };
 
 

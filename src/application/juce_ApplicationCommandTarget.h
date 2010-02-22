@@ -251,7 +251,7 @@ private:
         ApplicationCommandTarget* const owner;
 
         CommandTargetMessageInvoker (const CommandTargetMessageInvoker&);
-        const CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
+        CommandTargetMessageInvoker& operator= (const CommandTargetMessageInvoker&);
     };
 
     ScopedPointer <CommandTargetMessageInvoker> messageInvoker;
@@ -260,7 +260,7 @@ private:
     bool tryToInvoke (const InvocationInfo& info, const bool async);
 
     ApplicationCommandTarget (const ApplicationCommandTarget&);
-    const ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
+    ApplicationCommandTarget& operator= (const ApplicationCommandTarget&);
 };
 
 

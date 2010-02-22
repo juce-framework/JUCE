@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 class DummyMenuComponent  : public Component
 {
     DummyMenuComponent (const DummyMenuComponent&);
-    const DummyMenuComponent& operator= (const DummyMenuComponent&);
+    DummyMenuComponent& operator= (const DummyMenuComponent&);
 
 public:
     DummyMenuComponent()    {}

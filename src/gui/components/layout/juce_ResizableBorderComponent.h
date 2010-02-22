@@ -116,7 +116,7 @@ private:
     void updateMouseZone (const MouseEvent& e) throw();
 
     ResizableBorderComponent (const ResizableBorderComponent&);
-    const ResizableBorderComponent& operator= (const ResizableBorderComponent&);
+    ResizableBorderComponent& operator= (const ResizableBorderComponent&);
 };
 
 

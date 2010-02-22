@@ -291,7 +291,7 @@ private:
     String fileExtension, fileWildcard, openFileDialogTitle, saveFileDialogTitle;
 
     FileBasedDocument (const FileBasedDocument&);
-    const FileBasedDocument& operator= (const FileBasedDocument&);
+    FileBasedDocument& operator= (const FileBasedDocument&);
 };
 
 

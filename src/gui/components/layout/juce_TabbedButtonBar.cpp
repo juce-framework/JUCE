@@ -169,7 +169,7 @@ private:
     TabbedButtonBar* const owner;
 
     TabAreaBehindFrontButtonComponent (const TabAreaBehindFrontButtonComponent&);
-    const TabAreaBehindFrontButtonComponent& operator= (const TabAreaBehindFrontButtonComponent&);
+    TabAreaBehindFrontButtonComponent& operator= (const TabAreaBehindFrontButtonComponent&);
 };
 
 

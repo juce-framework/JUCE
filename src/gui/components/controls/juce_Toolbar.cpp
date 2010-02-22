@@ -168,7 +168,7 @@ private:
     const bool drawBar;
 
     ToolbarSpacerComp (const ToolbarSpacerComp&);
-    const ToolbarSpacerComp& operator= (const ToolbarSpacerComp&);
+    ToolbarSpacerComp& operator= (const ToolbarSpacerComp&);
 };
 
 //==============================================================================
@@ -263,7 +263,7 @@ private:
     Array <int> oldIndexes;
 
     MissingItemsComponent (const MissingItemsComponent&);
-    const MissingItemsComponent& operator= (const MissingItemsComponent&);
+    MissingItemsComponent& operator= (const MissingItemsComponent&);
 };
 
 
