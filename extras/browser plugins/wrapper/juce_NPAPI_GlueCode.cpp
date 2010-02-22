@@ -85,8 +85,8 @@ static void log (const String& s)
 
 //==============================================================================
 #if JUCE_MAC
-static const String nsStringToJuce (NSString* s)    { return String::fromUTF8 ((JUCE_NAMESPACE::uint8*) [s UTF8String]); }
-static NSString* juceStringToNS (const String& s)   { return [NSString stringWithUTF8String: (const char*) s.toUTF8()]; }
+static const String nsStringToJuce (NSString* s)    { return String::fromUTF8 ([s UTF8String]); }
+static NSString* juceStringToNS (const String& s)   { return [NSString stringWithUTF8String: s.toUTF8()]; }
 
 #pragma export on
 extern "C"
@@ -845,10 +845,10 @@ static const var createValueFromNPVariant (NPP npp, const NPVariant& v)
         return var (NPVARIANT_TO_DOUBLE (v));
     else if (NPVARIANT_IS_STRING (v))
 #if JUCE_MAC
-        return var (String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) (NPVARIANT_TO_STRING (v).UTF8Characters),
+        return var (String::fromUTF8 ((const char*) (NPVARIANT_TO_STRING (v).UTF8Characters),
                                       (int) NPVARIANT_TO_STRING (v).UTF8Length));
 #else
-        return var (String::fromUTF8 ((const JUCE_NAMESPACE::uint8*) (NPVARIANT_TO_STRING (v).utf8characters),
+        return var (String::fromUTF8 ((const char*) (NPVARIANT_TO_STRING (v).utf8characters),
                                       (int) NPVARIANT_TO_STRING (v).utf8length));
 #endif
     else if (NPVARIANT_IS_OBJECT (v))
