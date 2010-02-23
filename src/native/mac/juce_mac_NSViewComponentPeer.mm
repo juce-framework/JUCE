@@ -40,6 +40,7 @@ END_JUCE_NAMESPACE
     NSViewComponentPeer* owner;
     NSNotificationCenter* notificationCenter;
     String* stringBeingComposed;
+    bool textWasInserted;
 }
 
 - (JuceNSView*) initWithOwner: (NSViewComponentPeer*) owner withFrame: (NSRect) frame;
@@ -273,6 +274,7 @@ END_JUCE_NAMESPACE
     [super initWithFrame: frame];
     owner = owner_;
     stringBeingComposed = 0;
+    textWasInserted = false;
 
     notificationCenter = [NSNotificationCenter defaultCenter];
 
@@ -439,13 +441,14 @@ END_JUCE_NAMESPACE
 - (void) keyDown: (NSEvent*) ev
 {
     TextInputTarget* const target = owner->findCurrentTextInputTarget();
+    textWasInserted = false;
 
     if (target != 0)
         [self interpretKeyEvents: [NSArray arrayWithObject: ev]];
     else
         deleteAndZero (stringBeingComposed);
 
-    if (stringBeingComposed == 0 && (owner == 0 || ! owner->redirectKeyDown (ev)))
+    if ((! textWasInserted) && (owner == 0 || ! owner->redirectKeyDown (ev)))
         [super keyDown: ev];
 }
 
@@ -464,7 +467,10 @@ END_JUCE_NAMESPACE
         TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
         if (target != 0)
+        {
             target->insertTextAtCaret (nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString));
+            textWasInserted = true;
+        }
     }
 
     deleteAndZero (stringBeingComposed);
@@ -488,6 +494,7 @@ END_JUCE_NAMESPACE
         const Range<int> currentHighlight (target->getHighlightedRegion());
         target->insertTextAtCaret (*stringBeingComposed);
         target->setHighlightedRegion (currentHighlight.withLength (stringBeingComposed->length()));
+        textWasInserted = true;
     }
 }
 
@@ -498,7 +505,10 @@ END_JUCE_NAMESPACE
         TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
         if (target != 0)
+        {
             target->insertTextAtCaret (*stringBeingComposed);
+            textWasInserted = true;
+        }
     }
 
     deleteAndZero (stringBeingComposed);

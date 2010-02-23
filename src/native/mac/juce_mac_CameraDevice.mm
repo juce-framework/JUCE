@@ -39,7 +39,8 @@ END_JUCE_NAMESPACE
 @public
     CameraDevice* owner;
     QTCameraDeviceInteral* internal;
-    Time* firstRecordedTime;
+    int64 firstPresentationTime;
+    int64 averageTimeOffset;
 }
 
 - (QTCaptureCallbackDelegate*) initWithOwner: (CameraDevice*) owner internalDev: (QTCameraDeviceInteral*) d;
@@ -215,13 +216,13 @@ END_JUCE_NAMESPACE
     [super init];
     owner = owner_;
     internal = d;
-    firstRecordedTime = 0;
+    firstPresentationTime = 0;
+    averageTimeOffset = 0;
     return self;
 }
 
 - (void) dealloc
 {
-    delete firstRecordedTime;
     [super dealloc];
 }
 
@@ -244,10 +245,28 @@ END_JUCE_NAMESPACE
          didOutputSampleBuffer: (QTSampleBuffer*) sampleBuffer
          fromConnection: (QTCaptureConnection*) connection
 {
-    if (firstRecordedTime == 0)
+    const Time now (Time::getCurrentTime());
+    int64 presentationTime = ([sampleBuffer presentationTime].timeValue * 1000) / [sampleBuffer presentationTime].timeScale;
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
+    NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: QTSampleBufferHostTimeAttribute];
+#else
+    NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: @"hostTime"];
+#endif
+
+    if (hosttime != nil)
+        presentationTime = (int64) AudioConvertHostTimeToNanos ([hosttime unsignedLongLongValue]) / 1000000;
+
+    const int64 timeDiff = now.toMilliseconds() - presentationTime - 50;
+
+    if (firstPresentationTime == 0)
     {
-        const Time now (Time::getCurrentTime());
-        firstRecordedTime = new Time (now - RelativeTime (0.1));
+        firstPresentationTime = presentationTime;
+        averageTimeOffset = timeDiff;
+    }
+    else
+    {
+        averageTimeOffset = (averageTimeOffset * 120 + timeDiff * 8) / 128;
     }
 }
 
@@ -309,7 +328,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
     stopRecording();
 
     QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
-    deleteAndZero (d->callbackDelegate->firstRecordedTime);
+    d->callbackDelegate->firstPresentationTime = 0;
     file.deleteFile();
 
     // In some versions of QT (e.g. on 10.5), if you record video without audio, the speed comes
@@ -346,8 +365,8 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
 const Time CameraDevice::getTimeOfFirstRecordedFrame() const
 {
     QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
-    if (d->callbackDelegate->firstRecordedTime != 0)
-        return *d->callbackDelegate->firstRecordedTime;
+    if (d->callbackDelegate->firstPresentationTime != 0)
+        return Time (d->callbackDelegate->firstPresentationTime + d->callbackDelegate->averageTimeOffset);
 
     return Time();
 }

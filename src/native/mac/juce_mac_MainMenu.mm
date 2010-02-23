@@ -155,6 +155,9 @@ public:
 
     static void flashMenuBar (NSMenu* menu)
     {
+        if ([[menu title] isEqualToString: @"Apple"])
+            return;
+
         [menu retain];
 
         const unichar f35Key = NSF35FunctionKey;
@@ -167,21 +170,22 @@ public:
         [menu insertItem: item atIndex: [menu numberOfItems]];
         [item release];
 
-        NSEvent* f35Event = [NSEvent keyEventWithType: NSKeyDown
-                                             location: NSZeroPoint
-                                        modifierFlags: NSCommandKeyMask
-                                            timestamp: 0
-                                         windowNumber: 0
-                                              context: [NSGraphicsContext currentContext]
-                                           characters: f35String
-                          charactersIgnoringModifiers: f35String
-                                            isARepeat: NO
-                                              keyCode: 0];
-
-        [menu performKeyEquivalent: f35Event];
-
         if ([menu indexOfItem: item] >= 0)
+        {
+            NSEvent* f35Event = [NSEvent keyEventWithType: NSKeyDown
+                                                 location: NSZeroPoint
+                                            modifierFlags: NSCommandKeyMask
+                                                timestamp: 0
+                                             windowNumber: 0
+                                                  context: [NSGraphicsContext currentContext]
+                                               characters: f35String
+                              charactersIgnoringModifiers: f35String
+                                                isARepeat: NO
+                                                  keyCode: 0];
+
+            [menu performKeyEquivalent: f35Event];
             [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
+        }
 
         [menu release];
     }

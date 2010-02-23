@@ -210,19 +210,24 @@ public:
             }
         }
 
-        imageSwapLock.enter();
-        const int lineStride = width * 3;
-        const Image::BitmapData destData (*loadingImage, 0, 0, width, height, true);
+        {
+            const int lineStride = width * 3;
+            const ScopedLock sl (imageSwapLock);
 
-        for (int i = 0; i < height; ++i)
-            memcpy (destData.getLinePointer ((height - 1) - i),
-                    buffer + lineStride * i,
-                    lineStride);
+            {
+                const Image::BitmapData destData (*loadingImage, 0, 0, width, height, true);
 
-        imageNeedsFlipping = true;
-        imageSwapLock.exit();
+                for (int i = 0; i < height; ++i)
+                    memcpy (destData.getLinePointer ((height - 1) - i),
+                            buffer + lineStride * i,
+                            lineStride);
+            }
 
-        callListeners (*loadingImage);
+            imageNeedsFlipping = true;
+        }
+
+        if (listeners.size() > 0)
+            callListeners (*loadingImage);
 
         sendChangeMessage (this);
     }
@@ -231,10 +236,9 @@ public:
     {
         if (imageNeedsFlipping)
         {
-            imageSwapLock.enter();
+            const ScopedLock sl (imageSwapLock);
             swapVariables (loadingImage, activeImage);
             imageNeedsFlipping = false;
-            imageSwapLock.exit();
         }
 
         RectanglePlacement rp (RectanglePlacement::centred);
@@ -267,7 +271,7 @@ public:
 
             if (SUCCEEDED (hr))
             {
-                fileWriter.CoCreateInstance (CLSID_FileWriter, CLSCTX_INPROC_SERVER);
+                hr = fileWriter.CoCreateInstance (CLSID_FileWriter, CLSCTX_INPROC_SERVER);
 
                 if (SUCCEEDED (hr))
                 {
@@ -377,6 +381,7 @@ public:
                 l->imageReceived (image);
         }
     }
+
 
     //==============================================================================
     class DShowCaptureViewerComp   : public Component,
