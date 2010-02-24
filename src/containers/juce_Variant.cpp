@@ -209,7 +209,8 @@ DynamicObject* var::getObject() const
     return type == objectType ? value.objectValue : 0;
 }
 
-bool var::operator== (const var& other) const throw()
+//==============================================================================
+bool var::equals (const var& other) const throw()
 {
     switch (type)
     {
@@ -226,11 +227,12 @@ bool var::operator== (const var& other) const throw()
     return false;
 }
 
-bool var::operator!= (const var& other) const throw()
-{
-    return ! operator== (other);
-}
+bool operator== (const var& v1, const var& v2) throw()      { return v1.equals (v2); }
+bool operator!= (const var& v1, const var& v2) throw()      { return ! v1.equals (v2); }
+bool operator== (const var& v1, const String& v2) throw()   { return v1.toString() == v2; }
+bool operator!= (const var& v1, const String& v2) throw()   { return v1.toString() != v2; }
 
+//==============================================================================
 void var::writeToStream (OutputStream& output) const
 {
     switch (type)

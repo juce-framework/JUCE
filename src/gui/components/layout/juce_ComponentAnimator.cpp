@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ComponentAnimator.h"
+#include "../../../core/juce_Time.h"
 
 
 //==============================================================================

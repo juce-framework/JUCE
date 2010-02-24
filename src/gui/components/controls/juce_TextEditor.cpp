@@ -1322,7 +1322,7 @@ void TextEditor::repaintText (const Range<int>& range)
 
             if (range.getEnd() >= getTotalNumChars())
             {
-                y2 = getHeight();
+                y2 = textHolder->getHeight();
             }
             else
             {

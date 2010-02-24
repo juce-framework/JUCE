@@ -1072,73 +1072,73 @@ private:
 
 //==============================================================================
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (const char* string1,       const String& string2);
+const String operator+  (const char* string1,       const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (const juce_wchar* string1, const String& string2);
+const String operator+  (const juce_wchar* string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (char string1,              const String& string2);
+const String operator+  (char string1,              const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (juce_wchar string1,        const String& string2);
+const String operator+  (juce_wchar string1,        const String& string2);
 
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const String& string2);
+const String operator+  (String string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const char* string2);
+const String operator+  (String string1, const char* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const juce_wchar* string2);
+const String operator+  (String string1, const juce_wchar* string2);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, char characterToAppend);
+const String operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, juce_wchar characterToAppend);
+const String operator+  (String string1, juce_wchar characterToAppend);
 
 //==============================================================================
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const char characterToAppend);
+String& operator<< (String& string1, const char characterToAppend);
 /** Appends a character at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const juce_wchar characterToAppend);
+String& operator<< (String& string1, const juce_wchar characterToAppend);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const char* const string2);
+String& operator<< (String& string1, const char* const string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const juce_wchar* const string2);
+String& operator<< (String& string1, const juce_wchar* const string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const String& string2);
+String& operator<< (String& string1, const String& string2);
 
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const short number);
+String& operator<< (String& string1, const short number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const int number);
+String& operator<< (String& string1, const int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const unsigned int number);
+String& operator<< (String& string1, const unsigned int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const long number);
+String& operator<< (String& string1, const long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const unsigned long number);
+String& operator<< (String& string1, const unsigned long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const float number);
+String& operator<< (String& string1, const float number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_PUBLIC_FUNCTION        operator<< (String& string1, const double number);
+String& operator<< (String& string1, const double number);
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
+bool operator== (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const char* string2) throw();
+bool operator== (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const juce_wchar* string2) throw();
+bool operator== (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const String& string2) throw();
+bool operator!= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const char* string2) throw();
+bool operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const juce_wchar* string2) throw();
+bool operator!= (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator>  (const String& string1, const String& string2) throw();
+bool operator>  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& string2) throw();
+bool operator<  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
+bool operator>= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
+bool operator<= (const String& string1, const String& string2) throw();
 
 //==============================================================================
 /** This streaming override allows you to pass a juce String directly into std output streams.
@@ -1151,7 +1151,7 @@ std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, trait
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const String& text);
+OutputStream& operator<< (OutputStream& stream, const String& text);
 
 
 #endif   // __JUCE_STRING_JUCEHEADER__

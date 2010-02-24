@@ -96,9 +96,6 @@ public:
     bool isObject() const throw()       { return type == objectType; }
     bool isMethod() const throw()       { return type == methodType; }
 
-    bool operator== (const var& other) const throw();
-    bool operator!= (const var& other) const throw();
-
     //==============================================================================
     /** Writes a binary representation of this value to a stream.
         The data can be read back later using readFromStream().
@@ -170,6 +167,9 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
+    /** Returns true if this var has the same value as the one supplied. */
+    bool equals (const var& other) const throw();
+    
 private:
     enum Type
     {
@@ -195,6 +195,11 @@ private:
     Type type;
     ValueUnion value;
 };
+
+bool operator== (const var& v1, const var& v2) throw();
+bool operator!= (const var& v1, const var& v2) throw();
+bool operator== (const var& v1, const String& v2) throw();
+bool operator!= (const var& v1, const String& v2) throw();
 
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__
