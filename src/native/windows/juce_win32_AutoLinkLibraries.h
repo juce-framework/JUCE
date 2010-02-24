@@ -26,4 +26,5 @@
 
 #if JUCE_USE_CAMERA
  #pragma comment (lib, "Strmiids.lib")
+ #pragma comment (lib, "wmvcore.lib")
 #endif

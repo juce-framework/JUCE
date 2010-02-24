@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	3
+#define JUCE_BUILDNUMBER	4
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -28339,6 +28339,7 @@ END_JUCE_NAMESPACE
 
 #if JUCE_USE_CAMERA
  #pragma comment (lib, "Strmiids.lib")
+ #pragma comment (lib, "wmvcore.lib")
 #endif
 /*** End of inlined file: juce_win32_AutoLinkLibraries.h ***/
 

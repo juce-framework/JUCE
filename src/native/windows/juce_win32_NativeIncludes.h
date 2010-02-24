@@ -127,14 +127,15 @@
 
  /*  If you're using the camera classes, you'll need access to a few DirectShow headers.
 
-     Both of these files are provided in the normal Windows SDK, but some Microsoft plonker
-     didn't realise that qedit.h doesn't actually compile without the rest of the DirectShow SDK!
+     These files are provided in the normal Windows SDK, but some Microsoft plonker
+     didn't realise that qedit.h doesn't actually compile without the rest of the DirectShow SDK..
      Microsoft's suggested fix for this is to hack their qedit.h file! See:
      http://social.msdn.microsoft.com/Forums/en-US/windowssdk/thread/ed097d2c-3d68-4f48-8448-277eaaf68252
-     .. which is a pathetic bodge, but a lot less hassle than installing the full DShow SDK.
+     .. which is a bit of a bodge, but a lot less hassle than installing the full DShow SDK.
  */
  #include <dshow.h>
  #include <qedit.h>
+ #include <dshowasf.h>
 #endif
 
 //==============================================================================
