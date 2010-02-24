@@ -30,15 +30,20 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Desktop.h"
 #include "juce_ComponentDeletionWatcher.h"
-#include "../graphics/geometry/juce_RectangleList.h"
+#include "mouse/juce_MouseInputSource.h"
+#include "mouse/juce_MouseListener.h"
+#include "mouse/juce_MouseEvent.h"
+
 
 //==============================================================================
 Desktop::Desktop() throw()
     : mouseClickCounter (0),
-      mouseMovedSignificantlySincePressed (false),
       kioskModeComponent (0)
 {
-    zerostruct (mouseDowns);
+    const int maxNumMice = 1;
+    for (int i = maxNumMice; --i >= 0;)
+        mouseSources.add (new MouseInputSource (i, true));
+
     refreshMonitorSizes();
 }
 
@@ -204,7 +209,7 @@ void Desktop::componentBroughtToFront (Component* const c) throw()
 //==============================================================================
 const Point<int> Desktop::getLastMouseDownPosition() throw()
 {
-    return getInstance().mouseDowns[0].position;
+    return getInstance().getMainMouseSource().getLastMouseDownPosition();
 }
 
 int Desktop::getMouseButtonClickCounter() throw()
@@ -215,59 +220,6 @@ int Desktop::getMouseButtonClickCounter() throw()
 void Desktop::incrementMouseClickCounter() throw()
 {
     ++mouseClickCounter;
-}
-
-const Time Desktop::getLastMouseDownTime() const throw()
-{
-    return Time (mouseDowns[0].time);
-}
-
-void Desktop::registerMouseDown (const Point<int>& position, int64 time, Component* component) throw()
-{
-    for (int i = numElementsInArray (mouseDowns); --i > 0;)
-        mouseDowns[i] = mouseDowns[i - 1];
-
-    mouseDowns[0].position = position;
-    mouseDowns[0].time = time;
-    mouseDowns[0].component = component;
-    mouseMovedSignificantlySincePressed = false;
-}
-
-void Desktop::registerMouseDrag (const Point<int>& position) throw()
-{
-    mouseMovedSignificantlySincePressed
-        = mouseMovedSignificantlySincePressed
-           || abs (mouseDowns[0].position.getX() - position.getX()) >= 4
-           || abs (mouseDowns[0].position.getY() - position.getY()) >= 4;
-}
-
-int Desktop::getNumberOfMultipleClicks() const throw()
-{
-    int numClicks = 0;
-
-    if (mouseDowns[0].time != 0)
-    {
-        if (! mouseMovedSignificantlySincePressed)
-            ++numClicks;
-
-        for (int i = 1; i < numElementsInArray (mouseDowns); ++i)
-        {
-            if (mouseDowns[0].time - mouseDowns[i].time
-                    < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
-                && abs (mouseDowns[0].position.getX() - mouseDowns[i].position.getX()) < 8
-                && abs (mouseDowns[0].position.getY() - mouseDowns[i].position.getY()) < 8
-                && mouseDowns[0].component == mouseDowns[i].component)
-            {
-                ++numClicks;
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-
-    return numClicks;
 }
 
 //==============================================================================
@@ -339,7 +291,7 @@ void Desktop::sendMouseMove()
             const Point<int> pos (target->globalPositionToRelative (lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
-            const MouseEvent me (pos, ModifierKeys::getCurrentModifiers(),
+            const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),
                                  target, now, pos, now, 0, false);
 
             for (int i = mouseListeners.size(); --i >= 0;)

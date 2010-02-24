@@ -47,11 +47,11 @@ ModifierKeys& ModifierKeys::operator= (const ModifierKeys& other) throw()
     return *this;
 }
 
-int ModifierKeys::currentModifierFlags = 0;
+ModifierKeys ModifierKeys::currentModifiers;
 
 const ModifierKeys ModifierKeys::getCurrentModifiers() throw()
 {
-    return ModifierKeys (currentModifierFlags);
+    return currentModifiers;
 }
 
 int ModifierKeys::getNumMouseButtonsDown() const throw()

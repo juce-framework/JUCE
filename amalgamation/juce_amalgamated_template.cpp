@@ -288,6 +288,7 @@
  #include "../src/gui/components/mouse/juce_DragAndDropContainer.cpp"
  #include "../src/gui/components/mouse/juce_MouseCursor.cpp"
  #include "../src/gui/components/mouse/juce_MouseEvent.cpp"
+ #include "../src/gui/components/mouse/juce_MouseInputSource.cpp"
  #include "../src/gui/components/mouse/juce_MouseHoverDetector.cpp"
  #include "../src/gui/components/mouse/juce_MouseListener.cpp"
  #include "../src/gui/components/properties/juce_BooleanPropertyComponent.cpp"

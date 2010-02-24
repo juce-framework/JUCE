@@ -110,10 +110,10 @@ public:
                            roundToInt (p.getY() / zoom));
     }
 
-    bool contains (int x, int y, bool) const
+    bool contains (const Point<int>& position, bool) const
     {
-        return ((unsigned int) x) < (unsigned int) magnifierComp->getWidth()
-                && ((unsigned int) y) < (unsigned int) magnifierComp->getHeight();
+        return ((unsigned int) position.getX()) < (unsigned int) magnifierComp->getWidth()
+                && ((unsigned int) position.getY()) < (unsigned int) magnifierComp->getHeight();
     }
 
     void repaint (int x, int y, int w, int h)
@@ -193,7 +193,8 @@ MagnifierComponent::MagnifierComponent (Component* const content_,
       scaleFactor (0.0),
       peer (0),
       deleteContent (deleteContentCompWhenNoLongerNeeded),
-      quality (Graphics::lowResamplingQuality)
+      quality (Graphics::lowResamplingQuality),
+      mouseSource (0, true)
 {
     holderComp = new PeerHolderComp (this);
     setScaleFactor (1.0);
@@ -285,48 +286,48 @@ void MagnifierComponent::childBoundsChanged (Component* c)
                  roundToInt (c->getHeight() * scaleFactor));
 }
 
-void MagnifierComponent::mouseDown (const MouseEvent& e)
+void MagnifierComponent::passOnMouseEventToPeer (const MouseEvent& e)
 {
     if (peer != 0)
-        peer->handleMouseDown (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+        mouseSource.handleEvent (peer, Point<int> (scaleInt (e.x), scaleInt (e.y)),
+                                 e.eventTime.toMilliseconds(), ModifierKeys::getCurrentModifiers());
+}
+
+void MagnifierComponent::mouseDown (const MouseEvent& e)
+{
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseUp (const MouseEvent& e)
 {
-    if (peer != 0)
-        peer->handleMouseUp (e.mods.getRawFlags(), Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseDrag (const MouseEvent& e)
 {
-    if (peer != 0)
-        peer->handleMouseDrag (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseMove (const MouseEvent& e)
 {
-    if (peer != 0)
-        peer->handleMouseMove (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseEnter (const MouseEvent& e)
 {
-    if (peer != 0)
-        peer->handleMouseEnter (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseExit (const MouseEvent& e)
 {
-    if (peer != 0)
-        peer->handleMouseExit (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds());
+    passOnMouseEventToPeer (e);
 }
 
 void MagnifierComponent::mouseWheelMove (const MouseEvent& e, float ix, float iy)
 {
     if (peer != 0)
-        peer->handleMouseWheel (roundToInt (ix * 256.0f),
-                                roundToInt (iy * 256.0f),
-                                e.eventTime.toMilliseconds());
+        peer->handleMouseWheel (Point<int> (scaleInt (e.x), scaleInt (e.y)), e.eventTime.toMilliseconds(),
+                                ix * 256.0f, iy * 256.0f);
     else
         Component::mouseWheelMove (e, ix, iy);
 }

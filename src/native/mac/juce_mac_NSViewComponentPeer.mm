@@ -159,7 +159,7 @@ public:
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
     bool isFullScreen() const;
-    bool contains (int x, int y, bool trueIfInAChildWindow) const;
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
     const BorderSize getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
@@ -186,6 +186,7 @@ public:
     virtual void redirectMouseEnter (NSEvent* ev);
     virtual void redirectMouseExit (NSEvent* ev);
     virtual void redirectMouseWheel (NSEvent* ev);
+    void sendMouseEvent (NSEvent* ev);
 
     bool handleKeyEvent (NSEvent* ev, bool isKeyDown);
     virtual bool redirectKeyDown (NSEvent* ev);
@@ -261,6 +262,10 @@ public:
     NSWindow* window;
     JuceNSView* view;
     bool isSharedWindow, fullScreen, insideDrawRect, usingCoreGraphics, recursiveToFrontCall;
+
+    static ModifierKeys currentModifiers;
+    static ComponentPeer* currentlyFocusedPeer;
+    static VoidArray keysCurrentlyDown;
 };
 
 //==============================================================================
@@ -748,45 +753,37 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-static ComponentPeer* currentlyFocusedPeer = 0;
-static VoidArray keysCurrentlyDown;
+ModifierKeys NSViewComponentPeer::currentModifiers;
+ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = 0;
+VoidArray NSViewComponentPeer::keysCurrentlyDown;
 
+//==============================================================================
 bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
-    if (keysCurrentlyDown.contains ((void*) keyCode))
+    if (NSViewComponentPeer::keysCurrentlyDown.contains ((void*) keyCode))
         return true;
 
     if (keyCode >= 'A' && keyCode <= 'Z'
-        && keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toLowerCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toLowerCase ((tchar) keyCode)))
         return true;
 
     if (keyCode >= 'a' && keyCode <= 'z'
-        && keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toUpperCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toUpperCase ((tchar) keyCode)))
         return true;
 
     return false;
 }
 
-static int currentModifiers = 0;
-
 void NSViewComponentPeer::updateModifiers (NSEvent* e)
 {
-    int m = currentModifiers & ~(ModifierKeys::shiftModifier | ModifierKeys::ctrlModifier
-                                  | ModifierKeys::altModifier | ModifierKeys::commandModifier);
+    int m = 0;
 
-    if (([e modifierFlags] & NSShiftKeyMask) != 0)
-        m |= ModifierKeys::shiftModifier;
+    if (([e modifierFlags] & NSShiftKeyMask) != 0)          m |= ModifierKeys::shiftModifier;
+    if (([e modifierFlags] & NSControlKeyMask) != 0)        m |= ModifierKeys::ctrlModifier;
+    if (([e modifierFlags] & NSAlternateKeyMask) != 0)      m |= ModifierKeys::altModifier;
+    if (([e modifierFlags] & NSCommandKeyMask) != 0)        m |= ModifierKeys::commandModifier;
 
-    if (([e modifierFlags] & NSControlKeyMask) != 0)
-        m |= ModifierKeys::ctrlModifier;
-
-    if (([e modifierFlags] & NSAlternateKeyMask) != 0)
-        m |= ModifierKeys::altModifier;
-
-    if (([e modifierFlags] & NSCommandKeyMask) != 0)
-        m |= ModifierKeys::commandModifier;
-
-    currentModifiers = m;
+    currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (m);
 }
 
 void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
@@ -805,12 +802,12 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
-    return ModifierKeys (currentModifiers);
+    return NSViewComponentPeer::currentModifiers;
 }
 
 void ModifierKeys::updateCurrentModifiers() throw()
 {
-    currentModifierFlags = currentModifiers;
+    currentModifiers = NSViewComponentPeer::currentModifiers;
 }
 
 //==============================================================================
@@ -1106,15 +1103,15 @@ bool NSViewComponentPeer::isFullScreen() const
     return fullScreen;
 }
 
-bool NSViewComponentPeer::contains (int x, int y, bool trueIfInAChildWindow) const
+bool NSViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
 {
-    if (((unsigned int) x) >= (unsigned int) component->getWidth()
-        || ((unsigned int) y) >= (unsigned int) component->getHeight())
+    if (((unsigned int) position.getX()) >= (unsigned int) component->getWidth()
+        || ((unsigned int) position.getY()) >= (unsigned int) component->getHeight())
         return false;
 
     NSPoint p;
-    p.x = (float) x;
-    p.y = (float) y;
+    p.x = (float) position.getX();
+    p.y = (float) position.getY();
 
     NSView* v = [view hitTest: p];
 
@@ -1226,19 +1223,19 @@ void NSViewComponentPeer::viewFocusLoss()
 
 void juce_HandleProcessFocusChange()
 {
-    keysCurrentlyDown.clear();
+    NSViewComponentPeer::keysCurrentlyDown.clear();
 
-    if (NSViewComponentPeer::isValidPeer (currentlyFocusedPeer))
+    if (NSViewComponentPeer::isValidPeer (NSViewComponentPeer::currentlyFocusedPeer))
     {
         if (Process::isForegroundProcess())
         {
-            currentlyFocusedPeer->handleFocusGain();
+            NSViewComponentPeer::currentlyFocusedPeer->handleFocusGain();
 
             ComponentPeer::bringModalComponentToFront();
         }
         else
         {
-            currentlyFocusedPeer->handleFocusLoss();
+            NSViewComponentPeer::currentlyFocusedPeer->handleFocusLoss();
 
             // turn kiosk mode off if we lose focus..
             Desktop::getInstance().setKioskModeComponent (0);
@@ -1355,55 +1352,56 @@ bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
 #endif
 
 //==============================================================================
-void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
+void NSViewComponentPeer::sendMouseEvent (NSEvent* ev)
 {
     updateModifiers (ev);
-    currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
-    handleMouseDown (getMousePos (ev, view), getMouseTime (ev));
+    handleMouseEvent (getMousePos (ev, view), currentModifiers, getMouseTime (ev));
+}
+
+void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
+{
+    currentModifiers = currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
+    sendMouseEvent (ev);
 }
 
 void NSViewComponentPeer::redirectMouseUp (NSEvent* ev)
 {
-    const int oldMods = currentModifiers;
-    updateModifiers (ev);
-    currentModifiers &= ~getModifierForButtonNumber ([ev buttonNumber]);
-    handleMouseUp (oldMods, getMousePos (ev, view), getMouseTime (ev));
+    currentModifiers = currentModifiers.withoutFlags (getModifierForButtonNumber ([ev buttonNumber]));
+    sendMouseEvent (ev);
     showArrowCursorIfNeeded();
 }
 
 void NSViewComponentPeer::redirectMouseDrag (NSEvent* ev)
 {
-    updateModifiers (ev);
-    currentModifiers |= getModifierForButtonNumber ([ev buttonNumber]);
-    handleMouseDrag (getMousePos (ev, view), getMouseTime (ev));
+    currentModifiers = currentModifiers.withFlags (getModifierForButtonNumber ([ev buttonNumber]));
+    sendMouseEvent (ev);
 }
 
 void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
 {
-    updateModifiers (ev);
-    handleMouseMove (getMousePos (ev, view), getMouseTime (ev));
+    currentModifiers = currentModifiers.withoutMouseButtons();
+    sendMouseEvent (ev);
     showArrowCursorIfNeeded();
 }
 
 void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
 {
-    updateModifiers (ev);
-    handleMouseEnter (getMousePos (ev, view), getMouseTime (ev));
+    currentModifiers = currentModifiers.withoutMouseButtons();
+    sendMouseEvent (ev);
 }
 
 void NSViewComponentPeer::redirectMouseExit (NSEvent* ev)
 {
-    updateModifiers (ev);
-    handleMouseExit (getMousePos (ev, view), getMouseTime (ev));
+    currentModifiers = currentModifiers.withoutMouseButtons();
+    sendMouseEvent (ev);
 }
 
 void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
     updateModifiers (ev);
 
-    handleMouseWheel (roundToInt ([ev deltaX] * 10.0f),
-                      roundToInt ([ev deltaY] * 10.0f),
-                      getMouseTime (ev));
+    handleMouseWheel (getMousePos (ev, view), getMouseTime (ev),
+                      [ev deltaX] * 10.0f, [ev deltaY] * 10.0f);
 }
 
 void NSViewComponentPeer::showArrowCursorIfNeeded()

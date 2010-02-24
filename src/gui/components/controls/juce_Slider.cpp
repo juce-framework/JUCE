@@ -1148,35 +1148,32 @@ void Slider::restoreMouseIfHidden()
                                                      : ((sliderBeingDragged == 1) ? getMinValue()
                                                                                   : (double) currentValue.getValue());
 
+        Point<int> mousePos;
+
         if (style == RotaryHorizontalDrag || style == RotaryVerticalDrag)
         {
-            Point<int> mousePos (Desktop::getMousePosition());
-            const Point<int> lastMouseDown (Desktop::getLastMouseDownPosition());
+            mousePos = Desktop::getLastMouseDownPosition();
 
             if (style == RotaryHorizontalDrag)
             {
                 const double posDiff = valueToProportionOfLength (pos) - valueToProportionOfLength (valueOnMouseDown);
-                mousePos = Point<int> (roundToInt (pixelsForFullDragExtent * posDiff + lastMouseDown.getX()),
-                                       lastMouseDown.getY());
+                mousePos += Point<int> (roundToInt (pixelsForFullDragExtent * posDiff), 0);
             }
             else
             {
                 const double posDiff = valueToProportionOfLength (valueOnMouseDown) - valueToProportionOfLength (pos);
-                mousePos = Point<int> (lastMouseDown.getX(),
-                                       roundToInt (pixelsForFullDragExtent * posDiff + lastMouseDown.getY()));
+                mousePos += Point<int> (0, roundToInt (pixelsForFullDragExtent * posDiff));
             }
-
-            Desktop::setMousePosition (mousePos);
         }
         else
         {
             const int pixelPos = (int) getLinearSliderPos (pos);
 
-            const Point<int> pos (isHorizontal() ? pixelPos : (getWidth() / 2),
-                                  isVertical()   ? pixelPos : (getHeight() / 2));
-
-            Desktop::setMousePosition (relativePositionToGlobal (pos));
+            mousePos = relativePositionToGlobal (Point<int> (isHorizontal() ? pixelPos : (getWidth() / 2),
+                                                             isVertical()   ? pixelPos : (getHeight() / 2)));
         }
+
+        Desktop::setMousePosition (mousePos);
     }
 }
 

@@ -27,6 +27,7 @@
 #define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 
 #include "../juce_Component.h"
+#include "../mouse/juce_MouseInputSource.h"
 
 
 //==============================================================================
@@ -100,6 +101,7 @@ private:
     ComponentPeer* peer;
     bool deleteContent;
     Graphics::ResamplingQuality quality;
+    MouseInputSource mouseSource;
 
     //==============================================================================
     void paint (Graphics& g);
@@ -111,6 +113,7 @@ private:
     void mouseExit (const MouseEvent& e);
     void mouseWheelMove (const MouseEvent& e, float, float);
 
+    void passOnMouseEventToPeer (const MouseEvent& e);
     int scaleInt (const int n) const;
 
     MagnifierComponent (const MagnifierComponent&);

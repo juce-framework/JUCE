@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	2
+#define JUCE_BUILDNUMBER	3
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -1385,41 +1385,41 @@ private:
 	void dupeInternalIfMultiplyReferenced() throw();
 };
 
-const String JUCE_PUBLIC_FUNCTION   operator+  (const char* string1,	   const String& string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (const juce_wchar* string1, const String& string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (char string1,		  const String& string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (juce_wchar string1,	const String& string2);
+const String operator+  (const char* string1,	   const String& string2);
+const String operator+  (const juce_wchar* string1, const String& string2);
+const String operator+  (char string1,		  const String& string2);
+const String operator+  (juce_wchar string1,	const String& string2);
 
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const String& string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const char* string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, const juce_wchar* string2);
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, char characterToAppend);
-const String JUCE_PUBLIC_FUNCTION   operator+  (String string1, juce_wchar characterToAppend);
+const String operator+  (String string1, const String& string2);
+const String operator+  (String string1, const char* string2);
+const String operator+  (String string1, const juce_wchar* string2);
+const String operator+  (String string1, char characterToAppend);
+const String operator+  (String string1, juce_wchar characterToAppend);
 
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const char characterToAppend);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const juce_wchar characterToAppend);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const char* const string2);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const juce_wchar* const string2);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const String& string2);
+String& operator<< (String& string1, const char characterToAppend);
+String& operator<< (String& string1, const juce_wchar characterToAppend);
+String& operator<< (String& string1, const char* const string2);
+String& operator<< (String& string1, const juce_wchar* const string2);
+String& operator<< (String& string1, const String& string2);
 
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const short number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const int number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const unsigned int number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const long number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const unsigned long number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const float number);
-String& JUCE_PUBLIC_FUNCTION	operator<< (String& string1, const double number);
+String& operator<< (String& string1, const short number);
+String& operator<< (String& string1, const int number);
+String& operator<< (String& string1, const unsigned int number);
+String& operator<< (String& string1, const long number);
+String& operator<< (String& string1, const unsigned long number);
+String& operator<< (String& string1, const float number);
+String& operator<< (String& string1, const double number);
 
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const String& string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const char* string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator== (const String& string1, const juce_wchar* string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const String& string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const char* string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator!= (const String& string1, const juce_wchar* string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator>  (const String& string1, const String& string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator<  (const String& string1, const String& string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator>= (const String& string1, const String& string2) throw();
-bool JUCE_PUBLIC_FUNCTION  operator<= (const String& string1, const String& string2) throw();
+bool operator== (const String& string1, const String& string2) throw();
+bool operator== (const String& string1, const char* string2) throw();
+bool operator== (const String& string1, const juce_wchar* string2) throw();
+bool operator!= (const String& string1, const String& string2) throw();
+bool operator!= (const String& string1, const char* string2) throw();
+bool operator!= (const String& string1, const juce_wchar* string2) throw();
+bool operator>  (const String& string1, const String& string2) throw();
+bool operator<  (const String& string1, const String& string2) throw();
+bool operator>= (const String& string1, const String& string2) throw();
+bool operator<= (const String& string1, const String& string2) throw();
 
 template <class charT, class traits>
 std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
@@ -1427,7 +1427,7 @@ std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, trait
 	return stream << stringToWrite.toUTF8();
 }
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const String& text);
+OutputStream& operator<< (OutputStream& stream, const String& text);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -2850,13 +2850,13 @@ public:
 	juce_UseDebuggingNewOperator
 };
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const int number);
+OutputStream& operator<< (OutputStream& stream, const int number);
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const double number);
+OutputStream& operator<< (OutputStream& stream, const double number);
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char character);
+OutputStream& operator<< (OutputStream& stream, const char character);
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char* const text);
+OutputStream& operator<< (OutputStream& stream, const char* const text);
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/
@@ -2913,9 +2913,6 @@ public:
 	bool isObject() const throw()	   { return type == objectType; }
 	bool isMethod() const throw()	   { return type == methodType; }
 
-	bool operator== (const var& other) const throw();
-	bool operator!= (const var& other) const throw();
-
 	void writeToStream (OutputStream& output) const;
 
 	static const var readFromStream (InputStream& input);
@@ -2956,6 +2953,8 @@ public:
 
 	juce_UseDebuggingNewOperator
 
+	bool equals (const var& other) const throw();
+
 private:
 	enum Type
 	{
@@ -2981,6 +2980,11 @@ private:
 	Type type;
 	ValueUnion value;
 };
+
+bool operator== (const var& v1, const var& v2) throw();
+bool operator!= (const var& v1, const var& v2) throw();
+bool operator== (const var& v1, const String& v2) throw();
+bool operator!= (const var& v1, const String& v2) throw();
 
 #endif   // __JUCE_VARIANT_JUCEHEADER__
 /*** End of inlined file: juce_Variant.h ***/
@@ -8924,12 +8928,42 @@ private:
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
 #define __JUCE_MOUSELISTENER_JUCEHEADER__
 
+class MouseEvent;
+
+class JUCE_API  MouseListener
+{
+public:
+	virtual ~MouseListener()  {}
+
+	virtual void mouseMove	  (const MouseEvent& e);
+
+	virtual void mouseEnter	 (const MouseEvent& e);
+
+	virtual void mouseExit	  (const MouseEvent& e);
+
+	virtual void mouseDown	  (const MouseEvent& e);
+
+	virtual void mouseDrag	  (const MouseEvent& e);
+
+	virtual void mouseUp		(const MouseEvent& e);
+
+	virtual void mouseDoubleClick   (const MouseEvent& e);
+
+	virtual void mouseWheelMove	 (const MouseEvent& e,
+									 float wheelIncrementX,
+									 float wheelIncrementY);
+};
+
+#endif   // __JUCE_MOUSELISTENER_JUCEHEADER__
+/*** End of inlined file: juce_MouseListener.h ***/
+
 
 /*** Start of inlined file: juce_MouseEvent.h ***/
 #ifndef __JUCE_MOUSEEVENT_JUCEHEADER__
 #define __JUCE_MOUSEEVENT_JUCEHEADER__
 
 class Component;
+class MouseInputSource;
 
 /*** Start of inlined file: juce_ModifierKeys.h ***/
 #ifndef __JUCE_MODIFIERKEYS_JUCEHEADER__
@@ -8994,7 +9028,17 @@ public:
 		allMouseButtonModifiers		 = leftButtonModifier | rightButtonModifier | middleButtonModifier,
 	};
 
+	const ModifierKeys withOnlyMouseButtons() const throw()		 { return ModifierKeys (flags & allMouseButtonModifiers); }
+
+	const ModifierKeys withoutMouseButtons() const throw()		  { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+
+	bool operator== (const ModifierKeys& other) const throw()	   { return flags == other.flags; }
+	bool operator!= (const ModifierKeys& other) const throw()	   { return flags != other.flags; }
+
 	inline int getRawFlags() const throw()				  { return flags; }
+
+	inline const ModifierKeys withoutFlags (int rawFlagsToClear) const throw()  { return ModifierKeys (flags & ~rawFlagsToClear); }
+	inline const ModifierKeys withFlags (int rawFlagsToSet) const throw()	   { return ModifierKeys (flags | rawFlagsToSet); }
 
 	inline bool testFlags (const int flagsToTest) const throw()	 { return (flags & flagsToTest) != 0; }
 
@@ -9008,9 +9052,11 @@ private:
 
 	int flags;
 
-	static int currentModifierFlags;
+	static ModifierKeys currentModifiers;
 
 	friend class ComponentPeer;
+	friend class MouseInputSource;
+	friend class MouseInputSourceInternal;
 	static void updateCurrentModifiers() throw();
 };
 
@@ -9163,7 +9209,8 @@ class JUCE_API  MouseEvent
 {
 public:
 
-	MouseEvent (const Point<int>& position,
+	MouseEvent (MouseInputSource& source,
+				const Point<int>& position,
 				const ModifierKeys& modifiers,
 				Component* const originator,
 				const Time& eventTime,
@@ -9174,17 +9221,19 @@ public:
 
 	~MouseEvent() throw();
 
-	int x;
+	const int x;
 
-	int y;
+	const int y;
 
-	ModifierKeys mods;
+	const ModifierKeys mods;
 
-	Component* eventComponent;
+	Component* const eventComponent;
 
-	Component* originalComponent;
+	Component* const originalComponent;
 
-	Time eventTime;
+	const Time eventTime;
+
+	MouseInputSource& source;
 
 	int getMouseDownX() const throw();
 
@@ -9220,6 +9269,8 @@ public:
 
 	const MouseEvent getEventRelativeTo (Component* const otherComponent) const throw();
 
+	const MouseEvent withNewPosition (const Point<int>& newPosition) const throw();
+
 	static void setDoubleClickTimeout (const int timeOutMilliseconds) throw();
 
 	static int getDoubleClickTimeout() throw();
@@ -9227,41 +9278,16 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Point<int> mouseDownPos;
-	Time mouseDownTime;
-	int numberOfClicks;
-	bool wasMovedSinceMouseDown;
+	const Point<int> mouseDownPos;
+	const Time mouseDownTime;
+	const int numberOfClicks;
+	const bool wasMovedSinceMouseDown;
+
+	MouseEvent& operator= (const MouseEvent&);
 };
 
 #endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
 /*** End of inlined file: juce_MouseEvent.h ***/
-
-class JUCE_API  MouseListener
-{
-public:
-	virtual ~MouseListener()  {}
-
-	virtual void mouseMove	  (const MouseEvent& e);
-
-	virtual void mouseEnter	 (const MouseEvent& e);
-
-	virtual void mouseExit	  (const MouseEvent& e);
-
-	virtual void mouseDown	  (const MouseEvent& e);
-
-	virtual void mouseDrag	  (const MouseEvent& e);
-
-	virtual void mouseUp		(const MouseEvent& e);
-
-	virtual void mouseDoubleClick   (const MouseEvent& e);
-
-	virtual void mouseWheelMove	 (const MouseEvent& e,
-									 float wheelIncrementX,
-									 float wheelIncrementY);
-};
-
-#endif   // __JUCE_MOUSELISTENER_JUCEHEADER__
-/*** End of inlined file: juce_MouseListener.h ***/
 
 
 /*** Start of inlined file: juce_ComponentListener.h ***/
@@ -11966,7 +11992,7 @@ public:
 class ComponentBoundsConstrainer;
 class ComponentDeletionWatcher;
 
-class JUCE_API  ComponentPeer	: public MessageListener
+class JUCE_API  ComponentPeer
 {
 public:
 
@@ -12047,7 +12073,7 @@ public:
 
 	ComponentBoundsConstrainer* getConstrainer() const throw()		  { return constrainer; }
 
-	virtual bool contains (int x, int y, bool trueIfInAChildWindow) const = 0;
+	virtual bool contains (const Point<int>& position, bool trueIfInAChildWindow) const = 0;
 
 	virtual const BorderSize getFrameSize() const = 0;
 
@@ -12089,15 +12115,8 @@ public:
 
 	virtual void performAnyPendingRepaintsNow() = 0;
 
-	void handleMouseEnter (const Point<int>& position, const int64 time);
-	void handleMouseMove  (const Point<int>& position, const int64 time);
-	void handleMouseDown  (const Point<int>& position, const int64 time);
-	void handleMouseDrag  (const Point<int>& position, const int64 time);
-	void handleMouseUp	(const int oldModifiers, const Point<int>& position, const int64 time);
-	void handleMouseExit  (const Point<int>& position, const int64 time);
-	void handleMouseWheel (const int amountX, const int amountY, const int64 time);
-
-	void sendFakeMouseMove() throw();
+	void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
+	void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
 
 	void handleUserClosingWindow();
 
@@ -12133,8 +12152,6 @@ protected:
 
 	static void updateCurrentModifiers() throw();
 
-	void handleMessage (const Message& message);
-
 private:
 
 	Component* lastFocusedComponent;
@@ -12155,6 +12172,8 @@ private:
 /*** End of inlined file: juce_ComponentPeer.h ***/
 
 class LookAndFeel;
+class MouseInputSource;
+class MouseInputSourceInternal;
 
 class JUCE_API  Component  : public MouseListener,
 							 protected MessageListener
@@ -12545,6 +12564,8 @@ private:
 
 	friend class ComponentPeer;
 	friend class InternalDragRepeater;
+	friend class MouseInputSource;
+	friend class MouseInputSourceInternal;
 
 	static Component* currentlyFocusedComponent;
 	static Component* componentUnderMouse;
@@ -12595,13 +12616,13 @@ private:
 		ComponentFlags flags;
 	};
 
-	void internalMouseEnter (int x, int y, const int64 time);
-	void internalMouseExit  (int x, int y, const int64 time);
-	void internalMouseDown  (int x, int y, const int64 time);
-	void internalMouseUp	(const int oldModifiers, int x, int y, const int64 time);
-	void internalMouseDrag  (int x, int y, const int64 time);
-	void internalMouseMove  (int x, int y, const int64 time);
-	void internalMouseWheel (const int intAmountX, const int intAmountY, const int64 time);
+	void internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+	void internalMouseExit  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+	void internalMouseDown  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+	void internalMouseUp	(MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers);
+	void internalMouseDrag  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+	void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+	void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const float amountX, const float amountY);
 	void internalBroughtToFront();
 	void internalFocusGain (const FocusChangeType cause);
 	void internalFocusLoss (const FocusChangeType cause);
@@ -12998,6 +13019,10 @@ private:
 #endif   // __JUCE_TIMER_JUCEHEADER__
 /*** End of inlined file: juce_Timer.h ***/
 
+class MouseInputSource;
+class MouseInputSourceInternal;
+class MouseListener;
+
 class JUCE_API  FocusChangeListener
 {
 public:
@@ -13057,12 +13082,18 @@ public:
 
 	static bool canUseSemiTransparentWindows() throw();
 
+	int getNumMouseInputSources() const throw()			 { return mouseSources.size(); }
+	MouseInputSource* getMouseSource (int index) const throw()	  { return mouseSources [index]; }
+	MouseInputSource& getMainMouseSource() const throw()		{ return *mouseSources.getUnchecked(0); }
+
 private:
 
 	static Desktop* instance;
 
 	friend class Component;
 	friend class ComponentPeer;
+	friend class MouseInputSource;
+	friend class MouseInputSourceInternal;
 	SortedSet <void*> mouseListeners, focusListeners;
 	Array <Component*> desktopComponents;
 
@@ -13073,24 +13104,12 @@ private:
 
 	Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
+	OwnedArray <MouseInputSource> mouseSources;
+
 	Point<int> lastFakeMouseMove;
 	int mouseClickCounter;
-	bool mouseMovedSignificantlySincePressed;
-
-	struct RecentMouseDown
-	{
-		Point<int> position;
-		int64 time;
-		Component* component;
-	};
-
-	RecentMouseDown mouseDowns[4];
 
 	void incrementMouseClickCounter() throw();
-	void registerMouseDown (const Point<int>& position, int64 time, Component* component) throw();
-	void registerMouseDrag (const Point<int>& position) throw();
-	const Time getLastMouseDownTime() const throw();
-	int getNumberOfMultipleClicks() const throw();
 
 	Component* kioskModeComponent;
 	Rectangle<int> kioskComponentOriginalBounds;
@@ -25899,6 +25918,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
+	class ActiveXControlData;
 	friend class ActiveXControlData;
 	void* control;
 	bool mouseEventsAllowed;
@@ -26176,6 +26196,69 @@ private:
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 #define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_MouseInputSource.h ***/
+#ifndef __JUCE_MOUSEEVENT_JUCEHEADER__x
+#define __JUCE_MOUSEEVENT_JUCEHEADER__x
+
+class Component;
+class ComponentPeer;
+class MouseInputSourceInternal;
+
+class JUCE_API  MouseInputSource
+{
+public:
+
+	MouseInputSource (int index, bool isMouseDevice);
+
+	~MouseInputSource();
+
+	bool isMouse() const;
+
+	bool isTouch() const;
+
+	bool canHover() const;
+
+	bool hasMouseWheel() const;
+
+	int getIndex() const;
+
+	bool isDragging() const;
+
+	const Point<int> getScreenPosition() const;
+
+	const ModifierKeys getCurrentModifiers() const;
+
+	Component* getComponentUnderMouse() const;
+
+	void triggerFakeMove() const;
+
+	int getNumberOfMultipleClicks() const throw();
+
+	const Time getLastMouseDownTime() const throw();
+
+	const Point<int> getLastMouseDownPosition() const throw();
+
+	bool hasMouseMovedSignificantlySincePressed() const throw();
+
+	juce_UseDebuggingNewOperator
+
+	void handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys& mods);
+	void handleWheel (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, float x, float y);
+
+private:
+	friend class Desktop;
+	friend class ComponentPeer;
+	friend class MouseInputSourceInternal;
+	ScopedPointer<MouseInputSourceInternal> pimpl;
+
+	MouseInputSource (const MouseInputSource&);
+	MouseInputSource& operator= (const MouseInputSource&);
+};
+
+#endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
+/*** End of inlined file: juce_MouseInputSource.h ***/
+
 class JUCE_API  MagnifierComponent	: public Component
 {
 public:
@@ -26204,6 +26287,7 @@ private:
 	ComponentPeer* peer;
 	bool deleteContent;
 	Graphics::ResamplingQuality quality;
+	MouseInputSource mouseSource;
 
 	void paint (Graphics& g);
 	void mouseDown (const MouseEvent& e);
@@ -26214,6 +26298,7 @@ private:
 	void mouseExit (const MouseEvent& e);
 	void mouseWheelMove (const MouseEvent& e, float, float);
 
+	void passOnMouseEventToPeer (const MouseEvent& e);
 	int scaleInt (const int n) const;
 
 	MagnifierComponent (const MagnifierComponent&);

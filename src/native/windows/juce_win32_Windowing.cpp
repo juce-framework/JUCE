@@ -336,33 +336,6 @@ long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 
 
 //==============================================================================
-static int currentModifiers = 0;
-static int modifiersAtLastCallback = 0;
-
-static void updateKeyModifiers() throw()
-{
-    currentModifiers &= ~(ModifierKeys::shiftModifier
-                          | ModifierKeys::ctrlModifier
-                          | ModifierKeys::altModifier);
-
-    if ((GetKeyState (VK_SHIFT) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::shiftModifier;
-
-    if ((GetKeyState (VK_CONTROL) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::ctrlModifier;
-
-    if ((GetKeyState (VK_MENU) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::altModifier;
-
-    if ((GetKeyState (VK_RMENU) & 0x8000) != 0)
-        currentModifiers &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
-}
-
-void ModifierKeys::updateCurrentModifiers() throw()
-{
-    currentModifierFlags = currentModifiers;
-}
-
 bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
     SHORT k = (SHORT) keyCode;
@@ -387,39 +360,6 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
             k = translatedValues [i + 1];
 
     return (GetKeyState (k) & 0x8000) != 0;
-}
-
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
-{
-    updateKeyModifiers();
-
-    currentModifiers &= ~ModifierKeys::allMouseButtonModifiers;
-
-    if ((GetKeyState (VK_LBUTTON) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::leftButtonModifier;
-
-    if ((GetKeyState (VK_RBUTTON) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::rightButtonModifier;
-
-    if ((GetKeyState (VK_MBUTTON) & 0x8000) != 0)
-        currentModifiers |= ModifierKeys::middleButtonModifier;
-
-    return ModifierKeys (currentModifiers);
-}
-
-static int64 getMouseEventTime() throw()
-{
-    static int64 eventTimeOffset = 0;
-    static DWORD lastMessageTime = 0;
-    const DWORD thisMessageTime = GetMessageTime();
-
-    if (thisMessageTime < lastMessageTime || lastMessageTime == 0)
-    {
-        lastMessageTime = thisMessageTime;
-        eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
-    }
-
-    return eventTimeOffset + thisMessageTime;
 }
 
 static void* callFunctionIfNotLocked (MessageCallbackFunction* callback, void* userData)
@@ -666,17 +606,20 @@ public:
         return wp.showCmd == SW_SHOWMAXIMIZED;
     }
 
-    bool contains (int x, int y, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
+        if (((unsigned int) position.getX()) >= (unsigned int) component->getWidth()
+             || ((unsigned int) position.getY()) >= (unsigned int) component->getHeight())
+            return false;
+
         RECT r;
         GetWindowRect (hwnd, &r);
 
         POINT p;
-        p.x = x + r.left + windowBorder.getLeft();
-        p.y = y + r.top + windowBorder.getTop();
+        p.x = position.getX() + r.left + windowBorder.getLeft();
+        p.y = position.getY() + r.top + windowBorder.getTop();
 
         HWND w = WindowFromPoint (p);
-
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
@@ -850,9 +793,50 @@ public:
     }
 
     //==============================================================================
+    static void updateKeyModifiers() throw()
+    {
+        int keyMods = 0;
+        if (GetKeyState (VK_SHIFT) & 0x8000)    keyMods |= ModifierKeys::shiftModifier;
+        if (GetKeyState (VK_CONTROL) & 0x8000)  keyMods |= ModifierKeys::ctrlModifier;
+        if (GetKeyState (VK_MENU) & 0x8000)     keyMods |= ModifierKeys::altModifier;
+        if (GetKeyState (VK_RMENU) & 0x8000)    keyMods &= ~(ModifierKeys::ctrlModifier | ModifierKeys::altModifier);
+
+        currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+    }
+
+    static void updateModifiersFromWParam (const WPARAM wParam)
+    {
+        int mouseMods = 0;
+        if (wParam & MK_LBUTTON)   mouseMods |= ModifierKeys::leftButtonModifier;
+        if (wParam & MK_RBUTTON)   mouseMods |= ModifierKeys::rightButtonModifier;
+        if (wParam & MK_MBUTTON)   mouseMods |= ModifierKeys::middleButtonModifier;
+
+        currentModifiers = currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+        updateKeyModifiers();
+    }
+
+    static int64 getMouseEventTime()
+    {
+        static int64 eventTimeOffset = 0;
+        static DWORD lastMessageTime = 0;
+        const DWORD thisMessageTime = GetMessageTime();
+
+        if (thisMessageTime < lastMessageTime || lastMessageTime == 0)
+        {
+            lastMessageTime = thisMessageTime;
+            eventTimeOffset = Time::currentTimeMillis() - thisMessageTime;
+        }
+
+        return eventTimeOffset + thisMessageTime;
+    }
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
     bool dontRepaint;
+
+    static ModifierKeys currentModifiers;
+    static ModifierKeys modifiersAtLastCallback;
 
 private:
     HWND hwnd;
@@ -1257,19 +1241,17 @@ private:
     }
 
     //==============================================================================
-    void doMouseMove (const int x, const int y)
+    void doMouseEvent (const Point<int>& position)
     {
-        static uint32 lastMouseTime = 0;
-        // this can be set to throttle the mouse-messages to less than a
-        // certain number per second, as things can get unresponsive
-        // if each drag or move callback has to do a lot of work.
-        const int maxMouseMovesPerSecond = 60;
+        handleMouseEvent (position, currentModifiers, getMouseEventTime());
+    }
 
-        const int64 mouseEventTime = getMouseEventTime();
-
+    void doMouseMove (const Point<int>& position)
+    {
         if (! isMouseOver)
         {
             isMouseOver = true;
+            updateKeyModifiers();
 
             TRACKMOUSEEVENT tme;
             tme.cbSize = sizeof (tme);
@@ -1278,151 +1260,63 @@ private:
             tme.dwHoverTime = 0;
 
             if (! TrackMouseEvent (&tme))
-            {
                 jassertfalse;
-            }
-
-            updateKeyModifiers();
-            handleMouseEnter (Point<int> (x, y), mouseEventTime);
         }
         else if (! isDragging)
         {
-            if (((unsigned int) x) < (unsigned int) component->getWidth()
-                 && ((unsigned int) y) < (unsigned int) component->getHeight())
-            {
-                RECT r;
-                GetWindowRect (hwnd, &r);
-
-                POINT p;
-                p.x = x + r.left + windowBorder.getLeft();
-                p.y = y + r.top + windowBorder.getTop();
-
-                if (WindowFromPoint (p) == hwnd)
-                {
-                    const uint32 now = Time::getMillisecondCounter();
-
-                    if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
-                    {
-                        lastMouseTime = now;
-                        handleMouseMove (Point<int> (x, y), mouseEventTime);
-                    }
-                }
-            }
+            if (! contains (position, false))
+                return;
         }
-        else
-        {
-            const uint32 now = Time::getMillisecondCounter();
 
-            if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
-            {
-                lastMouseTime = now;
-                handleMouseDrag (Point<int> (x, y), mouseEventTime);
-            }
-        }
+        doMouseEvent (position);
     }
 
-    void doMouseDown (const int x, const int y, const WPARAM wParam)
+    void doMouseDown (const Point<int>& position, const WPARAM wParam)
     {
         if (GetCapture() != hwnd)
             SetCapture (hwnd);
 
-        doMouseMove (x, y);
+        doMouseMove (position);
 
-        currentModifiers &= ~ModifierKeys::allMouseButtonModifiers;
-
-        if ((wParam & MK_LBUTTON) != 0)
-            currentModifiers |= ModifierKeys::leftButtonModifier;
-
-        if ((wParam & MK_RBUTTON) != 0)
-            currentModifiers |= ModifierKeys::rightButtonModifier;
-
-        if ((wParam & MK_MBUTTON) != 0)
-            currentModifiers |= ModifierKeys::middleButtonModifier;
-
-        updateKeyModifiers();
+        updateModifiersFromWParam (wParam);
         isDragging = true;
 
-        handleMouseDown (Point<int> (x, y), getMouseEventTime());
+        doMouseEvent (position);
     }
 
-    void doMouseUp (const int x, const int y, const WPARAM wParam)
+    void doMouseUp (const Point<int>& position, const WPARAM wParam)
     {
-        int numButtons = 0;
-
-        if ((wParam & MK_LBUTTON) != 0)
-            ++numButtons;
-
-        if ((wParam & MK_RBUTTON) != 0)
-            ++numButtons;
-
-        if ((wParam & MK_MBUTTON) != 0)
-            ++numButtons;
-
-        const int oldModifiers = currentModifiers;
-
-        // update the currentmodifiers only after the callback, so the callback
-        // knows which button was released.
-        currentModifiers &= ~ModifierKeys::allMouseButtonModifiers;
-
-        if ((wParam & MK_LBUTTON) != 0)
-            currentModifiers |= ModifierKeys::leftButtonModifier;
-
-        if ((wParam & MK_RBUTTON) != 0)
-            currentModifiers |= ModifierKeys::rightButtonModifier;
-
-        if ((wParam & MK_MBUTTON) != 0)
-            currentModifiers |= ModifierKeys::middleButtonModifier;
-
-        updateKeyModifiers();
+        updateModifiersFromWParam (wParam);
         isDragging = false;
 
-        // release the mouse capture if the user's not still got a button down
-        if (numButtons == 0 && hwnd == GetCapture())
+        // release the mouse capture if the user has released all buttons
+        if ((wParam & (MK_LBUTTON | MK_RBUTTON | MK_MBUTTON)) == 0 && hwnd == GetCapture())
             ReleaseCapture();
 
-        handleMouseUp (oldModifiers, Point<int> (x, y), getMouseEventTime());
+        doMouseEvent (position);
     }
 
     void doCaptureChanged()
     {
         if (isDragging)
-        {
-            RECT wr;
-            GetWindowRect (hwnd, &wr);
-
-            const DWORD mp = GetMessagePos();
-
-            doMouseUp (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
-                       GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop(),
-                       (WPARAM) getMouseEventTime());
-        }
+            doMouseUp (getCurrentMousePos(), (WPARAM) 0);
     }
 
     void doMouseExit()
     {
-        if (isMouseOver)
-        {
-            isMouseOver = false;
-            RECT wr;
-            GetWindowRect (hwnd, &wr);
-
-            const DWORD mp = GetMessagePos();
-
-            handleMouseExit (Point<int> (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
-                                         GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop()),
-                             getMouseEventTime());
-        }
+        isMouseOver = false;
+        doMouseEvent (getCurrentMousePos());
     }
 
-    void doMouseWheel (const WPARAM wParam, const bool isVertical)
+    void doMouseWheel (const Point<int>& position, const WPARAM wParam, const bool isVertical)
     {
         updateKeyModifiers();
 
-        const int amount = jlimit (-1000, 1000, (int) (0.75f * (short) HIWORD (wParam)));
+        const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * HIWORD (wParam));
 
-        handleMouseWheel (isVertical ? 0 : amount,
-                          isVertical ? amount : 0,
-                          getMouseEventTime());
+        handleMouseWheel (position, getMouseEventTime(),
+                          isVertical ? 0.0f : amount,
+                          isVertical ? amount : 0.0f);
     }
 
     //==============================================================================
@@ -1592,7 +1486,7 @@ private:
                 key = (int) keyChar;
 
             // avoid sending junk text characters for some control-key combinations
-            if (textChar < ' ' && (currentModifiers & (ModifierKeys::ctrlModifier | ModifierKeys::altModifier)) != 0)
+            if (textChar < ' ' && currentModifiers.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
                 textChar = 0;
         }
 
@@ -1784,6 +1678,21 @@ public:
     }
 
 private:
+    static const Point<int> getPointFromLParam (LPARAM lParam) throw()
+    {
+        return Point<int> (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
+    }
+
+    const Point<int> getCurrentMousePos() throw()
+    {
+        RECT wr;
+        GetWindowRect (hwnd, &wr);
+        const DWORD mp = GetMessagePos();
+
+        return Point<int> (GET_X_LPARAM (mp) - wr.left - windowBorder.getLeft(),
+                           GET_Y_LPARAM (mp) - wr.top - windowBorder.getTop());
+    }
+
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
         if (isValidPeer (this))
@@ -1823,7 +1732,7 @@ private:
 
                 //==============================================================================
                 case WM_MOUSEMOVE:
-                    doMouseMove (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam));
+                    doMouseMove (getPointFromLParam (lParam));
                     return 0;
 
                 case WM_MOUSELEAVE:
@@ -1833,13 +1742,13 @@ private:
                 case WM_LBUTTONDOWN:
                 case WM_MBUTTONDOWN:
                 case WM_RBUTTONDOWN:
-                    doMouseDown (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
+                    doMouseDown (getPointFromLParam (lParam), wParam);
                     return 0;
 
                 case WM_LBUTTONUP:
                 case WM_MBUTTONUP:
                 case WM_RBUTTONUP:
-                    doMouseUp (GET_X_LPARAM (lParam), GET_Y_LPARAM (lParam), wParam);
+                    doMouseUp (getPointFromLParam (lParam), wParam);
                     return 0;
 
                 case WM_CAPTURECHANGED:
@@ -1853,11 +1762,11 @@ private:
                     return 0;
 
                 case 0x020A: /* WM_MOUSEWHEEL */
-                    doMouseWheel (wParam, true);
+                    doMouseWheel (getCurrentMousePos(), wParam, true);
                     return 0;
 
                 case 0x020E: /* WM_MOUSEHWHEEL */
-                    doMouseWheel (wParam, false);
+                    doMouseWheel (getCurrentMousePos(), wParam, false);
                     return 0;
 
                 //==============================================================================
@@ -1967,7 +1876,7 @@ private:
                             component->repaint();
                             handleMovedOrResized();
 
-                            if (! isValidMessageListener())
+                            if (! ComponentPeer::isValidPeer (this))
                                 return 0;
                         }
 
@@ -2042,31 +1951,31 @@ private:
                     }
                     else
                     {
-                        const int oldModifiers = currentModifiers;
-
-                        MouseEvent e (Point<int>(), ModifierKeys::getCurrentModifiersRealtime(), component,
-                                      getMouseEventTime(), Point<int>(), getMouseEventTime(), 1, false);
+                        ModifierKeys eventMods (ModifierKeys::getCurrentModifiersRealtime());
 
                         if (lParam == WM_LBUTTONDOWN || lParam == WM_LBUTTONDBLCLK)
-                            e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::leftButtonModifier);
+                            eventMods = eventMods.withFlags (ModifierKeys::leftButtonModifier);
                         else if (lParam == WM_RBUTTONDOWN || lParam == WM_RBUTTONDBLCLK)
-                            e.mods = ModifierKeys (e.mods.getRawFlags() | ModifierKeys::rightButtonModifier);
+                            eventMods = eventMods.withFlags (ModifierKeys::rightButtonModifier);
+                        else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
+                            eventMods = eventMods.withoutMouseButtons();
+
+                        const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
+                                            Point<int>(), eventMods, component, getMouseEventTime(),
+                                            Point<int>(), getMouseEventTime(), 1, false);
 
                         if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)
                         {
                             SetFocus (hwnd);
                             SetForegroundWindow (hwnd);
-
                             component->mouseDown (e);
                         }
                         else if (lParam == WM_LBUTTONUP || lParam == WM_RBUTTONUP)
                         {
-                            e.mods = ModifierKeys (oldModifiers);
                             component->mouseUp (e);
                         }
                         else if (lParam == WM_LBUTTONDBLCLK || lParam == WM_LBUTTONDBLCLK)
                         {
-                            e.mods = ModifierKeys (oldModifiers);
                             component->mouseDoubleClick (e);
                         }
                         else if (lParam == WM_MOUSEMOVE)
@@ -2216,12 +2125,37 @@ private:
     Win32ComponentPeer& operator= (const Win32ComponentPeer&);
 };
 
+ModifierKeys Win32ComponentPeer::currentModifiers;
+ModifierKeys Win32ComponentPeer::modifiersAtLastCallback;
+
 ComponentPeer* Component::createNewPeer (int styleFlags, void* /*nativeWindowToAttachTo*/)
 {
     return new Win32ComponentPeer (this, styleFlags);
 }
 
 juce_ImplementSingleton_SingleThreaded (Win32ComponentPeer::WindowClassHolder);
+
+
+//==============================================================================
+void ModifierKeys::updateCurrentModifiers() throw()
+{
+    currentModifiers = Win32ComponentPeer::currentModifiers;
+}
+
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+{
+    Win32ComponentPeer::updateKeyModifiers();
+
+    int keyMods = 0;
+    if ((GetKeyState (VK_LBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::leftButtonModifier;
+    if ((GetKeyState (VK_RBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::rightButtonModifier;
+    if ((GetKeyState (VK_MBUTTON) & 0x8000) != 0)   keyMods |= ModifierKeys::middleButtonModifier;
+
+    Win32ComponentPeer::currentModifiers
+        = Win32ComponentPeer::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+
+    return Win32ComponentPeer::currentModifiers;
+}
 
 //==============================================================================
 void SystemTrayIconComponent::setIconImage (const Image& newImage)

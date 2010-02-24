@@ -116,6 +116,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    class ActiveXControlData;
     friend class ActiveXControlData;
     void* control;
     bool mouseEventsAllowed;

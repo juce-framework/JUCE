@@ -27,223 +27,272 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
+namespace ActiveXHelpers
+{
+    class JuceIStorage   : public IStorage
+    {
+        int refCount;
+
+    public:
+        JuceIStorage() : refCount (1) {}
+
+        virtual ~JuceIStorage()
+        {
+            jassert (refCount == 0);
+        }
+
+        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        {
+            if (id == IID_IUnknown || id == IID_IStorage)
+            {
+                AddRef();
+                *result = this;
+                return S_OK;
+            }
+
+            *result = 0;
+            return E_NOINTERFACE;
+        }
+
+        ULONG __stdcall AddRef()    { return ++refCount; }
+        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+
+        HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
+        HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
+        HRESULT __stdcall CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)         { return E_NOTIMPL; }
+        HRESULT __stdcall OpenStorage (const WCHAR*, IStorage*, DWORD, SNB, DWORD, IStorage**)  { return E_NOTIMPL; }
+        HRESULT __stdcall CopyTo (DWORD, IID const*, SNB, IStorage*)                            { return E_NOTIMPL; }
+        HRESULT __stdcall MoveElementTo (const OLECHAR*,IStorage*, const OLECHAR*, DWORD)       { return E_NOTIMPL; }
+        HRESULT __stdcall Commit (DWORD)                                                        { return E_NOTIMPL; }
+        HRESULT __stdcall Revert()                                                              { return E_NOTIMPL; }
+        HRESULT __stdcall EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)                    { return E_NOTIMPL; }
+        HRESULT __stdcall DestroyElement (const OLECHAR*)                                       { return E_NOTIMPL; }
+        HRESULT __stdcall RenameElement (const WCHAR*, const WCHAR*)                            { return E_NOTIMPL; }
+        HRESULT __stdcall SetElementTimes (const WCHAR*, FILETIME const*, FILETIME const*, FILETIME const*)    { return E_NOTIMPL; }
+        HRESULT __stdcall SetClass (REFCLSID)                                                   { return S_OK; }
+        HRESULT __stdcall SetStateBits (DWORD, DWORD)                                           { return E_NOTIMPL; }
+        HRESULT __stdcall Stat (STATSTG*, DWORD)                                                { return E_NOTIMPL; }
+
+        juce_UseDebuggingNewOperator
+    };
+
+
+    class JuceOleInPlaceFrame   : public IOleInPlaceFrame
+    {
+        int refCount;
+        HWND window;
+
+    public:
+        JuceOleInPlaceFrame (HWND window_)
+            : refCount (1),
+              window (window_)
+        {
+        }
+
+        virtual ~JuceOleInPlaceFrame()
+        {
+            jassert (refCount == 0);
+        }
+
+        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        {
+            if (id == IID_IUnknown || id == IID_IOleInPlaceFrame)
+            {
+                AddRef();
+                *result = this;
+                return S_OK;
+            }
+
+            *result = 0;
+            return E_NOINTERFACE;
+        }
+
+        ULONG __stdcall AddRef()    { return ++refCount; }
+        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+
+        HRESULT __stdcall GetWindow (HWND* lphwnd)                      { *lphwnd = window; return S_OK; }
+        HRESULT __stdcall ContextSensitiveHelp (BOOL)                   { return E_NOTIMPL; }
+        HRESULT __stdcall GetBorder (LPRECT)                            { return E_NOTIMPL; }
+        HRESULT __stdcall RequestBorderSpace (LPCBORDERWIDTHS)          { return E_NOTIMPL; }
+        HRESULT __stdcall SetBorderSpace (LPCBORDERWIDTHS)              { return E_NOTIMPL; }
+        HRESULT __stdcall SetActiveObject (IOleInPlaceActiveObject*, LPCOLESTR)     { return S_OK; }
+        HRESULT __stdcall InsertMenus (HMENU, LPOLEMENUGROUPWIDTHS)     { return E_NOTIMPL; }
+        HRESULT __stdcall SetMenu (HMENU, HOLEMENU, HWND)               { return S_OK; }
+        HRESULT __stdcall RemoveMenus (HMENU)                           { return E_NOTIMPL; }
+        HRESULT __stdcall SetStatusText (LPCOLESTR)                     { return S_OK; }
+        HRESULT __stdcall EnableModeless (BOOL)                         { return S_OK; }
+        HRESULT __stdcall TranslateAccelerator(LPMSG, WORD)             { return E_NOTIMPL; }
+
+        juce_UseDebuggingNewOperator
+    };
+
+
+    class JuceIOleInPlaceSite   : public IOleInPlaceSite
+    {
+        int refCount;
+        HWND window;
+        JuceOleInPlaceFrame* frame;
+
+    public:
+        JuceIOleInPlaceSite (HWND window_)
+            : refCount (1),
+              window (window_)
+        {
+            frame = new JuceOleInPlaceFrame (window);
+        }
+
+        virtual ~JuceIOleInPlaceSite()
+        {
+            jassert (refCount == 0);
+            frame->Release();
+        }
+
+        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        {
+            if (id == IID_IUnknown || id == IID_IOleInPlaceSite)
+            {
+                AddRef();
+                *result = this;
+                return S_OK;
+            }
+
+            *result = 0;
+            return E_NOINTERFACE;
+        }
+
+        ULONG __stdcall AddRef()    { return ++refCount; }
+        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+
+        HRESULT __stdcall GetWindow (HWND* lphwnd)      { *lphwnd = window; return S_OK; }
+        HRESULT __stdcall ContextSensitiveHelp (BOOL)   { return E_NOTIMPL; }
+        HRESULT __stdcall CanInPlaceActivate()          { return S_OK; }
+        HRESULT __stdcall OnInPlaceActivate()           { return S_OK; }
+        HRESULT __stdcall OnUIActivate()                { return S_OK; }
+
+        HRESULT __stdcall GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
+        {
+            // frame->AddRef();   // MS docs are unclear about whether this is needed, but it seems to lead to a memory leak..
+            *lplpFrame = frame;
+            *lplpDoc = 0;
+            lpFrameInfo->fMDIApp = FALSE;
+            lpFrameInfo->hwndFrame = window;
+            lpFrameInfo->haccel = 0;
+            lpFrameInfo->cAccelEntries = 0;
+            return S_OK;
+        }
+
+        HRESULT __stdcall Scroll (SIZE)                 { return E_NOTIMPL; }
+        HRESULT __stdcall OnUIDeactivate (BOOL)         { return S_OK; }
+        HRESULT __stdcall OnInPlaceDeactivate()         { return S_OK; }
+        HRESULT __stdcall DiscardUndoState()            { return E_NOTIMPL; }
+        HRESULT __stdcall DeactivateAndUndo()           { return E_NOTIMPL; }
+        HRESULT __stdcall OnPosRectChange (LPCRECT)     { return S_OK; }
+
+        juce_UseDebuggingNewOperator
+    };
+
+
+    class JuceIOleClientSite  : public IOleClientSite
+    {
+        int refCount;
+        JuceIOleInPlaceSite* inplaceSite;
+
+    public:
+        JuceIOleClientSite (HWND window)
+            : refCount (1)
+        {
+            inplaceSite = new JuceIOleInPlaceSite (window);
+        }
+
+        virtual ~JuceIOleClientSite()
+        {
+            jassert (refCount == 0);
+            inplaceSite->Release();
+        }
+
+        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        {
+            if (id == IID_IUnknown || id == IID_IOleClientSite)
+            {
+                AddRef();
+                *result = this;
+                return S_OK;
+            }
+            else if (id == IID_IOleInPlaceSite)
+            {
+                inplaceSite->AddRef();
+                *result = inplaceSite;
+                return S_OK;
+            }
+
+            *result = 0;
+            return E_NOINTERFACE;
+        }
+
+        ULONG __stdcall AddRef()    { return ++refCount; }
+        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+
+        HRESULT __stdcall SaveObject()                                  { return E_NOTIMPL; }
+        HRESULT __stdcall GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }
+        HRESULT __stdcall GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = 0; return E_NOINTERFACE; }
+        HRESULT __stdcall ShowObject()                                  { return S_OK; }
+        HRESULT __stdcall OnShowWindow (BOOL)                           { return E_NOTIMPL; }
+        HRESULT __stdcall RequestNewObjectLayout()                      { return E_NOTIMPL; }
+
+        juce_UseDebuggingNewOperator
+    };
+
+    //==============================================================================
+    static VoidArray activeXComps;
+
+    static HWND getHWND (const ActiveXControlComponent* const component)
+    {
+        HWND hwnd = 0;
+
+        const IID iid = IID_IOleWindow;
+        IOleWindow* const window = (IOleWindow*) component->queryInterface (&iid);
+
+        if (window != 0)
+        {
+            window->GetWindow (&hwnd);
+            window->Release();
+        }
+
+        return hwnd;
+    }
+
+    static void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, UINT message, LPARAM lParam)
+    {
+        RECT activeXRect, peerRect;
+        GetWindowRect (hwnd, &activeXRect);
+        GetWindowRect ((HWND) peer->getNativeHandle(), &peerRect);
+
+        const Point<int> mousePos (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left,
+                                   GET_Y_LPARAM (lParam) + activeXRect.top - peerRect.top);
+        const int64 mouseEventTime = Win32ComponentPeer::getMouseEventTime();
+
+        ModifierKeys::getCurrentModifiersRealtime(); // to update the mouse button flags
+
+        switch (message)
+        {
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDOWN:
+        case WM_MBUTTONDOWN:
+        case WM_RBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MBUTTONUP:
+        case WM_RBUTTONUP:
+            peer->handleMouseEvent (mousePos, Win32ComponentPeer::currentModifiers, mouseEventTime);
+            break;
+
+        default:
+            break;
+        }
+    }
+}
 
 //==============================================================================
-class JuceIStorage   : public IStorage
-{
-    int refCount;
-
-public:
-    JuceIStorage() : refCount (1) {}
-
-    virtual ~JuceIStorage()
-    {
-        jassert (refCount == 0);
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IStorage)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
-
-    HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
-    HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
-    HRESULT __stdcall CreateStorage (const WCHAR*, DWORD, DWORD, DWORD, IStorage**)         { return E_NOTIMPL; }
-    HRESULT __stdcall OpenStorage (const WCHAR*, IStorage*, DWORD, SNB, DWORD, IStorage**)  { return E_NOTIMPL; }
-    HRESULT __stdcall CopyTo (DWORD, IID const*, SNB, IStorage*)                            { return E_NOTIMPL; }
-    HRESULT __stdcall MoveElementTo (const OLECHAR*,IStorage*, const OLECHAR*, DWORD)       { return E_NOTIMPL; }
-    HRESULT __stdcall Commit (DWORD)                                                        { return E_NOTIMPL; }
-    HRESULT __stdcall Revert()                                                              { return E_NOTIMPL; }
-    HRESULT __stdcall EnumElements (DWORD, void*, DWORD, IEnumSTATSTG**)                    { return E_NOTIMPL; }
-    HRESULT __stdcall DestroyElement (const OLECHAR*)                                       { return E_NOTIMPL; }
-    HRESULT __stdcall RenameElement (const WCHAR*, const WCHAR*)                            { return E_NOTIMPL; }
-    HRESULT __stdcall SetElementTimes (const WCHAR*, FILETIME const*, FILETIME const*, FILETIME const*)    { return E_NOTIMPL; }
-    HRESULT __stdcall SetClass (REFCLSID)                                                   { return S_OK; }
-    HRESULT __stdcall SetStateBits (DWORD, DWORD)                                           { return E_NOTIMPL; }
-    HRESULT __stdcall Stat (STATSTG*, DWORD)                                                { return E_NOTIMPL; }
-
-    juce_UseDebuggingNewOperator
-};
-
-
-class JuceOleInPlaceFrame   : public IOleInPlaceFrame
-{
-    int refCount;
-    HWND window;
-
-public:
-    JuceOleInPlaceFrame (HWND window_)
-        : refCount (1),
-          window (window_)
-    {
-    }
-
-    virtual ~JuceOleInPlaceFrame()
-    {
-        jassert (refCount == 0);
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IOleInPlaceFrame)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
-
-    HRESULT __stdcall GetWindow (HWND* lphwnd)                      { *lphwnd = window; return S_OK; }
-    HRESULT __stdcall ContextSensitiveHelp (BOOL)                   { return E_NOTIMPL; }
-    HRESULT __stdcall GetBorder (LPRECT)                            { return E_NOTIMPL; }
-    HRESULT __stdcall RequestBorderSpace (LPCBORDERWIDTHS)          { return E_NOTIMPL; }
-    HRESULT __stdcall SetBorderSpace (LPCBORDERWIDTHS)              { return E_NOTIMPL; }
-    HRESULT __stdcall SetActiveObject (IOleInPlaceActiveObject*, LPCOLESTR)     { return S_OK; }
-    HRESULT __stdcall InsertMenus (HMENU, LPOLEMENUGROUPWIDTHS)     { return E_NOTIMPL; }
-    HRESULT __stdcall SetMenu (HMENU, HOLEMENU, HWND)               { return S_OK; }
-    HRESULT __stdcall RemoveMenus (HMENU)                           { return E_NOTIMPL; }
-    HRESULT __stdcall SetStatusText (LPCOLESTR)                     { return S_OK; }
-    HRESULT __stdcall EnableModeless (BOOL)                         { return S_OK; }
-    HRESULT __stdcall TranslateAccelerator(LPMSG, WORD)             { return E_NOTIMPL; }
-
-    juce_UseDebuggingNewOperator
-};
-
-
-class JuceIOleInPlaceSite   : public IOleInPlaceSite
-{
-    int refCount;
-    HWND window;
-    JuceOleInPlaceFrame* frame;
-
-public:
-    JuceIOleInPlaceSite (HWND window_)
-        : refCount (1),
-          window (window_)
-    {
-        frame = new JuceOleInPlaceFrame (window);
-    }
-
-    virtual ~JuceIOleInPlaceSite()
-    {
-        jassert (refCount == 0);
-        frame->Release();
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IOleInPlaceSite)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
-
-    HRESULT __stdcall GetWindow (HWND* lphwnd)      { *lphwnd = window; return S_OK; }
-    HRESULT __stdcall ContextSensitiveHelp (BOOL)   { return E_NOTIMPL; }
-    HRESULT __stdcall CanInPlaceActivate()          { return S_OK; }
-    HRESULT __stdcall OnInPlaceActivate()           { return S_OK; }
-    HRESULT __stdcall OnUIActivate()                { return S_OK; }
-
-    HRESULT __stdcall GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
-    {
-        // frame->AddRef();   // MS docs are unclear about whether this is needed, but it seems to lead to a memory leak..
-        *lplpFrame = frame;
-        *lplpDoc = 0;
-        lpFrameInfo->fMDIApp = FALSE;
-        lpFrameInfo->hwndFrame = window;
-        lpFrameInfo->haccel = 0;
-        lpFrameInfo->cAccelEntries = 0;
-        return S_OK;
-    }
-
-    HRESULT __stdcall Scroll (SIZE)                 { return E_NOTIMPL; }
-    HRESULT __stdcall OnUIDeactivate (BOOL)         { return S_OK; }
-    HRESULT __stdcall OnInPlaceDeactivate()         { return S_OK; }
-    HRESULT __stdcall DiscardUndoState()            { return E_NOTIMPL; }
-    HRESULT __stdcall DeactivateAndUndo()           { return E_NOTIMPL; }
-    HRESULT __stdcall OnPosRectChange (LPCRECT)     { return S_OK; }
-
-    juce_UseDebuggingNewOperator
-};
-
-
-class JuceIOleClientSite  : public IOleClientSite
-{
-    int refCount;
-    JuceIOleInPlaceSite* inplaceSite;
-
-public:
-    JuceIOleClientSite (HWND window)
-        : refCount (1)
-    {
-        inplaceSite = new JuceIOleInPlaceSite (window);
-    }
-
-    virtual ~JuceIOleClientSite()
-    {
-        jassert (refCount == 0);
-        inplaceSite->Release();
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IOleClientSite)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-        else if (id == IID_IOleInPlaceSite)
-        {
-            inplaceSite->AddRef();
-            *result = inplaceSite;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
-
-    HRESULT __stdcall SaveObject()                                  { return E_NOTIMPL; }
-    HRESULT __stdcall GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }
-    HRESULT __stdcall GetContainer (LPOLECONTAINER* ppContainer)    { *ppContainer = 0; return E_NOINTERFACE; }
-    HRESULT __stdcall ShowObject()                                  { return S_OK; }
-    HRESULT __stdcall OnShowWindow (BOOL)                           { return E_NOTIMPL; }
-    HRESULT __stdcall RequestNewObjectLayout()                      { return E_NOTIMPL; }
-
-    juce_UseDebuggingNewOperator
-};
-
-//==============================================================================
-class ActiveXControlData  : public ComponentMovementWatcher
+class ActiveXControlComponent::ActiveXControlData  : public ComponentMovementWatcher
 {
     ActiveXControlComponent* const owner;
     bool wasShowing;
@@ -261,8 +310,8 @@ public:
           owner (owner_),
           wasShowing (owner_ != 0 && owner_->isShowing()),
           controlHWND (0),
-          storage (new JuceIStorage()),
-          clientSite (new JuceIOleClientSite (hwnd)),
+          storage (new ActiveXHelpers::JuceIStorage()),
+          clientSite (new ActiveXHelpers::JuceIOleClientSite (hwnd)),
           control (0)
     {
     }
@@ -315,124 +364,66 @@ public:
         return ((ActiveXControlData*) ax->control) != 0
                  && ((ActiveXControlData*) ax->control)->controlHWND == hwnd;
     }
-};
 
-//==============================================================================
-static VoidArray activeXComps;
-
-static HWND getHWND (const ActiveXControlComponent* const component)
-{
-    HWND hwnd = 0;
-
-    const IID iid = IID_IOleWindow;
-    IOleWindow* const window = (IOleWindow*) component->queryInterface (&iid);
-
-    if (window != 0)
+    // intercepts events going to an activeX control, so we can sneakily use the mouse events
+    static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
-        window->GetWindow (&hwnd);
-        window->Release();
-    }
-
-    return hwnd;
-}
-
-static void offerActiveXMouseEventToPeer (ComponentPeer* const peer, HWND hwnd, UINT message, LPARAM lParam)
-{
-    RECT activeXRect, peerRect;
-    GetWindowRect (hwnd, &activeXRect);
-    GetWindowRect ((HWND) peer->getNativeHandle(), &peerRect);
-
-    const Point<int> mousePos (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left,
-                               GET_Y_LPARAM (lParam) + activeXRect.top - peerRect.top);
-    const int64 mouseEventTime = getMouseEventTime();
-
-    const int oldModifiers = currentModifiers;
-    ModifierKeys::getCurrentModifiersRealtime(); // to update the mouse button flags
-
-    switch (message)
-    {
-    case WM_MOUSEMOVE:
-        if (ModifierKeys (currentModifiers).isAnyMouseButtonDown())
-            peer->handleMouseDrag (mousePos, mouseEventTime);
-        else
-            peer->handleMouseMove (mousePos, mouseEventTime);
-        break;
-
-    case WM_LBUTTONDOWN:
-    case WM_MBUTTONDOWN:
-    case WM_RBUTTONDOWN:
-        peer->handleMouseDown (mousePos, mouseEventTime);
-        break;
-
-    case WM_LBUTTONUP:
-    case WM_MBUTTONUP:
-    case WM_RBUTTONUP:
-        peer->handleMouseUp (oldModifiers, mousePos, mouseEventTime);
-        break;
-
-    default:
-        break;
-    }
-}
-
-// intercepts events going to an activeX control, so we can sneakily use the mouse events
-static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    for (int i = activeXComps.size(); --i >= 0;)
-    {
-        const ActiveXControlComponent* const ax = (const ActiveXControlComponent*) activeXComps.getUnchecked(i);
-
-        if (ActiveXControlData::doesWindowMatch (ax, hwnd))
+        for (int i = ActiveXHelpers::activeXComps.size(); --i >= 0;)
         {
-            switch (message)
+            const ActiveXControlComponent* const ax = (const ActiveXControlComponent*) ActiveXHelpers::activeXComps.getUnchecked(i);
+
+            if (doesWindowMatch (ax, hwnd))
             {
-            case WM_MOUSEMOVE:
-            case WM_LBUTTONDOWN:
-            case WM_MBUTTONDOWN:
-            case WM_RBUTTONDOWN:
-            case WM_LBUTTONUP:
-            case WM_MBUTTONUP:
-            case WM_RBUTTONUP:
-            case WM_LBUTTONDBLCLK:
-            case WM_MBUTTONDBLCLK:
-            case WM_RBUTTONDBLCLK:
-                if (ax->isShowing())
+                switch (message)
                 {
-                    ComponentPeer* const peer = ax->getPeer();
-
-                    if (peer != 0)
+                case WM_MOUSEMOVE:
+                case WM_LBUTTONDOWN:
+                case WM_MBUTTONDOWN:
+                case WM_RBUTTONDOWN:
+                case WM_LBUTTONUP:
+                case WM_MBUTTONUP:
+                case WM_RBUTTONUP:
+                case WM_LBUTTONDBLCLK:
+                case WM_MBUTTONDBLCLK:
+                case WM_RBUTTONDBLCLK:
+                    if (ax->isShowing())
                     {
-                        offerActiveXMouseEventToPeer (peer, hwnd, message, lParam);
+                        ComponentPeer* const peer = ax->getPeer();
 
-                        if (! ax->areMouseEventsAllowed())
-                            return 0;
+                        if (peer != 0)
+                        {
+                            ActiveXHelpers::offerActiveXMouseEventToPeer (peer, hwnd, message, lParam);
+
+                            if (! ax->areMouseEventsAllowed())
+                                return 0;
+                        }
                     }
+                    break;
+
+                default:
+                    break;
                 }
-                break;
 
-            default:
-                break;
+                return CallWindowProc ((WNDPROC) (ax->originalWndProc), hwnd, message, wParam, lParam);
             }
-
-            return CallWindowProc ((WNDPROC) (ax->originalWndProc), hwnd, message, wParam, lParam);
         }
-    }
 
-    return DefWindowProc (hwnd, message, wParam, lParam);
-}
+        return DefWindowProc (hwnd, message, wParam, lParam);
+    }
+};
 
 ActiveXControlComponent::ActiveXControlComponent()
     : originalWndProc (0),
       control (0),
       mouseEventsAllowed (true)
 {
-    activeXComps.add (this);
+    ActiveXHelpers::activeXComps.add (this);
 }
 
 ActiveXControlComponent::~ActiveXControlComponent()
 {
     deleteControl();
-    activeXComps.removeValue (this);
+    ActiveXHelpers::activeXComps.removeValue (this);
 }
 
 void ActiveXControlComponent::paint (Graphics& g)
@@ -476,12 +467,12 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                     control = info.release();
                     setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), getWidth(), getHeight()));
 
-                    ((ActiveXControlData*) control)->controlHWND = getHWND (this);
+                    ((ActiveXControlData*) control)->controlHWND = ActiveXHelpers::getHWND (this);
 
                     if (((ActiveXControlData*) control)->controlHWND != 0)
                     {
                         originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC);
-                        SetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC, (LONG_PTR) activeXHookWndProc);
+                        SetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC, (LONG_PTR) ActiveXControlData::activeXHookWndProc);
                     }
 
                     return true;

@@ -230,7 +230,7 @@ public:
             start = roundToInt ((y - yTerm) * grad);
     }
 
-    forcedinline const PixelARGB getPixel (const int x) const throw()
+    inline const PixelARGB getPixel (const int x) const throw()
     {
         return vertical ? linePix
                         : lookupTable [jlimit (0, numEntries, (x * scale - start) >> (int) numScaleBits)];
@@ -274,7 +274,7 @@ public:
         dy *= dy;
     }
 
-    forcedinline const PixelARGB getPixel (const int px) const throw()
+    inline const PixelARGB getPixel (const int px) const throw()
     {
         double x = px - gx1;
         x *= x;
@@ -312,7 +312,7 @@ public:
         lineYM11 = inverseTransform.mat11 * y + inverseTransform.mat12 - gy1;
     }
 
-    forcedinline const PixelARGB getPixel (const int px) const throw()
+    inline const PixelARGB getPixel (const int px) const throw()
     {
         double x = px;
         const double y = tM10 * x + lineYM11;

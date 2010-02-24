@@ -32,7 +32,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MouseEvent::MouseEvent (const Point<int>& position,
+MouseEvent::MouseEvent (MouseInputSource& source_,
+                        const Point<int>& position,
                         const ModifierKeys& mods_,
                         Component* const originator,
                         const Time& eventTime_,
@@ -46,6 +47,7 @@ MouseEvent::MouseEvent (const Point<int>& position,
       eventComponent (originator),
       originalComponent (originator),
       eventTime (eventTime_),
+      source (source_),
       mouseDownPos (mouseDownPos_),
       mouseDownTime (mouseDownTime_),
       numberOfClicks (numberOfClicks_),
@@ -55,6 +57,28 @@ MouseEvent::MouseEvent (const Point<int>& position,
 
 MouseEvent::~MouseEvent() throw()
 {
+}
+
+//==============================================================================
+const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const throw()
+{
+    if (otherComponent == 0)
+    {
+        jassertfalse
+        return *this;
+    }
+
+    return MouseEvent (source, eventComponent->relativePositionToOtherComponent (otherComponent, getPosition()),
+                       mods, originalComponent, eventTime,
+                       eventComponent->relativePositionToOtherComponent (otherComponent, mouseDownPos),
+                       mouseDownTime, numberOfClicks, wasMovedSinceMouseDown);
+}
+
+const MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const throw()
+{
+    return MouseEvent (source, newPosition, mods, originalComponent,
+                       eventTime, mouseDownPos, mouseDownTime,
+                       numberOfClicks, wasMovedSinceMouseDown);
 }
 
 //==============================================================================
@@ -90,8 +114,7 @@ int MouseEvent::getDistanceFromDragStartY() const throw()
 
 int MouseEvent::getDistanceFromDragStart() const throw()
 {
-    return roundToInt (juce_hypot (getDistanceFromDragStartX(),
-                                   getDistanceFromDragStartY()));
+    return mouseDownPos.getDistanceFrom (getPosition());
 }
 
 int MouseEvent::getLengthOfMousePress() const throw()
@@ -136,25 +159,6 @@ int MouseEvent::getMouseDownScreenY() const
 const Point<int> MouseEvent::getMouseDownScreenPosition() const
 {
     return eventComponent->relativePositionToGlobal (mouseDownPos);
-}
-
-//==============================================================================
-const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const throw()
-{
-    if (otherComponent == 0)
-    {
-        jassertfalse
-        return *this;
-    }
-
-    return MouseEvent (eventComponent->relativePositionToOtherComponent (otherComponent, Point<int> (x, y)),
-                       mods,
-                       originalComponent,
-                       eventTime,
-                       eventComponent->relativePositionToOtherComponent (otherComponent, mouseDownPos),
-                       mouseDownTime,
-                       numberOfClicks,
-                       wasMovedSinceMouseDown);
 }
 
 //==============================================================================

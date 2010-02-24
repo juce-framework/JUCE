@@ -34,6 +34,8 @@
 		8473E64B11249FD800D74E02 /* juce_TextInputTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E64911249FD800D74E02 /* juce_TextInputTarget.h */; };
 		8473E6531125974600D74E02 /* juce_Range.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E6521125974600D74E02 /* juce_Range.h */; };
 		8473E6541125974600D74E02 /* juce_Range.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E6521125974600D74E02 /* juce_Range.h */; };
+		84751E5B1132EE9E00640F9A /* juce_MouseInputSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84751E591132EE9E00640F9A /* juce_MouseInputSource.cpp */; };
+		84751E5C1132EE9E00640F9A /* juce_MouseInputSource.h in Headers */ = {isa = PBXBuildFile; fileRef = 84751E5A1132EE9E00640F9A /* juce_MouseInputSource.h */; };
 		84816E5710809D07008FEC33 /* juce_iphone_Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */; };
 		84816E5910809D07008FEC33 /* juce_iphone_MessageManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */; };
 		84816E5A10809D07008FEC33 /* juce_iphone_MiscUtilities.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84816E5410809D07008FEC33 /* juce_iphone_MiscUtilities.mm */; };
@@ -1243,6 +1245,8 @@
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
 		8473E64911249FD800D74E02 /* juce_TextInputTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_TextInputTarget.h; sourceTree = "<group>"; };
 		8473E6521125974600D74E02 /* juce_Range.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_Range.h; sourceTree = "<group>"; };
+		84751E591132EE9E00640F9A /* juce_MouseInputSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_MouseInputSource.cpp; sourceTree = "<group>"; };
+		84751E5A1132EE9E00640F9A /* juce_MouseInputSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_MouseInputSource.h; sourceTree = "<group>"; };
 		84816E3510809B4F008FEC33 /* libjucedebug.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libjucedebug.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		84816E5110809D07008FEC33 /* juce_iphone_Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_iphone_Audio.cpp; sourceTree = "<group>"; };
 		84816E5310809D07008FEC33 /* juce_iphone_MessageManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = juce_iphone_MessageManager.mm; sourceTree = "<group>"; };
@@ -2674,6 +2678,8 @@
 				84F1EAD810403709006A1807 /* juce_MouseEvent.cpp */,
 				84F1EAD910403709006A1807 /* juce_MouseHoverDetector.h */,
 				84F1EADA10403709006A1807 /* juce_MouseHoverDetector.cpp */,
+				84751E591132EE9E00640F9A /* juce_MouseInputSource.cpp */,
+				84751E5A1132EE9E00640F9A /* juce_MouseInputSource.h */,
 				84F1EADB10403709006A1807 /* juce_MouseListener.h */,
 				84F1EADC10403709006A1807 /* juce_MouseListener.cpp */,
 				84F1EADD10403709006A1807 /* juce_TooltipClient.h */,
@@ -3584,6 +3590,7 @@
 				8414DE8511122A8D00DAF75A /* juce_DynamicObject.h in Headers */,
 				8473E64A11249FD800D74E02 /* juce_TextInputTarget.h in Headers */,
 				8473E6531125974600D74E02 /* juce_Range.h in Headers */,
+				84751E5C1132EE9E00640F9A /* juce_MouseInputSource.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4226,6 +4233,7 @@
 				84CABF691101292D0088D64D /* juce_TemporaryFile.cpp in Sources */,
 				8414DE78111229B300DAF75A /* juce_NamedValueSet.cpp in Sources */,
 				8414DE8411122A8D00DAF75A /* juce_DynamicObject.cpp in Sources */,
+				84751E5B1132EE9E00640F9A /* juce_MouseInputSource.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../juce_Component.h"
 #include "juce_MouseHoverDetector.h"
+#include "juce_MouseEvent.h"
 
 
 //==============================================================================

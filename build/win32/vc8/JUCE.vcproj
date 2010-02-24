@@ -1932,6 +1932,14 @@
 							>
 						</File>
 						<File
+							RelativePath="..\..\..\src\gui\components\mouse\juce_MouseInputSource.cpp"
+							>
+						</File>
+						<File
+							RelativePath="..\..\..\src\gui\components\mouse\juce_MouseInputSource.h"
+							>
+						</File>
+						<File
 							RelativePath="..\..\..\src\gui\components\mouse\juce_MouseListener.cpp"
 							>
 						</File>

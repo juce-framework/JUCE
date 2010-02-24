@@ -169,7 +169,7 @@ public:
 
     /** Returns true if this var has the same value as the one supplied. */
     bool equals (const var& other) const throw();
-    
+
 private:
     enum Type
     {

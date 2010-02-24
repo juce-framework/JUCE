@@ -254,23 +254,23 @@ int OutputStream::writeFromInputStream (InputStream& source, int numBytesToWrite
 }
 
 //==============================================================================
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const int number)
+OutputStream& operator<< (OutputStream& stream, const int number)
 {
     return stream << String (number);
 }
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const double number)
+OutputStream& operator<< (OutputStream& stream, const double number)
 {
     return stream << String (number);
 }
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char character)
+OutputStream& operator<< (OutputStream& stream, const char character)
 {
     stream.writeByte (character);
     return stream;
 }
 
-OutputStream& JUCE_PUBLIC_FUNCTION  operator<< (OutputStream& stream, const char* const text)
+OutputStream& operator<< (OutputStream& stream, const char* const text)
 {
     stream.write (text, (int) strlen (text));
     return stream;

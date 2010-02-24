@@ -36,12 +36,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../core/juce_Random.h"
 #include "../layout/juce_ComponentBoundsConstrainer.h"
 #include "../mouse/juce_FileDragAndDropTarget.h"
+#include "../mouse/juce_MouseInputSource.h"
 
 //#define JUCE_ENABLE_REPAINT_DEBUGGING 1
 
 
 //==============================================================================
-static const int fakeMouseMoveMessage = 0x7fff00ff;
 static VoidArray heavyweightPeers;
 
 
@@ -102,203 +102,14 @@ void ComponentPeer::updateCurrentModifiers() throw()
 }
 
 //==============================================================================
-void ComponentPeer::handleMouseEnter (const Point<int>& position, const int64 time)
+void ComponentPeer::handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time)
 {
-    jassert (component->isValidComponent());
-    updateCurrentModifiers();
-
-    Component* c = component->getComponentAt (position);
-    const ComponentDeletionWatcher deletionChecker (component);
-
-    if (c != Component::componentUnderMouse && Component::componentUnderMouse != 0)
-    {
-        jassert (Component::componentUnderMouse->isValidComponent());
-
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-        Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
-        Component::componentUnderMouse = 0;
-
-        if (deletionChecker.hasBeenDeleted())
-            return;
-
-        c = component->getComponentAt (position);
-    }
-
-    Component::componentUnderMouse = c;
-
-    if (Component::componentUnderMouse != 0)
-    {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-        Component::componentUnderMouse->internalMouseEnter (relPos.getX(), relPos.getY(), time);
-    }
+    Desktop::getInstance().getMainMouseSource().handleEvent (this, positionWithinPeer, time, newMods);
 }
 
-void ComponentPeer::handleMouseMove (const Point<int>& position, const int64 time)
+void ComponentPeer::handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y)
 {
-    jassert (component->isValidComponent());
-    updateCurrentModifiers();
-
-    fakeMouseMessageSent = false;
-
-    const ComponentDeletionWatcher deletionChecker (component);
-    Component* c = component->getComponentAt (position);
-
-    if (c != Component::componentUnderMouse)
-    {
-        if (Component::componentUnderMouse != 0)
-        {
-            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-            Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
-            Component::componentUnderMouse = 0;
-
-            if (deletionChecker.hasBeenDeleted())
-                return; // if this window has just been deleted..
-
-            c = component->getComponentAt (position);
-        }
-
-        Component::componentUnderMouse = c;
-
-        if (c != 0)
-        {
-            const Point<int> relPos (component->relativePositionToOtherComponent (c, position));
-            c->internalMouseEnter (relPos.getX(), relPos.getY(), time);
-
-            if (deletionChecker.hasBeenDeleted())
-                return; // if this window has just been deleted..
-        }
-    }
-
-    if (Component::componentUnderMouse != 0)
-    {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-        Component::componentUnderMouse->internalMouseMove (relPos.getX(), relPos.getY(), time);
-    }
-}
-
-void ComponentPeer::handleMouseDown (const Point<int>& position, const int64 time)
-{
-    Desktop::getInstance().incrementMouseClickCounter();
-    updateCurrentModifiers();
-
-    if (ModifierKeys::getCurrentModifiers().getNumMouseButtonsDown() == 1)
-    {
-        Component::componentUnderMouse = component->getComponentAt (position);
-
-        if (Component::componentUnderMouse != 0)
-        {
-            const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-            Component::componentUnderMouse->internalMouseDown (relPos.getX(), relPos.getY(), time);
-        }
-    }
-}
-
-void ComponentPeer::handleMouseDrag (const Point<int>& position, const int64 time)
-{
-    updateCurrentModifiers();
-
-    if (Component::componentUnderMouse != 0)
-    {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-        Component::componentUnderMouse->internalMouseDrag (relPos.getX(), relPos.getY(), time);
-    }
-}
-
-void ComponentPeer::handleMouseUp (const int oldModifiers, const Point<int>& position, const int64 time)
-{
-    updateCurrentModifiers();
-
-    if (ModifierKeys (oldModifiers).getNumMouseButtonsDown() == 1)
-    {
-        const ComponentDeletionWatcher deletionChecker (component);
-        Component* c = component->getComponentAt (position);
-
-        if (c != Component::componentUnderMouse)
-        {
-            if (Component::componentUnderMouse != 0)
-            {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-                Component::componentUnderMouse->internalMouseUp (oldModifiers, relPos.getX(), relPos.getY(), time);
-
-                if (Component::componentUnderMouse != 0)
-                    Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
-
-                if (deletionChecker.hasBeenDeleted())
-                    return;
-
-                c = component->getComponentAt (position);
-            }
-
-            Component::componentUnderMouse = c;
-
-            if (Component::componentUnderMouse != 0)
-            {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-                Component::componentUnderMouse->internalMouseEnter (relPos.getX(), relPos.getY(), time);
-            }
-        }
-        else
-        {
-            if (Component::componentUnderMouse != 0)
-            {
-                const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-                Component::componentUnderMouse->internalMouseUp (oldModifiers, relPos.getX(), relPos.getY(), time);
-            }
-        }
-    }
-}
-
-void ComponentPeer::handleMouseExit (const Point<int>& position, const int64 time)
-{
-    jassert (component->isValidComponent());
-    updateCurrentModifiers();
-
-    if (Component::componentUnderMouse != 0)
-    {
-        const Point<int> relPos (component->relativePositionToOtherComponent (Component::componentUnderMouse, position));
-        Component::componentUnderMouse->internalMouseExit (relPos.getX(), relPos.getY(), time);
-        Component::componentUnderMouse = 0;
-    }
-}
-
-void ComponentPeer::handleMouseWheel (const int amountX, const int amountY, const int64 time)
-{
-    updateCurrentModifiers();
-
-    if (Component::componentUnderMouse != 0)
-        Component::componentUnderMouse->internalMouseWheel (amountX, amountY, time);
-}
-
-void ComponentPeer::sendFakeMouseMove() throw()
-{
-    if ((! fakeMouseMessageSent)
-         && component->flags.hasHeavyweightPeerFlag
-         && ! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
-    {
-        if (! isMinimised())
-            component->bounds_ = getBounds();
-
-        const Point<int> pos (component->getMouseXYRelative());
-
-        if (((unsigned int) pos.getX()) < (unsigned int) component->getWidth()
-             && ((unsigned int) pos.getY()) < (unsigned int) component->getHeight()
-             && contains (pos.getX(), pos.getY(), false))
-        {
-            postMessage (new Message (fakeMouseMoveMessage, pos.getX(), pos.getY(), 0));
-        }
-
-        fakeMouseMessageSent = true;
-    }
-}
-
-void ComponentPeer::handleMessage (const Message& message)
-{
-    if (message.intParameter1 == fakeMouseMoveMessage)
-    {
-        if (! ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
-            handleMouseMove (Point<int> (message.intParameter2, message.intParameter3),
-                             Time::currentTimeMillis());
-    }
+    Desktop::getInstance().getMainMouseSource().handleWheel (this, positionWithinPeer, time, x, y);
 }
 
 //==============================================================================

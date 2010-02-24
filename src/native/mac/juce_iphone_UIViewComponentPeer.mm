@@ -101,7 +101,7 @@ public:
     bool isMinimised() const;
     void setFullScreen (bool shouldBeFullScreen);
     bool isFullScreen() const;
-    bool contains (int x, int y, bool trueIfInAChildWindow) const;
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const;
     const BorderSize getFrameSize() const;
     bool setAlwaysOnTop (bool alwaysOnTop);
     void toFront (bool makeActiveWindow);
@@ -133,6 +133,7 @@ public:
     UIWindow* window;
     JuceUIView* view;
     bool isSharedWindow, fullScreen, insideDrawRect;
+    static ModifierKeys currentModifiers;
 };
 
 //==============================================================================
@@ -167,23 +168,16 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
     return false;
 }
 
-static int currentModifiers = 0;
+ModifierKeys UIViewComponentPeer::currentModifiers;
 
 const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
 {
-    return ModifierKeys (currentModifiers);
+    return UIViewComponentPeer::currentModifiers;
 }
 
 void ModifierKeys::updateCurrentModifiers() throw()
 {
-    currentModifierFlags = currentModifiers;
-}
-
-static int getModifierForButtonNumber (const int num)
-{
-    return num == 0 ? ModifierKeys::leftButtonModifier
-                : (num == 1 ? ModifierKeys::rightButtonModifier
-                            : (num == 2 ? ModifierKeys::middleButtonModifier : 0));
+    currentModifiers = UIViewComponentPeer::currentModifiers;
 }
 
 static int64 getMouseTime (UIEvent* e)
@@ -208,13 +202,15 @@ JUCE_NAMESPACE::Point<int> juce_lastMousePos;
         {
             CGPoint p = [[t objectAtIndex: 0] locationInView: self];
             const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
-            currentModifiers |= getModifierForButtonNumber (0);
             juce_lastMousePos = pos + owner->getScreenPosition();
 
-            owner->handleMouseMove (pos, getMouseTime (event));
+            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
 
-            if (owner != 0)
-                owner->handleMouseDown (pos, getMouseTime (event));
+            JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers
+                = JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers.withoutMouseButtons()
+                                                        .withFlags (JUCE_NAMESPACE::ModifierKeys::leftButtonModifier);
+
+            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
         }
 
         default:
@@ -238,7 +234,7 @@ JUCE_NAMESPACE::Point<int> juce_lastMousePos;
             const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
             juce_lastMousePos = pos + owner->getScreenPosition();
 
-            owner->handleMouseDrag (pos, getMouseTime (event));
+            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
         }
 
         default:
@@ -262,9 +258,10 @@ JUCE_NAMESPACE::Point<int> juce_lastMousePos;
             const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
             juce_lastMousePos = pos + owner->getScreenPosition();
 
-            const int oldMods = currentModifiers;
-            currentModifiers &= ~getModifierForButtonNumber (0);
-            owner->handleMouseUp (oldMods, pos, getMouseTime (event));
+            JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers
+                = JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers.withoutMouseButtons();
+
+            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
         }
 
         default:
@@ -559,15 +556,15 @@ bool UIViewComponentPeer::isFullScreen() const
     return fullScreen;
 }
 
-bool UIViewComponentPeer::contains (int x, int y, bool trueIfInAChildWindow) const
+bool UIViewComponentPeer::contains (const Point<int>& position, bool trueIfInAChildWindow) const
 {
-    if (((unsigned int) x) >= (unsigned int) component->getWidth()
-        || ((unsigned int) y) >= (unsigned int) component->getHeight())
+    if (((unsigned int) position.getX()) >= (unsigned int) component->getWidth()
+        || ((unsigned int) position.getY()) >= (unsigned int) component->getHeight())
         return false;
 
     CGPoint p;
-    p.x = (float) x;
-    p.y = (float) y;
+    p.x = (float) position.getX();
+    p.y = (float) position.getY();
 
     UIView* v = [view hitTest: p withEvent: nil];
 

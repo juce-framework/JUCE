@@ -120,33 +120,6 @@ enum MouseButtons
     WheelDown = 5
 };
 
-static const Point<int> getMousePos (int& mouseMods) throw()
-{
-    Window root, child;
-    int x, y, winx, winy;
-    unsigned int mask;
-
-    mouseMods = 0;
-    ScopedXLock xlock;
-
-    if (XQueryPointer (display,
-                       RootWindow (display, DefaultScreen (display)),
-                       &root, &child,
-                       &x, &y, &winx, &winy, &mask) == False)
-    {
-        // Pointer not on the default screen
-        x = y = -1;
-    }
-    else
-    {
-        if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
-        if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
-        if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
-    }
-
-    return Point<int> (x, y);
-}
-
 //==============================================================================
 static int AltMask = 0;
 static int NumLockMask = 0;
@@ -198,124 +171,6 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 
     ScopedXLock xlock;
     return keyDown (XKeysymToKeycode (display, keysym));
-}
-
-//==============================================================================
-// Alt and Num lock are not defined by standard X
-// modifier constants: check what they're mapped to
-static void getModifierMapping() throw()
-{
-    ScopedXLock xlock;
-    const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
-    const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
-
-    AltMask = 0;
-    NumLockMask = 0;
-
-    XModifierKeymap* mapping = XGetModifierMapping (display);
-
-    if (mapping)
-    {
-        for (int i = 0; i < 8; i++)
-        {
-            if (mapping->modifiermap [i << 1] == altLeftCode)
-                AltMask = 1 << i;
-            else if (mapping->modifiermap [i << 1] == numLockCode)
-                NumLockMask = 1 << i;
-        }
-
-        XFreeModifiermap (mapping);
-    }
-}
-
-static int currentModifiers = 0;
-
-void ModifierKeys::updateCurrentModifiers() throw()
-{
-    currentModifierFlags = currentModifiers;
-}
-
-const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
-{
-    int mouseMods;
-    getMousePos (mouseMods);
-
-    currentModifiers &= ~ModifierKeys::allMouseButtonModifiers;
-    currentModifiers |= mouseMods;
-
-    return ModifierKeys (currentModifiers);
-}
-
-static void updateKeyModifiers (const int status) throw()
-{
-    currentModifiers &= ~(ModifierKeys::shiftModifier
-                           | ModifierKeys::ctrlModifier
-                           | ModifierKeys::altModifier);
-
-    if (status & ShiftMask)
-        currentModifiers |= ModifierKeys::shiftModifier;
-
-    if (status & ControlMask)
-        currentModifiers |= ModifierKeys::ctrlModifier;
-
-    if (status & AltMask)
-        currentModifiers |= ModifierKeys::altModifier;
-
-    numLock  = ((status & NumLockMask) != 0);
-    capsLock = ((status & LockMask) != 0);
-}
-
-static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
-{
-    int modifier = 0;
-    bool isModifier = true;
-
-    switch (sym)
-    {
-        case XK_Shift_L:
-        case XK_Shift_R:
-            modifier = ModifierKeys::shiftModifier;
-            break;
-
-        case XK_Control_L:
-        case XK_Control_R:
-            modifier = ModifierKeys::ctrlModifier;
-            break;
-
-        case XK_Alt_L:
-        case XK_Alt_R:
-            modifier = ModifierKeys::altModifier;
-            break;
-
-        case XK_Num_Lock:
-            if (press)
-                numLock = ! numLock;
-
-            break;
-
-        case XK_Caps_Lock:
-            if (press)
-                capsLock = ! capsLock;
-
-            break;
-
-        case XK_Scroll_Lock:
-            break;
-
-        default:
-            isModifier = false;
-            break;
-    }
-
-    if (modifier != 0)
-    {
-        if (press)
-            currentModifiers |= modifier;
-        else
-            currentModifiers &= ~modifier;
-    }
-
-    return isModifier;
 }
 
 //==============================================================================
@@ -605,7 +460,6 @@ public:
           wh (0),
           taskbarImage (0),
           fullScreen (false),
-          entered (false),
           mapped (false)
     {
         // it's dangerous to create a window on a thread other than the message thread..
@@ -644,7 +498,7 @@ public:
         ScopedXLock xlock;
         if (! XFindContext (display, (XID) windowHandle, improbableNumber, &peer))
         {
-            if (peer != 0 && ! ((LinuxComponentPeer*) peer)->isValidMessageListener())
+            if (peer != 0 && ! ComponentPeer::isValidPeer ((LinuxComponentPeer*) peer))
                 peer = 0;
         }
 
@@ -854,9 +708,10 @@ public:
         return result;
     }
 
-    bool contains (int x, int y, bool trueIfInAChildWindow) const
+    bool contains (const Point<int>& position, bool trueIfInAChildWindow) const
     {
-        jassert (x >= 0 && y >= 0 && x < ww && y < wh); // should only be called for points that are actually inside the bounds
+        int x = position.getX();
+        int y = position.getY();
 
         if (((unsigned int) x) >= (unsigned int) ww
              || ((unsigned int) y) >= (unsigned int) wh)
@@ -1166,10 +1021,9 @@ public:
                 int keyCode = (int) unicodeChar;
 
                 if (keyCode < 0x20)
-                    keyCode = XKeycodeToKeysym (display, keyEvent->keycode,
-                                                (currentModifiers & ModifierKeys::shiftModifier) != 0 ? 1 : 0);
+                    keyCode = XKeycodeToKeysym (display, keyEvent->keycode, currentModifiers.isShiftDown() ? 1 : 0);
 
-                const int oldMods = currentModifiers;
+                const ModifierKeys oldMods (currentModifiers);
                 bool keyPressed = false;
 
                 const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
@@ -1267,7 +1121,7 @@ public:
                 ScopedXLock xlock;
                 KeySym sym = XKeycodeToKeysym (display, keyEvent->keycode, 0);
 
-                const int oldMods = currentModifiers;
+                const ModifierKeys oldMods (currentModifiers);
                 const bool keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, false);
 
                 if (oldMods != currentModifiers)
@@ -1282,48 +1136,37 @@ public:
             case ButtonPress:
             {
                 const XButtonPressedEvent* const buttonPressEvent = (const XButtonPressedEvent*) &event->xbutton;
+                updateKeyModifiers (buttonPressEvent->state);
 
                 bool buttonMsg = false;
-                bool wheelUpMsg = false;
-                bool wheelDownMsg = false;
-
                 const int map = pointerMap [buttonPressEvent->button - Button1];
 
+                if (map == WheelUp || map == WheelDown)
+                {
+                    handleMouseWheel (Point<int> (buttonPressEvent->x, buttonPressEvent->y),
+                                      getEventTime (buttonPressEvent->time), 0, map == WheelDown ? -84.0f : 84.0f);
+                }
                 if (map == LeftButton)
                 {
-                    currentModifiers |= ModifierKeys::leftButtonModifier;
+                    currentModifiers = currentModifiers.withFlags (ModifierKeys::leftButtonModifier);
                     buttonMsg = true;
                 }
                 else if (map == RightButton)
                 {
-                    currentModifiers |= ModifierKeys::rightButtonModifier;
+                    currentModifiers = currentModifiers.withFlags (ModifierKeys::rightButtonModifier);
                     buttonMsg = true;
                 }
                 else if (map == MiddleButton)
                 {
-                    currentModifiers |= ModifierKeys::middleButtonModifier;
+                    currentModifiers = currentModifiers.withFlags (ModifierKeys::middleButtonModifier);
                     buttonMsg = true;
                 }
-                else if (map == WheelUp)
-                {
-                    wheelUpMsg = true;
-                }
-                else if (map == WheelDown)
-                {
-                    wheelDownMsg = true;
-                }
-
-                updateKeyModifiers (buttonPressEvent->state);
 
                 if (buttonMsg)
                 {
                     toFront (true);
-                    handleMouseDown (Point<int> (buttonPressEvent->x, buttonPressEvent->y),
-                                     getEventTime (buttonPressEvent->time));
-                }
-                else if (wheelUpMsg || wheelDownMsg)
-                {
-                    handleMouseWheel (0, wheelDownMsg ? -84 : 84,
+
+                    handleMouseEvent (Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
                                       getEventTime (buttonPressEvent->time));
                 }
 
@@ -1334,22 +1177,19 @@ public:
             case ButtonRelease:
             {
                 const XButtonReleasedEvent* const buttonRelEvent = (const XButtonReleasedEvent*) &event->xbutton;
+                updateKeyModifiers (buttonRelEvent->state);
 
-                const int oldModifiers = currentModifiers;
                 const int map = pointerMap [buttonRelEvent->button - Button1];
 
                 if (map == LeftButton)
-                    currentModifiers &= ~ModifierKeys::leftButtonModifier;
+                    currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier);
                 else if (map == RightButton)
-                    currentModifiers &= ~ModifierKeys::rightButtonModifier;
+                    currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier);
                 else if (map == MiddleButton)
-                    currentModifiers &= ~ModifierKeys::middleButtonModifier;
+                    currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier);
 
-                updateKeyModifiers (buttonRelEvent->state);
-
-                handleMouseUp (oldModifiers,
-                               Point<int> (buttonRelEvent->x, buttonRelEvent->y),
-                               getEventTime (buttonRelEvent->time));
+                handleMouseEvent (Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
+                                  getEventTime (buttonRelEvent->time));
 
                 clearLastMousePos();
                 break;
@@ -1358,10 +1198,9 @@ public:
             case MotionNotify:
             {
                 const XPointerMovedEvent* const movedEvent = (const XPointerMovedEvent*) &event->xmotion;
-
                 updateKeyModifiers (movedEvent->state);
 
-                Point<int> mousePos (Desktop::getMousePosition());
+                const Point<int> mousePos (Desktop::getMousePosition());
 
                 if (lastMousePos != mousePos)
                 {
@@ -1370,37 +1209,28 @@ public:
                     if (parentWindow != 0 && (styleFlags & windowHasTitleBar) == 0)
                     {
                         Window wRoot = 0, wParent = 0;
-                        Window* wChild = 0;
-                        unsigned int numChildren;
 
                         {
                             ScopedXLock xlock;
+                            unsigned int numChildren;
+                            Window* wChild = 0;
                             XQueryTree (display, windowH, &wRoot, &wParent, &wChild, &numChildren);
                         }
 
                         if (wParent != 0
-                            && wParent != windowH
-                            && wParent != wRoot)
+                             && wParent != windowH
+                             && wParent != wRoot)
                         {
                             parentWindow = wParent;
                             updateBounds();
-                            mousePos -= getScreenPosition();
                         }
                         else
                         {
                             parentWindow = 0;
-                            mousePos -= getScreenPosition();
                         }
                     }
-                    else
-                    {
-                        mousePos -= getScreenPosition();
-                    }
 
-                    if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0)
-                        handleMouseMove (mousePos, getEventTime (movedEvent->time));
-                    else
-                        handleMouseDrag (mousePos, getEventTime (movedEvent->time));
+                    handleMouseEvent (mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent->time));
                 }
 
                 break;
@@ -1411,14 +1241,10 @@ public:
                 clearLastMousePos();
                 const XEnterWindowEvent* const enterEvent = (const XEnterWindowEvent*) &event->xcrossing;
 
-                if ((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0
-                     && ! entered)
+                if (! currentModifiers.isAnyMouseButtonDown())
                 {
                     updateKeyModifiers (enterEvent->state);
-
-                    handleMouseEnter (Point<int> (enterEvent->x, enterEvent->y), getEventTime (enterEvent->time));
-
-                    entered = true;
+                    handleMouseEvent (Point<int> (enterEvent->x, enterEvent->y), currentModifiers, getEventTime (enterEvent->time));
                 }
 
                 break;
@@ -1431,15 +1257,11 @@ public:
                 // Suppress the normal leave if we've got a pointer grab, or if
                 // it's a bogus one caused by clicking a mouse button when running
                 // in a Window manager
-                if (((currentModifiers & ModifierKeys::allMouseButtonModifiers) == 0
-                     && leaveEvent->mode == NotifyNormal)
-                    || leaveEvent->mode == NotifyUngrab)
+                if (((! currentModifiers.isAnyMouseButtonDown()) && leaveEvent->mode == NotifyNormal)
+                     || leaveEvent->mode == NotifyUngrab)
                 {
                     updateKeyModifiers (leaveEvent->state);
-
-                    handleMouseExit (Point<int> (leaveEvent->x, leaveEvent->y), getEventTime (leaveEvent->time));
-
-                    entered = false;
+                    handleMouseEvent (Point<int> (leaveEvent->x, leaveEvent->y), currentModifiers, getEventTime (leaveEvent->time));
                 }
 
                 break;
@@ -1570,7 +1392,7 @@ public:
                     // Deal with modifier/keyboard mapping
                     ScopedXLock xlock;
                     XRefreshKeyboardMapping (mappingEvent);
-                    getModifierMapping();
+                    updateModifierMappings();
                 }
 
                 break;
@@ -1726,6 +1548,8 @@ public:
 
     bool dontRepaint;
 
+    static ModifierKeys currentModifiers;
+
 private:
     //==============================================================================
     class LinuxRepaintManager : public Timer
@@ -1870,7 +1694,7 @@ private:
     Window windowH, parentWindow;
     int wx, wy, ww, wh;
     Image* taskbarImage;
-    bool fullScreen, entered, mapped, depthIs16Bit;
+    bool fullScreen, mapped, depthIs16Bit;
     BorderSize windowBorder;
 
     struct MotifWmHints
@@ -1881,6 +1705,100 @@ private:
         long input_mode;
         unsigned long status;
     };
+
+    static void updateKeyModifiers (const int status) throw()
+    {
+        int keyMods = 0;
+
+        if (status & ShiftMask)     keyMods |= ModifierKeys::shiftModifier;
+        if (status & ControlMask)   keyMods |= ModifierKeys::ctrlModifier;
+        if (status & AltMask)       keyMods |= ModifierKeys::altModifier;
+
+        currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
+
+        numLock  = ((status & NumLockMask) != 0);
+        capsLock = ((status & LockMask) != 0);
+    }
+
+    static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
+    {
+        int modifier = 0;
+        bool isModifier = true;
+
+        switch (sym)
+        {
+            case XK_Shift_L:
+            case XK_Shift_R:
+                modifier = ModifierKeys::shiftModifier;
+                break;
+
+            case XK_Control_L:
+            case XK_Control_R:
+                modifier = ModifierKeys::ctrlModifier;
+                break;
+
+            case XK_Alt_L:
+            case XK_Alt_R:
+                modifier = ModifierKeys::altModifier;
+                break;
+
+            case XK_Num_Lock:
+                if (press)
+                    numLock = ! numLock;
+
+                break;
+
+            case XK_Caps_Lock:
+                if (press)
+                    capsLock = ! capsLock;
+
+                break;
+
+            case XK_Scroll_Lock:
+                break;
+
+            default:
+                isModifier = false;
+                break;
+        }
+
+        if (modifier != 0)
+        {
+            if (press)
+                currentModifiers = currentModifiers.withFlags (modifier);
+            else
+                currentModifiers = currentModifiers.withoutFlags (modifier);
+        }
+
+        return isModifier;
+    }
+
+    // Alt and Num lock are not defined by standard X
+    // modifier constants: check what they're mapped to
+    static void updateModifierMappings() throw()
+    {
+        ScopedXLock xlock;
+        const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
+        const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
+
+        AltMask = 0;
+        NumLockMask = 0;
+
+        XModifierKeymap* mapping = XGetModifierMapping (display);
+
+        if (mapping)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                if (mapping->modifiermap [i << 1] == altLeftCode)
+                    AltMask = 1 << i;
+                else if (mapping->modifiermap [i << 1] == numLockCode)
+                    NumLockMask = 1 << i;
+            }
+
+            XFreeModifiermap (mapping);
+        }
+    }
 
     //==============================================================================
     void removeWindowDecorations (Window wndH)
@@ -2195,7 +2113,7 @@ private:
                 }
             }
 
-            getModifierMapping();
+            updateModifierMappings();
         }
 
         windowH = wndH;
@@ -2220,7 +2138,7 @@ private:
         {}
     }
 
-    static int64 getEventTime (::Time t) throw()
+    static int64 getEventTime (::Time t)
     {
         static int64 eventTimeOffset = 0x12345678;
         const int64 thisMessageTime = t;
@@ -2566,8 +2484,36 @@ private:
     }
 };
 
+ModifierKeys LinuxComponentPeer::currentModifiers;
 int LinuxComponentPeer::pointerMap[5];
 Point<int> LinuxComponentPeer::lastMousePos;
+
+//==============================================================================
+void ModifierKeys::updateCurrentModifiers() throw()
+{
+    currentModifiers = LinuxComponentPeer::currentModifiers;
+}
+
+const ModifierKeys ModifierKeys::getCurrentModifiersRealtime() throw()
+{
+    Window root, child;
+    int x, y, winx, winy;
+    unsigned int mask;
+    int mouseMods = 0;
+
+    ScopedXLock xlock;
+
+    if (XQueryPointer (display, RootWindow (display, DefaultScreen (display)),
+                       &root, &child, &x, &y, &winx, &winy, &mask) != False)
+    {
+        if ((mask & Button1Mask) != 0)  mouseMods |= ModifierKeys::leftButtonModifier;
+        if ((mask & Button2Mask) != 0)  mouseMods |= ModifierKeys::middleButtonModifier;
+        if ((mask & Button3Mask) != 0)  mouseMods |= ModifierKeys::rightButtonModifier;
+    }
+
+    LinuxComponentPeer::currentModifiers = LinuxComponentPeer::currentModifiers.withoutMouseButtons().withFlags (mouseMods);
+    return LinuxComponentPeer::currentModifiers;
+}
 
 
 //==============================================================================
@@ -2721,8 +2667,22 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 
 const Point<int> Desktop::getMousePosition()
 {
-    int mouseMods;
-    return getMousePos (mouseMods);
+    Window root, child;
+    int x, y, winx, winy;
+    unsigned int mask;
+
+    ScopedXLock xlock;
+
+    if (XQueryPointer (display,
+                       RootWindow (display, DefaultScreen (display)),
+                       &root, &child,
+                       &x, &y, &winx, &winy, &mask) == False)
+    {
+        // Pointer not on the default screen
+        x = y = -1;
+    }
+
+    return Point<int> (x, y);
 }
 
 void Desktop::setMousePosition (const Point<int>& newPosition)

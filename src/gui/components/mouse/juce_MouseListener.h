@@ -26,8 +26,7 @@
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
 #define __JUCE_MOUSELISTENER_JUCEHEADER__
 
-#include "juce_MouseEvent.h"
-
+class MouseEvent;
 
 //==============================================================================
 /**

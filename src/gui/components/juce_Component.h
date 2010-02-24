@@ -28,6 +28,7 @@
 
 #include "mouse/juce_MouseCursor.h"
 #include "mouse/juce_MouseListener.h"
+#include "mouse/juce_MouseEvent.h"
 #include "juce_ComponentListener.h"
 #include "keyboard/juce_KeyListener.h"
 #include "keyboard/juce_KeyboardFocusTraverser.h"
@@ -40,6 +41,8 @@
 #include "../../containers/juce_VoidArray.h"
 #include "../../containers/juce_NamedValueSet.h"
 class LookAndFeel;
+class MouseInputSource;
+class MouseInputSourceInternal;
 
 
 //==============================================================================
@@ -1921,6 +1924,8 @@ private:
     //==============================================================================
     friend class ComponentPeer;
     friend class InternalDragRepeater;
+    friend class MouseInputSource;
+    friend class MouseInputSourceInternal;
 
     static Component* currentlyFocusedComponent;
     static Component* componentUnderMouse;
@@ -1973,13 +1978,13 @@ private:
     };
 
     //==============================================================================
-    void internalMouseEnter (int x, int y, const int64 time);
-    void internalMouseExit  (int x, int y, const int64 time);
-    void internalMouseDown  (int x, int y, const int64 time);
-    void internalMouseUp    (const int oldModifiers, int x, int y, const int64 time);
-    void internalMouseDrag  (int x, int y, const int64 time);
-    void internalMouseMove  (int x, int y, const int64 time);
-    void internalMouseWheel (const int intAmountX, const int intAmountY, const int64 time);
+    void internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+    void internalMouseExit  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+    void internalMouseDown  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+    void internalMouseUp    (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers);
+    void internalMouseDrag  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+    void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
+    void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const float amountX, const float amountY);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType cause);
     void internalFocusLoss (const FocusChangeType cause);

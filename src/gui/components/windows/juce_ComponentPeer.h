@@ -48,7 +48,7 @@ class ComponentDeletionWatcher;
 
     @see Component::createNewPeer
 */
-class JUCE_API  ComponentPeer    : public MessageListener
+class JUCE_API  ComponentPeer
 {
 public:
     //==============================================================================
@@ -197,7 +197,7 @@ public:
         is false, then this returns false if the point is actually inside a child of this
         window.
     */
-    virtual bool contains (int x, int y, bool trueIfInAChildWindow) const = 0;
+    virtual bool contains (const Point<int>& position, bool trueIfInAChildWindow) const = 0;
 
     /** Returns the size of the window frame that's around this window.
 
@@ -295,16 +295,8 @@ public:
     virtual void performAnyPendingRepaintsNow() = 0;
 
     //==============================================================================
-    void handleMouseEnter (const Point<int>& position, const int64 time);
-    void handleMouseMove  (const Point<int>& position, const int64 time);
-    void handleMouseDown  (const Point<int>& position, const int64 time);
-    void handleMouseDrag  (const Point<int>& position, const int64 time);
-    void handleMouseUp    (const int oldModifiers, const Point<int>& position, const int64 time);
-    void handleMouseExit  (const Point<int>& position, const int64 time);
-    void handleMouseWheel (const int amountX, const int amountY, const int64 time);
-
-    /** Causes a mouse-move callback to be made asynchronously. */
-    void sendFakeMouseMove() throw();
+    void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
+    void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
 
     void handleUserClosingWindow();
 
@@ -372,9 +364,6 @@ protected:
     ComponentBoundsConstrainer* constrainer;
 
     static void updateCurrentModifiers() throw();
-
-    /** @internal */
-    void handleMessage (const Message& message);
 
 private:
     //==============================================================================

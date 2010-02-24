@@ -151,10 +151,22 @@ public:
         allMouseButtonModifiers                 = leftButtonModifier | rightButtonModifier | middleButtonModifier,
     };
 
+    //==============================================================================
+    /** Returns a copy of only the mouse-button flags */
+    const ModifierKeys withOnlyMouseButtons() const throw()             { return ModifierKeys (flags & allMouseButtonModifiers); }
+
+    /** Returns a copy of only the non-mouse flags */
+    const ModifierKeys withoutMouseButtons() const throw()              { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+
+    bool operator== (const ModifierKeys& other) const throw()           { return flags == other.flags; }
+    bool operator!= (const ModifierKeys& other) const throw()           { return flags != other.flags; }
 
     //==============================================================================
     /** Returns the raw flags for direct testing. */
     inline int getRawFlags() const throw()                              { return flags; }
+
+    inline const ModifierKeys withoutFlags (int rawFlagsToClear) const throw()  { return ModifierKeys (flags & ~rawFlagsToClear); }
+    inline const ModifierKeys withFlags (int rawFlagsToSet) const throw()       { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
     inline bool testFlags (const int flagsToTest) const throw()         { return (flags & flagsToTest) != 0; }
@@ -187,9 +199,11 @@ private:
     //==============================================================================
     int flags;
 
-    static int currentModifierFlags;
+    static ModifierKeys currentModifiers;
 
     friend class ComponentPeer;
+    friend class MouseInputSource;
+    friend class MouseInputSourceInternal;
     static void updateCurrentModifiers() throw();
 };
 

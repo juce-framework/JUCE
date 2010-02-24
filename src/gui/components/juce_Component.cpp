@@ -39,8 +39,9 @@ BEGIN_JUCE_NAMESPACE
 #include "../../events/juce_MessageManager.h"
 #include "../../events/juce_Timer.h"
 #include "../../core/juce_Time.h"
+#include "../../core/juce_Singleton.h"
 #include "../../core/juce_PlatformUtilities.h"
-
+#include "mouse/juce_MouseInputSource.h"
 
 //==============================================================================
 Component* Component::componentUnderMouse = 0;
@@ -1084,7 +1085,7 @@ bool Component::contains (const int x, const int y)
             const ComponentPeer* const peer = getPeer();
 
             if (peer != 0)
-                return peer->contains (x, y, true);
+                return peer->contains (Point<int> (x, y), true);
         }
     }
 
@@ -2226,7 +2227,7 @@ void Component::removeMouseListener (MouseListener* const listenerToRemove) thro
 }
 
 //==============================================================================
-void Component::internalMouseEnter (int x, int y, int64 time)
+void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2256,13 +2257,9 @@ void Component::internalMouseEnter (int x, int y, int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (Point<int> (x, y),
-                             ModifierKeys::getCurrentModifiers(),
-                             this,
-                             Time (time),
-                             Point<int> (x, y),
-                             Time (time),
-                             0, false);
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, time, relativePos,
+                             time, 0, false);
 
         mouseEnter (me);
 
@@ -2318,13 +2315,13 @@ void Component::internalMouseEnter (int x, int y, int64 time)
         internalUpdateMouseCursor (true);
 }
 
-void Component::internalMouseExit (int x, int y, int64 time)
+void Component::internalMouseExit (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     const ComponentDeletionWatcher deletionChecker (this);
 
     if (flags.draggingFlag)
     {
-        internalMouseUp (ModifierKeys::getCurrentModifiers().getRawFlags(), x, y, time);
+        internalMouseUp (source, relativePos, time, source.getCurrentModifiers().getRawFlags());
 
         if (deletionChecker.hasBeenDeleted())
             return;
@@ -2341,13 +2338,9 @@ void Component::internalMouseExit (int x, int y, int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (Point<int> (x, y),
-                             ModifierKeys::getCurrentModifiers(),
-                             this,
-                             Time (time),
-                             Point<int> (x, y),
-                             Time (time),
-                             0, false);
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, time, relativePos,
+                             time, 0, false);
         mouseExit (me);
 
         if (deletionChecker.hasBeenDeleted())
@@ -2403,23 +2396,33 @@ void Component::internalMouseExit (int x, int y, int64 time)
 class InternalDragRepeater  : public Timer
 {
 public:
-    InternalDragRepeater()      {}
-    ~InternalDragRepeater()     {}
+    InternalDragRepeater()
+    {}
+
+    ~InternalDragRepeater()
+    {
+        clearSingletonInstance();
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (InternalDragRepeater)
 
     void timerCallback()
     {
-        Component* const c = Component::getComponentUnderMouse();
+        Desktop& desktop = Desktop::getInstance();
+        int numMiceDown = 0;
 
-        if (c != 0 && c->isMouseButtonDown())
+        for (int i = desktop.getNumMouseInputSources(); --i >= 0;)
         {
-            const Point<int> mousePos (c->getMouseXYRelative());
-
-            // the offsets have been added on, so must be taken off before calling the
-            // drag.. otherwise they'll be added twice
-            c->internalMouseDrag (mousePos.getX() - unboundedMouseOffset.getX(),
-                                  mousePos.getY() - unboundedMouseOffset.getY(),
-                                  Time::currentTimeMillis());
+            MouseInputSource* const source = desktop.getMouseSource(i);
+            if (source->isDragging())
+            {
+                source->triggerFakeMove();
+                ++numMiceDown;
+            }
         }
+
+        if (numMiceDown == 0)
+            deleteInstance();
     }
 
     juce_UseDebuggingNewOperator
@@ -2429,30 +2432,26 @@ private:
     InternalDragRepeater& operator= (const InternalDragRepeater&);
 };
 
-static InternalDragRepeater* dragRepeater = 0;
+juce_ImplementSingleton_SingleThreaded (InternalDragRepeater)
+
 
 void Component::beginDragAutoRepeat (const int interval)
 {
     if (interval > 0)
     {
-        if (dragRepeater == 0)
-            dragRepeater = new InternalDragRepeater();
-
-        if (dragRepeater->getTimerInterval() != interval)
-            dragRepeater->startTimer (interval);
+        if (InternalDragRepeater::getInstance()->getTimerInterval() != interval)
+            InternalDragRepeater::getInstance()->startTimer (interval);
     }
     else
     {
-        deleteAndZero (dragRepeater);
+        InternalDragRepeater::deleteInstance();
     }
 }
 
 //==============================================================================
-void Component::internalMouseDown (const int x, const int y, const int64 time)
+void Component::internalMouseDown (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     Desktop& desktop = Desktop::getInstance();
-
-    desktop.registerMouseDown (relativePositionToGlobal (Point<int> (x, y)), time, this);
 
     const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2468,14 +2467,9 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
             // allow blocked mouse-events to go to global listeners..
-            const MouseEvent me (Point<int> (x, y),
-                                 ModifierKeys::getCurrentModifiers(),
-                                 this,
-                                 Time (time),
-                                 Point<int> (x, y),
-                                 desktop.getLastMouseDownTime(),
-                                 desktop.getNumberOfMultipleClicks(),
-                                 false);
+            const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                                 this, time, relativePos, time,
+                                 source.getNumberOfMultipleClicks(), false);
 
             desktop.resetTimer();
 
@@ -2521,14 +2515,9 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (Point<int> (x, y),
-                             ModifierKeys::getCurrentModifiers(),
-                             this,
-                             desktop.getLastMouseDownTime(),
-                             Point<int> (x, y),
-                             desktop.getLastMouseDownTime(),
-                             desktop.getNumberOfMultipleClicks(),
-                             false);
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, time, relativePos, time,
+                             source.getNumberOfMultipleClicks(), false);
         mouseDown (me);
 
         if (deletionChecker.hasBeenDeleted())
@@ -2581,37 +2570,25 @@ void Component::internalMouseDown (const int x, const int y, const int64 time)
 }
 
 //==============================================================================
-void Component::internalMouseUp (const int oldModifiers, int x, int y, const int64 time)
+void Component::internalMouseUp (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers)
 {
     if (isValidComponent() && flags.draggingFlag)
     {
         Desktop& desktop = Desktop::getInstance();
 
         flags.draggingFlag = false;
-        deleteAndZero (dragRepeater);
-
-        x += unboundedMouseOffset.getX();
-        y += unboundedMouseOffset.getY();
-
-        desktop.registerMouseDrag (relativePositionToGlobal (Point<int> (x, y)));
 
         const ComponentDeletionWatcher deletionChecker (this);
 
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const Point<int> mouseDownPos (globalPositionToRelative (Desktop::getLastMouseDownPosition()));
-        const Time lastMouseDownTime (desktop.getLastMouseDownTime());
-
-        const MouseEvent me (Point<int> (x, y),
-                             oldModifiers,
-                             this,
-                             Time (time),
-                             mouseDownPos,
-                             lastMouseDownTime,
-                             desktop.getNumberOfMultipleClicks(),
-                             desktop.mouseMovedSignificantlySincePressed
-                               || time > lastMouseDownTime.toMilliseconds() + 300);
+        const MouseEvent me (source, relativePos + unboundedMouseOffset,
+                             oldModifiers, this, time,
+                             globalPositionToRelative (source.getLastMouseDownPosition()),
+                             source.getLastMouseDownTime(),
+                             source.getNumberOfMultipleClicks(),
+                             source.hasMouseMovedSignificantlySincePressed());
 
         mouseUp (me);
 
@@ -2719,33 +2696,22 @@ void Component::internalMouseUp (const int oldModifiers, int x, int y, const int
     enableUnboundedMouseMovement (false);
 }
 
-void Component::internalMouseDrag (int x, int y, const int64 time)
+void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     if (isValidComponent() && flags.draggingFlag)
     {
         Desktop& desktop = Desktop::getInstance();
 
-        flags.mouseOverFlag = reallyContains (x, y, false);
-
-        x += unboundedMouseOffset.getX();
-        y += unboundedMouseOffset.getY();
-
-        desktop.registerMouseDrag (relativePositionToGlobal (Point<int> (x, y)));
+        flags.mouseOverFlag = reallyContains (relativePos.getX(), relativePos.getY(), false);
 
         const ComponentDeletionWatcher deletionChecker (this);
 
-        const Point<int> mouseDownPos (globalPositionToRelative (Desktop::getLastMouseDownPosition()));
-        const Time lastMouseDownTime (desktop.getLastMouseDownTime());
-
-        const MouseEvent me (Point<int> (x, y),
-                             ModifierKeys::getCurrentModifiers(),
-                             this,
-                             Time (time),
-                             mouseDownPos,
-                             lastMouseDownTime,
-                             desktop.getNumberOfMultipleClicks(),
-                             desktop.mouseMovedSignificantlySincePressed
-                               || time > lastMouseDownTime.toMilliseconds() + 300);
+        const MouseEvent me (source, relativePos + unboundedMouseOffset,
+                             source.getCurrentModifiers(), this, time,
+                             globalPositionToRelative (source.getLastMouseDownPosition()),
+                             source.getLastMouseDownTime(),
+                             source.getNumberOfMultipleClicks(),
+                             source.hasMouseMovedSignificantlySincePressed());
 
         mouseDrag (me);
 
@@ -2800,8 +2766,8 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
         {
             if (isUnboundedMouseModeOn)
             {
-                Rectangle<int> screenArea (getParentMonitorArea().expanded (-2, -2));
-                Point<int> mousePos (Desktop::getMousePosition());
+                const Rectangle<int> screenArea (getParentMonitorArea().expanded (-2, -2));
+                Point<int> mousePos (source.getScreenPosition());
 
                 if (! screenArea.contains (mousePos))
                 {
@@ -2833,7 +2799,7 @@ void Component::internalMouseDrag (int x, int y, const int64 time)
     }
 }
 
-void Component::internalMouseMove (const int x, const int y, const int64 time)
+void Component::internalMouseMove (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
     const ComponentDeletionWatcher deletionChecker (this);
 
@@ -2841,13 +2807,9 @@ void Component::internalMouseMove (const int x, const int y, const int64 time)
     {
         Desktop& desktop = Desktop::getInstance();
 
-        const MouseEvent me (Point<int> (x, y),
-                             ModifierKeys::getCurrentModifiers(),
-                             this,
-                             Time (time),
-                             Point<int> (x, y),
-                             Time (time),
-                             0, false);
+        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                             this, time, relativePos,
+                             time, 0, false);
 
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
@@ -2913,23 +2875,17 @@ void Component::internalMouseMove (const int x, const int y, const int64 time)
     }
 }
 
-void Component::internalMouseWheel (const int intAmountX, const int intAmountY, const int64 time)
+void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos,
+                                    const Time& time, const float amountX, const float amountY)
 {
     Desktop& desktop = Desktop::getInstance();
     const ComponentDeletionWatcher deletionChecker (this);
 
-    const float wheelIncrementX = intAmountX * (1.0f / 256.0f);
-    const float wheelIncrementY = intAmountY * (1.0f / 256.0f);
+    const float wheelIncrementX = amountX * (1.0f / 256.0f);
+    const float wheelIncrementY = amountY * (1.0f / 256.0f);
 
-    const Point<int> mousePos (getMouseXYRelative());
-
-    const MouseEvent me (mousePos,
-                         ModifierKeys::getCurrentModifiers(),
-                         this,
-                         Time (time),
-                         mousePos,
-                         Time (time),
-                         0, false);
+    const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                         this, time, relativePos, time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2992,17 +2948,12 @@ void Component::internalMouseWheel (const int intAmountX, const int intAmountY, 
 
             p = p->parentComponent_;
         }
-
-        sendFakeMouseMove();
     }
 }
 
 void Component::sendFakeMouseMove() const
 {
-    ComponentPeer* const peer = getPeer();
-
-    if (peer != 0)
-        peer->sendFakeMouseMove();
+    Desktop::getInstance().getMainMouseSource().triggerFakeMove();
 }
 
 void Component::broughtToFront()

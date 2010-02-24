@@ -27,10 +27,16 @@
 #define __JUCE_DESKTOP_JUCEHEADER__
 
 #include "juce_Component.h"
+#include "../../core/juce_Time.h"
 #include "../../utilities/juce_DeletedAtShutdown.h"
 #include "../../events/juce_Timer.h"
 #include "../../events/juce_AsyncUpdater.h"
 #include "../../containers/juce_SortedSet.h"
+#include "../../containers/juce_OwnedArray.h"
+#include "../graphics/geometry/juce_RectangleList.h"
+class MouseInputSource;
+class MouseInputSourceInternal;
+class MouseListener;
 
 
 //==============================================================================
@@ -233,6 +239,9 @@ public:
     /** True if the OS supports semitransparent windows */
     static bool canUseSemiTransparentWindows() throw();
 
+    int getNumMouseInputSources() const throw()                     { return mouseSources.size(); }
+    MouseInputSource* getMouseSource (int index) const throw()      { return mouseSources [index]; }
+    MouseInputSource& getMainMouseSource() const throw()            { return *mouseSources.getUnchecked(0); }
 
 private:
     //==============================================================================
@@ -240,6 +249,8 @@ private:
 
     friend class Component;
     friend class ComponentPeer;
+    friend class MouseInputSource;
+    friend class MouseInputSourceInternal;
     SortedSet <void*> mouseListeners, focusListeners;
     Array <Component*> desktopComponents;
 
@@ -250,24 +261,12 @@ private:
 
     Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
+    OwnedArray <MouseInputSource> mouseSources;
+
     Point<int> lastFakeMouseMove;
     int mouseClickCounter;
-    bool mouseMovedSignificantlySincePressed;
-
-    struct RecentMouseDown
-    {
-        Point<int> position;
-        int64 time;
-        Component* component;
-    };
-
-    RecentMouseDown mouseDowns[4];
 
     void incrementMouseClickCounter() throw();
-    void registerMouseDown (const Point<int>& position, int64 time, Component* component) throw();
-    void registerMouseDrag (const Point<int>& position) throw();
-    const Time getLastMouseDownTime() const throw();
-    int getNumberOfMultipleClicks() const throw();
 
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
