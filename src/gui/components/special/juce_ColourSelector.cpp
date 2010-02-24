@@ -28,9 +28,10 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ColourSelector.h"
-#include "../../../text/juce_LocalisedStrings.h"
 #include "../menus/juce_PopupMenu.h"
+#include "../mouse/juce_MouseEvent.h"
 #include "../../graphics/imaging/juce_Image.h"
+#include "../../../text/juce_LocalisedStrings.h"
 
 static const int swatchesPerRow = 8;
 static const int swatchHeight = 22;

@@ -33,6 +33,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../events/juce_Timer.h"
 #include "../../../core/juce_Random.h"
 #include "../../graphics/imaging/juce_Image.h"
+#include "../mouse/juce_MouseEvent.h"
 #include "juce_FileDragAndDropTarget.h"
 
 bool juce_performDragDropFiles (const StringArray& files, const bool copyFiles, bool& shouldStop);

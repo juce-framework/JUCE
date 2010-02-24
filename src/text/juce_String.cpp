@@ -2158,6 +2158,11 @@ const char* String::toCString() const
     }
 }
 
+#ifdef _MSC_VER
+  #pragma warning (disable: 4514 4996)
+  #pragma warning (push)
+#endif
+
 int String::getNumBytesAsCString() const throw()
 {
     return (int) wcstombs (0, text->text, 0);
@@ -2172,6 +2177,10 @@ int String::copyToCString (char* destBuffer, const int maxBufferSizeBytes) const
 
     return numBytes;
 }
+
+#ifdef _MSC_VER
+  #pragma warning (pop)
+#endif
 
 //==============================================================================
 void String::copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw()
