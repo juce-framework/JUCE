@@ -1307,7 +1307,7 @@ public:
             {
                 JUCE_TRY
                 {
-                    callback->audioDeviceIOCallback ((const float**) inputBuffers,
+                    callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getData()),
                                                      numInputBuffers,
                                                      outputBuffers,
                                                      numOutputBuffers,

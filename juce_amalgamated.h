@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	4
+#define JUCE_BUILDNUMBER	5
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -491,6 +491,10 @@
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
+  #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
+	#pragma warning (disable: 4284)  // (spurious VC6 warning)
+  #endif
+
   #pragma warning (push)
   #pragma warning (disable: 4514 4245 4100)
 #endif
@@ -1515,12 +1519,11 @@ public:
 
 	inline operator ElementType*() const throw()				{ return data; }
 
-	inline operator void*() const throw()				   { return (void*) data; }
+	inline ElementType* getData() const throw()				 { return data; }
+
+	inline operator void*() const throw()				   { return static_cast <void*> (data); }
 
 	inline ElementType* operator->() const  throw()			 { return data; }
-
-	template <class CastType>
-	inline operator CastType*() const throw()				   { return (CastType*) data; }
 
 	template <typename IndexType>
 	inline ElementType& operator[] (IndexType index) const throw()	  { return data [index]; }
@@ -1528,7 +1531,9 @@ public:
 	template <typename IndexType>
 	inline ElementType* operator+ (IndexType index) const throw()	   { return data + index; }
 
-	inline ElementType** operator&() const throw()			  { return (ElementType**) &data; }
+	inline ElementType* const* operator&() const throw()			{ return static_cast <ElementType* const*> (&data); }
+
+	inline ElementType** operator&() throw()				{ return static_cast <ElementType**> (&data); }
 
 	inline bool operator== (const ElementType* const otherPointer) const throw()	{ return otherPointer == data; }
 
@@ -2673,9 +2678,6 @@ public:
 
 	bool matches (const void* data, size_t dataSize) const throw();
 
-	template <class DataType>
-	operator DataType*() const throw()				  { return (DataType*) data; }
-
 	void* getData() const throw()				   { return data; }
 
 	template <typename Type>
@@ -3371,16 +3373,11 @@ public:
 
 	inline ObjectType* operator->() const throw()				   { return object; }
 
-	template <class CastType>
-	inline operator CastType*() const throw()					   { return static_cast <CastType*> (object); }
+	inline ObjectType* const* operator&() const throw()				 { return static_cast <ObjectType* const*> (&object); }
 
-	inline ObjectType** operator&() const throw()				   { return (ObjectType**) &object; }
+	inline ObjectType** operator&() throw()					 { return static_cast <ObjectType**> (&object); }
 
 	ObjectType* release() throw()						   { ObjectType* const o = object; object = 0; return o; }
-
-	inline bool operator== (const ObjectType* const otherPointer) const throw()	 { return otherPointer == object; }
-
-	inline bool operator!= (const ObjectType* const otherPointer) const throw()	 { return otherPointer != object; }
 
 	void swapWith (ScopedPointer <ObjectType>& other) throw()
 	{
@@ -3398,6 +3395,18 @@ private:
 	// (Required as an alternative to the overloaded & operator).
 	const ScopedPointer* getAddress() const throw()				 { return this; }
 };
+
+template <class ObjectType>
+inline bool operator== (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+{
+	return static_cast <ObjectType*> (pointer1) == pointer2;
+}
+
+template <class ObjectType>
+inline bool operator!= (const ScopedPointer<ObjectType>& pointer1, const ObjectType* const pointer2) throw()
+{
+	return static_cast <ObjectType*> (pointer1) != pointer2;
+}
 
 #endif   // __JUCE_SCOPEDPOINTER_JUCEHEADER__
 /*** End of inlined file: juce_ScopedPointer.h ***/
@@ -7680,6 +7689,9 @@ private:
 	class ZipInputStream;
 	class ZipFilenameComparator;
 	class ZipEntryInfo;
+	friend class ZipInputStream;
+	friend class ZipFilenameComparator;
+	friend class ZipEntryInfo;
 
 	OwnedArray <ZipEntryInfo> entries;
 	CriticalSection lock;
@@ -9555,6 +9567,8 @@ public:
 
 	~Rectangle() throw() {}
 
+	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
+
 	inline ValueType getX() const throw()			   { return x; }
 
 	inline ValueType getY() const throw()			   { return y; }
@@ -9567,13 +9581,13 @@ public:
 
 	inline ValueType getBottom() const throw()			  { return y + h; }
 
-	inline ValueType getCentreX() const throw()			 { return x + w / (ValueType) 2; }
+	ValueType getCentreX() const throw()				{ return x + w / (ValueType) 2; }
 
-	inline ValueType getCentreY() const throw()			 { return y + h / (ValueType) 2; }
+	ValueType getCentreY() const throw()				{ return y + h / (ValueType) 2; }
 
-	inline const Point<ValueType> getCentre() const throw()	 { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
+	const Point<ValueType> getCentre() const throw()		{ return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
 
-	bool isEmpty() const throw()					{ return w <= 0 || h <= 0; }
+	ValueType getAspectRatio (const bool widthOverHeight = true) const throw()			  { return widthOverHeight ? w / h : h / w; }
 
 	const Point<ValueType> getPosition() const throw()						  { return Point<ValueType> (x, y); }
 
@@ -9978,7 +9992,7 @@ public:
 	void clipToRectangle (const Rectangle<int>& r) throw();
 	void excludeRectangle (const Rectangle<int>& r) throw();
 	void clipToEdgeTable (const EdgeTable& other);
-	void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
+	void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
 	bool isEmpty() throw();
 	const Rectangle<int>& getMaximumBounds() const throw()	   { return bounds; }
 	void translate (float dx, int dy) throw();
@@ -15528,6 +15542,7 @@ private:
 	MemoryBlock data;
 	int bytesUsed;
 
+	uint8* getData() const throw()	   { return reinterpret_cast <uint8*> (data.getData()); }
 	uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
 };
 
@@ -15891,6 +15906,7 @@ private:
 	SortedSet <void*> buttonListeners;
 
 	class RepeatTimer;
+	friend class RepeatTimer;
 	friend class ScopedPointer <RepeatTimer>;
 	ScopedPointer <RepeatTimer> repeatTimer;
 	uint32 buttonPressTime, lastTimeCallbackTime;
@@ -16583,6 +16599,7 @@ private:
 	void timerCallbackInt();
 	void repaintCaret();
 	void repaintText (const Range<int>& range);
+	UndoManager* getUndoManager() throw();
 
 	TextEditor (const TextEditor&);
 	TextEditor& operator= (const TextEditor&);
@@ -19590,6 +19607,8 @@ public:
 private:
 	class SharedEvents;
 	class BlockingMessage;
+	friend class SharedEvents;
+	friend class BlockingMessage;
 	SharedEvents* sharedEvents;
 	bool locked;
 
@@ -26650,6 +26669,7 @@ public:
 
 private:
 	class OpenGLComponentWatcher;
+	friend class OpenGLComponentWatcher;
 	friend class ScopedPointer <OpenGLComponentWatcher>;
 	ScopedPointer <OpenGLComponentWatcher> componentWatcher;
 
@@ -27664,7 +27684,7 @@ public:
 
 	int subPathIndex;
 
-	bool isLastInSubpath() const		{ return stackPos == stackBase
+	bool isLastInSubpath() const		{ return stackPos == stackBase.getData()
 													  && (index >= path.numElements
 														   || points [index] == Path::moveMarker); }
 
@@ -27966,9 +27986,9 @@ public:
 
 	void clear();
 
-	void setKernelValue (const int x,
-						 const int y,
-						 const float value);
+	float getKernelValue (int x, int y) const throw();
+
+	void setKernelValue (int x, int y, float value) throw();
 
 	void setOverallSum (const float desiredTotalSum);
 
@@ -27977,8 +27997,6 @@ public:
 	void createGaussianBlur (const float blurRadius);
 
 	int getKernelSize() const		   { return size; }
-
-	float** getValues() const		   { return values; }
 
 	void applyToImage (Image& destImage,
 					   const Image* sourceImage,

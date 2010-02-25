@@ -95,7 +95,7 @@ public:
     int subPathIndex;
 
     /** Returns true if the current segment is the last in the current sub-path. */
-    bool isLastInSubpath() const            { return stackPos == stackBase
+    bool isLastInSubpath() const            { return stackPos == stackBase.getData()
                                                       && (index >= path.numElements
                                                            || points [index] == Path::moveMarker); }
 

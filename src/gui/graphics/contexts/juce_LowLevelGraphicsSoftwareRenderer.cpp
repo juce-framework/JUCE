@@ -583,10 +583,10 @@ public:
             scratchBuffer.malloc (scratchSize);
         }
 
-        uint8* mask = (uint8*) scratchBuffer;
         y = y_;
-        generate ((SrcPixelType*) mask, x, width);
+        generate (scratchBuffer, x, width);
 
+        const uint8* mask = reinterpret_cast <uint8*> (scratchBuffer.getData());
         if (sizeof (SrcPixelType) == sizeof (PixelARGB))
             mask += PixelARGB::indexA;
 

@@ -887,10 +887,6 @@ SOURCE=..\..\..\src\gui\graphics\geometry\juce_PathStrokeType.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\src\gui\graphics\geometry\juce_Point.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\src\gui\graphics\geometry\juce_Point.h
 # End Source File
 # Begin Source File
@@ -900,10 +896,6 @@ SOURCE=..\..\..\src\gui\graphics\geometry\juce_PositionedRectangle.cpp
 # Begin Source File
 
 SOURCE=..\..\..\src\gui\graphics\geometry\juce_PositionedRectangle.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\gui\graphics\geometry\juce_Rectangle.cpp
 # End Source File
 # Begin Source File
 
@@ -1518,6 +1510,14 @@ SOURCE=..\..\..\src\gui\components\mouse\juce_MouseHoverDetector.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseInputSource.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\mouse\juce_MouseInputSource.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\gui\components\mouse\juce_MouseListener.cpp
 # End Source File
 # Begin Source File
@@ -1861,6 +1861,38 @@ SOURCE=..\..\..\src\gui\components\properties\juce_TextPropertyComponent.cpp
 SOURCE=..\..\..\src\gui\components\properties\juce_TextPropertyComponent.h
 # End Source File
 # End Group
+# Begin Group "codeeditor"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CodeDocument.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CodeDocument.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CodeEditorComponent.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CodeEditorComponent.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CodeTokeniser.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\gui\components\code_editor\juce_CPlusPlusCodeTokeniser.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\..\src\gui\components\juce_Component.cpp
@@ -2092,6 +2124,14 @@ SOURCE=..\..\..\src\containers\juce_MemoryBlock.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\src\containers\juce_NamedValueSet.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_NamedValueSet.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\src\containers\juce_OwnedArray.h
 # End Source File
 # Begin Source File
@@ -2117,6 +2157,14 @@ SOURCE=..\..\..\src\containers\juce_SortedSet.h
 # Begin Source File
 
 SOURCE=..\..\..\src\containers\juce_SparseSet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_Value.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\containers\juce_Value.h
 # End Source File
 # Begin Source File
 
@@ -2192,6 +2240,14 @@ SOURCE=..\..\..\src\io\files\juce_NamedPipe.cpp
 # Begin Source File
 
 SOURCE=..\..\..\src\io\files\juce_NamedPipe.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\io\files\juce_TemporaryFile.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\io\files\juce_TemporaryFile.h
 # End Source File
 # Begin Source File
 

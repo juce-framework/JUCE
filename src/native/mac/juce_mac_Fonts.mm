@@ -210,7 +210,7 @@ public:
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             HeapBlock <NSSize> advances (length);
-            [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+            [nsFont getAdvancements: advances forGlyphs: reinterpret_cast<NSGlyph*> (glyphs.getData()) count: length];
 
             for (int i = 0; i < length; ++i)
                 x += advances[i].width;
@@ -257,14 +257,15 @@ public:
         if (NEW_CGFONT_FUNCTIONS_UNAVAILABLE)
         {
             HeapBlock <NSSize> advances (length);
-            [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+            NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
+            [nsFont getAdvancements: advances forGlyphs: nsGlyphs count: length];
 
             float x = 0;
             for (int i = 0; i < length; ++i)
             {
                 x += advances[i].width;
                 xOffsets.add (x * unitsToHeightScaleFactor);
-                resultGlyphs.add (((NSGlyph*) glyphs)[i]);
+                resultGlyphs.add (nsGlyphs[i]);
             }
         }
         else
@@ -357,10 +358,10 @@ private:
   #endif
         {
             glyphs.malloc (sizeof (NSGlyph) * length, 1);
-            NSGlyph* const g = (NSGlyph*) glyphs;
+            NSGlyph* const nsGlyphs = reinterpret_cast<NSGlyph*> (glyphs.getData());
 
             for (int i = 0; i < length; ++i)
-                g[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text[i]];
+                nsGlyphs[i] = (NSGlyph) [nsFont _defaultGlyphForChar: text[i]];
 
             return;
         }

@@ -149,6 +149,9 @@ private:
     class ZipInputStream;
     class ZipFilenameComparator;
     class ZipEntryInfo;
+    friend class ZipInputStream;
+    friend class ZipFilenameComparator;
+    friend class ZipEntryInfo;
 
     OwnedArray <ZipEntryInfo> entries;
     CriticalSection lock;

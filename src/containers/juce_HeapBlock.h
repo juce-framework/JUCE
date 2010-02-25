@@ -110,22 +110,23 @@ public:
     */
     inline operator ElementType*() const throw()                            { return data; }
 
+    /** Returns a raw pointer to the allocated data.
+        This may be a null pointer if the data hasn't yet been allocated, or if it has been
+        freed by calling the free() method.
+    */
+    inline ElementType* getData() const throw()                             { return data; }
+
     /** Returns a void pointer to the allocated data.
         This may be a null pointer if the data hasn't yet been allocated, or if it has been
         freed by calling the free() method.
     */
-    inline operator void*() const throw()                                   { return (void*) data; }
+    inline operator void*() const throw()                                   { return static_cast <void*> (data); }
 
     /** Lets you use indirect calls to the first element in the array.
         Obviously this will cause problems if the array hasn't been initialised, because it'll
         be referencing a null pointer.
     */
     inline ElementType* operator->() const  throw()                         { return data; }
-
-    /** Returns a pointer to the data by casting it to any type you need.
-    */
-    template <class CastType>
-    inline operator CastType*() const throw()                               { return (CastType*) data; }
 
     /** Returns a reference to one of the data elements.
         Obviously there's no bounds-checking here, as this object is just a dumb pointer and
@@ -144,7 +145,13 @@ public:
         Beware that the pointer returned here will become invalid as soon as you call
         any of the allocator methods on this object!
     */
-    inline ElementType** operator&() const throw()                          { return (ElementType**) &data; }
+    inline ElementType* const* operator&() const throw()                    { return static_cast <ElementType* const*> (&data); }
+
+    /** Returns a reference to the raw data pointer.
+        Beware that the pointer returned here will become invalid as soon as you call
+        any of the allocator methods on this object!
+    */
+    inline ElementType** operator&() throw()                                { return static_cast <ElementType**> (&data); }
 
     //==============================================================================
     /** Compares the pointer with another pointer.

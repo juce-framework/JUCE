@@ -902,7 +902,8 @@ public:
                 colour[index++] = image.getPixelAt (x, y).getARGB();
 
         XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                       0, (char*) colour, width, height, 32, 0);
+                                       0, reinterpret_cast<char*> (colour.getData()),
+                                       width, height, 32, 0);
 
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
                                        width, height, 24);
@@ -938,7 +939,7 @@ public:
         }
 
         return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                            (char*) mask, width, height, 1, 0, 1);
+                                            reinterpret_cast<char*> (mask.getData()), width, height, 1, 0, 1);
     }
 
     void setIcon (const Image& newIcon)
@@ -958,7 +959,7 @@ public:
         XChangeProperty (display, windowH,
                          XInternAtom (display, "_NET_WM_ICON", False),
                          XA_CARDINAL, 32, PropModeReplace,
-                         (unsigned char*) data, dataSize);
+                         reinterpret_cast<unsigned char*> (data.getData()), dataSize);
 
         deleteIconPixmaps();
 
@@ -1015,7 +1016,13 @@ public:
                 char utf8 [64];
                 zeromem (utf8, sizeof (utf8));
                 KeySym sym;
-                XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
+
+                {
+                    const char* oldLocale = ::setlocale (LC_ALL, 0);
+                    ::setlocale (LC_ALL, "");
+                    XLookupString (keyEvent, utf8, sizeof (utf8), &sym, 0);
+                    ::setlocale (LC_ALL, oldLocale);
+                }
 
                 const juce_wchar unicodeChar = *(const juce_wchar*) String::fromUTF8 (utf8, sizeof (utf8) - 1);
                 int keyCode = (int) unicodeChar;
@@ -2777,8 +2784,8 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
         }
     }
 
-    Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, (char*) sourcePlane, cursorW, cursorH, 0xffff, 0, 1);
-    Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, (char*) maskPlane, cursorW, cursorH, 0xffff, 0, 1);
+    Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, reinterpret_cast <char*> (sourcePlane.getData()), cursorW, cursorH, 0xffff, 0, 1);
+    Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, reinterpret_cast <char*> (maskPlane.getData()), cursorW, cursorH, 0xffff, 0, 1);
 
     XColor white, black;
     black.red = black.green = black.blue = 0;

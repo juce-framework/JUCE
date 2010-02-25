@@ -136,8 +136,13 @@ const Rectangle<float> DrawableComposite::getBounds() const
         const Drawable* const d = drawables.getUnchecked(i);
         const AffineTransform* const t = transforms.getUnchecked(i);
 
-        bounds = bounds.getUnion (t == 0 ? d->getBounds()
-                                         : d->getBounds().transformed (*t));
+        const Rectangle<float> childBounds (t == 0 ? d->getBounds()
+                                                   : d->getBounds().transformed (*t));
+
+        if (bounds.isEmpty())
+            bounds = childBounds;
+        else if (! childBounds.isEmpty())
+            bounds = bounds.getUnion (childBounds);
     }
 
     return bounds;

@@ -88,14 +88,6 @@ public:
     bool matches (const void* data, size_t dataSize) const throw();
 
     //==============================================================================
-    /** Returns a pointer to the data, casting it to any type of primitive data required.
-
-        Note that the pointer returned will probably become invalid when the
-        block is resized.
-    */
-    template <class DataType>
-    operator DataType*() const throw()                              { return (DataType*) data; }
-
     /** Returns a void pointer to the data.
 
         Note that the pointer returned will probably become invalid when the

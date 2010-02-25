@@ -60,6 +60,9 @@ XmlElement::XmlElement (const String& tagName_) throw()
 {
     // the tag name mustn't be empty, or it'll look like a text element!
     jassert (tagName_.containsNonWhitespaceChars())
+
+    // The tag can't contain spaces or other characters that would create invalid XML!
+    jassert (! tagName_.containsAnyOf (T(" <>/&")));
 }
 
 XmlElement::XmlElement (int /*dummy*/) throw()
@@ -473,7 +476,6 @@ XmlElement* XmlElement::getNextElementWithTagName (const String& requiredTagName
 
     return e;
 }
-
 
 //==============================================================================
 int XmlElement::getNumAttributes() const throw()

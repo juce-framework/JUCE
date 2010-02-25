@@ -181,8 +181,9 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
             numDataItems = 2;
             propertyFormat = 32; // atoms are 32-bit
             data.calloc (numDataItems * 4);
-            ((Atom*) data)[0] = atom_UTF8_STRING;
-            ((Atom*) data)[1] = XA_STRING;
+            Atom* atoms = reinterpret_cast<Atom*> (data.getData());
+            atoms[0] = atom_UTF8_STRING;
+            atoms[1] = XA_STRING;
         }
     }
     else
@@ -200,7 +201,7 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
             XChangeProperty (evt.display, evt.requestor,
                              evt.property, evt.target,
                              propertyFormat /* 8 or 32 */, PropModeReplace,
-                             (const unsigned char*) data, numDataItems);
+                             reinterpret_cast<const unsigned char*> (data.getData()), numDataItems);
             reply.property = evt.property; // " == success"
         }
     }

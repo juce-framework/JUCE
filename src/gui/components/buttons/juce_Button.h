@@ -474,6 +474,7 @@ private:
     SortedSet <void*> buttonListeners;
 
     class RepeatTimer;
+    friend class RepeatTimer;
     friend class ScopedPointer <RepeatTimer>;
     ScopedPointer <RepeatTimer> repeatTimer;
     uint32 buttonPressTime, lastTimeCallbackTime;

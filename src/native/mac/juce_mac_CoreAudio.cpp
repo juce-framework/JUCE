@@ -628,7 +628,7 @@ public:
             {
                 if (inputDevice == 0)
                 {
-                    callback->audioDeviceIOCallback ((const float**) tempInputBuffers,
+                    callback->audioDeviceIOCallback (const_cast<const float**> (inputDevice->tempInputBuffers.getData()),
                                                      numInputChans,
                                                      tempOutputBuffers,
                                                      numOutputChans,
@@ -643,7 +643,7 @@ public:
                     // changed while inside our callback..
                     const ScopedLock sl2 (inputDevice->callbackLock);
 
-                    callback->audioDeviceIOCallback ((const float**) inputDevice->tempInputBuffers,
+                    callback->audioDeviceIOCallback (const_cast<const float**> (inputDevice->tempInputBuffers.getData()),
                                                      inputDevice->numInputChans,
                                                      tempOutputBuffers,
                                                      numOutputChans,

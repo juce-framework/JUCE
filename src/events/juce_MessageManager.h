@@ -307,6 +307,8 @@ public:
 private:
     class SharedEvents;
     class BlockingMessage;
+    friend class SharedEvents;
+    friend class BlockingMessage;
     SharedEvents* sharedEvents;
     bool locked;
 

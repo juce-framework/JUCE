@@ -687,7 +687,7 @@ void EdgeTable::clipToEdgeTable (const EdgeTable& other)
     }
 }
 
-void EdgeTable::clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw()
+void EdgeTable::clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw()
 {
     y -= bounds.getY();
 

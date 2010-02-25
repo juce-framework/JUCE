@@ -60,7 +60,7 @@ void AudioSampleBuffer::allocateData()
     const size_t channelListSize = (numChannels + 1) * sizeof (float*);
     allocatedBytes = (int) (numChannels * size * sizeof (float) + channelListSize + 32);
     allocatedData.malloc (allocatedBytes);
-    channels = (float**) allocatedData;
+    channels = reinterpret_cast <float**> (allocatedData.getData());
 
     float* chan = (float*) (allocatedData + channelListSize);
     for (int i = 0; i < numChannels; ++i)
@@ -103,12 +103,12 @@ void AudioSampleBuffer::allocateChannels (float** const dataToReferTo)
     // (try to avoid doing a malloc here, as that'll blow up things like Pro-Tools)
     if (numChannels < numElementsInArray (preallocatedChannelSpace))
     {
-        channels = (float**) preallocatedChannelSpace;
+        channels = static_cast <float**> (preallocatedChannelSpace);
     }
     else
     {
         allocatedData.malloc (numChannels + 1, sizeof (float*));
-        channels = (float**) allocatedData;
+        channels = reinterpret_cast <float**> (allocatedData.getData());
     }
 
     for (int i = 0; i < numChannels; ++i)
@@ -162,8 +162,8 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             const int numChansToCopy = jmin (numChannels, newNumChannels);
             const size_t numBytesToCopy = sizeof (float) * jmin (newNumSamples, size);
 
-            float** const newChannels = (float**) newData;
-            float* newChan = (float*) (newData + channelListSize);
+            float** const newChannels = reinterpret_cast <float**> (newData.getData());
+            float* newChan = reinterpret_cast <float*> (newData + channelListSize);
             for (int i = 0; i < numChansToCopy; ++i)
             {
                 memcpy (newChan, channels[i], numBytesToCopy);
@@ -173,7 +173,7 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
 
             allocatedData.swapWith (newData);
             allocatedBytes = (int) newTotalBytes;
-            channels = (float**) allocatedData;
+            channels = newChannels;
         }
         else
         {
@@ -186,10 +186,10 @@ void AudioSampleBuffer::setSize (const int newNumChannels,
             {
                 allocatedBytes = newTotalBytes;
                 allocatedData.allocate (newTotalBytes, clearExtraSpace);
-                channels = (float**) allocatedData;
+                channels = reinterpret_cast <float**> (allocatedData.getData());
             }
 
-            float* chan = (float*) (allocatedData + channelListSize);
+            float* chan = reinterpret_cast <float*> (allocatedData + channelListSize);
             for (int i = 0; i < newNumChannels; ++i)
             {
                 channels[i] = chan;

@@ -1841,7 +1841,7 @@ static const var::identifier getColourPropertyId (const int colourId)
 {
     String s;
     s.preallocateStorage (18);
-    s << T("jcclr_") << colourId;
+    s << T("jcclr_") << String::toHexString (colourId);
     return s;
 }
 

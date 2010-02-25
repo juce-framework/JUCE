@@ -538,8 +538,8 @@ const StringPairArray& URL::getMimeTypesOfUploadFiles() const
 const String URL::removeEscapeChars (const String& s)
 {
     const int len = s.length();
-    HeapBlock <uint8> resultUTF8 (len * 4);
-    uint8* r = resultUTF8;
+    HeapBlock <char> resultUTF8 (len * 4);
+    char* r = resultUTF8;
 
     for (int i = 0; i < len; ++i)
     {

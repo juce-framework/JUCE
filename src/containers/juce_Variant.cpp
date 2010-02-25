@@ -246,7 +246,7 @@ void var::writeToStream (OutputStream& output) const
             const int len = value.stringValue->getNumBytesAsUTF8() + 1;
             output.writeCompressedInt (len + 1);
             output.writeByte (5);
-            HeapBlock <uint8> temp (len);
+            HeapBlock<char> temp (len);
             value.stringValue->copyToUTF8 (temp, len);
             output.write (temp, len);
             break;

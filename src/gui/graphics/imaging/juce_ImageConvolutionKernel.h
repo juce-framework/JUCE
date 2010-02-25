@@ -50,9 +50,11 @@ public:
     ~ImageConvolutionKernel();
 
     //==============================================================================
-    /** Resets all values in the kernel to zero.
-    */
+    /** Resets all values in the kernel to zero. */
     void clear();
+
+    /** Returns one of the kernel values. */
+    float getKernelValue (int x, int y) const throw();
 
     /** Sets the value of a specific cell in the kernel.
 
@@ -60,9 +62,7 @@ public:
 
         @see setOverallSum
     */
-    void setKernelValue (const int x,
-                         const int y,
-                         const float value);
+    void setKernelValue (int x, int y, float value) throw();
 
     /** Rescales all values in the kernel to make the total add up to a fixed value.
 
@@ -88,12 +88,6 @@ public:
         E.g. if it's a 3x3 kernel, this returns 3.
     */
     int getKernelSize() const               { return size; }
-
-    /** Returns a 2-dimensional array of the kernel's values.
-
-        The size of each dimension of the array will be getKernelSize().
-    */
-    float** getValues() const               { return values; }
 
     //==============================================================================
     /** Applies the kernel to an image.

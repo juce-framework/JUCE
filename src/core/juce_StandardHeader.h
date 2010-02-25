@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      51
-#define JUCE_BUILDNUMBER        4
+#define JUCE_BUILDNUMBER        5
 
 /** Current Juce version number.
 
@@ -65,6 +65,10 @@
 
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
+  #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
+    #pragma warning (disable: 4284)  // (spurious VC6 warning)
+  #endif
+
   #pragma warning (push)
   #pragma warning (disable: 4514 4245 4100)
 #endif

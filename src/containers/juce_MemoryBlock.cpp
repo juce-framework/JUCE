@@ -175,7 +175,7 @@ void MemoryBlock::append (const void* const srcData,
 
 void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) throw()
 {
-    const char* d = (const char*) src;
+    const char* d = static_cast<const char*> (src);
 
     if (offset < 0)
     {
@@ -193,7 +193,7 @@ void MemoryBlock::copyFrom (const void* const src, int offset, size_t num) throw
 
 void MemoryBlock::copyTo (void* const dst, int offset, size_t num) const throw()
 {
-    char* d = (char*) dst;
+    char* d = static_cast<char*> (dst);
 
     if (offset < 0)
     {
@@ -271,16 +271,16 @@ void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int b
 {
     size_t byte = bitRangeStart >> 3;
     int offsetInByte = bitRangeStart & 7;
-    unsigned int mask = ~((((unsigned int)0xffffffff) << (32 - numBits)) >> (32 - numBits));
+    unsigned int mask = ~((((unsigned int) 0xffffffff) << (32 - numBits)) >> (32 - numBits));
 
     while (numBits > 0 && (size_t) byte < size)
     {
         const int bitsThisTime = jmin ((int) numBits, 8 - offsetInByte);
 
-        const unsigned int tempMask = (mask << offsetInByte) | ~((((unsigned int)0xffffffff) >> offsetInByte) << offsetInByte);
+        const unsigned int tempMask = (mask << offsetInByte) | ~((((unsigned int) 0xffffffff) >> offsetInByte) << offsetInByte);
         const unsigned int tempBits = bitsToSet << offsetInByte;
 
-        data[byte] = (char)((data[byte] & tempMask) | tempBits);
+        data[byte] = (char) ((data[byte] & tempMask) | tempBits);
 
         ++byte;
         numBits -= bitsThisTime;
@@ -307,7 +307,7 @@ void MemoryBlock::loadFromHexString (const String& hex) throw()
 
             for (;;)
             {
-                const tchar c = hex [i++];
+                const juce_wchar c = hex [i++];
 
                 if (c >= T('0') && c <= T('9'))
                 {
@@ -326,7 +326,7 @@ void MemoryBlock::loadFromHexString (const String& hex) throw()
                 }
                 else if (c == 0)
                 {
-                    setSize ((int) (dest - data));
+                    setSize (static_cast <size_t> (dest - data));
                     return;
                 }
             }

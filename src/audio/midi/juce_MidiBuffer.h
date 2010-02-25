@@ -229,6 +229,7 @@ private:
     MemoryBlock data;
     int bytesUsed;
 
+    uint8* getData() const throw()       { return reinterpret_cast <uint8*> (data.getData()); }
     uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
 };
 

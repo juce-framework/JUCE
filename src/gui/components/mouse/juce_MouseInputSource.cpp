@@ -116,7 +116,7 @@ public:
                 if (current != 0)
                     current->internalMouseUp (source, current->globalPositionToRelative (screenPos + unboundedMouseOffset),
                                               time, getCurrentModifiers());
-                
+
                 enableUnboundedMouseMovement (false, false);
             }
 
@@ -408,7 +408,7 @@ private:
     MouseInputSource& source;
     ScopedPointer<ComponentDeletionWatcher> componentUnderMouse;
     ComponentPeer* lastPeer;
-    
+
     Point<int> unboundedMouseOffset;
     bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
     void* currentCursorHandle;

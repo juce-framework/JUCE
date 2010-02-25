@@ -698,6 +698,7 @@ private:
     void timerCallbackInt();
     void repaintCaret();
     void repaintText (const Range<int>& range);
+    UndoManager* getUndoManager() throw();
 
     TextEditor (const TextEditor&);
     TextEditor& operator= (const TextEditor&);

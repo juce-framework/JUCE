@@ -1022,8 +1022,8 @@ void TextEditor::doUndoRedo (const bool isRedo)
 {
     if (! isReadOnly())
     {
-        if ((isRedo) ? undoManager.redo()
-                     : undoManager.undo())
+        if (isRedo ? undoManager.redo()
+                   : undoManager.undo())
         {
             scrollToMakeSureCursorIsVisible();
             repaint();
@@ -1595,7 +1595,7 @@ void TextEditor::insertTextAtCaret (const String& newText_)
     const int newCaretPos = selection.getStart() + newText.length();
     const int insertIndex = selection.getStart();
 
-    remove (selection, &undoManager,
+    remove (selection, getUndoManager(),
             newText.isNotEmpty() ? newCaretPos - 1 : newCaretPos);
 
     if (maxTextLength > 0)
@@ -1606,7 +1606,7 @@ void TextEditor::insertTextAtCaret (const String& newText_)
                 insertIndex,
                 currentFont,
                 findColour (textColourId),
-                &undoManager,
+                getUndoManager(),
                 newCaretPos);
 
     textChanged();
@@ -2063,8 +2063,12 @@ void TextEditor::addPopupMenuItems (PopupMenu& m, const MouseEvent*)
     m.addSeparator();
     m.addItem (baseMenuItemID + 5, TRANS("select all"));
     m.addSeparator();
-    m.addItem (baseMenuItemID + 6, TRANS("undo"), undoManager.canUndo());
-    m.addItem (baseMenuItemID + 7, TRANS("redo"), undoManager.canRedo());
+
+    if (getUndoManager() != 0)
+    {
+        m.addItem (baseMenuItemID + 6, TRANS("undo"), undoManager.canUndo());
+        m.addItem (baseMenuItemID + 7, TRANS("redo"), undoManager.canRedo());
+    }
 }
 
 void TextEditor::performPopupMenuAction (const int menuItemID)
@@ -2206,6 +2210,11 @@ void TextEditor::enablementChanged()
 }
 
 //==============================================================================
+UndoManager* TextEditor::getUndoManager() throw()
+{
+    return isReadOnly() ? &undoManager : 0;
+}
+
 void TextEditor::clearInternal (UndoManager* const um)
 {
     remove (Range<int> (0, getTotalNumChars()), um, caretPosition);

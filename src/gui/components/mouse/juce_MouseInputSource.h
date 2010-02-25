@@ -138,7 +138,7 @@ public:
     void revealCursor();
 
     bool canDoUnboundedMovement() const throw();
-    
+
     /** Allows the mouse to move beyond the edges of the screen.
 
         Calling this method when the mouse button is currently pressed will remove the cursor

@@ -302,12 +302,12 @@ public:
 
         if (bufSize > 0)
         {
-            HeapBlock <char> data (bufSize);
+            HeapBlock<char> data (bufSize);
 
             GetGlyphOutline (dc, character, GGO_NATIVE, &gm,
                              bufSize, data, &identityMatrix);
 
-            const TTPOLYGONHEADER* pheader = (TTPOLYGONHEADER*) data;
+            const TTPOLYGONHEADER* pheader = reinterpret_cast<TTPOLYGONHEADER*> (data.getData());
 
             const float scaleX = 1.0f / height;
             const float scaleY = -1.0f / height;

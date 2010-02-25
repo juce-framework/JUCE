@@ -83,6 +83,9 @@ public:
     ~Rectangle() throw() {}
 
     //==============================================================================
+    /** Returns true if the rectangle's width and height are both zero or less */
+    bool isEmpty() const throw()                                    { return w <= 0 || h <= 0; }
+
     /** Returns the x co-ordinate of the rectangle's left-hand-side. */
     inline ValueType getX() const throw()                           { return x; }
 
@@ -102,15 +105,18 @@ public:
     inline ValueType getBottom() const throw()                      { return y + h; }
 
     /** Returns the x co-ordinate of the rectangle's centre. */
-    inline ValueType getCentreX() const throw()                     { return x + w / (ValueType) 2; }
+    ValueType getCentreX() const throw()                            { return x + w / (ValueType) 2; }
 
     /** Returns the y co-ordinate of the rectangle's centre. */
-    inline ValueType getCentreY() const throw()                     { return y + h / (ValueType) 2; }
+    ValueType getCentreY() const throw()                            { return y + h / (ValueType) 2; }
 
-    inline const Point<ValueType> getCentre() const throw()         { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
+    /** Returns the centre point of the rectangle. */
+    const Point<ValueType> getCentre() const throw()                { return Point<ValueType> (x + w / (ValueType) 2, y + h / (ValueType) 2); }
 
-    /** Returns true if the rectangle's width and height are both zero or less */
-    bool isEmpty() const throw()                                    { return w <= 0 || h <= 0; }
+    /** Returns the aspect ratio of the rectangle's width / height.
+        If widthOverHeight is true, it returns width / height; if widthOverHeight is false,
+        it returns height / width. */
+    ValueType getAspectRatio (const bool widthOverHeight = true) const throw()                      { return widthOverHeight ? w / h : h / w; }
 
     //==============================================================================
     /** Returns the rectangle's top-left position as a Point. */

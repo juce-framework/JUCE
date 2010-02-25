@@ -106,5 +106,8 @@
  #error "You need to define the JucePlugin_AUCocoaViewClassName value in your JucePluginCharacteristics.h file!"
 #endif
 
+#if ! defined (JUCE_ObjCExtraSuffix)
+ #error "To avoid objective-C name clashes with other plugins, you need to define the JUCE_ObjCExtraSuffix value in your JucePluginCharacteristics.h file!"
+#endif
 
 #endif   // __JUCE_INCLUDECHARACTERISTICS_JUCEHEADER__

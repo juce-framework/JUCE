@@ -74,12 +74,12 @@ void MidiBuffer::clear() throw()
 void MidiBuffer::clear (const int startSample,
                         const int numSamples) throw()
 {
-    uint8* const start = findEventAfter (data, startSample - 1);
+    uint8* const start = findEventAfter (getData(), startSample - 1);
     uint8* const end   = findEventAfter (start, startSample + numSamples - 1);
 
     if (end > start)
     {
-        const size_t bytesToMove = (size_t) (bytesUsed - (end - (uint8*) data.getData()));
+        const size_t bytesToMove = (size_t) (bytesUsed - (end - getData()));
 
         if (bytesToMove > 0)
             memmove (start, end, bytesToMove);
@@ -136,8 +136,8 @@ void MidiBuffer::addEvent (const uint8* const newData,
         int spaceNeeded = bytesUsed + numBytes + 6;
         data.ensureSize ((spaceNeeded + spaceNeeded / 2 + 8) & ~7);
 
-        uint8* d = findEventAfter ((uint8*) data.getData(), sampleNumber);
-        const size_t bytesToMove = (size_t) (bytesUsed - (d - (uint8*) data.getData()));
+        uint8* d = findEventAfter (getData(), sampleNumber);
+        const size_t bytesToMove = (size_t) (bytesUsed - (d - getData()));
 
         if (bytesToMove > 0)
             memmove (d + numBytes + 6,
@@ -181,7 +181,7 @@ bool MidiBuffer::isEmpty() const throw()
 int MidiBuffer::getNumEvents() const throw()
 {
     int n = 0;
-    const uint8* d = (uint8*) data.getData();
+    const uint8* d = getData();
     const uint8* const end = d + bytesUsed;
 
     while (d < end)
@@ -196,7 +196,7 @@ int MidiBuffer::getNumEvents() const throw()
 
 int MidiBuffer::getFirstEventTime() const throw()
 {
-    return (bytesUsed > 0) ? *(const int*) data.getData() : 0;
+    return (bytesUsed > 0) ? *reinterpret_cast <const int*> (data.getData()) : 0;
 }
 
 int MidiBuffer::getLastEventTime() const throw()
@@ -204,7 +204,7 @@ int MidiBuffer::getLastEventTime() const throw()
     if (bytesUsed == 0)
         return 0;
 
-    const uint8* d = (uint8*) data.getData();
+    const uint8* d = getData();
     const uint8* const endData = d + bytesUsed;
 
     for (;;)
@@ -220,7 +220,7 @@ int MidiBuffer::getLastEventTime() const throw()
 
 uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const throw()
 {
-    const uint8* const endData = ((uint8*) data.getData()) + bytesUsed;
+    const uint8* const endData = getData() + bytesUsed;
 
     while (d < endData && *(int*) d <= samplePosition)
     {
@@ -234,7 +234,7 @@ uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const thr
 //==============================================================================
 MidiBuffer::Iterator::Iterator (const MidiBuffer& buffer_) throw()
     : buffer (buffer_),
-      data ((uint8*) buffer_.data.getData())
+      data (buffer_.getData())
 {
 }
 
@@ -245,10 +245,10 @@ MidiBuffer::Iterator::~Iterator() throw()
 //==============================================================================
 void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) throw()
 {
-    data = buffer.data;
-    const uint8* dataEnd = ((uint8*) buffer.data.getData()) + buffer.bytesUsed;
+    data = buffer.getData();
+    const uint8* dataEnd = data + buffer.bytesUsed;
 
-    while (data < dataEnd && *(int*) data < samplePosition)
+    while (data < dataEnd && *reinterpret_cast<const int*> (data) < samplePosition)
     {
         data += 4;
         data += 2 + *(uint16*) data;
@@ -259,7 +259,7 @@ bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData,
                                          int& numBytes,
                                          int& samplePosition) throw()
 {
-    if (data >= ((uint8*) buffer.data.getData()) + buffer.bytesUsed)
+    if (data >= buffer.getData() + buffer.bytesUsed)
         return false;
 
     samplePosition = *(int*) data;
@@ -275,12 +275,12 @@ bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData,
 bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result,
                                          int& samplePosition) throw()
 {
-    if (data >= ((uint8*) buffer.data.getData()) + buffer.bytesUsed)
+    if (data >= buffer.getData() + buffer.bytesUsed)
         return false;
 
-    samplePosition = *(int*) data;
+    samplePosition = *reinterpret_cast <const int*> (data);
     data += 4;
-    const int numBytes = *(uint16*) data;
+    const int numBytes = *reinterpret_cast <const uint16*> (data);
     data += 2;
     result = MidiMessage (data, numBytes, samplePosition);
     data += numBytes;

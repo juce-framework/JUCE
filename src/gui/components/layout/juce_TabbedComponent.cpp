@@ -138,7 +138,7 @@ void TabbedComponent::clearTabs()
         // be careful not to delete these components until they've been removed from the tab component
         jassert (c == 0 || c->isValidComponent());
 
-        if (c != 0 && c->getProperties() ["deleteByTabComp_"])
+        if (c != 0 && (bool) c->getProperties() ["deleteByTabComp_"])
             delete c;
     }
 
@@ -169,7 +169,7 @@ void TabbedComponent::removeTab (const int tabIndex)
 {
     Component* const c = contentComponents [tabIndex];
 
-    if (c != 0 && c->getProperties() ["deleteByTabComp_"])
+    if (c != 0 && (bool) c->getProperties() ["deleteByTabComp_"])
     {
         if (c == panelComponent)
             panelComponent = 0;

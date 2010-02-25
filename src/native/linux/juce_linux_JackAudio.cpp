@@ -395,7 +395,7 @@ private:
 
         if (callback != 0)
         {
-            callback->audioDeviceIOCallback ((const float**) inChans, numActiveInChans,
+            callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numActiveInChans,
                                              outChans, numActiveOutChans, numSamples);
         }
         else

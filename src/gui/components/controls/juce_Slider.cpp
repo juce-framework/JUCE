@@ -502,7 +502,9 @@ void Slider::setValue (double newValue,
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (newValue));
+            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
+                ->updatePosition (getTextFromValue (newValue));
+
             popupDisplay->repaint();
         }
 
@@ -560,7 +562,9 @@ void Slider::setMinValue (double newValue, const bool sendUpdateMessage, const b
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (newValue));
+            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
+                ->updatePosition (getTextFromValue (newValue));
+
             popupDisplay->repaint();
         }
 
@@ -600,7 +604,9 @@ void Slider::setMaxValue (double newValue, const bool sendUpdateMessage, const b
 
         if (popupDisplay != 0)
         {
-            ((SliderPopupDisplayComponent*) popupDisplay)->updatePosition (getTextFromValue (valueMax.getValue()));
+            static_cast <SliderPopupDisplayComponent*> (static_cast <Component*> (popupDisplay))
+                ->updatePosition (getTextFromValue (valueMax.getValue()));
+
             popupDisplay->repaint();
         }
 

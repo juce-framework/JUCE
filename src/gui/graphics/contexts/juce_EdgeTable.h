@@ -83,7 +83,7 @@ public:
     void clipToRectangle (const Rectangle<int>& r) throw();
     void excludeRectangle (const Rectangle<int>& r) throw();
     void clipToEdgeTable (const EdgeTable& other);
-    void clipLineToMask (int x, int y, uint8* mask, int maskStride, int numPixels) throw();
+    void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
     bool isEmpty() throw();
     const Rectangle<int>& getMaximumBounds() const throw()       { return bounds; }
     void translate (float dx, int dy) throw();

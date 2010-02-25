@@ -79,7 +79,7 @@ public:
 
     ~DragImageComponent()
     {
-        if ((DragImageComponent*) owner->dragImageComponent == this)
+        if (owner->dragImageComponent == this)
             owner->dragImageComponent.release();
 
         if (! mouseDragSourceWatcher->hasBeenDeleted())
@@ -419,7 +419,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             else
                 thisComp->addChildComponent (dragImageComponent);
 
-            ((DragImageComponent*) dragImageComponent)->updateLocation (false, lastMouseDown);
+            static_cast <DragImageComponent*> (static_cast <Component*> (dragImageComponent))->updateLocation (false, lastMouseDown);
             dragImageComponent->setVisible (true);
         }
         else
