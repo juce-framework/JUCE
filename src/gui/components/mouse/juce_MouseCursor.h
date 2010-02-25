@@ -149,7 +149,7 @@ public:
 private:
     ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
 
-    friend class Component;
+    friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer* window) const throw();
     void showInAllWindows() const throw();
     void* getHandle() const throw();

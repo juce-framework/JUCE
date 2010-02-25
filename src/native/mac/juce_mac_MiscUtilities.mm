@@ -90,12 +90,14 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     if (files.size() == 0)
         return false;
 
-    Component* sourceComp = Component::getComponentUnderMouse();
+    // This method must be called in response to a component's mouseDrag event!
+    jassert (Desktop::getInstance().getMainMouseSource().isDragging());
+
+    Component* sourceComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
     if (sourceComp == 0)
     {
-        jassertfalse  // this method must be called in response to a
-                      // component's mouseDrag event!
+        jassertfalse  // this method must be called in response to a component's mouseDrag event!
         return false;
     }
 

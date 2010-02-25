@@ -1406,8 +1406,10 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 
 void NSViewComponentPeer::showArrowCursorIfNeeded()
 {
-    if (Component::getComponentUnderMouse() == 0
-         && Desktop::getInstance().findComponentAt (Desktop::getInstance().getMousePosition()) == 0)
+    MouseInputSource& mouse = Desktop::getInstance().getMainMouseSource();
+
+    if (mouse.getComponentUnderMouse() == 0
+         && Desktop::getInstance().findComponentAt (mouse.getScreenPosition()) == 0)
     {
         [[NSCursor arrowCursor] set];
     }

@@ -251,7 +251,7 @@ void ComponentPeer::handleModifierKeysChange()
 {
     updateCurrentModifiers();
 
-    Component* target = Component::getComponentUnderMouse();
+    Component* target = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
 
     if (target == 0)
         target = Component::getCurrentlyFocusedComponent();

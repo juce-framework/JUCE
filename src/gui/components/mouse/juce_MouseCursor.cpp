@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_MouseCursor.h"
 #include "../juce_Component.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../mouse/juce_MouseInputSource.h"
 #include "../../../threads/juce_ScopedLock.h"
 
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw();
@@ -148,18 +149,12 @@ void* MouseCursor::getHandle() const throw()
 
 void MouseCursor::showWaitCursor() throw()
 {
-    const MouseCursor mc (MouseCursor::WaitCursor);
-    mc.showInAllWindows();
+    Desktop::getInstance().getMainMouseSource().showMouseCursor (MouseCursor::WaitCursor);
 }
 
 void MouseCursor::hideWaitCursor() throw()
 {
-    Component* const c = Component::getComponentUnderMouse();
-
-    MouseCursor mc (c->isValidComponent() ? c->getLookAndFeel().getMouseCursorFor (*c)
-                                          : MouseCursor::NormalCursor);
-
-    mc.showInAllWindows();
+    Desktop::getInstance().getMainMouseSource().revealCursor();
 }
 
 END_JUCE_NAMESPACE

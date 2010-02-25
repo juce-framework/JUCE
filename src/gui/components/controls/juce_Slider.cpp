@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../menus/juce_PopupMenu.h"
 #include "../juce_Desktop.h"
 #include "../special/juce_BubbleComponent.h"
+#include "../mouse/juce_MouseInputSource.h"
 #include "../../../text/juce_LocalisedStrings.h"
 
 
@@ -1136,13 +1137,7 @@ void Slider::restoreMouseIfHidden()
     if (mouseWasHidden)
     {
         mouseWasHidden = false;
-
-        Component* c = Component::getComponentUnderMouse();
-
-        if (c == 0)
-            c = this;
-
-        c->enableUnboundedMouseMovement (false);
+        Desktop::getInstance().getMainMouseSource().enableUnboundedMouseMovement (false);
 
         const double pos = (sliderBeingDragged == 2) ? getMaxValue()
                                                      : ((sliderBeingDragged == 1) ? getMinValue()
@@ -1332,7 +1327,7 @@ void Slider::mouseDrag (const MouseEvent& e)
 
                     valueWhenLastDragged = proportionOfLengthToValue (jlimit (0.0, 1.0, currentPos + speed));
 
-                    e.originalComponent->enableUnboundedMouseMovement (true, false);
+                    e.source.enableUnboundedMouseMovement (true, false);
                     mouseWasHidden = true;
                 }
             }
@@ -1393,7 +1388,7 @@ void Slider::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float w
          && style != TwoValueHorizontal
          && style != TwoValueVertical)
     {
-        if (maximum > minimum && ! isMouseButtonDownAnywhere())
+        if (maximum > minimum && ! e.mods.isAnyMouseButtonDown())
         {
             if (valueBox != 0)
                 valueBox->hideEditor (false);

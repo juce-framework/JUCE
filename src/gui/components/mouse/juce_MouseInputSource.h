@@ -106,7 +106,7 @@ public:
     */
     const ModifierKeys getCurrentModifiers() const;
 
-    /** Returns the component that was last known to be under this device. */
+    /** Returns the component that was last known to be under this pointer. */
     Component* getComponentUnderMouse() const;
 
     /** Tells the device to dispatch a mouse-move event.
@@ -132,6 +132,31 @@ public:
     */
     bool hasMouseMovedSignificantlySincePressed() const throw();
 
+    bool hasMouseCursor() const throw();
+    void showMouseCursor (const MouseCursor& cursor);
+    void hideCursor();
+    void revealCursor();
+
+    bool canDoUnboundedMovement() const throw();
+    
+    /** Allows the mouse to move beyond the edges of the screen.
+
+        Calling this method when the mouse button is currently pressed will remove the cursor
+        from the screen and allow the mouse to (seem to) move beyond the edges of the screen.
+
+        This means that the co-ordinates returned to mouseDrag() will be unbounded, and this
+        can be used for things like custom slider controls or dragging objects around, where
+        movement would be otherwise be limited by the mouse hitting the edges of the screen.
+
+        The unbounded mode is automatically turned off when the mouse button is released, or
+        it can be turned off explicitly by calling this method again.
+
+        @param shouldUnboundedMovementBeEnabled     whether to turn this mode on or off
+        @param keepCursorVisibleUntilOffscreen      if set to false, the cursor will immediately be
+                                                    hidden; if true, it will only be hidden when it
+                                                    is moved beyond the edge of the screen
+    */
+    void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

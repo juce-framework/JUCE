@@ -1003,7 +1003,7 @@ public:
 
     void timerCallback()
     {
-        Component* const underMouse = Component::getComponentUnderMouse();
+        Component* const underMouse = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
         TooltipClient* const ttc = dynamic_cast <TooltipClient*> (underMouse);
 
         String newTip;

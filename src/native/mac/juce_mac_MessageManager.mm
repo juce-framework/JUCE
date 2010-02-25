@@ -354,7 +354,7 @@ static bool isEventBlockedByModalComps (NSEvent* e)
         case NSRightMouseUp:
         case NSOtherMouseUp:
         case NSOtherMouseDragged:
-            if (Component::getComponentUnderMouse() != 0)
+            if (Desktop::getInstance().getMainMouseSource().isDragging())
                 return false;
             break;
 

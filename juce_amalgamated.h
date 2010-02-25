@@ -8914,7 +8914,7 @@ public:
 private:
 	ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
 
-	friend class Component;
+	friend class MouseInputSourceInternal;
 	void showInWindow (ComponentPeer* window) const throw();
 	void showInAllWindows() const throw();
 	void* getHandle() const throw();
@@ -12499,9 +12499,6 @@ public:
 
 	static Component* JUCE_CALLTYPE getComponentUnderMouse() throw();
 
-	void enableUnboundedMouseMovement (bool shouldUnboundedMovementBeEnabled,
-									   bool keepCursorVisibleUntilOffscreen = false) throw();
-
 	virtual void resized();
 
 	virtual void moved();
@@ -12631,7 +12628,6 @@ private:
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
-	void internalUpdateMouseCursor (const bool forcedUpdate) throw();
 	void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
 	void repaintParent() throw();
 	void sendFakeMouseMove() const;
@@ -26240,6 +26236,15 @@ public:
 	const Point<int> getLastMouseDownPosition() const throw();
 
 	bool hasMouseMovedSignificantlySincePressed() const throw();
+
+	bool hasMouseCursor() const throw();
+	void showMouseCursor (const MouseCursor& cursor);
+	void hideCursor();
+	void revealCursor();
+
+	bool canDoUnboundedMovement() const throw();
+
+	void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
 
 	juce_UseDebuggingNewOperator
 

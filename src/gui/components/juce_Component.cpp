@@ -53,10 +53,6 @@ static Array <int> modalReturnValues;
 static const int customCommandMessage   = 0x7fff0001;
 static const int exitModalStateMessage  = 0x7fff0002;
 
-//==============================================================================
-static Point<int> unboundedMouseOffset;
-static bool isUnboundedMouseModeOn = false;
-static bool isCursorVisibleUntilOffscreen;
 
 //==============================================================================
 #define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
@@ -1558,14 +1554,7 @@ void Component::setMouseCursor (const MouseCursor& cursor) throw()
     cursor_ = cursor;
 
     if (flags.visibleFlag)
-    {
-        const Point<int> mousePos (getMouseXYRelative());
-
-        if (flags.draggingFlag || reallyContains (mousePos.getX(), mousePos.getY(), false))
-        {
-            internalUpdateMouseCursor (false);
-        }
-    }
+        sendFakeMouseMove();
 }
 
 const MouseCursor Component::getMouseCursor()
@@ -1576,31 +1565,6 @@ const MouseCursor Component::getMouseCursor()
 void Component::updateMouseCursor() const throw()
 {
     sendFakeMouseMove();
-}
-
-void Component::internalUpdateMouseCursor (bool forcedUpdate) throw()
-{
-    ComponentPeer* const peer = getPeer();
-
-    if (peer != 0)
-    {
-        MouseCursor mc (getLookAndFeel().getMouseCursorFor (*this));
-
-        if (isUnboundedMouseModeOn
-             && ((! unboundedMouseOffset.isOrigin()) || ! isCursorVisibleUntilOffscreen))
-        {
-            mc = MouseCursor::NoCursor;
-            forcedUpdate = true;
-        }
-
-        static void* currentCursorHandle = 0;
-
-        if (forcedUpdate || mc.getHandle() != currentCursorHandle)
-        {
-            currentCursorHandle = mc.getHandle();
-            mc.showInWindow (peer);
-        }
-    }
 }
 
 //==============================================================================
@@ -2232,17 +2196,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
         // if something else is modal, always just show a normal mouse cursor
-        if (componentUnderMouse == this)
-        {
-            ComponentPeer* const peer = getPeer();
-
-            if (peer != 0)
-            {
-                MouseCursor mc (MouseCursor::NormalCursor);
-                mc.showInWindow (peer);
-            }
-        }
-
+        source.showMouseCursor (MouseCursor::NormalCursor);
         return;
     }
 
@@ -2310,9 +2264,6 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
             p = p->parentComponent_;
         }
     }
-
-    if (componentUnderMouse == this)
-        internalUpdateMouseCursor (true);
 }
 
 void Component::internalMouseExit (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
@@ -2326,8 +2277,6 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
         if (deletionChecker.hasBeenDeleted())
             return;
     }
-
-    enableUnboundedMouseMovement (false);
 
     if (flags.mouseInsideFlag || flags.mouseOverFlag)
     {
@@ -2583,7 +2532,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
         if (flags.repaintOnMouseActivityFlag)
             repaint();
 
-        const MouseEvent me (source, relativePos + unboundedMouseOffset,
+        const MouseEvent me (source, relativePos,
                              oldModifiers, this, time,
                              globalPositionToRelative (source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
@@ -2692,8 +2641,6 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
             }
         }
     }
-
-    enableUnboundedMouseMovement (false);
 }
 
 void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
@@ -2706,7 +2653,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
         const ComponentDeletionWatcher deletionChecker (this);
 
-        const MouseEvent me (source, relativePos + unboundedMouseOffset,
+        const MouseEvent me (source, relativePos,
                              source.getCurrentModifiers(), this, time,
                              globalPositionToRelative (source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
@@ -2761,41 +2708,6 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
             p = p->parentComponent_;
         }
-
-        if (this == componentUnderMouse)
-        {
-            if (isUnboundedMouseModeOn)
-            {
-                const Rectangle<int> screenArea (getParentMonitorArea().expanded (-2, -2));
-                Point<int> mousePos (source.getScreenPosition());
-
-                if (! screenArea.contains (mousePos))
-                {
-                    int deltaX = 0, deltaY = 0;
-
-                    if (mousePos.getX() <= screenArea.getX() || mousePos.getX() >= screenArea.getRight())
-                        deltaX = getScreenX() + getWidth() / 2 - mousePos.getX();
-
-                    if (mousePos.getY() <= screenArea.getY() || mousePos.getY() >= screenArea.getBottom())
-                        deltaY = getScreenY() + getHeight() / 2 - mousePos.getY();
-
-                    unboundedMouseOffset -= Point<int> (deltaX, deltaY);
-
-                    Desktop::setMousePosition (mousePos + Point<int> (deltaX, deltaY));
-                }
-                else if (isCursorVisibleUntilOffscreen
-                          && (! unboundedMouseOffset.isOrigin())
-                          && screenArea.contains (mousePos + unboundedMouseOffset))
-                {
-                    mousePos += unboundedMouseOffset;
-                    unboundedMouseOffset = Point<int>();
-
-                    Desktop::setMousePosition (mousePos);
-                }
-            }
-
-            internalUpdateMouseCursor (false);
-        }
     }
 }
 
@@ -2818,9 +2730,6 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
         }
         else
         {
-            if (this == componentUnderMouse)
-                internalUpdateMouseCursor (false);
-
             flags.mouseOverFlag = true;
 
             mouseMove (me);
@@ -3337,30 +3246,7 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
 
 const Point<int> Component::getMouseXYRelative() const
 {
-    return globalPositionToRelative (Desktop::getMousePosition()) + unboundedMouseOffset;
-}
-
-void Component::enableUnboundedMouseMovement (bool enable,
-                                              bool keepCursorVisibleUntilOffscreen) throw()
-{
-    enable = enable && isMouseButtonDown();
-    isCursorVisibleUntilOffscreen = keepCursorVisibleUntilOffscreen;
-
-    if (enable != isUnboundedMouseModeOn)
-    {
-        if ((! enable) && ((! isCursorVisibleUntilOffscreen)
-                            || ! unboundedMouseOffset.isOrigin()))
-        {
-            // when released, return the mouse to within the component's bounds
-            Desktop::setMousePosition (relativePositionToGlobal (Rectangle<int> (0, 0, getWidth(), getHeight())
-                                                                    .getConstrainedPoint (getMouseXYRelative())));
-        }
-
-        isUnboundedMouseModeOn = enable;
-        unboundedMouseOffset = Point<int>();
-
-        internalUpdateMouseCursor (true);
-    }
+    return globalPositionToRelative (Desktop::getMousePosition());
 }
 
 Component* JUCE_CALLTYPE Component::getComponentUnderMouse() throw()
