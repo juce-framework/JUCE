@@ -95,6 +95,16 @@ public:
         @see Component::setName, Component::getName
     */
     virtual void componentNameChanged (Component& component);
+
+    /** Called when the component is in the process of being deleted.
+
+        This callback is made from inside the destructor, so be very, very cautious
+        about what you do inside the callback.
+
+        It will be called before the component has been removed from its parent, and
+        before any child components have been removed.
+    */
+    virtual void componentBeingDeleted (Component& component);
 };
 
 

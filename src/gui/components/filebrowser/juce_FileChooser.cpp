@@ -102,11 +102,7 @@ bool FileChooser::showDialog (const bool selectsDirectories,
                               const bool selectMultipleFiles,
                               FilePreviewComponent* const previewComponent)
 {
-    ScopedPointer <ComponentDeletionWatcher> currentlyFocusedChecker;
-    Component* const currentlyFocused = Component::getCurrentlyFocusedComponent();
-
-    if (currentlyFocused != 0)
-        currentlyFocusedChecker = new ComponentDeletionWatcher (currentlyFocused);
+    Component::SafePointer<Component> previouslyFocused (Component::getCurrentlyFocusedComponent());
 
     results.clear();
 
@@ -160,8 +156,8 @@ bool FileChooser::showDialog (const bool selectsDirectories,
         }
     }
 
-    if (currentlyFocused != 0 && ! currentlyFocusedChecker->hasBeenDeleted())
-        currentlyFocused->grabKeyboardFocus();
+    if (previouslyFocused != 0)
+        previouslyFocused->grabKeyboardFocus();
 
     return results.size() > 0;
 }

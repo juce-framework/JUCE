@@ -3451,7 +3451,7 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : (ObjectClass*) 0;
+																 : static_cast <ObjectClass*> (0);
 	}
 
 	inline ObjectClass* getUnchecked (const int index) const throw()
@@ -3465,14 +3465,14 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [0]
-						   : (ObjectClass*) 0;
+						   : static_cast <ObjectClass*> (0);
 	}
 
 	inline ObjectClass* getLast() const throw()
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [numUsed - 1]
-						   : (ObjectClass*) 0;
+						   : static_cast <ObjectClass*> (0);
 	}
 
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
@@ -9326,6 +9326,8 @@ public:
 	virtual void componentParentHierarchyChanged (Component& component);
 
 	virtual void componentNameChanged (Component& component);
+
+	virtual void componentBeingDeleted (Component& component);
 };
 
 #endif   // __JUCE_COMPONENTLISTENER_JUCEHEADER__
@@ -11970,224 +11972,10 @@ private:
 #endif   // __JUCE_BORDERSIZE_JUCEHEADER__
 /*** End of inlined file: juce_BorderSize.h ***/
 
-
-/*** Start of inlined file: juce_ComponentPeer.h ***/
-#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
-#define __JUCE_COMPONENTPEER_JUCEHEADER__
-
-class Component;
-class Graphics;
-
-
-/*** Start of inlined file: juce_TextInputTarget.h ***/
-#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-
-class JUCE_API  TextInputTarget
-{
-public:
-
-	TextInputTarget() {}
-
-	virtual ~TextInputTarget() {}
-
-	virtual const Range<int> getHighlightedRegion() const = 0;
-
-	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
-
-	virtual const String getTextInRange (const Range<int>& range) const = 0;
-
-	virtual void insertTextAtCaret (const String& textToInsert) = 0;
-};
-
-#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
-/*** End of inlined file: juce_TextInputTarget.h ***/
-
-class ComponentBoundsConstrainer;
-class ComponentDeletionWatcher;
-
-class JUCE_API  ComponentPeer
-{
-public:
-
-	enum StyleFlags
-	{
-		windowAppearsOnTaskbar	  = (1 << 0),	/**< Indicates that the window should have a corresponding
-														entry on the taskbar (ignored on MacOSX) */
-		windowIsTemporary	   = (1 << 1),	/**< Indicates that the window is a temporary popup, like a menu,
-														tooltip, etc. */
-		windowIgnoresMouseClicks	= (1 << 2),	/**< Indicates that the window should let mouse clicks pass
-														through it (may not be possible on some platforms). */
-		windowHasTitleBar	   = (1 << 3),	/**< Indicates that the window should have a normal OS-specific
-														title bar and frame\. if not specified, the window will be
-														borderless. */
-		windowIsResizable	   = (1 << 4),	/**< Indicates that the window should have a resizable border. */
-		windowHasMinimiseButton	 = (1 << 5),	/**< Indicates that if the window has a title bar, it should have a
-														minimise button on it. */
-		windowHasMaximiseButton	 = (1 << 6),	/**< Indicates that if the window has a title bar, it should have a
-														maximise button on it. */
-		windowHasCloseButton	= (1 << 7),	/**< Indicates that if the window has a title bar, it should have a
-														close button on it. */
-		windowHasDropShadow	 = (1 << 8),	/**< Indicates that the window should have a drop-shadow (this may
-														not be possible on all platforms). */
-		windowRepaintedExplictly	= (1 << 9),	/**< Not intended for public use - this tells a window not to
-														do its own repainting, but only to repaint when the
-														performAnyPendingRepaintsNow() method is called. */
-		windowIgnoresKeyPresses	 = (1 << 10),   /**< Tells the window not to catch any keypresses. This can
-														be used for things like plugin windows, to stop them interfering
-														with the host's shortcut keys */
-		windowIsSemiTransparent	 = (1 << 31)	/**< Not intended for public use - makes a window transparent. */
-
-	};
-
-	ComponentPeer (Component* const component,
-				   const int styleFlags) throw();
-
-	virtual ~ComponentPeer();
-
-	Component* getComponent() const throw()		 { return component; }
-
-	int getStyleFlags() const throw()			   { return styleFlags; }
-
-	virtual void* getNativeHandle() const = 0;
-
-	virtual void setVisible (bool shouldBeVisible) = 0;
-
-	virtual void setTitle (const String& title) = 0;
-
-	virtual void setPosition (int x, int y) = 0;
-
-	virtual void setSize (int w, int h) = 0;
-
-	virtual void setBounds (int x, int y, int w, int h, const bool isNowFullScreen) = 0;
-
-	virtual const Rectangle<int> getBounds() const = 0;
-
-	virtual const Point<int> getScreenPosition() const = 0;
-
-	virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
-
-	virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
-
-	virtual void setMinimised (bool shouldBeMinimised) = 0;
-
-	virtual bool isMinimised() const = 0;
-
-	virtual void setFullScreen (bool shouldBeFullScreen) = 0;
-
-	virtual bool isFullScreen() const = 0;
-
-	void setNonFullScreenBounds (const Rectangle<int>& newBounds) throw();
-
-	const Rectangle<int>& getNonFullScreenBounds() const throw();
-
-	virtual void setIcon (const Image& newIcon) = 0;
-
-	void setConstrainer (ComponentBoundsConstrainer* const newConstrainer) throw();
-
-	ComponentBoundsConstrainer* getConstrainer() const throw()		  { return constrainer; }
-
-	virtual bool contains (const Point<int>& position, bool trueIfInAChildWindow) const = 0;
-
-	virtual const BorderSize getFrameSize() const = 0;
-
-	void handleMovedOrResized();
-
-	void handleScreenSizeChange();
-
-	void handlePaint (LowLevelGraphicsContext& contextToPaintTo);
-
-	virtual bool setAlwaysOnTop (bool alwaysOnTop) = 0;
-
-	virtual void toFront (bool makeActive) = 0;
-
-	virtual void toBehind (ComponentPeer* other) = 0;
-
-	void handleBroughtToFront();
-
-	virtual bool isFocused() const = 0;
-
-	virtual void grabFocus() = 0;
-
-	virtual void textInputRequired (const Point<int>& position) = 0;
-
-	void handleFocusGain();
-	void handleFocusLoss();
-
-	Component* getLastFocusedSubcomponent() const throw();
-
-	bool handleKeyPress (const int keyCode,
-						 const juce_wchar textCharacter);
-
-	bool handleKeyUpOrDown (const bool isKeyDown);
-
-	void handleModifierKeysChange();
-
-	TextInputTarget* findCurrentTextInputTarget();
-
-	virtual void repaint (int x, int y, int w, int h) = 0;
-
-	virtual void performAnyPendingRepaintsNow() = 0;
-
-	void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
-	void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
-
-	void handleUserClosingWindow();
-
-	void handleFileDragMove (const StringArray& files, const Point<int>& position);
-	void handleFileDragExit (const StringArray& files);
-	void handleFileDragDrop (const StringArray& files, const Point<int>& position);
-
-	void clearMaskedRegion() throw();
-
-	void addMaskedRegion (int x, int y, int w, int h) throw();
-
-	static int getNumPeers() throw();
-
-	static ComponentPeer* getPeer (const int index) throw();
-
-	static bool isValidPeer (const ComponentPeer* const peer) throw();
-
-	static void bringModalComponentToFront();
-
-	virtual const StringArray getAvailableRenderingEngines() throw();
-	virtual int getCurrentRenderingEngine() throw();
-	virtual void setCurrentRenderingEngine (int index) throw();
-
-	juce_UseDebuggingNewOperator
-
-protected:
-	Component* const component;
-	const int styleFlags;
-	RectangleList maskedRegion;
-	Rectangle<int> lastNonFullscreenBounds;
-	uint32 lastPaintTime;
-	ComponentBoundsConstrainer* constrainer;
-
-	static void updateCurrentModifiers() throw();
-
-private:
-
-	Component* lastFocusedComponent;
-	ScopedPointer <ComponentDeletionWatcher> dragAndDropTargetComponent;
-	Component* lastDragAndDropCompUnderMouse;
-	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
-
-	friend class Component;
-	static ComponentPeer* getPeerFor (const Component* const component) throw();
-
-	void setLastDragDropTarget (Component* comp);
-
-	ComponentPeer (const ComponentPeer&);
-	ComponentPeer& operator= (const ComponentPeer&);
-};
-
-#endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
-/*** End of inlined file: juce_ComponentPeer.h ***/
-
 class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
+class ComponentPeer;
 
 class JUCE_API  Component  : public MouseListener,
 							 protected MessageListener
@@ -12511,8 +12299,6 @@ public:
 
 	const Point<int> getMouseXYRelative() const;
 
-	static Component* JUCE_CALLTYPE getComponentUnderMouse() throw();
-
 	virtual void resized();
 
 	virtual void moved();
@@ -12569,6 +12355,48 @@ public:
 
 	uint32 getComponentUID() const throw()		{ return componentUID; }
 
+	template <class ComponentType>
+	class JUCE_API  SafePointer   : private ComponentListener
+	{
+	public:
+		SafePointer()					   : comp (0) {}
+
+		SafePointer (ComponentType* const component)	: comp (component)   { attach(); }
+
+		SafePointer (const SafePointer& other)		  : comp (other.comp)  { attach(); }
+
+		~SafePointer()					  { detach(); }
+
+		SafePointer& operator= (const SafePointer& other)   { return operator= (other.comp); }
+
+		SafePointer& operator= (ComponentType* const newComponent)
+		{
+			detach();
+			comp = newComponent;
+			attach();
+			return *this;
+		}
+
+		operator ComponentType*() throw()		   { return comp; }
+
+		operator const ComponentType*() const throw()	   { return comp; }
+
+		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
+		ComponentType* operator->() throw()		 { jassert (comp != 0); return comp; }
+
+		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
+		const ComponentType* operator->() const throw()	 { jassert (comp != 0); return comp; }
+
+		juce_UseDebuggingNewOperator
+
+	private:
+		ComponentType* comp;
+
+		void attach()   { if (comp != 0) comp->addComponentListener (this); }
+		void detach()   { if (comp != 0) comp->removeComponentListener (this); }
+		void componentBeingDeleted (Component&)	 { comp = 0; }
+	};
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -12579,7 +12407,6 @@ private:
 	friend class MouseInputSourceInternal;
 
 	static Component* currentlyFocusedComponent;
-	static Component* componentUnderMouse;
 
 	String componentName_;
 	Component* parentComponent_;
@@ -13086,15 +12913,21 @@ public:
 
 	Component* findComponentAt (const Point<int>& screenPosition) const;
 
+	int getNumMouseSources() const throw()			  { return mouseSources.size(); }
+
+	MouseInputSource* getMouseSource (int index) const throw()	  { return mouseSources [index]; }
+
+	MouseInputSource& getMainMouseSource() const throw()		{ return *mouseSources.getUnchecked(0); }
+
+	int getNumDraggingMouseSources() const throw();
+
+	MouseInputSource* getDraggingMouseSource (int index) const throw();
+
 	juce_UseDebuggingNewOperator
 
 	void refreshMonitorSizes() throw();
 
 	static bool canUseSemiTransparentWindows() throw();
-
-	int getNumMouseInputSources() const throw()			 { return mouseSources.size(); }
-	MouseInputSource* getMouseSource (int index) const throw()	  { return mouseSources [index]; }
-	MouseInputSource& getMainMouseSource() const throw()		{ return *mouseSources.getUnchecked(0); }
 
 private:
 
@@ -15623,36 +15456,6 @@ protected:
 #define __JUCE_LABEL_JUCEHEADER__
 
 
-/*** Start of inlined file: juce_ComponentDeletionWatcher.h ***/
-#ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-
-class JUCE_API  ComponentDeletionWatcher
-{
-public:
-
-	ComponentDeletionWatcher (const Component* const componentToWatch) throw();
-
-	~ComponentDeletionWatcher() throw();
-
-	bool hasBeenDeleted() const throw();
-
-	const Component* getComponent() const throw();
-
-	juce_UseDebuggingNewOperator
-
-private:
-	const Component* const componentToWatch;
-	const uint32 componentUID;
-
-	ComponentDeletionWatcher (const ComponentDeletionWatcher&);
-	ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
-};
-
-#endif   // __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-/*** End of inlined file: juce_ComponentDeletionWatcher.h ***/
-
-
 /*** Start of inlined file: juce_TextEditor.h ***/
 #ifndef __JUCE_TEXTEDITOR_JUCEHEADER__
 #define __JUCE_TEXTEDITOR_JUCEHEADER__
@@ -16303,6 +16106,31 @@ private:
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__
 /*** End of inlined file: juce_PopupMenu.h ***/
 
+
+/*** Start of inlined file: juce_TextInputTarget.h ***/
+#ifndef __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+#define __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+
+class JUCE_API  TextInputTarget
+{
+public:
+
+	TextInputTarget() {}
+
+	virtual ~TextInputTarget() {}
+
+	virtual const Range<int> getHighlightedRegion() const = 0;
+
+	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
+
+	virtual const String getTextInRange (const Range<int>& range) const = 0;
+
+	virtual void insertTextAtCaret (const String& textToInsert) = 0;
+};
+
+#endif   // __JUCE_TEXTINPUTTARGET_JUCEHEADER__
+/*** End of inlined file: juce_TextInputTarget.h ***/
+
 class TextEditor;
 class TextHolderComponent;
 
@@ -16663,7 +16491,7 @@ public:
 	void attachToComponent (Component* owner,
 							const bool onLeft);
 
-	Component* getAttachedComponent() const throw()				 { return ownerComponent; }
+	Component* getAttachedComponent() const;
 
 	bool isAttachedOnLeft() const throw()					   { return leftOfOwnerComp; }
 
@@ -16731,8 +16559,7 @@ private:
 	Justification justification;
 	ScopedPointer <TextEditor> editor;
 	SortedSet <void*> listeners;
-	Component* ownerComponent;
-	ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
+	Component::SafePointer<Component> ownerComponent;
 	int horizontalBorderSize, verticalBorderSize;
 	float minimumHorizontalScale;
 	bool editSingleClick : 1;
@@ -23409,6 +23236,36 @@ private:
 #endif
 #ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
 
+/*** Start of inlined file: juce_ComponentDeletionWatcher.h ***/
+#ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
+#define __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
+
+class JUCE_API  ComponentDeletionWatcher
+{
+public:
+
+	ComponentDeletionWatcher (const Component* const componentToWatch) throw();
+
+	~ComponentDeletionWatcher() throw();
+
+	bool hasBeenDeleted() const throw();
+
+	const Component* getComponent() const throw();
+
+	juce_UseDebuggingNewOperator
+
+private:
+	const Component* const componentToWatch;
+	const uint32 componentUID;
+
+	ComponentDeletionWatcher (const ComponentDeletionWatcher&);
+	ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
+};
+
+#endif   // __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
+/*** End of inlined file: juce_ComponentDeletionWatcher.h ***/
+
+
 #endif
 #ifndef __JUCE_COMPONENTLISTENER_JUCEHEADER__
 
@@ -23618,14 +23475,11 @@ public:
 
 private:
 
-	Component* const component;
+	Component::SafePointer<Component> component;
 	ComponentPeer* lastPeer;
 	VoidArray registeredParentComps;
 	bool reentrant;
 	Rectangle<int> lastBounds;
-#ifdef JUCE_DEBUG
-	ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
-#endif
 
 	void unregister() throw();
 	void registerWithParentComps() throw();
@@ -26955,6 +26809,192 @@ private:
 
 #endif
 #ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
+
+/*** Start of inlined file: juce_ComponentPeer.h ***/
+#ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
+#define __JUCE_COMPONENTPEER_JUCEHEADER__
+
+class ComponentBoundsConstrainer;
+
+class JUCE_API  ComponentPeer
+{
+public:
+
+	enum StyleFlags
+	{
+		windowAppearsOnTaskbar	  = (1 << 0),	/**< Indicates that the window should have a corresponding
+														entry on the taskbar (ignored on MacOSX) */
+		windowIsTemporary	   = (1 << 1),	/**< Indicates that the window is a temporary popup, like a menu,
+														tooltip, etc. */
+		windowIgnoresMouseClicks	= (1 << 2),	/**< Indicates that the window should let mouse clicks pass
+														through it (may not be possible on some platforms). */
+		windowHasTitleBar	   = (1 << 3),	/**< Indicates that the window should have a normal OS-specific
+														title bar and frame\. if not specified, the window will be
+														borderless. */
+		windowIsResizable	   = (1 << 4),	/**< Indicates that the window should have a resizable border. */
+		windowHasMinimiseButton	 = (1 << 5),	/**< Indicates that if the window has a title bar, it should have a
+														minimise button on it. */
+		windowHasMaximiseButton	 = (1 << 6),	/**< Indicates that if the window has a title bar, it should have a
+														maximise button on it. */
+		windowHasCloseButton	= (1 << 7),	/**< Indicates that if the window has a title bar, it should have a
+														close button on it. */
+		windowHasDropShadow	 = (1 << 8),	/**< Indicates that the window should have a drop-shadow (this may
+														not be possible on all platforms). */
+		windowRepaintedExplictly	= (1 << 9),	/**< Not intended for public use - this tells a window not to
+														do its own repainting, but only to repaint when the
+														performAnyPendingRepaintsNow() method is called. */
+		windowIgnoresKeyPresses	 = (1 << 10),   /**< Tells the window not to catch any keypresses. This can
+														be used for things like plugin windows, to stop them interfering
+														with the host's shortcut keys */
+		windowIsSemiTransparent	 = (1 << 31)	/**< Not intended for public use - makes a window transparent. */
+
+	};
+
+	ComponentPeer (Component* const component,
+				   const int styleFlags) throw();
+
+	virtual ~ComponentPeer();
+
+	Component* getComponent() const throw()		 { return component; }
+
+	int getStyleFlags() const throw()			   { return styleFlags; }
+
+	virtual void* getNativeHandle() const = 0;
+
+	virtual void setVisible (bool shouldBeVisible) = 0;
+
+	virtual void setTitle (const String& title) = 0;
+
+	virtual void setPosition (int x, int y) = 0;
+
+	virtual void setSize (int w, int h) = 0;
+
+	virtual void setBounds (int x, int y, int w, int h, const bool isNowFullScreen) = 0;
+
+	virtual const Rectangle<int> getBounds() const = 0;
+
+	virtual const Point<int> getScreenPosition() const = 0;
+
+	virtual const Point<int> relativePositionToGlobal (const Point<int>& relativePosition) = 0;
+
+	virtual const Point<int> globalPositionToRelative (const Point<int>& screenPosition) = 0;
+
+	virtual void setMinimised (bool shouldBeMinimised) = 0;
+
+	virtual bool isMinimised() const = 0;
+
+	virtual void setFullScreen (bool shouldBeFullScreen) = 0;
+
+	virtual bool isFullScreen() const = 0;
+
+	void setNonFullScreenBounds (const Rectangle<int>& newBounds) throw();
+
+	const Rectangle<int>& getNonFullScreenBounds() const throw();
+
+	virtual void setIcon (const Image& newIcon) = 0;
+
+	void setConstrainer (ComponentBoundsConstrainer* const newConstrainer) throw();
+
+	ComponentBoundsConstrainer* getConstrainer() const throw()		  { return constrainer; }
+
+	virtual bool contains (const Point<int>& position, bool trueIfInAChildWindow) const = 0;
+
+	virtual const BorderSize getFrameSize() const = 0;
+
+	void handleMovedOrResized();
+
+	void handleScreenSizeChange();
+
+	void handlePaint (LowLevelGraphicsContext& contextToPaintTo);
+
+	virtual bool setAlwaysOnTop (bool alwaysOnTop) = 0;
+
+	virtual void toFront (bool makeActive) = 0;
+
+	virtual void toBehind (ComponentPeer* other) = 0;
+
+	void handleBroughtToFront();
+
+	virtual bool isFocused() const = 0;
+
+	virtual void grabFocus() = 0;
+
+	virtual void textInputRequired (const Point<int>& position) = 0;
+
+	void handleFocusGain();
+	void handleFocusLoss();
+
+	Component* getLastFocusedSubcomponent() const throw();
+
+	bool handleKeyPress (const int keyCode,
+						 const juce_wchar textCharacter);
+
+	bool handleKeyUpOrDown (const bool isKeyDown);
+
+	void handleModifierKeysChange();
+
+	TextInputTarget* findCurrentTextInputTarget();
+
+	virtual void repaint (int x, int y, int w, int h) = 0;
+
+	virtual void performAnyPendingRepaintsNow() = 0;
+
+	void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
+	void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
+
+	void handleUserClosingWindow();
+
+	void handleFileDragMove (const StringArray& files, const Point<int>& position);
+	void handleFileDragExit (const StringArray& files);
+	void handleFileDragDrop (const StringArray& files, const Point<int>& position);
+
+	void clearMaskedRegion() throw();
+
+	void addMaskedRegion (int x, int y, int w, int h) throw();
+
+	static int getNumPeers() throw();
+
+	static ComponentPeer* getPeer (const int index) throw();
+
+	static bool isValidPeer (const ComponentPeer* const peer) throw();
+
+	static void bringModalComponentToFront();
+
+	virtual const StringArray getAvailableRenderingEngines() throw();
+	virtual int getCurrentRenderingEngine() throw();
+	virtual void setCurrentRenderingEngine (int index) throw();
+
+	juce_UseDebuggingNewOperator
+
+protected:
+	Component* const component;
+	const int styleFlags;
+	RectangleList maskedRegion;
+	Rectangle<int> lastNonFullscreenBounds;
+	uint32 lastPaintTime;
+	ComponentBoundsConstrainer* constrainer;
+
+	static void updateCurrentModifiers() throw();
+
+private:
+
+	Component* lastFocusedComponent;
+	Component::SafePointer<Component> dragAndDropTargetComponent;
+	Component* lastDragAndDropCompUnderMouse;
+	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
+
+	friend class Component;
+	static ComponentPeer* getPeerFor (const Component* const component) throw();
+
+	void setLastDragDropTarget (Component* comp);
+
+	ComponentPeer (const ComponentPeer&);
+	ComponentPeer& operator= (const ComponentPeer&);
+};
+
+#endif   // __JUCE_COMPONENTPEER_JUCEHEADER__
+/*** End of inlined file: juce_ComponentPeer.h ***/
+
 
 #endif
 #ifndef __JUCE_DIALOGWINDOW_JUCEHEADER__

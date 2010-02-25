@@ -228,6 +228,41 @@ public:
 
 
     //==============================================================================
+    /** Returns the number of MouseInputSource objects the system has at its disposal.
+        In a traditional single-mouse system, there might be only one object. On a multi-touch
+        system, there could be one input source per potential finger.
+        To find out how many mouse events are currently happening, use getNumDraggingMouseSources().
+        @see getMouseSource
+    */
+    int getNumMouseSources() const throw()                          { return mouseSources.size(); }
+
+    /** Returns one of the system's MouseInputSource objects.
+        The index should be from 0 to getNumMouseSources() - 1. Out-of-range indexes will return
+        a null pointer.
+        In a traditional single-mouse system, there might be only one object. On a multi-touch
+        system, there could be one input source per potential finger.
+    */
+    MouseInputSource* getMouseSource (int index) const throw()      { return mouseSources [index]; }
+
+    /** Returns the main mouse input device that the system is using.
+        @see getNumMouseSources()
+    */
+    MouseInputSource& getMainMouseSource() const throw()            { return *mouseSources.getUnchecked(0); }
+
+    /** Returns the number of mouse-sources that are currently being dragged.
+        In a traditional single-mouse system, this will be 0 or 1, depending on whether a
+        juce component has the button down on it. In a multi-touch system, this could
+        be any number from 0 to the number of simultaneous touches that can be detected.
+    */
+    int getNumDraggingMouseSources() const throw();
+
+    /** Returns one of the mouse sources that's currently being dragged.
+        The index should be between 0 and getNumDraggingMouseSources() - 1. If the index is
+        out of range, or if no mice or fingers are down, this will return a null pointer.
+    */
+    MouseInputSource* getDraggingMouseSource (int index) const throw();
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
     /** Tells this object to refresh its idea of what the screen resolution is.
@@ -238,10 +273,6 @@ public:
 
     /** True if the OS supports semitransparent windows */
     static bool canUseSemiTransparentWindows() throw();
-
-    int getNumMouseInputSources() const throw()                     { return mouseSources.size(); }
-    MouseInputSource* getMouseSource (int index) const throw()      { return mouseSources [index]; }
-    MouseInputSource& getMainMouseSource() const throw()            { return *mouseSources.getUnchecked(0); }
 
 private:
     //==============================================================================

@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_TextEditor.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../../graphics/fonts/juce_GlyphArrangement.h"
 #include "../../../utilities/juce_SystemClipboard.h"
 #include "../../../core/juce_Time.h"
@@ -2165,7 +2166,7 @@ void TextEditor::resized()
 
 void TextEditor::handleCommandMessage (const int commandId)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    Component::SafePointer<Component> deletionChecker (this);
 
     for (int i = listeners.size(); --i >= 0;)
     {
@@ -2196,7 +2197,7 @@ void TextEditor::handleCommandMessage (const int commandId)
                 break;
             }
 
-            if (i > 0 && deletionChecker.hasBeenDeleted())
+            if (deletionChecker == 0)
                 return;
         }
     }

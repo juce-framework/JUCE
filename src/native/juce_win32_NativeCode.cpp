@@ -57,6 +57,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../gui/graphics/imaging/juce_ImageFileFormat.h"
 #include "../gui/graphics/imaging/juce_CameraDevice.h"
+#include "../gui/components/windows/juce_ComponentPeer.h"
 #include "../gui/components/windows/juce_AlertWindow.h"
 #include "../gui/components/juce_Desktop.h"
 #include "../gui/components/menus/juce_MenuBarModel.h"

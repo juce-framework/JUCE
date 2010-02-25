@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Label.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================
@@ -58,7 +59,7 @@ Label::~Label()
 {
     textValue.removeListener (this);
 
-    if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
+    if (ownerComponent != 0)
         ownerComponent->removeComponentListener (this);
 
     editor = 0;
@@ -78,7 +79,7 @@ void Label::setText (const String& newText,
 
         textWasChanged();
 
-        if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
+        if (ownerComponent != 0)
             componentMovedOrResized (*ownerComponent, true, true);
 
         if (broadcastChangeMessage)
@@ -137,21 +138,23 @@ void Label::setBorderSize (int h, int v)
 }
 
 //==============================================================================
+Component* Label::getAttachedComponent() const
+{
+    return const_cast <Component*> (static_cast <const Component*> (ownerComponent));
+}
+
 void Label::attachToComponent (Component* owner,
                                const bool onLeft)
 {
-    if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
+    if (ownerComponent != 0)
         ownerComponent->removeComponentListener (this);
 
-    deletionWatcher = 0;
     ownerComponent = owner;
 
     leftOfOwnerComp = onLeft;
 
     if (ownerComponent != 0)
     {
-        deletionWatcher = new ComponentDeletionWatcher (owner);
-
         setVisible (owner->isVisible());
         ownerComponent->addComponentListener (this);
         componentParentHierarchyChanged (*ownerComponent);
@@ -241,7 +244,7 @@ bool Label::updateFromTextEditorContents()
 
         textWasChanged();
 
-        if (ownerComponent != 0 && ! deletionWatcher->hasBeenDeleted())
+        if (ownerComponent != 0)
             componentMovedOrResized (*ownerComponent, true, true);
 
         return true;

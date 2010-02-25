@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Button.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../keyboard/juce_KeyPressMappingSet.h"
 #include "../../../text/juce_LocalisedStrings.h"
 #include "../../../events/juce_Timer.h"
@@ -145,16 +144,20 @@ void Button::setToggleState (const bool shouldBeOn,
 {
     if (shouldBeOn != lastToggleState)
     {
-        const ComponentDeletionWatcher deletionWatcher (this);
-
         isOn = shouldBeOn;
         lastToggleState = shouldBeOn;
         repaint();
 
         if (sendChangeNotification)
+        {
+            Component::SafePointer<Component> deletionWatcher (this);
             sendClickMessage (ModifierKeys());
 
-        if ((! deletionWatcher.hasBeenDeleted()) && lastToggleState)
+            if (deletionWatcher == 0)
+                return;
+        }
+
+        if (lastToggleState)
             turnOffOtherButtonsInGroup (sendChangeNotification);
     }
 }
@@ -198,7 +201,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
 
     if (p != 0 && radioGroupId != 0)
     {
-        const ComponentDeletionWatcher deletionWatcher (this);
+        Component::SafePointer<Component> deletionWatcher (this);
 
         for (int i = p->getNumChildComponents(); --i >= 0;)
         {
@@ -212,7 +215,7 @@ void Button::turnOffOtherButtonsInGroup (const bool sendChangeNotification)
                 {
                     b->setToggleState (false, sendChangeNotification);
 
-                    if (deletionWatcher.hasBeenDeleted())
+                    if (deletionWatcher == 0)
                         return;
                 }
             }
@@ -365,7 +368,7 @@ void Button::removeButtonListener (ButtonListener* const listener)
 
 void Button::sendClickMessage (const ModifierKeys& modifiers)
 {
-    const ComponentDeletionWatcher cdw (this);
+    Component::SafePointer<Component> deletionWatcher (this);
 
     if (commandManagerToUse != 0 && commandID != 0)
     {
@@ -378,7 +381,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
 
     clicked (modifiers);
 
-    if (! cdw.hasBeenDeleted())
+    if (deletionWatcher != 0)
     {
         for (int i = buttonListeners.size(); --i >= 0;)
         {
@@ -388,7 +391,7 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
             {
                 bl->buttonClicked (this);
 
-                if (cdw.hasBeenDeleted())
+                if (deletionWatcher == 0)
                     return;
             }
         }
@@ -397,11 +400,11 @@ void Button::sendClickMessage (const ModifierKeys& modifiers)
 
 void Button::sendStateMessage()
 {
-    const ComponentDeletionWatcher cdw (this);
+    Component::SafePointer<Component> deletionWatcher (this);
 
     buttonStateChanged();
 
-    if (cdw.hasBeenDeleted())
+    if (deletionWatcher == 0)
         return;
 
     for (int i = buttonListeners.size(); --i >= 0;)
@@ -412,7 +415,7 @@ void Button::sendStateMessage()
         {
             bl->buttonStateChanged (this);
 
-            if (cdw.hasBeenDeleted())
+            if (deletionWatcher == 0)
                 return;
         }
     }
@@ -694,13 +697,13 @@ void Button::repeatTimerCallback()
 
         lastTimeCallbackTime = now;
 
-        const ComponentDeletionWatcher cdw (this);
+        Component::SafePointer<Component> deletionWatcher (this);
 
         for (int i = numTimesToCallback; --i >= 0;)
         {
             internalClickCallback (ModifierKeys::getCurrentModifiers());
 
-            if (cdw.hasBeenDeleted() || ! isDown())
+            if (deletionWatcher == 0 || ! isDown())
                 return;
         }
     }

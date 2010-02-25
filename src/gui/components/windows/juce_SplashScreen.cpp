@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_SplashScreen.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../juce_Desktop.h"

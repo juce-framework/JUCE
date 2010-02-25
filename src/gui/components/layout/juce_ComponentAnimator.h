@@ -27,7 +27,6 @@
 #define __JUCE_COMPONENTANIMATOR_JUCEHEADER__
 
 #include "../juce_Component.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../../../events/juce_ChangeBroadcaster.h"
 #include "../../../events/juce_Timer.h"
 

@@ -26,7 +26,6 @@
 #ifndef __JUCE_LABEL_JUCEHEADER__
 #define __JUCE_LABEL_JUCEHEADER__
 
-#include "../juce_ComponentDeletionWatcher.h"
 #include "juce_TextEditor.h"
 class Label;
 
@@ -178,7 +177,7 @@ public:
 
         Returns 0 if the label is not attached.
     */
-    Component* getAttachedComponent() const throw()                             { return ownerComponent; }
+    Component* getAttachedComponent() const;
 
     /** If the label is attached to the left of another component, this returns true.
 
@@ -329,8 +328,7 @@ private:
     Justification justification;
     ScopedPointer <TextEditor> editor;
     SortedSet <void*> listeners;
-    Component* ownerComponent;
-    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
+    Component::SafePointer<Component> ownerComponent;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;
     bool editSingleClick : 1;

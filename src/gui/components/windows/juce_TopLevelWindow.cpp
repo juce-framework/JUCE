@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_TopLevelWindow.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../juce_Desktop.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../special/juce_DropShadower.h"

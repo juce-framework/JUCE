@@ -302,18 +302,19 @@ void FileBrowserComponent::resized()
 //==============================================================================
 void FileBrowserComponent::sendListenerChangeMessage()
 {
-    ComponentDeletionWatcher deletionWatcher (this);
+    Component::SafePointer<Component> deletionWatcher (this);
 
     if (previewComp != 0)
         previewComp->selectedFileChanged (getSelectedFile (0));
 
-    jassert (! deletionWatcher.hasBeenDeleted());
+    // You shouldn't delete the browser when the file gets changed!
+    jassert (deletionWatcher != 0);
 
     for (int i = listeners.size(); --i >= 0;)
     {
         ((FileBrowserListener*) listeners.getUnchecked (i))->selectionChanged();
 
-        if (deletionWatcher.hasBeenDeleted())
+        if (deletionWatcher == 0)
             return;
 
         i = jmin (i, listeners.size() - 1);
@@ -350,13 +351,13 @@ void FileBrowserComponent::selectionChanged()
 
 void FileBrowserComponent::fileClicked (const File& f, const MouseEvent& e)
 {
-    ComponentDeletionWatcher deletionWatcher (this);
+    Component::SafePointer<Component> deletionWatcher (this);
 
     for (int i = listeners.size(); --i >= 0;)
     {
         ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (f, e);
 
-        if (deletionWatcher.hasBeenDeleted())
+        if (deletionWatcher == 0)
             return;
 
         i = jmin (i, listeners.size() - 1);
@@ -371,13 +372,13 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     }
     else
     {
-        ComponentDeletionWatcher deletionWatcher (this);
+        Component::SafePointer<Component> deletionWatcher (this);
 
         for (int i = listeners.size(); --i >= 0;)
         {
             ((FileBrowserListener*) listeners.getUnchecked (i))->fileDoubleClicked (f);
 
-            if (deletionWatcher.hasBeenDeleted())
+            if (deletionWatcher == 0)
                 return;
 
             i = jmin (i, listeners.size() - 1);

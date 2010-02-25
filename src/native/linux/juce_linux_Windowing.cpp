@@ -535,7 +535,7 @@ public:
 
         if (windowH != 0)
         {
-            const ComponentDeletionWatcher deletionChecker (component);
+            Component::SafePointer<Component> deletionChecker (component);
 
             wx = x;
             wy = y;
@@ -566,7 +566,7 @@ public:
                                wx - windowBorder.getLeft(),
                                wy - windowBorder.getTop(), ww, wh);
 
-            if (! deletionChecker.hasBeenDeleted())
+            if (deletionChecker != 0)
             {
                 updateBorderSize();
                 handleMovedOrResized();

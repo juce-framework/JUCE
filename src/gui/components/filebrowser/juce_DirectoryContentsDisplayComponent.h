@@ -26,6 +26,7 @@
 #ifndef __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 #define __JUCE_DIRECTORYCONTENTSDISPLAYCOMPONENT_JUCEHEADER__
 
+#include "../juce_Component.h"
 #include "juce_DirectoryContentsList.h"
 #include "juce_FileBrowserListener.h"
 

@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ApplicationCommandManager.h"
 #include "juce_Application.h"
+#include "../gui/components/windows/juce_ComponentPeer.h"
 #include "../gui/components/keyboard/juce_KeyPressMappingSet.h"
 #include "../gui/components/windows/juce_ResizableWindow.h"
 #include "../gui/components/juce_Desktop.h"

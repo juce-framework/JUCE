@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ComponentBoundsConstrainer.h"
 #include "../juce_Desktop.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================

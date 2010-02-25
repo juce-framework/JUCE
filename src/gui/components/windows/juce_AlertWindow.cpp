@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_AlertWindow.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../buttons/juce_TextButton.h"
 #include "../controls/juce_TextEditor.h"

@@ -193,13 +193,8 @@ void MenuBarComponent::showMenu (int index)
         currentPopup = 0;
         menuBarItemsChanged (0);
 
-        Component* const prevFocused = getCurrentlyFocusedComponent();
-
-        ScopedPointer <ComponentDeletionWatcher> prevCompDeletionChecker;
-        if (prevFocused != 0)
-            prevCompDeletionChecker = new ComponentDeletionWatcher (prevFocused);
-
-        ComponentDeletionWatcher deletionChecker (this);
+        Component::SafePointer<Component> prevFocused (getCurrentlyFocusedComponent());
+        Component::SafePointer<Component> deletionChecker (this);
 
         enterModalState (false);
         inModalState = true;
@@ -244,7 +239,7 @@ void MenuBarComponent::showMenu (int index)
                                             // be stuck behind other comps that are already modal..
             result = currentPopup->runModalLoop();
 
-            if (deletionChecker.hasBeenDeleted())
+            if (deletionChecker == 0)
                 return;
 
             const int lastPopupIndex = currentPopupIndex;
@@ -276,7 +271,7 @@ void MenuBarComponent::showMenu (int index)
         inModalState = false;
         exitModalState (0);
 
-        if (prevCompDeletionChecker != 0 && ! prevCompDeletionChecker->hasBeenDeleted())
+        if (prevFocused != 0)
             prevFocused->grabKeyboardFocus();
 
         const Point<int> mousePos (getMouseXYRelative());

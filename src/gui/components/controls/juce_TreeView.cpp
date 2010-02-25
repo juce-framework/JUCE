@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../../containers/juce_BitArray.h"
 #include "../mouse/juce_DragAndDropContainer.h"
+#include "../mouse/juce_MouseInputSource.h"
 #include "../../graphics/imaging/juce_Image.h"
 
 
@@ -168,6 +169,24 @@ public:
     void paint (Graphics& g);
     TreeViewItem* findItemAt (int y, Rectangle<int>& itemPosition) const;
 
+    static bool isMouseDraggingInChildCompOf (Component* const comp)
+    {
+        for (int i = Desktop::getInstance().getNumMouseSources(); --i >= 0;)
+        {
+            MouseInputSource* source = Desktop::getInstance().getMouseSource(i);
+
+            if (source->isDragging())
+            {
+                Component* const underMouse = source->getComponentUnderMouse();
+
+                if (underMouse != 0 && (comp == underMouse || comp->isParentOf (underMouse)))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     void updateComponents()
     {
         const int visibleTop = -getY();
@@ -229,10 +248,7 @@ public:
                     }
                 }
 
-                if ((! keep)
-                     && Component::isMouseButtonDownAnywhere()
-                     && (comp == Component::getComponentUnderMouse()
-                          || comp->isParentOf (Component::getComponentUnderMouse())))
+                if ((! keep) && isMouseDraggingInChildCompOf (comp))
                 {
                     keep = true;
                     comp->setSize (0, 0);

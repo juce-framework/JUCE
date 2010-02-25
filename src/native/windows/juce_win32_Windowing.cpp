@@ -563,7 +563,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             fullScreen = shouldBeFullScreen;
-            const ComponentDeletionWatcher deletionChecker (component);
+            const Component::SafePointer deletionChecker (component);
 
             if (! fullScreen)
             {
@@ -589,7 +589,7 @@ public:
                     SendMessageW (hwnd, WM_SETTINGCHANGE, 0, 0);
             }
 
-            if (! deletionChecker.hasBeenDeleted())
+            if (deletionChecker != 0)
                 handleMovedOrResized();
         }
     }

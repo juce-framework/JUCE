@@ -31,8 +31,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../graphics/imaging/juce_ImageConvolutionKernel.h"
 #include "../../graphics/imaging/juce_Image.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../juce_Desktop.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================

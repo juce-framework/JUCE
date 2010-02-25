@@ -27,33 +27,15 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_ComponentListener.h"
 
-
 //==============================================================================
-void ComponentListener::componentMovedOrResized (Component&, bool, bool)
-{
-}
-
-void ComponentListener::componentBroughtToFront (Component&)
-{
-}
-
-void ComponentListener::componentVisibilityChanged (Component&)
-{
-}
-
-void ComponentListener::componentChildrenChanged (Component&)
-{
-}
-
-void ComponentListener::componentParentHierarchyChanged (Component&)
-{
-}
-
-void ComponentListener::componentNameChanged (Component&)
-{
-}
+void ComponentListener::componentMovedOrResized (Component&, bool, bool)    {}
+void ComponentListener::componentBroughtToFront (Component&)                {}
+void ComponentListener::componentVisibilityChanged (Component&)             {}
+void ComponentListener::componentChildrenChanged (Component&)               {}
+void ComponentListener::componentParentHierarchyChanged (Component&)        {}
+void ComponentListener::componentNameChanged (Component&)                   {}
+void ComponentListener::componentBeingDeleted (Component& component)        {}
 
 END_JUCE_NAMESPACE

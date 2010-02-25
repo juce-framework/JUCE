@@ -525,7 +525,7 @@ void ComboBox::showPopup()
     if (! menuActive)
     {
         const int selectedId = getSelectedId();
-        ComponentDeletionWatcher deletionWatcher (this);
+        Component::SafePointer<Component> deletionWatcher (this);
 
         PopupMenu menu;
 
@@ -553,7 +553,7 @@ void ComboBox::showPopup()
         const int resultId = menu.showAt (this, selectedId,
                                           getWidth(), 1, itemHeight);
 
-        if (deletionWatcher.hasBeenDeleted())
+        if (deletionWatcher == 0)
             return;
 
         menuActive = false;

@@ -75,7 +75,7 @@ public:
     void applyBoundsToComponent (Component* component, const Rectangle<int>& bounds);
 
     //==============================================================================
-    Component* const target;
+    Component::SafePointer<Component> target;
     const int borderThickness;
 
     //==============================================================================
@@ -84,7 +84,6 @@ public:
 private:
     ResizableBorderComponent* border;
 
-    ComponentDeletionWatcher deletionWatcher;
     ComponentLayout& layout;
 
     bool selected, dragging, mouseDownSelectStatus;

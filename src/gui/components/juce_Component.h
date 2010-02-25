@@ -35,7 +35,6 @@
 #include "../graphics/effects/juce_ImageEffectFilter.h"
 #include "../graphics/geometry/juce_RectangleList.h"
 #include "../graphics/geometry/juce_BorderSize.h"
-#include "windows/juce_ComponentPeer.h"
 #include "../../events/juce_MessageListener.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_VoidArray.h"
@@ -43,7 +42,7 @@
 class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
-
+class ComponentPeer;
 
 //==============================================================================
 /**
@@ -1602,13 +1601,6 @@ public:
     */
     const Point<int> getMouseXYRelative() const;
 
-    /** Returns the component that's currently underneath the mouse.
-
-        @returns the component or 0 if there isn't one.
-        @see contains, getComponentAt
-    */
-    static Component* JUCE_CALLTYPE getComponentUnderMouse() throw();
-
     //==============================================================================
     /** Called when this component's size has been changed.
 
@@ -1897,6 +1889,71 @@ public:
     uint32 getComponentUID() const throw()                { return componentUID; }
 
     //==============================================================================
+    /** Holds a pointer to some type of Component, which automatically becomes null if
+        the component is deleted.
+
+        If you're using a component which may be deleted by another event that's outside
+        of your control, use a SafePointer instead of a normal pointer to refer to it,
+        and you can test whether it's null before using it to see if something has deleted
+        it.
+
+        The ComponentType typedef must be Component, or some subclass of Component.
+
+        Note that this class isn't thread-safe, and assumes that all the code that uses
+        it is running on the message thread.
+    */
+    template <class ComponentType>
+    class JUCE_API  SafePointer   : private ComponentListener
+    {
+    public:
+        /** Creates a null SafePointer. */
+        SafePointer()                                       : comp (0) {}
+
+        /** Creates a SafePointer that points at the given component. */
+        SafePointer (ComponentType* const component)        : comp (component)   { attach(); }
+
+        /** Creates a copy of another SafePointer. */
+        SafePointer (const SafePointer& other)              : comp (other.comp)  { attach(); }
+
+        /** Destructor. */
+        ~SafePointer()                                      { detach(); }
+
+        /** Copies another pointer to this one. */
+        SafePointer& operator= (const SafePointer& other)   { return operator= (other.comp); }
+
+        /** Copies another pointer to this one. */
+        SafePointer& operator= (ComponentType* const newComponent)
+        {
+            detach();
+            comp = newComponent;
+            attach();
+            return *this;
+        }
+
+        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
+        operator ComponentType*() throw()                   { return comp; }
+
+        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
+        operator const ComponentType*() const throw()       { return comp; }
+
+        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
+        ComponentType* operator->() throw()                 { jassert (comp != 0); return comp; }
+
+        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
+        const ComponentType* operator->() const throw()     { jassert (comp != 0); return comp; }
+
+        //==============================================================================
+        juce_UseDebuggingNewOperator
+
+    private:
+        ComponentType* comp;
+
+        void attach()   { if (comp != 0) comp->addComponentListener (this); }
+        void detach()   { if (comp != 0) comp->removeComponentListener (this); }
+        void componentBeingDeleted (Component&)     { comp = 0; }
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
@@ -1907,7 +1964,6 @@ private:
     friend class MouseInputSourceInternal;
 
     static Component* currentlyFocusedComponent;
-    static Component* componentUnderMouse;
 
     //==============================================================================
     String componentName_;

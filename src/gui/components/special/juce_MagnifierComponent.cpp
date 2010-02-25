@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_MagnifierComponent.h"
 #include "../../graphics/imaging/juce_Image.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================

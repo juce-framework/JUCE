@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 #include "juce_ResizableWindow.h"
+#include "juce_ComponentPeer.h"
 #include "../juce_Desktop.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 #include "../../graphics/geometry/juce_RectangleList.h"

@@ -29,8 +29,8 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_PopupMenu.h"
 #include "juce_PopupMenuCustomComponent.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../juce_Desktop.h"
 #include "../../graphics/imaging/juce_Image.h"
 #include "../keyboard/juce_KeyPressMappingSet.h"
@@ -270,7 +270,6 @@ public:
          activeSubMenu (0),
          menuBarComponent (0),
          managerOfChosenCommand (0),
-         componentAttachedTo (0),
          minimumWidth (0),
          maximumNumColumns (7),
          standardItemHeight (0),
@@ -309,7 +308,6 @@ public:
         activeSubMenu = 0;
 
         deleteAllChildren();
-        attachedCompWatcher = 0;
     }
 
     //==============================================================================
@@ -353,7 +351,6 @@ public:
                 mw->menuBarComponent = menuBarComponent;
                 mw->managerOfChosenCommand = managerOfChosenCommand;
                 mw->componentAttachedTo = componentAttachedTo;
-                mw->attachedCompWatcher = componentAttachedTo != 0 ? new ComponentDeletionWatcher (componentAttachedTo) : 0;
 
                 mw->calculateWindowPos (minX, maxX, minY, maxY, alignToRectangle);
                 mw->setTopLeftPosition (mw->windowPos.getX(),
@@ -562,7 +559,7 @@ public:
 
         if (! isOverAnyMenu())
         {
-            if (componentAttachedTo != 0 && ! attachedCompWatcher->hasBeenDeleted())
+            if (componentAttachedTo != 0)
             {
                 // we want to dismiss the menu, but if we do it synchronously, then
                 // the mouse-click will be allowed to pass through. That's good, except
@@ -597,7 +594,7 @@ public:
         if (! isVisible())
             return;
 
-        if (attachedCompWatcher != 0 && attachedCompWatcher->hasBeenDeleted())
+        if (componentAttachedTo == 0)
         {
             dismissMenu (0);
             return;
@@ -750,8 +747,7 @@ private:
     ScopedPointer <Window> activeSubMenu;
     Component* menuBarComponent;
     ApplicationCommandManager** managerOfChosenCommand;
-    Component* componentAttachedTo;
-    ScopedPointer <ComponentDeletionWatcher> attachedCompWatcher;
+    Component::SafePointer<Component> componentAttachedTo;
     Rectangle<int> windowPos;
     Point<int> lastMouse;
     int minimumWidth, maximumNumColumns, standardItemHeight;
@@ -1546,16 +1542,8 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
                          const bool alignToRectangle,
                          Component* const componentAttachedTo)
 {
-    Component* const prevFocused = Component::getCurrentlyFocusedComponent();
-
-    ScopedPointer <ComponentDeletionWatcher> deletionChecker[2];
-    if (prevFocused != 0)
-        deletionChecker[0] = new ComponentDeletionWatcher (prevFocused);
-
-    Component* const prevTopLevel = (prevFocused != 0) ? prevFocused->getTopLevelComponent() : 0;
-
-    if (prevTopLevel != 0)
-        deletionChecker[1] = new ComponentDeletionWatcher (prevTopLevel);
+    Component::SafePointer<Component> prevFocused (Component::getCurrentlyFocusedComponent());
+    Component::SafePointer<Component> prevTopLevel ((prevFocused != 0) ? prevFocused->getTopLevelComponent() : 0);
 
     Window::wasHiddenBecauseOfAppChange() = false;
 
@@ -1582,10 +1570,10 @@ int PopupMenu::showMenu (const int x, const int y, const int w, const int h,
 
         if (! Window::wasHiddenBecauseOfAppChange())
         {
-            if (deletionChecker[1] != 0 && ! deletionChecker[1]->hasBeenDeleted())
+            if (prevTopLevel != 0)
                 prevTopLevel->toFront (true);
 
-            if (deletionChecker[0] != 0 && ! deletionChecker[0]->hasBeenDeleted())
+            if (prevFocused != 0)
                 prevFocused->grabKeyboardFocus();
         }
     }

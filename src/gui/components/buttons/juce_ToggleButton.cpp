@@ -29,7 +29,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_ToggleButton.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
-#include "../juce_ComponentDeletionWatcher.h"
 
 
 //==============================================================================

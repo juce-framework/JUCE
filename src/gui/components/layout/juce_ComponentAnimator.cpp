@@ -35,13 +35,11 @@ BEGIN_JUCE_NAMESPACE
 struct AnimationTask
 {
     AnimationTask (Component* const comp)
-        : component (comp),
-          watcher (comp)
+        : component (comp)
     {
     }
 
-    Component* component;
-    ComponentDeletionWatcher watcher;
+    Component::SafePointer<Component> component;
     Rectangle<int> destination;
     int msElapsed, msTotal;
     double startSpeed, midSpeed, endSpeed, lastProgress;
@@ -49,7 +47,7 @@ struct AnimationTask
 
     bool useTimeslice (const int elapsed)
     {
-        if (watcher.hasBeenDeleted())
+        if (component == 0)
             return false;
 
         msElapsed += elapsed;
@@ -88,7 +86,7 @@ struct AnimationTask
 
     void moveToFinalDestination()
     {
-        if (! watcher.hasBeenDeleted())
+        if (component != 0)
             component->setBounds (destination);
     }
 

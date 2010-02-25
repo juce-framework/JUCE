@@ -32,7 +32,6 @@ ComponentOverlayComponent::ComponentOverlayComponent (Component* const target_,
                                                       ComponentLayout& layout_)
     : target (target_),
       borderThickness (4),
-      deletionWatcher (target_),
       layout (layout_),
       selected (false),
       dragging (false),
@@ -58,7 +57,7 @@ ComponentOverlayComponent::~ComponentOverlayComponent()
 {
     layout.getSelectedSet().removeChangeListener (this);
 
-    if (! deletionWatcher.hasBeenDeleted())
+    if (target != 0)
         target->removeComponentListener (this);
 
     delete border;
@@ -78,7 +77,7 @@ void ComponentOverlayComponent::changeListenerCallback (void*)
 
 void ComponentOverlayComponent::paint (Graphics& g)
 {
-    jassert (! deletionWatcher.hasBeenDeleted());
+    jassert (target != 0);
 
     if (selected)
     {
@@ -94,7 +93,7 @@ void ComponentOverlayComponent::paint (Graphics& g)
 
 void ComponentOverlayComponent::resized()
 {
-    jassert (! deletionWatcher.hasBeenDeleted());
+    jassert (target != 0);
 
     border->setBounds (0, 0, getWidth(), getHeight());
 }

@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Component.h"
 #include "juce_ComponentDeletionWatcher.h"
 #include "juce_Desktop.h"
+#include "windows/juce_ComponentPeer.h"
 #include "keyboard/juce_KeyListener.h"
 #include "lookandfeel/juce_LookAndFeel.h"
 #include "../../application/juce_Application.h"
@@ -44,7 +45,6 @@ BEGIN_JUCE_NAMESPACE
 #include "mouse/juce_MouseInputSource.h"
 
 //==============================================================================
-Component* Component::componentUnderMouse = 0;
 Component* Component::currentlyFocusedComponent = 0;
 
 static Array <Component*> modalComponentStack, modalComponentReturnValueKeys;
@@ -92,6 +92,17 @@ Component::Component (const String& name) throw()
 
 Component::~Component()
 {
+    if (componentListeners_ != 0)
+    {
+        for (int i = componentListeners_->size(); --i >= 0;)
+        {
+            ((ComponentListener*) componentListeners_->getUnchecked (i))
+                ->componentBeingDeleted (*this);
+
+            i = jmin (i, componentListeners_->size());
+        }
+    }
+
     if (parentComponent_ != 0)
     {
         parentComponent_->removeChildComponent (this);
@@ -101,9 +112,6 @@ Component::~Component()
     {
         giveAwayFocus();
     }
-
-    if (componentUnderMouse == this)
-        componentUnderMouse = 0;
 
     if (flags.hasHeavyweightPeerFlag)
         removeFromDesktop();
@@ -141,14 +149,14 @@ void Component::setName (const String& name)
 
         if (componentListeners_ != 0)
         {
-            const ComponentDeletionWatcher deletionChecker (this);
+            SafePointer<Component> safePointer (this);
 
             for (int i = componentListeners_->size(); --i >= 0;)
             {
                 ((ComponentListener*) componentListeners_->getUnchecked (i))
                     ->componentNameChanged (*this);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, componentListeners_->size());
@@ -166,7 +174,7 @@ void Component::setVisible (bool shouldBeVisible)
         // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
         checkMessageManagerIsLocked
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
 
         flags.visibleFlag = shouldBeVisible;
 
@@ -188,7 +196,7 @@ void Component::setVisible (bool shouldBeVisible)
 
         sendVisibilityChangeMessage();
 
-        if ((! deletionChecker.hasBeenDeleted()) && flags.hasHeavyweightPeerFlag)
+        if (safePointer != 0 && flags.hasHeavyweightPeerFlag)
         {
             ComponentPeer* const peer = getPeer();
 
@@ -208,18 +216,18 @@ void Component::visibilityChanged()
 
 void Component::sendVisibilityChangeMessage()
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     visibilityChanged();
 
-    if ((! deletionChecker.hasBeenDeleted()) && componentListeners_ != 0)
+    if (safePointer != 0 && componentListeners_ != 0)
     {
         for (int i = componentListeners_->size(); --i >= 0;)
         {
             ((ComponentListener*) componentListeners_->getUnchecked (i))
                 ->componentVisibilityChanged (*this);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, componentListeners_->size());
@@ -398,7 +406,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
 
     if (styleWanted != currentStyleFlags || ! flags.hasHeavyweightPeerFlag)
     {
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
 
 #if JUCE_LINUX
         // it's wise to give the component a non-zero size before
@@ -430,7 +438,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
         if (parentComponent_ != 0)
             parentComponent_->removeChildComponent (this);
 
-        if (! deletionChecker.hasBeenDeleted())
+        if (safePointer != 0)
         {
             flags.hasHeavyweightPeerFlag = true;
 
@@ -900,14 +908,14 @@ void Component::sendMovedResizedMessages (const bool wasMoved, const bool wasRes
 
         if (componentListeners_ != 0)
         {
-            const ComponentDeletionWatcher deletionChecker (this);
+            SafePointer<Component> safePointer (this);
 
             for (int i = componentListeners_->size(); --i >= 0;)
             {
                 ((ComponentListener*) componentListeners_->getUnchecked (i))
                     ->componentMovedOrResized (*this, wasMoved, wasResized);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, componentListeners_->size());
@@ -1302,14 +1310,14 @@ void Component::childrenChanged()
 
 void Component::internalChildrenChanged()
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
     const bool hasListeners = componentListeners_ != 0;
 
     childrenChanged();
 
     if (hasListeners)
     {
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         for (int i = componentListeners_->size(); --i >= 0;)
@@ -1317,7 +1325,7 @@ void Component::internalChildrenChanged()
             ((ComponentListener*) componentListeners_->getUnchecked (i))
                 ->componentChildrenChanged (*this);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, componentListeners_->size());
@@ -1329,7 +1337,7 @@ void Component::internalHierarchyChanged()
 {
     parentHierarchyChanged();
 
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     if (componentListeners_ != 0)
     {
@@ -1338,7 +1346,7 @@ void Component::internalHierarchyChanged()
             ((ComponentListener*) componentListeners_->getUnchecked (i))
                 ->componentParentHierarchyChanged (*this);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, componentListeners_->size());
@@ -1351,8 +1359,8 @@ void Component::internalHierarchyChanged()
 
         // you really shouldn't delete the parent component during a callback telling you
         // that it's changed..
-        jassert (! deletionChecker.hasBeenDeleted());
-        if (deletionChecker.hasBeenDeleted())
+        jassert (safePointer != 0);
+        if (safePointer == 0)
             return;
 
         i = jmin (i, childComponentList_.size());
@@ -1375,11 +1383,7 @@ int Component::runModalLoop()
                        ->callFunctionOnMessageThread (&runModalLoopCallback, (void*) this);
     }
 
-    Component* const prevFocused = getCurrentlyFocusedComponent();
-
-    ScopedPointer <ComponentDeletionWatcher> deletionChecker;
-    if (prevFocused != 0)
-        deletionChecker = new ComponentDeletionWatcher (prevFocused);
+    SafePointer<Component> prevFocused (getCurrentlyFocusedComponent());
 
     if (! isCurrentlyModal())
         enterModalState();
@@ -1420,7 +1424,7 @@ int Component::runModalLoop()
 
     modalComponentStack.removeValue (this);
 
-    if (deletionChecker != 0 && ! deletionChecker->hasBeenDeleted())
+    if (prevFocused != 0)
         prevFocused->grabKeyboardFocus();
 
     return returnValue;
@@ -1824,13 +1828,13 @@ void Component::sendLookAndFeelChange()
     //  during the lookAndFeelChanged() callback)
     jassert (isValidComponent());
 
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     for (int i = childComponentList_.size(); --i >= 0;)
     {
         childComponentList_.getUnchecked (i)->sendLookAndFeelChange();
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         i = jmin (i, childComponentList_.size());
@@ -2206,7 +2210,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
         flags.mouseOverFlag = true;
         flags.draggingFlag = false;
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
 
         if (flags.repaintOnMouseActivityFlag)
             repaint();
@@ -2217,7 +2221,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
 
         mouseEnter (me);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         Desktop::getInstance().resetTimer();
@@ -2226,7 +2230,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
         {
             ((MouseListener*) Desktop::getInstance().mouseListeners[i])->mouseEnter (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, Desktop::getInstance().mouseListeners.size());
@@ -2238,24 +2242,24 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
             {
                 ((MouseListener*) mouseListeners_->getUnchecked(i))->mouseEnter (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, mouseListeners_->size());
             }
         }
 
-        const Component* p = parentComponent_;
+        Component* p = parentComponent_;
 
         while (p != 0)
         {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
+            SafePointer<Component> parentPointer (p);
 
             for (int i = p->numDeepMouseListeners; --i >= 0;)
             {
                 ((MouseListener*) (p->mouseListeners_->getUnchecked(i)))->mouseEnter (me);
 
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                if (safePointer == 0 || parentPointer == 0)
                     return;
 
                 i = jmin (i, p->numDeepMouseListeners);
@@ -2268,13 +2272,13 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
 
 void Component::internalMouseExit (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     if (flags.draggingFlag)
     {
         internalMouseUp (source, relativePos, time, source.getCurrentModifiers().getRawFlags());
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
     }
 
@@ -2292,7 +2296,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
                              time, 0, false);
         mouseExit (me);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         Desktop::getInstance().resetTimer();
@@ -2301,7 +2305,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
         {
             ((MouseListener*) Desktop::getInstance().mouseListeners[i])->mouseExit (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, Desktop::getInstance().mouseListeners.size());
@@ -2313,24 +2317,24 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
             {
                 ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseExit (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, mouseListeners_->size());
             }
         }
 
-        const Component* p = parentComponent_;
+        Component* p = parentComponent_;
 
         while (p != 0)
         {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
+            SafePointer<Component> parentPointer (p);
 
             for (int i = p->numDeepMouseListeners; --i >= 0;)
             {
                 ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseExit (me);
 
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                if (safePointer == 0 || parentPointer == 0)
                     return;
 
                 i = jmin (i, p->numDeepMouseListeners);
@@ -2360,7 +2364,7 @@ public:
         Desktop& desktop = Desktop::getInstance();
         int numMiceDown = 0;
 
-        for (int i = desktop.getNumMouseInputSources(); --i >= 0;)
+        for (int i = desktop.getNumMouseSources(); --i >= 0;)
         {
             MouseInputSource* const source = desktop.getMouseSource(i);
             if (source->isDragging())
@@ -2402,13 +2406,13 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
 {
     Desktop& desktop = Desktop::getInstance();
 
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
         internalModalInputAttempt();
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         // If processing the input attempt has exited the modal loop, we'll allow the event
@@ -2426,7 +2430,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
             {
                 ((MouseListener*) desktop.mouseListeners[i])->mouseDown (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, desktop.mouseListeners.size());
@@ -2445,7 +2449,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
             {
                 c->toFront (true);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
             }
 
@@ -2454,67 +2458,69 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
     }
 
     if (! flags.dontFocusOnMouseClickFlag)
+    {
         grabFocusInternal (focusChangedByMouseClick);
 
-    if (! deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
+            return;
+    }
+
+    flags.draggingFlag = true;
+    flags.mouseOverFlag = true;
+
+    if (flags.repaintOnMouseActivityFlag)
+        repaint();
+
+    const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
+                         this, time, relativePos, time,
+                         source.getNumberOfMultipleClicks(), false);
+    mouseDown (me);
+
+    if (safePointer == 0)
+        return;
+
+    desktop.resetTimer();
+
+    for (int i = desktop.mouseListeners.size(); --i >= 0;)
     {
-        flags.draggingFlag = true;
-        flags.mouseOverFlag = true;
+        ((MouseListener*) desktop.mouseListeners[i])->mouseDown (me);
 
-        if (flags.repaintOnMouseActivityFlag)
-            repaint();
-
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             this, time, relativePos, time,
-                             source.getNumberOfMultipleClicks(), false);
-        mouseDown (me);
-
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
-        desktop.resetTimer();
+        i = jmin (i, desktop.mouseListeners.size());
+    }
 
-        for (int i = desktop.mouseListeners.size(); --i >= 0;)
+    if (mouseListeners_ != 0)
+    {
+        for (int i = mouseListeners_->size(); --i >= 0;)
         {
-            ((MouseListener*) desktop.mouseListeners[i])->mouseDown (me);
+            ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseDown (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
-            i = jmin (i, desktop.mouseListeners.size());
+            i = jmin (i, mouseListeners_->size());
         }
+    }
 
-        if (mouseListeners_ != 0)
+    Component* p = parentComponent_;
+
+    while (p != 0)
+    {
+        SafePointer<Component> parentPointer (p);
+
+        for (int i = p->numDeepMouseListeners; --i >= 0;)
         {
-            for (int i = mouseListeners_->size(); --i >= 0;)
-            {
-                ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseDown (me);
+            ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseDown (me);
 
-                if (deletionChecker.hasBeenDeleted())
-                    return;
+            if (safePointer == 0 || parentPointer == 0)
+                return;
 
-                i = jmin (i, mouseListeners_->size());
-            }
+            i = jmin (i, p->numDeepMouseListeners);
         }
 
-        const Component* p = parentComponent_;
-
-        while (p != 0)
-        {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
-
-            for (int i = p->numDeepMouseListeners; --i >= 0;)
-            {
-                ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseDown (me);
-
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
-                    return;
-
-                i = jmin (i, p->numDeepMouseListeners);
-            }
-
-            p = p->parentComponent_;
-        }
+        p = p->parentComponent_;
     }
 }
 
@@ -2527,7 +2533,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
         flags.draggingFlag = false;
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
 
         if (flags.repaintOnMouseActivityFlag)
             repaint();
@@ -2541,7 +2547,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
         mouseUp (me);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         desktop.resetTimer();
@@ -2550,7 +2556,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
         {
             ((MouseListener*) desktop.mouseListeners[i])->mouseUp (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, desktop.mouseListeners.size());
@@ -2562,7 +2568,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
             {
                 ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseUp (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, mouseListeners_->size());
@@ -2570,17 +2576,17 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
         }
 
         {
-            const Component* p = parentComponent_;
+            Component* p = parentComponent_;
 
             while (p != 0)
             {
-                const ComponentDeletionWatcher parentDeletionChecker (p);
+                SafePointer<Component> parentPointer (p);
 
                 for (int i = p->numDeepMouseListeners; --i >= 0;)
                 {
                     ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseUp (me);
 
-                    if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                    if (safePointer == 0 || parentPointer == 0)
                         return;
 
                     i = jmin (i, p->numDeepMouseListeners);
@@ -2602,7 +2608,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
             {
                 ((MouseListener*) desktop.mouseListeners[i])->mouseDoubleClick (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, desktop.mouseListeners.size());
@@ -2610,7 +2616,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
             for (i = numListeners; --i >= 0;)
             {
-                if (deletionChecker.hasBeenDeleted() || mouseListeners_ == 0)
+                if (safePointer == 0 || mouseListeners_ == 0)
                     return;
 
                 MouseListener* const ml = (MouseListener*)((*mouseListeners_)[i]);
@@ -2618,20 +2624,20 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
                     ml->mouseDoubleClick (me);
             }
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
-            const Component* p = parentComponent_;
+            Component* p = parentComponent_;
 
             while (p != 0)
             {
-                const ComponentDeletionWatcher parentDeletionChecker (p);
+                SafePointer<Component> parentPointer (p);
 
                 for (i = p->numDeepMouseListeners; --i >= 0;)
                 {
                     ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseDoubleClick (me);
 
-                    if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                    if (safePointer == 0 || parentPointer == 0)
                         return;
 
                     i = jmin (i, p->numDeepMouseListeners);
@@ -2651,7 +2657,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
         flags.mouseOverFlag = reallyContains (relativePos.getX(), relativePos.getY(), false);
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
 
         const MouseEvent me (source, relativePos,
                              source.getCurrentModifiers(), this, time,
@@ -2662,7 +2668,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
         mouseDrag (me);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         desktop.resetTimer();
@@ -2671,7 +2677,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
         {
             ((MouseListener*) desktop.mouseListeners[i])->mouseDrag (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, desktop.mouseListeners.size());
@@ -2683,24 +2689,24 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
             {
                 ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseDrag (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, mouseListeners_->size());
             }
         }
 
-        const Component* p = parentComponent_;
+        Component* p = parentComponent_;
 
         while (p != 0)
         {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
+            SafePointer<Component> parentPointer (p);
 
             for (int i = p->numDeepMouseListeners; --i >= 0;)
             {
                 ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseDrag (me);
 
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                if (safePointer == 0 || parentPointer == 0)
                     return;
 
                 i = jmin (i, p->numDeepMouseListeners);
@@ -2713,7 +2719,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
 
 void Component::internalMouseMove (MouseInputSource& source, const Point<int>& relativePos, const Time& time)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     if (isValidComponent())
     {
@@ -2734,7 +2740,7 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
 
             mouseMove (me);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             desktop.resetTimer();
@@ -2743,7 +2749,7 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
             {
                 ((MouseListener*) desktop.mouseListeners[i])->mouseMove (me);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, desktop.mouseListeners.size());
@@ -2755,24 +2761,24 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
                 {
                     ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseMove (me);
 
-                    if (deletionChecker.hasBeenDeleted())
+                    if (safePointer == 0)
                         return;
 
                     i = jmin (i, mouseListeners_->size());
                 }
             }
 
-            const Component* p = parentComponent_;
+            Component* p = parentComponent_;
 
             while (p != 0)
             {
-                const ComponentDeletionWatcher parentDeletionChecker (p);
+                SafePointer<Component> parentPointer (p);
 
                 for (int i = p->numDeepMouseListeners; --i >= 0;)
                 {
                     ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseMove (me);
 
-                    if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                    if (safePointer == 0 || parentPointer == 0)
                         return;
 
                     i = jmin (i, p->numDeepMouseListeners);
@@ -2788,7 +2794,7 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
                                     const Time& time, const float amountX, const float amountY)
 {
     Desktop& desktop = Desktop::getInstance();
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     const float wheelIncrementX = amountX * (1.0f / 256.0f);
     const float wheelIncrementY = amountY * (1.0f / 256.0f);
@@ -2803,7 +2809,7 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
         {
             ((MouseListener*) desktop.mouseListeners[i])->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, desktop.mouseListeners.size());
@@ -2813,14 +2819,14 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
     {
         mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         for (int i = desktop.mouseListeners.size(); --i >= 0;)
         {
             ((MouseListener*) desktop.mouseListeners[i])->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
 
             i = jmin (i, desktop.mouseListeners.size());
@@ -2832,24 +2838,24 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
             {
                 ((MouseListener*) mouseListeners_->getUnchecked (i))->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, mouseListeners_->size());
             }
         }
 
-        const Component* p = parentComponent_;
+        Component* p = parentComponent_;
 
         while (p != 0)
         {
-            const ComponentDeletionWatcher parentDeletionChecker (p);
+            SafePointer<Component> parentPointer (p);
 
             for (int i = p->numDeepMouseListeners; --i >= 0;)
             {
                 ((MouseListener*) (p->mouseListeners_->getUnchecked (i)))->mouseWheelMove (me, wheelIncrementX, wheelIncrementY);
 
-                if (deletionChecker.hasBeenDeleted() || parentDeletionChecker.hasBeenDeleted())
+                if (safePointer == 0 || parentPointer == 0)
                     return;
 
                 i = jmin (i, p->numDeepMouseListeners);
@@ -2876,10 +2882,10 @@ void Component::internalBroughtToFront()
         if (flags.hasHeavyweightPeerFlag)
             Desktop::getInstance().componentBroughtToFront (this);
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
         broughtToFront();
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
 
         if (componentListeners_ != 0)
@@ -2889,7 +2895,7 @@ void Component::internalBroughtToFront()
                 ((ComponentListener*) componentListeners_->getUnchecked (i))
                     ->componentBroughtToFront (*this);
 
-                if (deletionChecker.hasBeenDeleted())
+                if (safePointer == 0)
                     return;
 
                 i = jmin (i, componentListeners_->size());
@@ -2913,11 +2919,11 @@ void Component::focusGained (FocusChangeType)
 
 void Component::internalFocusGain (const FocusChangeType cause)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     focusGained (cause);
 
-    if (! deletionChecker.hasBeenDeleted())
+    if (safePointer != 0)
         internalChildFocusChange (cause);
 }
 
@@ -2928,11 +2934,11 @@ void Component::focusLost (FocusChangeType)
 
 void Component::internalFocusLoss (const FocusChangeType cause)
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     focusLost (focusChangedDirectly);
 
-    if (! deletionChecker.hasBeenDeleted())
+    if (safePointer != 0)
         internalChildFocusChange (cause);
 }
 
@@ -2949,10 +2955,10 @@ void Component::internalChildFocusChange (FocusChangeType cause)
     {
         flags.childCompFocusedFlag = childIsNowFocused;
 
-        const ComponentDeletionWatcher deletionChecker (this);
+        SafePointer<Component> safePointer (this);
         focusOfChildComponentChanged (cause);
 
-        if (deletionChecker.hasBeenDeleted())
+        if (safePointer == 0)
             return;
     }
 
@@ -2982,11 +2988,11 @@ void Component::setEnabled (const bool shouldBeEnabled)
 
 void Component::sendEnablementChangeMessage()
 {
-    const ComponentDeletionWatcher deletionChecker (this);
+    SafePointer<Component> safePointer (this);
 
     enablementChanged();
 
-    if (deletionChecker.hasBeenDeleted())
+    if (safePointer == 0)
         return;
 
     for (int i = getNumChildComponents(); --i >= 0;)
@@ -2997,7 +3003,7 @@ void Component::sendEnablementChangeMessage()
         {
             c->sendEnablementChangeMessage();
 
-            if (deletionChecker.hasBeenDeleted())
+            if (safePointer == 0)
                 return;
         }
     }
@@ -3068,7 +3074,7 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
 
             if (peer != 0)
             {
-                const ComponentDeletionWatcher deletionChecker (this);
+                SafePointer<Component> safePointer (this);
 
                 peer->grabFocus();
 
@@ -3089,7 +3095,7 @@ void Component::takeKeyboardFocus (const FocusChangeType cause)
                     {
                         focusGained (cause);
 
-                        if (! deletionChecker.hasBeenDeleted())
+                        if (safePointer != 0)
                             internalChildFocusChange (cause);
                     }
                 }
@@ -3184,11 +3190,10 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
             {
                 if (nextComp->isCurrentlyBlockedByAnotherModalComponent())
                 {
-                    const ComponentDeletionWatcher deletionChecker (nextComp);
+                    SafePointer<Component> safePointer (this);
                     internalModalInputAttempt();
 
-                    if (deletionChecker.hasBeenDeleted()
-                         || nextComp->isCurrentlyBlockedByAnotherModalComponent())
+                    if (safePointer == 0 || nextComp->isCurrentlyBlockedByAnotherModalComponent())
                         return;
                 }
 
@@ -3247,11 +3252,6 @@ bool JUCE_CALLTYPE Component::isMouseButtonDownAnywhere() throw()
 const Point<int> Component::getMouseXYRelative() const
 {
     return globalPositionToRelative (Desktop::getMousePosition());
-}
-
-Component* JUCE_CALLTYPE Component::getComponentUnderMouse() throw()
-{
-    return componentUnderMouse;
 }
 
 //==============================================================================

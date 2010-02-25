@@ -111,7 +111,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-                                                                 : (ObjectClass*) 0;
+                                                                 : static_cast <ObjectClass*> (0);
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -135,7 +135,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
-                           : (ObjectClass*) 0;
+                           : static_cast <ObjectClass*> (0);
     }
 
     /** Returns a pointer to the last object in the array.
@@ -147,7 +147,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
-                           : (ObjectClass*) 0;
+                           : static_cast <ObjectClass*> (0);
     }
 
     //==============================================================================

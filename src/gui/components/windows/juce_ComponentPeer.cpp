@@ -27,9 +27,8 @@
 
 BEGIN_JUCE_NAMESPACE
 
+#include "juce_ComponentPeer.h"
 #include "../../../application/juce_Application.h"
-#include "../juce_Component.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../juce_Desktop.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../core/juce_Time.h"
@@ -167,7 +166,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
     while (target != 0)
     {
-        const ComponentDeletionWatcher deletionChecker (target);
+        const Component::SafePointer<Component> deletionChecker (target);
 
         if (target->keyListeners_ != 0)
         {
@@ -175,7 +174,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
             {
                 keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyPressed (keyInfo, target);
 
-                if (keyWasUsed || deletionChecker.hasBeenDeleted())
+                if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;
 
                 i = jmin (i, target->keyListeners_->size());
@@ -184,7 +183,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 
         keyWasUsed = target->keyPressed (keyInfo);
 
-        if (keyWasUsed || deletionChecker.hasBeenDeleted())
+        if (keyWasUsed || deletionChecker == 0)
             break;
 
         if (keyInfo.isKeyCode (KeyPress::tabKey) && Component::getCurrentlyFocusedComponent() != 0)
@@ -221,11 +220,11 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 
     while (target != 0)
     {
-        const ComponentDeletionWatcher deletionChecker (target);
+        const Component::SafePointer<Component> deletionChecker (target);
 
         keyWasUsed = target->keyStateChanged (isKeyDown);
 
-        if (keyWasUsed || deletionChecker.hasBeenDeleted())
+        if (keyWasUsed || deletionChecker == 0)
             break;
 
         if (target->keyListeners_ != 0)
@@ -234,7 +233,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
             {
                 keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyStateChanged (isKeyDown, target);
 
-                if (keyWasUsed || deletionChecker.hasBeenDeleted())
+                if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;
 
                 i = jmin (i, target->keyListeners_->size());
@@ -295,7 +294,7 @@ void ComponentPeer::handleMovedOrResized()
 
     if (component->flags.hasHeavyweightPeerFlag && ! nowMinimised)
     {
-        const ComponentDeletionWatcher deletionChecker (component);
+        const Component::SafePointer<Component> deletionChecker (component);
 
         const Rectangle<int> newBounds (getBounds());
         const bool wasMoved   = (component->getPosition() != newBounds.getPosition());
@@ -310,7 +309,7 @@ void ComponentPeer::handleMovedOrResized()
 
             component->sendMovedResizedMessages (wasMoved, wasResized);
 
-            if (deletionChecker.hasBeenDeleted())
+            if (deletionChecker == 0)
                 return;
         }
     }
@@ -409,10 +408,8 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
 {
     updateCurrentModifiers();
 
-    FileDragAndDropTarget* lastTarget = 0;
-
-    if (dragAndDropTargetComponent != 0 && ! dragAndDropTargetComponent->hasBeenDeleted())
-        lastTarget = const_cast <FileDragAndDropTarget*> (dynamic_cast <const FileDragAndDropTarget*> (dragAndDropTargetComponent->getComponent()));
+    FileDragAndDropTarget* lastTarget
+        = const_cast<FileDragAndDropTarget*> (dynamic_cast<const FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent)));
 
     FileDragAndDropTarget* newTarget = 0;
 
@@ -432,10 +429,8 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
 
             if (newTarget != 0)
             {
-                Component* const targetComp = dynamic_cast <Component*> (newTarget);
-                const Point<int> pos (component->relativePositionToOtherComponent (targetComp, position));
-
-                dragAndDropTargetComponent = new ComponentDeletionWatcher (dynamic_cast <Component*> (newTarget));
+                dragAndDropTargetComponent = dynamic_cast <Component*> (newTarget);
+                const Point<int> pos (component->relativePositionToOtherComponent (dragAndDropTargetComponent, position));
                 newTarget->fileDragEnter (files, pos.getX(), pos.getY());
             }
         }
@@ -466,9 +461,10 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
 {
     handleFileDragMove (files, position);
 
-    if (dragAndDropTargetComponent != 0 && ! dragAndDropTargetComponent->hasBeenDeleted())
+    if (dragAndDropTargetComponent != 0)
     {
-        FileDragAndDropTarget* const target = const_cast <FileDragAndDropTarget*> (dynamic_cast <const FileDragAndDropTarget*> (dragAndDropTargetComponent->getComponent()));
+        FileDragAndDropTarget* const target
+            = const_cast<FileDragAndDropTarget*> (dynamic_cast<const FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent)));
 
         dragAndDropTargetComponent = 0;
         lastDragAndDropCompUnderMouse = 0;

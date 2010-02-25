@@ -30,9 +30,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_MouseInputSource.h"
 #include "juce_MouseEvent.h"
 #include "../juce_Component.h"
-#include "../juce_ComponentDeletionWatcher.h"
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
+#include "../windows/juce_ComponentPeer.h"
 
 
 //==============================================================================
@@ -59,7 +59,7 @@ public:
 
     Component* getComponentUnderMouse() const
     {
-        return componentUnderMouse != 0 ? const_cast<Component*> (componentUnderMouse->getComponent()) : 0;
+        return const_cast<Component*> (static_cast <const Component*> (componentUnderMouse));
     }
 
     const ModifierKeys getCurrentModifiers() const
@@ -144,7 +144,7 @@ public:
 
         if (newComponent != current)
         {
-            ScopedPointer<ComponentDeletionWatcher> newCompWatcher (newComponent != 0 ? new ComponentDeletionWatcher (newComponent) : 0);
+            Component::SafePointer<Component> safeNewComp (newComponent);
             const ModifierKeys originalButtonState (buttonState);
 
             if (current != 0)
@@ -154,9 +154,8 @@ public:
                 buttonState = originalButtonState;
             }
 
-            componentUnderMouse = newCompWatcher;
+            componentUnderMouse = safeNewComp;
             current = getComponentUnderMouse();
-            Component::componentUnderMouse = current;
 
             if (current != 0)
                 current->internalMouseEnter (source, current->globalPositionToRelative (screenPos), time);
@@ -406,7 +405,7 @@ public:
 
 private:
     MouseInputSource& source;
-    ScopedPointer<ComponentDeletionWatcher> componentUnderMouse;
+    Component::SafePointer<Component> componentUnderMouse;
     ComponentPeer* lastPeer;
 
     Point<int> unboundedMouseOffset;

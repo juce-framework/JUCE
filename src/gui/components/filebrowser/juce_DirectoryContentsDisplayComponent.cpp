@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DirectoryContentsDisplayComponent.h"
-#include "../juce_ComponentDeletionWatcher.h"
 
 
 //==============================================================================
@@ -61,13 +60,13 @@ void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* con
 
 void DirectoryContentsDisplayComponent::sendSelectionChangeMessage()
 {
-    const ComponentDeletionWatcher deletionWatcher (dynamic_cast <Component*> (this));
+    Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
 
     for (int i = listeners.size(); --i >= 0;)
     {
         ((FileBrowserListener*) listeners.getUnchecked (i))->selectionChanged();
 
-        if (deletionWatcher.hasBeenDeleted())
+        if (deletionWatcher == 0)
             return;
 
         i = jmin (i, listeners.size() - 1);
@@ -78,13 +77,13 @@ void DirectoryContentsDisplayComponent::sendMouseClickMessage (const File& file,
 {
     if (fileList.getDirectory().exists())
     {
-        const ComponentDeletionWatcher deletionWatcher (dynamic_cast <Component*> (this));
+        Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
 
         for (int i = listeners.size(); --i >= 0;)
         {
             ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (file, e);
 
-            if (deletionWatcher.hasBeenDeleted())
+            if (deletionWatcher == 0)
                 return;
 
             i = jmin (i, listeners.size() - 1);
@@ -96,13 +95,13 @@ void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file
 {
     if (fileList.getDirectory().exists())
     {
-        const ComponentDeletionWatcher deletionWatcher (dynamic_cast <Component*> (this));
+        Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
 
         for (int i = listeners.size(); --i >= 0;)
         {
             ((FileBrowserListener*) listeners.getUnchecked (i))->fileDoubleClicked (file);
 
-            if (deletionWatcher.hasBeenDeleted())
+            if (deletionWatcher == 0)
                 return;
 
             i = jmin (i, listeners.size() - 1);

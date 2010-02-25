@@ -38,10 +38,6 @@ ComponentMovementWatcher::ComponentMovementWatcher (Component* const component_)
 {
     jassert (component != 0); // can't use this with a null pointer..
 
-#ifdef JUCE_DEBUG
-    deletionWatcher = new ComponentDeletionWatcher (component_);
-#endif
-
     component->addComponentListener (this);
 
     registerWithParentComps();
@@ -57,10 +53,8 @@ ComponentMovementWatcher::~ComponentMovementWatcher()
 //==============================================================================
 void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 {
-#ifdef JUCE_DEBUG
     // agh! don't delete the target component without deleting this object first!
-    jassert (! deletionWatcher->hasBeenDeleted());
-#endif
+    jassert (component != 0);
 
     if (! reentrant)
     {
@@ -70,11 +64,9 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 
         if (peer != lastPeer)
         {
-            ComponentDeletionWatcher watcher (component);
-
             componentPeerChanged();
 
-            if (watcher.hasBeenDeleted())
+            if (component == 0)
                 return;
 
             lastPeer = peer;
@@ -91,10 +83,8 @@ void ComponentMovementWatcher::componentParentHierarchyChanged (Component&)
 
 void ComponentMovementWatcher::componentMovedOrResized (Component&, bool wasMoved, bool wasResized)
 {
-#ifdef JUCE_DEBUG
     // agh! don't delete the target component without deleting this object first!
-    jassert (! deletionWatcher->hasBeenDeleted());
-#endif
+    jassert (component != 0);
 
     if (wasMoved)
     {

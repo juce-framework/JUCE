@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../buttons/juce_ImageButton.h"
 #include "../buttons/juce_DrawableButton.h"
 #include "../buttons/juce_HyperlinkButton.h"
+#include "../windows/juce_ComponentPeer.h"
 #include "../windows/juce_AlertWindow.h"
 #include "../windows/juce_DocumentWindow.h"
 #include "../windows/juce_ResizableWindow.h"

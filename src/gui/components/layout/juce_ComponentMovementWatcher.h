@@ -27,7 +27,6 @@
 #define __JUCE_COMPONENTMOVEMENTWATCHER_JUCEHEADER__
 
 #include "../juce_Component.h"
-#include "../juce_ComponentDeletionWatcher.h"
 
 
 //==============================================================================
@@ -77,14 +76,11 @@ public:
 
 private:
     //==============================================================================
-    Component* const component;
+    Component::SafePointer<Component> component;
     ComponentPeer* lastPeer;
     VoidArray registeredParentComps;
     bool reentrant;
     Rectangle<int> lastBounds;
-#ifdef JUCE_DEBUG
-    ScopedPointer <ComponentDeletionWatcher> deletionWatcher;
-#endif
 
     void unregister() throw();
     void registerWithParentComps() throw();
