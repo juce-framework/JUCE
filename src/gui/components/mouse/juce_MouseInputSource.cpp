@@ -92,9 +92,52 @@ public:
         return 0;
     }
 
-    const Point<int> getScreenPosition() const
+    const Point<int> getScreenPosition() const throw()
     {
         return lastScreenPos + unboundedMouseOffset;
+    }
+
+    //==============================================================================
+    void sendMouseEnter (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " enter: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseEnter (source, comp->globalPositionToRelative (screenPos), time);
+    }
+
+    void sendMouseExit (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " exit: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseExit (source, comp->globalPositionToRelative (screenPos), time);
+    }
+
+    void sendMouseMove (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " move: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseMove (source, comp->globalPositionToRelative (screenPos), time);
+    }
+
+    void sendMouseDown (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " down: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseDown (source, comp->globalPositionToRelative (screenPos), time);
+    }
+
+    void sendMouseDrag (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " drag: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseDrag (source, comp->globalPositionToRelative (screenPos), time);
+    }
+
+    void sendMouseUp (Component* const comp, const Point<int>& screenPos, const int64 time)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " up: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseUp (source, comp->globalPositionToRelative (screenPos), time, getCurrentModifiers());
+    }
+
+    void sendMouseWheel (Component* const comp, const Point<int>& screenPos, const int64 time, float x, float y)
+    {
+        //DBG ("Mouse " + String (source.getIndex()) + " wheel: " + comp->globalPositionToRelative (screenPos).toString() + " - Comp: " + String::toHexString ((int) comp));
+        comp->internalMouseWheel (source, comp->globalPositionToRelative (screenPos), time, x, y);
     }
 
     //==============================================================================
@@ -114,8 +157,7 @@ public:
                 Component* const current = getComponentUnderMouse();
 
                 if (current != 0)
-                    current->internalMouseUp (source, current->globalPositionToRelative (screenPos + unboundedMouseOffset),
-                                              time, getCurrentModifiers());
+                    sendMouseUp (current, screenPos + unboundedMouseOffset, time);
 
                 enableUnboundedMouseMovement (false, false);
             }
@@ -131,8 +173,7 @@ public:
                 if (current != 0)
                 {
                     registerMouseDown (screenPos, time, current);
-
-                    current->internalMouseDown (source, current->globalPositionToRelative (screenPos), time);
+                    sendMouseDown (current, screenPos, time);
                 }
             }
         }
@@ -150,7 +191,7 @@ public:
             if (current != 0)
             {
                 setButtons (screenPos, time, ModifierKeys());
-                current->internalMouseExit (source, current->globalPositionToRelative (screenPos), time);
+                sendMouseExit (current, screenPos, time);
                 buttonState = originalButtonState;
             }
 
@@ -158,7 +199,7 @@ public:
             current = getComponentUnderMouse();
 
             if (current != 0)
-                current->internalMouseEnter (source, current->globalPositionToRelative (screenPos), time);
+                sendMouseEnter (current, screenPos, time);
 
             revealCursor (false);
             setButtons (screenPos, time, originalButtonState);
@@ -191,19 +232,17 @@ public:
 
             if (current != 0)
             {
-                const Point<int> pos (current->globalPositionToRelative (lastScreenPos));
-
                 if (isDragging())
                 {
                     registerMouseDrag (newScreenPos);
-                    current->internalMouseDrag (source, pos + unboundedMouseOffset, time);
+                    sendMouseDrag (current, newScreenPos + unboundedMouseOffset, time);
 
                     if (isUnboundedMouseModeOn)
                         handleUnboundedDrag (current);
                 }
                 else
                 {
-                    current->internalMouseMove (source, pos, time);
+                    sendMouseMove (current, newScreenPos, time);
                 }
             }
 
@@ -252,7 +291,7 @@ public:
         {
             Component* current = getComponentUnderMouse();
             if (current != 0)
-                current->internalMouseWheel (source, current->globalPositionToRelative (screenPos), time, x, y);
+                sendMouseWheel (current, screenPos, time, x, y);
         }
     }
 

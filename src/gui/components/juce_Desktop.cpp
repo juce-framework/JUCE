@@ -40,10 +40,7 @@ Desktop::Desktop() throw()
     : mouseClickCounter (0),
       kioskModeComponent (0)
 {
-    const int maxNumMice = 1;
-    for (int i = maxNumMice; --i >= 0;)
-        mouseSources.add (new MouseInputSource (i, true));
-
+    createMouseInputSources();
     refreshMonitorSizes();
 }
 

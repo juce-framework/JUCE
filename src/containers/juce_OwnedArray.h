@@ -159,13 +159,13 @@ public:
     int indexOf (const ObjectClass* const objectToLookFor) const throw()
     {
         const ScopedLockType lock (getLock());
-        ObjectClass* const* e = data.elements;
+        ObjectClass* const* e = data.elements.getData();
         ObjectClass* const* const end = e + numUsed;
 
         while (e != end)
         {
             if (objectToLookFor == *e)
-                return (int) (e - data.elements);
+                return (int) (e - data.elements.getData());
 
             ++e;
         }
@@ -181,7 +181,7 @@ public:
     bool contains (const ObjectClass* const objectToLookFor) const throw()
     {
         const ScopedLockType lock (getLock());
-        ObjectClass* const* e = data.elements;
+        ObjectClass* const* e = data.elements.getData();
         ObjectClass* const* const end = e + numUsed;
 
         while (e != end)
@@ -333,7 +333,7 @@ public:
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
         const ScopedLockType lock (getLock());
-        insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
     }
 
     /** Finds the index of an object in the array, assuming that the array is sorted.
@@ -430,13 +430,13 @@ public:
                        const bool deleteObject = true)
     {
         const ScopedLockType lock (getLock());
-        ObjectClass** e = data.elements;
+        ObjectClass** e = data.elements.getData();
 
         for (int i = numUsed; --i >= 0;)
         {
             if (objectToRemove == *e)
             {
-                remove ((int) (e - data.elements), deleteObject);
+                remove ((int) (e - data.elements.getData()), deleteObject);
                 break;
             }
 
@@ -650,7 +650,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
-        sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================

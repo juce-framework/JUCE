@@ -123,6 +123,8 @@ public:
     void grabFocus();
     void textInputRequired (const Point<int>& position);
 
+    void handleTouches (UIEvent* e, bool isDown, bool isUp, bool isCancel);
+
     //==============================================================================
     void repaint (int x, int y, int w, int h);
     void performAnyPendingRepaintsNow();
@@ -134,6 +136,14 @@ public:
     JuceUIView* view;
     bool isSharedWindow, fullScreen, insideDrawRect;
     static ModifierKeys currentModifiers;
+
+    static int64 getMouseTime (UIEvent* e)
+    {
+        return (Time::currentTimeMillis() - Time::getMillisecondCounter())
+                + (int64) ([e timestamp] * 1000.0);
+    }
+
+    Array <UITouch*> currentTouches;
 };
 
 //==============================================================================
@@ -180,98 +190,32 @@ void ModifierKeys::updateCurrentModifiers() throw()
     currentModifiers = UIViewComponentPeer::currentModifiers;
 }
 
-static int64 getMouseTime (UIEvent* e)
-{
-    return (Time::currentTimeMillis() - Time::getMillisecondCounter())
-            + (int64) ([e timestamp] * 1000.0);
-}
-
 JUCE_NAMESPACE::Point<int> juce_lastMousePos;
 
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    if (owner == 0)
-        return;
-
-    NSArray* const t = [[event touchesForView: self] allObjects];
-
-    switch ([t count])
-    {
-        case 1:     // One finger..
-        {
-            CGPoint p = [[t objectAtIndex: 0] locationInView: self];
-            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
-            juce_lastMousePos = pos + owner->getScreenPosition();
-
-            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
-
-            JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers
-                = JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers.withoutMouseButtons()
-                                                        .withFlags (JUCE_NAMESPACE::ModifierKeys::leftButtonModifier);
-
-            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
-        }
-
-        default:
-            //xxx multi-touch..
-            break;
-    }
+    if (owner != 0)
+        owner->handleTouches (event, true, false, false);
 }
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    if (owner == 0)
-        return;
-
-    NSArray* const t = [[event touchesForView: self] allObjects];
-
-    switch ([t count])
-    {
-        case 1:     // One finger..
-        {
-            CGPoint p = [[t objectAtIndex: 0] locationInView: self];
-            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
-            juce_lastMousePos = pos + owner->getScreenPosition();
-
-            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
-        }
-
-        default:
-            //xxx multi-touch..
-            break;
-    }
+    if (owner != 0)
+        owner->handleTouches (event, false, false, false);
 }
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
-    if (owner == 0)
-        return;
-
-    NSArray* const t = [[event touchesForView: self] allObjects];
-
-    switch ([t count])
-    {
-        case 1:     // One finger..
-        {
-            CGPoint p = [[t objectAtIndex: 0] locationInView: self];
-            const JUCE_NAMESPACE::Point<int> pos ((int) p.x, (int) p.y);
-            juce_lastMousePos = pos + owner->getScreenPosition();
-
-            JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers
-                = JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers.withoutMouseButtons();
-
-            owner->handleMouseEvent (pos, JUCE_NAMESPACE::UIViewComponentPeer::currentModifiers, getMouseTime (event));
-        }
-
-        default:
-            //xxx multi-touch..
-            break;
-    }
+    if (owner != 0)
+        owner->handleTouches (event, false, true, false);
 }
 
 - (void) touchesCancelled: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    if (owner != 0)
+        owner->handleTouches (event, false, true, true);
+
     [self touchesEnded: touches withEvent: event];
 }
 
@@ -378,6 +322,8 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
 
         view.hidden = ! component->isVisible();
         window.hidden = ! component->isVisible();
+
+        view.multipleTouchEnabled = YES;
     }
 
     setTitle (component->getName());
@@ -629,6 +575,48 @@ void UIViewComponentPeer::setIcon (const Image& /*newIcon*/)
 }
 
 //==============================================================================
+void UIViewComponentPeer::handleTouches (UIEvent* event, const bool isDown, const bool isUp, bool isCancel)
+{
+    NSArray* touches = [[event touchesForView: view] allObjects];
+
+    for (unsigned int i = 0; i < [touches count]; ++i)
+    {
+        UITouch* touch = [touches objectAtIndex: i];
+
+        CGPoint p = [touch locationInView: view];
+        const Point<int> pos ((int) p.x, (int) p.y);
+        juce_lastMousePos = pos + getScreenPosition();
+
+        const int64 time = getMouseTime (event);
+
+        int touchIndex = currentTouches.indexOf (touch);
+
+        if (touchIndex < 0)
+        {
+            touchIndex = currentTouches.size();
+            currentTouches.add (touch);
+        }
+
+        if (isDown)
+        {
+            currentModifiers = currentModifiers.withoutMouseButtons();
+            handleMouseEvent (touchIndex, pos, currentModifiers, time);
+            currentModifiers = currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
+        }
+        else if (isUp)
+        {
+            currentModifiers = currentModifiers.withoutMouseButtons();
+            currentTouches.remove (touchIndex);
+        }
+
+        if (isCancel)
+            currentTouches.clear();
+
+        handleMouseEvent (touchIndex, pos, currentModifiers, time);
+    }
+}
+
+//==============================================================================
 static UIViewComponentPeer* currentlyFocusedPeer = 0;
 
 void UIViewComponentPeer::viewFocusGain()
@@ -783,6 +771,12 @@ Image* juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
+void Desktop::createMouseInputSources()
+{
+    for (int i = 0; i < 10; ++i)
+        mouseSources.add (new MouseInputSource (i, false));
+}
+
 bool Desktop::canUseSemiTransparentWindows() throw()
 {
     return true;

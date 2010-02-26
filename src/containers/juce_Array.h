@@ -282,13 +282,13 @@ public:
     int indexOf (const ElementType& elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
-        const ElementType* e = data.elements;
+        const ElementType* e = data.elements.getData();
         const ElementType* const end = e + numUsed;
 
         while (e != end)
         {
             if (elementToLookFor == *e)
-                return (int) (e - data.elements);
+                return (int) (e - data.elements.getData());
 
             ++e;
         }
@@ -304,7 +304,7 @@ public:
     bool contains (const ElementType& elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
-        const ElementType* e = data.elements;
+        const ElementType* e = data.elements.getData();
         const ElementType* const end = e + numUsed;
 
         while (e != end)
@@ -579,7 +579,7 @@ public:
     void addSorted (ElementComparator& comparator, const ElementType& newElement)
     {
         const ScopedLockType lock (getLock());
-        insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
+        insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
     }
 
     /** Finds the index of an element in the array, assuming that the array is sorted.
@@ -683,7 +683,7 @@ public:
         {
             if (valueToRemove == *e)
             {
-                remove ((int) (e - data.elements));
+                remove ((int) (e - data.elements.getData()));
                 break;
             }
 
@@ -929,7 +929,7 @@ public:
         const ScopedLockType lock (getLock());
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
-        sortArray (comparator, (ElementType*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================

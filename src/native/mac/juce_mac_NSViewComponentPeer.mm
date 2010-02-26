@@ -1355,7 +1355,7 @@ bool NSViewComponentPeer::redirectPerformKeyEquivalent (NSEvent* ev)
 void NSViewComponentPeer::sendMouseEvent (NSEvent* ev)
 {
     updateModifiers (ev);
-    handleMouseEvent (getMousePos (ev, view), currentModifiers, getMouseTime (ev));
+    handleMouseEvent (0, getMousePos (ev, view), currentModifiers, getMouseTime (ev));
 }
 
 void NSViewComponentPeer::redirectMouseDown (NSEvent* ev)
@@ -1400,7 +1400,7 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
     updateModifiers (ev);
 
-    handleMouseWheel (getMousePos (ev, view), getMouseTime (ev),
+    handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev),
                       [ev deltaX] * 10.0f, [ev deltaY] * 10.0f);
 }
 
@@ -1572,6 +1572,12 @@ void NSViewComponentPeer::viewMovedToWindow()
 {
     if (isSharedWindow)
         window = [view window];
+}
+
+//==============================================================================
+void Desktop::createMouseInputSources()
+{
+    mouseSources.add (new MouseInputSource (0, true));
 }
 
 //==============================================================================

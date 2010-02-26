@@ -563,7 +563,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             fullScreen = shouldBeFullScreen;
-            const Component::SafePointer deletionChecker (component);
+            const Component::SafePointer<Component> deletionChecker (component);
 
             if (! fullScreen)
             {
@@ -1243,7 +1243,7 @@ private:
     //==============================================================================
     void doMouseEvent (const Point<int>& position)
     {
-        handleMouseEvent (position, currentModifiers, getMouseEventTime());
+        handleMouseEvent (0, position, currentModifiers, getMouseEventTime());
     }
 
     void doMouseMove (const Point<int>& position)
@@ -1314,7 +1314,7 @@ private:
 
         const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * HIWORD (wParam));
 
-        handleMouseWheel (position, getMouseEventTime(),
+        handleMouseWheel (0, position, getMouseEventTime(),
                           isVertical ? 0.0f : amount,
                           isVertical ? amount : 0.0f);
     }
@@ -2227,6 +2227,11 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 
 
 //==============================================================================
+void Desktop::createMouseInputSources()
+{
+    mouseSources.add (new MouseInputSource (0, true));
+}
+
 const Point<int> Desktop::getMousePosition()
 {
     POINT mousePos;

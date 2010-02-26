@@ -101,14 +101,20 @@ void ComponentPeer::updateCurrentModifiers() throw()
 }
 
 //==============================================================================
-void ComponentPeer::handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time)
+void ComponentPeer::handleMouseEvent (const int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time)
 {
-    Desktop::getInstance().getMainMouseSource().handleEvent (this, positionWithinPeer, time, newMods);
+    MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
+    jassert (mouse != 0); // not enough sources!
+
+    mouse->handleEvent (this, positionWithinPeer, time, newMods);
 }
 
-void ComponentPeer::handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y)
+void ComponentPeer::handleMouseWheel (const int touchIndex, const Point<int>& positionWithinPeer, const int64 time, const float x, const float y)
 {
-    Desktop::getInstance().getMainMouseSource().handleWheel (this, positionWithinPeer, time, x, y);
+    MouseInputSource* const mouse = Desktop::getInstance().getMouseSource (touchIndex);
+    jassert (mouse != 0); // not enough sources!
+
+    mouse->handleWheel (this, positionWithinPeer, time, x, y);
 }
 
 //==============================================================================

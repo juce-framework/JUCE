@@ -282,7 +282,7 @@ namespace ActiveXHelpers
         case WM_LBUTTONUP:
         case WM_MBUTTONUP:
         case WM_RBUTTONUP:
-            peer->handleMouseEvent (mousePos, Win32ComponentPeer::currentModifiers, mouseEventTime);
+            peer->handleMouseEvent (0, mousePos, Win32ComponentPeer::currentModifiers, mouseEventTime);
             break;
 
         default:

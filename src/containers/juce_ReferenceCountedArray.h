@@ -130,7 +130,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-                                                                 : (ObjectClass*) 0;
+                                                                 : static_cast <ObjectClass*> (0);
     }
 
     /** Returns a pointer to the object at this index in the array, without checking whether the index is in-range.
@@ -154,7 +154,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [0]
-                           : (ObjectClass*) 0;
+                           : static_cast <ObjectClass*> (0);
     }
 
     /** Returns a pointer to the last object in the array.
@@ -166,7 +166,7 @@ public:
     {
         const ScopedLockType lock (getLock());
         return numUsed > 0 ? data.elements [numUsed - 1]
-                           : (ObjectClass*) 0;
+                           : static_cast <ObjectClass*> (0);
     }
 
     //==============================================================================
@@ -178,13 +178,13 @@ public:
     int indexOf (const ObjectClass* const objectToLookFor) const throw()
     {
         const ScopedLockType lock (getLock());
-        ObjectClass** e = data.elements;
+        ObjectClass** e = data.elements.getData();
         ObjectClass** const end = e + numUsed;
 
         while (e != end)
         {
             if (objectToLookFor == *e)
-                return (int) (e - data.elements);
+                return (int) (e - data.elements.getData());
 
             ++e;
         }
@@ -200,7 +200,7 @@ public:
     bool contains (const ObjectClass* const objectToLookFor) const throw()
     {
         const ScopedLockType lock (getLock());
-        ObjectClass** e = data.elements;
+        ObjectClass** e = data.elements.getData();
         ObjectClass** const end = e + numUsed;
 
         while (e != end)
@@ -378,7 +378,7 @@ public:
                     ObjectClass* newObject) throw()
     {
         const ScopedLockType lock (getLock());
-        insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
+        insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
     }
 
     /** Inserts or replaces an object in the array, assuming it is sorted.
@@ -391,7 +391,7 @@ public:
                              ObjectClass* newObject) throw()
     {
         const ScopedLockType lock (getLock());
-        const int index = findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed);
+        const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
 
         if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
             set (index - 1, newObject); // replace an existing object that matches
@@ -661,7 +661,7 @@ public:
                             // avoids getting warning messages about the parameter being unused
 
         const ScopedLockType lock (getLock());
-        sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+        sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
     }
 
     //==============================================================================

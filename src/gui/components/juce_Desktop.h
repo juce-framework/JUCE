@@ -302,6 +302,8 @@ private:
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
 
+    void createMouseInputSources();
+
     void timerCallback();
     void sendMouseMove();
     void resetTimer() throw();

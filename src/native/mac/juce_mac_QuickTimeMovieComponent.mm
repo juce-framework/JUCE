@@ -27,6 +27,50 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE && JUCE_QUICKTIME
 
+END_JUCE_NAMESPACE
+
+//==============================================================================
+#define NonInterceptingQTMovieView MakeObjCClassName(NonInterceptingQTMovieView)
+
+@interface NonInterceptingQTMovieView   : QTMovieView
+{
+}
+
+- (id) initWithFrame: (NSRect) frame;
+- (BOOL) acceptsFirstMouse: (NSEvent*) theEvent;
+- (NSView*) hitTest: (NSPoint) p;
+
+@end
+
+@implementation NonInterceptingQTMovieView
+
+- (id) initWithFrame: (NSRect) frame
+{
+    self = [super initWithFrame: frame];
+    [self setNextResponder: [self superview]];
+    return self;
+}
+
+- (void) dealloc
+{
+    [super dealloc];
+}
+
+- (NSView*) hitTest: (NSPoint) point
+{
+    return [self isControllerVisible] ? [super hitTest: point] : nil;
+}
+
+- (BOOL) acceptsFirstMouse: (NSEvent*) theEvent
+{
+    return YES;
+}
+
+@end
+
+BEGIN_JUCE_NAMESPACE
+
+//==============================================================================
 #define theMovie ((QTMovie*) movie)
 
 //==============================================================================
@@ -36,8 +80,9 @@ QuickTimeMovieComponent::QuickTimeMovieComponent()
     setOpaque (true);
     setVisible (true);
 
-    QTMovieView* view = [[QTMovieView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
+    QTMovieView* view = [[NonInterceptingQTMovieView alloc] initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
     setView (view);
+    [view release];
 }
 
 QuickTimeMovieComponent::~QuickTimeMovieComponent()

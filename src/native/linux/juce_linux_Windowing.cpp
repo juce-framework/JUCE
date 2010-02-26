@@ -1150,7 +1150,7 @@ public:
 
                 if (map == WheelUp || map == WheelDown)
                 {
-                    handleMouseWheel (Point<int> (buttonPressEvent->x, buttonPressEvent->y),
+                    handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
                                       getEventTime (buttonPressEvent->time), 0, map == WheelDown ? -84.0f : 84.0f);
                 }
                 if (map == LeftButton)
@@ -1173,7 +1173,7 @@ public:
                 {
                     toFront (true);
 
-                    handleMouseEvent (Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
+                    handleMouseEvent (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y), currentModifiers,
                                       getEventTime (buttonPressEvent->time));
                 }
 
@@ -1195,7 +1195,7 @@ public:
                 else if (map == MiddleButton)
                     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier);
 
-                handleMouseEvent (Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
+                handleMouseEvent (0, Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
                                   getEventTime (buttonRelEvent->time));
 
                 clearLastMousePos();
@@ -1237,7 +1237,7 @@ public:
                         }
                     }
 
-                    handleMouseEvent (mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent->time));
+                    handleMouseEvent (0, mousePos - getScreenPosition(), currentModifiers, getEventTime (movedEvent->time));
                 }
 
                 break;
@@ -1251,7 +1251,7 @@ public:
                 if (! currentModifiers.isAnyMouseButtonDown())
                 {
                     updateKeyModifiers (enterEvent->state);
-                    handleMouseEvent (Point<int> (enterEvent->x, enterEvent->y), currentModifiers, getEventTime (enterEvent->time));
+                    handleMouseEvent (0, Point<int> (enterEvent->x, enterEvent->y), currentModifiers, getEventTime (enterEvent->time));
                 }
 
                 break;
@@ -1268,7 +1268,7 @@ public:
                      || leaveEvent->mode == NotifyUngrab)
                 {
                     updateKeyModifiers (leaveEvent->state);
-                    handleMouseEvent (Point<int> (leaveEvent->x, leaveEvent->y), currentModifiers, getEventTime (leaveEvent->time));
+                    handleMouseEvent (0, Point<int> (leaveEvent->x, leaveEvent->y), currentModifiers, getEventTime (leaveEvent->time));
                 }
 
                 break;
@@ -2667,6 +2667,11 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 }
 
 //==============================================================================
+void Desktop::createMouseInputSources()
+{
+    mouseSources.add (new MouseInputSource (0, true));
+}
+
 bool Desktop::canUseSemiTransparentWindows() throw()
 {
     return false;

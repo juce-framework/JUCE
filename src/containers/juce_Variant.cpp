@@ -134,7 +134,7 @@ var::operator int() const
         case voidType:      break;
         case intType:       return value.intValue;
         case boolType:      return value.boolValue ? 1 : 0;
-        case doubleType:    return (int) value.doubleValue;
+        case doubleType:    return static_cast <int> (value.doubleValue);
         case stringType:    return value.stringValue->getIntValue();
         case objectType:    break;
         default:            jassertfalse; break;
@@ -215,9 +215,9 @@ bool var::equals (const var& other) const throw()
     switch (type)
     {
         case voidType:      return other.isVoid();
-        case intType:       return value.intValue == (int) other;
-        case boolType:      return value.boolValue == (bool) other;
-        case doubleType:    return value.doubleValue == (double) other;
+        case intType:       return value.intValue == static_cast <int> (other);
+        case boolType:      return value.boolValue == static_cast <bool> (other);
+        case doubleType:    return value.doubleValue == static_cast <double> (other);
         case stringType:    return (*(value.stringValue)) == other.toString();
         case objectType:    return value.objectValue == other.getObject();
         case methodType:    return value.methodValue == other.value.methodValue && other.isMethod();

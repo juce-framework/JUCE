@@ -293,8 +293,8 @@ public:
     virtual void performAnyPendingRepaintsNow() = 0;
 
     //==============================================================================
-    void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
-    void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
+    void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
+    void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, const int64 time, float x, float y);
 
     void handleUserClosingWindow();
 

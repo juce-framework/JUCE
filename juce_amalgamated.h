@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	5
+#define JUCE_BUILDNUMBER	6
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -1508,7 +1508,7 @@ public:
 	}
 
 	HeapBlock (const size_t numElements)
-		: data ((ElementType*) ::juce_malloc (numElements * sizeof (ElementType)))
+		: data (reinterpret_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
 	{
 	}
 
@@ -1542,13 +1542,13 @@ public:
 	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		::juce_free (data);
-		data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
+		data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
 	}
 
 	void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		::juce_free (data);
-		data = (ElementType*) ::juce_calloc (newNumElements * elementSize);
+		data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
 	}
 
 	void allocate (const size_t newNumElements, const bool initialiseToZero)
@@ -1556,17 +1556,17 @@ public:
 		::juce_free (data);
 
 		if (initialiseToZero)
-			data = (ElementType*) ::juce_calloc (newNumElements * sizeof (ElementType));
+			data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
 		else
-			data = (ElementType*) ::juce_malloc (newNumElements * sizeof (ElementType));
+			data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
 	}
 
 	void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		if (data == 0)
-			data = (ElementType*) ::juce_malloc (newNumElements * elementSize);
+			data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
 		else
-			data = (ElementType*) ::juce_realloc (data, newNumElements * elementSize);
+			data = reinterpret_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
 	}
 
 	void free()
@@ -2058,13 +2058,13 @@ public:
 	int indexOf (const ElementType& elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
-		const ElementType* e = data.elements;
+		const ElementType* e = data.elements.getData();
 		const ElementType* const end = e + numUsed;
 
 		while (e != end)
 		{
 			if (elementToLookFor == *e)
-				return (int) (e - data.elements);
+				return (int) (e - data.elements.getData());
 
 			++e;
 		}
@@ -2075,7 +2075,7 @@ public:
 	bool contains (const ElementType& elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
-		const ElementType* e = data.elements;
+		const ElementType* e = data.elements.getData();
 		const ElementType* const end = e + numUsed;
 
 		while (e != end)
@@ -2251,7 +2251,7 @@ public:
 	void addSorted (ElementComparator& comparator, const ElementType& newElement)
 	{
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, (ElementType*) data.elements, newElement, 0, numUsed), newElement);
+		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
 	}
 
 	template <class ElementComparator>
@@ -2324,7 +2324,7 @@ public:
 		{
 			if (valueToRemove == *e)
 			{
-				remove ((int) (e - data.elements));
+				remove ((int) (e - data.elements.getData()));
 				break;
 			}
 
@@ -2479,7 +2479,7 @@ public:
 		const ScopedLockType lock (getLock());
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
-		sortArray (comparator, (ElementType*) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
 	}
 
 	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
@@ -3478,13 +3478,13 @@ public:
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass* const* e = data.elements;
+		ObjectClass* const* e = data.elements.getData();
 		ObjectClass* const* const end = e + numUsed;
 
 		while (e != end)
 		{
 			if (objectToLookFor == *e)
-				return (int) (e - data.elements);
+				return (int) (e - data.elements.getData());
 
 			++e;
 		}
@@ -3495,7 +3495,7 @@ public:
 	bool contains (const ObjectClass* const objectToLookFor) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass* const* e = data.elements;
+		ObjectClass* const* e = data.elements.getData();
 		ObjectClass* const* const end = e + numUsed;
 
 		while (e != end)
@@ -3587,7 +3587,7 @@ public:
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
+		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
 	}
 
 	template <class ElementComparator>
@@ -3653,13 +3653,13 @@ public:
 					   const bool deleteObject = true)
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass** e = data.elements;
+		ObjectClass** e = data.elements.getData();
 
 		for (int i = numUsed; --i >= 0;)
 		{
 			if (objectToRemove == *e)
 			{
-				remove ((int) (e - data.elements), deleteObject);
+				remove ((int) (e - data.elements.getData()), deleteObject);
 				break;
 			}
 
@@ -3792,7 +3792,7 @@ public:
 							// avoids getting warning messages about the parameter being unused
 
 		const ScopedLockType lock (getLock());
-		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
 	}
 
 	inline const TypeOfCriticalSectionToUse& getLock() const throw()	   { return data; }
@@ -4905,7 +4905,7 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		return (((unsigned int) index) < (unsigned int) numUsed) ? data.elements [index]
-																 : (ObjectClass*) 0;
+																 : static_cast <ObjectClass*> (0);
 	}
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> getUnchecked (const int index) const throw()
@@ -4919,26 +4919,26 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [0]
-						   : (ObjectClass*) 0;
+						   : static_cast <ObjectClass*> (0);
 	}
 
 	inline const ReferenceCountedObjectPtr<ObjectClass> getLast() const throw()
 	{
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [numUsed - 1]
-						   : (ObjectClass*) 0;
+						   : static_cast <ObjectClass*> (0);
 	}
 
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass** e = data.elements;
+		ObjectClass** e = data.elements.getData();
 		ObjectClass** const end = e + numUsed;
 
 		while (e != end)
 		{
 			if (objectToLookFor == *e)
-				return (int) (e - data.elements);
+				return (int) (e - data.elements.getData());
 
 			++e;
 		}
@@ -4949,7 +4949,7 @@ public:
 	bool contains (const ObjectClass* const objectToLookFor) const throw()
 	{
 		const ScopedLockType lock (getLock());
-		ObjectClass** e = data.elements;
+		ObjectClass** e = data.elements.getData();
 		ObjectClass** const end = e + numUsed;
 
 		while (e != end)
@@ -5068,7 +5068,7 @@ public:
 					ObjectClass* newObject) throw()
 	{
 		const ScopedLockType lock (getLock());
-		insert (findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed), newObject);
+		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed), newObject);
 	}
 
 	template <class ElementComparator>
@@ -5076,7 +5076,7 @@ public:
 							 ObjectClass* newObject) throw()
 	{
 		const ScopedLockType lock (getLock());
-		const int index = findInsertIndexInSortedArray (comparator, (ObjectClass**) data.elements, newObject, 0, numUsed);
+		const int index = findInsertIndexInSortedArray (comparator, data.elements.getData(), newObject, 0, numUsed);
 
 		if (index > 0 && comparator.compareElements (newObject, data.elements [index - 1]) == 0)
 			set (index - 1, newObject); // replace an existing object that matches
@@ -5241,7 +5241,7 @@ public:
 							// avoids getting warning messages about the parameter being unused
 
 		const ScopedLockType lock (getLock());
-		sortArray (comparator, (ObjectClass**) data.elements, 0, size() - 1, retainOrderOfEquivalentItems);
+		sortArray (comparator, data.elements.getData(), 0, size() - 1, retainOrderOfEquivalentItems);
 	}
 
 	void minimiseStorageOverheads() throw()
@@ -9208,6 +9208,8 @@ public:
 
 	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
 
+	const String toString() const                                       { return String (x) + ", " + String (y); }
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -12956,6 +12958,8 @@ private:
 
 	Component* kioskModeComponent;
 	Rectangle<int> kioskComponentOriginalBounds;
+
+	void createMouseInputSources();
 
 	void timerCallback();
 	void sendMouseMove();
@@ -26939,8 +26943,8 @@ public:
 
 	virtual void performAnyPendingRepaintsNow() = 0;
 
-	void handleMouseEvent (const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
-	void handleMouseWheel (const Point<int>& positionWithinPeer, const int64 time, float x, float y);
+	void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
+	void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, const int64 time, float x, float y);
 
 	void handleUserClosingWindow();
 

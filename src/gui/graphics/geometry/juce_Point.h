@@ -101,6 +101,9 @@ public:
     */
     void applyTransform (const AffineTransform& transform) throw()      { transform.transformPoint (x, y); }
 
+    /** Returns the point as a string in the form "x, y". */
+    const String toString() const                                       { return String (x) + ", " + String (y); }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

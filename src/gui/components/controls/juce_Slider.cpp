@@ -1143,7 +1143,9 @@ void Slider::restoreMouseIfHidden()
     if (mouseWasHidden)
     {
         mouseWasHidden = false;
-        Desktop::getInstance().getMainMouseSource().enableUnboundedMouseMovement (false);
+
+        for (int i = Desktop::getInstance().getNumMouseSources(); --i >= 0;)
+            Desktop::getInstance().getMouseSource(i)->enableUnboundedMouseMovement (false);
 
         const double pos = (sliderBeingDragged == 2) ? getMaxValue()
                                                      : ((sliderBeingDragged == 1) ? getMinValue()
