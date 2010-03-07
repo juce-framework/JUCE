@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	6
+#define JUCE_BUILDNUMBER	7
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -1278,7 +1278,11 @@ public:
 	void vprintf (const tchar* const format, va_list& args) throw();
 
 	static const String repeatedString (const tchar* const stringToRepeat,
-										int numberOfTimesToRepeat) throw();
+										int numberOfTimesToRepeat);
+
+	const String paddedLeft (const juce_wchar padCharacter, int minimumLength) const;
+
+	const String paddedRight (const juce_wchar padCharacter, int minimumLength) const;
 
 	static const String createStringFromData (const void* const data,
 											  const int size) throw();
@@ -6013,6 +6017,211 @@ private:
 #endif   // __JUCE_ASYNCUPDATER_JUCEHEADER__
 /*** End of inlined file: juce_AsyncUpdater.h ***/
 
+
+/*** Start of inlined file: juce_ListenerList.h ***/
+#ifndef __JUCE_LISTENERLIST_JUCEHEADER__
+#define __JUCE_LISTENERLIST_JUCEHEADER__
+
+template <class ListenerClass,
+		  class ArrayType = Array <ListenerClass*> >
+class ListenerList
+{
+public:
+
+	ListenerList()
+	{
+	}
+
+	~ListenerList()
+	{
+	}
+
+	void add (ListenerClass* const listenerToAdd)
+	{
+		// Listeners can't be null pointers!
+		jassert (listenerToAdd != 0);
+
+		if (listenerToAdd != 0)
+			listeners.add (listenerToAdd);
+	}
+
+	void remove (ListenerClass* const listenerToRemove)
+	{
+		// Listeners can't be null pointers!
+		jassert (listenerToRemove != 0);
+
+		listeners.removeValue (listenerToRemove);
+	}
+
+	int size() const throw()
+	{
+		return listeners.size();
+	}
+
+	bool isEmpty() const throw()
+	{
+		return listeners.size() == 0;
+	}
+
+	bool contains (ListenerClass* const listener) const throw()
+	{
+		return listeners.contains (listener);
+	}
+
+	void call (void (ListenerClass::*callbackFunction) ())
+	{
+		callChecked (DummyBailOutChecker(), callbackFunction);
+	}
+
+	template <class BailOutCheckerType>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) ())
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) ();
+	}
+
+	template <typename P1, typename P2>
+	void call (void (ListenerClass::*callbackFunction) (P1),
+			   P2& param1)
+	{
+		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1),
+					  P2& param1)
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1);
+	}
+
+	template <typename P1, typename P2, typename P3, typename P4>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2),
+			   P3& param1, P4& param2)
+	{
+		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1, P2),
+					  P3& param1, P4& param2)
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2);
+	}
+
+	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
+			   P4& param1, P5& param2, P6& param3)
+	{
+		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
+					  P4& param1, P5& param2, P6& param3)
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3);
+	}
+
+	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
+			   P5& param1, P6& param2, P7& param3, P8& param4)
+	{
+		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
+					  P5& param1, P6& param2, P7& param3, P8& param4)
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
+	}
+
+	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
+			   P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+	{
+		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
+					  P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+	{
+		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
+	}
+
+	class DummyBailOutChecker
+	{
+	public:
+		inline bool shouldBailOut() const throw()	  { return false; }
+	};
+
+	template <class BailOutCheckerType>
+	class Iterator
+	{
+	public:
+
+		Iterator (const ListenerList& list_, const BailOutCheckerType& bailOutChecker_)
+			: list (list_), bailOutChecker (bailOutChecker_), index (list_.size())
+		{}
+
+		~Iterator() {}
+
+		bool next()
+		{
+			if (index <= 0 || bailOutChecker.shouldBailOut())
+				return false;
+
+			const int listSize = list.size();
+
+			if (--index < listSize)
+				return true;
+
+			index = listSize - 1;
+			return index >= 0;
+		}
+
+		ListenerClass* getListener() const throw()
+		{
+			return list.listeners.getUnchecked (index);
+		}
+
+	private:
+		const ListenerList& list;
+		const BailOutCheckerType& bailOutChecker;
+		int index;
+
+		Iterator (const Iterator&);
+		Iterator& operator= (const Iterator&);
+	};
+
+private:
+
+	ArrayType listeners;
+
+	ListenerList (const ListenerList&);
+	ListenerList& operator= (const ListenerList&);
+};
+
+#endif   // __JUCE_LISTENERLIST_JUCEHEADER__
+/*** End of inlined file: juce_ListenerList.h ***/
+
 class JUCE_API  Value
 {
 public:
@@ -6088,7 +6297,7 @@ public:
 private:
 	friend class ValueSource;
 	ReferenceCountedObjectPtr <ValueSource> value;
-	SortedSet <Listener*> listeners;
+	ListenerList <Listener> listeners;
 
 	void callListeners();
 
@@ -6490,11 +6699,7 @@ private:
 	typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
 
 	ReferenceCountedObjectPtr <SharedObject> object;
-	SortedSet <Listener*> listeners;
-
-	void deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
-	void deliverChildChangeMessage (ValueTree& tree);
-	void deliverParentChangeMessage (ValueTree& tree);
+	ListenerList <Listener> listeners;
 
 	ValueTree (SharedObject* const object_);
 };
@@ -9260,6 +9465,8 @@ public:
 	int getDistanceFromDragStartX() const throw();
 
 	int getDistanceFromDragStartY() const throw();
+
+	const Point<int> getOffsetFromDragStart() const throw();
 
 	bool mouseWasClicked() const throw();
 
@@ -12379,9 +12586,7 @@ public:
 			return *this;
 		}
 
-		operator ComponentType*() throw()		   { return comp; }
-
-		operator const ComponentType*() const throw()	   { return comp; }
+		operator ComponentType*() const throw()		 { return comp; }
 
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
 		ComponentType* operator->() throw()		 { jassert (comp != 0); return comp; }
@@ -12397,6 +12602,22 @@ public:
 		void attach()   { if (comp != 0) comp->addComponentListener (this); }
 		void detach()   { if (comp != 0) comp->removeComponentListener (this); }
 		void componentBeingDeleted (Component&)	 { comp = 0; }
+	};
+
+	class BailOutChecker
+	{
+	public:
+		BailOutChecker (Component* const component1,
+						Component* const component2 = 0);
+
+		bool shouldBailOut() const throw();
+
+	private:
+		Component::SafePointer<Component> safePointer1, safePointer2;
+		Component* const component2;
+
+		BailOutChecker (const BailOutChecker&);
+		BailOutChecker& operator= (const BailOutChecker&);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -12422,7 +12643,7 @@ private:
 	Image* bufferedImage_;
 	VoidArray* mouseListeners_;
 	VoidArray* keyListeners_;
-	VoidArray* componentListeners_;
+	ListenerList <ComponentListener> componentListeners;
 	NamedValueSet properties;
 
 	struct ComponentFlags
@@ -12876,13 +13097,13 @@ class JUCE_API  Desktop  : private DeletedAtShutdown,
 {
 public:
 
-	static Desktop& JUCE_CALLTYPE getInstance() throw();
+	static Desktop& JUCE_CALLTYPE getInstance();
 
 	const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const throw();
 
 	const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
 
-	const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const throw();
+	const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const;
 
 	static const Point<int> getMousePosition();
 
@@ -12896,18 +13117,18 @@ public:
 
 	static bool isScreenSaverEnabled() throw();
 
-	void addGlobalMouseListener (MouseListener* const listener) throw();
+	void addGlobalMouseListener (MouseListener* const listener);
 
-	void removeGlobalMouseListener (MouseListener* const listener) throw();
+	void removeGlobalMouseListener (MouseListener* const listener);
 
-	void addFocusChangeListener (FocusChangeListener* const listener) throw();
+	void addFocusChangeListener (FocusChangeListener* const listener);
 
-	void removeFocusChangeListener (FocusChangeListener* const listener) throw();
+	void removeFocusChangeListener (FocusChangeListener* const listener);
 
 	void setKioskModeComponent (Component* componentToUse,
 								const bool allowMenusAndBars = true);
 
-	Component* getKioskModeComponent() const		 { return kioskModeComponent; }
+	Component* getKioskModeComponent() const throw()		{ return kioskModeComponent; }
 
 	int getNumComponents() const throw();
 
@@ -12927,7 +13148,7 @@ public:
 
 	juce_UseDebuggingNewOperator
 
-	void refreshMonitorSizes() throw();
+	void refreshMonitorSizes();
 
 	static bool canUseSemiTransparentWindows() throw();
 
@@ -12939,41 +13160,42 @@ private:
 	friend class ComponentPeer;
 	friend class MouseInputSource;
 	friend class MouseInputSourceInternal;
-	SortedSet <void*> mouseListeners, focusListeners;
-	Array <Component*> desktopComponents;
-
 	friend class DeletedAtShutdown;
 	friend class TopLevelWindowManager;
-	Desktop() throw();
-	~Desktop() throw();
-
-	Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
 	OwnedArray <MouseInputSource> mouseSources;
+	void createMouseInputSources();
+
+	ListenerList <MouseListener> mouseListeners;
+	ListenerList <FocusChangeListener> focusListeners;
+
+	Array <Component*> desktopComponents;
+	Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
 	Point<int> lastFakeMouseMove;
-	int mouseClickCounter;
+	void sendMouseMove();
 
+	int mouseClickCounter;
 	void incrementMouseClickCounter() throw();
 
 	Component* kioskModeComponent;
 	Rectangle<int> kioskComponentOriginalBounds;
 
-	void createMouseInputSources();
-
 	void timerCallback();
-	void sendMouseMove();
-	void resetTimer() throw();
+	void resetTimer();
 
 	int getNumDisplayMonitors() const throw();
 	const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
 
-	void addDesktopComponent (Component* const c) throw();
-	void removeDesktopComponent (Component* const c) throw();
-	void componentBroughtToFront (Component* const c) throw();
+	void addDesktopComponent (Component* const c);
+	void removeDesktopComponent (Component* const c);
+	void componentBroughtToFront (Component* const c);
 
-	void triggerFocusCallback() throw();
+	void triggerFocusCallback();
 	void handleAsyncUpdate();
+
+	Desktop();
+	~Desktop();
 
 	Desktop (const Desktop&);
 	Desktop& operator= (const Desktop&);
@@ -13046,11 +13268,11 @@ public:
 private:
 
 	OwnedArray <ApplicationCommandInfo> commands;
-	SortedSet <void*> listeners;
+	ListenerList <ApplicationCommandManagerListener> listeners;
 	ScopedPointer <KeyPressMappingSet> keyMappings;
 	ApplicationCommandTarget* firstTarget;
 
-	void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info) const;
+	void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info);
 	void handleAsyncUpdate();
 	void globalFocusChanged (Component*);
 
@@ -15708,9 +15930,9 @@ protected:
 private:
 
 	Array <KeyPress> shortcuts;
-	Component* keySource;
+	Component::SafePointer<Component> keySource;
 	String text;
-	SortedSet <void*> buttonListeners;
+	ListenerList <ButtonListener> buttonListeners;
 
 	class RepeatTimer;
 	friend class RepeatTimer;
@@ -15843,7 +16065,7 @@ private:
 	bool vertical, isDraggingThumb, alwaysVisible;
 	Button* upButton;
 	Button* downButton;
-	SortedSet <void*> listeners;
+	ListenerList <ScrollBarListener> listeners;
 
 	void updateThumbPosition() throw();
 	void timerCallback();
@@ -15921,7 +16143,7 @@ public:
 	bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 
 private:
-	Component* contentComp;
+	Component::SafePointer<Component> contentComp;
 	int lastVX, lastVY, lastVW, lastVH;
 	int scrollBarThickness;
 	int singleStepX, singleStepY;
@@ -16385,7 +16607,7 @@ private:
 	} dragType;
 
 	String allowedCharacters;
-	SortedSet <void*> listeners;
+	ListenerList <TextEditorListener> listeners;
 
 	friend class TextEditorInsertAction;
 	friend class TextEditorRemoveAction;
@@ -16562,7 +16784,7 @@ private:
 	Font font;
 	Justification justification;
 	ScopedPointer <TextEditor> editor;
-	SortedSet <void*> listeners;
+	ListenerList <LabelListener> listeners;
 	Component::SafePointer<Component> ownerComponent;
 	int horizontalBorderSize, verticalBorderSize;
 	float minimumHorizontalScale;
@@ -16710,7 +16932,7 @@ private:
 	Value currentId;
 	int lastCurrentId;
 	bool isButtonDown, separatorPending, menuActive, textIsCustom;
-	SortedSet <void*> listeners;
+	ListenerList <ComboBoxListener> listeners;
 	ScopedPointer<Label> label;
 	String textWhenNothingSelected, noChoicesMessage;
 
@@ -19336,6 +19558,9 @@ private:
 
 
 #endif
+#ifndef __JUCE_LISTENERLIST_JUCEHEADER__
+
+#endif
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
 
 #endif
@@ -21063,7 +21288,7 @@ protected:
 	void valueChanged (Value& value);
 
 private:
-	SortedSet <void*> listeners;
+	ListenerList <SliderListener> listeners;
 	Value currentValue, valueMin, valueMax;
 	double lastCurrentValue, lastValueMin, lastValueMax;
 	double minimum, maximum, interval, doubleClickReturnValue;
@@ -22067,7 +22292,7 @@ public:
 
 protected:
 	DirectoryContentsList& fileList;
-	SortedSet <void*> listeners;
+	ListenerList <FileBrowserListener> listeners;
 
 	DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
 	DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);
@@ -22197,7 +22422,7 @@ private:
 	int flags;
 	File currentRoot;
 	Array<File> chosenFiles;
-	SortedSet <void*> listeners;
+	ListenerList <FileBrowserListener> listeners;
 
 	DirectoryContentsDisplayComponent* fileListComponent;
 	FilePreviewComponent* previewComp;
@@ -22537,9 +22762,9 @@ public:
 
 	~ResizableBorderComponent();
 
-	void setBorderThickness (const BorderSize& newBorderSize) throw();
+	void setBorderThickness (const BorderSize& newBorderSize);
 
-	const BorderSize getBorderThickness() const throw();
+	const BorderSize getBorderThickness() const;
 
 	juce_UseDebuggingNewOperator
 
@@ -22553,13 +22778,13 @@ protected:
 	bool hitTest (int x, int y);
 
 private:
-	Component* const component;
+	Component::SafePointer<Component> component;
 	ComponentBoundsConstrainer* constrainer;
 	BorderSize borderSize;
-	int originalX, originalY, originalW, originalH;
+	Rectangle<int> originalBounds;
 	int mouseZone;
 
-	void updateMouseZone (const MouseEvent& e) throw();
+	void updateMouseZone (const MouseEvent& e);
 
 	ResizableBorderComponent (const ResizableBorderComponent&);
 	ResizableBorderComponent& operator= (const ResizableBorderComponent&);
@@ -22593,9 +22818,9 @@ protected:
 
 private:
 
-	Component* const component;
+	Component::SafePointer<Component> component;
 	ComponentBoundsConstrainer* constrainer;
-	int originalX, originalY, originalW, originalH;
+	Rectangle<int> originalBounds;
 
 	ResizableCornerComponent (const ResizableCornerComponent&);
 	ResizableCornerComponent& operator= (const ResizableCornerComponent&);
@@ -23038,7 +23263,7 @@ private:
 	int maxRecentFiles;
 	bool isDir, isSaving, isFileDragOver;
 	String wildcard, enforcedSuffix, browseButtonText;
-	SortedSet <void*> listeners;
+	ListenerList <FilenameComponentListener> listeners;
 	File defaultBrowseFile;
 
 	void comboBoxChanged (ComboBox*);
@@ -23853,7 +24078,7 @@ public:
 
 private:
 	ApplicationCommandManager* manager;
-	SortedSet <void*> listeners;
+	ListenerList <MenuBarModelListener> listeners;
 
 	MenuBarModel (const MenuBarModel&);
 	MenuBarModel& operator= (const MenuBarModel&);
@@ -25517,6 +25742,81 @@ private:
 
 
 #endif
+#ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+
+/*** Start of inlined file: juce_MouseInputSource.h ***/
+#ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+#define __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+
+class Component;
+class ComponentPeer;
+class MouseInputSourceInternal;
+
+class JUCE_API  MouseInputSource
+{
+public:
+
+	MouseInputSource (int index, bool isMouseDevice);
+
+	~MouseInputSource();
+
+	bool isMouse() const;
+
+	bool isTouch() const;
+
+	bool canHover() const;
+
+	bool hasMouseWheel() const;
+
+	int getIndex() const;
+
+	bool isDragging() const;
+
+	const Point<int> getScreenPosition() const;
+
+	const ModifierKeys getCurrentModifiers() const;
+
+	Component* getComponentUnderMouse() const;
+
+	void triggerFakeMove() const;
+
+	int getNumberOfMultipleClicks() const throw();
+
+	const Time getLastMouseDownTime() const throw();
+
+	const Point<int> getLastMouseDownPosition() const throw();
+
+	bool hasMouseMovedSignificantlySincePressed() const throw();
+
+	bool hasMouseCursor() const throw();
+	void showMouseCursor (const MouseCursor& cursor);
+	void hideCursor();
+	void revealCursor();
+
+	bool canDoUnboundedMovement() const throw();
+
+	void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
+
+	juce_UseDebuggingNewOperator
+
+	void handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys& mods);
+	void handleWheel (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, float x, float y);
+
+private:
+	friend class Desktop;
+	friend class ComponentPeer;
+	friend class MouseInputSourceInternal;
+	ScopedPointer<MouseInputSourceInternal> pimpl;
+
+	MouseInputSource (const MouseInputSource&);
+	MouseInputSource& operator= (const MouseInputSource&);
+};
+
+#endif   // __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+/*** End of inlined file: juce_MouseInputSource.h ***/
+
+
+#endif
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
 
 #endif
@@ -26068,78 +26368,6 @@ private:
 /*** Start of inlined file: juce_MagnifierComponent.h ***/
 #ifndef __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
 #define __JUCE_MAGNIFIERCOMPONENT_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_MouseInputSource.h ***/
-#ifndef __JUCE_MOUSEEVENT_JUCEHEADER__x
-#define __JUCE_MOUSEEVENT_JUCEHEADER__x
-
-class Component;
-class ComponentPeer;
-class MouseInputSourceInternal;
-
-class JUCE_API  MouseInputSource
-{
-public:
-
-	MouseInputSource (int index, bool isMouseDevice);
-
-	~MouseInputSource();
-
-	bool isMouse() const;
-
-	bool isTouch() const;
-
-	bool canHover() const;
-
-	bool hasMouseWheel() const;
-
-	int getIndex() const;
-
-	bool isDragging() const;
-
-	const Point<int> getScreenPosition() const;
-
-	const ModifierKeys getCurrentModifiers() const;
-
-	Component* getComponentUnderMouse() const;
-
-	void triggerFakeMove() const;
-
-	int getNumberOfMultipleClicks() const throw();
-
-	const Time getLastMouseDownTime() const throw();
-
-	const Point<int> getLastMouseDownPosition() const throw();
-
-	bool hasMouseMovedSignificantlySincePressed() const throw();
-
-	bool hasMouseCursor() const throw();
-	void showMouseCursor (const MouseCursor& cursor);
-	void hideCursor();
-	void revealCursor();
-
-	bool canDoUnboundedMovement() const throw();
-
-	void enableUnboundedMouseMovement (bool isEnabled, bool keepCursorVisibleUntilOffscreen = false);
-
-	juce_UseDebuggingNewOperator
-
-	void handleEvent (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, const ModifierKeys& mods);
-	void handleWheel (ComponentPeer* peer, const Point<int>& positionWithinPeer, int64 time, float x, float y);
-
-private:
-	friend class Desktop;
-	friend class ComponentPeer;
-	friend class MouseInputSourceInternal;
-	ScopedPointer<MouseInputSourceInternal> pimpl;
-
-	MouseInputSource (const MouseInputSource&);
-	MouseInputSource& operator= (const MouseInputSource&);
-};
-
-#endif   // __JUCE_MOUSEEVENT_JUCEHEADER__
-/*** End of inlined file: juce_MouseInputSource.h ***/
 
 class JUCE_API  MagnifierComponent	: public Component
 {

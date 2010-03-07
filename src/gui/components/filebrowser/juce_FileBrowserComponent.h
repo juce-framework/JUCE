@@ -213,7 +213,7 @@ private:
     int flags;
     File currentRoot;
     Array<File> chosenFiles;
-    SortedSet <void*> listeners;
+    ListenerList <FileBrowserListener> listeners;
 
     DirectoryContentsDisplayComponent* fileListComponent;
     FilePreviewComponent* previewComp;

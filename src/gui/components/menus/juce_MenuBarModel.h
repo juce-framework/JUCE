@@ -172,7 +172,7 @@ public:
 
 private:
     ApplicationCommandManager* manager;
-    SortedSet <void*> listeners;
+    ListenerList <MenuBarModelListener> listeners;
 
     MenuBarModel (const MenuBarModel&);
     MenuBarModel& operator= (const MenuBarModel&);

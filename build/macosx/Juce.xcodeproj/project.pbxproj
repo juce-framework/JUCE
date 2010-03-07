@@ -30,6 +30,7 @@
 		844BB95D10C5579B00DF5536 /* juce_FillType.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F29A9E10C2EFA5005014DF /* juce_FillType.h */; };
 		844BB95E10C557A600DF5536 /* juce_mac_CoreGraphicsContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84D0F00B109B1546007F73A3 /* juce_mac_CoreGraphicsContext.mm */; };
 		844BB95F10C557A800DF5536 /* juce_Config.h in Headers */ = {isa = PBXBuildFile; fileRef = 8456EC6508A2A6C80087C412 /* juce_Config.h */; };
+		8458B536113ECFCF0044DA09 /* juce_ListenerList.h in Headers */ = {isa = PBXBuildFile; fileRef = 8458B535113ECFCF0044DA09 /* juce_ListenerList.h */; };
 		8473E64A11249FD800D74E02 /* juce_TextInputTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E64911249FD800D74E02 /* juce_TextInputTarget.h */; };
 		8473E64B11249FD800D74E02 /* juce_TextInputTarget.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E64911249FD800D74E02 /* juce_TextInputTarget.h */; };
 		8473E6531125974600D74E02 /* juce_Range.h in Headers */ = {isa = PBXBuildFile; fileRef = 8473E6521125974600D74E02 /* juce_Range.h */; };
@@ -1245,6 +1246,7 @@
 		843D4A3A10D3C54500624BA6 /* juce_ValueTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_ValueTree.h; sourceTree = "<group>"; };
 		8456EC6508A2A6C80087C412 /* juce_Config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; lineEnding = 2; name = juce_Config.h; path = ../../juce_Config.h; sourceTree = SOURCE_ROOT; };
 		8456EC6908A2A6F00087C412 /* JUCE changelist.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "JUCE changelist.txt"; path = "../../docs/JUCE changelist.txt"; sourceTree = SOURCE_ROOT; };
+		8458B535113ECFCF0044DA09 /* juce_ListenerList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_ListenerList.h; sourceTree = "<group>"; };
 		8473E64911249FD800D74E02 /* juce_TextInputTarget.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_TextInputTarget.h; sourceTree = "<group>"; };
 		8473E6521125974600D74E02 /* juce_Range.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = juce_Range.h; sourceTree = "<group>"; };
 		84751E591132EE9E00640F9A /* juce_MouseInputSource.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = juce_MouseInputSource.cpp; sourceTree = "<group>"; };
@@ -2313,6 +2315,7 @@
 				84F1E958104036B3006A1807 /* juce_InterprocessConnection.h */,
 				84F1E959104036B3006A1807 /* juce_InterprocessConnectionServer.cpp */,
 				84F1E95A104036B3006A1807 /* juce_InterprocessConnectionServer.h */,
+				8458B535113ECFCF0044DA09 /* juce_ListenerList.h */,
 				84F1E95B104036B3006A1807 /* juce_Message.cpp */,
 				84F1E95C104036B3006A1807 /* juce_Message.h */,
 				84F1E95D104036B3006A1807 /* juce_MessageListener.cpp */,
@@ -3594,6 +3597,7 @@
 				8473E64A11249FD800D74E02 /* juce_TextInputTarget.h in Headers */,
 				8473E6531125974600D74E02 /* juce_Range.h in Headers */,
 				84751E5C1132EE9E00640F9A /* juce_MouseInputSource.h in Headers */,
+				8458B536113ECFCF0044DA09 /* juce_ListenerList.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -189,25 +189,17 @@ void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
 //==============================================================================
 void ScrollBar::addListener (ScrollBarListener* const listener) throw()
 {
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void ScrollBar::removeListener (ScrollBarListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 void ScrollBar::handleAsyncUpdate()
 {
-    const double value = getCurrentRangeStart();
-
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((ScrollBarListener*) listeners.getUnchecked (i))->scrollBarMoved (this, value);
-        i = jmin (i, listeners.size());
-    }
+    listeners.call (&ScrollBarListener::scrollBarMoved, this, rangeStart);
 }
 
 //==============================================================================

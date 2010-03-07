@@ -140,7 +140,7 @@ void Label::setBorderSize (int h, int v)
 //==============================================================================
 Component* Label::getAttachedComponent() const
 {
-    return const_cast <Component*> (static_cast <const Component*> (ownerComponent));
+    return static_cast<Component*> (ownerComponent);
 }
 
 void Label::attachToComponent (Component* owner,
@@ -257,6 +257,8 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
 {
     if (editor != 0)
     {
+        Component::SafePointer<Component> deletionChecker (this);
+
         editorAboutToBeHidden (editor);
 
         const bool changed = (! discardCurrentEditorContents)
@@ -268,9 +270,10 @@ void Label::hideEditor (const bool discardCurrentEditorContents)
         if (changed)
             textWasEdited();
 
-        exitModalState (0);
+        if (deletionChecker != 0)
+            exitModalState (0);
 
-        if (changed && isValidComponent())
+        if (changed && deletionChecker != 0)
             callChangeListeners();
     }
 }
@@ -395,23 +398,18 @@ KeyboardFocusTraverser* Label::createFocusTraverser()
 //==============================================================================
 void Label::addListener (LabelListener* const listener) throw()
 {
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void Label::removeListener (LabelListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 void Label::callChangeListeners()
 {
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((LabelListener*) listeners.getUnchecked (i))->labelTextChanged (this);
-        i = jmin (i, listeners.size());
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &LabelListener::labelTextChanged, this);
 }
 
 //==============================================================================
@@ -443,9 +441,10 @@ void Label::textEditorReturnKeyPressed (TextEditor& ed)
 
         if (changed)
         {
+            Component::SafePointer<Component> deletionChecker (this);
             textWasEdited();
 
-            if (isValidComponent())
+            if (deletionChecker != 0)
                 callChangeListeners();
         }
     }

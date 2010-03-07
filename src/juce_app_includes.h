@@ -254,6 +254,9 @@
 #ifndef __JUCE_INTERPROCESSCONNECTIONSERVER_JUCEHEADER__
  #include "events/juce_InterprocessConnectionServer.h"
 #endif
+#ifndef __JUCE_LISTENERLIST_JUCEHEADER__
+ #include "events/juce_ListenerList.h"
+#endif
 #ifndef __JUCE_MESSAGE_JUCEHEADER__
  #include "events/juce_Message.h"
 #endif
@@ -508,6 +511,9 @@
 #endif
 #ifndef __JUCE_MOUSEHOVERDETECTOR_JUCEHEADER__
  #include "gui/components/mouse/juce_MouseHoverDetector.h"
+#endif
+#ifndef __JUCE_MOUSEINPUTSOURCE_JUCEHEADER__
+ #include "gui/components/mouse/juce_MouseInputSource.h"
 #endif
 #ifndef __JUCE_MOUSELISTENER_JUCEHEADER__
  #include "gui/components/mouse/juce_MouseListener.h"

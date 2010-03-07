@@ -392,7 +392,7 @@ private:
     Value currentId;
     int lastCurrentId;
     bool isButtonDown, separatorPending, menuActive, textIsCustom;
-    SortedSet <void*> listeners;
+    ListenerList <ComboBoxListener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
 

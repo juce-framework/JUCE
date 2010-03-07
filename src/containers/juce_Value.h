@@ -28,6 +28,7 @@
 
 #include "juce_Variant.h"
 #include "../events/juce_AsyncUpdater.h"
+#include "../events/juce_ListenerList.h"
 #include "juce_ReferenceCountedObject.h"
 #include "juce_SortedSet.h"
 
@@ -217,7 +218,7 @@ public:
 private:
     friend class ValueSource;
     ReferenceCountedObjectPtr <ValueSource> value;
-    SortedSet <Listener*> listeners;
+    ListenerList <Listener> listeners;
 
     void callListeners();
 

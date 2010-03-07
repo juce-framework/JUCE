@@ -162,23 +162,13 @@ ValueTree::SharedObject::~SharedObject()
 }
 
 //==============================================================================
-void ValueTree::deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property)
-{
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ValueTree::Listener* const l = listeners[i];
-        if (l != 0)
-            l->valueTreePropertyChanged (tree, property);
-    }
-}
-
 void ValueTree::SharedObject::sendPropertyChangeMessage (ValueTree& tree, const var::identifier& property)
 {
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
         if (v != 0)
-            v->deliverPropertyChangeMessage (tree, property);
+            v->listeners.call (&ValueTree::Listener::valueTreePropertyChanged, tree, property);
     }
 }
 
@@ -194,23 +184,13 @@ void ValueTree::SharedObject::sendPropertyChangeMessage (const var::identifier& 
     }
 }
 
-void ValueTree::deliverChildChangeMessage (ValueTree& tree)
-{
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ValueTree::Listener* const l = listeners[i];
-        if (l != 0)
-            l->valueTreeChildrenChanged (tree);
-    }
-}
-
 void ValueTree::SharedObject::sendChildChangeMessage (ValueTree& tree)
 {
     for (int i = valueTreesWithListeners.size(); --i >= 0;)
     {
         ValueTree* const v = valueTreesWithListeners[i];
         if (v != 0)
-            v->deliverChildChangeMessage (tree);
+            v->listeners.call (&ValueTree::Listener::valueTreeChildrenChanged, tree);
     }
 }
 
@@ -223,16 +203,6 @@ void ValueTree::SharedObject::sendChildChangeMessage()
     {
         t->sendChildChangeMessage (tree);
         t = t->parent;
-    }
-}
-
-void ValueTree::deliverParentChangeMessage (ValueTree& tree)
-{
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ValueTree::Listener* const l = listeners[i];
-        if (l != 0)
-            l->valueTreeParentChanged (tree);
     }
 }
 
@@ -252,7 +222,7 @@ void ValueTree::SharedObject::sendParentChangeMessage()
     {
         ValueTree* const v = valueTreesWithListeners[i];
         if (v != 0)
-            v->deliverParentChangeMessage (tree);
+            v->listeners.call (&ValueTree::Listener::valueTreeParentChanged, tree);
     }
 }
 
@@ -651,7 +621,7 @@ void ValueTree::addListener (Listener* listener)
 
 void ValueTree::removeListener (Listener* listener)
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 
     if (listeners.size() == 0 && object != 0)
         object->valueTreesWithListeners.removeValue (this);

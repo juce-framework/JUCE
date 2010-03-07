@@ -327,7 +327,7 @@ private:
     Font font;
     Justification justification;
     ScopedPointer <TextEditor> editor;
-    SortedSet <void*> listeners;
+    ListenerList <LabelListener> listeners;
     Component::SafePointer<Component> ownerComponent;
     int horizontalBorderSize, verticalBorderSize;
     float minimumHorizontalScale;

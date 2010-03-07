@@ -351,6 +351,7 @@ public:
                 mw->menuBarComponent = menuBarComponent;
                 mw->managerOfChosenCommand = managerOfChosenCommand;
                 mw->componentAttachedTo = componentAttachedTo;
+                mw->componentAttachedToOriginal = componentAttachedTo;
 
                 mw->calculateWindowPos (minX, maxX, minY, maxY, alignToRectangle);
                 mw->setTopLeftPosition (mw->windowPos.getX(),
@@ -502,16 +503,14 @@ public:
         }
         else if (key.isKeyCode (KeyPress::leftKey))
         {
-            Window* parentWindow = owner;
-
-            if (parentWindow != 0)
+            if (owner != 0)
             {
-                PopupMenu::ItemComponent* currentChildOfParent
-                    = (parentWindow != 0) ? parentWindow->currentChild : 0;
+                Component::SafePointer<Window> parentWindow (owner);
+                PopupMenu::ItemComponent* currentChildOfParent = parentWindow->currentChild;
 
                 hide (0);
 
-                if (parentWindow->isValidComponent())
+                if (parentWindow != 0)
                     parentWindow->setCurrentlyHighlightedChild (currentChildOfParent);
 
                 disableTimerUntilMouseMoves();
@@ -594,7 +593,7 @@ public:
         if (! isVisible())
             return;
 
-        if (componentAttachedTo == 0)
+        if (componentAttachedTo != componentAttachedToOriginal)
         {
             dismissMenu (0);
             return;
@@ -748,6 +747,7 @@ private:
     Component* menuBarComponent;
     ApplicationCommandManager** managerOfChosenCommand;
     Component::SafePointer<Component> componentAttachedTo;
+    Component* componentAttachedToOriginal;
     Rectangle<int> windowPos;
     Point<int> lastMouse;
     int minimumWidth, maximumNumColumns, standardItemHeight;

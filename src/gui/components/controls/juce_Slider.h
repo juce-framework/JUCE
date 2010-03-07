@@ -30,7 +30,6 @@
 #include "juce_Label.h"
 #include "../buttons/juce_Button.h"
 #include "../../../events/juce_AsyncUpdater.h"
-#include "../../../containers/juce_SortedSet.h"
 #include "../../../containers/juce_Value.h"
 
 
@@ -750,7 +749,7 @@ protected:
     void valueChanged (Value& value);
 
 private:
-    SortedSet <void*> listeners;
+    ListenerList <SliderListener> listeners;
     Value currentValue, valueMin, valueMax;
     double lastCurrentValue, lastValueMin, lastValueMax;
     double minimum, maximum, interval, doubleClickReturnValue;

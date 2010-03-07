@@ -209,7 +209,7 @@ private:
     int maxRecentFiles;
     bool isDir, isSaving, isFileDragOver;
     String wildcard, enforcedSuffix, browseButtonText;
-    SortedSet <void*> listeners;
+    ListenerList <FilenameComponentListener> listeners;
     File defaultBrowseFile;
 
     void comboBoxChanged (ComboBox*);

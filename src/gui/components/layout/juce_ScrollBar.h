@@ -293,7 +293,7 @@ private:
     bool vertical, isDraggingThumb, alwaysVisible;
     Button* upButton;
     Button* downButton;
-    SortedSet <void*> listeners;
+    ListenerList <ScrollBarListener> listeners;
 
     void updateThumbPosition() throw();
     void timerCallback();

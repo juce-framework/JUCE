@@ -652,7 +652,7 @@ private:
     } dragType;
 
     String allowedCharacters;
-    SortedSet <void*> listeners;
+    ListenerList <TextEditorListener> listeners;
 
     friend class TextEditorInsertAction;
     friend class TextEditorRemoveAction;

@@ -152,15 +152,12 @@ FileBrowserComponent::~FileBrowserComponent()
 //==============================================================================
 void FileBrowserComponent::addListener (FileBrowserListener* const newListener) throw()
 {
-    jassert (newListener != 0)
-
-    if (newListener != 0)
-        listeners.add (newListener);
+    listeners.add (newListener);
 }
 
 void FileBrowserComponent::removeListener (FileBrowserListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 //==============================================================================
@@ -302,23 +299,15 @@ void FileBrowserComponent::resized()
 //==============================================================================
 void FileBrowserComponent::sendListenerChangeMessage()
 {
-    Component::SafePointer<Component> deletionWatcher (this);
+    Component::BailOutChecker checker (this);
 
     if (previewComp != 0)
         previewComp->selectedFileChanged (getSelectedFile (0));
 
     // You shouldn't delete the browser when the file gets changed!
-    jassert (deletionWatcher != 0);
+    jassert (! checker.shouldBailOut());
 
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((FileBrowserListener*) listeners.getUnchecked (i))->selectionChanged();
-
-        if (deletionWatcher == 0)
-            return;
-
-        i = jmin (i, listeners.size() - 1);
-    }
+    listeners.callChecked (checker, &FileBrowserListener::selectionChanged);
 }
 
 void FileBrowserComponent::selectionChanged()
@@ -351,17 +340,8 @@ void FileBrowserComponent::selectionChanged()
 
 void FileBrowserComponent::fileClicked (const File& f, const MouseEvent& e)
 {
-    Component::SafePointer<Component> deletionWatcher (this);
-
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (f, e);
-
-        if (deletionWatcher == 0)
-            return;
-
-        i = jmin (i, listeners.size() - 1);
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &FileBrowserListener::fileClicked, f, e);
 }
 
 void FileBrowserComponent::fileDoubleClicked (const File& f)
@@ -372,17 +352,8 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     }
     else
     {
-        Component::SafePointer<Component> deletionWatcher (this);
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            ((FileBrowserListener*) listeners.getUnchecked (i))->fileDoubleClicked (f);
-
-            if (deletionWatcher == 0)
-                return;
-
-            i = jmin (i, listeners.size() - 1);
-        }
+        Component::BailOutChecker checker (this);
+        listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, f);
     }
 }
 

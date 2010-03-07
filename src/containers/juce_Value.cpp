@@ -200,7 +200,7 @@ void Value::addListener (Listener* const listener)
 
 void Value::removeListener (Listener* const listener)
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 
     if (listeners.size() == 0)
         value->valuesWithListeners.removeValue (this);
@@ -208,15 +208,9 @@ void Value::removeListener (Listener* const listener)
 
 void Value::callListeners()
 {
-    Value valueCopy (*this); // Use a copy in case this object gets deleted by a callback
-
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        Listener* const l = listeners[i];
-
-        if (l != 0)
-            l->valueChanged (valueCopy);
-    }
+    Value v (*this); // (create a copy in case this gets deleted by a callback)
+    listeners.call (&Listener::valueChanged, v);
 }
+
 
 END_JUCE_NAMESPACE

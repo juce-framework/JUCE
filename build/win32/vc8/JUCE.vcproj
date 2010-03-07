@@ -1286,6 +1286,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\events\juce_ListenerList.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\events\juce_Message.cpp"
 					>
 				</File>

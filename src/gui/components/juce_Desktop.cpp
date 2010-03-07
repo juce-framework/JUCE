@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-Desktop::Desktop() throw()
+Desktop::Desktop()
     : mouseClickCounter (0),
       kioskModeComponent (0)
 {
@@ -44,7 +44,7 @@ Desktop::Desktop() throw()
     refreshMonitorSizes();
 }
 
-Desktop::~Desktop() throw()
+Desktop::~Desktop()
 {
     jassert (instance == this);
     instance = 0;
@@ -54,7 +54,7 @@ Desktop::~Desktop() throw()
     jassert (desktopComponents.size() == 0);
 }
 
-Desktop& JUCE_CALLTYPE Desktop::getInstance() throw()
+Desktop& JUCE_CALLTYPE Desktop::getInstance()
 {
     if (instance == 0)
         instance = new Desktop();
@@ -68,7 +68,7 @@ Desktop* Desktop::instance = 0;
 extern void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords,
                                          const bool clipToWorkArea);
 
-void Desktop::refreshMonitorSizes() throw()
+void Desktop::refreshMonitorSizes()
 {
     const Array <Rectangle<int> > oldClipped (monitorCoordsClipped);
     const Array <Rectangle<int> > oldUnclipped (monitorCoordsUnclipped);
@@ -118,7 +118,7 @@ const Rectangle<int> Desktop::getMainMonitorArea (const bool clippedToWorkArea) 
     return getDisplayMonitorCoordinates (0, clippedToWorkArea);
 }
 
-const Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea) const throw()
+const Rectangle<int> Desktop::getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea) const
 {
     Rectangle<int> best (getMainMonitorArea (clippedToWorkArea));
     double bestDistance = 1.0e10;
@@ -168,19 +168,19 @@ Component* Desktop::findComponentAt (const Point<int>& screenPosition) const
 }
 
 //==============================================================================
-void Desktop::addDesktopComponent (Component* const c) throw()
+void Desktop::addDesktopComponent (Component* const c)
 {
     jassert (c != 0);
     jassert (! desktopComponents.contains (c));
     desktopComponents.addIfNotAlreadyThere (c);
 }
 
-void Desktop::removeDesktopComponent (Component* const c) throw()
+void Desktop::removeDesktopComponent (Component* const c)
 {
     desktopComponents.removeValue (c);
 }
 
-void Desktop::componentBroughtToFront (Component* const c) throw()
+void Desktop::componentBroughtToFront (Component* const c)
 {
     const int index = desktopComponents.indexOf (c);
     jassert (index >= 0);
@@ -249,52 +249,40 @@ MouseInputSource* Desktop::getDraggingMouseSource (int index) const throw()
 }
 
 //==============================================================================
-void Desktop::addGlobalMouseListener (MouseListener* const listener) throw()
+void Desktop::addFocusChangeListener (FocusChangeListener* const listener)
 {
-    jassert (listener != 0);
-
-    if (listener != 0)
-    {
-        mouseListeners.add (listener);
-        resetTimer();
-    }
+    focusListeners.add (listener);
 }
 
-void Desktop::removeGlobalMouseListener (MouseListener* const listener) throw()
+void Desktop::removeFocusChangeListener (FocusChangeListener* const listener)
 {
-    mouseListeners.removeValue (listener);
-    resetTimer();
+    focusListeners.remove (listener);
 }
 
-//==============================================================================
-void Desktop::addFocusChangeListener (FocusChangeListener* const listener) throw()
-{
-    jassert (listener != 0);
-
-    if (listener != 0)
-        focusListeners.add (listener);
-}
-
-void Desktop::removeFocusChangeListener (FocusChangeListener* const listener) throw()
-{
-    focusListeners.removeValue (listener);
-}
-
-void Desktop::triggerFocusCallback() throw()
+void Desktop::triggerFocusCallback()
 {
     triggerAsyncUpdate();
 }
 
 void Desktop::handleAsyncUpdate()
 {
-    for (int i = focusListeners.size(); --i >= 0;)
-    {
-        ((FocusChangeListener*) focusListeners.getUnchecked (i))->globalFocusChanged (Component::getCurrentlyFocusedComponent());
-        i = jmin (i, focusListeners.size());
-    }
+    Component* currentFocus = Component::getCurrentlyFocusedComponent();
+    focusListeners.call (&FocusChangeListener::globalFocusChanged, currentFocus);
 }
 
 //==============================================================================
+void Desktop::addGlobalMouseListener (MouseListener* const listener)
+{
+    mouseListeners.add (listener);
+    resetTimer();
+}
+
+void Desktop::removeGlobalMouseListener (MouseListener* const listener)
+{
+    mouseListeners.remove (listener);
+    resetTimer();
+}
+
 void Desktop::timerCallback()
 {
     if (lastFakeMouseMove != getMousePosition())
@@ -303,7 +291,7 @@ void Desktop::timerCallback()
 
 void Desktop::sendMouseMove()
 {
-    if (mouseListeners.size() > 0)
+    if (! mouseListeners.isEmpty())
     {
         startTimer (20);
 
@@ -313,30 +301,22 @@ void Desktop::sendMouseMove()
 
         if (target != 0)
         {
-            Component::SafePointer<Component> deletionChecker (target);
+            Component::BailOutChecker checker (target);
             const Point<int> pos (target->globalPositionToRelative (lastFakeMouseMove));
             const Time now (Time::getCurrentTime());
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),
                                  target, now, pos, now, 0, false);
 
-            for (int i = mouseListeners.size(); --i >= 0;)
-            {
-                if (ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown())
-                    ((MouseListener*) mouseListeners[i])->mouseDrag (me);
-                else
-                    ((MouseListener*) mouseListeners[i])->mouseMove (me);
-
-                if (deletionChecker == 0)
-                    return;
-
-                i = jmin (i, mouseListeners.size());
-            }
+            if (me.mods.isAnyMouseButtonDown())
+                mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);
+            else
+                mouseListeners.callChecked (checker, &MouseListener::mouseMove, me);
         }
     }
 }
 
-void Desktop::resetTimer() throw()
+void Desktop::resetTimer()
 {
     if (mouseListeners.size() == 0)
         stopTimer();

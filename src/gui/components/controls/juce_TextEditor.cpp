@@ -1258,15 +1258,12 @@ void TextEditor::escapePressed()
 
 void TextEditor::addListener (TextEditorListener* const newListener)
 {
-    jassert (newListener != 0)
-
-    if (newListener != 0)
-        listeners.add (newListener);
+    listeners.add (newListener);
 }
 
 void TextEditor::removeListener (TextEditorListener* const listenerToRemove)
 {
-    listeners.removeValue (listenerToRemove);
+    listeners.remove (listenerToRemove);
 }
 
 //==============================================================================
@@ -2166,47 +2163,36 @@ void TextEditor::resized()
 
 void TextEditor::handleCommandMessage (const int commandId)
 {
-    Component::SafePointer<Component> deletionChecker (this);
+    Component::BailOutChecker checker (this);
 
-    for (int i = listeners.size(); --i >= 0;)
+    switch (commandId)
     {
-        TextEditorListener* const tl = (TextEditorListener*) listeners [i];
+    case TextEditorDefs::textChangeMessageId:
+        listeners.callChecked (checker, &TextEditorListener::textEditorTextChanged, (TextEditor&) *this);
+        break;
 
-        if (tl != 0)
-        {
-            switch (commandId)
-            {
-            case TextEditorDefs::textChangeMessageId:
-                tl->textEditorTextChanged (*this);
-                break;
+    case TextEditorDefs::returnKeyMessageId:
+        listeners.callChecked (checker, &TextEditorListener::textEditorReturnKeyPressed, (TextEditor&) *this);
+        break;
 
-            case TextEditorDefs::returnKeyMessageId:
-                tl->textEditorReturnKeyPressed (*this);
-                break;
+    case TextEditorDefs::escapeKeyMessageId:
+        listeners.callChecked (checker, &TextEditorListener::textEditorEscapeKeyPressed, (TextEditor&) *this);
+        break;
 
-            case TextEditorDefs::escapeKeyMessageId:
-                tl->textEditorEscapeKeyPressed (*this);
-                break;
+    case TextEditorDefs::focusLossMessageId:
+        listeners.callChecked (checker, &TextEditorListener::textEditorFocusLost, (TextEditor&) *this);
+        break;
 
-            case TextEditorDefs::focusLossMessageId:
-                tl->textEditorFocusLost (*this);
-                break;
-
-            default:
-                jassertfalse
-                break;
-            }
-
-            if (deletionChecker == 0)
-                return;
-        }
+    default:
+        jassertfalse
+        break;
     }
 }
 
 void TextEditor::enablementChanged()
 {
-    setMouseCursor (MouseCursor (isReadOnly() ? MouseCursor::NormalCursor
-                                              : MouseCursor::IBeamCursor));
+    setMouseCursor (isReadOnly() ? MouseCursor::NormalCursor
+                                 : MouseCursor::IBeamCursor);
     repaint();
 }
 

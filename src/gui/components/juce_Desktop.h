@@ -31,7 +31,6 @@
 #include "../../utilities/juce_DeletedAtShutdown.h"
 #include "../../events/juce_Timer.h"
 #include "../../events/juce_AsyncUpdater.h"
-#include "../../containers/juce_SortedSet.h"
 #include "../../containers/juce_OwnedArray.h"
 #include "../graphics/geometry/juce_RectangleList.h"
 class MouseInputSource;
@@ -70,7 +69,7 @@ public:
     //==============================================================================
     /** There's only one dektop object, and this method will return it.
     */
-    static Desktop& JUCE_CALLTYPE getInstance() throw();
+    static Desktop& JUCE_CALLTYPE getInstance();
 
     //==============================================================================
     /** Returns a list of the positions of all the monitors available.
@@ -97,7 +96,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const;
 
 
     //==============================================================================
@@ -157,23 +156,23 @@ public:
 
         @see removeGlobalMouseListener
     */
-    void addGlobalMouseListener (MouseListener* const listener) throw();
+    void addGlobalMouseListener (MouseListener* const listener);
 
     /** Unregisters a MouseListener that was added with the addGlobalMouseListener()
         method.
 
         @see addGlobalMouseListener
     */
-    void removeGlobalMouseListener (MouseListener* const listener) throw();
+    void removeGlobalMouseListener (MouseListener* const listener);
 
     //==============================================================================
     /** Registers a MouseListener that will receive a callback whenever the focused
         component changes.
     */
-    void addFocusChangeListener (FocusChangeListener* const listener) throw();
+    void addFocusChangeListener (FocusChangeListener* const listener);
 
     /** Unregisters a listener that was added with addFocusChangeListener(). */
-    void removeFocusChangeListener (FocusChangeListener* const listener) throw();
+    void removeFocusChangeListener (FocusChangeListener* const listener);
 
     //==============================================================================
     /** Takes a component and makes it full-screen, removing the taskbar, dock, etc.
@@ -198,7 +197,7 @@ public:
         This is the component that was last set by setKioskModeComponent(). If none
         has been set, this returns 0.
     */
-    Component* getKioskModeComponent() const             { return kioskModeComponent; }
+    Component* getKioskModeComponent() const throw()                { return kioskModeComponent; }
 
     //==============================================================================
     /** Returns the number of components that are currently active as top-level
@@ -269,7 +268,7 @@ public:
 
         (Called internally by the native code).
     */
-    void refreshMonitorSizes() throw();
+    void refreshMonitorSizes();
 
     /** True if the OS supports semitransparent windows */
     static bool canUseSemiTransparentWindows() throw();
@@ -282,41 +281,42 @@ private:
     friend class ComponentPeer;
     friend class MouseInputSource;
     friend class MouseInputSourceInternal;
-    SortedSet <void*> mouseListeners, focusListeners;
-    Array <Component*> desktopComponents;
-
     friend class DeletedAtShutdown;
     friend class TopLevelWindowManager;
-    Desktop() throw();
-    ~Desktop() throw();
-
-    Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
     OwnedArray <MouseInputSource> mouseSources;
+    void createMouseInputSources();
+
+    ListenerList <MouseListener> mouseListeners;
+    ListenerList <FocusChangeListener> focusListeners;
+
+    Array <Component*> desktopComponents;
+    Array <Rectangle<int> > monitorCoordsClipped, monitorCoordsUnclipped;
 
     Point<int> lastFakeMouseMove;
-    int mouseClickCounter;
+    void sendMouseMove();
 
+    int mouseClickCounter;
     void incrementMouseClickCounter() throw();
 
     Component* kioskModeComponent;
     Rectangle<int> kioskComponentOriginalBounds;
 
-    void createMouseInputSources();
-
     void timerCallback();
-    void sendMouseMove();
-    void resetTimer() throw();
+    void resetTimer();
 
     int getNumDisplayMonitors() const throw();
     const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
 
-    void addDesktopComponent (Component* const c) throw();
-    void removeDesktopComponent (Component* const c) throw();
-    void componentBroughtToFront (Component* const c) throw();
+    void addDesktopComponent (Component* const c);
+    void removeDesktopComponent (Component* const c);
+    void componentBroughtToFront (Component* const c);
 
-    void triggerFocusCallback() throw();
+    void triggerFocusCallback();
     void handleAsyncUpdate();
+
+    Desktop();
+    ~Desktop();
 
     Desktop (const Desktop&);
     Desktop& operator= (const Desktop&);

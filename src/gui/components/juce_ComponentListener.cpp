@@ -36,6 +36,6 @@ void ComponentListener::componentVisibilityChanged (Component&)             {}
 void ComponentListener::componentChildrenChanged (Component&)               {}
 void ComponentListener::componentParentHierarchyChanged (Component&)        {}
 void ComponentListener::componentNameChanged (Component&)                   {}
-void ComponentListener::componentBeingDeleted (Component& component)        {}
+void ComponentListener::componentBeingDeleted (Component&)                  {}
 
 END_JUCE_NAMESPACE

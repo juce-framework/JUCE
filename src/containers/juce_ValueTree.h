@@ -30,6 +30,7 @@
 #include "juce_Value.h"
 #include "../utilities/juce_UndoManager.h"
 #include "../text/juce_XmlElement.h"
+#include "../events/juce_ListenerList.h"
 #include "juce_ReferenceCountedArray.h"
 
 
@@ -440,11 +441,7 @@ private:
     typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
 
     ReferenceCountedObjectPtr <SharedObject> object;
-    SortedSet <Listener*> listeners;
-
-    void deliverPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
-    void deliverChildChangeMessage (ValueTree& tree);
-    void deliverParentChangeMessage (ValueTree& tree);
+    ListenerList <Listener> listeners;
 
     ValueTree (SharedObject* const object_);
 };

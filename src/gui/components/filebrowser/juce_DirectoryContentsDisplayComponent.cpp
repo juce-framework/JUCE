@@ -47,47 +47,26 @@ FileBrowserListener::~FileBrowserListener()
 
 void DirectoryContentsDisplayComponent::addListener (FileBrowserListener* const listener) throw()
 {
-    jassert (listener != 0);
-
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 void DirectoryContentsDisplayComponent::sendSelectionChangeMessage()
 {
-    Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
-
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((FileBrowserListener*) listeners.getUnchecked (i))->selectionChanged();
-
-        if (deletionWatcher == 0)
-            return;
-
-        i = jmin (i, listeners.size() - 1);
-    }
+    Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+    listeners.callChecked (checker, &FileBrowserListener::selectionChanged);
 }
 
 void DirectoryContentsDisplayComponent::sendMouseClickMessage (const File& file, const MouseEvent& e)
 {
     if (fileList.getDirectory().exists())
     {
-        Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            ((FileBrowserListener*) listeners.getUnchecked (i))->fileClicked (file, e);
-
-            if (deletionWatcher == 0)
-                return;
-
-            i = jmin (i, listeners.size() - 1);
-        }
+        Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+        listeners.callChecked (checker, &FileBrowserListener::fileClicked, file, e);
     }
 }
 
@@ -95,17 +74,8 @@ void DirectoryContentsDisplayComponent::sendDoubleClickMessage (const File& file
 {
     if (fileList.getDirectory().exists())
     {
-        Component::SafePointer<Component> deletionWatcher (dynamic_cast <Component*> (this));
-
-        for (int i = listeners.size(); --i >= 0;)
-        {
-            ((FileBrowserListener*) listeners.getUnchecked (i))->fileDoubleClicked (file);
-
-            if (deletionWatcher == 0)
-                return;
-
-            i = jmin (i, listeners.size() - 1);
-        }
+        Component::BailOutChecker checker (dynamic_cast <Component*> (this));
+        listeners.callChecked (checker, &FileBrowserListener::fileDoubleClicked, file);
     }
 }
 

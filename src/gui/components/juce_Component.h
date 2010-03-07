@@ -36,6 +36,7 @@
 #include "../graphics/geometry/juce_RectangleList.h"
 #include "../graphics/geometry/juce_BorderSize.h"
 #include "../../events/juce_MessageListener.h"
+#include "../../events/juce_ListenerList.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_VoidArray.h"
 #include "../../containers/juce_NamedValueSet.h"
@@ -1931,10 +1932,7 @@ public:
         }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator ComponentType*() throw()                   { return comp; }
-
-        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        operator const ComponentType*() const throw()       { return comp; }
+        operator ComponentType*() const throw()             { return comp; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
         ComponentType* operator->() throw()                 { jassert (comp != 0); return comp; }
@@ -1951,6 +1949,35 @@ public:
         void attach()   { if (comp != 0) comp->addComponentListener (this); }
         void detach()   { if (comp != 0) comp->removeComponentListener (this); }
         void componentBeingDeleted (Component&)     { comp = 0; }
+    };
+
+    //==============================================================================
+    /** A class to keep an eye on one or two components and check for them being deleted.
+
+        This is designed for use with the ListenerList::callChecked() methods, to allow
+        the list iterator to stop cleanly if the component is deleted by a listener callback
+        while the list is still being iterated.
+    */
+    class BailOutChecker
+    {
+    public:
+        /** Creates a checker that watches either one or two components.
+            component1 must be a valid component; component2 can be null if you only need
+            to check on one component.
+        */
+        BailOutChecker (Component* const component1,
+                        Component* const component2 = 0);
+
+        /** Returns true if either of the two components have been deleted since this
+            object was created. */
+        bool shouldBailOut() const throw();
+
+    private:
+        Component::SafePointer<Component> safePointer1, safePointer2;
+        Component* const component2;
+
+        BailOutChecker (const BailOutChecker&);
+        BailOutChecker& operator= (const BailOutChecker&);
     };
 
     //==============================================================================
@@ -1978,7 +2005,7 @@ private:
     Image* bufferedImage_;
     VoidArray* mouseListeners_;
     VoidArray* keyListeners_;
-    VoidArray* componentListeners_;
+    ListenerList <ComponentListener> componentListeners;
     NamedValueSet properties;
 
     struct ComponentFlags

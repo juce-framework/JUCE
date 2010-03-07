@@ -64,6 +64,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../gui/components/special/juce_OpenGLComponent.h"
 #include "../gui/components/special/juce_QuickTimeMovieComponent.h"
 #include "../gui/components/mouse/juce_DragAndDropContainer.h"
+#include "../gui/components/mouse/juce_MouseInputSource.h"
 #include "../gui/components/keyboard/juce_KeyPressMappingSet.h"
 #include "../gui/components/layout/juce_ComponentMovementWatcher.h"
 #include "../gui/components/special/juce_ActiveXControlComponent.h"

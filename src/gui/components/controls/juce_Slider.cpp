@@ -158,22 +158,16 @@ void Slider::handleAsyncUpdate()
 {
     cancelPendingUpdate();
 
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((SliderListener*) listeners.getUnchecked (i))->sliderValueChanged (this);
-        i = jmin (i, listeners.size());
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &SliderListener::sliderValueChanged, this);
 }
 
 void Slider::sendDragStart()
 {
     startedDragging();
 
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((SliderListener*) listeners.getUnchecked (i))->sliderDragStarted (this);
-        i = jmin (i, listeners.size());
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &SliderListener::sliderDragStarted, this);
 }
 
 void Slider::sendDragEnd()
@@ -182,23 +176,18 @@ void Slider::sendDragEnd()
 
     sliderBeingDragged = -1;
 
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((SliderListener*) listeners.getUnchecked (i))->sliderDragEnded (this);
-        i = jmin (i, listeners.size());
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &SliderListener::sliderDragEnded, this);
 }
 
 void Slider::addListener (SliderListener* const listener)
 {
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void Slider::removeListener (SliderListener* const listener)
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 //==============================================================================

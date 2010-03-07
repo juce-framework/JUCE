@@ -320,11 +320,11 @@ public:
 private:
     //==============================================================================
     OwnedArray <ApplicationCommandInfo> commands;
-    SortedSet <void*> listeners;
+    ListenerList <ApplicationCommandManagerListener> listeners;
     ScopedPointer <KeyPressMappingSet> keyMappings;
     ApplicationCommandTarget* firstTarget;
 
-    void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info) const;
+    void sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info);
     void handleAsyncUpdate();
     void globalFocusChanged (Component*);
 

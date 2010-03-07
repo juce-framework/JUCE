@@ -63,11 +63,7 @@ void MenuBarModel::setApplicationCommandManagerToWatch (ApplicationCommandManage
 
 void MenuBarModel::addListener (MenuBarModelListener* const newListener) throw()
 {
-    jassert (newListener != 0);
-    jassert (! listeners.contains (newListener)); // trying to add a listener to the list twice!
-
-    if (newListener != 0)
-        listeners.add (newListener);
+    listeners.add (newListener);
 }
 
 void MenuBarModel::removeListener (MenuBarModelListener* const listenerToRemove) throw()
@@ -77,26 +73,18 @@ void MenuBarModel::removeListener (MenuBarModelListener* const listenerToRemove)
     // deleted this menu model while it's still being used by something (e.g. by a MenuBarComponent)
     jassert (listeners.contains (listenerToRemove));
 
-    listeners.removeValue (listenerToRemove);
-}
-
-void MenuBarModel::handleAsyncUpdate()
-{
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((MenuBarModelListener*) listeners.getUnchecked (i))->menuBarItemsChanged (this);
-        i = jmin (i, listeners.size());
-    }
+    listeners.remove (listenerToRemove);
 }
 
 //==============================================================================
+void MenuBarModel::handleAsyncUpdate()
+{
+    listeners.call (&MenuBarModelListener::menuBarItemsChanged, this);
+}
+
 void MenuBarModel::applicationCommandInvoked (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((MenuBarModelListener*) listeners.getUnchecked (i))->menuCommandInvoked (this, info);
-        i = jmin (i, listeners.size());
-    }
+    listeners.call (&MenuBarModelListener::menuCommandInvoked, this, info);
 }
 
 void MenuBarModel::applicationCommandListChanged()

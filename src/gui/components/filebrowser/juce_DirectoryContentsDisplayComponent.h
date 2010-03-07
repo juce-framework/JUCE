@@ -104,7 +104,7 @@ public:
 
 protected:
     DirectoryContentsList& fileList;
-    SortedSet <void*> listeners;
+    ListenerList <FileBrowserListener> listeners;
 
     DirectoryContentsDisplayComponent (const DirectoryContentsDisplayComponent&);
     DirectoryContentsDisplayComponent& operator= (const DirectoryContentsDisplayComponent&);

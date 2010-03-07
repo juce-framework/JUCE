@@ -239,24 +239,18 @@ void FilenameComponent::addRecentlyUsedFile (const File& file)
 //==============================================================================
 void FilenameComponent::addListener (FilenameComponentListener* const listener) throw()
 {
-    jassert (listener != 0);
-
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void FilenameComponent::removeListener (FilenameComponentListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 void FilenameComponent::handleAsyncUpdate()
 {
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((FilenameComponentListener*) listeners.getUnchecked (i))->filenameComponentChanged (this);
-        i = jmin (i, listeners.size());
-    }
+    Component::BailOutChecker checker (this);
+    listeners.callChecked (checker, &FilenameComponentListener::filenameComponentChanged, this);
 }
 
 END_JUCE_NAMESPACE

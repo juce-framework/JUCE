@@ -305,32 +305,22 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
 //==============================================================================
 void ApplicationCommandManager::addListener (ApplicationCommandManagerListener* const listener) throw()
 {
-    jassert (listener != 0);
-    if (listener != 0)
-        listeners.add (listener);
+    listeners.add (listener);
 }
 
 void ApplicationCommandManager::removeListener (ApplicationCommandManagerListener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
-void ApplicationCommandManager::sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info) const
+void ApplicationCommandManager::sendListenerInvokeCallback (const ApplicationCommandTarget::InvocationInfo& info)
 {
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((ApplicationCommandManagerListener*) listeners.getUnchecked (i))->applicationCommandInvoked (info);
-        i = jmin (i, listeners.size());
-    }
+    listeners.call (&ApplicationCommandManagerListener::applicationCommandInvoked, info);
 }
 
 void ApplicationCommandManager::handleAsyncUpdate()
 {
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        ((ApplicationCommandManagerListener*) listeners.getUnchecked (i))->applicationCommandListChanged();
-        i = jmin (i, listeners.size());
-    }
+    listeners.call (&ApplicationCommandManagerListener::applicationCommandListChanged);
 }
 
 void ApplicationCommandManager::globalFocusChanged (Component*)

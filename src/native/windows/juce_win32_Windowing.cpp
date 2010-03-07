@@ -1312,7 +1312,7 @@ private:
     {
         updateKeyModifiers();
 
-        const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * HIWORD (wParam));
+        const float amount = jlimit (-1000.0f, 1000.0f, 0.75f * (short) HIWORD (wParam));
 
         handleMouseWheel (0, position, getMouseEventTime(),
                           isVertical ? 0.0f : amount,

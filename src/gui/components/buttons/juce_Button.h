@@ -469,9 +469,9 @@ protected:
 private:
     //==============================================================================
     Array <KeyPress> shortcuts;
-    Component* keySource;
+    Component::SafePointer<Component> keySource;
     String text;
-    SortedSet <void*> buttonListeners;
+    ListenerList <ButtonListener> buttonListeners;
 
     class RepeatTimer;
     friend class RepeatTimer;
