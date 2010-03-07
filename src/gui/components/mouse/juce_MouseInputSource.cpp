@@ -422,7 +422,7 @@ public:
 
     void hideCursor()
     {
-        showMouseCursor (MouseCursor (MouseCursor::NoCursor), true);
+        showMouseCursor (MouseCursor::NoCursor, true);
     }
 
     void revealCursor (bool forcedUpdate)

@@ -134,7 +134,7 @@ private:
 
 #if JUCE_WINDOWS
         GetModuleFileNameW (0, (WCHAR*) buffer, size / sizeof (WCHAR));
-        return String ((const WCHAR*) buffer, size);
+        return String (reinterpret_cast <const WCHAR*> ((char*) buffer), size);
 #elif JUCE_MAC
         _NSGetExecutablePath ((char*) buffer, &size);
         return String::fromUTF8 (buffer, size);

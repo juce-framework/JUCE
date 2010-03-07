@@ -55,7 +55,7 @@ void AudioFilterStreamer::audioDeviceIOCallback (const float** inputChannelData,
 
     int i, numActiveInChans = 0, numActiveOutChans = 0;
     int numOutsWanted = filter.getNumOutputChannels();
-    const int numInsWanted = filter.getNumInputChannels();
+    const int numInsWanted = jmax (2, filter.getNumInputChannels());
 
     for (i = 0; i < totalNumInputChannels; ++i)
         if (inputChannelData[i] != 0)
