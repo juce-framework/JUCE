@@ -181,6 +181,13 @@ public:
     */
     int getDistanceFromDragStartY() const throw();
 
+    /** Returns the difference between the mouse's current postion and where it was
+        when the button was last pressed.
+
+        @see getDistanceFromDragStart
+    */
+    const Point<int> getOffsetFromDragStart() const throw();
+
     /** Returns true if the mouse has just been clicked.
 
         Used in either your mouseUp() or mouseDrag() methods, this will tell you whether

@@ -1157,7 +1157,7 @@ void String::vprintf (const tchar* const pf, va_list& args) throw()
 
 //==============================================================================
 const String String::repeatedString (const tchar* const stringToRepeat,
-                                     int numberOfTimesToRepeat) throw()
+                                     int numberOfTimesToRepeat)
 {
     const int len = CharacterFunctions::length (stringToRepeat);
     String result ((int) (len * numberOfTimesToRepeat + 1), (int) 0);
@@ -1172,6 +1172,48 @@ const String String::repeatedString (const tchar* const stringToRepeat,
     }
 
     return result;
+}
+
+const String String::paddedLeft (const juce_wchar padCharacter, int minimumLength) const
+{
+    if (padCharacter == 0)
+    {
+        jassertfalse;
+        return *this;
+    }
+
+    const int len = length();
+
+    if (len >= minimumLength)
+        return *this;
+
+    String result ((int) minimumLength + 1, (int) 0);
+
+    tchar* n = result.text->text;
+
+    minimumLength -= len;
+    while (--minimumLength >= 0)
+        *n++ = padCharacter;
+
+    *n = 0;
+    CharacterFunctions::append (n, text->text);
+
+    return result;
+}
+
+const String String::paddedRight (const juce_wchar padCharacter, int minimumLength) const
+{
+    if (padCharacter == 0)
+    {
+        jassertfalse;
+        return *this;
+    }
+
+    const int paddingNeeded = minimumLength - length();
+    if (paddingNeeded <= 0)
+        return *this;
+
+    return *this + String::empty.paddedLeft (padCharacter, paddingNeeded);
 }
 
 //==============================================================================

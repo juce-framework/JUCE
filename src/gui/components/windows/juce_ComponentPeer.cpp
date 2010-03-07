@@ -151,8 +151,8 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
 {
     updateCurrentModifiers();
 
-    Component* target = Component::currentlyFocusedComponent->isValidComponent()
-                            ? Component::currentlyFocusedComponent
+    Component* target = Component::getCurrentlyFocusedComponent() != 0
+                            ? Component::getCurrentlyFocusedComponent()
                             : component;
 
     if (target->isCurrentlyBlockedByAnotherModalComponent())
@@ -210,8 +210,8 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
 {
     updateCurrentModifiers();
 
-    Component* target = Component::currentlyFocusedComponent->isValidComponent()
-                            ? Component::currentlyFocusedComponent
+    Component* target = Component::getCurrentlyFocusedComponent() != 0
+                            ? Component::getCurrentlyFocusedComponent()
                             : component;
 
     if (target->isCurrentlyBlockedByAnotherModalComponent())
@@ -264,7 +264,7 @@ void ComponentPeer::handleModifierKeysChange()
     if (target == 0)
         target = component;
 
-    if (target->isValidComponent())
+    if (target != 0)
         target->internalModifierKeysChanged();
 }
 
@@ -415,7 +415,7 @@ void ComponentPeer::handleFileDragMove (const StringArray& files, const Point<in
     updateCurrentModifiers();
 
     FileDragAndDropTarget* lastTarget
-        = const_cast<FileDragAndDropTarget*> (dynamic_cast<const FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent)));
+        = dynamic_cast<FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent));
 
     FileDragAndDropTarget* newTarget = 0;
 
@@ -470,7 +470,7 @@ void ComponentPeer::handleFileDragDrop (const StringArray& files, const Point<in
     if (dragAndDropTargetComponent != 0)
     {
         FileDragAndDropTarget* const target
-            = const_cast<FileDragAndDropTarget*> (dynamic_cast<const FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent)));
+            = dynamic_cast<FileDragAndDropTarget*> (static_cast<Component*> (dragAndDropTargetComponent));
 
         dragAndDropTargetComponent = 0;
         lastDragAndDropCompUnderMouse = 0;

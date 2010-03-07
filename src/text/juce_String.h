@@ -750,7 +750,17 @@ public:
         @param numberOfTimesToRepeat  how many times to repeat it
     */
     static const String repeatedString (const tchar* const stringToRepeat,
-                                        int numberOfTimesToRepeat) throw();
+                                        int numberOfTimesToRepeat);
+
+    /** Returns a copy of this string with the specified character repeatedly added to its
+        beginning until the total length is at least the minimum length specified.
+    */
+    const String paddedLeft (const juce_wchar padCharacter, int minimumLength) const;
+
+    /** Returns a copy of this string with the specified character repeatedly added to its
+        end until the total length is at least the minimum length specified.
+    */
+    const String paddedRight (const juce_wchar padCharacter, int minimumLength) const;
 
     /** Creates a string from data in an unknown format.
 

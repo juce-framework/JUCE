@@ -78,13 +78,13 @@ public:
 
         @see getBorderThickness
     */
-    void setBorderThickness (const BorderSize& newBorderSize) throw();
+    void setBorderThickness (const BorderSize& newBorderSize);
 
     /** Returns the number of pixels wide that the draggable edges of this component are.
 
         @see setBorderThickness
     */
-    const BorderSize getBorderThickness() const throw();
+    const BorderSize getBorderThickness() const;
 
 
     //==============================================================================
@@ -107,13 +107,13 @@ protected:
     bool hitTest (int x, int y);
 
 private:
-    Component* const component;
+    Component::SafePointer<Component> component;
     ComponentBoundsConstrainer* constrainer;
     BorderSize borderSize;
-    int originalX, originalY, originalW, originalH;
+    Rectangle<int> originalBounds;
     int mouseZone;
 
-    void updateMouseZone (const MouseEvent& e) throw();
+    void updateMouseZone (const MouseEvent& e);
 
     ResizableBorderComponent (const ResizableBorderComponent&);
     ResizableBorderComponent& operator= (const ResizableBorderComponent&);

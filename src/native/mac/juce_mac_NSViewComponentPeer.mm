@@ -1456,10 +1456,7 @@ BOOL NSViewComponentPeer::sendDragCallback (int type, id <NSDraggingInfo> sender
 
 bool NSViewComponentPeer::isOpaque()
 {
-    if (! getComponent()->isValidComponent())
-        return true;
-
-    return getComponent()->isOpaque();
+    return component == 0 || component->isOpaque();
 }
 
 void NSViewComponentPeer::drawRect (NSRect r)

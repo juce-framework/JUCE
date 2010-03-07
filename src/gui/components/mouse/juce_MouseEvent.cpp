@@ -117,6 +117,11 @@ int MouseEvent::getDistanceFromDragStart() const throw()
     return mouseDownPos.getDistanceFrom (getPosition());
 }
 
+const Point<int> MouseEvent::getOffsetFromDragStart() const throw()
+{
+    return getPosition() - mouseDownPos;
+}
+
 int MouseEvent::getLengthOfMousePress() const throw()
 {
     if (mouseDownTime.toMilliseconds() > 0)

@@ -242,7 +242,7 @@ public:
     bool useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 
 private:
-    Component* contentComp;
+    Component::SafePointer<Component> contentComp;
     int lastVX, lastVY, lastVW, lastVH;
     int scrollBarThickness;
     int singleStepX, singleStepY;

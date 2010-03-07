@@ -78,11 +78,9 @@ void Viewport::setViewedComponent (Component* const newViewedComponent)
 {
     if (contentComp != newViewedComponent)
     {
-        if (contentComp->isValidComponent())
         {
-            Component* const oldComp = contentComp;
+            ScopedPointer<Component> oldCompDeleter (contentComp);
             contentComp = 0;
-            delete oldComp;
         }
 
         contentComp = newViewedComponent;

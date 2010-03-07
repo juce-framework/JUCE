@@ -310,20 +310,15 @@ const String Time::toString (const bool includeDate,
 
     if (includeTime)
     {
+        const int mins = getMinutes();
+
+        result << (use24HourClock ? getHours() : getHoursInAmPmFormat())
+               << (mins < 10 ? ":0" : ":") << mins;
+
         if (includeSeconds)
         {
-            result += String::formatted (T("%d:%02d:%02d "),
-                                         (use24HourClock) ? getHours()
-                                                          : getHoursInAmPmFormat(),
-                                         getMinutes(),
-                                         getSeconds());
-        }
-        else
-        {
-            result += String::formatted (T("%d.%02d"),
-                                         (use24HourClock) ? getHours()
-                                                          : getHoursInAmPmFormat(),
-                                         getMinutes());
+            const int secs = getSeconds();
+            result << (secs < 10 ? ":0" : ":") << secs;
         }
 
         if (! use24HourClock)

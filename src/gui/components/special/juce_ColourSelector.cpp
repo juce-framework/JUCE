@@ -36,6 +36,11 @@ BEGIN_JUCE_NAMESPACE
 static const int swatchesPerRow = 8;
 static const int swatchHeight = 22;
 
+static const String colourComponentToHexString (int value)
+{
+    return String::toHexString (value).toUpperCase().paddedLeft ('0', 2);
+}
+
 //==============================================================================
 class ColourComponentSlider  : public Slider
 {
@@ -52,7 +57,7 @@ public:
 
     const String getTextFromValue (double value)
     {
-        return String::formatted (T("%02X"), (int) value);
+        return colourComponentToHexString ((int) value);
     }
 
     double getValueFromText (const String& text)
@@ -496,15 +501,13 @@ void ColourSelector::paint (Graphics& g)
         g.setColour (Colours::white.overlaidWith (colour).contrasting());
         g.setFont (14.0f, true);
         g.drawText (((flags & showAlphaChannel) != 0)
-                       ? String::formatted (T("#%02X%02X%02X%02X"),
-                                            (int) colour.getAlpha(),
-                                            (int) colour.getRed(),
-                                            (int) colour.getGreen(),
-                                            (int) colour.getBlue())
-                       : String::formatted (T("#%02X%02X%02X"),
-                                            (int) colour.getRed(),
-                                            (int) colour.getGreen(),
-                                            (int) colour.getBlue()),
+                       ? colourComponentToHexString ((int) colour.getAlpha())
+                          + colourComponentToHexString ((int) colour.getRed())
+                          + colourComponentToHexString ((int) colour.getGreen())
+                          + colourComponentToHexString ((int) colour.getBlue())
+                       : colourComponentToHexString ((int) colour.getRed())
+                          + colourComponentToHexString ((int) colour.getGreen())
+                          + colourComponentToHexString ((int) colour.getBlue()),
                     0, edgeGap, getWidth(), topSpace - edgeGap * 2,
                     Justification::centred, false);
     }

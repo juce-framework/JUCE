@@ -85,9 +85,9 @@ protected:
 
 private:
     //==============================================================================
-    Component* const component;
+    Component::SafePointer<Component> component;
     ComponentBoundsConstrainer* constrainer;
-    int originalX, originalY, originalW, originalH;
+    Rectangle<int> originalBounds;
 
     ResizableCornerComponent (const ResizableCornerComponent&);
     ResizableCornerComponent& operator= (const ResizableCornerComponent&);

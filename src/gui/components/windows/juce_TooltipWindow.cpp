@@ -113,7 +113,7 @@ void TooltipWindow::showFor (const String& tip)
 
 const String TooltipWindow::getTipFor (Component* const c)
 {
-    if (c->isValidComponent()
+    if (c != 0
          && Process::isForegroundProcess()
          && ! Component::isMouseButtonDownAnywhere())
     {

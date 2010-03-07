@@ -378,7 +378,7 @@ END_JUCE_NAMESPACE
         NSEvent* e = [NSApp currentEvent];
         if ([e type] == NSKeyDown || [e type] == NSKeyUp)
         {
-            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->isValidComponent())
+            if (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent() != 0)
             {
                 JUCE_NAMESPACE::NSViewComponentPeer* peer = dynamic_cast <JUCE_NAMESPACE::NSViewComponentPeer*> (JUCE_NAMESPACE::Component::getCurrentlyFocusedComponent()->getPeer());
 

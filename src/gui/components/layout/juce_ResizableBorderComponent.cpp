@@ -33,10 +33,13 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/geometry/juce_Line.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 
-const int zoneL = 1;
-const int zoneR = 2;
-const int zoneT = 4;
-const int zoneB = 8;
+enum ResizableBorderComponentZones
+{
+    zoneL = 1,
+    zoneR = 2,
+    zoneT = 4,
+    zoneB = 8
+};
 
 //==============================================================================
 ResizableBorderComponent::ResizableBorderComponent (Component* const componentToResize,
@@ -70,67 +73,50 @@ void ResizableBorderComponent::mouseMove (const MouseEvent& e)
 
 void ResizableBorderComponent::mouseDown (const MouseEvent& e)
 {
-    if (component->isValidComponent())
+    if (component == 0)
     {
-        updateMouseZone (e);
-
-        originalX = component->getX();
-        originalY = component->getY();
-        originalW = component->getWidth();
-        originalH = component->getHeight();
-
-        if (constrainer != 0)
-            constrainer->resizeStart();
+        jassertfalse // You've deleted the component that this resizer was supposed to be using!
+        return;
     }
-    else
-    {
-        jassertfalse
-    }
+
+    updateMouseZone (e);
+
+    originalBounds = component->getBounds();
+
+    if (constrainer != 0)
+        constrainer->resizeStart();
 }
 
 void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
 {
-    if (! component->isValidComponent())
+    if (component == 0)
     {
-        jassertfalse
+        jassertfalse // You've deleted the component that this resizer was supposed to be using!
         return;
     }
 
-    int x = originalX;
-    int y = originalY;
-    int w = originalW;
-    int h = originalH;
-
-    const int dx = e.getDistanceFromDragStartX();
-    const int dy = e.getDistanceFromDragStartY();
+    Rectangle<int> bounds (originalBounds);
 
     if ((mouseZone & zoneL) != 0)
-    {
-        x += dx;
-        w -= dx;
-    }
+        bounds.setLeft (bounds.getX() + e.getDistanceFromDragStartX());
 
     if ((mouseZone & zoneT) != 0)
-    {
-        y += dy;
-        h -= dy;
-    }
+        bounds.setTop (bounds.getY() + e.getDistanceFromDragStartY());
 
     if ((mouseZone & zoneR) != 0)
-        w += dx;
+        bounds.setWidth (bounds.getWidth() + e.getDistanceFromDragStartX());
 
     if ((mouseZone & zoneB) != 0)
-        h += dy;
+        bounds.setHeight (bounds.getHeight() + e.getDistanceFromDragStartY());
 
     if (constrainer != 0)
-        constrainer->setBoundsForComponent (component,
-                                            Rectangle<int> (x, y, w, h),
+        constrainer->setBoundsForComponent (component, bounds,
                                             (mouseZone & zoneT) != 0,
                                             (mouseZone & zoneL) != 0,
                                             (mouseZone & zoneB) != 0,
                                             (mouseZone & zoneR) != 0);
     else
-        component->setBounds (x, y, w, h);
+        component->setBounds (bounds);
 }
 
 void ResizableBorderComponent::mouseUp (const MouseEvent&)
@@ -147,7 +133,7 @@ bool ResizableBorderComponent::hitTest (int x, int y)
             || y >= getHeight() - borderSize.getBottom();
 }
 
-void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSize) throw()
+void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSize)
 {
     if (borderSize != newBorderSize)
     {
@@ -156,12 +142,12 @@ void ResizableBorderComponent::setBorderThickness (const BorderSize& newBorderSi
     }
 }
 
-const BorderSize ResizableBorderComponent::getBorderThickness() const throw()
+const BorderSize ResizableBorderComponent::getBorderThickness() const
 {
     return borderSize;
 }
 
-void ResizableBorderComponent::updateMouseZone (const MouseEvent& e) throw()
+void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
 {
     int newZone = 0;
 
@@ -194,40 +180,15 @@ void ResizableBorderComponent::updateMouseZone (const MouseEvent& e) throw()
 
         switch (newZone)
         {
-        case (zoneL | zoneT):
-            mc = MouseCursor::TopLeftCornerResizeCursor;
-            break;
-
-        case zoneT:
-            mc = MouseCursor::TopEdgeResizeCursor;
-            break;
-
-        case (zoneR | zoneT):
-            mc = MouseCursor::TopRightCornerResizeCursor;
-            break;
-
-        case zoneL:
-            mc = MouseCursor::LeftEdgeResizeCursor;
-            break;
-
-        case zoneR:
-            mc = MouseCursor::RightEdgeResizeCursor;
-            break;
-
-        case (zoneL | zoneB):
-            mc = MouseCursor::BottomLeftCornerResizeCursor;
-            break;
-
-        case zoneB:
-            mc = MouseCursor::BottomEdgeResizeCursor;
-            break;
-
-        case (zoneR | zoneB):
-            mc = MouseCursor::BottomRightCornerResizeCursor;
-            break;
-
-        default:
-            break;
+            case (zoneL | zoneT):   mc = MouseCursor::TopLeftCornerResizeCursor; break;
+            case zoneT:             mc = MouseCursor::TopEdgeResizeCursor; break;
+            case (zoneR | zoneT):   mc = MouseCursor::TopRightCornerResizeCursor; break;
+            case zoneL:             mc = MouseCursor::LeftEdgeResizeCursor; break;
+            case zoneR:             mc = MouseCursor::RightEdgeResizeCursor; break;
+            case (zoneL | zoneB):   mc = MouseCursor::BottomLeftCornerResizeCursor; break;
+            case zoneB:             mc = MouseCursor::BottomEdgeResizeCursor; break;
+            case (zoneR | zoneB):   mc = MouseCursor::BottomRightCornerResizeCursor; break;
+            default:                break;
         }
 
         setMouseCursor (mc);
