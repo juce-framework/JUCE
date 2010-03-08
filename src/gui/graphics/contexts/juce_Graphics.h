@@ -665,8 +665,7 @@ public:
                            const AffineTransform& transform) throw();
 
     /** Excludes a rectangle to stop it being drawn into. */
-    void excludeClipRegion (const int x, const int y,
-                            const int width, const int height) throw();
+    void excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw();
 
     /** Returns true if no drawing can be done because the clip region is zero. */
     bool isClipEmpty() const throw();

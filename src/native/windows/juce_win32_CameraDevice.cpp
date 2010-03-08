@@ -244,7 +244,7 @@ public:
         const int rw = roundToInt (dw), rh = roundToInt (dh);
 
         g.saveState();
-        g.excludeClipRegion (rx, ry, rw, rh);
+        g.excludeClipRegion (Rectangle<int> (rx, ry, rw, rh));
         g.fillAll (Colours::black);
         g.restoreState();
 

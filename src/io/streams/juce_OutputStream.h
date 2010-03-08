@@ -207,16 +207,16 @@ public:
 
 //==============================================================================
 /** Writes a number to a stream as 8-bit characters in the default system encoding. */
-OutputStream& operator<< (OutputStream& stream, const int number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number);
 
 /** Writes a number to a stream as 8-bit characters in the default system encoding. */
-OutputStream& operator<< (OutputStream& stream, const double number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number);
 
 /** Writes a character to a stream. */
-OutputStream& operator<< (OutputStream& stream, const char character);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character);
 
 /** Writes a null-terminated text string to a stream. */
-OutputStream& operator<< (OutputStream& stream, const char* const text);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text);
 
 
 

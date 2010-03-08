@@ -1397,49 +1397,49 @@ private:
 	void dupeInternalIfMultiplyReferenced() throw();
 };
 
-const String operator+  (const char* string1,	   const String& string2);
-const String operator+  (const juce_wchar* string1, const String& string2);
-const String operator+  (char string1,		  const String& string2);
-const String operator+  (juce_wchar string1,	const String& string2);
+const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
+const String JUCE_CALLTYPE operator+  (const juce_wchar* string1, const String& string2);
+const String JUCE_CALLTYPE operator+  (char string1,		  const String& string2);
+const String JUCE_CALLTYPE operator+  (juce_wchar string1,	const String& string2);
 
-const String operator+  (String string1, const String& string2);
-const String operator+  (String string1, const char* string2);
-const String operator+  (String string1, const juce_wchar* string2);
-const String operator+  (String string1, char characterToAppend);
-const String operator+  (String string1, juce_wchar characterToAppend);
+const String JUCE_CALLTYPE operator+  (String string1, const String& string2);
+const String JUCE_CALLTYPE operator+  (String string1, const char* string2);
+const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2);
+const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
+const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
 
-String& operator<< (String& string1, const char characterToAppend);
-String& operator<< (String& string1, const juce_wchar characterToAppend);
-String& operator<< (String& string1, const char* const string2);
-String& operator<< (String& string1, const juce_wchar* const string2);
-String& operator<< (String& string1, const String& string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const char characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, const char* const string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* const string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
-String& operator<< (String& string1, const short number);
-String& operator<< (String& string1, const int number);
-String& operator<< (String& string1, const unsigned int number);
-String& operator<< (String& string1, const long number);
-String& operator<< (String& string1, const unsigned long number);
-String& operator<< (String& string1, const float number);
-String& operator<< (String& string1, const double number);
+String& JUCE_CALLTYPE operator<< (String& string1, const short number);
+String& JUCE_CALLTYPE operator<< (String& string1, const int number);
+String& JUCE_CALLTYPE operator<< (String& string1, const unsigned int number);
+String& JUCE_CALLTYPE operator<< (String& string1, const long number);
+String& JUCE_CALLTYPE operator<< (String& string1, const unsigned long number);
+String& JUCE_CALLTYPE operator<< (String& string1, const float number);
+String& JUCE_CALLTYPE operator<< (String& string1, const double number);
 
-bool operator== (const String& string1, const String& string2) throw();
-bool operator== (const String& string1, const char* string2) throw();
-bool operator== (const String& string1, const juce_wchar* string2) throw();
-bool operator!= (const String& string1, const String& string2) throw();
-bool operator!= (const String& string1, const char* string2) throw();
-bool operator!= (const String& string1, const juce_wchar* string2) throw();
-bool operator>  (const String& string1, const String& string2) throw();
-bool operator<  (const String& string1, const String& string2) throw();
-bool operator>= (const String& string1, const String& string2) throw();
-bool operator<= (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
+bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
+bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw();
+bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
 
 template <class charT, class traits>
-std::basic_ostream <charT, traits>& operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
 	return stream << stringToWrite.toUTF8();
 }
 
-OutputStream& operator<< (OutputStream& stream, const String& text);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -2860,13 +2860,13 @@ public:
 	juce_UseDebuggingNewOperator
 };
 
-OutputStream& operator<< (OutputStream& stream, const int number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number);
 
-OutputStream& operator<< (OutputStream& stream, const double number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number);
 
-OutputStream& operator<< (OutputStream& stream, const char character);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character);
 
-OutputStream& operator<< (OutputStream& stream, const char* const text);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text);
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/
@@ -11976,8 +11976,7 @@ public:
 	bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
 						   const AffineTransform& transform) throw();
 
-	void excludeClipRegion (const int x, const int y,
-							const int width, const int height) throw();
+	void excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw();
 
 	bool isClipEmpty() const throw();
 
@@ -12696,6 +12695,7 @@ private:
 	void internalModifierKeysChanged();
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
+	void renderComponent (Graphics& context);
 	void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
 	void repaintParent() throw();
 	void sendFakeMouseMove() const;
@@ -27214,8 +27214,7 @@ protected:
 
 private:
 
-	Component* lastFocusedComponent;
-	Component::SafePointer<Component> dragAndDropTargetComponent;
+	Component::SafePointer<Component> lastFocusedComponent, dragAndDropTargetComponent;
 	Component* lastDragAndDropCompUnderMouse;
 	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 

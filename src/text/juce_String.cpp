@@ -507,52 +507,52 @@ String& String::operator= (const String& other) throw()
 }
 
 //==============================================================================
-bool operator== (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) == 0;
 }
 
-bool operator== (const String& string1, const char* string2) throw()
+bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw()
 {
     return string1.compare (string2) == 0;
 }
 
-bool operator== (const String& string1, const juce_wchar* string2) throw()
+bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw()
 {
     return string1.compare (string2) == 0;
 }
 
-bool operator!= (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) != 0;
 }
 
-bool operator!= (const String& string1, const char* string2) throw()
+bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw()
 {
     return string1.compare (string2) != 0;
 }
 
-bool operator!= (const String& string1, const juce_wchar* string2) throw()
+bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw()
 {
     return string1.compare (string2) != 0;
 }
 
-bool operator>  (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) > 0;
 }
 
-bool operator<  (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) < 0;
 }
 
-bool operator>= (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) >= 0;
 }
 
-bool operator<= (const String& string1, const String& string2) throw()
+bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw()
 {
     return string1.compare (string2) <= 0;
 }
@@ -665,114 +665,114 @@ void String::append (const tchar* const other, const int howMany)
 }
 
 //==============================================================================
-const String operator+ (const char* const string1, const String& string2)
+const String JUCE_CALLTYPE operator+ (const char* const string1, const String& string2)
 {
     String s (string1);
     return s += string2;
 }
 
-const String operator+ (const juce_wchar* const string1, const String& string2)
+const String JUCE_CALLTYPE operator+ (const juce_wchar* const string1, const String& string2)
 {
     String s (string1);
     return s += string2;
 }
 
-const String operator+ (const char string1, const String& string2)
+const String JUCE_CALLTYPE operator+ (const char string1, const String& string2)
 {
     return String::charToString (string1) + string2;
 }
 
-const String operator+ (const juce_wchar string1, const String& string2)
+const String JUCE_CALLTYPE operator+ (const juce_wchar string1, const String& string2)
 {
     return String::charToString (string1) + string2;
 }
 
-const String operator+ (String string1, const String& string2)
+const String JUCE_CALLTYPE operator+ (String string1, const String& string2)
 {
     return string1 += string2;
 }
 
-const String operator+ (String string1, const char* const string2)
+const String JUCE_CALLTYPE operator+ (String string1, const char* const string2)
 {
     return string1 += string2;
 }
 
-const String operator+ (String string1, const juce_wchar* const string2)
+const String JUCE_CALLTYPE operator+ (String string1, const juce_wchar* const string2)
 {
     return string1 += string2;
 }
 
-const String operator+ (String string1, const char string2)
+const String JUCE_CALLTYPE operator+ (String string1, const char string2)
 {
     return string1 += string2;
 }
 
-const String operator+ (String string1, const juce_wchar string2)
+const String JUCE_CALLTYPE operator+ (String string1, const juce_wchar string2)
 {
     return string1 += string2;
 }
 
-String& operator<< (String& string1, const char characterToAppend)
+String& JUCE_CALLTYPE operator<< (String& string1, const char characterToAppend)
 {
     return string1 += characterToAppend;
 }
 
-String& operator<< (String& string1, const juce_wchar characterToAppend)
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar characterToAppend)
 {
     return string1 += characterToAppend;
 }
 
-String& operator<< (String& string1, const char* const string2)
+String& JUCE_CALLTYPE operator<< (String& string1, const char* const string2)
 {
     return string1 += string2;
 }
 
-String& operator<< (String& string1, const juce_wchar* const string2)
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* const string2)
 {
     return string1 += string2;
 }
 
-String& operator<< (String& string1, const String& string2)
+String& JUCE_CALLTYPE operator<< (String& string1, const String& string2)
 {
     return string1 += string2;
 }
 
-String& operator<< (String& string1, const short number)
+String& JUCE_CALLTYPE operator<< (String& string1, const short number)
 {
     return string1 += (int) number;
 }
 
-String& operator<< (String& string1, const int number)
+String& JUCE_CALLTYPE operator<< (String& string1, const int number)
 {
     return string1 += number;
 }
 
-String& operator<< (String& string1, const unsigned int number)
+String& JUCE_CALLTYPE operator<< (String& string1, const unsigned int number)
 {
     return string1 += number;
 }
 
-String& operator<< (String& string1, const long number)
+String& JUCE_CALLTYPE operator<< (String& string1, const long number)
 {
     return string1 += (int) number;
 }
 
-String& operator<< (String& string1, const unsigned long number)
+String& JUCE_CALLTYPE operator<< (String& string1, const unsigned long number)
 {
     return string1 += (unsigned int) number;
 }
 
-String& operator<< (String& string1, const float number)
+String& JUCE_CALLTYPE operator<< (String& string1, const float number)
 {
     return string1 += String (number);
 }
 
-String& operator<< (String& string1, const double number)
+String& JUCE_CALLTYPE operator<< (String& string1, const double number)
 {
     return string1 += String (number);
 }
 
-OutputStream& operator<< (OutputStream& stream, const String& text)
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text)
 {
     // (This avoids using toUTF8() to prevent the memory bloat that it would leave behind
     // if lots of large, persistent strings were to be written to streams).

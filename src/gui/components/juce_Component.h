@@ -2055,6 +2055,7 @@ private:
     void internalModifierKeysChanged();
     void internalChildrenChanged();
     void internalHierarchyChanged();
+    void renderComponent (Graphics& context);
     void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
     void repaintParent() throw();
     void sendFakeMouseMove() const;

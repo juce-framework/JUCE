@@ -61,14 +61,12 @@ Graphics::Graphics (Image& imageToDrawOnto) throw()
       contextToDelete (context),
       saveStatePending (false)
 {
-    resetToDefaultState();
 }
 
 Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
     : context (internalContext),
       saveStatePending (false)
 {
-    resetToDefaultState();
 }
 
 Graphics::~Graphics() throw()
@@ -116,11 +114,10 @@ bool Graphics::reduceClipRegion (const Image& image, const Rectangle<int>& sourc
     return ! context->isClipEmpty();
 }
 
-void Graphics::excludeClipRegion (const int x, const int y,
-                                  const int w, const int h) throw()
+void Graphics::excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw()
 {
     saveStateIfPending();
-    context->excludeClipRectangle (Rectangle<int> (x, y, w, h));
+    context->excludeClipRectangle (rectangleToExclude);
 }
 
 bool Graphics::isClipEmpty() const throw()

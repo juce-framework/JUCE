@@ -365,8 +365,7 @@ protected:
 
 private:
     //==============================================================================
-    Component* lastFocusedComponent;
-    Component::SafePointer<Component> dragAndDropTargetComponent;
+    Component::SafePointer<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse;
     bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 

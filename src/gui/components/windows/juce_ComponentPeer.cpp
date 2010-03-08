@@ -51,7 +51,6 @@ ComponentPeer::ComponentPeer (Component* const component_,
       styleFlags (styleFlags_),
       lastPaintTime (0),
       constrainer (0),
-      lastFocusedComponent (0),
       lastDragAndDropCompUnderMouse (0),
       fakeMouseMessageSent (false),
       isWindowMinimised (false)
@@ -370,7 +369,7 @@ void ComponentPeer::handleFocusLoss()
 Component* ComponentPeer::getLastFocusedSubcomponent() const throw()
 {
     return (component->isParentOf (lastFocusedComponent) && lastFocusedComponent->isShowing())
-                ? lastFocusedComponent
+                ? static_cast <Component*> (lastFocusedComponent)
                 : component;
 }
 

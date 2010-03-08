@@ -1595,108 +1595,95 @@ void Component::internalRepaint (int x, int y, int w, int h)
 }
 
 //==============================================================================
-void Component::paintEntireComponent (Graphics& originalContext)
+void Component::renderComponent (Graphics& g)
 {
-    jassert (! originalContext.isClipEmpty());
+    const Rectangle<int> clipBounds (g.getClipBounds());
 
-#ifdef JUCE_DEBUG
-    flags.isInsidePaintCall = true;
-#endif
+    g.saveState();
+    clipObscuredRegions (g, clipBounds, 0, 0);
 
-    Graphics* g = &originalContext;
-    Image* effectImage = 0;
-
-    if (effect_ != 0)
+    if (! g.isClipEmpty())
     {
-        effectImage = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                getWidth(), getHeight(),
-                                                ! flags.opaqueFlag);
-
-        g = new Graphics (*effectImage);
-    }
-
-    g->saveState();
-    clipObscuredRegions (*g, g->getClipBounds(), 0, 0);
-
-    if (! g->isClipEmpty())
-    {
-        if (bufferedImage_ != 0)
+        if (flags.bufferToImageFlag)
         {
-            g->setColour (Colours::black);
-            g->drawImageAt (bufferedImage_, 0, 0);
+            if (bufferedImage_ == 0)
+            {
+                bufferedImage_ = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                           getWidth(), getHeight(), ! flags.opaqueFlag);
+
+                Graphics imG (*bufferedImage_);
+                paint (imG);
+            }
+
+            g.setColour (Colours::black);
+            g.drawImageAt (bufferedImage_, 0, 0);
         }
         else
         {
-            if (flags.bufferToImageFlag)
-            {
-                if (bufferedImage_ == 0)
-                {
-                    bufferedImage_ = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                               getWidth(), getHeight(), ! flags.opaqueFlag);
-
-                    Graphics imG (*bufferedImage_);
-                    paint (imG);
-                }
-
-                g->setColour (Colours::black);
-                g->drawImageAt (bufferedImage_, 0, 0);
-            }
-            else
-            {
-                paint (*g);
-                g->resetToDefaultState();
-            }
+            paint (g);
         }
     }
 
-    g->restoreState();
+    g.restoreState();
 
     for (int i = 0; i < childComponentList_.size(); ++i)
     {
         Component* const child = childComponentList_.getUnchecked (i);
 
-        if (child->isVisible())
+        if (child->isVisible() && clipBounds.intersects (child->getBounds()))
         {
-            g->saveState();
+            g.saveState();
 
-            if (g->reduceClipRegion (child->getX(), child->getY(),
-                                     child->getWidth(), child->getHeight()))
+            if (g.reduceClipRegion (child->getX(), child->getY(),
+                                    child->getWidth(), child->getHeight()))
             {
                 for (int j = i + 1; j < childComponentList_.size(); ++j)
                 {
                     const Component* const sibling = childComponentList_.getUnchecked (j);
 
                     if (sibling->flags.opaqueFlag && sibling->isVisible())
-                        g->excludeClipRegion (sibling->getX(), sibling->getY(),
-                                              sibling->getWidth(), sibling->getHeight());
+                        g.excludeClipRegion (sibling->getBounds());
                 }
 
-                if (! g->isClipEmpty())
+                if (! g.isClipEmpty())
                 {
-                    g->setOrigin (child->getX(), child->getY());
-
-                    child->paintEntireComponent (*g);
+                    g.setOrigin (child->getX(), child->getY());
+                    child->paintEntireComponent (g);
                 }
             }
 
-            g->restoreState();
+            g.restoreState();
         }
     }
 
-    JUCE_TRY
-    {
-        g->saveState();
-        paintOverChildren (*g);
-        g->restoreState();
-    }
-    JUCE_CATCH_EXCEPTION
+    g.saveState();
+    paintOverChildren (g);
+    g.restoreState();
+}
+
+void Component::paintEntireComponent (Graphics& g)
+{
+    jassert (! g.isClipEmpty());
+
+#ifdef JUCE_DEBUG
+    flags.isInsidePaintCall = true;
+#endif
 
     if (effect_ != 0)
     {
-        delete g;
+        ScopedPointer<Image> effectImage (Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                                    getWidth(), getHeight(),
+                                                                    ! flags.opaqueFlag));
+        {
+            Graphics g2 (*effectImage);
+            renderComponent (g2);
+        }
 
-        effect_->applyEffect (*effectImage, originalContext);
-        delete effectImage;
+        effect_->applyEffect (*effectImage, g);
+    }
+    else
+    {
+        renderComponent (g);
     }
 
 #ifdef JUCE_DEBUG
@@ -1713,18 +1700,16 @@ Image* Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
     if (clipImageToComponentBounds)
         r = r.getIntersection (Rectangle<int> (0, 0, getWidth(), getHeight()));
 
-    Image* const componentImage = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                            jmax (1, r.getWidth()),
-                                                            jmax (1, r.getHeight()),
-                                                            true);
+    ScopedPointer<Image> componentImage (Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                                                   jmax (1, r.getWidth()),
+                                                                   jmax (1, r.getHeight()),
+                                                                   true));
 
     Graphics imageContext (*componentImage);
-    imageContext.setOrigin (-r.getX(),
-                            -r.getY());
-
+    imageContext.setOrigin (-r.getX(), -r.getY());
     paintEntireComponent (imageContext);
 
-    return componentImage;
+    return componentImage.release();
 }
 
 void Component::setComponentEffect (ImageEffectFilter* const effect)
@@ -1880,21 +1865,17 @@ void Component::clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect
 
         if (c->isVisible())
         {
-            Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
+            const Rectangle<int> newClip (clipRect.getIntersection (c->bounds_));
 
             if (! newClip.isEmpty())
             {
                 if (c->isOpaque())
                 {
-                    g.excludeClipRegion (deltaX + newClip.getX(),
-                                         deltaY + newClip.getY(),
-                                         newClip.getWidth(),
-                                         newClip.getHeight());
+                    g.excludeClipRegion (newClip.translated (deltaX, deltaY));
                 }
                 else
                 {
-                    newClip.translate (-c->getX(), -c->getY());
-                    c->clipObscuredRegions (g, newClip,
+                    c->clipObscuredRegions (g, newClip.translated (-c->getX(), -c->getY()),
                                             c->getX() + deltaX,
                                             c->getY() + deltaY);
                 }
@@ -2526,6 +2507,9 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
 
             mouseDoubleClick (me);
 
+            if (checker.shouldBailOut())
+                return;
+
             desktop.mouseListeners.callChecked (checker, &MouseListener::mouseDoubleClick, me);
 
             if (checker.shouldBailOut())
@@ -2534,9 +2518,6 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
             for (int i = numListeners; --i >= 0;)
             {
                 if (checker.shouldBailOut())
-                    return;
-
-                if (mouseListeners_ == 0)
                     return;
 
                 MouseListener* const ml = (MouseListener*)((*mouseListeners_)[i]);
