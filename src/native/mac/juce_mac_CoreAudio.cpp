@@ -628,7 +628,7 @@ public:
             {
                 if (inputDevice == 0)
                 {
-                    callback->audioDeviceIOCallback (const_cast<const float**> (inputDevice->tempInputBuffers.getData()),
+                    callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.getData()),
                                                      numInputChans,
                                                      tempOutputBuffers,
                                                      numOutputChans,

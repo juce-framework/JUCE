@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	7
+#define JUCE_BUILDNUMBER	8
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -10185,20 +10185,20 @@ public:
 
 	EdgeTable (const Rectangle<int>& clipLimits,
 			   const Path& pathToAdd,
-			   const AffineTransform& transform) throw();
+			   const AffineTransform& transform);
 
-	EdgeTable (const Rectangle<int>& rectangleToAdd) throw();
+	EdgeTable (const Rectangle<int>& rectangleToAdd);
 
-	EdgeTable (const RectangleList& rectanglesToAdd) throw();
+	EdgeTable (const RectangleList& rectanglesToAdd);
 
 	EdgeTable (const float x, const float y,
-			   const float w, const float h) throw();
+			   const float w, const float h);
 
-	EdgeTable (const EdgeTable& other) throw();
+	EdgeTable (const EdgeTable& other);
 
-	EdgeTable& operator= (const EdgeTable& other) throw();
+	EdgeTable& operator= (const EdgeTable& other);
 
-	~EdgeTable() throw();
+	~EdgeTable();
 
 	void clipToRectangle (const Rectangle<int>& r) throw();
 	void excludeRectangle (const Rectangle<int>& r) throw();

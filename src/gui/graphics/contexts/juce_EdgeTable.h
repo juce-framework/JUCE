@@ -55,29 +55,29 @@ public:
     */
     EdgeTable (const Rectangle<int>& clipLimits,
                const Path& pathToAdd,
-               const AffineTransform& transform) throw();
+               const AffineTransform& transform);
 
     /** Creates an edge table containing a rectangle.
     */
-    EdgeTable (const Rectangle<int>& rectangleToAdd) throw();
+    EdgeTable (const Rectangle<int>& rectangleToAdd);
 
     /** Creates an edge table containing a rectangle list.
     */
-    EdgeTable (const RectangleList& rectanglesToAdd) throw();
+    EdgeTable (const RectangleList& rectanglesToAdd);
 
     /** Creates an edge table containing a rectangle.
     */
     EdgeTable (const float x, const float y,
-               const float w, const float h) throw();
+               const float w, const float h);
 
     /** Creates a copy of another edge table. */
-    EdgeTable (const EdgeTable& other) throw();
+    EdgeTable (const EdgeTable& other);
 
     /** Copies from another edge table. */
-    EdgeTable& operator= (const EdgeTable& other) throw();
+    EdgeTable& operator= (const EdgeTable& other);
 
     /** Destructor. */
-    ~EdgeTable() throw();
+    ~EdgeTable();
 
     //==============================================================================
     void clipToRectangle (const Rectangle<int>& r) throw();

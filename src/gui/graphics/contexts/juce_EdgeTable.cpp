@@ -36,7 +36,7 @@ const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
 EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
-                      const Path& path, const AffineTransform& transform) throw()
+                      const Path& path, const AffineTransform& transform)
    : bounds (bounds_),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
@@ -110,7 +110,7 @@ EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
     sanitiseLevels (path.isUsingNonZeroWinding());
 }
 
-EdgeTable::EdgeTable (const Rectangle<int>& rectangleToAdd) throw()
+EdgeTable::EdgeTable (const Rectangle<int>& rectangleToAdd)
    : bounds (rectangleToAdd),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
@@ -134,7 +134,7 @@ EdgeTable::EdgeTable (const Rectangle<int>& rectangleToAdd) throw()
     }
 }
 
-EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
+EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd)
    : bounds (rectanglesToAdd.getBounds()),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
@@ -168,7 +168,7 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd) throw()
     sanitiseLevels (true);
 }
 
-EdgeTable::EdgeTable (const float x, const float y, const float w, const float h) throw()
+EdgeTable::EdgeTable (const float x, const float y, const float w, const float h)
    : bounds (Rectangle<int> ((int) floorf (x), roundToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
@@ -243,13 +243,13 @@ EdgeTable::EdgeTable (const float x, const float y, const float w, const float h
     }
 }
 
-EdgeTable::EdgeTable (const EdgeTable& other) throw()
+EdgeTable::EdgeTable (const EdgeTable& other)
    : table (0)
 {
     operator= (other);
 }
 
-EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
+EdgeTable& EdgeTable::operator= (const EdgeTable& other)
 {
     bounds = other.bounds;
     maxEdgesPerLine = other.maxEdgesPerLine;
@@ -261,7 +261,7 @@ EdgeTable& EdgeTable::operator= (const EdgeTable& other) throw()
     return *this;
 }
 
-EdgeTable::~EdgeTable() throw()
+EdgeTable::~EdgeTable()
 {
 }
 
