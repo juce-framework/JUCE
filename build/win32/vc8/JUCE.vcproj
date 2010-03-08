@@ -1345,10 +1345,6 @@
 						>
 					</File>
 					<File
-						RelativePath="..\..\..\src\gui\components\juce_ComponentDeletionWatcher.h"
-						>
-					</File>
-					<File
 						RelativePath="..\..\..\src\gui\components\juce_ComponentListener.cpp"
 						>
 					</File>

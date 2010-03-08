@@ -1904,7 +1904,7 @@ public:
         it is running on the message thread.
     */
     template <class ComponentType>
-    class JUCE_API  SafePointer   : private ComponentListener
+    class SafePointer   : private ComponentListener
     {
     public:
         /** Creates a null SafePointer. */

@@ -114,7 +114,6 @@
 		84816EA410809DCB008FEC33 /* juce_Component.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4710403708006A1807 /* juce_Component.h */; };
 		84816EA510809DCB008FEC33 /* juce_ComponentAnimator.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAA510403709006A1807 /* juce_ComponentAnimator.h */; };
 		84816EA610809DCB008FEC33 /* juce_ComponentBoundsConstrainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAA710403709006A1807 /* juce_ComponentBoundsConstrainer.h */; };
-		84816EA710809DCB008FEC33 /* juce_ComponentDeletionWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4810403708006A1807 /* juce_ComponentDeletionWatcher.h */; };
 		84816EA810809DCB008FEC33 /* juce_ComponentDragger.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EACF10403709006A1807 /* juce_ComponentDragger.h */; };
 		84816EA910809DCB008FEC33 /* juce_ComponentListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4A10403708006A1807 /* juce_ComponentListener.h */; };
 		84816EAA10809DCB008FEC33 /* juce_ComponentMovementWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EAA910403709006A1807 /* juce_ComponentMovementWatcher.h */; };
@@ -958,7 +957,6 @@
 		84F1EA43104036D6006A1807 /* juce_WaitableEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1E9E9104036D6006A1807 /* juce_WaitableEvent.h */; };
 		84F1EBCC1040370A006A1807 /* juce_Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EA4610403708006A1807 /* juce_Component.cpp */; };
 		84F1EBCD1040370A006A1807 /* juce_Component.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4710403708006A1807 /* juce_Component.h */; };
-		84F1EBCE1040370A006A1807 /* juce_ComponentDeletionWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4810403708006A1807 /* juce_ComponentDeletionWatcher.h */; };
 		84F1EBCF1040370A006A1807 /* juce_ComponentListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EA4910403708006A1807 /* juce_ComponentListener.cpp */; };
 		84F1EBD01040370A006A1807 /* juce_ComponentListener.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F1EA4A10403708006A1807 /* juce_ComponentListener.h */; };
 		84F1EBD11040370A006A1807 /* juce_Desktop.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F1EA4B10403708006A1807 /* juce_Desktop.cpp */; };
@@ -1578,7 +1576,6 @@
 		84F1E9E9104036D6006A1807 /* juce_WaitableEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_WaitableEvent.h; path = ../../src/threads/juce_WaitableEvent.h; sourceTree = SOURCE_ROOT; };
 		84F1EA4610403708006A1807 /* juce_Component.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Component.cpp; path = ../../src/gui/components/juce_Component.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EA4710403708006A1807 /* juce_Component.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_Component.h; path = ../../src/gui/components/juce_Component.h; sourceTree = SOURCE_ROOT; };
-		84F1EA4810403708006A1807 /* juce_ComponentDeletionWatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ComponentDeletionWatcher.h; path = ../../src/gui/components/juce_ComponentDeletionWatcher.h; sourceTree = SOURCE_ROOT; };
 		84F1EA4910403708006A1807 /* juce_ComponentListener.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComponentListener.cpp; path = ../../src/gui/components/juce_ComponentListener.cpp; sourceTree = SOURCE_ROOT; };
 		84F1EA4A10403708006A1807 /* juce_ComponentListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_ComponentListener.h; path = ../../src/gui/components/juce_ComponentListener.h; sourceTree = SOURCE_ROOT; };
 		84F1EA4B10403708006A1807 /* juce_Desktop.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = juce_Desktop.cpp; path = ../../src/gui/components/juce_Desktop.cpp; sourceTree = SOURCE_ROOT; };
@@ -2467,7 +2464,6 @@
 			children = (
 				84F1EA4610403708006A1807 /* juce_Component.cpp */,
 				84F1EA4710403708006A1807 /* juce_Component.h */,
-				84F1EA4810403708006A1807 /* juce_ComponentDeletionWatcher.h */,
 				84F1EA4910403708006A1807 /* juce_ComponentListener.cpp */,
 				84F1EA4A10403708006A1807 /* juce_ComponentListener.h */,
 				84F1EA4B10403708006A1807 /* juce_Desktop.cpp */,
@@ -3011,7 +3007,6 @@
 				84816EA410809DCB008FEC33 /* juce_Component.h in Headers */,
 				84816EA510809DCB008FEC33 /* juce_ComponentAnimator.h in Headers */,
 				84816EA610809DCB008FEC33 /* juce_ComponentBoundsConstrainer.h in Headers */,
-				84816EA710809DCB008FEC33 /* juce_ComponentDeletionWatcher.h in Headers */,
 				84816EA810809DCB008FEC33 /* juce_ComponentDragger.h in Headers */,
 				84816EA910809DCB008FEC33 /* juce_ComponentListener.h in Headers */,
 				84816EAA10809DCB008FEC33 /* juce_ComponentMovementWatcher.h in Headers */,
@@ -3434,7 +3429,6 @@
 				84F1EA42104036D6006A1807 /* juce_TimeSliceThread.h in Headers */,
 				84F1EA43104036D6006A1807 /* juce_WaitableEvent.h in Headers */,
 				84F1EBCD1040370A006A1807 /* juce_Component.h in Headers */,
-				84F1EBCE1040370A006A1807 /* juce_ComponentDeletionWatcher.h in Headers */,
 				84F1EBD01040370A006A1807 /* juce_ComponentListener.h in Headers */,
 				84F1EBD21040370A006A1807 /* juce_Desktop.h in Headers */,
 				84F1EBD41040370A006A1807 /* juce_ArrowButton.h in Headers */,

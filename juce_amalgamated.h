@@ -12568,7 +12568,7 @@ public:
 	uint32 getComponentUID() const throw()		{ return componentUID; }
 
 	template <class ComponentType>
-	class JUCE_API  SafePointer   : private ComponentListener
+	class SafePointer   : private ComponentListener
 	{
 	public:
 		SafePointer()					   : comp (0) {}
@@ -23465,39 +23465,6 @@ private:
 
 #endif
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-
-/*** Start of inlined file: juce_ComponentDeletionWatcher.h ***/
-#ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-#define __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-
-class JUCE_API  ComponentDeletionWatcher
-{
-public:
-
-	ComponentDeletionWatcher (const Component* const componentToWatch) throw();
-
-	~ComponentDeletionWatcher() throw();
-
-	bool hasBeenDeleted() const throw();
-
-	const Component* getComponent() const throw();
-
-	juce_UseDebuggingNewOperator
-
-private:
-	const Component* const componentToWatch;
-	const uint32 componentUID;
-
-	ComponentDeletionWatcher (const ComponentDeletionWatcher&);
-	ComponentDeletionWatcher& operator= (const ComponentDeletionWatcher&);
-};
-
-#endif   // __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
-/*** End of inlined file: juce_ComponentDeletionWatcher.h ***/
-
 
 #endif
 #ifndef __JUCE_COMPONENTLISTENER_JUCEHEADER__

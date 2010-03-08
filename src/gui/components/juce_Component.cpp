@@ -28,7 +28,6 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Component.h"
-#include "juce_ComponentDeletionWatcher.h"
 #include "juce_Desktop.h"
 #include "windows/juce_ComponentPeer.h"
 #include "keyboard/juce_KeyListener.h"
@@ -3195,28 +3194,6 @@ Component::BailOutChecker::BailOutChecker (Component* const component1, Componen
 bool Component::BailOutChecker::shouldBailOut() const throw()
 {
     return safePointer1 == 0 || safePointer2 != component2;
-}
-
-//==============================================================================
-ComponentDeletionWatcher::ComponentDeletionWatcher (const Component* const componentToWatch_) throw()
-    : componentToWatch (componentToWatch_),
-      componentUID (componentToWatch_->getComponentUID())
-{
-    // not possible to check on an already-deleted object..
-    jassert (componentToWatch_->isValidComponent());
-}
-
-ComponentDeletionWatcher::~ComponentDeletionWatcher() throw() {}
-
-bool ComponentDeletionWatcher::hasBeenDeleted() const throw()
-{
-    return ! (componentToWatch->isValidComponent()
-                && componentToWatch->getComponentUID() == componentUID);
-}
-
-const Component* ComponentDeletionWatcher::getComponent() const throw()
-{
-    return hasBeenDeleted() ? 0 : componentToWatch;
 }
 
 

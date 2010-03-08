@@ -398,9 +398,6 @@
 #ifndef __JUCE_COMPONENT_JUCEHEADER__
  #include "gui/components/juce_Component.h"
 #endif
-#ifndef __JUCE_COMPONENTDELETIONWATCHER_JUCEHEADER__
- #include "gui/components/juce_ComponentDeletionWatcher.h"
-#endif
 #ifndef __JUCE_COMPONENTLISTENER_JUCEHEADER__
  #include "gui/components/juce_ComponentListener.h"
 #endif
