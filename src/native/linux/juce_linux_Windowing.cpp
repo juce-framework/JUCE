@@ -2312,8 +2312,7 @@ private:
         XChangeProperty (display, wndH, XA_XdndAware, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) &dndVersion, 1);
 
-        if ((windowStyleFlags & windowHasDropShadow) != 0
-             && Desktop::canUseSemiTransparentWindows())
+        if ((styleFlags & windowHasDropShadow) != 0 && Desktop::canUseSemiTransparentWindows())
         {
         }
 
