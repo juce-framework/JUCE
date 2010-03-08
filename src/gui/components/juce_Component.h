@@ -67,7 +67,7 @@ public:
         subclass of Component or use one of the other types of component from
         the library.
     */
-    Component() throw();
+    Component();
 
     /** Destructor.
 
@@ -81,7 +81,7 @@ public:
 
         @see getName, setName
     */
-    Component (const String& componentName) throw();
+    Component (const String& componentName);
 
     /** Returns the name of this component.
 
@@ -109,7 +109,7 @@ public:
         same memory address which this one occupied, this methods can return a
         false positive.
     */
-    bool isValidComponent() const throw();
+    bool isValidComponent() const;
 
     //==============================================================================
     /** Makes the component visible or invisible.
@@ -148,7 +148,7 @@ public:
         @returns    true only if this component and all its parents are visible.
         @see isVisible
     */
-    bool isShowing() const throw();
+    bool isShowing() const;
 
     /** Makes a component invisible using a groovy fade-out and animated zoom effect.
 
@@ -227,7 +227,7 @@ public:
 
         @see addToDesktop, isOnDesktop
     */
-    ComponentPeer* getPeer() const throw();
+    ComponentPeer* getPeer() const;
 
     /** For components on the desktop, this is called if the system wants to close the window.
 
@@ -515,7 +515,7 @@ public:
         monitors, it will return the area of the monitor that contains the component's
         centre.
     */
-    const Rectangle<int> getParentMonitorArea() const throw();
+    const Rectangle<int> getParentMonitorArea() const;
 
     //==============================================================================
     /** Returns the number of child components that this component contains.
@@ -805,7 +805,7 @@ public:
 
         @see paint
     */
-    void repaint() throw();
+    void repaint();
 
     /** Marks a subsection of this component as needing to be redrawn.
 
@@ -821,7 +821,7 @@ public:
         @see repaint()
     */
     void repaint (const int x, const int y,
-                  const int width, const int height) throw();
+                  const int width, const int height);
 
     //==============================================================================
     /** Makes the component use an internal buffer to optimise its redrawing.
@@ -841,7 +841,7 @@ public:
 
         @see repaint, paint, createComponentSnapshot
     */
-    void setBufferedToImage (const bool shouldBeBuffered) throw();
+    void setBufferedToImage (const bool shouldBeBuffered);
 
     /** Generates a snapshot of part of this component.
 
@@ -963,7 +963,7 @@ public:
 
         @see isOpaque, getVisibleArea
     */
-    void setOpaque (const bool shouldBeOpaque) throw();
+    void setOpaque (const bool shouldBeOpaque);
 
     /** Returns true if no parts of this component are transparent.
 
@@ -1064,7 +1064,7 @@ public:
         @see grabKeyboardFocus, setWantsKeyboardFocus, getCurrentlyFocusedComponent,
              focusGained, focusLost
     */
-    bool hasKeyboardFocus (const bool trueIfChildIsFocused) const throw();
+    bool hasKeyboardFocus (const bool trueIfChildIsFocused) const;
 
     /** Returns the component that currently has the keyboard focus.
 
@@ -1117,7 +1117,7 @@ public:
 
         @see moveKeyboardFocusToSibling, createFocusTraverser, KeyboardFocusTraverser
     */
-    int getExplicitFocusOrder() const throw();
+    int getExplicitFocusOrder() const;
 
     /** Sets the index used in determining the order in which focusable components
         should be traversed.
@@ -1127,7 +1127,7 @@ public:
 
         @see getExplicitFocusOrder, moveKeyboardFocusToSibling
     */
-    void setExplicitFocusOrder (const int newFocusOrderIndex) throw();
+    void setExplicitFocusOrder (const int newFocusOrderIndex);
 
     /** Indicates whether this component is a parent for components that can have
         their focus traversed.
@@ -1197,7 +1197,7 @@ public:
 
         @see MouseCursor
     */
-    void setMouseCursor (const MouseCursor& cursorType) throw();
+    void setMouseCursor (const MouseCursor& cursorType);
 
     /** Returns the mouse cursor shape to use when the mouse is over this component.
 
@@ -1218,7 +1218,7 @@ public:
 
         This isn't needed if you're only using setMouseCursor().
     */
-    void updateMouseCursor() const throw();
+    void updateMouseCursor() const;
 
     //==============================================================================
     /** Components can override this method to draw their content.
@@ -1438,13 +1438,12 @@ public:
         @see MouseListener, removeMouseListener
     */
     void addMouseListener (MouseListener* const newListener,
-                           const bool wantsEventsForAllNestedChildComponents) throw();
+                           const bool wantsEventsForAllNestedChildComponents);
 
     /** Deregisters a mouse listener.
-
         @see addMouseListener, MouseListener
     */
-    void removeMouseListener (MouseListener* const listenerToRemove) throw();
+    void removeMouseListener (MouseListener* const listenerToRemove);
 
     //==============================================================================
     /** Adds a listener that wants to hear about keypresses that this component receives.
@@ -1457,13 +1456,13 @@ public:
 
         @see keyPressed, keyStateChanged, removeKeyListener
     */
-    void addKeyListener (KeyListener* const newListener) throw();
+    void addKeyListener (KeyListener* const newListener);
 
     /** Removes a previously-registered key listener.
 
         @see addKeyListener
     */
-    void removeKeyListener (KeyListener* const listenerToRemove) throw();
+    void removeKeyListener (KeyListener* const listenerToRemove);
 
     /** Called when a key is pressed.
 
@@ -1673,13 +1672,13 @@ public:
                             will be ignored.
         @see ComponentListener, removeComponentListener
     */
-    void addComponentListener (ComponentListener* const newListener) throw();
+    void addComponentListener (ComponentListener* const newListener);
 
     /** Removes a component listener.
 
         @see addComponentListener
     */
-    void removeComponentListener (ComponentListener* const listenerToRemove) throw();
+    void removeComponentListener (ComponentListener* const listenerToRemove);
 
     //==============================================================================
     /** Dispatches a numbered message to this component.
@@ -1693,7 +1692,7 @@ public:
 
         @see handleCommandMessage
     */
-    void postCommandMessage (const int commandId) throw();
+    void postCommandMessage (const int commandId);
 
     /** Called to handle a command that was sent by postCommandMessage().
 
@@ -1782,7 +1781,7 @@ public:
 
         @see runModalLoop, getCurrentlyModalComponent
     */
-    bool isCurrentlyBlockedByAnotherModalComponent() const throw();
+    bool isCurrentlyBlockedByAnotherModalComponent() const;
 
     /** When a component is modal, this callback allows it to choose which other
         components can still receive events.
@@ -1838,7 +1837,7 @@ public:
 
         @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    const Colour findColour (const int colourId, const bool inheritFromParent = false) const throw();
+    const Colour findColour (const int colourId, const bool inheritFromParent = false) const;
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -1861,12 +1860,12 @@ public:
     /** Returns true if the specified colour ID has been explicitly set for this
         component using the setColour() method.
     */
-    bool isColourSpecified (const int colourId) const throw();
+    bool isColourSpecified (const int colourId) const;
 
     /** This looks for any colours that have been specified for this component,
         and copies them to the specified target component.
     */
-    void copyAllExplicitColoursTo (Component& target) const throw();
+    void copyAllExplicitColoursTo (Component& target) const;
 
     /** This method is called when a colour is changed by the setColour() method.
 
@@ -1879,7 +1878,7 @@ public:
 
         This is platform-dependent and strictly for power-users only!
     */
-    void* getWindowHandle() const throw();
+    void* getWindowHandle() const;
 
     /** When created, each component is given a number to uniquely identify it.
 
@@ -2057,7 +2056,7 @@ private:
     void internalHierarchyChanged();
     void renderComponent (Graphics& context);
     void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
-    void repaintParent() throw();
+    void repaintParent();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (const FocusChangeType cause);
     void grabFocusInternal (const FocusChangeType cause, const bool canTryParent = true);
@@ -2067,9 +2066,9 @@ private:
     static void bringModalComponentToFront();
     void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
                                   const Rectangle<int>& clipRect,
-                                  const Component* const compToAvoid) const throw();
+                                  const Component* const compToAvoid) const;
     void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-                              const int deltaX, const int deltaY) const throw();
+                              const int deltaX, const int deltaY) const;
 
     // how much of the component is not off the edges of its parents
     const Rectangle<int> getUnclippedArea() const;

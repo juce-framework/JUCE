@@ -133,7 +133,7 @@ private:
         buffer.calloc (size + 8);
 
 #if JUCE_WINDOWS
-        WCHAR* w = reinterpret_cast <const WCHAR*> (buffer.getData());
+        WCHAR* w = reinterpret_cast <WCHAR*> (buffer.getData());
         GetModuleFileNameW (0, w, size / sizeof (WCHAR));
         return String (w, size);
 #elif JUCE_MAC

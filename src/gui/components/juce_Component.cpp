@@ -62,7 +62,7 @@ static uint32 nextComponentUID = 0;
 
 
 //==============================================================================
-Component::Component() throw()
+Component::Component()
   : parentComponent_ (0),
     componentUID (++nextComponentUID),
     numDeepMouseListeners (0),
@@ -75,7 +75,7 @@ Component::Component() throw()
 {
 }
 
-Component::Component (const String& name) throw()
+Component::Component (const String& name)
   : componentName_ (name),
     parentComponent_ (0),
     componentUID (++nextComponentUID),
@@ -199,7 +199,7 @@ void Component::sendVisibilityChangeMessage()
         componentListeners.callChecked (checker, &ComponentListener::componentVisibilityChanged, *this);
 }
 
-bool Component::isShowing() const throw()
+bool Component::isShowing() const
 {
     if (flags.visibleFlag)
     {
@@ -332,12 +332,12 @@ void Component::fadeOutComponent (const int millisecondsToFade,
 
 
 //==============================================================================
-bool Component::isValidComponent() const throw()
+bool Component::isValidComponent() const
 {
     return (this != 0) && isValidMessageListener();
 }
 
-void* Component::getWindowHandle() const throw()
+void* Component::getWindowHandle() const
 {
     const ComponentPeer* const peer = getPeer();
 
@@ -477,7 +477,7 @@ void Component::minimisationStateChanged (bool)
 }
 
 //==============================================================================
-void Component::setOpaque (const bool shouldBeOpaque) throw()
+void Component::setOpaque (const bool shouldBeOpaque)
 {
     if (shouldBeOpaque != flags.opaqueFlag)
     {
@@ -504,7 +504,7 @@ bool Component::isOpaque() const throw()
 }
 
 //==============================================================================
-void Component::setBufferedToImage (const bool shouldBeBuffered) throw()
+void Component::setBufferedToImage (const bool shouldBeBuffered)
 {
     if (shouldBeBuffered != flags.bufferToImageFlag)
     {
@@ -1237,7 +1237,7 @@ Component* Component::getTopLevelComponent() const throw()
     while (comp->parentComponent_ != 0)
         comp = comp->parentComponent_;
 
-    return (Component*) comp;
+    return const_cast <Component*> (comp);
 }
 
 bool Component::isParentOf (const Component* possibleChild) const throw()
@@ -1439,7 +1439,7 @@ bool Component::isCurrentlyModal() const throw()
             && getCurrentlyModalComponent() == this;
 }
 
-bool Component::isCurrentlyBlockedByAnotherModalComponent() const throw()
+bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 {
     Component* const mc = getCurrentlyModalComponent();
 
@@ -1456,7 +1456,7 @@ int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() throw()
 
 Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) throw()
 {
-    Component* const c = (Component*) (modalComponentStack [modalComponentStack.size() - index - 1]);
+    Component* const c = static_cast <Component*> (modalComponentStack [modalComponentStack.size() - index - 1]);
 
     return c->isValidComponent() ? c : 0;
 }
@@ -1501,7 +1501,7 @@ bool Component::isBroughtToFrontOnMouseClick() const throw()
 }
 
 //==============================================================================
-void Component::setMouseCursor (const MouseCursor& cursor) throw()
+void Component::setMouseCursor (const MouseCursor& cursor)
 {
     cursor_ = cursor;
 
@@ -1514,7 +1514,7 @@ const MouseCursor Component::getMouseCursor()
     return cursor_;
 }
 
-void Component::updateMouseCursor() const throw()
+void Component::updateMouseCursor() const
 {
     sendFakeMouseMove();
 }
@@ -1526,19 +1526,19 @@ void Component::setRepaintsOnMouseActivity (const bool shouldRepaint) throw()
 }
 
 //==============================================================================
-void Component::repaintParent() throw()
+void Component::repaintParent()
 {
     if (flags.visibleFlag)
         internalRepaint (0, 0, getWidth(), getHeight());
 }
 
-void Component::repaint() throw()
+void Component::repaint()
 {
     repaint (0, 0, getWidth(), getHeight());
 }
 
 void Component::repaint (const int x, const int y,
-                         const int w, const int h) throw()
+                         const int w, const int h)
 {
     deleteAndZero (bufferedImage_);
 
@@ -1782,7 +1782,7 @@ static const var::identifier getColourPropertyId (const int colourId)
     return s;
 }
 
-const Colour Component::findColour (const int colourId, const bool inheritFromParent) const throw()
+const Colour Component::findColour (const int colourId, const bool inheritFromParent) const
 {
     var* v = properties.getItem (getColourPropertyId (colourId));
 
@@ -1795,7 +1795,7 @@ const Colour Component::findColour (const int colourId, const bool inheritFromPa
     return getLookAndFeel().findColour (colourId);
 }
 
-bool Component::isColourSpecified (const int colourId) const throw()
+bool Component::isColourSpecified (const int colourId) const
 {
     return properties.contains (getColourPropertyId (colourId));
 }
@@ -1812,7 +1812,7 @@ void Component::setColour (const int colourId, const Colour& colour)
         colourChanged();
 }
 
-void Component::copyAllExplicitColoursTo (Component& target) const throw()
+void Component::copyAllExplicitColoursTo (Component& target) const
 {
     bool changed = false;
 
@@ -1856,7 +1856,7 @@ const Rectangle<int> Component::getUnclippedArea() const
 }
 
 void Component::clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-                                     const int deltaX, const int deltaY) const throw()
+                                     const int deltaX, const int deltaY) const
 {
     for (int i = childComponentList_.size(); --i >= 0;)
     {
@@ -1910,7 +1910,7 @@ void Component::getVisibleArea (RectangleList& result,
 void Component::subtractObscuredRegions (RectangleList& result,
                                          const Point<int>& delta,
                                          const Rectangle<int>& clipRect,
-                                         const Component* const compToAvoid) const throw()
+                                         const Component* const compToAvoid) const
 {
     for (int i = childComponentList_.size(); --i >= 0;)
     {
@@ -2004,12 +2004,12 @@ void Component::parentSizeChanged()
     // base class does nothing
 }
 
-void Component::addComponentListener (ComponentListener* const newListener) throw()
+void Component::addComponentListener (ComponentListener* const newListener)
 {
     componentListeners.add (newListener);
 }
 
-void Component::removeComponentListener (ComponentListener* const listenerToRemove) throw()
+void Component::removeComponentListener (ComponentListener* const listenerToRemove)
 {
     jassert (isValidComponent());
 
@@ -2064,7 +2064,7 @@ void Component::handleMessage (const Message& message)
 }
 
 //==============================================================================
-void Component::postCommandMessage (const int commandId) throw()
+void Component::postCommandMessage (const int commandId)
 {
     postMessage (new Message (customCommandMessage, commandId, 0, 0));
 }
@@ -2076,7 +2076,7 @@ void Component::handleCommandMessage (int)
 
 //==============================================================================
 void Component::addMouseListener (MouseListener* const newListener,
-                                  const bool wantsEventsForAllNestedChildComponents) throw()
+                                  const bool wantsEventsForAllNestedChildComponents)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -2099,7 +2099,7 @@ void Component::addMouseListener (MouseListener* const newListener,
     }
 }
 
-void Component::removeMouseListener (MouseListener* const listenerToRemove) throw()
+void Component::removeMouseListener (MouseListener* const listenerToRemove)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -2917,12 +2917,12 @@ bool Component::isFocusContainer() const throw()
     return flags.isFocusContainerFlag;
 }
 
-int Component::getExplicitFocusOrder() const throw()
+int Component::getExplicitFocusOrder() const
 {
     return properties ["_jexfo"];
 }
 
-void Component::setExplicitFocusOrder (const int newFocusOrderIndex) throw()
+void Component::setExplicitFocusOrder (const int newFocusOrderIndex)
 {
     properties.set ("_jexfo", newFocusOrderIndex);
 }
@@ -3079,7 +3079,7 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
     }
 }
 
-bool Component::hasKeyboardFocus (const bool trueIfChildIsFocused) const throw()
+bool Component::hasKeyboardFocus (const bool trueIfChildIsFocused) const
 {
     return (currentlyFocusedComponent == this)
             || (trueIfChildIsFocused && isParentOf (currentlyFocusedComponent));
@@ -3128,7 +3128,7 @@ const Point<int> Component::getMouseXYRelative() const
 }
 
 //==============================================================================
-const Rectangle<int> Component::getParentMonitorArea() const throw()
+const Rectangle<int> Component::getParentMonitorArea() const
 {
     return Desktop::getInstance()
             .getMonitorAreaContaining (relativePositionToGlobal (Point<int> (getWidth() / 2,
@@ -3136,7 +3136,7 @@ const Rectangle<int> Component::getParentMonitorArea() const throw()
 }
 
 //==============================================================================
-void Component::addKeyListener (KeyListener* const newListener) throw()
+void Component::addKeyListener (KeyListener* const newListener)
 {
     if (keyListeners_ == 0)
         keyListeners_ = new VoidArray();
@@ -3144,7 +3144,7 @@ void Component::addKeyListener (KeyListener* const newListener) throw()
     keyListeners_->addIfNotAlreadyThere (newListener);
 }
 
-void Component::removeKeyListener (KeyListener* const listenerToRemove) throw()
+void Component::removeKeyListener (KeyListener* const listenerToRemove)
 {
     if (keyListeners_ != 0)
         keyListeners_->removeValue (listenerToRemove);
@@ -3174,7 +3174,7 @@ void Component::internalModifierKeysChanged()
 }
 
 //==============================================================================
-ComponentPeer* Component::getPeer() const throw()
+ComponentPeer* Component::getPeer() const
 {
     if (flags.hasHeavyweightPeerFlag)
         return ComponentPeer::getPeerFor (this);

@@ -12194,17 +12194,17 @@ class JUCE_API  Component  : public MouseListener,
 {
 public:
 
-	Component() throw();
+	Component();
 
 	virtual ~Component();
 
-	Component (const String& componentName) throw();
+	Component (const String& componentName);
 
 	const String& getName() const throw()		   { return componentName_; }
 
 	virtual void setName (const String& newName);
 
-	bool isValidComponent() const throw();
+	bool isValidComponent() const;
 
 	virtual void setVisible (bool shouldBeVisible);
 
@@ -12212,7 +12212,7 @@ public:
 
 	virtual void visibilityChanged();
 
-	bool isShowing() const throw();
+	bool isShowing() const;
 
 	void fadeOutComponent (const int lengthOfFadeOutInMilliseconds,
 						   const int deltaXToMove = 0,
@@ -12226,7 +12226,7 @@ public:
 
 	bool isOnDesktop() const throw();
 
-	ComponentPeer* getPeer() const throw();
+	ComponentPeer* getPeer() const;
 
 	virtual void userTriedToCloseWindow();
 
@@ -12309,7 +12309,7 @@ public:
 
 	int getParentHeight() const throw();
 
-	const Rectangle<int> getParentMonitorArea() const throw();
+	const Rectangle<int> getParentMonitorArea() const;
 
 	int getNumChildComponents() const throw();
 
@@ -12375,12 +12375,12 @@ public:
 
 	Component* getComponentAt (const Point<int>& position);
 
-	void repaint() throw();
+	void repaint();
 
 	void repaint (const int x, const int y,
-				  const int width, const int height) throw();
+				  const int width, const int height);
 
-	void setBufferedToImage (const bool shouldBeBuffered) throw();
+	void setBufferedToImage (const bool shouldBeBuffered);
 
 	Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
 									const bool clipImageToComponentBounds = true);
@@ -12399,7 +12399,7 @@ public:
 
 	void sendLookAndFeelChange();
 
-	void setOpaque (const bool shouldBeOpaque) throw();
+	void setOpaque (const bool shouldBeOpaque);
 
 	bool isOpaque() const throw();
 
@@ -12419,7 +12419,7 @@ public:
 
 	void grabKeyboardFocus();
 
-	bool hasKeyboardFocus (const bool trueIfChildIsFocused) const throw();
+	bool hasKeyboardFocus (const bool trueIfChildIsFocused) const;
 
 	static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() throw();
 
@@ -12427,9 +12427,9 @@ public:
 
 	virtual KeyboardFocusTraverser* createFocusTraverser();
 
-	int getExplicitFocusOrder() const throw();
+	int getExplicitFocusOrder() const;
 
-	void setExplicitFocusOrder (const int newFocusOrderIndex) throw();
+	void setExplicitFocusOrder (const int newFocusOrderIndex);
 
 	void setFocusContainer (const bool shouldBeFocusContainer) throw();
 
@@ -12441,11 +12441,11 @@ public:
 
 	virtual void enablementChanged();
 
-	void setMouseCursor (const MouseCursor& cursorType) throw();
+	void setMouseCursor (const MouseCursor& cursorType);
 
 	virtual const MouseCursor getMouseCursor();
 
-	void updateMouseCursor() const throw();
+	void updateMouseCursor() const;
 
 	virtual void paint (Graphics& g);
 
@@ -12474,13 +12474,13 @@ public:
 	void setRepaintsOnMouseActivity (const bool shouldRepaint) throw();
 
 	void addMouseListener (MouseListener* const newListener,
-						   const bool wantsEventsForAllNestedChildComponents) throw();
+						   const bool wantsEventsForAllNestedChildComponents);
 
-	void removeMouseListener (MouseListener* const listenerToRemove) throw();
+	void removeMouseListener (MouseListener* const listenerToRemove);
 
-	void addKeyListener (KeyListener* const newListener) throw();
+	void addKeyListener (KeyListener* const newListener);
 
-	void removeKeyListener (KeyListener* const listenerToRemove) throw();
+	void removeKeyListener (KeyListener* const listenerToRemove);
 
 	virtual bool keyPressed (const KeyPress& key);
 
@@ -12521,11 +12521,11 @@ public:
 
 	virtual void broughtToFront();
 
-	void addComponentListener (ComponentListener* const newListener) throw();
+	void addComponentListener (ComponentListener* const newListener);
 
-	void removeComponentListener (ComponentListener* const listenerToRemove) throw();
+	void removeComponentListener (ComponentListener* const listenerToRemove);
 
-	void postCommandMessage (const int commandId) throw();
+	void postCommandMessage (const int commandId);
 
 	virtual void handleCommandMessage (int commandId);
 
@@ -12541,7 +12541,7 @@ public:
 
 	static Component* JUCE_CALLTYPE getCurrentlyModalComponent (int index = 0) throw();
 
-	bool isCurrentlyBlockedByAnotherModalComponent() const throw();
+	bool isCurrentlyBlockedByAnotherModalComponent() const;
 
 	virtual bool canModalEventBeSentToComponent (const Component* targetComponent);
 
@@ -12551,19 +12551,19 @@ public:
 
 	const NamedValueSet& getProperties() const throw()		  { return properties; }
 
-	const Colour findColour (const int colourId, const bool inheritFromParent = false) const throw();
+	const Colour findColour (const int colourId, const bool inheritFromParent = false) const;
 
 	void setColour (const int colourId, const Colour& colour);
 
 	void removeColour (const int colourId);
 
-	bool isColourSpecified (const int colourId) const throw();
+	bool isColourSpecified (const int colourId) const;
 
-	void copyAllExplicitColoursTo (Component& target) const throw();
+	void copyAllExplicitColoursTo (Component& target) const;
 
 	virtual void colourChanged();
 
-	void* getWindowHandle() const throw();
+	void* getWindowHandle() const;
 
 	uint32 getComponentUID() const throw()		{ return componentUID; }
 
@@ -12697,7 +12697,7 @@ private:
 	void internalHierarchyChanged();
 	void renderComponent (Graphics& context);
 	void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
-	void repaintParent() throw();
+	void repaintParent();
 	void sendFakeMouseMove() const;
 	void takeKeyboardFocus (const FocusChangeType cause);
 	void grabFocusInternal (const FocusChangeType cause, const bool canTryParent = true);
@@ -12707,9 +12707,9 @@ private:
 	static void bringModalComponentToFront();
 	void subtractObscuredRegions (RectangleList& result, const Point<int>& delta,
 								  const Rectangle<int>& clipRect,
-								  const Component* const compToAvoid) const throw();
+								  const Component* const compToAvoid) const;
 	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-							  const int deltaX, const int deltaY) const throw();
+							  const int deltaX, const int deltaY) const;
 
 	// how much of the component is not off the edges of its parents
 	const Rectangle<int> getUnclippedArea() const;
