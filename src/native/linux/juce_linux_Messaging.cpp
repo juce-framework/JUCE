@@ -66,8 +66,8 @@ public:
         int ret = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, fd);
         (void) ret; jassert (ret == 0);
 
-        setNonBlocking (fd[0]);
-        setNonBlocking (fd[1]);
+        //setNonBlocking (fd[0]);
+        //setNonBlocking (fd[1]);
     }
 
     ~InternalMessageQueue()

@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	8
+#define JUCE_BUILDNUMBER	9
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -254,6 +254,10 @@
 
 #ifndef JUCE_USE_XSHM
   #define JUCE_USE_XSHM 1
+#endif
+
+#ifndef JUCE_USE_XRENDER
+  //#define JUCE_USE_XRENDER 1
 #endif
 
 #ifndef JUCE_PLUGINHOST_VST

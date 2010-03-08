@@ -179,6 +179,12 @@
   #define JUCE_USE_XSHM 1
 #endif
 
+/** JUCE_USE_XRENDER: Uses XRender to allow semi-transparent windowing on Linux.
+*/
+#ifndef JUCE_USE_XRENDER
+  //#define JUCE_USE_XRENDER 1
+#endif
+
 //=============================================================================
 /** JUCE_PLUGINHOST_VST: Enables the VST audio plugin hosting classes. This requires the
     Steinberg VST SDK to be installed on your machine, and should be left turned off unless

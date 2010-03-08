@@ -133,13 +133,14 @@ private:
         buffer.calloc (size + 8);
 
 #if JUCE_WINDOWS
-        GetModuleFileNameW (0, (WCHAR*) buffer, size / sizeof (WCHAR));
-        return String (reinterpret_cast <const WCHAR*> ((char*) buffer), size);
+        WCHAR* w = reinterpret_cast <const WCHAR*> (buffer.getData());
+        GetModuleFileNameW (0, w, size / sizeof (WCHAR));
+        return String (w, size);
 #elif JUCE_MAC
-        _NSGetExecutablePath ((char*) buffer, &size);
+        _NSGetExecutablePath (buffer.getData(), &size);
         return String::fromUTF8 (buffer, size);
 #elif JUCE_LINUX
-        readlink ("/proc/self/exe", (char*) buffer, size);
+        readlink ("/proc/self/exe", buffer.getData(), size);
         return String::fromUTF8 (buffer, size);
 #else
         #error

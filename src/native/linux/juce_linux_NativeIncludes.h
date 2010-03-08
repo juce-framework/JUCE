@@ -85,6 +85,12 @@
  #include <sys/ipc.h>
 #endif
 
+#if JUCE_USE_XRENDER
+ // If you're missing these headers, try installing the libxrender-dev and libxcomposite-dev
+ #include <X11/extensions/Xrender.h>
+ #include <X11/extensions/Xcomposite.h>
+#endif
+
 #if JUCE_OPENGL
  /* Got an include error here?
 

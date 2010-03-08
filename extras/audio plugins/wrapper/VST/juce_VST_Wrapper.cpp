@@ -1078,7 +1078,7 @@ public:
         else
             filter->getStateInformation (chunkMemory);
 
-        *data = (void*) chunkMemory;
+        *data = (void*) chunkMemory.getData();
 
         // because the chunk is only needed temporarily by the host (or at least you'd
         // hope so) we'll give it a while and then free it in the timer callback.

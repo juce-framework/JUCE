@@ -177,8 +177,6 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 #if JUCE_USE_XSHM
 static bool isShmAvailable() throw()
 {
-    ScopedXLock xlock;
-
     static bool isChecked = false;
     static bool isAvailable = false;
 
@@ -188,6 +186,8 @@ static bool isShmAvailable() throw()
 
         int major, minor;
         Bool pixmaps;
+
+        ScopedXLock xlock;
 
         if (XShmQueryVersion (display, &major, &minor, &pixmaps))
         {
@@ -236,14 +236,240 @@ static bool isShmAvailable() throw()
 #endif
 
 //==============================================================================
+#if JUCE_USE_XRENDER
+
+namespace XRender
+{
+    typedef Status (*tXRenderQueryVersion) (Display*, int*, int*);
+    typedef XRenderPictFormat* (*tXrenderFindStandardFormat) (Display*, int);
+    typedef XRenderPictFormat* (*tXRenderFindFormat) (Display*, unsigned long, XRenderPictFormat*, int);
+    typedef XRenderPictFormat* (*tXRenderFindVisualFormat) (Display*, Visual*);
+
+    static tXRenderQueryVersion xRenderQueryVersion = 0;
+    static tXrenderFindStandardFormat xRenderFindStandardFormat = 0;
+    static tXRenderFindFormat xRenderFindFormat = 0;
+    static tXRenderFindVisualFormat xRenderFindVisualFormat = 0;
+
+    static bool isAvailable()
+    {
+        static bool isChecked = false;
+        static bool isAvailable = false;
+
+        if (! isChecked)
+        {
+            ScopedXLock xlock;
+
+            isChecked = true;
+
+            if (xRenderQueryVersion == 0)
+            {
+                void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW);
+
+                if (h != 0)
+                {
+                    xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
+                    xRenderFindStandardFormat   = (tXrenderFindStandardFormat)  dlsym (h, "XrenderFindStandardFormat");
+                    xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
+                    xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
+                }
+            }
+
+            if (xRenderQueryVersion != 0
+                 && xRenderFindStandardFormat != 0
+                 && xRenderFindFormat != 0
+                 && xRenderFindVisualFormat != 0)
+            {
+                int major, minor;
+                if (xRenderQueryVersion (display, &major, &minor))
+                    isAvailable = true;
+            }
+        }
+
+        return isAvailable;
+    }
+
+    static XRenderPictFormat* findPictureFormat()
+    {
+        ScopedXLock xlock;
+
+        XRenderPictFormat* pictFormat = 0;
+
+        if (isAvailable())
+        {
+            pictFormat = xRenderFindStandardFormat (display, PictStandardARGB32);
+
+            if (pictFormat == 0)
+            {
+                XRenderPictFormat desiredFormat;
+                desiredFormat.type = PictTypeDirect;
+                desiredFormat.depth = 32;
+
+                desiredFormat.direct.alphaMask = 0xff;
+                desiredFormat.direct.redMask = 0xff;
+                desiredFormat.direct.greenMask = 0xff;
+                desiredFormat.direct.blueMask = 0xff;
+
+                desiredFormat.direct.alpha = 24;
+                desiredFormat.direct.red = 16;
+                desiredFormat.direct.green = 8;
+                desiredFormat.direct.blue = 0;
+
+                pictFormat = xRenderFindFormat (display,
+                                                PictFormatType | PictFormatDepth
+                                                 | PictFormatRedMask | PictFormatRed
+                                                 | PictFormatGreenMask | PictFormatGreen
+                                                 | PictFormatBlueMask | PictFormatBlue
+                                                 | PictFormatAlphaMask | PictFormatAlpha,
+                                                &desiredFormat,
+                                                0);
+            }
+        }
+
+        return pictFormat;
+    }
+}
+
+#endif
+
+
+//==============================================================================
+namespace Visuals
+{
+    static Visual* findVisualWithDepth (const int desiredDepth) throw()
+    {
+        ScopedXLock xlock;
+
+        Visual* visual = 0;
+        int numVisuals = 0;
+        long desiredMask = VisualNoMask;
+        XVisualInfo desiredVisual;
+
+        desiredVisual.screen = DefaultScreen (display);
+        desiredVisual.depth = desiredDepth;
+
+        desiredMask = VisualScreenMask | VisualDepthMask;
+
+        if (desiredDepth == 32)
+        {
+            desiredVisual.c_class = TrueColor;
+            desiredVisual.red_mask = 0x00FF0000;
+            desiredVisual.green_mask = 0x0000FF00;
+            desiredVisual.blue_mask = 0x000000FF;
+            desiredVisual.bits_per_rgb = 8;
+
+            desiredMask |= VisualClassMask;
+            desiredMask |= VisualRedMaskMask;
+            desiredMask |= VisualGreenMaskMask;
+            desiredMask |= VisualBlueMaskMask;
+            desiredMask |= VisualBitsPerRGBMask;
+        }
+
+        XVisualInfo* xvinfos = XGetVisualInfo (display,
+                                               desiredMask,
+                                               &desiredVisual,
+                                               &numVisuals);
+
+        if (xvinfos != 0)
+        {
+            for (int i = 0; i < numVisuals; i++)
+            {
+                if (xvinfos[i].depth == desiredDepth)
+                {
+                    visual = xvinfos[i].visual;
+                    break;
+                }
+            }
+
+            XFree (xvinfos);
+        }
+
+        return visual;
+    }
+
+    static Visual* findVisualFormat (const int desiredDepth, int& matchedDepth) throw()
+    {
+        Visual* visual = 0;
+
+        if (desiredDepth == 32)
+        {
+#if JUCE_USE_XSHM
+            if (isShmAvailable())
+            {
+#if JUCE_USE_XRENDER
+                if (XRender::isAvailable())
+                {
+                    XRenderPictFormat* pictFormat = XRender::findPictureFormat();
+
+                    if (pictFormat != 0)
+                    {
+                        int numVisuals = 0;
+                        XVisualInfo desiredVisual;
+                        desiredVisual.screen = DefaultScreen (display);
+                        desiredVisual.depth = 32;
+                        desiredVisual.bits_per_rgb = 8;
+
+                        XVisualInfo* xvinfos = XGetVisualInfo (display,
+                                                               VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                               &desiredVisual, &numVisuals);
+                        if (xvinfos != 0)
+                        {
+                            for (int i = 0; i < numVisuals; ++i)
+                            {
+                                XRenderPictFormat* pictVisualFormat = XRender::xRenderFindVisualFormat (display, xvinfos[i].visual);
+
+                                if (pictVisualFormat != 0
+                                     && pictVisualFormat->type == PictTypeDirect
+                                     && pictVisualFormat->direct.alphaMask)
+                                {
+                                    visual = xvinfos[i].visual;
+                                    matchedDepth = 32;
+                                    break;
+                                }
+                            }
+
+                            XFree (xvinfos);
+                        }
+                    }
+                }
+#endif
+                if (visual == 0)
+                {
+                    visual = findVisualWithDepth (32);
+                    if (visual != 0)
+                        matchedDepth = 32;
+                }
+            }
+#endif
+        }
+
+        if (visual == 0 && desiredDepth >= 24)
+        {
+            visual = findVisualWithDepth (24);
+            if (visual != 0)
+                matchedDepth = 24;
+        }
+
+        if (visual == 0 && desiredDepth >= 16)
+        {
+            visual = findVisualWithDepth (16);
+            if (visual != 0)
+                matchedDepth = 16;
+        }
+
+        return visual;
+    }
+}
+
+//==============================================================================
 class XBitmapImage  : public Image
 {
 public:
     //==============================================================================
     XBitmapImage (const PixelFormat format_, const int w, const int h,
-                  const bool clearImage, const bool is16Bit_)
+                  const bool clearImage, const int imageDepth_, Visual* visual)
         : Image (format_, w, h),
-          is16Bit (is16Bit_)
+          imageDepth (imageDepth_),
+          gc (None)
     {
         jassert (format_ == RGB || format_ == ARGB);
 
@@ -251,16 +477,19 @@ public:
         lineStride = ((w * pixelStride + 3) & ~3);
 
         ScopedXLock xlock;
-        Visual* const visual = DefaultVisual (display, DefaultScreen (display));
 
 #if JUCE_USE_XSHM
         usingXShm = false;
 
-        if ((! is16Bit) && isShmAvailable())
+        if ((imageDepth > 16) && isShmAvailable())
         {
             zerostruct (segmentInfo);
 
-            xImage = XShmCreateImage (display, visual, 24, ZPixmap, 0, &segmentInfo, w, h);
+            segmentInfo.shmid = -1;
+            segmentInfo.shmaddr = (char *) -1;
+            segmentInfo.readOnly = False;
+
+            xImage = XShmCreateImage (display, visual, imageDepth, ZPixmap, 0, &segmentInfo, w, h);
 
             if (xImage != 0)
             {
@@ -268,30 +497,30 @@ public:
                                                  xImage->bytes_per_line * xImage->height,
                                                  IPC_CREAT | 0777)) >= 0)
                 {
-                    segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
-
-                    if (segmentInfo.shmaddr != (void*) -1)
+                    if (segmentInfo.shmid != -1)
                     {
-                        segmentInfo.readOnly = False;
+                        segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
 
-                        xImage->data = segmentInfo.shmaddr;
-                        imageData = (uint8*) segmentInfo.shmaddr;
-
-                        XSync (display, False);
-
-                        if (XShmAttach (display, &segmentInfo) != 0)
+                        if (segmentInfo.shmaddr != (void*) -1)
                         {
-                            XSync (display, False);
-                            usingXShm = true;
+                            segmentInfo.readOnly = False;
+
+                            xImage->data = segmentInfo.shmaddr;
+                            imageData = (uint8*) segmentInfo.shmaddr;
+
+                            if (XShmAttach (display, &segmentInfo) != 0)
+                            {
+                                usingXShm = true;
+                            }
+                            else
+                            {
+                                jassertfalse
+                            }
                         }
                         else
                         {
-                            jassertfalse
+                            shmctl (segmentInfo.shmid, IPC_RMID, 0);
                         }
-                    }
-                    else
-                    {
-                        shmctl (segmentInfo.shmid, IPC_RMID, 0);
                     }
                 }
             }
@@ -324,7 +553,7 @@ public:
             xImage->green_mask = 0x0000FF00;
             xImage->blue_mask  = 0x000000FF;
 
-            if (is16Bit)
+            if (imageDepth == 16)
             {
                 const int pixelStride = 2;
                 const int lineStride = ((w * pixelStride + 3) & ~3);
@@ -374,12 +603,22 @@ public:
     {
         ScopedXLock xlock;
 
-        static GC gc = 0;
-
         if (gc == 0)
-            gc = DefaultGC (display, DefaultScreen (display));
+        {
+          XGCValues gcvalues;
+          gcvalues.foreground = None;
+          gcvalues.background = None;
+          gcvalues.function = GXcopy;
+          gcvalues.plane_mask = AllPlanes;
+          gcvalues.clip_mask = None;
+          gcvalues.graphics_exposures = False;
 
-        if (is16Bit)
+          gc = XCreateGC (display, window,
+                          GCBackground | GCForeground | GCFunction | GCPlaneMask | GCClipMask | GCGraphicsExposures,
+                          &gcvalues);
+        }
+
+        if (imageDepth == 16)
         {
             const uint32 rMask = xImage->red_mask;
             const uint32 rShiftL = jmax (0, getShiftNeeded (rMask));
@@ -424,8 +663,10 @@ public:
 
 private:
     XImage* xImage;
-    const bool is16Bit;
+    const int imageDepth;
     HeapBlock <char> imageData16Bit;
+
+    GC gc;
 
 #if JUCE_USE_XSHM
     XShmSegmentInfo segmentInfo;
@@ -460,7 +701,9 @@ public:
           wh (0),
           taskbarImage (0),
           fullScreen (false),
-          mapped (false)
+          mapped (false),
+          visual (0),
+          depth (0)
     {
         // it's dangerous to create a window on a thread other than the message thread..
         checkMessageManagerIsLocked
@@ -1646,7 +1889,8 @@ private:
                                               (totalArea.getWidth() + 31) & ~31,
                                               (totalArea.getHeight() + 31) & ~31,
                                               false,
-                                              peer->depthIs16Bit);
+                                              peer->depth,
+                                              peer->visual);
                 }
 
                 startTimer (repaintTimerPeriod);
@@ -1656,7 +1900,20 @@ private:
                 context.setOrigin (-totalArea.getX(), -totalArea.getY());
 
                 if (context.clipToRectangleList (originalRepaintRegion))
+                {
+                    if (peer->depth == 32)
+                    {
+                        RectangleList::Iterator i (originalRepaintRegion);
+
+                        while (i.next())
+                        {
+                            const Rectangle<int>& r = *i.getRectangle();
+                            image->clear (r.getX() - totalArea.getX(), r.getY() - totalArea.getY(), r.getWidth(), r.getHeight());
+                        }
+                    }
+
                     peer->handlePaint (context);
+                }
 
                 if (! peer->maskedRegion.isEmpty())
                     originalRepaintRegion.subtract (peer->maskedRegion);
@@ -1701,7 +1958,9 @@ private:
     Window windowH, parentWindow;
     int wx, wy, ww, wh;
     Image* taskbarImage;
-    bool fullScreen, mapped, depthIs16Bit;
+    bool fullScreen, mapped;
+    int depth;
+    Visual* visual;
     BorderSize windowBorder;
 
     struct MotifWmHints
@@ -1986,47 +2245,30 @@ private:
         const int screen = DefaultScreen (display);
         Window root = RootWindow (display, screen);
 
-        // Attempt to create a 24-bit window on the default screen.  If this is not
-        // possible then exit
-        XVisualInfo desiredVisual;
-        desiredVisual.screen = screen;
-        desiredVisual.depth = 24;
-        depthIs16Bit = false;
+        // Try to obtain a 32-bit visual or fallback to 24 or 16
+        visual = Visuals::findVisualFormat ((styleFlags & windowIsSemiTransparent) ? 32 : 24, depth);
 
-        int numVisuals;
-        XVisualInfo* visuals = XGetVisualInfo (display, VisualScreenMask | VisualDepthMask,
-                                               &desiredVisual, &numVisuals);
-
-        if (numVisuals < 1 || visuals == 0)
+        if (visual == 0)
         {
-            XFree (visuals);
-            desiredVisual.depth = 16;
-
-            visuals = XGetVisualInfo (display, VisualScreenMask | VisualDepthMask,
-                                      &desiredVisual, &numVisuals);
-
-            if (numVisuals < 1 || visuals == 0)
-            {
-                Logger::outputDebugString ("ERROR: System doesn't support 24 or 16 bit RGB display.\n");
-                Process::terminate();
-            }
-
-            depthIs16Bit = true;
+            Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
+            Process::terminate();
         }
 
-        XFree (visuals);
+        // Create and install a colormap suitable fr our visual
+        Colormap colormap = XCreateColormap (display, root, visual, AllocNone);
+        XInstallColormap (display, colormap);
 
         // Set up the window attributes
         XSetWindowAttributes swa;
         swa.border_pixel = 0;
         swa.background_pixmap = None;
-        swa.colormap = DefaultColormap (display, screen);
+        swa.colormap = colormap;
         swa.override_redirect = getComponent()->isAlwaysOnTop() ? True : False;
         swa.event_mask = eventMask;
 
         Window wndH = XCreateWindow (display, root,
                                      0, 0, 1, 1,
-                                     0, 0, InputOutput, (Visual*) CopyFromParent,
+                                     0, depth, InputOutput, visual,
                                      CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
                                      &swa);
 
@@ -2052,23 +2294,6 @@ private:
         XSetWMHints (display, wndH, wmHints);
         XFree (wmHints);
 
-        if ((styleFlags & windowIsSemiTransparent) != 0)
-        {
-            //xxx
-        }
-
-        if ((styleFlags & windowAppearsOnTaskbar) != 0)
-        {
-            //xxx
-        }
-
-        //XSetTransientForHint (display, wndH, RootWindow (display, DefaultScreen (display)));
-
-        if ((styleFlags & windowHasTitleBar) == 0)
-            removeWindowDecorations (wndH);
-        else
-            addWindowButtons (wndH);
-
         // Set window manager protocols
         XChangeProperty (display, wndH, wm_Protocols, XA_ATOM, 32, PropModeReplace,
                          (unsigned char*) wm_ProtocolList, 2);
@@ -2086,6 +2311,24 @@ private:
         unsigned long dndVersion = ourDndVersion;
         XChangeProperty (display, wndH, XA_XdndAware, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) &dndVersion, 1);
+
+        if ((windowStyleFlags & windowHasDropShadow) != 0
+             && Desktop::canUseSemiTransparentWindows())
+        {
+        }
+
+        if ((styleFlags & windowIsTemporary) != 0)
+        {
+        }
+
+        if ((styleFlags & windowAppearsOnTaskbar) == 0)
+        {
+        }
+
+        if ((styleFlags & windowHasTitleBar) == 0)
+            removeWindowDecorations (wndH);
+        else
+            addWindowButtons (wndH);
 
         // Set window name
         setWindowTitle (wndH, getComponent()->getName());
@@ -2674,7 +2917,11 @@ void Desktop::createMouseInputSources()
 
 bool Desktop::canUseSemiTransparentWindows() throw()
 {
-    return false;
+    int matchedDepth = 0;
+    const int desiredDepth = 32;
+
+    return Visuals::findVisualFormat (desiredDepth, matchedDepth) != 0
+             && (matchedDepth == desiredDepth);
 }
 
 const Point<int> Desktop::getMousePosition()
@@ -3210,9 +3457,6 @@ bool AlertWindow::showNativeDialogBox (const String& title,
                                        const String& bodyText,
                                        bool isOkCancel)
 {
-    // xxx this is supposed to pop up an alert!
-    Logger::outputDebugString (title + ": " + bodyText);
-
     // use a non-native one for the time being..
     if (isOkCancel)
         return AlertWindow::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
