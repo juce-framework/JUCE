@@ -28,48 +28,77 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-#define TAKE_FOCUS 0
-#define DELETE_WINDOW 1
+namespace Atoms
+{
+    enum ProtocolItems
+    {
+        TAKE_FOCUS = 0,
+        DELETE_WINDOW = 1
+    };
 
-#define SYSTEM_TRAY_REQUEST_DOCK    0
-#define SYSTEM_TRAY_BEGIN_MESSAGE   1
-#define SYSTEM_TRAY_CANCEL_MESSAGE  2
+    static Atom Protocols, ProtocolList[2], ChangeState, State,
+                ActiveWin, Pid, WindowType, WindowState,
+                XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
+                XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
+                XdndActionDescription, XdndActionCopy,
+                allowedActions[5],
+                allowedMimeTypes[2];
 
-static const int repaintTimerPeriod = 1000 / 100;  // 100 fps maximum
+    const unsigned long DndVersion = 3;
+
+    //==============================================================================
+    static void initialiseAtoms()
+    {
+        static bool atomsInitialised = false;
+
+        if (! atomsInitialised)
+        {
+            atomsInitialised = true;
+
+            Protocols                      = XInternAtom (display, "WM_PROTOCOLS", True);
+            ProtocolList [TAKE_FOCUS]      = XInternAtom (display, "WM_TAKE_FOCUS", True);
+            ProtocolList [DELETE_WINDOW]   = XInternAtom (display, "WM_DELETE_WINDOW", True);
+            ChangeState                    = XInternAtom (display, "WM_CHANGE_STATE", True);
+            State                          = XInternAtom (display, "WM_STATE", True);
+            ActiveWin                      = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
+            Pid                            = XInternAtom (display, "_NET_WM_PID", False);
+            WindowType                     = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
+            WindowState                    = XInternAtom (display, "_NET_WM_WINDOW_STATE", True);
+
+            XdndAware               = XInternAtom (display, "XdndAware", False);
+            XdndEnter               = XInternAtom (display, "XdndEnter", False);
+            XdndLeave               = XInternAtom (display, "XdndLeave", False);
+            XdndPosition            = XInternAtom (display, "XdndPosition", False);
+            XdndStatus              = XInternAtom (display, "XdndStatus", False);
+            XdndDrop                = XInternAtom (display, "XdndDrop", False);
+            XdndFinished            = XInternAtom (display, "XdndFinished", False);
+            XdndSelection           = XInternAtom (display, "XdndSelection", False);
+
+            XdndTypeList            = XInternAtom (display, "XdndTypeList", False);
+            XdndActionList          = XInternAtom (display, "XdndActionList", False);
+            XdndActionCopy          = XInternAtom (display, "XdndActionCopy", False);
+            XdndActionDescription   = XInternAtom (display, "XdndActionDescription", False);
+
+            allowedMimeTypes [0] = XInternAtom (display, "text/plain", False);
+            allowedMimeTypes [1] = XInternAtom (display, "text/uri-list", False);
+
+            allowedActions [0] = XInternAtom (display, "XdndActionMove", False);
+            allowedActions [1] = XdndActionCopy;
+            allowedActions [2] = XInternAtom (display, "XdndActionLink", False);
+            allowedActions [3] = XInternAtom (display, "XdndActionAsk", False);
+            allowedActions [4] = XInternAtom (display, "XdndActionPrivate", False);
+        }
+    }
+}
 
 //==============================================================================
-static Atom wm_ChangeState = None;
-static Atom wm_State = None;
-static Atom wm_Protocols = None;
-static Atom wm_ProtocolList [2] = { None, None };
-static Atom wm_ActiveWin = None;
+enum SystemTrayValues
+{
+    SYSTEM_TRAY_REQUEST_DOCK = 0,
+    SYSTEM_TRAY_BEGIN_MESSAGE = 1,
+    SYSTEM_TRAY_CANCEL_MESSAGE = 2
+};
 
-#define ourDndVersion 3
-static Atom XA_XdndAware = None;
-static Atom XA_XdndEnter = None;
-static Atom XA_XdndLeave = None;
-static Atom XA_XdndPosition = None;
-static Atom XA_XdndStatus = None;
-static Atom XA_XdndDrop = None;
-static Atom XA_XdndFinished = None;
-static Atom XA_XdndSelection = None;
-static Atom XA_XdndProxy = None;
-
-static Atom XA_XdndTypeList = None;
-static Atom XA_XdndActionList = None;
-static Atom XA_XdndActionDescription = None;
-static Atom XA_XdndActionCopy = None;
-static Atom XA_XdndActionMove = None;
-static Atom XA_XdndActionLink = None;
-static Atom XA_XdndActionAsk = None;
-static Atom XA_XdndActionPrivate = None;
-static Atom XA_JXSelectionWindowProperty = None;
-
-static Atom XA_MimeTextPlain = None;
-static Atom XA_MimeTextUriList = None;
-static Atom XA_MimeRootDrop = None;
-
-//==============================================================================
 static XErrorHandler oldHandler = 0;
 static int trappedErrorCode = 0;
 
@@ -106,53 +135,35 @@ extern Display* display;
 extern XContext improbableNumber;
 
 static const int eventMask = NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
-                             | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-                             | ExposureMask | StructureNotifyMask | FocusChangeMask;
+                              | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
+                              | ExposureMask | StructureNotifyMask | FocusChangeMask;
 
 //==============================================================================
-enum MouseButtons
+namespace Keys
 {
-    NoButton = 0,
-    LeftButton = 1,
-    MiddleButton = 2,
-    RightButton = 3,
-    WheelUp = 4,
-    WheelDown = 5
-};
+    enum MouseButtons
+    {
+        NoButton = 0,
+        LeftButton = 1,
+        MiddleButton = 2,
+        RightButton = 3,
+        WheelUp = 4,
+        WheelDown = 5
+    };
 
-//==============================================================================
-static int AltMask = 0;
-static int NumLockMask = 0;
-static bool numLock = 0;
-static bool capsLock = 0;
-static char keyStates [32];
-
-static void updateKeyStates (const int keycode, const bool press) throw()
-{
-    const int keybyte = keycode >> 3;
-    const int keybit = (1 << (keycode & 7));
-
-    if (press)
-        keyStates [keybyte] |= keybit;
-    else
-        keyStates [keybyte] &= ~keybit;
+    static int AltMask = 0;
+    static int NumLockMask = 0;
+    static bool numLock = false;
+    static bool capsLock = false;
+    static char keyStates [32];
+    static const int extendedKeyModifier = 0x10000000;
 }
-
-static bool keyDown (const int keycode) throw()
-{
-    const int keybyte = keycode >> 3;
-    const int keybit = (1 << (keycode & 7));
-
-    return (keyStates [keybyte] & keybit) != 0;
-}
-
-static const int extendedKeyModifier = 0x10000000;
 
 bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 {
     int keysym;
 
-    if (keyCode & extendedKeyModifier)
+    if (keyCode & Keys::extendedKeyModifier)
     {
         keysym = 0xff00 | (keyCode & 0xff);
     }
@@ -170,7 +181,12 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
     }
 
     ScopedXLock xlock;
-    return keyDown (XKeysymToKeycode (display, keysym));
+
+    const int keycode = XKeysymToKeycode (display, keysym);
+
+    const int keybyte = keycode >> 3;
+    const int keybit = (1 << (keycode & 7));
+    return (Keys::keyStates [keybyte] & keybit) != 0;
 }
 
 //==============================================================================
@@ -684,7 +700,6 @@ private:
     }
 };
 
-#define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 //==============================================================================
 class LinuxComponentPeer  : public ComponentPeer
@@ -706,7 +721,7 @@ public:
           depth (0)
     {
         // it's dangerous to create a window on a thread other than the message thread..
-        checkMessageManagerIsLocked
+        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         repainter = new LinuxRepaintManager (this);
 
@@ -718,7 +733,7 @@ public:
     ~LinuxComponentPeer()
     {
         // it's dangerous to delete a window on a thread other than the message thread..
-        checkMessageManagerIsLocked
+        jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
         deleteTaskBarIcon();
         deleteIconPixmaps();
@@ -841,7 +856,7 @@ public:
             clientMsg.window = windowH;
             clientMsg.type = ClientMessage;
             clientMsg.format = 32;
-            clientMsg.message_type = wm_ChangeState;
+            clientMsg.message_type = Atoms::ChangeState;
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock;
@@ -865,10 +880,10 @@ public:
         int actualFormat;
 
         ScopedXLock xlock;
-        if (XGetWindowProperty (display, windowH, wm_State, 0, 64, False,
-                                wm_State, &actualType, &actualFormat, &nitems, &bytesLeft,
+        if (XGetWindowProperty (display, windowH, Atoms::State, 0, 64, False,
+                                Atoms::State, &actualType, &actualFormat, &nitems, &bytesLeft,
                                 &stateProp) == Success
-            && actualType == wm_State
+            && actualType == Atoms::State
             && actualFormat == 32
             && nitems > 0)
         {
@@ -1042,7 +1057,7 @@ public:
         ev.xclient.type = ClientMessage;
         ev.xclient.serial = 0;
         ev.xclient.send_event = True;
-        ev.xclient.message_type = wm_ActiveWin;
+        ev.xclient.message_type = Atoms::ActiveWin;
         ev.xclient.window = windowH;
         ev.xclient.format = 32;
         ev.xclient.data.l[0] = 2;
@@ -1292,27 +1307,27 @@ public:
                     else if (sym == XK_KP_Enter)
                         keyCode = XK_Return;
                     else if (sym == XK_KP_Decimal)
-                        keyCode = numLock ? XK_period : XK_Delete;
+                        keyCode = Keys::numLock ? XK_period : XK_Delete;
                     else if (sym == XK_KP_0)
-                        keyCode = numLock ? XK_0 : XK_Insert;
+                        keyCode = Keys::numLock ? XK_0 : XK_Insert;
                     else if (sym == XK_KP_1)
-                        keyCode = numLock ? XK_1 : XK_End;
+                        keyCode = Keys::numLock ? XK_1 : XK_End;
                     else if (sym == XK_KP_2)
-                        keyCode = numLock ? XK_2 : XK_Down;
+                        keyCode = Keys::numLock ? XK_2 : XK_Down;
                     else if (sym == XK_KP_3)
-                        keyCode = numLock ? XK_3 : XK_Page_Down;
+                        keyCode = Keys::numLock ? XK_3 : XK_Page_Down;
                     else if (sym == XK_KP_4)
-                        keyCode = numLock ? XK_4 : XK_Left;
+                        keyCode = Keys::numLock ? XK_4 : XK_Left;
                     else if (sym == XK_KP_5)
                         keyCode = XK_5;
                     else if (sym == XK_KP_6)
-                        keyCode = numLock ? XK_6 : XK_Right;
+                        keyCode = Keys::numLock ? XK_6 : XK_Right;
                     else if (sym == XK_KP_7)
-                        keyCode = numLock ? XK_7 : XK_Home;
+                        keyCode = Keys::numLock ? XK_7 : XK_Home;
                     else if (sym == XK_KP_8)
-                        keyCode = numLock ? XK_8 : XK_Up;
+                        keyCode = Keys::numLock ? XK_8 : XK_Up;
                     else if (sym == XK_KP_9)
-                        keyCode = numLock ? XK_9 : XK_Page_Up;
+                        keyCode = Keys::numLock ? XK_9 : XK_Page_Up;
 
                     switch (sym)
                     {
@@ -1327,7 +1342,7 @@ public:
                         case XK_Delete:
                         case XK_Insert:
                             keyPressed = true;
-                            keyCode = (sym & 0xff) | extendedKeyModifier;
+                            keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
                             break;
                         case XK_Tab:
                         case XK_Return:
@@ -1341,7 +1356,7 @@ public:
                             if (sym >= XK_F1 && sym <= XK_F16)
                             {
                                 keyPressed = true;
-                                keyCode = (sym & 0xff) | extendedKeyModifier;
+                                keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
                             }
                             break;
                         }
@@ -1391,22 +1406,22 @@ public:
                 bool buttonMsg = false;
                 const int map = pointerMap [buttonPressEvent->button - Button1];
 
-                if (map == WheelUp || map == WheelDown)
+                if (map == Keys::WheelUp || map == Keys::WheelDown)
                 {
                     handleMouseWheel (0, Point<int> (buttonPressEvent->x, buttonPressEvent->y),
-                                      getEventTime (buttonPressEvent->time), 0, map == WheelDown ? -84.0f : 84.0f);
+                                      getEventTime (buttonPressEvent->time), 0, map == Keys::WheelDown ? -84.0f : 84.0f);
                 }
-                if (map == LeftButton)
+                if (map == Keys::LeftButton)
                 {
                     currentModifiers = currentModifiers.withFlags (ModifierKeys::leftButtonModifier);
                     buttonMsg = true;
                 }
-                else if (map == RightButton)
+                else if (map == Keys::RightButton)
                 {
                     currentModifiers = currentModifiers.withFlags (ModifierKeys::rightButtonModifier);
                     buttonMsg = true;
                 }
-                else if (map == MiddleButton)
+                else if (map == Keys::MiddleButton)
                 {
                     currentModifiers = currentModifiers.withFlags (ModifierKeys::middleButtonModifier);
                     buttonMsg = true;
@@ -1431,11 +1446,11 @@ public:
 
                 const int map = pointerMap [buttonRelEvent->button - Button1];
 
-                if (map == LeftButton)
+                if (map == Keys::LeftButton)
                     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::leftButtonModifier);
-                else if (map == RightButton)
+                else if (map == Keys::RightButton)
                     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::rightButtonModifier);
-                else if (map == MiddleButton)
+                else if (map == Keys::MiddleButton)
                     currentModifiers = currentModifiers.withoutFlags (ModifierKeys::middleButtonModifier);
 
                 handleMouseEvent (0, Point<int> (buttonRelEvent->x, buttonRelEvent->y), currentModifiers,
@@ -1652,11 +1667,11 @@ public:
             {
                 const XClientMessageEvent* const clientMsg = (const XClientMessageEvent*) &event->xclient;
 
-                if (clientMsg->message_type == wm_Protocols && clientMsg->format == 32)
+                if (clientMsg->message_type == Atoms::Protocols && clientMsg->format == 32)
                 {
                     const Atom atom = (Atom) clientMsg->data.l[0];
 
-                    if (atom == wm_ProtocolList [TAKE_FOCUS])
+                    if (atom == Atoms::ProtocolList [Atoms::TAKE_FOCUS])
                     {
                         XWindowAttributes atts;
 
@@ -1668,32 +1683,32 @@ public:
                                 XSetInputFocus (display, clientMsg->window, RevertToParent, clientMsg->data.l[1]);
                         }
                     }
-                    else if (atom == wm_ProtocolList [DELETE_WINDOW])
+                    else if (atom == Atoms::ProtocolList [Atoms::DELETE_WINDOW])
                     {
                         handleUserClosingWindow();
                     }
                 }
-                else if (clientMsg->message_type == XA_XdndEnter)
+                else if (clientMsg->message_type == Atoms::XdndEnter)
                 {
                     handleDragAndDropEnter (clientMsg);
                 }
-                else if (clientMsg->message_type == XA_XdndLeave)
+                else if (clientMsg->message_type == Atoms::XdndLeave)
                 {
                     resetDragAndDrop();
                 }
-                else if (clientMsg->message_type == XA_XdndPosition)
+                else if (clientMsg->message_type == Atoms::XdndPosition)
                 {
                     handleDragAndDropPosition (clientMsg);
                 }
-                else if (clientMsg->message_type == XA_XdndDrop)
+                else if (clientMsg->message_type == Atoms::XdndDrop)
                 {
                     handleDragAndDropDrop (clientMsg);
                 }
-                else if (clientMsg->message_type == XA_XdndStatus)
+                else if (clientMsg->message_type == Atoms::XdndStatus)
                 {
                     handleDragAndDropStatus (clientMsg);
                 }
-                else if (clientMsg->message_type == XA_XdndFinished)
+                else if (clientMsg->message_type == Atoms::XdndFinished)
                 {
                     resetDragAndDrop();
                 }
@@ -1940,6 +1955,8 @@ private:
 #endif
 
     private:
+        enum { repaintTimerPeriod = 1000 / 100 };
+
         LinuxComponentPeer* const peer;
         ScopedPointer <XBitmapImage> image;
         uint32 lastTimeImageUsed;
@@ -1959,8 +1976,8 @@ private:
     int wx, wy, ww, wh;
     Image* taskbarImage;
     bool fullScreen, mapped;
-    int depth;
     Visual* visual;
+    int depth;
     BorderSize windowBorder;
 
     struct MotifWmHints
@@ -1972,18 +1989,29 @@ private:
         unsigned long status;
     };
 
+    static void updateKeyStates (const int keycode, const bool press) throw()
+    {
+        const int keybyte = keycode >> 3;
+        const int keybit = (1 << (keycode & 7));
+
+        if (press)
+            Keys::keyStates [keybyte] |= keybit;
+        else
+            Keys::keyStates [keybyte] &= ~keybit;
+    }
+
     static void updateKeyModifiers (const int status) throw()
     {
         int keyMods = 0;
 
         if (status & ShiftMask)     keyMods |= ModifierKeys::shiftModifier;
         if (status & ControlMask)   keyMods |= ModifierKeys::ctrlModifier;
-        if (status & AltMask)       keyMods |= ModifierKeys::altModifier;
+        if (status & Keys::AltMask)       keyMods |= ModifierKeys::altModifier;
 
         currentModifiers = currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
 
-        numLock  = ((status & NumLockMask) != 0);
-        capsLock = ((status & LockMask) != 0);
+        Keys::numLock  = ((status & Keys::NumLockMask) != 0);
+        Keys::capsLock = ((status & LockMask) != 0);
     }
 
     static bool updateKeyModifiersFromSym (KeySym sym, const bool press) throw()
@@ -2010,13 +2038,13 @@ private:
 
             case XK_Num_Lock:
                 if (press)
-                    numLock = ! numLock;
+                    Keys::numLock = ! Keys::numLock;
 
                 break;
 
             case XK_Caps_Lock:
                 if (press)
-                    capsLock = ! capsLock;
+                    Keys::capsLock = ! Keys::capsLock;
 
                 break;
 
@@ -2047,8 +2075,8 @@ private:
         const int altLeftCode = XKeysymToKeycode (display, XK_Alt_L);
         const int numLockCode = XKeysymToKeycode (display, XK_Num_Lock);
 
-        AltMask = 0;
-        NumLockMask = 0;
+        Keys::AltMask = 0;
+        Keys::NumLockMask = 0;
 
         XModifierKeymap* mapping = XGetModifierMapping (display);
 
@@ -2057,9 +2085,9 @@ private:
             for (int i = 0; i < 8; i++)
             {
                 if (mapping->modifiermap [i << 1] == altLeftCode)
-                    AltMask = 1 << i;
+                    Keys::AltMask = 1 << i;
                 else if (mapping->modifiermap [i << 1] == numLockCode)
-                    NumLockMask = 1 << i;
+                    Keys::NumLockMask = 1 << i;
             }
 
             XFreeModifiermap (mapping);
@@ -2103,30 +2131,6 @@ private:
             ScopedXLock xlock;
             XChangeProperty (display, wndH, hints, hints, 32, PropModeReplace,
                              (unsigned char*) &kwmHints, 1);
-        }
-
-        hints = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
-
-        if (hints != None)
-        {
-            ScopedXLock xlock;
-            int netHints [2];
-            int numHints = 0;
-            if ((styleFlags & windowIsTemporary) != 0)
-                netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_MENU", True);
-            else
-                netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
-
-            if (netHints [numHints] != 0)
-                ++numHints;
-
-            netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
-
-            if (netHints [numHints] != 0)
-                ++numHints;
-
-            XChangeProperty (display, wndH, hints, XA_ATOM, 32, PropModeReplace,
-                             (unsigned char*) &netHints, numHints);
         }
     }
 
@@ -2186,60 +2190,47 @@ private:
         }
     }
 
+    void setWindowType (Window wndH)
+    {
+        int netHints [2];
+        int numHints = 0;
+
+        if ((styleFlags & windowIsTemporary) != 0
+             || ((styleFlags & windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows()))
+        {
+            netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_COMBO", True);
+        }
+        else
+        {
+            netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
+        }
+
+        if (netHints [numHints] != 0)
+            ++numHints;
+
+        netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
+
+        if (netHints [numHints] != 0)
+            ++numHints;
+
+        XChangeProperty (display, wndH, Atoms::WindowType, XA_ATOM, 32, PropModeReplace,
+                         (unsigned char*) &netHints, numHints);
+
+        if ((styleFlags & windowAppearsOnTaskbar) == 0)
+        {
+/*          Atom skipTaskbar = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", False);
+
+            XChangeProperty (display, wndH, wm_WindowState, XA_ATOM, 32, PropModeReplace,
+                             (unsigned char*) &skipTaskbar, 1);
+*/
+        }
+    }
+
     void createWindow()
     {
         ScopedXLock xlock;
-        static bool atomsInitialised = false;
-
-        if (! atomsInitialised)
-        {
-            atomsInitialised = true;
-
-            wm_Protocols                      = XInternAtom (display, "WM_PROTOCOLS", 1);
-            wm_ProtocolList [TAKE_FOCUS]      = XInternAtom (display, "WM_TAKE_FOCUS", 1);
-            wm_ProtocolList [DELETE_WINDOW]   = XInternAtom (display, "WM_DELETE_WINDOW", 1);
-            wm_ChangeState                    = XInternAtom (display, "WM_CHANGE_STATE", 1);
-            wm_State                          = XInternAtom (display, "WM_STATE", 1);
-            wm_ActiveWin                      = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
-
-            XA_XdndAware                      = XInternAtom (display, "XdndAware", 0);
-            XA_XdndEnter                      = XInternAtom (display, "XdndEnter", 0);
-            XA_XdndLeave                      = XInternAtom (display, "XdndLeave", 0);
-            XA_XdndPosition                   = XInternAtom (display, "XdndPosition", 0);
-            XA_XdndStatus                     = XInternAtom (display, "XdndStatus", 0);
-            XA_XdndDrop                       = XInternAtom (display, "XdndDrop", 0);
-            XA_XdndFinished                   = XInternAtom (display, "XdndFinished", 0);
-            XA_XdndSelection                  = XInternAtom (display, "XdndSelection", 0);
-            XA_XdndProxy                      = XInternAtom (display, "XdndProxy", 0);
-
-            XA_XdndTypeList                   = XInternAtom (display, "XdndTypeList", 0);
-            XA_XdndActionList                 = XInternAtom (display, "XdndActionList", 0);
-            XA_XdndActionCopy                 = XInternAtom (display, "XdndActionCopy", 0);
-            XA_XdndActionMove                 = XInternAtom (display, "XdndActionMove", 0);
-            XA_XdndActionLink                 = XInternAtom (display, "XdndActionLink", 0);
-            XA_XdndActionAsk                  = XInternAtom (display, "XdndActionAsk", 0);
-            XA_XdndActionPrivate              = XInternAtom (display, "XdndActionPrivate", 0);
-            XA_XdndActionDescription          = XInternAtom (display, "XdndActionDescription", 0);
-
-            XA_JXSelectionWindowProperty      = XInternAtom (display, "JXSelectionWindowProperty", 0);
-
-            XA_MimeTextPlain                  = XInternAtom (display, "text/plain", 0);
-            XA_MimeTextUriList                = XInternAtom (display, "text/uri-list", 0);
-            XA_MimeRootDrop                   = XInternAtom (display, "application/x-rootwindow-drop", 0);
-        }
-
+        Atoms::initialiseAtoms();
         resetDragAndDrop();
-
-        XA_OtherMime = XA_MimeTextPlain;  //  xxx why??
-        allowedMimeTypeAtoms [0] = XA_MimeTextPlain;
-        allowedMimeTypeAtoms [1] = XA_OtherMime;
-        allowedMimeTypeAtoms [2] = XA_MimeTextUriList;
-
-        allowedActions [0] = XA_XdndActionMove;
-        allowedActions [1] = XA_XdndActionCopy;
-        allowedActions [2] = XA_XdndActionLink;
-        allowedActions [3] = XA_XdndActionAsk;
-        allowedActions [4] = XA_XdndActionPrivate;
 
         // Get defaults for various properties
         const int screen = DefaultScreen (display);
@@ -2294,36 +2285,10 @@ private:
         XSetWMHints (display, wndH, wmHints);
         XFree (wmHints);
 
-        // Set window manager protocols
-        XChangeProperty (display, wndH, wm_Protocols, XA_ATOM, 32, PropModeReplace,
-                         (unsigned char*) wm_ProtocolList, 2);
+        // Set the window type
+        setWindowType (wndH);
 
-        // Set drag and drop flags
-        XChangeProperty (display, wndH, XA_XdndTypeList, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) allowedMimeTypeAtoms, numElementsInArray (allowedMimeTypeAtoms));
-
-        XChangeProperty (display, wndH, XA_XdndActionList, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) allowedActions, numElementsInArray (allowedActions));
-
-        XChangeProperty (display, wndH, XA_XdndActionDescription, XA_STRING, 8, PropModeReplace,
-                         (const unsigned char*) "", 0);
-
-        unsigned long dndVersion = ourDndVersion;
-        XChangeProperty (display, wndH, XA_XdndAware, XA_ATOM, 32, PropModeReplace,
-                         (const unsigned char*) &dndVersion, 1);
-
-        if ((styleFlags & windowHasDropShadow) != 0 && Desktop::canUseSemiTransparentWindows())
-        {
-        }
-
-        if ((styleFlags & windowIsTemporary) != 0)
-        {
-        }
-
-        if ((styleFlags & windowAppearsOnTaskbar) == 0)
-        {
-        }
-
+        // Define decoration
         if ((styleFlags & windowHasTitleBar) == 0)
             removeWindowDecorations (wndH);
         else
@@ -2331,6 +2296,29 @@ private:
 
         // Set window name
         setWindowTitle (wndH, getComponent()->getName());
+
+        // Associate the PID, allowing to be shut down when something goes wrong
+        unsigned long pid = getpid();
+        XChangeProperty (display, wndH, Atoms::Pid, XA_CARDINAL, 32, PropModeReplace,
+                         (unsigned char*) &pid, 1);
+
+        // Set window manager protocols
+        XChangeProperty (display, wndH, Atoms::Protocols, XA_ATOM, 32, PropModeReplace,
+                         (unsigned char*) Atoms::ProtocolList, 2);
+
+        // Set drag and drop flags
+        XChangeProperty (display, wndH, Atoms::XdndTypeList, XA_ATOM, 32, PropModeReplace,
+                         (const unsigned char*) Atoms::allowedMimeTypes, numElementsInArray (Atoms::allowedMimeTypes));
+
+        XChangeProperty (display, wndH, Atoms::XdndActionList, XA_ATOM, 32, PropModeReplace,
+                         (const unsigned char*) Atoms::allowedActions, numElementsInArray (Atoms::allowedActions));
+
+        XChangeProperty (display, wndH, Atoms::XdndActionDescription, XA_STRING, 8, PropModeReplace,
+                         (const unsigned char*) "", 0);
+
+        unsigned long dndVersion = Atoms::DndVersion;
+        XChangeProperty (display, wndH, Atoms::XdndAware, XA_ATOM, 32, PropModeReplace,
+                         (const unsigned char*) &dndVersion, 1);
 
         // Initialise the pointer and keyboard mapping
         // This is not the same as the logical pointer mapping the X server uses:
@@ -2345,20 +2333,20 @@ private:
 
             if (numButtons == 2)
             {
-                pointerMap[0] = LeftButton;
-                pointerMap[1] = RightButton;
-                pointerMap[2] = pointerMap[3] = pointerMap[4] = NoButton;
+                pointerMap[0] = Keys::LeftButton;
+                pointerMap[1] = Keys::RightButton;
+                pointerMap[2] = pointerMap[3] = pointerMap[4] = Keys::NoButton;
             }
             else if (numButtons >= 3)
             {
-                pointerMap[0] = LeftButton;
-                pointerMap[1] = MiddleButton;
-                pointerMap[2] = RightButton;
+                pointerMap[0] = Keys::LeftButton;
+                pointerMap[1] = Keys::MiddleButton;
+                pointerMap[2] = Keys::RightButton;
 
                 if (numButtons >= 5)
                 {
-                    pointerMap[3] = WheelUp;
-                    pointerMap[4] = WheelDown;
+                    pointerMap[3] = Keys::WheelUp;
+                    pointerMap[4] = Keys::WheelDown;
                 }
             }
 
@@ -2495,7 +2483,7 @@ private:
     {
         XClientMessageEvent msg;
         zerostruct (msg);
-        msg.message_type = XA_XdndStatus;
+        msg.message_type = Atoms::XdndStatus;
         msg.data.l[1] = (acceptDrop ? 1 : 0) | 2; // 2 indicates that we want to receive position messages
         msg.data.l[4] = dropAction;
 
@@ -2506,7 +2494,7 @@ private:
     {
         XClientMessageEvent msg;
         zerostruct (msg);
-        msg.message_type = XA_XdndLeave;
+        msg.message_type = Atoms::XdndLeave;
         sendDragAndDropMessage (msg);
     }
 
@@ -2514,7 +2502,7 @@ private:
     {
         XClientMessageEvent msg;
         zerostruct (msg);
-        msg.message_type = XA_XdndFinished;
+        msg.message_type = Atoms::XdndFinished;
         sendDragAndDropMessage (msg);
     }
 
@@ -2547,13 +2535,13 @@ private:
             lastDropPos = dropPos;
             dragAndDropTimestamp = clientMsg->data.l[3];
 
-            Atom targetAction = XA_XdndActionCopy;
+            Atom targetAction = Atoms::XdndActionCopy;
 
-            for (int i = numElementsInArray (allowedActions); --i >= 0;)
+            for (int i = numElementsInArray (Atoms::allowedActions); --i >= 0;)
             {
-                if ((Atom) clientMsg->data.l[4] == allowedActions[i])
+                if ((Atom) clientMsg->data.l[4] == Atoms::allowedActions[i])
                 {
-                    targetAction = allowedActions[i];
+                    targetAction = Atoms::allowedActions[i];
                     break;
                 }
             }
@@ -2589,9 +2577,9 @@ private:
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        const int dndCurrentVersion = (int) (clientMsg->data.l[1] & 0xff000000) >> 24;
+        const unsigned long dndCurrentVersion = static_cast <unsigned long> (clientMsg->data.l[1] & 0xff000000) >> 24;
 
-        if (dndCurrentVersion < 3 || dndCurrentVersion > ourDndVersion)
+        if (dndCurrentVersion < 3 || dndCurrentVersion > Atoms::DndVersion)
         {
             dragAndDropSourceWindow = 0;
             return;
@@ -2607,7 +2595,7 @@ private:
             unsigned char* data = 0;
 
             ScopedXLock xlock;
-            XGetWindowProperty (display, dragAndDropSourceWindow, XA_XdndTypeList,
+            XGetWindowProperty (display, dragAndDropSourceWindow, Atoms::XdndTypeList,
                                 0, 0x8000000L, False, XA_ATOM, &actual, &format,
                                 &count, &remaining, &data);
 
@@ -2640,9 +2628,9 @@ private:
         }
 
         for (int i = 0; i < srcMimeTypeAtomList.size() && dragAndDropCurrentMimeType == 0; ++i)
-            for (int j = 0; j < numElementsInArray (allowedMimeTypeAtoms); ++j)
-                if (srcMimeTypeAtomList[i] == allowedMimeTypeAtoms[j])
-                    dragAndDropCurrentMimeType = allowedMimeTypeAtoms[j];
+            for (int j = 0; j < numElementsInArray (Atoms::allowedMimeTypes); ++j)
+                if (srcMimeTypeAtomList[i] == Atoms::allowedMimeTypes[j])
+                    dragAndDropCurrentMimeType = Atoms::allowedMimeTypes[j];
 
         handleDragAndDropPosition (clientMsg);
     }
@@ -2705,9 +2693,9 @@ private:
 
             ScopedXLock xlock;
             XConvertSelection (display,
-                               XA_XdndSelection,
+                               Atoms::XdndSelection,
                                dragAndDropCurrentMimeType,
-                               XA_JXSelectionWindowProperty,
+                               XInternAtom (display, "JXSelectionWindowProperty", 0),
                                windowH,
                                dragAndDropTimestamp);
         }
@@ -2717,11 +2705,9 @@ private:
     int dragAndDropTimestamp;
     Point<int> lastDropPos;
 
-    Atom XA_OtherMime, dragAndDropCurrentMimeType;
+    Atom dragAndDropCurrentMimeType;
     Window dragAndDropSourceWindow;
 
-    unsigned int allowedActions[5];
-    unsigned int allowedMimeTypeAtoms[3];
     Array <Atom> srcMimeTypeAtomList;
 
     static int pointerMap[5];
@@ -2797,7 +2783,7 @@ void juce_windowMessageReceive (XEvent* event)
             case KeymapNotify:
             {
                 const XKeymapEvent* const keymapEvent = (const XKeymapEvent*) &event->xkeymap;
-                memcpy (keyStates, keymapEvent->key_vector, 32);
+                memcpy (Keys::keyStates, keymapEvent->key_vector, 32);
                 break;
             }
 
@@ -3466,59 +3452,59 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 }
 
 //==============================================================================
-const int KeyPress::spaceKey            = XK_space & 0xff;
-const int KeyPress::returnKey           = XK_Return & 0xff;
-const int KeyPress::escapeKey           = XK_Escape & 0xff;
-const int KeyPress::backspaceKey        = XK_BackSpace & 0xff;
-const int KeyPress::leftKey             = (XK_Left & 0xff) | extendedKeyModifier;
-const int KeyPress::rightKey            = (XK_Right & 0xff) | extendedKeyModifier;
-const int KeyPress::upKey               = (XK_Up & 0xff) | extendedKeyModifier;
-const int KeyPress::downKey             = (XK_Down & 0xff) | extendedKeyModifier;
-const int KeyPress::pageUpKey           = (XK_Page_Up & 0xff) | extendedKeyModifier;
-const int KeyPress::pageDownKey         = (XK_Page_Down & 0xff) | extendedKeyModifier;
-const int KeyPress::endKey              = (XK_End & 0xff) | extendedKeyModifier;
-const int KeyPress::homeKey             = (XK_Home & 0xff) | extendedKeyModifier;
-const int KeyPress::insertKey           = (XK_Insert & 0xff) | extendedKeyModifier;
-const int KeyPress::deleteKey           = (XK_Delete & 0xff) | extendedKeyModifier;
-const int KeyPress::tabKey              = XK_Tab & 0xff;
-const int KeyPress::F1Key               = (XK_F1 & 0xff) | extendedKeyModifier;
-const int KeyPress::F2Key               = (XK_F2 & 0xff) | extendedKeyModifier;
-const int KeyPress::F3Key               = (XK_F3 & 0xff) | extendedKeyModifier;
-const int KeyPress::F4Key               = (XK_F4 & 0xff) | extendedKeyModifier;
-const int KeyPress::F5Key               = (XK_F5 & 0xff) | extendedKeyModifier;
-const int KeyPress::F6Key               = (XK_F6 & 0xff) | extendedKeyModifier;
-const int KeyPress::F7Key               = (XK_F7 & 0xff) | extendedKeyModifier;
-const int KeyPress::F8Key               = (XK_F8 & 0xff) | extendedKeyModifier;
-const int KeyPress::F9Key               = (XK_F9 & 0xff) | extendedKeyModifier;
-const int KeyPress::F10Key              = (XK_F10 & 0xff) | extendedKeyModifier;
-const int KeyPress::F11Key              = (XK_F11 & 0xff) | extendedKeyModifier;
-const int KeyPress::F12Key              = (XK_F12 & 0xff) | extendedKeyModifier;
-const int KeyPress::F13Key              = (XK_F13 & 0xff) | extendedKeyModifier;
-const int KeyPress::F14Key              = (XK_F14 & 0xff) | extendedKeyModifier;
-const int KeyPress::F15Key              = (XK_F15 & 0xff) | extendedKeyModifier;
-const int KeyPress::F16Key              = (XK_F16 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad0          = (XK_KP_0 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad1          = (XK_KP_1 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad2          = (XK_KP_2 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad3          = (XK_KP_3 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad4          = (XK_KP_4 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad5          = (XK_KP_5 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad6          = (XK_KP_6 & 0xff) | extendedKeyModifier;
-const int KeyPress::numberPad7          = (XK_KP_7 & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPad8          = (XK_KP_8 & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPad9          = (XK_KP_9 & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadAdd            = (XK_KP_Add & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadSubtract       = (XK_KP_Subtract & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadMultiply       = (XK_KP_Multiply & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadDivide         = (XK_KP_Divide & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadSeparator      = (XK_KP_Separator & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadDecimalPoint   = (XK_KP_Decimal & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadEquals         = (XK_KP_Equal & 0xff)| extendedKeyModifier;
-const int KeyPress::numberPadDelete         = (XK_KP_Delete & 0xff)| extendedKeyModifier;
-const int KeyPress::playKey             = (0xffeeff00) | extendedKeyModifier;
-const int KeyPress::stopKey             = (0xffeeff01) | extendedKeyModifier;
-const int KeyPress::fastForwardKey      = (0xffeeff02) | extendedKeyModifier;
-const int KeyPress::rewindKey           = (0xffeeff03) | extendedKeyModifier;
+const int KeyPress::spaceKey                = XK_space & 0xff;
+const int KeyPress::returnKey               = XK_Return & 0xff;
+const int KeyPress::escapeKey               = XK_Escape & 0xff;
+const int KeyPress::backspaceKey            = XK_BackSpace & 0xff;
+const int KeyPress::leftKey                 = (XK_Left & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::rightKey                = (XK_Right & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::upKey                   = (XK_Up & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::downKey                 = (XK_Down & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::pageUpKey               = (XK_Page_Up & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::pageDownKey             = (XK_Page_Down & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::endKey                  = (XK_End & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::homeKey                 = (XK_Home & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::insertKey               = (XK_Insert & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::deleteKey               = (XK_Delete & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::tabKey                  = XK_Tab & 0xff;
+const int KeyPress::F1Key                   = (XK_F1 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F2Key                   = (XK_F2 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F3Key                   = (XK_F3 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F4Key                   = (XK_F4 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F5Key                   = (XK_F5 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F6Key                   = (XK_F6 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F7Key                   = (XK_F7 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F8Key                   = (XK_F8 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F9Key                   = (XK_F9 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F10Key                  = (XK_F10 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F11Key                  = (XK_F11 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F12Key                  = (XK_F12 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F13Key                  = (XK_F13 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F14Key                  = (XK_F14 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F15Key                  = (XK_F15 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::F16Key                  = (XK_F16 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad0              = (XK_KP_0 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad1              = (XK_KP_1 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad2              = (XK_KP_2 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad3              = (XK_KP_3 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad4              = (XK_KP_4 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad5              = (XK_KP_5 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad6              = (XK_KP_6 & 0xff) | Keys::extendedKeyModifier;
+const int KeyPress::numberPad7              = (XK_KP_7 & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPad8              = (XK_KP_8 & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPad9              = (XK_KP_9 & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadAdd            = (XK_KP_Add & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadSubtract       = (XK_KP_Subtract & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadMultiply       = (XK_KP_Multiply & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadDivide         = (XK_KP_Divide & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadSeparator      = (XK_KP_Separator & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadDecimalPoint   = (XK_KP_Decimal & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadEquals         = (XK_KP_Equal & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::numberPadDelete         = (XK_KP_Delete & 0xff)| Keys::extendedKeyModifier;
+const int KeyPress::playKey                 = (0xffeeff00) | Keys::extendedKeyModifier;
+const int KeyPress::stopKey                 = (0xffeeff01) | Keys::extendedKeyModifier;
+const int KeyPress::fastForwardKey          = (0xffeeff02) | Keys::extendedKeyModifier;
+const int KeyPress::rewindKey               = (0xffeeff03) | Keys::extendedKeyModifier;
 
 
 #endif
