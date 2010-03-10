@@ -54,8 +54,6 @@ extern bool juce_IsRunningInWine();
   #define AC_SRC_ALPHA  0x01
 #endif
 
-#define DEBUG_REPAINT_TIMES 0
-
 static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
@@ -82,10 +80,6 @@ bool Desktop::canUseSemiTransparentWindows() throw()
 
     return updateLayeredWindow != 0;
 }
-
-//==============================================================================
-#undef DefWindowProc
-#define DefWindowProc DefWindowProcW
 
 //==============================================================================
 const int extendedKeyModifier               = 0x10000;
@@ -1094,9 +1088,6 @@ private:
     //==============================================================================
     void handlePaintMessage()
     {
-#if DEBUG_REPAINT_TIMES
-        const double paintStart = Time::getMillisecondCounterHiRes();
-#endif
         HRGN rgn = CreateRectRgn (0, 0, 0, 0);
         const int regionType = GetUpdateRgn (hwnd, rgn, false);
 
@@ -1233,11 +1224,6 @@ private:
 #endif
 
         lastPaintTime = Time::getMillisecondCounter();
-
-#if DEBUG_REPAINT_TIMES
-        const double elapsed = Time::getMillisecondCounterHiRes() - paintStart;
-        Logger::outputDebugString (T("repaint time: ") + String (elapsed, 2));
-#endif
     }
 
     //==============================================================================
@@ -1674,7 +1660,7 @@ public:
         if (peer != 0)
             return peer->peerWindowProc (h, message, wParam, lParam);
 
-        return DefWindowProc (h, message, wParam, lParam);
+        return DefWindowProcW (h, message, wParam, lParam);
     }
 
 private:
@@ -2103,7 +2089,7 @@ private:
             }
         }
 
-        return DefWindowProc (h, message, wParam, lParam);
+        return DefWindowProcW (h, message, wParam, lParam);
     }
 
     bool sendInputAttemptWhenModalMessage()

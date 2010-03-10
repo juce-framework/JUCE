@@ -36,22 +36,17 @@ static bool isQTAvailable = false;
 
 
 //==============================================================================
-struct QTMovieCompInternal
+class QuickTimeMovieComponent::Pimpl
 {
-    QTMovieCompInternal()
-        : dataHandle (0)
+public:
+    Pimpl() : dataHandle (0)
     {
     }
 
-    ~QTMovieCompInternal()
+    ~Pimpl()
     {
         clearHandle();
     }
-
-    IQTControlPtr qtControlInternal;
-    IQTMoviePtr qtMovieInternal;
-
-    Handle dataHandle;
 
     void clearHandle()
     {
@@ -61,38 +56,33 @@ struct QTMovieCompInternal
             dataHandle = 0;
         }
     }
-};
 
-#define qtControl  (((QTMovieCompInternal*) internal)->qtControlInternal)
-#define qtMovie    (((QTMovieCompInternal*) internal)->qtMovieInternal)
+    IQTControlPtr qtControl;
+    IQTMoviePtr qtMovie;
+    Handle dataHandle;
+};
 
 //==============================================================================
 QuickTimeMovieComponent::QuickTimeMovieComponent()
     : movieLoaded (false),
       controllerVisible (true)
 {
-    internal = new QTMovieCompInternal();
+    pimpl = new Pimpl();
     setMouseEventsAllowed (false);
 }
 
 QuickTimeMovieComponent::~QuickTimeMovieComponent()
 {
     closeMovie();
-    qtControl = 0;
-
+    pimpl->qtControl = 0;
     deleteControl();
-
-    delete internal;
-    internal = 0;
+    pimpl = 0;
 }
 
 bool QuickTimeMovieComponent::isQuickTimeAvailable() throw()
 {
     if (! isQTAvailable)
-    {
-        isQTAvailable = (InitializeQTML (0) == noErr)
-                           && (EnterMovies() == noErr);
-    }
+        isQTAvailable = (InitializeQTML (0) == noErr) && (EnterMovies() == noErr);
 
     return isQTAvailable;
 }
@@ -107,14 +97,14 @@ void QuickTimeMovieComponent::createControlIfNeeded()
         if (createControl (&qtIID))
         {
             const IID qtInterfaceIID = __uuidof (IQTControl);
-            qtControl = (IQTControl*) queryInterface (&qtInterfaceIID);
+            pimpl->qtControl = (IQTControl*) queryInterface (&qtInterfaceIID);
 
-            if (qtControl != 0)
+            if (pimpl->qtControl != 0)
             {
-                qtControl->Release(); // it has one ref too many at this point
+                pimpl->qtControl->Release(); // it has one ref too many at this point
 
-                qtControl->QuickTimeInitialize();
-                qtControl->PutSizing (qtMovieFitsControl);
+                pimpl->qtControl->QuickTimeInitialize();
+                pimpl->qtControl->PutSizing (qtMovieFitsControl);
 
                 if (movieFile != File::nonexistent)
                     loadMovie (movieFile, controllerVisible);
@@ -131,36 +121,38 @@ bool QuickTimeMovieComponent::isControlCreated() const
 bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
                                          const bool isControllerVisible)
 {
+    const ScopedPointer<InputStream> movieStreamDeleter (movieStream);
+
     movieFile = File::nonexistent;
     movieLoaded = false;
-    qtMovie = 0;
+    pimpl->qtMovie = 0;
     controllerVisible = isControllerVisible;
     createControlIfNeeded();
 
     if (isControlCreated())
     {
-        if (qtControl != 0)
+        if (pimpl->qtControl != 0)
         {
-            qtControl->Put_MovieHandle (0);
-            ((QTMovieCompInternal*) internal)->clearHandle();
+            pimpl->qtControl->Put_MovieHandle (0);
+            pimpl->clearHandle();
 
             Movie movie;
-            if (juce_OpenQuickTimeMovieFromStream (movieStream, movie, ((QTMovieCompInternal*) internal)->dataHandle))
+            if (juce_OpenQuickTimeMovieFromStream (movieStream, movie, pimpl->dataHandle))
             {
-                qtControl->Put_MovieHandle ((long) (pointer_sized_int) movie);
+                pimpl->qtControl->Put_MovieHandle ((long) (pointer_sized_int) movie);
 
-                qtMovie = qtControl->GetMovie();
+                pimpl->qtMovie = pimpl->qtControl->GetMovie();
 
-                if (qtMovie != 0)
-                    qtMovie->PutMovieControllerType (isControllerVisible ? qtMovieControllerTypeStandard
-                                                                         : qtMovieControllerTypeNone);
+                if (pimpl->qtMovie != 0)
+                    pimpl->qtMovie->PutMovieControllerType (isControllerVisible ? qtMovieControllerTypeStandard
+                                                                                : qtMovieControllerTypeNone);
             }
 
             if (movie == 0)
-                ((QTMovieCompInternal*) internal)->clearHandle();
+                pimpl->clearHandle();
         }
 
-        movieLoaded = (qtMovie != 0);
+        movieLoaded = (pimpl->qtMovie != 0);
     }
     else
     {
@@ -169,7 +161,6 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
         jassertfalse
     }
 
-    delete movieStream;
     return movieLoaded;
 }
 
@@ -178,12 +169,12 @@ void QuickTimeMovieComponent::closeMovie()
     stop();
     movieFile = File::nonexistent;
     movieLoaded = false;
-    qtMovie = 0;
+    pimpl->qtMovie = 0;
 
-    if (qtControl != 0)
-        qtControl->Put_MovieHandle (0);
+    if (pimpl->qtControl != 0)
+        pimpl->qtControl->Put_MovieHandle (0);
 
-    ((QTMovieCompInternal*) internal)->clearHandle();
+    pimpl->clearHandle();
 }
 
 const File QuickTimeMovieComponent::getCurrentMovieFile() const
@@ -198,17 +189,17 @@ bool QuickTimeMovieComponent::isMovieOpen() const
 
 double QuickTimeMovieComponent::getMovieDuration() const
 {
-    if (qtMovie != 0)
-        return qtMovie->GetDuration() / (double) qtMovie->GetTimeScale();
+    if (pimpl->qtMovie != 0)
+        return pimpl->qtMovie->GetDuration() / (double) pimpl->qtMovie->GetTimeScale();
 
     return 0.0;
 }
 
 void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
 {
-    if (qtMovie != 0)
+    if (pimpl->qtMovie != 0)
     {
-        struct QTRECT r = qtMovie->GetNaturalRect();
+        struct QTRECT r = pimpl->qtMovie->GetNaturalRect();
 
         width = r.right - r.left;
         height = r.bottom - r.top;
@@ -221,67 +212,67 @@ void QuickTimeMovieComponent::getMovieNormalSize (int& width, int& height) const
 
 void QuickTimeMovieComponent::play()
 {
-    if (qtMovie != 0)
-        qtMovie->Play();
+    if (pimpl->qtMovie != 0)
+        pimpl->qtMovie->Play();
 }
 
 void QuickTimeMovieComponent::stop()
 {
-    if (qtMovie != 0)
-        qtMovie->Stop();
+    if (pimpl->qtMovie != 0)
+        pimpl->qtMovie->Stop();
 }
 
 bool QuickTimeMovieComponent::isPlaying() const
 {
-    return qtMovie != 0 && qtMovie->GetRate() != 0.0f;
+    return pimpl->qtMovie != 0 && pimpl->qtMovie->GetRate() != 0.0f;
 }
 
 void QuickTimeMovieComponent::setPosition (const double seconds)
 {
-    if (qtMovie != 0)
-        qtMovie->PutTime ((long) (seconds * qtMovie->GetTimeScale()));
+    if (pimpl->qtMovie != 0)
+        pimpl->qtMovie->PutTime ((long) (seconds * pimpl->qtMovie->GetTimeScale()));
 }
 
 double QuickTimeMovieComponent::getPosition() const
 {
-    if (qtMovie != 0)
-        return qtMovie->GetTime() / (double) qtMovie->GetTimeScale();
+    if (pimpl->qtMovie != 0)
+        return pimpl->qtMovie->GetTime() / (double) pimpl->qtMovie->GetTimeScale();
 
     return 0.0;
 }
 
 void QuickTimeMovieComponent::setSpeed (const float newSpeed)
 {
-    if (qtMovie != 0)
-        qtMovie->PutRate (newSpeed);
+    if (pimpl->qtMovie != 0)
+        pimpl->qtMovie->PutRate (newSpeed);
 }
 
 void QuickTimeMovieComponent::setMovieVolume (const float newVolume)
 {
-    if (qtMovie != 0)
+    if (pimpl->qtMovie != 0)
     {
-        qtMovie->PutAudioVolume (newVolume);
-        qtMovie->PutAudioMute (newVolume <= 0);
+        pimpl->qtMovie->PutAudioVolume (newVolume);
+        pimpl->qtMovie->PutAudioMute (newVolume <= 0);
     }
 }
 
 float QuickTimeMovieComponent::getMovieVolume() const
 {
-    if (qtMovie != 0)
-        return qtMovie->GetAudioVolume();
+    if (pimpl->qtMovie != 0)
+        return pimpl->qtMovie->GetAudioVolume();
 
     return 0.0f;
 }
 
 void QuickTimeMovieComponent::setLooping (const bool shouldLoop)
 {
-    if (qtMovie != 0)
-        qtMovie->PutLoop (shouldLoop);
+    if (pimpl->qtMovie != 0)
+        pimpl->qtMovie->PutLoop (shouldLoop);
 }
 
 bool QuickTimeMovieComponent::isLooping() const
 {
-    return qtMovie != 0 && qtMovie->GetLoop();
+    return pimpl->qtMovie != 0 && pimpl->qtMovie->GetLoop();
 }
 
 bool QuickTimeMovieComponent::isControllerVisible() const
@@ -465,7 +456,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
 bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
                                          const bool isControllerVisible)
 {
-    const bool ok = loadMovie ((InputStream*) movieFile_.createInputStream(), isControllerVisible);
+    const bool ok = loadMovie (static_cast <InputStream*> (movieFile_.createInputStream()), isControllerVisible);
     movieFile = movieFile_;
     return ok;
 }
@@ -473,7 +464,7 @@ bool QuickTimeMovieComponent::loadMovie (const File& movieFile_,
 bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
                                          const bool isControllerVisible)
 {
-    return loadMovie ((InputStream*) movieURL.createInputStream (false), isControllerVisible);
+    return loadMovie (static_cast <InputStream*> (movieURL.createInputStream (false)), isControllerVisible);
 }
 
 void QuickTimeMovieComponent::goToStart()

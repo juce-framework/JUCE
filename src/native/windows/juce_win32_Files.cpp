@@ -429,11 +429,9 @@ bool File::isOnRemovableDrive() const
 }
 
 //==============================================================================
-#define MAX_PATH_CHARS (MAX_PATH + 256)
-
 static const File juce_getSpecialFolderPath (int type)
 {
-    WCHAR path [MAX_PATH_CHARS];
+    WCHAR path [MAX_PATH + 256];
 
     if (SHGetSpecialFolderPath (0, path, type, 0))
         return File (String (path));
@@ -493,9 +491,9 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
         {
             HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
 
-            WCHAR dest [MAX_PATH_CHARS];
+            WCHAR dest [MAX_PATH + 256];
             dest[0] = 0;
-            GetModuleFileName (moduleHandle, dest, MAX_PATH_CHARS);
+            GetModuleFileName (moduleHandle, dest, numElementsInArray (dest));
             return File (String (dest));
         }
         break;
@@ -511,9 +509,9 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
 //==============================================================================
 const File File::getCurrentWorkingDirectory()
 {
-    WCHAR dest [MAX_PATH_CHARS];
+    WCHAR dest [MAX_PATH + 256];
     dest[0] = 0;
-    GetCurrentDirectory (MAX_PATH_CHARS, dest);
+    GetCurrentDirectory (numElementsInArray (dest), dest);
     return File (String (dest));
 }
 

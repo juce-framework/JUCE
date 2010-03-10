@@ -112,8 +112,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_VSTMidiEventList.h"
 
 #if ! JUCE_WIN32
- #define _fpreset()
- #define _clearfp()
+ static void _fpreset() {}
+ static void _clearfp() {}
 #endif
 
 extern void juce_callAnyTimersSynchronously();

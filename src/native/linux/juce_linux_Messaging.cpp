@@ -35,22 +35,10 @@
 Display* display = 0;     // This is also referenced from WindowDriver.cpp
 Window juce_messageWindowHandle = None;
 
-#define SpecialAtom         "JUCESpecialAtom"
-#define BroadcastAtom       "JUCEBroadcastAtom"
-#define SpecialCallbackAtom "JUCESpecialCallbackAtom"
+XContext improbableNumber;   // This is referenced from Windowing.cpp
 
-static Atom specialId;
-static Atom broadcastId;
-static Atom specialCallbackId;
-
-// This is referenced from Windowing.cpp
-XContext improbableNumber;
-
-// Defined in Windowing.cpp
-extern void juce_windowMessageReceive (XEvent* event);
-
-// Defined in Clipboard.cpp
-extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);
+extern void juce_windowMessageReceive (XEvent* event);  // Defined in Windowing.cpp
+extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);  // Defined in Clipboard.cpp
 
 //==============================================================================
 ScopedXLock::ScopedXLock()       { XLockDisplay (display); }
@@ -290,11 +278,6 @@ void MessageManager::doPlatformSpecificInitialisation()
     Window root = RootWindow (display, screen);
     Visual* visual = DefaultVisual (display, screen);
 
-    // Create atoms for our ClientMessages (these cannot be deleted)
-    specialId = XInternAtom (display, SpecialAtom, false);
-    broadcastId = XInternAtom (display, BroadcastAtom, false);
-    specialCallbackId = XInternAtom (display, SpecialCallbackAtom, false);
-
     // Create a context to store user data associated with Windows we
     // create in WindowDriver
     improbableNumber = XUniqueContext();
@@ -339,29 +322,6 @@ bool juce_postMessageToSystemQueue (void* message)
     juce_internalMessageQueue->postMessage ((Message*) message);
     return true;
 }
-
-/*bool juce_postMessageToX11Queue (void *message)
-{
-    XClientMessageEvent clientMsg;
-    clientMsg.display = display;
-    clientMsg.window = juce_messageWindowHandle;
-    clientMsg.type = ClientMessage;
-    clientMsg.format = 32;
-    clientMsg.message_type = specialId;
-#if JUCE_64BIT
-    clientMsg.data.l[0] = (long) (0x00000000ffffffff & (((uint64) message) >> 32));
-    clientMsg.data.l[1] = (long) (0x00000000ffffffff & (long) message);
-#else
-    clientMsg.data.l[0] = (long) message;
-#endif
-
-    XSendEvent (display, juce_messageWindowHandle, false,
-                NoEventMask, (XEvent*) &clientMsg);
-
-    XFlush (display); // This is necessary to ensure the event is delivered
-
-    return true;
-}*/
 
 void MessageManager::broadcastMessage (const String& value) throw()
 {

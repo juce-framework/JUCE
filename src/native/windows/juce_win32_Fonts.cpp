@@ -314,11 +314,8 @@ public:
 
             while ((char*) pheader < data + bufSize)
             {
-                #define remapX(v) (scaleX * (v).x.value)
-                #define remapY(v) (scaleY * (v).y.value)
-
-                float x = remapX (pheader->pfxStart);
-                float y = remapY (pheader->pfxStart);
+                float x = scaleX * pheader->pfxStart.x.value;
+                float y = scaleY * pheader->pfxStart.y.value;
 
                 glyphPath.startNewSubPath (x, y);
 
@@ -331,8 +328,8 @@ public:
                     {
                         for (int i = 0; i < curve->cpfx; ++i)
                         {
-                            x = remapX (curve->apfx [i]);
-                            y = remapY (curve->apfx [i]);
+                            x = scaleX * curve->apfx[i].x.value;
+                            y = scaleY * curve->apfx[i].y.value;
 
                             glyphPath.lineTo (x, y);
                         }
@@ -341,19 +338,19 @@ public:
                     {
                         for (int i = 0; i < curve->cpfx - 1; ++i)
                         {
-                            const float x2 = remapX (curve->apfx [i]);
-                            const float y2 = remapY (curve->apfx [i]);
+                            const float x2 = scaleX * curve->apfx[i].x.value;
+                            const float y2 = scaleY * curve->apfx[i].y.value;
                             float x3, y3;
 
                             if (i < curve->cpfx - 2)
                             {
-                                x3 = 0.5f * (x2 + remapX (curve->apfx [i + 1]));
-                                y3 = 0.5f * (y2 + remapY (curve->apfx [i + 1]));
+                                x3 = 0.5f * (x2 + scaleX * curve->apfx[i + 1].x.value);
+                                y3 = 0.5f * (y2 + scaleY * curve->apfx[i + 1].y.value);
                             }
                             else
                             {
-                                x3 = remapX (curve->apfx [i + 1]);
-                                y3 = remapY (curve->apfx [i + 1]);
+                                x3 = scaleX * curve->apfx[i + 1].x.value;
+                                y3 = scaleY * curve->apfx[i + 1].y.value;
                             }
 
                             glyphPath.quadraticTo (x2, y2, x3, y3);

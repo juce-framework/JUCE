@@ -27,11 +27,10 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-#define U_ISOFS_SUPER_MAGIC     (short) 0x9660   // linux/iso_fs.h
-#define U_MSDOS_SUPER_MAGIC     (short) 0x4d44   // linux/msdos_fs.h
-#define U_NFS_SUPER_MAGIC       (short) 0x6969   // linux/nfs_fs.h
-#define U_SMB_SUPER_MAGIC       (short) 0x517B   // linux/smb_fs.h
-
+static const short U_ISOFS_SUPER_MAGIC = 0x9660;   // linux/iso_fs.h
+static const short U_MSDOS_SUPER_MAGIC = 0x4d44;   // linux/msdos_fs.h
+static const short U_NFS_SUPER_MAGIC = 0x6969;     // linux/nfs_fs.h
+static const short U_SMB_SUPER_MAGIC = 0x517B;     // linux/smb_fs.h
 
 //==============================================================================
 void juce_getFileTimes (const String& fileName,

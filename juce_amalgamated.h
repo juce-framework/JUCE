@@ -26894,7 +26894,10 @@ private:
 
 	void createControlIfNeeded();
 	bool isControlCreated() const;
-	void* internal;
+
+	class Pimpl;
+	friend class ScopedPointer <Pimpl>;
+	ScopedPointer <Pimpl> pimpl;
 #else
 	void* movie;
 #endif

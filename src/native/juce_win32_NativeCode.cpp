@@ -23,7 +23,6 @@
   ==============================================================================
 */
 
-//==============================================================================
 /*
     This file wraps together all the win32-specific code, so that
     we can include all the native headers just once, and compile all our
@@ -31,9 +30,11 @@
     the rest of the codebase.
 */
 
-//==============================================================================
-#include "windows/juce_win32_NativeIncludes.h"
+#include "../core/juce_TargetPlatform.h"
 
+#if JUCE_WINDOWS
+
+#include "windows/juce_win32_NativeIncludes.h"
 #include "../core/juce_StandardHeader.h"
 
 BEGIN_JUCE_NAMESPACE
@@ -118,3 +119,5 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 END_JUCE_NAMESPACE
+
+#endif

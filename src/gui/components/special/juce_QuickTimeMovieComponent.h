@@ -209,14 +209,15 @@ private:
     bool movieLoaded, controllerVisible, looping;
 
 #if JUCE_WINDOWS
-    /** @internal */
     void parentHierarchyChanged();
-    /** @internal */
     void visibilityChanged();
 
     void createControlIfNeeded();
     bool isControlCreated() const;
-    void* internal;
+
+    class Pimpl;
+    friend class ScopedPointer <Pimpl>;
+    ScopedPointer <Pimpl> pimpl;
 #else
     void* movie;
 #endif

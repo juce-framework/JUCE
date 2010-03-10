@@ -71,7 +71,7 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-#define theMovie ((QTMovie*) movie)
+#define theMovie (static_cast <QTMovie*> (movie))
 
 //==============================================================================
 QuickTimeMovieComponent::QuickTimeMovieComponent()

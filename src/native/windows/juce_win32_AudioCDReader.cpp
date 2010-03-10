@@ -29,6 +29,9 @@
 
 #if JUCE_USE_CDREADER
 
+namespace CDReaderHelpers
+{
+
 //***************************************************************************
 //       %%% TARGET STATUS VALUES %%%
 //***************************************************************************
@@ -528,12 +531,12 @@ public:
           wantsIndex (false)
     {
         bufferSize = 2352 * numberOfFrames;
-        buffer = (BYTE*) malloc (bufferSize);
+        buffer = (BYTE*) juce_malloc (bufferSize);
     }
 
     ~CDReadBuffer()
     {
-        free (buffer);
+        juce_free (buffer);
     }
 
     bool isZero() const
@@ -627,7 +630,7 @@ public:
         if (controller != 0)
         {
             controller->shutDown();
-            delete controller;
+            controller = 0;
         }
 
         if (scsiHandle != 0)
@@ -643,7 +646,7 @@ public:
     BYTE readType;
 
 private:
-    CDController* controller;
+    ScopedPointer<CDController> controller;
 
     bool testController (const int readType,
                          CDController* const newController,
@@ -713,14 +716,7 @@ static void DeinitialiseCDRipper()
 //==============================================================================
 static HANDLE CreateSCSIDeviceHandle (char driveLetter)
 {
-    TCHAR devicePath[8];
-    devicePath[0] = '\\';
-    devicePath[1] = '\\';
-    devicePath[2] = '.';
-    devicePath[3] = '\\';
-    devicePath[4] = driveLetter;
-    devicePath[5] = ':';
-    devicePath[6] = 0;
+    TCHAR devicePath[] = { '\\', '\\', '.', '\\', driveLetter, ':', 0, 0 };
 
     OSVERSIONINFO info;
     info.dwOSVersionInfoSize = sizeof (info);
@@ -1283,7 +1279,6 @@ void CDDeviceHandle::openDrawer (bool shouldBeOpen)
         if (controller != 0)
         {
             controller->shutDown();
-            delete controller;
             controller = 0;
         }
 
@@ -1365,7 +1360,6 @@ bool CDDeviceHandle::testController (const int type,
     if (! passed)
     {
         controller->shutDown();
-        delete controller;
         controller = 0;
     }
 
@@ -1595,8 +1589,8 @@ static void decUserCount()
 //==============================================================================
 struct CDDeviceWrapper
 {
-    CDDeviceHandle* cdH;
-    CDReadBuffer* overlapBuffer;
+    ScopedPointer<CDDeviceHandle> cdH;
+    ScopedPointer<CDReadBuffer> overlapBuffer;
     bool jitter;
 };
 
@@ -1614,38 +1608,6 @@ static int getMSFAddressOf (const TOCTRACK* const t)
 
 static const int samplesPerFrame = 44100 / 75;
 static const int bytesPerFrame = samplesPerFrame * 4;
-
-
-//==============================================================================
-const StringArray AudioCDReader::getAvailableCDNames()
-{
-    StringArray results;
-    incUserCount();
-
-    if (initialisedOk)
-    {
-        CDDeviceInfo list[8];
-        const int num = FindCDDevices (list, 8);
-
-        decUserCount();
-
-        for (int i = 0; i < num; ++i)
-        {
-            String s;
-
-            if (list[i].scsiDriveLetter > 0)
-                s << String::charToString (list[i].scsiDriveLetter).toUpperCase() << T(": ");
-
-            s << String (list[i].vendor).trim()
-              << T(" ") << String (list[i].productId).trim()
-              << T(" ") << String (list[i].rev).trim();
-
-            results.add (s);
-        }
-    }
-
-    return results;
-}
 
 static CDDeviceHandle* openHandle (const CDDeviceInfo* const device)
 {
@@ -1680,8 +1642,43 @@ static CDDeviceHandle* openHandle (const CDDeviceInfo* const device)
     return 0;
 }
 
+}
+
+//==============================================================================
+const StringArray AudioCDReader::getAvailableCDNames()
+{
+    using namespace CDReaderHelpers;
+    StringArray results;
+    incUserCount();
+
+    if (initialisedOk)
+    {
+        CDDeviceInfo list[8];
+        const int num = FindCDDevices (list, 8);
+
+        decUserCount();
+
+        for (int i = 0; i < num; ++i)
+        {
+            String s;
+
+            if (list[i].scsiDriveLetter > 0)
+                s << String::charToString (list[i].scsiDriveLetter).toUpperCase() << T(": ");
+
+            s << String (list[i].vendor).trim()
+              << T(" ") << String (list[i].productId).trim()
+              << T(" ") << String (list[i].rev).trim();
+
+            results.add (s);
+        }
+    }
+
+    return results;
+}
+
 AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
 {
+    using namespace CDReaderHelpers;
     incUserCount();
 
     if (initialisedOk)
@@ -1716,6 +1713,7 @@ AudioCDReader::AudioCDReader (void* handle_)
       firstFrameInBuffer (0),
       samplesInBuffer (0)
 {
+    using namespace CDReaderHelpers;
     jassert (handle_ != 0);
 
     refreshTrackLengths();
@@ -1731,10 +1729,8 @@ AudioCDReader::AudioCDReader (void* handle_)
 
 AudioCDReader::~AudioCDReader()
 {
-    CDDeviceWrapper* const device = (CDDeviceWrapper*)handle;
-
-    delete device->cdH;
-    delete device->overlapBuffer;
+    using namespace CDReaderHelpers;
+    CDDeviceWrapper* const device = (CDDeviceWrapper*) handle;
     delete device;
 
     decUserCount();
@@ -1743,6 +1739,7 @@ AudioCDReader::~AudioCDReader()
 bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                  int64 startSampleInFile, int numSamples)
 {
+    using namespace CDReaderHelpers;
     CDDeviceWrapper* const device = (CDDeviceWrapper*) handle;
 
     bool ok = true;
@@ -1840,10 +1837,11 @@ bool AudioCDReader::readSamples (int** destSamples, int numDestChannels, int sta
 
 bool AudioCDReader::isCDStillPresent() const
 {
+    using namespace CDReaderHelpers;
     TOC toc;
     zerostruct (toc);
 
-    return ((CDDeviceWrapper*)handle)->cdH->readTOC (&toc, false);
+    return ((CDDeviceWrapper*) handle)->cdH->readTOC (&toc, false);
 }
 
 int AudioCDReader::getNumTracks() const
@@ -1853,12 +1851,14 @@ int AudioCDReader::getNumTracks() const
 
 int AudioCDReader::getPositionOfTrackStart (int trackNum) const
 {
+    using namespace CDReaderHelpers;
     return (trackNum >= 0 && trackNum <= numTracks) ? trackStarts [trackNum] * samplesPerFrame
                                                     : 0;
 }
 
 void AudioCDReader::refreshTrackLengths()
 {
+    using namespace CDReaderHelpers;
     zeromem (trackStarts, sizeof (trackStarts));
     zeromem (audioTracks, sizeof (audioTracks));
 
@@ -1901,6 +1901,7 @@ const int framesPerIndexRead = 4;
 
 int AudioCDReader::getIndexAt (int samplePos)
 {
+    using namespace CDReaderHelpers;
     CDDeviceWrapper* const device = (CDDeviceWrapper*) handle;
 
     const int frameNeeded = samplePos / samplesPerFrame;
@@ -1934,6 +1935,7 @@ int AudioCDReader::getIndexAt (int samplePos)
 
 const Array <int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 {
+    using namespace CDReaderHelpers;
     Array <int> indexes;
 
     const int trackStart = getPositionOfTrackStart (trackNumber);
@@ -2030,6 +2032,7 @@ const Array <int> AudioCDReader::findIndexesInTrack (const int trackNumber)
 
 int AudioCDReader::getCDDBId()
 {
+    using namespace CDReaderHelpers;
     refreshTrackLengths();
 
     if (numTracks > 0)
@@ -2067,6 +2070,7 @@ int AudioCDReader::getCDDBId()
 
 void AudioCDReader::ejectDisk()
 {
+    using namespace CDReaderHelpers;
     ((CDDeviceWrapper*) handle)->cdH->openDrawer (true);
 }
 

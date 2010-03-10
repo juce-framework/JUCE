@@ -2814,10 +2814,6 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\src\threads\juce_InterProcessLock.cpp"
-					>
-				</File>
-				<File
 					RelativePath="..\..\..\src\threads\juce_InterProcessLock.h"
 					>
 				</File>

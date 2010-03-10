@@ -138,7 +138,6 @@
  #include "../src/text/juce_StringPairArray.cpp"
  #include "../src/text/juce_XmlDocument.cpp"
  #include "../src/text/juce_XmlElement.cpp"
- #include "../src/threads/juce_InterProcessLock.cpp"
  #include "../src/threads/juce_ReadWriteLock.cpp"
  #include "../src/threads/juce_Thread.cpp"
  #include "../src/threads/juce_ThreadPool.cpp"

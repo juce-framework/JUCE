@@ -30,10 +30,15 @@
     the rest of the codebase.
 */
 
+#include "../core/juce_TargetPlatform.h"
+
+#if JUCE_LINUX
+
 #include "linux/juce_linux_NativeIncludes.h"
 
 BEGIN_JUCE_NAMESPACE
 
+//==============================================================================
 #include "../io/files/juce_FileInputStream.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../core/juce_SystemStats.h"
@@ -115,3 +120,5 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 END_JUCE_NAMESPACE
+
+#endif

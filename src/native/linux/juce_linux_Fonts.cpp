@@ -296,9 +296,6 @@ public:
         const float scaleY = -1.0f / height;
         Path destShape;
 
-        #define CONVERTX(val) (scaleX * (val).x)
-        #define CONVERTY(val) (scaleY * (val).y)
-
         if (FT_Load_Glyph (face, glyphIndex, FT_LOAD_NO_SCALE | FT_LOAD_NO_BITMAP | FT_LOAD_IGNORE_TRANSFORM) != 0
              || face->glyph->format != ft_glyph_format_outline)
         {
@@ -317,15 +314,15 @@ public:
 
             for (int p = startPoint; p <= endPoint; p++)
             {
-                const float x = CONVERTX (points[p]);
-                const float y = CONVERTY (points[p]);
+                const float x = scaleX * points[p].x;
+                const float y = scaleY * points[p].y;
 
                 if (p == startPoint)
                 {
                     if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                     {
-                        float x2 = CONVERTX (points [endPoint]);
-                        float y2 = CONVERTY (points [endPoint]);
+                        float x2 = scaleX * points [endPoint].x;
+                        float y2 = scaleY * points [endPoint].y;
 
                         if (FT_CURVE_TAG (tags[endPoint]) != FT_Curve_Tag_On)
                         {
@@ -349,8 +346,8 @@ public:
                 else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                 {
                     const int nextIndex = (p == endPoint) ? startPoint : p + 1;
-                    float x2 = CONVERTX (points [nextIndex]);
-                    float y2 = CONVERTY (points [nextIndex]);
+                    float x2 = scaleX * points [nextIndex].x;
+                    float y2 = scaleY * points [nextIndex].y;
 
                     if (FT_CURVE_TAG (tags [nextIndex]) == FT_Curve_Tag_Conic)
                     {
@@ -372,10 +369,10 @@ public:
                     const int next1 = p + 1;
                     const int next2 = (p == (endPoint - 1)) ? startPoint : p + 2;
 
-                    const float x2 = CONVERTX (points [next1]);
-                    const float y2 = CONVERTY (points [next1]);
-                    const float x3 = CONVERTX (points [next2]);
-                    const float y3 = CONVERTY (points [next2]);
+                    const float x2 = scaleX * points [next1].x;
+                    const float y2 = scaleY * points [next1].y;
+                    const float x3 = scaleX * points [next2].x;
+                    const float y3 = scaleY * points [next2].y;
 
                     if (FT_CURVE_TAG (tags[next1]) != FT_Curve_Tag_Cubic
                          || FT_CURVE_TAG (tags[next2]) != FT_Curve_Tag_On)
