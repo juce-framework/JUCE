@@ -352,7 +352,11 @@ namespace IntToCharConverters
         else
         {
 #if JUCE_WIN32
+  #if _MSC_VER <= 1200
+            len = (int) _snwprintf (buffer, numChars, L"%.9g", n) + 1;
+  #else
             len = (int) _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n) + 1;
+  #endif
 #else
             len = (int) swprintf (buffer, numChars, L"%.9g", n) + 1;
 #endif

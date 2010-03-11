@@ -53,7 +53,7 @@ public:
         @param newRangeStart            the new range start of this bar
     */
     virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
-                                 const double newRangeStart) = 0;
+                                 double newRangeStart) = 0;
 };
 
 

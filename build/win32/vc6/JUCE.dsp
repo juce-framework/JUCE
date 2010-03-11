@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "../../../bin/intermediate_win32/static"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /G6 /MD /GR /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# ADD CPP /nologo /G6 /MD /GR /GX /O2 /D "NDEBUG" /D "WIN32" /D "_LIB" /D "UNICODE" /D "_UNICODE" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
@@ -654,6 +654,10 @@ SOURCE=..\..\..\src\events\juce_InterprocessConnectionServer.cpp
 # Begin Source File
 
 SOURCE=..\..\..\src\events\juce_InterprocessConnectionServer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\src\events\juce_ListenerList.h
 # End Source File
 # Begin Source File
 
@@ -2429,10 +2433,6 @@ SOURCE=..\..\..\src\text\juce_XmlElement.h
 # Begin Source File
 
 SOURCE=..\..\..\src\threads\juce_CriticalSection.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\src\threads\juce_InterProcessLock.cpp
 # End Source File
 # Begin Source File
 

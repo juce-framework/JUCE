@@ -1070,7 +1070,7 @@ void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, float wheelIncrem
     horizontalScrollBar->mouseWheelMove (e, wheelIncrementX, 0);
 }
 
-void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart)
+void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
 {
     if (scrollBarThatHasMoved == verticalScrollBar)
         scrollToLineInternal ((int) newRangeStart);

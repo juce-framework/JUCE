@@ -3193,7 +3193,7 @@ Component::BailOutChecker::BailOutChecker (Component* const component1, Componen
 
 bool Component::BailOutChecker::shouldBailOut() const throw()
 {
-    return safePointer1 == 0 || safePointer2 != component2;
+    return safePointer1 == 0 || safePointer2.getComponent() != component2;
 }
 
 

@@ -477,7 +477,7 @@ void Button::parentHierarchyChanged()
 {
     Component* const newKeySource = (shortcuts.size() == 0) ? 0 : getTopLevelComponent();
 
-    if (newKeySource != keySource)
+    if (newKeySource != keySource.getComponent())
     {
         if (keySource != 0)
             keySource->removeKeyListener (this);

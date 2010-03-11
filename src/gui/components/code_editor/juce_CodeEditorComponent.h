@@ -237,7 +237,7 @@ public:
     /** @internal */
     void timerCallback();
     /** @internal */
-    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart);
+    void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
     /** @internal */
     void handleAsyncUpdate();
     /** @internal */

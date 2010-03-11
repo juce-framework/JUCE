@@ -1934,6 +1934,9 @@ public:
         operator ComponentType*() const throw()             { return comp; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
+        ComponentType* getComponent() const throw()         { return comp; }
+
+        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
         ComponentType* operator->() throw()                 { jassert (comp != 0); return comp; }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
@@ -1972,7 +1975,8 @@ public:
         bool shouldBailOut() const throw();
 
     private:
-        Component::SafePointer<Component> safePointer1, safePointer2;
+        typedef SafePointer<Component> SafeComponentPtr;
+        SafeComponentPtr safePointer1, safePointer2;
         Component* const component2;
 
         BailOutChecker (const BailOutChecker&);

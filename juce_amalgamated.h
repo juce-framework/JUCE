@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	9
+#define JUCE_BUILDNUMBER	10
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -362,7 +362,7 @@
 #if JUCE_LOG_ASSERTIONS
   #define juce_LogCurrentAssertion	juce_LogAssertion (__FILE__, __LINE__);
 #elif defined (JUCE_DEBUG)
-  #define juce_LogCurrentAssertion    fprintf (stderr, "JUCE Assertion failure in %s, line %d\n", __FILE__, __LINE__);
+  #define juce_LogCurrentAssertion    std::cerr << "JUCE Assertion failure in " << __FILE__ << ", line " << __LINE__ << std::endl;
 #else
   #define juce_LogCurrentAssertion
 #endif
@@ -372,8 +372,6 @@
   // If debugging is enabled..
 
   #define DBG(dbgtext)		  Logger::outputDebugString (dbgtext);
-
-  #define DBG_PRINTF(dbgprintf)	 Logger::outputDebugPrintf dbgprintf;
 
   // Assertions..
 
@@ -423,7 +421,6 @@
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(dbgtext)
-  #define DBG_PRINTF(dbgprintf)
 
   #define jassertfalse		  { juce_LogCurrentAssertion }
 
@@ -496,7 +493,7 @@
 // Now we'll include any OS headers we need.. (at this point we are outside the Juce namespace).
 #if JUCE_MSVC
   #if (defined(_MSC_VER) && (_MSC_VER <= 1200))
-	#pragma warning (disable: 4284)  // (spurious VC6 warning)
+	#pragma warning (disable: 4284 4786)  // (spurious VC6 warnings)
   #endif
 
   #pragma warning (push)
@@ -1060,9 +1057,6 @@ public:
 
 	static int getHexDigitValue (const juce_wchar digit) throw();
 
-	static int printf (char* const dest, const int maxLength, const char* const format, ...) throw();
-	static int printf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, ...) throw();
-
 	static int vprintf (char* const dest, const int maxLength, const char* const format, va_list& args) throw();
 	static int vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw();
 };
@@ -1275,8 +1269,6 @@ public:
 
 	const String quoted (const tchar quoteCharacter = JUCE_T('"')) const throw();
 
-	void printf (const tchar* const format, ...) throw();
-
 	static const String formatted (const tchar* const format, ...) throw();
 
 	void vprintf (const tchar* const format, va_list& args) throw();
@@ -1393,7 +1385,6 @@ private:
 	void createInternal (const int numChars) throw();
 	void createInternal (const tchar* const text, const tchar* const textEnd) throw();
 	void appendInternal (const tchar* const text, const int numExtraChars) throw();
-	void doubleToStringWithDecPlaces (double n, int numDecPlaces) throw();
 	void dupeInternalIfMultiplyReferenced() throw();
 };
 
@@ -1456,8 +1447,6 @@ public:
 	static void JUCE_CALLTYPE writeToLog (const String& message);
 
 	static void JUCE_CALLTYPE outputDebugString (const String& text) throw();
-
-	static void JUCE_CALLTYPE outputDebugPrintf (const tchar* format, ...) throw();
 
 protected:
 
@@ -6074,14 +6063,14 @@ public:
 
 	void call (void (ListenerClass::*callbackFunction) ())
 	{
-		callChecked (DummyBailOutChecker(), callbackFunction);
+		callChecked (static_cast <const DummyBailOutChecker&> (DummyBailOutChecker()), callbackFunction);
 	}
 
 	template <class BailOutCheckerType>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) ())
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) ();
 	}
 
@@ -6089,7 +6078,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1),
 			   P2& param1)
 	{
-		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
@@ -6098,7 +6087,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1),
 					  P2& param1)
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
@@ -6106,7 +6095,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2),
 			   P3& param1, P4& param2)
 	{
-		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
@@ -6115,7 +6104,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2),
 					  P3& param1, P4& param2)
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
@@ -6123,7 +6112,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
 			   P4& param1, P5& param2, P6& param3)
 	{
-		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
@@ -6132,7 +6121,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
 					  P4& param1, P5& param2, P6& param3)
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
@@ -6140,7 +6129,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
 			   P5& param1, P6& param2, P7& param3, P8& param4)
 	{
-		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
@@ -6149,7 +6138,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
 					  P5& param1, P6& param2, P7& param3, P8& param4)
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
@@ -6157,7 +6146,7 @@ public:
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
 			   P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
 	{
-		for (Iterator<DummyBailOutChecker> iter (*this, DummyBailOutChecker()); iter.next();)
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
@@ -6166,7 +6155,7 @@ public:
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
 					  P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
 	{
-		for (Iterator<BailOutCheckerType> iter (*this, bailOutChecker); iter.next();)
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
@@ -6176,12 +6165,12 @@ public:
 		inline bool shouldBailOut() const throw()	  { return false; }
 	};
 
-	template <class BailOutCheckerType>
+	template <class BailOutCheckerType, class ListType>
 	class Iterator
 	{
 	public:
 
-		Iterator (const ListenerList& list_, const BailOutCheckerType& bailOutChecker_)
+		Iterator (const ListType& list_, const BailOutCheckerType& bailOutChecker_)
 			: list (list_), bailOutChecker (bailOutChecker_), index (list_.size())
 		{}
 
@@ -6201,19 +6190,24 @@ public:
 			return index >= 0;
 		}
 
-		ListenerClass* getListener() const throw()
+		typename ListType::ListenerType* getListener() const throw()
 		{
-			return list.listeners.getUnchecked (index);
+			return list.getListeners().getUnchecked (index);
 		}
 
 	private:
-		const ListenerList& list;
+		const ListType& list;
 		const BailOutCheckerType& bailOutChecker;
 		int index;
 
 		Iterator (const Iterator&);
 		Iterator& operator= (const Iterator&);
 	};
+
+	typedef ListenerList<ListenerClass, ArrayType> ThisType;
+	typedef ListenerClass ListenerType;
+
+	const ArrayType& getListeners() const throw()	   { return listeners; }
 
 private:
 
@@ -7311,10 +7305,12 @@ public:
 
 	static int getMACAddresses (int64* addresses, int maxNum,
 #if JUCE_MAC
-								const bool littleEndian = true) throw();
+								const bool littleEndian = true);
 #else
-								const bool littleEndian = false) throw();
+								const bool littleEndian = false);
 #endif
+
+	static const StringArray getMACAddressStrings();
 
 	// not-for-public-use platform-specific method gets called at startup to initialise things.
 	static void initialiseStats() throw();
@@ -12591,6 +12587,8 @@ public:
 
 		operator ComponentType*() const throw()		 { return comp; }
 
+		ComponentType* getComponent() const throw()	 { return comp; }
+
 		/** Returns the component that this pointer refers to, or null if the component no longer exists. */
 		ComponentType* operator->() throw()		 { jassert (comp != 0); return comp; }
 
@@ -12616,7 +12614,8 @@ public:
 		bool shouldBailOut() const throw();
 
 	private:
-		Component::SafePointer<Component> safePointer1, safePointer2;
+		typedef SafePointer<Component> SafeComponentPtr;
+		SafeComponentPtr safePointer1, safePointer2;
 		Component* const component2;
 
 		BailOutChecker (const BailOutChecker&);
@@ -15983,7 +15982,7 @@ public:
 	virtual ~ScrollBarListener() {}
 
 	virtual void scrollBarMoved (ScrollBar* scrollBarThatHasMoved,
-								 const double newRangeStart) = 0;
+								 double newRangeStart) = 0;
 };
 
 class JUCE_API  ScrollBar  : public Component,
@@ -16140,7 +16139,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 	void resized();
-	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart);
+	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
 	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 	bool keyPressed (const KeyPress& key);
 	void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
@@ -20858,7 +20857,7 @@ public:
 	void mouseDoubleClick (const MouseEvent& e);
 	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 	void timerCallback();
-	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, const double newRangeStart);
+	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
 	void handleAsyncUpdate();
 	void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
 							  const CodeDocument::Position& affectedTextEnd);
@@ -22984,7 +22983,8 @@ private:
 	juce_wchar character;
 	int glyph;
 
-	PositionedGlyph();
+	PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
+	PositionedGlyph (const PositionedGlyph& other);
 };
 
 class JUCE_API  GlyphArrangement

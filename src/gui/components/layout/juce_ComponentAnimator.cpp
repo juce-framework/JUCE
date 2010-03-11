@@ -115,7 +115,7 @@ ComponentAnimator::~ComponentAnimator()
 void* ComponentAnimator::findTaskFor (Component* const component) const
 {
     for (int i = tasks.size(); --i >= 0;)
-        if (component == ((AnimationTask*) tasks.getUnchecked(i))->component)
+        if (component == ((AnimationTask*) tasks.getUnchecked(i))->component.getComponent())
             return tasks.getUnchecked(i);
 
     return 0;
