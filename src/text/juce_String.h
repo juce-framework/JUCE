@@ -706,18 +706,6 @@ public:
 
 
     //==============================================================================
-    /** Writes text into this string, using printf style-arguments.
-
-        This will replace the contents of the string with the output of this
-        formatted printf.
-
-        Note that using the %s token with a juce string is probably a bad idea, as
-        this may expect differect encodings on different platforms.
-
-        @see formatted
-    */
-    void printf (const tchar* const format, ...) throw();
-
     /** Returns a string, created using arguments in the style of printf.
 
         This will return a string which is the result of a sprintf using the
@@ -1076,7 +1064,6 @@ private:
     void createInternal (const int numChars) throw();
     void createInternal (const tchar* const text, const tchar* const textEnd) throw();
     void appendInternal (const tchar* const text, const int numExtraChars) throw();
-    void doubleToStringWithDecPlaces (double n, int numDecPlaces) throw();
     void dupeInternalIfMultiplyReferenced() throw();
 };
 

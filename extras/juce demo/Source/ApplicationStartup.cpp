@@ -124,47 +124,22 @@ private:
           << "\nFull user name: " << SystemStats::getFullUserName()
           << "\nOperating system: " << SystemStats::getOperatingSystemName()
           << "\nCPU vendor: " << SystemStats::getCpuVendor()
-          << "\nCPU speed: " << SystemStats::getCpuSpeedInMegaherz() << "MHz\n"
+          << "\nCPU speed: " << SystemStats::getCpuSpeedInMegaherz() << "MHz"
           << "\nNumber of CPUs: " << SystemStats::getNumCpus()
           << "\nCPU has MMX: " << (SystemStats::hasMMX() ? "yes" : "no")
           << "\nCPU has SSE: " << (SystemStats::hasSSE() ? "yes" : "no")
           << "\nCPU has SSE2: " << (SystemStats::hasSSE2() ? "yes" : "no")
           << "\nCPU has 3DNOW: " << (SystemStats::has3DNow() ? "yes" : "no")
-          << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB\n";
-
-        int64 macAddresses[8];
-        const int numAddresses = SystemStats::getMACAddresses (macAddresses, 8, false);
-
-        for (int i = 0; i < numAddresses; ++i)
-        {
-            systemInfo
-              << "Found network card MAC address: "
-              << String::formatted (T("%02x-%02x-%02x-%02x-%02x-%02x\n"),
-                                    0xff & (int) (macAddresses [i] >> 40),
-                                    0xff & (int) (macAddresses [i] >> 32),
-                                    0xff & (int) (macAddresses [i] >> 24),
-                                    0xff & (int) (macAddresses [i] >> 16),
-                                    0xff & (int) (macAddresses [i] >> 8),
-                                    0xff & (int) macAddresses [i]);
-        }
-
-        systemInfo
-          << "Current executable file: "
-          << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
-          << "\nCurrent application file: "
-          << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
-          << "\nCurrent working directory: "
-          << File::getCurrentWorkingDirectory().getFullPathName()
-          << "\nUser home directory: "
-          << File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
-          << "\nUser documents directory: "
-          << File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName()
-          << "\nUser application data directory: "
-          << File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
-          << "\nCommon application data directory: "
-          << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName()
-          << "\nTemp directory: "
-          << File::getSpecialLocation (File::tempDirectory).getFullPathName()
+          << "\nMemory size: " << SystemStats::getMemorySizeInMegabytes() << "MB"
+          << "\nFound network card MAC addresses: " << SystemStats::getMACAddressStrings().joinIntoString (T(", "))
+          << "\nCurrent executable file: " << File::getSpecialLocation (File::currentExecutableFile).getFullPathName()
+          << "\nCurrent application file: " << File::getSpecialLocation (File::currentApplicationFile).getFullPathName()
+          << "\nCurrent working directory: " << File::getCurrentWorkingDirectory().getFullPathName()
+          << "\nUser home directory: " << File::getSpecialLocation (File::userHomeDirectory).getFullPathName()
+          << "\nUser documents directory: " << File::getSpecialLocation (File::userDocumentsDirectory).getFullPathName()
+          << "\nUser application data directory: " << File::getSpecialLocation (File::userApplicationDataDirectory).getFullPathName()
+          << "\nCommon application data directory: " << File::getSpecialLocation (File::commonApplicationDataDirectory).getFullPathName()
+          << "\nTemp directory: " << File::getSpecialLocation (File::tempDirectory).getFullPathName()
           << "\n\n";
 
         return systemInfo;

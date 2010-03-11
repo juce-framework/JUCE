@@ -89,7 +89,8 @@ private:
     juce_wchar character;
     int glyph;
 
-    PositionedGlyph();
+    PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
+    PositionedGlyph (const PositionedGlyph& other);
 };
 
 

@@ -28,7 +28,7 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
 {
     #ifndef IFT_ETHER
      #define IFT_ETHER 6

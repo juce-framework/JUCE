@@ -37,9 +37,16 @@ static const String timeToTimecodeString (const double seconds)
     const int mins  = ((int) (absSecs / 60.0)) % 60;
     const int secs  = ((int) absSecs) % 60;
 
-    return String::formatted (T("%s%02d:%02d:%02d:%03d"),
-                              sign, hours, mins, secs,
-                              roundToInt (absSecs * 1000) % 1000);
+    String t;
+    if (seconds < 0)
+        t = T("-");
+
+    t << String (hours).paddedLeft ('0', 2) << ":"
+      << String (mins).paddedLeft ('0', 2) << ":"
+      << String (secs).paddedLeft ('0', 2) << ":"
+      << String (roundToInt (absSecs * 1000) % 1000).paddedLeft ('0', 3);
+
+    return t;
 }
 
 // quick-and-dirty function to format a bars/beats string

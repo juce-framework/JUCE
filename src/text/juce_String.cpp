@@ -322,6 +322,43 @@ namespace IntToCharConverters
 
         return t;
     }
+
+    static tchar* doubleToString (tchar* buffer, int numChars, double n, int numDecPlaces, int& len) throw()
+    {
+        if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
+        {
+            tchar* const end = buffer + numChars;
+            tchar* t = end;
+            int64 v = (int64) (pow (10.0, numDecPlaces) * fabs (n) + 0.5);
+            *--t = (tchar) 0;
+
+            while (numDecPlaces >= 0 || v > 0)
+            {
+                if (numDecPlaces == 0)
+                    *--t = decimalPoint;
+
+                *--t = (tchar) (T('0') + (v % 10));
+
+                v /= 10;
+                --numDecPlaces;
+            }
+
+            if (n < 0)
+                *--t = T('-');
+
+            len = end - t;
+            return t;
+        }
+        else
+        {
+#if JUCE_WIN32
+            len = (int) _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n) + 1;
+#else
+            len = (int) swprintf (buffer, numChars, L"%.9g", n) + 1;
+#endif
+            return buffer;
+        }
+    }
 }
 
 String::String (const int number) throw()
@@ -372,71 +409,22 @@ String::String (const uint64 number) throw()
     createInternal (IntToCharConverters::uint64ToString (end, number), end);
 }
 
-// a double-to-string routine that actually uses the number of dec. places you asked for
-// without resorting to exponent notation if the number's too big or small (which is what printf does).
-void String::doubleToStringWithDecPlaces (double n, int numDecPlaces) throw()
-{
-    const int bufSize = 80;
-    tchar buffer [bufSize];
-    int len;
-    tchar* t;
-
-    if (numDecPlaces > 0 && n > -1.0e20 && n < 1.0e20)
-    {
-        int64 v = (int64) (pow (10.0, numDecPlaces) * fabs (n) + 0.5);
-
-        t = buffer + bufSize;
-        *--t = (tchar) 0;
-
-        while (numDecPlaces >= 0 || v > 0)
-        {
-            if (numDecPlaces == 0)
-                *--t = decimalPoint;
-
-            *--t = (tchar) (T('0') + (v % 10));
-
-            v /= 10;
-            --numDecPlaces;
-        }
-
-        if (n < 0)
-            *--t = T('-');
-
-        len = (int) ((buffer + bufSize) - t);
-    }
-    else
-    {
-        len = CharacterFunctions::printf (buffer, bufSize, T("%.9g"), n) + 1;
-        t = buffer;
-    }
-
-    if (len > 1)
-    {
-        jassert (len < numElementsInArray (buffer));
-
-        createInternal (len - 1);
-        memcpy (text->text, t, len * sizeof (tchar));
-    }
-    else
-    {
-        jassert (*t == 0);
-        text = &emptyString;
-        emptyString.refCount = safeEmptyStringRefCount;
-    }
-}
-
 String::String (const float number,
                 const int numberOfDecimalPlaces) throw()
 {
-    doubleToStringWithDecPlaces ((double) number,
-                                 numberOfDecimalPlaces);
+    tchar buffer [48];
+    int len;
+    tchar* start = IntToCharConverters::doubleToString (buffer, numElementsInArray (buffer), (double) number, numberOfDecimalPlaces, len);
+    createInternal (start, start + len);
 }
 
 String::String (const double number,
                 const int numberOfDecimalPlaces) throw()
 {
-    doubleToStringWithDecPlaces (number,
-                                 numberOfDecimalPlaces);
+    tchar buffer [48];
+    int len;
+    tchar* start = IntToCharConverters::doubleToString (buffer, numElementsInArray (buffer), number, numberOfDecimalPlaces, len);
+    createInternal (start, start + len);
 }
 
 String::~String() throw()
@@ -1102,14 +1090,6 @@ bool String::matchesWildcard (const tchar* wildcard, const bool ignoreCase) cons
 }
 
 //==============================================================================
-void String::printf (const tchar* const pf, ...) throw()
-{
-    va_list list;
-    va_start (list, pf);
-
-    vprintf (pf, list);
-}
-
 const String String::formatted (const tchar* const pf, ...) throw()
 {
     va_list list;

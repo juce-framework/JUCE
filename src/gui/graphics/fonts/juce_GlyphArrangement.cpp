@@ -34,7 +34,24 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-PositionedGlyph::PositionedGlyph()
+PositionedGlyph::PositionedGlyph (const float x_, const float y_, const float w_, const Font& font_,
+                                  const juce_wchar character_, const int glyph_)
+    : x (x_),
+      y (y_),
+      w (w_),
+      font (font_),
+      character (character_),
+      glyph (glyph_)
+{
+}
+
+PositionedGlyph::PositionedGlyph (const PositionedGlyph& other)
+    : x (other.x),
+      y (other.y),
+      w (other.w),
+      font (other.font),
+      character (other.character),
+      glyph (other.glyph)
 {
 }
 
@@ -178,16 +195,14 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
                                                const float maxWidthPixels,
                                                const bool useEllipsis)
 {
-    int textLen = text.length();
-
-    if (textLen > 0)
+    if (text.isNotEmpty())
     {
         Array <int> newGlyphs;
         Array <float> xOffsets;
         font.getGlyphPositions (text, newGlyphs, xOffsets);
+        const int textLen = newGlyphs.size();
 
         const juce_wchar* const unicodeText = (const juce_wchar*) text;
-        textLen = jmin (textLen, newGlyphs.size());
 
         for (int i = 0; i < textLen; ++i)
         {
@@ -204,15 +219,8 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
             }
             else
             {
-                PositionedGlyph* const pg = new PositionedGlyph();
-                pg->x = xOffset + thisX;
-                pg->y = yOffset;
-                pg->w = nextX - thisX;
-                pg->font = font;
-                pg->glyph = newGlyphs.getUnchecked(i);
-                pg->character = unicodeText[i];
-
-                glyphs.add (pg);
+                glyphs.add (new PositionedGlyph (xOffset + thisX, yOffset, nextX - thisX,
+                                                 font, unicodeText[i], newGlyphs.getUnchecked(i)));
             }
         }
     }
@@ -247,16 +255,9 @@ int GlyphArrangement::insertEllipsis (const Font& font, const float maxXPos,
 
         for (int i = 3; --i >= 0;)
         {
-            PositionedGlyph* const pg = new PositionedGlyph();
-            pg->x = xOffset;
-            pg->y = yOffset;
-            pg->w = dx;
-            pg->font = font;
-            pg->character = '.';
-            pg->glyph = dotGlyphs.getFirst();
-            glyphs.insert (endIndex++, pg);
+            glyphs.insert (endIndex++, new PositionedGlyph (xOffset, yOffset, dx,
+                                                            font, '.', dotGlyphs.getFirst()));
             --numDeleted;
-
             xOffset += dx;
 
             if (xOffset > maxXPos)

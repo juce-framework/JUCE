@@ -31,17 +31,7 @@
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    fputs (text.toUTF8(), stdout);
-    fputs ("\n", stdout);
-}
-
-void Logger::outputDebugPrintf (const tchar* format, ...) throw()
-{
-    String text;
-    va_list args;
-    va_start (args, format);
-    text.vprintf(format, args);
-    outputDebugString(text);
+    std::cerr << text << std::endl;
 }
 
 SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()

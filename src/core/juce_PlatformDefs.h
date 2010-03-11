@@ -53,7 +53,7 @@
 #if JUCE_LOG_ASSERTIONS
   #define juce_LogCurrentAssertion    juce_LogAssertion (__FILE__, __LINE__);
 #elif defined (JUCE_DEBUG)
-  #define juce_LogCurrentAssertion    fprintf (stderr, "JUCE Assertion failure in %s, line %d\n", __FILE__, __LINE__);
+  #define juce_LogCurrentAssertion    std::cerr << "JUCE Assertion failure in " << __FILE__ << ", line " << __LINE__ << std::endl;
 #else
   #define juce_LogCurrentAssertion
 #endif
@@ -69,14 +69,6 @@
     @see Logger::outputDebugString
   */
   #define DBG(dbgtext)                  Logger::outputDebugString (dbgtext);
-
-  /** Printf's a string to the standard error stream.
-
-    This is only compiled in a debug build.
-
-    @see Logger::outputDebugString
-  */
-  #define DBG_PRINTF(dbgprintf)         Logger::outputDebugPrintf dbgprintf;
 
   //==============================================================================
   // Assertions..
@@ -138,7 +130,6 @@
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(dbgtext)
-  #define DBG_PRINTF(dbgprintf)
 
   #define jassertfalse                  { juce_LogCurrentAssertion }
 

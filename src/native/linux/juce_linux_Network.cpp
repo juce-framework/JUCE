@@ -29,7 +29,7 @@
 
 
 //==============================================================================
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
 {
     int numResults = 0;
 

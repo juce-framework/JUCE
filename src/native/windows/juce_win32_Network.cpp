@@ -417,7 +417,7 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool l
     return numFound;
 }
 
-int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian) throw()
+int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littleEndian)
 {
     int numFound = getMACAddressViaGetAdaptersInfo (addresses, maxNum, littleEndian);
 

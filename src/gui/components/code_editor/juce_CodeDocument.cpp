@@ -151,7 +151,13 @@ juce_wchar CodeDocument::Iterator::nextChar()
 
     jassert (currentLine == document->lines.getUnchecked (line));
     const juce_wchar result = currentLine->line [position - currentLine->lineStartInFile];
-    skip();
+
+    if (++position >= currentLine->lineStartInFile + currentLine->lineLength)
+    {
+        ++line;
+        currentLine = document->lines [line];
+    }
+
     return result;
 }
 
@@ -191,7 +197,7 @@ juce_wchar CodeDocument::Iterator::peekNextChar() const
         return 0;
 
     jassert (currentLine == document->lines.getUnchecked (line));
-    return currentLine->line [position - currentLine->lineStartInFile];
+    return const_cast <const String&> (currentLine->line) [position - currentLine->lineStartInFile];
 }
 
 void CodeDocument::Iterator::skipWhitespace()

@@ -36,15 +36,6 @@ void Logger::outputDebugString (const String& text) throw()
     OutputDebugString (text + T("\n"));
 }
 
-void Logger::outputDebugPrintf (const tchar* format, ...) throw()
-{
-    String text;
-    va_list args;
-    va_start (args, format);
-    text.vprintf(format, args);
-    outputDebugString (text);
-}
-
 //==============================================================================
 static int64 hiResTicksPerSecond;
 static double hiResTicksScaleFactor;

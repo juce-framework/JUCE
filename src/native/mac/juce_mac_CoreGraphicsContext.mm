@@ -132,6 +132,7 @@ public:
     CoreGraphicsContext (CGContextRef context_, const float flipHeight_)
         : context (context_),
           flipHeight (flipHeight_),
+          state (new SavedState()),
           numGradientLookupEntries (0)
     {
         CGContextRetain (context);
@@ -144,7 +145,7 @@ public:
         gradientCallbacks.version = 0;
         gradientCallbacks.evaluate = gradientCallback;
         gradientCallbacks.releaseInfo = 0;
-        state = new SavedState();
+        setFont (Font());
     }
 
     ~CoreGraphicsContext()

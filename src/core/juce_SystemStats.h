@@ -26,6 +26,8 @@
 #ifndef __JUCE_SYSTEMSTATS_JUCEHEADER__
 #define __JUCE_SYSTEMSTATS_JUCEHEADER__
 
+#include "../text/juce_StringArray.h"
+
 
 //==============================================================================
 /**
@@ -172,10 +174,16 @@ public:
     */
     static int getMACAddresses (int64* addresses, int maxNum,
 #if JUCE_MAC
-                                const bool littleEndian = true) throw();
+                                const bool littleEndian = true);
 #else
-                                const bool littleEndian = false) throw();
+                                const bool littleEndian = false);
 #endif
+
+    /** Returns a list of MAC addresses found on this machine.
+
+        @returns            an array of strings containing the MAC addresses that were found
+    */
+    static const StringArray getMACAddressStrings();
 
 
     //==============================================================================

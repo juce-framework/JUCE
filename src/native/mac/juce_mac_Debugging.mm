@@ -30,16 +30,7 @@
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    std::cerr << (const char*) text.toUTF8() << std::endl;
-}
-
-void Logger::outputDebugPrintf (const tchar* format, ...) throw()
-{
-    String text;
-    va_list args;
-    va_start (args, format);
-    text.vprintf (format, args);
-    outputDebugString (text);
+    std::cerr << text << std::endl;
 }
 
 bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger()

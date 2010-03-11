@@ -201,7 +201,7 @@ public:
 
 #if SUPPORT_ONLY_10_4_FONTS
         HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast <NSGlyph*> (glyphs.getData()) count: length];
 
         for (int i = 0; i < length; ++i)
             x += advances[i].width;
@@ -242,14 +242,14 @@ public:
 
 #if SUPPORT_ONLY_10_4_FONTS
         HeapBlock <NSSize> advances (length);
-        [nsFont getAdvancements: advances forGlyphs: (NSGlyph*) glyphs count: length];
+        [nsFont getAdvancements: advances forGlyphs: reinterpret_cast <NSGlyph*> (glyphs.getData()) count: length];
 
         int x = 0;
         for (int i = 0; i < length; ++i)
         {
             x += advances[i].width;
             xOffsets.add (x * unitsToHeightScaleFactor);
-            resultGlyphs.add (((NSGlyph*) glyphs)[i]);
+            resultGlyphs.add (reinterpret_cast <NSGlyph*> (glyphs.getData())[i]);
         }
 
 #else
