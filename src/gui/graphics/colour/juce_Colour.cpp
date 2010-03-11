@@ -31,13 +31,82 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static uint8 floatAlphaToInt (const float alpha)
+namespace ColourHelpers
 {
-    return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
+    static uint8 floatAlphaToInt (const float alpha) throw()
+    {
+        return (uint8) jlimit (0, 0xff, roundToInt (alpha * 255.0f));
+    }
+
+    static void convertHSBtoRGB (float h, float s, float v,
+                                 uint8& r, uint8& g, uint8& b) throw()
+    {
+        v = jlimit (0.0f, 1.0f, v);
+        v *= 255.0f;
+        const uint8 intV = (uint8) roundToInt (v);
+
+        if (s <= 0)
+        {
+            r = intV;
+            g = intV;
+            b = intV;
+        }
+        else
+        {
+            s = jmin (1.0f, s);
+            h = jlimit (0.0f, 1.0f, h);
+            h = (h - floorf (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
+            const float f = h - floorf (h);
+
+            const uint8 x = (uint8) roundToInt (v * (1.0f - s));
+            const float y = v * (1.0f - s * f);
+            const float z = v * (1.0f - (s * (1.0f - f)));
+
+            if (h < 1.0f)
+            {
+                r = intV;
+                g = (uint8) roundToInt (z);
+                b = x;
+            }
+            else if (h < 2.0f)
+            {
+                r = (uint8) roundToInt (y);
+                g = intV;
+                b = x;
+            }
+            else if (h < 3.0f)
+            {
+                r = x;
+                g = intV;
+                b = (uint8) roundToInt (z);
+            }
+            else if (h < 4.0f)
+            {
+                r = x;
+                g = (uint8) roundToInt (y);
+                b = intV;
+            }
+            else if (h < 5.0f)
+            {
+                r = (uint8) roundToInt (z);
+                g = x;
+                b = intV;
+            }
+            else if (h < 6.0f)
+            {
+                r = intV;
+                g = x;
+                b = (uint8) roundToInt (y);
+            }
+            else
+            {
+                r = 0;
+                g = 0;
+                b = 0;
+            }
+        }
+    }
 }
-
-static const float oneOver255 = 1.0f / 255.0f;
-
 
 //==============================================================================
 Colour::Colour() throw()
@@ -107,7 +176,7 @@ Colour::Colour (const uint8 red,
                 const uint8 blue,
                 const float alpha) throw()
 {
-    argb.setARGB (floatAlphaToInt (alpha), red, green, blue);
+    argb.setARGB (ColourHelpers::floatAlphaToInt (alpha), red, green, blue);
 }
 
 const Colour Colour::fromRGBAFloat (const uint8 red,
@@ -118,85 +187,15 @@ const Colour Colour::fromRGBAFloat (const uint8 red,
     return Colour (red, green, blue, alpha);
 }
 
-//==============================================================================
-static void convertHSBtoRGB (float h, float s, float v,
-                             uint8& r, uint8& g, uint8& b) throw()
-{
-    v = jlimit (0.0f, 1.0f, v);
-    v *= 255.0f;
-    const uint8 intV = (uint8) roundToInt (v);
-
-    if (s <= 0)
-    {
-        r = intV;
-        g = intV;
-        b = intV;
-    }
-    else
-    {
-        s = jmin (1.0f, s);
-        h = jlimit (0.0f, 1.0f, h);
-        h = (h - floorf (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
-        const float f = h - floorf (h);
-
-        const uint8 x = (uint8) roundToInt (v * (1.0f - s));
-        const float y = v * (1.0f - s * f);
-        const float z = v * (1.0f - (s * (1.0f - f)));
-
-        if (h < 1.0f)
-        {
-            r = intV;
-            g = (uint8) roundToInt (z);
-            b = x;
-        }
-        else if (h < 2.0f)
-        {
-            r = (uint8) roundToInt (y);
-            g = intV;
-            b = x;
-        }
-        else if (h < 3.0f)
-        {
-            r = x;
-            g = intV;
-            b = (uint8) roundToInt (z);
-        }
-        else if (h < 4.0f)
-        {
-            r = x;
-            g = (uint8) roundToInt (y);
-            b = intV;
-        }
-        else if (h < 5.0f)
-        {
-            r = (uint8) roundToInt (z);
-            g = x;
-            b = intV;
-        }
-        else if (h < 6.0f)
-        {
-            r = intV;
-            g = x;
-            b = (uint8) roundToInt (y);
-        }
-        else
-        {
-            r = 0;
-            g = 0;
-            b = 0;
-        }
-    }
-}
-
 Colour::Colour (const float hue,
                 const float saturation,
                 const float brightness,
                 const float alpha) throw()
 {
     uint8 r = getRed(), g = getGreen(), b = getBlue();
-    convertHSBtoRGB (hue, saturation, brightness, r, g, b);
+    ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
-    argb.setARGB (floatAlphaToInt (alpha), r, g, b);
+    argb.setARGB (ColourHelpers::floatAlphaToInt (alpha), r, g, b);
 }
 
 const Colour Colour::fromHSV (const float hue,
@@ -213,7 +212,7 @@ Colour::Colour (const float hue,
                 const uint8 alpha) throw()
 {
     uint8 r = getRed(), g = getGreen(), b = getBlue();
-    convertHSBtoRGB (hue, saturation, brightness, r, g, b);
+    ColourHelpers::convertHSBtoRGB (hue, saturation, brightness, r, g, b);
 
     argb.setARGB (alpha, r, g, b);
 }
@@ -258,7 +257,7 @@ const Colour Colour::withAlpha (const float newAlpha) const throw()
     jassert (newAlpha >= 0 && newAlpha <= 1.0f);
 
     PixelARGB newCol (argb);
-    newCol.setAlpha (floatAlphaToInt (newAlpha));
+    newCol.setAlpha (ColourHelpers::floatAlphaToInt (newAlpha));
     return Colour (newCol.getARGB());
 }
 
@@ -318,22 +317,22 @@ const Colour Colour::interpolatedWith (const Colour& other, float proportionOfOt
 //==============================================================================
 float Colour::getFloatRed() const throw()
 {
-    return getRed() * oneOver255;
+    return getRed() / 255.0f;
 }
 
 float Colour::getFloatGreen() const throw()
 {
-    return getGreen() * oneOver255;
+    return getGreen() / 255.0f;
 }
 
 float Colour::getFloatBlue() const throw()
 {
-    return getBlue() * oneOver255;
+    return getBlue() / 255.0f;
 }
 
 float Colour::getFloatAlpha() const throw()
 {
-    return getAlpha() * oneOver255;
+    return getAlpha() / 255.0f;
 }
 
 //==============================================================================
@@ -381,7 +380,7 @@ void Colour::getHSB (float& h, float& s, float& v) const throw()
         h = 0;
     }
 
-    v = hi * oneOver255;
+    v = hi / 255.0f;
 }
 
 //==============================================================================
@@ -528,7 +527,7 @@ const Colour Colour::contrasting (const Colour& colour1,
 }
 
 //==============================================================================
-const String Colour::toString() const throw()
+const String Colour::toString() const
 {
     return String::toHexString ((int) argb.getARGB());
 }
@@ -536,6 +535,13 @@ const String Colour::toString() const throw()
 const Colour Colour::fromString (const String& encodedColourString)
 {
     return Colour ((uint32) encodedColourString.getHexValue32());
+}
+
+const String Colour::toDisplayString (const bool includeAlphaValue) const
+{
+    return String::toHexString ((int) (argb.getARGB() & (includeAlphaValue ? 0xffffffff : 0xffffff)))
+                  .paddedLeft ('0', includeAlphaValue ? 8 : 6)
+                  .toUpperCase();
 }
 
 

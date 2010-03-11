@@ -315,6 +315,36 @@ public:
         }
     }
 
+    /** Adds elements from another array to the end of this array.
+
+        @param arrayToAddFrom       the array from which to copy the elements
+        @param startIndex           the first element of the other array to start copying from
+        @param numElementsToAdd     how many elements to add from the other array. If this
+                                    value is negative or greater than the number of available elements,
+                                    all available elements will be copied.
+        @see add
+    */
+    template <class OtherArrayType>
+    void addArray (const OtherArrayType& arrayToAddFrom,
+                   int startIndex = 0,
+                   int numElementsToAdd = -1)
+    {
+        const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+        const ScopedLockType lock2 (getLock());
+
+        if (startIndex < 0)
+        {
+            jassertfalse
+            startIndex = 0;
+        }
+
+        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+            numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+        while (--numElementsToAdd >= 0)
+            add (arrayToAddFrom.getUnchecked (startIndex++));
+    }
+
     /** Inserts a new object into the array assuming that the array is sorted.
 
         This will use a comparator to find the position at which the new object

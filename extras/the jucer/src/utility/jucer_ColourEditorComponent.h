@@ -56,11 +56,7 @@ public:
 
         g.setColour (Colours::white.overlaidWith (colour).contrasting());
         g.setFont (getHeight() * 0.6f, Font::bold);
-        g.drawFittedText (String::formatted (T("%02X%02X%02X%02X"),
-                                             (int) colour.getAlpha(),
-                                             (int) colour.getRed(),
-                                             (int) colour.getGreen(),
-                                             (int) colour.getBlue()),
+        g.drawFittedText (colour.toDisplayString (true),
                           2, 1, getWidth() - 4, getHeight() - 1,
                           Justification::centred, 1);
     }

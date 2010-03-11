@@ -1056,9 +1056,6 @@ public:
 	static bool isLetterOrDigit (const juce_wchar character) throw();
 
 	static int getHexDigitValue (const juce_wchar digit) throw();
-
-	static int vprintf (char* const dest, const int maxLength, const char* const format, va_list& args) throw();
-	static int vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw();
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__
@@ -1268,10 +1265,6 @@ public:
 	const String unquoted() const throw();
 
 	const String quoted (const tchar quoteCharacter = JUCE_T('"')) const throw();
-
-	static const String formatted (const tchar* const format, ...) throw();
-
-	void vprintf (const tchar* const format, va_list& args) throw();
 
 	static const String repeatedString (const tchar* const stringToRepeat,
 										int numberOfTimesToRepeat);
@@ -3575,6 +3568,27 @@ public:
 				data.elements [numUsed++] = const_cast <ObjectClass*> (newObject);
 			}
 		}
+	}
+
+	template <class OtherArrayType>
+	void addArray (const OtherArrayType& arrayToAddFrom,
+				   int startIndex = 0,
+				   int numElementsToAdd = -1)
+	{
+		const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+		const ScopedLockType lock2 (getLock());
+
+		if (startIndex < 0)
+		{
+			jassertfalse
+			startIndex = 0;
+		}
+
+		if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+			numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+		while (--numElementsToAdd >= 0)
+			add (arrayToAddFrom.getUnchecked (startIndex++));
 	}
 
 	template <class ElementComparator>
@@ -11475,9 +11489,11 @@ public:
 
 	static const Colour greyLevel (const float brightness) throw();
 
-	const String toString() const throw();
+	const String toString() const;
 
 	static const Colour fromString (const String& encodedColourString);
+
+	const String toDisplayString (bool includeAlphaValue) const;
 
 	juce_UseDebuggingNewOperator
 

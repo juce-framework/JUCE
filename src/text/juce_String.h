@@ -706,32 +706,6 @@ public:
 
 
     //==============================================================================
-    /** Returns a string, created using arguments in the style of printf.
-
-        This will return a string which is the result of a sprintf using the
-        arguments passed-in.
-
-        Note that using the %s token with a juce string is probably a bad idea, as
-        this may expect differect encodings on different platforms.
-
-        @see printf, vprintf
-    */
-    static const String formatted (const tchar* const format, ...) throw();
-
-    /** Writes text into this string, using a printf style, but taking a va_list argument.
-
-        This will replace the contents of the string with the output of this
-        formatted printf. Used by other methods, this is public in case it's
-        useful for other purposes where you want to pass a va_list through directly.
-
-        Note that using the %s token with a juce string is probably a bad idea, as
-        this may expect differect encodings on different platforms.
-
-        @see printf, formatted
-    */
-    void vprintf (const tchar* const format, va_list& args) throw();
-
-    //==============================================================================
     /** Creates a string which is a version of a string repeated and joined together.
 
         @param stringToRepeat         the string to repeat

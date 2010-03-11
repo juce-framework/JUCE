@@ -71,13 +71,11 @@
 #include "juce_IncludeBrowserPluginInfo.h"
 
 #if JUCE_MAC && JUCE_DEBUG && 0
+#include <fstream>
 static void log (const String& s)
 {
-    FILE* f = fopen ("/Users/jules/Desktop/log.txt", "a+");
-    fprintf (f, (const char*) s);
-    fprintf (f, "\n");
-    fflush (f);
-    fclose (f);
+    std::ofstream file ("/Users/jules/Desktop/log.txt", std::ios::out | std::ios::app);
+    file << s << std::endl;
 }
 #else
 #define log(a)

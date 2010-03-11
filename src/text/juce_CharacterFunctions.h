@@ -146,10 +146,6 @@ public:
         hex digit.
     */
     static int getHexDigitValue (const juce_wchar digit) throw();
-
-    //==============================================================================
-    static int vprintf (char* const dest, const int maxLength, const char* const format, va_list& args) throw();
-    static int vprintf (juce_wchar* const dest, const int maxLength, const juce_wchar* const format, va_list& args) throw();
 };
 
 #endif   // __JUCE_CHARACTERFUNCTIONS_JUCEHEADER__

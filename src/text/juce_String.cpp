@@ -1094,52 +1094,6 @@ bool String::matchesWildcard (const tchar* wildcard, const bool ignoreCase) cons
 }
 
 //==============================================================================
-const String String::formatted (const tchar* const pf, ...) throw()
-{
-    va_list list;
-    va_start (list, pf);
-
-    String result;
-    result.vprintf (pf, list);
-    return result;
-}
-
-//==============================================================================
-void String::vprintf (const tchar* const pf, va_list& args) throw()
-{
-    int bufferSize = 256;
-    String result (bufferSize, 0);
-
-    do
-    {
-#if JUCE_LINUX && JUCE_64BIT
-        va_list tempArgs;
-        va_copy (tempArgs, args);
-        const int num = CharacterFunctions::vprintf (result.text->text, bufferSize - 1, pf, tempArgs);
-        va_end (tempArgs);
-#else
-        const int num = CharacterFunctions::vprintf (result.text->text, bufferSize - 1, pf, args);
-#endif
-
-        if (num > 0)
-        {
-            *this = result;
-            break;
-        }
-        else if (num == 0)
-        {
-            *this = String::empty;
-            break;
-        }
-
-        bufferSize += 256;
-        result.preallocateStorage (bufferSize);
-    }
-    while (bufferSize < 65536);  // this is a sanity check to avoid situations where vprintf repeatedly
-                                 // returns -1 because of an error rather than because it needs more space.
-}
-
-//==============================================================================
 const String String::repeatedString (const tchar* const stringToRepeat,
                                      int numberOfTimesToRepeat)
 {

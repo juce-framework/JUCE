@@ -343,11 +343,14 @@ public:
 
         The string can be turned back into a colour using the fromString() method.
     */
-    const String toString() const throw();
+    const String toString() const;
 
     /** Reads the colour from a string that was created with toString().
     */
     static const Colour fromString (const String& encodedColourString);
+
+    /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
+    const String toDisplayString (bool includeAlphaValue) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
