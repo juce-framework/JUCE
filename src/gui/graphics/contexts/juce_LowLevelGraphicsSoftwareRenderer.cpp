@@ -103,7 +103,7 @@ private:
     PixelRGB filler [4];
     bool areRGBComponentsEqual;
 
-    inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const
+    inline void blendLine (PixelType* dest, const PixelARGB& colour, int width) const throw()
     {
         do
         {

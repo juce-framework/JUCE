@@ -243,7 +243,7 @@ void MD5::ProcessContext::finish (uint8* const result)
 
     processBlock (encodedLength, 8);
 
-    MD5Functions::encode (result, state, sizeof (result));
+    MD5Functions::encode (result, state, 16);
     zerostruct (buffer);
 }
 
