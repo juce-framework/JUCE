@@ -248,7 +248,7 @@ int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const 
     int res = 0;
 
     size_t byte = bitRangeStart >> 3;
-    int offsetInByte = bitRangeStart & 7;
+    int offsetInByte = (int) bitRangeStart & 7;
     size_t bitsSoFar = 0;
 
     while (numBits > 0 && (size_t) byte < size)
@@ -270,7 +270,7 @@ int MemoryBlock::getBitRange (const size_t bitRangeStart, size_t numBits) const 
 void MemoryBlock::setBitRange (const size_t bitRangeStart, size_t numBits, int bitsToSet) throw()
 {
     size_t byte = bitRangeStart >> 3;
-    int offsetInByte = bitRangeStart & 7;
+    int offsetInByte = (int) bitRangeStart & 7;
     unsigned int mask = ~((((unsigned int) 0xffffffff) << (32 - numBits)) >> (32 - numBits));
 
     while (numBits > 0 && (size_t) byte < size)

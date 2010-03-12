@@ -37,7 +37,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_PlatformUtilities.h"
 #include "../io/streams/juce_MemoryOutputStream.h"
 #include "../io/streams/juce_MemoryInputStream.h"
-void juce_initialiseStrings();
 
 
 //==============================================================================
@@ -134,7 +133,6 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
         juceInitialisedNonGUI = true;
 
         DBG (SystemStats::getJUCEVersion());
-        juce_initialiseStrings();
         SystemStats::initialiseStats();
         Random::getSystemRandom().setSeedRandomly(); // (mustn't call this before initialiseStats() because it relies on the time being set up)
     }

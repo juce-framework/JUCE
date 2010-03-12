@@ -1247,6 +1247,8 @@ private:
 
             if (! TrackMouseEvent (&tme))
                 jassertfalse;
+
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
         }
         else if (! isDragging)
         {
@@ -1254,7 +1256,16 @@ private:
                 return;
         }
 
-        doMouseEvent (position);
+        // (Throttling the incoming queue of mouse-events seems to still be required in XP..)
+        static uint32 lastMouseTime = 0;
+        const uint32 now = Time::getMillisecondCounter();
+        const int maxMouseMovesPerSecond = 60;
+
+        if (now > lastMouseTime + 1000 / maxMouseMovesPerSecond)
+        {
+            lastMouseTime = now;
+            doMouseEvent (position);
+        }
     }
 
     void doMouseDown (const Point<int>& position, const WPARAM wParam)

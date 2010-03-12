@@ -1071,20 +1071,19 @@ public:
 
 	String (const String& other) throw();
 
-	String (const char* const text) throw();
+	String (const char* text) throw();
 
-	String (const char* const text,
-			const size_t maxChars) throw();
+	String (const char* text, size_t maxChars) throw();
 
-	String (const juce_wchar* const unicodeText) throw();
+	String (const juce_wchar* unicodeText) throw();
 
-	String (const juce_wchar* const unicodeText,
-			const size_t maxChars) throw();
+	String (const juce_wchar* unicodeText, size_t maxChars) throw();
 
-	static const String charToString (const juce_wchar character) throw();
+	static const String charToString (juce_wchar character) throw();
 
 	~String() throw();
 
+	//========================juce_wchar======================================================
 	static const String empty;
 
 	int hashCode() const throw();
@@ -1097,24 +1096,24 @@ public:
 
 	String& operator= (const String& other) throw();
 
-	String& operator+= (const tchar* const textToAppend);
+	String& operator+= (const juce_wchar* textToAppend);
 	String& operator+= (const String& stringToAppend);
-	String& operator+= (const char characterToAppend);
-	String& operator+= (const juce_wchar characterToAppend);
-	String& operator+= (const int numberToAppend);
-	String& operator+= (const unsigned int numberToAppend);
+	String& operator+= (char characterToAppend);
+	String& operator+= (juce_wchar characterToAppend);
+	String& operator+= (int numberToAppend);
+	String& operator+= (unsigned int numberToAppend);
 
-	void append (const tchar* const textToAppend,
-				 const int maxCharsToTake);
+	void append (const juce_wchar* textToAppend, int maxCharsToTake);
 
 	// Comparison methods..
 
-	inline bool isEmpty() const throw()			 { return text->text[0] == 0; }
+	inline bool isEmpty() const throw()			 { return text[0] == 0; }
 
-	inline bool isNotEmpty() const throw()		  { return text->text[0] != 0; }
+	inline bool isNotEmpty() const throw()		  { return text[0] != 0; }
 
 	bool equalsIgnoreCase (const String& other) const throw();
-	bool equalsIgnoreCase (const tchar* const other) const throw();
+
+	bool equalsIgnoreCase (const juce_wchar* other) const throw();
 
 	int compare (const String& other) const throw();
 
@@ -1126,68 +1125,68 @@ public:
 
 	int compareLexicographically (const String& other) const throw();
 
-	bool startsWith (const tchar* const text) const throw();
+	bool startsWith (const juce_wchar* text) const throw();
 
-	bool startsWithChar (const tchar character) const throw();
+	bool startsWithChar (juce_wchar character) const throw();
 
-	bool startsWithIgnoreCase (const tchar* const text) const throw();
+	bool startsWithIgnoreCase (const juce_wchar* text) const throw();
 
-	bool endsWith (const tchar* const text) const throw();
+	bool endsWith (const juce_wchar* text) const throw();
 
-	bool endsWithChar (const tchar character) const throw();
+	bool endsWithChar (juce_wchar character) const throw();
 
-	bool endsWithIgnoreCase (const tchar* const text) const throw();
+	bool endsWithIgnoreCase (const juce_wchar* text) const throw();
 
-	bool contains (const tchar* const text) const throw();
+	bool contains (const juce_wchar* text) const throw();
 
-	bool containsChar (const tchar character) const throw();
+	bool containsChar (juce_wchar character) const throw();
 
-	bool containsIgnoreCase (const tchar* const text) const throw();
+	bool containsIgnoreCase (const juce_wchar* text) const throw();
 
-	bool containsWholeWord (const tchar* const wordToLookFor) const throw();
+	bool containsWholeWord (const juce_wchar* wordToLookFor) const throw();
 
-	bool containsWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw();
+	bool containsWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
 
-	int indexOfWholeWord (const tchar* const wordToLookFor) const throw();
+	int indexOfWholeWord (const juce_wchar* wordToLookFor) const throw();
 
-	int indexOfWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw();
+	int indexOfWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
 
-	bool containsAnyOf (const tchar* const charactersItMightContain) const throw();
+	bool containsAnyOf (const juce_wchar* charactersItMightContain) const throw();
 
-	bool containsOnly (const tchar* const charactersItMightContain) const throw();
+	bool containsOnly (const juce_wchar* charactersItMightContain) const throw();
 
 	bool containsNonWhitespaceChars() const throw();
 
-	bool matchesWildcard (const tchar* wildcard, const bool ignoreCase) const throw();
+	bool matchesWildcard (const juce_wchar* wildcard, bool ignoreCase) const throw();
 
 	// Substring location methods..
 
-	int indexOfChar (const tchar characterToLookFor) const throw();
+	int indexOfChar (juce_wchar characterToLookFor) const throw();
 
-	int indexOfChar (const int startIndex, const tchar characterToLookFor) const throw();
+	int indexOfChar (int startIndex, juce_wchar characterToLookFor) const throw();
 
-	int indexOfAnyOf (const tchar* const charactersToLookFor,
-					  const int startIndex = 0,
-					  const bool ignoreCase = false) const throw();
+	int indexOfAnyOf (const juce_wchar* charactersToLookFor,
+					  int startIndex = 0,
+					  bool ignoreCase = false) const throw();
 
-	int indexOf (const tchar* const text) const throw();
+	int indexOf (const juce_wchar* text) const throw();
 
-	int indexOf (const int startIndex,
-				 const tchar* const textToLookFor) const throw();
+	int indexOf (int startIndex,
+				 const juce_wchar* textToLookFor) const throw();
 
-	int indexOfIgnoreCase (const tchar* const textToLookFor) const throw();
+	int indexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
 
-	int indexOfIgnoreCase (const int startIndex,
-						   const tchar* const textToLookFor) const throw();
+	int indexOfIgnoreCase (int startIndex,
+						   const juce_wchar* textToLookFor) const throw();
 
-	int lastIndexOfChar (const tchar character) const throw();
+	int lastIndexOfChar (juce_wchar character) const throw();
 
-	int lastIndexOf (const tchar* const textToLookFor) const throw();
+	int lastIndexOf (const juce_wchar* textToLookFor) const throw();
 
-	int lastIndexOfIgnoreCase (const tchar* const textToLookFor) const throw();
+	int lastIndexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
 
-	int lastIndexOfAnyOf (const tchar* const charactersToLookFor,
-						  const bool ignoreCase = false) const throw();
+	int lastIndexOfAnyOf (const juce_wchar* charactersToLookFor,
+						  bool ignoreCase = false) const throw();
 
 	// Substring extraction and manipulation methods..
 
@@ -1195,44 +1194,43 @@ public:
 
 		No checks are made to see if the index is within a valid range, so be careful!
 	*/
-	inline const juce_wchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
+	inline const juce_wchar& operator[] (int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text [index]; }
 
-	juce_wchar& operator[] (const int index) throw();
+	juce_wchar& operator[] (int index) throw();
 
 	juce_wchar getLastCharacter() const throw();
 
-	const String substring (int startIndex,
-							int endIndex) const throw();
+	const String substring (int startIndex, int endIndex) const throw();
 
-	const String substring (const int startIndex) const throw();
+	const String substring (int startIndex) const throw();
 
-	const String dropLastCharacters (const int numberToDrop) const throw();
+	const String dropLastCharacters (int numberToDrop) const throw();
 
-	const String getLastCharacters (const int numCharacters) const throw();
+	const String getLastCharacters (int numCharacters) const throw();
 
-	const String fromFirstOccurrenceOf (const tchar* const substringToStartFrom,
-										const bool includeSubStringInResult,
-										const bool ignoreCase) const throw();
+	const String fromFirstOccurrenceOf (const juce_wchar* substringToStartFrom,
+										bool includeSubStringInResult,
+										bool ignoreCase) const throw();
 
-	const String fromLastOccurrenceOf (const tchar* const substringToFind,
-									   const bool includeSubStringInResult,
-									   const bool ignoreCase) const throw();
+	const String fromLastOccurrenceOf (const juce_wchar* substringToFind,
+									   bool includeSubStringInResult,
+									   bool ignoreCase) const throw();
 
-	const String upToFirstOccurrenceOf (const tchar* const substringToEndWith,
-										const bool includeSubStringInResult,
-										const bool ignoreCase) const throw();
+	const String upToFirstOccurrenceOf (const juce_wchar* substringToEndWith,
+										bool includeSubStringInResult,
+										bool ignoreCase) const throw();
 
-	const String upToLastOccurrenceOf (const tchar* substringToFind,
-									   const bool includeSubStringInResult,
-									   const bool ignoreCase) const throw();
+	const String upToLastOccurrenceOf (const juce_wchar* substringToFind,
+									   bool includeSubStringInResult,
+									   bool ignoreCase) const throw();
 
 	const String trim() const throw();
 	const String trimStart() const throw();
 	const String trimEnd() const throw();
 
-	const String trimCharactersAtStart (const tchar* charactersToTrim) const throw();
+	const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const throw();
 
-	const String trimCharactersAtEnd (const tchar* charactersToTrim) const throw();
+	const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const throw();
 
 	const String toUpperCase() const throw();
 
@@ -1240,61 +1238,61 @@ public:
 
 	const String replaceSection (int startIndex,
 								 int numCharactersToReplace,
-								 const tchar* const stringToInsert) const throw();
+								 const juce_wchar* stringToInsert) const throw();
 
-	const String replace (const tchar* const stringToReplace,
-						  const tchar* const stringToInsertInstead,
-						  const bool ignoreCase = false) const throw();
+	const String replace (const juce_wchar* stringToReplace,
+						  const juce_wchar* stringToInsertInstead,
+						  bool ignoreCase = false) const throw();
 
-	const String replaceCharacter (const tchar characterToReplace,
-								   const tchar characterToInsertInstead) const throw();
+	const String replaceCharacter (juce_wchar characterToReplace,
+								   juce_wchar characterToInsertInstead) const throw();
 
 	const String replaceCharacters (const String& charactersToReplace,
-									const tchar* const charactersToInsertInstead) const throw();
+									const juce_wchar* charactersToInsertInstead) const throw();
 
-	const String retainCharacters (const tchar* const charactersToRetain) const throw();
+	const String retainCharacters (const juce_wchar* charactersToRetain) const throw();
 
-	const String removeCharacters (const tchar* const charactersToRemove) const throw();
+	const String removeCharacters (const juce_wchar* charactersToRemove) const throw();
 
-	const String initialSectionContainingOnly (const tchar* const permittedCharacters) const throw();
+	const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const throw();
 
-	const String initialSectionNotContaining (const tchar* const charactersToStopAt) const throw();
+	const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const throw();
 
 	bool isQuotedString() const throw();
 
 	const String unquoted() const throw();
 
-	const String quoted (const tchar quoteCharacter = JUCE_T('"')) const throw();
+	const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const throw();
 
-	static const String repeatedString (const tchar* const stringToRepeat,
+	static const String repeatedString (const juce_wchar* stringToRepeat,
 										int numberOfTimesToRepeat);
 
-	const String paddedLeft (const juce_wchar padCharacter, int minimumLength) const;
+	const String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
 
-	const String paddedRight (const juce_wchar padCharacter, int minimumLength) const;
+	const String paddedRight (juce_wchar padCharacter, int minimumLength) const;
 
-	static const String createStringFromData (const void* const data,
-											  const int size) throw();
+	static const String createStringFromData (const void* data,
+											  int size) throw();
 
 	// Numeric conversions..
 
-	explicit String (const int decimalInteger) throw();
+	explicit String (int decimalInteger) throw();
 
-	explicit String (const unsigned int decimalInteger) throw();
+	explicit String (unsigned int decimalInteger) throw();
 
-	explicit String (const short decimalInteger) throw();
+	explicit String (short decimalInteger) throw();
 
-	explicit String (const unsigned short decimalInteger) throw();
+	explicit String (unsigned short decimalInteger) throw();
 
-	explicit String (const int64 largeIntegerValue) throw();
+	explicit String (int64 largeIntegerValue) throw();
 
-	explicit String (const uint64 largeIntegerValue) throw();
+	explicit String (uint64 largeIntegerValue) throw();
 
-	explicit String (const float floatValue,
-					 const int numberOfDecimalPlaces = 0) throw();
+	explicit String (float floatValue,
+					 int numberOfDecimalPlaces = 0) throw();
 
-	explicit String (const double doubleValue,
-					 const int numberOfDecimalPlaces = 0) throw();
+	explicit String (double doubleValue,
+					 int numberOfDecimalPlaces = 0) throw();
 
 	int getIntValue() const throw();
 
@@ -1310,19 +1308,19 @@ public:
 
 	int64 getHexValue64() const throw();
 
-	static const String toHexString (const int number) throw();
+	static const String toHexString (int number) throw();
 
-	static const String toHexString (const int64 number) throw();
+	static const String toHexString (int64 number) throw();
 
-	static const String toHexString (const short number) throw();
+	static const String toHexString (short number) throw();
 
 	static const String toHexString (const unsigned char* data,
-									 const int size,
-									 const int groupSize = 1) throw();
+									 int size,
+									 int groupSize = 1) throw();
 
-	inline operator const juce_wchar*() const throw()   { return text->text; }
+	inline operator const juce_wchar*() const throw()   { return text; }
 
-	inline operator juce_wchar*() throw()		   { return text->text; }
+	inline operator juce_wchar*() throw()		   { return text; }
 
 	const char* toUTF8() const;
 
@@ -1330,17 +1328,17 @@ public:
 
 	int getNumBytesAsUTF8() const throw();
 
-	int copyToUTF8 (char* destBuffer, const int maxBufferSizeBytes) const throw();
+	int copyToUTF8 (char* destBuffer, int maxBufferSizeBytes) const throw();
 
 	const char* toCString() const;
 
 	int getNumBytesAsCString() const throw();
 
-	int copyToCString (char* destBuffer, const int maxBufferSizeBytes) const throw();
+	int copyToCString (char* destBuffer, int maxBufferSizeBytes) const throw();
 
-	void copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw();
+	void copyToUnicode (juce_wchar* destBuffer, int maxCharsToCopy) const throw();
 
-	void preallocateStorage (const size_t numCharsNeeded) throw();
+	void preallocateStorage (size_t numCharsNeeded);
 
 	class JUCE_API  Concatenator
 	{
@@ -1362,23 +1360,14 @@ public:
 
 private:
 
-	struct InternalRefCountedStringHolder
-	{
-		int refCount;
-		int allocatedNumChars;
-		wchar_t text[1];
-	};
-
-	InternalRefCountedStringHolder* text;
-	static InternalRefCountedStringHolder emptyString;
+	juce_wchar* text;
 
 	// internal constructor that preallocates a certain amount of memory
-	String (const int numChars, const int dummyVariable) throw();
+	String (size_t numChars, int dummyVariable);
 
-	void createInternal (const int numChars) throw();
-	void createInternal (const tchar* const text, const tchar* const textEnd) throw();
-	void appendInternal (const tchar* const text, const int numExtraChars) throw();
-	void dupeInternalIfMultiplyReferenced() throw();
+	void createInternal (const juce_wchar* text, size_t numChars);
+	void appendInternal (const juce_wchar* text, int numExtraChars);
+	void dupeInternalIfMultiplyReferenced();
 };
 
 const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
@@ -1392,19 +1381,19 @@ const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2
 const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
 const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
 
-String& JUCE_CALLTYPE operator<< (String& string1, const char characterToAppend);
-String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar characterToAppend);
-String& JUCE_CALLTYPE operator<< (String& string1, const char* const string2);
-String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* const string2);
+String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
 String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
-String& JUCE_CALLTYPE operator<< (String& string1, const short number);
-String& JUCE_CALLTYPE operator<< (String& string1, const int number);
-String& JUCE_CALLTYPE operator<< (String& string1, const unsigned int number);
-String& JUCE_CALLTYPE operator<< (String& string1, const long number);
-String& JUCE_CALLTYPE operator<< (String& string1, const unsigned long number);
-String& JUCE_CALLTYPE operator<< (String& string1, const float number);
-String& JUCE_CALLTYPE operator<< (String& string1, const double number);
+String& JUCE_CALLTYPE operator<< (String& string1, short number);
+String& JUCE_CALLTYPE operator<< (String& string1, int number);
+String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
+String& JUCE_CALLTYPE operator<< (String& string1, long number);
+String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
+String& JUCE_CALLTYPE operator<< (String& string1, float number);
+String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw();
 bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
@@ -25779,6 +25768,7 @@ public:
 	void showMouseCursor (const MouseCursor& cursor);
 	void hideCursor();
 	void revealCursor();
+	void forceMouseCursorUpdate();
 
 	bool canDoUnboundedMovement() const throw();
 

@@ -136,6 +136,7 @@ public:
     void showMouseCursor (const MouseCursor& cursor);
     void hideCursor();
     void revealCursor();
+    void forceMouseCursorUpdate();
 
     bool canDoUnboundedMovement() const throw();
 

@@ -57,34 +57,32 @@ public:
 
         The string is assumed to be stored in the default system encoding.
     */
-    String (const char* const text) throw();
+    String (const char* text) throw();
 
     /** Creates a string from an string of characters.
 
         This will use up the the first maxChars characters of the string (or
         less if the string is actually shorter)
     */
-    String (const char* const text,
-            const size_t maxChars) throw();
+    String (const char* text, size_t maxChars) throw();
 
     /** Creates a string from a zero-terminated unicode text string. */
-    String (const juce_wchar* const unicodeText) throw();
+    String (const juce_wchar* unicodeText) throw();
 
     /** Creates a string from a unicode text string.
 
         This will use up the the first maxChars characters of the string (or
         less if the string is actually shorter)
     */
-    String (const juce_wchar* const unicodeText,
-            const size_t maxChars) throw();
+    String (const juce_wchar* unicodeText, size_t maxChars) throw();
 
     /** Creates a string from a single character. */
-    static const String charToString (const juce_wchar character) throw();
+    static const String charToString (juce_wchar character) throw();
 
     /** Destructor. */
     ~String() throw();
 
-    //==============================================================================
+    //========================juce_wchar======================================================
     /** This is an empty string that can be used whenever one is needed.
 
         It's better to use this than String() because it explains what's going on
@@ -109,25 +107,24 @@ public:
     String& operator= (const String& other) throw();
 
     /** Appends another string at the end of this one. */
-    String& operator+= (const tchar* const textToAppend);
+    String& operator+= (const juce_wchar* textToAppend);
     /** Appends another string at the end of this one. */
     String& operator+= (const String& stringToAppend);
     /** Appends a character at the end of this string. */
-    String& operator+= (const char characterToAppend);
+    String& operator+= (char characterToAppend);
     /** Appends a character at the end of this string. */
-    String& operator+= (const juce_wchar characterToAppend);
+    String& operator+= (juce_wchar characterToAppend);
     /** Appends a decimal number at the end of this string. */
-    String& operator+= (const int numberToAppend);
+    String& operator+= (int numberToAppend);
     /** Appends a decimal number at the end of this string. */
-    String& operator+= (const unsigned int numberToAppend);
+    String& operator+= (unsigned int numberToAppend);
 
     /** Appends a string at the end of this one.
 
         @param textToAppend     the string to add
         @param maxCharsToTake   the maximum number of characters to take from the string passed in
     */
-    void append (const tchar* const textToAppend,
-                 const int maxCharsToTake);
+    void append (const juce_wchar* textToAppend, int maxCharsToTake);
 
     //==============================================================================
     // Comparison methods..
@@ -138,7 +135,7 @@ public:
 
         @see containsNonWhitespaceChars()
     */
-    inline bool isEmpty() const throw()                     { return text->text[0] == 0; }
+    inline bool isEmpty() const throw()                     { return text[0] == 0; }
 
     /** Returns true if the string contains at least one character.
 
@@ -146,12 +143,13 @@ public:
 
         @see containsNonWhitespaceChars()
     */
-    inline bool isNotEmpty() const throw()                  { return text->text[0] != 0; }
+    inline bool isNotEmpty() const throw()                  { return text[0] != 0; }
 
     /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const String& other) const throw();
+
     /** Case-insensitive comparison with another string. */
-    bool equalsIgnoreCase (const tchar* const other) const throw();
+    bool equalsIgnoreCase (const juce_wchar* other) const throw();
 
     /** Case-sensitive comparison with another string.
         @returns     0 if the two strings are identical; negative if this string
@@ -195,47 +193,47 @@ public:
     /** Tests whether the string begins with another string.
         Uses a case-sensitive comparison.
     */
-    bool startsWith (const tchar* const text) const throw();
+    bool startsWith (const juce_wchar* text) const throw();
 
     /** Tests whether the string begins with a particular character.
         Uses a case-sensitive comparison.
     */
-    bool startsWithChar (const tchar character) const throw();
+    bool startsWithChar (juce_wchar character) const throw();
 
     /** Tests whether the string begins with another string.
         Uses a case-insensitive comparison.
     */
-    bool startsWithIgnoreCase (const tchar* const text) const throw();
+    bool startsWithIgnoreCase (const juce_wchar* text) const throw();
 
     /** Tests whether the string ends with another string.
         Uses a case-sensitive comparison.
     */
-    bool endsWith (const tchar* const text) const throw();
+    bool endsWith (const juce_wchar* text) const throw();
 
     /** Tests whether the string ends with a particular character.
         Uses a case-sensitive comparison.
     */
-    bool endsWithChar (const tchar character) const throw();
+    bool endsWithChar (juce_wchar character) const throw();
 
     /** Tests whether the string ends with another string.
         Uses a case-insensitive comparison.
     */
-    bool endsWithIgnoreCase (const tchar* const text) const throw();
+    bool endsWithIgnoreCase (const juce_wchar* text) const throw();
 
     /** Tests whether the string contains another substring.
         Uses a case-sensitive comparison.
     */
-    bool contains (const tchar* const text) const throw();
+    bool contains (const juce_wchar* text) const throw();
 
     /** Tests whether the string contains a particular character.
         Uses a case-sensitive comparison.
     */
-    bool containsChar (const tchar character) const throw();
+    bool containsChar (juce_wchar character) const throw();
 
     /** Tests whether the string contains another substring.
         Uses a case-insensitive comparison.
     */
-    bool containsIgnoreCase (const tchar* const text) const throw();
+    bool containsIgnoreCase (const juce_wchar* text) const throw();
 
     /** Tests whether the string contains another substring as a distict word.
 
@@ -243,7 +241,7 @@ public:
                     non-alphanumeric characters
         @see indexOfWholeWord, containsWholeWordIgnoreCase
     */
-    bool containsWholeWord (const tchar* const wordToLookFor) const throw();
+    bool containsWholeWord (const juce_wchar* wordToLookFor) const throw();
 
     /** Tests whether the string contains another substring as a distict word.
 
@@ -251,7 +249,7 @@ public:
                     non-alphanumeric characters
         @see indexOfWholeWordIgnoreCase, containsWholeWord
     */
-    bool containsWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw();
+    bool containsWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
 
     /** Finds an instance of another substring if it exists as a distict word.
 
@@ -260,7 +258,7 @@ public:
                     found, then it will return -1
         @see indexOfWholeWordIgnoreCase, containsWholeWord
     */
-    int indexOfWholeWord (const tchar* const wordToLookFor) const throw();
+    int indexOfWholeWord (const juce_wchar* wordToLookFor) const throw();
 
     /** Finds an instance of another substring if it exists as a distict word.
 
@@ -269,7 +267,7 @@ public:
                     found, then it will return -1
         @see indexOfWholeWord, containsWholeWordIgnoreCase
     */
-    int indexOfWholeWordIgnoreCase (const tchar* const wordToLookFor) const throw();
+    int indexOfWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
 
     /** Looks for any of a set of characters in the string.
 
@@ -278,7 +276,7 @@ public:
         @returns    true if the string contains any of the characters from
                     the string that is passed in.
     */
-    bool containsAnyOf (const tchar* const charactersItMightContain) const throw();
+    bool containsAnyOf (const juce_wchar* charactersItMightContain) const throw();
 
     /** Looks for a set of characters in the string.
 
@@ -287,7 +285,7 @@ public:
         @returns    true if the all the characters in the string are also found in the
                     string that is passed in.
     */
-    bool containsOnly (const tchar* const charactersItMightContain) const throw();
+    bool containsOnly (const juce_wchar* charactersItMightContain) const throw();
 
     /** Returns true if this string contains any non-whitespace characters.
 
@@ -305,7 +303,7 @@ public:
         This isn't a full-blown regex though! The only wildcard characters supported
         are "*" and "?". It's mainly intended for filename pattern matching.
     */
-    bool matchesWildcard (const tchar* wildcard, const bool ignoreCase) const throw();
+    bool matchesWildcard (const juce_wchar* wildcard, bool ignoreCase) const throw();
 
     //==============================================================================
     // Substring location methods..
@@ -317,7 +315,7 @@ public:
         @returns    the index of the first occurrence of the character in this
                     string, or -1 if it's not found.
     */
-    int indexOfChar (const tchar characterToLookFor) const throw();
+    int indexOfChar (juce_wchar characterToLookFor) const throw();
 
     /** Searches for a character inside this string.
 
@@ -328,7 +326,7 @@ public:
         @returns            the index of the first occurrence of the character in this
                             string, or -1 if it's not found.
     */
-    int indexOfChar (const int startIndex, const tchar characterToLookFor) const throw();
+    int indexOfChar (int startIndex, juce_wchar characterToLookFor) const throw();
 
     /** Returns the index of the first character that matches one of the characters
         passed-in to this method.
@@ -342,9 +340,9 @@ public:
 
         @see indexOfChar, lastIndexOfAnyOf
     */
-    int indexOfAnyOf (const tchar* const charactersToLookFor,
-                      const int startIndex = 0,
-                      const bool ignoreCase = false) const throw();
+    int indexOfAnyOf (const juce_wchar* charactersToLookFor,
+                      int startIndex = 0,
+                      bool ignoreCase = false) const throw();
 
     /** Searches for a substring within this string.
 
@@ -352,7 +350,7 @@ public:
 
         @returns    the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOf (const tchar* const text) const throw();
+    int indexOf (const juce_wchar* text) const throw();
 
     /** Searches for a substring within this string.
 
@@ -362,8 +360,8 @@ public:
         @param textToLookFor    the string to search for
         @returns                the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOf (const int startIndex,
-                 const tchar* const textToLookFor) const throw();
+    int indexOf (int startIndex,
+                 const juce_wchar* textToLookFor) const throw();
 
     /** Searches for a substring within this string.
 
@@ -371,7 +369,7 @@ public:
 
         @returns    the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOfIgnoreCase (const tchar* const textToLookFor) const throw();
+    int indexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
 
     /** Searches for a substring within this string.
 
@@ -381,8 +379,8 @@ public:
         @param textToLookFor    the string to search for
         @returns                the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOfIgnoreCase (const int startIndex,
-                           const tchar* const textToLookFor) const throw();
+    int indexOfIgnoreCase (int startIndex,
+                           const juce_wchar* textToLookFor) const throw();
 
     /** Searches for a character inside this string (working backwards from the end of the string).
 
@@ -391,7 +389,7 @@ public:
         @returns            the index of the last occurrence of the character in this
                             string, or -1 if it's not found.
     */
-    int lastIndexOfChar (const tchar character) const throw();
+    int lastIndexOfChar (juce_wchar character) const throw();
 
     /** Searches for a substring inside this string (working backwards from the end of the string).
 
@@ -400,7 +398,7 @@ public:
         @returns            the index of the start of the last occurrence of the
                             substring within this string, or -1 if it's not found.
     */
-    int lastIndexOf (const tchar* const textToLookFor) const throw();
+    int lastIndexOf (const juce_wchar* textToLookFor) const throw();
 
     /** Searches for a substring inside this string (working backwards from the end of the string).
 
@@ -409,7 +407,7 @@ public:
         @returns            the index of the start of the last occurrence of the
                             substring within this string, or -1 if it's not found.
     */
-    int lastIndexOfIgnoreCase (const tchar* const textToLookFor) const throw();
+    int lastIndexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
 
     /** Returns the index of the last character in this string that matches one of the
         characters passed-in to this method.
@@ -423,8 +421,8 @@ public:
 
         @see lastIndexOf, indexOfAnyOf
     */
-    int lastIndexOfAnyOf (const tchar* const charactersToLookFor,
-                          const bool ignoreCase = false) const throw();
+    int lastIndexOfAnyOf (const juce_wchar* charactersToLookFor,
+                          bool ignoreCase = false) const throw();
 
 
     //==============================================================================
@@ -434,7 +432,7 @@ public:
 
         No checks are made to see if the index is within a valid range, so be careful!
     */
-    inline const juce_wchar& operator[] (const int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text->text [index]; }
+    inline const juce_wchar& operator[] (int index) const throw()  { jassert (((unsigned int) index) <= (unsigned int) length()); return text [index]; }
 
     /** Returns a character from the string such that it can also be altered.
 
@@ -443,7 +441,7 @@ public:
         Note that the index passed-in is not checked to see whether it's in-range, so
         be careful when using this.
     */
-    juce_wchar& operator[] (const int index) throw();
+    juce_wchar& operator[] (int index) throw();
 
     /** Returns the final character of the string.
 
@@ -462,8 +460,7 @@ public:
                             this index are returned
         @see fromFirstOccurrenceOf, dropLastCharacters, getLastCharacters, upToFirstOccurrenceOf
     */
-    const String substring (int startIndex,
-                            int endIndex) const throw();
+    const String substring (int startIndex, int endIndex) const throw();
 
     /** Returns a section of the string, starting from a given position.
 
@@ -473,7 +470,7 @@ public:
         @returns            the substring from startIndex up to the end of the string
         @see dropLastCharacters, getLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String substring (const int startIndex) const throw();
+    const String substring (int startIndex) const throw();
 
     /** Returns a version of this string with a number of characters removed
         from the end.
@@ -484,7 +481,7 @@ public:
                                 original string will be returned.
         @see substring, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf, getLastCharacter
     */
-    const String dropLastCharacters (const int numberToDrop) const throw();
+    const String dropLastCharacters (int numberToDrop) const throw();
 
     /** Returns a number of characters from the end of the string.
 
@@ -493,7 +490,7 @@ public:
 
         @see substring, dropLastCharacters, getLastCharacter
     */
-    const String getLastCharacters (const int numCharacters) const throw();
+    const String getLastCharacters (int numCharacters) const throw();
 
     //==============================================================================
     /** Returns a section of the string starting from a given substring.
@@ -511,9 +508,9 @@ public:
 
         @see upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String fromFirstOccurrenceOf (const tchar* const substringToStartFrom,
-                                        const bool includeSubStringInResult,
-                                        const bool ignoreCase) const throw();
+    const String fromFirstOccurrenceOf (const juce_wchar* substringToStartFrom,
+                                        bool includeSubStringInResult,
+                                        bool ignoreCase) const throw();
 
     /** Returns a section of the string starting from the last occurrence of a given substring.
 
@@ -523,9 +520,9 @@ public:
 
         @see fromFirstOccurrenceOf, upToLastOccurrenceOf
     */
-    const String fromLastOccurrenceOf (const tchar* const substringToFind,
-                                       const bool includeSubStringInResult,
-                                       const bool ignoreCase) const throw();
+    const String fromLastOccurrenceOf (const juce_wchar* substringToFind,
+                                       bool includeSubStringInResult,
+                                       bool ignoreCase) const throw();
 
     /** Returns the start of this string, up to the first occurrence of a substring.
 
@@ -540,9 +537,9 @@ public:
 
         @see upToLastOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToFirstOccurrenceOf (const tchar* const substringToEndWith,
-                                        const bool includeSubStringInResult,
-                                        const bool ignoreCase) const throw();
+    const String upToFirstOccurrenceOf (const juce_wchar* substringToEndWith,
+                                        bool includeSubStringInResult,
+                                        bool ignoreCase) const throw();
 
     /** Returns the start of this string, up to the last occurrence of a substring.
 
@@ -551,9 +548,9 @@ public:
 
         @see upToFirstOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToLastOccurrenceOf (const tchar* substringToFind,
-                                       const bool includeSubStringInResult,
-                                       const bool ignoreCase) const throw();
+    const String upToLastOccurrenceOf (const juce_wchar* substringToFind,
+                                       bool includeSubStringInResult,
+                                       bool ignoreCase) const throw();
 
     //==============================================================================
     /** Returns a copy of this string with any whitespace characters removed from the start and end. */
@@ -569,7 +566,7 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimStart, trimCharactersAtEnd
     */
-    const String trimCharactersAtStart (const tchar* charactersToTrim) const throw();
+    const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const throw();
 
     /** Returns a copy of this string, having removed a specified set of characters from its end.
         Characters are removed from the end of the string until it finds one that is not in the
@@ -577,7 +574,7 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimEnd, trimCharactersAtStart
     */
-    const String trimCharactersAtEnd (const tchar* charactersToTrim) const throw();
+    const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const throw();
 
     //==============================================================================
     /** Returns an upper-case version of this string. */
@@ -604,7 +601,7 @@ public:
     */
     const String replaceSection (int startIndex,
                                  int numCharactersToReplace,
-                                 const tchar* const stringToInsert) const throw();
+                                 const juce_wchar* stringToInsert) const throw();
 
     /** Replaces all occurrences of a substring with another string.
 
@@ -613,13 +610,13 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String replace (const tchar* const stringToReplace,
-                          const tchar* const stringToInsertInstead,
-                          const bool ignoreCase = false) const throw();
+    const String replace (const juce_wchar* stringToReplace,
+                          const juce_wchar* stringToInsertInstead,
+                          bool ignoreCase = false) const throw();
 
     /** Returns a string with all occurrences of a character replaced with a different one. */
-    const String replaceCharacter (const tchar characterToReplace,
-                                   const tchar characterToInsertInstead) const throw();
+    const String replaceCharacter (juce_wchar characterToReplace,
+                                   juce_wchar characterToInsertInstead) const throw();
 
     /** Replaces a set of characters with another set.
 
@@ -632,7 +629,7 @@ public:
         Note that this is a const method, and won't affect the string itself.
     */
     const String replaceCharacters (const String& charactersToReplace,
-                                    const tchar* const charactersToInsertInstead) const throw();
+                                    const juce_wchar* charactersToInsertInstead) const throw();
 
     /** Returns a version of this string that only retains a fixed set of characters.
 
@@ -643,7 +640,7 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String retainCharacters (const tchar* const charactersToRetain) const throw();
+    const String retainCharacters (const juce_wchar* charactersToRetain) const throw();
 
     /** Returns a version of this string with a set of characters removed.
 
@@ -654,21 +651,21 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String removeCharacters (const tchar* const charactersToRemove) const throw();
+    const String removeCharacters (const juce_wchar* charactersToRemove) const throw();
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that doesn't appear in the string passed in.
     */
-    const String initialSectionContainingOnly (const tchar* const permittedCharacters) const throw();
+    const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const throw();
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that occurs in the string passed in.
     */
-    const String initialSectionNotContaining (const tchar* const charactersToStopAt) const throw();
+    const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const throw();
 
     //==============================================================================
     /** Checks whether the string might be in quotation marks.
@@ -702,7 +699,7 @@ public:
         @param quoteCharacter   the character to add at the start and end
         @see isQuotedString, unquoted
     */
-    const String quoted (const tchar quoteCharacter = JUCE_T('"')) const throw();
+    const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const throw();
 
 
     //==============================================================================
@@ -711,18 +708,18 @@ public:
         @param stringToRepeat         the string to repeat
         @param numberOfTimesToRepeat  how many times to repeat it
     */
-    static const String repeatedString (const tchar* const stringToRepeat,
+    static const String repeatedString (const juce_wchar* stringToRepeat,
                                         int numberOfTimesToRepeat);
 
     /** Returns a copy of this string with the specified character repeatedly added to its
         beginning until the total length is at least the minimum length specified.
     */
-    const String paddedLeft (const juce_wchar padCharacter, int minimumLength) const;
+    const String paddedLeft (juce_wchar padCharacter, int minimumLength) const;
 
     /** Returns a copy of this string with the specified character repeatedly added to its
         end until the total length is at least the minimum length specified.
     */
-    const String paddedRight (const juce_wchar padCharacter, int minimumLength) const;
+    const String paddedRight (juce_wchar padCharacter, int minimumLength) const;
 
     /** Creates a string from data in an unknown format.
 
@@ -732,8 +729,8 @@ public:
         Should be able to handle Unicode endianness correctly, by looking at
         the first two bytes.
     */
-    static const String createStringFromData (const void* const data,
-                                              const int size) throw();
+    static const String createStringFromData (const void* data,
+                                              int size) throw();
 
     //==============================================================================
     // Numeric conversions..
@@ -742,37 +739,37 @@ public:
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const int decimalInteger) throw();
+    explicit String (int decimalInteger) throw();
 
     /** Creates a string containing this unsigned 32-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const unsigned int decimalInteger) throw();
+    explicit String (unsigned int decimalInteger) throw();
 
     /** Creates a string containing this signed 16-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const short decimalInteger) throw();
+    explicit String (short decimalInteger) throw();
 
     /** Creates a string containing this unsigned 16-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const unsigned short decimalInteger) throw();
+    explicit String (unsigned short decimalInteger) throw();
 
     /** Creates a string containing this signed 64-bit integer as a decimal number.
 
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const int64 largeIntegerValue) throw();
+    explicit String (int64 largeIntegerValue) throw();
 
     /** Creates a string containing this unsigned 64-bit integer as a decimal number.
 
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (const uint64 largeIntegerValue) throw();
+    explicit String (uint64 largeIntegerValue) throw();
 
     /** Creates a string representing this floating-point number.
 
@@ -782,8 +779,8 @@ public:
                                         less, it will use exponent notation if necessary.
         @see getDoubleValue, getIntValue
     */
-    explicit String (const float floatValue,
-                     const int numberOfDecimalPlaces = 0) throw();
+    explicit String (float floatValue,
+                     int numberOfDecimalPlaces = 0) throw();
 
     /** Creates a string representing this floating-point number.
 
@@ -794,8 +791,8 @@ public:
 
         @see getFloatValue, getIntValue
     */
-    explicit String (const double doubleValue,
-                     const int numberOfDecimalPlaces = 0) throw();
+    explicit String (double doubleValue,
+                     int numberOfDecimalPlaces = 0) throw();
 
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
@@ -858,13 +855,13 @@ public:
     int64 getHexValue64() const throw();
 
     /** Creates a string representing this 32-bit value in hexadecimal. */
-    static const String toHexString (const int number) throw();
+    static const String toHexString (int number) throw();
 
     /** Creates a string representing this 64-bit value in hexadecimal. */
-    static const String toHexString (const int64 number) throw();
+    static const String toHexString (int64 number) throw();
 
     /** Creates a string representing this 16-bit value in hexadecimal. */
-    static const String toHexString (const short number) throw();
+    static const String toHexString (short number) throw();
 
     /** Creates a string containing a hex dump of a block of binary data.
 
@@ -876,8 +873,8 @@ public:
                             like "bea1 c2ff".
     */
     static const String toHexString (const unsigned char* data,
-                                     const int size,
-                                     const int groupSize = 1) throw();
+                                     int size,
+                                     int groupSize = 1) throw();
 
     //==============================================================================
     /** Returns a unicode version of this string.
@@ -886,7 +883,7 @@ public:
         that is returned must not be stored anywhere, as it can become invalid whenever
         any string methods (even some const ones!) are called.
     */
-    inline operator const juce_wchar*() const throw()   { return text->text; }
+    inline operator const juce_wchar*() const throw()   { return text; }
 
     //==============================================================================
     /** Returns a unicode version of this string.
@@ -895,7 +892,7 @@ public:
         that is returned must not be stored anywhere, as it can become invalid whenever
         any string methods (even some const ones!) are called.
     */
-    inline operator juce_wchar*() throw()               { return text->text; }
+    inline operator juce_wchar*() throw()               { return text; }
 
     //==============================================================================
     /** Returns a pointer to a UTF-8 version of this string.
@@ -933,7 +930,7 @@ public:
                                 still allowing for a terminating null char at the end, and
                                 will return the number of bytes that were actually used.
     */
-    int copyToUTF8 (char* destBuffer, const int maxBufferSizeBytes) const throw();
+    int copyToUTF8 (char* destBuffer, int maxBufferSizeBytes) const throw();
 
     //==============================================================================
     /** Returns a version of this string using the default 8-bit multi-byte system encoding.
@@ -960,7 +957,7 @@ public:
                                 still allowing for a terminating null char at the end, and
                                 will return the number of bytes that were actually used.
     */
-    int copyToCString (char* destBuffer, const int maxBufferSizeBytes) const throw();
+    int copyToCString (char* destBuffer, int maxBufferSizeBytes) const throw();
 
     //==============================================================================
     /** Copies the string to a unicode buffer.
@@ -970,7 +967,7 @@ public:
                                 not including the tailing zero, so this shouldn't be
                                 larger than the size of your destination buffer - 1
     */
-    void copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw();
+    void copyToUnicode (juce_wchar* destBuffer, int maxCharsToCopy) const throw();
 
 
     //==============================================================================
@@ -988,7 +985,7 @@ public:
                                 value is less than the currently allocated size, it will
                                 have no effect.
     */
-    void preallocateStorage (const size_t numCharsNeeded) throw();
+    void preallocateStorage (size_t numCharsNeeded);
 
     //==============================================================================
     /** A helper class to improve performance when concatenating many large strings
@@ -1021,24 +1018,15 @@ public:
 
 private:
     //==============================================================================
-    struct InternalRefCountedStringHolder
-    {
-        int refCount;
-        int allocatedNumChars;
-        wchar_t text[1];
-    };
-
-    InternalRefCountedStringHolder* text;
-    static InternalRefCountedStringHolder emptyString;
+    juce_wchar* text;
 
     //==============================================================================
     // internal constructor that preallocates a certain amount of memory
-    String (const int numChars, const int dummyVariable) throw();
+    String (size_t numChars, int dummyVariable);
 
-    void createInternal (const int numChars) throw();
-    void createInternal (const tchar* const text, const tchar* const textEnd) throw();
-    void appendInternal (const tchar* const text, const int numExtraChars) throw();
-    void dupeInternalIfMultiplyReferenced() throw();
+    void createInternal (const juce_wchar* text, size_t numChars);
+    void appendInternal (const juce_wchar* text, int numExtraChars);
+    void dupeInternalIfMultiplyReferenced();
 };
 
 //==============================================================================
@@ -1064,30 +1052,30 @@ const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToApp
 
 //==============================================================================
 /** Appends a character at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const char characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
 /** Appends a character at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar characterToAppend);
+String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
 /** Appends a string to the end of the first one. */
-String& JUCE_CALLTYPE operator<< (String& string1, const char* const string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* const string2);
+String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
 /** Appends a string to the end of the first one. */
 String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
 
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const short number);
+String& JUCE_CALLTYPE operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const int number);
+String& JUCE_CALLTYPE operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const unsigned int number);
+String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const long number);
+String& JUCE_CALLTYPE operator<< (String& string1, long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const unsigned long number);
+String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const float number);
+String& JUCE_CALLTYPE operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, const double number);
+String& JUCE_CALLTYPE operator<< (String& string1, double number);
 
 //==============================================================================
 /** Case-sensitive comparison of two strings. */
