@@ -33,23 +33,22 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MidiOutput::MidiOutput() throw()
+MidiOutput::MidiOutput()
     : Thread ("midi out"),
       internal (0),
       firstMessage (0)
 {
 }
 
-MidiOutput::PendingMessage::PendingMessage (const uint8* const data,
-                                            const int len,
-                                            const double sampleNumber) throw()
+MidiOutput::PendingMessage::PendingMessage (const uint8* const data, const int len,
+                                            const double sampleNumber)
     : message (data, len, sampleNumber)
 {
 }
 
 void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
                                       const double millisecondCounterToStartAt,
-                                      double samplesPerSecondForBuffer) throw()
+                                      double samplesPerSecondForBuffer)
 {
     // You've got to call startBackgroundThread() for this to actually work..
     jassert (isThreadRunning());
@@ -93,7 +92,7 @@ void MidiOutput::sendBlockOfMessages (const MidiBuffer& buffer,
     notify();
 }
 
-void MidiOutput::clearAllPendingMessages() throw()
+void MidiOutput::clearAllPendingMessages()
 {
     const ScopedLock sl (lock);
 
@@ -105,12 +104,12 @@ void MidiOutput::clearAllPendingMessages() throw()
     }
 }
 
-void MidiOutput::startBackgroundThread() throw()
+void MidiOutput::startBackgroundThread()
 {
     startThread (9);
 }
 
-void MidiOutput::stopBackgroundThread() throw()
+void MidiOutput::stopBackgroundThread()
 {
     stopThread (5000);
 }

@@ -41,7 +41,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_GZIPCompressorOutputStream.h"
 
-using namespace zlibNamespace;
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
@@ -59,6 +58,7 @@ public:
           finished (false),
           shouldFinish (false)
     {
+        using namespace zlibNamespace;
         zerostruct (stream);
 
         streamIsValid = (deflateInit2 (&stream, compLevel, Z_DEFLATED,
@@ -68,6 +68,7 @@ public:
 
     ~GZIPCompressorHelper()
     {
+        using namespace zlibNamespace;
         if (streamIsValid)
             deflateEnd (&stream);
     }
@@ -85,6 +86,7 @@ public:
 
     int doNextBlock (uint8* const dest, const int destSize) throw()
     {
+        using namespace zlibNamespace;
         if (streamIsValid)
         {
             stream.next_in = data;
@@ -117,7 +119,7 @@ public:
     }
 
 private:
-    z_stream stream;
+    zlibNamespace::z_stream stream;
     uint8* data;
     int dataSize, compLevel, strategy;
     bool setParams, streamIsValid;

@@ -87,6 +87,9 @@ private:
     int64 currentPosition;
     int bufferSize, bytesInBuffer;
     HeapBlock <char> buffer;
+
+    FileOutputStream (const FileOutputStream&);
+    FileOutputStream& operator= (const FileOutputStream&);
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__

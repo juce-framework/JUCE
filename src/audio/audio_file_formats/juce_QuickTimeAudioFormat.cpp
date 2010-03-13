@@ -337,6 +337,9 @@ private:
         DetachMovieFromCurrentThread (movie);
 #endif
     }
+
+    QTAudioReader (const QTAudioReader&);
+    QTAudioReader& operator= (const QTAudioReader&);
 };
 
 

@@ -1894,6 +1894,10 @@ public:
 	};
 
 	typedef ScopedLockType ScopedUnlockType;
+
+private:
+	DummyCriticalSection (const DummyCriticalSection&);
+	DummyCriticalSection& operator= (const DummyCriticalSection&);
 };
 
 #endif   // __JUCE_CRITICALSECTION_JUCEHEADER__
@@ -7659,6 +7663,9 @@ private:
 	int64 currentPosition;
 	int bufferSize, bytesInBuffer;
 	HeapBlock <char> buffer;
+
+	FileOutputStream (const FileOutputStream&);
+	FileOutputStream& operator= (const FileOutputStream&);
 };
 
 #endif   // __JUCE_FILEOUTPUTSTREAM_JUCEHEADER__
@@ -8318,6 +8325,9 @@ private:
 	const char* data;
 	size_t dataSize, position;
 	MemoryBlock internalCopy;
+
+	MemoryInputStream (const MemoryInputStream&);
+	MemoryInputStream& operator= (const MemoryInputStream&);
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__
@@ -8358,6 +8368,9 @@ private:
 	MemoryBlock* data;
 	ScopedPointer <MemoryBlock> dataToDelete;
 	size_t position, size, blockSize;
+
+	MemoryOutputStream (const MemoryOutputStream&);
+	MemoryOutputStream& operator= (const MemoryOutputStream&);
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
@@ -8522,6 +8535,9 @@ private:
 	const String expandEntity (const String& entity);
 	const String expandExternalEntity (const String& entity);
 	const String getParameterEntity (const String& entity);
+
+	XmlDocument (const XmlDocument&);
+	XmlDocument& operator= (const XmlDocument&);
 };
 
 #endif   // __JUCE_XMLDOCUMENT_JUCEHEADER__
@@ -13291,6 +13307,9 @@ private:
 	// xxx this is just here to cause a compile error in old code that hasn't been changed to use the new
 	// version of this method.
 	virtual short getFirstCommandTarget() { return 0; }
+
+	ApplicationCommandManager (const ApplicationCommandManager&);
+	ApplicationCommandManager& operator= (const ApplicationCommandManager&);
 };
 
 class JUCE_API  ApplicationCommandManagerListener
@@ -13777,6 +13796,9 @@ protected:
 
 private:
 	String formatName;
+
+	AudioFormatWriter (const AudioFormatWriter&);
+	AudioFormatWriter& operator= (const AudioFormatWriter&);
 };
 
 #endif   // __JUCE_AUDIOFORMATWRITER_JUCEHEADER__
@@ -15522,7 +15544,10 @@ protected:
 	void* internal;
 
 	MidiInput (const String& name);
+
+private:
 	MidiInput (const MidiInput&);
+	MidiInput& operator= (const MidiInput&);
 };
 
 #endif   // __JUCE_MIDIINPUT_JUCEHEADER__
@@ -15648,13 +15673,13 @@ public:
 
 	virtual void sendBlockOfMessages (const MidiBuffer& buffer,
 									  const double millisecondCounterToStartAt,
-									  double samplesPerSecondForBuffer) throw();
+									  double samplesPerSecondForBuffer);
 
-	virtual void clearAllPendingMessages() throw();
+	virtual void clearAllPendingMessages();
 
-	virtual void startBackgroundThread() throw();
+	virtual void startBackgroundThread();
 
-	virtual void stopBackgroundThread() throw();
+	virtual void stopBackgroundThread();
 
 	juce_UseDebuggingNewOperator
 
@@ -15663,7 +15688,7 @@ protected:
 
 	struct PendingMessage
 	{
-		PendingMessage (const uint8* const data, const int len, const double sampleNumber) throw();
+		PendingMessage (const uint8* data, int len, double sampleNumber);
 
 		MidiMessage message;
 		PendingMessage* next;
@@ -15674,10 +15699,12 @@ protected:
 	CriticalSection lock;
 	PendingMessage* firstMessage;
 
-	MidiOutput() throw();
-	MidiOutput (const MidiOutput&);
-
+	MidiOutput();
 	void run();
+
+private:
+	MidiOutput (const MidiOutput&);
+	MidiOutput& operator= (const MidiOutput&);
 };
 
 #endif   // __JUCE_MIDIOUTPUT_JUCEHEADER__
@@ -17548,6 +17575,9 @@ public:
 private:
 
 	AudioProcessor* const owner;
+
+	AudioProcessorEditor (const AudioProcessorEditor&);
+	AudioProcessorEditor& operator= (const AudioProcessorEditor&);
 };
 
 #endif   // __JUCE_AUDIOPROCESSOREDITOR_JUCEHEADER__
@@ -22755,6 +22785,9 @@ public:
 private:
 	ComponentBoundsConstrainer* constrainer;
 	Point<int> originalPos;
+
+	ComponentDragger (const ComponentDragger&);
+	ComponentDragger& operator= (const ComponentDragger&);
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__

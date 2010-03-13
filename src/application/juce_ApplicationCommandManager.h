@@ -331,6 +331,9 @@ private:
     // xxx this is just here to cause a compile error in old code that hasn't been changed to use the new
     // version of this method.
     virtual short getFirstCommandTarget() { return 0; }
+
+    ApplicationCommandManager (const ApplicationCommandManager&);
+    ApplicationCommandManager& operator= (const ApplicationCommandManager&);
 };
 
 

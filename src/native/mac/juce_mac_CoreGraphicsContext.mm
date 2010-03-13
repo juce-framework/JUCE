@@ -38,8 +38,8 @@ public:
                        const bool clearImage)
         : Image (format_, imageWidth_, imageHeight_, clearImage)
     {
-        CGColorSpaceRef colourSpace = format == Image::SingleChannel ? CGColorSpaceCreateDeviceGray()
-                                                                     : CGColorSpaceCreateDeviceRGB();
+        CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
+                                                                       : CGColorSpaceCreateDeviceRGB();
 
         context = CGBitmapContextCreate (imageData, imageWidth, imageHeight, 8, lineStride,
                                          colourSpace, getCGImageFlags (*this));
@@ -450,8 +450,8 @@ public:
                                     state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
                                     state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
 
-        CGPoint line[] = { { (float) x1 + 0.5f, flipHeight - ((float) y1 + 0.5f) },
-                           { (float) x2 + 0.5f, flipHeight - ((float) y2 + 0.5f) } };
+        CGPoint line[] = { { (CGFloat) x1, flipHeight - (CGFloat) y1 },
+                           { (CGFloat) x2, flipHeight - (CGFloat) y2 } };
 
         CGContextStrokeLineSegments (context, line, 1);
     }
@@ -545,7 +545,7 @@ public:
 
 private:
     CGContextRef context;
-    const float flipHeight;
+    const CGFloat flipHeight;
     CGColorSpaceRef rgbColourSpace, greyColourSpace;
     CGFunctionCallbacks gradientCallbacks;
 
@@ -728,10 +728,8 @@ private:
         CGContextConcatCTM (context, t);
     }
 
-    float flipY (float y) const
-    {
-        return flipHeight - y;
-    }
+    CoreGraphicsContext (const CoreGraphicsContext&);
+    CoreGraphicsContext& operator= (const CoreGraphicsContext&);
 };
 
 LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()

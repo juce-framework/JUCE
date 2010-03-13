@@ -156,6 +156,9 @@ private:
     const String expandEntity (const String& entity);
     const String expandExternalEntity (const String& entity);
     const String getParameterEntity (const String& entity);
+
+    XmlDocument (const XmlDocument&);
+    XmlDocument& operator= (const XmlDocument&);
 };
 
 

@@ -99,6 +99,9 @@ public:
 private:
     ComponentBoundsConstrainer* constrainer;
     Point<int> originalPos;
+
+    ComponentDragger (const ComponentDragger&);
+    ComponentDragger& operator= (const ComponentDragger&);
 };
 
 #endif   // __JUCE_COMPONENTDRAGGER_JUCEHEADER__

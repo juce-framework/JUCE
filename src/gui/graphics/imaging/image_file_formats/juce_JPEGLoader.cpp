@@ -128,57 +128,96 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../io/streams/juce_OutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
 
-using namespace jpeglibNamespace;
-
-#if ! JUCE_MSVC
- using jpeglibNamespace::boolean;
-#endif
-
 //==============================================================================
-struct JPEGDecodingFailure {};
-
-static void fatalErrorHandler (j_common_ptr)
+namespace JPEGHelpers
 {
-    throw JPEGDecodingFailure();
-}
+    using namespace jpeglibNamespace;
 
-static void silentErrorCallback1 (j_common_ptr)         {}
-static void silentErrorCallback2 (j_common_ptr, int)    {}
-static void silentErrorCallback3 (j_common_ptr, char*)  {}
+    #if ! JUCE_MSVC
+     using jpeglibNamespace::boolean;
+    #endif
 
-static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
-{
-    zerostruct (err);
+    struct JPEGDecodingFailure {};
 
-    err.error_exit = fatalErrorHandler;
-    err.emit_message = silentErrorCallback2;
-    err.output_message = silentErrorCallback1;
-    err.format_message = silentErrorCallback3;
-    err.reset_error_mgr = silentErrorCallback1;
-}
+    static void fatalErrorHandler (j_common_ptr)
+    {
+        throw JPEGDecodingFailure();
+    }
+
+    static void silentErrorCallback1 (j_common_ptr)         {}
+    static void silentErrorCallback2 (j_common_ptr, int)    {}
+    static void silentErrorCallback3 (j_common_ptr, char*)  {}
+
+    static void setupSilentErrorHandler (struct jpeg_error_mgr& err)
+    {
+        zerostruct (err);
+
+        err.error_exit = fatalErrorHandler;
+        err.emit_message = silentErrorCallback2;
+        err.output_message = silentErrorCallback1;
+        err.format_message = silentErrorCallback3;
+        err.reset_error_mgr = silentErrorCallback1;
+    }
 
 
-//==============================================================================
-static void dummyCallback1 (j_decompress_ptr)
-{
-}
+    //==============================================================================
+    static void dummyCallback1 (j_decompress_ptr)
+    {
+    }
 
-static void jpegSkip (j_decompress_ptr decompStruct, long num)
-{
-    decompStruct->src->next_input_byte += num;
+    static void jpegSkip (j_decompress_ptr decompStruct, long num)
+    {
+        decompStruct->src->next_input_byte += num;
 
-    num = jmin (num, (long) decompStruct->src->bytes_in_buffer);
-    decompStruct->src->bytes_in_buffer -= num;
-}
+        num = jmin (num, (long) decompStruct->src->bytes_in_buffer);
+        decompStruct->src->bytes_in_buffer -= num;
+    }
 
-static boolean jpegFill (j_decompress_ptr)
-{
-    return 0;
+    static boolean jpegFill (j_decompress_ptr)
+    {
+        return 0;
+    }
+
+    //==============================================================================
+    static const int jpegBufferSize = 512;
+
+    struct JuceJpegDest  : public jpeg_destination_mgr
+    {
+        OutputStream* output;
+        char* buffer;
+    };
+
+    static void jpegWriteInit (j_compress_ptr)
+    {
+    }
+
+    static void jpegWriteTerminate (j_compress_ptr cinfo)
+    {
+        JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
+
+        const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
+        dest->output->write (dest->buffer, (int) numToWrite);
+    }
+
+    static boolean jpegWriteFlush (j_compress_ptr cinfo)
+    {
+        JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
+
+        const int numToWrite = jpegBufferSize;
+
+        dest->next_output_byte = (JOCTET*) dest->buffer;
+        dest->free_in_buffer = jpegBufferSize;
+
+        return dest->output->write (dest->buffer, numToWrite);
+    }
 }
 
 //==============================================================================
 Image* juce_loadJPEGImageFromStream (InputStream& in)
 {
+    using namespace jpeglibNamespace;
+    using namespace JPEGHelpers;
+
     MemoryBlock mb;
     in.readIntoMemoryBlock (mb);
 
@@ -271,45 +310,14 @@ Image* juce_loadJPEGImageFromStream (InputStream& in)
     return image;
 }
 
-
-//==============================================================================
-static const int jpegBufferSize = 512;
-
-struct JuceJpegDest  : public jpeg_destination_mgr
-{
-    OutputStream* output;
-    char* buffer;
-};
-
-static void jpegWriteInit (j_compress_ptr)
-{
-}
-
-static void jpegWriteTerminate (j_compress_ptr cinfo)
-{
-    JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
-
-    const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
-    dest->output->write (dest->buffer, (int) numToWrite);
-}
-
-static boolean jpegWriteFlush (j_compress_ptr cinfo)
-{
-    JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
-
-    const int numToWrite = jpegBufferSize;
-
-    dest->next_output_byte = (JOCTET*) dest->buffer;
-    dest->free_in_buffer = jpegBufferSize;
-
-    return dest->output->write (dest->buffer, numToWrite);
-}
-
 //==============================================================================
 bool juce_writeJPEGImageToStream (const Image& image,
                                   OutputStream& out,
                                   float quality)
 {
+    using namespace jpeglibNamespace;
+    using namespace JPEGHelpers;
+
     if (image.hasAlphaChannel())
     {
         // this method could fill the background in white and still save the image..

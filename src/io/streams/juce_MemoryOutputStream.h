@@ -90,6 +90,9 @@ private:
     MemoryBlock* data;
     ScopedPointer <MemoryBlock> dataToDelete;
     size_t position, size, blockSize;
+
+    MemoryOutputStream (const MemoryOutputStream&);
+    MemoryOutputStream& operator= (const MemoryOutputStream&);
 };
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__

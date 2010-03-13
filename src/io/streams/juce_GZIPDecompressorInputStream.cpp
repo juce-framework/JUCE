@@ -73,7 +73,6 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_GZIPDecompressorInputStream.h"
 
-using namespace zlibNamespace;
 
 //==============================================================================
 // internal helper object that holds the zlib structures so they don't have to be
@@ -81,21 +80,23 @@ using namespace zlibNamespace;
 class GZIPDecompressHelper
 {
 public:
-    GZIPDecompressHelper (const bool noWrap) throw()
-        : data (0),
-          dataSize (0),
-          finished (true),
+    GZIPDecompressHelper (const bool noWrap)
+        : finished (true),
           needsDictionary (false),
           error (true),
-          streamIsValid (false)
+          streamIsValid (false),
+          data (0),
+          dataSize (0)
     {
+        using namespace zlibNamespace;
         zerostruct (stream);
         streamIsValid = (inflateInit2 (&stream, noWrap ? -MAX_WBITS : MAX_WBITS) == Z_OK);
         finished = error = ! streamIsValid;
     }
 
-    ~GZIPDecompressHelper() throw()
+    ~GZIPDecompressHelper()
     {
+        using namespace zlibNamespace;
         if (streamIsValid)
             inflateEnd (&stream);
     }
@@ -108,8 +109,9 @@ public:
         dataSize = size;
     }
 
-    int doNextBlock (uint8* const dest, const int destSize) throw()
+    int doNextBlock (uint8* const dest, const int destSize)
     {
+        using namespace zlibNamespace;
         if (streamIsValid && data != 0 && ! finished)
         {
             stream.next_in  = data;
@@ -145,13 +147,15 @@ public:
         return 0;
     }
 
+    bool finished, needsDictionary, error, streamIsValid;
+
 private:
-    z_stream stream;
+    zlibNamespace::z_stream stream;
     uint8* data;
     int dataSize;
 
-public:
-    bool finished, needsDictionary, error, streamIsValid;
+    GZIPDecompressHelper (const GZIPDecompressHelper&);
+    GZIPDecompressHelper& operator= (const GZIPDecompressHelper&);
 };
 
 //==============================================================================

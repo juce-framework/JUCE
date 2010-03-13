@@ -60,6 +60,9 @@ public:
 private:
     //==============================================================================
     AudioProcessor* const owner;
+
+    AudioProcessorEditor (const AudioProcessorEditor&);
+    AudioProcessorEditor& operator= (const AudioProcessorEditor&);
 };
 
 

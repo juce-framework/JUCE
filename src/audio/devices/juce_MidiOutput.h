@@ -129,23 +129,23 @@ public:
     */
     virtual void sendBlockOfMessages (const MidiBuffer& buffer,
                                       const double millisecondCounterToStartAt,
-                                      double samplesPerSecondForBuffer) throw();
+                                      double samplesPerSecondForBuffer);
 
     /** Gets rid of any midi messages that had been added by sendBlockOfMessages().
     */
-    virtual void clearAllPendingMessages() throw();
+    virtual void clearAllPendingMessages();
 
     /** Starts up a background thread so that the device can send blocks of data.
 
         Call this to get the device ready, before using sendBlockOfMessages().
     */
-    virtual void startBackgroundThread() throw();
+    virtual void startBackgroundThread();
 
     /** Stops the background thread, and clears any pending midi events.
 
         @see startBackgroundThread
     */
-    virtual void stopBackgroundThread() throw();
+    virtual void stopBackgroundThread();
 
 
     //==============================================================================
@@ -156,7 +156,7 @@ protected:
 
     struct PendingMessage
     {
-        PendingMessage (const uint8* const data, const int len, const double sampleNumber) throw();
+        PendingMessage (const uint8* data, int len, double sampleNumber);
 
         MidiMessage message;
         PendingMessage* next;
@@ -167,10 +167,12 @@ protected:
     CriticalSection lock;
     PendingMessage* firstMessage;
 
-    MidiOutput() throw();
-    MidiOutput (const MidiOutput&);
-
+    MidiOutput();
     void run();
+
+private:
+    MidiOutput (const MidiOutput&);
+    MidiOutput& operator= (const MidiOutput&);
 };
 
 

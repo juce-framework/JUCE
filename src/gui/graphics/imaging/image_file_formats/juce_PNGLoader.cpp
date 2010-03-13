@@ -102,29 +102,45 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../../io/streams/juce_OutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
 
-using namespace pnglibNamespace;
-
 using ::calloc;
 using ::malloc;
 using ::free;
 
 //==============================================================================
-static void pngReadCallback (png_structp pngReadStruct, png_bytep data, png_size_t length)
+namespace PNGHelpers
 {
-    InputStream* const in = (InputStream*) png_get_io_ptr (pngReadStruct);
-    in->read (data, (int) length);
-}
+    using namespace pnglibNamespace;
 
-struct PNGErrorStruct {};
+    static void readCallback (png_structp pngReadStruct, png_bytep data, png_size_t length)
+    {
+        using namespace pnglibNamespace;
+        InputStream* const in = (InputStream*) png_get_io_ptr (pngReadStruct);
+        in->read (data, (int) length);
+    }
 
-static void pngErrorCallback (png_structp, png_const_charp)
-{
-    throw PNGErrorStruct();
+    struct PNGErrorStruct {};
+
+    static void errorCallback (png_structp, png_const_charp)
+    {
+        throw PNGErrorStruct();
+    }
+
+    static void writeDataCallback (png_structp png_ptr, png_bytep data, png_size_t length)
+    {
+        OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
+
+        const bool ok = out->write (data, (int) length);
+
+        (void) ok;
+        jassert (ok);
+    }
+
 }
 
 //==============================================================================
 Image* juce_loadPNGImageFromStream (InputStream& in)
 {
+    using namespace pnglibNamespace;
     Image* image = 0;
 
     png_structp pngReadStruct;
@@ -142,10 +158,10 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
             return 0;
         }
 
-        png_set_error_fn (pngReadStruct, 0, pngErrorCallback, pngErrorCallback);
+        png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback );
 
         // read the header..
-        png_set_read_fn (pngReadStruct, &in, pngReadCallback);
+        png_set_read_fn (pngReadStruct, &in, PNGHelpers::readCallback);
 
         png_uint_32 width, height;
         int bitDepth, colorType, interlaceType;
@@ -234,18 +250,9 @@ Image* juce_loadPNGImageFromStream (InputStream& in)
 }
 
 //==============================================================================
-static void pngWriteDataCallback (png_structp png_ptr, png_bytep data, png_size_t length)
-{
-    OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
-
-    const bool ok = out->write (data, (int) length);
-
-    (void) ok;
-    jassert (ok);
-}
-
 bool juce_writePNGImageToStream (const Image& image, OutputStream& out)
 {
+    using namespace pnglibNamespace;
     const int width = image.getWidth();
     const int height = image.getHeight();
 
@@ -262,7 +269,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out)
         return false;
     }
 
-    png_set_write_fn (pngWriteStruct, &out, pngWriteDataCallback, 0);
+    png_set_write_fn (pngWriteStruct, &out, PNGHelpers::writeDataCallback, 0);
 
     png_set_IHDR (pngWriteStruct, pngInfoStruct, width, height, 8,
                   image.hasAlphaChannel() ? PNG_COLOR_TYPE_RGB_ALPHA

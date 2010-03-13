@@ -80,18 +80,16 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../text/juce_LocalisedStrings.h"
 
-using namespace OggVorbisNamespace;
 
 //==============================================================================
 static const char* const oggFormatName = "Ogg-Vorbis file";
 static const tchar* const oggExtensions[] =    { T(".ogg"), 0 };
 
-
 //==============================================================================
 class OggReader : public AudioFormatReader
 {
-    OggVorbis_File ovFile;
-    ov_callbacks callbacks;
+    OggVorbisNamespace::OggVorbis_File ovFile;
+    OggVorbisNamespace::ov_callbacks callbacks;
     AudioSampleBuffer reservoir;
     int reservoirStart, samplesInReservoir;
 
@@ -103,6 +101,7 @@ public:
           reservoirStart (0),
           samplesInReservoir (0)
     {
+        using namespace OggVorbisNamespace;
         sampleRate = 0;
         usesFloatingPointData = true;
 
@@ -217,7 +216,7 @@ public:
         return (size_t) (((InputStream*) datasource)->read (ptr, (int) (size * nmemb)) / size);
     }
 
-    static int oggSeekCallback (void* datasource, ogg_int64_t offset, int whence)
+    static int oggSeekCallback (void* datasource, OggVorbisNamespace::ogg_int64_t offset, int whence)
     {
         InputStream* const in = (InputStream*) datasource;
 
@@ -246,13 +245,13 @@ public:
 //==============================================================================
 class OggWriter  : public AudioFormatWriter
 {
-    ogg_stream_state os;
-    ogg_page og;
-    ogg_packet op;
-    vorbis_info vi;
-    vorbis_comment vc;
-    vorbis_dsp_state vd;
-    vorbis_block vb;
+    OggVorbisNamespace::ogg_stream_state os;
+    OggVorbisNamespace::ogg_page og;
+    OggVorbisNamespace::ogg_packet op;
+    OggVorbisNamespace::vorbis_info vi;
+    OggVorbisNamespace::vorbis_comment vc;
+    OggVorbisNamespace::vorbis_dsp_state vd;
+    OggVorbisNamespace::vorbis_block vb;
 
 public:
     bool ok;
@@ -268,6 +267,7 @@ public:
                              numChannels,
                              bitsPerSample)
     {
+        using namespace OggVorbisNamespace;
         ok = false;
 
         vorbis_info_init (&vi);

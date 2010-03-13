@@ -478,6 +478,9 @@ private:
 
     ScopedPointer <CharToGlyphMapper> charToGlyphMapper;
 #endif
+
+    MacTypeface (const MacTypeface&);
+    MacTypeface& operator= (const MacTypeface&);
 };
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)

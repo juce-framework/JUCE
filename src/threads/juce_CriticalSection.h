@@ -144,6 +144,10 @@ public:
 
     /** A dummy scoped-unlocker type to use with a dummy critical section. */
     typedef ScopedLockType ScopedUnlockType;
+
+private:
+    DummyCriticalSection (const DummyCriticalSection&);
+    DummyCriticalSection& operator= (const DummyCriticalSection&);
 };
 
 

@@ -73,6 +73,9 @@ public:
 private:
     AudioDeviceManager* const manager;
     float level;
+
+    SimpleDeviceManagerInputLevelMeter (const SimpleDeviceManagerInputLevelMeter&);
+    SimpleDeviceManagerInputLevelMeter& operator= (const SimpleDeviceManagerInputLevelMeter&);
 };
 
 

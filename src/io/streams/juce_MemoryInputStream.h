@@ -83,6 +83,9 @@ private:
     const char* data;
     size_t dataSize, position;
     MemoryBlock internalCopy;
+
+    MemoryInputStream (const MemoryInputStream&);
+    MemoryInputStream& operator= (const MemoryInputStream&);
 };
 
 #endif   // __JUCE_MEMORYINPUTSTREAM_JUCEHEADER__

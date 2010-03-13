@@ -162,6 +162,9 @@ protected:
 
 private:
     String formatName;
+
+    AudioFormatWriter (const AudioFormatWriter&);
+    AudioFormatWriter& operator= (const AudioFormatWriter&);
 };
 
 

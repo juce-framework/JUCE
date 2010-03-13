@@ -178,7 +178,10 @@ protected:
     void* internal;
 
     MidiInput (const String& name);
+
+private:
     MidiInput (const MidiInput&);
+    MidiInput& operator= (const MidiInput&);
 };
 
 
