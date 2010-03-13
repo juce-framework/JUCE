@@ -184,6 +184,11 @@ String::String (const String& other) throw()
     StringHolder::retain (text);
 }
 
+void String::swapWith (String& other) throw()
+{
+    swapVariables (text, other.text);
+}
+
 String& String::operator= (const String& other) throw()
 {
     juce_wchar* const newText = other.text;
@@ -197,7 +202,7 @@ String::String (const size_t numChars, const int /*dummyVariable*/)
 {
 }
 
-String::String (const char* const t) throw()
+String::String (const char* const t)
 {
     if (t != 0 && *t != 0)
     {
@@ -211,7 +216,7 @@ String::String (const char* const t) throw()
     }
 }
 
-String::String (const juce_wchar* const t) throw()
+String::String (const juce_wchar* const t)
 {
     if (t != 0 && *t != 0)
     {
@@ -225,7 +230,7 @@ String::String (const juce_wchar* const t) throw()
     }
 }
 
-String::String (const char* const t, const size_t maxChars) throw()
+String::String (const char* const t, const size_t maxChars)
 {
     int i;
     for (i = 0; (size_t) i < maxChars; ++i)
@@ -244,7 +249,7 @@ String::String (const char* const t, const size_t maxChars) throw()
     }
 }
 
-String::String (const juce_wchar* const t, const size_t maxChars) throw()
+String::String (const juce_wchar* const t, const size_t maxChars)
 {
     int i;
     for (i = 0; (size_t) i < maxChars; ++i)
@@ -263,7 +268,7 @@ String::String (const juce_wchar* const t, const size_t maxChars) throw()
     }
 }
 
-const String String::charToString (const juce_wchar character) throw()
+const String String::charToString (const juce_wchar character)
 {
     juce_wchar temp[] = { character, 0 };
     return String (temp);
@@ -389,7 +394,7 @@ namespace NumberToStringConverters
 }
 
 //==============================================================================
-String::String (const int number) throw()
+String::String (const int number)
 {
     juce_wchar buffer [16];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -397,7 +402,7 @@ String::String (const int number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const unsigned int number) throw()
+String::String (const unsigned int number)
 {
     juce_wchar buffer [16];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -405,7 +410,7 @@ String::String (const unsigned int number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const short number) throw()
+String::String (const short number)
 {
     juce_wchar buffer [16];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -413,7 +418,7 @@ String::String (const short number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const unsigned short number) throw()
+String::String (const unsigned short number)
 {
     juce_wchar buffer [16];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -421,7 +426,7 @@ String::String (const unsigned short number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const int64 number) throw()
+String::String (const int64 number)
 {
     juce_wchar buffer [32];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -429,7 +434,7 @@ String::String (const int64 number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const uint64 number) throw()
+String::String (const uint64 number)
 {
     juce_wchar buffer [32];
     juce_wchar* const end = buffer + numElementsInArray (buffer);
@@ -437,7 +442,7 @@ String::String (const uint64 number) throw()
     createInternal (start, end - start - 1);
 }
 
-String::String (const float number, const int numberOfDecimalPlaces) throw()
+String::String (const float number, const int numberOfDecimalPlaces)
 {
     juce_wchar buffer [48];
     size_t len;
@@ -445,7 +450,7 @@ String::String (const float number, const int numberOfDecimalPlaces) throw()
     createInternal (start, len);
 }
 
-String::String (const double number, const int numberOfDecimalPlaces) throw()
+String::String (const double number, const int numberOfDecimalPlaces)
 {
     juce_wchar buffer [48];
     size_t len;
@@ -1128,9 +1133,8 @@ const String String::paddedRight (const juce_wchar padCharacter, int minimumLeng
 }
 
 //==============================================================================
-const String String::replaceSection (int index,
-                                     int numCharsToReplace,
-                                     const juce_wchar* const stringToInsert) const throw()
+const String String::replaceSection (int index, int numCharsToReplace,
+                                     const juce_wchar* const stringToInsert) const
 {
     if (index < 0)
     {
@@ -1189,7 +1193,7 @@ const String String::replaceSection (int index,
 
 const String String::replace (const juce_wchar* const stringToReplace,
                               const juce_wchar* const stringToInsert,
-                              const bool ignoreCase) const throw()
+                              const bool ignoreCase) const
 {
     const int stringToReplaceLen = CharacterFunctions::length (stringToReplace);
     const int stringToInsertLen = CharacterFunctions::length (stringToInsert);
@@ -1207,8 +1211,7 @@ const String String::replace (const juce_wchar* const stringToReplace,
     return result;
 }
 
-const String String::replaceCharacter (const juce_wchar charToReplace,
-                                       const juce_wchar charToInsert) const throw()
+const String String::replaceCharacter (const juce_wchar charToReplace, const juce_wchar charToInsert) const
 {
     const int index = indexOfChar (charToReplace);
 
@@ -1232,7 +1235,7 @@ const String String::replaceCharacter (const juce_wchar charToReplace,
 }
 
 const String String::replaceCharacters (const String& charactersToReplace,
-                                        const juce_wchar* const charactersToInsertInstead) const throw()
+                                        const juce_wchar* const charactersToInsertInstead) const
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1309,7 +1312,7 @@ bool String::endsWithIgnoreCase (const juce_wchar* const other) const throw()
 }
 
 //==============================================================================
-const String String::toUpperCase() const throw()
+const String String::toUpperCase() const
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1317,7 +1320,7 @@ const String String::toUpperCase() const throw()
     return result;
 }
 
-const String String::toLowerCase() const throw()
+const String String::toLowerCase() const
 {
     String result (*this);
     result.dupeInternalIfMultiplyReferenced();
@@ -1326,7 +1329,7 @@ const String String::toLowerCase() const throw()
 }
 
 //==============================================================================
-juce_wchar& String::operator[] (const int index) throw()
+juce_wchar& String::operator[] (const int index)
 {
     jassert (((unsigned int) index) <= (unsigned int) length());
 
@@ -1337,11 +1340,10 @@ juce_wchar& String::operator[] (const int index) throw()
 
 juce_wchar String::getLastCharacter() const throw()
 {
-    return (isEmpty()) ? ((juce_wchar) 0)
-                       : text [length() - 1];
+    return isEmpty() ? juce_wchar() : text [length() - 1];
 }
 
-const String String::substring (int start, int end) const throw()
+const String String::substring (int start, int end) const
 {
     if (start < 0)
         start = 0;
@@ -1362,11 +1364,10 @@ const String String::substring (int start, int end) const throw()
         end = len;
     }
 
-    return String (text + start,
-                   end - start);
+    return String (text + start, end - start);
 }
 
-const String String::substring (const int start) const throw()
+const String String::substring (const int start) const
 {
     if (start <= 0)
         return *this;
@@ -1379,19 +1380,19 @@ const String String::substring (const int start) const throw()
         return String (text + start, len - start);
 }
 
-const String String::dropLastCharacters (const int numberToDrop) const throw()
+const String String::dropLastCharacters (const int numberToDrop) const
 {
     return String (text, jmax (0, length() - numberToDrop));
 }
 
-const String String::getLastCharacters (const int numCharacters) const throw()
+const String String::getLastCharacters (const int numCharacters) const
 {
     return String (text + jmax (0, length() - jmax (0, numCharacters)));
 }
 
 const String String::fromFirstOccurrenceOf (const juce_wchar* const sub,
                                             const bool includeSubString,
-                                            const bool ignoreCase) const throw()
+                                            const bool ignoreCase) const
 {
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
@@ -1402,10 +1403,9 @@ const String String::fromFirstOccurrenceOf (const juce_wchar* const sub,
         return substring (includeSubString ? i : i + CharacterFunctions::length (sub));
 }
 
-
 const String String::fromLastOccurrenceOf (const juce_wchar* const sub,
                                            const bool includeSubString,
-                                           const bool ignoreCase) const throw()
+                                           const bool ignoreCase) const
 {
     const int i = ignoreCase ? lastIndexOfIgnoreCase (sub)
                              : lastIndexOf (sub);
@@ -1418,7 +1418,7 @@ const String String::fromLastOccurrenceOf (const juce_wchar* const sub,
 
 const String String::upToFirstOccurrenceOf (const juce_wchar* const sub,
                                             const bool includeSubString,
-                                            const bool ignoreCase) const throw()
+                                            const bool ignoreCase) const
 {
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
@@ -1431,7 +1431,7 @@ const String String::upToFirstOccurrenceOf (const juce_wchar* const sub,
 
 const String String::upToLastOccurrenceOf (const juce_wchar* const sub,
                                            const bool includeSubString,
-                                           const bool ignoreCase) const throw()
+                                           const bool ignoreCase) const
 {
     const int i = ignoreCase ? lastIndexOfIgnoreCase (sub)
                              : lastIndexOf (sub);
@@ -1441,7 +1441,7 @@ const String String::upToLastOccurrenceOf (const juce_wchar* const sub,
     return substring (0, includeSubString ? i + CharacterFunctions::length (sub) : i);
 }
 
-bool String::isQuotedString() const throw()
+bool String::isQuotedString() const
 {
     const String trimmed (trimStart());
 
@@ -1449,7 +1449,7 @@ bool String::isQuotedString() const throw()
         || trimmed[0] == T('\'');
 }
 
-const String String::unquoted() const throw()
+const String String::unquoted() const
 {
     String s (*this);
 
@@ -1465,7 +1465,7 @@ const String String::unquoted() const throw()
     return s;
 }
 
-const String String::quoted (const juce_wchar quoteCharacter) const throw()
+const String String::quoted (const juce_wchar quoteCharacter) const
 {
     if (isEmpty())
         return charToString (quoteCharacter) + quoteCharacter;
@@ -1482,7 +1482,7 @@ const String String::quoted (const juce_wchar quoteCharacter) const throw()
 }
 
 //==============================================================================
-const String String::trim() const throw()
+const String String::trim() const
 {
     if (isEmpty())
         return empty;
@@ -1508,7 +1508,7 @@ const String String::trim() const throw()
         return *this;
 }
 
-const String String::trimStart() const throw()
+const String String::trimStart() const
 {
     if (isEmpty())
         return empty;
@@ -1524,7 +1524,7 @@ const String String::trimStart() const throw()
         return String (t);
 }
 
-const String String::trimEnd() const throw()
+const String String::trimEnd() const
 {
     if (isEmpty())
         return empty;
@@ -1537,7 +1537,7 @@ const String String::trimEnd() const throw()
     return String (text, (int) (++endT - text));
 }
 
-const String String::trimCharactersAtStart (const juce_wchar* charactersToTrim) const throw()
+const String String::trimCharactersAtStart (const juce_wchar* charactersToTrim) const
 {
     jassert (charactersToTrim != 0);
 
@@ -1555,7 +1555,7 @@ const String String::trimCharactersAtStart (const juce_wchar* charactersToTrim) 
         return String (t);
 }
 
-const String String::trimCharactersAtEnd (const juce_wchar* charactersToTrim) const throw()
+const String String::trimCharactersAtEnd (const juce_wchar* charactersToTrim) const
 {
     jassert (charactersToTrim != 0);
 
@@ -1571,7 +1571,7 @@ const String String::trimCharactersAtEnd (const juce_wchar* charactersToTrim) co
 }
 
 //==============================================================================
-const String String::retainCharacters (const juce_wchar* const charactersToRetain) const throw()
+const String String::retainCharacters (const juce_wchar* const charactersToRetain) const
 {
     jassert (charactersToRetain != 0);
 
@@ -1594,7 +1594,7 @@ const String String::retainCharacters (const juce_wchar* const charactersToRetai
     return result;
 }
 
-const String String::removeCharacters (const juce_wchar* const charactersToRemove) const throw()
+const String String::removeCharacters (const juce_wchar* const charactersToRemove) const
 {
     jassert (charactersToRemove != 0);
 
@@ -1617,12 +1617,12 @@ const String String::removeCharacters (const juce_wchar* const charactersToRemov
     return result;
 }
 
-const String String::initialSectionContainingOnly (const juce_wchar* const permittedCharacters) const throw()
+const String String::initialSectionContainingOnly (const juce_wchar* const permittedCharacters) const
 {
     return substring (0, CharacterFunctions::getIntialSectionContainingOnly (text, permittedCharacters));
 }
 
-const String String::initialSectionNotContaining (const juce_wchar* const charactersToStopAt) const throw()
+const String String::initialSectionNotContaining (const juce_wchar* const charactersToStopAt) const
 {
     jassert (charactersToStopAt != 0);
 
@@ -1726,7 +1726,7 @@ double String::getDoubleValue() const throw()
 
 static const juce_wchar* const hexDigits = T("0123456789abcdef");
 
-const String String::toHexString (const int number) throw()
+const String String::toHexString (const int number)
 {
     juce_wchar buffer[32];
     juce_wchar* const end = buffer + 32;
@@ -1744,7 +1744,7 @@ const String String::toHexString (const int number) throw()
     return String (t, (int) (((char*) end) - (char*) t) - 1);
 }
 
-const String String::toHexString (const int64 number) throw()
+const String String::toHexString (const int64 number)
 {
     juce_wchar buffer[32];
     juce_wchar* const end = buffer + 32;
@@ -1762,14 +1762,14 @@ const String String::toHexString (const int64 number) throw()
     return String (t, (int) (((char*) end) - (char*) t));
 }
 
-const String String::toHexString (const short number) throw()
+const String String::toHexString (const short number)
 {
     return toHexString ((int) (unsigned short) number);
 }
 
 const String String::toHexString (const unsigned char* data,
                                   const int size,
-                                  const int groupSize) throw()
+                                  const int groupSize)
 {
     if (size <= 0)
         return empty;
@@ -1837,8 +1837,7 @@ int64 String::getHexValue64() const throw()
 }
 
 //==============================================================================
-const String String::createStringFromData (const void* const data_,
-                                           const int size) throw()
+const String String::createStringFromData (const void* const data_, const int size)
 {
     const char* const data = (const char*) data_;
 

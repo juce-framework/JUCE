@@ -50,15 +50,15 @@ public:
                                     will allocate its own storage internally, which you can
                                     access using getData() and getDataSize()
     */
-    MemoryOutputStream (const size_t initialSize = 256,
-                        const size_t granularity = 256,
-                        MemoryBlock* const memoryBlockToWriteTo = 0) throw();
+    MemoryOutputStream (size_t initialSize = 256,
+                        size_t granularity = 256,
+                        MemoryBlock* memoryBlockToWriteTo = 0);
 
     /** Destructor.
 
         This will free any data that was written to it.
     */
-    ~MemoryOutputStream() throw();
+    ~MemoryOutputStream();
 
     //==============================================================================
     /** Returns a pointer to the data that has been written to the stream.

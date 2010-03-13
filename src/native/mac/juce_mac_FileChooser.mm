@@ -93,7 +93,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     const ScopedAutoReleasePool pool;
 
     StringArray* filters = new StringArray();
-    filters->addTokens (filter.replaceCharacters (T(",:"), T(";;")), T(";"), 0);
+    filters->addTokens (filter.replaceCharacters (T(",:"), T(";;")), T(";"), String::empty);
     filters->trim();
     filters->removeEmptyStrings();
 

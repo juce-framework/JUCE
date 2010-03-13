@@ -1139,7 +1139,7 @@ private:
             StringArray tokens;
             tokens.addTokens (t.fromFirstOccurrenceOf (T("("), false, false)
                                .upToFirstOccurrenceOf (T(")"), false, false),
-                              T(", "), 0);
+                              T(", "), String::empty);
 
             tokens.removeEmptyStrings (true);
 

@@ -187,7 +187,7 @@ public:
 
         @returns    the number of tokens added
     */
-    int addTokens (const tchar* const stringToTokenise,
+    int addTokens (const String& stringToTokenise,
                    const bool preserveQuotedStrings);
 
     /** Breaks up a string into tokens and adds them to this array.
@@ -203,9 +203,9 @@ public:
                                     between quotes is not broken up into tokens.
         @returns    the number of tokens added
     */
-    int addTokens (const tchar* const stringToTokenise,
-                   const tchar* breakCharacters,
-                   const tchar* quoteCharacters);
+    int addTokens (const String& stringToTokenise,
+                   const String& breakCharacters,
+                   const String& quoteCharacters);
 
     /** Breaks up a string into lines and adds them to this array.
 
@@ -213,7 +213,7 @@ public:
         to the array. Line-break characters are omitted from the strings that are added to
         the array.
     */
-    int addLines (const tchar* stringToBreakUp);
+    int addLines (const String& stringToBreakUp);
 
     //==============================================================================
     /** Removes all elements from the array. */

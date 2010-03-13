@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_MemoryInputStream.h"
 
 
@@ -35,14 +34,27 @@ BEGIN_JUCE_NAMESPACE
 MemoryInputStream::MemoryInputStream (const void* const sourceData,
                                       const size_t sourceDataSize,
                                       const bool keepInternalCopy)
-    : data ((const char*) sourceData),
+    : data (static_cast <const char*> (sourceData)),
       dataSize (sourceDataSize),
       position (0)
 {
     if (keepInternalCopy)
     {
         internalCopy.append (data, sourceDataSize);
-        data = (const char*) internalCopy.getData();
+        data = static_cast <const char*> (internalCopy.getData());
+    }
+}
+
+MemoryInputStream::MemoryInputStream (const MemoryBlock& sourceData,
+                                      const bool keepInternalCopy)
+    : data (static_cast <const char*> (sourceData.getData())),
+      dataSize (sourceData.getSize()),
+      position (0)
+{
+    if (keepInternalCopy)
+    {
+        internalCopy = sourceData;
+        data = static_cast <const char*> (internalCopy.getData());
     }
 }
 
@@ -55,7 +67,7 @@ int64 MemoryInputStream::getTotalLength()
     return dataSize;
 }
 
-int MemoryInputStream::read (void* buffer, int howMany)
+int MemoryInputStream::read (void* const buffer, const int howMany)
 {
     jassert (howMany >= 0);
     const int num = jmin (howMany, (int) (dataSize - position));
@@ -69,10 +81,9 @@ bool MemoryInputStream::isExhausted()
     return (position >= dataSize);
 }
 
-bool MemoryInputStream::setPosition (int64 pos)
+bool MemoryInputStream::setPosition (const int64 pos)
 {
     position = (int) jlimit ((int64) 0, (int64) dataSize, pos);
-
     return true;
 }
 

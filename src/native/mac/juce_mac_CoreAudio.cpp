@@ -244,7 +244,7 @@ public:
             {
                 bufferSizes.add ((int) ranges[0].mMinimum);
 
-                for (int i = 32; i < 8192; i += 32)
+                for (int i = 32; i < 2048; i += 32)
                 {
                     for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {

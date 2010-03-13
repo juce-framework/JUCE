@@ -599,7 +599,7 @@ bool XmlElement::getBoolAttribute (const String& attributeName,
     {
         if (att->name.equalsIgnoreCase (attributeName))
         {
-            tchar firstChar = att->value[0];
+            juce_wchar firstChar = att->value[0];
 
             if (CharacterFunctions::isWhitespace (firstChar))
                 firstChar = att->value.trimStart() [0];
@@ -645,7 +645,7 @@ void XmlElement::setAttribute (const String& attributeName,
 {
 #ifdef JUCE_DEBUG
     // check the identifier being passed in is legal..
-    const tchar* t = attributeName;
+    const juce_wchar* t = attributeName;
     while (*t != 0)
     {
         jassert (CharacterFunctions::isLetterOrDigit (*t)
@@ -1084,7 +1084,7 @@ bool XmlElement::isTextElement() const throw()
     return tagName.isEmpty();
 }
 
-static const tchar* const juce_xmltextContentAttributeName = T("text");
+static const juce_wchar* const juce_xmltextContentAttributeName = T("text");
 
 const String XmlElement::getText() const throw()
 {

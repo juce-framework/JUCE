@@ -57,7 +57,7 @@ void XmlDocument::setEmptyTextElementsIgnored (const bool shouldBeIgnored) throw
     ignoreEmptyTextElements = shouldBeIgnored;
 }
 
-bool XmlDocument::isXmlIdentifierCharSlow (const tchar c) throw()
+bool XmlDocument::isXmlIdentifierCharSlow (const juce_wchar c) throw()
 {
     return CharacterFunctions::isLetterOrDigit (c)
             || c == T('_')
@@ -66,7 +66,7 @@ bool XmlDocument::isXmlIdentifierCharSlow (const tchar c) throw()
             || c == T('.');
 }
 
-inline bool XmlDocument::isXmlIdentifierChar (const tchar c) const throw()
+inline bool XmlDocument::isXmlIdentifierChar (const juce_wchar c) const throw()
 {
     return (c > 0 && c <= 127) ? identifierLookupTable [(int) c]
                                : isXmlIdentifierCharSlow (c);
@@ -109,7 +109,7 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
     needToLoadDTD = true;
 
     for (int i = 0; i < 128; ++i)
-        identifierLookupTable[i] = isXmlIdentifierCharSlow ((tchar) i);
+        identifierLookupTable[i] = isXmlIdentifierCharSlow ((juce_wchar) i);
 
     if (textToParse.isEmpty())
     {
@@ -159,7 +159,7 @@ const String XmlDocument::getFileContents (const String& filename) const
     return String::empty;
 }
 
-tchar XmlDocument::readNextChar() throw()
+juce_wchar XmlDocument::readNextChar() throw()
 {
     if (*input != 0)
     {
@@ -175,7 +175,7 @@ tchar XmlDocument::readNextChar() throw()
 int XmlDocument::findNextTokenLength() throw()
 {
     int len = 0;
-    tchar c = *input;
+    juce_wchar c = *input;
 
     while (isXmlIdentifierChar (c))
         c = input [++len];
@@ -185,7 +185,7 @@ int XmlDocument::findNextTokenLength() throw()
 
 void XmlDocument::skipHeader() throw()
 {
-    const tchar* const found = CharacterFunctions::find (input, T("<?xml"));
+    const juce_wchar* const found = CharacterFunctions::find (input, T("<?xml"));
 
     if (found != 0)
     {
@@ -199,7 +199,7 @@ void XmlDocument::skipHeader() throw()
     }
 
     skipNextWhiteSpace();
-    const tchar* docType = CharacterFunctions::find (input, T("<!DOCTYPE"));
+    const juce_wchar* docType = CharacterFunctions::find (input, T("<!DOCTYPE"));
 
     if (docType == 0)
         return;
@@ -210,7 +210,7 @@ void XmlDocument::skipHeader() throw()
 
     while (n > 0)
     {
-        const tchar c = readNextChar();
+        const juce_wchar c = readNextChar();
 
         if (outOfData)
             return;
@@ -229,7 +229,7 @@ void XmlDocument::skipNextWhiteSpace() throw()
 {
     for (;;)
     {
-        tchar c = *input;
+        juce_wchar c = *input;
 
         while (CharacterFunctions::isWhitespace (c))
             c = *++input;
@@ -245,7 +245,7 @@ void XmlDocument::skipNextWhiteSpace() throw()
                  && input[2] == T('-')
                  && input[3] == T('-'))
             {
-                const tchar* const closeComment = CharacterFunctions::find (input, T("-->"));
+                const juce_wchar* const closeComment = CharacterFunctions::find (input, T("-->"));
 
                 if (closeComment == 0)
                 {
@@ -258,7 +258,7 @@ void XmlDocument::skipNextWhiteSpace() throw()
             }
             else if (input[1] == T('?'))
             {
-                const tchar* const closeBracket = CharacterFunctions::find (input, T("?>"));
+                const juce_wchar* const closeBracket = CharacterFunctions::find (input, T("?>"));
 
                 if (closeBracket == 0)
                 {
@@ -277,11 +277,11 @@ void XmlDocument::skipNextWhiteSpace() throw()
 
 void XmlDocument::readQuotedString (String& result) throw()
 {
-    const tchar quote = readNextChar();
+    const juce_wchar quote = readNextChar();
 
     while (! outOfData)
     {
-        const tchar c = readNextChar();
+        const juce_wchar c = readNextChar();
 
         if (c == quote)
             break;
@@ -294,11 +294,11 @@ void XmlDocument::readQuotedString (String& result) throw()
         else
         {
             --input;
-            const tchar* const start = input;
+            const juce_wchar* const start = input;
 
             for (;;)
             {
-                const tchar character = *input;
+                const juce_wchar character = *input;
 
                 if (character == quote)
                 {
@@ -362,7 +362,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
         {
             skipNextWhiteSpace();
 
-            const tchar c = *input;
+            const juce_wchar c = *input;
 
             // empty tag..
             if (c == T('/') && input[1] == T('>'))
@@ -390,7 +390,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
 
                 if (attNameLen > 0)
                 {
-                    const tchar* attNameStart = input;
+                    const juce_wchar* attNameStart = input;
                     input += attNameLen;
 
                     skipNextWhiteSpace();
@@ -399,7 +399,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
                     {
                         skipNextWhiteSpace();
 
-                        const tchar nextChar = *input;
+                        const juce_wchar nextChar = *input;
 
                         if (nextChar == T('"') || nextChar == T('\''))
                         {
@@ -467,7 +467,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
                   && input[8] == T('['))
             {
                 input += 9;
-                const tchar* const inputStart = input;
+                const juce_wchar* const inputStart = input;
 
                 int len = 0;
 
@@ -537,7 +537,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
 
             for (;;)
             {
-                const tchar c = *input;
+                const juce_wchar c = *input;
 
                 if (c == T('<'))
                     break;
@@ -556,10 +556,10 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
 
                     if (entity.startsWithChar (T('<')) && entity [1] != 0)
                     {
-                        const tchar* const oldInput = input;
+                        const juce_wchar* const oldInput = input;
                         const bool oldOutOfData = outOfData;
 
-                        input = (const tchar*) entity;
+                        input = entity;
                         outOfData = false;
 
                         for (;;)
@@ -587,12 +587,12 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
                 }
                 else
                 {
-                    const tchar* start = input;
+                    const juce_wchar* start = input;
                     int len = 0;
 
                     for (;;)
                     {
-                        const tchar nextChar = *input;
+                        const juce_wchar nextChar = *input;
 
                         if (nextChar == T('<') || nextChar == T('&'))
                         {
@@ -701,12 +701,12 @@ void XmlDocument::readEntity (String& result) throw()
             return;
         }
 
-        result << (tchar) charCode;
+        result << (juce_wchar) charCode;
     }
     else
     {
-        const tchar* const entityNameStart = input;
-        const tchar* const closingSemiColon = CharacterFunctions::find (input, T(";"));
+        const juce_wchar* const entityNameStart = input;
+        const juce_wchar* const closingSemiColon = CharacterFunctions::find (input, T(";"));
 
         if (closingSemiColon == 0)
         {
@@ -749,11 +749,11 @@ const String XmlDocument::expandEntity (const String& ent)
     {
         if (ent[1] == T('x') || ent[1] == T('X'))
         {
-            return String::charToString ((tchar) ent.substring (2).getHexValue32());
+            return String::charToString (static_cast <juce_wchar> (ent.substring (2).getHexValue32()));
         }
         else if (ent[1] >= T('0') && ent[1] <= T('9'))
         {
-            return String::charToString ((tchar) ent.substring (1).getIntValue());
+            return String::charToString (static_cast <juce_wchar> (ent.substring (1).getIntValue()));
         }
 
         setLastError ("illegal escape sequence", false);

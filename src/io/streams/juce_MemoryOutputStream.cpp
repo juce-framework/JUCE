@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 MemoryOutputStream::MemoryOutputStream (const size_t initialSize,
                                         const size_t blockSizeToIncreaseBy,
-                                        MemoryBlock* const memoryBlockToWriteTo) throw()
+                                        MemoryBlock* const memoryBlockToWriteTo)
   : data (memoryBlockToWriteTo),
     position (0),
     size (0),
@@ -46,7 +46,7 @@ MemoryOutputStream::MemoryOutputStream (const size_t initialSize,
         data->setSize (initialSize, false);
 }
 
-MemoryOutputStream::~MemoryOutputStream() throw()
+MemoryOutputStream::~MemoryOutputStream()
 {
     flush();
 }
@@ -63,7 +63,7 @@ void MemoryOutputStream::reset() throw()
     size = 0;
 }
 
-bool MemoryOutputStream::write (const void* buffer, int howMany)
+bool MemoryOutputStream::write (const void* const buffer, int howMany)
 {
     if (howMany > 0)
     {
@@ -88,10 +88,12 @@ bool MemoryOutputStream::write (const void* buffer, int howMany)
 
 const char* MemoryOutputStream::getData() const throw()
 {
-    if (data->getSize() > size)
-        ((char*) data->getData()) [size] = 0;
+    char* const d = static_cast <char*> (data->getData());
 
-    return (const char*) data->getData();
+    if (data->getSize() > size)
+        d [size] = 0;
+
+    return d;
 }
 
 size_t MemoryOutputStream::getDataSize() const throw()

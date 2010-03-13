@@ -327,40 +327,32 @@ const String StringArray::joinIntoString (const String& separator, int start, in
     return result;
 }
 
-int StringArray::addTokens (const tchar* const text, const bool preserveQuotedStrings)
+int StringArray::addTokens (const String& text, const bool preserveQuotedStrings)
 {
-    return addTokens (text,
-                      T(" \n\r\t"),
-                      preserveQuotedStrings ? T("\"") : 0);
+    return addTokens (text, T(" \n\r\t"), preserveQuotedStrings ? T("\"") : 0);
 }
 
-int StringArray::addTokens (const tchar* const text, const tchar* breakCharacters, const tchar* quoteCharacters)
+int StringArray::addTokens (const String& text, const String& breakCharacters, const String& quoteCharacters)
 {
     int num = 0;
 
-    if (text != 0 && *text != 0)
+    if (text.isNotEmpty())
     {
-        if (breakCharacters == 0)
-            breakCharacters = T("");
-
-        if (quoteCharacters == 0)
-            quoteCharacters = T("");
-
         bool insideQuotes = false;
-        tchar currentQuoteChar = 0;
+        juce_wchar currentQuoteChar = 0;
 
         int i = 0;
         int tokenStart = 0;
 
         for (;;)
         {
-            const tchar c = text[i];
+            const juce_wchar c = text[i];
 
             bool isBreak = (c == 0);
 
             if (! (insideQuotes || isBreak))
             {
-                const tchar* b = breakCharacters;
+                const juce_wchar* b = breakCharacters;
                 while (*b != 0)
                 {
                     if (*b++ == c)
@@ -374,7 +366,7 @@ int StringArray::addTokens (const tchar* const text, const tchar* breakCharacter
             if (! isBreak)
             {
                 bool isQuote = false;
-                const tchar* q = quoteCharacters;
+                const juce_wchar* q = quoteCharacters;
                 while (*q != 0)
                 {
                     if (*q++ == c)
@@ -402,7 +394,7 @@ int StringArray::addTokens (const tchar* const text, const tchar* breakCharacter
             }
             else
             {
-                add (String (text + tokenStart, i - tokenStart));
+                add (String (static_cast <const juce_wchar*> (text) + tokenStart, i - tokenStart));
 
                 ++num;
                 tokenStart = i + 1;
@@ -418,47 +410,45 @@ int StringArray::addTokens (const tchar* const text, const tchar* breakCharacter
     return num;
 }
 
-int StringArray::addLines (const tchar* text)
+int StringArray::addLines (const String& sourceText)
 {
     int numLines = 0;
+    const juce_wchar* text = sourceText;
 
-    if (text != 0)
+    while (*text != 0)
     {
+        const juce_wchar* const startOfLine = text;
+
         while (*text != 0)
         {
-            const tchar* const startOfLine = text;
-
-            while (*text != 0)
+            if (*text == T('\r'))
             {
-                if (*text == T('\r'))
-                {
-                    ++text;
-                    if (*text == T('\n'))
-                        ++text;
-
-                    break;
-                }
-
-                if (*text == T('\n'))
-                {
-                    ++text;
-                    break;
-                }
-
                 ++text;
+                if (*text == T('\n'))
+                    ++text;
+
+                break;
             }
 
-            const tchar* endOfLine = text;
-            if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
-                --endOfLine;
+            if (*text == T('\n'))
+            {
+                ++text;
+                break;
+            }
 
-            if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
-                --endOfLine;
-
-            add (String (startOfLine, jmax (0, (int) (endOfLine - startOfLine))));
-
-            ++numLines;
+            ++text;
         }
+
+        const juce_wchar* endOfLine = text;
+        if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
+            --endOfLine;
+
+        if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
+            --endOfLine;
+
+        add (String (startOfLine, jmax (0, (int) (endOfLine - startOfLine))));
+
+        ++numLines;
     }
 
     return numLines;

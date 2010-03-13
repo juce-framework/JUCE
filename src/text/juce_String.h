@@ -54,30 +54,29 @@ public:
     String (const String& other) throw();
 
     /** Creates a string from a zero-terminated text string.
-
         The string is assumed to be stored in the default system encoding.
     */
-    String (const char* text) throw();
+    String (const char* text);
 
     /** Creates a string from an string of characters.
 
         This will use up the the first maxChars characters of the string (or
         less if the string is actually shorter)
     */
-    String (const char* text, size_t maxChars) throw();
+    String (const char* text, size_t maxChars);
 
     /** Creates a string from a zero-terminated unicode text string. */
-    String (const juce_wchar* unicodeText) throw();
+    String (const juce_wchar* unicodeText);
 
     /** Creates a string from a unicode text string.
 
         This will use up the the first maxChars characters of the string (or
         less if the string is actually shorter)
     */
-    String (const juce_wchar* unicodeText, size_t maxChars) throw();
+    String (const juce_wchar* unicodeText, size_t maxChars);
 
     /** Creates a string from a single character. */
-    static const String charToString (juce_wchar character) throw();
+    static const String charToString (juce_wchar character);
 
     /** Destructor. */
     ~String() throw();
@@ -441,7 +440,7 @@ public:
         Note that the index passed-in is not checked to see whether it's in-range, so
         be careful when using this.
     */
-    juce_wchar& operator[] (int index) throw();
+    juce_wchar& operator[] (int index);
 
     /** Returns the final character of the string.
 
@@ -460,7 +459,7 @@ public:
                             this index are returned
         @see fromFirstOccurrenceOf, dropLastCharacters, getLastCharacters, upToFirstOccurrenceOf
     */
-    const String substring (int startIndex, int endIndex) const throw();
+    const String substring (int startIndex, int endIndex) const;
 
     /** Returns a section of the string, starting from a given position.
 
@@ -470,7 +469,7 @@ public:
         @returns            the substring from startIndex up to the end of the string
         @see dropLastCharacters, getLastCharacters, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String substring (int startIndex) const throw();
+    const String substring (int startIndex) const;
 
     /** Returns a version of this string with a number of characters removed
         from the end.
@@ -481,7 +480,7 @@ public:
                                 original string will be returned.
         @see substring, fromFirstOccurrenceOf, upToFirstOccurrenceOf, fromLastOccurrenceOf, getLastCharacter
     */
-    const String dropLastCharacters (int numberToDrop) const throw();
+    const String dropLastCharacters (int numberToDrop) const;
 
     /** Returns a number of characters from the end of the string.
 
@@ -490,7 +489,7 @@ public:
 
         @see substring, dropLastCharacters, getLastCharacter
     */
-    const String getLastCharacters (int numCharacters) const throw();
+    const String getLastCharacters (int numCharacters) const;
 
     //==============================================================================
     /** Returns a section of the string starting from a given substring.
@@ -510,7 +509,7 @@ public:
     */
     const String fromFirstOccurrenceOf (const juce_wchar* substringToStartFrom,
                                         bool includeSubStringInResult,
-                                        bool ignoreCase) const throw();
+                                        bool ignoreCase) const;
 
     /** Returns a section of the string starting from the last occurrence of a given substring.
 
@@ -522,7 +521,7 @@ public:
     */
     const String fromLastOccurrenceOf (const juce_wchar* substringToFind,
                                        bool includeSubStringInResult,
-                                       bool ignoreCase) const throw();
+                                       bool ignoreCase) const;
 
     /** Returns the start of this string, up to the first occurrence of a substring.
 
@@ -539,7 +538,7 @@ public:
     */
     const String upToFirstOccurrenceOf (const juce_wchar* substringToEndWith,
                                         bool includeSubStringInResult,
-                                        bool ignoreCase) const throw();
+                                        bool ignoreCase) const;
 
     /** Returns the start of this string, up to the last occurrence of a substring.
 
@@ -550,15 +549,15 @@ public:
     */
     const String upToLastOccurrenceOf (const juce_wchar* substringToFind,
                                        bool includeSubStringInResult,
-                                       bool ignoreCase) const throw();
+                                       bool ignoreCase) const;
 
     //==============================================================================
     /** Returns a copy of this string with any whitespace characters removed from the start and end. */
-    const String trim() const throw();
+    const String trim() const;
     /** Returns a copy of this string with any whitespace characters removed from the start. */
-    const String trimStart() const throw();
+    const String trimStart() const;
     /** Returns a copy of this string with any whitespace characters removed from the end. */
-    const String trimEnd() const throw();
+    const String trimEnd() const;
 
     /** Returns a copy of this string, having removed a specified set of characters from its start.
         Characters are removed from the start of the string until it finds one that is not in the
@@ -566,7 +565,7 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimStart, trimCharactersAtEnd
     */
-    const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const throw();
+    const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const;
 
     /** Returns a copy of this string, having removed a specified set of characters from its end.
         Characters are removed from the end of the string until it finds one that is not in the
@@ -574,14 +573,14 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimEnd, trimCharactersAtStart
     */
-    const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const throw();
+    const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const;
 
     //==============================================================================
     /** Returns an upper-case version of this string. */
-    const String toUpperCase() const throw();
+    const String toUpperCase() const;
 
     /** Returns an lower-case version of this string. */
-    const String toLowerCase() const throw();
+    const String toLowerCase() const;
 
     //==============================================================================
     /** Replaces a sub-section of the string with another string.
@@ -601,7 +600,7 @@ public:
     */
     const String replaceSection (int startIndex,
                                  int numCharactersToReplace,
-                                 const juce_wchar* stringToInsert) const throw();
+                                 const juce_wchar* stringToInsert) const;
 
     /** Replaces all occurrences of a substring with another string.
 
@@ -612,11 +611,11 @@ public:
     */
     const String replace (const juce_wchar* stringToReplace,
                           const juce_wchar* stringToInsertInstead,
-                          bool ignoreCase = false) const throw();
+                          bool ignoreCase = false) const;
 
     /** Returns a string with all occurrences of a character replaced with a different one. */
     const String replaceCharacter (juce_wchar characterToReplace,
-                                   juce_wchar characterToInsertInstead) const throw();
+                                   juce_wchar characterToInsertInstead) const;
 
     /** Replaces a set of characters with another set.
 
@@ -629,7 +628,7 @@ public:
         Note that this is a const method, and won't affect the string itself.
     */
     const String replaceCharacters (const String& charactersToReplace,
-                                    const juce_wchar* charactersToInsertInstead) const throw();
+                                    const juce_wchar* charactersToInsertInstead) const;
 
     /** Returns a version of this string that only retains a fixed set of characters.
 
@@ -640,7 +639,7 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String retainCharacters (const juce_wchar* charactersToRetain) const throw();
+    const String retainCharacters (const juce_wchar* charactersToRetain) const;
 
     /** Returns a version of this string with a set of characters removed.
 
@@ -651,21 +650,21 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String removeCharacters (const juce_wchar* charactersToRemove) const throw();
+    const String removeCharacters (const juce_wchar* charactersToRemove) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that doesn't appear in the string passed in.
     */
-    const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const throw();
+    const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that occurs in the string passed in.
     */
-    const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const throw();
+    const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const;
 
     //==============================================================================
     /** Checks whether the string might be in quotation marks.
@@ -674,7 +673,7 @@ public:
                     It is also true if there is whitespace before the quote, but it doesn't check the end of the string.
         @see unquoted, quoted
     */
-    bool isQuotedString() const throw();
+    bool isQuotedString() const;
 
     /** Removes quotation marks from around the string, (if there are any).
 
@@ -686,7 +685,7 @@ public:
 
         @see isQuotedString, quoted
     */
-    const String unquoted() const throw();
+    const String unquoted() const;
 
     /** Adds quotation marks around a string.
 
@@ -699,7 +698,7 @@ public:
         @param quoteCharacter   the character to add at the start and end
         @see isQuotedString, unquoted
     */
-    const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const throw();
+    const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const;
 
 
     //==============================================================================
@@ -729,8 +728,7 @@ public:
         Should be able to handle Unicode endianness correctly, by looking at
         the first two bytes.
     */
-    static const String createStringFromData (const void* data,
-                                              int size) throw();
+    static const String createStringFromData (const void* data, int size);
 
     //==============================================================================
     // Numeric conversions..
@@ -739,37 +737,37 @@ public:
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (int decimalInteger) throw();
+    explicit String (int decimalInteger);
 
     /** Creates a string containing this unsigned 32-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (unsigned int decimalInteger) throw();
+    explicit String (unsigned int decimalInteger);
 
     /** Creates a string containing this signed 16-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (short decimalInteger) throw();
+    explicit String (short decimalInteger);
 
     /** Creates a string containing this unsigned 16-bit integer as a decimal number.
 
         @see getIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (unsigned short decimalInteger) throw();
+    explicit String (unsigned short decimalInteger);
 
     /** Creates a string containing this signed 64-bit integer as a decimal number.
 
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (int64 largeIntegerValue) throw();
+    explicit String (int64 largeIntegerValue);
 
     /** Creates a string containing this unsigned 64-bit integer as a decimal number.
 
         @see getLargeIntValue, getFloatValue, getDoubleValue, toHexString
     */
-    explicit String (uint64 largeIntegerValue) throw();
+    explicit String (uint64 largeIntegerValue);
 
     /** Creates a string representing this floating-point number.
 
@@ -780,7 +778,7 @@ public:
         @see getDoubleValue, getIntValue
     */
     explicit String (float floatValue,
-                     int numberOfDecimalPlaces = 0) throw();
+                     int numberOfDecimalPlaces = 0);
 
     /** Creates a string representing this floating-point number.
 
@@ -792,7 +790,7 @@ public:
         @see getFloatValue, getIntValue
     */
     explicit String (double doubleValue,
-                     int numberOfDecimalPlaces = 0) throw();
+                     int numberOfDecimalPlaces = 0);
 
     /** Reads the value of the string as a decimal number (up to 32 bits in size).
 
@@ -855,13 +853,13 @@ public:
     int64 getHexValue64() const throw();
 
     /** Creates a string representing this 32-bit value in hexadecimal. */
-    static const String toHexString (int number) throw();
+    static const String toHexString (int number);
 
     /** Creates a string representing this 64-bit value in hexadecimal. */
-    static const String toHexString (int64 number) throw();
+    static const String toHexString (int64 number);
 
     /** Creates a string representing this 16-bit value in hexadecimal. */
-    static const String toHexString (short number) throw();
+    static const String toHexString (short number);
 
     /** Creates a string containing a hex dump of a block of binary data.
 
@@ -874,7 +872,7 @@ public:
     */
     static const String toHexString (const unsigned char* data,
                                      int size,
-                                     int groupSize = 1) throw();
+                                     int groupSize = 1);
 
     //==============================================================================
     /** Returns a unicode version of this string.
@@ -986,6 +984,11 @@ public:
                                 have no effect.
     */
     void preallocateStorage (size_t numCharsNeeded);
+
+    /** Swaps the contents of this string with another one.
+        This is a very fast operation, as no allocation or copying needs to be done.
+    */
+    void swapWith (String& other) throw();
 
     //==============================================================================
     /** A helper class to improve performance when concatenating many large strings
