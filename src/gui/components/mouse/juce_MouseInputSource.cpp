@@ -382,18 +382,9 @@ public:
 
         if (! screenArea.contains (lastScreenPos))
         {
-            const Point<int> compPos (current->getScreenPosition());
-            int deltaX = 0, deltaY = 0;
-
-            if (lastScreenPos.getX() <= screenArea.getX() || lastScreenPos.getX() >= screenArea.getRight())
-                deltaX = compPos.getX() + current->getWidth() / 2 - lastScreenPos.getX();
-
-            if (lastScreenPos.getY() <= screenArea.getY() || lastScreenPos.getY() >= screenArea.getBottom())
-                deltaY = compPos.getY() + current->getHeight() / 2 - lastScreenPos.getY();
-
-            const Point<int> delta (deltaX, deltaY);
-            unboundedMouseOffset -= delta;
-            Desktop::setMousePosition (lastScreenPos + delta);
+            const Point<int> componentCentre (current->getScreenBounds().getCentre());
+            unboundedMouseOffset += (lastScreenPos - componentCentre);
+            Desktop::setMousePosition (componentCentre);
         }
         else if (isCursorVisibleUntilOffscreen
                   && (! unboundedMouseOffset.isOrigin())

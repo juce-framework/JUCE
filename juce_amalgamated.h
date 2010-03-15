@@ -1365,10 +1365,10 @@ private:
 
 	// internal constructor that preallocates a certain amount of memory
 	String (size_t numChars, int dummyVariable);
+	String (const String& stringToCopy, size_t charsToAllocate);
 
 	void createInternal (const juce_wchar* text, size_t numChars);
 	void appendInternal (const juce_wchar* text, int numExtraChars);
-	void dupeInternalIfMultiplyReferenced();
 };
 
 const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
@@ -4456,19 +4456,19 @@ public:
 								 const bool allOnOneLine = false,
 								 const bool includeXmlHeader = true,
 								 const String& encodingType = JUCE_T("UTF-8"),
-								 const int lineWrapLength = 60) const throw();
+								 const int lineWrapLength = 60) const;
 
 	void writeToStream (OutputStream& output,
 						const String& dtdToUse,
 						const bool allOnOneLine = false,
 						const bool includeXmlHeader = true,
 						const String& encodingType = JUCE_T("UTF-8"),
-						const int lineWrapLength = 60) const throw();
+						const int lineWrapLength = 60) const;
 
 	bool writeToFile (const File& destinationFile,
 					  const String& dtdToUse,
 					  const String& encodingType = JUCE_T("UTF-8"),
-					  const int lineWrapLength = 60) const throw();
+					  const int lineWrapLength = 60) const;
 
 	inline const String& getTagName() const throw()  { return tagName; }
 
@@ -4484,30 +4484,32 @@ public:
 
 	bool hasAttribute (const String& attributeName) const throw();
 
+	const String& getStringAttribute (const String& attributeName) const throw();
+
 	const String getStringAttribute (const String& attributeName,
-									 const String& defaultReturnValue = String::empty) const throw();
+									 const String& defaultReturnValue) const;
 
 	bool compareAttribute (const String& attributeName,
 						   const String& stringToCompareAgainst,
 						   const bool ignoreCase = false) const throw();
 
 	int getIntAttribute (const String& attributeName,
-						 const int defaultReturnValue = 0) const throw();
+						 const int defaultReturnValue = 0) const;
 
 	double getDoubleAttribute (const String& attributeName,
-							   const double defaultReturnValue = 0.0) const throw();
+							   const double defaultReturnValue = 0.0) const;
 
 	bool getBoolAttribute (const String& attributeName,
-						   const bool defaultReturnValue = false) const throw();
+						   const bool defaultReturnValue = false) const;
 
 	void setAttribute (const String& attributeName,
-					   const String& newValue) throw();
+					   const String& newValue);
 
 	void setAttribute (const String& attributeName,
-					   const int newValue) throw();
+					   const int newValue);
 
 	void setAttribute (const String& attributeName,
-					   const double newValue) throw();
+					   const double newValue);
 
 	void removeAttribute (const String& attributeName) throw();
 
@@ -4609,7 +4611,7 @@ private:
 
 	void writeElementAsText (OutputStream& out,
 							 const int indentationLevel,
-							 const int lineWrapLength) const throw();
+							 const int lineWrapLength) const;
 
 	void getChildElementsAsArray (XmlElement**) const throw();
 	void reorderChildElements (XmlElement** const, const int) throw();

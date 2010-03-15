@@ -246,7 +246,7 @@ namespace XmlOutputFunctions
         }
     }
 
-    static void writeSpaces (OutputStream& out, int numSpaces) throw()
+    static void writeSpaces (OutputStream& out, int numSpaces)
     {
         if (numSpaces > 0)
         {
@@ -266,7 +266,7 @@ namespace XmlOutputFunctions
 
 void XmlElement::writeElementAsText (OutputStream& outputStream,
                                      const int indentationLevel,
-                                     const int lineWrapLength) const throw()
+                                     const int lineWrapLength) const
 {
     using namespace XmlOutputFunctions;
     writeSpaces (outputStream, indentationLevel);
@@ -386,7 +386,7 @@ const String XmlElement::createDocument (const String& dtdToUse,
                                          const bool allOnOneLine,
                                          const bool includeXmlHeader,
                                          const String& encodingType,
-                                         const int lineWrapLength) const throw()
+                                         const int lineWrapLength) const
 {
     MemoryOutputStream mem (2048, 4096);
     writeToStream (mem, dtdToUse, allOnOneLine, includeXmlHeader, encodingType, lineWrapLength);
@@ -399,7 +399,7 @@ void XmlElement::writeToStream (OutputStream& output,
                                 const bool allOnOneLine,
                                 const bool includeXmlHeader,
                                 const String& encodingType,
-                                const int lineWrapLength) const throw()
+                                const int lineWrapLength) const
 {
     if (includeXmlHeader)
     {
@@ -427,7 +427,7 @@ void XmlElement::writeToStream (OutputStream& output,
 bool XmlElement::writeToFile (const File& file,
                               const String& dtdToUse,
                               const String& encodingType,
-                              const int lineWrapLength) const throw()
+                              const int lineWrapLength) const
 {
     if (file.hasWriteAccess())
     {
@@ -542,8 +542,22 @@ bool XmlElement::hasAttribute (const String& attributeName) const throw()
 }
 
 //==============================================================================
-const String XmlElement::getStringAttribute (const String& attributeName,
-                                             const String& defaultReturnValue) const throw()
+const String& XmlElement::getStringAttribute (const String& attributeName) const throw()
+{
+    const XmlAttributeNode* att = attributes;
+
+    while (att != 0)
+    {
+        if (att->name.equalsIgnoreCase (attributeName))
+            return att->value;
+
+        att = att->next;
+    }
+
+    return String::empty;
+}
+
+const String XmlElement::getStringAttribute (const String& attributeName, const String& defaultReturnValue) const
 {
     const XmlAttributeNode* att = attributes;
 
@@ -558,8 +572,7 @@ const String XmlElement::getStringAttribute (const String& attributeName,
     return defaultReturnValue;
 }
 
-int XmlElement::getIntAttribute (const String& attributeName,
-                                 const int defaultReturnValue) const throw()
+int XmlElement::getIntAttribute (const String& attributeName, const int defaultReturnValue) const
 {
     const XmlAttributeNode* att = attributes;
 
@@ -574,8 +587,7 @@ int XmlElement::getIntAttribute (const String& attributeName,
     return defaultReturnValue;
 }
 
-double XmlElement::getDoubleAttribute (const String& attributeName,
-                                       const double defaultReturnValue) const throw()
+double XmlElement::getDoubleAttribute (const String& attributeName, const double defaultReturnValue) const
 {
     const XmlAttributeNode* att = attributes;
 
@@ -590,8 +602,7 @@ double XmlElement::getDoubleAttribute (const String& attributeName,
     return defaultReturnValue;
 }
 
-bool XmlElement::getBoolAttribute (const String& attributeName,
-                                   const bool defaultReturnValue) const throw()
+bool XmlElement::getBoolAttribute (const String& attributeName, const bool defaultReturnValue) const
 {
     const XmlAttributeNode* att = attributes;
 
@@ -640,8 +651,7 @@ bool XmlElement::compareAttribute (const String& attributeName,
 }
 
 //==============================================================================
-void XmlElement::setAttribute (const String& attributeName,
-                               const String& value) throw()
+void XmlElement::setAttribute (const String& attributeName, const String& value)
 {
 #ifdef JUCE_DEBUG
     // check the identifier being passed in is legal..
@@ -682,14 +692,12 @@ void XmlElement::setAttribute (const String& attributeName,
     }
 }
 
-void XmlElement::setAttribute (const String& attributeName,
-                               const int number) throw()
+void XmlElement::setAttribute (const String& attributeName, const int number)
 {
     setAttribute (attributeName, String (number));
 }
 
-void XmlElement::setAttribute (const String& attributeName,
-                               const double number) throw()
+void XmlElement::setAttribute (const String& attributeName, const double number)
 {
     setAttribute (attributeName, String (number));
 }

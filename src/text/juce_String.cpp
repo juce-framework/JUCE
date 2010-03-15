@@ -93,7 +93,7 @@ public:
             return text;
 
         juce_wchar* const newText = create (b->allocatedNumChars);
-        memcpy (newText, text, (b->allocatedNumChars + 1) * sizeof (juce_wchar));
+        copyChars (newText, text, b->allocatedNumChars);
         release (b);
 
         return newText;
@@ -107,7 +107,7 @@ public:
             return text;
 
         juce_wchar* const newText = create (jmax (b->allocatedNumChars, numChars));
-        memcpy (newText, text, (b->allocatedNumChars + 1) * sizeof (juce_wchar));
+        copyChars (newText, text, b->allocatedNumChars);
         release (b);
 
         return newText;
@@ -116,6 +116,12 @@ public:
     static size_t getAllocatedNumChars (juce_wchar* const text) throw()
     {
         return bufferFromText (text)->allocatedNumChars;
+    }
+
+    static void copyChars (juce_wchar* const dest, const juce_wchar* const src, const size_t numChars) throw()
+    {
+        memcpy (dest, src, numChars * sizeof (juce_wchar));
+        dest [numChars] = 0;
     }
 
     //==============================================================================
@@ -141,7 +147,7 @@ void String::createInternal (const juce_wchar* const t, const size_t numChars)
     jassert (t[numChars] == 0); // must have a null terminator
 
     text = StringHolder::create (numChars);
-    memcpy (text, t, (numChars + 1) * sizeof (juce_wchar));
+    StringHolder::copyChars (text, t, numChars);
 }
 
 void String::appendInternal (const juce_wchar* const newText, const int numExtraChars)
@@ -152,14 +158,8 @@ void String::appendInternal (const juce_wchar* const newText, const int numExtra
         const int newTotalLen = oldLen + numExtraChars;
 
         text = StringHolder::makeUniqueWithSize (text, newTotalLen);
-        memcpy (text + oldLen, newText, numExtraChars * sizeof (juce_wchar));
-        text [newTotalLen] = 0;
+        StringHolder::copyChars (text + oldLen, newText, numExtraChars);
     }
-}
-
-void String::dupeInternalIfMultiplyReferenced()
-{
-    text = StringHolder::makeUnique (text);
 }
 
 void String::preallocateStorage (const size_t numChars)
@@ -202,6 +202,13 @@ String::String (const size_t numChars, const int /*dummyVariable*/)
 {
 }
 
+String::String (const String& stringToCopy, const size_t charsToAllocate)
+{
+    const size_t otherSize = StringHolder::getAllocatedNumChars (stringToCopy.text);
+    text = StringHolder::create (jmax (charsToAllocate, otherSize));
+    StringHolder::copyChars (text, stringToCopy.text, otherSize);
+}
+
 String::String (const char* const t)
 {
     if (t != 0 && *t != 0)
@@ -222,7 +229,7 @@ String::String (const juce_wchar* const t)
     {
         const int len = CharacterFunctions::length (t);
         text = StringHolder::create (len);
-        memcpy (text, t, (len + 1) * sizeof (juce_wchar));
+        StringHolder::copyChars (text, t, len);
     }
     else
     {
@@ -259,8 +266,7 @@ String::String (const juce_wchar* const t, const size_t maxChars)
     if (i > 0)
     {
         text = StringHolder::create (i);
-        memcpy (text, t, i * sizeof (juce_wchar));
-        text[i] = 0;
+        StringHolder::copyChars (text, t, i);
     }
     else
     {
@@ -1085,13 +1091,11 @@ const String String::repeatedString (const juce_wchar* const stringToRepeat, int
 {
     const int len = CharacterFunctions::length (stringToRepeat);
     String result ((size_t) (len * numberOfTimesToRepeat + 1), (int) 0);
-
     juce_wchar* n = result.text;
-    n[0] = 0;
 
     while (--numberOfTimesToRepeat >= 0)
     {
-        CharacterFunctions::append (n, stringToRepeat);
+        StringHolder::copyChars (n, stringToRepeat, len);
         n += len;
     }
 
@@ -1103,21 +1107,17 @@ const String String::paddedLeft (const juce_wchar padCharacter, int minimumLengt
     jassert (padCharacter != 0);
 
     const int len = length();
-
     if (len >= minimumLength || padCharacter == 0)
         return *this;
 
     String result ((size_t) minimumLength + 1, (int) 0);
-
     juce_wchar* n = result.text;
 
     minimumLength -= len;
     while (--minimumLength >= 0)
         *n++ = padCharacter;
 
-    *n = 0;
-    CharacterFunctions::append (n, text);
-
+    StringHolder::copyChars (n, text, len);
     return result;
 }
 
@@ -1125,11 +1125,19 @@ const String String::paddedRight (const juce_wchar padCharacter, int minimumLeng
 {
     jassert (padCharacter != 0);
 
-    const int paddingNeeded = minimumLength - length();
-    if (paddingNeeded <= 0 || padCharacter == 0)
+    const int len = length();
+    if (len >= minimumLength || padCharacter == 0)
         return *this;
 
-    return *this + String::empty.paddedLeft (padCharacter, paddingNeeded);
+    String result (*this, (size_t) minimumLength);
+    juce_wchar* n = result.text + len;
+
+    minimumLength -= len;
+    while (--minimumLength >= 0)
+        *n++ = padCharacter;
+
+    *n = 0;
+    return result;
 }
 
 //==============================================================================
@@ -1172,21 +1180,17 @@ const String String::replaceSection (int index, int numCharsToReplace,
 
     String result ((size_t) newTotalLen, (int) 0);
 
-    memcpy (result.text, text, index * sizeof (juce_wchar));
+    StringHolder::copyChars (result.text, text, index);
 
     if (newStringLen > 0)
-        memcpy (result.text + index,
-                stringToInsert,
-                newStringLen * sizeof (juce_wchar));
+        StringHolder::copyChars (result.text + index, stringToInsert, newStringLen);
 
     const int endStringLen = newTotalLen - (index + newStringLen);
 
     if (endStringLen > 0)
-        memcpy (result.text + (index + newStringLen),
-                text + (index + numCharsToReplace),
-                endStringLen * sizeof (juce_wchar));
-
-    result.text [newTotalLen] = 0;
+        StringHolder::copyChars (result.text + (index + newStringLen),
+                                 text + (index + numCharsToReplace),
+                                 endStringLen);
 
     return result;
 }
@@ -1218,9 +1222,7 @@ const String String::replaceCharacter (const juce_wchar charToReplace, const juc
     if (index < 0)
         return *this;
 
-    String result (*this);
-    result.dupeInternalIfMultiplyReferenced();
-
+    String result (*this, size_t());
     juce_wchar* t = result.text + index;
 
     while (*t != 0)
@@ -1237,9 +1239,7 @@ const String String::replaceCharacter (const juce_wchar charToReplace, const juc
 const String String::replaceCharacters (const String& charactersToReplace,
                                         const juce_wchar* const charactersToInsertInstead) const
 {
-    String result (*this);
-    result.dupeInternalIfMultiplyReferenced();
-
+    String result (*this, size_t());
     juce_wchar* t = result.text;
     const int len2 = CharacterFunctions::length (charactersToInsertInstead);
 
@@ -1314,16 +1314,14 @@ bool String::endsWithIgnoreCase (const juce_wchar* const other) const throw()
 //==============================================================================
 const String String::toUpperCase() const
 {
-    String result (*this);
-    result.dupeInternalIfMultiplyReferenced();
+    String result (*this, size_t());
     CharacterFunctions::toUpperCase (result.text);
     return result;
 }
 
 const String String::toLowerCase() const
 {
-    String result (*this);
-    result.dupeInternalIfMultiplyReferenced();
+    String result (*this, size_t());
     CharacterFunctions::toLowerCase (result.text);
     return result;
 }
@@ -1332,9 +1330,7 @@ const String String::toLowerCase() const
 juce_wchar& String::operator[] (const int index)
 {
     jassert (((unsigned int) index) <= (unsigned int) length());
-
-    dupeInternalIfMultiplyReferenced();
-
+    text = StringHolder::makeUnique (text);
     return text [index];
 }
 
@@ -1453,7 +1449,7 @@ const String String::unquoted() const
 {
     String s (*this);
 
-    if (s[0] == T('"') || s[0] == T('\''))
+    if (s.text[0] == T('"') || s.text[0] == T('\''))
         s = s.substring (1);
 
     const int lastCharIndex = s.length() - 1;
@@ -2124,9 +2120,7 @@ int String::copyToCString (char* destBuffer, const int maxBufferSizeBytes) const
 //==============================================================================
 void String::copyToUnicode (juce_wchar* const destBuffer, const int maxCharsToCopy) const throw()
 {
-    const int len = jmin (maxCharsToCopy, length());
-    memcpy (destBuffer, text, len * sizeof (juce_wchar));
-    destBuffer [len] = 0;
+    StringHolder::copyChars (destBuffer, text, jmin (maxCharsToCopy, length()));
 }
 
 

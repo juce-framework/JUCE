@@ -1026,10 +1026,10 @@ private:
     //==============================================================================
     // internal constructor that preallocates a certain amount of memory
     String (size_t numChars, int dummyVariable);
+    String (const String& stringToCopy, size_t charsToAllocate);
 
     void createInternal (const juce_wchar* text, size_t numChars);
     void appendInternal (const juce_wchar* text, int numExtraChars);
-    void dupeInternalIfMultiplyReferenced();
 };
 
 //==============================================================================

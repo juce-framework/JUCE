@@ -193,7 +193,7 @@ public:
                                  const bool allOnOneLine = false,
                                  const bool includeXmlHeader = true,
                                  const String& encodingType = JUCE_T("UTF-8"),
-                                 const int lineWrapLength = 60) const throw();
+                                 const int lineWrapLength = 60) const;
 
     /** Writes the document to a stream as UTF-8.
 
@@ -215,7 +215,7 @@ public:
                         const bool allOnOneLine = false,
                         const bool includeXmlHeader = true,
                         const String& encodingType = JUCE_T("UTF-8"),
-                        const int lineWrapLength = 60) const throw();
+                        const int lineWrapLength = 60) const;
 
     /** Writes the element to a file as an XML document.
 
@@ -239,7 +239,7 @@ public:
     bool writeToFile (const File& destinationFile,
                       const String& dtdToUse,
                       const String& encodingType = JUCE_T("UTF-8"),
-                      const int lineWrapLength = 60) const throw();
+                      const int lineWrapLength = 60) const;
 
     //==============================================================================
     /** Returns this element's tag type name.
@@ -297,8 +297,16 @@ public:
         @param defaultReturnValue   a value to return if the element doesn't have an attribute
                                     with this name
     */
+    const String& getStringAttribute (const String& attributeName) const throw();
+
+    /** Returns the value of a named attribute.
+
+        @param attributeName        the name of the attribute to look up
+        @param defaultReturnValue   a value to return if the element doesn't have an attribute
+                                    with this name
+    */
     const String getStringAttribute (const String& attributeName,
-                                     const String& defaultReturnValue = String::empty) const throw();
+                                     const String& defaultReturnValue) const;
 
     /** Compares the value of a named attribute with a value passed-in.
 
@@ -323,7 +331,7 @@ public:
         @see setAttribute
     */
     int getIntAttribute (const String& attributeName,
-                         const int defaultReturnValue = 0) const throw();
+                         const int defaultReturnValue = 0) const;
 
     /** Returns the value of a named attribute as floating-point.
 
@@ -336,7 +344,7 @@ public:
         @see setAttribute
     */
     double getDoubleAttribute (const String& attributeName,
-                               const double defaultReturnValue = 0.0) const throw();
+                               const double defaultReturnValue = 0.0) const;
 
     /** Returns the value of a named attribute as a boolean.
 
@@ -349,7 +357,7 @@ public:
                                     with this name
     */
     bool getBoolAttribute (const String& attributeName,
-                           const bool defaultReturnValue = false) const throw();
+                           const bool defaultReturnValue = false) const;
 
     /** Adds a named attribute to the element.
 
@@ -365,7 +373,7 @@ public:
         @see removeAttribute
     */
     void setAttribute (const String& attributeName,
-                       const String& newValue) throw();
+                       const String& newValue);
 
     /** Adds a named attribute to the element, setting it to an integer value.
 
@@ -380,7 +388,7 @@ public:
         @param newValue             the value to set it to
     */
     void setAttribute (const String& attributeName,
-                       const int newValue) throw();
+                       const int newValue);
 
     /** Adds a named attribute to the element, setting it to a floating-point value.
 
@@ -395,7 +403,7 @@ public:
         @param newValue             the value to set it to
     */
     void setAttribute (const String& attributeName,
-                       const double newValue) throw();
+                       const double newValue);
 
     /** Removes a named attribute from the element.
 
@@ -704,7 +712,7 @@ private:
 
     void writeElementAsText (OutputStream& out,
                              const int indentationLevel,
-                             const int lineWrapLength) const throw();
+                             const int lineWrapLength) const;
 
     void getChildElementsAsArray (XmlElement**) const throw();
     void reorderChildElements (XmlElement** const, const int) throw();
