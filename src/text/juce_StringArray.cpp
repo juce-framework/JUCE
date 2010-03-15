@@ -329,7 +329,7 @@ const String StringArray::joinIntoString (const String& separator, int start, in
 
 int StringArray::addTokens (const String& text, const bool preserveQuotedStrings)
 {
-    return addTokens (text, T(" \n\r\t"), preserveQuotedStrings ? T("\"") : 0);
+    return addTokens (text, T(" \n\r\t"), preserveQuotedStrings ? T("\"") : T(""));
 }
 
 int StringArray::addTokens (const String& text, const String& breakCharacters, const String& quoteCharacters)

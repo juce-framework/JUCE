@@ -165,7 +165,7 @@ static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, Comp
                                                     fileOrIdentifier.lastIndexOfChar (T('/'))) + 1));
 
         StringArray tokens;
-        tokens.addTokens (s, T(","), 0);
+        tokens.addTokens (s, T(","), String::empty);
         tokens.trim();
         tokens.removeEmptyStrings();
 
