@@ -29,6 +29,7 @@
 
 #if JUCE_MAC
 
+Image* juce_loadPNGImageFromStream (InputStream& inputStream);
 
 //==============================================================================
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
@@ -43,7 +44,8 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
 
 static void* juce_cursorFromData (const unsigned char* data, const size_t size, float hx, float hy) throw()
 {
-    ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) data, (int) size));
+    MemoryInputStream stream (data, size, false);
+    ScopedPointer <Image> im (juce_loadPNGImageFromStream (stream));
     jassert (im != 0);
 
     if (im == 0)
@@ -77,10 +79,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
         break;
 
     case MouseCursor::NoCursor:
-        {
-            Image blank (Image::ARGB, 8, 8, true);
-            return juce_createMouseCursorFromImage (blank, 0, 0);
-        }
+        return juce_createMouseCursorFromImage (Image (Image::ARGB, 8, 8, true), 0, 0);
 
     case MouseCursor::DraggingHandCursor:
         c = [NSCursor openHandCursor];

@@ -46,48 +46,48 @@ public:
 
     //==============================================================================
     /** Swaps the byte order of a 16-bit int if the CPU is big-endian */
-    static uint16 swapIfBigEndian (const uint16 value);
+    static uint16 swapIfBigEndian (uint16 value);
 
     /** Swaps the byte order of a 32-bit int if the CPU is big-endian */
-    static uint32 swapIfBigEndian (const uint32 value);
+    static uint32 swapIfBigEndian (uint32 value);
 
     /** Swaps the byte order of a 64-bit int if the CPU is big-endian */
-    static uint64 swapIfBigEndian (const uint64 value);
+    static uint64 swapIfBigEndian (uint64 value);
 
     /** Swaps the byte order of a 16-bit int if the CPU is little-endian */
-    static uint16 swapIfLittleEndian (const uint16 value);
+    static uint16 swapIfLittleEndian (uint16 value);
 
     /** Swaps the byte order of a 32-bit int if the CPU is little-endian */
-    static uint32 swapIfLittleEndian (const uint32 value);
+    static uint32 swapIfLittleEndian (uint32 value);
 
     /** Swaps the byte order of a 64-bit int if the CPU is little-endian */
-    static uint64 swapIfLittleEndian (const uint64 value);
+    static uint64 swapIfLittleEndian (uint64 value);
 
     //==============================================================================
     /** Turns 4 bytes into a little-endian integer. */
-    static uint32 littleEndianInt (const char* const bytes);
+    static uint32 littleEndianInt (const char* bytes);
 
     /** Turns 2 bytes into a little-endian integer. */
-    static uint16 littleEndianShort (const char* const bytes);
+    static uint16 littleEndianShort (const char* bytes);
 
     /** Turns 4 bytes into a big-endian integer. */
-    static uint32 bigEndianInt (const char* const bytes);
+    static uint32 bigEndianInt (const char* bytes);
 
     /** Turns 2 bytes into a big-endian integer. */
-    static uint16 bigEndianShort (const char* const bytes);
+    static uint16 bigEndianShort (const char* bytes);
 
     //==============================================================================
     /** Converts 3 little-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-    static int littleEndian24Bit (const char* const bytes);
+    static int littleEndian24Bit (const char* bytes);
 
     /** Converts 3 big-endian bytes into a signed 24-bit value (which is sign-extended to 32 bits). */
-    static int bigEndian24Bit (const char* const bytes);
+    static int bigEndian24Bit (const char* bytes);
 
     /** Copies a 24-bit number to 3 little-endian bytes. */
-    static void littleEndian24BitToChars (const int value, char* const destBytes);
+    static void littleEndian24BitToChars (int value, char* destBytes);
 
     /** Copies a 24-bit number to 3 big-endian bytes. */
-    static void bigEndian24BitToChars (const int value, char* const destBytes);
+    static void bigEndian24BitToChars (int value, char* destBytes);
 
     //==============================================================================
     /** Returns true if the current CPU is big-endian. */
@@ -103,9 +103,9 @@ public:
 inline uint16 ByteOrder::swap (uint16 n)
 {
 #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
-    return (uint16) _byteswap_ushort (n);
+    return static_cast <uint16> (_byteswap_ushort (n));
 #else
-    return (uint16) ((n << 8) | (n >> 8));
+    return static_cast <uint16> ((n << 8) | (n >> 8));
 #endif
 }
 

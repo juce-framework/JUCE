@@ -112,11 +112,11 @@ inline Type jmax (const Type a, const Type b, const Type c, const Type d)       
 
 /** Returns the smaller of two values. */
 template <typename Type>
-inline Type jmin (const Type a, const Type b)                                               { return (a > b) ? b : a; }
+inline Type jmin (const Type a, const Type b)                                               { return (b < a) ? b : a; }
 
 /** Returns the smaller of three values. */
 template <typename Type>
-inline Type jmin (const Type a, const Type b, const Type c)                                 { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline Type jmin (const Type a, const Type b, const Type c)                                 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
 
 /** Returns the smaller of four values. */
 template <typename Type>
@@ -148,7 +148,7 @@ inline Type jlimit (const Type lowerLimit,
     jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
     return (valueToConstrain < lowerLimit) ? lowerLimit
-                                           : ((valueToConstrain > upperLimit) ? upperLimit
+                                           : ((upperLimit < valueToConstrain) ? upperLimit
                                                                               : valueToConstrain);
 }
 
@@ -173,7 +173,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
     @endcode
 */
 template <typename Type>
-inline int numElementsInArray (Type& array)         { return (int) (sizeof (array) / sizeof (array[0])); }
+inline int numElementsInArray (Type& array)         { return static_cast<int> (sizeof (array) / sizeof (array[0])); }
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.

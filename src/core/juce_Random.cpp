@@ -86,12 +86,12 @@ bool Random::nextBool() throw()
 
 float Random::nextFloat() throw()
 {
-    return ((uint32) nextInt()) / (float) 0xffffffff;
+    return static_cast <uint32> (nextInt()) / (float) 0xffffffff;
 }
 
 double Random::nextDouble() throw()
 {
-    return ((uint32) nextInt()) / (double) 0xffffffff;
+    return static_cast <uint32> (nextInt()) / (double) 0xffffffff;
 }
 
 const BitArray Random::nextLargeNumber (const BitArray& maximumValue) throw()

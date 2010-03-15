@@ -726,10 +726,10 @@ template <typename Type>
 inline Type jmax (const Type a, const Type b, const Type c, const Type d)		   { return jmax (a, jmax (b, c, d)); }
 
 template <typename Type>
-inline Type jmin (const Type a, const Type b)						   { return (a > b) ? b : a; }
+inline Type jmin (const Type a, const Type b)						   { return (b < a) ? b : a; }
 
 template <typename Type>
-inline Type jmin (const Type a, const Type b, const Type c)				 { return (a > b) ? ((b > c) ? c : b) : ((a > c) ? c : a); }
+inline Type jmin (const Type a, const Type b, const Type c)				 { return (b < a) ? ((c < b) ? c : b) : ((c < a) ? c : a); }
 
 template <typename Type>
 inline Type jmin (const Type a, const Type b, const Type c, const Type d)		   { return jmin (a, jmin (b, c, d)); }
@@ -742,7 +742,7 @@ inline Type jlimit (const Type lowerLimit,
 	jassert (lowerLimit <= upperLimit); // if these are in the wrong order, results are unpredictable..
 
 	return (valueToConstrain < lowerLimit) ? lowerLimit
-										   : ((valueToConstrain > upperLimit) ? upperLimit
+										   : ((upperLimit < valueToConstrain) ? upperLimit
 																			  : valueToConstrain);
 }
 
@@ -755,7 +755,7 @@ inline void swapVariables (Type& variable1, Type& variable2)
 }
 
 template <typename Type>
-inline int numElementsInArray (Type& array)	 { return (int) (sizeof (array) / sizeof (array[0])); }
+inline int numElementsInArray (Type& array)	 { return static_cast<int> (sizeof (array) / sizeof (array[0])); }
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
@@ -842,33 +842,33 @@ public:
 
 	static uint64 swap (uint64 value);
 
-	static uint16 swapIfBigEndian (const uint16 value);
+	static uint16 swapIfBigEndian (uint16 value);
 
-	static uint32 swapIfBigEndian (const uint32 value);
+	static uint32 swapIfBigEndian (uint32 value);
 
-	static uint64 swapIfBigEndian (const uint64 value);
+	static uint64 swapIfBigEndian (uint64 value);
 
-	static uint16 swapIfLittleEndian (const uint16 value);
+	static uint16 swapIfLittleEndian (uint16 value);
 
-	static uint32 swapIfLittleEndian (const uint32 value);
+	static uint32 swapIfLittleEndian (uint32 value);
 
-	static uint64 swapIfLittleEndian (const uint64 value);
+	static uint64 swapIfLittleEndian (uint64 value);
 
-	static uint32 littleEndianInt (const char* const bytes);
+	static uint32 littleEndianInt (const char* bytes);
 
-	static uint16 littleEndianShort (const char* const bytes);
+	static uint16 littleEndianShort (const char* bytes);
 
-	static uint32 bigEndianInt (const char* const bytes);
+	static uint32 bigEndianInt (const char* bytes);
 
-	static uint16 bigEndianShort (const char* const bytes);
+	static uint16 bigEndianShort (const char* bytes);
 
-	static int littleEndian24Bit (const char* const bytes);
+	static int littleEndian24Bit (const char* bytes);
 
-	static int bigEndian24Bit (const char* const bytes);
+	static int bigEndian24Bit (const char* bytes);
 
-	static void littleEndian24BitToChars (const int value, char* const destBytes);
+	static void littleEndian24BitToChars (int value, char* destBytes);
 
-	static void bigEndian24BitToChars (const int value, char* const destBytes);
+	static void bigEndian24BitToChars (int value, char* destBytes);
 
 	static bool isBigEndian();
 };
@@ -880,9 +880,9 @@ public:
 inline uint16 ByteOrder::swap (uint16 n)
 {
 #if JUCE_USE_INTRINSICSxxx // agh - the MS compiler has an internal error when you try to use this intrinsic!
-	return (uint16) _byteswap_ushort (n);
+	return static_cast <uint16> (_byteswap_ushort (n));
 #else
-	return (uint16) ((n << 8) | (n >> 8));
+	return static_cast <uint16> ((n << 8) | (n >> 8));
 #endif
 }
 
@@ -7044,13 +7044,13 @@ class JUCE_API  Random
 {
 public:
 
-	Random (const int64 seedValue) throw();
+	Random (int64 seedValue) throw();
 
 	~Random() throw();
 
 	int nextInt() throw();
 
-	int nextInt (const int maxValue) throw();
+	int nextInt (int maxValue) throw();
 
 	int64 nextInt64() throw();
 
@@ -7066,9 +7066,9 @@ public:
 
 	static Random& getSystemRandom() throw();
 
-	void setSeed (const int64 newSeed) throw();
+	void setSeed (int64 newSeed) throw();
 
-	void combineSeed (const int64 seedValue) throw();
+	void combineSeed (int64 seedValue) throw();
 
 	void setSeedRandomly();
 
@@ -8211,10 +8211,10 @@ class JUCE_API  GZIPCompressorOutputStream  : public OutputStream
 {
 public:
 
-	GZIPCompressorOutputStream (OutputStream* const destStream,
+	GZIPCompressorOutputStream (OutputStream* destStream,
 								int compressionLevel = 0,
-								const bool deleteDestStreamWhenDestroyed = false,
-								const bool noWrap = false);
+								bool deleteDestStreamWhenDestroyed = false,
+								bool noWrap = false);
 
 	~GZIPCompressorOutputStream();
 
@@ -8253,10 +8253,10 @@ class JUCE_API  GZIPDecompressorInputStream  : public InputStream
 {
 public:
 
-	GZIPDecompressorInputStream (InputStream* const sourceStream,
-								 const bool deleteSourceWhenDestroyed,
-								 const bool noWrap = false,
-								 const int64 uncompressedStreamLength = -1);
+	GZIPDecompressorInputStream (InputStream* sourceStream,
+								 bool deleteSourceWhenDestroyed,
+								 bool noWrap = false,
+								 int64 uncompressedStreamLength = -1);
 
 	~GZIPDecompressorInputStream();
 

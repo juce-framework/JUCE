@@ -54,10 +54,10 @@ public:
         @param noWrap                           this is used internally by the ZipFile class
                                                 and should be ignored by user applications
     */
-    GZIPCompressorOutputStream (OutputStream* const destStream,
+    GZIPCompressorOutputStream (OutputStream* destStream,
                                 int compressionLevel = 0,
-                                const bool deleteDestStreamWhenDestroyed = false,
-                                const bool noWrap = false);
+                                bool deleteDestStreamWhenDestroyed = false,
+                                bool noWrap = false);
 
     /** Destructor. */
     ~GZIPCompressorOutputStream();

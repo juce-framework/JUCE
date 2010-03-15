@@ -27,57 +27,61 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-static int64 highResTimerFrequency = 0;
-static double highResTimerToMillisecRatio = 0;
-
-#if JUCE_INTEL
-
-static void juce_getCpuVendor (char* const v) throw()
+namespace SystemStatsHelpers
 {
-    int vendor[4];
-    zerostruct (vendor);
-    int dummy = 0;
+    static int64 highResTimerFrequency = 0;
+    static double highResTimerToMillisecRatio = 0;
 
-    asm ("mov %%ebx, %%esi \n\t"
-         "cpuid \n\t"
-         "xchg %%esi, %%ebx"
-           : "=a" (dummy), "=S" (vendor[0]), "=c" (vendor[2]), "=d" (vendor[1]) : "a" (0));
+    #if JUCE_INTEL
 
-    memcpy (v, vendor, 16);
+    static void juce_getCpuVendor (char* const v) throw()
+    {
+        int vendor[4];
+        zerostruct (vendor);
+        int dummy = 0;
+
+        asm ("mov %%ebx, %%esi \n\t"
+             "cpuid \n\t"
+             "xchg %%esi, %%ebx"
+               : "=a" (dummy), "=S" (vendor[0]), "=c" (vendor[2]), "=d" (vendor[1]) : "a" (0));
+
+        memcpy (v, vendor, 16);
+    }
+
+    static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures)
+    {
+        unsigned int cpu = 0;
+        unsigned int ext = 0;
+        unsigned int family = 0;
+        unsigned int dummy = 0;
+
+        asm ("mov %%ebx, %%esi \n\t"
+             "cpuid \n\t"
+             "xchg %%esi, %%ebx"
+               : "=a" (family), "=S" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
+
+        familyModel = family;
+        extFeatures = ext;
+        return cpu;
+    }
+
+    struct CPUFlags
+    {
+        bool hasMMX : 1;
+        bool hasSSE : 1;
+        bool hasSSE2 : 1;
+        bool has3DNow : 1;
+    };
+
+    static CPUFlags cpuFlags;
+
+    #endif
 }
-
-static unsigned int getCPUIDWord (unsigned int& familyModel, unsigned int& extFeatures)
-{
-    unsigned int cpu = 0;
-    unsigned int ext = 0;
-    unsigned int family = 0;
-    unsigned int dummy = 0;
-
-    asm ("mov %%ebx, %%esi \n\t"
-         "cpuid \n\t"
-         "xchg %%esi, %%ebx"
-           : "=a" (family), "=S" (ext), "=c" (dummy), "=d" (cpu) : "a" (1));
-
-    familyModel = family;
-    extFeatures = ext;
-    return cpu;
-}
-
-struct CPUFlags
-{
-    bool hasMMX : 1;
-    bool hasSSE : 1;
-    bool hasSSE2 : 1;
-    bool has3DNow : 1;
-};
-
-static CPUFlags cpuFlags;
-
-#endif
 
 //==============================================================================
 void SystemStats::initialiseStats() throw()
 {
+    using namespace SystemStatsHelpers;
     static bool initialised = false;
 
     if (! initialised)
@@ -151,7 +155,7 @@ int SystemStats::getMemorySizeInMegabytes() throw()
 bool SystemStats::hasMMX() throw()
 {
 #if JUCE_INTEL
-    return cpuFlags.hasMMX;
+    return SystemStatsHelpers::cpuFlags.hasMMX;
 #else
     return false;
 #endif
@@ -160,7 +164,7 @@ bool SystemStats::hasMMX() throw()
 bool SystemStats::hasSSE() throw()
 {
 #if JUCE_INTEL
-    return cpuFlags.hasSSE;
+    return SystemStatsHelpers::cpuFlags.hasSSE;
 #else
     return false;
 #endif
@@ -169,7 +173,7 @@ bool SystemStats::hasSSE() throw()
 bool SystemStats::hasSSE2() throw()
 {
 #if JUCE_INTEL
-    return cpuFlags.hasSSE2;
+    return SystemStatsHelpers::cpuFlags.hasSSE2;
 #else
     return false;
 #endif
@@ -178,7 +182,7 @@ bool SystemStats::hasSSE2() throw()
 bool SystemStats::has3DNow() throw()
 {
 #if JUCE_INTEL
-    return cpuFlags.has3DNow;
+    return SystemStatsHelpers::cpuFlags.has3DNow;
 #else
     return false;
 #endif
@@ -188,7 +192,7 @@ const String SystemStats::getCpuVendor() throw()
 {
 #if JUCE_INTEL
     char v [16];
-    juce_getCpuVendor (v);
+    SystemStatsHelpers::juce_getCpuVendor (v);
     return String (v, 16);
 #else
     return String::empty;
@@ -232,12 +236,12 @@ const String SystemStats::getFullUserName()
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
-    return (uint32) (mach_absolute_time() * highResTimerToMillisecRatio);
+    return (uint32) (mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio);
 }
 
 double Time::getMillisecondCounterHiRes() throw()
 {
-    return mach_absolute_time() * highResTimerToMillisecRatio;
+    return mach_absolute_time() * SystemStatsHelpers::highResTimerToMillisecRatio;
 }
 
 int64 Time::getHighResolutionTicks() throw()
@@ -247,7 +251,7 @@ int64 Time::getHighResolutionTicks() throw()
 
 int64 Time::getHighResolutionTicksPerSecond() throw()
 {
-    return highResTimerFrequency;
+    return SystemStatsHelpers::highResTimerFrequency;
 }
 
 int64 SystemStats::getClockCycleCounter() throw()

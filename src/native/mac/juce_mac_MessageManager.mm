@@ -27,14 +27,6 @@
 // compiled on its own).
 #if JUCE_INCLUDED_FILE
 
-struct CallbackMessagePayload
-{
-    MessageCallbackFunction* function;
-    void* parameter;
-    void* volatile result;
-    bool volatile hasBeenExecuted;
-};
-
 /* When you use multiple DLLs which share similarly-named obj-c classes - like
    for example having more than one juce plugin loaded into a host, then when a
    method is called, the actual code that runs might actually be in a different module
@@ -117,6 +109,14 @@ public:
     {
         juce_HandleProcessFocusChange();
     }
+
+    struct CallbackMessagePayload
+    {
+        MessageCallbackFunction* function;
+        void* parameter;
+        void* volatile result;
+        bool volatile hasBeenExecuted;
+    };
 
     virtual void performCallback (CallbackMessagePayload* pl)
     {
@@ -268,7 +268,8 @@ using namespace JUCE_NAMESPACE;
 {
     if ([info isKindOfClass: [NSData class]])
     {
-        CallbackMessagePayload* pl = (CallbackMessagePayload*) [((NSData*) info) bytes];
+        AppDelegateRedirector::CallbackMessagePayload* pl
+            = (AppDelegateRedirector::CallbackMessagePayload*) [((NSData*) info) bytes];
 
         if (pl != 0)
             redirector->performCallback (pl);
@@ -486,7 +487,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
 
         const ScopedAutoReleasePool pool;
 
-        CallbackMessagePayload cmp;
+        AppDelegateRedirector::CallbackMessagePayload cmp;
         cmp.function = callback;
         cmp.parameter = data;
         cmp.result = 0;

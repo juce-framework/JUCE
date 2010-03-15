@@ -1169,6 +1169,7 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
         if (! recursiveToFrontCall)
         {
             recursiveToFrontCall = true;
+            Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
             handleBroughtToFront();
             recursiveToFrontCall = false;
         }
@@ -1207,7 +1208,6 @@ void NSViewComponentPeer::viewFocusGain()
             currentlyFocusedPeer->handleFocusLoss();
 
         currentlyFocusedPeer = this;
-
         handleFocusGain();
     }
 }
@@ -1386,6 +1386,7 @@ void NSViewComponentPeer::redirectMouseMove (NSEvent* ev)
 
 void NSViewComponentPeer::redirectMouseEnter (NSEvent* ev)
 {
+    Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
     currentModifiers = currentModifiers.withoutMouseButtons();
     sendMouseEvent (ev);
 }

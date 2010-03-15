@@ -66,11 +66,6 @@ void juce_setCurrentThreadName (const String& /*name*/)
 {
 }
 
-Thread::ThreadID Thread::getCurrentThreadId()
-{
-    return (ThreadID) pthread_self();
-}
-
 bool juce_setThreadPriority (void* handle, int priority)
 {
     if (handle == 0)
@@ -81,6 +76,11 @@ bool juce_setThreadPriority (void* handle, int priority)
     pthread_getschedparam ((pthread_t) handle, &policy, &param);
     param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
+}
+
+Thread::ThreadID Thread::getCurrentThreadId()
+{
+    return static_cast <ThreadID> (pthread_self());
 }
 
 void Thread::yield()

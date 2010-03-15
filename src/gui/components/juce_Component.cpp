@@ -1503,10 +1503,13 @@ bool Component::isBroughtToFrontOnMouseClick() const throw()
 //==============================================================================
 void Component::setMouseCursor (const MouseCursor& cursor)
 {
-    cursor_ = cursor;
+    if (cursor_ != cursor)
+    {
+        cursor_ = cursor;
 
-    if (flags.visibleFlag)
-        sendFakeMouseMove();
+        if (flags.visibleFlag)
+            updateMouseCursor();
+    }
 }
 
 const MouseCursor Component::getMouseCursor()
