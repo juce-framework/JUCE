@@ -101,7 +101,7 @@ public:
         }
 
         StringArray fontDirs;
-        fontDirs.addTokens (String (getenv ("JUCE_FONT_PATH")), T(";,"), 0);
+        fontDirs.addTokens (String::fromUTF8 (getenv ("JUCE_FONT_PATH")), ";,", String::empty);
         fontDirs.removeEmptyStrings (true);
 
         if (fontDirs.size() == 0)
@@ -521,7 +521,7 @@ static const String pickBestFont (const StringArray& names,
                                   const char* const choicesString)
 {
     StringArray choices;
-    choices.addTokens (String (choicesString), T(","), 0);
+    choices.addTokens (String (choicesString), ",", String::empty);
     choices.trim();
     choices.removeEmptyStrings();
 

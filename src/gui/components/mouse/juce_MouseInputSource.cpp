@@ -416,7 +416,7 @@ public:
         if (forcedUpdate || cursor.getHandle() != currentCursorHandle)
         {
             currentCursorHandle = cursor.getHandle();
-            cursor.showInWindow (lastPeer);
+            cursor.showInWindow (getPeer());
         }
     }
 
