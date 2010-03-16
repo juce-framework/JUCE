@@ -417,7 +417,7 @@ bool juce_launchFile (const String& fileName,
         cmdString = cmdLines.joinIntoString (T(" || "));
     }
 
-    const char* const argv[4] = { "/bin/sh", "-c", (const char*) cmdString.toUTF8(), 0 };
+    const char* const argv[4] = { "/bin/sh", "-c", cmdString.toUTF8(), 0 };
 
     const int cpid = fork();
 

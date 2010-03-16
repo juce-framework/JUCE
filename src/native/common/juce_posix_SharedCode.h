@@ -61,91 +61,115 @@ void CriticalSection::exit() const throw()
 
 
 //==============================================================================
-struct EventStruct
+class WaitableEventImpl
 {
+public:
+    WaitableEventImpl()
+        : triggered (false)
+    {
+        pthread_cond_init (&condition, 0);
+        pthread_mutex_init (&mutex, 0);
+    }
+
+    ~WaitableEventImpl()
+    {
+        pthread_cond_destroy (&condition);
+        pthread_mutex_destroy (&mutex);
+    }
+
+    bool wait (const int timeOutMillisecs) throw()
+    {
+        pthread_mutex_lock (&mutex);
+
+        if (! triggered)
+        {
+            if (timeOutMillisecs < 0)
+            {
+                do
+                {
+                    pthread_cond_wait (&condition, &mutex);
+                }
+                while (! triggered);
+            }
+            else
+            {
+                struct timeval now;
+                gettimeofday (&now, 0);
+
+                struct timespec time;
+                time.tv_sec  = now.tv_sec  + (timeOutMillisecs / 1000);
+                time.tv_nsec = (now.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
+
+                if (time.tv_nsec >= 1000000000)
+                {
+                    time.tv_nsec -= 1000000000;
+                    time.tv_sec++;
+                }
+
+                do
+                {
+                    if (pthread_cond_timedwait (&condition, &mutex, &time) == ETIMEDOUT)
+                    {
+                        pthread_mutex_unlock (&mutex);
+                        return false;
+                    }
+                }
+                while (! triggered);
+            }
+        }
+
+        triggered = false;
+        pthread_mutex_unlock (&mutex);
+        return true;
+    }
+
+    void signal() throw()
+    {
+        pthread_mutex_lock (&mutex);
+        triggered = true;
+        pthread_cond_broadcast (&condition);
+        pthread_mutex_unlock (&mutex);
+    }
+
+    void reset() throw()
+    {
+        pthread_mutex_lock (&mutex);
+        triggered = false;
+        pthread_mutex_unlock (&mutex);
+    }
+
+private:
     pthread_cond_t condition;
     pthread_mutex_t mutex;
     bool triggered;
+
+    WaitableEventImpl (const WaitableEventImpl&);
+    WaitableEventImpl& operator= (const WaitableEventImpl&);
 };
 
 WaitableEvent::WaitableEvent() throw()
+    : internal (new WaitableEventImpl())
 {
-    EventStruct* const es = new EventStruct();
-    es->triggered = false;
-
-    pthread_cond_init (&es->condition, 0);
-    pthread_mutex_init (&es->mutex, 0);
-
-    internal = es;
 }
 
 WaitableEvent::~WaitableEvent() throw()
 {
-    EventStruct* const es = (EventStruct*) internal;
-
-    pthread_cond_destroy (&es->condition);
-    pthread_mutex_destroy (&es->mutex);
-
-    delete es;
+    delete static_cast <WaitableEventImpl*> (internal);
 }
 
 bool WaitableEvent::wait (const int timeOutMillisecs) const throw()
 {
-    EventStruct* const es = (EventStruct*) internal;
-    pthread_mutex_lock (&es->mutex);
-
-    if (timeOutMillisecs < 0)
-    {
-        while (! es->triggered)
-            pthread_cond_wait (&es->condition, &es->mutex);
-    }
-    else
-    {
-        while (! es->triggered)
-        {
-            struct timeval t;
-            gettimeofday (&t, 0);
-
-            struct timespec time;
-            time.tv_sec  = t.tv_sec  + (timeOutMillisecs / 1000);
-            time.tv_nsec = (t.tv_usec + ((timeOutMillisecs % 1000) * 1000)) * 1000;
-
-            if (time.tv_nsec >= 1000000000)
-            {
-                time.tv_nsec -= 1000000000;
-                time.tv_sec++;
-            }
-
-            if (pthread_cond_timedwait (&es->condition, &es->mutex, &time) == ETIMEDOUT)
-            {
-                pthread_mutex_unlock (&es->mutex);
-                return false;
-            }
-        }
-    }
-
-    es->triggered = false;
-    pthread_mutex_unlock (&es->mutex);
-    return true;
+    return static_cast <WaitableEventImpl*> (internal)->wait (timeOutMillisecs);
 }
 
 void WaitableEvent::signal() const throw()
 {
-    EventStruct* const es = (EventStruct*) internal;
-
-    pthread_mutex_lock (&es->mutex);
-    es->triggered = true;
-    pthread_cond_broadcast (&es->condition);
-    pthread_mutex_unlock (&es->mutex);
+    static_cast <WaitableEventImpl*> (internal)->signal();
 }
 
 void WaitableEvent::reset() const throw()
 {
-    EventStruct* const es = (EventStruct*) internal;
-
-    pthread_mutex_lock (&es->mutex);
-    es->triggered = false;
-    pthread_mutex_unlock (&es->mutex);
+    static_cast <WaitableEventImpl*> (internal)->reset();
 }
 
 //==============================================================================
@@ -239,9 +263,9 @@ bool juce_canWriteToFile (const String& fileName)
 bool juce_deleteFile (const String& fileName)
 {
     if (juce_isDirectory (fileName))
-        return rmdir ((const char*) fileName.toUTF8()) == 0;
+        return rmdir (fileName.toUTF8()) == 0;
     else
-        return remove ((const char*) fileName.toUTF8()) == 0;
+        return remove (fileName.toUTF8()) == 0;
 }
 
 bool juce_moveFile (const String& source, const String& dest)
@@ -274,7 +298,7 @@ void* juce_fileOpen (const String& fileName, bool forWriting)
     {
         if (juce_fileExists (fileName, false))
         {
-            const int f = open ((const char*) fileName.toUTF8(), O_RDWR, 00644);
+            const int f = open (fileName.toUTF8(), O_RDWR, 00644);
 
             if (f != -1)
                 lseek (f, 0, SEEK_END);
@@ -287,7 +311,7 @@ void* juce_fileOpen (const String& fileName, bool forWriting)
         }
     }
 
-    return (void*) open ((const char*) fileName.toUTF8(), flags, 00644);
+    return (void*) open (fileName.toUTF8(), flags, 00644);
 }
 
 void juce_fileClose (void* handle)
@@ -398,7 +422,7 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
 
     for (;;)
     {
-        if (getattrlist ((const char*) f.getFullPathName().toUTF8(),
+        if (getattrlist (f.getFullPathName().toUTF8(),
                          &attrList, &attrBuf, sizeof(attrBuf), 0) == 0)
         {
             return String::fromUTF8 (((const char*) &attrBuf.mountPointRef) + attrBuf.mountPointRef.attr_dataoffset,
@@ -421,7 +445,7 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
 //==============================================================================
 void juce_runSystemCommand (const String& command)
 {
-    int result = system ((const char*) command.toUTF8());
+    int result = system (command.toUTF8());
     (void) result;
 }
 

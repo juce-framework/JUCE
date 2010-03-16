@@ -136,12 +136,12 @@ public:
             if (! decomposeURL (proxyURL, proxyName, proxyPath, proxyPort))
                 return false;
 
-            host = gethostbyname ((const char*) proxyName.toUTF8());
+            host = gethostbyname (proxyName.toUTF8());
             port = proxyPort;
         }
         else
         {
-            host = gethostbyname ((const char*) hostName.toUTF8());
+            host = gethostbyname (hostName.toUTF8());
             port = hostPort;
         }
 

@@ -68,7 +68,7 @@ BEGIN_JUCE_NAMESPACE
 static int insideCallback = 0;
 
 //==============================================================================
-static const String osTypeToString (OSType type) throw()
+static const String osTypeToString (OSType type)
 {
     char s[4];
     s[0] = (char) (((uint32) type) >> 24);
@@ -78,7 +78,7 @@ static const String osTypeToString (OSType type) throw()
     return String (s, 4);
 }
 
-static OSType stringToOSType (const String& s1) throw()
+static OSType stringToOSType (const String& s1)
 {
     const String s (s1 + "    ");
 
@@ -107,10 +107,8 @@ static const String createAUPluginIdentifier (const ComponentDescription& desc)
     else if (desc.componentType == kAudioUnitType_Panner)
         s << "Panners/";
 
-    s << osTypeToString (desc.componentType)
-      << T(",")
-      << osTypeToString (desc.componentSubType)
-      << T(",")
+    s << osTypeToString (desc.componentType) << ","
+      << osTypeToString (desc.componentSubType) << ","
       << osTypeToString (desc.componentManufacturer);
 
     return s;
@@ -133,7 +131,7 @@ static void getAUDetails (ComponentRecord* comp, String& name, String& manufactu
             if (nameString != 0 && nameString[0] != 0)
             {
                 const String all ((const char*) nameString + 1, nameString[0]);
-DBG ("name: "+ all);
+                DBG ("name: "+ all);
 
                 manufacturer = all.upToFirstOccurrenceOf (T(":"), false, false).trim();
                 name = all.fromFirstOccurrenceOf (T(":"), false, false).trim();
@@ -141,8 +139,7 @@ DBG ("name: "+ all);
 
             if (infoString != 0 && infoString[0] != 0)
             {
-                const String all ((const char*) infoString + 1, infoString[0]);
-DBG ("info: " + all);
+                DBG ("info: " + String ((const char*) infoString + 1, infoString[0]));
             }
 
             if (name.isEmpty())
@@ -406,17 +403,15 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier
 
 AudioUnitPluginInstance::~AudioUnitPluginInstance()
 {
+    const ScopedLock sl (lock);
+
+    jassert (insideCallback == 0);
+
+    if (audioUnit != 0)
     {
-        const ScopedLock sl (lock);
-
-        jassert (insideCallback == 0);
-
-        if (audioUnit != 0)
-        {
-            AudioUnitUninitialize (audioUnit);
-            CloseComponent (audioUnit);
-            audioUnit = 0;
-        }
+        AudioUnitUninitialize (audioUnit);
+        CloseComponent (audioUnit);
+        audioUnit = 0;
     }
 }
 

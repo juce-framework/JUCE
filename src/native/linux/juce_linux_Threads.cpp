@@ -237,7 +237,7 @@ void Process::lowerPrivilege()
 
 void* PlatformUtilities::loadDynamicLibrary (const String& name)
 {
-    return dlopen ((const char*) name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
+    return dlopen (name.toUTF8(), RTLD_LOCAL | RTLD_NOW);
 }
 
 void PlatformUtilities::freeDynamicLibrary (void* handle)

@@ -246,7 +246,6 @@ END_JUCE_NAMESPACE
          fromConnection: (QTCaptureConnection*) connection
 {
     const Time now (Time::getCurrentTime());
-    int64 presentationTime = ([sampleBuffer presentationTime].timeValue * 1000) / [sampleBuffer presentationTime].timeScale;
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: QTSampleBufferHostTimeAttribute];
@@ -254,10 +253,11 @@ END_JUCE_NAMESPACE
     NSNumber* hosttime = (NSNumber*) [sampleBuffer attributeForKey: @"hostTime"];
 #endif
 
-    if (hosttime != nil)
-        presentationTime = (int64) AudioConvertHostTimeToNanos ([hosttime unsignedLongLongValue]) / 1000000;
+    int64 presentationTime = (hosttime != nil)
+            ? ((int64) AudioConvertHostTimeToNanos ([hosttime unsignedLongLongValue]) / 1000000 + 40)
+            : (([sampleBuffer presentationTime].timeValue * 1000) / [sampleBuffer presentationTime].timeScale + 50);
 
-    const int64 timeDiff = now.toMilliseconds() - presentationTime - 50;
+    const int64 timeDiff = now.toMilliseconds() - presentationTime;
 
     if (firstPresentationTime == 0)
     {
@@ -302,20 +302,19 @@ CameraDevice::CameraDevice (const String& name_, int index)
     : name (name_)
 {
     isRecording = false;
-    QTCameraDeviceInteral* d = new QTCameraDeviceInteral (this, index);
-    internal = d;
+    internal = new QTCameraDeviceInteral (this, index);
 }
 
 CameraDevice::~CameraDevice()
 {
     stopRecording();
-    delete (QTCameraDeviceInteral*) internal;
+    delete static_cast <QTCameraDeviceInteral*> (internal);
     internal = 0;
 }
 
 Component* CameraDevice::createViewerComponent()
 {
-    return new QTCaptureViewerComp (this, (QTCameraDeviceInteral*) internal);
+    return new QTCaptureViewerComp (this, static_cast <QTCameraDeviceInteral*> (internal));
 }
 
 const String CameraDevice::getFileExtension()
@@ -327,7 +326,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
 {
     stopRecording();
 
-    QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
+    QTCameraDeviceInteral* const d = static_cast <QTCameraDeviceInteral*> (internal);
     d->callbackDelegate->firstPresentationTime = 0;
     file.deleteFile();
 
@@ -364,7 +363,7 @@ void CameraDevice::startRecordingToFile (const File& file, int quality)
 
 const Time CameraDevice::getTimeOfFirstRecordedFrame() const
 {
-    QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
+    QTCameraDeviceInteral* const d = static_cast <QTCameraDeviceInteral*> (internal);
     if (d->callbackDelegate->firstPresentationTime != 0)
         return Time (d->callbackDelegate->firstPresentationTime + d->callbackDelegate->averageTimeOffset);
 
@@ -375,26 +374,21 @@ void CameraDevice::stopRecording()
 {
     if (isRecording)
     {
-        QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
-        d->resetFile();
+        static_cast <QTCameraDeviceInteral*> (internal)->resetFile();
         isRecording = false;
     }
 }
 
 void CameraDevice::addListener (CameraImageListener* listenerToAdd)
 {
-    QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
-
     if (listenerToAdd != 0)
-        d->addListener (listenerToAdd);
+        static_cast <QTCameraDeviceInteral*> (internal)->addListener (listenerToAdd);
 }
 
 void CameraDevice::removeListener (CameraImageListener* listenerToRemove)
 {
-    QTCameraDeviceInteral* const d = (QTCameraDeviceInteral*) internal;
-
     if (listenerToRemove != 0)
-        d->removeListener (listenerToRemove);
+        static_cast <QTCameraDeviceInteral*> (internal)->removeListener (listenerToRemove);
 }
 
 //==============================================================================
@@ -420,7 +414,7 @@ CameraDevice* CameraDevice::openDevice (int index,
 {
     ScopedPointer <CameraDevice> d (new CameraDevice (getAvailableDevices() [index], index));
 
-    if (((QTCameraDeviceInteral*) (d->internal))->openingError.isEmpty())
+    if (static_cast <QTCameraDeviceInteral*> (d->internal)->openingError.isEmpty())
         return d.release();
 
     return 0;

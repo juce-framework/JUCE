@@ -204,6 +204,12 @@ public:
         return Rectangle (x + deltaX, y + deltaY, w, h);
     }
 
+    /** Returns a rectangle which is the same as this one moved by a given amount. */
+    const Rectangle operator+ (const Point<ValueType>& deltaPosition) const throw()
+    {
+        return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
+    }
+
     /** Expands the rectangle by a given amount.
 
         Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).
@@ -274,7 +280,7 @@ public:
     }
 
     /** Returns true if this co-ordinate is inside the rectangle. */
-    bool contains (const Point<ValueType> point) const throw()
+    bool contains (const Point<ValueType>& point) const throw()
     {
         return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
     }

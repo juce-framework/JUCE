@@ -37,7 +37,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
                                                 const AffineTransform& transform_,
-                                                float tolerence_) throw()
+                                                float tolerence_)
     : x2 (0),
       y2 (0),
       closesSubPath (false),
@@ -48,19 +48,19 @@ PathFlatteningIterator::PathFlatteningIterator (const Path& path_,
       tolerence (tolerence_ * tolerence_),
       subPathCloseX (0),
       subPathCloseY (0),
+      isIdentityTransform (transform_.isIdentity()),
       stackBase (32),
       index (0),
       stackSize (32)
 {
-    isIdentityTransform = transform.isIdentity();
     stackPos = stackBase;
 }
 
-PathFlatteningIterator::~PathFlatteningIterator() throw()
+PathFlatteningIterator::~PathFlatteningIterator()
 {
 }
 
-bool PathFlatteningIterator::next() throw()
+bool PathFlatteningIterator::next()
 {
     x1 = x2;
     y1 = y2;
@@ -153,7 +153,7 @@ bool PathFlatteningIterator::next() throw()
         }
         else if (type == Path::quadMarker)
         {
-            const int offset = (int) (stackPos - stackBase);
+            const size_t offset = (size_t) (stackPos - stackBase);
 
             if (offset >= stackSize - 10)
             {
@@ -203,7 +203,7 @@ bool PathFlatteningIterator::next() throw()
         }
         else if (type == Path::cubicMarker)
         {
-            const int offset = (int) (stackPos - stackBase);
+            const size_t offset = (size_t) (stackPos - stackBase);
 
             if (offset >= stackSize - 16)
             {

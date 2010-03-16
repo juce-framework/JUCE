@@ -78,7 +78,7 @@ public:
         Point<int> origin;
     };
 
-    Canvas* getCanvas() const       { return (Canvas*) viewport->getViewedComponent(); }
+    Canvas* getCanvas() const       { return static_cast <Canvas*> (viewport->getViewedComponent()); }
 
     SelectedItemSet <int64> selectedItems;
 

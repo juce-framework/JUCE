@@ -61,7 +61,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
     MemoryOutputStream result;
     int status = -1;
-    FILE* stream = popen ((const char*) command.toUTF8(), "r");
+    FILE* stream = popen (command.toUTF8(), "r");
 
     if (stream != 0)
     {
