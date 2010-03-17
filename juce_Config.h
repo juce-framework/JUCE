@@ -71,7 +71,7 @@
     info about this.
 */
 #ifndef JUCE_ASIO
-  #define JUCE_ASIO 1
+  #define JUCE_ASIO 0
 #endif
 
 /** JUCE_WASAPI: Enables WASAPI audio devices (Windows Vista and above).
@@ -102,7 +102,7 @@
     installed, and its header files will need to be on your include path.
 */
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
-  #define JUCE_QUICKTIME 1
+  #define JUCE_QUICKTIME 0
 #endif
 
 
@@ -137,7 +137,7 @@
     reduce code size.
 */
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
-  #define JUCE_USE_CDBURNER 1
+  #define JUCE_USE_CDBURNER 0
 #endif
 
 /** JUCE_USE_CDREADER: Enables the audio CD reader code (Mac and Windows only).
@@ -217,7 +217,7 @@
     If you're not using any embedded web-pages, turning this off may reduce your code size.
 */
 #ifndef JUCE_WEB_BROWSER
-  #define JUCE_WEB_BROWSER 1
+  #define JUCE_WEB_BROWSER 0
 #endif
 
 

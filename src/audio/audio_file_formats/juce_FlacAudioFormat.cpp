@@ -347,7 +347,7 @@ public:
     {
         if (ok)
         {
-            FLAC__stream_encoder_finish (encoder);
+            FlacNamespace::FLAC__stream_encoder_finish (encoder);
             output->flush();
         }
         else
@@ -356,7 +356,7 @@ public:
                         // to the caller of createWriter()
         }
 
-        FLAC__stream_encoder_delete (encoder);
+        FlacNamespace::FLAC__stream_encoder_delete (encoder);
     }
 
     //==============================================================================

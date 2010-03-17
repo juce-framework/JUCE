@@ -127,7 +127,7 @@ public:
 
     ~OggReader()
     {
-        ov_clear (&ovFile);
+        OggVorbisNamespace::ov_clear (&ovFile);
     }
 
     //==============================================================================
@@ -167,8 +167,8 @@ public:
                 reservoirStart = jmax (0, (int) startSampleInFile);
                 samplesInReservoir = reservoir.getNumSamples();
 
-                if (reservoirStart != (int) ov_pcm_tell (&ovFile))
-                    ov_pcm_seek (&ovFile, reservoirStart);
+                if (reservoirStart != (int) OggVorbisNamespace::ov_pcm_tell (&ovFile))
+                    OggVorbisNamespace::ov_pcm_seek (&ovFile, reservoirStart);
 
                 int offset = 0;
                 int numToRead = samplesInReservoir;
@@ -177,7 +177,7 @@ public:
                 {
                     float** dataIn = 0;
 
-                    const int samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
+                    const int samps = OggVorbisNamespace::ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
                     if (samps <= 0)
                         break;
 
@@ -312,6 +312,7 @@ public:
 
     ~OggWriter()
     {
+        using namespace OggVorbisNamespace;
         if (ok)
         {
             // write a zero-length packet to show ogg that we're finished..
@@ -336,6 +337,7 @@ public:
     //==============================================================================
     bool write (const int** samplesToWrite, int numSamples)
     {
+        using namespace OggVorbisNamespace;
         if (! ok)
             return false;
 

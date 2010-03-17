@@ -73,19 +73,26 @@ public:
                                             each time a value-change method is called). If it is
                                             less than zero, the file won't be saved until
                                             save() or saveIfNeeded() are explicitly called.
-        @param options                      a combination of the flags in the FileFormatOptions
+        @param optionFlags                  a combination of the flags in the FileFormatOptions
                                             enum, which specify the type of file to save, and other
                                             options.
     */
     PropertiesFile (const File& file,
-                    const int millisecondsBeforeSaving,
-                    const int options);
+                    int millisecondsBeforeSaving,
+                    int optionFlags);
 
     /** Destructor.
 
         When deleted, the file will first call saveIfNeeded() to flush any changes to disk.
     */
     ~PropertiesFile();
+
+    //==============================================================================
+    /** Returns true if this file was created from a valid (or non-existent) file.
+        If the file failed to load correctly because it was corrupt or had insufficient
+        access, this will be false.
+    */
+    bool isValidFile() const throw()                { return loadedOk; }
 
     //==============================================================================
     /** This will flush all the values to disk if they've changed since the last
@@ -108,10 +115,16 @@ public:
     */
     bool save();
 
-    /** Returns true if the properties have been altered since the last time they were
-        saved.
+    /** Returns true if the properties have been altered since the last time they were saved.
+        The file is flagged as needing to be saved when you change a value, but you can
+        explicitly set this flag with setNeedsToBeSaved().
     */
     bool needsToBeSaved() const;
+    
+    /** Explicitly sets the flag to indicate whether the file needs saving or not.
+        @see needsToBeSaved
+    */
+    void setNeedsToBeSaved (bool needsToBeSaved);
 
     //==============================================================================
     /** Returns the file that's being used. */
@@ -131,9 +144,9 @@ public:
     static PropertiesFile* createDefaultAppPropertiesFile (const String& applicationName,
                                                            const String& fileNameSuffix,
                                                            const String& folderName,
-                                                           const bool commonToAllUsers,
-                                                           const int millisecondsBeforeSaving,
-                                                           const int propertiesFileOptions);
+                                                           bool commonToAllUsers,
+                                                           int millisecondsBeforeSaving,
+                                                           int propertiesFileOptions);
 
     /** Handy utility to choose a file in the standard OS-dependent location for application
         settings files.
@@ -158,7 +171,7 @@ public:
     static const File getDefaultAppSettingsFile (const String& applicationName,
                                                  const String& fileNameSuffix,
                                                  const String& folderName,
-                                                 const bool commonToAllUsers);
+                                                 bool commonToAllUsers);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -172,7 +185,7 @@ private:
     File file;
     int timerInterval;
     const int options;
-    bool needsWriting;
+    bool loadedOk, needsWriting;
 
     void timerCallback();
 
