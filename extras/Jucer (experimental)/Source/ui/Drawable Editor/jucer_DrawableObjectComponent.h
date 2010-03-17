@@ -246,7 +246,8 @@ public:
         deleteAllChildren();
         Rectangle<int> childBounds;
 
-        for (int i = 0; i < dc->getNumDrawables(); ++i)
+        int i;
+        for (i = 0; i < dc->getNumDrawables(); ++i)
         {
             Drawable* d = dc->getDrawable (i);
             jassert (d != 0);
@@ -271,12 +272,12 @@ public:
             }
         }
 
-        for (int i = dc->getNumDrawables(); --i >= 0;)
+        for (i = dc->getNumDrawables(); --i >= 0;)
             dc->removeDrawable (i, false);
 
         setBounds (childBounds);
 
-        for (int i = getNumChildComponents(); --i >= 0;)
+        for (i = getNumChildComponents(); --i >= 0;)
         {
             DrawableObjectComponent* dc = dynamic_cast <DrawableObjectComponent*> (getChildComponent (i));
 

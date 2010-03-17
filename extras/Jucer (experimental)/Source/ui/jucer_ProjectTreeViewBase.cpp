@@ -288,7 +288,7 @@ void ProjectTreeViewBase::moveItems (OwnedArray <Project::Item>& selectedNodes,
     }
 
     // Remove and re-insert them one at a time..
-    for (int i = 0; i < selectedNodes.size(); ++i)
+    for (i = 0; i < selectedNodes.size(); ++i)
     {
         Project::Item* selectedNode = selectedNodes.getUnchecked(i);
 

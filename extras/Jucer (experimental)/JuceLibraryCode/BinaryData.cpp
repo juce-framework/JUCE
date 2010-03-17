@@ -8,12 +8,12 @@
 #include "BinaryData.h"
 
 
-const char* BinaryData::getNamedResource (const wchar_t* resourceName, int& numBytes) throw()
+const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()
 {
     int hash = 0;
-    if (resourceName != 0)
-        while (*resourceName != 0)
-            hash = 31 * hash + *resourceName++;
+    if (resourceNameUTF8 != 0)
+        while (*resourceNameUTF8 != 0)
+            hash = 31 * hash + *resourceNameUTF8++;
 
     switch (hash)
     {

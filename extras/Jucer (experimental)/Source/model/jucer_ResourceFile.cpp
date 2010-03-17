@@ -177,6 +177,16 @@ static void writeCppData (InputStream& in, OutputStream& out)
     }
 }
 
+static int calcResourceHashCode (const String& s)
+{
+    const char* t = s.toUTF8();
+    int hash = 0;
+    while (*t != 0)
+        hash = 31 * hash + *t++;
+
+    return hash;
+}
+
 bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& header)
 {
     String comment;
@@ -216,19 +226,19 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
     cpp << createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
         << newLine
         << newLine
-        << "const char* " << namespaceName << "::getNamedResource (const wchar_t* resourceName, int& numBytes) throw()" << newLine
+        << "const char* " << namespaceName << "::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
         << "{" << newLine
         << "    int hash = 0;" << newLine
-        << "    if (resourceName != 0)" << newLine
-        << "        while (*resourceName != 0)" << newLine
-        << "            hash = 31 * hash + *resourceName++;" << newLine
+        << "    if (resourceNameUTF8 != 0)" << newLine
+        << "        while (*resourceNameUTF8 != 0)" << newLine
+        << "            hash = 31 * hash + *resourceNameUTF8++;" << newLine
         << newLine
         << "    switch (hash)" << newLine
         << "    {" << newLine;
 
     for (i = 0; i < files.size(); ++i)
     {
-        cpp << "        case 0x" << hexString8Digits (variableNames[i].hashCode())
+        cpp << "        case 0x" << hexString8Digits (calcResourceHashCode (variableNames[i]))
             << ":  numBytes = " << namespaceName << "::" << variableNames[i] << "Size; return "
             << namespaceName << "::" << variableNames[i] << ";" << newLine;
     }
@@ -273,7 +283,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
 
     header << "    // If you provide the name of one of the binary resource variables above, this function will" << newLine
            << "    // return the corresponding data and its size (or a null pointer if the name isn't found)." << newLine
-           << "    const char* getNamedResource (const wchar_t* resourceName, int& dataSizeInBytes) throw();" << newLine
+           << "    const char* getNamedResource (const char* resourceNameUTF8, int& dataSizeInBytes) throw();" << newLine
            << "}" << newLine;
 
     return true;

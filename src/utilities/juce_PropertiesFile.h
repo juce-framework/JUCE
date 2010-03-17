@@ -120,7 +120,7 @@ public:
         explicitly set this flag with setNeedsToBeSaved().
     */
     bool needsToBeSaved() const;
-    
+
     /** Explicitly sets the flag to indicate whether the file needs saving or not.
         @see needsToBeSaved
     */

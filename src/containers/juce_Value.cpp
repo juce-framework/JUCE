@@ -217,5 +217,9 @@ void Value::callListeners()
     listeners.call (&Listener::valueChanged, v);
 }
 
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value)
+{
+    return stream << value.toString();
+}
 
 END_JUCE_NAMESPACE

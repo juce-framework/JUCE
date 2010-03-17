@@ -197,7 +197,7 @@
 #endif
 
 #ifndef JUCE_ASIO
-  #define JUCE_ASIO 1
+  #define JUCE_ASIO 0
 #endif
 
 #ifndef JUCE_WASAPI
@@ -217,7 +217,7 @@
 #endif
 
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
-  #define JUCE_QUICKTIME 1
+  #define JUCE_QUICKTIME 0
 #endif
 
 #ifndef JUCE_OPENGL
@@ -233,7 +233,7 @@
 #endif
 
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
-  #define JUCE_USE_CDBURNER 1
+  #define JUCE_USE_CDBURNER 0
 #endif
 
 #ifndef JUCE_USE_CDREADER
@@ -273,7 +273,7 @@
 #endif
 
 #ifndef JUCE_WEB_BROWSER
-  #define JUCE_WEB_BROWSER 1
+  #define JUCE_WEB_BROWSER 0
 #endif
 
 #ifndef JUCE_SUPPORT_CARBON
@@ -6314,6 +6314,8 @@ private:
 	Value& operator= (const Value& other);
 };
 
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value);
+
 #endif   // __JUCE_VALUE_JUCEHEADER__
 /*** End of inlined file: juce_Value.h ***/
 
@@ -6709,7 +6711,8 @@ private:
 	ReferenceCountedObjectPtr <SharedObject> object;
 	ListenerList <Listener> listeners;
 
-	ValueTree (SharedObject* const object_);
+public:
+	ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
@@ -9884,6 +9887,11 @@ public:
 		return Rectangle (x + deltaX, y + deltaY, w, h);
 	}
 
+	const Rectangle operator+ (const Point<ValueType>& deltaPosition) const throw()
+	{
+		return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
+	}
+
 	void expand (const ValueType deltaX,
 				 const ValueType deltaY) throw()
 	{
@@ -9929,7 +9937,7 @@ public:
 		return xCoord >= x && yCoord >= y && xCoord < x + w && yCoord < y + h;
 	}
 
-	bool contains (const Point<ValueType> point) const throw()
+	bool contains (const Point<ValueType>& point) const throw()
 	{
 		return point.getX() >= x && point.getY() >= y && point.getX() < x + w && point.getY() < y + h;
 	}
@@ -10341,13 +10349,13 @@ class JUCE_API  Path
 {
 public:
 
-	Path() throw();
+	Path();
 
-	Path (const Path& other) throw();
+	Path (const Path& other);
 
-	~Path() throw();
+	~Path();
 
-	Path& operator= (const Path& other) throw();
+	Path& operator= (const Path& other);
 
 	bool isEmpty() const throw();
 
@@ -10355,99 +10363,91 @@ public:
 
 	const Rectangle<float> getBoundsTransformed (const AffineTransform& transform) const throw();
 
-	bool contains (const float x,
-				   const float y,
-				   const float tolerence = 10.0f) const throw();
+	bool contains (float x, float y,
+				   float tolerence = 10.0f) const;
 
-	bool intersectsLine (const float x1, const float y1,
-						 const float x2, const float y2,
-						 const float tolerence = 10.0f) throw();
+	bool intersectsLine (float x1, float y1,
+						 float x2, float y2,
+						 float tolerence = 10.0f);
 
 	void clear() throw();
 
-	void startNewSubPath (const float startX,
-						  const float startY) throw();
+	void startNewSubPath (float startX, float startY);
 
-	void closeSubPath() throw();
+	void closeSubPath();
 
-	void lineTo (const float endX,
-				 const float endY) throw();
+	void lineTo (float endX, float endY);
 
-	void quadraticTo (const float controlPointX,
-					  const float controlPointY,
-					  const float endPointX,
-					  const float endPointY) throw();
+	void quadraticTo (float controlPointX,
+					  float controlPointY,
+					  float endPointX,
+					  float endPointY);
 
-	void cubicTo (const float controlPoint1X,
-				  const float controlPoint1Y,
-				  const float controlPoint2X,
-				  const float controlPoint2Y,
-				  const float endPointX,
-				  const float endPointY) throw();
+	void cubicTo (float controlPoint1X,
+				  float controlPoint1Y,
+				  float controlPoint2X,
+				  float controlPoint2Y,
+				  float endPointX,
+				  float endPointY);
 
 	const Point<float> getCurrentPosition() const;
 
-	void addRectangle (const float x, const float y,
-					   const float w, const float h) throw();
+	void addRectangle (float x, float y, float width, float height);
 
-	void addRectangle (const Rectangle<int>& rectangle) throw();
+	void addRectangle (const Rectangle<int>& rectangle);
 
-	void addRoundedRectangle (const float x, const float y,
-							  const float w, const float h,
-							  float cornerSize) throw();
+	void addRoundedRectangle (float x, float y, float width, float height,
+							  float cornerSize);
 
-	void addRoundedRectangle (const float x, const float y,
-							  const float w, const float h,
+	void addRoundedRectangle (float x, float y, float width, float height,
 							  float cornerSizeX,
-							  float cornerSizeY) throw();
+							  float cornerSizeY);
 
-	void addTriangle (const float x1, const float y1,
-					  const float x2, const float y2,
-					  const float x3, const float y3) throw();
+	void addTriangle (float x1, float y1,
+					  float x2, float y2,
+					  float x3, float y3);
 
-	void addQuadrilateral (const float x1, const float y1,
-						   const float x2, const float y2,
-						   const float x3, const float y3,
-						   const float x4, const float y4) throw();
+	void addQuadrilateral (float x1, float y1,
+						   float x2, float y2,
+						   float x3, float y3,
+						   float x4, float y4);
 
-	void addEllipse (const float x, const float y,
-					 const float width, const float height) throw();
+	void addEllipse (float x, float y, float width, float height);
 
-	void addArc (const float x, const float y,
-				 const float width, const float height,
-				 const float fromRadians,
-				 const float toRadians,
-				 const bool startAsNewSubPath = false) throw();
+	void addArc (float x, float y, float width, float height,
+				 float fromRadians,
+				 float toRadians,
+				 bool startAsNewSubPath = false);
 
-	void addCentredArc (const float centreX, const float centreY,
-						const float radiusX, const float radiusY,
-						const float rotationOfEllipse,
-						const float fromRadians,
-						const float toRadians,
-						const bool startAsNewSubPath = false) throw();
+	void addCentredArc (float centreX, float centreY,
+						float radiusX, float radiusY,
+						float rotationOfEllipse,
+						float fromRadians,
+						float toRadians,
+						bool startAsNewSubPath = false);
 
-	void addPieSegment (const float x, const float y,
-						const float width, const float height,
-						const float fromRadians,
-						const float toRadians,
-						const float innerCircleProportionalSize);
+	void addPieSegment (float x, float y,
+						float width, float height,
+						float fromRadians,
+						float toRadians,
+						float innerCircleProportionalSize);
 
-	void addLineSegment (const float startX, const float startY,
-						 const float endX, const float endY,
-						 float lineThickness) throw();
+	void addLineSegment (float startX, float startY,
+						 float endX, float endY,
+						 float lineThickness);
 
-	void addArrow (const float startX, const float startY,
-				   const float endX, const float endY,
+	void addArrow (float startX, float startY,
+				   float endX, float endY,
 				   float lineThickness,
 				   float arrowheadWidth,
-				   float arrowheadLength) throw();
+				   float arrowheadLength);
 
-	void addStar (const float centreX,
-				  const float centreY,
-				  const int numberOfPoints,
-				  const float innerRadius,
-				  const float outerRadius,
-				  const float startAngle = 0.0f);
+	void addStar (float centreX,
+				  float centreY,
+				  int numberOfPoints,
+				  float innerRadius,
+				  float outerRadius,
+				  float startAngle = 0.0f);
 
 	void addBubble (float bodyX, float bodyY,
 					float bodyW, float bodyH,
@@ -10458,27 +10458,25 @@ public:
 					float arrowPositionAlongEdgeProportional,
 					float arrowWidth);
 
-	void addPath (const Path& pathToAppend) throw();
+	void addPath (const Path& pathToAppend);
 
 	void addPath (const Path& pathToAppend,
-				  const AffineTransform& transformToApply) throw();
+				  const AffineTransform& transformToApply);
 
 	void swapWithPath (Path& other);
 
 	void applyTransform (const AffineTransform& transform) throw();
 
-	void scaleToFit (const float x, const float y,
-					 const float width, const float height,
-					 const bool preserveProportions) throw();
+	void scaleToFit (float x, float y, float width, float height,
+					 bool preserveProportions) throw();
 
-	const AffineTransform getTransformToScaleToFit (const float x, const float y,
-													const float width, const float height,
-													const bool preserveProportions,
-													const Justification& justificationType = Justification::centred) const throw();
+	const AffineTransform getTransformToScaleToFit (float x, float y, float width, float height,
+													bool preserveProportions,
+													const Justification& justificationType = Justification::centred) const;
 
-	const Path createPathWithRoundedCorners (const float cornerRadius) const throw();
+	const Path createPathWithRoundedCorners (float cornerRadius) const;
 
-	void setUsingNonZeroWinding (const bool isNonZeroWinding) throw();
+	void setUsingNonZeroWinding (bool isNonZeroWinding) throw();
 
 	bool isUsingNonZeroWinding() const		  { return useNonZeroWinding; }
 
@@ -10506,7 +10504,7 @@ public:
 
 	private:
 		const Path& path;
-		int index;
+		size_t index;
 
 		Iterator (const Iterator&);
 		Iterator& operator= (const Iterator&);
@@ -10514,8 +10512,7 @@ public:
 
 	void loadPathFromStream (InputStream& source);
 
-	void loadPathFromData (const unsigned char* const data,
-						   const int numberOfBytes) throw();
+	void loadPathFromData (const void* data, int numberOfBytes);
 
 	void writePathToStream (OutputStream& destination) const;
 
@@ -10529,7 +10526,7 @@ private:
 	friend class PathFlatteningIterator;
 	friend class Path::Iterator;
 	ArrayAllocationBase <float, DummyCriticalSection> data;
-	int numElements;
+	size_t numElements;
 	float pathXMin, pathXMax, pathYMin, pathYMax;
 	bool useNonZeroWinding;
 
@@ -13359,10 +13356,12 @@ public:
 	};
 
 	PropertiesFile (const File& file,
-					const int millisecondsBeforeSaving,
-					const int options);
+					int millisecondsBeforeSaving,
+					int optionFlags);
 
 	~PropertiesFile();
+
+	bool isValidFile() const throw()		{ return loadedOk; }
 
 	bool saveIfNeeded();
 
@@ -13370,19 +13369,21 @@ public:
 
 	bool needsToBeSaved() const;
 
+	void setNeedsToBeSaved (bool needsToBeSaved);
+
 	const File getFile() const				  { return file; }
 
 	static PropertiesFile* createDefaultAppPropertiesFile (const String& applicationName,
 														   const String& fileNameSuffix,
 														   const String& folderName,
-														   const bool commonToAllUsers,
-														   const int millisecondsBeforeSaving,
-														   const int propertiesFileOptions);
+														   bool commonToAllUsers,
+														   int millisecondsBeforeSaving,
+														   int propertiesFileOptions);
 
 	static const File getDefaultAppSettingsFile (const String& applicationName,
 												 const String& fileNameSuffix,
 												 const String& folderName,
-												 const bool commonToAllUsers);
+												 bool commonToAllUsers);
 
 	juce_UseDebuggingNewOperator
 
@@ -13394,7 +13395,7 @@ private:
 	File file;
 	int timerInterval;
 	const int options;
-	bool needsWriting;
+	bool loadedOk, needsWriting;
 
 	void timerCallback();
 
@@ -26668,7 +26669,11 @@ public:
 	OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
 					   const int alphaBits = 8,
 					   const int depthBufferBits = 16,
-					   const int stencilBufferBits = 0) throw();
+					   const int stencilBufferBits = 0);
+
+	OpenGLPixelFormat (const OpenGLPixelFormat&);
+	OpenGLPixelFormat& operator= (const OpenGLPixelFormat&);
+	bool operator== (const OpenGLPixelFormat&) const;
 
 	int redBits;	  /**< The number of bits per pixel to use for the red channel. */
 	int greenBits;	/**< The number of bits per pixel to use for the green channel. */
@@ -26687,8 +26692,6 @@ public:
 
 	static void getAvailablePixelFormats (Component* component,
 										  OwnedArray <OpenGLPixelFormat>& results);
-
-	bool operator== (const OpenGLPixelFormat&) const throw();
 
 	juce_UseDebuggingNewOperator
 };
@@ -27959,11 +27962,11 @@ public:
 
 	PathFlatteningIterator (const Path& path,
 							const AffineTransform& transform = AffineTransform::identity,
-							float tolerence = 6.0f) throw();
+							float tolerence = 6.0f);
 
-	~PathFlatteningIterator() throw();
+	~PathFlatteningIterator();
 
-	bool next() throw();
+	bool next();
 
 	float x1;
 	float y1;
@@ -27985,11 +27988,11 @@ private:
 	const AffineTransform transform;
 	float* points;
 	float tolerence, subPathCloseX, subPathCloseY;
-	bool isIdentityTransform;
+	const bool isIdentityTransform;
 
 	HeapBlock <float> stackBase;
 	float* stackPos;
-	int index, stackSize;
+	size_t index, stackSize;
 
 	PathFlatteningIterator (const PathFlatteningIterator&);
 	PathFlatteningIterator& operator= (const PathFlatteningIterator&);

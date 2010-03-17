@@ -227,5 +227,8 @@ private:
     Value& operator= (const Value& other);
 };
 
+/** Writes a Value to an OutputStream as a UTF8 string. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const Value& value);
+
 
 #endif   // __JUCE_VALUE_JUCEHEADER__

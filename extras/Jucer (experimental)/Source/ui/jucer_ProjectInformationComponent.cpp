@@ -147,7 +147,7 @@ private:
     String lastTip;
     int tabIndex;
 
-    const String findTip (Component* c) const
+    const String findTip (Component* c)
     {
         while (c != 0 && c != this)
         {

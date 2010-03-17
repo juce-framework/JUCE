@@ -263,7 +263,8 @@ private:
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)" << newLine
             << newLine;
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        int i;
+        for (i = 0; i < project.getNumConfigurations(); ++i)
             writeConfig (out, project.getConfiguration(i));
 
         writeObjects (out, files);
@@ -272,7 +273,7 @@ private:
             << newLine;
 
         out << "$(OUTDIR)/$(TARGET): $(OBJECTS) $(LDDEPS) $(RESOURCES)" << newLine
-            << "\t@echo Linking " << project.getProjectName().toString() << newLine
+            << "\t@echo Linking " << project.getProjectName() << newLine
             << "\t-@mkdir -p $(BINDIR)" << newLine
             << "\t-@mkdir -p $(LIBDIR)" << newLine
             << "\t-@mkdir -p $(OUTDIR)" << newLine
@@ -280,13 +281,13 @@ private:
             << newLine;
 
         out << "clean:" << newLine
-            << "\t@echo Cleaning " << project.getProjectName().toString() << newLine
+            << "\t@echo Cleaning " << project.getProjectName() << newLine
             << "\t-@rm -f $(OUTDIR)/$(TARGET)" << newLine
             << "\t-@rm -rf $(OBJDIR)/*" << newLine
             << "\t-@rm -rf $(OBJDIR)" << newLine
             << newLine;
 
-        for (int i = 0; i < files.size(); ++i)
+        for (i = 0; i < files.size(); ++i)
         {
             if (shouldFileBeCompiledByDefault (files.getReference(i)))
             {

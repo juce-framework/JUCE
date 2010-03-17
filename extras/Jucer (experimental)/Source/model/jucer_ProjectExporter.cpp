@@ -42,7 +42,7 @@ ProjectExporter::~ProjectExporter()
 //==============================================================================
 int ProjectExporter::getNumExporters()
 {
-    return 5;
+    return 6;
 }
 
 const StringArray ProjectExporter::getExporterNames()
@@ -50,6 +50,7 @@ const StringArray ProjectExporter::getExporterNames()
     StringArray s;
     s.add (XCodeProjectExporter::getNameMac());
     s.add (XCodeProjectExporter::getNameiPhone());
+    s.add (MSVCProjectExporter::getNameVC6());
     s.add (MSVCProjectExporter::getName2005());
     s.add (MSVCProjectExporter::getName2008());
     s.add (MakefileProjectExporter::getNameLinux());
@@ -64,9 +65,10 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     {
         case 0:     exp = new XCodeProjectExporter (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (false)), false); break;
         case 1:     exp = new XCodeProjectExporter (project, ValueTree (XCodeProjectExporter::getValueTreeTypeName (true)), true); break;
-        case 2:     exp = new MSVCProjectExporter (project, ValueTree (MSVCProjectExporter::getValueTreeTypeName (MSVCProjectExporter::visualStudio2005)), MSVCProjectExporter::visualStudio2005); break;
-        case 3:     exp = new MSVCProjectExporter (project, ValueTree (MSVCProjectExporter::getValueTreeTypeName (MSVCProjectExporter::visualStudio2008)), MSVCProjectExporter::visualStudio2008); break;
-        case 4:     exp = new MakefileProjectExporter (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
+        case 2:     exp = new MSVCProjectExporter (project, ValueTree (MSVCProjectExporter::getValueTreeTypeName (MSVCProjectExporter::visualStudio6)), MSVCProjectExporter::visualStudio6); break;
+        case 3:     exp = new MSVCProjectExporter (project, ValueTree (MSVCProjectExporter::getValueTreeTypeName (MSVCProjectExporter::visualStudio2005)), MSVCProjectExporter::visualStudio2005); break;
+        case 4:     exp = new MSVCProjectExporter (project, ValueTree (MSVCProjectExporter::getValueTreeTypeName (MSVCProjectExporter::visualStudio2008)), MSVCProjectExporter::visualStudio2008); break;
+        case 5:     exp = new MakefileProjectExporter (project, ValueTree (MakefileProjectExporter::getValueTreeTypeName())); break;
         default:    jassertfalse; return 0;
     }
 

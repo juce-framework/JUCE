@@ -50,7 +50,11 @@ public:
     OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
                        const int alphaBits = 8,
                        const int depthBufferBits = 16,
-                       const int stencilBufferBits = 0) throw();
+                       const int stencilBufferBits = 0);
+
+    OpenGLPixelFormat (const OpenGLPixelFormat&);
+    OpenGLPixelFormat& operator= (const OpenGLPixelFormat&);
+    bool operator== (const OpenGLPixelFormat&) const;
 
     //==============================================================================
     int redBits;          /**< The number of bits per pixel to use for the red channel. */
@@ -78,8 +82,6 @@ public:
                                           OwnedArray <OpenGLPixelFormat>& results);
 
     //==============================================================================
-    bool operator== (const OpenGLPixelFormat&) const throw();
-
     juce_UseDebuggingNewOperator
 };
 

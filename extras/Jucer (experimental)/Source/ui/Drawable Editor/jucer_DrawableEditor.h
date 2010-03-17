@@ -86,6 +86,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    friend class Canvas;
     Project* project;
     DrawableDocument* drawableDocument;
 

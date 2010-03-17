@@ -845,7 +845,7 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
 const StringArray Project::BuildConfiguration::parsePreprocessorDefs() const
 {
     StringArray defines;
-    defines.addTokens (getPreprocessorDefs().toString(), T(" ,;"));
+    defines.addTokens (getPreprocessorDefs().toString(), T(" ,;"), String::empty);
     defines.removeEmptyStrings (true);
     return defines;
 }
@@ -853,7 +853,7 @@ const StringArray Project::BuildConfiguration::parsePreprocessorDefs() const
 const StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
 {
     StringArray s;
-    s.addTokens (getHeaderSearchPath().toString(), T(";"));
+    s.addTokens (getHeaderSearchPath().toString(), T(";"), String::empty);
     return s;
 }
 
@@ -919,7 +919,7 @@ void Project::createDefaultExporters()
 const String Project::getFileTemplate (const String& templateName)
 {
     int dataSize;
-    const char* data = BinaryData::getNamedResource (templateName, dataSize);
+    const char* data = BinaryData::getNamedResource (templateName.toUTF8(), dataSize);
 
     if (data == 0)
     {

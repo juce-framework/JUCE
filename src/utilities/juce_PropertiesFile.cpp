@@ -187,7 +187,7 @@ bool PropertiesFile::save()
             if (childElement != 0)
                 e->addChildElement (childElement);
             else
-                e->setAttribute (PropertyFileConstants::valueAttribute, 
+                e->setAttribute (PropertyFileConstants::valueAttribute,
                                  getAllProperties().getAllValues() [i]);
         }
 

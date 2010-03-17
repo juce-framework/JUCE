@@ -443,7 +443,9 @@ private:
     ReferenceCountedObjectPtr <SharedObject> object;
     ListenerList <Listener> listeners;
 
-    ValueTree (SharedObject* const object_);
+public:
+    /** @internal */
+    ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
 };
 
 

@@ -53,6 +53,12 @@ BEGIN_JUCE_NAMESPACE
 class StringHolder
 {
 public:
+    StringHolder()
+        : refCount (0x3fffffff), allocatedNumChars (0)
+    {
+        text[0] = 0;
+    }
+
     //==============================================================================
     static juce_wchar* create (const size_t numChars)
     {
@@ -134,11 +140,13 @@ public:
 private:
     static inline StringHolder* bufferFromText (juce_wchar* const text) throw()
     {
-        return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text) - offsetof (StringHolder, StringHolder::text));
+        // (Can't use offsetof() here because of warnings about this not being a POD)
+        return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text)
+                    - (reinterpret_cast <size_t> (reinterpret_cast <StringHolder*> (1)->text) - 1));
     }
 };
 
-StringHolder StringHolder::empty = { 0x3fffffff, 0, { 0 } };
+StringHolder StringHolder::empty;
 const String String::empty;
 
 //==============================================================================
@@ -353,7 +361,11 @@ namespace NumberToStringConverters
 
     static juce_wchar getDecimalPoint()
     {
+#if JUCE_WINDOWS && _MSC_VER < 1400
+        static juce_wchar dp = std::_USE (std::locale(), std::numpunct <wchar_t>).decimal_point();
+#else
         static juce_wchar dp = std::use_facet <std::numpunct <wchar_t> > (std::locale()).decimal_point();
+#endif
         return dp;
     }
 
@@ -1092,6 +1104,7 @@ const String String::repeatedString (const juce_wchar* const stringToRepeat, int
     const int len = CharacterFunctions::length (stringToRepeat);
     String result ((size_t) (len * numberOfTimesToRepeat + 1), (int) 0);
     juce_wchar* n = result.text;
+    *n = 0;
 
     while (--numberOfTimesToRepeat >= 0)
     {

@@ -270,7 +270,8 @@ private:
         }
         else
         {
-            for (int i = paths.size(); --i >= 0;)
+            int i = paths.size();
+            for (; --i >= 0;)
             {
                 for (int j = i; --j >= 0;)
                 {
@@ -282,7 +283,7 @@ private:
                 }
             }
 
-            for (int i = 0; i < paths.size(); ++i)
+            for (i = 0; i < paths.size(); ++i)
             {
                 out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
                     << " #include " << paths[i].quoted() << newLine;
@@ -310,7 +311,7 @@ private:
     static const String createVersionCode (const String& version)
     {
         StringArray configs;
-        configs.addTokens (version, T(",."));
+        configs.addTokens (version, T(",."), String::empty);
         configs.trim();
         configs.removeEmptyStrings();
 

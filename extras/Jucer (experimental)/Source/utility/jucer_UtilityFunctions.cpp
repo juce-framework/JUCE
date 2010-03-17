@@ -132,8 +132,7 @@ const String randomHexString (Random& random, int numChars)
 
 const String hexString8Digits (int value)
 {
-    String s (String::toHexString (value));
-    return String::repeatedString (T("0"), 8 - s.length()) + s;
+    return String::toHexString (value).paddedLeft ('0', 8);
 }
 
 

@@ -36,10 +36,12 @@ public:
     //==============================================================================
     enum VisualStudioVersion
     {
+        visualStudio6,
         visualStudio2005,
         visualStudio2008
     };
 
+    static const char* getNameVC6()             { return "Visual C++ 6.0"; }
     static const char* getName2005()            { return "Visual Studio 2005"; }
     static const char* getName2008()            { return "Visual Studio 2008"; }
 
@@ -47,6 +49,7 @@ public:
     {
         switch (version)
         {
+            case visualStudio6:     return "MSVC6"; break;
             case visualStudio2005:  return "VS2005"; break;
             case visualStudio2008:  return "VS2008"; break;
             default:                jassertfalse; break;
@@ -58,7 +61,9 @@ public:
     //==============================================================================
     static MSVCProjectExporter* createForSettings (Project& project, const ValueTree& settings)
     {
-        if (settings.hasType (getValueTreeTypeName (visualStudio2005)))
+        if (settings.hasType (getValueTreeTypeName (visualStudio6)))
+            return new MSVCProjectExporter (project, settings, visualStudio6);
+        else if (settings.hasType (getValueTreeTypeName (visualStudio2005)))
             return new MSVCProjectExporter (project, settings, visualStudio2005);
         else if (settings.hasType (getValueTreeTypeName (visualStudio2008)))
             return new MSVCProjectExporter (project, settings, visualStudio2008);
@@ -74,6 +79,7 @@ public:
 
         switch (version)
         {
+            case visualStudio6:     name = "Visual C++ 6.0";     subFolderName += "MSVC6"; break;
             case visualStudio2005:  name = "Visual Studio 2005"; subFolderName += "VisualStudio2005"; break;
             case visualStudio2008:  name = "Visual Studio 2008"; subFolderName += "VisualStudio2008"; break;
             default:                jassertfalse; break;
@@ -118,25 +124,46 @@ public:
     //==============================================================================
     const String create()
     {
-        projectGUID = createGUID (project.getProjectUID());
-
-        XmlElement masterXml ("VisualStudioProject");
-        fillInMasterXml (masterXml);
-
+        if (version == visualStudio6)
         {
-            MemoryOutputStream mo;
-            masterXml.writeToStream (mo, String::empty, false, true, "UTF-8", 10);
+            {
+                MemoryOutputStream mo;
+                writeVC6Project (mo);
 
-            if (! overwriteFileWithNewDataIfDifferent (getVCProjFile(), mo))
-                return "Can't write to the VC project file: " + getVCProjFile().getFullPathName();
+                if (! overwriteFileWithNewDataIfDifferent (getDSPFile(), mo))
+                    return "Can't write to the VC project file: " + getDSPFile().getFullPathName();
+            }
+
+            {
+                MemoryOutputStream mo;
+                writeDSWFile (mo);
+
+                if (! overwriteFileWithNewDataIfDifferent (getDSWFile(), mo))
+                    return "Can't write to the VC solution file: " + getDSWFile().getFullPathName();
+            }
         }
-
+        else
         {
-            MemoryOutputStream mo;
-            writeSolutionFile (mo);
+            projectGUID = createGUID (project.getProjectUID());
 
-            if (! overwriteFileWithNewDataIfDifferent (getSLNFile(), mo))
-                return "Can't write to the VC solution file: " + getSLNFile().getFullPathName();
+            XmlElement masterXml ("VisualStudioProject");
+            fillInMasterXml (masterXml);
+
+            {
+                MemoryOutputStream mo;
+                masterXml.writeToStream (mo, String::empty, false, true, "UTF-8", 10);
+
+                if (! overwriteFileWithNewDataIfDifferent (getVCProjFile(), mo))
+                    return "Can't write to the VC project file: " + getVCProjFile().getFullPathName();
+            }
+
+            {
+                MemoryOutputStream mo;
+                writeSolutionFile (mo);
+
+                if (! overwriteFileWithNewDataIfDifferent (getSLNFile(), mo))
+                    return "Can't write to the VC solution file: " + getSLNFile().getFullPathName();
+            }
         }
 
         return String::empty;
@@ -146,9 +173,12 @@ private:
     String projectGUID;
     const VisualStudioVersion version;
 
-    const File getVCProjFile() const { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".vcproj"); }
-    const File getSLNFile() const    { return getVCProjFile().withFileExtension (".sln"); }
+    const File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
+    const File getVCProjFile() const    { return getProjectFile (".vcproj"); }
+    const File getSLNFile() const       { return getProjectFile (".sln"); }
+    const File getDSPFile() const       { return getProjectFile (".dsp"); }
+    const File getDSWFile() const       { return getProjectFile (".dsw"); }
 
     //==============================================================================
     void fillInMasterXml (XmlElement& masterXml)
@@ -306,7 +336,7 @@ private:
         return ".exe";
     }
 
-    const String getPreprocessorDefs (const Project::BuildConfiguration& config) const
+    const String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
     {
         StringArray defines;
         defines.add ("WIN32");
@@ -327,7 +357,7 @@ private:
         }
 
         defines.addArray (config.parsePreprocessorDefs());
-        return defines.joinIntoString (";");
+        return defines.joinIntoString (joinString);
     }
 
     const StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config) const
@@ -449,7 +479,7 @@ private:
             }
 
             compiler->setAttribute ("AdditionalIncludeDirectories", getHeaderSearchPaths (config).joinIntoString (";"));
-            compiler->setAttribute ("PreprocessorDefinitions", getPreprocessorDefs (config));
+            compiler->setAttribute ("PreprocessorDefinitions", getPreprocessorDefs (config, ";"));
             compiler->setAttribute ("RuntimeLibrary", isRTAS() ? (isDebug ? 3 : 2) // MT DLL
                                                                : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
@@ -559,12 +589,13 @@ private:
         }
 
         out << newLine << "Project(\"" << createGUID (project.getProjectName().toString() + "sln_guid") << "\") = \"" << project.getProjectName().toString() << "\", \""
-            << getVCProjFile().getFileName() << "\", \"" << projectGUID << "\"" << newLine
+            << getVCProjFile().getFileName() << "\", \"" << projectGUID << '"' << newLine
             << "EndProject" << newLine
             << "Global" << newLine
             << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution" << newLine;
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        int i;
+        for (i = 0; i < project.getNumConfigurations(); ++i)
         {
             Project::BuildConfiguration config (project.getConfiguration (i));
             out << "\t\t" << createConfigName (config) << " = " << createConfigName (config) << newLine;
@@ -573,7 +604,7 @@ private:
         out << "\tEndGlobalSection" << newLine
             << "\tGlobalSection(ProjectConfigurationPlatforms) = postSolution" << newLine;
 
-        for (int i = 0; i < project.getNumConfigurations(); ++i)
+        for (i = 0; i < project.getNumConfigurations(); ++i)
         {
             Project::BuildConfiguration config (project.getConfiguration (i));
             out << "\t\t" << projectGUID << "." << createConfigName (config) << ".ActiveCfg = " << createConfigName (config) << newLine;
@@ -585,6 +616,216 @@ private:
             << "\t\tHideSolutionNode = FALSE" << newLine
             << "\tEndGlobalSection" << newLine
             << "EndGlobal" << newLine;
+    }
+
+    //==============================================================================
+    const String createConfigNameVC6 (const Project::BuildConfiguration& config) const
+    {
+        return project.getProjectName().toString() + " - Win32 " + config.getName().toString();
+    }
+
+    void writeVC6Project (OutputStream& out)
+    {
+        String defaultConfig (createConfigNameVC6 (project.getConfiguration (0)));
+
+        const bool isDLL = project.isAudioPlugin() || project.isBrowserPlugin();
+        String targetType, targetCode;
+
+        if (isDLL)                              { targetType = "\"Win32 (x86) Dynamic-Link Library\"";  targetCode = "0x0102"; }
+        else if (project.isLibrary())           { targetType = "\"Win32 (x86) Static Library\"";        targetCode = "0x0104"; }
+        else if (project.isCommandLineApp())    { targetType = "\"Win32 (x86) Console Application\"";   targetCode = "0x0103"; }
+        else                                    { targetType = "\"Win32 (x86) Application\"";           targetCode = "0x0101"; }
+
+        out << "# Microsoft Developer Studio Project File - Name=\"" << project.getProjectName()
+            << "\" - Package Owner=<4>" << newLine
+            << "# Microsoft Developer Studio Generated Build File, Format Version 6.00" << newLine
+            << "# ** DO NOT EDIT **" << newLine
+            << "# TARGTYPE " << targetType << " " << targetCode << newLine
+            << "CFG=" << defaultConfig << newLine
+            << "!MESSAGE This is not a valid makefile. To build this project using NMAKE," << newLine
+            << "!MESSAGE use the Export Makefile command and run" << newLine
+            << "!MESSAGE " << newLine
+            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak.\"" << newLine
+            << "!MESSAGE " << newLine
+            << "!MESSAGE You can specify a configuration when running NMAKE" << newLine
+            << "!MESSAGE by defining the macro CFG on the command line. For example:" << newLine
+            << "!MESSAGE " << newLine
+            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak\" CFG=\"" << defaultConfig << '"' << newLine
+            << "!MESSAGE " << newLine
+            << "!MESSAGE Possible choices for configuration are:" << newLine
+            << "!MESSAGE " << newLine;
+
+        int i;
+        for (i = 0; i < project.getNumConfigurations(); ++i)
+            out << "!MESSAGE \"" << createConfigNameVC6 (project.getConfiguration (i)) << "\" (based on " << targetType << ")" << newLine;
+
+        out << "!MESSAGE " << newLine
+            << "# Begin Project" << newLine
+            << "# PROP AllowPerConfigDependencies 0" << newLine
+            << "# PROP Scc_ProjName \"\"" << newLine
+            << "# PROP Scc_LocalPath \"\"" << newLine
+            << "CPP=cl.exe" << newLine
+            << "MTL=midl.exe" << newLine
+            << "RSC=rc.exe" << newLine;
+
+        String targetList;
+
+        for (i = 0; i < project.getNumConfigurations(); ++i)
+        {
+            const Project::BuildConfiguration config (project.getConfiguration (i));
+            const String configName (createConfigNameVC6 (config));
+            targetList << "# Name \"" << configName << '"' << newLine;
+
+            const String outFile (windowsStylePath (getConfigTargetPath(config) + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
+            const String optimisationFlag (((int) config.getOptimisationLevel().getValue() <= 1) ? "Od" : (config.getOptimisationLevel() == 2 ? "O2" : "O3"));
+            const String defines (getPreprocessorDefs (config, " /D "));
+            const bool isDebug = (bool) config.isDebug().getValue();
+            const String extraDebugFlags (isDebug ? "/Gm /ZI /GZ" : "");
+            const String includes (getHeaderSearchPaths (config).joinIntoString (" /I "));
+
+            out << (i == 0 ? "!IF" : "!ELSEIF") << "  \"$(CFG)\" == \"" << configName << '"' << newLine
+                << "# PROP BASE Use_MFC 0" << newLine
+                << "# PROP BASE Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
+                << "# PROP BASE Output_Dir \"" << getConfigTargetPath (config) << '"' << newLine
+                << "# PROP BASE Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
+                << "# PROP BASE Target_Dir \"\"" << newLine
+                << "# PROP Use_MFC 0" << newLine
+                << "# PROP Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
+                << "# PROP Output_Dir \"" << getConfigTargetPath (config) << '"' << newLine
+                << "# PROP Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
+                << "# PROP Ignore_Export_Lib 0" << newLine
+                << "# PROP Target_Dir \"\"" << newLine
+                << "# ADD BASE CPP /nologo /W3 /GX /" << optimisationFlag << " /D " << defines
+                << " /YX /FD /c " << extraDebugFlags << " /Zm1024" << newLine
+                << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
+                << " /I " << includes << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c " << extraDebugFlags << " /Zm1024" << newLine;
+
+            if (! isDebug)
+                out << "# SUBTRACT CPP /YX" << newLine;
+
+            if (! project.isLibrary())
+                out << "# ADD BASE MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine
+                    << "# ADD MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine;
+
+            out << "# ADD BASE RSC /l 0x40c /d " << defines  << newLine
+                << "# ADD RSC /l 0x40c /d " << defines << newLine
+                << "BSC32=bscmake.exe" << newLine
+                << "# ADD BASE BSC32 /nologo" << newLine
+                << "# ADD BSC32 /nologo" << newLine;
+
+            if (project.isLibrary())
+            {
+                out << "LIB32=link.exe -lib" << newLine
+                    << "# ADD BASE LIB32 /nologo" << newLine
+                    << "# ADD LIB32 /nologo /out:\"" << outFile << '"' << newLine;
+            }
+            else
+            {
+                out << "LINK32=link.exe" << newLine
+                    << "# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386" << newLine
+                    << "# ADD LINK32 \"C:\\Program Files\\Microsoft Visual Studio\\VC98\\LIB\\shell32.lib\" " // This is avoid debug information corruption when mixing Platform SDK
+                    << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
+                    << (isDebug ? " /debug" : "")
+                    << " /nologo /machine:I386 /out:\"" << outFile << "\" "
+                    << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console"
+                                                                     : "/subsystem:windows")) << newLine;
+            }
+        }
+
+        out << "!ENDIF" << newLine
+            << "# Begin Target"  << newLine
+            << targetList;
+
+        writeFilesVC6 (out, project.getMainGroup());
+        writeGroupVC6 (out, project.getJuceCodeGroupName(), juceWrapperFiles);
+        writeGroupVC6 (out, "Juce VST Wrapper", getVSTFilesRequired());
+
+        out << "# End Target" << newLine
+            << "# End Project" << newLine;
+    }
+
+    void writeFileVC6 (OutputStream& out, const RelativePath& file, const bool excludeFromBuild)
+    {
+        jassert (file.getRoot() == RelativePath::buildTargetFolder);
+
+        out << "# Begin Source File" << newLine
+            << "SOURCE=" << file.toWindowsStyle().quoted() << newLine;
+
+        if (excludeFromBuild)
+            out << "# PROP Exclude_From_Build 1" << newLine;
+
+        out << "# End Source File" << newLine;
+    }
+
+    void writeFilesVC6 (OutputStream& out, const Project::Item& projectItem)
+    {
+        if (projectItem.isGroup())
+        {
+            out << "# Begin Group \"" << projectItem.getName() << '"' << newLine
+                << "# PROP Default_Filter \"cpp;c;cxx;rc;def;r;odl;idl;hpj;bat\"" << newLine;
+
+            for (int i = 0; i < projectItem.getNumChildren(); ++i)
+                writeFilesVC6 (out, projectItem.getChild (i));
+
+            out << "# End Group" << newLine;
+        }
+        else if (projectItem.shouldBeAddedToTargetProject())
+        {
+            const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
+            writeFileVC6 (out, path, projectItem.shouldBeAddedToBinaryResources() || (shouldFileBeCompiledByDefault (path) && ! projectItem.shouldBeCompiled()));
+        }
+    }
+
+    void writeGroupVC6 (OutputStream& out, const String& groupName, const Array<RelativePath>& files)
+    {
+        if (files.size() > 0)
+        {
+            out << "# Begin Group \"" << groupName << '"' << newLine;
+            for (int i = 0; i < files.size(); ++i)
+                if (files.getReference(i).hasFileExtension ("cpp;c;h"))
+                    writeFileVC6 (out, files.getReference(i), false);
+
+            out << "# End Group" << newLine;
+        }
+    }
+
+    void writeDSWFile (OutputStream& out)
+    {
+        out << "Microsoft Developer Studio Workspace File, Format Version 6.00 " << newLine;
+
+        if (! project.isUsingWrapperFiles())
+        {
+            out << "Project: \"JUCE\"= ..\\JUCE.dsp - Package Owner=<4>" << newLine
+                << "Package=<5>" << newLine
+                << "{{{" << newLine
+                << "}}}" << newLine
+                << "Package=<4>" << newLine
+                << "{{{" << newLine
+                << "}}}" << newLine;
+        }
+
+        out << "Project: \"" << project.getProjectName() << "\" = .\\" << getDSPFile().getFileName() << " - Package Owner=<4>" << newLine
+            << "Package=<5>" << newLine
+            << "{{{" << newLine
+            << "}}}" << newLine
+            << "Package=<4>" << newLine
+            << "{{{" << newLine;
+
+        if (! project.isUsingWrapperFiles())
+        {
+            out << "    Begin Project Dependency" << newLine
+                << "    Project_Dep_Name JUCE" << newLine
+                << "    End Project Dependency" << newLine;
+        }
+
+        out << "}}}" << newLine
+            << "Global:" << newLine
+            << "Package=<5>" << newLine
+            << "{{{" << newLine
+            << "}}}" << newLine
+            << "Package=<3>" << newLine
+            << "{{{" << newLine
+            << "}}}" << newLine;
     }
 };
 

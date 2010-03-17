@@ -919,8 +919,8 @@ private:
 
         const char* files[] = { "extras/audio plugins/wrapper/AU/juce_AU_Resources.r",
                                 "extras/audio plugins/wrapper/AU/juce_AU_Wrapper.mm" };
-
-        for (int i = 0; i < numElementsInArray (files); ++i)
+        int i;
+        for (i = 0; i < numElementsInArray (files); ++i)
             auWrappers.add (getJucePathFromTargetFolder().getChildFile (files[i]));
 
         const char* appleAUFiles[] = {  "Extras/CoreAudio/PublicUtility/CADebugMacros.h",
@@ -976,7 +976,6 @@ private:
 
         StringArray fileIDs, appleFileIDs;
 
-        int i;
         for (i = 0; i < auWrappers.size(); ++i)
         {
             addFile (auWrappers.getReference(i), shouldFileBeCompiledByDefault (auWrappers.getReference(i)), false);

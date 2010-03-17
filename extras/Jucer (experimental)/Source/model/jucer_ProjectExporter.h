@@ -71,9 +71,9 @@ public:
     Value getRTASFolder() const             { return getSetting ("rtasFolder"); }
     Value getAUFolder() const               { return getSetting ("auFolder"); }
 
-    bool isVST() const                      { return project.isAudioPlugin() && project.shouldBuildVST().getValue(); }
-    bool isRTAS() const                     { return project.isAudioPlugin() && project.shouldBuildRTAS().getValue(); }
-    bool isAU() const                       { return project.isAudioPlugin() && project.shouldBuildAU().getValue(); }
+    bool isVST() const                      { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildVST().getValue(); }
+    bool isRTAS() const                     { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
+    bool isAU() const                       { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
 
     Array<RelativePath> juceWrapperFiles;
 
