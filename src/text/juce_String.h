@@ -730,6 +730,17 @@ public:
     */
     static const String createStringFromData (const void* data, int size);
 
+    /** Creates a String from a printf-style parameter list.
+
+        I don't like this method. I don't use it myself, and I recommend avoiding it and
+        using the operator<< methods or pretty much anything else instead. It's only provided
+        here because of the popular unrest that was stirred-up when I tried to remove it...
+
+        If you're really determined to use it, at least make sure that you never, ever,
+        pass any String objects to it as parameters.
+    */
+    static const String formatted (const juce_wchar* formatString, ... );
+
     //==============================================================================
     // Numeric conversions..
 

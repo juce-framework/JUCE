@@ -1686,6 +1686,43 @@ bool String::containsNonWhitespaceChars() const throw()
     return false;
 }
 
+const String String::formatted (const juce_wchar* const pf, ... )
+{
+    jassert (pf != 0);
+
+    va_list args;
+    va_start (args, pf);
+
+    size_t bufferSize = 256;
+    String result (bufferSize, (int) 0);
+    result.text[0] = 0;
+
+    for (;;)
+    {
+#if JUCE_LINUX && JUCE_64BIT
+        va_list tempArgs;
+        va_copy (tempArgs, args);
+        const int num = (int) vswprintf (result.text, bufferSize - 1, pf, tempArgs);
+        va_end (tempArgs);
+#elif JUCE_WINDOWS
+        const int num = (int) _vsnwprintf (result.text, bufferSize - 1, pf, args);
+#else
+        const int num = (int) vswprintf (result.text, bufferSize - 1, pf, args);
+#endif
+
+        if (num > 0)
+            return result;
+
+        bufferSize += 256;
+
+        if (num == 0 || bufferSize > 65536) // the upper limit is a sanity check to avoid situations where vprintf repeatedly
+            break;                          // returns -1 because of an error rather than because it needs more space.
+
+        result.preallocateStorage (bufferSize);
+    }
+
+    return empty;
+}
 
 //==============================================================================
 int String::getIntValue() const throw()

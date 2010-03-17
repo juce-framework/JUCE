@@ -1273,6 +1273,8 @@ public:
 
 	static const String createStringFromData (const void* data, int size);
 
+	static const String formatted (const juce_wchar* formatString, ... );
+
 	// Numeric conversions..
 
 	explicit String (int decimalInteger);
