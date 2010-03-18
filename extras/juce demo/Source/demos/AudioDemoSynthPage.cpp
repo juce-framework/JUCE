@@ -200,7 +200,7 @@ public:
                                                                 false),
                                          true);
 
-        BitArray allNotes;
+        BigInteger allNotes;
         allNotes.setRange (0, 128, true);
 
         synth.addSound (new SamplerSound (T("demo sound"),

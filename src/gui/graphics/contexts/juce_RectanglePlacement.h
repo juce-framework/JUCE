@@ -42,12 +42,12 @@ class JUCE_API  RectanglePlacement
 public:
     //==============================================================================
     /** Creates a RectanglePlacement object using a combination of flags. */
-    inline RectanglePlacement (const int flags_) throw()  : flags (flags_) {}
+    inline RectanglePlacement (int flags_) throw()  : flags (flags_) {}
 
-    /** Creates a copy of another Justification object. */
+    /** Creates a copy of another RectanglePlacement object. */
     RectanglePlacement (const RectanglePlacement& other) throw();
 
-    /** Copies another Justification object. */
+    /** Copies another RectanglePlacement object. */
     RectanglePlacement& operator= (const RectanglePlacement& other) throw();
 
     //==============================================================================
@@ -122,7 +122,7 @@ public:
 
         @returns true if any of the flags passed in are set on this object.
     */
-    inline bool testFlags (const int flagsToTest) const throw()     { return (flags & flagsToTest) != 0; }
+    inline bool testFlags (int flagsToTest) const throw()           { return (flags & flagsToTest) != 0; }
 
 
     //==============================================================================
@@ -135,10 +135,10 @@ public:
                   double& sourceY,
                   double& sourceW,
                   double& sourceH,
-                  const double destinationX,
-                  const double destinationY,
-                  const double destinationW,
-                  const double destinationH) const throw();
+                  double destinationX,
+                  double destinationY,
+                  double destinationW,
+                  double destinationH) const throw();
 
     /** Returns the transform that should be applied to these source co-ordinates to fit them
         into the destination rectangle using the current flags.
@@ -147,10 +147,10 @@ public:
                                              float sourceY,
                                              float sourceW,
                                              float sourceH,
-                                             const float destinationX,
-                                             const float destinationY,
-                                             const float destinationW,
-                                             const float destinationH) const throw();
+                                             float destinationX,
+                                             float destinationY,
+                                             float destinationW,
+                                             float destinationH) const throw();
 
 private:
     //==============================================================================

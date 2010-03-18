@@ -11722,7 +11722,7 @@ class JUCE_API  RectanglePlacement
 {
 public:
 
-	inline RectanglePlacement (const int flags_) throw()  : flags (flags_) {}
+	inline RectanglePlacement (int flags_) throw()  : flags (flags_) {}
 
 	RectanglePlacement (const RectanglePlacement& other) throw();
 
@@ -11758,25 +11758,25 @@ public:
 
 	inline int getFlags() const throw()				 { return flags; }
 
-	inline bool testFlags (const int flagsToTest) const throw()	 { return (flags & flagsToTest) != 0; }
+	inline bool testFlags (int flagsToTest) const throw()	   { return (flags & flagsToTest) != 0; }
 
 	void applyTo (double& sourceX,
 				  double& sourceY,
 				  double& sourceW,
 				  double& sourceH,
-				  const double destinationX,
-				  const double destinationY,
-				  const double destinationW,
-				  const double destinationH) const throw();
+				  double destinationX,
+				  double destinationY,
+				  double destinationW,
+				  double destinationH) const throw();
 
 	const AffineTransform getTransformToFit (float sourceX,
 											 float sourceY,
 											 float sourceW,
 											 float sourceH,
-											 const float destinationX,
-											 const float destinationY,
-											 const float destinationW,
-											 const float destinationH) const throw();
+											 float destinationX,
+											 float destinationY,
+											 float destinationW,
+											 float destinationH) const throw();
 
 private:
 

@@ -1090,7 +1090,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
     ScopedPointer <AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
-    if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor> (w))->isValid())
+    if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor*> (w))->isValid())
         w = 0;
 
 #if JUCE_SUPPORT_CARBON
@@ -1098,7 +1098,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     {
         w = new AudioUnitPluginWindowCarbon (*this);
 
-        if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor> (w))->isValid())
+        if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor*> (w))->isValid())
             w = 0;
     }
 #endif
