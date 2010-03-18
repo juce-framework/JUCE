@@ -626,7 +626,7 @@ private:
 
     void writeVC6Project (OutputStream& out)
     {
-        String defaultConfig (createConfigNameVC6 (project.getConfiguration (0)));
+        const String defaultConfigName (createConfigNameVC6 (project.getConfiguration (0)));
 
         const bool isDLL = project.isAudioPlugin() || project.isBrowserPlugin();
         String targetType, targetCode;
@@ -641,7 +641,7 @@ private:
             << "# Microsoft Developer Studio Generated Build File, Format Version 6.00" << newLine
             << "# ** DO NOT EDIT **" << newLine
             << "# TARGTYPE " << targetType << " " << targetCode << newLine
-            << "CFG=" << defaultConfig << newLine
+            << "CFG=" << defaultConfigName << newLine
             << "!MESSAGE This is not a valid makefile. To build this project using NMAKE," << newLine
             << "!MESSAGE use the Export Makefile command and run" << newLine
             << "!MESSAGE " << newLine
@@ -650,7 +650,7 @@ private:
             << "!MESSAGE You can specify a configuration when running NMAKE" << newLine
             << "!MESSAGE by defining the macro CFG on the command line. For example:" << newLine
             << "!MESSAGE " << newLine
-            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak\" CFG=\"" << defaultConfig << '"' << newLine
+            << "!MESSAGE NMAKE /f \"" << project.getProjectName() << ".mak\" CFG=\"" << defaultConfigName << '"' << newLine
             << "!MESSAGE " << newLine
             << "!MESSAGE Possible choices for configuration are:" << newLine
             << "!MESSAGE " << newLine;
@@ -676,29 +676,31 @@ private:
             const String configName (createConfigNameVC6 (config));
             targetList << "# Name \"" << configName << '"' << newLine;
 
-            const String outFile (windowsStylePath (getConfigTargetPath(config) + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
+            const String binariesPath (getConfigTargetPath (config));
+            const String targetBinary (windowsStylePath (binariesPath + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
             const String optimisationFlag (((int) config.getOptimisationLevel().getValue() <= 1) ? "Od" : (config.getOptimisationLevel() == 2 ? "O2" : "O3"));
             const String defines (getPreprocessorDefs (config, " /D "));
             const bool isDebug = (bool) config.isDebug().getValue();
             const String extraDebugFlags (isDebug ? "/Gm /ZI /GZ" : "");
-            const String includes (getHeaderSearchPaths (config).joinIntoString (" /I "));
 
             out << (i == 0 ? "!IF" : "!ELSEIF") << "  \"$(CFG)\" == \"" << configName << '"' << newLine
                 << "# PROP BASE Use_MFC 0" << newLine
                 << "# PROP BASE Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
-                << "# PROP BASE Output_Dir \"" << getConfigTargetPath (config) << '"' << newLine
+                << "# PROP BASE Output_Dir \"" << binariesPath << '"' << newLine
                 << "# PROP BASE Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
                 << "# PROP BASE Target_Dir \"\"" << newLine
                 << "# PROP Use_MFC 0" << newLine
                 << "# PROP Use_Debug_Libraries " << (isDebug ? "1" : "0") << newLine
-                << "# PROP Output_Dir \"" << getConfigTargetPath (config) << '"' << newLine
+                << "# PROP Output_Dir \"" << binariesPath << '"' << newLine
                 << "# PROP Intermediate_Dir \"" << getIntermediatesPath (config) << '"' << newLine
                 << "# PROP Ignore_Export_Lib 0" << newLine
                 << "# PROP Target_Dir \"\"" << newLine
                 << "# ADD BASE CPP /nologo /W3 /GX /" << optimisationFlag << " /D " << defines
                 << " /YX /FD /c " << extraDebugFlags << " /Zm1024" << newLine
                 << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
-                << " /I " << includes << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c " << extraDebugFlags << " /Zm1024" << newLine;
+                << " /I " << getHeaderSearchPaths (config).joinIntoString (" /I ")
+                << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c " << extraDebugFlags
+                << " /Zm1024" << newLine;
 
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
@@ -707,7 +709,7 @@ private:
                 out << "# ADD BASE MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine
                     << "# ADD MTL /nologo /D " << defines << " /mktyplib203 /win32" << newLine;
 
-            out << "# ADD BASE RSC /l 0x40c /d " << defines  << newLine
+            out << "# ADD BASE RSC /l 0x40c /d " << defines << newLine
                 << "# ADD RSC /l 0x40c /d " << defines << newLine
                 << "BSC32=bscmake.exe" << newLine
                 << "# ADD BASE BSC32 /nologo" << newLine
@@ -717,7 +719,7 @@ private:
             {
                 out << "LIB32=link.exe -lib" << newLine
                     << "# ADD BASE LIB32 /nologo" << newLine
-                    << "# ADD LIB32 /nologo /out:\"" << outFile << '"' << newLine;
+                    << "# ADD LIB32 /nologo /out:\"" << targetBinary << '"' << newLine;
             }
             else
             {
@@ -726,7 +728,7 @@ private:
                     << "# ADD LINK32 \"C:\\Program Files\\Microsoft Visual Studio\\VC98\\LIB\\shell32.lib\" " // This is avoid debug information corruption when mixing Platform SDK
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
-                    << " /nologo /machine:I386 /out:\"" << outFile << "\" "
+                    << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
                     << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console"
                                                                      : "/subsystem:windows")) << newLine;
             }

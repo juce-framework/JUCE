@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 SamplerSound::SamplerSound (const String& name_,
                             AudioFormatReader& source,
-                            const BitArray& midiNotes_,
+                            const BigInteger& midiNotes_,
                             const int midiNoteForNormalPitch,
                             const double attackTimeSecs,
                             const double releaseTimeSecs,

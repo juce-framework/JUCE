@@ -112,7 +112,7 @@ public:
 private:
     //==============================================================================
     VoidArray inputs;
-    BitArray inputsToDelete;
+    BigInteger inputsToDelete;
     CriticalSection lock;
     AudioSampleBuffer tempBuffer;
     double currentSampleRate;

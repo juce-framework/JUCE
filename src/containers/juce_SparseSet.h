@@ -34,9 +34,9 @@
 /**
     Holds a set of primitive values, storing them as a set of ranges.
 
-    This container acts like a simple BitArray, but can efficiently hold large
-    continguous ranges of values. It's quite a specialised class, mostly useful
-    for things like keeping the set of selected rows in a listbox.
+    This container acts like an array, but can efficiently hold large continguous
+    ranges of values. It's quite a specialised class, mostly useful for things
+    like keeping the set of selected rows in a listbox.
 
     The type used as a template paramter must be an integer type, such as int, short,
     int64, etc.

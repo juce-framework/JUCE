@@ -165,7 +165,7 @@ public:
         while (e != end)
         {
             if (objectToLookFor == *e)
-                return (int) (e - data.elements.getData());
+                return static_cast <int> (e - data.elements.getData());
 
             ++e;
         }
@@ -466,7 +466,7 @@ public:
         {
             if (objectToRemove == *e)
             {
-                remove ((int) (e - data.elements.getData()), deleteObject);
+                remove (static_cast <int> (e - data.elements.getData()), deleteObject);
                 break;
             }
 

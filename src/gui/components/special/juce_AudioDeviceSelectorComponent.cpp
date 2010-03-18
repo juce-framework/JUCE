@@ -856,9 +856,9 @@ public:
 
                 if (setup.useStereoPairs)
                 {
-                    BitArray bits;
-                    BitArray& original = (type == audioInputType ? config.inputChannels
-                                                                 : config.outputChannels);
+                    BigInteger bits;
+                    BigInteger& original = (type == audioInputType ? config.inputChannels
+                                                                   : config.outputChannels);
 
                     int i;
                     for (i = 0; i < 256; i += 2)
@@ -901,7 +901,7 @@ public:
             }
         }
 
-        static void flipBit (BitArray& chans, int index, int minNumber, int maxNumber)
+        static void flipBit (BigInteger& chans, int index, int minNumber, int maxNumber)
         {
             const int numActive = chans.countNumberOfSetBits();
 

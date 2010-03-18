@@ -35,7 +35,7 @@
 
     This class contains static methods for generating and testing prime numbers.
 
-    @see BitArray
+    @see BigInteger
 */
 class JUCE_API  Primes
 {
@@ -50,10 +50,10 @@ public:
         which to seed the random number generation, improving the security of the
         keys generated.
     */
-    static const BitArray createProbablePrime (int bitLength,
-                                               int certainty,
-                                               const int* randomSeeds = 0,
-                                               int numRandomSeeds = 0) throw();
+    static const BigInteger createProbablePrime (int bitLength,
+                                                 int certainty,
+                                                 const int* randomSeeds = 0,
+                                                 int numRandomSeeds = 0);
 
     /** Tests a number to see if it's prime.
 
@@ -63,8 +63,7 @@ public:
         The certainty parameter specifies how many iterations to use when testing - a
         safe value might be anything over about 20-30.
     */
-    static bool isProbablyPrime (const BitArray& number,
-                                 int certainty) throw();
+    static bool isProbablyPrime (const BigInteger& number, int certainty);
 };
 
 

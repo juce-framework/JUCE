@@ -203,7 +203,7 @@ public:
     juce_UseDebuggingNewOperator
 
 protected:
-    virtual const BitArray getRoots (StringArray& rootNames, StringArray& rootPaths);
+    virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
 
 private:
     //==============================================================================

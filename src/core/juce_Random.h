@@ -84,14 +84,14 @@ public:
     */
     bool nextBool() throw();
 
-    /** Returns a BitArray containing a random number.
+    /** Returns a BigInteger containing a random number.
 
         @returns a random value in the range 0 to (maximumValue - 1).
     */
-    const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
+    const BigInteger nextLargeNumber (const BigInteger& maximumValue);
 
-    /** Sets a range of bits in a BitArray to random values. */
-    void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
+    /** Sets a range of bits in a BigInteger to random values. */
+    void fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits);
 
     //==============================================================================
     /** To avoid the overhead of having to create a new Random object whenever

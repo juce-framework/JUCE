@@ -288,7 +288,7 @@ public:
         while (e != end)
         {
             if (elementToLookFor == *e)
-                return (int) (e - data.elements.getData());
+                return static_cast <int> (e - data.elements.getData());
 
             ++e;
         }
@@ -683,7 +683,7 @@ public:
         {
             if (valueToRemove == *e)
             {
-                remove ((int) (e - data.elements.getData()));
+                remove (static_cast <int> (e - data.elements.getData()));
                 break;
             }
 
@@ -711,7 +711,7 @@ public:
 
         if (endIndex > startIndex)
         {
-            ElementType* e = data.elements + startIndex;
+            ElementType* const e = data.elements + startIndex;
 
             numberToRemove = endIndex - startIndex;
             for (int i = 0; i < numberToRemove; ++i)

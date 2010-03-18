@@ -98,8 +98,8 @@ public:
         return 1024;
     }
 
-    const String open (const BitArray& inputChannels,
-                       const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
                        double sampleRate,
                        int bufferSize)
     {
@@ -178,12 +178,12 @@ public:
         return 16;
     }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
         return activeOutputChans;
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
         return activeInputChans;
     }
@@ -251,7 +251,7 @@ private:
     AudioUnit audioUnit;
     UInt32 audioInputIsAvailable;
     AudioIODeviceCallback* callback;
-    BitArray activeOutputChans, activeInputChans;
+    BigInteger activeOutputChans, activeInputChans;
 
     AudioSampleBuffer floatData;
     float* inputChannels[3];

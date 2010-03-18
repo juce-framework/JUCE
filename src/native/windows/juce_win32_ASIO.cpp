@@ -186,8 +186,8 @@ public:
         return preferredSize;
     }
 
-    const String open (const BitArray& inputChannels,
-                       const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
                        double sr,
                        int bufferSizeSamples)
     {
@@ -653,12 +653,12 @@ public:
         return currentSampleRate;
     }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
         return currentChansOut;
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
         return currentChansIn;
     }
@@ -781,7 +781,7 @@ public:
                 AudioIODeviceCallback* const oldCallback = currentCallback;
 
                 close();
-                open (BitArray (currentChansIn), BitArray (currentChansOut),
+                open (BigInteger (currentChansIn), BigInteger (currentChansOut),
                       currentSampleRate, currentBlockSizeSamples);
 
                 if (oldCallback != 0)
@@ -817,7 +817,7 @@ private:
     int volatile currentBlockSizeSamples;
     int volatile currentBitDepth;
     double volatile currentSampleRate;
-    BitArray currentChansOut, currentChansIn;
+    BigInteger currentChansOut, currentChansIn;
     AudioIODeviceCallback* volatile currentCallback;
     CriticalSection callbackLock;
 

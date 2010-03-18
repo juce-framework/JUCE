@@ -1030,8 +1030,8 @@ public:
         return 2560;
     }
 
-    const String open (const BitArray& inputChannels,
-                       const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
                        double sampleRate,
                        int bufferSizeSamples)
     {
@@ -1083,12 +1083,12 @@ public:
         return bits;
     }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
         return enabledOutputs;
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
         return enabledInputs;
     }
@@ -1167,7 +1167,7 @@ private:
     int volatile totalSamplesOut;
     int64 volatile lastBlockTime;
     double sampleRate;
-    BitArray enabledInputs, enabledOutputs;
+    BigInteger enabledInputs, enabledOutputs;
     HeapBlock <float*> inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback;
@@ -1176,8 +1176,8 @@ private:
     DSoundAudioIODevice (const DSoundAudioIODevice&);
     DSoundAudioIODevice& operator= (const DSoundAudioIODevice&);
 
-    const String openDevice (const BitArray& inputChannels,
-                             const BitArray& outputChannels,
+    const String openDevice (const BigInteger& inputChannels,
+                             const BigInteger& outputChannels,
                              double sampleRate_,
                              int bufferSizeSamples_);
 
@@ -1497,8 +1497,8 @@ private:
 };
 
 //==============================================================================
-const String DSoundAudioIODevice::openDevice (const BitArray& inputChannels,
-                                              const BitArray& outputChannels,
+const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
+                                              const BigInteger& outputChannels,
                                               double sampleRate_,
                                               int bufferSizeSamples_)
 {

@@ -124,7 +124,7 @@ public:
             The bits that are set in this array indicate the channels of the
             input device that are active.
         */
-        BitArray inputChannels;
+        BigInteger inputChannels;
 
         /** If this is true, it indicates that the inputChannels array
             should be ignored, and instead, the device's default channels
@@ -136,7 +136,7 @@ public:
             The bits that are set in this array indicate the channels of the
             input device that are active.
         */
-        BitArray outputChannels;
+        BigInteger outputChannels;
 
         /** If this is true, it indicates that the outputChannels array
             should be ignored, and instead, the device's default channels
@@ -426,7 +426,7 @@ private:
     SortedSet <AudioIODeviceCallback*> callbacks;
     int numInputChansNeeded, numOutputChansNeeded;
     String currentDeviceType;
-    BitArray inputChannels, outputChannels;
+    BigInteger inputChannels, outputChannels;
     ScopedPointer <XmlElement> lastExplicitSettings;
     mutable bool listNeedsScanning;
     bool useInputNames;
@@ -480,7 +480,7 @@ private:
     void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);
 
     const String restartDevice (int blockSizeToUse, double sampleRateToUse,
-                                const BitArray& ins, const BitArray& outs);
+                                const BigInteger& ins, const BigInteger& outs);
     void stopDevice();
 
     void updateXml();

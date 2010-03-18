@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	10
+#define JUCE_BUILDNUMBER	11
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -2050,7 +2050,7 @@ public:
 		while (e != end)
 		{
 			if (elementToLookFor == *e)
-				return (int) (e - data.elements.getData());
+				return static_cast <int> (e - data.elements.getData());
 
 			++e;
 		}
@@ -2310,7 +2310,7 @@ public:
 		{
 			if (valueToRemove == *e)
 			{
-				remove ((int) (e - data.elements.getData()));
+				remove (static_cast <int> (e - data.elements.getData()));
 				break;
 			}
 
@@ -2326,7 +2326,7 @@ public:
 
 		if (endIndex > startIndex)
 		{
-			ElementType* e = data.elements + startIndex;
+			ElementType* const e = data.elements + startIndex;
 
 			numberToRemove = endIndex - startIndex;
 			for (int i = 0; i < numberToRemove; ++i)
@@ -2495,88 +2495,53 @@ private:
 
 class MemoryBlock;
 
-class JUCE_API  BitArray
+class JUCE_API  BigInteger
 {
 public:
 
-	BitArray() throw();
+	BigInteger();
 
-	BitArray (const unsigned int value) throw();
+	BigInteger (unsigned int value);
 
-	BitArray (const int value) throw();
+	BigInteger (int value);
 
-	BitArray (int64 value) throw();
+	BigInteger (int64 value);
 
-	BitArray (const BitArray& other) throw();
+	BigInteger (const BigInteger& other);
 
-	~BitArray() throw();
+	~BigInteger();
 
-	BitArray& operator= (const BitArray& other) throw();
+	BigInteger& operator= (const BigInteger& other);
 
-	bool operator== (const BitArray& other) const throw();
-	bool operator!= (const BitArray& other) const throw();
+	void swapWith (BigInteger& other) throw();
 
-	void clear() throw();
+	bool operator[] (int bit) const throw();
 
-	void clearBit (const int bitNumber) throw();
+	bool isZero() const throw();
 
-	void setBit (const int bitNumber) throw();
+	bool isOne() const throw();
 
-	void setBit (const int bitNumber,
-				 const bool shouldBeSet) throw();
+	int toInteger() const throw();
 
-	void setRange (int startBit,
-				   int numBits,
-				   const bool shouldBeSet) throw();
+	void clear();
 
-	void insertBit (const int bitNumber,
-					const bool shouldBeSet) throw();
+	void clearBit (int bitNumber) throw();
 
-	bool operator[] (const int bit) const throw();
+	void setBit (int bitNumber);
 
-	bool isEmpty() const throw();
+	void setBit (int bitNumber, bool shouldBeSet);
 
-	const BitArray getBitRange (int startBit, int numBits) const throw();
+	void setRange (int startBit, int numBits, bool shouldBeSet);
+
+	void insertBit (int bitNumber, bool shouldBeSet);
+
+	const BigInteger getBitRange (int startBit, int numBits) const;
 
 	int getBitRangeAsInt (int startBit, int numBits) const throw();
 
-	void setBitRangeAsInt (int startBit, int numBits,
-						   unsigned int valueToSet) throw();
+	void setBitRangeAsInt (int startBit, int numBits, unsigned int valueToSet);
 
-	void orWith (const BitArray& other) throw();
-
-	void andWith (const BitArray& other) throw();
-
-	void xorWith (const BitArray& other) throw();
-
-	void add (const BitArray& other) throw();
-
-	void subtract (const BitArray& other) throw();
-
-	void multiplyBy (const BitArray& other) throw();
-
-	void divideBy (const BitArray& divisor, BitArray& remainder) throw();
-
-	const BitArray findGreatestCommonDivisor (BitArray other) const throw();
-
-	void modulo (const BitArray& divisor) throw();
-
-	void exponentModulo (const BitArray& exponent, const BitArray& modulus) throw();
-
-	void inverseModulo (const BitArray& modulus) throw();
-
-	void shiftBits (int howManyBitsLeft,
-					int startBit = 0) throw();
-
-	int compare (const BitArray& other) const throw();
-
-	int compareAbsolute (const BitArray& other) const throw();
-
-	bool isNegative() const throw();
-
-	void setNegative (const bool shouldBeNegative) throw();
-
-	void negate() throw();
+	void shiftBits (int howManyBitsLeft, int startBit);
 
 	int countNumberOfSetBits() const throw();
 
@@ -2586,23 +2551,82 @@ public:
 
 	int getHighestBit() const throw();
 
-	const String toString (const int base, const int minimumNumCharacters = 1) const throw();
+	// All the standard arithmetic ops...
 
-	void parseString (const String& text,
-					  const int base) throw();
+	BigInteger& operator+= (const BigInteger& other);
+	BigInteger& operator-= (const BigInteger& other);
+	BigInteger& operator*= (const BigInteger& other);
+	BigInteger& operator/= (const BigInteger& other);
+	BigInteger& operator|= (const BigInteger& other);
+	BigInteger& operator&= (const BigInteger& other);
+	BigInteger& operator^= (const BigInteger& other);
+	BigInteger& operator%= (const BigInteger& other);
+	BigInteger& operator<<= (int numBitsToShift);
+	BigInteger& operator>>= (int numBitsToShift);
+	BigInteger& operator++();
+	BigInteger& operator--();
+	const BigInteger operator++ (int);
+	const BigInteger operator-- (int);
 
-	const MemoryBlock toMemoryBlock() const throw();
+	const BigInteger operator-() const;
+	const BigInteger operator+ (const BigInteger& other) const;
+	const BigInteger operator- (const BigInteger& other) const;
+	const BigInteger operator* (const BigInteger& other) const;
+	const BigInteger operator/ (const BigInteger& other) const;
+	const BigInteger operator| (const BigInteger& other) const;
+	const BigInteger operator& (const BigInteger& other) const;
+	const BigInteger operator^ (const BigInteger& other) const;
+	const BigInteger operator% (const BigInteger& other) const;
+	const BigInteger operator<< (int numBitsToShift) const;
+	const BigInteger operator>> (int numBitsToShift) const;
 
-	void loadFromMemoryBlock (const MemoryBlock& data) throw();
+	bool operator== (const BigInteger& other) const throw();
+	bool operator!= (const BigInteger& other) const throw();
+	bool operator<  (const BigInteger& other) const throw();
+	bool operator<= (const BigInteger& other) const throw();
+	bool operator>  (const BigInteger& other) const throw();
+	bool operator>= (const BigInteger& other) const throw();
+
+	int compare (const BigInteger& other) const throw();
+
+	int compareAbsolute (const BigInteger& other) const throw();
+
+	void divideBy (const BigInteger& divisor, BigInteger& remainder);
+
+	const BigInteger findGreatestCommonDivisor (BigInteger other) const;
+
+	void exponentModulo (const BigInteger& exponent, const BigInteger& modulus);
+
+	void inverseModulo (const BigInteger& modulus);
+
+	bool isNegative() const throw();
+
+	void setNegative (const bool shouldBeNegative) throw();
+
+	void negate() throw();
+
+	const String toString (int base, int minimumNumCharacters = 1) const;
+
+	void parseString (const String& text, int base);
+
+	const MemoryBlock toMemoryBlock() const;
+
+	void loadFromMemoryBlock (const MemoryBlock& data);
 
 	juce_UseDebuggingNewOperator
 
 private:
-	void ensureSize (const int numVals) throw();
 	HeapBlock <unsigned int> values;
 	int numValues, highestBit;
 	bool negative;
+
+	void ensureSize (int numVals);
+	static const BigInteger simpleGCD (BigInteger* m, BigInteger* n);
 };
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& value);
+
+typedef BigInteger BitArray;
 
 #endif   // __JUCE_BITARRAY_JUCEHEADER__
 /*** End of inlined file: juce_BitArray.h ***/
@@ -3470,7 +3494,7 @@ public:
 		while (e != end)
 		{
 			if (objectToLookFor == *e)
-				return (int) (e - data.elements.getData());
+				return static_cast <int> (e - data.elements.getData());
 
 			++e;
 		}
@@ -3666,7 +3690,7 @@ public:
 		{
 			if (objectToRemove == *e)
 			{
-				remove ((int) (e - data.elements.getData()), deleteObject);
+				remove (static_cast <int> (e - data.elements.getData()), deleteObject);
 				break;
 			}
 
@@ -4947,7 +4971,7 @@ public:
 		while (e != end)
 		{
 			if (objectToLookFor == *e)
-				return (int) (e - data.elements.getData());
+				return static_cast <int> (e - data.elements.getData());
 
 			++e;
 		}
@@ -7067,9 +7091,9 @@ public:
 
 	bool nextBool() throw();
 
-	const BitArray nextLargeNumber (const BitArray& maximumValue) throw();
+	const BigInteger nextLargeNumber (const BigInteger& maximumValue);
 
-	void fillBitsRandomly (BitArray& arrayToChange, int startBit, int numBits) throw();
+	void fillBitsRandomly (BigInteger& arrayToChange, int startBit, int numBits);
 
 	static Random& getSystemRandom() throw();
 
@@ -7503,13 +7527,12 @@ class JUCE_API  Primes
 {
 public:
 
-	static const BitArray createProbablePrime (int bitLength,
-											   int certainty,
-											   const int* randomSeeds = 0,
-											   int numRandomSeeds = 0) throw();
+	static const BigInteger createProbablePrime (int bitLength,
+												 int certainty,
+												 const int* randomSeeds = 0,
+												 int numRandomSeeds = 0);
 
-	static bool isProbablyPrime (const BitArray& number,
-								 int certainty) throw();
+	static bool isProbablyPrime (const BigInteger& number, int certainty);
 };
 
 #endif   // __JUCE_PRIMES_JUCEHEADER__
@@ -7527,26 +7550,26 @@ class JUCE_API  RSAKey
 {
 public:
 
-	RSAKey() throw();
+	RSAKey();
 
-	RSAKey (const String& stringRepresentation) throw();
+	RSAKey (const String& stringRepresentation);
 
-	~RSAKey() throw();
+	~RSAKey();
 
-	const String toString() const throw();
+	const String toString() const;
 
-	bool applyToValue (BitArray& value) const throw();
+	bool applyToValue (BigInteger& value) const;
 
 	static void createKeyPair (RSAKey& publicKey,
 							   RSAKey& privateKey,
-							   const int numBits,
+							   int numBits,
 							   const int* randomSeeds = 0,
-							   const int numRandomSeeds = 0) throw();
+							   int numRandomSeeds = 0);
 
 	juce_UseDebuggingNewOperator
 
 protected:
-	BitArray part1, part2;
+	BigInteger part1, part2;
 };
 
 #endif   // __JUCE_RSAKEY_JUCEHEADER__
@@ -14595,8 +14618,8 @@ public:
 
 	virtual int getDefaultBufferSize() = 0;
 
-	virtual const String open (const BitArray& inputChannels,
-							   const BitArray& outputChannels,
+	virtual const String open (const BigInteger& inputChannels,
+							   const BigInteger& outputChannels,
 							   double sampleRate,
 							   int bufferSizeSamples) = 0;
 
@@ -14618,9 +14641,9 @@ public:
 
 	virtual int getCurrentBitDepth() = 0;
 
-	virtual const BitArray getActiveOutputChannels() const = 0;
+	virtual const BigInteger getActiveOutputChannels() const = 0;
 
-	virtual const BitArray getActiveInputChannels() const = 0;
+	virtual const BigInteger getActiveInputChannels() const = 0;
 
 	virtual int getOutputLatencyInSamples() = 0;
 
@@ -15068,7 +15091,7 @@ public:
 private:
 
 	VoidArray inputs;
-	BitArray inputsToDelete;
+	BigInteger inputsToDelete;
 	CriticalSection lock;
 	AudioSampleBuffer tempBuffer;
 	double currentSampleRate;
@@ -17013,11 +17036,11 @@ public:
 
 		int bufferSize;
 
-		BitArray inputChannels;
+		BigInteger inputChannels;
 
 		bool useDefaultInputChannels;
 
-		BitArray outputChannels;
+		BigInteger outputChannels;
 
 		bool useDefaultOutputChannels;
 	};
@@ -17094,7 +17117,7 @@ private:
 	SortedSet <AudioIODeviceCallback*> callbacks;
 	int numInputChansNeeded, numOutputChansNeeded;
 	String currentDeviceType;
-	BitArray inputChannels, outputChannels;
+	BigInteger inputChannels, outputChannels;
 	ScopedPointer <XmlElement> lastExplicitSettings;
 	mutable bool listNeedsScanning;
 	bool useInputNames;
@@ -17147,7 +17170,7 @@ private:
 	void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);
 
 	const String restartDevice (int blockSizeToUse, double sampleRateToUse,
-								const BitArray& ins, const BitArray& outs);
+								const BigInteger& ins, const BigInteger& outs);
 	void stopDevice();
 
 	void updateXml();
@@ -17810,7 +17833,7 @@ private:
 	CriticalSection callbackLock, listenerLock;
 
 #ifdef JUCE_DEBUG
-	BitArray changingParams;
+	BigInteger changingParams;
 #endif
 
 	AudioProcessor (const AudioProcessor&);
@@ -19299,7 +19322,7 @@ public:
 
 	SamplerSound (const String& name,
 				  AudioFormatReader& source,
-				  const BitArray& midiNotes,
+				  const BigInteger& midiNotes,
 				  const int midiNoteForNormalPitch,
 				  const double attackTimeSecs,
 				  const double releaseTimeSecs,
@@ -19322,7 +19345,7 @@ private:
 	String name;
 	ScopedPointer <AudioSampleBuffer> data;
 	double sourceSampleRate;
-	BitArray midiNotes;
+	BigInteger midiNotes;
 	int length, attackSamples, releaseSamples;
 	int midiRootNote;
 };
@@ -22459,7 +22482,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 protected:
-	virtual const BitArray getRoots (StringArray& rootNames, StringArray& rootPaths);
+	virtual const BigInteger getRoots (StringArray& rootNames, StringArray& rootPaths);
 
 private:
 
@@ -26584,7 +26607,7 @@ private:
 	int midiChannel, midiInChannelMask;
 	float velocity;
 	int noteUnderMouse, mouseDownNote;
-	BitArray keysPressed, keysCurrentlyDrawnDown;
+	BigInteger keysPressed, keysCurrentlyDrawnDown;
 
 	int rangeStart, rangeEnd, firstKey;
 	bool canScroll, mouseDragging, useMousePositionForVelocity;

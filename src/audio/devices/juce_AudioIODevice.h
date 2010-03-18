@@ -203,9 +203,9 @@ public:
     //==============================================================================
     /** Tries to open the device ready to play.
 
-        @param inputChannels        a BitArray in which a set bit indicates that the corresponding
+        @param inputChannels        a BigInteger in which a set bit indicates that the corresponding
                                     input channel should be enabled
-        @param outputChannels       a BitArray in which a set bit indicates that the corresponding
+        @param outputChannels       a BigInteger in which a set bit indicates that the corresponding
                                     output channel should be enabled
         @param sampleRate           the sample rate to try to use - to find out which rates are
                                     available, see getNumSampleRates() and getSampleRate()
@@ -215,8 +215,8 @@ public:
                     opening the device
         @see close
     */
-    virtual const String open (const BitArray& inputChannels,
-                               const BitArray& outputChannels,
+    virtual const String open (const BigInteger& inputChannels,
+                               const BigInteger& outputChannels,
                                double sampleRate,
                                int bufferSizeSamples) = 0;
 
@@ -279,13 +279,13 @@ public:
         enabled.
         @see getOutputChannelNames
     */
-    virtual const BitArray getActiveOutputChannels() const = 0;
+    virtual const BigInteger getActiveOutputChannels() const = 0;
 
     /** Returns a mask showing which of the available input channels are currently
         enabled.
         @see getInputChannelNames
     */
-    virtual const BitArray getActiveInputChannels() const = 0;
+    virtual const BigInteger getActiveInputChannels() const = 0;
 
     /** Returns the device's output latency.
 

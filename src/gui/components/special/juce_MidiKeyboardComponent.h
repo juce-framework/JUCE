@@ -392,7 +392,7 @@ private:
     int midiChannel, midiInChannelMask;
     float velocity;
     int noteUnderMouse, mouseDownNote;
-    BitArray keysPressed, keysCurrentlyDrawnDown;
+    BigInteger keysPressed, keysCurrentlyDrawnDown;
 
     int rangeStart, rangeEnd, firstKey;
     bool canScroll, mouseDragging, useMousePositionForVelocity;

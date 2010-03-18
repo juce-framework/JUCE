@@ -243,7 +243,7 @@ private:
     TableListBox& owner;
     int row;
     bool isSelected, isDragging, selectRowOnMouseUp;
-    BitArray columnsWithComponents;
+    BigInteger columnsWithComponents;
 
     Component* findChildComponentForColumn (const int columnId) const
     {

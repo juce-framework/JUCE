@@ -362,8 +362,8 @@ public:
         close();
     }
 
-    void open (BitArray inputChannels,
-               BitArray outputChannels,
+    void open (BigInteger inputChannels,
+               BigInteger outputChannels,
                const double sampleRate_,
                const int bufferSize_)
     {
@@ -581,7 +581,7 @@ public:
     String error;
     double sampleRate;
     int bufferSize;
-    BitArray currentInputChans, currentOutputChans;
+    BigInteger currentInputChans, currentOutputChans;
 
     Array <int> sampleRates;
     StringArray channelNamesOut, channelNamesIn;
@@ -704,8 +704,8 @@ public:
         return 512;
     }
 
-    const String open (const BitArray& inputChannels,
-                       const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
                        double sampleRate,
                        int bufferSizeSamples)
     {
@@ -760,12 +760,12 @@ public:
         return internal->getBitDepth();
     }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
         return internal->currentOutputChans;
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
         return internal->currentInputChans;
     }

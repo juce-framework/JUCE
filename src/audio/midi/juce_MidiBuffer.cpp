@@ -79,7 +79,7 @@ void MidiBuffer::clear (const int startSample,
 
     if (end > start)
     {
-        const size_t bytesToMove = (size_t) (bytesUsed - (end - getData()));
+        const int bytesToMove = bytesUsed - (int) (end - getData());
 
         if (bytesToMove > 0)
             memmove (start, end, bytesToMove);
@@ -137,7 +137,7 @@ void MidiBuffer::addEvent (const uint8* const newData,
         data.ensureSize ((spaceNeeded + spaceNeeded / 2 + 8) & ~7);
 
         uint8* d = findEventAfter (getData(), sampleNumber);
-        const size_t bytesToMove = (size_t) (bytesUsed - (d - getData()));
+        const int bytesToMove = bytesUsed - (int) (d - getData());
 
         if (bytesToMove > 0)
             memmove (d + numBytes + 6,

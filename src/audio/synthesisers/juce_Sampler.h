@@ -66,7 +66,7 @@ public:
     */
     SamplerSound (const String& name,
                   AudioFormatReader& source,
-                  const BitArray& midiNotes,
+                  const BigInteger& midiNotes,
                   const int midiNoteForNormalPitch,
                   const double attackTimeSecs,
                   const double releaseTimeSecs,
@@ -99,7 +99,7 @@ private:
     String name;
     ScopedPointer <AudioSampleBuffer> data;
     double sourceSampleRate;
-    BitArray midiNotes;
+    BigInteger midiNotes;
     int length, attackSamples, releaseSamples;
     int midiRootNote;
 };

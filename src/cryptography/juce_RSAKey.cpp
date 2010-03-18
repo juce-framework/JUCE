@@ -33,11 +33,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-RSAKey::RSAKey() throw()
+RSAKey::RSAKey()
 {
 }
 
-RSAKey::RSAKey (const String& s) throw()
+RSAKey::RSAKey (const String& s)
 {
     if (s.containsChar (T(',')))
     {
@@ -51,97 +51,75 @@ RSAKey::RSAKey (const String& s) throw()
     }
 }
 
-RSAKey::~RSAKey() throw()
+RSAKey::~RSAKey()
 {
 }
 
-const String RSAKey::toString() const throw()
+const String RSAKey::toString() const
 {
-    return part1.toString (16) + T(",") + part2.toString (16);
+    return part1.toString (16) + "," + part2.toString (16);
 }
 
-bool RSAKey::applyToValue (BitArray& value) const throw()
+bool RSAKey::applyToValue (BigInteger& value) const
 {
-    if (part1.isEmpty() || part2.isEmpty()
-         || value.compare (0) <= 0)
+    if (part1.isZero() || part2.isZero() || value <= 0)
     {
         jassertfalse   // using an uninitialised key
         value.clear();
         return false;
     }
 
-    BitArray result;
+    BigInteger result;
 
-    while (! value.isEmpty())
+    while (! value.isZero())
     {
-        result.multiplyBy (part2);
+        result *= part2;
 
-        BitArray remainder;
+        BigInteger remainder;
         value.divideBy (part2, remainder);
 
         remainder.exponentModulo (part1, part2);
 
-        result.add (remainder);
+        result += remainder;
     }
 
-    value = result;
-
+    value.swapWith (result);
     return true;
 }
 
-static const BitArray findBestCommonDivisor (const BitArray& p,
-                                             const BitArray& q) throw()
+static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q)
 {
-    const BitArray one (1);
-
     // try 3, 5, 9, 17, etc first because these only contain 2 bits and so
     // are fast to divide + multiply
     for (int i = 2; i <= 65536; i *= 2)
     {
-        const BitArray e (1 + i);
+        const BigInteger e (1 + i);
 
-        if (e.findGreatestCommonDivisor (p) == one
-             && e.findGreatestCommonDivisor (q) == one)
-        {
+        if (e.findGreatestCommonDivisor (p).isOne() && e.findGreatestCommonDivisor (q).isOne())
             return e;
-        }
     }
 
-    BitArray e (4);
+    BigInteger e (4);
 
-    while (! (e.findGreatestCommonDivisor (p) == one
-                && e.findGreatestCommonDivisor (q) == one))
-    {
-        e.add (one);
-    }
+    while (! (e.findGreatestCommonDivisor (p).isOne() && e.findGreatestCommonDivisor (q).isOne()))
+        ++e;
 
     return e;
 }
 
-void RSAKey::createKeyPair (RSAKey& publicKey,
-                            RSAKey& privateKey,
-                            const int numBits,
-                            const int* randomSeeds,
-                            const int numRandomSeeds) throw()
+void RSAKey::createKeyPair (RSAKey& publicKey, RSAKey& privateKey,
+                            const int numBits, const int* randomSeeds, const int numRandomSeeds)
 {
     jassert (numBits > 16); // not much point using less than this..
 
-    BitArray p (Primes::createProbablePrime (numBits / 2, 30, randomSeeds, numRandomSeeds));
-    BitArray q (Primes::createProbablePrime (numBits - numBits / 2, 30, randomSeeds, numRandomSeeds));
+    BigInteger p (Primes::createProbablePrime (numBits / 2, 30, randomSeeds, numRandomSeeds));
+    BigInteger q (Primes::createProbablePrime (numBits - numBits / 2, 30, randomSeeds, numRandomSeeds));
 
-    BitArray n (p);
-    n.multiplyBy (q);   // n = pq
+    const BigInteger n (p * q);
+    const BigInteger m (--p * --q);
+    const BigInteger e (findBestCommonDivisor (p, q));
 
-    const BitArray one (1);
-    p.subtract (one);
-    q.subtract (one);
-
-    BitArray m (p);
-    m.multiplyBy (q);   // m = (p - 1)(q - 1)
-
-    const BitArray e (findBestCommonDivisor (p, q));
-
-    BitArray d (e);
+    BigInteger d (e);
     d.inverseModulo (m);
 
     publicKey.part1 = e;

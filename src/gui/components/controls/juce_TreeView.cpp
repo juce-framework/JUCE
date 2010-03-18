@@ -192,7 +192,7 @@ public:
         const int visibleTop = -getY();
         const int visibleBottom = visibleTop + getParentHeight();
 
-        BitArray itemsToKeep;
+        BigInteger itemsToKeep;
         TreeViewItem* item = owner->rootItem;
         int y = (item != 0 && !owner->rootItemVisible) ? -item->itemHeight : 0;
 

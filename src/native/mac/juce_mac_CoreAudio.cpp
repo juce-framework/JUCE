@@ -421,8 +421,8 @@ public:
     }
 
     //==============================================================================
-    const String reopen (const BitArray& inputChannels,
-                         const BitArray& outputChannels,
+    const String reopen (const BigInteger& inputChannels,
+                         const BigInteger& outputChannels,
                          double newSampleRate,
                          int bufferSizeSamples)
     {
@@ -761,7 +761,7 @@ public:
     juce_UseDebuggingNewOperator
 
     int inputLatency, outputLatency;
-    BitArray activeInputChans, activeOutputChans;
+    BigInteger activeInputChans, activeOutputChans;
     StringArray inChanNames, outChanNames;
     Array <double> sampleRates;
     Array <int> bufferSizes;
@@ -960,8 +960,8 @@ public:
         return 512;
     }
 
-    const String open (const BitArray& inputChannels,
-                       const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels,
+                       const BigInteger& outputChannels,
                        double sampleRate,
                        int bufferSizeSamples)
     {
@@ -1001,21 +1001,21 @@ public:
         return 32;  // no way to find out, so just assume it's high..
     }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
-        return internal != 0 ? internal->activeOutputChans : BitArray();
+        return internal != 0 ? internal->activeOutputChans : BigInteger();
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
-        BitArray chans;
+        BigInteger chans;
 
         if (internal != 0)
         {
             chans = internal->activeInputChans;
 
             if (internal->inputDevice != 0)
-                chans.orWith (internal->inputDevice->activeInputChans);
+                chans |= internal->inputDevice->activeInputChans;
         }
 
         return chans;

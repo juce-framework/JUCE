@@ -44,23 +44,23 @@ public:
 
         Initialise a pair of objects for use with the createKeyPair() method.
     */
-    RSAKey() throw();
+    RSAKey();
 
     /** Loads a key from an encoded string representation.
 
         This reloads a key from a string created by the toString() method.
     */
-    RSAKey (const String& stringRepresentation) throw();
+    RSAKey (const String& stringRepresentation);
 
     /** Destructor. */
-    ~RSAKey() throw();
+    ~RSAKey();
 
     //==============================================================================
     /** Turns the key into a string representation.
 
         This can be reloaded using the constructor that takes a string.
     */
-    const String toString() const throw();
+    const String toString() const;
 
     //==============================================================================
     /** Encodes or decodes a value.
@@ -76,7 +76,7 @@ public:
         happily do its job and return true, but the result won't be what you were expecting.
         It's your responsibility to check that the result is what you wanted.
     */
-    bool applyToValue (BitArray& value) const throw();
+    bool applyToValue (BigInteger& value) const;
 
     //==============================================================================
     /** Creates a public/private key-pair.
@@ -93,16 +93,16 @@ public:
     */
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
-                               const int numBits,
+                               int numBits,
                                const int* randomSeeds = 0,
-                               const int numRandomSeeds = 0) throw();
+                               int numRandomSeeds = 0);
 
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
-    BitArray part1, part2;
+    BigInteger part1, part2;
 };
 
 

@@ -579,7 +579,7 @@ private:
     CriticalSection callbackLock, listenerLock;
 
 #ifdef JUCE_DEBUG
-    BitArray changingParams;
+    BigInteger changingParams;
 #endif
 
     AudioProcessor (const AudioProcessor&);

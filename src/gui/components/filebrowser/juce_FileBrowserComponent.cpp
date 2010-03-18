@@ -101,7 +101,7 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
     currentPathBox->setEditableText (true);
 
     StringArray rootNames, rootPaths;
-    const BitArray separators (getRoots (rootNames, rootPaths));
+    const BigInteger separators (getRoots (rootNames, rootPaths));
 
     for (int i = 0; i < rootNames.size(); ++i)
     {
@@ -457,9 +457,9 @@ void FileBrowserComponent::comboBoxChanged (ComboBox*)
     }
 }
 
-const BitArray FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
+const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPaths)
 {
-    BitArray separators;
+    BigInteger separators;
 
 #if JUCE_WINDOWS
     Array<File> roots;

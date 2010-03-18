@@ -211,7 +211,7 @@ public:
     int getBufferSizeSamples (int index)        { return getDefaultBufferSize(); }
     int getDefaultBufferSize()                  { return client != 0 ? JUCE_NAMESPACE::jack_get_buffer_size (client) : 0; }
 
-    const String open (const BitArray& inputChannels, const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                        double sampleRate, int bufferSizeSamples)
     {
         if (client == 0)
@@ -228,13 +228,13 @@ public:
         JUCE_NAMESPACE::jack_activate (client);
         isOpen_ = true;
 
-        if (! inputChannels.isEmpty())
+        if (! inputChannels.isZero())
         {
             const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsOutput);
 
             if (ports != 0)
             {
-                const int numInputChannels = inputChannels.getHighestBit () + 1;
+                const int numInputChannels = inputChannels.getHighestBit() + 1;
 
                 for (int i = 0; i < numInputChannels; ++i)
                 {
@@ -252,13 +252,13 @@ public:
             }
         }
 
-        if (! outputChannels.isEmpty())
+        if (! outputChannels.isZero())
         {
             const char** const ports = JUCE_NAMESPACE::jack_get_ports (client, 0, 0, /* JackPortIsPhysical | */ JackPortIsInput);
 
             if (ports != 0)
             {
-                const int numOutputChannels = outputChannels.getHighestBit () + 1;
+                const int numOutputChannels = outputChannels.getHighestBit() + 1;
 
                 for (int i = 0; i < numOutputChannels; ++i)
                 {
@@ -324,9 +324,9 @@ public:
     int getCurrentBitDepth()                { return 32; }
     const String getLastError()             { return lastError; }
 
-    const BitArray getActiveOutputChannels() const
+    const BigInteger getActiveOutputChannels() const
     {
-        BitArray outputBits;
+        BigInteger outputBits;
 
         for (int i = 0; i < outputPorts.size(); i++)
             if (JUCE_NAMESPACE::jack_port_connected ((jack_port_t*) outputPorts [i]))
@@ -335,9 +335,9 @@ public:
         return outputBits;
     }
 
-    const BitArray getActiveInputChannels() const
+    const BigInteger getActiveInputChannels() const
     {
-        BitArray inputBits;
+        BigInteger inputBits;
 
         for (int i = 0; i < inputPorts.size(); i++)
             if (JUCE_NAMESPACE::jack_port_connected ((jack_port_t*) inputPorts [i]))

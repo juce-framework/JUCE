@@ -184,7 +184,7 @@ public:
         while (e != end)
         {
             if (objectToLookFor == *e)
-                return (int) (e - data.elements.getData());
+                return static_cast <int> (e - data.elements.getData());
 
             ++e;
         }

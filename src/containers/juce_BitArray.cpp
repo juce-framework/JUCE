@@ -27,14 +27,13 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_BitArray.h"
 #include "juce_MemoryBlock.h"
 #include "../core/juce_Random.h"
 
 
 //==============================================================================
-BitArray::BitArray() throw()
+BigInteger::BigInteger()
     : numValues (4),
       highestBit (-1),
       negative (false)
@@ -42,7 +41,7 @@ BitArray::BitArray() throw()
     values.calloc (numValues + 1);
 }
 
-BitArray::BitArray (const int value) throw()
+BigInteger::BigInteger (const int value)
     : numValues (4),
       highestBit (31),
       negative (value < 0)
@@ -52,7 +51,7 @@ BitArray::BitArray (const int value) throw()
     highestBit = getHighestBit();
 }
 
-BitArray::BitArray (int64 value) throw()
+BigInteger::BigInteger (int64 value)
     : numValues (4),
       highestBit (63),
       negative (value < 0)
@@ -67,7 +66,7 @@ BitArray::BitArray (int64 value) throw()
     highestBit = getHighestBit();
 }
 
-BitArray::BitArray (const unsigned int value) throw()
+BigInteger::BigInteger (const unsigned int value)
     : numValues (4),
       highestBit (31),
       negative (false)
@@ -77,7 +76,7 @@ BitArray::BitArray (const unsigned int value) throw()
     highestBit = getHighestBit();
 }
 
-BitArray::BitArray (const BitArray& other) throw()
+BigInteger::BigInteger (const BigInteger& other)
     : numValues (jmax (4, (other.highestBit >> 5) + 1)),
       highestBit (other.getHighestBit()),
       negative (other.negative)
@@ -86,11 +85,19 @@ BitArray::BitArray (const BitArray& other) throw()
     memcpy (values, other.values, sizeof (unsigned int) * (numValues + 1));
 }
 
-BitArray::~BitArray() throw()
+BigInteger::~BigInteger()
 {
 }
 
-BitArray& BitArray::operator= (const BitArray& other) throw()
+void BigInteger::swapWith (BigInteger& other) throw()
+{
+    values.swapWith (other.values);
+    swapVariables (numValues, other.numValues);
+    swapVariables (highestBit, other.highestBit);
+    swapVariables (negative, other.negative);
+}
+
+BigInteger& BigInteger::operator= (const BigInteger& other)
 {
     if (this != &other)
     {
@@ -104,10 +111,508 @@ BitArray& BitArray::operator= (const BitArray& other) throw()
     return *this;
 }
 
-// result == 0 = the same
-// result < 0  = this number is smaller
-// result > 0  = this number is bigger
-int BitArray::compare (const BitArray& other) const throw()
+void BigInteger::ensureSize (const int numVals)
+{
+    if (numVals + 2 >= numValues)
+    {
+        int oldSize = numValues;
+        numValues = ((numVals + 2) * 3) / 2;
+        values.realloc (numValues + 1);
+
+        while (oldSize < numValues)
+            values [oldSize++] = 0;
+    }
+}
+
+//==============================================================================
+bool BigInteger::operator[] (const int bit) const throw()
+{
+    return bit <= highestBit && bit >= 0
+             && ((values [bit >> 5] & (1 << (bit & 31))) != 0);
+}
+
+int BigInteger::toInteger() const throw()
+{
+    const int n = (int) (values[0] & 0x7fffffff);
+    return negative ? -n : n;
+}
+
+const BigInteger BigInteger::getBitRange (int startBit, int numBits) const
+{
+    BigInteger r;
+    numBits = jmin (numBits, getHighestBit() + 1 - startBit);
+    r.ensureSize (numBits >> 5);
+    r.highestBit = numBits;
+
+    int i = 0;
+    while (numBits > 0)
+    {
+        r.values[i++] = getBitRangeAsInt (startBit, jmin (32, numBits));
+        numBits -= 32;
+        startBit += 32;
+    }
+
+    r.highestBit = r.getHighestBit();
+    return r;
+}
+
+int BigInteger::getBitRangeAsInt (const int startBit, int numBits) const throw()
+{
+    if (numBits > 32)
+    {
+        jassertfalse  // use getBitRange() if you need more than 32 bits..
+        numBits = 32;
+    }
+
+    numBits = jmin (numBits, highestBit + 1 - startBit);
+
+    if (numBits <= 0)
+        return 0;
+
+    const int pos = startBit >> 5;
+    const int offset = startBit & 31;
+    const int endSpace = 32 - numBits;
+
+    uint32 n = ((uint32) values [pos]) >> offset;
+
+    if (offset > endSpace)
+        n |= ((uint32) values [pos + 1]) << (32 - offset);
+
+    return (int) (n & (((uint32) 0xffffffff) >> endSpace));
+}
+
+void BigInteger::setBitRangeAsInt (const int startBit, int numBits, unsigned int valueToSet)
+{
+    if (numBits > 32)
+    {
+        jassertfalse
+        numBits = 32;
+    }
+
+    for (int i = 0; i < numBits; ++i)
+    {
+        setBit (startBit + i, (valueToSet & 1) != 0);
+        valueToSet >>= 1;
+    }
+}
+
+//==============================================================================
+void BigInteger::clear()
+{
+    if (numValues > 16)
+    {
+        numValues = 4;
+        values.calloc (numValues + 1);
+    }
+    else
+    {
+        zeromem (values, sizeof (unsigned int) * (numValues + 1));
+    }
+
+    highestBit = -1;
+    negative = false;
+}
+
+void BigInteger::setBit (const int bit)
+{
+    if (bit >= 0)
+    {
+        if (bit > highestBit)
+        {
+            ensureSize (bit >> 5);
+            highestBit = bit;
+        }
+
+        values [bit >> 5] |= (1 << (bit & 31));
+    }
+}
+
+void BigInteger::setBit (const int bit, const bool shouldBeSet)
+{
+    if (shouldBeSet)
+        setBit (bit);
+    else
+        clearBit (bit);
+}
+
+void BigInteger::clearBit (const int bit) throw()
+{
+    if (bit >= 0 && bit <= highestBit)
+        values [bit >> 5] &= ~(1 << (bit & 31));
+}
+
+void BigInteger::setRange (int startBit, int numBits, const bool shouldBeSet)
+{
+    while (--numBits >= 0)
+        setBit (startBit++, shouldBeSet);
+}
+
+void BigInteger::insertBit (const int bit, const bool shouldBeSet)
+{
+    if (bit >= 0)
+        shiftBits (1, bit);
+
+    setBit (bit, shouldBeSet);
+}
+
+//==============================================================================
+bool BigInteger::isZero() const throw()
+{
+    return getHighestBit() < 0;
+}
+
+bool BigInteger::isOne() const throw()
+{
+    return getHighestBit() == 0 && ! negative;
+}
+
+bool BigInteger::isNegative() const throw()
+{
+    return negative && ! isZero();
+}
+
+void BigInteger::setNegative (const bool neg) throw()
+{
+    negative = neg;
+}
+
+void BigInteger::negate() throw()
+{
+    negative = (! negative) && ! isZero();
+}
+
+int BigInteger::countNumberOfSetBits() const throw()
+{
+    int total = 0;
+
+    for (int i = (highestBit >> 5) + 1; --i >= 0;)
+    {
+        unsigned int n = values[i];
+
+        if (n == 0xffffffff)
+        {
+            total += 32;
+        }
+        else
+        {
+            while (n != 0)
+            {
+                total += (n & 1);
+                n >>= 1;
+            }
+        }
+    }
+
+    return total;
+}
+
+int BigInteger::getHighestBit() const throw()
+{
+    for (int i = highestBit + 1; --i >= 0;)
+        if ((values [i >> 5] & (1 << (i & 31))) != 0)
+            return i;
+
+    return -1;
+}
+
+int BigInteger::findNextSetBit (int i) const throw()
+{
+    for (; i <= highestBit; ++i)
+        if ((values [i >> 5] & (1 << (i & 31))) != 0)
+            return i;
+
+    return -1;
+}
+
+int BigInteger::findNextClearBit (int i) const throw()
+{
+    for (; i <= highestBit; ++i)
+        if ((values [i >> 5] & (1 << (i & 31))) == 0)
+            break;
+
+    return i;
+}
+
+//==============================================================================
+BigInteger& BigInteger::operator+= (const BigInteger& other)
+{
+    if (other.isNegative())
+        return operator-= (-other);
+
+    if (isNegative())
+    {
+        if (compareAbsolute (other) < 0)
+        {
+            BigInteger temp (*this);
+            temp.negate();
+            *this = other;
+            operator-= (temp);
+        }
+        else
+        {
+            negate();
+            operator-= (other);
+            negate();
+        }
+    }
+    else
+    {
+        if (other.highestBit > highestBit)
+            highestBit = other.highestBit;
+
+        ++highestBit;
+
+        const int numInts = (highestBit >> 5) + 1;
+        ensureSize (numInts);
+
+        int64 remainder = 0;
+
+        for (int i = 0; i <= numInts; ++i)
+        {
+            if (i < numValues)
+                remainder += values[i];
+
+            if (i < other.numValues)
+                remainder += other.values[i];
+
+            values[i] = (unsigned int) remainder;
+            remainder >>= 32;
+        }
+
+        jassert (remainder == 0);
+        highestBit = getHighestBit();
+    }
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator-= (const BigInteger& other)
+{
+    if (other.isNegative())
+        return operator+= (-other);
+
+    if (! isNegative())
+    {
+        if (compareAbsolute (other) < 0)
+        {
+            BigInteger temp (other);
+            swapWith (temp);
+            operator-= (temp);
+            negate();
+            return *this;
+        }
+    }
+    else
+    {
+        negate();
+        operator+= (other);
+        negate();
+        return *this;
+    }
+
+    const int numInts = (highestBit >> 5) + 1;
+    const int maxOtherInts = (other.highestBit >> 5) + 1;
+    int64 amountToSubtract = 0;
+
+    for (int i = 0; i <= numInts; ++i)
+    {
+        if (i <= maxOtherInts)
+            amountToSubtract += (int64) other.values[i];
+
+        if (values[i] >= amountToSubtract)
+        {
+            values[i] = (unsigned int) (values[i] - amountToSubtract);
+            amountToSubtract = 0;
+        }
+        else
+        {
+            const int64 n = ((int64) values[i] + (((int64) 1) << 32)) - amountToSubtract;
+            values[i] = (unsigned int) n;
+            amountToSubtract = 1;
+        }
+    }
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator*= (const BigInteger& other)
+{
+    BigInteger total;
+    highestBit = getHighestBit();
+    const bool wasNegative = isNegative();
+    setNegative (false);
+
+    for (int i = 0; i <= highestBit; ++i)
+    {
+        if (operator[](i))
+        {
+            BigInteger n (other);
+            n.setNegative (false);
+            n <<= i;
+            total += n;
+        }
+    }
+
+    total.setNegative (wasNegative ^ other.isNegative());
+    swapWith (total);
+    return *this;
+}
+
+void BigInteger::divideBy (const BigInteger& divisor, BigInteger& remainder)
+{
+    jassert (this != &remainder); // (can't handle passing itself in to get the remainder)
+
+    const int divHB = divisor.getHighestBit();
+    const int ourHB = getHighestBit();
+
+    if (divHB < 0 || ourHB < 0)
+    {
+        // division by zero
+        remainder.clear();
+        clear();
+    }
+    else
+    {
+        const bool wasNegative = isNegative();
+
+        swapWith (remainder);
+        remainder.setNegative (false);
+        clear();
+
+        BigInteger temp (divisor);
+        temp.setNegative (false);
+
+        int leftShift = ourHB - divHB;
+        temp <<= leftShift;
+
+        while (leftShift >= 0)
+        {
+            if (remainder.compareAbsolute (temp) >= 0)
+            {
+                remainder -= temp;
+                setBit (leftShift);
+            }
+
+            if (--leftShift >= 0)
+                temp >>= 1;
+        }
+
+        negative = wasNegative ^ divisor.isNegative();
+        remainder.setNegative (wasNegative);
+    }
+}
+
+BigInteger& BigInteger::operator/= (const BigInteger& other)
+{
+    BigInteger remainder;
+    divideBy (other, remainder);
+    return *this;
+}
+
+BigInteger& BigInteger::operator|= (const BigInteger& other)
+{
+    // this operation doesn't take into account negative values..
+    jassert (isNegative() == other.isNegative());
+
+    if (other.highestBit >= 0)
+    {
+        ensureSize (other.highestBit >> 5);
+
+        int n = (other.highestBit >> 5) + 1;
+
+        while (--n >= 0)
+            values[n] |= other.values[n];
+
+        if (other.highestBit > highestBit)
+            highestBit = other.highestBit;
+
+        highestBit = getHighestBit();
+    }
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator&= (const BigInteger& other)
+{
+    // this operation doesn't take into account negative values..
+    jassert (isNegative() == other.isNegative());
+
+    int n = numValues;
+
+    while (n > other.numValues)
+        values[--n] = 0;
+
+    while (--n >= 0)
+        values[n] &= other.values[n];
+
+    if (other.highestBit < highestBit)
+        highestBit = other.highestBit;
+
+    highestBit = getHighestBit();
+    return *this;
+}
+
+BigInteger& BigInteger::operator^= (const BigInteger& other)
+{
+    // this operation will only work with the absolute values
+    jassert (isNegative() == other.isNegative());
+
+    if (other.highestBit >= 0)
+    {
+        ensureSize (other.highestBit >> 5);
+
+        int n = (other.highestBit >> 5) + 1;
+
+        while (--n >= 0)
+            values[n] ^= other.values[n];
+
+        if (other.highestBit > highestBit)
+            highestBit = other.highestBit;
+
+        highestBit = getHighestBit();
+    }
+
+    return *this;
+}
+
+BigInteger& BigInteger::operator%= (const BigInteger& divisor)
+{
+    BigInteger remainder;
+    divideBy (divisor, remainder);
+    swapWith (remainder);
+    return *this;
+}
+
+BigInteger& BigInteger::operator<<= (int numBitsToShift)
+{
+    shiftBits (numBitsToShift, 0);
+    return *this;
+}
+
+BigInteger& BigInteger::operator>>= (int numBitsToShift)
+{
+    return operator<<= (-numBitsToShift);
+}
+
+BigInteger& BigInteger::operator++()            { return operator+= (1); }
+BigInteger& BigInteger::operator--()            { return operator-= (1); }
+const BigInteger BigInteger::operator++ (int)   { const BigInteger old (*this); operator+= (1); return old; }
+const BigInteger BigInteger::operator-- (int)   { const BigInteger old (*this); operator-= (1); return old; }
+
+const BigInteger BigInteger::operator+ (const BigInteger& other) const  { BigInteger b (*this); return b += other; }
+const BigInteger BigInteger::operator- (const BigInteger& other) const  { BigInteger b (*this); return b -= other; }
+const BigInteger BigInteger::operator* (const BigInteger& other) const  { BigInteger b (*this); return b *= other; }
+const BigInteger BigInteger::operator/ (const BigInteger& other) const  { BigInteger b (*this); return b /= other; }
+const BigInteger BigInteger::operator| (const BigInteger& other) const  { BigInteger b (*this); return b |= other; }
+const BigInteger BigInteger::operator& (const BigInteger& other) const  { BigInteger b (*this); return b &= other; }
+const BigInteger BigInteger::operator^ (const BigInteger& other) const  { BigInteger b (*this); return b ^= other; }
+const BigInteger BigInteger::operator% (const BigInteger& other) const  { BigInteger b (*this); return b %= other; }
+const BigInteger BigInteger::operator<< (const int numBits) const       { BigInteger b (*this); return b <<= numBits; }
+const BigInteger BigInteger::operator>> (const int numBits) const       { BigInteger b (*this); return b >>= numBits; }
+const BigInteger BigInteger::operator-() const                          { BigInteger b (*this); b.negate(); return b; }
+
+//==============================================================================
+int BigInteger::compare (const BigInteger& other) const throw()
 {
     if (isNegative() == other.isNegative())
     {
@@ -120,7 +625,7 @@ int BitArray::compare (const BitArray& other) const throw()
     }
 }
 
-int BitArray::compareAbsolute (const BitArray& other) const throw()
+int BigInteger::compareAbsolute (const BigInteger& other) const throw()
 {
     const int h1 = getHighestBit();
     const int h2 = other.getHighestBit();
@@ -137,447 +642,15 @@ int BitArray::compareAbsolute (const BitArray& other) const throw()
     return 0;
 }
 
-bool BitArray::operator== (const BitArray& other) const throw()
-{
-    return compare (other) == 0;
-}
-
-bool BitArray::operator!= (const BitArray& other) const throw()
-{
-    return compare (other) != 0;
-}
-
-bool BitArray::operator[] (const int bit) const throw()
-{
-    return bit >= 0 && bit <= highestBit
-             && ((values [bit >> 5] & (1 << (bit & 31))) != 0);
-}
-
-bool BitArray::isEmpty() const throw()
-{
-    return getHighestBit() < 0;
-}
-
-void BitArray::clear() throw()
-{
-    if (numValues > 16)
-    {
-        numValues = 4;
-        values.calloc (numValues + 1);
-    }
-    else
-    {
-        zeromem (values, sizeof (unsigned int) * (numValues + 1));
-    }
-
-    highestBit = -1;
-    negative = false;
-}
-
-void BitArray::setBit (const int bit) throw()
-{
-    if (bit >= 0)
-    {
-        if (bit > highestBit)
-        {
-            ensureSize (bit >> 5);
-            highestBit = bit;
-        }
-
-        values [bit >> 5] |= (1 << (bit & 31));
-    }
-}
-
-void BitArray::setBit (const int bit,
-                       const bool shouldBeSet) throw()
-{
-    if (shouldBeSet)
-        setBit (bit);
-    else
-        clearBit (bit);
-}
-
-void BitArray::clearBit (const int bit) throw()
-{
-    if (bit >= 0 && bit <= highestBit)
-        values [bit >> 5] &= ~(1 << (bit & 31));
-}
-
-void BitArray::setRange (int startBit,
-                         int numBits,
-                         const bool shouldBeSet) throw()
-{
-    while (--numBits >= 0)
-        setBit (startBit++, shouldBeSet);
-}
-
-void BitArray::insertBit (const int bit,
-                          const bool shouldBeSet) throw()
-{
-    if (bit >= 0)
-        shiftBits (1, bit);
-
-    setBit (bit, shouldBeSet);
-}
+bool BigInteger::operator== (const BigInteger& other) const throw()     { return compare (other) == 0; }
+bool BigInteger::operator!= (const BigInteger& other) const throw()     { return compare (other) != 0; }
+bool BigInteger::operator<  (const BigInteger& other) const throw()     { return compare (other) < 0; }
+bool BigInteger::operator<= (const BigInteger& other) const throw()     { return compare (other) <= 0; }
+bool BigInteger::operator>  (const BigInteger& other) const throw()     { return compare (other) > 0; }
+bool BigInteger::operator>= (const BigInteger& other) const throw()     { return compare (other) >= 0; }
 
 //==============================================================================
-void BitArray::andWith (const BitArray& other) throw()
-{
-    // this operation will only work with the absolute values
-    jassert (isNegative() == other.isNegative());
-
-    int n = numValues;
-
-    while (n > other.numValues)
-        values[--n] = 0;
-
-    while (--n >= 0)
-        values[n] &= other.values[n];
-
-    if (other.highestBit < highestBit)
-        highestBit = other.highestBit;
-
-    highestBit = getHighestBit();
-}
-
-void BitArray::orWith (const BitArray& other) throw()
-{
-    if (other.highestBit < 0)
-        return;
-
-    // this operation will only work with the absolute values
-    jassert (isNegative() == other.isNegative());
-
-    ensureSize (other.highestBit >> 5);
-
-    int n = (other.highestBit >> 5) + 1;
-
-    while (--n >= 0)
-        values[n] |= other.values[n];
-
-    if (other.highestBit > highestBit)
-        highestBit = other.highestBit;
-
-    highestBit = getHighestBit();
-}
-
-void BitArray::xorWith (const BitArray& other) throw()
-{
-    if (other.highestBit < 0)
-        return;
-
-    // this operation will only work with the absolute values
-    jassert (isNegative() == other.isNegative());
-
-    ensureSize (other.highestBit >> 5);
-
-    int n = (other.highestBit >> 5) + 1;
-
-    while (--n >= 0)
-        values[n] ^= other.values[n];
-
-    if (other.highestBit > highestBit)
-        highestBit = other.highestBit;
-
-    highestBit = getHighestBit();
-}
-
-//==============================================================================
-void BitArray::add (const BitArray& other) throw()
-{
-    if (other.isNegative())
-    {
-        BitArray o (other);
-        o.negate();
-        subtract (o);
-        return;
-    }
-
-    if (isNegative())
-    {
-        if (compareAbsolute (other) < 0)
-        {
-            BitArray temp (*this);
-            temp.negate();
-            *this = other;
-            subtract (temp);
-        }
-        else
-        {
-            negate();
-            subtract (other);
-            negate();
-        }
-
-        return;
-    }
-
-    if (other.highestBit > highestBit)
-        highestBit = other.highestBit;
-
-    ++highestBit;
-
-    const int numInts = (highestBit >> 5) + 1;
-    ensureSize (numInts);
-
-    int64 remainder = 0;
-
-    for (int i = 0; i <= numInts; ++i)
-    {
-        if (i < numValues)
-            remainder += values[i];
-
-        if (i < other.numValues)
-            remainder += other.values[i];
-
-        values[i] = (unsigned int) remainder;
-        remainder >>= 32;
-    }
-
-    jassert (remainder == 0);
-    highestBit = getHighestBit();
-}
-
-void BitArray::subtract (const BitArray& other) throw()
-{
-    if (other.isNegative())
-    {
-        BitArray o (other);
-        o.negate();
-        add (o);
-        return;
-    }
-
-    if (! isNegative())
-    {
-        if (compareAbsolute (other) < 0)
-        {
-            BitArray temp (*this);
-            *this = other;
-            subtract (temp);
-            negate();
-            return;
-        }
-    }
-    else
-    {
-        negate();
-        add (other);
-        negate();
-        return;
-    }
-
-    const int numInts = (highestBit >> 5) + 1;
-    const int maxOtherInts = (other.highestBit >> 5) + 1;
-    int64 amountToSubtract = 0;
-
-    for (int i = 0; i <= numInts; ++i)
-    {
-        if (i <= maxOtherInts)
-            amountToSubtract += (int64)other.values[i];
-
-        if (values[i] >= amountToSubtract)
-        {
-            values[i] = (unsigned int) (values[i] - amountToSubtract);
-            amountToSubtract = 0;
-        }
-        else
-        {
-            const int64 n = ((int64) values[i] + (((int64) 1) << 32)) - amountToSubtract;
-            values[i] = (unsigned int) n;
-            amountToSubtract = 1;
-        }
-    }
-}
-
-void BitArray::multiplyBy (const BitArray& other) throw()
-{
-    BitArray total;
-    highestBit = getHighestBit();
-    const bool wasNegative = isNegative();
-    setNegative (false);
-
-    for (int i = 0; i <= highestBit; ++i)
-    {
-        if (operator[](i))
-        {
-            BitArray n (other);
-            n.setNegative (false);
-            n.shiftBits (i);
-            total.add (n);
-        }
-    }
-
-    *this = total;
-    negative = wasNegative ^ other.isNegative();
-}
-
-void BitArray::divideBy (const BitArray& divisor, BitArray& remainder) throw()
-{
-    jassert (this != &remainder); // (can't handle passing itself in to get the remainder)
-
-    const int divHB = divisor.getHighestBit();
-    const int ourHB = getHighestBit();
-
-    if (divHB < 0 || ourHB < 0)
-    {
-        // division by zero
-        remainder.clear();
-        clear();
-    }
-    else
-    {
-        remainder = *this;
-        remainder.setNegative (false);
-        const bool wasNegative = isNegative();
-        clear();
-
-        BitArray temp (divisor);
-        temp.setNegative (false);
-
-        int leftShift = ourHB - divHB;
-        temp.shiftBits (leftShift);
-
-        while (leftShift >= 0)
-        {
-            if (remainder.compareAbsolute (temp) >= 0)
-            {
-                remainder.subtract (temp);
-                setBit (leftShift);
-            }
-
-            if (--leftShift >= 0)
-                temp.shiftBits (-1);
-        }
-
-        negative = wasNegative ^ divisor.isNegative();
-        remainder.setNegative (wasNegative);
-    }
-}
-
-void BitArray::modulo (const BitArray& divisor) throw()
-{
-    BitArray remainder;
-    divideBy (divisor, remainder);
-    *this = remainder;
-}
-
-static const BitArray simpleGCD (BitArray* m, BitArray* n) throw()
-{
-    while (! m->isEmpty())
-    {
-        if (n->compareAbsolute (*m) > 0)
-            swapVariables (m, n);
-
-        m->subtract (*n);
-    }
-
-    return *n;
-}
-
-const BitArray BitArray::findGreatestCommonDivisor (BitArray n) const throw()
-{
-    BitArray m (*this);
-
-    while (! n.isEmpty())
-    {
-        if (abs (m.getHighestBit() - n.getHighestBit()) <= 16)
-            return simpleGCD (&m, &n);
-
-        BitArray temp1 (m), temp2;
-        temp1.divideBy (n, temp2);
-
-        m = n;
-        n = temp2;
-    }
-
-    return m;
-}
-
-void BitArray::exponentModulo (const BitArray& exponent,
-                               const BitArray& modulus) throw()
-{
-    BitArray exp (exponent);
-    exp.modulo (modulus);
-
-    BitArray value (*this);
-    value.modulo (modulus);
-
-    clear();
-    setBit (0);
-
-    while (! exp.isEmpty())
-    {
-        if (exp [0])
-        {
-            multiplyBy (value);
-            this->modulo (modulus);
-        }
-
-        value.multiplyBy (value);
-        value.modulo (modulus);
-
-        exp.shiftBits (-1);
-    }
-}
-
-void BitArray::inverseModulo (const BitArray& modulus) throw()
-{
-    const BitArray one (1);
-
-    if (modulus == one || modulus.isNegative())
-    {
-        clear();
-        return;
-    }
-
-    if (isNegative() || compareAbsolute (modulus) >= 0)
-        this->modulo (modulus);
-
-    if (*this == one)
-        return;
-
-    if (! (*this)[0])
-    {
-        // not invertible
-        clear();
-        return;
-    }
-
-    BitArray a1 (modulus);
-    BitArray a2 (*this);
-    BitArray b1 (modulus);
-    BitArray b2 (1);
-
-    while (a2 != one)
-    {
-        BitArray temp1, temp2, multiplier (a1);
-        multiplier.divideBy (a2, temp1);
-
-        temp1 = a2;
-        temp1.multiplyBy (multiplier);
-        temp2 = a1;
-        temp2.subtract (temp1);
-        a1 = a2;
-        a2 = temp2;
-
-        temp1 = b2;
-        temp1.multiplyBy (multiplier);
-        temp2 = b1;
-        temp2.subtract (temp1);
-        b1 = b2;
-        b2 = temp2;
-    }
-
-    while (b2.isNegative())
-        b2.add (modulus);
-
-    b2.modulo (modulus);
-    *this = b2;
-}
-
-//==============================================================================
-void BitArray::shiftBits (int bits, const int startBit) throw()
+void BigInteger::shiftBits (int bits, const int startBit)
 {
     if (highestBit < 0)
         return;
@@ -681,165 +754,138 @@ void BitArray::shiftBits (int bits, const int startBit) throw()
     }
 }
 
-const BitArray BitArray::getBitRange (int startBit, int numBits) const throw()
+//==============================================================================
+const BigInteger BigInteger::simpleGCD (BigInteger* m, BigInteger* n)
 {
-    BitArray r;
-    numBits = jmin (numBits, getHighestBit() + 1 - startBit);
-    r.ensureSize (numBits >> 5);
-    r.highestBit = numBits;
-
-    int i = 0;
-    while (numBits > 0)
+    while (! m->isZero())
     {
-        r.values[i++] = getBitRangeAsInt (startBit, jmin (32, numBits));
-        numBits -= 32;
-        startBit += 32;
+        if (n->compareAbsolute (*m) > 0)
+            swapVariables (m, n);
+
+        *m -= *n;
     }
 
-    r.highestBit = r.getHighestBit();
-
-    return r;
+    return *n;
 }
 
-int BitArray::getBitRangeAsInt (const int startBit, int numBits) const throw()
+const BigInteger BigInteger::findGreatestCommonDivisor (BigInteger n) const
 {
-    if (numBits > 32)
+    BigInteger m (*this);
+
+    while (! n.isZero())
     {
-        jassertfalse  // use getBitRange() if you need more than 32 bits..
-        numBits = 32;
+        if (abs (m.getHighestBit() - n.getHighestBit()) <= 16)
+            return simpleGCD (&m, &n);
+
+        BigInteger temp1 (m), temp2;
+        temp1.divideBy (n, temp2);
+
+        m = n;
+        n = temp2;
     }
 
-    numBits = jmin (numBits, highestBit + 1 - startBit);
-
-    if (numBits <= 0)
-        return 0;
-
-    const int pos = startBit >> 5;
-    const int offset = startBit & 31;
-    const int endSpace = 32 - numBits;
-
-    uint32 n = ((uint32) values [pos]) >> offset;
-
-    if (offset > endSpace)
-        n |= ((uint32) values [pos + 1]) << (32 - offset);
-
-    return (int) (n & (((uint32) 0xffffffff) >> endSpace));
+    return m;
 }
 
-void BitArray::setBitRangeAsInt (const int startBit, int numBits, unsigned int valueToSet) throw()
+void BigInteger::exponentModulo (const BigInteger& exponent, const BigInteger& modulus)
 {
-    if (numBits > 32)
+    BigInteger exp (exponent);
+    exp %= modulus;
+
+    BigInteger value (1);
+    swapWith (value);
+    value %= modulus;
+
+    while (! exp.isZero())
     {
-        jassertfalse
-        numBits = 32;
+        if (exp [0])
+        {
+            operator*= (value);
+            operator%= (modulus);
+        }
+
+        value *= value;
+        value %= modulus;
+        exp >>= 1;
+    }
+}
+
+void BigInteger::inverseModulo (const BigInteger& modulus)
+{
+    if (modulus.isOne() || modulus.isNegative())
+    {
+        clear();
+        return;
     }
 
-    for (int i = 0; i < numBits; ++i)
+    if (isNegative() || compareAbsolute (modulus) >= 0)
+        operator%= (modulus);
+
+    if (isOne())
+        return;
+
+    if (! (*this)[0])
     {
-        setBit (startBit + i, (valueToSet & 1) != 0);
-        valueToSet >>= 1;
+        // not invertible
+        clear();
+        return;
     }
+
+    BigInteger a1 (modulus);
+    BigInteger a2 (*this);
+    BigInteger b1 (modulus);
+    BigInteger b2 (1);
+
+    while (! a2.isOne())
+    {
+        BigInteger temp1, temp2, multiplier (a1);
+        multiplier.divideBy (a2, temp1);
+
+        temp1 = a2;
+        temp1 *= multiplier;
+        temp2 = a1;
+        temp2 -= temp1;
+        a1 = a2;
+        a2 = temp2;
+
+        temp1 = b2;
+        temp1 *= multiplier;
+        temp2 = b1;
+        temp2 -= temp1;
+        b1 = b2;
+        b2 = temp2;
+    }
+
+    while (b2.isNegative())
+        b2 += modulus;
+
+    b2 %= modulus;
+    swapWith (b2);
 }
 
 //==============================================================================
-bool BitArray::isNegative() const throw()
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& value)
 {
-    return negative && ! isEmpty();
+    return stream << value.toString (10);
 }
 
-void BitArray::setNegative (const bool neg) throw()
-{
-    negative = neg;
-}
-
-void BitArray::negate() throw()
-{
-    negative = (! negative) && ! isEmpty();
-}
-
-int BitArray::countNumberOfSetBits() const throw()
-{
-    int total = 0;
-
-    for (int i = (highestBit >> 5) + 1; --i >= 0;)
-    {
-        unsigned int n = values[i];
-
-        if (n == 0xffffffff)
-        {
-            total += 32;
-        }
-        else
-        {
-            while (n != 0)
-            {
-                total += (n & 1);
-                n >>= 1;
-            }
-        }
-    }
-
-    return total;
-}
-
-int BitArray::getHighestBit() const throw()
-{
-    for (int i = highestBit + 1; --i >= 0;)
-        if ((values [i >> 5] & (1 << (i & 31))) != 0)
-            return i;
-
-    return -1;
-}
-
-int BitArray::findNextSetBit (int i) const throw()
-{
-    for (; i <= highestBit; ++i)
-        if ((values [i >> 5] & (1 << (i & 31))) != 0)
-            return i;
-
-    return -1;
-}
-
-int BitArray::findNextClearBit (int i) const throw()
-{
-    for (; i <= highestBit; ++i)
-        if ((values [i >> 5] & (1 << (i & 31))) == 0)
-            break;
-
-    return i;
-}
-
-void BitArray::ensureSize (const int numVals) throw()
-{
-    if (numVals + 2 >= numValues)
-    {
-        int oldSize = numValues;
-        numValues = ((numVals + 2) * 3) / 2;
-        values.realloc (numValues + 1);
-
-        while (oldSize < numValues)
-            values [oldSize++] = 0;
-    }
-}
-
-//==============================================================================
-const String BitArray::toString (const int base, const int minimumNumCharacters) const throw()
+const String BigInteger::toString (const int base, const int minimumNumCharacters) const
 {
     String s;
-    BitArray v (*this);
+    BigInteger v (*this);
 
     if (base == 2 || base == 8 || base == 16)
     {
         const int bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
-        static const tchar* const hexDigits = T("0123456789abcdef");
+        static const juce_wchar* const hexDigits = T("0123456789abcdef");
 
         for (;;)
         {
             const int remainder = v.getBitRangeAsInt (0, bits);
 
-            v.shiftBits (-bits);
+            v >>= bits;
 
-            if (remainder == 0 && v.isEmpty())
+            if (remainder == 0 && v.isZero())
                 break;
 
             s = String::charToString (hexDigits [remainder]) + s;
@@ -847,14 +893,14 @@ const String BitArray::toString (const int base, const int minimumNumCharacters)
     }
     else if (base == 10)
     {
-        const BitArray ten (10);
-        BitArray remainder;
+        const BigInteger ten (10);
+        BigInteger remainder;
 
         for (;;)
         {
             v.divideBy (ten, remainder);
 
-            if (remainder.isEmpty() && v.isEmpty())
+            if (remainder.isZero() && v.isZero())
                 break;
 
             s = String (remainder.getBitRangeAsInt (0, 8)) + s;
@@ -862,7 +908,7 @@ const String BitArray::toString (const int base, const int minimumNumCharacters)
     }
     else
     {
-        jassertfalse // can't do the specified base
+        jassertfalse // can't do the specified base!
         return String::empty;
     }
 
@@ -871,11 +917,10 @@ const String BitArray::toString (const int base, const int minimumNumCharacters)
     return isNegative() ? T("-") + s : s;
 }
 
-void BitArray::parseString (const String& text,
-                            const int base) throw()
+void BigInteger::parseString (const String& text, const int base)
 {
     clear();
-    const tchar* t = (const tchar*) text;
+    const juce_wchar* t = (const juce_wchar*) text;
 
     if (base == 2 || base == 8 || base == 16)
     {
@@ -883,13 +928,13 @@ void BitArray::parseString (const String& text,
 
         for (;;)
         {
-            const tchar c = *t++;
+            const juce_wchar c = *t++;
             const int digit = CharacterFunctions::getHexDigitValue (c);
 
             if (((unsigned int) digit) < (unsigned int) base)
             {
-                shiftBits (bits);
-                add (digit);
+                operator<<= (bits);
+                operator+= (digit);
             }
             else if (c == 0)
             {
@@ -899,16 +944,16 @@ void BitArray::parseString (const String& text,
     }
     else if (base == 10)
     {
-        const BitArray ten ((unsigned int) 10);
+        const BigInteger ten ((unsigned int) 10);
 
         for (;;)
         {
-            const tchar c = *t++;
+            const juce_wchar c = *t++;
 
             if (c >= T('0') && c <= T('9'))
             {
-                multiplyBy (ten);
-                add ((int) (c - T('0')));
+                operator*= (ten);
+                operator+= ((int) (c - T('0')));
             }
             else if (c == 0)
             {
@@ -920,7 +965,7 @@ void BitArray::parseString (const String& text,
     setNegative (text.trimStart().startsWithChar (T('-')));
 }
 
-const MemoryBlock BitArray::toMemoryBlock() const throw()
+const MemoryBlock BigInteger::toMemoryBlock() const
 {
     const int numBytes = (getHighestBit() + 8) >> 3;
     MemoryBlock mb ((size_t) numBytes);
@@ -931,7 +976,7 @@ const MemoryBlock BitArray::toMemoryBlock() const throw()
     return mb;
 }
 
-void BitArray::loadFromMemoryBlock (const MemoryBlock& data) throw()
+void BigInteger::loadFromMemoryBlock (const MemoryBlock& data)
 {
     clear();
 

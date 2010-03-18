@@ -99,7 +99,7 @@ void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteI
 void MixerAudioSource::removeAllInputs()
 {
     VoidArray inputsCopy;
-    BitArray inputsToDeleteCopy;
+    BigInteger inputsToDeleteCopy;
 
     {
         const ScopedLock sl (lock);

@@ -182,7 +182,7 @@ public:
 
     bool isOk() const throw()     { return defaultBufferSize > 0 && defaultSampleRate > 0; }
 
-    bool openClient (const double newSampleRate, const BitArray& newChannels)
+    bool openClient (const double newSampleRate, const BigInteger& newChannels)
     {
         sampleRate = newSampleRate;
         channels = newChannels;
@@ -232,7 +232,7 @@ public:
     const bool useExclusiveMode;
     Array <double> rates;
     HANDLE clientEvent;
-    BitArray channels;
+    BigInteger channels;
     AudioDataConverters::DataFormat dataFormat;
     Array <int> channelMaps;
     UINT32 actualBufferSize;
@@ -338,7 +338,7 @@ public:
         close();
     }
 
-    bool open (const double newSampleRate, const BitArray& newChannels)
+    bool open (const double newSampleRate, const BigInteger& newChannels)
     {
         reservoirSize = 0;
         reservoirCapacity = 16384;
@@ -483,7 +483,7 @@ public:
         close();
     }
 
-    bool open (const double newSampleRate, const BitArray& newChannels)
+    bool open (const double newSampleRate, const BigInteger& newChannels)
     {
         return openClient (newSampleRate, newChannels)
                 && (numChannels == 0 || OK (client->GetService (__uuidof (IAudioRenderClient), (void**) &renderClient)));
@@ -674,12 +674,12 @@ public:
     int getCurrentBitDepth()                            { return 32; }
     int getOutputLatencyInSamples()                     { return latencyOut; }
     int getInputLatencyInSamples()                      { return latencyIn; }
-    const BitArray getActiveOutputChannels() const      { return outputDevice != 0 ? outputDevice->channels : BitArray(); }
-    const BitArray getActiveInputChannels() const       { return inputDevice != 0 ? inputDevice->channels : BitArray(); }
+    const BigInteger getActiveOutputChannels() const    { return outputDevice != 0 ? outputDevice->channels : BigInteger(); }
+    const BigInteger getActiveInputChannels() const     { return inputDevice != 0 ? inputDevice->channels : BigInteger(); }
     const String getLastError() { return lastError; }
 
 
-    const String open (const BitArray& inputChannels, const BitArray& outputChannels,
+    const String open (const BigInteger& inputChannels, const BigInteger& outputChannels,
                        double sampleRate, int bufferSizeSamples)
     {
         close();
