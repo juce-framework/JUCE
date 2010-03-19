@@ -27,6 +27,7 @@
 #define __JUCE_NAMEDPIPE_JUCEHEADER__
 
 #include "../streams/juce_OutputStream.h"
+#include "../../threads/juce_CriticalSection.h"
 
 
 //==============================================================================
@@ -104,6 +105,7 @@ public:
 private:
     void* internal;
     String currentPipeName;
+    CriticalSection lock;
 
     NamedPipe (const NamedPipe&);
     NamedPipe& operator= (const NamedPipe&);

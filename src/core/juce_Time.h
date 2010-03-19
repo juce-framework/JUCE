@@ -64,7 +64,7 @@ public:
                                         'epoch' (midnight Jan 1st 1970).
         @see getCurrentTime, currentTimeMillis
     */
-    Time (const int64 millisecondsSinceEpoch) throw();
+    Time (int64 millisecondsSinceEpoch) throw();
 
     /** Creates a time from a set of date components.
 
@@ -80,14 +80,14 @@ public:
         @param useLocalTime     if true, encode using the current machine's local time; if
                                 false, it will always work in GMT.
     */
-    Time (const int year,
-          const int month,
-          const int day,
-          const int hours,
-          const int minutes,
-          const int seconds = 0,
-          const int milliseconds = 0,
-          const bool useLocalTime = true) throw();
+    Time (int year,
+          int month,
+          int day,
+          int hours,
+          int minutes,
+          int seconds = 0,
+          int milliseconds = 0,
+          bool useLocalTime = true) throw();
 
     /** Destructor. */
     ~Time() throw();
@@ -129,7 +129,7 @@ public:
                                     it'll return the long form, e.g. "January"
         @see getMonth
     */
-    const String getMonthName (const bool threeLetterVersion) const throw();
+    const String getMonthName (bool threeLetterVersion) const throw();
 
     /** Returns the day of the month.
 
@@ -148,7 +148,7 @@ public:
         @param threeLetterVersion   if true, it'll return a 3-letter abbreviation, e.g. "Tue"; if
                                     false, it'll return the full version, e.g. "Tuesday".
     */
-    const String getWeekdayName (const bool threeLetterVersion) const throw();
+    const String getWeekdayName (bool threeLetterVersion) const throw();
 
     /** Returns the number of hours since midnight.
 
@@ -209,10 +209,10 @@ public:
                                 hour notation.
         @see formatted
     */
-    const String toString (const bool includeDate,
-                           const bool includeTime,
-                           const bool includeSeconds = true,
-                           const bool use24HourClock = false) const throw();
+    const String toString (bool includeDate,
+                           bool includeTime,
+                           bool includeSeconds = true,
+                           bool use24HourClock = false) const throw();
 
     /** Converts this date/time to a string with a user-defined format.
 
@@ -245,7 +245,7 @@ public:
 
         @see toString
     */
-    const String formatted (const tchar* const format) const throw();
+    const String formatted (const juce_wchar* format) const throw();
 
     //==============================================================================
     /** Adds a RelativeTime to this time and returns the result. */
@@ -291,7 +291,7 @@ public:
                                     false, it'll return the full version, e.g. "Tuesday".
     */
     static const String getWeekdayName (int dayNumber,
-                                        const bool threeLetterVersion) throw();
+                                        bool threeLetterVersion) throw();
 
     /** Returns the name of one of the months.
 
@@ -300,7 +300,7 @@ public:
                                     it'll return the long form, e.g. "January"
     */
     static const String getMonthName (int monthNumber,
-                                      const bool threeLetterVersion) throw();
+                                      bool threeLetterVersion) throw();
 
     //==============================================================================
     // Static methods for getting system timers directly..
@@ -336,7 +336,7 @@ public:
 
         This will make the thread sleep as efficiently as it can while it's waiting.
     */
-    static void waitForMillisecondCounter (const uint32 targetTime) throw();
+    static void waitForMillisecondCounter (uint32 targetTime) throw();
 
     /** Less-accurate but faster version of getMillisecondCounter().
 
@@ -374,14 +374,14 @@ public:
         @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
              secondsToHighResolutionTicks
     */
-    static double highResolutionTicksToSeconds (const int64 ticks) throw();
+    static double highResolutionTicksToSeconds (int64 ticks) throw();
 
     /** Converts a number seconds into high-resolution ticks.
 
         @see getHighResolutionTicks, getHighResolutionTicksPerSecond,
              highResolutionTicksToSeconds
     */
-    static int64 secondsToHighResolutionTicks (const double seconds) throw();
+    static int64 secondsToHighResolutionTicks (double seconds) throw();
 
 
 private:

@@ -923,10 +923,10 @@ inline uint64 ByteOrder::swap (uint64 value)
  inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)				   { return swap (v); }
  inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)				   { return swap (v); }
  inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)				   { return swap (v); }
- inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return *(uint32*) bytes; }
- inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return *(uint16*) bytes; }
- inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return swap (*(uint32*) bytes); }
- inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return swap (*(uint16*) bytes); }
+ inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return *reinterpret_cast <const uint32*> (bytes); }
+ inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return *reinterpret_cast <const uint16*> (bytes); }
+ inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return swap (*reinterpret_cast <const uint32*> (bytes)); }
+ inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return swap (*reinterpret_cast <const uint16*> (bytes)); }
  inline bool ByteOrder::isBigEndian()							   { return false; }
 #else
  inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)				  { return swap (v); }
@@ -935,10 +935,10 @@ inline uint64 ByteOrder::swap (uint64 value)
  inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)				   { return v; }
  inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)				   { return v; }
  inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)				   { return v; }
- inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return swap (*(uint32*) bytes); }
- inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return swap (*(uint16*) bytes); }
- inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return *(uint32*) bytes; }
- inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return *(uint16*) bytes; }
+ inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return swap (*reinterpret_cast <const uint32*> (bytes)); }
+ inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return swap (*reinterpret_cast <const uint16*> (bytes)); }
+ inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return *reinterpret_cast <const uint32*> (bytes); }
+ inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return *reinterpret_cast <const uint16*> (bytes); }
  inline bool ByteOrder::isBigEndian()							   { return true; }
 #endif
 
@@ -3076,11 +3076,11 @@ public:
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
 
-inline void Atomic::increment (int32& variable)		 { OSAtomicIncrement32 ((int32_t*) &variable); }
-inline int32  Atomic::incrementAndReturn (int32& variable)	  { return OSAtomicIncrement32 ((int32_t*) &variable); }
-inline void Atomic::decrement (int32& variable)		 { OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int32  Atomic::decrementAndReturn (int32& variable)	  { return OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int32  Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+inline void  Atomic::increment (int32& variable)		{ OSAtomicIncrement32 ((int32_t*) &variable); }
+inline int32 Atomic::incrementAndReturn (int32& variable)	   { return OSAtomicIncrement32 ((int32_t*) &variable); }
+inline void  Atomic::decrement (int32& variable)		{ OSAtomicDecrement32 ((int32_t*) &variable); }
+inline int32 Atomic::decrementAndReturn (int32& variable)	   { return OSAtomicDecrement32 ((int32_t*) &variable); }
+inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
 																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (int32_t*) &destination); }
 inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
 {
@@ -4112,16 +4112,16 @@ public:
 
 	Time (const Time& other) throw();
 
-	Time (const int64 millisecondsSinceEpoch) throw();
+	Time (int64 millisecondsSinceEpoch) throw();
 
-	Time (const int year,
-		  const int month,
-		  const int day,
-		  const int hours,
-		  const int minutes,
-		  const int seconds = 0,
-		  const int milliseconds = 0,
-		  const bool useLocalTime = true) throw();
+	Time (int year,
+		  int month,
+		  int day,
+		  int hours,
+		  int minutes,
+		  int seconds = 0,
+		  int milliseconds = 0,
+		  bool useLocalTime = true) throw();
 
 	~Time() throw();
 
@@ -4135,13 +4135,13 @@ public:
 
 	int getMonth() const throw();
 
-	const String getMonthName (const bool threeLetterVersion) const throw();
+	const String getMonthName (bool threeLetterVersion) const throw();
 
 	int getDayOfMonth() const throw();
 
 	int getDayOfWeek() const throw();
 
-	const String getWeekdayName (const bool threeLetterVersion) const throw();
+	const String getWeekdayName (bool threeLetterVersion) const throw();
 
 	int getHours() const throw();
 
@@ -4159,12 +4159,12 @@ public:
 
 	const String getTimeZone() const throw();
 
-	const String toString (const bool includeDate,
-						   const bool includeTime,
-						   const bool includeSeconds = true,
-						   const bool use24HourClock = false) const throw();
+	const String toString (bool includeDate,
+						   bool includeTime,
+						   bool includeSeconds = true,
+						   bool use24HourClock = false) const throw();
 
-	const String formatted (const tchar* const format) const throw();
+	const String formatted (const juce_wchar* format) const throw();
 
 	const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
 
@@ -4187,10 +4187,10 @@ public:
 	bool setSystemTimeToThisTime() const throw();
 
 	static const String getWeekdayName (int dayNumber,
-										const bool threeLetterVersion) throw();
+										bool threeLetterVersion) throw();
 
 	static const String getMonthName (int monthNumber,
-									  const bool threeLetterVersion) throw();
+									  bool threeLetterVersion) throw();
 
 	// Static methods for getting system timers directly..
 
@@ -4200,7 +4200,7 @@ public:
 
 	static double getMillisecondCounterHiRes() throw();
 
-	static void waitForMillisecondCounter (const uint32 targetTime) throw();
+	static void waitForMillisecondCounter (uint32 targetTime) throw();
 
 	static uint32 getApproximateMillisecondCounter() throw();
 
@@ -4210,9 +4210,9 @@ public:
 
 	static int64 getHighResolutionTicksPerSecond() throw();
 
-	static double highResolutionTicksToSeconds (const int64 ticks) throw();
+	static double highResolutionTicksToSeconds (int64 ticks) throw();
 
-	static int64 secondsToHighResolutionTicks (const double seconds) throw();
+	static int64 secondsToHighResolutionTicks (double seconds) throw();
 
 private:
 
@@ -7429,7 +7429,7 @@ class JUCE_API  BlowFish
 {
 public:
 
-	BlowFish (const uint8* keyData, int keyBytes);
+	BlowFish (const void* keyData, int keyBytes);
 
 	BlowFish (const BlowFish& other);
 
@@ -7437,9 +7437,9 @@ public:
 
 	~BlowFish();
 
-	void encrypt (uint32& data1, uint32& data2) const;
+	void encrypt (uint32& data1, uint32& data2) const throw();
 
-	void decrypt (uint32& data1, uint32& data2) const;
+	void decrypt (uint32& data1, uint32& data2) const throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -7447,7 +7447,7 @@ private:
 	uint32 p[18];
 	HeapBlock <uint32> s[4];
 
-	uint32 F (uint32 x) const;
+	uint32 F (uint32 x) const throw();
 };
 
 #endif   // __JUCE_BLOWFISH_JUCEHEADER__
@@ -7799,6 +7799,7 @@ public:
 private:
 	void* internal;
 	String currentPipeName;
+	CriticalSection lock;
 
 	NamedPipe (const NamedPipe&);
 	NamedPipe& operator= (const NamedPipe&);
@@ -22125,19 +22126,19 @@ public:
 		SingleChannel	   /**<< each pixel is a 1-byte alpha channel value. */
 	};
 
-	Image (const PixelFormat format,
-		   const int imageWidth,
-		   const int imageHeight,
-		   const bool clearImage);
+	Image (PixelFormat format,
+		   int imageWidth,
+		   int imageHeight,
+		   bool clearImage);
 
 	Image (const Image& other);
 
 	virtual ~Image();
 
-	static Image* createNativeImage (const PixelFormat format,
-									 const int imageWidth,
-									 const int imageHeight,
-									 const bool clearImage);
+	static Image* createNativeImage (PixelFormat format,
+									 int imageWidth,
+									 int imageHeight,
+									 bool clearImage);
 
 	int getWidth() const throw()			{ return imageWidth; }
 
@@ -22158,30 +22159,30 @@ public:
 
 	virtual Image* createCopy (int newWidth = -1,
 							   int newHeight = -1,
-							   const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+							   Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
 	virtual Image* createCopyOfAlphaChannel() const;
 
-	virtual const Colour getPixelAt (const int x, const int y) const;
+	virtual const Colour getPixelAt (int x, int y) const;
 
-	virtual void setPixelAt (const int x, const int y, const Colour& colour);
+	virtual void setPixelAt (int x, int y, const Colour& colour);
 
-	virtual void multiplyAlphaAt (const int x, const int y, const float multiplier);
+	virtual void multiplyAlphaAt (int x, int y, float multiplier);
 
-	virtual void multiplyAllAlphas (const float amountToMultiplyBy);
+	virtual void multiplyAllAlphas (float amountToMultiplyBy);
 
 	virtual void desaturate();
 
 	class BitmapData
 	{
 	public:
-		BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable);
+		BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
 		BitmapData (const Image& image, int x, int y, int w, int h);
 		~BitmapData();
 
-		inline uint8* getLinePointer (const int y) const			{ return data + y * lineStride; }
+		inline uint8* getLinePointer (int y) const			  { return data + y * lineStride; }
 
-		inline uint8* getPixelPointer (const int x, const int y) const	  { return data + y * lineStride + x * pixelStride; }
+		inline uint8* getPixelPointer (int x, int y) const		  { return data + y * lineStride + x * pixelStride; }
 
 		uint8* data;
 		int lineStride, pixelStride, width, height;
@@ -22199,7 +22200,7 @@ public:
 								   int width, int height);
 
 	void createSolidAreaMask (RectangleList& result,
-							  const float alphaThreshold = 0.5f) const;
+							  float alphaThreshold = 0.5f) const;
 
 	juce_UseDebuggingNewOperator
 
@@ -22210,9 +22211,9 @@ protected:
 	const PixelFormat format;
 	const int imageWidth, imageHeight;
 
-	Image (const PixelFormat format,
-		   const int imageWidth,
-		   const int imageHeight);
+	Image (PixelFormat format,
+		   int imageWidth,
+		   int imageHeight);
 
 	int pixelStride, lineStride;
 	HeapBlock <uint8> imageDataAllocated;
@@ -28241,8 +28242,6 @@ private:
 #ifndef __JUCE_IMAGECACHE_JUCEHEADER__
 #define __JUCE_IMAGECACHE_JUCEHEADER__
 
-struct ImageCacheItem;
-
 class JUCE_API  ImageCache  : private DeletedAtShutdown,
 							  private Timer
 {
@@ -28250,30 +28249,34 @@ public:
 
 	static Image* getFromFile (const File& file);
 
-	static Image* getFromMemory (const void* imageData,
-								 const int dataSize);
+	static Image* getFromMemory (const void* imageData, int dataSize);
 
-	static void release (Image* const imageToRelease);
+	static void release (Image* imageToRelease);
 
-	static void releaseOrDelete (Image* const imageToRelease);
+	static void releaseOrDelete (Image* imageToRelease);
 
-	static bool isImageInCache (Image* const imageToLookFor);
+	static bool isImageInCache (Image* imageToLookFor);
 
-	static void incReferenceCount (Image* const image);
+	static void incReferenceCount (Image* image);
 
-	static Image* getFromHashCode (const int64 hashCode);
+	static Image* getFromHashCode (int64 hashCode);
 
-	static void addImageToCache (Image* const image,
-								 const int64 hashCode);
+	static void addImageToCache (Image* image, int64 hashCode);
 
-	static void setCacheTimeout (const int millisecs);
+	static void setCacheTimeout (int millisecs);
 
 	juce_UseDebuggingNewOperator
 
 private:
 
 	CriticalSection lock;
-	OwnedArray <ImageCacheItem> images;
+	struct Item;
+	friend class ScopedPointer<Item>;
+	friend class OwnedArray<Item>;
+	OwnedArray<Item> images;
+
+	static ImageCache* instance;
+	static int cacheTimeout;
 
 	ImageCache();
 	ImageCache (const ImageCache&);

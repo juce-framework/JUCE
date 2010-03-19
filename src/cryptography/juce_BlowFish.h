@@ -42,7 +42,7 @@ public:
 
         The key data can be up to 72 bytes long.
     */
-    BlowFish (const uint8* keyData, int keyBytes);
+    BlowFish (const void* keyData, int keyBytes);
 
     /** Creates a copy of another blowfish object. */
     BlowFish (const BlowFish& other);
@@ -55,10 +55,10 @@ public:
 
     //==============================================================================
     /** Encrypts a pair of 32-bit integers. */
-    void encrypt (uint32& data1, uint32& data2) const;
+    void encrypt (uint32& data1, uint32& data2) const throw();
 
     /** Decrypts a pair of 32-bit integers. */
-    void decrypt (uint32& data1, uint32& data2) const;
+    void decrypt (uint32& data1, uint32& data2) const throw();
 
 
     //==============================================================================
@@ -68,7 +68,7 @@ private:
     uint32 p[18];
     HeapBlock <uint32> s[4];
 
-    uint32 F (uint32 x) const;
+    uint32 F (uint32 x) const throw();
 };
 
 

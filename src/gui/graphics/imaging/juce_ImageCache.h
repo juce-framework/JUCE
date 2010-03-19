@@ -31,7 +31,6 @@
 #include "../../../events/juce_Timer.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
 #include "../../../containers/juce_VoidArray.h"
-struct ImageCacheItem;
 
 
 //==============================================================================
@@ -89,8 +88,7 @@ public:
         @returns            the image, or null if it there was an error loading it
         @see release, getFromMemory, getFromCache, ImageFileFormat::loadFrom
     */
-    static Image* getFromMemory (const void* imageData,
-                                 const int dataSize);
+    static Image* getFromMemory (const void* imageData, int dataSize);
 
     /** Releases an image that was previously created by the ImageCache.
 
@@ -100,26 +98,26 @@ public:
 
         @see getFromFile, getFromMemory
     */
-    static void release (Image* const imageToRelease);
+    static void release (Image* imageToRelease);
 
     /** Releases an image if it's in the cache, or deletes it if it isn't cached.
 
         This is a handy function to use if you want to delete an image but are afraid that
         it might be cached.
     */
-    static void releaseOrDelete (Image* const imageToRelease);
+    static void releaseOrDelete (Image* imageToRelease);
 
     /** Checks whether an image is in the cache or not.
 
         @returns true if the image is currently in the cache
     */
-    static bool isImageInCache (Image* const imageToLookFor);
+    static bool isImageInCache (Image* imageToLookFor);
 
     /** Increments the reference-count for a cached image.
 
         If the image isn't in the cache, this method won't do anything.
     */
-    static void incReferenceCount (Image* const image);
+    static void incReferenceCount (Image* image);
 
     //==============================================================================
     /** Checks the cache for an image with a particular hashcode.
@@ -134,7 +132,7 @@ public:
                         image by addImageToCache()
         @see addImageToCache
     */
-    static Image* getFromHashCode (const int64 hashCode);
+    static Image* getFromHashCode (int64 hashCode);
 
     /** Adds an image to the cache with a user-defined hash-code.
 
@@ -148,14 +146,13 @@ public:
         @param hashCode the hash-code to associate with it
         @see getFromHashCode
     */
-    static void addImageToCache (Image* const image,
-                                 const int64 hashCode);
+    static void addImageToCache (Image* image, int64 hashCode);
 
     /** Changes the amount of time before an unused image will be removed from the cache.
 
         By default this is about 5 seconds.
     */
-    static void setCacheTimeout (const int millisecs);
+    static void setCacheTimeout (int millisecs);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -163,7 +160,13 @@ public:
 private:
     //==============================================================================
     CriticalSection lock;
-    OwnedArray <ImageCacheItem> images;
+    struct Item;
+    friend class ScopedPointer<Item>;
+    friend class OwnedArray<Item>;
+    OwnedArray<Item> images;
+
+    static ImageCache* instance;
+    static int cacheTimeout;
 
     ImageCache();
     ImageCache (const ImageCache&);

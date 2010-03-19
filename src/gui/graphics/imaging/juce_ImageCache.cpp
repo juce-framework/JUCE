@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-struct ImageCacheItem
+struct ImageCache::Item
 {
     ScopedPointer <Image> image;
     int64 hashCode;
@@ -43,11 +43,11 @@ struct ImageCacheItem
     juce_UseDebuggingNewOperator
 };
 
+ImageCache* ImageCache::instance = 0;
+int ImageCache::cacheTimeout = 5000;
+
+
 //==============================================================================
-static ImageCache* instance = 0;
-static int cacheTimeout = 5000;
-
-
 ImageCache::ImageCache()
 {
 }
@@ -66,7 +66,7 @@ Image* ImageCache::getFromHashCode (const int64 hashCode)
 
         for (int i = instance->images.size(); --i >= 0;)
         {
-            ImageCacheItem* const ci = instance->images.getUnchecked(i);
+            Item* const ci = instance->images.getUnchecked(i);
 
             if (ci->hashCode == hashCode)
             {
@@ -79,15 +79,14 @@ Image* ImageCache::getFromHashCode (const int64 hashCode)
     return 0;
 }
 
-void ImageCache::addImageToCache (Image* const image,
-                                  const int64 hashCode)
+void ImageCache::addImageToCache (Image* const image, const int64 hashCode)
 {
     if (image != 0)
     {
         if (instance == 0)
             instance = new ImageCache();
 
-        ImageCacheItem* const newC = new ImageCacheItem();
+        Item* const newC = new Item();
         newC->hashCode = hashCode;
         newC->image = image;
         newC->refCount = 1;
@@ -106,9 +105,9 @@ void ImageCache::release (Image* const imageToRelease)
 
         for (int i = instance->images.size(); --i >= 0;)
         {
-            ImageCacheItem* const ci = instance->images.getUnchecked(i);
+            Item* const ci = instance->images.getUnchecked(i);
 
-            if ((Image*) ci->image == imageToRelease)
+            if (static_cast <Image*> (ci->image) == imageToRelease)
             {
                 if (--(ci->refCount) == 0)
                     ci->releaseTime = Time::getApproximateMillisecondCounter();
@@ -137,7 +136,7 @@ bool ImageCache::isImageInCache (Image* const imageToLookFor)
         const ScopedLock sl (instance->lock);
 
         for (int i = instance->images.size(); --i >= 0;)
-            if ((Image*) instance->images.getUnchecked(i)->image == imageToLookFor)
+            if (static_cast <Image*> (instance->images.getUnchecked(i)->image) == imageToLookFor)
                 return true;
     }
 
@@ -152,9 +151,9 @@ void ImageCache::incReferenceCount (Image* const image)
 
         for (int i = instance->images.size(); --i >= 0;)
         {
-            ImageCacheItem* const ci = (ImageCacheItem*) instance->images.getUnchecked(i);
+            Item* const ci = instance->images.getUnchecked(i);
 
-            if ((Image*) ci->image == image)
+            if (static_cast <Image*> (ci->image) == image)
             {
                 ci->refCount++;
                 return;
@@ -168,13 +167,13 @@ void ImageCache::incReferenceCount (Image* const image)
 void ImageCache::timerCallback()
 {
     int numberStillNeedingReleasing = 0;
-    const unsigned int now = Time::getApproximateMillisecondCounter();
+    const uint32 now = Time::getApproximateMillisecondCounter();
 
     const ScopedLock sl (lock);
 
     for (int i = images.size(); --i >= 0;)
     {
-        ImageCacheItem* const ci = images.getUnchecked(i);
+        Item* const ci = images.getUnchecked(i);
 
         if (ci->refCount <= 0)
         {
@@ -208,11 +207,9 @@ Image* ImageCache::getFromFile (const File& file)
     return image;
 }
 
-Image* ImageCache::getFromMemory (const void* imageData,
-                                  const int dataSize)
+Image* ImageCache::getFromMemory (const void* imageData, const int dataSize)
 {
     const int64 hashCode = (int64) (pointer_sized_int) imageData;
-
     Image* image = getFromHashCode (hashCode);
 
     if (image == 0)

@@ -681,24 +681,26 @@ void File::revealToUser() const
 }
 
 //==============================================================================
-struct NamedPipeInternal
+class NamedPipeInternal
 {
-    HANDLE pipeH;
-    HANDLE cancelEvent;
-    bool connected, createdPipe;
-
-    NamedPipeInternal()
+public:
+    NamedPipeInternal (const String& file, const bool isPipe_)
         : pipeH (0),
           cancelEvent (0),
           connected (false),
-          createdPipe (false)
+          isPipe (isPipe_)
     {
         cancelEvent = CreateEvent (0, FALSE, FALSE, 0);
+
+        pipeH = isPipe ? CreateNamedPipe (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
+                                          PIPE_UNLIMITED_INSTANCES, 4096, 4096, 0, 0)
+                       : CreateFile (file, GENERIC_READ | GENERIC_WRITE, 0, 0,
+                                     OPEN_EXISTING, FILE_FLAG_OVERLAPPED, 0);
     }
 
     ~NamedPipeInternal()
     {
-        disconnect();
+        disconnectPipe();
 
         if (pipeH != 0)
             CloseHandle (pipeH);
@@ -708,7 +710,7 @@ struct NamedPipeInternal
 
     bool connect (const int timeOutMs)
     {
-        if (! createdPipe)
+        if (! isPipe)
             return true;
 
         if (! connected)
@@ -746,7 +748,7 @@ struct NamedPipeInternal
         return connected;
     }
 
-    void disconnect()
+    void disconnectPipe()
     {
         if (connected)
         {
@@ -754,12 +756,18 @@ struct NamedPipeInternal
             connected = false;
         }
     }
+
+    HANDLE pipeH;
+    HANDLE cancelEvent;
+    bool connected, isPipe;
 };
 
 void NamedPipe::close()
 {
-    NamedPipeInternal* const intern = (NamedPipeInternal*) internal;
-    delete intern;
+    cancelPendingReads();
+
+    const ScopedLock sl (lock);
+    delete static_cast<NamedPipeInternal*> (internal);
     internal = 0;
 }
 
@@ -767,43 +775,26 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
 {
     close();
 
-    NamedPipeInternal* const intern = new NamedPipeInternal();
-
-    String file ("\\\\.\\pipe\\");
-    file += pipeName;
-
-    intern->createdPipe = createPipe;
-
-    if (createPipe)
-    {
-        intern->pipeH = CreateNamedPipe (file, PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, 0,
-                                         PIPE_UNLIMITED_INSTANCES,
-                                         4096, 4096, 0, NULL);
-    }
-    else
-    {
-        intern->pipeH = CreateFile (file, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING,
-                                    FILE_FLAG_OVERLAPPED, 0);
-    }
+    ScopedPointer<NamedPipeInternal> intern (new NamedPipeInternal ("\\\\.\\pipe\\" + pipeName, createPipe));
 
     if (intern->pipeH != INVALID_HANDLE_VALUE)
     {
-        internal = intern;
+        internal = intern.release();
         return true;
     }
 
-    delete intern;
     return false;
 }
 
 int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMilliseconds)
 {
+    const ScopedLock sl (lock);
     int bytesRead = -1;
     bool waitAgain = true;
 
     while (waitAgain && internal != 0)
     {
-        NamedPipeInternal* const intern = (NamedPipeInternal*) internal;
+        NamedPipeInternal* const intern = static_cast<NamedPipeInternal*> (internal);
         waitAgain = false;
 
         if (! intern->connect (timeOutMilliseconds))
@@ -839,9 +830,9 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
             {
                 bytesRead = (int) numRead;
             }
-            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
+            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->isPipe)
             {
-                intern->disconnect();
+                intern->disconnectPipe();
                 waitAgain = true;
             }
         }
@@ -860,7 +851,7 @@ int NamedPipe::read (void* destBuffer, int maxBytesToRead, int timeOutMillisecon
 int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOutMilliseconds)
 {
     int bytesWritten = -1;
-    NamedPipeInternal* const intern = (NamedPipeInternal*) internal;
+    NamedPipeInternal* const intern = static_cast<NamedPipeInternal*> (internal);
 
     if (intern != 0 && intern->connect (timeOutMilliseconds))
     {
@@ -897,9 +888,9 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
             {
                 bytesWritten = (int) numWritten;
             }
-            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->createdPipe)
+            else if (GetLastError() == ERROR_BROKEN_PIPE && intern->isPipe)
             {
-                intern->disconnect();
+                intern->disconnectPipe();
             }
         }
 
@@ -911,10 +902,8 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
 
 void NamedPipe::cancelPendingReads()
 {
-    NamedPipeInternal* const intern = (NamedPipeInternal*) internal;
-
-    if (intern != 0)
-        SetEvent (intern->cancelEvent);
+    if (internal != 0)
+        SetEvent (static_cast<NamedPipeInternal*> (internal)->cancelEvent);
 }
 
 

@@ -77,10 +77,10 @@ public:
                                 black. If false, the image may contain random data, and the
                                 user will have to deal with this
     */
-    Image (const PixelFormat format,
-           const int imageWidth,
-           const int imageHeight,
-           const bool clearImage);
+    Image (PixelFormat format,
+           int imageWidth,
+           int imageHeight,
+           bool clearImage);
 
     /** Creates a copy of another image.
 
@@ -97,10 +97,10 @@ public:
 
         On some platforms this will just return a normal software-based image.
     */
-    static Image* createNativeImage (const PixelFormat format,
-                                     const int imageWidth,
-                                     const int imageHeight,
-                                     const bool clearImage);
+    static Image* createNativeImage (PixelFormat format,
+                                     int imageWidth,
+                                     int imageHeight,
+                                     bool clearImage);
 
     //==============================================================================
     /** Returns the image's width (in pixels). */
@@ -144,7 +144,7 @@ public:
     */
     virtual Image* createCopy (int newWidth = -1,
                                int newHeight = -1,
-                               const Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+                               Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
     /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
     */
@@ -160,7 +160,7 @@ public:
 
         @see getAlphaAt, setPixelAt, blendPixelAt
     */
-    virtual const Colour getPixelAt (const int x, const int y) const;
+    virtual const Colour getPixelAt (int x, int y) const;
 
     /** Sets the colour of one of the image's pixels.
 
@@ -175,7 +175,7 @@ public:
 
         @see blendPixelAt
     */
-    virtual void setPixelAt (const int x, const int y, const Colour& colour);
+    virtual void setPixelAt (int x, int y, const Colour& colour);
 
     /** Changes the opacity of a pixel.
 
@@ -187,7 +187,7 @@ public:
 
         @see getAlphaAt, setPixelAt
     */
-    virtual void multiplyAlphaAt (const int x, const int y, const float multiplier);
+    virtual void multiplyAlphaAt (int x, int y, float multiplier);
 
     /** Changes the overall opacity of the image.
 
@@ -197,7 +197,7 @@ public:
 
         If the image doesn't have an alpha channel, this won't have any effect.
     */
-    virtual void multiplyAllAlphas (const float amountToMultiplyBy);
+    virtual void multiplyAllAlphas (float amountToMultiplyBy);
 
     /** Changes all the colours to be shades of grey, based on their current luminosity.
     */
@@ -223,7 +223,7 @@ public:
     class BitmapData
     {
     public:
-        BitmapData (Image& image, int x, int y, int w, int h, const bool needsToBeWritable);
+        BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
         BitmapData (const Image& image, int x, int y, int w, int h);
         ~BitmapData();
 
@@ -231,13 +231,13 @@ public:
             The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (const int y) const                        { return data + y * lineStride; }
+        inline uint8* getLinePointer (int y) const                      { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (const int x, const int y) const          { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (int x, int y) const              { return data + y * lineStride + x * pixelStride; }
 
         uint8* data;
         int lineStride, pixelStride, width, height;
@@ -269,7 +269,7 @@ public:
                                 above this level will be considered opaque
     */
     void createSolidAreaMask (RectangleList& result,
-                              const float alphaThreshold = 0.5f) const;
+                              float alphaThreshold = 0.5f) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -286,9 +286,9 @@ protected:
     const int imageWidth, imageHeight;
 
     /** Used internally so that subclasses can call a constructor that doesn't allocate memory */
-    Image (const PixelFormat format,
-           const int imageWidth,
-           const int imageHeight);
+    Image (PixelFormat format,
+           int imageWidth,
+           int imageHeight);
 
     int pixelStride, lineStride;
     HeapBlock <uint8> imageDataAllocated;

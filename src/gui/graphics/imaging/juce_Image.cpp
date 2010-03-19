@@ -139,41 +139,43 @@ void Image::setPixelData (int x, int y, int w, int h,
 }
 
 //==============================================================================
-void Image::clear (int dx, int dy, int dw, int dh,
-                   const Colour& colourToClearTo)
+void Image::clear (int dx, int dy, int dw, int dh, const Colour& colourToClearTo)
 {
-    const PixelARGB col (colourToClearTo.getPixelARGB());
-
-    const BitmapData destData (*this, dx, dy, dw, dh, true);
-    uint8* dest = destData.data;
-
-    while (--dh >= 0)
+    if (Rectangle<int>::intersectRectangles (dx, dy, dw, dh, 0, 0, imageWidth, imageHeight))
     {
-        uint8* line = dest;
-        dest += destData.lineStride;
+        const PixelARGB col (colourToClearTo.getPixelARGB());
 
-        if (isARGB())
+        const BitmapData destData (*this, dx, dy, dw, dh, true);
+        uint8* dest = destData.data;
+
+        while (--dh >= 0)
         {
-            for (int x = dw; --x >= 0;)
+            uint8* line = dest;
+            dest += destData.lineStride;
+
+            if (isARGB())
             {
-                ((PixelARGB*) line)->set (col);
-                line += destData.pixelStride;
+                for (int x = dw; --x >= 0;)
+                {
+                    ((PixelARGB*) line)->set (col);
+                    line += destData.pixelStride;
+                }
             }
-        }
-        else if (isRGB())
-        {
-            for (int x = dw; --x >= 0;)
+            else if (isRGB())
             {
-                ((PixelRGB*) line)->set (col);
-                line += destData.pixelStride;
+                for (int x = dw; --x >= 0;)
+                {
+                    ((PixelRGB*) line)->set (col);
+                    line += destData.pixelStride;
+                }
             }
-        }
-        else
-        {
-            for (int x = dw; --x >= 0;)
+            else
             {
-                *line = col.getAlpha();
-                line += destData.pixelStride;
+                for (int x = dw; --x >= 0;)
+                {
+                    *line = col.getAlpha();
+                    line += destData.pixelStride;
+                }
             }
         }
     }

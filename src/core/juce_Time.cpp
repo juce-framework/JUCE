@@ -55,55 +55,69 @@ BEGIN_JUCE_NAMESPACE
 #endif
 
 //==============================================================================
-static void millisToLocal (const int64 millis, struct tm& result) throw()
+namespace TimeHelpers
 {
-    const int64 seconds = millis / 1000;
-
-    if (seconds < literal64bit (86400) || seconds >= literal64bit (2145916800))
+    static struct tm  millisToLocal (const int64 millis) throw()
     {
-        // use extended maths for dates beyond 1970 to 2037..
-        const int timeZoneAdjustment = 31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000);
-        const int64 jdm = seconds + timeZoneAdjustment + literal64bit (210866803200);
+        struct tm result;
+        const int64 seconds = millis / 1000;
 
-        const int days = (int) (jdm / literal64bit (86400));
-        const int a = 32044 + days;
-        const int b = (4 * a + 3) / 146097;
-        const int c = a - (b * 146097) / 4;
-        const int d = (4 * c + 3) / 1461;
-        const int e = c - (d * 1461) / 4;
-        const int m = (5 * e + 2) / 153;
+        if (seconds < literal64bit (86400) || seconds >= literal64bit (2145916800))
+        {
+            // use extended maths for dates beyond 1970 to 2037..
+            const int timeZoneAdjustment = 31536000 - (int) (Time (1971, 0, 1, 0, 0).toMilliseconds() / 1000);
+            const int64 jdm = seconds + timeZoneAdjustment + literal64bit (210866803200);
 
-        result.tm_mday  = e - (153 * m + 2) / 5 + 1;
-        result.tm_mon   = m + 2 - 12 * (m / 10);
-        result.tm_year  = b * 100 + d - 6700 + (m / 10);
-        result.tm_wday  = (days + 1) % 7;
-        result.tm_yday  = -1;
+            const int days = (int) (jdm / literal64bit (86400));
+            const int a = 32044 + days;
+            const int b = (4 * a + 3) / 146097;
+            const int c = a - (b * 146097) / 4;
+            const int d = (4 * c + 3) / 1461;
+            const int e = c - (d * 1461) / 4;
+            const int m = (5 * e + 2) / 153;
 
-        int t = (int) (jdm % literal64bit (86400));
-        result.tm_hour  = t / 3600;
-        t %= 3600;
-        result.tm_min   = t / 60;
-        result.tm_sec   = t % 60;
-        result.tm_isdst = -1;
-    }
-    else
-    {
-        time_t now = (time_t) (seconds);
+            result.tm_mday  = e - (153 * m + 2) / 5 + 1;
+            result.tm_mon   = m + 2 - 12 * (m / 10);
+            result.tm_year  = b * 100 + d - 6700 + (m / 10);
+            result.tm_wday  = (days + 1) % 7;
+            result.tm_yday  = -1;
 
-#if JUCE_WINDOWS
-  #ifdef USE_NEW_SECURE_TIME_FNS
-        if (now >= 0 && now <= 0x793406fff)
-            localtime_s (&result, &now);
+            int t = (int) (jdm % literal64bit (86400));
+            result.tm_hour  = t / 3600;
+            t %= 3600;
+            result.tm_min   = t / 60;
+            result.tm_sec   = t % 60;
+            result.tm_isdst = -1;
+        }
         else
-            zeromem (&result, sizeof (result));
-  #else
-        result = *localtime (&now);
-  #endif
-#else
-        // more thread-safe
-        localtime_r (&now, &result);
-#endif
+        {
+            time_t now = static_cast <time_t> (seconds);
+
+    #if JUCE_WINDOWS
+      #ifdef USE_NEW_SECURE_TIME_FNS
+            if (now >= 0 && now <= 0x793406fff)
+                localtime_s (&result, &now);
+            else
+                zeromem (&result, sizeof (result));
+      #else
+            result = *localtime (&now);
+      #endif
+    #else
+            // more thread-safe
+            localtime_r (&now, &result);
+    #endif
+        }
+
+        return result;
     }
+
+    static int extendedModulo (const int64 value, const int modulo) throw()
+    {
+        return (int) (value >= 0 ? (value % modulo)
+                                 : (value - ((value / modulo) + 1) * modulo));
+    }
+
+    static uint32 lastMSCounterValue = 0;
 }
 
 //==============================================================================
@@ -219,23 +233,22 @@ int64 Time::currentTimeMillis() throw()
 
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() throw();
-static uint32 lastMSCounterValue = 0;
 
 uint32 Time::getMillisecondCounter() throw()
 {
     const uint32 now = juce_millisecondsSinceStartup();
 
-    if (now < lastMSCounterValue)
+    if (now < TimeHelpers::lastMSCounterValue)
     {
         // in multi-threaded apps this might be called concurrently, so
         // make sure that our last counter value only increases and doesn't
         // go backwards..
-        if (now < lastMSCounterValue - 1000)
-            lastMSCounterValue = now;
+        if (now < TimeHelpers::lastMSCounterValue - 1000)
+            TimeHelpers::lastMSCounterValue = now;
     }
     else
     {
-        lastMSCounterValue = now;
+        TimeHelpers::lastMSCounterValue = now;
     }
 
     return now;
@@ -243,8 +256,8 @@ uint32 Time::getMillisecondCounter() throw()
 
 uint32 Time::getApproximateMillisecondCounter() throw()
 {
-    jassert (lastMSCounterValue != 0);
-    return lastMSCounterValue;
+    jassert (TimeHelpers::lastMSCounterValue != 0);
+    return TimeHelpers::lastMSCounterValue;
 }
 
 void Time::waitForMillisecondCounter (const uint32 targetTime) throw()
@@ -328,16 +341,15 @@ const String Time::toString (const bool includeDate,
     return result.trimEnd();
 }
 
-const String Time::formatted (const tchar* const format) const throw()
+const String Time::formatted (const juce_wchar* const format) const throw()
 {
     String buffer;
     int bufferSize = 128;
     buffer.preallocateStorage (bufferSize);
 
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
+    struct tm t (TimeHelpers::millisToLocal (millisSinceEpoch));
 
-    while (CharacterFunctions::ftime ((tchar*) (const tchar*) buffer, bufferSize, format, &t) <= 0)
+    while (CharacterFunctions::ftime (static_cast <juce_wchar*> (buffer), bufferSize, format, &t) <= 0)
     {
         bufferSize += 128;
         buffer.preallocateStorage (bufferSize);
@@ -349,37 +361,27 @@ const String Time::formatted (const tchar* const format) const throw()
 //==============================================================================
 int Time::getYear() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_year + 1900;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_year + 1900;
 }
 
 int Time::getMonth() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_mon;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mon;
 }
 
 int Time::getDayOfMonth() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_mday;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_mday;
 }
 
 int Time::getDayOfWeek() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_wday;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_wday;
 }
 
 int Time::getHours() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_hour;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_hour;
 }
 
 int Time::getHoursInAmPmFormat() const throw()
@@ -399,34 +401,24 @@ bool Time::isAfternoon() const throw()
     return getHours() >= 12;
 }
 
-static int extendedModulo (const int64 value, const int modulo) throw()
-{
-    return (int) (value >= 0 ? (value % modulo)
-                             : (value - ((value / modulo) + 1) * modulo));
-}
-
 int Time::getMinutes() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_min;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_min;
 }
 
 int Time::getSeconds() const throw()
 {
-    return extendedModulo (millisSinceEpoch / 1000, 60);
+    return TimeHelpers::extendedModulo (millisSinceEpoch / 1000, 60);
 }
 
 int Time::getMilliseconds() const throw()
 {
-    return extendedModulo (millisSinceEpoch, 1000);
+    return TimeHelpers::extendedModulo (millisSinceEpoch, 1000);
 }
 
 bool Time::isDaylightSavingTime() const throw()
 {
-    struct tm t;
-    millisToLocal (millisSinceEpoch, t);
-    return t.tm_isdst != 0;
+    return TimeHelpers::millisToLocal (millisSinceEpoch).tm_isdst != 0;
 }
 
 const String Time::getTimeZone() const throw()
@@ -483,8 +475,7 @@ const String Time::getWeekdayName (const bool threeLetterVersion) const throw()
     return getWeekdayName (getDayOfWeek(), threeLetterVersion);
 }
 
-const String Time::getMonthName (int monthNumber,
-                                 const bool threeLetterVersion) throw()
+const String Time::getMonthName (int monthNumber, const bool threeLetterVersion) throw()
 {
     const char* const shortMonthNames[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
     const char* const longMonthNames[]  = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
@@ -495,8 +486,7 @@ const String Time::getMonthName (int monthNumber,
                                      : longMonthNames [monthNumber]);
 }
 
-const String Time::getWeekdayName (int day,
-                                   const bool threeLetterVersion) throw()
+const String Time::getWeekdayName (int day, const bool threeLetterVersion) throw()
 {
     const char* const shortDayNames[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
     const char* const longDayNames[]  = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };

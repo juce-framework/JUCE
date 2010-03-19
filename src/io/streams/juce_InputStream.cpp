@@ -46,42 +46,42 @@ bool InputStream::readBool()
 
 short InputStream::readShort()
 {
-    char temp [2];
+    char temp[2];
 
     if (read (temp, 2) == 2)
         return (short) ByteOrder::littleEndianShort (temp);
-    else
-        return 0;
+
+    return 0;
 }
 
 short InputStream::readShortBigEndian()
 {
-    char temp [2];
+    char temp[2];
 
     if (read (temp, 2) == 2)
         return (short) ByteOrder::bigEndianShort (temp);
-    else
-        return 0;
+
+    return 0;
 }
 
 int InputStream::readInt()
 {
-    char temp [4];
+    char temp[4];
 
     if (read (temp, 4) == 4)
         return (int) ByteOrder::littleEndianInt (temp);
-    else
-        return 0;
+
+    return 0;
 }
 
 int InputStream::readIntBigEndian()
 {
-    char temp [4];
+    char temp[4];
 
     if (read (temp, 4) == 4)
         return (int) ByteOrder::bigEndianInt (temp);
-    else
-        return 0;
+
+    return 0;
 }
 
 int InputStream::readCompressedInt()
@@ -108,22 +108,22 @@ int InputStream::readCompressedInt()
 
 int64 InputStream::readInt64()
 {
-    char temp [8];
+    char temp[8];
 
     if (read (temp, 8) == 8)
-        return (int64) ByteOrder::swapIfBigEndian (*(uint64*) temp);
-    else
-        return 0;
+        return (int64) ByteOrder::swapIfBigEndian (*reinterpret_cast <uint64*> (temp));
+
+    return 0;
 }
 
 int64 InputStream::readInt64BigEndian()
 {
-    char temp [8];
+    char temp[8];
 
     if (read (temp, 8) == 8)
-        return (int64) ByteOrder::swapIfLittleEndian (*(uint64*) temp);
-    else
-        return 0;
+        return (int64) ByteOrder::swapIfLittleEndian (*reinterpret_cast <uint64*> (temp));
+
+    return 0;
 }
 
 float InputStream::readFloat()
@@ -157,7 +157,7 @@ double InputStream::readDoubleBigEndian()
 const String InputStream::readString()
 {
     MemoryBlock buffer (256);
-    char* data = (char*) buffer.getData();
+    char* data = static_cast<char*> (buffer.getData());
     size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
@@ -165,7 +165,7 @@ const String InputStream::readString()
         if (++i >= buffer.getSize())
         {
             buffer.setSize (buffer.getSize() + 512);
-            data = (char*) buffer.getData();
+            data = static_cast<char*> (buffer.getData());
         }
     }
 
@@ -175,7 +175,7 @@ const String InputStream::readString()
 const String InputStream::readNextLine()
 {
     MemoryBlock buffer (256);
-    char* data = (char*) buffer.getData();
+    char* data = static_cast<char*> (buffer.getData());
     size_t i = 0;
 
     while ((data[i] = readByte()) != 0)
@@ -196,15 +196,14 @@ const String InputStream::readNextLine()
         if (++i >= buffer.getSize())
         {
             buffer.setSize (buffer.getSize() + 512);
-            data = (char*) buffer.getData();
+            data = static_cast<char*> (buffer.getData());
         }
     }
 
     return String::fromUTF8 (data, (int) i);
 }
 
-int InputStream::readIntoMemoryBlock (MemoryBlock& block,
-                                      int numBytes)
+int InputStream::readIntoMemoryBlock (MemoryBlock& block, int numBytes)
 {
     const int64 totalLength = getTotalLength();
 
@@ -228,7 +227,7 @@ int InputStream::readIntoMemoryBlock (MemoryBlock& block,
     {
         // know how many bytes we want, so we can resize the block first..
         block.setSize (originalBlockSize + numBytes, false);
-        totalBytesRead = read (((char*) block.getData()) + originalBlockSize, numBytes);
+        totalBytesRead = read (static_cast<char*> (block.getData()) + originalBlockSize, numBytes);
     }
     else
     {
@@ -239,7 +238,7 @@ int InputStream::readIntoMemoryBlock (MemoryBlock& block,
         {
             block.ensureSize (originalBlockSize + totalBytesRead + chunkSize, false);
 
-            const int bytesJustIn = read (((char*) block.getData())
+            const int bytesJustIn = read (static_cast<char*> (block.getData())
                                             + originalBlockSize
                                             + totalBytesRead,
                                           chunkSize);
@@ -261,7 +260,7 @@ const String InputStream::readEntireStreamAsString()
     MemoryBlock mb;
     const int size = readIntoMemoryBlock (mb);
 
-    return String::createStringFromData ((const char*) mb.getData(), size);
+    return String::createStringFromData (static_cast<const char*> (mb.getData()), size);
 }
 
 //==============================================================================
@@ -270,7 +269,7 @@ void InputStream::skipNextBytes (int64 numBytesToSkip)
     if (numBytesToSkip > 0)
     {
         const int skipBufferSize = (int) jmin (numBytesToSkip, (int64) 16384);
-        HeapBlock <char> temp (skipBufferSize);
+        HeapBlock<char> temp (skipBufferSize);
 
         while (numBytesToSkip > 0 && ! isExhausted())
             numBytesToSkip -= read (temp, (int) jmin (numBytesToSkip, (int64) skipBufferSize));
