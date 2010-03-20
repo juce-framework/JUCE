@@ -43,8 +43,7 @@ XmlElement::XmlAttributeNode::XmlAttributeNode (const XmlAttributeNode& other) t
 {
 }
 
-XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_,
-                                                const String& value_) throw()
+XmlElement::XmlAttributeNode::XmlAttributeNode (const String& name_, const String& value_) throw()
     : name (name_),
       value (value_),
       next (0)
@@ -402,24 +401,11 @@ void XmlElement::writeToStream (OutputStream& output,
                                 const int lineWrapLength) const
 {
     if (includeXmlHeader)
-    {
-        output << "<?xml version=\"1.0\" encoding=\"" << encodingType;
-
-        if (allOnOneLine)
-            output << "\"?> ";
-        else
-            output << "\"?>\r\n\r\n";
-    }
+        output << "<?xml version=\"1.0\" encoding=\"" << encodingType
+               << (allOnOneLine ? "\"?> " : "\"?>\r\n\r\n");
 
     if (dtdToUse.isNotEmpty())
-    {
-        output << dtdToUse;
-
-        if (allOnOneLine)
-            output << " ";
-        else
-            output << "\r\n";
-    }
+        output << dtdToUse << (allOnOneLine ? " " : "\r\n");
 
     writeElementAsText (output, allOnOneLine ? -1 : 0, lineWrapLength);
 }

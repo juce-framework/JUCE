@@ -340,7 +340,6 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
     {
         bool insideQuotes = false;
         juce_wchar currentQuoteChar = 0;
-
         int i = 0;
         int tokenStart = 0;
 
@@ -348,35 +347,11 @@ int StringArray::addTokens (const String& text, const String& breakCharacters, c
         {
             const juce_wchar c = text[i];
 
-            bool isBreak = (c == 0);
-
-            if (! (insideQuotes || isBreak))
-            {
-                const juce_wchar* b = breakCharacters;
-                while (*b != 0)
-                {
-                    if (*b++ == c)
-                    {
-                        isBreak = true;
-                        break;
-                    }
-                }
-            }
+            const bool isBreak = (c == 0) || ((! insideQuotes) && breakCharacters.containsChar (c));
 
             if (! isBreak)
             {
-                bool isQuote = false;
-                const juce_wchar* q = quoteCharacters;
-                while (*q != 0)
-                {
-                    if (*q++ == c)
-                    {
-                        isQuote = true;
-                        break;
-                    }
-                }
-
-                if (isQuote)
+                if (quoteCharacters.containsChar (c))
                 {
                     if (insideQuotes)
                     {
@@ -477,9 +452,11 @@ void StringArray::removeDuplicates (const bool ignoreCase)
 
 void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const bool appendNumberToFirstInstance,
-                                             const tchar* const preNumberString,
-                                             const tchar* const postNumberString)
+                                             const juce_wchar* const preNumberString,
+                                             const juce_wchar* const postNumberString)
 {
+    jassert (preNumberString != 0 && postNumberString != 0); // These strings can't be null pointers..
+
     for (int i = 0; i < size() - 1; ++i)
     {
         String& s = strings.getReference(i);

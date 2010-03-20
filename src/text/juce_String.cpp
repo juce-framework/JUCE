@@ -825,8 +825,10 @@ int String::indexOfChar (const int startIndex,
         if (*t == character)
             return (int) (t - text);
 
-        if (*t++ == 0)
+        if (*t == 0)
             return -1;
+
+        ++t;
     }
 }
 
@@ -959,7 +961,18 @@ bool String::contains (const juce_wchar* const other) const throw()
 
 bool String::containsChar (const juce_wchar character) const throw()
 {
-    return indexOfChar (character) >= 0;
+    const juce_wchar* t = text;
+
+    for (;;)
+    {
+        if (*t == character)
+            return true;
+
+        if (*t == 0)
+            return false;
+
+        ++t;
+    }
 }
 
 bool String::containsIgnoreCase (const juce_wchar* const t) const throw()

@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-XmlDocument::XmlDocument (const String& documentText) throw()
+XmlDocument::XmlDocument (const String& documentText)
     : originalText (documentText),
       ignoreEmptyTextElements (true)
 {
@@ -43,7 +43,7 @@ XmlDocument::XmlDocument (const File& file)
     inputSource = new FileInputSource (file);
 }
 
-XmlDocument::~XmlDocument() throw()
+XmlDocument::~XmlDocument()
 {
 }
 
@@ -140,7 +140,7 @@ const String& XmlDocument::getLastParseError() const throw()
     return lastError;
 }
 
-void XmlDocument::setLastError (const String& desc, const bool carryOn) throw()
+void XmlDocument::setLastError (const String& desc, const bool carryOn)
 {
     lastError = desc;
     errorOccurred = ! carryOn;
@@ -183,7 +183,7 @@ int XmlDocument::findNextTokenLength() throw()
     return len;
 }
 
-void XmlDocument::skipHeader() throw()
+void XmlDocument::skipHeader()
 {
     const juce_wchar* const found = CharacterFunctions::find (input, T("<?xml"));
 
@@ -225,7 +225,7 @@ void XmlDocument::skipHeader() throw()
     dtdText = String (docType, (int) (input - (docType + 1))).trim();
 }
 
-void XmlDocument::skipNextWhiteSpace() throw()
+void XmlDocument::skipNextWhiteSpace()
 {
     for (;;)
     {
@@ -275,7 +275,7 @@ void XmlDocument::skipNextWhiteSpace() throw()
     }
 }
 
-void XmlDocument::readQuotedString (String& result) throw()
+void XmlDocument::readQuotedString (String& result)
 {
     const juce_wchar quote = readNextChar();
 
@@ -325,7 +325,7 @@ void XmlDocument::readQuotedString (String& result) throw()
     }
 }
 
-XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw()
+XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
 {
     XmlElement* node = 0;
 
@@ -434,7 +434,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements) throw
     return node;
 }
 
-void XmlDocument::readChildElements (XmlElement* parent) throw()
+void XmlDocument::readChildElements (XmlElement* parent)
 {
     XmlElement* lastChildNode = 0;
 
@@ -620,7 +620,7 @@ void XmlDocument::readChildElements (XmlElement* parent) throw()
     }
 }
 
-void XmlDocument::readEntity (String& result) throw()
+void XmlDocument::readEntity (String& result)
 {
     // skip over the ampersand
     ++input;
@@ -726,43 +726,33 @@ void XmlDocument::readEntity (String& result) throw()
 const String XmlDocument::expandEntity (const String& ent)
 {
     if (ent.equalsIgnoreCase (T("amp")))
-    {
         return T("&");
-    }
-    else if (ent.equalsIgnoreCase (T("quot")))
-    {
+
+    if (ent.equalsIgnoreCase (T("quot")))
         return T("\"");
-    }
-    else if (ent.equalsIgnoreCase (T("apos")))
-    {
+
+    if (ent.equalsIgnoreCase (T("apos")))
         return T("\'");
-    }
-    else if (ent.equalsIgnoreCase (T("lt")))
-    {
+
+    if (ent.equalsIgnoreCase (T("lt")))
         return T("<");
-    }
-    else if (ent.equalsIgnoreCase (T("gt")))
-    {
+
+    if (ent.equalsIgnoreCase (T("gt")))
         return T(">");
-    }
-    else if (ent[0] == T('#'))
+
+    if (ent[0] == T('#'))
     {
         if (ent[1] == T('x') || ent[1] == T('X'))
-        {
             return String::charToString (static_cast <juce_wchar> (ent.substring (2).getHexValue32()));
-        }
-        else if (ent[1] >= T('0') && ent[1] <= T('9'))
-        {
+
+        if (ent[1] >= T('0') && ent[1] <= T('9'))
             return String::charToString (static_cast <juce_wchar> (ent.substring (1).getIntValue()));
-        }
 
         setLastError ("illegal escape sequence", false);
         return T("&");
     }
-    else
-    {
-        return expandExternalEntity (ent);
-    }
+
+    return expandExternalEntity (ent);
 }
 
 const String XmlDocument::expandExternalEntity (const String& entity)

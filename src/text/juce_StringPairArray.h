@@ -40,16 +40,16 @@ class JUCE_API  StringPairArray
 public:
     //==============================================================================
     /** Creates an empty array */
-    StringPairArray (const bool ignoreCaseWhenComparingKeys = true) throw();
+    StringPairArray (bool ignoreCaseWhenComparingKeys = true);
 
     /** Creates a copy of another array */
-    StringPairArray (const StringPairArray& other) throw();
+    StringPairArray (const StringPairArray& other);
 
     /** Destructor. */
-    ~StringPairArray() throw();
+    ~StringPairArray();
 
     /** Copies the contents of another string array into this one */
-    StringPairArray& operator= (const StringPairArray& other) throw();
+    StringPairArray& operator= (const StringPairArray& other);
 
     //==============================================================================
     /** Compares two arrays.
@@ -58,7 +58,7 @@ public:
 
         @returns    true only if the other array contains exactly the same strings with the same keys
     */
-    bool operator== (const StringPairArray& other) const throw();
+    bool operator== (const StringPairArray& other) const;
 
     /** Compares two arrays.
 
@@ -66,7 +66,7 @@ public:
 
         @returns    false if the other array contains exactly the same strings with the same keys
     */
-    bool operator!= (const StringPairArray& other) const throw();
+    bool operator!= (const StringPairArray& other) const;
 
     //==============================================================================
     /** Finds the value corresponding to a key string.
@@ -80,7 +80,7 @@ public:
 
         @see getValue
     */
-    const String& operator[] (const String& key) const throw();
+    const String& operator[] (const String& key) const;
 
     /** Finds the value corresponding to a key string.
 
@@ -92,13 +92,13 @@ public:
 
 
     /** Returns a list of all keys in the array. */
-    const StringArray& getAllKeys() const throw()       { return keys; }
+    const StringArray& getAllKeys() const throw()           { return keys; }
 
     /** Returns a list of all values in the array. */
-    const StringArray& getAllValues() const throw()     { return values; }
+    const StringArray& getAllValues() const throw()         { return values; }
 
     /** Returns the number of strings in the array */
-    inline int size() const throw()                     { return keys.size(); };
+    inline int size() const throw()                         { return keys.size(); };
 
 
     //==============================================================================
@@ -107,8 +107,7 @@ public:
         If a value already exists with this key, its value will be overwritten,
         otherwise the key/value pair will be added to the array.
     */
-    void set (const String& key,
-              const String& value) throw();
+    void set (const String& key, const String& value);
 
     /** Adds the items from another array to this one.
 
@@ -118,24 +117,24 @@ public:
 
     //==============================================================================
     /** Removes all elements from the array. */
-    void clear() throw();
+    void clear();
 
     /** Removes a string from the array based on its key.
 
         If the key isn't found, nothing will happen.
     */
-    void remove (const String& key) throw();
+    void remove (const String& key);
 
     /** Removes a string from the array based on its index.
 
         If the index is out-of-range, no action will be taken.
     */
-    void remove (const int index) throw();
+    void remove (int index);
 
     //==============================================================================
     /** Indicates whether to use a case-insensitive search when looking up a key string.
     */
-    void setIgnoresCase (const bool shouldIgnoreCase) throw();
+    void setIgnoresCase (bool shouldIgnoreCase);
 
     //==============================================================================
     /** Returns a descriptive string containing the items.
@@ -151,7 +150,7 @@ public:
         removing elements, they may have quite a lot of unused space allocated.
         This method will reduce the amount of allocated storage to a minimum.
     */
-    void minimiseStorageOverheads() throw();
+    void minimiseStorageOverheads();
 
 
     //==============================================================================

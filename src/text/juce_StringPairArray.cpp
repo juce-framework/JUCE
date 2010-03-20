@@ -32,30 +32,30 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-StringPairArray::StringPairArray (const bool ignoreCase_) throw()
+StringPairArray::StringPairArray (const bool ignoreCase_)
     : ignoreCase (ignoreCase_)
 {
 }
 
-StringPairArray::StringPairArray (const StringPairArray& other) throw()
+StringPairArray::StringPairArray (const StringPairArray& other)
     : keys (other.keys),
       values (other.values),
       ignoreCase (other.ignoreCase)
 {
 }
 
-StringPairArray::~StringPairArray() throw()
+StringPairArray::~StringPairArray()
 {
 }
 
-StringPairArray& StringPairArray::operator= (const StringPairArray& other) throw()
+StringPairArray& StringPairArray::operator= (const StringPairArray& other)
 {
     keys = other.keys;
     values = other.values;
     return *this;
 }
 
-bool StringPairArray::operator== (const StringPairArray& other) const throw()
+bool StringPairArray::operator== (const StringPairArray& other) const
 {
     for (int i = keys.size(); --i >= 0;)
         if (other [keys[i]] != values[i])
@@ -64,12 +64,12 @@ bool StringPairArray::operator== (const StringPairArray& other) const throw()
     return true;
 }
 
-bool StringPairArray::operator!= (const StringPairArray& other) const throw()
+bool StringPairArray::operator!= (const StringPairArray& other) const
 {
     return ! operator== (other);
 }
 
-const String& StringPairArray::operator[] (const String& key) const throw()
+const String& StringPairArray::operator[] (const String& key) const
 {
     return values [keys.indexOf (key, ignoreCase)];
 }
@@ -84,8 +84,7 @@ const String StringPairArray::getValue (const String& key, const String& default
     return defaultReturnValue;
 }
 
-void StringPairArray::set (const String& key,
-                           const String& value) throw()
+void StringPairArray::set (const String& key, const String& value)
 {
     const int i = keys.indexOf (key, ignoreCase);
 
@@ -106,24 +105,24 @@ void StringPairArray::addArray (const StringPairArray& other)
         set (other.keys[i], other.values[i]);
 }
 
-void StringPairArray::clear() throw()
+void StringPairArray::clear()
 {
     keys.clear();
     values.clear();
 }
 
-void StringPairArray::remove (const String& key) throw()
+void StringPairArray::remove (const String& key)
 {
     remove (keys.indexOf (key, ignoreCase));
 }
 
-void StringPairArray::remove (const int index) throw()
+void StringPairArray::remove (const int index)
 {
     keys.remove (index);
     values.remove (index);
 }
 
-void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase) throw()
+void StringPairArray::setIgnoresCase (const bool shouldIgnoreCase)
 {
     ignoreCase = shouldIgnoreCase;
 }
@@ -142,7 +141,7 @@ const String StringPairArray::getDescription() const
     return s;
 }
 
-void StringPairArray::minimiseStorageOverheads() throw()
+void StringPairArray::minimiseStorageOverheads()
 {
     keys.minimiseStorageOverheads();
     values.minimiseStorageOverheads();

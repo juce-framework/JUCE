@@ -3866,12 +3866,6 @@ private:
 #ifndef __JUCE_STRINGARRAY_JUCEHEADER__
 #define __JUCE_STRINGARRAY_JUCEHEADER__
 
-#ifndef DOXYGEN
- // (used in StringArray::appendNumbersToDuplicates)
- static const tchar* const defaultPreNumberString  = JUCE_T(" (");
- static const tchar* const defaultPostNumberString = JUCE_T(")");
-#endif
-
 class JUCE_API  StringArray
 {
 public:
@@ -3880,15 +3874,13 @@ public:
 
 	StringArray (const StringArray& other);
 
-	StringArray (const juce_wchar** const strings,
-				 const int numberOfStrings);
+	StringArray (const juce_wchar** strings, int numberOfStrings);
 
-	StringArray (const char** const strings,
-				 const int numberOfStrings);
+	StringArray (const char** strings, int numberOfStrings);
 
-	explicit StringArray (const juce_wchar** const strings);
+	explicit StringArray (const juce_wchar** strings);
 
-	explicit StringArray (const char** const strings);
+	explicit StringArray (const char** strings);
 
 	~StringArray();
 
@@ -3903,26 +3895,26 @@ public:
 	const String& operator[] (const int index) const throw();
 
 	bool contains (const String& stringToLookFor,
-				   const bool ignoreCase = false) const;
+				   bool ignoreCase = false) const;
 
 	int indexOf (const String& stringToLookFor,
-				 const bool ignoreCase = false,
+				 bool ignoreCase = false,
 				 int startIndex = 0) const;
 
 	void add (const String& stringToAdd);
 
-	void insert (const int index, const String& stringToAdd);
+	void insert (int index, const String& stringToAdd);
 
-	void addIfNotAlreadyThere (const String& stringToAdd, const bool ignoreCase = false);
+	void addIfNotAlreadyThere (const String& stringToAdd, bool ignoreCase = false);
 
-	void set (const int index, const String& newString);
+	void set (int index, const String& newString);
 
 	void addArray (const StringArray& other,
 				   int startIndex = 0,
 				   int numElementsToAdd = -1);
 
 	int addTokens (const String& stringToTokenise,
-				   const bool preserveQuotedStrings);
+				   bool preserveQuotedStrings);
 
 	int addTokens (const String& stringToTokenise,
 				   const String& breakCharacters,
@@ -3932,29 +3924,29 @@ public:
 
 	void clear();
 
-	void remove (const int index);
+	void remove (int index);
 
 	void removeString (const String& stringToRemove,
-					   const bool ignoreCase = false);
+					   bool ignoreCase = false);
 
-	void removeDuplicates (const bool ignoreCase);
+	void removeDuplicates (bool ignoreCase);
 
-	void removeEmptyStrings (const bool removeWhitespaceStrings = true);
+	void removeEmptyStrings (bool removeWhitespaceStrings = true);
 
-	void move (const int currentIndex, int newIndex) throw();
+	void move (int currentIndex, int newIndex) throw();
 
 	void trim();
 
-	void appendNumbersToDuplicates (const bool ignoreCaseWhenComparing,
-									const bool appendNumberToFirstInstance,
-									const tchar* const preNumberString = defaultPreNumberString,
-									const tchar* const postNumberString = defaultPostNumberString);
+	void appendNumbersToDuplicates (bool ignoreCaseWhenComparing,
+									bool appendNumberToFirstInstance,
+									const juce_wchar* preNumberString = JUCE_T(" ("),
+									const juce_wchar* postNumberString = JUCE_T(")"));
 
 	const String joinIntoString (const String& separatorString,
 								 int startIndex = 0,
 								 int numberOfElements = -1) const;
 
-	void sort (const bool ignoreCase);
+	void sort (bool ignoreCase);
 
 	void minimiseStorageOverheads();
 
@@ -3971,19 +3963,19 @@ class JUCE_API  StringPairArray
 {
 public:
 
-	StringPairArray (const bool ignoreCaseWhenComparingKeys = true) throw();
+	StringPairArray (bool ignoreCaseWhenComparingKeys = true);
 
-	StringPairArray (const StringPairArray& other) throw();
+	StringPairArray (const StringPairArray& other);
 
-	~StringPairArray() throw();
+	~StringPairArray();
 
-	StringPairArray& operator= (const StringPairArray& other) throw();
+	StringPairArray& operator= (const StringPairArray& other);
 
-	bool operator== (const StringPairArray& other) const throw();
+	bool operator== (const StringPairArray& other) const;
 
-	bool operator!= (const StringPairArray& other) const throw();
+	bool operator!= (const StringPairArray& other) const;
 
-	const String& operator[] (const String& key) const throw();
+	const String& operator[] (const String& key) const;
 
 	const String getValue (const String& key, const String& defaultReturnValue) const;
 
@@ -3993,22 +3985,21 @@ public:
 
 	inline int size() const throw()			 { return keys.size(); };
 
-	void set (const String& key,
-			  const String& value) throw();
+	void set (const String& key, const String& value);
 
 	void addArray (const StringPairArray& other);
 
-	void clear() throw();
+	void clear();
 
-	void remove (const String& key) throw();
+	void remove (const String& key);
 
-	void remove (const int index) throw();
+	void remove (int index);
 
-	void setIgnoresCase (const bool shouldIgnoreCase) throw();
+	void setIgnoresCase (bool shouldIgnoreCase);
 
 	const String getDescription() const;
 
-	void minimiseStorageOverheads() throw();
+	void minimiseStorageOverheads();
 
 	juce_UseDebuggingNewOperator
 
@@ -4479,26 +4470,26 @@ public:
 
 	~XmlElement() throw();
 
-	bool isEquivalentTo (const XmlElement* const other,
-						 const bool ignoreOrderOfAttributes) const throw();
+	bool isEquivalentTo (const XmlElement* other,
+						 bool ignoreOrderOfAttributes) const throw();
 
 	const String createDocument (const String& dtdToUse,
-								 const bool allOnOneLine = false,
-								 const bool includeXmlHeader = true,
+								 bool allOnOneLine = false,
+								 bool includeXmlHeader = true,
 								 const String& encodingType = JUCE_T("UTF-8"),
-								 const int lineWrapLength = 60) const;
+								 int lineWrapLength = 60) const;
 
 	void writeToStream (OutputStream& output,
 						const String& dtdToUse,
-						const bool allOnOneLine = false,
-						const bool includeXmlHeader = true,
+						bool allOnOneLine = false,
+						bool includeXmlHeader = true,
 						const String& encodingType = JUCE_T("UTF-8"),
-						const int lineWrapLength = 60) const;
+						int lineWrapLength = 60) const;
 
 	bool writeToFile (const File& destinationFile,
 					  const String& dtdToUse,
 					  const String& encodingType = JUCE_T("UTF-8"),
-					  const int lineWrapLength = 60) const;
+					  int lineWrapLength = 60) const;
 
 	inline const String& getTagName() const throw()  { return tagName; }
 
@@ -4506,9 +4497,9 @@ public:
 
 	int getNumAttributes() const throw();
 
-	const String& getAttributeName (const int attributeIndex) const throw();
+	const String& getAttributeName (int attributeIndex) const throw();
 
-	const String& getAttributeValue (const int attributeIndex) const throw();
+	const String& getAttributeValue (int attributeIndex) const throw();
 
 	// Attribute-handling methods..
 
@@ -4521,25 +4512,25 @@ public:
 
 	bool compareAttribute (const String& attributeName,
 						   const String& stringToCompareAgainst,
-						   const bool ignoreCase = false) const throw();
+						   bool ignoreCase = false) const throw();
 
 	int getIntAttribute (const String& attributeName,
-						 const int defaultReturnValue = 0) const;
+						 int defaultReturnValue = 0) const;
 
 	double getDoubleAttribute (const String& attributeName,
-							   const double defaultReturnValue = 0.0) const;
+							   double defaultReturnValue = 0.0) const;
 
 	bool getBoolAttribute (const String& attributeName,
-						   const bool defaultReturnValue = false) const;
+						   bool defaultReturnValue = false) const;
 
 	void setAttribute (const String& attributeName,
 					   const String& newValue);
 
 	void setAttribute (const String& attributeName,
-					   const int newValue);
+					   int newValue);
 
 	void setAttribute (const String& attributeName,
-					   const double newValue);
+					   double newValue);
 
 	void removeAttribute (const String& attributeName) throw();
 
@@ -4555,22 +4546,22 @@ public:
 
 	int getNumChildElements() const throw();
 
-	XmlElement* getChildElement (const int index) const throw();
+	XmlElement* getChildElement (int index) const throw();
 
 	XmlElement* getChildByName (const String& tagNameToLookFor) const throw();
 
 	void addChildElement (XmlElement* const newChildElement) throw();
 
-	void insertChildElement (XmlElement* const newChildNode,
+	void insertChildElement (XmlElement* newChildNode,
 							 int indexToInsertAt) throw();
 
 	XmlElement* createNewChildElement (const String& tagName);
 
-	bool replaceChildElement (XmlElement* const currentChildElement,
-							  XmlElement* const newChildNode) throw();
+	bool replaceChildElement (XmlElement* currentChildElement,
+							  XmlElement* newChildNode) throw();
 
-	void removeChildElement (XmlElement* const childToRemove,
-							 const bool shouldDeleteTheChild) throw();
+	void removeChildElement (XmlElement* childToRemove,
+							 bool shouldDeleteTheChild) throw();
 
 	void deleteAllChildElements() throw();
 
@@ -4578,7 +4569,7 @@ public:
 
 	bool containsChildElement (const XmlElement* const possibleChild) const throw();
 
-	XmlElement* findParentElementOf (const XmlElement* const elementToLookFor) throw();
+	XmlElement* findParentElementOf (const XmlElement* elementToLookFor) throw();
 
 	template <class ElementComparator>
 	void sortChildElements (ElementComparator& comparator,
@@ -4635,14 +4626,9 @@ private:
 
 	XmlAttributeNode* attributes;
 
-	XmlElement (int) throw(); // for internal use
-
+	XmlElement (int) throw();
 	void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
-
-	void writeElementAsText (OutputStream& out,
-							 const int indentationLevel,
-							 const int lineWrapLength) const;
-
+	void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
 	void getChildElementsAsArray (XmlElement**) const throw();
 	void reorderChildElements (XmlElement** const, const int) throw();
 };
@@ -8527,11 +8513,11 @@ class JUCE_API  XmlDocument
 {
 public:
 
-	XmlDocument (const String& documentText) throw();
+	XmlDocument (const String& documentText);
 
 	XmlDocument (const File& file);
 
-	~XmlDocument() throw();
+	~XmlDocument();
 
 	XmlElement* getDocumentElement (const bool onlyReadOuterDocumentElement = false);
 
@@ -8554,15 +8540,15 @@ private:
 	bool needToLoadDTD, ignoreEmptyTextElements;
 	ScopedPointer <InputSource> inputSource;
 
-	void setLastError (const String& desc, const bool carryOn) throw();
-	void skipHeader() throw();
-	void skipNextWhiteSpace() throw();
+	void setLastError (const String& desc, const bool carryOn);
+	void skipHeader();
+	void skipNextWhiteSpace();
 	juce_wchar readNextChar() throw();
-	XmlElement* readNextElement (const bool alsoParseSubElements) throw();
-	void readChildElements (XmlElement* parent) throw();
+	XmlElement* readNextElement (const bool alsoParseSubElements);
+	void readChildElements (XmlElement* parent);
 	int findNextTokenLength() throw();
-	void readQuotedString (String& result) throw();
-	void readEntity (String& result) throw();
+	void readQuotedString (String& result);
+	void readEntity (String& result);
 	static bool isXmlIdentifierCharSlow (juce_wchar c) throw();
 	bool isXmlIdentifierChar (juce_wchar c) const throw();
 
