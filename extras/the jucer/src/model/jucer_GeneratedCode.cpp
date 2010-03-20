@@ -176,7 +176,7 @@ const String GeneratedCode::getCallbackDefinitions() const
 const String GeneratedCode::getClassDeclaration() const
 {
     StringArray parentClassLines;
-    parentClassLines.addTokens (parentClasses, T(","), 0);
+    parentClassLines.addTokens (parentClasses, T(","), String::empty);
     parentClassLines.addArray (getExtraParentClasses());
 
     parentClassLines.trim();

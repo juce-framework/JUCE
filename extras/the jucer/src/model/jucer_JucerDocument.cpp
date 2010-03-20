@@ -129,7 +129,7 @@ void JucerDocument::setParentClasses (const String& classes)
     if (classes != parentClasses)
     {
         StringArray parentClassLines;
-        parentClassLines.addTokens (classes, T(","), 0);
+        parentClassLines.addTokens (classes, T(","), String::empty);
         parentClassLines.trim();
         parentClassLines.removeEmptyStrings();
         parentClassLines.removeDuplicates (false);

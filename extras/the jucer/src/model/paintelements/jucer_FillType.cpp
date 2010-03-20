@@ -237,7 +237,7 @@ void JucerFillType::restoreFromString (const String& s)
     if (s.isNotEmpty())
     {
         StringArray toks;
-        toks.addTokens (s, T(",:"), 0);
+        toks.addTokens (s, T(",:"), String::empty);
         toks.trim();
 
         if (toks[0] == T("solid"))
