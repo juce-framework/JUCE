@@ -509,7 +509,7 @@ OpenGLContext* OpenGLComponent::createContext()
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != 0 ? ((WindowedGLContext*) context)->getNativeWindowHandle() : 0;
+    return context != 0 ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle() : 0;
 }
 
 void juce_glViewport (const int w, const int h)

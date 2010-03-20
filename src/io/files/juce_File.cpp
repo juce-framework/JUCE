@@ -908,22 +908,19 @@ const File File::withFileExtension (const String& newExtension) const
     String filePart (getFileName());
 
     int i = filePart.lastIndexOfChar (T('.'));
-    if (i < 0)
-        i = filePart.length();
+    if (i >= 0)
+        filePart = filePart.substring (0, i);
 
-    String newExt (newExtension);
+    if (newExtension.isNotEmpty() && ! newExtension.startsWithChar (T('.')))
+        filePart << '.';
 
-    if (newExt.isNotEmpty() && ! newExt.startsWithChar (T('.')))
-        newExt = T(".") + newExt;
-
-    return getSiblingFile (filePart.substring (0, i) + newExt);
+    return getSiblingFile (filePart + newExtension);
 }
 
 //==============================================================================
 bool File::startAsProcess (const String& parameters) const
 {
-    return exists()
-            && juce_launchFile (fullPath, parameters);
+    return exists() && juce_launchFile (fullPath, parameters);
 }
 
 //==============================================================================
@@ -931,8 +928,8 @@ FileInputStream* File::createInputStream() const
 {
     if (existsAsFile())
         return new FileInputStream (*this);
-    else
-        return 0;
+
+    return 0;
 }
 
 FileOutputStream* File::createOutputStream (const int bufferSize) const

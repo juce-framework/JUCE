@@ -339,8 +339,7 @@ private:
     friend class OpenGLComponentWatcher;
     friend class ScopedPointer <OpenGLComponentWatcher>;
     ScopedPointer <OpenGLComponentWatcher> componentWatcher;
-
-    OpenGLContext* context;
+    ScopedPointer <OpenGLContext> context;
     OpenGLContext* contextToShareListsWith;
 
     CriticalSection contextLock;

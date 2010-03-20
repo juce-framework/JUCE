@@ -132,7 +132,7 @@ public:
         So for example 100 would return "100 bytes", 2000 would return "2 KB",
         2000000 would produce "2 MB", etc.
     */
-    static const String descriptionOfSizeInBytes (const int64 bytes);
+    static const String descriptionOfSizeInBytes (int64 bytes);
 
     //==============================================================================
     /** Returns the complete, absolute path of this file.
@@ -313,7 +313,7 @@ public:
         @param putNumbersInBrackets     whether to add brackets around the numbers that
                                         get appended to the new filename.
     */
-    const File getNonexistentSibling (const bool putNumbersInBrackets = true) const;
+    const File getNonexistentSibling (bool putNumbersInBrackets = true) const;
 
     //==============================================================================
     /** Compares the pathnames for two files. */
@@ -340,8 +340,8 @@ public:
         @returns    true if it manages to change the file's permissions.
         @see hasWriteAccess
     */
-    bool setReadOnly (const bool shouldBeReadOnly,
-                      const bool applyRecursively = false) const;
+    bool setReadOnly (bool shouldBeReadOnly,
+                      bool applyRecursively = false) const;
 
     /** Returns true if this file is a hidden or system file.
 
@@ -530,8 +530,8 @@ public:
         @see getNumberOfChildFiles, DirectoryIterator
     */
     int findChildFiles (Array<File>& results,
-                        const int whatToLookFor,
-                        const bool searchRecursively,
+                        int whatToLookFor,
+                        bool searchRecursively,
                         const String& wildCardPattern = JUCE_T("*")) const;
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
@@ -550,7 +550,7 @@ public:
         @returns                the number of matches found
         @see findChildFiles, DirectoryIterator
     */
-    int getNumberOfChildFiles (const int whatToLookFor,
+    int getNumberOfChildFiles (int whatToLookFor,
                                const String& wildCardPattern = JUCE_T("*")) const;
 
     /** Returns true if this file is a directory that contains one or more subdirectories.
@@ -577,7 +577,7 @@ public:
                     end of the file), or 0 if the file can't be opened for some reason
         @see createInputStream, appendData, appendText
     */
-    FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const;
+    FileOutputStream* createOutputStream (int bufferSize = 0x8000) const;
 
     //==============================================================================
     /** Loads a file's contents into memory as a block of binary data.
@@ -608,8 +608,8 @@ public:
 
         @returns false if it can't write to the file for some reason
     */
-    bool appendData (const void* const dataToAppend,
-                     const int numberOfBytes) const;
+    bool appendData (const void* dataToAppend,
+                     int numberOfBytes) const;
 
     /** Replaces this file's contents with a given block of data.
 
@@ -625,8 +625,8 @@ public:
 
         @see appendText
     */
-    bool replaceWithData (const void* const dataToWrite,
-                          const int numberOfBytes) const;
+    bool replaceWithData (const void* dataToWrite,
+                          int numberOfBytes) const;
 
     /** Appends a string to the end of the file.
 
@@ -641,8 +641,8 @@ public:
         @see replaceWithText
     */
     bool appendText (const String& textToAppend,
-                     const bool asUnicode = false,
-                     const bool writeUnicodeHeaderBytes = false) const;
+                     bool asUnicode = false,
+                     bool writeUnicodeHeaderBytes = false) const;
 
     /** Replaces this file's contents with a given text string.
 
@@ -661,8 +661,8 @@ public:
         @see appendText
     */
     bool replaceWithText (const String& textToWrite,
-                          const bool asUnicode = false,
-                          const bool writeUnicodeHeaderBytes = false) const;
+                          bool asUnicode = false,
+                          bool writeUnicodeHeaderBytes = false) const;
 
     //==============================================================================
     /** Creates a set of files to represent each file root.

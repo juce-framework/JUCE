@@ -502,7 +502,7 @@ public:
     {
         String s;
         s.preallocateStorage (16);
-        s << x << T(' ') << y << T(' ') << w << T(' ') << h;
+        s << x << ' ' << y << ' ' << w << ' ' << h;
         return s;
     }
 
@@ -519,7 +519,7 @@ public:
     static const Rectangle fromString (const String& stringVersion)
     {
         StringArray toks;
-        toks.addTokens (stringVersion.trim(), T(",; \t\r\n"), String::empty);
+        toks.addTokens (stringVersion.trim(), JUCE_T(",; \t\r\n"), String::empty);
 
         return Rectangle (toks[0].trim().getIntValue(),
                           toks[1].trim().getIntValue(),

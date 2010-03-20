@@ -49,9 +49,9 @@ public:
         @param deleteSourceWhenDestroyed    whether the sourceStream that is passed in should be
                                             deleted by this object when it is itself deleted.
     */
-    BufferedInputStream (InputStream* const sourceStream,
-                         const int bufferSize,
-                         const bool deleteSourceWhenDestroyed);
+    BufferedInputStream (InputStream* sourceStream,
+                         int bufferSize,
+                         bool deleteSourceWhenDestroyed);
 
     /** Destructor.
 

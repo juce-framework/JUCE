@@ -165,7 +165,8 @@ public:
 
         glOrthof (-1.0f, 1.0f, -1.5f, 1.5f, -1.0f, 1.0f);
         glMatrixMode (GL_MODELVIEW);
-        glRotatef (1.0f, 0.0f, 0.0f, 1.0f);
+        glPushMatrix();
+        glRotatef (rotation, 0.0f, 0.0f, 1.0f);
 
         glVertexPointer (2, GL_FLOAT, 0, vertices);
         glEnableClientState (GL_VERTEX_ARRAY);
@@ -173,6 +174,7 @@ public:
         glEnableClientState (GL_COLOR_ARRAY);
 
         glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+        glPopMatrix();
 #else
 
         glOrtho (0.0, getWidth(), 0.0, getHeight(), 0, 1);

@@ -962,8 +962,7 @@ public:
 
     ~AudioUnitPluginWindowCarbon()
     {
-        deleteAndZero (innerWrapper);
-
+        innerWrapper = 0;
         activeWindows.removeValue (this);
 
         if (isValid())
@@ -1080,7 +1079,7 @@ private:
     };
 
     friend class InnerWrapperComponent;
-    InnerWrapperComponent* innerWrapper;
+    ScopedPointer<InnerWrapperComponent> innerWrapper;
 };
 
 #endif

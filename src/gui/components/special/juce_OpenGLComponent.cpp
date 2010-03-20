@@ -179,7 +179,6 @@ private:
 //==============================================================================
 OpenGLComponent::OpenGLComponent (const OpenGLType type_)
     : type (type_),
-      context (0),
       contextToShareListsWith (0),
       needToUpdateViewport (true)
 {
@@ -196,7 +195,7 @@ OpenGLComponent::~OpenGLComponent()
 void OpenGLComponent::deleteContext()
 {
     const ScopedLock sl (contextLock);
-    deleteAndZero (context);
+    context = 0;
 }
 
 void OpenGLComponent::updateContextPosition()

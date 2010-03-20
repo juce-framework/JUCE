@@ -714,7 +714,6 @@ public:
           wy (0),
           ww (0),
           wh (0),
-          taskbarImage (0),
           fullScreen (false),
           mapped (false),
           visual (0),
@@ -735,7 +734,6 @@ public:
         // it's dangerous to delete a window on a thread other than the message thread..
         jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
-        deleteTaskBarIcon();
         deleteIconPixmaps();
 
         destroyWindow();
@@ -1746,7 +1744,6 @@ public:
     void setTaskBarIcon (const Image& image)
     {
         ScopedXLock xlock;
-        deleteTaskBarIcon();
         taskbarImage = image.createCopy();
 
         Screen* const screen = XDefaultScreenOfDisplay (display);
@@ -1799,11 +1796,6 @@ public:
         hints->min_height = 22;
         XSetWMNormalHints (display, windowH, hints);
         XFree (hints);
-    }
-
-    void deleteTaskBarIcon()
-    {
-        deleteAndZero (taskbarImage);
     }
 
     const Image* getTaskbarIcon() const throw()           { return taskbarImage; }
@@ -1974,7 +1966,7 @@ private:
     friend class LinuxRepaintManager;
     Window windowH, parentWindow;
     int wx, wy, ww, wh;
-    Image* taskbarImage;
+    ScopedPointer<Image> taskbarImage;
     bool fullScreen, mapped;
     Visual* visual;
     int depth;

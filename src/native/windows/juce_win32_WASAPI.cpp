@@ -1060,24 +1060,24 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         const bool useExclusiveMode = false;
-        WASAPIAudioIODevice* d = 0;
+        ScopedPointer<WASAPIAudioIODevice> device;
 
         const int outputIndex = outputDeviceNames.indexOf (outputDeviceName);
         const int inputIndex = inputDeviceNames.indexOf (inputDeviceName);
 
         if (outputIndex >= 0 || inputIndex >= 0)
         {
-            d = new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
-                                                                       : inputDeviceName,
-                                         outputDeviceIds [outputIndex],
-                                         inputDeviceIds [inputIndex],
-                                         useExclusiveMode);
+            device = new WASAPIAudioIODevice (outputDeviceName.isNotEmpty() ? outputDeviceName
+                                                                            : inputDeviceName,
+                                              outputDeviceIds [outputIndex],
+                                              inputDeviceIds [inputIndex],
+                                              useExclusiveMode);
 
-            if (! d->initialise())
-                deleteAndZero (d);
+            if (! device->initialise())
+                device = 0;
         }
 
-        return d;
+        return device.release();
     }
 
     //==============================================================================

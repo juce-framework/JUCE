@@ -68,10 +68,10 @@ OutputStream::~OutputStream()
 }
 
 //==============================================================================
-void OutputStream::writeBool (bool b)
+void OutputStream::writeBool (const bool b)
 {
-    writeByte ((b) ? (char) 1
-                   : (char) 0);
+    writeByte (b ? (char) 1
+                 : (char) 0);
 }
 
 void OutputStream::writeByte (char byte)

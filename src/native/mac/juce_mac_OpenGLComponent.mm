@@ -268,7 +268,7 @@ OpenGLContext* OpenGLComponent::createContext()
 
 void* OpenGLComponent::getNativeWindowHandle() const
 {
-    return context != 0 ? ((WindowedGLContext*) context)->getNativeWindowHandle()
+    return context != 0 ? static_cast<WindowedGLContext*> (static_cast<OpenGLContext*> (context))->getNativeWindowHandle()
                         : 0;
 }
 
@@ -348,7 +348,8 @@ public:
         view = [[JuceGLView alloc] initWithFrame: CGRectMake (0, 0, 64, 64)];
         view.opaque = YES;
         view.hidden = NO;
-        view.backgroundColor = [UIColor redColor];
+        view.backgroundColor = [UIColor blackColor];
+        view.userInteractionEnabled = NO;
 
         glLayer = (CAEAGLLayer*) [view layer];
         [peer->view addSubview: view];

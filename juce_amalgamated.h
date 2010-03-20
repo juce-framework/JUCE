@@ -4255,7 +4255,7 @@ public:
 
 	int64 getSize() const;
 
-	static const String descriptionOfSizeInBytes (const int64 bytes);
+	static const String descriptionOfSizeInBytes (int64 bytes);
 
 	const String& getFullPathName() const throw()	   { return fullPath; }
 
@@ -4287,15 +4287,15 @@ public:
 										const String& suffix,
 										bool putNumbersInBrackets = true) const;
 
-	const File getNonexistentSibling (const bool putNumbersInBrackets = true) const;
+	const File getNonexistentSibling (bool putNumbersInBrackets = true) const;
 
 	bool operator== (const File& otherFile) const;
 	bool operator!= (const File& otherFile) const;
 
 	bool hasWriteAccess() const;
 
-	bool setReadOnly (const bool shouldBeReadOnly,
-					  const bool applyRecursively = false) const;
+	bool setReadOnly (bool shouldBeReadOnly,
+					  bool applyRecursively = false) const;
 
 	bool isHidden() const;
 
@@ -4340,36 +4340,36 @@ public:
 	};
 
 	int findChildFiles (Array<File>& results,
-						const int whatToLookFor,
-						const bool searchRecursively,
+						int whatToLookFor,
+						bool searchRecursively,
 						const String& wildCardPattern = JUCE_T("*")) const;
 
-	int getNumberOfChildFiles (const int whatToLookFor,
+	int getNumberOfChildFiles (int whatToLookFor,
 							   const String& wildCardPattern = JUCE_T("*")) const;
 
 	bool containsSubDirectories() const;
 
 	FileInputStream* createInputStream() const;
 
-	FileOutputStream* createOutputStream (const int bufferSize = 0x8000) const;
+	FileOutputStream* createOutputStream (int bufferSize = 0x8000) const;
 
 	bool loadFileAsData (MemoryBlock& result) const;
 
 	const String loadFileAsString() const;
 
-	bool appendData (const void* const dataToAppend,
-					 const int numberOfBytes) const;
+	bool appendData (const void* dataToAppend,
+					 int numberOfBytes) const;
 
-	bool replaceWithData (const void* const dataToWrite,
-						  const int numberOfBytes) const;
+	bool replaceWithData (const void* dataToWrite,
+						  int numberOfBytes) const;
 
 	bool appendText (const String& textToAppend,
-					 const bool asUnicode = false,
-					 const bool writeUnicodeHeaderBytes = false) const;
+					 bool asUnicode = false,
+					 bool writeUnicodeHeaderBytes = false) const;
 
 	bool replaceWithText (const String& textToWrite,
-						  const bool asUnicode = false,
-						  const bool writeUnicodeHeaderBytes = false) const;
+						  bool asUnicode = false,
+						  bool writeUnicodeHeaderBytes = false) const;
 
 	static void findFileSystemRoots (Array<File>& results);
 
@@ -8171,9 +8171,9 @@ class JUCE_API  BufferedInputStream  : public InputStream
 {
 public:
 
-	BufferedInputStream (InputStream* const sourceStream,
-						 const int bufferSize,
-						 const bool deleteSourceWhenDestroyed);
+	BufferedInputStream (InputStream* sourceStream,
+						 int bufferSize,
+						 bool deleteSourceWhenDestroyed);
 
 	~BufferedInputStream();
 
@@ -10136,14 +10136,14 @@ public:
 	{
 		String s;
 		s.preallocateStorage (16);
-		s << x << T(' ') << y << T(' ') << w << T(' ') << h;
+		s << x << ' ' << y << ' ' << w << ' ' << h;
 		return s;
 	}
 
 	static const Rectangle fromString (const String& stringVersion)
 	{
 		StringArray toks;
-		toks.addTokens (stringVersion.trim(), T(",; \t\r\n"), String::empty);
+		toks.addTokens (stringVersion.trim(), JUCE_T(",; \t\r\n"), String::empty);
 
 		return Rectangle (toks[0].trim().getIntValue(),
 						  toks[1].trim().getIntValue(),
@@ -26815,8 +26815,7 @@ private:
 	friend class OpenGLComponentWatcher;
 	friend class ScopedPointer <OpenGLComponentWatcher>;
 	ScopedPointer <OpenGLComponentWatcher> componentWatcher;
-
-	OpenGLContext* context;
+	ScopedPointer <OpenGLContext> context;
 	OpenGLContext* contextToShareListsWith;
 
 	CriticalSection contextLock;
