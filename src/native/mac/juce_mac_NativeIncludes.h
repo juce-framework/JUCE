@@ -44,7 +44,12 @@
  #import <AVFoundation/AVFoundation.h>
  #import <CoreData/CoreData.h>
  #import <MobileCoreServices/MobileCoreServices.h>
+ #import <QuartzCore/QuartzCore.h>
  #include <sys/fcntl.h>
+ #if JUCE_OPENGL
+  #include <OpenGLES/ES1/gl.h>
+  #include <OpenGLES/ES1/glext.h>
+ #endif
 #else
  #import <Cocoa/Cocoa.h>
  #import <CoreAudio/HostTime.h>

@@ -139,7 +139,8 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
 
 PropertiesFile::~PropertiesFile()
 {
-    saveIfNeeded();
+    if (! saveIfNeeded())
+        jassertfalse;
 }
 
 bool PropertiesFile::saveIfNeeded()

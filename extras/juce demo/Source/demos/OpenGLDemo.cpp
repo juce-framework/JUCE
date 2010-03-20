@@ -29,7 +29,7 @@
 
 #include "../jucedemo_headers.h"
 
-#if JUCE_OPENGL && ! JUCE_IPHONE
+#if JUCE_OPENGL
 
 #if JUCE_WINDOWS
  #include <gl/gl.h>
@@ -38,6 +38,9 @@
  #include <GL/gl.h>
  #include <GL/glut.h>
  #undef KeyPress
+#elif JUCE_IPHONE
+ #include <OpenGLES/ES1/gl.h>
+ #include <OpenGLES/ES1/glext.h>
 #elif JUCE_MAC
  #include <GLUT/glut.h>
 #elif JUCE_IPHONE
@@ -58,6 +61,11 @@ class DemoOpenGLCanvas  : public OpenGLComponent,
 public:
     DemoOpenGLCanvas()
     {
+#if JUCE_IPHONE
+        // (On the iPhone, choose a format without a depth buffer)
+        setPixelFormat (OpenGLPixelFormat (8, 8, 0, 0));
+#endif
+
         rotation = 0.0f;
         delta = 1.0f;
 
@@ -106,6 +114,7 @@ public:
     // we'll use the opportunity to create the textures needed.
     void newOpenGLContextCreated()
     {
+#if ! JUCE_IPHONE
         // (no need to call makeCurrentContextActive(), as that will have
         // been done for us before the method call).
         glClearColor (0.0f, 0.0f, 0.0f, 0.0f);
@@ -133,6 +142,7 @@ public:
         glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
         glHint (GL_POINT_SMOOTH_HINT, GL_NICEST);
         glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
     }
 
     void mouseDrag (const MouseEvent& e)
@@ -143,15 +153,32 @@ public:
 
     void renderOpenGL()
     {
-        glClearColor (0.8f, 0.0f, 0.4f, 0.0f);
+        glClearColor (0.25f, 0.25f, 0.25f, 0.0f);
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glMatrixMode(GL_PROJECTION);
+        glMatrixMode (GL_PROJECTION);
         glLoadIdentity();
+
+#if JUCE_IPHONE
+        const GLfloat vertices[] = { -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,  0.5f, 0.5f, 0.5f };
+        const GLubyte colours[] = { 255, 255, 0, 255, 0, 255, 255, 255, 0, 0, 0, 0, 255, 0, 255, 255 };
+
+        glOrthof (-1.0f, 1.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+        glMatrixMode (GL_MODELVIEW);
+        glRotatef (1.0f, 0.0f, 0.0f, 1.0f);
+
+        glVertexPointer (2, GL_FLOAT, 0, vertices);
+        glEnableClientState (GL_VERTEX_ARRAY);
+        glColorPointer (4, GL_UNSIGNED_BYTE, 0, colours);
+        glEnableClientState (GL_COLOR_ARRAY);
+
+        glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+#else
+
         glOrtho (0.0, getWidth(), 0.0, getHeight(), 0, 1);
 
         glColor4f (1.0f, 1.0f, 1.0f, fabsf (::sinf (rotation / 100.0f)));
-        glBegin(GL_QUADS);
+        glBegin (GL_QUADS);
             glTexCoord2i (0, 0); glVertex2f (50.0f, getHeight() - 50.0f);
             glTexCoord2i (1, 0); glVertex2f (getWidth() - 50.0f, getHeight() - 50.0f);
             glTexCoord2i (1, 1); glVertex2f (getWidth() - 50.0f, 50.0f);
@@ -222,6 +249,7 @@ public:
             glEnd();
 
         glPopMatrix();
+#endif
     }
 
     void timerCallback()

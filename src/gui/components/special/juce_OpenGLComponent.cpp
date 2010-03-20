@@ -177,8 +177,9 @@ private:
 };
 
 //==============================================================================
-OpenGLComponent::OpenGLComponent()
-    : context (0),
+OpenGLComponent::OpenGLComponent (const OpenGLType type_)
+    : type (type_),
+      context (0),
       contextToShareListsWith (0),
       needToUpdateViewport (true)
 {
@@ -259,9 +260,7 @@ bool OpenGLComponent::makeCurrentContextActive()
 
         if (isShowing() && getTopLevelComponent()->getPeer() != 0)
         {
-            context = OpenGLContext::createContextForWindow (this,
-                                                             preferredPixelFormat,
-                                                             contextToShareListsWith);
+            context = createContext();
 
             if (context != 0)
             {

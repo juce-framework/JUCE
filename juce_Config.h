@@ -105,6 +105,9 @@
   #define JUCE_QUICKTIME 0
 #endif
 
+#if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
+  #undef JUCE_QUICKTIME
+#endif
 
 //=============================================================================
 /** JUCE_OPENGL: Enables the OpenGLComponent class (available on all platforms).
@@ -151,7 +154,7 @@
 //=============================================================================
 /** JUCE_USE_CAMERA: Enables web-cam support using the CameraDevice class (Mac and Windows).
 */
-#if JUCE_QUICKTIME && ! defined (JUCE_USE_CAMERA)
+#if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
 //  #define JUCE_USE_CAMERA 1
 #endif
 

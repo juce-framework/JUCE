@@ -25,7 +25,11 @@
 
 // (This file gets included by juce_mac_NativeCode.mm, rather than being
 // compiled on its own).
-#if JUCE_INCLUDED_FILE && JUCE_QUICKTIME && JUCE_USE_CAMERA
+#if JUCE_INCLUDED_FILE && JUCE_USE_CAMERA
+
+#if ! JUCE_QUICKTIME
+ #error "On the Mac, cameras use Quicktime, so if you turn on JUCE_USE_CAMERA, you also need to enable JUCE_QUICKTIME"
+#endif
 
 //==============================================================================
 #define QTCaptureCallbackDelegate MakeObjCClassName(QTCaptureCallbackDelegate)

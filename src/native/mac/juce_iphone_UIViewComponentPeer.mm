@@ -283,11 +283,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
       fullScreen (false),
       insideDrawRect (false)
 {
-    CGRect r;
-    r.origin.x = 0;
-    r.origin.y = 0;
-    r.size.width = (float) component->getWidth();
-    r.size.height = (float) component->getHeight();
+    CGRect r = CGRectMake (0, 0, (float) component->getWidth(), (float) component->getHeight());
 
     view = [[JuceUIView alloc] initWithOwner: this withFrame: r];
 

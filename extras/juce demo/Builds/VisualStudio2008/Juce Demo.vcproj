@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="9.00"
                      Name="Juce Demo"
-                     ProjectGUID="{49CD629B-E99C-F915-A29E-7BE8278496F2}"
+                     ProjectGUID="{36211E76-A802-50EE-3B95-0202F4EB67ED}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>

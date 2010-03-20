@@ -95,10 +95,6 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
 
             Thread::sleep (100);
         }
-
-        // Failed to overwrite the new file! Make sure you've not left any
-        // file streams hanging around when you call this method!
-        jassertfalse
     }
     else
     {

@@ -101,11 +101,12 @@
   </MAINGROUP>
   <JUCEOPTIONS JUCE_FORCE_DEBUG="default" JUCE_LOG_ASSERTIONS="default" JUCE_ASIO="default"
                JUCE_WASAPI="enabled" JUCE_DIRECTSOUND="default" JUCE_ALSA="default"
-               JUCE_QUICKTIME="default" JUCE_OPENGL="enabled" JUCE_USE_FLAC="default"
+               JUCE_QUICKTIME="enabled" JUCE_OPENGL="enabled" JUCE_USE_FLAC="default"
                JUCE_USE_OGGVORBIS="default" JUCE_USE_CDBURNER="default" JUCE_USE_CDREADER="default"
                JUCE_USE_CAMERA="enabled" JUCE_ENABLE_REPAINT_DEBUGGING="default"
                JUCE_USE_XINERAMA="default" JUCE_USE_XSHM="default" JUCE_PLUGINHOST_VST="disabled"
                JUCE_PLUGINHOST_AU="disabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
                JUCE_WEB_BROWSER="enabled" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
-               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"/>
+               JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
+               JUCE_USE_XRENDER="default"/>
 </JUCERPROJECT>

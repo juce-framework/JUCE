@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	11
+#define JUCE_BUILDNUMBER	12
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -220,6 +220,10 @@
   #define JUCE_QUICKTIME 0
 #endif
 
+#if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
+  #undef JUCE_QUICKTIME
+#endif
+
 #ifndef JUCE_OPENGL
   #define JUCE_OPENGL 1
 #endif
@@ -240,7 +244,7 @@
   #define JUCE_USE_CDREADER 1
 #endif
 
-#if JUCE_QUICKTIME && ! defined (JUCE_USE_CAMERA)
+#if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
 //  #define JUCE_USE_CAMERA 1
 #endif
 
@@ -26746,10 +26750,6 @@ public:
 
 	virtual void* getRawContext() const throw() = 0;
 
-	static OpenGLContext* createContextForWindow (Component* componentToDrawTo,
-												  const OpenGLPixelFormat& pixelFormat,
-												  const OpenGLContext* const contextToShareWith);
-
 	static OpenGLContext* getCurrentContext();
 
 	juce_UseDebuggingNewOperator
@@ -26762,7 +26762,17 @@ class JUCE_API  OpenGLComponent  : public Component
 {
 public:
 
-	OpenGLComponent();
+	enum OpenGLType
+	{
+		openGLDefault = 0,
+
+#if JUCE_IPHONE
+		openGLES1,  /**< On the iPhone, this selects openGL ES 1.0 */
+		openGLES2   /**< On the iPhone, this selects openGL ES 2.0 */
+#endif
+	};
+
+	OpenGLComponent (OpenGLType type = openGLDefault);
 
 	~OpenGLComponent();
 
@@ -26799,6 +26809,8 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
+	const OpenGLType type;
+
 	class OpenGLComponentWatcher;
 	friend class OpenGLComponentWatcher;
 	friend class ScopedPointer <OpenGLComponentWatcher>;
@@ -26811,6 +26823,7 @@ private:
 	OpenGLPixelFormat preferredPixelFormat;
 	bool needToUpdateViewport;
 
+	OpenGLContext* createContext();
 	void deleteContext();
 	void updateContextPosition();
 	void internalRepaint (int x, int y, int w, int h);

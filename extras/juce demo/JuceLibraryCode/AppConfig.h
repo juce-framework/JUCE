@@ -17,7 +17,7 @@
 #define    JUCE_WASAPI 1
 //#define  JUCE_DIRECTSOUND
 //#define  JUCE_ALSA
-//#define  JUCE_QUICKTIME
+#define    JUCE_QUICKTIME 1
 #define    JUCE_OPENGL 1
 //#define  JUCE_USE_FLAC
 //#define  JUCE_USE_OGGVORBIS
@@ -27,6 +27,7 @@
 //#define  JUCE_ENABLE_REPAINT_DEBUGGING
 //#define  JUCE_USE_XINERAMA
 //#define  JUCE_USE_XSHM
+//#define  JUCE_USE_XRENDER
 #define    JUCE_PLUGINHOST_VST 0
 #define    JUCE_PLUGINHOST_AU 0
 //#define  JUCE_ONLY_BUILD_CORE_LIBRARY

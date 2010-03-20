@@ -498,18 +498,13 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
-                                                      const OpenGLPixelFormat& pixelFormat,
-                                                      const OpenGLContext* const contextToShareWith)
+OpenGLContext* OpenGLComponent::createContext()
 {
-    WindowedGLContext* c = new WindowedGLContext (component,
-                                                  contextToShareWith != 0 ? (HGLRC) contextToShareWith->getRawContext() : 0,
-                                                  pixelFormat);
+    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this,
+                                                               contextToShareListsWith != 0 ? (HGLRC) contextToShareListsWith->getRawContext() : 0,
+                                                               preferredPixelFormat));
 
-    if (c->renderContext == 0)
-        deleteAndZero (c);
-
-    return c;
+    return (c->renderContext != 0) ? c.release() : 0;
 }
 
 void* OpenGLComponent::getNativeWindowHandle() const

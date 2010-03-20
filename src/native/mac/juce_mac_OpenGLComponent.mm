@@ -258,12 +258,10 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
-                                                      const OpenGLPixelFormat& pixelFormat,
-                                                      const OpenGLContext* const contextToShareWith)
+OpenGLContext* OpenGLComponent::createContext()
 {
-    ScopedPointer <WindowedGLContext> c (new WindowedGLContext (component, pixelFormat,
-                                                                contextToShareWith != 0 ? (NSOpenGLContext*) contextToShareWith->getRawContext() : 0));
+    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this, preferredPixelFormat,
+                                                               contextToShareListsWith != 0 ? (NSOpenGLContext*) contextToShareListsWith->getRawContext() : 0));
 
     return (c->renderContext != 0) ? c.release() : 0;
 }
@@ -317,16 +315,213 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
 #else
 //==============================================================================
 
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
-                                                      const OpenGLPixelFormat& pixelFormat,
-                                                      const OpenGLContext* const contextToShareWith)
+END_JUCE_NAMESPACE
+
+@interface JuceGLView   : UIView
 {
+}
++ (Class) layerClass;
+@end
+
+@implementation JuceGLView
++ (Class) layerClass
+{
+    return [CAEAGLLayer class];
+}
+@end
+
+BEGIN_JUCE_NAMESPACE
+
+//==============================================================================
+class GLESContext   : public OpenGLContext
+{
+public:
+    GLESContext (UIViewComponentPeer* peer,
+                 Component* const component_,
+                 const OpenGLPixelFormat& pixelFormat_,
+                 const GLESContext* const sharedContext,
+                 NSUInteger apiType)
+        : component (component_), pixelFormat (pixelFormat_), glLayer (0), context (0),
+          useDepthBuffer (pixelFormat_.depthBufferBits > 0), frameBufferHandle (0), colorBufferHandle (0),
+          depthBufferHandle (0), lastWidth (0), lastHeight (0)
+    {
+        view = [[JuceGLView alloc] initWithFrame: CGRectMake (0, 0, 64, 64)];
+        view.opaque = YES;
+        view.hidden = NO;
+        view.backgroundColor = [UIColor redColor];
+
+        glLayer = (CAEAGLLayer*) [view layer];
+        [peer->view addSubview: view];
+
+        if (sharedContext != 0)
+            context = [[EAGLContext alloc] initWithAPI: apiType
+                                            sharegroup: [sharedContext->context sharegroup]];
+        else
+            context = [[EAGLContext alloc] initWithAPI: apiType];
+
+        createGLBuffers();
+    }
+
+    ~GLESContext()
+    {
+        makeInactive();
+        [context release];
+        [view removeFromSuperview];
+        [view release];
+        freeGLBuffers();
+    }
+
+    bool makeActive() const throw()
+    {
+        jassert (context != 0);
+
+        [EAGLContext setCurrentContext: context];
+        glBindFramebufferOES (GL_FRAMEBUFFER_OES, frameBufferHandle);
+        return true;
+    }
+
+    void swapBuffers()
+    {
+        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
+        [context presentRenderbuffer: GL_RENDERBUFFER_OES];
+    }
+
+    bool makeInactive() const throw()
+    {
+        return [EAGLContext setCurrentContext: nil];
+    }
+
+    bool isActive() const throw()
+    {
+        return [EAGLContext currentContext] == context;
+    }
+
+    const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
+    void* getRawContext() const throw()             { return (void*) glLayer; }
+
+    void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
+    {
+        view.frame = CGRectMake ((CGFloat) x, (CGFloat) y, (CGFloat) w, (CGFloat) h);
+
+        if (lastWidth != w || lastHeight != h)
+        {
+            lastWidth = w;
+            lastHeight = h;
+            freeGLBuffers();
+            createGLBuffers();
+        }
+    }
+
+    bool setSwapInterval (const int numFramesPerSwap)
+    {
+        numFrames = numFramesPerSwap;
+        return true;
+    }
+
+    int getSwapInterval() const
+    {
+        return numFrames;
+    }
+
+    void repaint()
+    {
+    }
+
+    //==============================================================================
+    void createGLBuffers()
+    {
+        makeActive();
+
+        glGenFramebuffersOES (1, &frameBufferHandle);
+        glGenRenderbuffersOES (1, &colorBufferHandle);
+        glGenRenderbuffersOES (1, &depthBufferHandle);
+
+        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
+        [context renderbufferStorage: GL_RENDERBUFFER_OES fromDrawable: glLayer];
+
+        GLint width, height;
+        glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &width);
+        glGetRenderbufferParameterivOES (GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &height);
+
+        if (useDepthBuffer)
+        {
+            glBindRenderbufferOES (GL_RENDERBUFFER_OES, depthBufferHandle);
+            glRenderbufferStorageOES (GL_RENDERBUFFER_OES, GL_DEPTH_COMPONENT16_OES, width, height);
+        }
+
+        glBindRenderbufferOES (GL_RENDERBUFFER_OES, colorBufferHandle);
+
+        glBindFramebufferOES (GL_FRAMEBUFFER_OES, frameBufferHandle);
+        glFramebufferRenderbufferOES (GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, colorBufferHandle);
+
+        if (useDepthBuffer)
+            glFramebufferRenderbufferOES (GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthBufferHandle);
+
+        jassert (glCheckFramebufferStatusOES (GL_FRAMEBUFFER_OES) == GL_FRAMEBUFFER_COMPLETE_OES);
+    }
+
+    void freeGLBuffers()
+    {
+        if (frameBufferHandle != 0)
+        {
+            glDeleteFramebuffersOES (1, &frameBufferHandle);
+            frameBufferHandle = 0;
+        }
+
+        if (colorBufferHandle != 0)
+        {
+            glDeleteRenderbuffersOES (1, &colorBufferHandle);
+            colorBufferHandle = 0;
+        }
+
+        if (depthBufferHandle != 0)
+        {
+            glDeleteRenderbuffersOES (1, &depthBufferHandle);
+            depthBufferHandle = 0;
+        }
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+private:
+    Component::SafePointer<Component> component;
+    OpenGLPixelFormat pixelFormat;
+    JuceGLView* view;
+    CAEAGLLayer* glLayer;
+    EAGLContext* context;
+    bool useDepthBuffer;
+    GLuint frameBufferHandle, colorBufferHandle, depthBufferHandle;
+    int numFrames;
+    int lastWidth, lastHeight;
+
+    //==============================================================================
+    GLESContext (const GLESContext&);
+    GLESContext& operator= (const GLESContext&);
+};
+
+
+OpenGLContext* OpenGLComponent::createContext()
+{
+    ScopedAutoReleasePool pool;
+    UIViewComponentPeer* peer = dynamic_cast <UIViewComponentPeer*> (getPeer());
+
+    if (peer != 0)
+        return new GLESContext (peer, this, preferredPixelFormat,
+                                dynamic_cast <const GLESContext*> (contextToShareListsWith),
+                                type == openGLES2 ? kEAGLRenderingAPIOpenGLES2 : kEAGLRenderingAPIOpenGLES1);
+
     return 0;
+}
+
+void OpenGLPixelFormat::getAvailablePixelFormats (Component* /*component*/,
+                                                  OwnedArray <OpenGLPixelFormat>& /*results*/)
+{
 }
 
 void juce_glViewport (const int w, const int h)
 {
-    //glViewport (0, 0, w, h);
+    glViewport (0, 0, w, h);
 }
 
 #endif

@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 8.00
 # Visual C++ Express 2005
-Project("{3B1DD41A-AF04-DA23-7081-0A1575DE7532}") = "Juce Demo", "Juce Demo.vcproj", "{49CD629B-E99C-F915-A29E-7BE8278496F2}"
+Project("{7A947A64-CDD8-D41D-F886-5E65A8ABDF81}") = "Juce Demo", "Juce Demo.vcproj", "{36211E76-A802-50EE-3B95-0202F4EB67ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{49CD629B-E99C-F915-A29E-7BE8278496F2}.Debug|Win32.ActiveCfg = Debug|Win32
-		{49CD629B-E99C-F915-A29E-7BE8278496F2}.Debug|Win32.Build.0 = Debug|Win32
-		{49CD629B-E99C-F915-A29E-7BE8278496F2}.Release|Win32.ActiveCfg = Release|Win32
-		{49CD629B-E99C-F915-A29E-7BE8278496F2}.Release|Win32.Build.0 = Release|Win32
+		{36211E76-A802-50EE-3B95-0202F4EB67ED}.Debug|Win32.ActiveCfg = Debug|Win32
+		{36211E76-A802-50EE-3B95-0202F4EB67ED}.Debug|Win32.Build.0 = Debug|Win32
+		{36211E76-A802-50EE-3B95-0202F4EB67ED}.Release|Win32.ActiveCfg = Release|Win32
+		{36211E76-A802-50EE-3B95-0202F4EB67ED}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

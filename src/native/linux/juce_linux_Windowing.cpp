@@ -3349,17 +3349,12 @@ private:
 };
 
 //==============================================================================
-OpenGLContext* OpenGLContext::createContextForWindow (Component* const component,
-                                                      const OpenGLPixelFormat& pixelFormat,
-                                                      const OpenGLContext* const contextToShareWith)
+OpenGLContext* OpenGLComponent::createContext()
 {
-    WindowedGLContext* c = new WindowedGLContext (component, pixelFormat,
-                                                  contextToShareWith != 0 ? (GLXContext) contextToShareWith->getRawContext() : 0);
+    ScopedPointer<WindowedGLContext> c (new WindowedGLContext (this, preferredPixelFormat,
+                                                               contextToShareListsWith != 0 ? (GLXContext) contextToShareListsWith->getRawContext() : 0));
 
-    if (c->renderContext == 0)
-        deleteAndZero (c);
-
-    return c;
+    return (c->renderContext != 0) ? c.release() : 0;
 }
 
 void juce_glViewport (const int w, const int h)

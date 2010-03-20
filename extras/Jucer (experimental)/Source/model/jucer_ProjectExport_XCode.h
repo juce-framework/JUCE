@@ -488,14 +488,21 @@ private:
         StringArray s;
 
         if (iPhone)
+        {
             s.addTokens (T("UIKit Foundation CoreGraphics AudioToolbox"), false);
+
+            if ((int) project.getJuceConfigFlag ("JUCE_OPENGL").getValue() == 1)
+                s.addTokens (T("QuartzCore OpenGLES"), false);
+        }
         else
+        {
             s.addTokens (T("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime"), false);
 
-        if (isAU())
-            s.addTokens (T("AudioUnit CoreAudioKit AudioToolbox"), false);
-        else if ((int) project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").getValue() == 1)
-            s.addTokens (T("AudioUnit CoreAudioKit"), false);
+            if (isAU())
+                s.addTokens (T("AudioUnit CoreAudioKit AudioToolbox"), false);
+            else if ((int) project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").getValue() == 1)
+                s.addTokens (T("AudioUnit CoreAudioKit"), false);
+        }
 
         for (int i = 0; i < s.size(); ++i)
             addFramework (s[i]);
