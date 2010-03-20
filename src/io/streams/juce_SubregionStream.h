@@ -57,10 +57,10 @@ public:
         @param deleteSourceWhenDestroyed    whether the sourceStream that is passed in should be
                                             deleted by this object when it is itself deleted.
     */
-    SubregionStream (InputStream* const sourceStream,
-                     const int64 startPositionInSourceStream,
-                     const int64 lengthOfSourceStream,
-                     const bool deleteSourceWhenDestroyed) throw();
+    SubregionStream (InputStream* sourceStream,
+                     int64 startPositionInSourceStream,
+                     int64 lengthOfSourceStream,
+                     bool deleteSourceWhenDestroyed) throw();
 
     /** Destructor.
 

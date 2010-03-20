@@ -189,8 +189,8 @@ public:
         The method also replaces '\\n' characters in the text with '\\r\\n'.
     */
     virtual void writeText (const String& text,
-                            const bool asUnicode,
-                            const bool writeUnicodeHeaderBytes);
+                            bool asUnicode,
+                            bool writeUnicodeHeaderBytes);
 
     /** Reads data from an input stream and writes it to this stream.
 
@@ -207,16 +207,16 @@ public:
 
 //==============================================================================
 /** Writes a number to a stream as 8-bit characters in the default system encoding. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, int number);
 
 /** Writes a number to a stream as 8-bit characters in the default system encoding. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, double number);
 
 /** Writes a character to a stream. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, char character);
 
 /** Writes a null-terminated text string to a stream. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* text);
 
 
 

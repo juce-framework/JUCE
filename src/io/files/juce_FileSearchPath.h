@@ -78,7 +78,7 @@ public:
 
         @see getNumPaths
     */
-    const File operator[] (const int index) const;
+    const File operator[] (int index) const;
 
     /** Returns the search path as a semicolon-separated list of directories. */
     const String toString() const;
@@ -90,13 +90,13 @@ public:
         less than zero, otherwise it is inserted at the given index.
     */
     void add (const File& directoryToAdd,
-              const int insertIndex = -1);
+              int insertIndex = -1);
 
     /** Adds a new directory to the search path if it's not already in there. */
     void addIfNotAlreadyThere (const File& directoryToAdd);
 
     /** Removes a directory from the search path. */
-    void remove (const int indexToRemove);
+    void remove (int indexToRemove);
 
     /** Merges another search path into this one.
 
@@ -131,8 +131,8 @@ public:
         @see File::findChildFiles
     */
     int findChildFiles (Array<File>& results,
-                        const int whatToLookFor,
-                        const bool searchRecursively,
+                        int whatToLookFor,
+                        bool searchRecursively,
                         const String& wildCardPattern = JUCE_T("*")) const;
 
     //==============================================================================
@@ -152,7 +152,7 @@ public:
 
     */
     bool isFileInPath (const File& fileToCheck,
-                       const bool checkRecursively) const;
+                       bool checkRecursively) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

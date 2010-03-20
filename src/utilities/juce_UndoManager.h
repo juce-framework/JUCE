@@ -71,8 +71,8 @@ public:
                                             that will be kept, even if this involves exceeding
                                             the amount of space specified in maxNumberOfUnitsToKeep
     */
-    UndoManager (const int maxNumberOfUnitsToKeep = 30000,
-                 const int minimumTransactionsToKeep = 30);
+    UndoManager (int maxNumberOfUnitsToKeep = 30000,
+                 int minimumTransactionsToKeep = 30);
 
     /** Destructor. */
     ~UndoManager();
@@ -101,8 +101,8 @@ public:
                                             the amount of space specified in maxNumberOfUnitsToKeep
         @see getNumberOfUnitsTakenUpByStoredCommands
     */
-    void setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
-                                    const int minimumTransactionsToKeep);
+    void setMaxNumberOfStoredUnits (int maxNumberOfUnitsToKeep,
+                                    int minimumTransactionsToKeep);
 
     //==============================================================================
     /** Performs an action and adds it to the undo history list.
@@ -115,7 +115,7 @@ public:
         @returns true if the command succeeds - see UndoableAction::perform
         @see beginNewTransaction
     */
-    bool perform (UndoableAction* const action,
+    bool perform (UndoableAction* action,
                   const String& actionName = String::empty);
 
     /** Starts a new group of actions that together will be treated as a single transaction.

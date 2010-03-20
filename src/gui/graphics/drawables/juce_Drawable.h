@@ -62,7 +62,7 @@ public:
     /** Renders this Drawable object.
         @see drawWithin
     */
-    void draw (Graphics& g, const float opacity,
+    void draw (Graphics& g, float opacity,
                const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Renders the Drawable at a given offset within the Graphics context.
@@ -75,9 +75,8 @@ public:
         @endcode
     */
     void drawAt (Graphics& g,
-                 const float x,
-                 const float y,
-                 const float opacity) const;
+                 float x, float y,
+                 float opacity) const;
 
     /** Renders the Drawable within a rectangle, scaling it to fit neatly inside without
         changing its aspect-ratio.
@@ -95,12 +94,12 @@ public:
         @param opacity                  the opacity to use, in the range 0 to 1.0
     */
     void drawWithin (Graphics& g,
-                     const int destX,
-                     const int destY,
-                     const int destWidth,
-                     const int destHeight,
+                     int destX,
+                     int destY,
+                     int destWidth,
+                     int destHeight,
                      const RectanglePlacement& placement,
-                     const float opacity) const;
+                     float opacity) const;
 
 
     //==============================================================================
@@ -110,7 +109,7 @@ public:
     class RenderingContext
     {
     public:
-        RenderingContext (Graphics& g, const AffineTransform& transform, const float opacity) throw();
+        RenderingContext (Graphics& g, const AffineTransform& transform, float opacity) throw();
 
         Graphics& g;
         AffineTransform transform;
@@ -153,7 +152,7 @@ public:
         The data could be an image that the ImageFileFormat class understands, or it
         could be SVG.
     */
-    static Drawable* createFromImageData (const void* data, const size_t numBytes);
+    static Drawable* createFromImageData (const void* data, size_t numBytes);
 
     /** Tries to turn a stream containing some kind of image data into a drawable.
 

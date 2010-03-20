@@ -52,13 +52,13 @@ public:
     BorderSize (const BorderSize& other) throw();
 
     /** Creates a border with the given gaps. */
-    BorderSize (const int topGap,
-                const int leftGap,
-                const int bottomGap,
-                const int rightGap) throw();
+    BorderSize (int topGap,
+                int leftGap,
+                int bottomGap,
+                int rightGap) throw();
 
     /** Creates a border with the given gap on all sides. */
-    BorderSize (const int allGaps) throw();
+    BorderSize (int allGaps) throw();
 
     /** Destructor. */
     ~BorderSize() throw();
@@ -84,16 +84,16 @@ public:
 
     //==============================================================================
     /** Changes the top gap. */
-    void setTop (const int newTopGap) throw();
+    void setTop (int newTopGap) throw();
 
     /** Changes the left gap. */
-    void setLeft (const int newLeftGap) throw();
+    void setLeft (int newLeftGap) throw();
 
     /** Changes the bottom gap. */
-    void setBottom (const int newBottomGap) throw();
+    void setBottom (int newBottomGap) throw();
 
     /** Changes the right gap. */
-    void setRight (const int newRightGap) throw();
+    void setRight (int newRightGap) throw();
 
     //==============================================================================
     /** Returns a rectangle with these borders removed from it. */

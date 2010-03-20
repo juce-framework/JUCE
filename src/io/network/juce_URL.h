@@ -64,7 +64,7 @@ public:
         withParameter() method, then the string will have these appended on the
         end and url-encoded.
     */
-    const String toString (const bool includeGetParameters) const;
+    const String toString (bool includeGetParameters) const;
 
     /** True if it seems to be valid. */
     bool isWellFormed() const;
@@ -204,11 +204,11 @@ public:
                                 a negative number, it will be infinite. Otherwise it specifies a
                                 time in milliseconds.
     */
-    InputStream* createInputStream (const bool usePostCommand,
-                                    OpenStreamProgressCallback* const progressCallback = 0,
-                                    void* const progressCallbackContext = 0,
+    InputStream* createInputStream (bool usePostCommand,
+                                    OpenStreamProgressCallback* progressCallback = 0,
+                                    void* progressCallbackContext = 0,
                                     const String& extraHeaders = String::empty,
-                                    const int connectionTimeOutMs = 0) const;
+                                    int connectionTimeOutMs = 0) const;
 
 
     //==============================================================================
@@ -223,7 +223,7 @@ public:
         @see readEntireTextStream, readEntireXmlStream
     */
     bool readEntireBinaryStream (MemoryBlock& destData,
-                                 const bool usePostCommand = false) const;
+                                 bool usePostCommand = false) const;
 
     /** Tries to download the entire contents of this URL as a string.
 
@@ -236,7 +236,7 @@ public:
                                 a GET command if this is false)
         @see readEntireBinaryStream, readEntireXmlStream
     */
-    const String readEntireTextStream (const bool usePostCommand = false) const;
+    const String readEntireTextStream (bool usePostCommand = false) const;
 
     /** Tries to download the entire contents of this URL and parse it as XML.
 
@@ -251,7 +251,7 @@ public:
 
         @see readEntireBinaryStream, readEntireTextStream
     */
-    XmlElement* readEntireXmlStream (const bool usePostCommand = false) const;
+    XmlElement* readEntireXmlStream (bool usePostCommand = false) const;
 
     //==============================================================================
     /** Adds escape sequences to a string to encode any characters that aren't
@@ -268,7 +268,7 @@ public:
         @see removeEscapeChars
     */
     static const String addEscapeChars (const String& stringToAddEscapeCharsTo,
-                                        const bool isParameter);
+                                        bool isParameter);
 
     /** Replaces any escape character sequences in a string with their original
         character codes.

@@ -69,7 +69,7 @@ public:
                                         in which case it will be released with ImageCache::release().
     */
     void setImage (Image* imageToUse,
-                   const bool releaseWhenNotNeeded);
+                   bool releaseWhenNotNeeded);
 
     /** Returns the current image. */
     Image* getImage() const throw()                             { return image; }
@@ -78,7 +78,7 @@ public:
     void clearImage();
 
     /** Sets the opacity to use when drawing the image. */
-    void setOpacity (const float newOpacity);
+    void setOpacity (float newOpacity);
 
     /** Returns the image's opacity. */
     float getOpacity() const throw()                            { return opacity; }

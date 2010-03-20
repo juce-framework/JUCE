@@ -2757,8 +2757,7 @@ public:
 
 	virtual bool isExhausted() = 0;
 
-	virtual int read (void* destBuffer,
-					  int maxBytesToRead) = 0;
+	virtual int read (void* destBuffer, int maxBytesToRead) = 0;
 
 	virtual char readByte();
 
@@ -2858,21 +2857,21 @@ public:
 	virtual void writeString (const String& text);
 
 	virtual void writeText (const String& text,
-							const bool asUnicode,
-							const bool writeUnicodeHeaderBytes);
+							bool asUnicode,
+							bool writeUnicodeHeaderBytes);
 
 	virtual int writeFromInputStream (InputStream& source, int maxNumBytesToWrite);
 
 	juce_UseDebuggingNewOperator
 };
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const int number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, int number);
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const double number);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, double number);
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char character);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, char character);
 
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text);
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* text);
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_OutputStream.h ***/
@@ -6509,8 +6508,8 @@ class JUCE_API  UndoManager  : public ChangeBroadcaster
 {
 public:
 
-	UndoManager (const int maxNumberOfUnitsToKeep = 30000,
-				 const int minimumTransactionsToKeep = 30);
+	UndoManager (int maxNumberOfUnitsToKeep = 30000,
+				 int minimumTransactionsToKeep = 30);
 
 	~UndoManager();
 
@@ -6518,10 +6517,10 @@ public:
 
 	int getNumberOfUnitsTakenUpByStoredCommands() const;
 
-	void setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
-									const int minimumTransactionsToKeep);
+	void setMaxNumberOfStoredUnits (int maxNumberOfUnitsToKeep,
+									int minimumTransactionsToKeep);
 
-	bool perform (UndoableAction* const action,
+	bool perform (UndoableAction* action,
 				  const String& actionName = String::empty);
 
 	void beginNewTransaction (const String& actionName = String::empty);
@@ -7580,7 +7579,7 @@ public:
 	DirectoryIterator (const File& directory,
 					   bool isRecursive,
 					   const String& wildCard = JUCE_T("*"),
-					   const int whatToLookFor = File::findFiles);
+					   int whatToLookFor = File::findFiles);
 
 	~DirectoryIterator();
 
@@ -7662,7 +7661,7 @@ class JUCE_API  FileOutputStream  : public OutputStream
 public:
 
 	FileOutputStream (const File& fileToWriteTo,
-					  const int bufferSizeToUse = 16384);
+					  int bufferSizeToUse = 16384);
 
 	~FileOutputStream();
 
@@ -7715,16 +7714,16 @@ public:
 
 	int getNumPaths() const;
 
-	const File operator[] (const int index) const;
+	const File operator[] (int index) const;
 
 	const String toString() const;
 
 	void add (const File& directoryToAdd,
-			  const int insertIndex = -1);
+			  int insertIndex = -1);
 
 	void addIfNotAlreadyThere (const File& directoryToAdd);
 
-	void remove (const int indexToRemove);
+	void remove (int indexToRemove);
 
 	void addPath (const FileSearchPath& other);
 
@@ -7733,12 +7732,12 @@ public:
 	void removeNonExistentPaths();
 
 	int findChildFiles (Array<File>& results,
-						const int whatToLookFor,
-						const bool searchRecursively,
+						int whatToLookFor,
+						bool searchRecursively,
 						const String& wildCardPattern = JUCE_T("*")) const;
 
 	bool isFileInPath (const File& fileToCheck,
-					   const bool checkRecursively) const;
+					   bool checkRecursively) const;
 
 	juce_UseDebuggingNewOperator
 
@@ -7822,10 +7821,10 @@ public:
 	};
 
 	TemporaryFile (const String& suffix = String::empty,
-				   const int optionFlags = 0);
+				   int optionFlags = 0);
 
 	TemporaryFile (const File& targetFile,
-				   const int optionFlags = 0);
+				   int optionFlags = 0);
 
 	~TemporaryFile();
 
@@ -7841,7 +7840,7 @@ private:
 
 	File temporaryFile, targetFile;
 
-	void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
+	void createTempFile (const File& parentDirectory, String name, const String& suffix, int optionFlags);
 
 	TemporaryFile (const TemporaryFile&);
 	TemporaryFile& operator= (const TemporaryFile&);
@@ -7887,12 +7886,12 @@ class JUCE_API  ZipFile
 {
 public:
 
-	ZipFile (InputStream* const inputStream,
-			 const bool deleteStreamWhenDestroyed) throw();
+	ZipFile (InputStream* inputStream,
+			 bool deleteStreamWhenDestroyed) throw();
 
 	ZipFile (const File& file);
 
-	ZipFile (InputSource* const inputSource);
+	ZipFile (InputSource* inputSource);
 
 	~ZipFile() throw();
 
@@ -7907,7 +7906,7 @@ public:
 
 	int getNumEntries() const throw();
 
-	const ZipEntry* getEntry (const int index) const throw();
+	const ZipEntry* getEntry (int index) const throw();
 
 	int getIndexOfFileName (const String& fileName) const throw();
 
@@ -7915,10 +7914,10 @@ public:
 
 	void sortEntriesByFilename();
 
-	InputStream* createStreamForEntry (const int index);
+	InputStream* createStreamForEntry (int index);
 
 	void uncompressTo (const File& targetDirectory,
-					   const bool shouldOverwriteFiles = true);
+					   bool shouldOverwriteFiles = true);
 
 	juce_UseDebuggingNewOperator
 
@@ -7967,11 +7966,11 @@ public:
 
 	~StreamingSocket();
 
-	bool bindToPort (const int localPortNumber);
+	bool bindToPort (int localPortNumber);
 
 	bool connect (const String& remoteHostname,
-				  const int remotePortNumber,
-				  const int timeOutMillisecs = 3000);
+				  int remotePortNumber,
+				  int timeOutMillisecs = 3000);
 
 	bool isConnected() const throw()				{ return connected; }
 
@@ -7983,15 +7982,15 @@ public:
 
 	bool isLocal() const throw();
 
-	int waitUntilReady (const bool readyForReading,
-						const int timeoutMsecs) const;
+	int waitUntilReady (bool readyForReading,
+						int timeoutMsecs) const;
 
-	int read (void* destBuffer, const int maxBytesToRead,
-			  const bool blockUntilSpecifiedAmountHasArrived);
+	int read (void* destBuffer, int maxBytesToRead,
+			  bool blockUntilSpecifiedAmountHasArrived);
 
-	int write (const void* sourceBuffer, const int numBytesToWrite);
+	int write (const void* sourceBuffer, int numBytesToWrite);
 
-	bool createListener (const int portNumber, const String& localHostName = String::empty);
+	bool createListener (int portNumber, const String& localHostName = String::empty);
 
 	StreamingSocket* waitForNextConnection() const;
 
@@ -8002,7 +8001,7 @@ private:
 	int volatile portNumber, handle;
 	bool connected, isListener;
 
-	StreamingSocket (const String& hostname, const int portNumber, const int handle);
+	StreamingSocket (const String& hostname, int portNumber, int handle);
 	StreamingSocket (const StreamingSocket&);
 	StreamingSocket& operator= (const StreamingSocket&);
 };
@@ -8011,16 +8010,16 @@ class JUCE_API  DatagramSocket
 {
 public:
 
-	DatagramSocket (const int localPortNumber,
-					const bool enableBroadcasting = false);
+	DatagramSocket (int localPortNumber,
+					bool enableBroadcasting = false);
 
 	~DatagramSocket();
 
-	bool bindToPort (const int localPortNumber);
+	bool bindToPort (int localPortNumber);
 
 	bool connect (const String& remoteHostname,
-				  const int remotePortNumber,
-				  const int timeOutMillisecs = 3000);
+				  int remotePortNumber,
+				  int timeOutMillisecs = 3000);
 
 	bool isConnected() const throw()				{ return connected; }
 
@@ -8032,13 +8031,13 @@ public:
 
 	bool isLocal() const throw();
 
-	int waitUntilReady (const bool readyForReading,
-						const int timeoutMsecs) const;
+	int waitUntilReady (bool readyForReading,
+						int timeoutMsecs) const;
 
-	int read (void* destBuffer, const int maxBytesToRead,
-			  const bool blockUntilSpecifiedAmountHasArrived);
+	int read (void* destBuffer, int maxBytesToRead,
+			  bool blockUntilSpecifiedAmountHasArrived);
 
-	int write (const void* sourceBuffer, const int numBytesToWrite);
+	int write (const void* sourceBuffer, int numBytesToWrite);
 
 	DatagramSocket* waitForNextConnection() const;
 
@@ -8050,7 +8049,7 @@ private:
 	bool connected, allowBroadcast;
 	void* serverAddress;
 
-	DatagramSocket (const String& hostname, const int portNumber, const int handle, const int localPortNumber);
+	DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
 	DatagramSocket (const DatagramSocket&);
 	DatagramSocket& operator= (const DatagramSocket&);
 };
@@ -8080,7 +8079,7 @@ public:
 
 	URL& operator= (const URL& other);
 
-	const String toString (const bool includeGetParameters) const;
+	const String toString (bool includeGetParameters) const;
 
 	bool isWellFormed() const;
 
@@ -8117,21 +8116,21 @@ public:
 
 	typedef bool (OpenStreamProgressCallback) (void* context, int bytesSent, int totalBytes);
 
-	InputStream* createInputStream (const bool usePostCommand,
-									OpenStreamProgressCallback* const progressCallback = 0,
-									void* const progressCallbackContext = 0,
+	InputStream* createInputStream (bool usePostCommand,
+									OpenStreamProgressCallback* progressCallback = 0,
+									void* progressCallbackContext = 0,
 									const String& extraHeaders = String::empty,
-									const int connectionTimeOutMs = 0) const;
+									int connectionTimeOutMs = 0) const;
 
 	bool readEntireBinaryStream (MemoryBlock& destData,
-								 const bool usePostCommand = false) const;
+								 bool usePostCommand = false) const;
 
-	const String readEntireTextStream (const bool usePostCommand = false) const;
+	const String readEntireTextStream (bool usePostCommand = false) const;
 
-	XmlElement* readEntireXmlStream (const bool usePostCommand = false) const;
+	XmlElement* readEntireXmlStream (bool usePostCommand = false) const;
 
 	static const String addEscapeChars (const String& stringToAddEscapeCharsTo,
-										const bool isParameter);
+										bool isParameter);
 
 	static const String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
@@ -8412,10 +8411,10 @@ class JUCE_API  SubregionStream  : public InputStream
 {
 public:
 
-	SubregionStream (InputStream* const sourceStream,
-					 const int64 startPositionInSourceStream,
-					 const int64 lengthOfSourceStream,
-					 const bool deleteSourceWhenDestroyed) throw();
+	SubregionStream (InputStream* sourceStream,
+					 int64 startPositionInSourceStream,
+					 int64 lengthOfSourceStream,
+					 bool deleteSourceWhenDestroyed) throw();
 
 	~SubregionStream() throw();
 
@@ -8669,7 +8668,7 @@ public:
 
 	~WaitableEvent() throw();
 
-	bool wait (const int timeOutMilliseconds = -1) const throw();
+	bool wait (int timeOutMilliseconds = -1) const throw();
 
 	void signal() const throw();
 
@@ -8706,9 +8705,9 @@ public:
 
 	void startThread();
 
-	void startThread (const int priority);
+	void startThread (int priority);
 
-	void stopThread (const int timeOutMilliseconds);
+	void stopThread (int timeOutMilliseconds);
 
 	bool isThreadRunning() const;
 
@@ -8716,22 +8715,22 @@ public:
 
 	inline bool threadShouldExit() const		{ return threadShouldExit_; }
 
-	bool waitForThreadToExit (const int timeOutMilliseconds) const;
+	bool waitForThreadToExit (int timeOutMilliseconds) const;
 
-	bool setPriority (const int priority);
+	bool setPriority (int priority);
 
-	static bool setCurrentThreadPriority (const int priority);
+	static bool setCurrentThreadPriority (int priority);
 
-	void setAffinityMask (const uint32 affinityMask);
+	void setAffinityMask (uint32 affinityMask);
 
-	static void setCurrentThreadAffinityMask (const uint32 affinityMask);
+	static void setCurrentThreadAffinityMask (uint32 affinityMask);
 
 	// this can be called from any thread that needs to pause..
 	static void JUCE_CALLTYPE sleep (int milliseconds);
 
 	static void JUCE_CALLTYPE yield();
 
-	bool wait (const int timeOutMilliseconds) const;
+	bool wait (int timeOutMilliseconds) const;
 
 	void notify() const;
 
@@ -8741,13 +8740,13 @@ public:
 
 	static Thread* getCurrentThread();
 
-	ThreadID getThreadId() const					{ return threadId_; }
+	ThreadID getThreadId() const throw()				{ return threadId_; }
 
 	const String getThreadName() const				  { return threadName_; }
 
 	static int getNumRunningThreads();
 
-	static void stopAllThreads (const int timeoutInMillisecs);
+	static void stopAllThreads (int timeoutInMillisecs);
 
 	juce_UseDebuggingNewOperator
 
@@ -8959,9 +8958,9 @@ class JUCE_API  ThreadPool
 {
 public:
 
-	ThreadPool (const int numberOfThreads,
-				const bool startThreadsOnlyWhenNeeded = true,
-				const int stopThreadsWhenNotUsedTimeoutMs = 5000);
+	ThreadPool (int numberOfThreads,
+				bool startThreadsOnlyWhenNeeded = true,
+				int stopThreadsWhenNotUsedTimeoutMs = 5000);
 
 	~ThreadPool();
 
@@ -8973,31 +8972,31 @@ public:
 		virtual bool isJobSuitable (ThreadPoolJob* job) = 0;
 	};
 
-	void addJob (ThreadPoolJob* const job);
+	void addJob (ThreadPoolJob* job);
 
-	bool removeJob (ThreadPoolJob* const job,
-					const bool interruptIfRunning,
-					const int timeOutMilliseconds);
+	bool removeJob (ThreadPoolJob* job,
+					bool interruptIfRunning,
+					int timeOutMilliseconds);
 
-	bool removeAllJobs (const bool interruptRunningJobs,
-						const int timeOutMilliseconds,
-						const bool deleteInactiveJobs = false,
+	bool removeAllJobs (bool interruptRunningJobs,
+						int timeOutMilliseconds,
+						bool deleteInactiveJobs = false,
 						JobSelector* selectedJobsToRemove = 0);
 
 	int getNumJobs() const;
 
-	ThreadPoolJob* getJob (const int index) const;
+	ThreadPoolJob* getJob (int index) const;
 
-	bool contains (const ThreadPoolJob* const job) const;
+	bool contains (const ThreadPoolJob* job) const;
 
-	bool isJobRunning (const ThreadPoolJob* const job) const;
+	bool isJobRunning (const ThreadPoolJob* job) const;
 
-	bool waitForJobToFinish (const ThreadPoolJob* const job,
-							 const int timeOutMilliseconds) const;
+	bool waitForJobToFinish (const ThreadPoolJob* job,
+							 int timeOutMilliseconds) const;
 
-	const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const;
+	const StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
-	bool setThreadPriorities (const int newPriority);
+	bool setThreadPriorities (int newPriority);
 
 	juce_UseDebuggingNewOperator
 
@@ -9046,13 +9045,13 @@ public:
 
 	~TimeSliceThread();
 
-	void addTimeSliceClient (TimeSliceClient* const client);
+	void addTimeSliceClient (TimeSliceClient* client);
 
-	void removeTimeSliceClient (TimeSliceClient* const client);
+	void removeTimeSliceClient (TimeSliceClient* client);
 
 	int getNumClients() const;
 
-	TimeSliceClient* getClient (const int index) const;
+	TimeSliceClient* getClient (int index) const;
 
 	void run();
 
@@ -9475,12 +9474,12 @@ public:
 	MouseEvent (MouseInputSource& source,
 				const Point<int>& position,
 				const ModifierKeys& modifiers,
-				Component* const originator,
+				Component* originator,
 				const Time& eventTime,
 				const Point<int> mouseDownPos,
 				const Time& mouseDownTime,
-				const int numberOfClicks,
-				const bool mouseWasDragged) throw();
+				int numberOfClicks,
+				bool mouseWasDragged) throw();
 
 	~MouseEvent() throw();
 
@@ -9532,11 +9531,11 @@ public:
 
 	const Point<int> getMouseDownScreenPosition() const;
 
-	const MouseEvent getEventRelativeTo (Component* const otherComponent) const throw();
+	const MouseEvent getEventRelativeTo (Component* otherComponent) const throw();
 
 	const MouseEvent withNewPosition (const Point<int>& newPosition) const throw();
 
-	static void setDoubleClickTimeout (const int timeOutMilliseconds) throw();
+	static void setDoubleClickTimeout (int timeOutMilliseconds) throw();
 
 	static int getDoubleClickTimeout() throw();
 
@@ -10156,7 +10155,7 @@ class JUCE_API  Justification
 {
 public:
 
-	inline Justification (const int flags_) throw()  : flags (flags_) {}
+	inline Justification (int flags_) throw()  : flags (flags_) {}
 
 	Justification (const Justification& other) throw();
 
@@ -10164,16 +10163,14 @@ public:
 
 	inline int getFlags() const throw()				 { return flags; }
 
-	inline bool testFlags (const int flagsToTest) const throw()	 { return (flags & flagsToTest) != 0; }
+	inline bool testFlags (int flagsToTest) const throw()	   { return (flags & flagsToTest) != 0; }
 
 	int getOnlyVerticalFlags() const throw();
 
 	int getOnlyHorizontalFlags() const throw();
 
-	void applyToRectangle (int& x, int& y,
-						   const int w, const int h,
-						   const int spaceX, const int spaceY,
-						   const int spaceW, const int spaceH) const throw();
+	void applyToRectangle (int& x, int& y, int w, int h,
+						   int spaceX, int spaceY, int spaceW, int spaceH) const throw();
 
 	enum
 	{
@@ -10240,8 +10237,7 @@ public:
 
 	EdgeTable (const RectangleList& rectanglesToAdd);
 
-	EdgeTable (const float x, const float y,
-			   const float w, const float h);
+	EdgeTable (float x, float y, float w, float h);
 
 	EdgeTable (const EdgeTable& other);
 
@@ -10348,12 +10344,12 @@ private:
 	int maxEdgesPerLine, lineStrideElements;
 	bool needToCheckEmptinesss;
 
-	void addEdgePoint (const int x, const int y, const int winding) throw();
-	void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
-	void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
+	void addEdgePoint (int x, int y, int winding) throw();
+	void remapTableForNumEdges (int newNumEdgesPerLine) throw();
+	void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
 	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
-	void sanitiseLevels (const bool useNonZeroWinding) throw();
-	static void copyEdgeTableData (int* dest, const int destLineStride, const int* src, const int srcLineStride, int numLines) throw();
+	void sanitiseLevels (bool useNonZeroWinding) throw();
+	static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
 };
 
 #endif   // __JUCE_EDGETABLE_JUCEHEADER__
@@ -10604,13 +10600,13 @@ public:
 
 	void clear();
 
-	void setCharacteristics (const String& name, const float ascent,
-							 const bool isBold, const bool isItalic,
-							 const juce_wchar defaultCharacter) throw();
+	void setCharacteristics (const String& name, float ascent,
+							 bool isBold, bool isItalic,
+							 juce_wchar defaultCharacter) throw();
 
-	void addGlyph (const juce_wchar character, const Path& path, const float width) throw();
+	void addGlyph (juce_wchar character, const Path& path, float width) throw();
 
-	void addKerningPair (const juce_wchar char1, const juce_wchar char2, const float extraAmount) throw();
+	void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) throw();
 
 	void addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) throw();
 
@@ -10631,7 +10627,7 @@ protected:
 	float ascent;
 	bool isBold, isItalic;
 
-	virtual bool loadGlyphIfPossible (const juce_wchar characterNeeded);
+	virtual bool loadGlyphIfPossible (juce_wchar characterNeeded);
 
 private:
 
@@ -10643,8 +10639,8 @@ private:
 	CustomTypeface (const CustomTypeface&);
 	CustomTypeface& operator= (const CustomTypeface&);
 
-	GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
-	GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
+	GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) throw();
+	GlyphInfo* findGlyphSubstituting (juce_wchar character) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__
@@ -10664,12 +10660,12 @@ public:
 		underlined  = 4	 /**< underlines the font. @see setStyleFlags */
 	};
 
-	Font (const float fontHeight,
-		  const int styleFlags = plain) throw();
+	Font (float fontHeight,
+		  int styleFlags = plain) throw();
 
 	Font (const String& typefaceName,
-		  const float fontHeight,
-		  const int styleFlags) throw();
+		  float fontHeight,
+		  int styleFlags) throw();
 
 	Font (const Font& other) throw();
 
@@ -10710,27 +10706,27 @@ public:
 
 	void setStyleFlags (const int newFlags) throw();
 
-	void setBold (const bool shouldBeBold) throw();
+	void setBold (bool shouldBeBold) throw();
 	bool isBold() const throw();
 
-	void setItalic (const bool shouldBeItalic) throw();
+	void setItalic (bool shouldBeItalic) throw();
 	bool isItalic() const throw();
 
-	void setUnderline (const bool shouldBeUnderlined) throw();
+	void setUnderline (bool shouldBeUnderlined) throw();
 	bool isUnderlined() const throw();
 
-	void setHorizontalScale (const float scaleFactor) throw();
+	void setHorizontalScale (float scaleFactor) throw();
 
 	float getHorizontalScale() const throw()		{ return font->horizontalScale; }
 
-	void setExtraKerningFactor (const float extraKerning) throw();
+	void setExtraKerningFactor (float extraKerning) throw();
 
 	float getExtraKerningFactor() const throw()		 { return font->kerning; }
 
 	void setSizeAndStyle (float newHeight,
-						  const int newStyleFlags,
-						  const float newHorizontalScale,
-						  const float newKerningAmount) throw();
+						  int newStyleFlags,
+						  float newHorizontalScale,
+						  float newKerningAmount) throw();
 
 	int getStringWidth (const String& text) const throw();
 
@@ -10758,9 +10754,9 @@ private:
 	class SharedFontInternal  : public ReferenceCountedObject
 	{
 	public:
-		SharedFontInternal (const String& typefaceName, const float height, const float horizontalScale,
-							const float kerning, const float ascent, const int styleFlags,
-							Typeface* const typeface) throw();
+		SharedFontInternal (const String& typefaceName, float height, float horizontalScale,
+							float kerning, float ascent, int styleFlags,
+							Typeface* typeface) throw();
 		SharedFontInternal (const SharedFontInternal& other) throw();
 
 		String typefaceName;
@@ -10805,9 +10801,9 @@ public:
 		rounded	 /**< Ends of lines are rounded-off with a circular shape. */
 	};
 
-	PathStrokeType (const float strokeThickness,
-					const JointStyle jointStyle = mitered,
-					const EndCapStyle endStyle = butt) throw();
+	PathStrokeType (float strokeThickness,
+					JointStyle jointStyle = mitered,
+					EndCapStyle endStyle = butt) throw();
 
 	PathStrokeType (const PathStrokeType& other) throw();
 
@@ -10818,14 +10814,14 @@ public:
 	void createStrokedPath (Path& destPath,
 							const Path& sourcePath,
 							const AffineTransform& transform = AffineTransform::identity,
-							const float extraAccuracy = 1.0f) const;
+							float extraAccuracy = 1.0f) const;
 
 	void createDashedStroke (Path& destPath,
 							 const Path& sourcePath,
 							 const float* dashLengths,
 							 int numDashLengths,
 							 const AffineTransform& transform = AffineTransform::identity,
-							 const float extraAccuracy = 1.0f) const;
+							 float extraAccuracy = 1.0f) const;
 
 	float getStrokeThickness() const throw()			{ return thickness; }
 
@@ -10862,10 +10858,10 @@ public:
 
 	Line (const Line& other) throw();
 
-	Line (const float startX,
-		  const float startY,
-		  const float endX,
-		  const float endY) throw();
+	Line (float startX,
+		  float startY,
+		  float endX,
+		  float endY) throw();
 
 	Line (const Point<float>& start,
 		  const Point<float>& end) throw();
@@ -10886,11 +10882,11 @@ public:
 
 	const Point<float> getEnd() const throw();
 
-	void setStart (const float newStartX,
-				   const float newStartY) throw();
+	void setStart (float newStartX,
+				   float newStartY) throw();
 
-	void setEnd (const float newEndX,
-				 const float newEndY) throw();
+	void setEnd (float newEndX,
+				 float newEndY) throw();
 
 	void setStart (const Point<float>& newStart) throw();
 
@@ -10914,27 +10910,24 @@ public:
 					 float& intersectionX,
 					 float& intersectionY) const throw();
 
-	const Point<float> getPointAlongLine (const float distanceFromStart) const throw();
+	const Point<float> getPointAlongLine (float distanceFromStart) const throw();
 
-	const Point<float> getPointAlongLine (const float distanceFromStart,
-										  const float perpendicularDistance) const throw();
+	const Point<float> getPointAlongLine (float distanceFromStart,
+										  float perpendicularDistance) const throw();
 
-	const Point<float> getPointAlongLineProportionally (const float proportionOfLength) const throw();
+	const Point<float> getPointAlongLineProportionally (float proportionOfLength) const throw();
 
-	float getDistanceFromLine (const float x,
-							   const float y) const throw();
+	float getDistanceFromLine (float x, float y) const throw();
 
-	float findNearestPointTo (const float x,
-							  const float y) const throw();
+	float findNearestPointTo (float x, float y) const throw();
 
-	bool isPointAbove (const float x, const float y) const throw();
+	bool isPointAbove (float x, float y) const throw();
 
-	const Line withShortenedStart (const float distanceToShortenBy) const throw();
+	const Line withShortenedStart (float distanceToShortenBy) const throw();
 
-	const Line withShortenedEnd (const float distanceToShortenBy) const throw();
+	const Line withShortenedEnd (float distanceToShortenBy) const throw();
 
-	bool clipToPath (const Path& path,
-					 const bool keepSectionOutsidePath) throw();
+	bool clipToPath (const Path& path, bool keepSectionOutsidePath) throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -11394,50 +11387,50 @@ public:
 
 	Colour (const Colour& other) throw();
 
-	explicit Colour (const uint32 argb) throw();
+	explicit Colour (uint32 argb) throw();
 
-	Colour (const uint8 red,
-			const uint8 green,
-			const uint8 blue) throw();
+	Colour (uint8 red,
+			uint8 green,
+			uint8 blue) throw();
 
-	static const Colour fromRGB (const uint8 red,
-								 const uint8 green,
-								 const uint8 blue) throw();
+	static const Colour fromRGB (uint8 red,
+								 uint8 green,
+								 uint8 blue) throw();
 
-	Colour (const uint8 red,
-			const uint8 green,
-			const uint8 blue,
-			const uint8 alpha) throw();
+	Colour (uint8 red,
+			uint8 green,
+			uint8 blue,
+			uint8 alpha) throw();
 
-	static const Colour fromRGBA (const uint8 red,
-								  const uint8 green,
-								  const uint8 blue,
-								  const uint8 alpha) throw();
+	static const Colour fromRGBA (uint8 red,
+								  uint8 green,
+								  uint8 blue,
+								  uint8 alpha) throw();
 
-	Colour (const uint8 red,
-			const uint8 green,
-			const uint8 blue,
-			const float alpha) throw();
+	Colour (uint8 red,
+			uint8 green,
+			uint8 blue,
+			float alpha) throw();
 
-	static const Colour fromRGBAFloat (const uint8 red,
-									   const uint8 green,
-									   const uint8 blue,
-									   const float alpha) throw();
+	static const Colour fromRGBAFloat (uint8 red,
+									   uint8 green,
+									   uint8 blue,
+									   float alpha) throw();
 
-	Colour (const float hue,
-			const float saturation,
-			const float brightness,
-			const uint8 alpha) throw();
+	Colour (float hue,
+			float saturation,
+			float brightness,
+			uint8 alpha) throw();
 
-	Colour (const float hue,
-			const float saturation,
-			const float brightness,
-			const float alpha) throw();
+	Colour (float hue,
+			float saturation,
+			float brightness,
+			float alpha) throw();
 
-	static const Colour fromHSV (const float hue,
-								 const float saturation,
-								 const float brightness,
-								 const float alpha) throw();
+	static const Colour fromHSV (float hue,
+								 float saturation,
+								 float brightness,
+								 float alpha) throw();
 
 	~Colour() throw();
 
@@ -11470,11 +11463,11 @@ public:
 
 	bool isTransparent() const throw();
 
-	const Colour withAlpha (const uint8 newAlpha) const throw();
+	const Colour withAlpha (uint8 newAlpha) const throw();
 
-	const Colour withAlpha (const float newAlpha) const throw();
+	const Colour withAlpha (float newAlpha) const throw();
 
-	const Colour withMultipliedAlpha (const float alphaMultiplier) const throw();
+	const Colour withMultipliedAlpha (float alphaMultiplier) const throw();
 
 	const Colour overlaidWith (const Colour& foregroundColour) const throw();
 
@@ -11490,28 +11483,28 @@ public:
 				 float& saturation,
 				 float& brightness) const throw();
 
-	const Colour withHue (const float newHue) const throw();
+	const Colour withHue (float newHue) const throw();
 
-	const Colour withSaturation (const float newSaturation) const throw();
+	const Colour withSaturation (float newSaturation) const throw();
 
-	const Colour withBrightness (const float newBrightness) const throw();
+	const Colour withBrightness (float newBrightness) const throw();
 
-	const Colour withRotatedHue (const float amountToRotate) const throw();
+	const Colour withRotatedHue (float amountToRotate) const throw();
 
-	const Colour withMultipliedSaturation (const float multiplier) const throw();
+	const Colour withMultipliedSaturation (float multiplier) const throw();
 
-	const Colour withMultipliedBrightness (const float amount) const throw();
+	const Colour withMultipliedBrightness (float amount) const throw();
 
 	const Colour brighter (float amountBrighter = 0.4f) const throw();
 
 	const Colour darker (float amountDarker = 0.4f) const throw();
 
-	const Colour contrasting (const float amount = 1.0f) const throw();
+	const Colour contrasting (float amount = 1.0f) const throw();
 
 	static const Colour contrasting (const Colour& colour1,
 									 const Colour& colour2) throw();
 
-	static const Colour greyLevel (const float brightness) throw();
+	static const Colour greyLevel (float brightness) throw();
 
 	const String toString() const;
 
@@ -11605,13 +11598,9 @@ class JUCE_API  ColourGradient
 {
 public:
 
-	ColourGradient (const Colour& colour1,
-					const float x1,
-					const float y1,
-					const Colour& colour2,
-					const float x2,
-					const float y2,
-					const bool isRadial) throw();
+	ColourGradient (const Colour& colour1, float x1, float y1,
+					const Colour& colour2, float x2, float y2,
+					bool isRadial) throw();
 
 	ColourGradient() throw();
 
@@ -11619,18 +11608,18 @@ public:
 
 	void clearColours() throw();
 
-	void addColour (const double proportionAlongGradient,
+	void addColour (double proportionAlongGradient,
 					const Colour& colour) throw();
 
-	void multiplyOpacity (const float multiplier) throw();
+	void multiplyOpacity (float multiplier) throw();
 
 	int getNumColours() const throw();
 
-	double getColourPosition (const int index) const throw();
+	double getColourPosition (int index) const throw();
 
-	const Colour getColour (const int index) const throw();
+	const Colour getColour (int index) const throw();
 
-	const Colour getColourAtPosition (const float position) const throw();
+	const Colour getColourAtPosition (float position) const throw();
 
 	int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const throw();
 
@@ -11686,7 +11675,7 @@ public:
 
 	void setTiledImage (const Image& image, const AffineTransform& transform) throw();
 
-	void setOpacity (const float newOpacity) throw();
+	void setOpacity (float newOpacity) throw();
 
 	float getOpacity() const throw()	{ return colour.getFloatAlpha(); }
 
@@ -11796,154 +11785,114 @@ public:
 	void setGradientFill (const ColourGradient& gradient) throw();
 
 	void setTiledImageFill (const Image& imageToUse,
-							const int anchorX,
-							const int anchorY,
-							const float opacity) throw();
+							int anchorX,
+							int anchorY,
+							float opacity) throw();
 
 	void setFillType (const FillType& newFill) throw();
 
 	void setFont (const Font& newFont) throw();
 
-	void setFont (const float newFontHeight,
-				  const int fontStyleFlags = Font::plain) throw();
+	void setFont (float newFontHeight,
+				  int fontStyleFlags = Font::plain) throw();
 
 	void drawSingleLineText (const String& text,
-							 const int startX,
-							 const int baselineY) const throw();
+							 int startX, int baselineY) const throw();
 
 	void drawMultiLineText (const String& text,
-							const int startX,
-							const int baselineY,
-							const int maximumLineWidth) const throw();
+							int startX, int baselineY,
+							int maximumLineWidth) const throw();
 
 	void drawTextAsPath (const String& text,
 						 const AffineTransform& transform) const throw();
 
 	void drawText (const String& text,
-				   const int x,
-				   const int y,
-				   const int width,
-				   const int height,
+				   int x, int y, int width, int height,
 				   const Justification& justificationType,
-				   const bool useEllipsesIfTooBig) const throw();
+				   bool useEllipsesIfTooBig) const throw();
 
 	void drawFittedText (const String& text,
-						 const int x,
-						 const int y,
-						 const int width,
-						 const int height,
+						 int x, int y, int width, int height,
 						 const Justification& justificationFlags,
-						 const int maximumNumberOfLines,
-						 const float minimumHorizontalScale = 0.7f) const throw();
+						 int maximumNumberOfLines,
+						 float minimumHorizontalScale = 0.7f) const throw();
 
 	void fillAll() const throw();
 
 	void fillAll (const Colour& colourToUse) const throw();
 
-	void fillRect (int x,
-				   int y,
-				   int width,
-				   int height) const throw();
+	void fillRect (int x, int y, int width, int height) const throw();
 
 	void fillRect (const Rectangle<int>& rectangle) const throw();
 
-	void fillRect (const float x,
-				   const float y,
-				   const float width,
-				   const float height) const throw();
+	void fillRect (float x, float y, float width, float height) const throw();
 
-	void fillRoundedRectangle (const float x,
-							   const float y,
-							   const float width,
-							   const float height,
-							   const float cornerSize) const throw();
+	void fillRoundedRectangle (float x, float y, float width, float height,
+							   float cornerSize) const throw();
 
 	void fillRoundedRectangle (const Rectangle<int>& rectangle,
-							   const float cornerSize) const throw();
+							   float cornerSize) const throw();
 
-	void fillCheckerBoard (int x, int y,
-						   int width, int height,
-						   const int checkWidth,
-						   const int checkHeight,
-						   const Colour& colour1,
-						   const Colour& colour2) const throw();
+	void fillCheckerBoard (int x, int y, int width, int height,
+						   int checkWidth, int checkHeight,
+						   const Colour& colour1, const Colour& colour2) const throw();
 
-	void drawRect (const int x,
-				   const int y,
-				   const int width,
-				   const int height,
-				   const int lineThickness = 1) const throw();
+	void drawRect (int x, int y, int width, int height,
+				   int lineThickness = 1) const throw();
 
-	void drawRect (const float x,
-				   const float y,
-				   const float width,
-				   const float height,
-				   const float lineThickness = 1.0f) const throw();
+	void drawRect (float x, float y, float width, float height,
+				   float lineThickness = 1.0f) const throw();
 
 	void drawRect (const Rectangle<int>& rectangle,
-				   const int lineThickness = 1) const throw();
+				   int lineThickness = 1) const throw();
 
-	void drawRoundedRectangle (const float x,
-							   const float y,
-							   const float width,
-							   const float height,
-							   const float cornerSize,
-							   const float lineThickness) const throw();
+	void drawRoundedRectangle (float x, float y, float width, float height,
+							   float cornerSize, float lineThickness) const throw();
 
 	void drawRoundedRectangle (const Rectangle<int>& rectangle,
-							   const float cornerSize,
-							   const float lineThickness) const throw();
+							   float cornerSize, float lineThickness) const throw();
 
-	void drawBevel (const int x,
-					const int y,
-					const int width,
-					const int height,
-					const int bevelThickness,
+	void drawBevel (int x, int y, int width, int height,
+					int bevelThickness,
 					const Colour& topLeftColour = Colours::white,
 					const Colour& bottomRightColour = Colours::black,
-					const bool useGradient = true,
-					const bool sharpEdgeOnOutside = true) const throw();
+					bool useGradient = true,
+					bool sharpEdgeOnOutside = true) const throw();
 
 	void setPixel (int x, int y) const throw();
 
-	void fillEllipse (const float x,
-					  const float y,
-					  const float width,
-					  const float height) const throw();
+	void fillEllipse (float x, float y, float width, float height) const throw();
 
-	void drawEllipse (const float x,
-					  const float y,
-					  const float width,
-					  const float height,
-					  const float lineThickness) const throw();
+	void drawEllipse (float x, float y, float width, float height,
+					  float lineThickness) const throw();
 
 	void drawLine (float startX,
 				   float startY,
 				   float endX,
 				   float endY) const throw();
 
-	void drawLine (const float startX,
-				   const float startY,
-				   const float endX,
-				   const float endY,
-				   const float lineThickness) const throw();
+	void drawLine (float startX,
+				   float startY,
+				   float endX,
+				   float endY,
+				   float lineThickness) const throw();
 
 	void drawLine (const Line& line) const throw();
 
 	void drawLine (const Line& line,
-				   const float lineThickness) const throw();
+				   float lineThickness) const throw();
 
-	void drawDashedLine (const float startX,
-						 const float startY,
-						 const float endX,
-						 const float endY,
-						 const float* const dashLengths,
-						 const int numDashLengths,
-						 const float lineThickness = 1.0f) const throw();
+	void drawDashedLine (float startX,
+						 float startY,
+						 float endX,
+						 float endY,
+						 const float* dashLengths,
+						 int numDashLengths,
+						 float lineThickness = 1.0f) const throw();
 
-	void drawVerticalLine (const int x, float top, float bottom) const throw();
+	void drawVerticalLine (int x, float top, float bottom) const throw();
 
-	void drawHorizontalLine (const int y, float left, float right) const throw();
+	void drawHorizontalLine (int y, float left, float right) const throw();
 
 	void fillPath (const Path& path,
 				   const AffineTransform& transform = AffineTransform::identity) const throw();
@@ -11952,13 +11901,13 @@ public:
 					 const PathStrokeType& strokeType,
 					 const AffineTransform& transform = AffineTransform::identity) const throw();
 
-	void drawArrow (const float startX,
-					const float startY,
-					const float endX,
-					const float endY,
-					const float lineThickness,
-					const float arrowheadWidth,
-					const float arrowheadLength) const throw();
+	void drawArrow (float startX,
+					float startY,
+					float endX,
+					float endY,
+					float lineThickness,
+					float arrowheadWidth,
+					float arrowheadLength) const throw();
 
 	enum ResamplingQuality
 	{
@@ -11970,9 +11919,8 @@ public:
 	void setImageResamplingQuality (const ResamplingQuality newQuality) throw();
 
 	void drawImageAt (const Image* const imageToDraw,
-					  const int topLeftX,
-					  const int topLeftY,
-					  const bool fillAlphaChannelWithCurrentBrush = false) const throw();
+					  int topLeftX, int topLeftY,
+					  bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
 	void drawImage (const Image* const imageToDraw,
 					int destX,
@@ -11983,27 +11931,23 @@ public:
 					int sourceY,
 					int sourceWidth,
 					int sourceHeight,
-					const bool fillAlphaChannelWithCurrentBrush = false) const throw();
+					bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
-	void drawImageTransformed (const Image* const imageToDraw,
+	void drawImageTransformed (const Image* imageToDraw,
 							   const Rectangle<int>& imageSubRegion,
 							   const AffineTransform& transform,
-							   const bool fillAlphaChannelWithCurrentBrush = false) const throw();
+							   bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
-	void drawImageWithin (const Image* const imageToDraw,
-						  const int destX,
-						  const int destY,
-						  const int destWidth,
-						  const int destHeight,
+	void drawImageWithin (const Image* imageToDraw,
+						  int destX, int destY, int destWidth, int destHeight,
 						  const RectanglePlacement& placementWithinTarget,
-						  const bool fillAlphaChannelWithCurrentBrush = false) const throw();
+						  bool fillAlphaChannelWithCurrentBrush = false) const throw();
 
 	const Rectangle<int> getClipBounds() const throw();
 
-	bool clipRegionIntersects (const int x, const int y, const int width, const int height) const throw();
+	bool clipRegionIntersects (int x, int y, int width, int height) const throw();
 
-	bool reduceClipRegion (const int x, const int y,
-						   const int width, const int height) throw();
+	bool reduceClipRegion (int x, int y, int width, int height) throw();
 
 	bool reduceClipRegion (const RectangleList& clipRegion) throw();
 
@@ -12020,8 +11964,7 @@ public:
 
 	void restoreState() throw();
 
-	void setOrigin (const int newOriginX,
-					const int newOriginY) throw();
+	void setOrigin (int newOriginX, int newOriginY) throw();
 
 	void resetToDefaultState() throw();
 
@@ -12089,8 +12032,7 @@ public:
 
 	void clear() throw();
 
-	void add (const int x, const int y,
-			  const int w, const int h) throw();
+	void add (int x, int y, int width, int height) throw();
 
 	void add (const Rectangle<int>& rect) throw();
 
@@ -12110,7 +12052,7 @@ public:
 
 	void swapWith (RectangleList& otherList) throw();
 
-	bool containsPoint (const int x, const int y) const throw();
+	bool containsPoint (int x, int y) const throw();
 
 	bool containsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
@@ -12122,7 +12064,7 @@ public:
 
 	void consolidate() throw();
 
-	void offsetAll (const int dx, const int dy) throw();
+	void offsetAll (int dx, int dy) throw();
 
 	const Path toPath() const throw();
 
@@ -12171,12 +12113,12 @@ public:
 
 	BorderSize (const BorderSize& other) throw();
 
-	BorderSize (const int topGap,
-				const int leftGap,
-				const int bottomGap,
-				const int rightGap) throw();
+	BorderSize (int topGap,
+				int leftGap,
+				int bottomGap,
+				int rightGap) throw();
 
-	BorderSize (const int allGaps) throw();
+	BorderSize (int allGaps) throw();
 
 	~BorderSize() throw();
 
@@ -12192,13 +12134,13 @@ public:
 
 	int getLeftAndRight() const throw()		 { return left + right; }
 
-	void setTop (const int newTopGap) throw();
+	void setTop (int newTopGap) throw();
 
-	void setLeft (const int newLeftGap) throw();
+	void setLeft (int newLeftGap) throw();
 
-	void setBottom (const int newBottomGap) throw();
+	void setBottom (int newBottomGap) throw();
 
-	void setRight (const int newRightGap) throw();
+	void setRight (int newRightGap) throw();
 
 	const Rectangle<int> subtractedFrom (const Rectangle<int>& original) const throw();
 
@@ -12250,10 +12192,10 @@ public:
 
 	bool isShowing() const;
 
-	void fadeOutComponent (const int lengthOfFadeOutInMilliseconds,
-						   const int deltaXToMove = 0,
-						   const int deltaYToMove = 0,
-						   const float scaleFactorAtEnd = 1.0f);
+	void fadeOutComponent (int lengthOfFadeOutInMilliseconds,
+						   int deltaXToMove = 0,
+						   int deltaYToMove = 0,
+						   float scaleFactorAtEnd = 1.0f);
 
 	virtual void addToDesktop (int windowStyleFlags,
 							   void* nativeWindowToAttachTo = 0);
@@ -12268,13 +12210,13 @@ public:
 
 	virtual void minimisationStateChanged (bool isNowMinimised);
 
-	void toFront (const bool shouldAlsoGainFocus);
+	void toFront (bool shouldAlsoGainFocus);
 
 	void toBack();
 
-	void toBehind (Component* const other);
+	void toBehind (Component* other);
 
-	void setAlwaysOnTop (const bool shouldStayOnTop);
+	void setAlwaysOnTop (bool shouldStayOnTop);
 
 	bool isAlwaysOnTop() const throw();
 
@@ -12295,7 +12237,7 @@ public:
 	const Rectangle<int>& getBounds() const throw()	 { return bounds_; }
 
 	void getVisibleArea (RectangleList& result,
-						 const bool includeSiblings) const;
+						 bool includeSiblings) const;
 
 	int getScreenX() const;
 
@@ -12309,37 +12251,37 @@ public:
 
 	const Point<int> globalPositionToRelative (const Point<int>& screenPosition) const;
 
-	const Point<int> relativePositionToOtherComponent (const Component* const targetComponent,
+	const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
 													   const Point<int>& positionRelativeToThis) const;
 
-	void setTopLeftPosition (const int x, const int y);
+	void setTopLeftPosition (int x, int y);
 
-	void setTopRightPosition (const int x, const int y);
+	void setTopRightPosition (int x, int y);
 
-	void setSize (const int newWidth, const int newHeight);
+	void setSize (int newWidth, int newHeight);
 
 	void setBounds (int x, int y, int width, int height);
 
 	void setBounds (const Rectangle<int>& newBounds);
 
-	void setBoundsRelative (const float proportionalX, const float proportionalY,
-							const float proportionalWidth, const float proportionalHeight);
+	void setBoundsRelative (float proportionalX, float proportionalY,
+							float proportionalWidth, float proportionalHeight);
 
 	void setBoundsInset (const BorderSize& borders);
 
 	void setBoundsToFit (int x, int y, int width, int height,
 						 const Justification& justification,
-						 const bool onlyReduceInSize);
+						 bool onlyReduceInSize);
 
-	void setCentrePosition (const int x, const int y);
+	void setCentrePosition (int x, int y);
 
-	void setCentreRelative (const float x, const float y);
+	void setCentreRelative (float x, float y);
 
-	void centreWithSize (const int width, const int height);
+	void centreWithSize (int width, int height);
 
-	int proportionOfWidth (const float proportion) const throw();
+	int proportionOfWidth (float proportion) const throw();
 
-	int proportionOfHeight (const float proportion) const throw();
+	int proportionOfHeight (float proportion) const throw();
 
 	int getParentWidth() const throw();
 
@@ -12349,19 +12291,17 @@ public:
 
 	int getNumChildComponents() const throw();
 
-	Component* getChildComponent (const int index) const throw();
+	Component* getChildComponent (int index) const throw();
 
-	int getIndexOfChildComponent (const Component* const child) const throw();
+	int getIndexOfChildComponent (const Component* child) const throw();
 
-	void addChildComponent (Component* const child,
-							int zOrder = -1);
+	void addChildComponent (Component* child, int zOrder = -1);
 
-	void addAndMakeVisible (Component* const child,
-							int zOrder = -1);
+	void addAndMakeVisible (Component* child, int zOrder = -1);
 
-	void removeChildComponent (Component* const childToRemove);
+	void removeChildComponent (Component* childToRemove);
 
-	Component* removeChildComponent (const int childIndexToRemove);
+	Component* removeChildComponent (int childIndexToRemove);
 
 	void removeAllChildren();
 
@@ -12396,56 +12336,54 @@ public:
 
 	virtual bool hitTest (int x, int y);
 
-	void setInterceptsMouseClicks (const bool allowClicksOnThisComponent,
-								   const bool allowClicksOnChildComponents) throw();
+	void setInterceptsMouseClicks (bool allowClicksOnThisComponent,
+								   bool allowClicksOnChildComponents) throw();
 
 	void getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 								   bool& allowsClicksOnChildComponents) const throw();
 
 	virtual bool contains (int x, int y);
 
-	bool reallyContains (int x, int y,
-						 const bool returnTrueIfWithinAChild);
+	bool reallyContains (int x, int y, bool returnTrueIfWithinAChild);
 
-	Component* getComponentAt (const int x, const int y);
+	Component* getComponentAt (int x, int y);
 
 	Component* getComponentAt (const Point<int>& position);
 
 	void repaint();
 
-	void repaint (const int x, const int y,
-				  const int width, const int height);
+	void repaint (int x, int y, int width, int height);
 
-	void setBufferedToImage (const bool shouldBeBuffered);
+	void setBufferedToImage (bool shouldBeBuffered);
 
 	Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
-									const bool clipImageToComponentBounds = true);
+									bool clipImageToComponentBounds = true);
 
 	void paintEntireComponent (Graphics& context);
 
-	void setComponentEffect (ImageEffectFilter* const newEffect);
+	void setComponentEffect (ImageEffectFilter* newEffect);
 
 	ImageEffectFilter* getComponentEffect() const throw()		   { return effect_; }
 
 	LookAndFeel& getLookAndFeel() const throw();
 
-	void setLookAndFeel (LookAndFeel* const newLookAndFeel);
+	void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
 	virtual void lookAndFeelChanged();
 
 	void sendLookAndFeelChange();
 
-	void setOpaque (const bool shouldBeOpaque);
+	void setOpaque (bool shouldBeOpaque);
 
 	bool isOpaque() const throw();
 
-	void setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront) throw();
+	void setBroughtToFrontOnMouseClick (bool shouldBeBroughtToFront) throw();
 
 	bool isBroughtToFrontOnMouseClick() const throw();
 
 	// Keyboard focus methods
 
-	void setWantsKeyboardFocus (const bool wantsFocus) throw();
+	void setWantsKeyboardFocus (bool wantsFocus) throw();
 
 	bool getWantsKeyboardFocus() const throw();
 
@@ -12455,25 +12393,25 @@ public:
 
 	void grabKeyboardFocus();
 
-	bool hasKeyboardFocus (const bool trueIfChildIsFocused) const;
+	bool hasKeyboardFocus (bool trueIfChildIsFocused) const;
 
 	static Component* JUCE_CALLTYPE getCurrentlyFocusedComponent() throw();
 
-	void moveKeyboardFocusToSibling (const bool moveToNext);
+	void moveKeyboardFocusToSibling (bool moveToNext);
 
 	virtual KeyboardFocusTraverser* createFocusTraverser();
 
 	int getExplicitFocusOrder() const;
 
-	void setExplicitFocusOrder (const int newFocusOrderIndex);
+	void setExplicitFocusOrder (int newFocusOrderIndex);
 
-	void setFocusContainer (const bool shouldBeFocusContainer) throw();
+	void setFocusContainer (bool shouldBeFocusContainer) throw();
 
 	bool isFocusContainer() const throw();
 
 	bool isEnabled() const throw();
 
-	void setEnabled (const bool shouldBeEnabled);
+	void setEnabled (bool shouldBeEnabled);
 
 	virtual void enablementChanged();
 
@@ -12505,22 +12443,22 @@ public:
 									float wheelIncrementX,
 									float wheelIncrementY);
 
-	static void beginDragAutoRepeat (const int millisecondIntervalBetweenCallbacks);
+	static void beginDragAutoRepeat (int millisecondIntervalBetweenCallbacks);
 
-	void setRepaintsOnMouseActivity (const bool shouldRepaint) throw();
+	void setRepaintsOnMouseActivity (bool shouldRepaint) throw();
 
-	void addMouseListener (MouseListener* const newListener,
-						   const bool wantsEventsForAllNestedChildComponents);
+	void addMouseListener (MouseListener* newListener,
+						   bool wantsEventsForAllNestedChildComponents);
 
-	void removeMouseListener (MouseListener* const listenerToRemove);
+	void removeMouseListener (MouseListener* listenerToRemove);
 
-	void addKeyListener (KeyListener* const newListener);
+	void addKeyListener (KeyListener* newListener);
 
-	void removeKeyListener (KeyListener* const listenerToRemove);
+	void removeKeyListener (KeyListener* listenerToRemove);
 
 	virtual bool keyPressed (const KeyPress& key);
 
-	virtual bool keyStateChanged (const bool isKeyDown);
+	virtual bool keyStateChanged (bool isKeyDown);
 
 	virtual void modifierKeysChanged (const ModifierKeys& modifiers);
 
@@ -12557,19 +12495,19 @@ public:
 
 	virtual void broughtToFront();
 
-	void addComponentListener (ComponentListener* const newListener);
+	void addComponentListener (ComponentListener* newListener);
 
-	void removeComponentListener (ComponentListener* const listenerToRemove);
+	void removeComponentListener (ComponentListener* listenerToRemove);
 
-	void postCommandMessage (const int commandId);
+	void postCommandMessage (int commandId);
 
 	virtual void handleCommandMessage (int commandId);
 
 	int runModalLoop();
 
-	void enterModalState (const bool takeKeyboardFocus = true);
+	void enterModalState (bool takeKeyboardFocus = true);
 
-	void exitModalState (const int returnValue);
+	void exitModalState (int returnValue);
 
 	bool isCurrentlyModal() const throw();
 
@@ -12587,13 +12525,13 @@ public:
 
 	const NamedValueSet& getProperties() const throw()		  { return properties; }
 
-	const Colour findColour (const int colourId, const bool inheritFromParent = false) const;
+	const Colour findColour (int colourId, bool inheritFromParent = false) const;
 
-	void setColour (const int colourId, const Colour& colour);
+	void setColour (int colourId, const Colour& colour);
 
-	void removeColour (const int colourId);
+	void removeColour (int colourId);
 
-	bool isColourSpecified (const int colourId) const;
+	bool isColourSpecified (int colourId) const;
 
 	void copyAllExplicitColoursTo (Component& target) const;
 
@@ -12648,8 +12586,8 @@ public:
 	class BailOutChecker
 	{
 	public:
-		BailOutChecker (Component* const component1,
-						Component* const component2 = 0);
+		BailOutChecker (Component* component1,
+						Component* component2 = 0);
 
 		bool shouldBailOut() const throw();
 
@@ -12725,7 +12663,7 @@ private:
 	void internalMouseUp	(MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers);
 	void internalMouseDrag  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
 	void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
-	void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const float amountX, const float amountY);
+	void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, float amountX, float amountY);
 	void internalBroughtToFront();
 	void internalFocusGain (const FocusChangeType cause);
 	void internalFocusLoss (const FocusChangeType cause);
@@ -12735,11 +12673,11 @@ private:
 	void internalChildrenChanged();
 	void internalHierarchyChanged();
 	void renderComponent (Graphics& context);
-	void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
+	void sendMovedResizedMessages (bool wasMoved, bool wasResized);
 	void repaintParent();
 	void sendFakeMouseMove() const;
 	void takeKeyboardFocus (const FocusChangeType cause);
-	void grabFocusInternal (const FocusChangeType cause, const bool canTryParent = true);
+	void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
 	static void giveAwayFocus();
 	void sendEnablementChangeMessage();
 	static void* runModalLoopCallback (void*);
@@ -12748,7 +12686,7 @@ private:
 								  const Rectangle<int>& clipRect,
 								  const Component* const compToAvoid) const;
 	void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-							  const int deltaX, const int deltaY) const;
+							  int deltaX, int deltaY) const;
 
 	// how much of the component is not off the edges of its parents
 	const Rectangle<int> getUnclippedArea() const;
@@ -13142,11 +13080,11 @@ public:
 
 	static Desktop& JUCE_CALLTYPE getInstance();
 
-	const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const throw();
+	const RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const throw();
 
-	const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
+	const Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const throw();
 
-	const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const;
+	const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, bool clippedToWorkArea = true) const;
 
 	static const Point<int> getMousePosition();
 
@@ -13156,26 +13094,26 @@ public:
 
 	static int getMouseButtonClickCounter() throw();
 
-	static void setScreenSaverEnabled (const bool isEnabled) throw();
+	static void setScreenSaverEnabled (bool isEnabled) throw();
 
 	static bool isScreenSaverEnabled() throw();
 
-	void addGlobalMouseListener (MouseListener* const listener);
+	void addGlobalMouseListener (MouseListener* listener);
 
-	void removeGlobalMouseListener (MouseListener* const listener);
+	void removeGlobalMouseListener (MouseListener* listener);
 
-	void addFocusChangeListener (FocusChangeListener* const listener);
+	void addFocusChangeListener (FocusChangeListener* listener);
 
-	void removeFocusChangeListener (FocusChangeListener* const listener);
+	void removeFocusChangeListener (FocusChangeListener* listener);
 
 	void setKioskModeComponent (Component* componentToUse,
-								const bool allowMenusAndBars = true);
+								bool allowMenusAndBars = true);
 
 	Component* getKioskModeComponent() const throw()		{ return kioskModeComponent; }
 
 	int getNumComponents() const throw();
 
-	Component* getComponent (const int index) const throw();
+	Component* getComponent (int index) const throw();
 
 	Component* findComponentAt (const Point<int>& screenPosition) const;
 
@@ -13228,11 +13166,11 @@ private:
 	void resetTimer();
 
 	int getNumDisplayMonitors() const throw();
-	const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
+	const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const throw();
 
-	void addDesktopComponent (Component* const c);
-	void removeDesktopComponent (Component* const c);
-	void componentBroughtToFront (Component* const c);
+	void addDesktopComponent (Component* c);
+	void removeDesktopComponent (Component* c);
+	void componentBroughtToFront (Component* c);
 
 	void triggerFocusCallback();
 	void handleAsyncUpdate();
@@ -19880,26 +19818,25 @@ public:
 
 	virtual Drawable* createCopy() const = 0;
 
-	void draw (Graphics& g, const float opacity,
+	void draw (Graphics& g, float opacity,
 			   const AffineTransform& transform = AffineTransform::identity) const;
 
 	void drawAt (Graphics& g,
-				 const float x,
-				 const float y,
-				 const float opacity) const;
+				 float x, float y,
+				 float opacity) const;
 
 	void drawWithin (Graphics& g,
-					 const int destX,
-					 const int destY,
-					 const int destWidth,
-					 const int destHeight,
+					 int destX,
+					 int destY,
+					 int destWidth,
+					 int destHeight,
 					 const RectanglePlacement& placement,
-					 const float opacity) const;
+					 float opacity) const;
 
 	class RenderingContext
 	{
 	public:
-		RenderingContext (Graphics& g, const AffineTransform& transform, const float opacity) throw();
+		RenderingContext (Graphics& g, const AffineTransform& transform, float opacity) throw();
 
 		Graphics& g;
 		AffineTransform transform;
@@ -19919,7 +19856,7 @@ public:
 
 	void setName (const String& newName) throw()	{ name = newName; }
 
-	static Drawable* createFromImageData (const void* data, const size_t numBytes);
+	static Drawable* createFromImageData (const void* data, size_t numBytes);
 
 	static Drawable* createFromImageDataStream (InputStream& dataSource);
 
@@ -24588,7 +24525,7 @@ public:
 
 	void layout (int maximumWidth,
 				 const Justification& justification,
-				 const bool attemptToBalanceLineLengths) throw();
+				 bool attemptToBalanceLineLengths) throw();
 
 	int getWidth() const throw();
 
@@ -24596,11 +24533,9 @@ public:
 
 	int getNumLines() const throw()		 { return totalLines; }
 
-	int getLineWidth (const int lineNumber) const throw();
+	int getLineWidth (int lineNumber) const throw();
 
-	void draw (Graphics& g,
-			   const int topLeftX,
-			   const int topLeftY) const throw();
+	void draw (Graphics& g, int topLeftX, int topLeftY) const throw();
 
 	void drawWithin (Graphics& g,
 					 int x, int y, int w, int h,
@@ -24647,7 +24582,7 @@ public:
 	void setMessage (const String& message);
 
 	void addButton (const String& name,
-					const int returnValue,
+					int returnValue,
 					const KeyPress& shortcutKey1 = KeyPress(),
 					const KeyPress& shortcutKey2 = KeyPress());
 
@@ -24656,7 +24591,7 @@ public:
 	void addTextEditor (const String& name,
 						const String& initialContents,
 						const String& onScreenLabel = String::empty,
-						const bool isPasswordBox = false);
+						bool isPasswordBox = false);
 
 	const String getTextEditorContents (const String& nameOfTextEditor) const;
 
@@ -24670,13 +24605,13 @@ public:
 
 	void addProgressBarComponent (double& progressValue);
 
-	void addCustomComponent (Component* const component);
+	void addCustomComponent (Component* component);
 
 	int getNumCustomComponents() const;
 
-	Component* getCustomComponent (const int index) const;
+	Component* getCustomComponent (int index) const;
 
-	Component* removeCustomComponent (const int index);
+	Component* removeCustomComponent (int index);
 
 	bool containsAnyExtraComponents() const;
 
@@ -27128,8 +27063,8 @@ public:
 
 	};
 
-	ComponentPeer (Component* const component,
-				   const int styleFlags) throw();
+	ComponentPeer (Component* component,
+				   int styleFlags) throw();
 
 	virtual ~ComponentPeer();
 
@@ -27147,7 +27082,7 @@ public:
 
 	virtual void setSize (int w, int h) = 0;
 
-	virtual void setBounds (int x, int y, int w, int h, const bool isNowFullScreen) = 0;
+	virtual void setBounds (int x, int y, int w, int h, bool isNowFullScreen) = 0;
 
 	virtual const Rectangle<int> getBounds() const = 0;
 
@@ -27171,7 +27106,7 @@ public:
 
 	virtual void setIcon (const Image& newIcon) = 0;
 
-	void setConstrainer (ComponentBoundsConstrainer* const newConstrainer) throw();
+	void setConstrainer (ComponentBoundsConstrainer* newConstrainer) throw();
 
 	ComponentBoundsConstrainer* getConstrainer() const throw()		  { return constrainer; }
 
@@ -27204,10 +27139,10 @@ public:
 
 	Component* getLastFocusedSubcomponent() const throw();
 
-	bool handleKeyPress (const int keyCode,
-						 const juce_wchar textCharacter);
+	bool handleKeyPress (int keyCode,
+						 juce_wchar textCharacter);
 
-	bool handleKeyUpOrDown (const bool isKeyDown);
+	bool handleKeyUpOrDown (bool isKeyDown);
 
 	void handleModifierKeysChange();
 
@@ -27217,8 +27152,8 @@ public:
 
 	virtual void performAnyPendingRepaintsNow() = 0;
 
-	void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, const int64 time);
-	void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, const int64 time, float x, float y);
+	void handleMouseEvent (int touchIndex, const Point<int>& positionWithinPeer, const ModifierKeys& newMods, int64 time);
+	void handleMouseWheel (int touchIndex, const Point<int>& positionWithinPeer, int64 time, float x, float y);
 
 	void handleUserClosingWindow();
 
@@ -27232,9 +27167,9 @@ public:
 
 	static int getNumPeers() throw();
 
-	static ComponentPeer* getPeer (const int index) throw();
+	static ComponentPeer* getPeer (int index) throw();
 
-	static bool isValidPeer (const ComponentPeer* const peer) throw();
+	static bool isValidPeer (const ComponentPeer* peer) throw();
 
 	static void bringModalComponentToFront();
 
@@ -27261,7 +27196,7 @@ private:
 	bool fakeMouseMessageSent : 1, isWindowMinimised : 1;
 
 	friend class Component;
-	static ComponentPeer* getPeerFor (const Component* const component) throw();
+	static ComponentPeer* getPeerFor (const Component* component) throw();
 
 	void setLastDragDropTarget (Component* comp);
 
@@ -27483,15 +27418,15 @@ public:
 	virtual void setOpacity (float newOpacity) = 0;
 	virtual void setInterpolationQuality (Graphics::ResamplingQuality quality) = 0;
 
-	virtual void fillRect (const Rectangle<int>& r, const bool replaceExistingContents) = 0;
+	virtual void fillRect (const Rectangle<int>& r, bool replaceExistingContents) = 0;
 	virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
 	virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-							const AffineTransform& transform, const bool fillEntireClipAsTiles) = 0;
+							const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
 
 	virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
-	virtual void drawVerticalLine (const int x, double top, double bottom) = 0;
-	virtual void drawHorizontalLine (const int y, double left, double right) = 0;
+	virtual void drawVerticalLine (int x, double top, double bottom) = 0;
+	virtual void drawHorizontalLine (int y, double left, double right) = 0;
 
 	virtual void setFont (const Font& newFont) = 0;
 	virtual const Font getFont() = 0;
@@ -27688,21 +27623,21 @@ public:
 
 	void insertDrawable (Drawable* drawable,
 						 const AffineTransform& transform = AffineTransform::identity,
-						 const int index = -1);
+						 int index = -1);
 
 	void insertDrawable (const Drawable& drawable,
 						 const AffineTransform& transform = AffineTransform::identity,
-						 const int index = -1);
+						 int index = -1);
 
-	void removeDrawable (const int index, const bool deleteDrawable = true);
+	void removeDrawable (int index, bool deleteDrawable = true);
 
-	int getNumDrawables() const throw()			 { return drawables.size(); }
+	int getNumDrawables() const throw()					 { return drawables.size(); }
 
-	Drawable* getDrawable (const int index) const throw()			   { return drawables [index]; }
+	Drawable* getDrawable (int index) const throw()				 { return drawables [index]; }
 
-	const AffineTransform* getDrawableTransform (const int index) const throw()	 { return transforms [index]; }
+	const AffineTransform* getDrawableTransform (int index) const throw()	   { return transforms [index]; }
 
-	void bringToFront (const int index);
+	void bringToFront (int index);
 
 	void render (const Drawable::RenderingContext& context) const;
 	const Rectangle<float> getBounds() const;
@@ -27743,13 +27678,13 @@ public:
 	void setImage (const Image& imageToCopy);
 
 	void setImage (Image* imageToUse,
-				   const bool releaseWhenNotNeeded);
+				   bool releaseWhenNotNeeded);
 
 	Image* getImage() const throw()				 { return image; }
 
 	void clearImage();
 
-	void setOpacity (const float newOpacity);
+	void setOpacity (float newOpacity);
 
 	float getOpacity() const throw()				{ return opacity; }
 
@@ -27809,7 +27744,7 @@ public:
 
 	void setStrokeType (const PathStrokeType& newStrokeType) throw();
 
-	void setStrokeThickness (const float newThickness) throw();
+	void setStrokeThickness (float newThickness) throw();
 
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
@@ -28068,8 +28003,7 @@ public:
 	void updateFrom (const Rectangle<int>& newPosition,
 					 const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
-	void updateFromDouble (const double x, const double y,
-						   const double width, const double height,
+	void updateFromDouble (double x, double y, double width, double height,
 						   const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
 	void updateFromComponent (const Component& comp) throw();
@@ -28144,16 +28078,16 @@ private:
 	double x, y, w, h;
 	uint8 xMode, yMode, wMode, hMode;
 
-	void addPosDescription (String& result, const uint8 mode, const double value) const throw();
-	void addSizeDescription (String& result, const uint8 mode, const double value) const throw();
+	void addPosDescription (String& result, uint8 mode, double value) const throw();
+	void addSizeDescription (String& result, uint8 mode, double value) const throw();
 	void decodePosString (const String& s, uint8& mode, double& value) throw();
 	void decodeSizeString (const String& s, uint8& mode, double& value) throw();
-	void applyPosAndSize (double& xOut, double& wOut, const double x, const double w,
-						  const uint8 xMode, const uint8 wMode,
-						  const int parentPos, const int parentSize) const throw();
-	void updatePosAndSize (double& xOut, double& wOut, double x, const double w,
-						   const uint8 xMode, const uint8 wMode,
-						   const int parentPos, const int parentSize) const throw();
+	void applyPosAndSize (double& xOut, double& wOut, double x, double w,
+						  uint8 xMode, uint8 wMode,
+						  int parentPos, int parentSize) const throw();
+	void updatePosAndSize (double& xOut, double& wOut, double x, double w,
+						   uint8 xMode, uint8 wMode,
+						   int parentPos, int parentSize) const throw();
 };
 
 #endif   // __JUCE_POSITIONEDRECTANGLE_JUCEHEADER__
@@ -28439,12 +28373,12 @@ public:
 
 	virtual void changed();
 
-	void setChangedFlag (const bool hasChanged);
+	void setChangedFlag (bool hasChanged);
 
 	bool loadFrom (const File& fileToLoadFrom,
-				   const bool showMessageOnFailure);
+				   bool showMessageOnFailure);
 
-	bool loadFromUserSpecifiedFile (const bool showMessageOnFailure);
+	bool loadFromUserSpecifiedFile (bool showMessageOnFailure);
 
 	enum SaveResult
 	{
@@ -28453,17 +28387,17 @@ public:
 		failedToWriteToFile	 /**< indicates that it tried to write to a file but this failed. */
 	};
 
-	SaveResult save (const bool askUserForFileIfNotSpecified,
-					 const bool showMessageOnFailure);
+	SaveResult save (bool askUserForFileIfNotSpecified,
+					 bool showMessageOnFailure);
 
 	SaveResult saveIfNeededAndUserAgrees();
 
 	SaveResult saveAs (const File& newFile,
-					   const bool warnAboutOverwritingExistingFiles,
-					   const bool askUserForFileIfNotSpecified,
-					   const bool showMessageOnFailure);
+					   bool warnAboutOverwritingExistingFiles,
+					   bool askUserForFileIfNotSpecified,
+					   bool showMessageOnFailure);
 
-	SaveResult saveAsInteractive (const bool warnAboutOverwritingExistingFiles);
+	SaveResult saveAsInteractive (bool warnAboutOverwritingExistingFiles);
 
 	const File getFile() const				  { return documentFile; }
 
@@ -28517,13 +28451,13 @@ public:
 
 	~RecentlyOpenedFilesList();
 
-	void setMaxNumberOfItems (const int newMaxNumber);
+	void setMaxNumberOfItems (int newMaxNumber);
 
 	int getMaxNumberOfItems() const throw()				 { return maxNumberOfItems; }
 
 	int getNumFiles() const;
 
-	const File getFile (const int index) const;
+	const File getFile (int index) const;
 
 	const StringArray& getAllFilenames() const throw()		  { return files; }
 
@@ -28534,9 +28468,9 @@ public:
 	void removeNonExistentFiles();
 
 	int createPopupMenuItems (PopupMenu& menuToAddItemsTo,
-							  const int baseItemId,
-							  const bool showFullPaths,
-							  const bool dontAddNonExistentFiles,
+							  int baseItemId,
+							  bool showFullPaths,
+							  bool dontAddNonExistentFiles,
 							  const File** filesToAvoid = 0);
 
 	const String toString() const;

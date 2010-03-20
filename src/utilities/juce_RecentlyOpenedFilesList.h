@@ -59,7 +59,7 @@ public:
 
         @see getMaxNumberOfItems
     */
-    void setMaxNumberOfItems (const int newMaxNumber);
+    void setMaxNumberOfItems (int newMaxNumber);
 
     /** Returns the number of items that this list will store.
         @see setMaxNumberOfItems
@@ -76,7 +76,7 @@ public:
 
         The most recently added file is always at index 0.
     */
-    const File getFile (const int index) const;
+    const File getFile (int index) const;
 
     /** Returns an array of all the absolute pathnames in the list.
     */
@@ -121,9 +121,9 @@ public:
         It returns the number of items that were added.
     */
     int createPopupMenuItems (PopupMenu& menuToAddItemsTo,
-                              const int baseItemId,
-                              const bool showFullPaths,
-                              const bool dontAddNonExistentFiles,
+                              int baseItemId,
+                              bool showFullPaths,
+                              bool dontAddNonExistentFiles,
                               const File** filesToAvoid = 0);
 
     //==============================================================================

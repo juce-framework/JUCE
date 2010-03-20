@@ -67,8 +67,8 @@ public:
                             just Font::plain for the normal style.
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
-    Font (const float fontHeight,
-          const int styleFlags = plain) throw();
+    Font (float fontHeight,
+          int styleFlags = plain) throw();
 
     /** Creates a font with a given typeface and parameters.
 
@@ -80,8 +80,8 @@ public:
         @see FontStyleFlags, getDefaultSansSerifFontName
     */
     Font (const String& typefaceName,
-          const float fontHeight,
-          const int styleFlags) throw();
+          float fontHeight,
+          int styleFlags) throw();
 
     /** Creates a copy of another Font object. */
     Font (const Font& other) throw();
@@ -229,17 +229,17 @@ public:
 
     //==============================================================================
     /** Makes the font bold or non-bold. */
-    void setBold (const bool shouldBeBold) throw();
+    void setBold (bool shouldBeBold) throw();
     /** Returns true if the font is bold. */
     bool isBold() const throw();
 
     /** Makes the font italic or non-italic. */
-    void setItalic (const bool shouldBeItalic) throw();
+    void setItalic (bool shouldBeItalic) throw();
     /** Returns true if the font is italic. */
     bool isItalic() const throw();
 
     /** Makes the font underlined or non-underlined. */
-    void setUnderline (const bool shouldBeUnderlined) throw();
+    void setUnderline (bool shouldBeUnderlined) throw();
     /** Returns true if the font is underlined. */
     bool isUnderlined() const throw();
 
@@ -249,7 +249,7 @@ public:
         @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
                             narrower, greater than 1.0 will be stretched out.
     */
-    void setHorizontalScale (const float scaleFactor) throw();
+    void setHorizontalScale (float scaleFactor) throw();
 
     /** Returns the font's horizontal scale.
 
@@ -267,7 +267,7 @@ public:
                                 normal spacing, positive values spread the letters out,
                                 negative values make them closer together.
     */
-    void setExtraKerningFactor (const float extraKerning) throw();
+    void setExtraKerningFactor (float extraKerning) throw();
 
     /** Returns the font's kerning.
 
@@ -283,9 +283,9 @@ public:
     //==============================================================================
     /** Changes all the font's characteristics with one call. */
     void setSizeAndStyle (float newHeight,
-                          const int newStyleFlags,
-                          const float newHorizontalScale,
-                          const float newKerningAmount) throw();
+                          int newStyleFlags,
+                          float newHorizontalScale,
+                          float newKerningAmount) throw();
 
     //==============================================================================
     /** Returns the total width of a string as it would be drawn using this font.
@@ -356,9 +356,9 @@ private:
     class SharedFontInternal  : public ReferenceCountedObject
     {
     public:
-        SharedFontInternal (const String& typefaceName, const float height, const float horizontalScale,
-                            const float kerning, const float ascent, const int styleFlags,
-                            Typeface* const typeface) throw();
+        SharedFontInternal (const String& typefaceName, float height, float horizontalScale,
+                            float kerning, float ascent, int styleFlags,
+                            Typeface* typeface) throw();
         SharedFontInternal (const SharedFontInternal& other) throw();
 
         String typefaceName;

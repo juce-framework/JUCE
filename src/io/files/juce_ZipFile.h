@@ -50,8 +50,8 @@ public:
         @param deleteStreamWhenDestroyed    if set to true, the object passed-in
                                             will be deleted when this ZipFile object is deleted
     */
-    ZipFile (InputStream* const inputStream,
-             const bool deleteStreamWhenDestroyed) throw();
+    ZipFile (InputStream* inputStream,
+             bool deleteStreamWhenDestroyed) throw();
 
     /** Creates a ZipFile based for a file. */
     ZipFile (const File& file);
@@ -61,7 +61,7 @@ public:
         The inputSource object will be owned by the zip file, which will delete
         it later when not needed.
     */
-    ZipFile (InputSource* const inputSource);
+    ZipFile (InputSource* inputSource);
 
     /** Destructor. */
     ~ZipFile() throw();
@@ -94,7 +94,7 @@ public:
 
         @see ZipFile::ZipEntry
     */
-    const ZipEntry* getEntry (const int index) const throw();
+    const ZipEntry* getEntry (int index) const throw();
 
     /** Returns the index of the first entry with a given filename.
 
@@ -127,7 +127,7 @@ public:
         The stream must not be used after the ZipFile object that created
         has been deleted.
     */
-    InputStream* createStreamForEntry (const int index);
+    InputStream* createStreamForEntry (int index);
 
     //==============================================================================
     /** Uncompresses all of the files in the zip file.
@@ -139,7 +139,7 @@ public:
         @param shouldOverwriteFiles whether to overwrite existing files with similarly-named ones
     */
     void uncompressTo (const File& targetDirectory,
-                       const bool shouldOverwriteFiles = true);
+                       bool shouldOverwriteFiles = true);
 
 
     //==============================================================================

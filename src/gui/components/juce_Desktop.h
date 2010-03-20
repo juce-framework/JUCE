@@ -79,14 +79,14 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const RectangleList getAllMonitorDisplayAreas (const bool clippedToWorkArea = true) const throw();
+    const RectangleList getAllMonitorDisplayAreas (bool clippedToWorkArea = true) const throw();
 
     /** Returns the position and size of the main monitor.
 
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMainMonitorArea (const bool clippedToWorkArea = true) const throw();
+    const Rectangle<int> getMainMonitorArea (bool clippedToWorkArea = true) const throw();
 
     /** Returns the position and size of the monitor which contains this co-ordinate.
 
@@ -96,7 +96,7 @@ public:
         If clippedToWorkArea is true, it will exclude any areas like the taskbar on Windows,
         or the menu bar on Mac. If clippedToWorkArea is false, the entire monitor area is returned.
     */
-    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, const bool clippedToWorkArea = true) const;
+    const Rectangle<int> getMonitorAreaContaining (const Point<int>& position, bool clippedToWorkArea = true) const;
 
 
     //==============================================================================
@@ -138,7 +138,7 @@ public:
 
         @see isScreenSaverEnabled
     */
-    static void setScreenSaverEnabled (const bool isEnabled) throw();
+    static void setScreenSaverEnabled (bool isEnabled) throw();
 
     /** Returns true if the screensaver has not been turned off.
 
@@ -156,23 +156,23 @@ public:
 
         @see removeGlobalMouseListener
     */
-    void addGlobalMouseListener (MouseListener* const listener);
+    void addGlobalMouseListener (MouseListener* listener);
 
     /** Unregisters a MouseListener that was added with the addGlobalMouseListener()
         method.
 
         @see addGlobalMouseListener
     */
-    void removeGlobalMouseListener (MouseListener* const listener);
+    void removeGlobalMouseListener (MouseListener* listener);
 
     //==============================================================================
     /** Registers a MouseListener that will receive a callback whenever the focused
         component changes.
     */
-    void addFocusChangeListener (FocusChangeListener* const listener);
+    void addFocusChangeListener (FocusChangeListener* listener);
 
     /** Unregisters a listener that was added with addFocusChangeListener(). */
-    void removeFocusChangeListener (FocusChangeListener* const listener);
+    void removeFocusChangeListener (FocusChangeListener* listener);
 
     //==============================================================================
     /** Takes a component and makes it full-screen, removing the taskbar, dock, etc.
@@ -190,7 +190,7 @@ public:
         to hide as much on-screen paraphenalia as possible.
     */
     void setKioskModeComponent (Component* componentToUse,
-                                const bool allowMenusAndBars = true);
+                                bool allowMenusAndBars = true);
 
     /** Returns the component that is currently being used in kiosk-mode.
 
@@ -214,7 +214,7 @@ public:
 
         @see getNumComponents, Component::addToDesktop
     */
-    Component* getComponent (const int index) const throw();
+    Component* getComponent (int index) const throw();
 
     /** Finds the component at a given screen location.
 
@@ -306,11 +306,11 @@ private:
     void resetTimer();
 
     int getNumDisplayMonitors() const throw();
-    const Rectangle<int> getDisplayMonitorCoordinates (const int index, const bool clippedToWorkArea) const throw();
+    const Rectangle<int> getDisplayMonitorCoordinates (int index, bool clippedToWorkArea) const throw();
 
-    void addDesktopComponent (Component* const c);
-    void removeDesktopComponent (Component* const c);
-    void componentBroughtToFront (Component* const c);
+    void addDesktopComponent (Component* c);
+    void removeDesktopComponent (Component* c);
+    void componentBroughtToFront (Component* c);
 
     void triggerFocusCallback();
     void handleAsyncUpdate();

@@ -91,7 +91,7 @@ public:
     /** Changes the stroke thickness.
         This is a shortcut for calling setStrokeType.
     */
-    void setStrokeThickness (const float newThickness) throw();
+    void setStrokeThickness (float newThickness) throw();
 
     /** Returns the current outline style. */
     const PathStrokeType& getStrokeType() const throw()         { return strokeType; }

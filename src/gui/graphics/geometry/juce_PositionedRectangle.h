@@ -168,8 +168,7 @@ public:
 
     /** Same functionality as updateFrom(), but taking doubles instead of ints.
     */
-    void updateFromDouble (const double x, const double y,
-                           const double width, const double height,
+    void updateFromDouble (double x, double y, double width, double height,
                            const Rectangle<int>& targetSpaceToBeRelativeTo) throw();
 
     /** Updates this object's co-ordinates to match the bounds of this component.
@@ -330,16 +329,16 @@ private:
     double x, y, w, h;
     uint8 xMode, yMode, wMode, hMode;
 
-    void addPosDescription (String& result, const uint8 mode, const double value) const throw();
-    void addSizeDescription (String& result, const uint8 mode, const double value) const throw();
+    void addPosDescription (String& result, uint8 mode, double value) const throw();
+    void addSizeDescription (String& result, uint8 mode, double value) const throw();
     void decodePosString (const String& s, uint8& mode, double& value) throw();
     void decodeSizeString (const String& s, uint8& mode, double& value) throw();
-    void applyPosAndSize (double& xOut, double& wOut, const double x, const double w,
-                          const uint8 xMode, const uint8 wMode,
-                          const int parentPos, const int parentSize) const throw();
-    void updatePosAndSize (double& xOut, double& wOut, double x, const double w,
-                           const uint8 xMode, const uint8 wMode,
-                           const int parentPos, const int parentSize) const throw();
+    void applyPosAndSize (double& xOut, double& wOut, double x, double w,
+                          uint8 xMode, uint8 wMode,
+                          int parentPos, int parentSize) const throw();
+    void updatePosAndSize (double& xOut, double& wOut, double x, double w,
+                           uint8 xMode, uint8 wMode,
+                           int parentPos, int parentSize) const throw();
 };
 
 

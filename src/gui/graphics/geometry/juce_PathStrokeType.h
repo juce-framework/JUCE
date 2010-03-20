@@ -72,9 +72,9 @@ public:
         @param jointStyle           the type of joints to use for corners
         @param endStyle             the type of end-caps to use for the ends of open paths.
     */
-    PathStrokeType (const float strokeThickness,
-                    const JointStyle jointStyle = mitered,
-                    const EndCapStyle endStyle = butt) throw();
+    PathStrokeType (float strokeThickness,
+                    JointStyle jointStyle = mitered,
+                    EndCapStyle endStyle = butt) throw();
 
     /** Createes a copy of another stroke type. */
     PathStrokeType (const PathStrokeType& other) throw();
@@ -104,7 +104,7 @@ public:
     void createStrokedPath (Path& destPath,
                             const Path& sourcePath,
                             const AffineTransform& transform = AffineTransform::identity,
-                            const float extraAccuracy = 1.0f) const;
+                            float extraAccuracy = 1.0f) const;
 
 
     //==============================================================================
@@ -135,7 +135,7 @@ public:
                              const float* dashLengths,
                              int numDashLengths,
                              const AffineTransform& transform = AffineTransform::identity,
-                             const float extraAccuracy = 1.0f) const;
+                             float extraAccuracy = 1.0f) const;
 
     //==============================================================================
     /** Returns the stroke thickness. */

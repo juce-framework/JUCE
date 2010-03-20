@@ -95,7 +95,7 @@ public:
 
         @see changed, hasChangedSinceSaved
     */
-    void setChangedFlag (const bool hasChanged);
+    void setChangedFlag (bool hasChanged);
 
     //==============================================================================
     /** Tries to open a file.
@@ -108,7 +108,7 @@ public:
         @see loadDocument, loadFromUserSpecifiedFile
     */
     bool loadFrom (const File& fileToLoadFrom,
-                   const bool showMessageOnFailure);
+                   bool showMessageOnFailure);
 
     /** Asks the user for a file and tries to load it.
 
@@ -121,7 +121,7 @@ public:
                     picked a file which failed to load correctly
         @see loadFrom
     */
-    bool loadFromUserSpecifiedFile (const bool showMessageOnFailure);
+    bool loadFromUserSpecifiedFile (bool showMessageOnFailure);
 
     //==============================================================================
     /** A set of possible outcomes of one of the save() methods
@@ -145,8 +145,8 @@ public:
                                                 save operation fails
         @see saveIfNeededAndUserAgrees, saveAs, saveAsInteractive
     */
-    SaveResult save (const bool askUserForFileIfNotSpecified,
-                     const bool showMessageOnFailure);
+    SaveResult save (bool askUserForFileIfNotSpecified,
+                     bool showMessageOnFailure);
 
     /** If the file needs saving, it'll ask the user if that's what they want to do, and save
         it if they say yes.
@@ -186,9 +186,9 @@ public:
         @see saveIfNeededAndUserAgrees, save, saveAsInteractive
     */
     SaveResult saveAs (const File& newFile,
-                       const bool warnAboutOverwritingExistingFiles,
-                       const bool askUserForFileIfNotSpecified,
-                       const bool showMessageOnFailure);
+                       bool warnAboutOverwritingExistingFiles,
+                       bool askUserForFileIfNotSpecified,
+                       bool showMessageOnFailure);
 
     /** Prompts the user for a filename and tries to save to it.
 
@@ -201,7 +201,7 @@ public:
                                             the user first if they want to overwrite it
         @see saveIfNeededAndUserAgrees, save, saveAs
     */
-    SaveResult saveAsInteractive (const bool warnAboutOverwritingExistingFiles);
+    SaveResult saveAsInteractive (bool warnAboutOverwritingExistingFiles);
 
     //==============================================================================
     /** Returns the file that this document was last successfully saved or loaded from.

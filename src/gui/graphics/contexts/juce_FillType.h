@@ -96,7 +96,7 @@ public:
         If the fill is a solid colour, this just changes the opacity of that colour. For
         gradients and image tiles, it changes the opacity that will be used for them.
     */
-    void setOpacity (const float newOpacity) throw();
+    void setOpacity (float newOpacity) throw();
 
     /** Returns the current opacity to be applied to the colour, gradient, or image.
         @see setOpacity

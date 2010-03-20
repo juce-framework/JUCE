@@ -55,45 +55,45 @@ public:
 
         @see getPixelARGB
     */
-    explicit Colour (const uint32 argb) throw();
+    explicit Colour (uint32 argb) throw();
 
     /** Creates an opaque colour using 8-bit red, green and blue values */
-    Colour (const uint8 red,
-            const uint8 green,
-            const uint8 blue) throw();
+    Colour (uint8 red,
+            uint8 green,
+            uint8 blue) throw();
 
     /** Creates an opaque colour using 8-bit red, green and blue values */
-    static const Colour fromRGB (const uint8 red,
-                                 const uint8 green,
-                                 const uint8 blue) throw();
+    static const Colour fromRGB (uint8 red,
+                                 uint8 green,
+                                 uint8 blue) throw();
 
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
-    Colour (const uint8 red,
-            const uint8 green,
-            const uint8 blue,
-            const uint8 alpha) throw();
+    Colour (uint8 red,
+            uint8 green,
+            uint8 blue,
+            uint8 alpha) throw();
 
     /** Creates a colour using 8-bit red, green, blue and alpha values. */
-    static const Colour fromRGBA (const uint8 red,
-                                  const uint8 green,
-                                  const uint8 blue,
-                                  const uint8 alpha) throw();
+    static const Colour fromRGBA (uint8 red,
+                                  uint8 green,
+                                  uint8 blue,
+                                  uint8 alpha) throw();
 
     /** Creates a colour from 8-bit red, green, and blue values, and a floating-point alpha.
 
         Alpha of 0.0 is transparent, alpha of 1.0f is opaque.
         Values outside the valid range will be clipped.
     */
-    Colour (const uint8 red,
-            const uint8 green,
-            const uint8 blue,
-            const float alpha) throw();
+    Colour (uint8 red,
+            uint8 green,
+            uint8 blue,
+            float alpha) throw();
 
     /** Creates a colour using 8-bit red, green, blue and float alpha values. */
-    static const Colour fromRGBAFloat (const uint8 red,
-                                       const uint8 green,
-                                       const uint8 blue,
-                                       const float alpha) throw();
+    static const Colour fromRGBAFloat (uint8 red,
+                                       uint8 green,
+                                       uint8 blue,
+                                       float alpha) throw();
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -101,20 +101,20 @@ public:
         An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
         Values outside the valid range will be clipped.
     */
-    Colour (const float hue,
-            const float saturation,
-            const float brightness,
-            const uint8 alpha) throw();
+    Colour (float hue,
+            float saturation,
+            float brightness,
+            uint8 alpha) throw();
 
     /** Creates a colour using floating point hue, saturation, brightness and alpha values.
 
         All values must be between 0.0 and 1.0.
         Numbers outside the valid range will be clipped.
     */
-    Colour (const float hue,
-            const float saturation,
-            const float brightness,
-            const float alpha) throw();
+    Colour (float hue,
+            float saturation,
+            float brightness,
+            float alpha) throw();
 
     /** Creates a colour using floating point hue, saturation and brightness values, and an 8-bit alpha.
 
@@ -122,10 +122,10 @@ public:
         An alpha of 0x00 is completely transparent, alpha of 0xff is opaque.
         Values outside the valid range will be clipped.
     */
-    static const Colour fromHSV (const float hue,
-                                 const float saturation,
-                                 const float brightness,
-                                 const float alpha) throw();
+    static const Colour fromHSV (float hue,
+                                 float saturation,
+                                 float brightness,
+                                 float alpha) throw();
 
     /** Destructor. */
     ~Colour() throw();
@@ -212,16 +212,16 @@ public:
     bool isTransparent() const throw();
 
     /** Returns a colour that's the same colour as this one, but with a new alpha value. */
-    const Colour withAlpha (const uint8 newAlpha) const throw();
+    const Colour withAlpha (uint8 newAlpha) const throw();
 
     /** Returns a colour that's the same colour as this one, but with a new alpha value. */
-    const Colour withAlpha (const float newAlpha) const throw();
+    const Colour withAlpha (float newAlpha) const throw();
 
     /** Returns a colour that's the same colour as this one, but with a modified alpha value.
 
         The new colour's alpha will be this object's alpha multiplied by the value passed-in.
     */
-    const Colour withMultipliedAlpha (const float alphaMultiplier) const throw();
+    const Colour withMultipliedAlpha (float alphaMultiplier) const throw();
 
     //==============================================================================
     /** Returns a colour that is the result of alpha-compositing a new colour over this one.
@@ -263,15 +263,15 @@ public:
 
     //==============================================================================
     /** Returns a copy of this colour with a different hue. */
-    const Colour withHue (const float newHue) const throw();
+    const Colour withHue (float newHue) const throw();
 
     /** Returns a copy of this colour with a different saturation. */
-    const Colour withSaturation (const float newSaturation) const throw();
+    const Colour withSaturation (float newSaturation) const throw();
 
     /** Returns a copy of this colour with a different brightness.
         @see brighter, darker, withMultipliedBrightness
     */
-    const Colour withBrightness (const float newBrightness) const throw();
+    const Colour withBrightness (float newBrightness) const throw();
 
     /** Returns a copy of this colour with it hue rotated.
 
@@ -279,21 +279,21 @@ public:
 
         @see brighter, darker, withMultipliedBrightness
     */
-    const Colour withRotatedHue (const float amountToRotate) const throw();
+    const Colour withRotatedHue (float amountToRotate) const throw();
 
     /** Returns a copy of this colour with its saturation multiplied by the given value.
 
         The new colour's saturation is (this->getSaturation() * multiplier)
         (the result is clipped to legal limits).
     */
-    const Colour withMultipliedSaturation (const float multiplier) const throw();
+    const Colour withMultipliedSaturation (float multiplier) const throw();
 
     /** Returns a copy of this colour with its brightness multiplied by the given value.
 
         The new colour's saturation is (this->getBrightness() * multiplier)
         (the result is clipped to legal limits).
     */
-    const Colour withMultipliedBrightness (const float amount) const throw();
+    const Colour withMultipliedBrightness (float amount) const throw();
 
     //==============================================================================
     /** Returns a brighter version of this colour.
@@ -320,7 +320,7 @@ public:
         that's just a little bit lighter; Colours::black.contrasting (1.0f) will
         return white; Colours::white.contrasting (1.0f) will return black, etc.
     */
-    const Colour contrasting (const float amount = 1.0f) const throw();
+    const Colour contrasting (float amount = 1.0f) const throw();
 
     /** Returns a colour that contrasts against two colours.
 
@@ -336,7 +336,7 @@ public:
 
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
-    static const Colour greyLevel (const float brightness) throw();
+    static const Colour greyLevel (float brightness) throw();
 
     //==============================================================================
     /** Returns a stringified version of this colour.

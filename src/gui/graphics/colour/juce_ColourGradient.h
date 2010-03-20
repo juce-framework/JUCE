@@ -59,13 +59,9 @@ public:
 
         @see ColourGradient
     */
-    ColourGradient (const Colour& colour1,
-                    const float x1,
-                    const float y1,
-                    const Colour& colour2,
-                    const float x2,
-                    const float y2,
-                    const bool isRadial) throw();
+    ColourGradient (const Colour& colour1, float x1, float y1,
+                    const Colour& colour2, float x2, float y2,
+                    bool isRadial) throw();
 
     /** Creates an uninitialised gradient.
 
@@ -95,11 +91,11 @@ public:
                                             at which the colour should occur.
         @param colour                       the colour that should be used at this point
     */
-    void addColour (const double proportionAlongGradient,
+    void addColour (double proportionAlongGradient,
                     const Colour& colour) throw();
 
     /** Multiplies the alpha value of all the colours by the given scale factor */
-    void multiplyOpacity (const float multiplier) throw();
+    void multiplyOpacity (float multiplier) throw();
 
     //==============================================================================
     /** Returns the number of colour-stops that have been added. */
@@ -109,18 +105,18 @@ public:
 
         The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
     */
-    double getColourPosition (const int index) const throw();
+    double getColourPosition (int index) const throw();
 
     /** Returns the colour that was added with a given index.
 
         The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
     */
-    const Colour getColour (const int index) const throw();
+    const Colour getColour (int index) const throw();
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
     */
-    const Colour getColourAtPosition (const float position) const throw();
+    const Colour getColourAtPosition (float position) const throw();
 
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.

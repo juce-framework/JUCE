@@ -65,12 +65,12 @@ public:
     MouseEvent (MouseInputSource& source,
                 const Point<int>& position,
                 const ModifierKeys& modifiers,
-                Component* const originator,
+                Component* originator,
                 const Time& eventTime,
                 const Point<int> mouseDownPos,
                 const Time& mouseDownTime,
-                const int numberOfClicks,
-                const bool mouseWasDragged) throw();
+                int numberOfClicks,
+                bool mouseWasDragged) throw();
 
     /** Destructor. */
     ~MouseEvent() throw();
@@ -282,7 +282,7 @@ public:
         The x and y positions of the event that is returned will have been
         adjusted to be relative to the new component.
     */
-    const MouseEvent getEventRelativeTo (Component* const otherComponent) const throw();
+    const MouseEvent getEventRelativeTo (Component* otherComponent) const throw();
 
     /** Creates a copy of this event with a different position.
         All other members of the event object are the same, but the x and y are
@@ -298,7 +298,7 @@ public:
 
         @see getDoubleClickTimeout, MouseListener::mouseDoubleClick
     */
-    static void setDoubleClickTimeout (const int timeOutMilliseconds) throw();
+    static void setDoubleClickTimeout (int timeOutMilliseconds) throw();
 
     /** Returns the application-wide setting for the double-click time limit.
 

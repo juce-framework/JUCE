@@ -50,10 +50,10 @@ public:
     Line (const Line& other) throw();
 
     /** Creates a line based on the co-ordinates of its start and end points. */
-    Line (const float startX,
-          const float startY,
-          const float endX,
-          const float endY) throw();
+    Line (float startX,
+          float startY,
+          float endX,
+          float endY) throw();
 
     /** Creates a line from its start and end points. */
     Line (const Point<float>& start,
@@ -85,12 +85,12 @@ public:
     const Point<float> getEnd() const throw();
 
     /** Changes this line's start point */
-    void setStart (const float newStartX,
-                   const float newStartY) throw();
+    void setStart (float newStartX,
+                   float newStartY) throw();
 
     /** Changes this line's end point */
-    void setEnd (const float newEndX,
-                 const float newEndY) throw();
+    void setEnd (float newEndX,
+                 float newEndY) throw();
 
     /** Changes this line's start point */
     void setStart (const Point<float>& newStart) throw();
@@ -151,7 +151,7 @@ public:
                                     than the line itself
         @see getPointAlongLineProportionally
     */
-    const Point<float> getPointAlongLine (const float distanceFromStart) const throw();
+    const Point<float> getPointAlongLine (float distanceFromStart) const throw();
 
     /** Returns a point which is a certain distance along and to the side of this line.
 
@@ -166,8 +166,8 @@ public:
                                     end, then a positive value here will move to the
                                     right, negative value move to the left.
     */
-    const Point<float> getPointAlongLine (const float distanceFromStart,
-                                          const float perpendicularDistance) const throw();
+    const Point<float> getPointAlongLine (float distanceFromStart,
+                                          float perpendicularDistance) const throw();
 
     /** Returns the location of the point which is a given distance along this line
         proportional to the line's length.
@@ -179,7 +179,7 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    const Point<float> getPointAlongLineProportionally (const float proportionOfLength) const throw();
+    const Point<float> getPointAlongLineProportionally (float proportionOfLength) const throw();
 
     /** Returns the smallest distance between this line segment and a given point.
 
@@ -192,8 +192,7 @@ public:
         @returns the point's distance from the line
         @see getPositionAlongLineOfNearestPoint
     */
-    float getDistanceFromLine (const float x,
-                               const float y) const throw();
+    float getDistanceFromLine (float x, float y) const throw();
 
     /** Finds the point on this line which is nearest to a given point, and
         returns its position as a proportional position along the line.
@@ -205,8 +204,7 @@ public:
                     turn this number into a position, use getPointAlongLineProportionally().
         @see getDistanceFromLine, getPointAlongLineProportionally
     */
-    float findNearestPointTo (const float x,
-                              const float y) const throw();
+    float findNearestPointTo (float x, float y) const throw();
 
     /** Returns true if the given point lies above this line.
 
@@ -214,7 +212,7 @@ public:
         coordinate of this line at the given x (assuming the line extends infinitely
         in both directions).
     */
-    bool isPointAbove (const float x, const float y) const throw();
+    bool isPointAbove (float x, float y) const throw();
 
     //==============================================================================
     /** Returns a shortened copy of this line.
@@ -222,14 +220,14 @@ public:
         This will chop off part of the start of this line by a certain amount, (leaving the
         end-point the same), and return the new line.
     */
-    const Line withShortenedStart (const float distanceToShortenBy) const throw();
+    const Line withShortenedStart (float distanceToShortenBy) const throw();
 
     /** Returns a shortened copy of this line.
 
         This will chop off part of the end of this line by a certain amount, (leaving the
         start-point the same), and return the new line.
     */
-    const Line withShortenedEnd (const float distanceToShortenBy) const throw();
+    const Line withShortenedEnd (float distanceToShortenBy) const throw();
 
     /** Cuts off parts of this line to keep the parts that are either inside or
         outside a path.
@@ -244,8 +242,7 @@ public:
                                         the path
         @returns true if the line was changed.
     */
-    bool clipToPath (const Path& path,
-                     const bool keepSectionOutsidePath) throw();
+    bool clipToPath (const Path& path, bool keepSectionOutsidePath) throw();
 
 
     //==============================================================================

@@ -83,8 +83,7 @@ public:
         The rectangle being added will first be clipped to remove any parts of it
         that overlap existing rectangles in the list.
     */
-    void add (const int x, const int y,
-              const int w, const int h) throw();
+    void add (int x, int y, int width, int height) throw();
 
     /** Merges a new rectangle into the list.
 
@@ -167,7 +166,7 @@ public:
 
         @returns true if the point lies within one of the rectangles in the list
     */
-    bool containsPoint (const int x, const int y) const throw();
+    bool containsPoint (int x, int y) const throw();
 
     /** Checks whether the region contains the whole of a given rectangle.
 
@@ -204,7 +203,7 @@ public:
     void consolidate() throw();
 
     /** Adds an x and y value to all the co-ordinates. */
-    void offsetAll (const int dx, const int dy) throw();
+    void offsetAll (int dx, int dy) throw();
 
     //==============================================================================
     /** Creates a Path object to represent this region. */

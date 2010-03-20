@@ -57,7 +57,7 @@ public:
         @see TemporaryFile
     */
     FileOutputStream (const File& fileToWriteTo,
-                      const int bufferSizeToUse = 16384);
+                      int bufferSizeToUse = 16384);
 
     /** Destructor. */
     ~FileOutputStream();

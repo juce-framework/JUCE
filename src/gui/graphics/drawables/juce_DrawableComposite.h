@@ -64,7 +64,7 @@ public:
     */
     void insertDrawable (Drawable* drawable,
                          const AffineTransform& transform = AffineTransform::identity,
-                         const int index = -1);
+                         int index = -1);
 
     /** Adds a new sub-drawable to this one.
 
@@ -82,7 +82,7 @@ public:
     */
     void insertDrawable (const Drawable& drawable,
                          const AffineTransform& transform = AffineTransform::identity,
-                         const int index = -1);
+                         int index = -1);
 
     /** Deletes one of the Drawable objects.
 
@@ -92,13 +92,13 @@ public:
                         be deleted. If false, it'll just be removed.
         @see insertDrawable, getNumDrawables
     */
-    void removeDrawable (const int index, const bool deleteDrawable = true);
+    void removeDrawable (int index, bool deleteDrawable = true);
 
     /** Returns the number of drawables contained inside this one.
 
         @see getDrawable
     */
-    int getNumDrawables() const throw()                         { return drawables.size(); }
+    int getNumDrawables() const throw()                                         { return drawables.size(); }
 
     /** Returns one of the drawables that are contained in this one.
 
@@ -110,7 +110,7 @@ public:
 
         @see getNumDrawables
     */
-    Drawable* getDrawable (const int index) const throw()                           { return drawables [index]; }
+    Drawable* getDrawable (int index) const throw()                             { return drawables [index]; }
 
     /** Returns the transform that applies to one of the drawables that are contained in this one.
 
@@ -119,7 +119,7 @@ public:
 
         @see getNumDrawables
     */
-    const AffineTransform* getDrawableTransform (const int index) const throw()     { return transforms [index]; }
+    const AffineTransform* getDrawableTransform (int index) const throw()       { return transforms [index]; }
 
     /** Brings one of the Drawables to the front.
 
@@ -127,7 +127,7 @@ public:
                         and (getNumDrawables() - 1).
         @see insertDrawable, getNumDrawables
     */
-    void bringToFront (const int index);
+    void bringToFront (int index);
 
 
     //==============================================================================

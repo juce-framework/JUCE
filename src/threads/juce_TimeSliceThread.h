@@ -100,20 +100,20 @@ public:
         The client's callbacks will start immediately (possibly before the method
         has returned).
     */
-    void addTimeSliceClient (TimeSliceClient* const client);
+    void addTimeSliceClient (TimeSliceClient* client);
 
     /** Removes a client from the list.
 
         This method will make sure that all callbacks to the client have completely
         finished before the method returns.
     */
-    void removeTimeSliceClient (TimeSliceClient* const client);
+    void removeTimeSliceClient (TimeSliceClient* client);
 
     /** Returns the number of registered clients. */
     int getNumClients() const;
 
     /** Returns one of the registered clients. */
-    TimeSliceClient* getClient (const int index) const;
+    TimeSliceClient* getClient (int index) const;
 
     //==============================================================================
     /** @internal */

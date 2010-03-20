@@ -73,8 +73,7 @@ public:
         @returns    the actual number of bytes that were read, which may be less than
                     maxBytesToRead if the stream is exhausted before it gets that far
     */
-    virtual int read (void* destBuffer,
-                      int maxBytesToRead) = 0;
+    virtual int read (void* destBuffer, int maxBytesToRead) = 0;
 
     /** Reads a byte from the stream.
 

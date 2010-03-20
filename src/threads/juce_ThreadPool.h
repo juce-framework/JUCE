@@ -167,9 +167,9 @@ public:
                                             inactive for this length of time, they will automatically
                                             be stopped until more jobs come along and they're needed
     */
-    ThreadPool (const int numberOfThreads,
-                const bool startThreadsOnlyWhenNeeded = true,
-                const int stopThreadsWhenNotUsedTimeoutMs = 5000);
+    ThreadPool (int numberOfThreads,
+                bool startThreadsOnlyWhenNeeded = true,
+                int stopThreadsWhenNotUsedTimeoutMs = 5000);
 
     /** Destructor.
 
@@ -205,7 +205,7 @@ public:
         runJob() method, the pool will either remove the job from the pool or add it to
         the back of the queue to be run again.
     */
-    void addJob (ThreadPoolJob* const job);
+    void addJob (ThreadPoolJob* job);
 
     /** Tries to remove a job from the pool.
 
@@ -224,9 +224,9 @@ public:
         @param timeOutMilliseconds  the length of time this method should wait for the job to finish
                                     before giving up and returning false
     */
-    bool removeJob (ThreadPoolJob* const job,
-                    const bool interruptIfRunning,
-                    const int timeOutMilliseconds);
+    bool removeJob (ThreadPoolJob* job,
+                    bool interruptIfRunning,
+                    int timeOutMilliseconds);
 
     /** Tries to remove all jobs from the pool.
 
@@ -243,9 +243,9 @@ public:
         @returns    true if all jobs are successfully stopped and removed; false if the timeout period
                     expires while waiting for one or more jobs to stop
     */
-    bool removeAllJobs (const bool interruptRunningJobs,
-                        const int timeOutMilliseconds,
-                        const bool deleteInactiveJobs = false,
+    bool removeAllJobs (bool interruptRunningJobs,
+                        int timeOutMilliseconds,
+                        bool deleteInactiveJobs = false,
                         JobSelector* selectedJobsToRemove = 0);
 
     /** Returns the number of jobs currently running or queued.
@@ -257,17 +257,17 @@ public:
         Note that this can be a very volatile list as jobs might be continuously getting shifted
         around in the list, and this method may return 0 if the index is currently out-of-range.
     */
-    ThreadPoolJob* getJob (const int index) const;
+    ThreadPoolJob* getJob (int index) const;
 
     /** Returns true if the given job is currently queued or running.
 
         @see isJobRunning()
     */
-    bool contains (const ThreadPoolJob* const job) const;
+    bool contains (const ThreadPoolJob* job) const;
 
     /** Returns true if the given job is currently being run by a thread.
     */
-    bool isJobRunning (const ThreadPoolJob* const job) const;
+    bool isJobRunning (const ThreadPoolJob* job) const;
 
     /** Waits until a job has finished running and has been removed from the pool.
 
@@ -277,21 +277,21 @@ public:
         If the timeout period expires before the job finishes, this will return false;
         it returns true if the job has finished successfully.
     */
-    bool waitForJobToFinish (const ThreadPoolJob* const job,
-                             const int timeOutMilliseconds) const;
+    bool waitForJobToFinish (const ThreadPoolJob* job,
+                             int timeOutMilliseconds) const;
 
     /** Returns a list of the names of all the jobs currently running or queued.
 
         If onlyReturnActiveJobs is true, only the ones currently running are returned.
     */
-    const StringArray getNamesOfAllJobs (const bool onlyReturnActiveJobs) const;
+    const StringArray getNamesOfAllJobs (bool onlyReturnActiveJobs) const;
 
     /** Changes the priority of all the threads.
 
         This will call Thread::setPriority() for each thread in the pool.
         May return false if for some reason the priority can't be changed.
     */
-    bool setThreadPriorities (const int newPriority);
+    bool setThreadPriorities (int newPriority);
 
 
     //==============================================================================

@@ -67,8 +67,7 @@ public:
 
     /** Creates an edge table containing a rectangle.
     */
-    EdgeTable (const float x, const float y,
-               const float w, const float h);
+    EdgeTable (float x, float y, float w, float h);
 
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other);
@@ -200,12 +199,12 @@ private:
     int maxEdgesPerLine, lineStrideElements;
     bool needToCheckEmptinesss;
 
-    void addEdgePoint (const int x, const int y, const int winding) throw();
-    void remapTableForNumEdges (const int newNumEdgesPerLine) throw();
-    void intersectWithEdgeTableLine (const int y, const int* otherLine) throw();
+    void addEdgePoint (int x, int y, int winding) throw();
+    void remapTableForNumEdges (int newNumEdgesPerLine) throw();
+    void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
     void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
-    void sanitiseLevels (const bool useNonZeroWinding) throw();
-    static void copyEdgeTableData (int* dest, const int destLineStride, const int* src, const int srcLineStride, int numLines) throw();
+    void sanitiseLevels (bool useNonZeroWinding) throw();
+    static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
 };
 
 

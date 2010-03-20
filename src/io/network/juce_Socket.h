@@ -62,7 +62,7 @@ public:
         @returns    true on success; false may indicate that another socket is already bound
                     on the same port
     */
-    bool bindToPort (const int localPortNumber);
+    bool bindToPort (int localPortNumber);
 
     /** Tries to connect the socket to hostname:port.
 
@@ -73,8 +73,8 @@ public:
         @see isConnected
     */
     bool connect (const String& remoteHostname,
-                  const int remotePortNumber,
-                  const int timeOutMillisecs = 3000);
+                  int remotePortNumber,
+                  int timeOutMillisecs = 3000);
 
     /** True if the socket is currently connected. */
     bool isConnected() const throw()                            { return connected; }
@@ -103,8 +103,8 @@ public:
         If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (const bool readyForReading,
-                        const int timeoutMsecs) const;
+    int waitUntilReady (bool readyForReading,
+                        int timeoutMsecs) const;
 
     /** Reads bytes from the socket.
 
@@ -116,8 +116,8 @@ public:
         @returns the number of bytes read, or -1 if there was an error.
         @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead,
-              const bool blockUntilSpecifiedAmountHasArrived);
+    int read (void* destBuffer, int maxBytesToRead,
+              bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 
@@ -126,7 +126,7 @@ public:
 
         @returns the number of bytes written, or -1 if there was an error.
     */
-    int write (const void* sourceBuffer, const int numBytesToWrite);
+    int write (const void* sourceBuffer, int numBytesToWrite);
 
     //==============================================================================
     /** Puts this socket into "listener" mode.
@@ -142,7 +142,7 @@ public:
 
         @see waitForNextConnection
     */
-    bool createListener (const int portNumber, const String& localHostName = String::empty);
+    bool createListener (int portNumber, const String& localHostName = String::empty);
 
     /** When in "listener" mode, this waits for a connection and spawns it as a new
         socket.
@@ -164,7 +164,7 @@ private:
     int volatile portNumber, handle;
     bool connected, isListener;
 
-    StreamingSocket (const String& hostname, const int portNumber, const int handle);
+    StreamingSocket (const String& hostname, int portNumber, int handle);
     StreamingSocket (const StreamingSocket&);
     StreamingSocket& operator= (const StreamingSocket&);
 };
@@ -198,8 +198,8 @@ public:
 
         To wait for other sockets to connect to this one, call waitForNextConnection().
     */
-    DatagramSocket (const int localPortNumber,
-                    const bool enableBroadcasting = false);
+    DatagramSocket (int localPortNumber,
+                    bool enableBroadcasting = false);
 
     /** Destructor. */
     ~DatagramSocket();
@@ -210,7 +210,7 @@ public:
         @returns    true on success; false may indicate that another socket is already bound
                     on the same port
     */
-    bool bindToPort (const int localPortNumber);
+    bool bindToPort (int localPortNumber);
 
     /** Tries to connect the socket to hostname:port.
 
@@ -221,8 +221,8 @@ public:
         @see isConnected
     */
     bool connect (const String& remoteHostname,
-                  const int remotePortNumber,
-                  const int timeOutMillisecs = 3000);
+                  int remotePortNumber,
+                  int timeOutMillisecs = 3000);
 
     /** True if the socket is currently connected. */
     bool isConnected() const throw()                            { return connected; }
@@ -251,8 +251,8 @@ public:
         If the socket is ready on return, this returns 1. If it times-out before
         the socket becomes ready, it returns 0. If an error occurs, it returns -1.
     */
-    int waitUntilReady (const bool readyForReading,
-                        const int timeoutMsecs) const;
+    int waitUntilReady (bool readyForReading,
+                        int timeoutMsecs) const;
 
     /** Reads bytes from the socket.
 
@@ -264,8 +264,8 @@ public:
         @returns the number of bytes read, or -1 if there was an error.
         @see waitUntilReady
     */
-    int read (void* destBuffer, const int maxBytesToRead,
-              const bool blockUntilSpecifiedAmountHasArrived);
+    int read (void* destBuffer, int maxBytesToRead,
+              bool blockUntilSpecifiedAmountHasArrived);
 
     /** Writes bytes to the socket from a buffer.
 
@@ -274,7 +274,7 @@ public:
 
         @returns the number of bytes written, or -1 if there was an error.
     */
-    int write (const void* sourceBuffer, const int numBytesToWrite);
+    int write (const void* sourceBuffer, int numBytesToWrite);
 
     //==============================================================================
     /** This waits for incoming data to be sent, and returns a socket that can be used
@@ -295,7 +295,7 @@ private:
     bool connected, allowBroadcast;
     void* serverAddress;
 
-    DatagramSocket (const String& hostname, const int portNumber, const int handle, const int localPortNumber);
+    DatagramSocket (const String& hostname, int portNumber, int handle, int localPortNumber);
     DatagramSocket (const DatagramSocket&);
     DatagramSocket& operator= (const DatagramSocket&);
 };

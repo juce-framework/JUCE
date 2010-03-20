@@ -103,7 +103,7 @@ public:
     */
     void layout (int maximumWidth,
                  const Justification& justification,
-                 const bool attemptToBalanceLineLengths) throw();
+                 bool attemptToBalanceLineLengths) throw();
 
 
     //==============================================================================
@@ -120,14 +120,12 @@ public:
 
         @param lineNumber   the line, from 0 to (getNumLines() - 1)
     */
-    int getLineWidth (const int lineNumber) const throw();
+    int getLineWidth (int lineNumber) const throw();
 
     //==============================================================================
     /** Renders the text at a specified position using a graphics context.
     */
-    void draw (Graphics& g,
-               const int topLeftX,
-               const int topLeftY) const throw();
+    void draw (Graphics& g, int topLeftX, int topLeftY) const throw();
 
     /** Renders the text within a specified rectangle using a graphics context.
 

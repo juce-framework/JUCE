@@ -160,9 +160,9 @@ public:
         @param defaultCharacter     the character to be used as a replacement if there's
                         no glyph available for the character that's being drawn
     */
-    void setCharacteristics (const String& name, const float ascent,
-                             const bool isBold, const bool isItalic,
-                             const juce_wchar defaultCharacter) throw();
+    void setCharacteristics (const String& name, float ascent,
+                             bool isBold, bool isItalic,
+                             juce_wchar defaultCharacter) throw();
 
     /** Adds a glyph to the typeface.
 
@@ -172,12 +172,12 @@ public:
         The width is the nominal width of the character, and any extra kerning values that
         are specified will be added to this width.
     */
-    void addGlyph (const juce_wchar character, const Path& path, const float width) throw();
+    void addGlyph (juce_wchar character, const Path& path, float width) throw();
 
     /** Specifies an extra kerning amount to be used between a pair of characters.
         The amount will be added to the nominal width of the first character when laying out a string.
     */
-    void addKerningPair (const juce_wchar char1, const juce_wchar char2, const float extraAmount) throw();
+    void addKerningPair (juce_wchar char1, juce_wchar char2, float extraAmount) throw();
 
     /** Adds a range of glyphs from another typeface.
         This will attempt to pull in the paths and kerning information from another typeface and
@@ -215,7 +215,7 @@ protected:
         method so that a subclass can try to add that glyph, returning true if it
         manages to do so.
     */
-    virtual bool loadGlyphIfPossible (const juce_wchar characterNeeded);
+    virtual bool loadGlyphIfPossible (juce_wchar characterNeeded);
 
 private:
     //==============================================================================
@@ -227,8 +227,8 @@ private:
     CustomTypeface (const CustomTypeface&);
     CustomTypeface& operator= (const CustomTypeface&);
 
-    GlyphInfo* findGlyph (const juce_wchar character, const bool loadIfNeeded) throw();
-    GlyphInfo* findGlyphSubstituting (const juce_wchar character) throw();
+    GlyphInfo* findGlyph (const juce_wchar character, bool loadIfNeeded) throw();
+    GlyphInfo* findGlyphSubstituting (juce_wchar character) throw();
 };
 
 #endif   // __JUCE_TYPEFACE_JUCEHEADER__

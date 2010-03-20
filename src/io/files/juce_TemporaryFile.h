@@ -90,7 +90,7 @@ public:
         this object is deleted, the file will also be deleted!
     */
     TemporaryFile (const String& suffix = String::empty,
-                   const int optionFlags = 0);
+                   int optionFlags = 0);
 
     /** Creates a temporary file in the same directory as a specified file.
 
@@ -108,7 +108,7 @@ public:
         @param optionFlags  a combination of the values listed in the OptionFlags enum
     */
     TemporaryFile (const File& targetFile,
-                   const int optionFlags = 0);
+                   int optionFlags = 0);
 
     /** Destructor.
 
@@ -150,7 +150,7 @@ private:
     //==============================================================================
     File temporaryFile, targetFile;
 
-    void createTempFile (const File& parentDirectory, String name, const String& suffix, const int optionFlags);
+    void createTempFile (const File& parentDirectory, String name, const String& suffix, int optionFlags);
 
     TemporaryFile (const TemporaryFile&);
     TemporaryFile& operator= (const TemporaryFile&);

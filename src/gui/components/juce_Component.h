@@ -170,10 +170,10 @@ public:
         One thing to be careful about is that the parent component must be able to cope
         with this unknown component type being added to it.
     */
-    void fadeOutComponent (const int lengthOfFadeOutInMilliseconds,
-                           const int deltaXToMove = 0,
-                           const int deltaYToMove = 0,
-                           const float scaleFactorAtEnd = 1.0f);
+    void fadeOutComponent (int lengthOfFadeOutInMilliseconds,
+                           int deltaXToMove = 0,
+                           int deltaYToMove = 0,
+                           float scaleFactorAtEnd = 1.0f);
 
     //==============================================================================
     /** Makes this component appear as a window on the desktop.
@@ -257,7 +257,7 @@ public:
                                     to the component (see grabKeyboardFocus() for more details)
         @see toBack, toBehind, setAlwaysOnTop
     */
-    void toFront (const bool shouldAlsoGainFocus);
+    void toFront (bool shouldAlsoGainFocus);
 
     /** Changes this component's z-order to be at the back of all its siblings.
 
@@ -272,13 +272,13 @@ public:
 
         @see toFront, toBack
     */
-    void toBehind (Component* const other);
+    void toBehind (Component* other);
 
     /** Sets whether the component should always be kept at the front of its siblings.
 
         @see isAlwaysOnTop
     */
-    void setAlwaysOnTop (const bool shouldStayOnTop);
+    void setAlwaysOnTop (bool shouldStayOnTop);
 
     /** Returns true if this component is set to always stay in front of its siblings.
 
@@ -339,7 +339,7 @@ public:
         that may be overlapping the component.
     */
     void getVisibleArea (RectangleList& result,
-                         const bool includeSiblings) const;
+                         bool includeSiblings) const;
 
     //==============================================================================
     /** Returns this component's x co-ordinate relative the the screen's top-left origin.
@@ -379,7 +379,7 @@ public:
 
         @see relativePositionToGlobal, globalPositionToRelative
     */
-    const Point<int> relativePositionToOtherComponent (const Component* const targetComponent,
+    const Point<int> relativePositionToOtherComponent (const Component* targetComponent,
                                                        const Point<int>& positionRelativeToThis) const;
 
     //==============================================================================
@@ -392,7 +392,7 @@ public:
 
         @see setBounds, ComponentListener::componentMovedOrResized
     */
-    void setTopLeftPosition (const int x, const int y);
+    void setTopLeftPosition (int x, int y);
 
     /** Moves the component to a new position.
 
@@ -401,13 +401,13 @@ public:
 
         If the component actually moves, this method will make a synchronous call to moved().
     */
-    void setTopRightPosition (const int x, const int y);
+    void setTopRightPosition (int x, int y);
 
     /** Changes the size of the component.
 
         A synchronous call to resized() will be occur if the size actually changes.
     */
-    void setSize (const int newWidth, const int newHeight);
+    void setSize (int newWidth, int newHeight);
 
     /** Changes the component's position and size.
 
@@ -434,8 +434,8 @@ public:
         width and height of the parent, with its top-left position 20% of
         the way across and down the parent.
     */
-    void setBoundsRelative (const float proportionalX, const float proportionalY,
-                            const float proportionalWidth, const float proportionalHeight);
+    void setBoundsRelative (float proportionalX, float proportionalY,
+                            float proportionalWidth, float proportionalHeight);
 
     /** Changes the component's position and size based on the amount of space to leave around it.
 
@@ -458,14 +458,14 @@ public:
     */
     void setBoundsToFit (int x, int y, int width, int height,
                          const Justification& justification,
-                         const bool onlyReduceInSize);
+                         bool onlyReduceInSize);
 
     /** Changes the position of the component's centre.
 
         Leaves the component's size unchanged, but sets the position of its centre
         relative to its parent's top-left.
     */
-    void setCentrePosition (const int x, const int y);
+    void setCentrePosition (int x, int y);
 
     /** Changes the position of the component's centre.
 
@@ -473,27 +473,27 @@ public:
         parent's size. E.g. setCentreRelative (0.5f, 0.5f) would place it centrally in
         its parent.
     */
-    void setCentreRelative (const float x, const float y);
+    void setCentreRelative (float x, float y);
 
     /** Changes the component's size and centres it within its parent.
 
         After changing the size, the component will be moved so that it's
         centred within its parent.
     */
-    void centreWithSize (const int width, const int height);
+    void centreWithSize (int width, int height);
 
     //==============================================================================
     /** Returns a proportion of the component's width.
 
         This is a handy equivalent of (getWidth() * proportion).
     */
-    int proportionOfWidth (const float proportion) const throw();
+    int proportionOfWidth (float proportion) const throw();
 
     /** Returns a proportion of the component's height.
 
         This is a handy equivalent of (getHeight() * proportion).
     */
-    int proportionOfHeight (const float proportion) const throw();
+    int proportionOfHeight (float proportion) const throw();
 
     /** Returns the width of the component's parent.
 
@@ -533,7 +533,7 @@ public:
 
         @see getNumChildComponents, getIndexOfChildComponent
     */
-    Component* getChildComponent (const int index) const throw();
+    Component* getChildComponent (int index) const throw();
 
     /** Returns the index of this component in the list of child components.
 
@@ -544,7 +544,7 @@ public:
 
         @see getNumChildComponents, getChildComponent, addChildComponent, toFront, toBack, toBehind
     */
-    int getIndexOfChildComponent (const Component* const child) const throw();
+    int getIndexOfChildComponent (const Component* child) const throw();
 
     /** Adds a child component to this one.
 
@@ -556,16 +556,14 @@ public:
         @see removeChildComponent, addAndMakeVisible, getChild,
              ComponentListener::componentChildrenChanged
     */
-    void addChildComponent (Component* const child,
-                            int zOrder = -1);
+    void addChildComponent (Component* child, int zOrder = -1);
 
     /** Adds a child component to this one, and also makes the child visible if it isn't.
 
         Quite a useful function, this is just the same as calling addChildComponent()
         followed by setVisible (true) on the child.
     */
-    void addAndMakeVisible (Component* const child,
-                            int zOrder = -1);
+    void addAndMakeVisible (Component* child, int zOrder = -1);
 
     /** Removes one of this component's child-components.
 
@@ -576,7 +574,7 @@ public:
 
         @see addChildComponent, ComponentListener::componentChildrenChanged
     */
-    void removeChildComponent (Component* const childToRemove);
+    void removeChildComponent (Component* childToRemove);
 
     /** Removes one of this component's child-components by index.
 
@@ -587,7 +585,7 @@ public:
 
         @see addChildComponent, ComponentListener::componentChildrenChanged
     */
-    Component* removeChildComponent (const int childIndexToRemove);
+    Component* removeChildComponent (int childIndexToRemove);
 
     /** Removes all this component's children.
 
@@ -723,8 +721,8 @@ public:
                                             be clicked on
         @see hitTest, getInterceptsMouseClicks
     */
-    void setInterceptsMouseClicks (const bool allowClicksOnThisComponent,
-                                   const bool allowClicksOnChildComponents) throw();
+    void setInterceptsMouseClicks (bool allowClicksOnThisComponent,
+                                   bool allowClicksOnChildComponents) throw();
 
     /** Retrieves the current state of the mouse-click interception flags.
 
@@ -762,8 +760,7 @@ public:
 
         @see contains, getComponentAt
     */
-    bool reallyContains (int x, int y,
-                         const bool returnTrueIfWithinAChild);
+    bool reallyContains (int x, int y, bool returnTrueIfWithinAChild);
 
     /** Returns the component at a certain point within this one.
 
@@ -775,7 +772,7 @@ public:
                     instead call getComponentAt on the top-level parent of this component.
         @see hitTest, contains, reallyContains
     */
-    Component* getComponentAt (const int x, const int y);
+    Component* getComponentAt (int x, int y);
 
     /** Returns the component at a certain point within this one.
 
@@ -820,8 +817,7 @@ public:
 
         @see repaint()
     */
-    void repaint (const int x, const int y,
-                  const int width, const int height);
+    void repaint (int x, int y, int width, int height);
 
     //==============================================================================
     /** Makes the component use an internal buffer to optimise its redrawing.
@@ -841,7 +837,7 @@ public:
 
         @see repaint, paint, createComponentSnapshot
     */
-    void setBufferedToImage (const bool shouldBeBuffered);
+    void setBufferedToImage (bool shouldBeBuffered);
 
     /** Generates a snapshot of part of this component.
 
@@ -861,7 +857,7 @@ public:
         @see paintEntireComponent
     */
     Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                    const bool clipImageToComponentBounds = true);
+                                    bool clipImageToComponentBounds = true);
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.
@@ -893,7 +889,7 @@ public:
 
         @see ImageEffectFilter, DropShadowEffect, GlowEffect
     */
-    void setComponentEffect (ImageEffectFilter* const newEffect);
+    void setComponentEffect (ImageEffectFilter* newEffect);
 
     /** Returns the current component effect.
 
@@ -925,7 +921,7 @@ public:
 
         @see getLookAndFeel, lookAndFeelChanged
     */
-    void setLookAndFeel (LookAndFeel* const newLookAndFeel);
+    void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
     /** Called to let the component react to a change in the look-and-feel setting.
 
@@ -963,7 +959,7 @@ public:
 
         @see isOpaque, getVisibleArea
     */
-    void setOpaque (const bool shouldBeOpaque);
+    void setOpaque (bool shouldBeOpaque);
 
     /** Returns true if no parts of this component are transparent.
 
@@ -985,7 +981,7 @@ public:
 
         @see setMouseClickGrabsKeyboardFocus
     */
-    void setBroughtToFrontOnMouseClick (const bool shouldBeBroughtToFront) throw();
+    void setBroughtToFrontOnMouseClick (bool shouldBeBroughtToFront) throw();
 
     /** Indicates whether the component should be brought to the front when clicked-on.
 
@@ -1006,7 +1002,7 @@ public:
 
         @see grabKeyboardFocus, getWantsKeyboardFocus
     */
-    void setWantsKeyboardFocus (const bool wantsFocus) throw();
+    void setWantsKeyboardFocus (bool wantsFocus) throw();
 
     /** Returns true if the component is interested in getting keyboard focus.
 
@@ -1064,7 +1060,7 @@ public:
         @see grabKeyboardFocus, setWantsKeyboardFocus, getCurrentlyFocusedComponent,
              focusGained, focusLost
     */
-    bool hasKeyboardFocus (const bool trueIfChildIsFocused) const;
+    bool hasKeyboardFocus (bool trueIfChildIsFocused) const;
 
     /** Returns the component that currently has the keyboard focus.
 
@@ -1084,7 +1080,7 @@ public:
                             move backwards
         @see grabKeyboardFocus, setFocusContainer, setWantsKeyboardFocus
     */
-    void moveKeyboardFocusToSibling (const bool moveToNext);
+    void moveKeyboardFocusToSibling (bool moveToNext);
 
     /** Creates a KeyboardFocusTraverser object to use to determine the logic by
         which focus should be passed from this component.
@@ -1127,7 +1123,7 @@ public:
 
         @see getExplicitFocusOrder, moveKeyboardFocusToSibling
     */
-    void setExplicitFocusOrder (const int newFocusOrderIndex);
+    void setExplicitFocusOrder (int newFocusOrderIndex);
 
     /** Indicates whether this component is a parent for components that can have
         their focus traversed.
@@ -1141,7 +1137,7 @@ public:
 
         @see isFocusContainer, createFocusTraverser, moveKeyboardFocusToSibling
     */
-    void setFocusContainer (const bool shouldBeFocusContainer) throw();
+    void setFocusContainer (bool shouldBeFocusContainer) throw();
 
     /** Returns true if this component has been marked as a focus container.
 
@@ -1175,7 +1171,7 @@ public:
 
         @see isEnabled, enablementChanged
     */
-    void setEnabled (const bool shouldBeEnabled);
+    void setEnabled (bool shouldBeEnabled);
 
     /** Callback to indicate that this component has been enabled or disabled.
 
@@ -1405,7 +1401,7 @@ public:
 
         @see mouseDrag
     */
-    static void beginDragAutoRepeat (const int millisecondIntervalBetweenCallbacks);
+    static void beginDragAutoRepeat (int millisecondIntervalBetweenCallbacks);
 
     /** Causes automatic repaints when the mouse enters or exits this component.
 
@@ -1418,7 +1414,7 @@ public:
 
         @see mouseEnter, mouseExit, mouseDown, mouseUp
     */
-    void setRepaintsOnMouseActivity (const bool shouldRepaint) throw();
+    void setRepaintsOnMouseActivity (bool shouldRepaint) throw();
 
     /** Registers a listener to be told when mouse events occur in this component.
 
@@ -1437,13 +1433,13 @@ public:
                                                         told about events that this component handles.
         @see MouseListener, removeMouseListener
     */
-    void addMouseListener (MouseListener* const newListener,
-                           const bool wantsEventsForAllNestedChildComponents);
+    void addMouseListener (MouseListener* newListener,
+                           bool wantsEventsForAllNestedChildComponents);
 
     /** Deregisters a mouse listener.
         @see addMouseListener, MouseListener
     */
-    void removeMouseListener (MouseListener* const listenerToRemove);
+    void removeMouseListener (MouseListener* listenerToRemove);
 
     //==============================================================================
     /** Adds a listener that wants to hear about keypresses that this component receives.
@@ -1456,13 +1452,13 @@ public:
 
         @see keyPressed, keyStateChanged, removeKeyListener
     */
-    void addKeyListener (KeyListener* const newListener);
+    void addKeyListener (KeyListener* newListener);
 
     /** Removes a previously-registered key listener.
 
         @see addKeyListener
     */
-    void removeKeyListener (KeyListener* const listenerToRemove);
+    void removeKeyListener (KeyListener* listenerToRemove);
 
     /** Called when a key is pressed.
 
@@ -1504,7 +1500,7 @@ public:
 
         @see keyPressed, KeyPress, getCurrentlyFocusedComponent, addKeyListener
     */
-    virtual bool keyStateChanged (const bool isKeyDown);
+    virtual bool keyStateChanged (bool isKeyDown);
 
     /** Called when a modifier key is pressed or released.
 
@@ -1672,13 +1668,13 @@ public:
                             will be ignored.
         @see ComponentListener, removeComponentListener
     */
-    void addComponentListener (ComponentListener* const newListener);
+    void addComponentListener (ComponentListener* newListener);
 
     /** Removes a component listener.
 
         @see addComponentListener
     */
-    void removeComponentListener (ComponentListener* const listenerToRemove);
+    void removeComponentListener (ComponentListener* listenerToRemove);
 
     //==============================================================================
     /** Dispatches a numbered message to this component.
@@ -1692,7 +1688,7 @@ public:
 
         @see handleCommandMessage
     */
-    void postCommandMessage (const int commandId);
+    void postCommandMessage (int commandId);
 
     /** Called to handle a command that was sent by postCommandMessage().
 
@@ -1734,7 +1730,7 @@ public:
 
         @see exitModalState, runModalLoop
     */
-    void enterModalState (const bool takeKeyboardFocus = true);
+    void enterModalState (bool takeKeyboardFocus = true);
 
     /** Ends a component's modal state.
 
@@ -1743,7 +1739,7 @@ public:
 
         @see runModalLoop, enterModalState, isCurrentlyModal
     */
-    void exitModalState (const int returnValue);
+    void exitModalState (int returnValue);
 
     /** Returns true if this component is the modal one.
 
@@ -1837,7 +1833,7 @@ public:
 
         @see setColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    const Colour findColour (const int colourId, const bool inheritFromParent = false) const;
+    const Colour findColour (int colourId, bool inheritFromParent = false) const;
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -1849,18 +1845,18 @@ public:
 
         @see findColour, isColourSpecified, colourChanged, LookAndFeel::findColour, LookAndFeel::setColour
     */
-    void setColour (const int colourId, const Colour& colour);
+    void setColour (int colourId, const Colour& colour);
 
     /** If a colour has been set with setColour(), this will remove it.
 
         This allows you to make a colour revert to its default state.
     */
-    void removeColour (const int colourId);
+    void removeColour (int colourId);
 
     /** Returns true if the specified colour ID has been explicitly set for this
         component using the setColour() method.
     */
-    bool isColourSpecified (const int colourId) const;
+    bool isColourSpecified (int colourId) const;
 
     /** This looks for any colours that have been specified for this component,
         and copies them to the specified target component.
@@ -1967,8 +1963,8 @@ public:
             component1 must be a valid component; component2 can be null if you only need
             to check on one component.
         */
-        BailOutChecker (Component* const component1,
-                        Component* const component2 = 0);
+        BailOutChecker (Component* component1,
+                        Component* component2 = 0);
 
         /** Returns true if either of the two components have been deleted since this
             object was created. */
@@ -2049,7 +2045,7 @@ private:
     void internalMouseUp    (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const ModifierKeys& oldModifiers);
     void internalMouseDrag  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
     void internalMouseMove  (MouseInputSource& source, const Point<int>& relativePos, const Time& time);
-    void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, const float amountX, const float amountY);
+    void internalMouseWheel (MouseInputSource& source, const Point<int>& relativePos, const Time& time, float amountX, float amountY);
     void internalBroughtToFront();
     void internalFocusGain (const FocusChangeType cause);
     void internalFocusLoss (const FocusChangeType cause);
@@ -2059,11 +2055,11 @@ private:
     void internalChildrenChanged();
     void internalHierarchyChanged();
     void renderComponent (Graphics& context);
-    void sendMovedResizedMessages (const bool wasMoved, const bool wasResized);
+    void sendMovedResizedMessages (bool wasMoved, bool wasResized);
     void repaintParent();
     void sendFakeMouseMove() const;
     void takeKeyboardFocus (const FocusChangeType cause);
-    void grabFocusInternal (const FocusChangeType cause, const bool canTryParent = true);
+    void grabFocusInternal (const FocusChangeType cause, bool canTryParent = true);
     static void giveAwayFocus();
     void sendEnablementChangeMessage();
     static void* runModalLoopCallback (void*);
@@ -2072,7 +2068,7 @@ private:
                                   const Rectangle<int>& clipRect,
                                   const Component* const compToAvoid) const;
     void clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect,
-                              const int deltaX, const int deltaY) const;
+                              int deltaX, int deltaY) const;
 
     // how much of the component is not off the edges of its parents
     const Rectangle<int> getUnclippedArea() const;
