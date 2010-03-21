@@ -86,7 +86,7 @@ public:
 
         @see BubblePlacement
     */
-    void setAllowedPlacement (const int newPlacement);
+    void setAllowedPlacement (int newPlacement);
 
     //==============================================================================
     /** Moves and resizes the bubble to point at a given component.
@@ -111,8 +111,8 @@ public:
         on where there's the most space, honouring any restrictions that were set
         with setAllowedPlacement().
     */
-    void setPosition (const int arrowTipX,
-                      const int arrowTipY);
+    void setPosition (int arrowTipX,
+                      int arrowTipY);
 
     /** Moves and resizes the bubble to point at a given rectangle.
 

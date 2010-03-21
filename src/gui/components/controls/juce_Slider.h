@@ -109,7 +109,7 @@ public:
         @param newStyle         the type of interface
         @see setRotaryParameters, setVelocityBasedMode,
     */
-    void setSliderStyle (const SliderStyle newStyle);
+    void setSliderStyle (SliderStyle newStyle);
 
     /** Returns the slider's current style.
 
@@ -129,9 +129,9 @@ public:
                                         minimum or maximum, it'll stop there; if false, it'll wrap
                                         back to the opposite value
     */
-    void setRotaryParameters (const float startAngleRadians,
-                              const float endAngleRadians,
-                              const bool stopAtEnd);
+    void setRotaryParameters (float startAngleRadians,
+                              float endAngleRadians,
+                              bool stopAtEnd);
 
     /** Sets the distance the mouse has to move to drag the slider across
         the full extent of its range.
@@ -139,7 +139,7 @@ public:
         This only applies when in modes like RotaryHorizontalDrag, where it's using
         relative mouse movements to adjust the slider.
     */
-    void setMouseDragSensitivity (const int distanceForFullScaleDrag);
+    void setMouseDragSensitivity (int distanceForFullScaleDrag);
 
     //==============================================================================
     /** Changes the way the the mouse is used when dragging the slider.
@@ -150,7 +150,7 @@ public:
 
         If false, the slider will just try to snap to wherever the mouse is.
     */
-    void setVelocityBasedMode (const bool isVelocityBased);
+    void setVelocityBasedMode (bool isVelocityBased);
 
     /** Returns true if velocity-based mode is active.
         @see setVelocityBasedMode
@@ -170,10 +170,10 @@ public:
         @param userCanPressKeyToSwapMode    if true, then the user can hold down the ctrl or command
                                 key to toggle velocity-sensitive mode
     */
-    void setVelocityModeParameters (const double sensitivity = 1.0,
-                                    const int threshold = 1,
-                                    const double offset = 0.0,
-                                    const bool userCanPressKeyToSwapMode = true);
+    void setVelocityModeParameters (double sensitivity = 1.0,
+                                    int threshold = 1,
+                                    double offset = 0.0,
+                                    bool userCanPressKeyToSwapMode = true);
 
     /** Returns the velocity sensitivity setting.
         @see setVelocityModeParameters
@@ -211,7 +211,7 @@ public:
 
         @see getSkewFactor, setSkewFactorFromMidPoint
     */
-    void setSkewFactor (const double factor);
+    void setSkewFactor (double factor);
 
     /** Sets up a skew factor to alter the way values are distributed.
 
@@ -220,7 +220,7 @@ public:
 
         @see setSkewFactor, getSkewFactor
      */
-    void setSkewFactorFromMidPoint (const double sliderValueToShowAtMidPoint);
+    void setSkewFactorFromMidPoint (double sliderValueToShowAtMidPoint);
 
     /** Returns the current skew factor.
 
@@ -251,7 +251,7 @@ public:
         incDecButtonsDraggable_AutoDirection so that it depends on whether the buttons
         are side-by-side or above each other.
     */
-    void setIncDecButtonsMode (const IncDecButtonMode mode);
+    void setIncDecButtonsMode (IncDecButtonMode mode);
 
     //==============================================================================
     /** The position of the slider's text-entry box.
@@ -278,10 +278,10 @@ public:
 
         @see setTextBoxIsEditable, getValueFromText, getTextFromValue
     */
-    void setTextBoxStyle (const TextEntryBoxPosition newPosition,
-                          const bool isReadOnly,
-                          const int textEntryBoxWidth,
-                          const int textEntryBoxHeight);
+    void setTextBoxStyle (TextEntryBoxPosition newPosition,
+                          bool isReadOnly,
+                          int textEntryBoxWidth,
+                          int textEntryBoxHeight);
 
     /** Returns the status of the text-box.
         @see setTextBoxStyle
@@ -305,7 +305,7 @@ public:
 
         @see setTextBoxStyle, getValueFromText, getTextFromValue
     */
-    void setTextBoxIsEditable (const bool shouldBeEditable);
+    void setTextBoxIsEditable (bool shouldBeEditable);
 
     /** Returns true if the text-box is read-only.
         @see setTextBoxStyle
@@ -327,7 +327,7 @@ public:
                                                 text editor will be used to set the slider position
                                                 before it is hidden.
     */
-    void hideTextBox (const bool discardCurrentEditorContents);
+    void hideTextBox (bool discardCurrentEditorContents);
 
 
     //==============================================================================
@@ -346,8 +346,8 @@ public:
                                         synchronously; if false, it will be asynchronous
     */
     void setValue (double newValue,
-                   const bool sendUpdateMessage = true,
-                   const bool sendMessageSynchronously = false);
+                   bool sendUpdateMessage = true,
+                   bool sendMessageSynchronously = false);
 
     /** Returns the slider's current value. */
     double getValue() const;
@@ -368,9 +368,9 @@ public:
         @param newInterval  the steps in which the value is allowed to increase - if this
                             is not zero, the value will always be (newMinimum + (newInterval * an integer)).
     */
-    void setRange (const double newMinimum,
-                   const double newMaximum,
-                   const double newInterval = 0);
+    void setRange (double newMinimum,
+                   double newMaximum,
+                   double newInterval = 0);
 
     /** Returns the current maximum value.
         @see setRange
@@ -426,9 +426,9 @@ public:
         @see getMinValue, setMaxValue, setValue
     */
     void setMinValue (double newValue,
-                      const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false,
-                      const bool allowNudgingOfOtherValues = false);
+                      bool sendUpdateMessage = true,
+                      bool sendMessageSynchronously = false,
+                      bool allowNudgingOfOtherValues = false);
 
     /** For a slider with two or three thumbs, this returns the higher of its values.
 
@@ -468,16 +468,16 @@ public:
         @see getMaxValue, setMinValue, setValue
     */
     void setMaxValue (double newValue,
-                      const bool sendUpdateMessage = true,
-                      const bool sendMessageSynchronously = false,
-                      const bool allowNudgingOfOtherValues = false);
+                      bool sendUpdateMessage = true,
+                      bool sendMessageSynchronously = false,
+                      bool allowNudgingOfOtherValues = false);
 
     //==============================================================================
     /** Adds a listener to be called when this slider's value changes. */
-    void addListener (SliderListener* const listener);
+    void addListener (SliderListener* listener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (SliderListener* const listener);
+    void removeListener (SliderListener* listener);
 
     //==============================================================================
     /** This lets you choose whether double-clicking moves the slider to a given position.
@@ -488,8 +488,8 @@ public:
 
         @see getDoubleClickReturnValue
     */
-    void setDoubleClickReturnValue (const bool isDoubleClickEnabled,
-                                    const double valueToSetOnDoubleClick);
+    void setDoubleClickReturnValue (bool isDoubleClickEnabled,
+                                    double valueToSetOnDoubleClick);
 
     /** Returns the values last set by setDoubleClickReturnValue() method.
 
@@ -509,7 +509,7 @@ public:
         will be continuously sent as they drag it while the mouse button is still
         held down.
     */
-    void setChangeNotificationOnlyOnRelease (const bool onlyNotifyOnRelease);
+    void setChangeNotificationOnlyOnRelease (bool onlyNotifyOnRelease);
 
     /** This lets you change whether the slider thumb jumps to the mouse position
         when you click.
@@ -520,7 +520,7 @@ public:
         This only applies to linear bars, and won't affect two- or three- value
         sliders.
     */
-    void setSliderSnapsToMousePosition (const bool shouldSnapToMouse);
+    void setSliderSnapsToMousePosition (bool shouldSnapToMouse);
 
     /** If enabled, this gives the slider a pop-up bubble which appears while the
         slider is being dragged.
@@ -534,8 +534,8 @@ public:
         transparent window, so if you're using an OS that can't do transparent windows
         you'll have to add it to a parent component instead).
     */
-    void setPopupDisplayEnabled (const bool isEnabled,
-                                 Component* const parentComponentToUse);
+    void setPopupDisplayEnabled (bool isEnabled,
+                                 Component* parentComponentToUse);
 
     /** If this is set to true, then right-clicking on the slider will pop-up
         a menu to let the user change the way it works.
@@ -544,13 +544,13 @@ public:
         things like velocity sensitivity, and for rotary sliders, whether they
         use a linear or rotary mouse-drag to move them.
     */
-    void setPopupMenuEnabled (const bool menuEnabled);
+    void setPopupMenuEnabled (bool menuEnabled);
 
     /** This can be used to stop the mouse scroll-wheel from moving the slider.
 
         By default it's enabled.
     */
-    void setScrollWheelEnabled (const bool enabled);
+    void setScrollWheelEnabled (bool enabled);
 
     /** Returns a number to indicate which thumb is currently being dragged by the
         mouse.
@@ -658,7 +658,7 @@ public:
         If the slider is rotary, this will throw an assertion and return 0. If the
         value is out-of-range, it will be constrained to the length of the slider.
     */
-    float getPositionOfValue (const double value);
+    float getPositionOfValue (double value);
 
     //==============================================================================
     /** This can be overridden to allow the slider to snap to user-definable values.
@@ -672,7 +672,7 @@ public:
                                     they are entering the value using the text box
         @returns                    the value to use instead
     */
-    virtual double snapValue (double attemptedValue, const bool userIsDragging);
+    virtual double snapValue (double attemptedValue, bool userIsDragging);
 
 
     //==============================================================================
@@ -782,12 +782,12 @@ private:
     ScopedPointer <Component> popupDisplay;
     Component* parentForPopupDisplay;
 
-    float getLinearSliderPos (const double value);
+    float getLinearSliderPos (double value);
     void restoreMouseIfHidden();
     void sendDragStart();
     void sendDragEnd();
     double constrainedValue (double value) const;
-    void triggerChangeMessage (const bool synchronous);
+    void triggerChangeMessage (bool synchronous);
     bool incDecDragDirectionIsHorizontal() const;
 
     Slider (const Slider&);

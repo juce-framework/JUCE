@@ -115,11 +115,11 @@ public:
 
         @see addSeparator, addColouredItem, addCustomItem, addSubMenu
     */
-    void addItem (const int itemResultId,
+    void addItem (int itemResultId,
                   const String& itemText,
-                  const bool isActive = true,
-                  const bool isTicked = false,
-                  const Image* const iconToUse = 0);
+                  bool isActive = true,
+                  bool isTicked = false,
+                  const Image* iconToUse = 0);
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -130,7 +130,7 @@ public:
                                     the command's registered name
     */
     void addCommandItem (ApplicationCommandManager* commandManager,
-                         const int commandID,
+                         int commandID,
                          const String& displayName = String::empty);
 
 
@@ -140,12 +140,12 @@ public:
         text, which will override the default colours that are used by the
         current look-and-feel. See addItem() for a description of the parameters.
     */
-    void addColouredItem (const int itemResultId,
+    void addColouredItem (int itemResultId,
                           const String& itemText,
                           const Colour& itemTextColour,
-                          const bool isActive = true,
-                          const bool isTicked = false,
-                          const Image* const iconToUse = 0);
+                          bool isActive = true,
+                          bool isTicked = false,
+                          const Image* iconToUse = 0);
 
     /** Appends a custom menu item.
 
@@ -154,8 +154,7 @@ public:
 
         @see PopupMenuCustomComponent
     */
-    void addCustomItem (const int itemResultId,
-                        PopupMenuCustomComponent* const customComponent);
+    void addCustomItem (int itemResultId, PopupMenuCustomComponent* customComponent);
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
@@ -172,10 +171,10 @@ public:
 
         @see PopupMenuCustomComponent
     */
-    void addCustomItem (const int itemResultId,
+    void addCustomItem (int itemResultId,
                         Component* customComponent,
                         int idealWidth, int idealHeight,
-                        const bool triggerMenuItemAutomaticallyWhenClicked);
+                        bool triggerMenuItemAutomaticallyWhenClicked);
 
     /** Appends a sub-menu.
 
@@ -183,9 +182,9 @@ public:
     */
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
-                     const bool isActive = true,
-                     Image* const iconToUse = 0,
-                     const bool isTicked = false);
+                     bool isActive = true,
+                     Image* iconToUse = 0,
+                     bool isTicked = false);
 
     /** Appends a separator to the menu, to help break it up into sections.
 
@@ -210,7 +209,7 @@ public:
     int getNumItems() const throw();
 
     /** Returns true if the menu contains a command item that triggers the given command. */
-    bool containsCommandItem (const int commandID) const;
+    bool containsCommandItem (int commandID) const;
 
     /** Returns true if the menu contains any items that can be used. */
     bool containsAnyActiveItems() const throw();
@@ -243,10 +242,10 @@ public:
                                         height for menu items (apart from custom items)
         @see showAt
     */
-    int show (const int itemIdThatMustBeVisible = 0,
-              const int minimumWidth = 0,
-              const int maximumNumColumns = 0,
-              const int standardItemHeight = 0);
+    int show (int itemIdThatMustBeVisible = 0,
+              int minimumWidth = 0,
+              int maximumNumColumns = 0,
+              int standardItemHeight = 0);
 
 
     /** Displays the menu at a specific location.
@@ -260,12 +259,12 @@ public:
 
         @see show()
     */
-    int showAt (const int screenX,
-                const int screenY,
-                const int itemIdThatMustBeVisible = 0,
-                const int minimumWidth = 0,
-                const int maximumNumColumns = 0,
-                const int standardItemHeight = 0);
+    int showAt (int screenX,
+                int screenY,
+                int itemIdThatMustBeVisible = 0,
+                int minimumWidth = 0,
+                int maximumNumColumns = 0,
+                int standardItemHeight = 0);
 
     /** Displays the menu as if it's attached to a component such as a button.
 
@@ -274,10 +273,10 @@ public:
         things like buttons that trigger a pop-up menu.
     */
     int showAt (Component* componentToAttachTo,
-                const int itemIdThatMustBeVisible = 0,
-                const int minimumWidth = 0,
-                const int maximumNumColumns = 0,
-                const int standardItemHeight = 0);
+                int itemIdThatMustBeVisible = 0,
+                int minimumWidth = 0,
+                int maximumNumColumns = 0,
+                int standardItemHeight = 0);
 
     //==============================================================================
     /** Closes any menus that are currently open.
@@ -295,7 +294,7 @@ public:
         This can be called before show() if you need a customised menu. Be careful
         not to delete the LookAndFeel object before the menu has been deleted.
     */
-    void setLookAndFeel (LookAndFeel* const newLookAndFeel);
+    void setLookAndFeel (LookAndFeel* newLookAndFeel);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the menu.
@@ -393,24 +392,24 @@ private:
 
     void addSeparatorIfPending();
 
-    int showMenu (const int x, const int y, const int w, const int h,
-                  const int itemIdThatMustBeVisible,
-                  const int minimumWidth,
-                  const int maximumNumColumns,
-                  const int standardItemHeight,
-                  const bool alignToRectangle,
-                  Component* const componentAttachedTo);
+    int showMenu (int x, int y, int w, int h,
+                  int itemIdThatMustBeVisible,
+                  int minimumWidth,
+                  int maximumNumColumns,
+                  int standardItemHeight,
+                  bool alignToRectangle,
+                  Component* componentAttachedTo);
 
     friend class MenuBarComponent;
-    Component* createMenuComponent (const int x, const int y, const int w, const int h,
-                                    const int itemIdThatMustBeVisible,
-                                    const int minimumWidth,
-                                    const int maximumNumColumns,
-                                    const int standardItemHeight,
-                                    const bool alignToRectangle,
+    Component* createMenuComponent (int x, int y, int w, int h,
+                                    int itemIdThatMustBeVisible,
+                                    int minimumWidth,
+                                    int maximumNumColumns,
+                                    int standardItemHeight,
+                                    bool alignToRectangle,
                                     Component* menuBarComponent,
                                     ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* const componentAttachedTo);
+                                    Component* componentAttachedTo);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

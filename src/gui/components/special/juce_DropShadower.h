@@ -54,10 +54,10 @@ public:
         @param yOffset      the vertical displacement of the shadow, in pixels
         @param blurRadius   the radius of the blur to use for creating the shadow
     */
-    DropShadower (const float alpha = 0.5f,
-                  const int xOffset = 1,
-                  const int yOffset = 5,
-                  const float blurRadius = 10.0f);
+    DropShadower (float alpha = 0.5f,
+                  int xOffset = 1,
+                  int yOffset = 5,
+                  float blurRadius = 10.0f);
 
     /** Destructor. */
     virtual ~DropShadower();

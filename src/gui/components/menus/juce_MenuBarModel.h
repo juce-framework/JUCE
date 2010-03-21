@@ -95,7 +95,7 @@ public:
         This will also allow it to flash a menu name when a command from that menu
         is invoked using a keystroke.
     */
-    void setApplicationCommandManagerToWatch (ApplicationCommandManager* const manager) throw();
+    void setApplicationCommandManagerToWatch (ApplicationCommandManager* manager) throw();
 
     /** Registers a listener for callbacks when the menu items in this model change.
 
@@ -104,13 +104,13 @@ public:
 
         @see removeListener
     */
-    void addListener (MenuBarModelListener* const listenerToAdd) throw();
+    void addListener (MenuBarModelListener* listenerToAdd) throw();
 
     /** Removes a listener.
 
         @see addListener
     */
-    void removeListener (MenuBarModelListener* const listenerToRemove) throw();
+    void removeListener (MenuBarModelListener* listenerToRemove) throw();
 
     //==============================================================================
     /** This method must return a list of the names of the menus. */

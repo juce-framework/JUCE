@@ -91,7 +91,7 @@ public:
         @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
                                         rounded up to 1)
     */
-    void startTimer (const int intervalInMilliseconds) throw();
+    void startTimer (int intervalInMilliseconds) throw();
 
     /** Stops the timer.
 

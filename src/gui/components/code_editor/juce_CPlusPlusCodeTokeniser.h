@@ -61,7 +61,7 @@ public:
     //==============================================================================
     int readNextToken (CodeDocument::Iterator& source);
     const StringArray getTokenTypes();
-    const Colour getDefaultColour (const int tokenType);
+    const Colour getDefaultColour (int tokenType);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

@@ -48,8 +48,8 @@ protected:
         @see TextEditor
     */
     TextPropertyComponent (const String& propertyName,
-                           const int maxNumChars,
-                           const bool isMultiLine);
+                           int maxNumChars,
+                           bool isMultiLine);
 
 public:
     /** Creates a text property component.
@@ -61,8 +61,8 @@ public:
     */
     TextPropertyComponent (const Value& valueToControl,
                            const String& propertyName,
-                           const int maxNumChars,
-                           const bool isMultiLine);
+                           int maxNumChars,
+                           bool isMultiLine);
 
     /** Destructor. */
     ~TextPropertyComponent();
@@ -91,7 +91,7 @@ public:
 private:
     Label* textEditor;
 
-    void createEditor (const int maxNumChars, const bool isMultiLine);
+    void createEditor (int maxNumChars, bool isMultiLine);
 
     TextPropertyComponent (const TextPropertyComponent&);
     TextPropertyComponent& operator= (const TextPropertyComponent&);

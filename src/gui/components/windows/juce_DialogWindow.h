@@ -66,8 +66,8 @@ public:
     */
     DialogWindow (const String& name,
                   const Colour& backgroundColour,
-                  const bool escapeKeyTriggersCloseButton,
-                  const bool addToDesktop = true);
+                  bool escapeKeyTriggersCloseButton,
+                  bool addToDesktop = true);
 
     /** Destructor.
 
@@ -116,9 +116,9 @@ public:
                                 Component* contentComponent,
                                 Component* componentToCentreAround,
                                 const Colour& backgroundColour,
-                                const bool escapeKeyTriggersCloseButton,
-                                const bool shouldBeResizable = false,
-                                const bool useBottomRightCornerResizer = false);
+                                bool escapeKeyTriggersCloseButton,
+                                bool shouldBeResizable = false,
+                                bool useBottomRightCornerResizer = false);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

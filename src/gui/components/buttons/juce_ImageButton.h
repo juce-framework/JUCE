@@ -106,19 +106,19 @@ public:
                                                     image's alpha channel at that position is greater than
                                                     this level.
     */
-    void setImages (const bool resizeButtonNowToFitThisImage,
-                    const bool rescaleImagesWhenButtonSizeChanges,
-                    const bool preserveImageProportions,
-                    Image* const normalImage,
-                    const float imageOpacityWhenNormal,
+    void setImages (bool resizeButtonNowToFitThisImage,
+                    bool rescaleImagesWhenButtonSizeChanges,
+                    bool preserveImageProportions,
+                    Image* normalImage,
+                    float imageOpacityWhenNormal,
                     const Colour& overlayColourWhenNormal,
-                    Image* const overImage,
-                    const float imageOpacityWhenOver,
+                    Image* overImage,
+                    float imageOpacityWhenOver,
                     const Colour& overlayColourWhenOver,
-                    Image* const downImage,
-                    const float imageOpacityWhenDown,
+                    Image* downImage,
+                    float imageOpacityWhenDown,
                     const Colour& overlayColourWhenDown,
-                    const float hitTestAlphaThreshold = 0.0f);
+                    float hitTestAlphaThreshold = 0.0f);
 
     /** Returns the currently set 'normal' image. */
     Image* getNormalImage() const throw();

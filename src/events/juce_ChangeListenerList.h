@@ -56,13 +56,13 @@ public:
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void addChangeListener (ChangeListener* const listener) throw();
+    void addChangeListener (ChangeListener* listener) throw();
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void removeChangeListener (ChangeListener* const listener) throw();
+    void removeChangeListener (ChangeListener* listener) throw();
 
     /** Removes all listeners from the list. */
     void removeAllChangeListeners() throw();

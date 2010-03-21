@@ -101,7 +101,7 @@ public:
 
     /** Set this to false to stop mouse events being allowed through to the control.
     */
-    void setMouseEventsAllowed (const bool eventsCanReachControl);
+    void setMouseEventsAllowed (bool eventsCanReachControl);
 
     /** Returns true if mouse events are allowed to get through to the control.
     */
@@ -125,7 +125,7 @@ private:
     ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 
     void setControlBounds (const Rectangle<int>& bounds) const;
-    void setControlVisible (const bool b) const;
+    void setControlVisible (bool b) const;
 };
 
 #endif

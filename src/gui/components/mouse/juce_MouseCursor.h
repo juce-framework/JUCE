@@ -78,7 +78,7 @@ public:
     MouseCursor() throw();
 
     /** Creates one of the standard mouse cursor */
-    MouseCursor (const StandardCursorType type) throw();
+    MouseCursor (StandardCursorType type) throw();
 
     /** Creates a custom cursor from an image.
 
@@ -89,9 +89,7 @@ public:
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
     */
-    MouseCursor (const Image& image,
-                 const int hotSpotX,
-                 const int hotSpotY) throw();
+    MouseCursor (const Image& image, int hotSpotX, int hotSpotY) throw();
 
     //==============================================================================
     /** Creates a copy of another cursor object. */

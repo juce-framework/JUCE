@@ -66,7 +66,7 @@ public:
                                     desktop; if false, you can use it as a child component
     */
     ResizableWindow (const String& name,
-                     const bool addToDesktop);
+                     bool addToDesktop);
 
     /** Creates a ResizableWindow.
 
@@ -77,7 +77,7 @@ public:
     */
     ResizableWindow (const String& name,
                      const Colour& backgroundColour,
-                     const bool addToDesktop);
+                     bool addToDesktop);
 
     /** Destructor.
 
@@ -124,8 +124,8 @@ public:
                                             around the edge
         @see setResizeLimits, isResizable
     */
-    void setResizable (const bool shouldBeResizable,
-                       const bool useBottomRightCornerResizer);
+    void setResizable (bool shouldBeResizable,
+                       bool useBottomRightCornerResizer);
 
     /** True if resizing is enabled.
 
@@ -143,10 +143,10 @@ public:
 
         @see setResizable, setFixedAspectRatio
     */
-    void setResizeLimits (const int newMinimumWidth,
-                          const int newMinimumHeight,
-                          const int newMaximumWidth,
-                          const int newMaximumHeight) throw();
+    void setResizeLimits (int newMinimumWidth,
+                          int newMinimumHeight,
+                          int newMaximumWidth,
+                          int newMaximumHeight) throw();
 
     /** Returns the bounds constrainer object that this window is using.
 
@@ -185,7 +185,7 @@ public:
 
         @see isFullScreen
     */
-    void setFullScreen (const bool shouldBeFullScreen);
+    void setFullScreen (bool shouldBeFullScreen);
 
     /** Returns true if the window is currently minimised.
 
@@ -200,7 +200,7 @@ public:
 
         @see isMinimised
     */
-    void setMinimised (const bool shouldMinimise);
+    void setMinimised (bool shouldMinimise);
 
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
@@ -257,9 +257,9 @@ public:
                                     it always fits around the size of the content component. If false, the
                                     new content will be resized to fit the current space available.
     */
-    void setContentComponent (Component* const newContentComponent,
-                              const bool deleteOldOne = true,
-                              const bool resizeToFit = false);
+    void setContentComponent (Component* newContentComponent,
+                              bool deleteOldOne = true,
+                              bool resizeToFit = false);
 
     /** Changes the window so that the content component ends up with the specified size.
 
@@ -327,14 +327,14 @@ protected:
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addChildComponent (Component* const child, int zOrder = -1);
+    void addChildComponent (Component* child, int zOrder = -1);
     /** Overridden to warn people about adding components directly to this component
         instead of using setContentComponent().
 
         If you know what you're doing and are sure you really want to add a component, specify
         a base-class method call to Component::addAndMakeVisible(), to side-step this warning.
     */
-    void addAndMakeVisible (Component* const child, int zOrder = -1);
+    void addAndMakeVisible (Component* child, int zOrder = -1);
 
 #endif
 

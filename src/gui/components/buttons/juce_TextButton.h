@@ -81,7 +81,7 @@ public:
         If newHeight is >= 0, the button's height will be changed to this
         value. If it's less than zero, its height will be unaffected.
     */
-    void changeWidthToFitText (const int newHeight = -1);
+    void changeWidthToFitText (int newHeight = -1);
 
     /** This can be overridden to use different fonts than the default one.
 

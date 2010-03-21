@@ -88,8 +88,8 @@ public:
         @param isVertical           whether it should be a vertical or horizontal bar
         @param buttonsAreVisible    whether to show the up/down or left/right buttons
     */
-    ScrollBar (const bool isVertical,
-               const bool buttonsAreVisible = true);
+    ScrollBar (bool isVertical,
+               bool buttonsAreVisible = true);
 
     /** Destructor. */
     ~ScrollBar();
@@ -105,10 +105,10 @@ public:
 
         @param shouldBeVertical     true makes it vertical; false makes it horizontal.
     */
-    void setOrientation (const bool shouldBeVertical) throw();
+    void setOrientation (bool shouldBeVertical) throw();
 
     /** Shows or hides the scrollbar's buttons. */
-    void setButtonVisibility (const bool buttonsAreVisible);
+    void setButtonVisibility (bool buttonsAreVisible);
 
     /** Tells the scrollbar whether to make itself invisible when not needed.
 
@@ -116,7 +116,7 @@ public:
         fills the whole of its range (i.e. when it can't be moved). Setting this
         value to false forces the bar to always be visible.
     */
-    void setAutoHide (const bool shouldHideWhenFullRange);
+    void setAutoHide (bool shouldHideWhenFullRange);
 
     //==============================================================================
     /** Sets the minimum and maximum values that the bar will move between.
@@ -126,8 +126,8 @@ public:
 
         @see setCurrentRange
     */
-    void setRangeLimits (const double minimum,
-                         const double maximum) throw();
+    void setRangeLimits (double minimum,
+                         double maximum) throw();
 
     /** Returns the lower value that the thumb can be set to.
 
@@ -193,7 +193,7 @@ public:
         The value here is in terms of the total range, and is added or subtracted
         from the thumb position when the user clicks an up/down (or left/right) button.
     */
-    void setSingleStepSize (const double newSingleStepSize) throw();
+    void setSingleStepSize (double newSingleStepSize) throw();
 
     /** Moves the scrollbar by a number of single-steps.
 
@@ -203,7 +203,7 @@ public:
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
     */
-    void moveScrollbarInSteps (const int howManySteps) throw();
+    void moveScrollbarInSteps (int howManySteps) throw();
 
     /** Moves the scroll bar up or down in pages.
 
@@ -213,7 +213,7 @@ public:
         A positive value here will move the bar down or to the right, a negative
         value moves it up or to the left.
     */
-    void moveScrollbarInPages (const int howManyPages) throw();
+    void moveScrollbarInPages (int howManyPages) throw();
 
     /** Scrolls to the top (or left).
 
@@ -234,9 +234,9 @@ public:
 
         @see Button::setRepeatSpeed
     */
-    void setButtonRepeatSpeed (const int initialDelayInMillisecs,
-                               const int repeatDelayInMillisecs,
-                               const int minimumDelayInMillisecs = -1) throw();
+    void setButtonRepeatSpeed (int initialDelayInMillisecs,
+                               int repeatDelayInMillisecs,
+                               int minimumDelayInMillisecs = -1) throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
@@ -255,10 +255,10 @@ public:
 
     //==============================================================================
     /** Registers a listener that will be called when the scrollbar is moved. */
-    void addListener (ScrollBarListener* const listener) throw();
+    void addListener (ScrollBarListener* listener) throw();
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (ScrollBarListener* const listener) throw();
+    void removeListener (ScrollBarListener* listener) throw();
 
     //==============================================================================
     /** @internal */

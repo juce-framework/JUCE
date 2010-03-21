@@ -56,13 +56,13 @@ public:
 
         (Trying to add a listener that's already on the list will have no effect).
     */
-    void addActionListener (ActionListener* const listener) throw();
+    void addActionListener (ActionListener* listener) throw();
 
     /** Removes a listener from the list.
 
         If the listener isn't on the list, this won't have any effect.
     */
-    void removeActionListener (ActionListener* const listener) throw();
+    void removeActionListener (ActionListener* listener) throw();
 
     /** Removes all listeners from the list. */
     void removeAllActionListeners() throw();

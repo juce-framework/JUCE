@@ -176,7 +176,7 @@ public:
         with setModel().
     */
     ListBox (const String& componentName,
-             ListBoxModel* const model);
+             ListBoxModel* model);
 
     /** Destructor. */
     ~ListBox();
@@ -184,7 +184,7 @@ public:
 
     //==============================================================================
     /** Changes the current data model to display. */
-    void setModel (ListBoxModel* const newModel);
+    void setModel (ListBoxModel* newModel);
 
     /** Returns the current list model. */
     ListBoxModel* getModel() const throw()                      { return model; }
@@ -234,7 +234,7 @@ public:
         @see isRowSelected, selectRowsBasedOnModifierKeys, flipRowSelection, deselectRow,
              deselectAllRows, selectRangeOfRows
     */
-    void selectRow (const int rowNumber,
+    void selectRow (int rowNumber,
                     bool dontScrollToShowThisRow = false,
                     bool deselectOthersFirst = true);
 
@@ -255,7 +255,7 @@ public:
 
         @see selectRow, deselectAllRows
     */
-    void deselectRow (const int rowNumber);
+    void deselectRow (int rowNumber);
 
     /** Deselects any currently selected rows.
 
@@ -267,7 +267,7 @@ public:
 
         If the row's currently selected, this deselects it, and vice-versa.
     */
-    void flipRowSelection (const int rowNumber);
+    void flipRowSelection (int rowNumber);
 
     /** Returns a sparse set indicating the rows that are currently selected.
 
@@ -283,11 +283,11 @@ public:
         @see getSelectedRows
     */
     void setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
-                          const bool sendNotificationEventToModel = true);
+                          bool sendNotificationEventToModel = true);
 
     /** Checks whether a row is selected.
     */
-    bool isRowSelected (const int rowNumber) const;
+    bool isRowSelected (int rowNumber) const;
 
     /** Returns the number of rows that are currently selected.
 
@@ -305,7 +305,7 @@ public:
                         selected
         @see getNumSelectedRows, isRowSelected, getLastRowSelected
     */
-    int getSelectedRow (const int index = 0) const;
+    int getSelectedRow (int index = 0) const;
 
     /** Returns the last row that the user selected.
 
@@ -329,7 +329,7 @@ public:
 
         @see selectRow
     */
-    void selectRowsBasedOnModifierKeys (const int rowThatWasClickedOn,
+    void selectRowsBasedOnModifierKeys (int rowThatWasClickedOn,
                                         const ModifierKeys& modifiers);
 
     //==============================================================================
@@ -343,7 +343,7 @@ public:
 
         @see getVerticalPosition
     */
-    void setVerticalPosition (const double newProportion);
+    void setVerticalPosition (double newProportion);
 
     /** Returns the current vertical position as a proportion of the total.
 
@@ -356,7 +356,7 @@ public:
 
     /** Scrolls if necessary to make sure that a particular row is visible.
     */
-    void scrollToEnsureRowIsOnscreen (const int row);
+    void scrollToEnsureRowIsOnscreen (int row);
 
     /** Returns a pointer to the scrollbar.
 
@@ -378,7 +378,7 @@ public:
 
         @see getComponentForRowNumber
     */
-    int getRowContainingPosition (const int x, const int y) const throw();
+    int getRowContainingPosition (int x, int y) const throw();
 
     /** Finds a row index that would be the most suitable place to insert a new
         item for a given position.
@@ -393,7 +393,7 @@ public:
 
         @see getComponentForRowNumber
     */
-    int getInsertionIndexForPosition (const int x, const int y) const throw();
+    int getInsertionIndexForPosition (int x, int y) const throw();
 
     /** Returns the position of one of the rows, relative to the top-left of
         the listbox.
@@ -401,8 +401,8 @@ public:
         This may be off-screen, and the range of the row number that is passed-in is
         not checked to see if it's a valid row.
     */
-    const Rectangle<int> getRowPosition (const int rowNumber,
-                                         const bool relativeToComponentTopLeft) const throw();
+    const Rectangle<int> getRowPosition (int rowNumber,
+                                         bool relativeToComponentTopLeft) const throw();
 
     /** Finds the row component for a given row in the list.
 
@@ -413,13 +413,13 @@ public:
 
         @see getRowContainingPosition
     */
-    Component* getComponentForRowNumber (const int rowNumber) const throw();
+    Component* getComponentForRowNumber (int rowNumber) const throw();
 
     /** Returns the row number that the given component represents.
 
         If the component isn't one of the list's rows, this will return -1.
     */
-    int getRowNumberOfComponent (Component* const rowComponent) const throw();
+    int getRowNumberOfComponent (Component* rowComponent) const throw();
 
     /** Returns the width of a row (which may be less than the width of this component
         if there's a scrollbar).
@@ -433,7 +433,7 @@ public:
 
         @see getRowHeight
     */
-    void setRowHeight (const int newHeight);
+    void setRowHeight (int newHeight);
 
     /** Returns the height of a row in the list.
 
@@ -470,7 +470,7 @@ public:
         To set the colour of the outline, use @code setColour (ListBox::outlineColourId, colourXYZ); @endcode
         @see outlineColourId
     */
-    void setOutlineThickness (const int outlineThickness);
+    void setOutlineThickness (int outlineThickness);
 
     /** Returns the thickness of outline that will be drawn around the listbox.
 
@@ -487,7 +487,7 @@ public:
         The component will be deleted when setHeaderComponent() is called with a
         different component, or when the listbox is deleted.
     */
-    void setHeaderComponent (Component* const newHeaderComponent);
+    void setHeaderComponent (Component* newHeaderComponent);
 
     /** Changes the width of the rows in the list.
 
@@ -499,7 +499,7 @@ public:
         The default value for this is 0, which means that the rows will always
         be the same width as the list.
     */
-    void setMinimumContentWidth (const int newMinimumWidth);
+    void setMinimumContentWidth (int newMinimumWidth);
 
     /** Returns the space currently available for the row items, taking into account
         borders, scrollbars, etc.
@@ -511,7 +511,7 @@ public:
         This is a lightweight alternative to calling updateContent, and just causes a
         repaint of the row's area.
     */
-    void repaintRow (const int rowNumber) throw();
+    void repaintRow (int rowNumber) throw();
 
     /** This fairly obscure method creates an image that just shows the currently
         selected row components.
@@ -539,7 +539,7 @@ public:
     /** @internal */
     bool keyPressed (const KeyPress& key);
     /** @internal */
-    bool keyStateChanged (const bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown);
     /** @internal */
     void paint (Graphics& g);
     /** @internal */
@@ -576,7 +576,7 @@ private:
     bool mouseMoveSelects, multipleSelection, hasDoneInitialUpdate;
     SparseSet <int> selected;
 
-    void selectRowInternal (const int rowNumber,
+    void selectRowInternal (int rowNumber,
                             bool dontScrollToShowThisRow,
                             bool deselectOthersFirst,
                             bool isMouseClick);

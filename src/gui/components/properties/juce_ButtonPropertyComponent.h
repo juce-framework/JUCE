@@ -50,7 +50,7 @@ public:
         @param triggerOnMouseDown   this is passed to the Button::setTriggeredOnMouseDown() method
     */
     ButtonPropertyComponent (const String& propertyName,
-                             const bool triggerOnMouseDown);
+                             bool triggerOnMouseDown);
 
     /** Destructor. */
     ~ButtonPropertyComponent();

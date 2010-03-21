@@ -76,7 +76,7 @@ public:
         @param orientation  whether the keyboard is horizonal or vertical
     */
     MidiKeyboardComponent (MidiKeyboardState& state,
-                           const Orientation orientation);
+                           Orientation orientation);
 
     /** Destructor. */
     ~MidiKeyboardComponent();
@@ -89,7 +89,7 @@ public:
 
         @see setMidiChannel
     */
-    void setVelocity (const float velocity, const bool useMousePositionForVelocity);
+    void setVelocity (float velocity, bool useMousePositionForVelocity);
 
     /** Changes the midi channel number that will be used for events triggered by clicking
         on the component.
@@ -102,7 +102,7 @@ public:
 
         @see setVelocity
     */
-    void setMidiChannel (const int midiChannelNumber);
+    void setMidiChannel (int midiChannelNumber);
 
     /** Returns the midi channel that the keyboard is using for midi messages.
 
@@ -122,7 +122,7 @@ public:
 
         @see setMidiChannel
     */
-    void setMidiChannelsToDisplay (const int midiChannelMask);
+    void setMidiChannelsToDisplay (int midiChannelMask);
 
     /** Returns the current set of midi channels represented by the component.
 
@@ -132,13 +132,13 @@ public:
 
     //==============================================================================
     /** Changes the width used to draw the white keys. */
-    void setKeyWidth (const float widthInPixels);
+    void setKeyWidth (float widthInPixels);
 
     /** Returns the width that was set by setKeyWidth(). */
     float getKeyWidth() const throw()                               { return keyWidth; }
 
     /** Changes the keyboard's current direction. */
-    void setOrientation (const Orientation newOrientation);
+    void setOrientation (Orientation newOrientation);
 
     /** Returns the keyboard's current direction. */
     const Orientation getOrientation() const throw()                { return orientation; }
@@ -150,8 +150,8 @@ public:
 
         Note that the values here are inclusive and must be between 0 and 127.
     */
-    void setAvailableRange (const int lowestNote,
-                            const int highestNote);
+    void setAvailableRange (int lowestNote,
+                            int highestNote);
 
     /** Returns the first note in the available range.
 
@@ -188,7 +188,7 @@ public:
     /** If set to true, then scroll buttons will appear at either end of the keyboard
         if there are too many notes to fit them all in the component at once.
     */
-    void setScrollButtonsVisible (const bool canScroll);
+    void setScrollButtonsVisible (bool canScroll);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
@@ -233,13 +233,13 @@ public:
                                     the base octave, see setKeyPressBaseOctave()
     */
     void setKeyPressForNote (const KeyPress& key,
-                             const int midiNoteOffsetFromC);
+                             int midiNoteOffsetFromC);
 
     /** Removes any key-mappings for a given note.
 
         For a description of what the note number means, see setKeyPressForNote().
     */
-    void removeKeyPressForNote (const int midiNoteOffsetFromC);
+    void removeKeyPressForNote (int midiNoteOffsetFromC);
 
     /** Changes the base note above which key-press-triggered notes are played.
 
@@ -250,7 +250,7 @@ public:
         indicates which C is the base note to which the key-mapped notes are
         relative.
     */
-    void setKeyPressBaseOctave (const int newOctaveNumber);
+    void setKeyPressBaseOctave (int newOctaveNumber);
 
     /** This sets the octave number which is shown as the octave number for middle C.
 
@@ -263,7 +263,7 @@ public:
 
         @see getOctaveForMiddleC
     */
-    void setOctaveForMiddleC (const int octaveNumForMiddleC) throw();
+    void setOctaveForMiddleC (int octaveNumForMiddleC) throw();
 
     /** This returns the value set by setOctaveForMiddleC().
         @see setOctaveForMiddleC

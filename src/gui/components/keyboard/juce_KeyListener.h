@@ -73,7 +73,7 @@ public:
         @param isKeyDown                true if a key is being pressed, false if one is being released
         @see KeyPress, Component::keyStateChanged
     */
-    virtual bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
+    virtual bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
 };
 
 

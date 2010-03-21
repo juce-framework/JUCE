@@ -76,7 +76,7 @@ public:
         It's perfectly ok to call startTimer() or stopTimer() from within this
         callback to change the subsequent intervals.
     */
-    virtual void timerCallback (const int timerId) = 0;
+    virtual void timerCallback (int timerId) = 0;
 
     //==============================================================================
     /** Starts a timer and sets the length of interval required.
@@ -92,7 +92,7 @@ public:
         @param  intervalInMilliseconds  the interval to use (any values less than 1 will be
                                         rounded up to 1)
     */
-    void startTimer (const int timerId, const int intervalInMilliseconds) throw();
+    void startTimer (int timerId, int intervalInMilliseconds) throw();
 
     /** Stops a timer.
 
@@ -103,21 +103,21 @@ public:
         be currently executing may be allowed to finish before the method
         returns.
     */
-    void stopTimer (const int timerId) throw();
+    void stopTimer (int timerId) throw();
 
     //==============================================================================
     /** Checks whether a timer has been started for a specified ID.
 
         @returns true if a timer with the given ID is running.
     */
-    bool isTimerRunning (const int timerId) const throw();
+    bool isTimerRunning (int timerId) const throw();
 
     /** Returns the interval for a specified timer ID.
 
         @returns    the timer's interval in milliseconds if it's running, or 0 if it's no timer
                     is running for the ID number specified.
     */
-    int getTimerInterval (const int timerId) const throw();
+    int getTimerInterval (int timerId) const throw();
 
 
     //==============================================================================

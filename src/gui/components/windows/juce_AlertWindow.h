@@ -365,7 +365,7 @@ private:
     Font font;
     Component* associatedComponent;
 
-    void updateLayout (const bool onlyIncreaseSize);
+    void updateLayout (bool onlyIncreaseSize);
 
     // disable copy constructor
     AlertWindow (const AlertWindow&);

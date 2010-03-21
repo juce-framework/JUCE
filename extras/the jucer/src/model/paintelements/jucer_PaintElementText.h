@@ -496,7 +496,7 @@ private:
             element->setFont (f, true);
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return element->getFont().getHeight();
         }

@@ -73,7 +73,7 @@ public:
 
     //==============================================================================
     /** Called to change the state of the boolean value. */
-    virtual void setState (const bool newState);
+    virtual void setState (bool newState);
 
     /** Must return the current value of the property. */
     virtual bool getState() const;

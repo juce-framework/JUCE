@@ -72,7 +72,7 @@ public:
                             references to it after calling this method.
         @see handleMessage
     */
-    void postMessage (Message* const message) const throw();
+    void postMessage (Message* message) const throw();
 
     //==============================================================================
     /** Checks whether this MessageListener has been deleted.

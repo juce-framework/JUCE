@@ -54,7 +54,7 @@ public:
         The toolbar and factory must not be deleted while this object exists.
     */
     ToolbarItemPalette (ToolbarItemFactory& factory,
-                        Toolbar* const toolbar);
+                        Toolbar* toolbar);
 
     /** Destructor. */
     ~ToolbarItemPalette();
@@ -71,7 +71,7 @@ private:
     Viewport* viewport;
 
     friend class Toolbar;
-    void replaceComponent (ToolbarItemComponent* const comp);
+    void replaceComponent (ToolbarItemComponent* comp);
 
     ToolbarItemPalette (const ToolbarItemPalette&);
     ToolbarItemPalette& operator= (const ToolbarItemPalette&);

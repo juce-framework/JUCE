@@ -63,7 +63,7 @@ public:
         @see ButtonStyle, setButtonStyle, setImages
     */
     DrawableButton (const String& buttonName,
-                    const ButtonStyle buttonStyle);
+                    ButtonStyle buttonStyle);
 
     /** Destructor. */
     ~DrawableButton();
@@ -112,7 +112,7 @@ public:
 
         @see ButtonStyle
     */
-    void setButtonStyle (const ButtonStyle newStyle);
+    void setButtonStyle (ButtonStyle newStyle);
 
     //==============================================================================
     /** Changes the button's background colours.
@@ -144,7 +144,7 @@ public:
 
         By default there's a gap of about 3 pixels.
     */
-    void setEdgeIndent (const int numPixelsIndent);
+    void setEdgeIndent (int numPixelsIndent);
 
     //==============================================================================
     /** Returns the image that the button is currently displaying. */

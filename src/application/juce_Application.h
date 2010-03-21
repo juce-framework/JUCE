@@ -222,7 +222,7 @@ public:
     */
     virtual void unhandledException (const std::exception* e,
                                      const String& sourceFilename,
-                                     const int lineNumber);
+                                     int lineNumber);
 
     //==============================================================================
     /** Signals that the main message loop should stop and the application should terminate.
@@ -248,7 +248,7 @@ public:
 
         @see getApplicationReturnValue
     */
-    void setApplicationReturnValue (const int newReturnValue) throw();
+    void setApplicationReturnValue (int newReturnValue) throw();
 
     /** Returns the value that has been set as the application's exit code.
         @see setApplicationReturnValue
@@ -263,20 +263,20 @@ public:
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
     /** @internal */
-    static int main (String& commandLine, JUCEApplication* const newApp);
+    static int main (String& commandLine, JUCEApplication* newApp);
     /** @internal */
-    static int main (int argc, const char* argv[], JUCEApplication* const newApp);
+    static int main (int argc, const char* argv[], JUCEApplication* newApp);
 
     /** @internal */
-    static void sendUnhandledException (const std::exception* const e,
-                                        const char* const sourceFile,
-                                        const int lineNumber);
+    static void sendUnhandledException (const std::exception* e,
+                                        const char* sourceFile,
+                                        int lineNumber);
 
     //==============================================================================
     /** @internal */
     ApplicationCommandTarget* getNextCommandTarget();
     /** @internal */
-    void getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result);
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     /** @internal */
     void getAllCommands (Array <CommandID>& commands);
     /** @internal */

@@ -80,7 +80,7 @@ public:
     */
     void addSection (const String& sectionTitle,
                      const Array <PropertyComponent*>& newPropertyComponents,
-                     const bool shouldSectionInitiallyBeOpen = true);
+                     bool shouldSectionInitiallyBeOpen = true);
 
     /** Calls the refresh() method of all PropertyComponents in the panel */
     void refreshAll() const;
@@ -96,19 +96,19 @@ public:
 
         The index is from 0 up to the number of items returned by getSectionNames().
     */
-    bool isSectionOpen (const int sectionIndex) const;
+    bool isSectionOpen (int sectionIndex) const;
 
     /** Opens or closes one of the sections.
 
         The index is from 0 up to the number of items returned by getSectionNames().
     */
-    void setSectionOpen (const int sectionIndex, const bool shouldBeOpen);
+    void setSectionOpen (int sectionIndex, bool shouldBeOpen);
 
     /** Enables or disables one of the sections.
 
         The index is from 0 up to the number of items returned by getSectionNames().
     */
-    void setSectionEnabled (const int sectionIndex, const bool shouldBeEnabled);
+    void setSectionEnabled (int sectionIndex, bool shouldBeEnabled);
 
     //==============================================================================
     /** Saves the current state of open/closed sections so it can be restored later.
@@ -157,7 +157,7 @@ private:
     String messageWhenEmpty;
 
     void updatePropHolderLayout() const;
-    void updatePropHolderLayout (const int width) const;
+    void updatePropHolderLayout (int width) const;
 };
 
 

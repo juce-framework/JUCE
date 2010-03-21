@@ -67,13 +67,13 @@ public:
                             null if the keypress is a non-printing character
         @see getKeyCode, isKeyCode, getModifiers
     */
-    KeyPress (const int keyCode,
+    KeyPress (int keyCode,
               const ModifierKeys& modifiers,
-              const juce_wchar textCharacter) throw();
+              juce_wchar textCharacter) throw();
 
     /** Creates a keypress with a keyCode but no modifiers or text character.
     */
-    KeyPress (const int keyCode) throw();
+    KeyPress (int keyCode) throw();
 
     /** Creates a copy of another KeyPress. */
     KeyPress (const KeyPress& other) throw();
@@ -123,7 +123,7 @@ public:
 
         @see getKeyCode
     */
-    bool isKeyCode (const int keyCodeToCompare) const throw()   { return keyCode == keyCodeToCompare; }
+    bool isKeyCode (int keyCodeToCompare) const throw()         { return keyCode == keyCodeToCompare; }
 
     //==============================================================================
     /** Converts a textual key description to a KeyPress.

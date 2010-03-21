@@ -58,7 +58,7 @@ public:
         @see CodeDocument
     */
     CodeEditorComponent (CodeDocument& document,
-                         CodeTokeniser* const codeTokeniser);
+                         CodeTokeniser* codeTokeniser);
 
     /** Destructor. */
     ~CodeEditorComponent();
@@ -99,7 +99,7 @@ public:
         caret position and the new one will become selected. If false, any currently
         selected region will be deselected.
     */
-    void moveCaretTo (const CodeDocument::Position& newPos, const bool selecting);
+    void moveCaretTo (const CodeDocument::Position& newPos, bool selecting);
 
     /** Returns the on-screen position of a character in the document.
         The rectangle returned is relative to this component's top-left origin.
@@ -112,13 +112,13 @@ public:
     const CodeDocument::Position getPositionAt (int x, int y);
 
     //==============================================================================
-    void cursorLeft (const bool moveInWholeWordSteps, const bool selecting);
-    void cursorRight (const bool moveInWholeWordSteps, const bool selecting);
-    void cursorDown (const bool selecting);
-    void cursorUp (const bool selecting);
+    void cursorLeft (bool moveInWholeWordSteps, bool selecting);
+    void cursorRight (bool moveInWholeWordSteps, bool selecting);
+    void cursorDown (bool selecting);
+    void cursorUp (bool selecting);
 
-    void pageDown (const bool selecting);
-    void pageUp (const bool selecting);
+    void pageDown (bool selecting);
+    void pageUp (bool selecting);
 
     void scrollDown();
     void scrollUp();
@@ -127,10 +127,10 @@ public:
     void scrollToColumn (int newFirstColumnOnScreen);
     void scrollToKeepCaretOnScreen();
 
-    void goToStartOfDocument (const bool selecting);
-    void goToStartOfLine (const bool selecting);
-    void goToEndOfDocument (const bool selecting);
-    void goToEndOfLine (const bool selecting);
+    void goToStartOfDocument (bool selecting);
+    void goToStartOfLine (bool selecting);
+    void goToEndOfDocument (bool selecting);
+    void goToEndOfLine (bool selecting);
 
     void deselectAll();
     void selectAll();
@@ -141,8 +141,8 @@ public:
     void copy();
     void copyThenCut();
     void paste();
-    void backspace (const bool moveInWholeWordSteps);
-    void deleteForward (const bool moveInWholeWordSteps);
+    void backspace (bool moveInWholeWordSteps);
+    void deleteForward (bool moveInWholeWordSteps);
 
     void undo();
     void redo();
@@ -157,8 +157,8 @@ public:
         This lets you change the tab size and whether pressing the tab key inserts a
         tab character, or its equivalent number of spaces.
     */
-    void setTabSize (const int numSpacesPerTab,
-                     const bool insertSpacesInsteadOfTabCharacters) throw();
+    void setTabSize (int numSpacesPerTab,
+                     bool insertSpacesInsteadOfTabCharacters) throw();
 
     /** Returns the current number of spaces per tab.
         @see setTabSize
@@ -186,14 +186,14 @@ public:
         CodeTokeniser::getTokenTypes() to get a list of the token types.
         @see getColourForTokenType
     */
-    void setColourForTokenType (const int tokenType, const Colour& colour);
+    void setColourForTokenType (int tokenType, const Colour& colour);
 
     /** Returns one of the syntax highlighting colours.
         The token type values are dependent on the tokeniser being used - use
         CodeTokeniser::getTokenTypes() to get a list of the token types.
         @see setColourForTokenType
     */
-    const Colour getColourForTokenType (const int tokenType) const throw();
+    const Colour getColourForTokenType (int tokenType) const throw();
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the editor.
@@ -215,7 +215,7 @@ public:
 
     //==============================================================================
     /** Changes the size of the scrollbars. */
-    void setScrollbarThickness (const int thickness) throw();
+    void setScrollbarThickness (int thickness) throw();
 
     //==============================================================================
     /** @internal */
@@ -282,10 +282,10 @@ private:
     void rebuildLineTokens();
 
     OwnedArray <CodeDocument::Iterator> cachedIterators;
-    void clearCachedIterators (const int firstLineToBeInvalid) throw();
+    void clearCachedIterators (int firstLineToBeInvalid) throw();
     void updateCachedIterators (int maxLineNum);
     void getIteratorForPosition (int position, CodeDocument::Iterator& result);
-    void moveLineDelta (const int delta, const bool selecting);
+    void moveLineDelta (int delta, bool selecting);
 
     //==============================================================================
     void updateScrollBars();

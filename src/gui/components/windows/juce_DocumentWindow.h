@@ -91,8 +91,8 @@ public:
     */
     DocumentWindow (const String& name,
                     const Colour& backgroundColour,
-                    const int requiredButtons,
-                    const bool addToDesktop = true);
+                    int requiredButtons,
+                    bool addToDesktop = true);
 
     /** Destructor.
 
@@ -118,7 +118,7 @@ public:
     void setIcon (const Image* imageToUse);
 
     /** Changes the height of the title-bar. */
-    void setTitleBarHeight (const int newHeight);
+    void setTitleBarHeight (int newHeight);
 
     /** Returns the current title bar height. */
     int getTitleBarHeight() const;
@@ -132,15 +132,15 @@ public:
         @param positionTitleBarButtonsOnLeft    if true, the buttons should go at the
                                 left side of the bar; if false, they'll be placed at the right
     */
-    void setTitleBarButtonsRequired (const int requiredButtons,
-                                     const bool positionTitleBarButtonsOnLeft);
+    void setTitleBarButtonsRequired (int requiredButtons,
+                                     bool positionTitleBarButtonsOnLeft);
 
     /** Sets whether the title should be centred within the window.
 
         If true, the title text is shown in the middle of the title-bar; if false,
         it'll be shown at the left of the bar.
     */
-    void setTitleBarTextCentred (const bool textShouldBeCentred);
+    void setTitleBarTextCentred (bool textShouldBeCentred);
 
     /** Creates a menu inside this window.
 
@@ -154,7 +154,7 @@ public:
                                 or less to use the look-and-feel's default size.
     */
     void setMenuBar (MenuBarModel* menuBarModel,
-                     const int menuBarHeight = 0);
+                     int menuBarHeight = 0);
 
     //==============================================================================
     /** This method is called when the user tries to close the window.

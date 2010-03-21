@@ -130,7 +130,7 @@ public:
         If you implement this, your method should re-sort the table using the given
         column as the key.
     */
-    virtual void sortOrderChanged (int newSortColumnId, const bool isForwards);
+    virtual void sortOrderChanged (int newSortColumnId, bool isForwards);
 
     //==============================================================================
     /** Returns the best width for one of the columns.
@@ -209,7 +209,7 @@ public:
         with setModel().
     */
     TableListBox (const String& componentName,
-                  TableListBoxModel* const model);
+                  TableListBoxModel* model);
 
     /** Destructor. */
     ~TableListBox();
@@ -217,7 +217,7 @@ public:
     //==============================================================================
     /** Changes the TableListBoxModel that is being used for this table.
     */
-    void setModel (TableListBoxModel* const newModel);
+    void setModel (TableListBoxModel* newModel);
 
     /** Returns the model currently in use. */
     TableListBoxModel* getModel() const                             { return model; }
@@ -229,7 +229,7 @@ public:
     /** Changes the height of the table header component.
         @see getHeaderHeight
     */
-    void setHeaderHeight (const int newHeight);
+    void setHeaderHeight (int newHeight);
 
     /** Returns the height of the table header.
         @see setHeaderHeight
@@ -244,7 +244,7 @@ public:
 
         @see autoSizeAllColumns, TableHeaderComponent::setColumnWidth
     */
-    void autoSizeColumn (const int columnId);
+    void autoSizeColumn (int columnId);
 
     /** Calls autoSizeColumn() for all columns in the table. */
     void autoSizeAllColumns();
@@ -253,7 +253,7 @@ public:
 
         By default, these are enabled.
     */
-    void setAutoSizeMenuOptionShown (const bool shouldBeShown);
+    void setAutoSizeMenuOptionShown (bool shouldBeShown);
 
     /** True if the auto-size options should be shown on the menu.
         @see setAutoSizeMenuOptionsShown
@@ -269,15 +269,15 @@ public:
         If relativeToComponentTopLeft is false, the co-ords are relative to the
         top-left of the table's top-left cell.
     */
-    const Rectangle<int> getCellPosition (const int columnId,
-                                          const int rowNumber,
-                                          const bool relativeToComponentTopLeft) const;
+    const Rectangle<int> getCellPosition (int columnId,
+                                          int rowNumber,
+                                          bool relativeToComponentTopLeft) const;
 
     /** Scrolls horizontally if necessary to make sure that a particular column is visible.
 
         @see ListBox::scrollToEnsureRowIsOnscreen
     */
-    void scrollToEnsureColumnIsOnscreen (const int columnId);
+    void scrollToEnsureColumnIsOnscreen (int columnId);
 
     //==============================================================================
     /** @internal */

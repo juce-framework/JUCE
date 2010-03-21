@@ -74,7 +74,7 @@ protected:
         a click on this component and use that to trigger it. If it's false, then it's
         up to your class to manually trigger the item if it wants to.
     */
-    PopupMenuCustomComponent (const bool isTriggeredAutomatically = true);
+    PopupMenuCustomComponent (bool isTriggeredAutomatically = true);
 
 
 private:

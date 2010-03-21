@@ -47,7 +47,7 @@ public:
                             pass 0 into this if you like, and set the model later
                             using the setModel() method
     */
-    MenuBarComponent (MenuBarModel* const model);
+    MenuBarComponent (MenuBarModel* model);
 
     /** Destructor. */
     ~MenuBarComponent();
@@ -58,7 +58,7 @@ public:
         This can be 0, in which case the bar will be empty. Don't delete the object
         that is passed-in while it's still being used by this MenuBar.
     */
-    void setModel (MenuBarModel* const newModel);
+    void setModel (MenuBarModel* newModel);
 
     //==============================================================================
     /** Pops up one of the menu items.
@@ -66,7 +66,7 @@ public:
         This lets you manually open one of the menus - it could be triggered by a
         key shortcut, for example.
     */
-    void showMenu (const int menuIndex);
+    void showMenu (int menuIndex);
 
     //==============================================================================
     /** @internal */
@@ -112,7 +112,7 @@ private:
     ScopedPointer <Component> currentPopup;
 
     int getItemAt (int x, int y);
-    void updateItemUnderMouse (const int x, const int y);
+    void updateItemUnderMouse (int x, int y);
     void hideCurrentMenu();
     void timerCallback();
     void repaintMenuItem (int index);

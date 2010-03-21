@@ -63,9 +63,9 @@ public:
                             to draw itself with button over/down states when the mouse
                             moves over it or clicks
     */
-    ToolbarItemComponent (const int itemId,
+    ToolbarItemComponent (int itemId,
                           const String& labelText,
-                          const bool isBeingUsedAsAButton);
+                          bool isBeingUsedAsAButton);
 
     /** Destructor. */
     ~ToolbarItemComponent();

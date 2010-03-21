@@ -62,8 +62,7 @@ public:
         @param addToDesktop         if true, the window will be automatically added to the
                                     desktop; if false, you can use it as a child component
     */
-    TopLevelWindow (const String& name,
-                    const bool addToDesktop);
+    TopLevelWindow (const String& name, bool addToDesktop);
 
     /** Destructor. */
     ~TopLevelWindow();
@@ -92,17 +91,17 @@ public:
         screen.
     */
     void centreAroundComponent (Component* componentToCentreAround,
-                                const int width, const int height);
+                                int width, int height);
 
     //==============================================================================
     /** Turns the drop-shadow on and off. */
-    void setDropShadowEnabled (const bool useShadow);
+    void setDropShadowEnabled (bool useShadow);
 
     /** Sets whether an OS-native title bar will be used, or a Juce one.
 
         @see isUsingNativeTitleBar
     */
-    void setUsingNativeTitleBar (const bool useNativeTitleBar);
+    void setUsingNativeTitleBar (bool useNativeTitleBar);
 
     /** Returns true if the window is currently using an OS-native title bar.
 
@@ -121,7 +120,7 @@ public:
 
         The index is 0 to (getNumTopLevelWindows() - 1).
     */
-    static TopLevelWindow* getTopLevelWindow (const int index) throw();
+    static TopLevelWindow* getTopLevelWindow (int index) throw();
 
     /** Returns the currently-active top level window.
 
@@ -162,7 +161,7 @@ private:
     bool useDropShadow, useNativeTitleBar, windowIsActive_;
     ScopedPointer <DropShadower> shadower;
 
-    void setWindowActive (const bool isNowActive) throw();
+    void setWindowActive (bool isNowActive) throw();
 
     TopLevelWindow (const TopLevelWindow&);
     TopLevelWindow& operator= (const TopLevelWindow&);

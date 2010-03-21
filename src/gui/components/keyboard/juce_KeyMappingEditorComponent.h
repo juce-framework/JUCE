@@ -54,8 +54,8 @@ public:
                             list, the component will include a 'reset to
                             defaults' button.
     */
-    KeyMappingEditorComponent (KeyPressMappingSet* const mappingSet,
-                               const bool showResetToDefaultButton);
+    KeyMappingEditorComponent (KeyPressMappingSet* mappingSet,
+                               bool showResetToDefaultButton);
 
     /** Destructor. */
     virtual ~KeyMappingEditorComponent();
@@ -80,14 +80,14 @@ public:
         By default this will use the KeyPressMappingSet's shouldCommandBeVisibleInEditor()
         method to decide what to return, but you can override it to handle special cases.
     */
-    virtual bool shouldCommandBeIncluded (const CommandID commandID);
+    virtual bool shouldCommandBeIncluded (CommandID commandID);
 
     /** Can be overridden to indicate that some commands are shown as read-only.
 
         By default this will use the KeyPressMappingSet's shouldCommandBeReadOnlyInEditor()
         method to decide what to return, but you can override it to handle special cases.
     */
-    virtual bool isCommandReadOnly (const CommandID commandID);
+    virtual bool isCommandReadOnly (CommandID commandID);
 
     /** This can be overridden to let you change the format of the string used
         to describe a keypress.
@@ -141,7 +141,7 @@ private:
     friend class KeyMappingChangeButton;
     TextButton* resetButton;
 
-    void assignNewKey (const CommandID commandID, int index);
+    void assignNewKey (CommandID commandID, int index);
 
     KeyMappingEditorComponent (const KeyMappingEditorComponent&);
     KeyMappingEditorComponent& operator= (const KeyMappingEditorComponent&);

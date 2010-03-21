@@ -61,7 +61,7 @@ public:
         to match the size of the component.
     */
     void setFont (const Font& newFont,
-                  const bool resizeToMatchComponentHeight,
+                  bool resizeToMatchComponentHeight,
                   const Justification& justificationType = Justification::horizontallyCentred);
 
     //==============================================================================

@@ -78,7 +78,7 @@ public:
     /** Changes the bar's orientation.
         @see isVertical
     */
-    void setVertical (const bool shouldBeVertical);
+    void setVertical (bool shouldBeVertical);
 
     /** Returns true if the bar is set to be vertical, or false if it's horizontal.
 
@@ -123,12 +123,12 @@ public:
         @see ToolbarItemFactory
     */
     void addItem (ToolbarItemFactory& factory,
-                  const int itemId,
-                  const int insertIndex = -1);
+                  int itemId,
+                  int insertIndex = -1);
 
     /** Deletes one of the items from the bar.
     */
-    void removeToolbarItem (const int itemIndex);
+    void removeToolbarItem (int itemIndex);
 
     /** Returns the number of items currently on the toolbar.
 
@@ -143,7 +143,7 @@ public:
 
         @see getNumItems
     */
-    int getItemId (const int itemIndex) const throw();
+    int getItemId (int itemIndex) const throw();
 
     /** Returns the component being used for the item with the given index.
 
@@ -152,7 +152,7 @@ public:
 
         @see getNumItems
     */
-    ToolbarItemComponent* getItemComponent (const int itemIndex) const throw();
+    ToolbarItemComponent* getItemComponent (int itemIndex) const throw();
 
     /** Clears this toolbar and adds to it the default set of items that the specified
         factory creates.
@@ -213,7 +213,7 @@ public:
         @see ToolbarItemPalette
     */
     void showCustomisationDialog (ToolbarItemFactory& factory,
-                                  const int optionFlags = allCustomisationOptionsEnabled);
+                                  int optionFlags = allCustomisationOptionsEnabled);
 
     /** Turns on or off the toolbar's editing mode, in which its items can be
         rearranged by the user.
@@ -223,7 +223,7 @@ public:
 
         @see ToolbarItemPalette
     */
-    void setEditingActive (const bool editingEnabled);
+    void setEditingActive (bool editingEnabled);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the toolbar.

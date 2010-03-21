@@ -136,7 +136,7 @@ public:
 
         Note that this will also remove any key mappings that are mapped to the command.
     */
-    void removeCommand (const CommandID commandID);
+    void removeCommand (CommandID commandID);
 
     /** This should be called to tell the manager that one of its registered commands may have changed
         its active status.
@@ -161,7 +161,7 @@ public:
 
         The index is between 0 and (getNumCommands() - 1).
     */
-    const ApplicationCommandInfo* getCommandForIndex (const int index) const throw()    { return commands [index]; }
+    const ApplicationCommandInfo* getCommandForIndex (int index) const throw()    { return commands [index]; }
 
     /** Returns the details about a given command ID.
 
@@ -169,14 +169,14 @@ public:
         ID number, and return its associated info. If no matching command is found, this
         will return 0.
     */
-    const ApplicationCommandInfo* getCommandForID (const CommandID commandID) const throw();
+    const ApplicationCommandInfo* getCommandForID (CommandID commandID) const throw();
 
     /** Returns the name field for a command.
 
         An empty string is returned if no command with this ID has been registered.
         @see getDescriptionOfCommand
     */
-    const String getNameOfCommand (const CommandID commandID) const throw();
+    const String getNameOfCommand (CommandID commandID) const throw();
 
     /** Returns the description field for a command.
 
@@ -185,7 +185,7 @@ public:
 
         @see getNameOfCommand
     */
-    const String getDescriptionOfCommand (const CommandID commandID) const throw();
+    const String getDescriptionOfCommand (CommandID commandID) const throw();
 
     /** Returns the list of categories.
 
@@ -220,8 +220,7 @@ public:
         This is just an easy way to call invoke() without having to fill out the InvocationInfo
         structure.
     */
-    bool invokeDirectly (const CommandID commandID,
-                         const bool asynchronously);
+    bool invokeDirectly (CommandID commandID, bool asynchronously);
 
     /** Sends a command to the default target.
 
@@ -239,7 +238,7 @@ public:
         @see ApplicationCommandTarget::invoke
     */
     bool invoke (const ApplicationCommandTarget::InvocationInfo& invocationInfo,
-                 const bool asynchronously);
+                 bool asynchronously);
 
 
     //==============================================================================
@@ -259,7 +258,7 @@ public:
 
         @see getTargetForCommand, invoke, invokeDirectly
     */
-    virtual ApplicationCommandTarget* getFirstCommandTarget (const CommandID commandID);
+    virtual ApplicationCommandTarget* getFirstCommandTarget (CommandID commandID);
 
     /** Sets a target to be returned by getFirstCommandTarget().
 
@@ -269,7 +268,7 @@ public:
         If you use this to set a target, make sure you call setFirstCommandTarget (0) before
         deleting the target object.
     */
-    void setFirstCommandTarget (ApplicationCommandTarget* const newTarget) throw();
+    void setFirstCommandTarget (ApplicationCommandTarget* newTarget) throw();
 
     /** Tries to find the best target to use to perform a given command.
 
@@ -284,15 +283,15 @@ public:
         structure with the latest info about that command, so that the caller can see
         whether the command is disabled, ticked, etc.
     */
-    ApplicationCommandTarget* getTargetForCommand (const CommandID commandID,
+    ApplicationCommandTarget* getTargetForCommand (CommandID commandID,
                                                    ApplicationCommandInfo& upToDateInfo);
 
     //==============================================================================
     /** Registers a listener that will be called when various events occur. */
-    void addListener (ApplicationCommandManagerListener* const listener) throw();
+    void addListener (ApplicationCommandManagerListener* listener) throw();
 
     /** Deregisters a previously-added listener. */
-    void removeListener (ApplicationCommandManagerListener* const listener) throw();
+    void removeListener (ApplicationCommandManagerListener* listener) throw();
 
     //==============================================================================
     /** Looks for a suitable command target based on which Components have the keyboard focus.

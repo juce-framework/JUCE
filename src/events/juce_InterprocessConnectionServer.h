@@ -62,7 +62,7 @@ public:
 
         @see createConnectionObject, stop
     */
-    bool beginWaitingForSocket (const int portNumber);
+    bool beginWaitingForSocket (int portNumber);
 
     /** Terminates the listener thread, if it's active.
 

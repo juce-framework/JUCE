@@ -81,8 +81,8 @@ public:
     void setStorageParameters (const String& applicationName,
                                const String& fileNameSuffix,
                                const String& folderName,
-                               const int millisecondsBeforeSaving,
-                               const int propertiesFileOptions) throw();
+                               int millisecondsBeforeSaving,
+                               int propertiesFileOptions) throw();
 
     /** Tests whether the files can be successfully written to, and can show
         an error message if not.
@@ -94,9 +94,9 @@ public:
         @param showWarningDialogOnFailure   if true, the method will show a helpful error
                                     message box if either of the tests fail
     */
-    bool testWriteAccess (const bool testUserSettings,
-                          const bool testCommonSettings,
-                          const bool showWarningDialogOnFailure);
+    bool testWriteAccess (bool testUserSettings,
+                          bool testCommonSettings,
+                          bool showWarningDialogOnFailure);
 
     //==============================================================================
     /** Returns the user settings file.
@@ -126,7 +126,7 @@ public:
                             the common settings, even if any changes to them can't be saved.
         @see getUserSettings
     */
-    PropertiesFile* getCommonSettings (const bool returnUserPropsIfReadOnly) throw();
+    PropertiesFile* getCommonSettings (bool returnUserPropsIfReadOnly) throw();
 
     //==============================================================================
     /** Saves both files if they need to be saved.

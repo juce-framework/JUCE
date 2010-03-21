@@ -49,10 +49,10 @@ protected:
         access the slider member variable and change it directly.
     */
     SliderPropertyComponent (const String& propertyName,
-                             const double rangeMin,
-                             const double rangeMax,
-                             const double interval,
-                             const double skewFactor = 1.0);
+                             double rangeMin,
+                             double rangeMax,
+                             double interval,
+                             double skewFactor = 1.0);
 
 public:
     //==============================================================================
@@ -65,10 +65,10 @@ public:
     */
     SliderPropertyComponent (Value& valueToControl,
                              const String& propertyName,
-                             const double rangeMin,
-                             const double rangeMax,
-                             const double interval,
-                             const double skewFactor = 1.0);
+                             double rangeMin,
+                             double rangeMax,
+                             double interval,
+                             double skewFactor = 1.0);
 
     /** Destructor. */
     ~SliderPropertyComponent();
@@ -80,10 +80,10 @@ public:
         Your subclass must use this method to update whatever item this property
         represents.
     */
-    virtual void setValue (const double newValue);
+    virtual void setValue (double newValue);
 
     /** Returns the value that the slider should show. */
-    virtual const double getValue() const;
+    virtual double getValue() const;
 
 
     //==============================================================================

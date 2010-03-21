@@ -88,7 +88,7 @@ public:
         represents. The index is the index of the chosen item in the choices
         StringArray.
     */
-    virtual void setIndex (const int newIndex);
+    virtual void setIndex (int newIndex);
 
     /** Returns the index of the item that should currently be shown.
 

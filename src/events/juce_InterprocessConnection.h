@@ -73,8 +73,8 @@ public:
                                             can be any number, but the sender and receiver must obviously
                                             use matching values or they won't recognise each other.
     */
-    InterprocessConnection (const bool callbacksOnMessageThread = true,
-                            const uint32 magicMessageHeaderNumber = 0xf2b49e2c);
+    InterprocessConnection (bool callbacksOnMessageThread = true,
+                            uint32 magicMessageHeaderNumber = 0xf2b49e2c);
 
     /** Destructor. */
     ~InterprocessConnection();
@@ -92,8 +92,8 @@ public:
         @see Socket
     */
     bool connectToSocket (const String& hostName,
-                          const int portNumber,
-                          const int timeOutMillisecs);
+                          int portNumber,
+                          int timeOutMillisecs);
 
     /** Tries to connect the object to an existing named pipe.
 
@@ -107,7 +107,7 @@ public:
         @see createPipe, NamedPipe
     */
     bool connectToPipe (const String& pipeName,
-                        const int pipeReceiveMessageTimeoutMs = -1);
+                        int pipeReceiveMessageTimeoutMs = -1);
 
     /** Tries to create a new pipe for other processes to connect to.
 
@@ -119,7 +119,7 @@ public:
         If another process is already using this pipe, this will fail and return false.
     */
     bool createPipe (const String& pipeName,
-                     const int pipeReceiveMessageTimeoutMs = -1);
+                     int pipeReceiveMessageTimeoutMs = -1);
 
     /** Disconnects and closes any currently-open sockets or pipes. */
     void disconnect();
@@ -197,8 +197,8 @@ private:
     //==============================================================================
     friend class InterprocessConnectionServer;
 
-    void initialiseWithSocket (StreamingSocket* const socket_);
-    void initialiseWithPipe (NamedPipe* const pipe_);
+    void initialiseWithSocket (StreamingSocket* socket_);
+    void initialiseWithPipe (NamedPipe* pipe_);
 
     void handleMessage (const Message& message);
 

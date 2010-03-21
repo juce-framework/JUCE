@@ -148,19 +148,19 @@ public:
                                 all columns, not just the index amongst those that are currently visible
     */
     void addColumn (const String& columnName,
-                    const int columnId,
-                    const int width,
-                    const int minimumWidth = 30,
-                    const int maximumWidth = -1,
-                    const int propertyFlags = defaultFlags,
-                    const int insertIndex = -1);
+                    int columnId,
+                    int width,
+                    int minimumWidth = 30,
+                    int maximumWidth = -1,
+                    int propertyFlags = defaultFlags,
+                    int insertIndex = -1);
 
     /** Removes a column with the given ID.
 
         If there is such a column, this will asynchronously call the tableColumnsChanged() method of any
         registered listeners.
     */
-    void removeColumn (const int columnIdToRemove);
+    void removeColumn (int columnIdToRemove);
 
     /** Deletes all columns from the table.
 
@@ -176,44 +176,44 @@ public:
 
         @see isColumnVisible
     */
-    int getNumColumns (const bool onlyCountVisibleColumns) const;
+    int getNumColumns (bool onlyCountVisibleColumns) const;
 
     /** Returns the name for a column.
         @see setColumnName
     */
-    const String getColumnName (const int columnId) const;
+    const String getColumnName (int columnId) const;
 
     /** Changes the name of a column. */
-    void setColumnName (const int columnId, const String& newName);
+    void setColumnName (int columnId, const String& newName);
 
     /** Moves a column to a different index in the table.
 
         @param columnId             the column to move
         @param newVisibleIndex      the target index for it, from 0 to the number of columns currently visible.
     */
-    void moveColumn (const int columnId, int newVisibleIndex);
+    void moveColumn (int columnId, int newVisibleIndex);
 
     /** Returns the width of one of the columns.
     */
-    int getColumnWidth (const int columnId) const;
+    int getColumnWidth (int columnId) const;
 
     /** Changes the width of a column.
 
         This will cause an asynchronous callback to the tableColumnsResized() method of any registered listeners.
     */
-    void setColumnWidth (const int columnId, const int newWidth);
+    void setColumnWidth (int columnId, int newWidth);
 
     /** Shows or hides a column.
 
         This can cause an asynchronous callback to the tableColumnsChanged() method of any registered listeners.
         @see isColumnVisible
     */
-    void setColumnVisible (const int columnId, const bool shouldBeVisible);
+    void setColumnVisible (int columnId, bool shouldBeVisible);
 
     /** Returns true if this column is currently visible.
         @see setColumnVisible
     */
-    bool isColumnVisible (const int columnId) const;
+    bool isColumnVisible (int columnId) const;
 
     /** Changes the column which is the sort column.
 
@@ -224,7 +224,7 @@ public:
 
         @see getSortColumnId, isSortedForwards, reSortTable
     */
-    void setSortColumnId (const int columnId, const bool sortForwards);
+    void setSortColumnId (int columnId, bool sortForwards);
 
     /** Returns the column ID by which the table is currently sorted, or 0 if it is unsorted.
 
@@ -259,7 +259,7 @@ public:
         If onlyCountVisibleColumns is true, this will return the index amoungst the visible columns;
         otherwise it'll return the index amongst all the columns, including any hidden ones.
     */
-    int getIndexOfColumnId (const int columnId, const bool onlyCountVisibleColumns) const;
+    int getIndexOfColumnId (int columnId, bool onlyCountVisibleColumns) const;
 
     /** Returns the ID of the column at a given index.
 
@@ -268,7 +268,7 @@ public:
 
         If the index is out-of-range, it'll return 0.
     */
-    int getColumnIdOfIndex (int index, const bool onlyCountVisibleColumns) const;
+    int getColumnIdOfIndex (int index, bool onlyCountVisibleColumns) const;
 
     /** Returns the rectangle containing of one of the columns.
 
@@ -276,13 +276,13 @@ public:
         ones are not counted). It returns a rectangle showing the position of the column relative
         to this component's top-left. If the index is out-of-range, an empty rectangle is retrurned.
     */
-    const Rectangle<int> getColumnPosition (const int index) const;
+    const Rectangle<int> getColumnPosition (int index) const;
 
     /** Finds the column ID at a given x-position in the component.
 
         If there is a column at this point this returns its ID, or if not, it will return 0.
     */
-    int getColumnIdAtX (const int xToFind) const;
+    int getColumnIdAtX (int xToFind) const;
 
     /** If set to true, this indicates that the columns should be expanded or shrunk to fill the
         entire width of the component.
@@ -290,7 +290,7 @@ public:
         By default this is disabled. Turning it on also means that when resizing a column, those
         on the right will be squashed to fit.
     */
-    void setStretchToFitActive (const bool shouldStretchToFit);
+    void setStretchToFitActive (bool shouldStretchToFit);
 
     /** Returns true if stretch-to-fit has been enabled.
         @see setStretchToFitActive
@@ -315,7 +315,7 @@ public:
 
         @see isPopupMenuActive, addMenuItems, reactToMenuItem
     */
-    void setPopupMenuActive (const bool hasMenu);
+    void setPopupMenuActive (bool hasMenu);
 
     /** Returns true if the pop-up menu is enabled.
         @see setPopupMenuActive
@@ -341,10 +341,10 @@ public:
 
     //==============================================================================
     /** Adds a listener to be informed about things that happen to the header. */
-    void addListener (TableHeaderListener* const newListener);
+    void addListener (TableHeaderListener* newListener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (TableHeaderListener* const listenerToRemove);
+    void removeListener (TableHeaderListener* listenerToRemove);
 
     //==============================================================================
     /** This can be overridden to handle a mouse-click on one of the column headers.
@@ -363,7 +363,7 @@ public:
 
         @see reactToMenuItem
     */
-    virtual void addMenuItems (PopupMenu& menu, const int columnIdClicked);
+    virtual void addMenuItems (PopupMenu& menu, int columnIdClicked);
 
     /** Override this to handle any custom items that you have added to the
         pop-up menu with an addMenuItems() override.
@@ -374,7 +374,7 @@ public:
 
         @see addMenuItems
     */
-    virtual void reactToMenuItem (const int menuReturnId, const int columnIdClicked);
+    virtual void reactToMenuItem (int menuReturnId, int columnIdClicked);
 
     //==============================================================================
     /** @internal */
@@ -397,7 +397,7 @@ public:
     const MouseCursor getMouseCursor();
 
     /** Can be overridden for more control over the pop-up menu behaviour. */
-    virtual void showColumnChooserMenu (const int columnIdClicked);
+    virtual void showColumnChooserMenu (int columnIdClicked);
 
     juce_UseDebuggingNewOperator
 
@@ -419,13 +419,13 @@ private:
     int columnIdBeingResized, columnIdBeingDragged, initialColumnWidth;
     int columnIdUnderMouse, draggingColumnOffset, draggingColumnOriginalIndex, lastDeliberateWidth;
 
-    ColumnInfo* getInfoForId (const int columnId) const;
-    int visibleIndexToTotalIndex (const int visibleIndex) const;
+    ColumnInfo* getInfoForId (int columnId) const;
+    int visibleIndexToTotalIndex (int visibleIndex) const;
     void sendColumnsChanged();
     void handleAsyncUpdate();
     void beginDrag (const MouseEvent&);
-    void endDrag (const int finalIndex);
-    int getResizeDraggerAt (const int mouseX) const;
+    void endDrag (int finalIndex);
+    int getResizeDraggerAt (int mouseX) const;
     void updateColumnUnderMouse (int x, int y);
     void resizeColumnsToFit (int firstColumnIndex, int targetTotalWidth);
 

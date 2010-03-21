@@ -82,8 +82,8 @@ public:
             Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
             they will be adjusted to keep them within its limits.
         */
-        Position (const CodeDocument* const ownerDocument,
-                  const int line, const int indexInLine) throw();
+        Position (const CodeDocument* ownerDocument,
+                  int line, int indexInLine) throw();
 
         /** Creates a position based on a character index in a document.
             This position is placed at the specified number of characters from the start of the
@@ -92,8 +92,8 @@ public:
             If the position is beyond the range of the document, it'll be adjusted to keep it
             inside.
         */
-        Position (const CodeDocument* const ownerDocument,
-                  const int charactersFromStartOfDocument) throw();
+        Position (const CodeDocument* ownerDocument,
+                  int charactersFromStartOfDocument) throw();
 
         /** Creates a copy of another position.
 
@@ -115,7 +115,7 @@ public:
             inside.
             @see getPosition, setLineAndIndex
         */
-        void setPosition (const int charactersFromStartOfDocument) throw();
+        void setPosition (int charactersFromStartOfDocument) throw();
 
         /** Returns the position as the number of characters from the start of the document.
             @see setPosition, getLineNumber, getIndexInLine
@@ -131,7 +131,7 @@ public:
             Lines are numbered from zero, and if the line or index are beyond the bounds of the document,
             they will be adjusted to keep them within its limits.
         */
-        void setLineAndIndex (const int newLine, const int newIndexInLine) throw();
+        void setLineAndIndex (int newLine, int newIndexInLine) throw();
 
         /** Returns the line number of this position.
             The first line in the document is numbered zero, not one!
@@ -152,7 +152,7 @@ public:
             when the document has text inserted or deleted, this position will be automatically
             moved to keep it at the same position in the text.
         */
-        void setPositionMaintained (const bool isMaintained) throw();
+        void setPositionMaintained (bool isMaintained) throw();
 
         //==============================================================================
         /** Moves the position forwards or backwards by the specified number of characters.
@@ -164,13 +164,13 @@ public:
             characters.
             @see moveBy
         */
-        const Position movedBy (const int characterDelta) const throw();
+        const Position movedBy (int characterDelta) const throw();
 
         /** Returns a position which is the same as this one, moved up or down by the specified
             number of lines.
             @see movedBy
         */
-        const Position movedByLines (const int deltaLines) const throw();
+        const Position movedByLines (int deltaLines) const throw();
 
         /** Returns the character in the document at this position.
             @see getLineText
@@ -197,7 +197,7 @@ public:
     const String getTextBetween (const Position& start, const Position& end) const throw();
 
     /** Returns a line from the document. */
-    const String getLine (const int lineIndex) const throw();
+    const String getLine (int lineIndex) const throw();
 
     /** Returns the number of characters in the document. */
     int getNumCharacters() const throw();
@@ -321,12 +321,12 @@ public:
         If the listener is already registered, this method has no effect.
         @see removeListener
     */
-    void addListener (Listener* const listener) throw();
+    void addListener (Listener* listener) throw();
 
     /** Deregisters a listener.
         @see addListener
     */
-    void removeListener (Listener* const listener) throw();
+    void removeListener (Listener* listener) throw();
 
     //==============================================================================
     /** Iterates the text in a CodeDocument.
@@ -339,7 +339,7 @@ public:
     class Iterator
     {
     public:
-        Iterator (CodeDocument* const document);
+        Iterator (CodeDocument* document);
         Iterator (const Iterator& other);
         Iterator& operator= (const Iterator& other) throw();
         ~Iterator() throw();
@@ -395,10 +395,10 @@ private:
     VoidArray listeners;
     String newLineChars;
 
-    void sendListenerChangeMessage (const int startLine, const int endLine);
+    void sendListenerChangeMessage (int startLine, int endLine);
 
-    void insert (const String& text, const int insertPos, const bool undoable);
-    void remove (const int startPos, const int endPos, const bool undoable);
+    void insert (const String& text, int insertPos, bool undoable);
+    void remove (int startPos, int endPos, bool undoable);
     void checkLastLineStatus();
 
     CodeDocument (const CodeDocument&);

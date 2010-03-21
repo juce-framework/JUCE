@@ -60,10 +60,10 @@ public:
                             this object and will be deleted when no longer needed or when this button
                             is deleted.
     */
-    ToolbarButton (const int itemId,
+    ToolbarButton (int itemId,
                    const String& labelText,
-                   Drawable* const normalImage,
-                   Drawable* const toggledOnImage);
+                   Drawable* normalImage,
+                   Drawable* toggledOnImage);
 
     /** Destructor. */
     ~ToolbarButton();

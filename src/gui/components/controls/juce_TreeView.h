@@ -74,7 +74,7 @@ public:
 
         @see getNumSubItems
     */
-    TreeViewItem* getSubItem (const int index) const throw();
+    TreeViewItem* getSubItem (int index) const throw();
 
     /** Removes any sub-items. */
     void clearSubItems();
@@ -87,16 +87,14 @@ public:
         @param insertPosition   the index which the new item should have when it's added. If this
                                 value is less than 0, the item will be added to the end of the list.
     */
-    void addSubItem (TreeViewItem* const newItem,
-                     const int insertPosition = -1);
+    void addSubItem (TreeViewItem* newItem, int insertPosition = -1);
 
     /** Removes one of the sub-items.
 
         @param index        the item to remove
         @param deleteItem   if true, the item that is removed will also be deleted.
     */
-    void removeSubItem (const int index,
-                        const bool deleteItem = true);
+    void removeSubItem (int index, bool deleteItem = true);
 
     //==============================================================================
     /** Returns the TreeView to which this item belongs. */
@@ -117,7 +115,7 @@ public:
 
         @see itemOpennessChanged, mightContainSubItems
     */
-    void setOpen (const bool shouldBeOpen);
+    void setOpen (bool shouldBeOpen);
 
     /** True if this item is currently selected.
 
@@ -129,8 +127,8 @@ public:
 
         This will cause a callback to itemSelectionChanged()
     */
-    void setSelected (const bool shouldBeSelected,
-                      const bool deselectOtherItemsFirst);
+    void setSelected (bool shouldBeSelected,
+                      bool deselectOtherItemsFirst);
 
     /** Returns the rectangle that this item occupies.
 
@@ -139,7 +137,7 @@ public:
         the tree. If false, it is relative to the top-left of the topmost item in the
         tree (so this would be unaffected by scrolling the view).
     */
-    const Rectangle<int> getItemPosition (const bool relativeToTreeViewTopLeft) const throw();
+    const Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const throw();
 
     /** Sends a signal to the treeview to make it refresh itself.
 
@@ -173,7 +171,7 @@ public:
 
         By default, line-drawing is turned on.
     */
-    void setLinesDrawnForSubItems (const bool shouldDrawLines) throw();
+    void setLinesDrawnForSubItems (bool shouldDrawLines) throw();
 
     //==============================================================================
     /** Tells the tree whether this item can potentially be opened.
@@ -479,7 +477,7 @@ private:
 
     void updatePositions (int newY);
     int getIndentX() const throw();
-    void setOwnerView (TreeView* const newOwner) throw();
+    void setOwnerView (TreeView* newOwner) throw();
     void paintRecursively (Graphics& g, int width);
     TreeViewItem* getTopLevelItem() throw();
     TreeViewItem* findItemRecursively (int y) throw();
@@ -489,7 +487,7 @@ private:
     void deselectAllRecursively();
     int countSelectedItemsRecursively() const throw();
     TreeViewItem* getSelectedItemWithIndex (int index) throw();
-    TreeViewItem* getNextVisibleItem (const bool recurse) const throw();
+    TreeViewItem* getNextVisibleItem (bool recurse) const throw();
     TreeViewItem* findItemFromIdentifierString (const String& identifierString);
 
     TreeViewItem (const TreeViewItem&);
@@ -537,7 +535,7 @@ public:
         or by deleting the tree first. You can also use deleteRootItem() as a quick way
         to delete it.
     */
-    void setRootItem (TreeViewItem* const newRootItem);
+    void setRootItem (TreeViewItem* newRootItem);
 
     /** Returns the tree's root item.
 
@@ -557,7 +555,7 @@ public:
         lets you make the tree look as if it's got many root items. If it's hidden, this call
         will also make sure the root item is open (otherwise the treeview would look empty).
     */
-    void setRootItemVisible (const bool shouldBeVisible);
+    void setRootItemVisible (bool shouldBeVisible);
 
     /** Returns true if the root item is visible.
 
@@ -572,7 +570,7 @@ public:
 
         @see areItemsOpenByDefault
     */
-    void setDefaultOpenness (const bool isOpenByDefault);
+    void setDefaultOpenness (bool isOpenByDefault);
 
     /** Returns true if the tree's items default to being open.
 
@@ -590,7 +588,7 @@ public:
 
         @see isMultiSelectEnabled
     */
-    void setMultiSelectEnabled (const bool canMultiSelect);
+    void setMultiSelectEnabled (bool canMultiSelect);
 
     /** Returns whether multi-select has been enabled for the tree.
 
@@ -602,7 +600,7 @@ public:
 
         @see areOpenCloseButtonsVisible
     */
-    void setOpenCloseButtonsVisible (const bool shouldBeVisible);
+    void setOpenCloseButtonsVisible (bool shouldBeVisible);
 
     /** Returns whether open/close buttons are shown.
 
@@ -624,7 +622,7 @@ public:
 
         @param index    the index, 0 to (getNumSelectedItems() - 1)
     */
-    TreeViewItem* getSelectedItem (const int index) const throw();
+    TreeViewItem* getSelectedItem (int index) const throw();
 
     //==============================================================================
     /** Returns the number of rows the tree is using.
@@ -662,7 +660,7 @@ public:
     /** Changes the distance by which each nested level of the tree is indented.
         @see getIndentSize
     */
-    void setIndentSize (const int newIndentSize);
+    void setIndentSize (int newIndentSize);
 
     /** Searches the tree for an item with the specified identifier.
         The identifer string must have been created by calling TreeViewItem::getItemIdentifierString().
@@ -689,7 +687,7 @@ public:
                                             so this can also be restored
         @see restoreOpennessState
     */
-    XmlElement* getOpennessState (const bool alsoIncludeScrollPosition) const;
+    XmlElement* getOpennessState (bool alsoIncludeScrollPosition) const;
 
     /** Restores a previously saved arrangement of open/closed nodes.
 

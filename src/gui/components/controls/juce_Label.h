@@ -85,7 +85,7 @@ public:
         are registered.
     */
     void setText (const String& newText,
-                  const bool broadcastChangeMessage);
+                  bool broadcastChangeMessage);
 
     /** Returns the label's current text.
 
@@ -96,7 +96,7 @@ public:
                                             the user has finished typing and pressed the return
                                             key.
     */
-    const String getText (const bool returnActiveEditorContents = false) const throw();
+    const String getText (bool returnActiveEditorContents = false) const throw();
 
     /** Returns the text content as a Value object.
         You can call Value::referTo() on this object to make the label read and control
@@ -169,8 +169,7 @@ public:
         @param onLeft   if true, the label will stay on the left of its component; if
                         false, it will stay above it.
     */
-    void attachToComponent (Component* owner,
-                            const bool onLeft);
+    void attachToComponent (Component* owner, bool onLeft);
 
     /** If this label has been attached to another component using attachToComponent, this
         returns the other component.
@@ -191,16 +190,16 @@ public:
 
         @see Graphics::drawFittedText
     */
-    void setMinimumHorizontalScale (const float newScale);
+    void setMinimumHorizontalScale (float newScale);
 
     float getMinimumHorizontalScale() const throw()                             { return minimumHorizontalScale; }
 
     //==============================================================================
     /** Registers a listener that will be called when the label's text changes. */
-    void addListener (LabelListener* const listener) throw();
+    void addListener (LabelListener* listener) throw();
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (LabelListener* const listener) throw();
+    void removeListener (LabelListener* listener) throw();
 
     //==============================================================================
     /** Makes the label turn into a TextEditor when clicked.
@@ -223,9 +222,9 @@ public:
                                             commit the changes.
         @see showEditor, setEditorColours, TextEditor
     */
-    void setEditable (const bool editOnSingleClick,
-                      const bool editOnDoubleClick = false,
-                      const bool lossOfFocusDiscardsChanges = false) throw();
+    void setEditable (bool editOnSingleClick,
+                      bool editOnDoubleClick = false,
+                      bool lossOfFocusDiscardsChanges = false) throw();
 
     /** Returns true if this option was set using setEditable(). */
     bool isEditableOnSingleClick() const throw()                        { return editSingleClick; }
@@ -253,7 +252,7 @@ public:
                                                 editor will be used to set the label's text
                                                 before it is hidden.
     */
-    void hideEditor (const bool discardCurrentEditorContents);
+    void hideEditor (bool discardCurrentEditorContents);
 
     /** Returns true if the editor is currently focused and active. */
     bool isBeingEdited() const throw();

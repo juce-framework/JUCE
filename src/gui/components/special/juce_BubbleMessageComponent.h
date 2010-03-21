@@ -55,7 +55,7 @@ public:
           also delete itself), or you can reuse it somewhere else by calling
           showAt() again.
     */
-    BubbleMessageComponent (const int fadeOutLengthMs = 150);
+    BubbleMessageComponent (int fadeOutLengthMs = 150);
 
     /** Destructor. */
     ~BubbleMessageComponent();
@@ -82,9 +82,9 @@ public:
     */
     void showAt (int x, int y,
                  const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
+                 int numMillisecondsBeforeRemoving,
+                 bool removeWhenMouseClicked = true,
+                 bool deleteSelfAfterUse = false);
 
     /** Shows a message bubble next to a particular component.
 
@@ -103,11 +103,11 @@ public:
         @param deleteSelfAfterUse               if true, then the component will delete itself after
                                                 it becomes invisible
     */
-    void showAt (Component* const component,
+    void showAt (Component* component,
                  const String& message,
-                 const int numMillisecondsBeforeRemoving,
-                 const bool removeWhenMouseClicked = true,
-                 const bool deleteSelfAfterUse = false);
+                 int numMillisecondsBeforeRemoving,
+                 bool removeWhenMouseClicked = true,
+                 bool deleteSelfAfterUse = false);
 
 
     //==============================================================================
@@ -126,9 +126,9 @@ private:
     int64 expiryTime;
     bool deleteAfterUse;
 
-    void init (const int numMillisecondsBeforeRemoving,
-               const bool removeWhenMouseClicked,
-               const bool deleteSelfAfterUse);
+    void init (int numMillisecondsBeforeRemoving,
+               bool removeWhenMouseClicked,
+               bool deleteSelfAfterUse);
 
     BubbleMessageComponent (const BubbleMessageComponent&);
     BubbleMessageComponent& operator= (const BubbleMessageComponent&);

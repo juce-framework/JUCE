@@ -410,7 +410,7 @@ public:
             setImageOpacity (layout, owner, role, (float) newValue, true);
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return getImageOpacity (owner, role);
         }

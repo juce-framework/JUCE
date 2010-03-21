@@ -63,7 +63,7 @@ public:
                                 preferredHeight member variable.
     */
     PropertyComponent (const String& propertyName,
-                       const int preferredHeight = 25);
+                       int preferredHeight = 25);
 
     /** Destructor. */
     ~PropertyComponent();

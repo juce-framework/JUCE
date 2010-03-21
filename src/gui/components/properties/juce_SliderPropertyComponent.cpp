@@ -73,7 +73,7 @@ void SliderPropertyComponent::setValue (const double /*newValue*/)
 {
 }
 
-const double SliderPropertyComponent::getValue() const
+double SliderPropertyComponent::getValue() const
 {
     return slider->getValue();
 }

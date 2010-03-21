@@ -96,7 +96,7 @@ public:
     */
     void addSettingsPage (const String& pageTitle,
                           const char* imageData,
-                          const int imageDataSize);
+                          int imageDataSize);
 
     /** Utility method to display this panel in a DialogWindow.
 

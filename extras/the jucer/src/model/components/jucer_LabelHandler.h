@@ -530,7 +530,7 @@ private:
                               T("Change Label font size"));
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return label->getFont().getHeight();
         }

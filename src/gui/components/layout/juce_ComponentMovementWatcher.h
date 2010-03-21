@@ -49,7 +49,7 @@ class JUCE_API  ComponentMovementWatcher    : public ComponentListener
 public:
     //==============================================================================
     /** Creates a ComponentMovementWatcher to watch a given target component. */
-    ComponentMovementWatcher (Component* const component);
+    ComponentMovementWatcher (Component* component);
 
     /** Destructor. */
     ~ComponentMovementWatcher();

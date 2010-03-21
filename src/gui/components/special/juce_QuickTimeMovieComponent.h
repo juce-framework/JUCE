@@ -79,7 +79,7 @@ public:
         @returns true if the movie opens successfully
     */
     bool loadMovie (const File& movieFile,
-                    const bool isControllerVisible);
+                    bool isControllerVisible);
 
     /** Tries to load a QuickTime movie from a URL into the player.
 
@@ -93,7 +93,7 @@ public:
         @returns true if the movie opens successfully
     */
     bool loadMovie (const URL& movieURL,
-                    const bool isControllerVisible);
+                    bool isControllerVisible);
 
     /** Tries to load a QuickTime movie from a stream into the player.
 
@@ -109,7 +109,7 @@ public:
         @returns true if the movie opens successfully
     */
     bool loadMovie (InputStream* movieStream,
-                    const bool isControllerVisible);
+                    bool isControllerVisible);
 
     /** Closes the movie, if one is open. */
     void closeMovie();
@@ -158,7 +158,7 @@ public:
     void goToStart();
 
     /** Sets the movie's position to a given time. */
-    void setPosition (const double seconds);
+    void setPosition (double seconds);
 
     /** Returns the current play position of the movie. */
     double getPosition() const;
@@ -168,13 +168,13 @@ public:
         A value of 1 is normal speed, greater values play it proportionately faster,
         smaller values play it slower.
     */
-    void setSpeed (const float newSpeed);
+    void setSpeed (float newSpeed);
 
     /** Changes the movie's playback volume.
 
         @param newVolume    the volume in the range 0 (silent) to 1.0 (full)
     */
-    void setMovieVolume (const float newVolume);
+    void setMovieVolume (float newVolume);
 
     /** Returns the movie's playback volume.
 
@@ -183,7 +183,7 @@ public:
     float getMovieVolume() const;
 
     /** Tells the movie whether it should loop. */
-    void setLooping (const bool shouldLoop);
+    void setLooping (bool shouldLoop);
 
     /** Returns true if the movie is currently looping.
 

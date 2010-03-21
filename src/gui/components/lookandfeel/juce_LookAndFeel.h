@@ -112,7 +112,7 @@ public:
 
         @see setColour, Component::findColour, Component::setColour
     */
-    const Colour findColour (const int colourId) const throw();
+    const Colour findColour (int colourId) const throw();
 
     /** Registers a colour to be used for a particular purpose.
 
@@ -120,12 +120,12 @@ public:
 
         @see findColour, Component::findColour, Component::setColour
     */
-    void setColour (const int colourId, const Colour& colour) throw();
+    void setColour (int colourId, const Colour& colour) throw();
 
     /** Returns true if the specified colour ID has been explicitly set using the
         setColour() method.
     */
-    bool isColourSpecified (const int colourId) const throw();
+    bool isColourSpecified (int colourId) const throw();
 
 
     //==============================================================================
@@ -172,10 +172,10 @@ public:
     virtual void drawTickBox (Graphics& g,
                               Component& component,
                               float x, float y, float w, float h,
-                              const bool ticked,
-                              const bool isEnabled,
-                              const bool isMouseOverButton,
-                              const bool isButtonDown);
+                              bool ticked,
+                              bool isEnabled,
+                              bool isMouseOverButton,
+                              bool isButtonDown);
 
     //==============================================================================
     /* AlertWindow handling..
@@ -280,9 +280,9 @@ public:
 
     //==============================================================================
     /** Returns a tick shape for use in yes/no boxes, etc. */
-    virtual const Path getTickShape (const float height);
+    virtual const Path getTickShape (float height);
     /** Returns a cross shape for use in yes/no boxes, etc. */
-    virtual const Path getCrossShape (const float height);
+    virtual const Path getCrossShape (float height);
 
     //==============================================================================
     /** Draws the + or - box in a treeview. */
@@ -306,9 +306,9 @@ public:
                                      const String& filename, Image* icon,
                                      const String& fileSizeDescription,
                                      const String& fileTimeDescription,
-                                     const bool isDirectory,
-                                     const bool isItemSelected,
-                                     const int itemIndex);
+                                     bool isDirectory,
+                                     bool isItemSelected,
+                                     int itemIndex);
 
     virtual Button* createFileBrowserGoUpButton();
 
@@ -331,11 +331,11 @@ public:
     /** Draws one of the items in a popup menu. */
     virtual void drawPopupMenuItem (Graphics& g,
                                     int width, int height,
-                                    const bool isSeparator,
-                                    const bool isActive,
-                                    const bool isHighlighted,
-                                    const bool isTicked,
-                                    const bool hasSubMenu,
+                                    bool isSeparator,
+                                    bool isActive,
+                                    bool isHighlighted,
+                                    bool isTicked,
+                                    bool hasSubMenu,
                                     const String& text,
                                     const String& shortcutKeyText,
                                     Image* image,
@@ -350,7 +350,7 @@ public:
 
     /** Finds the best size for an item in a popup menu. */
     virtual void getIdealPopupMenuItemSize (const String& text,
-                                            const bool isSeparator,
+                                            bool isSeparator,
                                             int standardMenuItemHeight,
                                             int& idealWidth,
                                             int& idealHeight);
@@ -376,7 +376,7 @@ public:
 
     //==============================================================================
     virtual void drawComboBox (Graphics& g, int width, int height,
-                               const bool isButtonDown,
+                               bool isButtonDown,
                                int buttonX, int buttonY,
                                int buttonW, int buttonH,
                                ComboBox& box);
@@ -424,11 +424,11 @@ public:
                                    int x, int y,
                                    int width, int height,
                                    float sliderPosProportional,
-                                   const float rotaryStartAngle,
-                                   const float rotaryEndAngle,
+                                   float rotaryStartAngle,
+                                   float rotaryEndAngle,
                                    Slider& slider);
 
-    virtual Button* createSliderButton (const bool isIncrement);
+    virtual Button* createSliderButton (bool isIncrement);
     virtual Label* createSliderTextBox (Slider& slider);
 
     virtual ImageEffectFilter* getSliderEffect();
@@ -506,9 +506,9 @@ public:
                                        const String& text,
                                        Button& button,
                                        TabbedButtonBar::Orientation orientation,
-                                       const bool isMouseOver,
-                                       const bool isMouseDown,
-                                       const bool isFrontTab);
+                                       bool isMouseOver,
+                                       bool isMouseDown,
+                                       bool isFrontTab);
 
     virtual void fillTabButtonShape (Graphics& g,
                                      const Path& path,
@@ -517,9 +517,9 @@ public:
                                      const String& text,
                                      Button& button,
                                      TabbedButtonBar::Orientation orientation,
-                                     const bool isMouseOver,
-                                     const bool isMouseDown,
-                                     const bool isFrontTab);
+                                     bool isMouseOver,
+                                     bool isMouseDown,
+                                     bool isFrontTab);
 
     virtual void drawTabButtonText (Graphics& g,
                                     int x, int y, int w, int h,
@@ -528,9 +528,9 @@ public:
                                     const String& text,
                                     Button& button,
                                     TabbedButtonBar::Orientation orientation,
-                                    const bool isMouseOver,
-                                    const bool isMouseDown,
-                                    const bool isFrontTab);
+                                    bool isMouseOver,
+                                    bool isMouseDown,
+                                    bool isFrontTab);
 
     virtual int getTabButtonOverlap (int tabDepth);
     virtual int getTabButtonSpaceAroundImage();
@@ -547,9 +547,9 @@ public:
                                 const String& text,
                                 Button& button,
                                 TabbedButtonBar::Orientation orientation,
-                                const bool isMouseOver,
-                                const bool isMouseDown,
-                                const bool isFrontTab);
+                                bool isMouseOver,
+                                bool isMouseDown,
+                                bool isFrontTab);
 
     virtual void drawTabAreaBehindFrontButton (Graphics& g,
                                                int w, int h,
@@ -610,26 +610,26 @@ public:
     //==============================================================================
     /** Utility function to draw a shiny, glassy circle (for round LED-type buttons). */
     static void drawGlassSphere (Graphics& g,
-                                 const float x, const float y,
-                                 const float diameter,
+                                 float x, float y,
+                                 float diameter,
                                  const Colour& colour,
-                                 const float outlineThickness) throw();
+                                 float outlineThickness) throw();
 
     static void drawGlassPointer (Graphics& g,
-                                  const float x, const float y,
-                                  const float diameter,
-                                  const Colour& colour, const float outlineThickness,
-                                  const int direction) throw();
+                                  float x, float y,
+                                  float diameter,
+                                  const Colour& colour, float outlineThickness,
+                                  int direction) throw();
 
     /** Utility function to draw a shiny, glassy oblong (for text buttons). */
     static void drawGlassLozenge (Graphics& g,
-                                  const float x, const float y,
-                                  const float width, const float height,
+                                  float x, float y,
+                                  float width, float height,
                                   const Colour& colour,
-                                  const float outlineThickness,
-                                  const float cornerSize,
-                                  const bool flatOnLeft, const bool flatOnRight,
-                                  const bool flatOnTop, const bool flatOnBottom) throw();
+                                  float outlineThickness,
+                                  float cornerSize,
+                                  bool flatOnLeft, bool flatOnRight,
+                                  bool flatOnTop, bool flatOnBottom) throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -648,11 +648,11 @@ private:
     void drawShinyButtonShape (Graphics& g,
                                float x, float y, float w, float h, float maxCornerSize,
                                const Colour& baseColour,
-                               const float strokeWidth,
-                               const bool flatOnLeft,
-                               const bool flatOnRight,
-                               const bool flatOnTop,
-                               const bool flatOnBottom) throw();
+                               float strokeWidth,
+                               bool flatOnLeft,
+                               bool flatOnRight,
+                               bool flatOnTop,
+                               bool flatOnBottom) throw();
 
     LookAndFeel (const LookAndFeel&);
     LookAndFeel& operator= (const LookAndFeel&);

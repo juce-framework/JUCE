@@ -95,7 +95,7 @@ public:
         The default state for a new ComboBox is non-editable, and can only be changed
         by choosing from the drop-down list.
     */
-    void setEditableText (const bool isEditable);
+    void setEditableText (bool isEditable);
 
     /** Returns true if the text is directly editable.
         @see setEditableText
@@ -123,7 +123,7 @@ public:
         @see setItemEnabled, addSeparator, addSectionHeading, removeItem, getNumItems, getItemText, getItemId
     */
     void addItem (const String& newItemText,
-                  const int newItemId) throw();
+                  int newItemId) throw();
 
     /** Adds a separator line to the drop-down list.
 
@@ -150,12 +150,12 @@ public:
         If you disable an item which is already selected, this won't change the
         current selection - it just stops the user choosing that item from the list.
     */
-    void setItemEnabled (const int itemId,
-                         const bool shouldBeEnabled) throw();
+    void setItemEnabled (int itemId,
+                         bool shouldBeEnabled) throw();
 
     /** Changes the text for an existing item.
     */
-    void changeItemText (const int itemId,
+    void changeItemText (int itemId,
                          const String& newText) throw();
 
     /** Removes all the items from the drop-down list.
@@ -165,7 +165,7 @@ public:
 
         @see addItem, removeItem, getNumItems
     */
-    void clear (const bool dontSendChangeMessage = false);
+    void clear (bool dontSendChangeMessage = false);
 
     /** Returns the number of items that have been added to the list.
 
@@ -179,7 +179,7 @@ public:
 
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    const String getItemText (const int index) const throw();
+    const String getItemText (int index) const throw();
 
     /** Returns the ID for one of the items in the list.
 
@@ -187,12 +187,12 @@ public:
 
         @param index    the item's index from 0 to (getNumItems() - 1)
     */
-    int getItemId (const int index) const throw();
+    int getItemId (int index) const throw();
 
     /** Returns the index in the list of a particular item ID.
         If no such ID is found, this will return -1.
     */
-    int indexOfItemId (const int itemId) const throw();
+    int indexOfItemId (int itemId) const throw();
 
     //==============================================================================
     /** Returns the ID of the item that's currently shown in the box.
@@ -222,8 +222,8 @@ public:
                                         change notification
         @see getSelectedId, setSelectedItemIndex, setText
     */
-    void setSelectedId (const int newItemId,
-                        const bool dontSendChangeMessage = false) throw();
+    void setSelectedId (int newItemId,
+                        bool dontSendChangeMessage = false) throw();
 
     //==============================================================================
     /** Returns the index of the item that's currently shown in the box.
@@ -246,8 +246,8 @@ public:
                                         change notification
         @see getSelectedItemIndex, setSelectedId, setText
     */
-    void setSelectedItemIndex (const int newItemIndex,
-                               const bool dontSendChangeMessage = false) throw();
+    void setSelectedItemIndex (int newItemIndex,
+                               bool dontSendChangeMessage = false) throw();
 
     //==============================================================================
     /** Returns the text that is currently shown in the combo-box's text field.
@@ -273,7 +273,7 @@ public:
         @see getText
     */
     void setText (const String& newText,
-                  const bool dontSendChangeMessage = false) throw();
+                  bool dontSendChangeMessage = false) throw();
 
     /** Programmatically opens the text editor to allow the user to edit the current item.
 
@@ -284,10 +284,10 @@ public:
 
     //==============================================================================
     /** Registers a listener that will be called when the box's content changes. */
-    void addListener (ComboBoxListener* const listener) throw();
+    void addListener (ComboBoxListener* listener) throw();
 
     /** Deregisters a previously-registered listener. */
-    void removeListener (ComboBoxListener* const listener) throw();
+    void removeListener (ComboBoxListener* listener) throw();
 
     //==============================================================================
     /** Sets a message to display when there is no item currently selected.
@@ -368,7 +368,7 @@ public:
     /** @internal */
     void resized();
     /** @internal */
-    bool keyStateChanged (const bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown);
     /** @internal */
     bool keyPressed (const KeyPress&);
     /** @internal */
@@ -398,8 +398,8 @@ private:
 
     void showPopup();
 
-    ItemInfo* getItemForId (const int itemId) const throw();
-    ItemInfo* getItemForIndex (const int index) const throw();
+    ItemInfo* getItemForId (int itemId) const throw();
+    ItemInfo* getItemForIndex (int index) const throw();
 
     ComboBox (const ComboBox&);
     ComboBox& operator= (const ComboBox&);

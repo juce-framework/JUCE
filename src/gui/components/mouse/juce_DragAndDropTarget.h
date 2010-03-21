@@ -76,8 +76,7 @@ public:
     */
     virtual void itemDragEnter (const String& sourceDescription,
                                 Component* sourceComponent,
-                                int x,
-                                int y);
+                                int x, int y);
 
     /** Callback to indicate that the user is dragging something over this component.
 
@@ -92,8 +91,7 @@ public:
     */
     virtual void itemDragMove (const String& sourceDescription,
                                Component* sourceComponent,
-                               int x,
-                               int y);
+                               int x, int y);
 
     /** Callback to indicate that something has been dragged off the edge of this component.
 
@@ -125,8 +123,7 @@ public:
     */
     virtual void itemDropped (const String& sourceDescription,
                               Component* sourceComponent,
-                              int x,
-                              int y) = 0;
+                              int x, int y) = 0;
 
     /** Overriding this allows the target to tell the drag container whether to
         draw the drag image while the cursor is over it.

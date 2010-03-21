@@ -93,7 +93,7 @@ public:
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
                         Image* dragImage = 0,
-                        const bool allowDraggingToOtherJuceWindows = false,
+                        bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = 0);
 
     /** Returns true if something is currently being dragged. */
@@ -137,7 +137,7 @@ public:
                         was interrupted
         @see performExternalDragDropOfText
     */
-    static bool performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles);
+    static bool performExternalDragDropOfFiles (const StringArray& files, bool canMoveFiles);
 
     /** This performs a synchronous drag-and-drop of a block of text to some external
         application.

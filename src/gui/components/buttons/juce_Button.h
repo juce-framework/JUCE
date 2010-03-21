@@ -129,8 +129,8 @@ public:
                                         be sent
         @see getToggleState, setRadioGroupId
     */
-    void setToggleState (const bool shouldBeOn,
-                         const bool sendChangeNotification);
+    void setToggleState (bool shouldBeOn,
+                         bool sendChangeNotification);
 
     /** Returns true if the button in 'on'.
 
@@ -156,7 +156,7 @@ public:
         If set to true, then before the clicked() callback occurs, the toggle-state
         of the button is flipped.
     */
-    void setClickingTogglesState (const bool shouldToggle) throw();
+    void setClickingTogglesState (bool shouldToggle) throw();
 
     /** Returns true if this button is set to be an automatic toggle-button.
 
@@ -182,7 +182,7 @@ public:
 
         @see getRadioGroupId
     */
-    void setRadioGroupId (const int newGroupId);
+    void setRadioGroupId (int newGroupId);
 
     /** Returns the ID of the group to which this button belongs.
 
@@ -197,13 +197,13 @@ public:
 
         @see removeButtonListener
     */
-    void addButtonListener (ButtonListener* const newListener);
+    void addButtonListener (ButtonListener* newListener);
 
     /** Removes a previously-registered button listener
 
         @see addButtonListener
     */
-    void removeButtonListener (ButtonListener* const listener);
+    void removeButtonListener (ButtonListener* listener);
 
     //==============================================================================
     /** Causes the button to act as if it's been clicked.
@@ -231,8 +231,8 @@ public:
         @see addShortcut, getCommandID
     */
     void setCommandToTrigger (ApplicationCommandManager* commandManagerToUse,
-                              const int commandID,
-                              const bool generateTooltip);
+                              int commandID,
+                              bool generateTooltip);
 
     /** Returns the command ID that was set by setCommandToTrigger().
     */
@@ -276,9 +276,9 @@ public:
                                             get faster, the longer the button is held down, up to the
                                             minimum interval specified here
     */
-    void setRepeatSpeed (const int initialDelayInMillisecs,
-                         const int repeatDelayInMillisecs,
-                         const int minimumDelayInMillisecs = -1) throw();
+    void setRepeatSpeed (int initialDelayInMillisecs,
+                         int repeatDelayInMillisecs,
+                         int minimumDelayInMillisecs = -1) throw();
 
     /** Sets whether the button click should happen when the mouse is pressed or released.
 
@@ -289,7 +289,7 @@ public:
         This is useful if the button is being used to show a pop-up menu, as it allows
         the click to be used as a drag onto the menu.
     */
-    void setTriggeredOnMouseDown (const bool isTriggeredOnMouseDown) throw();
+    void setTriggeredOnMouseDown (bool isTriggeredOnMouseDown) throw();
 
     /** Returns the number of milliseconds since the last time the button
         went into the 'down' state.
@@ -333,7 +333,7 @@ public:
         LookAndFeel can choose to ignore it if it's not relevent for this type of
         button.
     */
-    void setConnectedEdges (const int connectedEdgeFlags);
+    void setConnectedEdges (int connectedEdgeFlags);
 
     /** Returns the set of flags passed into setConnectedEdges(). */
     int getConnectedEdgeFlags() const throw()                   { return connectedEdgeFlags; }
