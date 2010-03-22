@@ -323,7 +323,7 @@ void juce_fileClose (void* handle)
 int juce_fileRead (void* handle, void* buffer, int size)
 {
     if (handle != 0)
-        return (int) read ((int) (pointer_sized_int) handle, buffer, size);
+        return jmax (0, (int) read ((int) (pointer_sized_int) handle, buffer, size));
 
     return 0;
 }
@@ -348,8 +348,8 @@ int64 juce_fileGetPosition (void* handle)
 {
     if (handle != 0)
         return lseek ((int) (pointer_sized_int) handle, 0, SEEK_CUR);
-    else
-        return -1;
+
+    return -1;
 }
 
 void juce_fileFlush (void* handle)

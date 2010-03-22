@@ -224,7 +224,7 @@ public:
 
     // This method is used when something needs to find out the details about one of the commands
     // that this object can perform..
-    void getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
     {
         const String generalCategory (T("General"));
         const String demosCategory (T("Demos"));

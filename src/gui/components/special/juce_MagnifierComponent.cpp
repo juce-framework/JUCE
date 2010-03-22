@@ -54,7 +54,7 @@ public:
     void setTitle (const String&)                   {}
     void setPosition (int, int)                     {}
     void setSize (int, int)                         {}
-    void setBounds (int, int, int, int, const bool) {}
+    void setBounds (int, int, int, int, bool)       {}
     void setMinimised (bool)                        {}
     bool isMinimised() const                        { return false; }
     void setFullScreen (bool)                       {}

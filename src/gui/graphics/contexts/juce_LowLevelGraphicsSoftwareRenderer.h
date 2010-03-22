@@ -68,16 +68,16 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
+    void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
     void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
+                    const AffineTransform& transform, bool fillEntireClipAsTiles);
 
     void drawLine (double x1, double y1, double x2, double y2);
 
-    void drawVerticalLine (const int x, double top, double bottom);
-    void drawHorizontalLine (const int x, double top, double bottom);
+    void drawVerticalLine (int x, double top, double bottom);
+    void drawHorizontalLine (int x, double top, double bottom);
 
     //==============================================================================
     void setFont (const Font& newFont);

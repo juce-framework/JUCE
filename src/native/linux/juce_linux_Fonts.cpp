@@ -496,7 +496,7 @@ public:
         }
     }
 
-    bool loadGlyphIfPossible (const juce_wchar character)
+    bool loadGlyphIfPossible (juce_wchar character)
     {
         return FreeTypeInterface::getInstance()
                     ->addGlyphToFont (character, name, isBold, isItalic, *this);

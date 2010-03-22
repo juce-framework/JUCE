@@ -858,13 +858,13 @@ public:
 
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const tchar separator;
+    static const juce_wchar separator;
 
     /** The system-specific file separator character, as a string.
 
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const tchar* separatorString;
+    static const juce_wchar* separatorString;
 
     //==============================================================================
     /** Removes illegal characters from a filename.

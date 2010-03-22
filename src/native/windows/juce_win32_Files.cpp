@@ -37,9 +37,13 @@
  #define CSIDL_MYVIDEO 0x000e
 #endif
 
+#ifndef INVALID_FILE_ATTRIBUTES
+ #define INVALID_FILE_ATTRIBUTES ((DWORD) -1)
+#endif
+
 //==============================================================================
-const tchar  File::separator        = T('\\');
-const tchar* File::separatorString  = T("\\");
+const juce_wchar  File::separator        = T('\\');
+const juce_wchar* File::separatorString  = T("\\");
 
 
 //==============================================================================
@@ -49,31 +53,27 @@ bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
         return false;
 
     const DWORD attr = GetFileAttributes (fileName);
-
     return dontCountDirectories ? ((attr & FILE_ATTRIBUTE_DIRECTORY) == 0)
-                                : (attr != 0xffffffff);
+                                : (attr != INVALID_FILE_ATTRIBUTES);
 }
 
 bool juce_isDirectory (const String& fileName)
 {
     const DWORD attr = GetFileAttributes (fileName);
-
-    return (attr != 0xffffffff)
-             && ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0);
+    return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) && (attr != INVALID_FILE_ATTRIBUTES);
 }
 
 bool juce_canWriteToFile (const String& fileName)
 {
     const DWORD attr = GetFileAttributes (fileName);
-
-    return ((attr & FILE_ATTRIBUTE_READONLY) == 0);
+    return (attr & FILE_ATTRIBUTE_READONLY) == 0;
 }
 
 bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
 {
     DWORD attr = GetFileAttributes (fileName);
 
-    if (attr == 0xffffffff)
+    if (attr == INVALID_FILE_ATTRIBUTES)
         return false;
 
     if (isReadOnly != juce_canWriteToFile (fileName))
@@ -111,13 +111,11 @@ bool File::moveToTrash() const
 
     // The string we pass in must be double null terminated..
     String doubleNullTermPath (getFullPathName() + " ");
-    TCHAR* p = (TCHAR*) (const TCHAR*) doubleNullTermPath;
+    TCHAR* const p = const_cast <TCHAR*> (static_cast <const TCHAR*> (doubleNullTermPath));
     p [getFullPathName().length()] = 0;
 
     fos.wFunc = FO_DELETE;
-    fos.hwnd = (HWND) 0;
     fos.pFrom = p;
-    fos.pTo = NULL;
     fos.fFlags = FOF_ALLOWUNDO | FOF_NOERRORUI | FOF_SILENT | FOF_NOCONFIRMATION
                    | FOF_NOCONFIRMMKDIR | FOF_RENAMEONCOLLISION;
 
@@ -137,9 +135,7 @@ bool juce_copyFile (const String& source, const String& dest)
 void juce_createDirectory (const String& fileName)
 {
     if (! juce_fileExists (fileName, true))
-    {
         CreateDirectory (fileName, 0);
-    }
 }
 
 //==============================================================================
@@ -180,29 +176,21 @@ int juce_fileRead (void* handle, void* buffer, int size)
 {
     DWORD num = 0;
     ReadFile ((HANDLE) handle, buffer, size, &num, 0);
-    return num;
+    return (int) num;
 }
 
 int juce_fileWrite (void* handle, const void* buffer, int size)
 {
     DWORD num;
-
-    WriteFile ((HANDLE) handle,
-               buffer, size,
-               &num, 0);
-
-    return num;
+    WriteFile ((HANDLE) handle, buffer, size, &num, 0);
+    return (int) num;
 }
 
 int64 juce_fileSetPosition (void* handle, int64 pos)
 {
     LARGE_INTEGER li;
     li.QuadPart = pos;
-    li.LowPart = SetFilePointer ((HANDLE) handle,
-                                 li.LowPart,
-                                 &li.HighPart,
-                                 FILE_BEGIN);  // (returns -1 if it fails)
-
+    li.LowPart = SetFilePointer ((HANDLE) handle, li.LowPart, &li.HighPart, FILE_BEGIN);  // (returns -1 if it fails)
     return li.QuadPart;
 }
 
@@ -210,10 +198,7 @@ int64 juce_fileGetPosition (void* handle)
 {
     LARGE_INTEGER li;
     li.QuadPart = 0;
-    li.LowPart = SetFilePointer ((HANDLE) handle,
-                                 0, &li.HighPart,
-                                 FILE_CURRENT);  // (returns -1 if it fails)
-
+    li.LowPart = SetFilePointer ((HANDLE) handle, 0, &li.HighPart, FILE_CURRENT);  // (returns -1 if it fails)
     return jmax ((int64) 0, li.QuadPart);
 }
 
@@ -227,10 +212,7 @@ int64 juce_getFileSize (const String& fileName)
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
     if (GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
-    {
-        return (((int64) attributes.nFileSizeHigh) << 32)
-                 | attributes.nFileSizeLow;
-    }
+        return (((int64) attributes.nFileSizeHigh) << 32) | attributes.nFileSizeLow;
 
     return 0;
 }
@@ -238,23 +220,14 @@ int64 juce_getFileSize (const String& fileName)
 //==============================================================================
 static int64 fileTimeToTime (const FILETIME* const ft)
 {
-    // tell me if this fails!
-    static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME));
+    static_jassert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME)); // tell me if this fails!
 
-#if JUCE_GCC
-    return (((const ULARGE_INTEGER*) ft)->QuadPart - 116444736000000000LL) / 10000;
-#else
-    return (((const ULARGE_INTEGER*) ft)->QuadPart - 116444736000000000) / 10000;
-#endif
+    return (reinterpret_cast<const ULARGE_INTEGER*> (ft)->QuadPart - literal64bit (116444736000000000)) / 10000;
 }
 
 static void timeToFileTime (const int64 time, FILETIME* const ft)
 {
-#if JUCE_GCC
-    ((ULARGE_INTEGER*) ft)->QuadPart = time * 10000 + 116444736000000000LL;
-#else
-    ((ULARGE_INTEGER*) ft)->QuadPart = time * 10000 + 116444736000000000;
-#endif
+    reinterpret_cast<ULARGE_INTEGER*> (ft)->QuadPart = time * 10000 + literal64bit (116444736000000000);
 }
 
 void juce_getFileTimes (const String& fileName,
@@ -263,7 +236,6 @@ void juce_getFileTimes (const String& fileName,
                         int64& creationTime)
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
-
 
     if (GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
     {
@@ -282,26 +254,21 @@ bool juce_setFileTimes (const String& fileName,
                         int64 accessTime,
                         int64 creationTime)
 {
-    FILETIME m, a, c;
-
-    if (modificationTime > 0)
-        timeToFileTime (modificationTime, &m);
-
-    if (accessTime > 0)
-        timeToFileTime (accessTime, &a);
-
-    if (creationTime > 0)
-        timeToFileTime (creationTime, &c);
-
     void* const h = juce_fileOpen (fileName, true);
     bool ok = false;
 
     if (h != 0)
     {
+        FILETIME m, a, c;
+        timeToFileTime (modificationTime, &m);
+        timeToFileTime (accessTime, &a);
+        timeToFileTime (creationTime, &c);
+
         ok = SetFileTime ((HANDLE) h,
-                          (creationTime > 0)     ? &c : 0,
-                          (accessTime > 0)       ? &a : 0,
-                          (modificationTime > 0) ? &m : 0) != 0;
+                          creationTime > 0     ? &c : 0,
+                          accessTime > 0       ? &a : 0,
+                          modificationTime > 0 ? &m : 0) != 0;
+
         juce_fileClose (h);
     }
 
@@ -317,7 +284,7 @@ const StringArray juce_getFileSystemRoots()
     buffer[1] = 0;
     GetLogicalDriveStrings (2048, buffer);
 
-    TCHAR* n = buffer;
+    const TCHAR* n = buffer;
     StringArray roots;
 
     while (*n != 0)
@@ -325,8 +292,7 @@ const StringArray juce_getFileSystemRoots()
         roots.add (String (n));
 
         while (*n++ != 0)
-        {
-        }
+        {}
     }
 
     roots.sort (true);
@@ -334,38 +300,38 @@ const StringArray juce_getFileSystemRoots()
 }
 
 //==============================================================================
+static const String getDriveFromPath (const String& path)
+{
+    if (path.isNotEmpty() && path[1] == T(':'))
+        return path.substring (0, 2) + T("\\");
+
+    return path;
+}
+
 const String juce_getVolumeLabel (const String& filenameOnVolume,
                                   int& volumeSerialNumber)
 {
-    TCHAR n [4];
-    n[0] = *(const TCHAR*) filenameOnVolume;
-    n[1] = L':';
-    n[2] = L'\\';
-    n[3] = 0;
-
-    TCHAR dest [64];
+    TCHAR dest[64];
     DWORD serialNum;
 
-    if (! GetVolumeInformation (n, dest, 64, (DWORD*) &serialNum, 0, 0, 0, 0))
+    if (! GetVolumeInformation (getDriveFromPath (filenameOnVolume), dest,
+                                numElementsInArray (dest), &serialNum, 0, 0, 0, 0))
     {
         dest[0] = 0;
         serialNum = 0;
     }
 
     volumeSerialNumber = serialNum;
-    return String (dest);
+    return dest;
 }
 
-static int64 getDiskSpaceInfo (String fn, const bool total)
+static int64 getDiskSpaceInfo (const String& path, const bool total)
 {
-    if (fn[1] == T(':'))
-        fn = fn.substring (0, 2) + T("\\");
-
     ULARGE_INTEGER spc, tot, totFree;
 
-    if (GetDiskFreeSpaceEx (fn, &spc, &tot, &totFree))
-        return (int64) (total ? tot.QuadPart
-                              : spc.QuadPart);
+    if (GetDiskFreeSpaceEx (getDriveFromPath (path), &spc, &tot, &totFree))
+        return total ? (int64) tot.QuadPart
+                     : (int64) spc.QuadPart;
 
     return 0;
 }
@@ -381,15 +347,9 @@ int64 File::getVolumeTotalSize() const
 }
 
 //==============================================================================
-static unsigned int getWindowsDriveType (const String& fileName)
+static unsigned int getWindowsDriveType (const String& path)
 {
-    TCHAR n[4];
-    n[0] = *(const TCHAR*) fileName;
-    n[1] = L':';
-    n[2] = L'\\';
-    n[3] = 0;
-
-    return GetDriveType (n);
+    return GetDriveType (getDriveFromPath (path));
 }
 
 bool File::isOnCDRomDrive() const
@@ -404,15 +364,10 @@ bool File::isOnHardDisk() const
 
     const unsigned int n = getWindowsDriveType (getFullPathName());
 
-    if (fullPath.toLowerCase()[0] <= 'b'
-         && fullPath[1] == T(':'))
-    {
+    if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == T(':'))
         return n != DRIVE_REMOVABLE;
-    }
     else
-    {
         return n != DRIVE_CDROM && n != DRIVE_REMOTE;
-    }
 }
 
 bool File::isOnRemovableDrive() const
@@ -433,7 +388,7 @@ static const File juce_getSpecialFolderPath (int type)
 {
     WCHAR path [MAX_PATH + 256];
 
-    if (SHGetSpecialFolderPath (0, path, type, 0))
+    if (SHGetSpecialFolderPath (0, path, type, FALSE))
         return File (String (path));
 
     return File::nonexistent;
@@ -445,49 +400,26 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
 
     switch (type)
     {
-    case userHomeDirectory:
-        csidlType = CSIDL_PROFILE;
-        break;
+        case userHomeDirectory:                 csidlType = CSIDL_PROFILE; break;
+        case userDocumentsDirectory:            csidlType = CSIDL_PERSONAL; break;
+        case userDesktopDirectory:              csidlType = CSIDL_DESKTOP; break;
+        case userApplicationDataDirectory:      csidlType = CSIDL_APPDATA; break;
+        case commonApplicationDataDirectory:    csidlType = CSIDL_COMMON_APPDATA; break;
+        case globalApplicationsDirectory:       csidlType = CSIDL_PROGRAM_FILES; break;
+        case userMusicDirectory:                csidlType = CSIDL_MYMUSIC; break;
+        case userMoviesDirectory:               csidlType = CSIDL_MYVIDEO; break;
 
-    case userDocumentsDirectory:
-        csidlType = CSIDL_PERSONAL;
-        break;
-
-    case userDesktopDirectory:
-        csidlType = CSIDL_DESKTOP;
-        break;
-
-    case userApplicationDataDirectory:
-        csidlType = CSIDL_APPDATA;
-        break;
-
-    case commonApplicationDataDirectory:
-        csidlType = CSIDL_COMMON_APPDATA;
-        break;
-
-    case globalApplicationsDirectory:
-        csidlType = CSIDL_PROGRAM_FILES;
-        break;
-
-    case userMusicDirectory:
-        csidlType = CSIDL_MYMUSIC;
-        break;
-
-    case userMoviesDirectory:
-        csidlType = CSIDL_MYVIDEO;
-        break;
-
-    case tempDirectory:
+        case tempDirectory:
         {
             WCHAR dest [2048];
             dest[0] = 0;
-            GetTempPath (2048, dest);
+            GetTempPath (numElementsInArray (dest), dest);
             return File (String (dest));
         }
 
-    case invokedExecutableFile:
-    case currentExecutableFile:
-    case currentApplicationFile:
+        case invokedExecutableFile:
+        case currentExecutableFile:
+        case currentApplicationFile:
         {
             HINSTANCE moduleHandle = (HINSTANCE) PlatformUtilities::getCurrentModuleInstanceHandle();
 
@@ -498,9 +430,9 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
         }
         break;
 
-    default:
-        jassertfalse // unknown type?
-        return File::nonexistent;
+        default:
+            jassertfalse // unknown type?
+            return File::nonexistent;
     }
 
     return juce_getSpecialFolderPath (csidlType);
@@ -520,7 +452,6 @@ bool File::setAsCurrentWorkingDirectory() const
     return SetCurrentDirectory (getFullPathName()) != FALSE;
 }
 
-
 //==============================================================================
 const String File::getVersion() const
 {
@@ -528,7 +459,7 @@ const String File::getVersion() const
 
     DWORD handle = 0;
     DWORD bufferSize = GetFileVersionInfoSize (getFullPathName(), &handle);
-    HeapBlock <char> buffer;
+    HeapBlock<char> buffer;
     buffer.calloc (bufferSize);
 
     if (GetFileVersionInfo (getFullPathName(), 0, bufferSize, buffer))
@@ -538,9 +469,9 @@ const String File::getVersion() const
 
         if (VerQueryValue (buffer, (LPTSTR) _T("\\"), (LPVOID*) &vffi, &len))
         {
-            result << (int) HIWORD (vffi->dwFileVersionMS) << "."
-                   << (int) LOWORD (vffi->dwFileVersionMS) << "."
-                   << (int) HIWORD (vffi->dwFileVersionLS) << "."
+            result << (int) HIWORD (vffi->dwFileVersionMS) << '.'
+                   << (int) LOWORD (vffi->dwFileVersionMS) << '.'
+                   << (int) HIWORD (vffi->dwFileVersionLS) << '.'
                    << (int) LOWORD (vffi->dwFileVersionLS);
         }
     }
@@ -607,7 +538,6 @@ static void getFindFileInfo (FindDataType& findData,
 
     if (isReadOnly != 0)
         *isReadOnly = ((findData.dwFileAttributes & FILE_ATTRIBUTE_READONLY) != 0);
-
 }
 
 void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResult,
@@ -658,8 +588,7 @@ void juce_findFileClose (void* handle)
 }
 
 //==============================================================================
-bool juce_launchFile (const String& fileName,
-                      const String& parameters)
+bool juce_launchFile (const String& fileName, const String& parameters)
 {
     HINSTANCE hInstance = 0;
 

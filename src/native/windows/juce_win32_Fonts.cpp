@@ -268,7 +268,7 @@ public:
                             tm.tmDefaultChar);
     }
 
-    bool loadGlyphIfPossible (const juce_wchar character)
+    bool loadGlyphIfPossible (juce_wchar character)
     {
         HDC dc = FontDCHolder::getInstance()->loadFont (name, isBold, isItalic, 0);
 

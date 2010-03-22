@@ -483,7 +483,7 @@ public:
         repaintNowIfTransparent();
     }
 
-    void setBounds (int x, int y, int w, int h, const bool isNowFullScreen)
+    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
         offsetWithinParent (x, y);

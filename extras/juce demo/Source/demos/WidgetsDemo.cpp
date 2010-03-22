@@ -224,7 +224,7 @@ public:
     {
     }
 
-    double snapValue (double attemptedValue, const bool userIsDragging)
+    double snapValue (double attemptedValue, bool userIsDragging)
     {
         if (! userIsDragging)
             return attemptedValue;  // if they're entering the value in the text-box, don't mess with it.
@@ -809,7 +809,7 @@ private:
             ids.add (juceLogoButton);
         }
 
-        ToolbarItemComponent* createItem (const int itemId)
+        ToolbarItemComponent* createItem (int itemId)
         {
             switch (itemId)
             {

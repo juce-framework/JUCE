@@ -292,7 +292,7 @@ public:
     /** @internal */
     void timerCallback();
     /** @internal */
-    bool keyStateChanged (const bool isKeyDown);
+    bool keyStateChanged (bool isKeyDown);
     /** @internal */
     void focusLost (FocusChangeType cause);
     /** @internal */

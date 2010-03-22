@@ -41,8 +41,8 @@ public:
     //==============================================================================
     LowLevelGraphicsPostScriptRenderer (OutputStream& resultingPostScript,
                                         const String& documentTitle,
-                                        const int totalWidth,
-                                        const int totalHeight);
+                                        int totalWidth,
+                                        int totalHeight);
 
     ~LowLevelGraphicsPostScriptRenderer();
 
@@ -69,16 +69,16 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
     //==============================================================================
-    void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
+    void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
     void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                    const AffineTransform& transform, const bool fillEntireClipAsTiles);
+                    const AffineTransform& transform, bool fillEntireClipAsTiles);
 
     void drawLine (double x1, double y1, double x2, double y2);
 
-    void drawVerticalLine (const int x, double top, double bottom);
-    void drawHorizontalLine (const int x, double top, double bottom);
+    void drawVerticalLine (int x, double top, double bottom);
+    void drawHorizontalLine (int x, double top, double bottom);
 
     //==============================================================================
     const Font getFont();
@@ -114,9 +114,9 @@ protected:
     void writeClip();
     void writeColour (const Colour& colour);
     void writePath (const Path& path) const;
-    void writeXY (const float x, const float y) const;
+    void writeXY (float x, float y) const;
     void writeTransform (const AffineTransform& trans) const;
-    void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
+    void writeImage (const Image& im, int sx, int sy, int maxW, int maxH) const;
 
     LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
     LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);

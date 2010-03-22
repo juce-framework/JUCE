@@ -4426,9 +4426,9 @@ public:
 
 	bool setAsCurrentWorkingDirectory() const;
 
-	static const tchar separator;
+	static const juce_wchar separator;
 
-	static const tchar* separatorString;
+	static const juce_wchar* separatorString;
 
 	static const String createLegalFileName (const String& fileNameToFix);
 
@@ -12858,8 +12858,7 @@ public:
 
 	virtual void getAllCommands (Array <CommandID>& commands) = 0;
 
-	virtual void getCommandInfo (const CommandID commandID,
-								 ApplicationCommandInfo& result) = 0;
+	virtual void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) = 0;
 
 	virtual bool perform (const InvocationInfo& info) = 0;
 
@@ -15930,7 +15929,7 @@ protected:
 	void mouseUp (const MouseEvent& e);
 	bool keyPressed (const KeyPress& key);
 	bool keyPressed (const KeyPress& key, Component* originatingComponent);
-	bool keyStateChanged (const bool isKeyDown, Component* originatingComponent);
+	bool keyStateChanged (bool isKeyDown, Component* originatingComponent);
 	void paint (Graphics& g);
 	void parentHierarchyChanged();
 	void focusGained (FocusChangeType cause);
@@ -25182,10 +25181,10 @@ public:
 	virtual void drawTickBox (Graphics& g,
 							  Component& component,
 							  float x, float y, float w, float h,
-							  const bool ticked,
-							  const bool isEnabled,
-							  const bool isMouseOverButton,
-							  const bool isButtonDown);
+							  bool ticked,
+							  bool isEnabled,
+							  bool isMouseOverButton,
+							  bool isButtonDown);
 
 	virtual void drawProgressBar (Graphics& g, ProgressBar& progressBar,
 								  int width, int height,
@@ -25222,7 +25221,7 @@ public:
 										MenuBarComponent& menuBar);
 
 	virtual void drawComboBox (Graphics& g, int width, int height,
-							   const bool isButtonDown,
+							   bool isButtonDown,
 							   int buttonX, int buttonY,
 							   int buttonW, int buttonH,
 							   ComboBox& box);
@@ -25240,7 +25239,7 @@ public:
 
 	virtual int getSliderThumbRadius (Slider& slider);
 
-	virtual Button* createSliderButton (const bool isIncrement);
+	virtual Button* createSliderButton (bool isIncrement);
 
 	virtual ImageEffectFilter* getSliderEffect();
 
@@ -26473,7 +26472,7 @@ public:
 	void mouseExit (const MouseEvent& e);
 	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
 	void timerCallback();
-	bool keyStateChanged (const bool isKeyDown);
+	bool keyStateChanged (bool isKeyDown);
 	void focusLost (FocusChangeType cause);
 	void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
 	void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
@@ -27439,8 +27438,8 @@ public:
 
 	LowLevelGraphicsPostScriptRenderer (OutputStream& resultingPostScript,
 										const String& documentTitle,
-										const int totalWidth,
-										const int totalHeight);
+										int totalWidth,
+										int totalHeight);
 
 	~LowLevelGraphicsPostScriptRenderer();
 
@@ -27464,16 +27463,16 @@ public:
 	void setOpacity (float opacity);
 	void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-	void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
+	void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
 	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-					const AffineTransform& transform, const bool fillEntireClipAsTiles);
+					const AffineTransform& transform, bool fillEntireClipAsTiles);
 
 	void drawLine (double x1, double y1, double x2, double y2);
 
-	void drawVerticalLine (const int x, double top, double bottom);
-	void drawHorizontalLine (const int x, double top, double bottom);
+	void drawVerticalLine (int x, double top, double bottom);
+	void drawHorizontalLine (int x, double top, double bottom);
 
 	const Font getFont();
 	void setFont (const Font& newFont);
@@ -27507,9 +27506,9 @@ protected:
 	void writeClip();
 	void writeColour (const Colour& colour);
 	void writePath (const Path& path) const;
-	void writeXY (const float x, const float y) const;
+	void writeXY (float x, float y) const;
 	void writeTransform (const AffineTransform& trans) const;
-	void writeImage (const Image& im, const int sx, const int sy, const int maxW, const int maxH) const;
+	void writeImage (const Image& im, int sx, int sy, int maxW, int maxH) const;
 
 	LowLevelGraphicsPostScriptRenderer (const LowLevelGraphicsPostScriptRenderer& other);
 	LowLevelGraphicsPostScriptRenderer& operator= (const LowLevelGraphicsPostScriptRenderer&);
@@ -27556,16 +27555,16 @@ public:
 	void setOpacity (float opacity);
 	void setInterpolationQuality (Graphics::ResamplingQuality quality);
 
-	void fillRect (const Rectangle<int>& r, const bool replaceExistingContents);
+	void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
 	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-					const AffineTransform& transform, const bool fillEntireClipAsTiles);
+					const AffineTransform& transform, bool fillEntireClipAsTiles);
 
 	void drawLine (double x1, double y1, double x2, double y2);
 
-	void drawVerticalLine (const int x, double top, double bottom);
-	void drawHorizontalLine (const int x, double top, double bottom);
+	void drawVerticalLine (int x, double top, double bottom);
+	void drawHorizontalLine (int x, double top, double bottom);
 
 	void setFont (const Font& newFont);
 	const Font getFont();

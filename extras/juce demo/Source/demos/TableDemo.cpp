@@ -116,7 +116,7 @@ public:
 
     // This is overloaded from TableListBoxModel, and tells us that the user has clicked a table header
     // to change the sort order.
-    void sortOrderChanged (int newSortColumnId, const bool isForwards)
+    void sortOrderChanged (int newSortColumnId, bool isForwards)
     {
         if (newSortColumnId != 0)
         {

@@ -449,7 +449,7 @@ public:
         return true;
     }
 
-    bool keyStateChanged (const bool)
+    bool keyStateChanged (bool)
     {
         return true;
     }

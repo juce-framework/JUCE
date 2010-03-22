@@ -162,11 +162,9 @@ void juce_setCurrentThreadName (const String& name)
     info.dwThreadID = GetCurrentThreadId();
     info.dwFlags = 0;
 
-    #define MS_VC_EXCEPTION 0x406d1388
-
     __try
     {
-        RaiseException (MS_VC_EXCEPTION, 0, sizeof (info) / sizeof (ULONG_PTR), (ULONG_PTR*) &info);
+        RaiseException (0x406d1388 /*MS_VC_EXCEPTION*/, 0, sizeof (info) / sizeof (ULONG_PTR), (ULONG_PTR*) &info);
     }
     __except (EXCEPTION_CONTINUE_EXECUTION)
     {}
@@ -256,25 +254,11 @@ void juce_repeatLastProcessPriority()
 
         switch (lastProcessPriority)
         {
-        case Process::LowPriority:
-            p = IDLE_PRIORITY_CLASS;
-            break;
-
-        case Process::NormalPriority:
-            p = NORMAL_PRIORITY_CLASS;
-            break;
-
-        case Process::HighPriority:
-            p = HIGH_PRIORITY_CLASS;
-            break;
-
-        case Process::RealtimePriority:
-            p = REALTIME_PRIORITY_CLASS;
-            break;
-
-        default:
-            jassertfalse // bad priority value
-            return;
+            case Process::LowPriority:          p = IDLE_PRIORITY_CLASS; break;
+            case Process::NormalPriority:       p = NORMAL_PRIORITY_CLASS; break;
+            case Process::HighPriority:         p = HIGH_PRIORITY_CLASS; break;
+            case Process::RealtimePriority:     p = REALTIME_PRIORITY_CLASS; break;
+            default:                            jassertfalse; return; // bad priority value
         }
 
         SetPriorityClass (GetCurrentProcess(), p);

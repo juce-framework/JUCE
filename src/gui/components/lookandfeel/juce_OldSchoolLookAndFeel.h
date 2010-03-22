@@ -62,10 +62,10 @@ public:
     virtual void drawTickBox (Graphics& g,
                               Component& component,
                               float x, float y, float w, float h,
-                              const bool ticked,
-                              const bool isEnabled,
-                              const bool isMouseOverButton,
-                              const bool isButtonDown);
+                              bool ticked,
+                              bool isEnabled,
+                              bool isMouseOverButton,
+                              bool isButtonDown);
 
     //==============================================================================
     virtual void drawProgressBar (Graphics& g, ProgressBar& progressBar,
@@ -108,7 +108,7 @@ public:
 
     //==============================================================================
     virtual void drawComboBox (Graphics& g, int width, int height,
-                               const bool isButtonDown,
+                               bool isButtonDown,
                                int buttonX, int buttonY,
                                int buttonW, int buttonH,
                                ComboBox& box);
@@ -127,7 +127,7 @@ public:
 
     virtual int getSliderThumbRadius (Slider& slider);
 
-    virtual Button* createSliderButton (const bool isIncrement);
+    virtual Button* createSliderButton (bool isIncrement);
 
     virtual ImageEffectFilter* getSliderEffect();
 

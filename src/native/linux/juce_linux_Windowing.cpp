@@ -785,7 +785,7 @@ public:
         setBounds (wx, wy, w, h, false);
     }
 
-    void setBounds (int x, int y, int w, int h, const bool isNowFullScreen)
+    void setBounds (int x, int y, int w, int h, bool isNowFullScreen)
     {
         fullScreen = isNowFullScreen;
 

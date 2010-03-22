@@ -96,7 +96,7 @@ public:
     void setTitle (const String& title);
     void setPosition (int x, int y);
     void setSize (int w, int h);
-    void setBounds (int x, int y, int w, int h, const bool isNowFullScreen);
+    void setBounds (int x, int y, int w, int h, bool isNowFullScreen);
 
     const Rectangle<int> getBounds() const;
     const Rectangle<int> getBounds (const bool global) const;

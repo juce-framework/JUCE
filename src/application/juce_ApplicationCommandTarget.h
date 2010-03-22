@@ -164,8 +164,7 @@ public:
         active or inactive), you should call ApplicationCommandManager::commandStatusChanged()
         to cause the manager to refresh its status.
     */
-    virtual void getCommandInfo (const CommandID commandID,
-                                 ApplicationCommandInfo& result) = 0;
+    virtual void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) = 0;
 
     /** This must actually perform the specified command.
 

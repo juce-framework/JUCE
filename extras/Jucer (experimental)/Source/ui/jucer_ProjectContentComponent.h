@@ -61,7 +61,7 @@ public:
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();
     void getAllCommands (Array <CommandID>& commands);
-    void getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result);
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
     bool isCommandActive (const CommandID commandID);
     bool perform (const InvocationInfo& info);
 

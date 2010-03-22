@@ -276,7 +276,7 @@ public:
     {
     }
 
-    void addMenuItems (PopupMenu& menu, const int columnIdClicked)
+    void addMenuItems (PopupMenu& menu, int columnIdClicked)
     {
         if (owner.isAutoSizeMenuOptionShown())
         {
@@ -288,7 +288,7 @@ public:
         TableHeaderComponent::addMenuItems (menu, columnIdClicked);
     }
 
-    void reactToMenuItem (const int menuReturnId, const int columnIdClicked)
+    void reactToMenuItem (int menuReturnId, int columnIdClicked)
     {
         if (menuReturnId == 0xf836743)
         {

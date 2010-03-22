@@ -983,7 +983,7 @@ public:
     }
 
     //==============================================================================
-    bool keyStateChanged (const bool)
+    bool keyStateChanged (bool)
     {
         return false;
     }
@@ -1087,7 +1087,7 @@ private:
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
-    ScopedPointer <AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
+    ScopedPointer<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor*> (w))->isValid())
         w = 0;
@@ -1097,7 +1097,7 @@ AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
     {
         w = new AudioUnitPluginWindowCarbon (*this);
 
-        if (! static_cast <AudioUnitPluginWindowCocoa*> (static_cast <AudioProcessorEditor*> (w))->isValid())
+        if (! static_cast <AudioUnitPluginWindowCarbon*> (static_cast <AudioProcessorEditor*> (w))->isValid())
             w = 0;
     }
 #endif

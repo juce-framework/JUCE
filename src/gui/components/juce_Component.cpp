@@ -169,17 +169,20 @@ void Component::setVisible (bool shouldBeVisible)
             }
         }
 
-        sendVisibilityChangeMessage();
-
-        if (safePointer != 0 && flags.hasHeavyweightPeerFlag)
+        if (safePointer != 0)
         {
-            ComponentPeer* const peer = getPeer();
+            sendVisibilityChangeMessage();
 
-            jassert (peer != 0);
-            if (peer != 0)
+            if (safePointer != 0 && flags.hasHeavyweightPeerFlag)
             {
-                peer->setVisible (shouldBeVisible);
-                internalHierarchyChanged();
+                ComponentPeer* const peer = getPeer();
+
+                jassert (peer != 0);
+                if (peer != 0)
+                {
+                    peer->setVisible (shouldBeVisible);
+                    internalHierarchyChanged();
+                }
             }
         }
     }
@@ -2009,13 +2012,13 @@ void Component::parentSizeChanged()
 
 void Component::addComponentListener (ComponentListener* const newListener)
 {
+    jassert (isValidComponent());
     componentListeners.add (newListener);
 }
 
 void Component::removeComponentListener (ComponentListener* const listenerToRemove)
 {
     jassert (isValidComponent());
-
     componentListeners.remove (listenerToRemove);
 }
 
