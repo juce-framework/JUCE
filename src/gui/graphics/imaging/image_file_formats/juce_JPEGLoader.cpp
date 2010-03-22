@@ -117,6 +117,9 @@ namespace jpeglibNamespace
 #endif
 }
 
+#undef max
+#undef min
+
 #if JUCE_MSVC
   #pragma warning (pop)
 #endif

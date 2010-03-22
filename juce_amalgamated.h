@@ -875,6 +875,11 @@ public:
 	static void bigEndian24BitToChars (int value, char* destBytes);
 
 	static bool isBigEndian();
+
+private:
+	ByteOrder();
+	ByteOrder (const ByteOrder&);
+	ByteOrder& operator= (const ByteOrder&);
 };
 
 #if JUCE_USE_INTRINSICS
@@ -2891,13 +2896,13 @@ public:
 	static const var null;
 
 	var (const var& valueToCopy);
-	var (const int value) throw();
-	var (const bool value) throw();
-	var (const double value) throw();
-	var (const char* const value);
-	var (const juce_wchar* const value);
+	var (int value) throw();
+	var (bool value) throw();
+	var (double value) throw();
+	var (const char* value);
+	var (const juce_wchar* value);
 	var (const String& value);
-	var (DynamicObject* const object);
+	var (DynamicObject* object);
 	var (MethodFunction method) throw();
 
 	var& operator= (const var& valueToCopy);
@@ -2937,7 +2942,7 @@ public:
 	public:
 		identifier() throw();
 
-		identifier (const char* const name);
+		identifier (const char* name);
 
 		identifier (const String& name);
 
@@ -3075,6 +3080,11 @@ public:
 	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
 
 	static void* swapPointers (void* volatile* value1, void* value2);
+
+private:
+	Atomic();
+	Atomic (const Atomic&);
+	Atomic& operator= (const Atomic&);
 };
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
@@ -3891,7 +3901,7 @@ public:
 
 	inline int size() const throw()					 { return strings.size(); };
 
-	const String& operator[] (const int index) const throw();
+	const String& operator[] (int index) const throw();
 
 	bool contains (const String& stringToLookFor,
 				   bool ignoreCase = false) const;
@@ -6967,6 +6977,11 @@ public:
 #if JUCE_LINUX || DOXYGEN
 
 #endif
+
+private:
+	PlatformUtilities();
+	PlatformUtilities (const PlatformUtilities&);
+	PlatformUtilities& operator= (const PlatformUtilities&);
 };
 
 #if JUCE_MAC || JUCE_IPHONE
@@ -7342,6 +7357,11 @@ public:
 
 	// not-for-public-use platform-specific method gets called at startup to initialise things.
 	static void initialiseStats() throw();
+
+private:
+	SystemStats();
+	SystemStats (const SystemStats&);
+	SystemStats& operator= (const SystemStats&);
 };
 
 #endif   // __JUCE_SYSTEMSTATS_JUCEHEADER__

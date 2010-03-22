@@ -227,7 +227,7 @@ private:
             owner->setCornerSize (newValue, true);
         }
 
-        const double getValue() const           { return owner->getCornerSize(); }
+        double getValue() const                 { return owner->getCornerSize(); }
 
         void changeListenerCallback (void*)     { refresh(); }
 

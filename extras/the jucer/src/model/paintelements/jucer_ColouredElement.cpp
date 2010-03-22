@@ -330,7 +330,7 @@ public:
                               true);
     }
 
-    const double getValue() const           { return owner->getStrokeType().stroke.getStrokeThickness(); }
+    double getValue() const                 { return owner->getStrokeType().stroke.getStrokeThickness(); }
 
     void changeListenerCallback (void*)     { refresh(); }
 
@@ -586,7 +586,7 @@ public:
         }
     }
 
-    const double getValue() const
+    double getValue() const
     {
         if (isForStroke)
             return element->getStrokeType().fill.imageOpacity;

@@ -194,6 +194,11 @@ public:
     //==============================================================================
 
 #endif
+
+private:
+    PlatformUtilities();
+    PlatformUtilities (const PlatformUtilities&);
+    PlatformUtilities& operator= (const PlatformUtilities&);
 };
 
 

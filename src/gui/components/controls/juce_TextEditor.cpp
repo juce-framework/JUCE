@@ -1585,6 +1585,12 @@ void TextEditor::insertTextAtCaret (const String& newText_)
     if (allowedCharacters.isNotEmpty())
         newText = newText.retainCharacters (allowedCharacters);
 
+    if ((! returnKeyStartsNewLine) && newText == T("\n"))
+    {
+        returnPressed();
+        return;
+    }
+
     if (! isMultiLine())
         newText = newText.replaceCharacters (T("\r\n"), T("  "));
     else
@@ -2002,11 +2008,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key == KeyPress::returnKey)
     {
         newTransaction();
-
-        if (returnKeyStartsNewLine)
-            insertTextAtCaret (T("\n"));
-        else
-            returnPressed();
+        insertTextAtCaret (T("\n"));
     }
     else if (key.isKeyCode (KeyPress::escapeKey))
     {

@@ -110,7 +110,7 @@ public:
         Obviously the reference returned shouldn't be stored for later use, as the
         string it refers to may disappear when the array changes.
     */
-    const String& operator[] (const int index) const throw();
+    const String& operator[] (int index) const throw();
 
     /** Searches for a string in the array.
 

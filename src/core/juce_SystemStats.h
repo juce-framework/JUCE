@@ -189,6 +189,11 @@ public:
     //==============================================================================
     // not-for-public-use platform-specific method gets called at startup to initialise things.
     static void initialiseStats() throw();
+
+private:
+    SystemStats();
+    SystemStats (const SystemStats&);
+    SystemStats& operator= (const SystemStats&);
 };
 
 

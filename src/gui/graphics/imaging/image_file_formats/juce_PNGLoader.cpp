@@ -90,12 +90,14 @@ namespace pnglibNamespace
 #endif
 }
 
+#undef max
+#undef min
+
 #ifdef _MSC_VER
   #pragma warning (pop)
 #endif
 
 BEGIN_JUCE_NAMESPACE
-
 
 #include "../juce_Image.h"
 #include "../../../../io/streams/juce_InputStream.h"
@@ -111,11 +113,14 @@ namespace PNGHelpers
 {
     using namespace pnglibNamespace;
 
-    static void readCallback (png_structp pngReadStruct, png_bytep data, png_size_t length)
+    static void readCallback (png_structp png, png_bytep data, png_size_t length)
     {
-        using namespace pnglibNamespace;
-        InputStream* const in = (InputStream*) png_get_io_ptr (pngReadStruct);
-        in->read (data, (int) length);
+        static_cast<InputStream*> (png->io_ptr)->read (data, (int) length);
+    }
+
+    static void writeDataCallback (png_structp png, png_bytep data, png_size_t length)
+    {
+        static_cast<OutputStream*> (png->io_ptr)->write (data, (int) length);
     }
 
     struct PNGErrorStruct {};
@@ -124,17 +129,6 @@ namespace PNGHelpers
     {
         throw PNGErrorStruct();
     }
-
-    static void writeDataCallback (png_structp png_ptr, png_bytep data, png_size_t length)
-    {
-        OutputStream* const out = (OutputStream*) png_ptr->io_ptr;
-
-        const bool ok = out->write (data, (int) length);
-
-        (void) ok;
-        jassert (ok);
-    }
-
 }
 
 //==============================================================================

@@ -449,7 +449,7 @@ private:
             element->setOpacity (newValue, true);
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return element->getOpacity();
         }

@@ -396,7 +396,7 @@ private:
                               T("Change Viewport scrollbar size"));
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return component->getScrollBarThickness();
         }

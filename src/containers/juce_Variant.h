@@ -59,13 +59,13 @@ public:
     static const var null;
 
     var (const var& valueToCopy);
-    var (const int value) throw();
-    var (const bool value) throw();
-    var (const double value) throw();
-    var (const char* const value);
-    var (const juce_wchar* const value);
+    var (int value) throw();
+    var (bool value) throw();
+    var (double value) throw();
+    var (const char* value);
+    var (const juce_wchar* value);
     var (const String& value);
-    var (DynamicObject* const object);
+    var (DynamicObject* object);
     var (MethodFunction method) throw();
 
     var& operator= (const var& valueToCopy);
@@ -119,7 +119,7 @@ public:
             Because this name may need to be used in contexts such as script variables or XML
             tags, it must only contain ascii letters and digits, or the underscore character.
         */
-        identifier (const char* const name);
+        identifier (const char* name);
 
         /** Creates an identifier with a specified name.
             Because this name may need to be used in contexts such as script variables or XML

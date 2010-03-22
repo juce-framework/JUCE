@@ -92,6 +92,11 @@ public:
     //==============================================================================
     /** Returns true if the current CPU is big-endian. */
     static bool isBigEndian();
+
+private:
+    ByteOrder();
+    ByteOrder (const ByteOrder&);
+    ByteOrder& operator= (const ByteOrder&);
 };
 
 

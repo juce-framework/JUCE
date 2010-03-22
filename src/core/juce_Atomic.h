@@ -53,6 +53,11 @@ public:
 
     /** This atomically sets *value1 to be value2, and returns the previous value of *value1. */
     static void* swapPointers (void* volatile* value1, void* value2);
+
+private:
+    Atomic();
+    Atomic (const Atomic&);
+    Atomic& operator= (const Atomic&);
 };
 
 

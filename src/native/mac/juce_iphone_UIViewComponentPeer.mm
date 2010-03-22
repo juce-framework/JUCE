@@ -34,10 +34,11 @@ END_JUCE_NAMESPACE
 
 #define JuceUIView MakeObjCClassName(JuceUIView)
 
-@interface JuceUIView : UIView
+@interface JuceUIView : UIView <UITextFieldDelegate>
 {
 @public
     UIViewComponentPeer* owner;
+    UITextField *hiddenTextField;
 }
 
 - (JuceUIView*) initWithOwner: (UIViewComponentPeer*) owner withFrame: (CGRect) frame;
@@ -56,7 +57,11 @@ END_JUCE_NAMESPACE
 
 - (void) asyncRepaint: (id) rect;
 
+- (BOOL) textField: (UITextField*) textField shouldChangeCharactersInRange: (NSRange) range replacementString: (NSString*) string;
+- (BOOL) textFieldShouldClear: (UITextField*) textField;
+- (BOOL) textFieldShouldReturn: (UITextField*) textField;
 @end
+
 
 //==============================================================================
 #define JuceUIWindow MakeObjCClassName(JuceUIWindow)
@@ -75,7 +80,8 @@ END_JUCE_NAMESPACE
 BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
-class UIViewComponentPeer  : public ComponentPeer
+class UIViewComponentPeer  : public ComponentPeer,
+                             public FocusChangeListener
 {
 public:
     UIViewComponentPeer (Component* const component,
@@ -123,6 +129,12 @@ public:
     void grabFocus();
     void textInputRequired (const Point<int>& position);
 
+    virtual BOOL textFieldReplaceCharacters (const Range<int>& range, const String& text);
+    virtual BOOL textFieldShouldClear();
+    virtual BOOL textFieldShouldReturn();
+    void updateHiddenTextContent (TextInputTarget* target);
+    void globalFocusChanged (Component*);
+
     void handleTouches (UIEvent* e, bool isDown, bool isUp, bool isCancel);
 
     //==============================================================================
@@ -157,11 +169,18 @@ END_JUCE_NAMESPACE
     [super initWithFrame: frame];
     owner = owner_;
 
+    hiddenTextField = [[UITextField alloc] initWithFrame: CGRectMake (0, 0, 0, 0)];
+    [self addSubview: hiddenTextField];
+    hiddenTextField.delegate = self;
+
     return self;
 }
 
 - (void) dealloc
 {
+    [hiddenTextField removeFromSuperview];
+    [hiddenTextField release];
+
     [super dealloc];
 }
 
@@ -247,6 +266,22 @@ JUCE_NAMESPACE::Point<int> juce_lastMousePos;
     [self setNeedsDisplayInRect: *r];
 }
 
+- (BOOL) textField: (UITextField*) textField shouldChangeCharactersInRange: (NSRange) range replacementString: (NSString*) text
+{
+    return owner->textFieldReplaceCharacters (Range<int> (range.location, range.location + range.length),
+                                              nsStringToJuce (text));
+}
+
+- (BOOL) textFieldShouldClear: (UITextField*) textField
+{
+    return owner->textFieldShouldClear();
+}
+
+- (BOOL) textFieldShouldReturn: (UITextField*) textField
+{
+    return owner->textFieldShouldReturn();
+}
+
 @end
 
 //==============================================================================
@@ -323,10 +358,14 @@ UIViewComponentPeer::UIViewComponentPeer (Component* const component,
     }
 
     setTitle (component->getName());
+
+    Desktop::getInstance().addFocusChangeListener (this);
 }
 
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    Desktop::getInstance().removeFocusChangeListener (this);
+
     view->owner = 0;
     [view removeFromSuperview];
     [view release];
@@ -674,6 +713,77 @@ void UIViewComponentPeer::grabFocus()
 
 void UIViewComponentPeer::textInputRequired (const Point<int>&)
 {
+}
+
+void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
+{
+    view->hiddenTextField.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
+}
+
+BOOL UIViewComponentPeer::textFieldReplaceCharacters (const Range<int>& range, const String& text)
+{
+    TextInputTarget* const target = findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        const Range<int> currentSelection (target->getHighlightedRegion());
+
+        if (range.getLength() == 1 && text.isEmpty()) // (detect backspace)
+            if (currentSelection.isEmpty())
+                target->setHighlightedRegion (currentSelection.withStart (currentSelection.getStart() - 1));
+
+        target->insertTextAtCaret (text);
+        updateHiddenTextContent (target);
+    }
+
+    return NO;
+}
+
+BOOL UIViewComponentPeer::textFieldShouldClear()
+{
+    TextInputTarget* const target = findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        target->setHighlightedRegion (Range<int> (0, std::numeric_limits<int>::max()));
+        target->insertTextAtCaret (String::empty);
+        updateHiddenTextContent (target);
+    }
+
+    return YES;
+}
+
+BOOL UIViewComponentPeer::textFieldShouldReturn()
+{
+    TextInputTarget* const target = findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        target->insertTextAtCaret (T("\n"));
+        updateHiddenTextContent (target);
+    }
+
+    return YES;
+}
+
+void UIViewComponentPeer::globalFocusChanged (Component*)
+{
+    TextInputTarget* const target = findCurrentTextInputTarget();
+
+    if (target != 0)
+    {
+        Component* comp = dynamic_cast<Component*> (target);
+
+        Point<int> pos (comp->relativePositionToOtherComponent (component, Point<int>()));
+        view->hiddenTextField.frame = CGRectMake (pos.getX(), pos.getY(), 0, 0);
+
+        updateHiddenTextContent (target);
+        [view->hiddenTextField becomeFirstResponder];
+    }
+    else
+    {
+        [view->hiddenTextField resignFirstResponder];
+    }
 }
 
 

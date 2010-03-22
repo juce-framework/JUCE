@@ -46,7 +46,8 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
       lastComponentUnderMouse (0),
       changedCompsSinceShown (true)
 {
-    startTimer (123);
+    if (Desktop::getInstance().getMainMouseSource().canHover())
+        startTimer (123);
 
     setAlwaysOnTop (true);
     setOpaque (true);

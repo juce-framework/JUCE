@@ -72,6 +72,9 @@ namespace OggVorbisNamespace
 #endif
 }
 
+#undef max
+#undef min
+
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_OggVorbisAudioFormat.h"
@@ -80,10 +83,9 @@ BEGIN_JUCE_NAMESPACE
 #include "../../io/files/juce_FileInputStream.h"
 #include "../../text/juce_LocalisedStrings.h"
 
-
 //==============================================================================
 static const char* const oggFormatName = "Ogg-Vorbis file";
-static const tchar* const oggExtensions[] =    { T(".ogg"), 0 };
+static const juce_wchar* const oggExtensions[] = { T(".ogg"), 0 };
 
 //==============================================================================
 class OggReader : public AudioFormatReader
@@ -393,7 +395,7 @@ public:
 
 //==============================================================================
 OggVorbisAudioFormat::OggVorbisAudioFormat()
-    : AudioFormat (TRANS (oggFormatName), (const tchar**) oggExtensions)
+    : AudioFormat (TRANS (oggFormatName), (const juce_wchar**) oggExtensions)
 {
 }
 

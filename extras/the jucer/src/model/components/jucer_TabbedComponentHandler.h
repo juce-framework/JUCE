@@ -597,7 +597,7 @@ private:
                               T("Change TabComponent tab depth"));
         }
 
-        const double getValue() const
+        double getValue() const
         {
             return component->getTabBarDepth();
         }
