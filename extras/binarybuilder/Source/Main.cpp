@@ -26,7 +26,7 @@ static int addFile (const File& file,
                            .replaceCharacter ('.', '_')
                            .retainCharacters (T("abcdefghijklmnopqrstuvwxyz_0123456789")));
 
-    std::cout << "Adding " << (const char*) name << ": "
+    std::cout << "Adding " << name << ": "
               << (int) mb.getSize() << " bytes" << std::endl;
 
     headerStream << "    extern const char*  " << name << ";\r\n"
@@ -97,7 +97,7 @@ int main (int argc, char* argv[])
     if (! sourceDirectory.isDirectory())
     {
         std::cout << "Source directory doesn't exist: "
-                  << (const char*) sourceDirectory.getFullPathName()
+                  << sourceDirectory.getFullPathName()
                   << std::endl << std::endl;
 
         return 0;
@@ -109,7 +109,7 @@ int main (int argc, char* argv[])
     if (! destDirectory.isDirectory())
     {
         std::cout << "Destination directory doesn't exist: "
-                  << (const char*) destDirectory.getFullPathName() << std::endl << std::endl;
+                  << destDirectory.getFullPathName() << std::endl << std::endl;
 
         return 0;
     }
@@ -120,9 +120,9 @@ int main (int argc, char* argv[])
     const File headerFile (destDirectory.getChildFile (className).withFileExtension (T(".h")));
     const File cppFile    (destDirectory.getChildFile (className).withFileExtension (T(".cpp")));
 
-    std::cout << "Creating " << (const char*) headerFile.getFullPathName()
-              << " and " << (const char*) cppFile.getFullPathName()
-              << " from files in " << (const char*) sourceDirectory.getFullPathName()
+    std::cout << "Creating " << headerFile.getFullPathName()
+              << " and " << cppFile.getFullPathName()
+              << " from files in " << sourceDirectory.getFullPathName()
               << "..." << std::endl << std::endl;
 
     Array <File> files;
@@ -132,7 +132,7 @@ int main (int argc, char* argv[])
     if (files.size() == 0)
     {
         std::cout << "Didn't find any source files in: "
-                  << (const char*) sourceDirectory.getFullPathName() << std::endl << std::endl;
+                  << sourceDirectory.getFullPathName() << std::endl << std::endl;
         return 0;
     }
 
@@ -144,7 +144,7 @@ int main (int argc, char* argv[])
     if (header == 0)
     {
         std::cout << "Couldn't open "
-                  << (const char*) headerFile.getFullPathName() << " for writing" << std::endl << std::endl;
+                  << headerFile.getFullPathName() << " for writing" << std::endl << std::endl;
         return 0;
     }
 
@@ -153,7 +153,7 @@ int main (int argc, char* argv[])
     if (cpp == 0)
     {
         std::cout << "Couldn't open "
-                  << (const char*) cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
+                  << cppFile.getFullPathName() << " for writing" << std::endl << std::endl;
         return 0;
     }
 
