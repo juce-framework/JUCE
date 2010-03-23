@@ -508,7 +508,7 @@ void ColourSelector::paint (Graphics& g)
         for (int i = 4; --i >= 0;)
         {
             if (sliders[i]->isVisible())
-                g.drawText (sliders[i]->getName() + T(":"),
+                g.drawText (sliders[i]->getName() + ":",
                             0, sliders[i]->getY(),
                             sliders[i]->getX() - 8, sliders[i]->getHeight(),
                             Justification::centredRight, false);

@@ -82,21 +82,21 @@ void DocumentEditorComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Save" + name,
                         "Saves the current document",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::saveDocumentAs:
         result.setInfo ("Save" + name + " As...",
                         "Saves the current document to a different filename",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::closeDocument:
         result.setInfo ("Close" + name,
                         "Closes the current document",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('w'), ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     default:

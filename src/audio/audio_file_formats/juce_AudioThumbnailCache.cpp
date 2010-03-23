@@ -44,7 +44,7 @@ struct ThumbnailCacheEntry
 
 //==============================================================================
 AudioThumbnailCache::AudioThumbnailCache (const int maxNumThumbsToStore_)
-    : TimeSliceThread (T("thumb cache")),
+    : TimeSliceThread ("thumb cache"),
       maxNumThumbsToStore (maxNumThumbsToStore_)
 {
     startThread (2);

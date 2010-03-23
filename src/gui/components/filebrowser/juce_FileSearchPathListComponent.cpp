@@ -153,7 +153,7 @@ void FileSearchPathListComponent::deleteKeyPressed (int row)
 
 void FileSearchPathListComponent::returnKeyPressed (int row)
 {
-    FileChooser chooser (TRANS("Change folder..."), path [row], T("*"));
+    FileChooser chooser (TRANS("Change folder..."), path [row], "*");
 
     if (chooser.browseForDirectory())
     {
@@ -234,7 +234,7 @@ void FileSearchPathListComponent::buttonClicked (Button* button)
         if (start == File::nonexistent)
             start = File::getCurrentWorkingDirectory();
 
-        FileChooser chooser (TRANS("Add a folder..."), start, T("*"));
+        FileChooser chooser (TRANS("Add a folder..."), start, "*");
 
         if (chooser.browseForDirectory())
         {

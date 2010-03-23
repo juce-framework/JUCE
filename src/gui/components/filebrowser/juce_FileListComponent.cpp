@@ -206,7 +206,7 @@ private:
     {
         if (icon == 0)
         {
-            const int hashCode = (file.getFullPathName() + T("_iconCacheSalt")).hashCode();
+            const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
             Image* im = ImageCache::getFromHashCode (hashCode);
 
             if (im == 0 && ! onlyUpdateIfCached)

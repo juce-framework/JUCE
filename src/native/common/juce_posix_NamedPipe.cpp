@@ -95,10 +95,10 @@ bool NamedPipe::openInternal (const String& pipeName, const bool createPipe)
     signal (SIGPIPE, NamedPipeInternal::signalHandler);
     siginterrupt (SIGPIPE, 1);
 
-    const String pipePath (T("/tmp/") + File::createLegalFileName  (pipeName));
+    const String pipePath ("/tmp/" + File::createLegalFileName (pipeName));
 
-    intern->pipeInName  = pipePath + T("_in");
-    intern->pipeOutName = pipePath + T("_out");
+    intern->pipeInName  = pipePath + "_in";
+    intern->pipeOutName = pipePath + "_out";
     intern->pipeIn = -1;
     intern->pipeOut = -1;
 

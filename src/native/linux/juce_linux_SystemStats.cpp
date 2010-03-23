@@ -41,7 +41,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
 
 const String SystemStats::getOperatingSystemName() throw()
 {
-    return T("Linux");
+    return "Linux";
 }
 
 bool SystemStats::isOperatingSystem64Bit() throw()

@@ -361,7 +361,7 @@ bool juce_writeJPEGImageToStream (const Image& image,
 
     jpegCompStruct.dct_method = JDCT_FLOAT;
     jpegCompStruct.optimize_coding = 1;
-//    jpegCompStruct.smoothing_factor = 10;
+    //jpegCompStruct.smoothing_factor = 10;
 
     if (quality < 0.0f)
         quality = 0.85f;
@@ -373,8 +373,7 @@ bool juce_writeJPEGImageToStream (const Image& image,
     const int strideBytes = jpegCompStruct.image_width * jpegCompStruct.input_components;
 
     JSAMPARRAY buffer = (*jpegCompStruct.mem->alloc_sarray) ((j_common_ptr) &jpegCompStruct,
-                                                    JPOOL_IMAGE,
-                                                    strideBytes, 1);
+                                                             JPOOL_IMAGE, strideBytes, 1);
 
     const Image::BitmapData srcData (image, 0, 0, jpegCompStruct.image_width, jpegCompStruct.image_height);
 

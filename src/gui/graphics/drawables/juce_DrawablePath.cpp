@@ -168,12 +168,12 @@ static ValueTree createTreeForFillType (const String& tagName, const FillType& f
 
     if (fillType.isColour())
     {
-        v.setProperty ("type", T("solid"), 0);
+        v.setProperty ("type", "solid", 0);
         v.setProperty ("colour", String::toHexString ((int) fillType.colour.getARGB()), 0);
     }
     else if (fillType.isGradient())
     {
-        v.setProperty ("type", T("gradient"), 0);
+        v.setProperty ("type", "gradient", 0);
         v.setProperty ("x1", fillType.gradient->x1, 0);
         v.setProperty ("y1", fillType.gradient->y1, 0);
         v.setProperty ("x2", fillType.gradient->x2, 0);
@@ -197,19 +197,19 @@ static ValueTree createTreeForFillType (const String& tagName, const FillType& f
 
 ValueTree DrawablePath::createValueTree() const throw()
 {
-    ValueTree v (T("Path"));
+    ValueTree v ("Path");
 
-    v.addChild (createTreeForFillType (T("fill"), mainFill), -1, 0);
-    v.addChild (createTreeForFillType (T("stroke"), strokeFill), -1, 0);
+    v.addChild (createTreeForFillType ("fill", mainFill), -1, 0);
+    v.addChild (createTreeForFillType ("stroke", strokeFill), -1, 0);
 
     if (getName().isNotEmpty())
         v.setProperty ("id", getName(), 0);
 
     v.setProperty ("strokeWidth", (double) strokeType.getStrokeThickness(), 0);
     v.setProperty ("jointStyle", strokeType.getJointStyle() == PathStrokeType::mitered
-                                    ? T("miter") : (strokeType.getJointStyle() == PathStrokeType::curved ? T("curved") : T("bevel")), 0);
+                                    ? "miter" : (strokeType.getJointStyle() == PathStrokeType::curved ? "curved" : "bevel"), 0);
     v.setProperty ("capStyle", strokeType.getEndStyle() == PathStrokeType::butt
-                                    ? T("butt") : (strokeType.getEndStyle() == PathStrokeType::square ? T("square") : T("round")), 0);
+                                    ? "butt" : (strokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), 0);
     v.setProperty ("path", path.toString(), 0);
 
     return v;
@@ -223,8 +223,8 @@ DrawablePath* DrawablePath::createFromValueTree (const ValueTree& tree) throw()
     DrawablePath* p = new DrawablePath();
 
     p->setName (tree ["id"]);
-    p->mainFill = readFillTypeFromTree (tree.getChildWithName (T("fill")));
-    p->strokeFill = readFillTypeFromTree (tree.getChildWithName (T("stroke")));
+    p->mainFill = readFillTypeFromTree (tree.getChildWithName ("fill"));
+    p->strokeFill = readFillTypeFromTree (tree.getChildWithName ("stroke"));
 
     const String jointStyle (tree ["jointStyle"].toString());
     const String endStyle (tree ["capStyle"].toString());

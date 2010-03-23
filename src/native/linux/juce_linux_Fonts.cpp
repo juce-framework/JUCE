@@ -47,14 +47,14 @@ public:
     };
 
     //==============================================================================
-    FreeTypeFontFace (const String& familyName) throw()
+    FreeTypeFontFace (const String& familyName)
       : hasSerif (false),
         monospaced (false)
     {
         family = familyName;
     }
 
-    void setFileName (const String& name, const int faceIndex, FontStyle style) throw()
+    void setFileName (const String& name, const int faceIndex, FontStyle style)
     {
         if (names [(int) style].fileName.isEmpty())
         {
@@ -89,7 +89,7 @@ class FreeTypeInterface  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    FreeTypeInterface() throw()
+    FreeTypeInterface()
         : lastFace (0),
           lastBold (false),
           lastItalic (false)
@@ -97,7 +97,7 @@ public:
         if (FT_Init_FreeType (&ftLib) != 0)
         {
             ftLib = 0;
-            DBG (T("Failed to initialize FreeType"));
+            DBG ("Failed to initialize FreeType");
         }
 
         StringArray fontDirs;
@@ -111,7 +111,7 @@ public:
 
             if (fontsInfo != 0)
             {
-                forEachXmlChildElementWithTagName (*fontsInfo, e, T("dir"))
+                forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
                 {
                     fontDirs.add (e->getAllSubText().trim());
                 }
@@ -127,7 +127,7 @@ public:
             enumerateFaces (fontDirs[i]);
     }
 
-    ~FreeTypeInterface() throw()
+    ~FreeTypeInterface()
     {
         if (lastFace != 0)
             FT_Done_Face (lastFace);
@@ -139,8 +139,7 @@ public:
     }
 
     //==============================================================================
-    FreeTypeFontFace* findOrCreate (const String& familyName,
-                                    const bool create = false) throw()
+    FreeTypeFontFace* findOrCreate (const String& familyName, const bool create = false)
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getFamilyName() == familyName)
@@ -156,7 +155,7 @@ public:
     }
 
     // Enumerate all font faces available in a given directory
-    void enumerateFaces (const String& path) throw()
+    void enumerateFaces (const String& path)
     {
         File dirPath (path);
         if (path.isEmpty() || ! dirPath.isDirectory())
@@ -168,9 +167,9 @@ public:
         {
             File possible (di.getFile());
 
-            if (possible.hasFileExtension (T("ttf"))
-                 || possible.hasFileExtension (T("pfb"))
-                 || possible.hasFileExtension (T("pcf")))
+            if (possible.hasFileExtension ("ttf")
+                 || possible.hasFileExtension ("pfb")
+                 || possible.hasFileExtension ("pcf"))
             {
                 FT_Face face;
                 int faceIndex = 0;
@@ -216,9 +215,7 @@ public:
     }
 
     // Create a FreeType face object for a given font
-    FT_Face createFT_Face (const String& fontName,
-                           const bool bold,
-                           const bool italic) throw()
+    FT_Face createFT_Face (const String& fontName, const bool bold, const bool italic)
     {
         FT_Face face = 0;
 
@@ -288,7 +285,7 @@ public:
         return face;
     }
 
-    bool addGlyph (FT_Face face, CustomTypeface& dest, uint32 character) throw()
+    bool addGlyph (FT_Face face, CustomTypeface& dest, uint32 character)
     {
         const unsigned int glyphIndex = FT_Get_Char_Index (face, character);
         const float height = (float) (face->ascender - face->descender);
@@ -394,7 +391,7 @@ public:
         return true;
     }
 
-    void addKerning (FT_Face face, CustomTypeface& dest, const uint32 character, const uint32 glyphIndex) throw()
+    void addKerning (FT_Face face, CustomTypeface& dest, const uint32 character, const uint32 glyphIndex)
     {
         const float height = (float) (face->ascender - face->descender);
 
@@ -418,7 +415,7 @@ public:
     // Add a glyph to a font
     bool addGlyphToFont (const uint32 character,
                          const tchar* fontName, bool bold, bool italic,
-                         CustomTypeface& dest) throw()
+                         CustomTypeface& dest)
     {
         FT_Face face = createFT_Face (fontName, bold, italic);
 
@@ -429,27 +426,27 @@ public:
     }
 
     //==============================================================================
-    void getFamilyNames (StringArray& familyNames) const throw()
+    void getFamilyNames (StringArray& familyNames) const
     {
         for (int i = 0; i < faces.size(); i++)
             familyNames.add (faces[i]->getFamilyName());
     }
 
-    void getMonospacedNames (StringArray& monoSpaced) const throw()
+    void getMonospacedNames (StringArray& monoSpaced) const
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getMonospaced())
                 monoSpaced.add (faces[i]->getFamilyName());
     }
 
-    void getSerifNames (StringArray& serif) const throw()
+    void getSerifNames (StringArray& serif) const
     {
         for (int i = 0; i < faces.size(); i++)
             if (faces[i]->getSerif())
                 serif.add (faces[i]->getFamilyName());
     }
 
-    void getSansSerifNames (StringArray& sansSerif) const throw()
+    void getSansSerifNames (StringArray& sansSerif) const
     {
         for (int i = 0; i < faces.size(); i++)
             if (! faces[i]->getSerif())
@@ -482,7 +479,7 @@ public:
         if (face == 0)
         {
 #ifdef JUCE_DEBUG
-            String msg (T("Failed to create typeface: "));
+            String msg ("Failed to create typeface: ");
             msg << font.getTypefaceName() << " " << (font.isBold() ? 'B' : ' ') << (font.isItalic() ? 'I' : ' ');
             DBG (msg);
 #endif
@@ -509,7 +506,7 @@ const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 }
 
 //==============================================================================
-const StringArray Font::findAllTypefaceNames() throw()
+const StringArray Font::findAllTypefaceNames()
 {
     StringArray s;
     FreeTypeInterface::getInstance()->getFamilyNames (s);
@@ -567,7 +564,7 @@ static const String linux_getDefaultMonospacedFontName()
     return pickBestFont (allFonts, "Bitstream Vera Sans Mono, Courier, Sans Mono, Mono");
 }
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
 {
     defaultSans = linux_getDefaultSansSerifFontName();
     defaultSerif = linux_getDefaultSerifFontName();

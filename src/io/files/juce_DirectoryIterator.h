@@ -70,7 +70,7 @@ public:
     */
     DirectoryIterator (const File& directory,
                        bool isRecursive,
-                       const String& wildCard = JUCE_T("*"),
+                       const String& wildCard = "*",
                        int whatToLookFor = File::findFiles);
 
     /** Destructor. */

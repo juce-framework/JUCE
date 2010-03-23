@@ -71,13 +71,13 @@ public:
 
     const RelativePath withFileExtension (const String& extension) const
     {
-        return RelativePath (path.upToLastOccurrenceOf (T("."), ! extension.startsWithChar (T('.')), false) + extension, root);
+        return RelativePath (path.upToLastOccurrenceOf (T("."), ! extension.startsWithChar ('.'), false) + extension, root);
     }
 
     const RelativePath getParentDirectory() const
     {
         String p (path);
-        if (path.endsWithChar (T('/')))
+        if (path.endsWithChar ('/'))
             p = p.dropLastCharacters (1);
 
         return RelativePath (p.upToLastOccurrenceOf (T("/"), false, false), root);
@@ -89,7 +89,7 @@ public:
             return RelativePath (subpath, root);
 
         String p (toUnixStyle());
-        if (! p.endsWithChar (T('/')))
+        if (! p.endsWithChar ('/'))
             p << '/';
 
         return RelativePath (p + subpath, root);
@@ -116,9 +116,9 @@ private:
     static bool isAbsolute (const String& path)
     {
         return File::isAbsolutePath (path)
-                || path.startsWithChar (T('$'))
-                || path.startsWithChar (T('~'))
-                || (CharacterFunctions::isLetter (path[0]) && path[1] == T(':'));
+                || path.startsWithChar ('$')
+                || path.startsWithChar ('~')
+                || (CharacterFunctions::isLetter (path[0]) && path[1] == ':');
     }
 };
 

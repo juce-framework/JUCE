@@ -220,7 +220,7 @@ void NewFileWizard::showFailedToWriteMessage (const File& file)
 const File NewFileWizard::askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
                                                   const Project::Item& projectGroupToAddTo)
 {
-    FileChooser fc (T("Select File to Create"),
+    FileChooser fc ("Select File to Create",
                     projectGroupToAddTo.determineGroupFolder()
                                        .getChildFile (suggestedFilename)
                                        .getNonexistentSibling(),

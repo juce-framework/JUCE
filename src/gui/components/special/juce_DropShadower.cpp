@@ -231,10 +231,7 @@ void DropShadower::updateShadows()
     {
         // keep a cached version of the image to save doing the gaussian too often
         String imageId;
-        imageId << shadowEdge << T(',')
-                << xOffset << T(',')
-                << yOffset << T(',')
-                << alpha;
+        imageId << shadowEdge << ',' << xOffset << ',' << yOffset << ',' << alpha;
 
         const int hash = imageId.hashCode();
 
@@ -329,12 +326,8 @@ void DropShadower::updateShadows()
         bringShadowWindowsToFront();
 }
 
-void DropShadower::setShadowImage (Image* const src,
-                                   const int num,
-                                   const int w,
-                                   const int h,
-                                   const int sx,
-                                   const int sy)
+void DropShadower::setShadowImage (Image* const src, const int num, const int w, const int h,
+                                   const int sx, const int sy)
 {
     shadowImageSections[num] = new Image (Image::ARGB, w, h, true);
 

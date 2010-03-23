@@ -396,16 +396,16 @@ int StringArray::addLines (const String& sourceText)
 
         while (*text != 0)
         {
-            if (*text == T('\r'))
+            if (*text == '\r')
             {
                 ++text;
-                if (*text == T('\n'))
+                if (*text == '\n')
                     ++text;
 
                 break;
             }
 
-            if (*text == T('\n'))
+            if (*text == '\n')
             {
                 ++text;
                 break;
@@ -415,10 +415,10 @@ int StringArray::addLines (const String& sourceText)
         }
 
         const juce_wchar* endOfLine = text;
-        if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
+        if (endOfLine > startOfLine && (*(endOfLine - 1) == '\r' || *(endOfLine - 1) == '\n'))
             --endOfLine;
 
-        if (endOfLine > startOfLine && (*(endOfLine - 1) == T('\r') || *(endOfLine - 1) == T('\n')))
+        if (endOfLine > startOfLine && (*(endOfLine - 1) == '\r' || *(endOfLine - 1) == '\n'))
             --endOfLine;
 
         add (String (startOfLine, jmax (0, (int) (endOfLine - startOfLine))));

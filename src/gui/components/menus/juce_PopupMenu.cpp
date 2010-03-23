@@ -264,7 +264,7 @@ class PopupMenu::Window  : public Component,
 public:
     //==============================================================================
     Window()
-       : Component (T("menu")),
+       : Component ("menu"),
          owner (0),
          currentChild (0),
          activeSubMenu (0),

@@ -29,118 +29,115 @@
 
 
 //==============================================================================
-static const void* defaultDirPath = 0;
-static String returnedString; // need this to get non-existent pathnames from the directory chooser
-static Component* currentExtraFileWin = 0;
-
-static bool areThereAnyAlwaysOnTopWindows()
-{
-    for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
-    {
-        Component* c = Desktop::getInstance().getComponent (i);
-
-        if (c != 0 && c->isAlwaysOnTop() && c->isShowing())
-            return true;
-    }
-
-    return false;
-}
-
-static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM /*lpData*/)
-{
-    if (msg == BFFM_INITIALIZED)
-    {
-        SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) defaultDirPath);
-    }
-    else if (msg == BFFM_VALIDATEFAILEDW)
-    {
-        returnedString = (LPCWSTR) lParam;
-    }
-    else if (msg == BFFM_VALIDATEFAILEDA)
-    {
-        returnedString = (const char*) lParam;
-    }
-
-    return 0;
-}
-
 void juce_setWindowStyleBit (HWND h, const int styleType, const int feature, const bool bitIsSet) throw();
 
-static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
+namespace FileChooserHelpers
 {
-    if (currentExtraFileWin != 0)
+    static const void* defaultDirPath = 0;
+    static String returnedString; // need this to get non-existent pathnames from the directory chooser
+    static Component* currentExtraFileWin = 0;
+
+    static bool areThereAnyAlwaysOnTopWindows()
     {
-        if (uiMsg == WM_INITDIALOG)
+        for (int i = Desktop::getInstance().getNumComponents(); --i >= 0;)
         {
-            HWND dialogH = GetParent (hdlg);
-            jassert (dialogH != 0);
-            if (dialogH == 0)
-                dialogH = hdlg;
+            Component* c = Desktop::getInstance().getComponent (i);
 
-            RECT r, cr;
-            GetWindowRect (dialogH, &r);
-            GetClientRect (dialogH, &cr);
-
-            SetWindowPos (dialogH, 0,
-                          r.left, r.top,
-                          currentExtraFileWin->getWidth() + jmax (150, (int) (r.right - r.left)),
-                          jmax (150, (int) (r.bottom - r.top)),
-                          SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
-
-            currentExtraFileWin->setBounds (cr.right, cr.top, currentExtraFileWin->getWidth(), cr.bottom - cr.top);
-            currentExtraFileWin->getChildComponent(0)->setBounds (0, 0, currentExtraFileWin->getWidth(), currentExtraFileWin->getHeight());
-
-            SetParent ((HWND) currentExtraFileWin->getWindowHandle(), (HWND) dialogH);
-            juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_CHILD, (dialogH != 0));
-            juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_POPUP, (dialogH == 0));
+            if (c != 0 && c->isAlwaysOnTop() && c->isShowing())
+                return true;
         }
-        else if (uiMsg == WM_NOTIFY)
+
+        return false;
+    }
+
+    static int CALLBACK browseCallbackProc (HWND hWnd, UINT msg, LPARAM lParam, LPARAM /*lpData*/)
+    {
+        if (msg == BFFM_INITIALIZED)
+            SendMessage (hWnd, BFFM_SETSELECTIONW, TRUE, (LPARAM) defaultDirPath);
+        else if (msg == BFFM_VALIDATEFAILEDW)
+            returnedString = (LPCWSTR) lParam;
+        else if (msg == BFFM_VALIDATEFAILEDA)
+            returnedString = (const char*) lParam;
+
+        return 0;
+    }
+
+    static UINT_PTR CALLBACK openCallback (HWND hdlg, UINT uiMsg, WPARAM /*wParam*/, LPARAM lParam)
+    {
+        if (currentExtraFileWin != 0)
         {
-            LPOFNOTIFY ofn = (LPOFNOTIFY) lParam;
-
-            if (ofn->hdr.code == CDN_SELCHANGE)
+            if (uiMsg == WM_INITDIALOG)
             {
-                FilePreviewComponent* comp = (FilePreviewComponent*) currentExtraFileWin->getChildComponent(0);
+                HWND dialogH = GetParent (hdlg);
+                jassert (dialogH != 0);
+                if (dialogH == 0)
+                    dialogH = hdlg;
 
-                if (comp != 0)
+                RECT r, cr;
+                GetWindowRect (dialogH, &r);
+                GetClientRect (dialogH, &cr);
+
+                SetWindowPos (dialogH, 0,
+                              r.left, r.top,
+                              currentExtraFileWin->getWidth() + jmax (150, (int) (r.right - r.left)),
+                              jmax (150, (int) (r.bottom - r.top)),
+                              SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER);
+
+                currentExtraFileWin->setBounds (cr.right, cr.top, currentExtraFileWin->getWidth(), cr.bottom - cr.top);
+                currentExtraFileWin->getChildComponent(0)->setBounds (0, 0, currentExtraFileWin->getWidth(), currentExtraFileWin->getHeight());
+
+                SetParent ((HWND) currentExtraFileWin->getWindowHandle(), (HWND) dialogH);
+                juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_CHILD, (dialogH != 0));
+                juce_setWindowStyleBit ((HWND)currentExtraFileWin->getWindowHandle(), GWL_STYLE, WS_POPUP, (dialogH == 0));
+            }
+            else if (uiMsg == WM_NOTIFY)
+            {
+                LPOFNOTIFY ofn = (LPOFNOTIFY) lParam;
+
+                if (ofn->hdr.code == CDN_SELCHANGE)
                 {
-                    TCHAR path [MAX_PATH * 2];
-                    path[0] = 0;
-                    CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
+                    FilePreviewComponent* comp = (FilePreviewComponent*) currentExtraFileWin->getChildComponent(0);
 
-                    const String fn ((const WCHAR*) path);
+                    if (comp != 0)
+                    {
+                        TCHAR path [MAX_PATH * 2];
+                        path[0] = 0;
+                        CommDlg_OpenSave_GetFilePath (GetParent (hdlg), (LPARAM) &path, MAX_PATH);
 
-                    comp->selectedFileChanged (File (fn));
+                        const String fn ((const WCHAR*) path);
+
+                        comp->selectedFileChanged (File (fn));
+                    }
                 }
             }
         }
+
+        return 0;
     }
 
-    return 0;
+    class FPComponentHolder  : public Component
+    {
+    public:
+        FPComponentHolder()
+        {
+            setVisible (true);
+            setOpaque (true);
+        }
+
+        ~FPComponentHolder()
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::lightgrey);
+        }
+
+    private:
+        FPComponentHolder (const FPComponentHolder&);
+        FPComponentHolder& operator= (const FPComponentHolder&);
+    };
 }
-
-class FPComponentHolder  : public Component
-{
-public:
-    FPComponentHolder()
-    {
-        setVisible (true);
-        setOpaque (true);
-    }
-
-    ~FPComponentHolder()
-    {
-    }
-
-    void paint (Graphics& g)
-    {
-        g.fillAll (Colours::lightgrey);
-    }
-
-private:
-    FPComponentHolder (const FPComponentHolder&);
-    FPComponentHolder& operator= (const FPComponentHolder&);
-};
 
 //==============================================================================
 void FileChooser::showPlatformDialog (Array<File>& results,
@@ -154,6 +151,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* extraInfoComponent)
 {
+    using namespace FileChooserHelpers;
     const int numCharsAvailable = 32768;
     MemoryBlock filenameSpace ((numCharsAvailable + 1) * sizeof (WCHAR), true);
     WCHAR* const fname = (WCHAR*) filenameSpace.getData();
@@ -324,7 +322,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
         while (*filename != 0)
         {
-            const String filepath (String (files) + T("\\") + String (filename));
+            const String filepath (String (files) + "\\" + String (filename));
             results.add (File (filepath));
             filename += CharacterFunctions::length (filename) + 1;
         }

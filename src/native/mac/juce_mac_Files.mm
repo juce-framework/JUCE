@@ -102,7 +102,7 @@ bool juce_copyFile (const String& src, const String& dst)
 const StringArray juce_getFileSystemRoots()
 {
     StringArray s;
-    s.add (T("/"));
+    s.add ("/");
     return s;
 }
 
@@ -160,7 +160,7 @@ bool File::isOnRemovableDrive() const
 static bool juce_isHiddenFile (const String& path)
 {
 #if JUCE_IPHONE
-    return File (path).getFileName().startsWithChar (T('.'));
+    return File (path).getFileName().startsWithChar ('.');
 #else
     FSRef ref;
     if (! PlatformUtilities::makeFSRefFromPath (&ref, path))
@@ -226,7 +226,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
 
     case tempDirectory:
     {
-        File tmp (T("~/Library/Caches/") + juce_getExecutableFile().getFileNameWithoutExtension());
+        File tmp ("~/Library/Caches/" + juce_getExecutableFile().getFileNameWithoutExtension());
 
         tmp.createDirectory();
         return tmp.getFullPathName();
@@ -475,7 +475,7 @@ bool juce_launchFile (const String& fileName, const String& parameters)
         }
         else
         {
-            ok = juce_launchExecutable (T("\"") + fileName + T("\" ") + parameters);
+            ok = juce_launchExecutable ("\"" + fileName + "\" " + parameters);
         }
     }
 

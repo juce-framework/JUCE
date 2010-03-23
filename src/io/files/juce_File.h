@@ -532,7 +532,7 @@ public:
     int findChildFiles (Array<File>& results,
                         int whatToLookFor,
                         bool searchRecursively,
-                        const String& wildCardPattern = JUCE_T("*")) const;
+                        const String& wildCardPattern = "*") const;
 
     /** Searches inside a directory and counts how many files match a wildcard pattern.
 
@@ -551,7 +551,7 @@ public:
         @see findChildFiles, DirectoryIterator
     */
     int getNumberOfChildFiles (int whatToLookFor,
-                               const String& wildCardPattern = JUCE_T("*")) const;
+                               const String& wildCardPattern = "*") const;
 
     /** Returns true if this file is a directory that contains one or more subdirectories.
         @see isDirectory, findChildFiles

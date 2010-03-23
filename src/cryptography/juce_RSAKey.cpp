@@ -39,7 +39,7 @@ RSAKey::RSAKey()
 
 RSAKey::RSAKey (const String& s)
 {
-    if (s.containsChar (T(',')))
+    if (s.containsChar (','))
     {
         part1.parseString (s.upToFirstOccurrenceOf (T(","), false, false), 16);
         part2.parseString (s.fromFirstOccurrenceOf (T(","), false, false), 16);

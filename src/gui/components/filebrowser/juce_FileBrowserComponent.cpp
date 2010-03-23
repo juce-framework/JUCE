@@ -333,7 +333,7 @@ void FileBrowserComponent::selectionChanged()
     }
 
     if (newFilenames.size() > 0)
-        filenameBox->setText (newFilenames.joinIntoString (T(", ")), false);
+        filenameBox->setText (newFilenames.joinIntoString (", "), false);
 
     sendListenerChangeMessage();
 }
@@ -516,7 +516,7 @@ const BigInteger FileBrowserComponent::getRoots (StringArray& rootNames, StringA
     {
         const File& volume = volumes.getReference(i);
 
-        if (volume.isDirectory() && ! volume.getFileName().startsWithChar (T('.')))
+        if (volume.isDirectory() && ! volume.getFileName().startsWithChar ('.'))
         {
             rootPaths.add (volume.getFullPathName());
             rootNames.add (volume.getFileName());

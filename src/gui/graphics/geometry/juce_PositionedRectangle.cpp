@@ -108,11 +108,11 @@ const String PositionedRectangle::toString() const throw()
     s.preallocateStorage (12);
 
     addPosDescription (s, xMode, x);
-    s << T(' ');
+    s << ' ';
     addPosDescription (s, yMode, y);
-    s << T(' ');
+    s << ' ';
     addSizeDescription (s, wMode, w);
-    s << T(' ');
+    s << ' ';
     addSizeDescription (s, hMode, h);
 
     return s;
@@ -251,53 +251,53 @@ void PositionedRectangle::addPosDescription (String& s, const uint8 mode, const 
 {
     if ((mode & proportionOfParentSize) != 0)
     {
-        s << (roundToInt (value * 100000.0) / 1000.0) << T('%');
+        s << (roundToInt (value * 100000.0) / 1000.0) << '%';
     }
     else
     {
         s << (roundToInt (value * 100.0) / 100.0);
 
         if ((mode & absoluteFromParentBottomRight) != 0)
-            s << T('R');
+            s << 'R';
         else if ((mode & absoluteFromParentCentre) != 0)
-            s << T('C');
+            s << 'C';
     }
 
     if ((mode & anchorAtRightOrBottom) != 0)
-        s << T('r');
+        s << 'r';
     else if ((mode & anchorAtCentre) != 0)
-        s << T('c');
+        s << 'c';
 }
 
 void PositionedRectangle::addSizeDescription (String& s, const uint8 mode, const double value) const throw()
 {
     if (mode == proportionalSize)
-        s << (roundToInt (value * 100000.0) / 1000.0) << T('%');
+        s << (roundToInt (value * 100000.0) / 1000.0) << '%';
     else if (mode == parentSizeMinusAbsolute)
-        s << (roundToInt (value * 100.0) / 100.0) << T('M');
+        s << (roundToInt (value * 100.0) / 100.0) << 'M';
     else
         s << (roundToInt (value * 100.0) / 100.0);
 }
 
 void PositionedRectangle::decodePosString (const String& s, uint8& mode, double& value) throw()
 {
-    if (s.containsChar (T('r')))
+    if (s.containsChar ('r'))
         mode = anchorAtRightOrBottom;
-    else if (s.containsChar (T('c')))
+    else if (s.containsChar ('c'))
         mode = anchorAtCentre;
     else
         mode = anchorAtLeftOrTop;
 
-    if (s.containsChar (T('%')))
+    if (s.containsChar ('%'))
     {
         mode |= proportionOfParentSize;
         value = s.removeCharacters (T("%rcRC")).getDoubleValue() / 100.0;
     }
     else
     {
-        if (s.containsChar (T('R')))
+        if (s.containsChar ('R'))
             mode |= absoluteFromParentBottomRight;
-        else if (s.containsChar (T('C')))
+        else if (s.containsChar ('C'))
             mode |= absoluteFromParentCentre;
         else
             mode |= absoluteFromParentTopLeft;
@@ -308,12 +308,12 @@ void PositionedRectangle::decodePosString (const String& s, uint8& mode, double&
 
 void PositionedRectangle::decodeSizeString (const String& s, uint8& mode, double& value) throw()
 {
-    if (s.containsChar (T('%')))
+    if (s.containsChar ('%'))
     {
         mode = proportionalSize;
         value = s.upToFirstOccurrenceOf (T("%"), false, false).getDoubleValue() / 100.0;
     }
-    else if (s.containsChar (T('M')))
+    else if (s.containsChar ('M'))
     {
         mode = parentSizeMinusAbsolute;
         value = s.getDoubleValue();

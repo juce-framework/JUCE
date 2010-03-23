@@ -1663,11 +1663,11 @@ const StringArray AudioCDReader::getAvailableCDNames()
             String s;
 
             if (list[i].scsiDriveLetter > 0)
-                s << String::charToString (list[i].scsiDriveLetter).toUpperCase() << T(": ");
+                s << String::charToString (list[i].scsiDriveLetter).toUpperCase() << ": ";
 
             s << String (list[i].vendor).trim()
-              << T(" ") << String (list[i].productId).trim()
-              << T(" ") << String (list[i].rev).trim();
+              << ' ' << String (list[i].productId).trim()
+              << ' ' << String (list[i].rev).trim();
 
             results.add (s);
         }
@@ -1706,7 +1706,7 @@ AudioCDReader* AudioCDReader::createReaderForCD (const int deviceIndex)
 }
 
 AudioCDReader::AudioCDReader (void* handle_)
-    : AudioFormatReader (0, T("CD Audio")),
+    : AudioFormatReader (0, "CD Audio"),
       handle (handle_),
       indexingEnabled (false),
       lastIndex (0),

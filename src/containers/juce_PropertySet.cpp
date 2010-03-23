@@ -184,7 +184,7 @@ void PropertySet::setValue (const String& keyName, const double value) throw()
 
 void PropertySet::setValue (const String& keyName, const bool value) throw()
 {
-    setValue (keyName, String ((value) ? T("1") : T("0")));
+    setValue (keyName, String (value ? "1" : "0"));
 }
 
 void PropertySet::setValue (const String& keyName, const XmlElement* const xml)
@@ -213,8 +213,8 @@ XmlElement* PropertySet::createXml (const String& nodeName) const throw()
     for (int i = 0; i < properties.getAllKeys().size(); ++i)
     {
         XmlElement* const e = xml->createNewChildElement ("VALUE");
-        e->setAttribute (T("name"), properties.getAllKeys()[i]);
-        e->setAttribute (T("val"), properties.getAllValues()[i]);
+        e->setAttribute ("name", properties.getAllKeys()[i]);
+        e->setAttribute ("val", properties.getAllValues()[i]);
     }
 
     return xml;
@@ -225,13 +225,13 @@ void PropertySet::restoreFromXml (const XmlElement& xml) throw()
     const ScopedLock sl (lock);
     clear();
 
-    forEachXmlChildElementWithTagName (xml, e, T("VALUE"))
+    forEachXmlChildElementWithTagName (xml, e, "VALUE")
     {
-        if (e->hasAttribute (T("name"))
-             && e->hasAttribute (T("val")))
+        if (e->hasAttribute ("name")
+             && e->hasAttribute ("val"))
         {
-            properties.set (e->getStringAttribute (T("name")),
-                            e->getStringAttribute (T("val")));
+            properties.set (e->getStringAttribute ("name"),
+                            e->getStringAttribute ("val"));
         }
     }
 

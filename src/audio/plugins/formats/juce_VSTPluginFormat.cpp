@@ -469,7 +469,7 @@ public:
         bool ok = false;
         const String filename (file.getFullPathName());
 
-        if (file.hasFileExtension (T(".vst")))
+        if (file.hasFileExtension (".vst"))
         {
             const char* const utf8 = filename.toUTF8();
             CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*) utf8,
@@ -823,7 +823,7 @@ VSTPluginInstance::VSTPluginInstance (const ReferenceCountedObjectPtr <ModuleHan
         ++insideVSTCallback;
 
         name = module->pluginName;
-        log (T("Creating VST instance: ") + name);
+        log ("Creating VST instance: " + name);
 
 #if JUCE_MAC
         if (module->resFileId != 0)
@@ -907,7 +907,7 @@ void VSTPluginInstance::initialise()
     if (initialised || effect == 0)
         return;
 
-    log (T("Initialising VST: ") + module->pluginName);
+    log ("Initialising VST: " + module->pluginName);
     initialised = true;
 
     dispatch (effIdentify, 0, 0, 0, 0);
@@ -1454,7 +1454,7 @@ private:
         if (isOpen || getWindowHandle() == 0)
             return;
 
-        log (T("Opening VST UI: ") + plugin.name);
+        log ("Opening VST UI: " + plugin.name);
         isOpen = true;
 
         ERect* rect = 0;
@@ -1569,7 +1569,7 @@ private:
     {
         if (isOpen)
         {
-            log (T("Closing VST UI: ") + plugin.getName());
+            log ("Closing VST UI: " + plugin.getName());
             isOpen = false;
 
             dispatch (effEditClose, 0, 0, 0, 0);
@@ -2937,7 +2937,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     const File f (fileOrIdentifier);
 
 #if JUCE_MAC
-    if (f.isDirectory() && f.hasFileExtension (T(".vst")))
+    if (f.isDirectory() && f.hasFileExtension (".vst"))
         return true;
 
 #if JUCE_PPC
@@ -2960,10 +2960,10 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     return false;
 #elif JUCE_WIN32
     return f.existsAsFile()
-            && f.hasFileExtension (T(".dll"));
+            && f.hasFileExtension (".dll");
 #elif JUCE_LINUX
     return f.existsAsFile()
-            && f.hasFileExtension (T(".so"));
+            && f.hasFileExtension (".so");
 #endif
 }
 

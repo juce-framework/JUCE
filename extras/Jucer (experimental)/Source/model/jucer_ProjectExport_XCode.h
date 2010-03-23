@@ -136,7 +136,7 @@ private:
 
     static const String sanitisePath (const String& path)
     {
-        if (path.startsWithChar (T('~')))
+        if (path.startsWithChar ('~'))
             return "$(HOME)" + path.substring (1);
 
         return path;
@@ -211,7 +211,7 @@ private:
         if (! hasPList())
             return true;
 
-        XmlElement plist (T("plist"));
+        XmlElement plist ("plist");
         XmlElement* dict = plist.createNewChildElement ("dict");
 
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
@@ -303,7 +303,7 @@ private:
 
     void getLinkerFlagsForStaticLibrary (const RelativePath& library, StringArray& flags, StringArray& librarySearchPaths)
     {
-        jassert (library.getFileNameWithoutExtension().substring (0, 3) == T("lib"));
+        jassert (library.getFileNameWithoutExtension().substring (0, 3) == "lib");
 
         flags.add ("-l" + library.getFileNameWithoutExtension().substring (3));
 
@@ -433,7 +433,7 @@ private:
             getLinkerFlags (config, linkerFlags, librarySearchPaths);
 
             if (linkerFlags.size() > 0)
-                settings.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (T(" ")) + "\"");
+                settings.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
 
             if (librarySearchPaths.size() > 0)
             {
@@ -489,19 +489,19 @@ private:
 
         if (iPhone)
         {
-            s.addTokens (T("UIKit Foundation CoreGraphics AudioToolbox"), false);
+            s.addTokens ("UIKit Foundation CoreGraphics AudioToolbox", false);
 
             if ((int) project.getJuceConfigFlag ("JUCE_OPENGL").getValue() == 1)
-                s.addTokens (T("QuartzCore OpenGLES"), false);
+                s.addTokens ("QuartzCore OpenGLES", false);
         }
         else
         {
-            s.addTokens (T("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime"), false);
+            s.addTokens ("Cocoa Carbon IOKit CoreAudio CoreMIDI WebKit DiscRecording OpenGL QuartzCore QTKit QuickTime", false);
 
             if (isAU())
-                s.addTokens (T("AudioUnit CoreAudioKit AudioToolbox"), false);
+                s.addTokens ("AudioUnit CoreAudioKit AudioToolbox", false);
             else if ((int) project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").getValue() == 1)
-                s.addTokens (T("AudioUnit CoreAudioKit"), false);
+                s.addTokens ("AudioUnit CoreAudioKit", false);
         }
 
         for (int i = 0; i < s.size(); ++i)
@@ -536,8 +536,8 @@ private:
                 String val (o.getProperty (name).toString());
 
                 if (val.isEmpty() || (val.containsAnyOf (T(" \t;<>()=,-\r\n"))
-                                        && ! (val.trimStart().startsWithChar (T('('))
-                                                || val.trimStart().startsWithChar (T('{')))))
+                                        && ! (val.trimStart().startsWithChar ('(')
+                                                || val.trimStart().startsWithChar ('{'))))
                     val = val.quoted();
 
                 output << name.name << " = " << val << "; ";
@@ -602,20 +602,20 @@ private:
 
     static const String getFileType (const RelativePath& file)
     {
-        if (file.hasFileExtension (T(".cpp")))                      return "sourcecode.cpp.cpp";
-        else if (file.hasFileExtension (T(".mm")))                  return "sourcecode.cpp.objcpp";
-        else if (file.hasFileExtension (T(".m")))                   return "sourcecode.c.objc";
-        else if (file.hasFileExtension (T(".h;.hpp")))              return "sourcecode.c.h";
-        else if (file.hasFileExtension (T(".framework")))           return "wrapper.framework";
-        else if (file.hasFileExtension (T(".jpeg;.jpg")))           return "image.jpeg";
-        else if (file.hasFileExtension (T("png;gif")))              return "image" + file.getFileExtension();
-        else if (file.hasFileExtension (T("html;htm")))             return "text.html";
-        else if (file.hasFileExtension (T("txt;rtf")))              return "text" + file.getFileExtension();
-        else if (file.hasFileExtension (T("plist")))                return "text.plist.xml";
-        else if (file.hasFileExtension (T("app")))                  return "wrapper.application";
-        else if (file.hasFileExtension (T("component;vst;plugin"))) return "wrapper.cfbundle";
-        else if (file.hasFileExtension (T("xcodeproj")))            return "wrapper.pb-project";
-        else if (file.hasFileExtension (T("a")))                    return "archive.ar";
+        if (file.hasFileExtension (".cpp"))                      return "sourcecode.cpp.cpp";
+        else if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
+        else if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
+        else if (file.hasFileExtension (".h;.hpp"))              return "sourcecode.c.h";
+        else if (file.hasFileExtension (".framework"))           return "wrapper.framework";
+        else if (file.hasFileExtension (".jpeg;.jpg"))           return "image.jpeg";
+        else if (file.hasFileExtension ("png;gif"))              return "image" + file.getFileExtension();
+        else if (file.hasFileExtension ("html;htm"))             return "text.html";
+        else if (file.hasFileExtension ("txt;rtf"))              return "text" + file.getFileExtension();
+        else if (file.hasFileExtension ("plist"))                return "text.plist.xml";
+        else if (file.hasFileExtension ("app"))                  return "wrapper.application";
+        else if (file.hasFileExtension ("component;vst;plugin")) return "wrapper.cfbundle";
+        else if (file.hasFileExtension ("xcodeproj"))            return "wrapper.pb-project";
+        else if (file.hasFileExtension ("a"))                    return "archive.ar";
 
         return "file" + file.getFileExtension();
     }
@@ -869,7 +869,7 @@ private:
             return " ";
 
         return "\n\t\t\t\t" + list.joinIntoString (separator + "\n\t\t\t\t")
-                  + (separator == T(";") ? separator : String::empty);
+                  + (separator == ";" ? separator : String::empty);
     }
 
     const String createID (const RelativePath& path) const
@@ -896,7 +896,7 @@ private:
 
     bool shouldFileBeCompiledByDefault (const RelativePath& file) const
     {
-        return file.hasFileExtension (T("cpp;mm;c;m"));
+        return file.hasFileExtension ("cpp;mm;c;m");
     }
 
     //==============================================================================

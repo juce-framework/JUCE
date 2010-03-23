@@ -1271,7 +1271,7 @@ public:
 
 	const String unquoted() const;
 
-	const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const;
+	const String quoted (juce_wchar quoteCharacter = '"') const;
 
 	static const String repeatedString (const juce_wchar* stringToRepeat,
 										int numberOfTimesToRepeat);
@@ -4076,7 +4076,7 @@ public:
 
 	double inWeeks() const throw();
 
-	const String getDescription (const String& returnValueForZeroTime = JUCE_T("0")) const throw();
+	const String getDescription (const String& returnValueForZeroTime = "0") const throw();
 
 	bool operator== (const RelativeTime& other) const throw();
 	bool operator!= (const RelativeTime& other) const throw();
@@ -4342,10 +4342,10 @@ public:
 	int findChildFiles (Array<File>& results,
 						int whatToLookFor,
 						bool searchRecursively,
-						const String& wildCardPattern = JUCE_T("*")) const;
+						const String& wildCardPattern = "*") const;
 
 	int getNumberOfChildFiles (int whatToLookFor,
-							   const String& wildCardPattern = JUCE_T("*")) const;
+							   const String& wildCardPattern = "*") const;
 
 	bool containsSubDirectories() const;
 
@@ -4485,19 +4485,19 @@ public:
 	const String createDocument (const String& dtdToUse,
 								 bool allOnOneLine = false,
 								 bool includeXmlHeader = true,
-								 const String& encodingType = JUCE_T("UTF-8"),
+								 const String& encodingType = "UTF-8",
 								 int lineWrapLength = 60) const;
 
 	void writeToStream (OutputStream& output,
 						const String& dtdToUse,
 						bool allOnOneLine = false,
 						bool includeXmlHeader = true,
-						const String& encodingType = JUCE_T("UTF-8"),
+						const String& encodingType = "UTF-8",
 						int lineWrapLength = 60) const;
 
 	bool writeToFile (const File& destinationFile,
 					  const String& dtdToUse,
-					  const String& encodingType = JUCE_T("UTF-8"),
+					  const String& encodingType = "UTF-8",
 					  int lineWrapLength = 60) const;
 
 	inline const String& getTagName() const throw()  { return tagName; }
@@ -7598,7 +7598,7 @@ public:
 
 	DirectoryIterator (const File& directory,
 					   bool isRecursive,
-					   const String& wildCard = JUCE_T("*"),
+					   const String& wildCard = "*",
 					   int whatToLookFor = File::findFiles);
 
 	~DirectoryIterator();
@@ -7754,7 +7754,7 @@ public:
 	int findChildFiles (Array<File>& results,
 						int whatToLookFor,
 						bool searchRecursively,
-						const String& wildCardPattern = JUCE_T("*")) const;
+						const String& wildCardPattern = "*") const;
 
 	bool isFileInPath (const File& fileToCheck,
 					   bool checkRecursively) const;
@@ -10146,7 +10146,7 @@ public:
 	static const Rectangle fromString (const String& stringVersion)
 	{
 		StringArray toks;
-		toks.addTokens (stringVersion.trim(), JUCE_T(",; \t\r\n"), String::empty);
+		toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
 
 		return Rectangle (toks[0].trim().getIntValue(),
 						  toks[1].trim().getIntValue(),
@@ -10708,7 +10708,7 @@ public:
 
 	static const String getDefaultMonospacedFontName() throw();
 
-	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
+	static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
 
 	float getHeight() const throw()				 { return font->height; }
 
@@ -10756,7 +10756,7 @@ public:
 
 	static void findFonts (Array<Font>& results) throw();
 
-	static const StringArray findAllTypefaceNames() throw();
+	static const StringArray findAllTypefaceNames();
 
 	static const String getFallbackFontName() throw();
 
@@ -14914,11 +14914,11 @@ class JUCE_API  IIRFilter
 {
 public:
 
-	IIRFilter() throw();
+	IIRFilter();
 
-	IIRFilter (const IIRFilter& other) throw();
+	IIRFilter (const IIRFilter& other);
 
-	~IIRFilter() throw();
+	~IIRFilter();
 
 	void reset() throw();
 
@@ -15142,7 +15142,7 @@ public:
 	virtual ~AudioIODeviceType();
 
 protected:
-	AudioIODeviceType (const tchar* const typeName);
+	AudioIODeviceType (const String& typeName);
 
 private:
 	String typeName;
@@ -16984,7 +16984,7 @@ public:
 
 	AudioIODevice* getCurrentAudioDevice() const throw()		{ return currentAudioDevice; }
 
-	const String getCurrentAudioDeviceType() const throw()		  { return currentDeviceType; }
+	const String getCurrentAudioDeviceType() const			  { return currentDeviceType; }
 
 	AudioIODeviceType* getCurrentDeviceTypeObject() const;
 
@@ -17014,7 +17014,7 @@ public:
 
 	void setDefaultMidiOutput (const String& deviceName);
 
-	const String getDefaultMidiOutputName() const throw()	   { return defaultMidiOutputName; }
+	const String getDefaultMidiOutputName() const		   { return defaultMidiOutputName; }
 
 	MidiOutput* getDefaultMidiOutput() const throw()		{ return defaultMidiOutput; }
 
@@ -27308,7 +27308,7 @@ public:
 							  bool hasProgressBar,
 							  bool hasCancelButton,
 							  int timeOutMsWhenCancelling = 10000,
-							  const String& cancelButtonText = JUCE_T("Cancel"));
+							  const String& cancelButtonText = "Cancel");
 
 	~ThreadWithProgressWindow();
 
@@ -28490,9 +28490,9 @@ private:
 class JUCE_API  SystemClipboard
 {
 public:
-	static void copyTextToClipboard (const String& text) throw();
+	static void copyTextToClipboard (const String& text);
 
-	static const String getTextFromClipboard() throw();
+	static const String getTextFromClipboard();
 };
 
 #endif   // __JUCE_SYSTEMCLIPBOARD_JUCEHEADER__

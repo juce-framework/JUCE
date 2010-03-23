@@ -49,7 +49,7 @@ FileChooser::FileChooser (const String& chooserBoxTitle,
 #endif
 
     if (! fileFilters.containsNonWhitespaceChars())
-        filters = T("*");
+        filters = "*";
 }
 
 FileChooser::~FileChooser()

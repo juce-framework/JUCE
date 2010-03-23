@@ -210,7 +210,7 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
 }
 
 //==============================================================================
-void SystemClipboard::copyTextToClipboard (const String& clipText) throw()
+void SystemClipboard::copyTextToClipboard (const String& clipText)
 {
     initSelectionAtoms();
     localClipboardContent = clipText;
@@ -219,7 +219,7 @@ void SystemClipboard::copyTextToClipboard (const String& clipText) throw()
     XSetSelectionOwner (display, atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
 }
 
-const String SystemClipboard::getTextFromClipboard() throw()
+const String SystemClipboard::getTextFromClipboard()
 {
     initSelectionAtoms();
 

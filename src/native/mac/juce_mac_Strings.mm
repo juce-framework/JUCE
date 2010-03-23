@@ -141,7 +141,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 //==============================================================================
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
 
-void SystemClipboard::copyTextToClipboard (const String& text) throw()
+void SystemClipboard::copyTextToClipboard (const String& text)
 {
 #if JUCE_IPHONE
     [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
@@ -155,7 +155,7 @@ void SystemClipboard::copyTextToClipboard (const String& text) throw()
 #endif
 }
 
-const String SystemClipboard::getTextFromClipboard() throw()
+const String SystemClipboard::getTextFromClipboard()
 {
 #if JUCE_IPHONE
     NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];

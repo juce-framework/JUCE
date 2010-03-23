@@ -947,7 +947,7 @@ class WASAPIAudioIODeviceType  : public AudioIODeviceType
 {
 public:
     WASAPIAudioIODeviceType()
-        : AudioIODeviceType (T("Windows Audio")),
+        : AudioIODeviceType ("Windows Audio"),
           hasScanned (false)
     {
     }

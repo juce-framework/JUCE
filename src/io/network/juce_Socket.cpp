@@ -488,7 +488,7 @@ StreamingSocket* StreamingSocket::waitForNextConnection() const
 
 bool StreamingSocket::isLocal() const throw()
 {
-    return hostName == T("127.0.0.1");
+    return hostName == "127.0.0.1";
 }
 
 
@@ -625,7 +625,7 @@ int DatagramSocket::write (const void* sourceBuffer, const int numBytesToWrite)
 
 bool DatagramSocket::isLocal() const throw()
 {
-    return hostName == T("127.0.0.1");
+    return hostName == "127.0.0.1";
 }
 
 

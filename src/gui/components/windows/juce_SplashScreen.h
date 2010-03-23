@@ -47,7 +47,7 @@
     {
         SplashScreen* splash = new SplashScreen();
 
-        splash->show (T("welcome to my app"),
+        splash->show ("welcome to my app",
                       ImageCache::getFromFile (File ("/foobar/splash.jpg")),
                       4000, false);
 

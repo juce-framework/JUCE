@@ -270,7 +270,7 @@ FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (Op
     const int r = AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
                                                    TRANS("Closing document..."),
                                                    TRANS("Do you want to save the changes to \"")
-                                                       + doc->getName() + T("\"?"),
+                                                       + doc->getName() + "\"?",
                                                    TRANS("save"),
                                                    TRANS("discard changes"),
                                                    TRANS("cancel"));

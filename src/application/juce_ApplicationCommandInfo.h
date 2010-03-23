@@ -76,11 +76,11 @@ struct JUCE_API  ApplicationCommandInfo
 
         This is just so you can write things like:
         @code
-        myinfo.addDefaultKeypress (T('s'), ModifierKeys::commandModifier);
+        myinfo.addDefaultKeypress ('s', ModifierKeys::commandModifier);
         @endcode
         instead of
         @code
-        myinfo.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier));
+        myinfo.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier));
         @endcode
     */
     void addDefaultKeypress (int keyCode,

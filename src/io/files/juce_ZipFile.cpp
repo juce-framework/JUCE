@@ -386,7 +386,7 @@ void ZipFile::uncompressTo (const File& targetDirectory,
 
         const File targetFile (targetDirectory.getChildFile (zei.filename));
 
-        if (zei.filename.endsWithChar (T('/')))
+        if (zei.filename.endsWithChar ('/'))
         {
             targetFile.createDirectory(); // (entry is a directory, not a file)
         }

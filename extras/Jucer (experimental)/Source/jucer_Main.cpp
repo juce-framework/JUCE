@@ -53,7 +53,7 @@ public:
         ImageCache::setCacheTimeout (30 * 1000);
 
         if (commandLine.trim().isNotEmpty()
-              && ! commandLine.trim().startsWithChar (T('-')))
+              && ! commandLine.trim().startsWithChar ('-'))
             anotherInstanceStarted (commandLine);
 
         theMainWindow->reloadLastProject();

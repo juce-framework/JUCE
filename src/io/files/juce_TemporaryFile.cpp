@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 TemporaryFile::TemporaryFile (const String& suffix, const int optionFlags)
 {
     createTempFile (File::getSpecialLocation (File::tempDirectory),
-                    T("temp_") + String (Random::getSystemRandom().nextInt()),
+                    "temp_" + String (Random::getSystemRandom().nextInt()),
                     suffix,
                     optionFlags);
 }
@@ -48,7 +48,7 @@ TemporaryFile::TemporaryFile (const File& targetFile_, const int optionFlags)
     jassert (targetFile != File::nonexistent);
 
     createTempFile (targetFile.getParentDirectory(),
-                    targetFile.getFileNameWithoutExtension() + T("_temp") + String (Random::getSystemRandom().nextInt()),
+                    targetFile.getFileNameWithoutExtension() + "_temp" + String (Random::getSystemRandom().nextInt()),
                     targetFile.getFileExtension(),
                     optionFlags);
 }
@@ -57,7 +57,7 @@ void TemporaryFile::createTempFile (const File& parentDirectory, String name,
                                     const String& suffix, const int optionFlags)
 {
     if ((optionFlags & useHiddenFile) != 0)
-        name = T(".") + name;
+        name = "." + name;
 
     temporaryFile = parentDirectory.getNonexistentChildFile (name, suffix, (optionFlags & putNumbersInBrackets) != 0);
 }

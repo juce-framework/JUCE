@@ -417,7 +417,7 @@ Project::Item Project::createNewItem (const File& file)
     Item item (*this, ValueTree (Tags::file));
     item.createUIDIfMissing();
     item.getName() = file.getFileName();
-    item.getShouldCompileValue() = file.hasFileExtension (T("cpp;mm;c;m"));
+    item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m");
     item.getShouldAddToResourceValue() = shouldBeAddedToBinaryResourcesByDefault (file);
     return item;
 }
@@ -845,7 +845,7 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
 const StringArray Project::BuildConfiguration::parsePreprocessorDefs() const
 {
     StringArray defines;
-    defines.addTokens (getPreprocessorDefs().toString(), T(" ,;"), String::empty);
+    defines.addTokens (getPreprocessorDefs().toString(), " ,;", String::empty);
     defines.removeEmptyStrings (true);
     return defines;
 }
@@ -853,7 +853,7 @@ const StringArray Project::BuildConfiguration::parsePreprocessorDefs() const
 const StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
 {
     StringArray s;
-    s.addTokens (getHeaderSearchPath().toString(), T(";"), String::empty);
+    s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);
     return s;
 }
 

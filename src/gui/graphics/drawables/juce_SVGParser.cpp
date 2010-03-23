@@ -52,26 +52,26 @@ public:
     //==============================================================================
     Drawable* parseSVGElement (const XmlElement& xml)
     {
-        if (! xml.hasTagName (T("svg")))
+        if (! xml.hasTagName ("svg"))
             return 0;
 
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml.getStringAttribute (T("id")));
+        drawable->setName (xml.getStringAttribute ("id"));
 
         SVGState newState (*this);
 
-        if (xml.hasAttribute (T("transform")))
+        if (xml.hasAttribute ("transform"))
             newState.addTransform (xml);
 
-        newState.elementX = getCoordLength (xml.getStringAttribute (T("x"), String (newState.elementX)), viewBoxW);
-        newState.elementY = getCoordLength (xml.getStringAttribute (T("y"), String (newState.elementY)), viewBoxH);
-        newState.width = getCoordLength (xml.getStringAttribute (T("width"), String (newState.width)), viewBoxW);
-        newState.height = getCoordLength (xml.getStringAttribute (T("height"), String (newState.height)), viewBoxH);
+        newState.elementX = getCoordLength (xml.getStringAttribute ("x", String (newState.elementX)), viewBoxW);
+        newState.elementY = getCoordLength (xml.getStringAttribute ("y", String (newState.elementY)), viewBoxH);
+        newState.width = getCoordLength (xml.getStringAttribute ("width", String (newState.width)), viewBoxW);
+        newState.height = getCoordLength (xml.getStringAttribute ("height", String (newState.height)), viewBoxH);
 
-        if (xml.hasAttribute (T("viewBox")))
+        if (xml.hasAttribute ("viewBox"))
         {
-            const String viewParams (xml.getStringAttribute (T("viewBox")));
+            const String viewParams (xml.getStringAttribute ("viewBox"));
             int i = 0;
             float vx, vy, vw, vh;
 
@@ -85,7 +85,7 @@ public:
 
                 int placementFlags = 0;
 
-                const String aspect (xml.getStringAttribute (T("preserveAspectRatio")));
+                const String aspect (xml.getStringAttribute ("preserveAspectRatio"));
 
                 if (aspect.containsIgnoreCase (T("none")))
                 {
@@ -147,29 +147,29 @@ private:
         {
             Drawable* d = 0;
 
-            if (e->hasTagName (T("g")))
+            if (e->hasTagName ("g"))
                 d = parseGroupElement (*e);
-            else if (e->hasTagName (T("svg")))
+            else if (e->hasTagName ("svg"))
                 d = parseSVGElement (*e);
-            else if (e->hasTagName (T("path")))
+            else if (e->hasTagName ("path"))
                 d = parsePath (*e);
-            else if (e->hasTagName (T("rect")))
+            else if (e->hasTagName ("rect"))
                 d = parseRect (*e);
-            else if (e->hasTagName (T("circle")))
+            else if (e->hasTagName ("circle"))
                 d = parseCircle (*e);
-            else if (e->hasTagName (T("ellipse")))
+            else if (e->hasTagName ("ellipse"))
                 d = parseEllipse (*e);
-            else if (e->hasTagName (T("line")))
+            else if (e->hasTagName ("line"))
                 d = parseLine (*e);
-            else if (e->hasTagName (T("polyline")))
+            else if (e->hasTagName ("polyline"))
                 d = parsePolygon (*e, true);
-            else if (e->hasTagName (T("polygon")))
+            else if (e->hasTagName ("polygon"))
                 d = parsePolygon (*e, false);
-            else if (e->hasTagName (T("text")))
+            else if (e->hasTagName ("text"))
                 d = parseText (*e);
-            else if (e->hasTagName (T("switch")))
+            else if (e->hasTagName ("switch"))
                 d = parseSwitch (*e);
-            else if (e->hasTagName (T("style")))
+            else if (e->hasTagName ("style"))
                 parseCSSStyle (*e);
 
             parentDrawable->insertDrawable (d);
@@ -178,7 +178,7 @@ private:
 
     DrawableComposite* parseSwitch (const XmlElement& xml)
     {
-        const XmlElement* const group = xml.getChildByName (T("g"));
+        const XmlElement* const group = xml.getChildByName ("g");
 
         if (group != 0)
             return parseGroupElement (*group);
@@ -190,9 +190,9 @@ private:
     {
         DrawableComposite* const drawable = new DrawableComposite();
 
-        drawable->setName (xml.getStringAttribute (T("id")));
+        drawable->setName (xml.getStringAttribute ("id"));
 
-        if (xml.hasAttribute (T("transform")))
+        if (xml.hasAttribute ("transform"))
         {
             SVGState newState (*this);
             newState.addTransform (xml);
@@ -210,10 +210,10 @@ private:
     //==============================================================================
     Drawable* parsePath (const XmlElement& xml) const
     {
-        const String d (xml.getStringAttribute (T("d")).trimStart());
+        const String d (xml.getStringAttribute ("d").trimStart());
         Path path;
 
-        if (getStyleAttribute (&xml, T("fill-rule")).trim().equalsIgnoreCase (T("evenodd")))
+        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase (T("evenodd")))
             path.setUsingNonZeroWinding (false);
 
         int index = 0;
@@ -223,7 +223,7 @@ private:
         bool isRelative = true;
         bool carryOn = true;
 
-        const String validCommandChars (T("MmLlHhVvCcSsQqTtAaZz"));
+        const String validCommandChars ("MmLlHhVvCcSsQqTtAaZz");
 
         for (;;)
         {
@@ -237,10 +237,10 @@ private:
 
             switch (lastCommandChar)
             {
-            case T('M'):
-            case T('m'):
-            case T('L'):
-            case T('l'):
+            case 'M':
+            case 'm':
+            case 'L':
+            case 'l':
                 if (parseCoords (d, x, y, index, false))
                 {
                     if (isRelative)
@@ -249,7 +249,7 @@ private:
                         y += lastY;
                     }
 
-                    if (lastCommandChar == T('M') || lastCommandChar == T('m'))
+                    if (lastCommandChar == 'M' || lastCommandChar == 'm')
                         path.startNewSubPath (x, y);
                     else
                         path.lineTo (x, y);
@@ -266,8 +266,8 @@ private:
 
                 break;
 
-            case T('H'):
-            case T('h'):
+            case 'H':
+            case 'h':
                 if (parseCoord (d, x, index, false, true))
                 {
                     if (isRelative)
@@ -284,8 +284,8 @@ private:
                 }
                 break;
 
-            case T('V'):
-            case T('v'):
+            case 'V':
+            case 'v':
                 if (parseCoord (d, y, index, false, false))
                 {
                     if (isRelative)
@@ -302,8 +302,8 @@ private:
                 }
                 break;
 
-            case T('C'):
-            case T('c'):
+            case 'C':
+            case 'c':
                 if (parseCoords (d, x, y, index, false)
                      && parseCoords (d, x2, y2, index, false)
                      && parseCoords (d, x3, y3, index, false))
@@ -331,8 +331,8 @@ private:
                 }
                 break;
 
-            case T('S'):
-            case T('s'):
+            case 'S':
+            case 's':
                 if (parseCoords (d, x, y, index, false)
                      && parseCoords (d, x3, y3, index, false))
                 {
@@ -359,8 +359,8 @@ private:
                 }
                 break;
 
-            case T('Q'):
-            case T('q'):
+            case 'Q':
+            case 'q':
                 if (parseCoords (d, x, y, index, false)
                      && parseCoords (d, x2, y2, index, false))
                 {
@@ -385,8 +385,8 @@ private:
                 }
                 break;
 
-            case T('T'):
-            case T('t'):
+            case 'T':
+            case 't':
                 if (parseCoords (d, x, y, index, false))
                 {
                     if (isRelative)
@@ -410,8 +410,8 @@ private:
                 }
                 break;
 
-            case T('A'):
-            case T('a'):
+            case 'A':
+            case 'a':
                 if (parseCoords (d, x, y, index, false))
                 {
                     String num;
@@ -470,8 +470,8 @@ private:
 
                 break;
 
-            case T('Z'):
-            case T('z'):
+            case 'Z':
+            case 'z':
                 path.closeSubPath();
                 while (CharacterFunctions::isWhitespace (d [index]))
                     ++index;
@@ -494,31 +494,31 @@ private:
     {
         Path rect;
 
-        const bool hasRX = xml.hasAttribute (T("rx"));
-        const bool hasRY = xml.hasAttribute (T("ry"));
+        const bool hasRX = xml.hasAttribute ("rx");
+        const bool hasRY = xml.hasAttribute ("ry");
 
         if (hasRX || hasRY)
         {
-            float rx = getCoordLength (xml.getStringAttribute (T("rx")), viewBoxW);
-            float ry = getCoordLength (xml.getStringAttribute (T("ry")), viewBoxH);
+            float rx = getCoordLength (xml.getStringAttribute ("rx"), viewBoxW);
+            float ry = getCoordLength (xml.getStringAttribute ("ry"), viewBoxH);
 
             if (! hasRX)
                 rx = ry;
             else if (! hasRY)
                 ry = rx;
 
-            rect.addRoundedRectangle (getCoordLength (xml.getStringAttribute (T("x")), viewBoxW),
-                                      getCoordLength (xml.getStringAttribute (T("y")), viewBoxH),
-                                      getCoordLength (xml.getStringAttribute (T("width")), viewBoxW),
-                                      getCoordLength (xml.getStringAttribute (T("height")), viewBoxH),
+            rect.addRoundedRectangle (getCoordLength (xml.getStringAttribute ("x"), viewBoxW),
+                                      getCoordLength (xml.getStringAttribute ("y"), viewBoxH),
+                                      getCoordLength (xml.getStringAttribute ("width"), viewBoxW),
+                                      getCoordLength (xml.getStringAttribute ("height"), viewBoxH),
                                       rx, ry);
         }
         else
         {
-            rect.addRectangle (getCoordLength (xml.getStringAttribute (T("x")), viewBoxW),
-                               getCoordLength (xml.getStringAttribute (T("y")), viewBoxH),
-                               getCoordLength (xml.getStringAttribute (T("width")), viewBoxW),
-                               getCoordLength (xml.getStringAttribute (T("height")), viewBoxH));
+            rect.addRectangle (getCoordLength (xml.getStringAttribute ("x"), viewBoxW),
+                               getCoordLength (xml.getStringAttribute ("y"), viewBoxH),
+                               getCoordLength (xml.getStringAttribute ("width"), viewBoxW),
+                               getCoordLength (xml.getStringAttribute ("height"), viewBoxH));
         }
 
         return parseShape (xml, rect);
@@ -528,9 +528,9 @@ private:
     {
         Path circle;
 
-        const float cx = getCoordLength (xml.getStringAttribute (T("cx")), viewBoxW);
-        const float cy = getCoordLength (xml.getStringAttribute (T("cy")), viewBoxH);
-        const float radius = getCoordLength (xml.getStringAttribute (T("r")), viewBoxW);
+        const float cx = getCoordLength (xml.getStringAttribute ("cx"), viewBoxW);
+        const float cy = getCoordLength (xml.getStringAttribute ("cy"), viewBoxH);
+        const float radius = getCoordLength (xml.getStringAttribute ("r"), viewBoxW);
 
         circle.addEllipse (cx - radius, cy - radius, radius * 2.0f, radius * 2.0f);
 
@@ -541,10 +541,10 @@ private:
     {
         Path ellipse;
 
-        const float cx = getCoordLength (xml.getStringAttribute (T("cx")), viewBoxW);
-        const float cy = getCoordLength (xml.getStringAttribute (T("cy")), viewBoxH);
-        const float radiusX = getCoordLength (xml.getStringAttribute (T("rx")), viewBoxW);
-        const float radiusY = getCoordLength (xml.getStringAttribute (T("ry")), viewBoxH);
+        const float cx = getCoordLength (xml.getStringAttribute ("cx"), viewBoxW);
+        const float cy = getCoordLength (xml.getStringAttribute ("cy"), viewBoxH);
+        const float radiusX = getCoordLength (xml.getStringAttribute ("rx"), viewBoxW);
+        const float radiusY = getCoordLength (xml.getStringAttribute ("ry"), viewBoxH);
 
         ellipse.addEllipse (cx - radiusX, cy - radiusY, radiusX * 2.0f, radiusY * 2.0f);
 
@@ -555,10 +555,10 @@ private:
     {
         Path line;
 
-        const float x1 = getCoordLength (xml.getStringAttribute (T("x1")), viewBoxW);
-        const float y1 = getCoordLength (xml.getStringAttribute (T("y1")), viewBoxH);
-        const float x2 = getCoordLength (xml.getStringAttribute (T("x2")), viewBoxW);
-        const float y2 = getCoordLength (xml.getStringAttribute (T("y2")), viewBoxH);
+        const float x1 = getCoordLength (xml.getStringAttribute ("x1"), viewBoxW);
+        const float y1 = getCoordLength (xml.getStringAttribute ("y1"), viewBoxH);
+        const float x2 = getCoordLength (xml.getStringAttribute ("x2"), viewBoxW);
+        const float y2 = getCoordLength (xml.getStringAttribute ("y2"), viewBoxH);
 
         line.startNewSubPath (x1, y1);
         line.lineTo (x2, y2);
@@ -568,7 +568,7 @@ private:
 
     Drawable* parsePolygon (const XmlElement& xml, const bool isPolyline) const
     {
-        const String points (xml.getStringAttribute (T("points")));
+        const String points (xml.getStringAttribute ("points"));
         Path path;
 
         int index = 0;
@@ -600,7 +600,7 @@ private:
     Drawable* parseShape (const XmlElement& xml, Path& path,
                           const bool shouldParseTransform = true) const
     {
-        if (shouldParseTransform && xml.hasAttribute (T("transform")))
+        if (shouldParseTransform && xml.hasAttribute ("transform"))
         {
             SVGState newState (*this);
             newState.addTransform (xml);
@@ -609,7 +609,7 @@ private:
         }
 
         DrawablePath* dp = new DrawablePath();
-        dp->setName (xml.getStringAttribute (T("id")));
+        dp->setName (xml.getStringAttribute ("id"));
         dp->setFill (FillType (Colours::transparentBlack));
 
         path.applyTransform (transform);
@@ -628,19 +628,19 @@ private:
         }
 
         dp->setFill (getPathFillType (path,
-                                      getStyleAttribute (&xml, T("fill")),
-                                      getStyleAttribute (&xml, T("fill-opacity")),
-                                      getStyleAttribute (&xml, T("opacity")),
+                                      getStyleAttribute (&xml, "fill"),
+                                      getStyleAttribute (&xml, "fill-opacity"),
+                                      getStyleAttribute (&xml, "opacity"),
                                       containsClosedSubPath ? Colours::black
                                                             : Colours::transparentBlack));
 
-        const String strokeType (getStyleAttribute (&xml, T("stroke")));
+        const String strokeType (getStyleAttribute (&xml, "stroke"));
 
-        if (strokeType.isNotEmpty() && ! strokeType.equalsIgnoreCase (T("none")))
+        if (strokeType.isNotEmpty() && ! strokeType.equalsIgnoreCase ("none"))
         {
             dp->setStrokeFill (getPathFillType (path, strokeType,
-                                                getStyleAttribute (&xml, T("stroke-opacity")),
-                                                getStyleAttribute (&xml, T("opacity")),
+                                                getStyleAttribute (&xml, "stroke-opacity"),
+                                                getStyleAttribute (&xml, "opacity"),
                                                 Colours::transparentBlack));
 
             dp->setStrokeType (getStrokeFor (&xml));
@@ -651,9 +651,9 @@ private:
 
     const XmlElement* findLinkedElement (const XmlElement* e) const
     {
-        const String id (e->getStringAttribute (T("xlink:href")));
+        const String id (e->getStringAttribute ("xlink:href"));
 
-        if (! id.startsWithChar (T('#')))
+        if (! id.startsWithChar ('#'))
             return 0;
 
         return findElementForId (topLevelXml, id.substring (1));
@@ -664,17 +664,17 @@ private:
         if (fillXml == 0)
             return;
 
-        forEachXmlChildElementWithTagName (*fillXml, e, T("stop"))
+        forEachXmlChildElementWithTagName (*fillXml, e, "stop")
         {
             int index = 0;
-            Colour col (parseColour (getStyleAttribute  (e, T("stop-color")), index, Colours::black));
+            Colour col (parseColour (getStyleAttribute  (e, "stop-color"), index, Colours::black));
 
-            const String opacity (getStyleAttribute (e, T("stop-opacity"), T("1")));
+            const String opacity (getStyleAttribute (e, "stop-opacity", "1"));
             col = col.withMultipliedAlpha (jlimit (0.0f, 1.0f, opacity.getFloatValue()));
 
-            double offset = e->getDoubleAttribute (T("offset"));
+            double offset = e->getDoubleAttribute ("offset");
 
-            if (e->getStringAttribute (T("offset")).containsChar (T('%')))
+            if (e->getStringAttribute ("offset").containsChar ('%'))
                 offset *= 0.01;
 
             cg.addColour (jlimit (0.0, 1.0, offset), col);
@@ -703,8 +703,8 @@ private:
             const XmlElement* const fillXml = findElementForId (topLevelXml, id);
 
             if (fillXml != 0
-                 && (fillXml->hasTagName (T("linearGradient"))
-                      || fillXml->hasTagName (T("radialGradient"))))
+                 && (fillXml->hasTagName ("linearGradient")
+                      || fillXml->hasTagName ("radialGradient")))
             {
                 const XmlElement* inheritedFrom = findLinkedElement (fillXml);
 
@@ -729,14 +729,14 @@ private:
 
                 jassert (gradient.getNumColours() > 0);
 
-                gradient.isRadial = fillXml->hasTagName (T("radialGradient"));
+                gradient.isRadial = fillXml->hasTagName ("radialGradient");
 
                 float width = viewBoxW;
                 float height = viewBoxH;
                 float dx = 0.0f;
                 float dy = 0.0f;
 
-                const bool userSpace = fillXml->getStringAttribute (T("gradientUnits")).equalsIgnoreCase (T("userSpaceOnUse"));
+                const bool userSpace = fillXml->getStringAttribute ("gradientUnits").equalsIgnoreCase (T("userSpaceOnUse"));
 
                 if (! userSpace)
                 {
@@ -749,10 +749,10 @@ private:
 
                 if (gradient.isRadial)
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute (T("cx"), T("50%")), width);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute (T("cy"), T("50%")), height);
+                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), width);
+                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), height);
 
-                    const float radius = getCoordLength (fillXml->getStringAttribute (T("r"), T("50%")), width);
+                    const float radius = getCoordLength (fillXml->getStringAttribute ("r", "50%"), width);
 
                     gradient.x2 = gradient.x1 + radius;
                     gradient.y2 = gradient.y1;
@@ -761,18 +761,18 @@ private:
                 }
                 else
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute (T("x1"), T("0%")), width);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute (T("y1"), T("0%")), height);
+                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), width);
+                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), height);
 
-                    gradient.x2 = dx + getCoordLength (fillXml->getStringAttribute (T("x2"), T("100%")), width);
-                    gradient.y2 = dy + getCoordLength (fillXml->getStringAttribute (T("y2"), T("0%")), height);
+                    gradient.x2 = dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), width);
+                    gradient.y2 = dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), height);
 
                     if (gradient.x1 == gradient.x2 && gradient.y1 == gradient.y2)
                         return Colour (gradient.getColour (gradient.getNumColours() - 1));
                 }
 
                 FillType type (gradient);
-                type.transform = parseTransform (fillXml->getStringAttribute (T("gradientTransform")))
+                type.transform = parseTransform (fillXml->getStringAttribute ("gradientTransform"))
                                    .followedBy (transform);
                 return type;
             }
@@ -788,9 +788,9 @@ private:
 
     const PathStrokeType getStrokeFor (const XmlElement* const xml) const
     {
-        const String width (getStyleAttribute (xml, T("stroke-width")));
-        const String cap (getStyleAttribute (xml, T("stroke-linecap")));
-        const String join (getStyleAttribute (xml, T("stroke-linejoin")));
+        const String width (getStyleAttribute (xml, "stroke-width"));
+        const String cap (getStyleAttribute (xml, "stroke-linecap"));
+        const String join (getStyleAttribute (xml, "stroke-linejoin"));
 
         //const String mitreLimit (getStyleAttribute (xml, T("stroke-miterlimit")));
         //const String dashArray (getStyleAttribute (xml, T("stroke-dasharray")));
@@ -823,10 +823,10 @@ private:
     {
         Array <float> xCoords, yCoords, dxCoords, dyCoords;
 
-        getCoordList (xCoords, getInheritedAttribute (&xml, T("x")), true, true);
-        getCoordList (yCoords, getInheritedAttribute (&xml, T("y")), true, false);
-        getCoordList (dxCoords, getInheritedAttribute (&xml, T("dx")), true, true);
-        getCoordList (dyCoords, getInheritedAttribute (&xml, T("dy")), true, false);
+        getCoordList (xCoords, getInheritedAttribute (&xml, "x"), true, true);
+        getCoordList (yCoords, getInheritedAttribute (&xml, "y"), true, false);
+        getCoordList (dxCoords, getInheritedAttribute (&xml, "dx"), true, true);
+        getCoordList (dyCoords, getInheritedAttribute (&xml, "dy"), true, false);
 
 
         //xxx not done text yet!
@@ -842,7 +842,7 @@ private:
                 Drawable* s = parseShape (*e, path);
                 delete s;
             }
-            else if (e->hasTagName (T("tspan")))
+            else if (e->hasTagName ("tspan"))
             {
                 Drawable* s = parseText (*e);
                 delete s;
@@ -855,7 +855,7 @@ private:
     //==============================================================================
     void addTransform (const XmlElement& xml)
     {
-        transform = parseTransform (xml.getStringAttribute (T("transform")))
+        transform = parseTransform (xml.getStringAttribute ("transform"))
                         .followedBy (transform);
     }
 
@@ -894,15 +894,15 @@ private:
             const tchar n1 = s [len - 2];
             const tchar n2 = s [len - 1];
 
-            if (n1 == T('i') && n2 == T('n'))
+            if (n1 == 'i' && n2 == 'n')
                 n *= dpi;
-            else if (n1 == T('m') && n2 == T('m'))
+            else if (n1 == 'm' && n2 == 'm')
                 n *= dpi / 25.4f;
-            else if (n1 == T('c') && n2 == T('m'))
+            else if (n1 == 'c' && n2 == 'm')
                 n *= dpi / 2.54f;
-            else if (n1 == T('p') && n2 == T('c'))
+            else if (n1 == 'p' && n2 == 'c')
                 n *= 15.0f;
-            else if (n2 == T('%'))
+            else if (n2 == '%')
                 n *= 0.01f * sizeForProportions;
         }
 
@@ -922,7 +922,7 @@ private:
     //==============================================================================
     void parseCSSStyle (const XmlElement& xml)
     {
-        cssStyleText = xml.getAllSubText() + T("\n") + cssStyleText;
+        cssStyleText = xml.getAllSubText() + "\n" + cssStyleText;
     }
 
     const String getStyleAttribute (const XmlElement* xml, const String& attributeName,
@@ -931,7 +931,7 @@ private:
         if (xml->hasAttribute (attributeName))
             return xml->getStringAttribute (attributeName, defaultValue);
 
-        const String styleAtt (xml->getStringAttribute (T("style")));
+        const String styleAtt (xml->getStringAttribute ("style"));
 
         if (styleAtt.isNotEmpty())
         {
@@ -940,22 +940,22 @@ private:
             if (value.isNotEmpty())
                 return value;
         }
-        else if (xml->hasAttribute (T("class")))
+        else if (xml->hasAttribute ("class"))
         {
-            const String className (T(".") + xml->getStringAttribute (T("class")));
+            const String className ("." + xml->getStringAttribute ("class"));
 
-            int index = cssStyleText.indexOfIgnoreCase (className + T(" "));
+            int index = cssStyleText.indexOfIgnoreCase (className + " ");
 
             if (index < 0)
-                index = cssStyleText.indexOfIgnoreCase (className + T("{"));
+                index = cssStyleText.indexOfIgnoreCase (className + "{");
 
             if (index >= 0)
             {
-                const int openBracket = cssStyleText.indexOfChar (index, T('{'));
+                const int openBracket = cssStyleText.indexOfChar (index, '{');
 
                 if (openBracket > index)
                 {
-                    const int closeBracket = cssStyleText.indexOfChar (openBracket, T('}'));
+                    const int closeBracket = cssStyleText.indexOfChar (openBracket, '}');
 
                     if (closeBracket > openBracket)
                     {
@@ -992,7 +992,7 @@ private:
     //==============================================================================
     static bool isIdentifierChar (const tchar c)
     {
-        return CharacterFunctions::isLetter (c) || c == T('-');
+        return CharacterFunctions::isLetter (c) || c == '-';
     }
 
     static const String getAttributeFromStyleList (const String& list, const String& attributeName, const String& defaultValue)
@@ -1009,12 +1009,12 @@ private:
             if ((i == 0 || (i > 0 && ! isIdentifierChar (list [i - 1])))
                  && ! isIdentifierChar (list [i + attributeName.length()]))
             {
-                i = list.indexOfChar (i, T(':'));
+                i = list.indexOfChar (i, ':');
 
                 if (i < 0)
                     break;
 
-                int end = list.indexOfChar (i, T(';'));
+                int end = list.indexOfChar (i, ';');
 
                 if (end < 0)
                     end = 0x7ffff;
@@ -1033,21 +1033,21 @@ private:
     {
         const tchar* const s = (const tchar*) source;
 
-        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == T(','))
+        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == ',')
             ++index;
 
         int start = index;
 
-        if (CharacterFunctions::isDigit (s[index]) || s[index] == T('.') || s[index] == T('-'))
+        if (CharacterFunctions::isDigit (s[index]) || s[index] == '.' || s[index] == '-')
             ++index;
 
-        while (CharacterFunctions::isDigit (s[index]) || s[index] == T('.'))
+        while (CharacterFunctions::isDigit (s[index]) || s[index] == '.')
             ++index;
 
-        if ((s[index] == T('e') || s[index] == T('E'))
+        if ((s[index] == 'e' || s[index] == 'E')
              && (CharacterFunctions::isDigit (s[index + 1])
-                  || s[index + 1] == T('-')
-                  || s[index + 1] == T('+')))
+                  || s[index + 1] == '-'
+                  || s[index + 1] == '+'))
         {
             index += 2;
 
@@ -1066,7 +1066,7 @@ private:
 
         value = String (s + start, index - start);
 
-        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == T(','))
+        while (CharacterFunctions::isWhitespace (s[index]) || s[index] == ',')
             ++index;
 
         return true;
@@ -1075,7 +1075,7 @@ private:
     //==============================================================================
     static const Colour parseColour (const String& s, int& index, const Colour& defaultColour)
     {
-        if (s [index] == T('#'))
+        if (s [index] == '#')
         {
             uint32 hex [6];
             zeromem (hex, sizeof (hex));
@@ -1100,23 +1100,23 @@ private:
                                (uint8) ((hex [2] << 4) + hex [3]),
                                (uint8) ((hex [4] << 4) + hex [5]));
         }
-        else if (s [index] == T('r')
-                  && s [index + 1] == T('g')
-                  && s [index + 2] == T('b'))
+        else if (s [index] == 'r'
+                  && s [index + 1] == 'g'
+                  && s [index + 2] == 'b')
         {
-            const int openBracket = s.indexOfChar (index, T('('));
-            const int closeBracket = s.indexOfChar (openBracket, T(')'));
+            const int openBracket = s.indexOfChar (index, '(');
+            const int closeBracket = s.indexOfChar (openBracket, ')');
 
             if (openBracket >= 3 && closeBracket > openBracket)
             {
                 index = closeBracket;
 
                 StringArray tokens;
-                tokens.addTokens (s.substring (openBracket + 1, closeBracket), T(","), T(""));
+                tokens.addTokens (s.substring (openBracket + 1, closeBracket), ",", "");
                 tokens.trim();
                 tokens.removeEmptyStrings();
 
-                if (tokens[0].containsChar (T('%')))
+                if (tokens[0].containsChar ('%'))
                     return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
                                    (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
                                    (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()));
@@ -1139,7 +1139,7 @@ private:
             StringArray tokens;
             tokens.addTokens (t.fromFirstOccurrenceOf (T("("), false, false)
                                .upToFirstOccurrenceOf (T(")"), false, false),
-                              T(", "), String::empty);
+                              ", ", String::empty);
 
             tokens.removeEmptyStrings (true);
 
@@ -1279,7 +1279,7 @@ private:
     {
         forEachXmlChildElement (*parent, e)
         {
-            if (e->compareAttribute (T("id"), id))
+            if (e->compareAttribute ("id", id))
                 return e;
 
             const XmlElement* const found = findElementForId (e, id);

@@ -401,7 +401,7 @@ public:
         if (error.isNotEmpty())
         {
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         T("Error when trying to open audio device!"),
+                                         "Error when trying to open audio device!",
                                          error);
         }
     }
@@ -559,7 +559,7 @@ public:
                 for (int i = 0; i < numRates; ++i)
                 {
                     const int rate = roundToInt (currentDevice->getSampleRate (i));
-                    sampleRateDropDown->addItem (String (rate) + T(" Hz"), rate);
+                    sampleRateDropDown->addItem (String (rate) + " Hz", rate);
                 }
 
                 sampleRateDropDown->setSelectedId (roundToInt (currentDevice->getCurrentSampleRate()), true);
@@ -591,9 +591,9 @@ public:
                 {
                     const int bs = currentDevice->getBufferSizeSamples (i);
                     bufferSizeDropDown->addItem (String (bs)
-                                                  + T(" samples (")
+                                                  + " samples ("
                                                   + String (bs * 1000.0 / currentRate, 1)
-                                                  + T(" ms)"),
+                                                  + " ms)",
                                                  bs);
                 }
 

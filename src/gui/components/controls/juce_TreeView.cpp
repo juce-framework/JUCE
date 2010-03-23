@@ -583,7 +583,7 @@ XmlElement* TreeView::getOpennessState (const bool alsoIncludeScrollPosition) co
         e = rootItem->getOpennessState();
 
         if (e != 0 && alsoIncludeScrollPosition)
-            e->setAttribute (T("scrollPos"), viewport->getViewPositionY());
+            e->setAttribute ("scrollPos", viewport->getViewPositionY());
     }
 
     return e;
@@ -595,9 +595,9 @@ void TreeView::restoreOpennessState (const XmlElement& newState)
     {
         rootItem->restoreOpennessState (newState);
 
-        if (newState.hasAttribute (T("scrollPos")))
+        if (newState.hasAttribute ("scrollPos"))
             viewport->setViewPosition (viewport->getViewPositionX(),
-                                       newState.getIntAttribute (T("scrollPos")));
+                                       newState.getIntAttribute ("scrollPos"));
     }
 }
 
@@ -1699,7 +1699,7 @@ const String TreeViewItem::getItemIdentifierString() const
     if (parentItem != 0)
         s = parentItem->getItemIdentifierString();
 
-    return s + T("/") + getUniqueName().replaceCharacter (T('/'), T('\\'));
+    return s + "/" + getUniqueName().replaceCharacter ('/', '\\');
 }
 
 TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifierString)
@@ -1709,7 +1709,7 @@ TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifi
     if (uid == identifierString)
         return this;
 
-    if (identifierString.startsWith (uid + T("/")))
+    if (identifierString.startsWith (uid + "/"))
     {
         const String remainingPath (identifierString.substring (uid.length() + 1));
 
@@ -1732,17 +1732,17 @@ TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifi
 
 void TreeViewItem::restoreOpennessState (const XmlElement& e) throw()
 {
-    if (e.hasTagName (T("CLOSED")))
+    if (e.hasTagName ("CLOSED"))
     {
         setOpen (false);
     }
-    else if (e.hasTagName (T("OPEN")))
+    else if (e.hasTagName ("OPEN"))
     {
         setOpen (true);
 
         forEachXmlChildElement (e, n)
         {
-            const String id (n->getStringAttribute (T("id")));
+            const String id (n->getStringAttribute ("id"));
 
             for (int i = 0; i < subItems.size(); ++i)
             {
@@ -1768,17 +1768,17 @@ XmlElement* TreeViewItem::getOpennessState() const throw()
 
         if (isOpen())
         {
-            e = new XmlElement (T("OPEN"));
+            e = new XmlElement ("OPEN");
 
             for (int i = 0; i < subItems.size(); ++i)
                 e->addChildElement (subItems.getUnchecked(i)->getOpennessState());
         }
         else
         {
-            e = new XmlElement (T("CLOSED"));
+            e = new XmlElement ("CLOSED");
         }
 
-        e->setAttribute (T("id"), name);
+        e->setAttribute ("id", name);
 
         return e;
     }

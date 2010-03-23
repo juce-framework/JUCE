@@ -183,8 +183,8 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 
 
 //==============================================================================
-const tchar File::separator = T('/');
-const tchar* File::separatorString = T("/");
+const juce_wchar File::separator = '/';
+const juce_wchar* File::separatorString = T("/");
 
 //==============================================================================
 const File File::getCurrentWorkingDirectory()
@@ -470,7 +470,7 @@ InterProcessLock::InterProcessLock (const String& name_)
 {
 #if JUCE_MAC
     // (don't use getSpecialLocation() to avoid the temp folder being different for each app)
-    const File temp (File (T("~/Library/Caches/Juce")).getChildFile (name));
+    const File temp (File ("~/Library/Caches/Juce").getChildFile (name));
 #else
     const File temp (File::getSpecialLocation (File::tempDirectory).getChildFile (name));
 #endif

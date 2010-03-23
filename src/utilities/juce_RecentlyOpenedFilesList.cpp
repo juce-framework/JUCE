@@ -130,7 +130,7 @@ int RecentlyOpenedFilesList::createPopupMenuItems (PopupMenu& menuToAddTo,
 //==============================================================================
 const String RecentlyOpenedFilesList::toString() const
 {
-    return files.joinIntoString (T("\n"));
+    return files.joinIntoString ("\n");
 }
 
 void RecentlyOpenedFilesList::restoreFromString (const String& stringifiedVersion)

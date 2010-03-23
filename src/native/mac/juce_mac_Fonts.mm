@@ -489,7 +489,7 @@ const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
 }
 
 //==============================================================================
-const StringArray Font::findAllTypefaceNames() throw()
+const StringArray Font::findAllTypefaceNames()
 {
     StringArray names;
 
@@ -508,7 +508,7 @@ const StringArray Font::findAllTypefaceNames() throw()
     return names;
 }
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
 {
 #if JUCE_IPHONE
     defaultSans  = "Helvetica";

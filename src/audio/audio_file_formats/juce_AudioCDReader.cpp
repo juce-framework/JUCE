@@ -112,7 +112,7 @@ void AudioCDReader::refreshTrackLengths()
 {
     tracks.clear();
     trackStartSamples.clear();
-    volumeDir.findChildFiles (tracks, File::findFiles | File::ignoreHiddenFiles, false, T("*.aiff"));
+    volumeDir.findChildFiles (tracks, File::findFiles | File::ignoreHiddenFiles, false, "*.aiff");
 
     tracks.sort (*this);
 

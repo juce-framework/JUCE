@@ -87,15 +87,6 @@ static const Colour createBaseColour (const Colour& buttonColour,
     return baseColour;
 }
 
-//==============================================================================
-static String defaultSansName, defaultSerifName, defaultFixedName;
-
-void clearUpDefaultFontNames() throw()
-{
-    defaultSansName = String::empty;
-    defaultSerifName = String::empty;
-    defaultFixedName = String::empty;
-}
 
 //==============================================================================
 LookAndFeel::LookAndFeel()
@@ -233,6 +224,8 @@ LookAndFeel::LookAndFeel()
 
     for (int i = 0; i < numElementsInArray (standardColours); i += 2)
         setColour (standardColours [i], Colour (standardColours [i + 1]));
+
+    static String defaultSansName, defaultSerifName, defaultFixedName;
 
     if (defaultSansName.isEmpty())
         Font::getPlatformDefaultFontNames (defaultSansName, defaultSerifName, defaultFixedName);
@@ -2381,7 +2374,7 @@ Button* LookAndFeel::createTabBarExtrasButton()
     overImage.insertDrawable (ellipse);
     overImage.insertDrawable (dp);
 
-    DrawableButton* db = new DrawableButton (T("tabs"), DrawableButton::ImageFitted);
+    DrawableButton* db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, 0);
     return db;
 }

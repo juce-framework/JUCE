@@ -92,7 +92,7 @@ Drawable* DrawableText::createCopy() const
 //==============================================================================
 ValueTree DrawableText::createValueTree() const throw()
 {
-    ValueTree v (T("Text"));
+    ValueTree v ("Text");
 
     if (getName().isNotEmpty())
         v.setProperty ("id", getName(), 0);

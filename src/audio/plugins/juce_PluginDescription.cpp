@@ -85,44 +85,44 @@ bool PluginDescription::isDuplicateOf (const PluginDescription& other) const
 const String PluginDescription::createIdentifierString() const throw()
 {
     return pluginFormatName
-            + T("-") + name
-            + T("-") + String::toHexString (fileOrIdentifier.hashCode())
-            + T("-") + String::toHexString (uid);
+            + "-" + name
+            + "-" + String::toHexString (fileOrIdentifier.hashCode())
+            + "-" + String::toHexString (uid);
 }
 
 XmlElement* PluginDescription::createXml() const
 {
-    XmlElement* const e = new XmlElement (T("PLUGIN"));
-    e->setAttribute (T("name"), name);
-    e->setAttribute (T("format"), pluginFormatName);
-    e->setAttribute (T("category"), category);
-    e->setAttribute (T("manufacturer"), manufacturerName);
-    e->setAttribute (T("version"), version);
-    e->setAttribute (T("file"), fileOrIdentifier);
-    e->setAttribute (T("uid"), String::toHexString (uid));
-    e->setAttribute (T("isInstrument"), isInstrument);
-    e->setAttribute (T("fileTime"), String::toHexString (lastFileModTime.toMilliseconds()));
-    e->setAttribute (T("numInputs"), numInputChannels);
-    e->setAttribute (T("numOutputs"), numOutputChannels);
+    XmlElement* const e = new XmlElement ("PLUGIN");
+    e->setAttribute ("name", name);
+    e->setAttribute ("format", pluginFormatName);
+    e->setAttribute ("category", category);
+    e->setAttribute ("manufacturer", manufacturerName);
+    e->setAttribute ("version", version);
+    e->setAttribute ("file", fileOrIdentifier);
+    e->setAttribute ("uid", String::toHexString (uid));
+    e->setAttribute ("isInstrument", isInstrument);
+    e->setAttribute ("fileTime", String::toHexString (lastFileModTime.toMilliseconds()));
+    e->setAttribute ("numInputs", numInputChannels);
+    e->setAttribute ("numOutputs", numOutputChannels);
 
     return e;
 }
 
 bool PluginDescription::loadFromXml (const XmlElement& xml)
 {
-    if (xml.hasTagName (T("PLUGIN")))
+    if (xml.hasTagName ("PLUGIN"))
     {
-        name = xml.getStringAttribute (T("name"));
-        pluginFormatName = xml.getStringAttribute (T("format"));
-        category = xml.getStringAttribute (T("category"));
-        manufacturerName = xml.getStringAttribute (T("manufacturer"));
-        version = xml.getStringAttribute (T("version"));
-        fileOrIdentifier = xml.getStringAttribute (T("file"));
-        uid = xml.getStringAttribute (T("uid")).getHexValue32();
-        isInstrument = xml.getBoolAttribute (T("isInstrument"), false);
-        lastFileModTime = Time (xml.getStringAttribute (T("fileTime")).getHexValue64());
-        numInputChannels = xml.getIntAttribute (T("numInputs"));
-        numOutputChannels = xml.getIntAttribute (T("numOutputs"));
+        name = xml.getStringAttribute ("name");
+        pluginFormatName = xml.getStringAttribute ("format");
+        category = xml.getStringAttribute ("category");
+        manufacturerName = xml.getStringAttribute ("manufacturer");
+        version = xml.getStringAttribute ("version");
+        fileOrIdentifier = xml.getStringAttribute ("file");
+        uid = xml.getStringAttribute ("uid").getHexValue32();
+        isInstrument = xml.getBoolAttribute ("isInstrument", false);
+        lastFileModTime = Time (xml.getStringAttribute ("fileTime").getHexValue64());
+        numInputChannels = xml.getIntAttribute ("numInputs");
+        numOutputChannels = xml.getIntAttribute ("numOutputs");
 
         return true;
     }

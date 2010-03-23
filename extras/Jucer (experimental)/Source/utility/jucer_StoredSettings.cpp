@@ -54,26 +54,26 @@ void StoredSettings::flush()
 {
     if (props != 0)
     {
-        props->setValue (T("recentFiles"), recentFiles.toString());
+        props->setValue ("recentFiles", recentFiles.toString());
 
-        props->removeValue (T("keyMappings"));
+        props->removeValue ("keyMappings");
 
         ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
         if (keys != 0)
-            props->setValue (T("keyMappings"), (XmlElement*) keys);
+            props->setValue ("keyMappings", (XmlElement*) keys);
     }
 
     deleteAndZero (props);
 
-    props = PropertiesFile::createDefaultAppPropertiesFile (T("Jucer2"),
-                                                            T("settings"),
+    props = PropertiesFile::createDefaultAppPropertiesFile ("Jucer2",
+                                                            "settings",
                                                             String::empty,
                                                             false, 3000,
                                                             PropertiesFile::storeAsXML);
 
     // recent files...
-    recentFiles.restoreFromString (props->getValue (T("recentFiles")));
+    recentFiles.restoreFromString (props->getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
 }
 

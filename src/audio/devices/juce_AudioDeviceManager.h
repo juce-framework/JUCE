@@ -224,7 +224,7 @@ public:
     /** Returns the type of audio device currently in use.
         @see setCurrentAudioDeviceType
     */
-    const String getCurrentAudioDeviceType() const throw()              { return currentDeviceType; }
+    const String getCurrentAudioDeviceType() const                      { return currentDeviceType; }
 
     /** Returns the currently active audio device type object.
         Don't keep a copy of this pointer - it's owned by the device manager and could
@@ -356,7 +356,7 @@ public:
 
         @see setDefaultMidiOutput, getDefaultMidiOutput
     */
-    const String getDefaultMidiOutputName() const throw()           { return defaultMidiOutputName; }
+    const String getDefaultMidiOutputName() const                   { return defaultMidiOutputName; }
 
     /** Returns the current default midi output device.
 

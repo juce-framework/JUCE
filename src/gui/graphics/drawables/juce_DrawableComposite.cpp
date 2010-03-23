@@ -185,7 +185,7 @@ Drawable* DrawableComposite::createCopy() const
 //==============================================================================
 ValueTree DrawableComposite::createValueTree() const throw()
 {
-    ValueTree v (T("Group"));
+    ValueTree v ("Group");
 
     if (getName().isNotEmpty())
         v.setProperty ("id", getName(), 0);

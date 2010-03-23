@@ -61,12 +61,12 @@ public:
 
             while (t[pos] != 0)
             {
-                if (t[pos] == T('\r'))
+                if (t[pos] == '\r')
                 {
                     ++numNewLineChars;
                     ++pos;
 
-                    if (t[pos] == T('\n'))
+                    if (t[pos] == '\n')
                     {
                         ++numNewLineChars;
                         ++pos;
@@ -75,7 +75,7 @@ public:
                     break;
                 }
 
-                if (t[pos] == T('\n'))
+                if (t[pos] == '\n')
                 {
                     ++numNewLineChars;
                     ++pos;
@@ -567,7 +567,7 @@ bool CodeDocument::writeToStream (OutputStream& stream)
 
 void CodeDocument::setNewLineCharacters (const String& newLine) throw()
 {
-    jassert (newLine == T("\r\n") || newLine == T("\n") || newLine == T("\r"));
+    jassert (newLine == "\r\n" || newLine == "\n" || newLine == "\r");
     newLineChars = newLine;
 }
 
@@ -617,8 +617,8 @@ const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& p
 
     while (i < maxDistance
             && CharacterFunctions::isWhitespace (p.getCharacter())
-            && (i == 0 || (p.getCharacter() != T('\n')
-                            && p.getCharacter() != T('\r'))))
+            && (i == 0 || (p.getCharacter() != '\n'
+                            && p.getCharacter() != '\r')))
     {
         ++i;
         p.moveBy (1);
@@ -636,8 +636,8 @@ const CodeDocument::Position CodeDocument::findWordBreakAfter (const Position& p
 
         while (i < maxDistance
                 && CharacterFunctions::isWhitespace (p.getCharacter())
-                && (i == 0 || (p.getCharacter() != T('\n')
-                                && p.getCharacter() != T('\r'))))
+                && (i == 0 || (p.getCharacter() != '\n'
+                                && p.getCharacter() != '\r')))
         {
             ++i;
             p.moveBy (1);
@@ -658,7 +658,7 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
     {
         const tchar c = p.movedBy (-1).getCharacter();
 
-        if (c == T('\r') || c == T('\n'))
+        if (c == '\r' || c == '\n')
         {
             stoppedAtLineStart = true;
 

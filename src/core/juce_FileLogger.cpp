@@ -75,7 +75,7 @@ void FileLogger::logMessage (const String& message)
         DBG (message);
 
         const ScopedLock sl (logLock);
-        (*logStream) << message << T("\r\n");
+        (*logStream) << message << "\r\n";
         logStream->flush();
     }
 }

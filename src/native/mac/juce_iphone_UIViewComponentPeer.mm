@@ -759,7 +759,7 @@ BOOL UIViewComponentPeer::textFieldShouldReturn()
 
     if (target != 0)
     {
-        target->insertTextAtCaret (T("\n"));
+        target->insertTextAtCaret ("\n");
         updateHiddenTextContent (target);
     }
 

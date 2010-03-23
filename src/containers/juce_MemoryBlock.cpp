@@ -309,19 +309,19 @@ void MemoryBlock::loadFromHexString (const String& hex) throw()
             {
                 const juce_wchar c = hex [i++];
 
-                if (c >= T('0') && c <= T('9'))
+                if (c >= '0' && c <= '9')
                 {
-                    byte |= c - T('0');
+                    byte |= c - '0';
                     break;
                 }
-                else if (c >= T('a') && c <= T('z'))
+                else if (c >= 'a' && c <= 'z')
                 {
-                    byte |= c - (T('a') - 10);
+                    byte |= c - ('a' - 10);
                     break;
                 }
-                else if (c >= T('A') && c <= T('Z'))
+                else if (c >= 'A' && c <= 'Z')
                 {
-                    byte |= c - (T('A') - 10);
+                    byte |= c - ('A' - 10);
                     break;
                 }
                 else if (c == 0)
@@ -349,7 +349,7 @@ const String MemoryBlock::toBase64Encoding() const throw()
     destString.preallocateStorage (initialLen + 2 + numChars);
 
     tchar* d = const_cast <tchar*> (((const tchar*) destString) + initialLen);
-    *d++ = T('.');
+    *d++ = '.';
 
     for (size_t i = 0; i < numChars; ++i)
         *d++ = encodingTable [getBitRange (i * 6, 6)];
@@ -361,7 +361,7 @@ const String MemoryBlock::toBase64Encoding() const throw()
 
 bool MemoryBlock::fromBase64Encoding (const String& s) throw()
 {
-    const int startPos = s.indexOfChar (T('.')) + 1;
+    const int startPos = s.indexOfChar ('.') + 1;
 
     if (startPos <= 0)
         return false;

@@ -42,7 +42,7 @@
 
     forEachXmlChildElement (*myParentXml, child)
     {
-        if (child->hasTagName (T("FOO")))
+        if (child->hasTagName ("FOO"))
             doSomethingWithXmlElement (child);
     }
 
@@ -69,7 +69,7 @@
     E.g. @code
     XmlElement* myParentXml = createSomeKindOfXmlDocument();
 
-    forEachXmlChildElementWithTagName (*myParentXml, child, T("MYTAG"))
+    forEachXmlChildElementWithTagName (*myParentXml, child, "MYTAG")
     {
         // the child object is now guaranteed to be a <MYTAG> element..
         doSomethingWithMYTAGElement (child);
@@ -100,12 +100,12 @@
 
     Here's an example of parsing some elements: @code
     // check we're looking at the right kind of document..
-    if (myElement->hasTagName (T("ANIMALS")))
+    if (myElement->hasTagName ("ANIMALS"))
     {
         // now we'll iterate its sub-elements looking for 'giraffe' elements..
         forEachXmlChildElement (*myElement, e)
         {
-            if (e->hasTagName (T("GIRAFFE")))
+            if (e->hasTagName ("GIRAFFE"))
             {
                 // found a giraffe, so use some of its attributes..
 
@@ -192,7 +192,7 @@ public:
     const String createDocument (const String& dtdToUse,
                                  bool allOnOneLine = false,
                                  bool includeXmlHeader = true,
-                                 const String& encodingType = JUCE_T("UTF-8"),
+                                 const String& encodingType = "UTF-8",
                                  int lineWrapLength = 60) const;
 
     /** Writes the document to a stream as UTF-8.
@@ -214,7 +214,7 @@ public:
                         const String& dtdToUse,
                         bool allOnOneLine = false,
                         bool includeXmlHeader = true,
-                        const String& encodingType = JUCE_T("UTF-8"),
+                        const String& encodingType = "UTF-8",
                         int lineWrapLength = 60) const;
 
     /** Writes the element to a file as an XML document.
@@ -238,7 +238,7 @@ public:
     */
     bool writeToFile (const File& destinationFile,
                       const String& dtdToUse,
-                      const String& encodingType = JUCE_T("UTF-8"),
+                      const String& encodingType = "UTF-8",
                       int lineWrapLength = 60) const;
 
     //==============================================================================

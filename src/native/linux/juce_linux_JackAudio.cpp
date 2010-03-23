@@ -122,7 +122,7 @@ public:
     JackAudioIODevice (const String& deviceName,
                        const String& inputId_,
                        const String& outputId_)
-        : AudioIODevice (deviceName, T("JACK")),
+        : AudioIODevice (deviceName, "JACK"),
           inputId (inputId_),
           outputId (outputId_),
           isOpen_ (false),
@@ -216,7 +216,7 @@ public:
     {
         if (client == 0)
         {
-            lastError = T("No JACK client running");
+            lastError = "No JACK client running";
             return lastError;
         }
 
@@ -455,7 +455,7 @@ class JackAudioIODeviceType  : public AudioIODeviceType
 public:
     //==============================================================================
     JackAudioIODeviceType()
-        : AudioIODeviceType (T("JACK")),
+        : AudioIODeviceType ("JACK"),
           hasScanned (false)
     {
     }

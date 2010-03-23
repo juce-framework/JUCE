@@ -111,7 +111,7 @@ bool FileBasedDocument::loadFrom (const File& newFile,
                                      TRANS("Failed to open file..."),
                                      TRANS("There was an error while trying to load the file:\n\n")
                                        + newFile.getFullPathName()
-                                       + T("\n\n")
+                                       + "\n\n"
                                        + error);
     }
 
@@ -199,7 +199,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
                                         + getDocumentTitle()
                                         + TRANS("\" to the file:\n\n")
                                         + newFile.getFullPathName()
-                                        + T("\n\n")
+                                        + "\n\n"
                                         + error);
     }
 
@@ -214,7 +214,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveIfNeededAndUserAgrees()
     const int r = AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
                                                    TRANS("Closing document..."),
                                                    TRANS("Do you want to save the changes to \"")
-                                                       + getDocumentTitle() + T("\"?"),
+                                                       + getDocumentTitle() + "\"?",
                                                    TRANS("save"),
                                                    TRANS("discard changes"),
                                                    TRANS("cancel"));
@@ -270,9 +270,9 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAsInteractive (const bool w
             {
                 if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                     TRANS("File already exists"),
-                                                    TRANS("There's already a file called:\n\n")
-                                                    + chosen.getFullPathName()
-                                                    + T("\n\nAre you sure you want to overwrite it?"),
+                                                    TRANS("There's already a file called:")
+                                                      + "\n\n" + chosen.getFullPathName()
+                                                      + "\n\n" + TRANS("Are you sure you want to overwrite it?"),
                                                     TRANS("overwrite"),
                                                     TRANS("cancel")))
                 {

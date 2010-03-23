@@ -44,9 +44,9 @@ static HKEY findKeyForPath (String name,
 
     if (rootKey != 0)
     {
-        name = name.substring (name.indexOfChar (T('\\')) + 1);
+        name = name.substring (name.indexOfChar ('\\') + 1);
 
-        const int lastSlash = name.lastIndexOfChar (T('\\'));
+        const int lastSlash = name.lastIndexOfChar ('\\');
         valueName = name.substring (lastSlash + 1);
         name = name.substring (0, lastSlash);
 
@@ -198,7 +198,7 @@ const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams() thro
     StringArray tokens;
     tokens.addTokens (s, true); // tokenise so that we can remove the initial filename argument
 
-    return tokens.joinIntoString (T(" "), 1);
+    return tokens.joinIntoString (" ", 1);
 }
 
 //==============================================================================

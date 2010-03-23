@@ -153,7 +153,7 @@ void TextLayout::appendText (const String& text,
             break;
 
         int charType;
-        if (c == T('\r') || c == T('\n'))
+        if (c == '\r' || c == '\n')
         {
             charType = 0;
         }
@@ -176,7 +176,7 @@ void TextLayout::appendText (const String& text,
 
             currentString = String::charToString (c);
 
-            if (c == T('\r') && *t == T('\n'))
+            if (c == '\r' && *t == '\n')
                 currentString += *t++;
         }
         else

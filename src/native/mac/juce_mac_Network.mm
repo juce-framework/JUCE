@@ -161,7 +161,7 @@ class JuceURLConnectionMessageThread  : public Thread
 
 public:
     JuceURLConnectionMessageThread (JuceURLConnection* owner_)
-        : Thread (T("http connection")),
+        : Thread ("http connection"),
           owner (owner_)
     {
     }

@@ -39,7 +39,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
                                       bool selectMultipleFiles,
                                       FilePreviewComponent* previewComponent)
 {
-    const tchar* const separator = T(":");
+    const String separator (":");
     String command ("zenity --file-selection");
 
     if (title.isNotEmpty())

@@ -74,7 +74,7 @@ static int CALLBACK wfontEnum1 (ENUMLOGFONTEXW* lpelfe,
     return 1;
 }
 
-const StringArray Font::findAllTypefaceNames() throw()
+const StringArray Font::findAllTypefaceNames()
 {
     StringArray results;
     HDC dc = CreateCompatibleDC (0);
@@ -104,7 +104,7 @@ const StringArray Font::findAllTypefaceNames() throw()
 
 extern bool juce_IsRunningInWine();
 
-void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw()
+void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
 {
     if (juce_IsRunningInWine())
     {

@@ -280,7 +280,7 @@ public:
     MidiInputThread (MidiInput* const midiInput_,
                      snd_seq_t* const seqHandle_,
                      MidiInputCallback* const callback_)
-        : Thread (T("Juce MIDI Input")),
+        : Thread ("Juce MIDI Input"),
           midiInput (midiInput_),
           seqHandle (seqHandle_),
           callback (callback_)

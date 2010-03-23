@@ -420,10 +420,10 @@ void Toolbar::setStyle (const ToolbarItemStyle& newStyle)
 
 const String Toolbar::toString() const
 {
-    String s (T("TB:"));
+    String s ("TB:");
 
     for (int i = 0; i < getNumItems(); ++i)
-        s << getItemId(i) << T(' ');
+        s << getItemId(i) << ' ';
 
     return s.trimEnd();
 }

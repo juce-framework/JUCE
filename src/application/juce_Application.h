@@ -78,12 +78,12 @@
 
             const String getApplicationName()
             {
-                return T("Super JUCE-o-matic");
+                return "Super JUCE-o-matic";
             }
 
             const String getApplicationVersion()
             {
-                return T("1.0");
+                return "1.0";
             }
         };
 

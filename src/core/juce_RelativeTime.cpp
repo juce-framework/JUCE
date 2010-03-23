@@ -112,7 +112,7 @@ const String RelativeTime::getDescription (const String& returnValueForZeroTime)
     String result;
 
     if (seconds < 0)
-        result = T("-");
+        result = "-";
 
     int fieldsShown = 0;
     int n = abs ((int) inWeeks());

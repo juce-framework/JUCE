@@ -33,7 +33,7 @@ extern void juce_initialiseThreadEvents();
 //==============================================================================
 void Logger::outputDebugString (const String& text) throw()
 {
-    OutputDebugString (text + T("\n"));
+    OutputDebugString (text + "\n");
 }
 
 //==============================================================================

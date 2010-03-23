@@ -144,7 +144,7 @@ void JUCEApplication::getCommandInfo (const CommandID commandID, ApplicationComm
                         "Application",
                         0);
 
-        result.defaultKeypresses.add (KeyPress (T('q'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('q', ModifierKeys::commandModifier, 0));
     }
 }
 

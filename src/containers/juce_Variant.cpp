@@ -188,7 +188,7 @@ const String var::toString() const
     {
         case voidType:      return String::empty;
         case intType:       return String (value.intValue);
-        case boolType:      return value.boolValue ? T("1") : T("0");
+        case boolType:      return String::charToString (value.boolValue ? '1' : '0');
         case doubleType:    return String (value.doubleValue);
         case stringType:    return *(value.stringValue);
         case objectType:    return "Object 0x" + String::toHexString ((int) (pointer_sized_int) value.objectValue);

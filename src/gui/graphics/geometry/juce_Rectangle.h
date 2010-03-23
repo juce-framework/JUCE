@@ -519,7 +519,7 @@ public:
     static const Rectangle fromString (const String& stringVersion)
     {
         StringArray toks;
-        toks.addTokens (stringVersion.trim(), JUCE_T(",; \t\r\n"), String::empty);
+        toks.addTokens (stringVersion.trim(), ",; \t\r\n", String::empty);
 
         return Rectangle (toks[0].trim().getIntValue(),
                           toks[1].trim().getIntValue(),

@@ -122,8 +122,8 @@ AudioFormat* AudioFormatManager::getDefaultFormat() const
 AudioFormat* AudioFormatManager::findFormatForFileExtension (const String& fileExtension) const
 {
     String e (fileExtension);
-    if (! e.startsWithChar (T('.')))
-        e = T(".") + e;
+    if (! e.startsWithChar ('.'))
+        e = "." + e;
 
     for (int i = 0; i < getNumKnownFormats(); ++i)
         if (getKnownFormat(i)->getFileExtensions().contains (e, true))
@@ -146,15 +146,15 @@ const String AudioFormatManager::getWildcardForAllFormats() const
     String s;
     for (i = 0; i < allExtensions.size(); ++i)
     {
-        s << T('*');
+        s << '*';
 
-        if (! allExtensions[i].startsWithChar (T('.')))
-            s << T('.');
+        if (! allExtensions[i].startsWithChar ('.'))
+            s << '.';
 
         s << allExtensions[i];
 
         if (i < allExtensions.size() - 1)
-            s << T(';');
+            s << ';';
     }
 
     return s;

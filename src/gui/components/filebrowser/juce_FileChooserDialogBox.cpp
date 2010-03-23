@@ -106,9 +106,9 @@ void FileChooserDialogBox::buttonClicked (Button* button)
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                                 TRANS("File already exists"),
-                                                TRANS("There's already a file called:\n\n")
-                                                + content->chooserComponent->getSelectedFile(0).getFullPathName()
-                                                + T("\n\nAre you sure you want to overwrite it?"),
+                                                TRANS("There's already a file called:")
+                                                  + "\n\n" + content->chooserComponent->getSelectedFile(0).getFullPathName()
+                                                  + "\n\n" + TRANS("Are you sure you want to overwrite it?"),
                                                 TRANS("overwrite"),
                                                 TRANS("cancel")))
             {

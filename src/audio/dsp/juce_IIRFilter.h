@@ -46,13 +46,13 @@ public:
         you process with it. Use the appropriate method to turn it into the type
         of filter needed.
     */
-    IIRFilter() throw();
+    IIRFilter();
 
     /** Creates a copy of another filter. */
-    IIRFilter (const IIRFilter& other) throw();
+    IIRFilter (const IIRFilter& other);
 
     /** Destructor. */
-    ~IIRFilter() throw();
+    ~IIRFilter();
 
     //==============================================================================
     /** Resets the filter's processing pipeline, ready to start a new stream of data.

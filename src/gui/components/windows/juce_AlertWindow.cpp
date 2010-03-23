@@ -62,7 +62,7 @@ public:
     void returnPressed()
     {
         // pass these up the component hierarchy to be trigger the buttons
-        getParentComponent()->keyPressed (KeyPress (KeyPress::returnKey, 0, T('\n')));
+        getParentComponent()->keyPressed (KeyPress (KeyPress::returnKey, 0, '\n'));
     }
 
     void escapePressed()
@@ -92,7 +92,7 @@ AlertWindow::AlertWindow (const String& title,
      associatedComponent (associatedComponent_)
 {
     if (message.isEmpty())
-        text = T(" "); // to force an update if the message is empty
+        text = " "; // to force an update if the message is empty
 
     setMessage (message);
 
@@ -140,7 +140,7 @@ void AlertWindow::setMessage (const String& message)
         font.setHeight (15.0f);
 
         Font titleFont (font.getHeight() * 1.1f, Font::bold);
-        textLayout.setText (getName() + T("\n\n"), titleFont);
+        textLayout.setText (getName() + "\n\n", titleFont);
 
         textLayout.appendText (text, font);
 

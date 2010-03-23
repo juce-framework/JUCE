@@ -24,8 +24,8 @@
 */
 
 #ifdef _MSC_VER
-  #pragma warning (disable: 4514)
   #pragma warning (push)
+  #pragma warning (disable: 4514)
 #endif
 #include <locale>
 
@@ -62,7 +62,7 @@ public:
     //==============================================================================
     static juce_wchar* create (const size_t numChars)
     {
-        StringHolder* const s = reinterpret_cast <StringHolder*> (juce_malloc (sizeof (StringHolder) + numChars * sizeof (juce_wchar)));
+        StringHolder* const s = reinterpret_cast <StringHolder*> (new char [sizeof (StringHolder) + numChars * sizeof (juce_wchar)]);
         s->refCount = 0;
         s->allocatedNumChars = numChars;
         return &(s->text[0]);
@@ -82,7 +82,7 @@ public:
     static inline void release (StringHolder* const b) throw()
     {
         if (Atomic::decrementAndReturn (b->refCount) == -1 && b != &empty)
-            juce_free (b);
+            delete[] reinterpret_cast <char*> (b);
     }
 
     static void release (juce_wchar* const text) throw()
@@ -284,8 +284,10 @@ String::String (const juce_wchar* const t, const size_t maxChars)
 
 const String String::charToString (const juce_wchar character)
 {
-    juce_wchar temp[] = { character, 0 };
-    return String (temp);
+    String result ((size_t) 1, (int) 0);
+    result.text[0] = character;
+    result.text[1] = 0;
+    return result;
 }
 
 //==============================================================================
@@ -299,13 +301,13 @@ namespace NumberToStringConverters
 
         do
         {
-            *--t = (juce_wchar) (T('0') + (int) (v % 10));
+            *--t = (juce_wchar) ('0' + (int) (v % 10));
             v /= 10;
 
         } while (v > 0);
 
         if (n < 0)
-            *--t = T('-');
+            *--t = '-';
 
         return t;
     }
@@ -316,7 +318,7 @@ namespace NumberToStringConverters
 
         do
         {
-            *--t = (juce_wchar) (T('0') + (int) (v % 10));
+            *--t = (juce_wchar) ('0' + (int) (v % 10));
             v /= 10;
 
         } while (v > 0);
@@ -334,13 +336,13 @@ namespace NumberToStringConverters
 
         do
         {
-            *--t = (juce_wchar) (T('0') + (v % 10));
+            *--t = (juce_wchar) ('0' + (v % 10));
             v /= 10;
 
         } while (v > 0);
 
         if (n < 0)
-            *--t = T('-');
+            *--t = '-';
 
         return t;
     }
@@ -351,7 +353,7 @@ namespace NumberToStringConverters
 
         do
         {
-            *--t = (juce_wchar) (T('0') + (v % 10));
+            *--t = (juce_wchar) ('0' + (v % 10));
             v /= 10;
 
         } while (v > 0);
@@ -383,14 +385,14 @@ namespace NumberToStringConverters
                 if (numDecPlaces == 0)
                     *--t = getDecimalPoint();
 
-                *--t = (juce_wchar) (T('0') + (v % 10));
+                *--t = (juce_wchar) ('0' + (v % 10));
 
                 v /= 10;
                 --numDecPlaces;
             }
 
             if (n < 0)
-                *--t = T('-');
+                *--t = '-';
 
             len = end - t - 1;
             return t;
@@ -1056,7 +1058,7 @@ static int indexOfMatch (const juce_wchar* const wildcard,
 
             if (wc == c
                  || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (c))
-                 || (wc == T('?') && c != 0))
+                 || (wc == '?' && c != 0))
             {
                 if (wc == 0)
                     return start;
@@ -1065,10 +1067,10 @@ static int indexOfMatch (const juce_wchar* const wildcard,
             }
             else
             {
-                if (wc == T('*') && (wildcard [i + 1] == 0
-                                      || indexOfMatch (wildcard + i + 1,
-                                                       test + start + i,
-                                                       ignoreCase) >= 0))
+                if (wc == '*' && (wildcard [i + 1] == 0
+                                   || indexOfMatch (wildcard + i + 1,
+                                                    test + start + i,
+                                                    ignoreCase) >= 0))
                 {
                     return start;
                 }
@@ -1094,7 +1096,7 @@ bool String::matchesWildcard (const juce_wchar* wildcard, const bool ignoreCase)
 
         if (wc == c
              || (ignoreCase && CharacterFunctions::toLowerCase (wc) == CharacterFunctions::toLowerCase (c))
-             || (wc == T('?') && c != 0))
+             || (wc == '?' && c != 0))
         {
             if (wc == 0)
                 return true;
@@ -1103,10 +1105,10 @@ bool String::matchesWildcard (const juce_wchar* wildcard, const bool ignoreCase)
         }
         else
         {
-            return wc == T('*') && (wildcard [i + 1] == 0
-                                     || indexOfMatch (wildcard + i + 1,
-                                                      text + i,
-                                                      ignoreCase) >= 0);
+            return wc == '*' && (wildcard [i + 1] == 0
+                                  || indexOfMatch (wildcard + i + 1,
+                                                   text + i,
+                                                   ignoreCase) >= 0);
         }
     }
 }
@@ -1467,21 +1469,21 @@ bool String::isQuotedString() const
 {
     const String trimmed (trimStart());
 
-    return trimmed[0] == T('"')
-        || trimmed[0] == T('\'');
+    return trimmed[0] == '"'
+        || trimmed[0] == '\'';
 }
 
 const String String::unquoted() const
 {
     String s (*this);
 
-    if (s.text[0] == T('"') || s.text[0] == T('\''))
+    if (s.text[0] == '"' || s.text[0] == '\'')
         s = s.substring (1);
 
     const int lastCharIndex = s.length() - 1;
 
     if (lastCharIndex >= 0
-         && (s [lastCharIndex] == T('"') || s[lastCharIndex] == T('\'')))
+         && (s [lastCharIndex] == '"' || s[lastCharIndex] == '\''))
         s [lastCharIndex] = 0;
 
     return s;
@@ -1718,7 +1720,14 @@ const String String::formatted (const juce_wchar* const pf, ... )
         const int num = (int) vswprintf (result.text, bufferSize - 1, pf, tempArgs);
         va_end (tempArgs);
 #elif JUCE_WINDOWS
+        #ifdef _MSC_VER
+          #pragma warning (push)
+          #pragma warning (disable: 4996)
+        #endif
         const int num = (int) _vsnwprintf (result.text, bufferSize - 1, pf, args);
+        #ifdef _MSC_VER
+          #pragma warning (pop)
+        #endif
 #else
         const int num = (int) vswprintf (result.text, bufferSize - 1, pf, args);
 #endif
@@ -1755,13 +1764,13 @@ int String::getTrailingIntValue() const throw()
 
         if (! CharacterFunctions::isDigit (c))
         {
-            if (c == T('-'))
+            if (c == '-')
                 n = -n;
 
             break;
         }
 
-        n += mult * (c - T('0'));
+        n += mult * (c - '0');
         mult *= 10;
     }
 
@@ -1848,7 +1857,7 @@ const String String::toHexString (const unsigned char* data,
         ++data;
 
         if (groupSize > 0 && (i % groupSize) == (groupSize - 1) && i < (size - 1))
-            *d++ = T(' ');
+            *d++ = ' ';
     }
 
     *d = 0;

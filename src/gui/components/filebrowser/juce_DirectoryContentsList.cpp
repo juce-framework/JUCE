@@ -121,7 +121,7 @@ void DirectoryContentsList::refresh()
 
         jassert (fileFindHandle == 0);
 
-        fileFindHandle = juce_findFileStart (path, T("*"), fileFound,
+        fileFindHandle = juce_findFileStart (path, "*", fileFound,
                                              &fileFoundIsDir,
                                              &isHidden,
                                              &fileSize,
@@ -265,8 +265,8 @@ bool DirectoryContentsList::addFile (const String& filename,
                                      const Time& creationTime,
                                      const bool isReadOnly)
 {
-    if (filename == T("..")
-         || filename == T(".")
+    if (filename == ".."
+         || filename == "."
          || (ignoreHiddenFiles && isHidden))
         return false;
 

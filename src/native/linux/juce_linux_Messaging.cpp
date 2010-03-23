@@ -152,7 +152,7 @@ static XIOErrorHandler oldIOErrorHandler = (XIOErrorHandler) 0;
 // Usually happens when client-server connection is broken
 static int ioErrorHandler (Display* display)
 {
-    DBG (T("ERROR: connection to X server broken.. terminating."));
+    DBG ("ERROR: connection to X server broken.. terminating.");
 
     errorOccurred = true;
 
@@ -174,7 +174,7 @@ static int errorHandler (Display* display, XErrorEvent* event)
     XGetErrorDatabaseText (display, "XRequest", String (event->request_code).toCString(),
                            "Unknown", requestStr, 64);
 
-    DBG (T("ERROR: X returned ") + String (errorStr) + T(" for operation ") + String (requestStr));
+    DBG ("ERROR: X returned " + String (errorStr) + " for operation " + String (requestStr));
 #endif
 
     return 0;

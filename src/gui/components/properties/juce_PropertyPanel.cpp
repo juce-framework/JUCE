@@ -385,7 +385,7 @@ void PropertyPanel::setSectionEnabled (const int sectionIndex, const bool should
 //==============================================================================
 XmlElement* PropertyPanel::getOpennessState() const
 {
-    XmlElement* const xml = new XmlElement (T("PROPERTYPANELSTATE"));
+    XmlElement* const xml = new XmlElement ("PROPERTYPANELSTATE");
 
     xml->setAttribute ("scrollPos", viewport->getViewPositionY());
 
@@ -406,14 +406,14 @@ XmlElement* PropertyPanel::getOpennessState() const
 
 void PropertyPanel::restoreOpennessState (const XmlElement& xml)
 {
-    if (xml.hasTagName (T("PROPERTYPANELSTATE")))
+    if (xml.hasTagName ("PROPERTYPANELSTATE"))
     {
         const StringArray sections (getSectionNames());
 
-        forEachXmlChildElementWithTagName (xml, e, T("SECTION"))
+        forEachXmlChildElementWithTagName (xml, e, "SECTION")
         {
-            setSectionOpen (sections.indexOf (e->getStringAttribute (T("name"))),
-                            e->getBoolAttribute (T("open")));
+            setSectionOpen (sections.indexOf (e->getStringAttribute ("name")),
+                            e->getBoolAttribute ("open"));
         }
 
         viewport->setViewPosition (viewport->getViewPositionX(),

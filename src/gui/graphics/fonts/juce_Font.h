@@ -169,7 +169,7 @@ public:
     static const String getDefaultMonospacedFontName() throw();
 
     /** Returns the typeface names of the default fonts on the current platform. */
-    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed) throw();
+    static void getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed);
 
     //==============================================================================
     /** Returns the total height of this font.
@@ -331,7 +331,7 @@ public:
         You can use this instead of findFonts() if you only need their names, and not
         font objects.
     */
-    static const StringArray findAllTypefaceNames() throw();
+    static const StringArray findAllTypefaceNames();
 
     //==============================================================================
     /** Returns the name of the typeface to be used for rendering glyphs that aren't found

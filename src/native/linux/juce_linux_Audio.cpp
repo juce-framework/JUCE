@@ -181,7 +181,7 @@ public:
         if (bitDepth == 0)
         {
             error = "device doesn't support a compatible PCM format";
-            DBG (T("ALSA error: ") + error + T("\n"));
+            DBG ("ALSA error: " + error + "\n");
             return false;
         }
 
@@ -326,7 +326,7 @@ private:
             return false;
 
         error = snd_strerror (errorNum);
-        DBG (T("ALSA error: ") + error + T("\n"));
+        DBG ("ALSA error: " + error + "\n");
         return true;
     }
 };
@@ -612,7 +612,7 @@ private:
             return false;
 
         error = snd_strerror (errorNum);
-        DBG (T("ALSA error: ") + error + T("\n"));
+        DBG ("ALSA error: " + error + "\n");
         return true;
     }
 
@@ -632,10 +632,10 @@ private:
 
         unsigned int i;
         for (i = 0; i < maxChansOut; ++i)
-            channelNamesOut.add (T("channel ") + String ((int) i + 1));
+            channelNamesOut.add ("channel " + String ((int) i + 1));
 
         for (i = 0; i < maxChansIn; ++i)
-            channelNamesIn.add (T("channel ") + String ((int) i + 1));
+            channelNamesIn.add ("channel " + String ((int) i + 1));
     }
 };
 
@@ -647,7 +647,7 @@ public:
     ALSAAudioIODevice (const String& deviceName,
                        const String& inputId_,
                        const String& outputId_)
-        : AudioIODevice (deviceName, T("ALSA")),
+        : AudioIODevice (deviceName, "ALSA"),
           inputId (inputId_),
           outputId (outputId_),
           isOpen_ (false),
@@ -827,7 +827,7 @@ class ALSAAudioIODeviceType  : public AudioIODeviceType
 public:
     //==============================================================================
     ALSAAudioIODeviceType()
-        : AudioIODeviceType (T("ALSA")),
+        : AudioIODeviceType ("ALSA"),
           hasScanned (false)
     {
     }
@@ -973,10 +973,10 @@ private:
 
         getDeviceProperties (id, minChansOut, maxChansOut, minChansIn, maxChansIn, rates);
 
-        DBG (T("ALSA device: ") + id
-              + T(" outs=") + String ((int) minChansOut) + T("-") + String ((int) maxChansOut)
-              + T(" ins=") + String ((int) minChansIn) + T("-") + String ((int) maxChansIn)
-              + T(" rates=") + String (rates.size()));
+        DBG ("ALSA device: " + id
+              + " outs=" + String ((int) minChansOut) + "-" + String ((int) maxChansOut)
+              + " ins=" + String ((int) minChansIn) + "-" + String ((int) maxChansIn)
+              + " rates=" + String (rates.size()));
 
         isInput = maxChansIn > 0;
         isOutput = maxChansOut > 0;

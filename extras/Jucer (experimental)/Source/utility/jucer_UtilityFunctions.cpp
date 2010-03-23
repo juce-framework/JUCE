@@ -150,27 +150,27 @@ const String createGUID (const String& seed)
 
 const String unixStylePath (const String& path)
 {
-    return path.replaceCharacter (T('\\'), T('/'));
+    return path.replaceCharacter ('\\', '/');
 }
 
 const String windowsStylePath (const String& path)
 {
-    return path.replaceCharacter (T('/'), T('\\'));
+    return path.replaceCharacter ('/', '\\');
 }
 
 const String appendPath (const String& path, const String& subpath)
 {
     if (File::isAbsolutePath (subpath)
-         || subpath.startsWithChar (T('$'))
-         || subpath.startsWithChar (T('~'))
-         || (CharacterFunctions::isLetter (subpath[0]) && subpath[1] == T(':')))
-        return subpath.replaceCharacter (T('\\'), T('/'));
+         || subpath.startsWithChar ('$')
+         || subpath.startsWithChar ('~')
+         || (CharacterFunctions::isLetter (subpath[0]) && subpath[1] == ':'))
+        return subpath.replaceCharacter ('\\', '/');
 
-    String path1 (path.replaceCharacter (T('\\'), T('/')));
-    if (! path1.endsWithChar (T('/')))
+    String path1 (path.replaceCharacter ('\\', '/'));
+    if (! path1.endsWithChar ('/'))
         path1 << '/';
 
-    return path1 + subpath.replaceCharacter (T('\\'), T('/'));
+    return path1 + subpath.replaceCharacter ('\\', '/');
 }
 
 bool shouldPathsBeRelative (String path1, String path2)
@@ -275,34 +275,34 @@ const String replaceCEscapeChars (const String& s)
         switch (c)
         {
         case '\t':
-            r << T("\\t");
+            r << "\\t";
             lastWasHexEscapeCode = false;
             break;
         case '\r':
-            r << T("\\r");
+            r << "\\r";
             lastWasHexEscapeCode = false;
             break;
         case '\n':
-            r <<  T("\\n");
+            r <<  "\\n";
             lastWasHexEscapeCode = false;
             break;
         case '\\':
-            r << T("\\\\");
+            r << "\\\\";
             lastWasHexEscapeCode = false;
             break;
         case '\'':
-            r << T("\\\'");
+            r << "\\\'";
             lastWasHexEscapeCode = false;
             break;
         case '\"':
-            r << T("\\\"");
+            r << "\\\"";
             lastWasHexEscapeCode = false;
             break;
 
         default:
             if (c < 128 &&
                  ! (lastWasHexEscapeCode
-                     && String (T("0123456789abcdefABCDEF")).containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
+                     && String ("0123456789abcdefABCDEF").containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
             {
                 r << c;
                 lastWasHexEscapeCode = false;
@@ -310,7 +310,7 @@ const String replaceCEscapeChars (const String& s)
             else
             {
                 lastWasHexEscapeCode = true;
-                r << T("\\x") << String::toHexString ((int) c);
+                r << "\\x" << String::toHexString ((int) c);
             }
 
             break;
@@ -339,12 +339,12 @@ const String makeValidCppIdentifier (String s,
              && ! CharacterFunctions::isUpperCase (s[i - 1]))
             s = s.substring (0, i) + T(" ") + s.substring (i);
 
-    String allowedChars (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789"));
+    String allowedChars ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789");
     if (allowTemplates)
-        allowedChars += T("<>");
+        allowedChars += "<>";
 
     if (! removeColons)
-        allowedChars += T(":");
+        allowedChars += ":";
 
     StringArray words;
     words.addTokens (s.retainCharacters (allowedChars), false);
@@ -365,7 +365,7 @@ const String makeValidCppIdentifier (String s,
     }
 
     if (CharacterFunctions::isDigit (n[0]))
-        n = T("_") + n;
+        n = "_" + n;
 
     // make sure it's not a reserved c++ keyword..
     static const tchar* const reservedWords[] =
@@ -417,7 +417,7 @@ const String doubleToCode (const double v)
 
 const String boolToCode (const bool b)
 {
-    return b ? T("true") : T("false");
+    return b ? "true" : "false";
 }
 
 const String colourToCode (const Colour& col)
@@ -441,9 +441,9 @@ const String colourToCode (const Colour& col)
 
     for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
         if (col == colours[i])
-            return T("Colours::") + String (colourNames[i]);
+            return "Colours::" + String (colourNames[i]);
 
-    return T("Colour (0x") + hexString8Digits ((int) col.getARGB()) + T(')');
+    return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + T(')');
 }
 
 const String justificationToCode (const Justification& justification)
@@ -469,7 +469,7 @@ const String justificationToCode (const Justification& justification)
         default:                                    jassertfalse; break;
     }
 
-    return T("Justification (") + String (justification.getFlags()) + T(")");
+    return "Justification (" + String (justification.getFlags()) + ")";
 }
 
 const String castToFloat (const String& expression)
@@ -479,12 +479,12 @@ const String castToFloat (const String& expression)
         String s (expression.getFloatValue());
 
         if (s.containsChar (T('.')))
-            return s + T("f");
+            return s + "f";
 
-        return s + T(".0f");
+        return s + ".0f";
     }
 
-    return T("(float) (") + expression + T(")");
+    return "(float) (" + expression + ")";
 }
 
 const String indentCode (const String& code, const int numSpaces)
@@ -506,7 +506,7 @@ const String indentCode (const String& code, const int numSpaces)
         lines.set (i, s);
     }
 
-    return lines.joinIntoString (T("\n"));
+    return lines.joinIntoString ("\n");
 }
 
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex)

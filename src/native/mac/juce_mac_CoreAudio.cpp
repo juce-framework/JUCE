@@ -48,7 +48,7 @@
       if (err == noErr)
           return true;
 
-      Logger::writeToLog (T("CoreAudio error: ") + String (lineNum) + T(" - ") + String::toHexString ((int)err));
+      Logger::writeToLog ("CoreAudio error: " + String (lineNum) + " - " + String::toHexString ((int) err));
       jassertfalse
       return false;
   }
@@ -288,7 +288,7 @@ public:
                     if (ok)
                     {
                         sampleRates.add (possibleRates[i]);
-                        rates << possibleRates[i] << T(" ");
+                        rates << possibleRates[i] << ' ';
                     }
                 }
             }
@@ -300,7 +300,7 @@ public:
             rates << sampleRate;
         }
 
-        log (T("sr: ") + rates);
+        log ("sr: " + rates);
 
         inputLatency = 0;
         outputLatency = 0;
@@ -318,7 +318,7 @@ public:
         if (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &lat) == noErr)
             outputLatency = (int) lat;
 
-        log (T("lat: ") + String (inputLatency) + T(" ") + String (outputLatency));
+        log ("lat: " + String (inputLatency) + " " + String (outputLatency));
 
         inChanNames.clear();
         outChanNames.clear();
@@ -1117,7 +1117,7 @@ class CoreAudioIODeviceType  : public AudioIODeviceType
 public:
     //==============================================================================
     CoreAudioIODeviceType()
-        : AudioIODeviceType (T("CoreAudio")),
+        : AudioIODeviceType ("CoreAudio"),
           hasScanned (false)
     {
     }
@@ -1163,7 +1163,7 @@ public:
                         const String nameString (String::fromUTF8 (name, (int) strlen (name)));
 
                         if (! alreadyLogged)
-                            log (T("CoreAudio device: ") + nameString);
+                            log ("CoreAudio device: " + nameString);
 
                         const int numIns = getNumChannels (devs[i], true);
                         const int numOuts = getNumChannels (devs[i], false);

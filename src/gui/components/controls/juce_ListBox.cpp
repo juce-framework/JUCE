@@ -767,7 +767,7 @@ bool ListBox::keyPressed (const KeyPress& key)
         if (model != 0)
             model->deleteKeyPressed (lastRowSelected);
     }
-    else if (multiple && key == KeyPress (T('a'), ModifierKeys::commandModifier, 0))
+    else if (multiple && key == KeyPress ('a', ModifierKeys::commandModifier, 0))
     {
         selectRangeOfRows (0, std::numeric_limits<int>::max());
     }

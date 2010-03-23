@@ -60,7 +60,7 @@ static int findCloseQuote (const String& text, int startPos)
     {
         const tchar c = text [startPos];
 
-        if (c == 0 || (c == T('"') && lastChar != T('\\')))
+        if (c == 0 || (c == '"' && lastChar != '\\'))
             break;
 
         lastChar = c;
@@ -88,7 +88,7 @@ void LocalisedStrings::loadFromText (const String& fileContents)
     {
         String line (lines[i].trim());
 
-        if (line.startsWithChar (T('"')))
+        if (line.startsWithChar ('"'))
         {
             int closeQuote = findCloseQuote (line, 1);
 

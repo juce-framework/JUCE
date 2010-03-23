@@ -262,7 +262,7 @@ static const String getMessageWindowClassName()
     if (number == 0)
         number = 0x7fffffff & (int) Time::getHighResolutionTicks();
 
-    return T("JUCEcs_") + String (number);
+    return "JUCEcs_" + String (number);
 }
 
 void MessageManager::doPlatformSpecificInitialisation()

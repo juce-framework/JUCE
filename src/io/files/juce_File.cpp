@@ -107,7 +107,7 @@ static const String parseAbsolutePath (String path)
 
 #if JUCE_WINDOWS
     // Windows..
-    path = path.replaceCharacter (T('/'), T('\\'));
+    path = path.replaceCharacter ('/', '\\');
 
     if (path.startsWithChar (File::separator))
     {
@@ -125,7 +125,7 @@ static const String parseAbsolutePath (String path)
             path = File::getCurrentWorkingDirectory().getFullPathName().substring (0, 2) + path;
         }
     }
-    else if (path.indexOfChar (T(':')) < 0)
+    else if (path.indexOfChar (':') < 0)
     {
         if (path.isEmpty())
             return String::empty;
@@ -143,9 +143,9 @@ static const String parseAbsolutePath (String path)
     }
 #else
     // Mac or Linux..
-    path = path.replaceCharacter (T('\\'), T('/'));
+    path = path.replaceCharacter ('\\', '/');
 
-    if (path.startsWithChar (T('~')))
+    if (path.startsWithChar ('~'))
     {
         const char* homeDir = 0;
 
@@ -422,7 +422,7 @@ int64 File::hashCode64() const
 const String File::getFileNameWithoutExtension() const
 {
     const int lastSlash = fullPath.lastIndexOfChar (separator) + 1;
-    const int lastDot = fullPath.lastIndexOfChar (T('.'));
+    const int lastDot = fullPath.lastIndexOfChar ('.');
 
     if (lastDot > lastSlash)
         return fullPath.substring (lastSlash, lastDot);
@@ -458,11 +458,11 @@ bool File::isAChildOf (const File& potentialParent) const
 //==============================================================================
 bool File::isAbsolutePath (const String& path)
 {
-    return path.startsWithChar (T('/')) || path.startsWithChar (T('\\'))
+    return path.startsWithChar ('/') || path.startsWithChar ('\\')
 #if JUCE_WINDOWS
-            || (path.isNotEmpty() && ((const String&) path)[1] == T(':'));
+            || (path.isNotEmpty() && path[1] == ':');
 #else
-            || path.startsWithChar (T('~'));
+            || path.startsWithChar ('~');
 #endif
 }
 
@@ -478,16 +478,16 @@ const File File::getChildFile (String relativePath) const
         // it's relative, so remove any ../ or ./ bits at the start.
         String path (fullPath);
 
-        if (relativePath[0] == T('.'))
+        if (relativePath[0] == '.')
         {
 #if JUCE_WINDOWS
-            relativePath = relativePath.replaceCharacter (T('/'), T('\\')).trimStart();
+            relativePath = relativePath.replaceCharacter ('/', '\\').trimStart();
 #else
-            relativePath = relativePath.replaceCharacter (T('\\'), T('/')).trimStart();
+            relativePath = relativePath.replaceCharacter ('\\', '/').trimStart();
 #endif
-            while (relativePath[0] == T('.'))
+            while (relativePath[0] == '.')
             {
-                if (relativePath[1] == T('.'))
+                if (relativePath[1] == '.')
                 {
                     if (relativePath [2] == 0 || relativePath[2] == separator)
                     {
@@ -772,7 +772,7 @@ bool File::containsSubDirectories() const
         String filename;
         bool itemIsDirectory, itemIsHidden;
         void* const handle = juce_findFileStart (juce_addTrailingSeparator (fullPath),
-                                                 T("*"), filename,
+                                                 "*", filename,
                                                  &itemIsDirectory, &itemIsHidden, 0, 0, 0, 0);
 
         if (handle != 0)
@@ -807,12 +807,12 @@ const File File::getNonexistentChildFile (const String& prefix_,
         String prefix (prefix_);
 
         // remove any bracketed numbers that may already be on the end..
-        if (prefix.trim().endsWithChar (T(')')))
+        if (prefix.trim().endsWithChar (')'))
         {
             putNumbersInBrackets = true;
 
-            const int openBracks = prefix.lastIndexOfChar (T('('));
-            const int closeBracks = prefix.lastIndexOfChar (T(')'));
+            const int openBracks = prefix.lastIndexOfChar ('(');
+            const int closeBracks = prefix.lastIndexOfChar (')');
 
             if (openBracks > 0
                  && closeBracks > openBracks
@@ -830,7 +830,7 @@ const File File::getNonexistentChildFile (const String& prefix_,
         do
         {
             if (putNumbersInBrackets)
-                f = getChildFile (prefix + T('(') + String (num++) + T(')') + suffix);
+                f = getChildFile (prefix + '(' + String (num++) + ')' + suffix);
             else
                 f = getChildFile (prefix + String (num++) + suffix);
 
@@ -862,7 +862,7 @@ const String File::getFileExtension() const
 
     if (! isDirectory())
     {
-        const int indexOfDot = fullPath.lastIndexOfChar (T('.'));
+        const int indexOfDot = fullPath.lastIndexOfChar ('.');
 
         if (indexOfDot > fullPath.lastIndexOfChar (separator))
             ext = fullPath.substring (indexOfDot);
@@ -874,9 +874,9 @@ const String File::getFileExtension() const
 bool File::hasFileExtension (const String& possibleSuffix) const
 {
     if (possibleSuffix.isEmpty())
-        return fullPath.lastIndexOfChar (T('.')) <= fullPath.lastIndexOfChar (separator);
+        return fullPath.lastIndexOfChar ('.') <= fullPath.lastIndexOfChar (separator);
 
-    const int semicolon = possibleSuffix.indexOfChar (0, T(';'));
+    const int semicolon = possibleSuffix.indexOfChar (0, ';');
 
     if (semicolon >= 0)
     {
@@ -887,13 +887,13 @@ bool File::hasFileExtension (const String& possibleSuffix) const
     {
         if (fullPath.endsWithIgnoreCase (possibleSuffix))
         {
-            if (possibleSuffix.startsWithChar (T('.')))
+            if (possibleSuffix.startsWithChar ('.'))
                 return true;
 
             const int dotPos = fullPath.length() - possibleSuffix.length() - 1;
 
             if (dotPos >= 0)
-                return fullPath [dotPos] == T('.');
+                return fullPath [dotPos] == '.';
         }
     }
 
@@ -907,11 +907,11 @@ const File File::withFileExtension (const String& newExtension) const
 
     String filePart (getFileName());
 
-    int i = filePart.lastIndexOfChar (T('.'));
+    int i = filePart.lastIndexOfChar ('.');
     if (i >= 0)
         filePart = filePart.substring (0, i);
 
-    if (newExtension.isNotEmpty() && ! newExtension.startsWithChar (T('.')))
+    if (newExtension.isNotEmpty() && ! newExtension.startsWithChar ('.'))
         filePart << '.';
 
     return getSiblingFile (filePart + newExtension);
@@ -1002,7 +1002,7 @@ const String File::createLegalPathName (const String& original)
     String s (original);
     String start;
 
-    if (s[1] == T(':'))
+    if (s[1] == ':')
     {
         start = s.substring (0, 2);
         s = s.substring (2);
@@ -1021,7 +1021,7 @@ const String File::createLegalFileName (const String& original)
 
     if (len > maxLength)
     {
-        const int lastDot = s.lastIndexOfChar (T('.'));
+        const int lastDot = s.lastIndexOfChar ('.');
 
         if (lastDot > jmax (0, len - 12))
         {
@@ -1083,9 +1083,9 @@ const String File::getRelativePathFrom (const File& dir)  const
     while (dirPath.isNotEmpty())
     {
 #if JUCE_WINDOWS
-        thisPath = T("..\\") + thisPath;
+        thisPath = "..\\" + thisPath;
 #else
-        thisPath = T("../") + thisPath;
+        thisPath = "../" + thisPath;
 #endif
 
         const int sep = dirPath.indexOfChar (separator);
@@ -1126,7 +1126,7 @@ int File::getVolumeSerialNumber() const
 const File File::createTempFile (const String& fileNameEnding)
 {
     const File tempFile (getSpecialLocation (tempDirectory)
-                            .getChildFile (T("temp_") + String (Random::getSystemRandom().nextInt()))
+                            .getChildFile ("temp_" + String (Random::getSystemRandom().nextInt()))
                             .withFileExtension (fileNameEnding));
 
     if (tempFile.exists())

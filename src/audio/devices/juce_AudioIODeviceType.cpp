@@ -31,7 +31,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-AudioIODeviceType::AudioIODeviceType (const tchar* const name)
+AudioIODeviceType::AudioIODeviceType (const String& name)
     : typeName (name)
 {
 }

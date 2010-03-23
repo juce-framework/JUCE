@@ -296,7 +296,7 @@ private:
     static int countMaxPluginChannels (const String& configString, bool isInput)
     {
         StringArray configs;
-        configs.addTokens (configString, T(", {}"), String::empty);
+        configs.addTokens (configString, ", {}", String::empty);
         configs.trim();
         configs.removeEmptyStrings();
         jassert ((configs.size() & 1) == 0);  // looks like a syntax error in the configs?
@@ -311,7 +311,7 @@ private:
     static const String createVersionCode (const String& version)
     {
         StringArray configs;
-        configs.addTokens (version, T(",."), String::empty);
+        configs.addTokens (version, ",.", String::empty);
         configs.trim();
         configs.removeEmptyStrings();
 

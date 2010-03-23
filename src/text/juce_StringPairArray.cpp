@@ -133,9 +133,9 @@ const String StringPairArray::getDescription() const
 
     for (int i = 0; i < keys.size(); ++i)
     {
-        s << keys[i] << T(" = ") << values[i];
+        s << keys[i] << " = " << values[i];
         if (i < keys.size())
-            s << T(", ");
+            s << ", ";
     }
 
     return s;

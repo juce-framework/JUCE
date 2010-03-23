@@ -601,11 +601,11 @@ bool XmlElement::getBoolAttribute (const String& attributeName, const bool defau
             if (CharacterFunctions::isWhitespace (firstChar))
                 firstChar = att->value.trimStart() [0];
 
-            return firstChar == T('1')
-                || firstChar == T('t')
-                || firstChar == T('y')
-                || firstChar == T('T')
-                || firstChar == T('Y');
+            return firstChar == '1'
+                || firstChar == 't'
+                || firstChar == 'y'
+                || firstChar == 'T'
+                || firstChar == 'Y';
         }
 
         att = att->next;
@@ -645,9 +645,9 @@ void XmlElement::setAttribute (const String& attributeName, const String& value)
     while (*t != 0)
     {
         jassert (CharacterFunctions::isLetterOrDigit (*t)
-                 || *t == T('_')
-                 || *t == T('-')
-                 || *t == T(':'));
+                  || *t == '_'
+                  || *t == '-'
+                  || *t == ':');
         ++t;
     }
 #endif

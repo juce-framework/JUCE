@@ -380,7 +380,7 @@ int CharacterFunctions::getIntValue (const juce_wchar* s) throw()
     while (isWhitespace (*s))
         ++s;
 
-    const bool isNeg = *s == T('-');
+    const bool isNeg = *s == '-';
     if (isNeg)
         ++s;
 
@@ -388,8 +388,8 @@ int CharacterFunctions::getIntValue (const juce_wchar* s) throw()
     {
         const wchar_t c = *s++;
 
-        if (c >= T('0') && c <= T('9'))
-            v = v * 10 + (int) (c - T('0'));
+        if (c >= '0' && c <= '9')
+            v = v * 10 + (int) (c - '0');
         else
             break;
     }
@@ -410,7 +410,7 @@ int64 CharacterFunctions::getInt64Value (const char* s) throw()
     while (isWhitespace (*s))
         ++s;
 
-    const bool isNeg = *s == T('-');
+    const bool isNeg = *s == '-';
     if (isNeg)
         ++s;
 
@@ -438,7 +438,7 @@ int64 CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
     while (isWhitespace (*s))
         ++s;
 
-    const bool isNeg = *s == T('-');
+    const bool isNeg = *s == '-';
     if (isNeg)
         ++s;
 
@@ -446,8 +446,8 @@ int64 CharacterFunctions::getInt64Value (const juce_wchar* s) throw()
     {
         const juce_wchar c = *s++;
 
-        if (c >= T('0') && c <= T('9'))
-            v = v * 10 + (int64) (c - T('0'));
+        if (c >= '0' && c <= '9')
+            v = v * 10 + (int64) (c - '0');
         else
             break;
     }
@@ -718,7 +718,7 @@ bool CharacterFunctions::isLowerCase (const juce_wchar character) throw()
 //==============================================================================
 bool CharacterFunctions::isWhitespace (const char character) throw()
 {
-    return character == T(' ') || (character <= 13 && character >= 9);
+    return character == ' ' || (character <= 13 && character >= 9);
 }
 
 bool CharacterFunctions::isWhitespace (const juce_wchar character) throw()

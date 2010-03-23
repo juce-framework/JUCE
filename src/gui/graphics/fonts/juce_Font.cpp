@@ -36,15 +36,15 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static const float minFontHeight = 0.1f;
-static const float maxFontHeight = 10000.0f;
-static const float defaultFontHeight = 14.0f;
+namespace FontValues
+{
+    static float limitFontHeight (const float height) throw()
+    {
+        return jlimit (0.1f, 10000.0f, height);
+    }
 
-static const tchar* const juce_defaultFontNameSans = T("<Sans-Serif>");
-static const tchar* const juce_defaultFontNameSerif = T("<Serif>");
-static const tchar* const juce_defaultFontNameMono = T("<Monospaced>");
-
-void clearUpDefaultFontNames() throw(); // in juce_LookAndFeel.cpp
+    static const float defaultFontHeight = 14.0f;
+}
 
 //==============================================================================
 Font::SharedFontInternal::SharedFontInternal (const String& typefaceName_, const float height_, const float horizontalScale_,
@@ -74,13 +74,13 @@ Font::SharedFontInternal::SharedFontInternal (const SharedFontInternal& other) t
 
 //==============================================================================
 Font::Font() throw()
-    : font (new SharedFontInternal (juce_defaultFontNameSans, defaultFontHeight,
+    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::defaultFontHeight,
                                     1.0f, 0, 0, Font::plain, 0))
 {
 }
 
 Font::Font (const float fontHeight, const int styleFlags_) throw()
-    : font (new SharedFontInternal (juce_defaultFontNameSans, jlimit (minFontHeight, maxFontHeight, fontHeight),
+    : font (new SharedFontInternal (getDefaultSansSerifFontName(), FontValues::limitFontHeight (fontHeight),
                                     1.0f, 0, 0, styleFlags_, 0))
 {
 }
@@ -88,7 +88,7 @@ Font::Font (const float fontHeight, const int styleFlags_) throw()
 Font::Font (const String& typefaceName_,
             const float fontHeight,
             const int styleFlags_) throw()
-    : font (new SharedFontInternal (typefaceName_, jlimit (minFontHeight, maxFontHeight, fontHeight),
+    : font (new SharedFontInternal (typefaceName_, FontValues::limitFontHeight (fontHeight),
                                     1.0f, 0, 0, styleFlags_, 0))
 {
 }
@@ -109,7 +109,7 @@ Font::~Font() throw()
 }
 
 Font::Font (const Typeface::Ptr& typeface) throw()
-    : font (new SharedFontInternal (typeface->getName(), defaultFontHeight,
+    : font (new SharedFontInternal (typeface->getName(), FontValues::defaultFontHeight,
                                     1.0f, 0, 0, Font::plain, typeface))
 {
 }
@@ -138,17 +138,20 @@ void Font::dupeInternalIfShared() throw()
 //==============================================================================
 const String Font::getDefaultSansSerifFontName() throw()
 {
-    return juce_defaultFontNameSans;
+    static const String name ("<Sans-Serif>");
+    return name;
 }
 
 const String Font::getDefaultSerifFontName() throw()
 {
-    return juce_defaultFontNameSerif;
+    static const String name ("<Serif>");
+    return name;
 }
 
 const String Font::getDefaultMonospacedFontName() throw()
 {
-    return juce_defaultFontNameMono;
+    static const String name ("<Monospaced>");
+    return name;
 }
 
 void Font::setTypefaceName (const String& faceName) throw()
@@ -178,7 +181,7 @@ void Font::setFallbackFontName (const String& name) throw()
 //==============================================================================
 void Font::setHeight (float newHeight) throw()
 {
-    newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
+    newHeight = FontValues::limitFontHeight (newHeight);
 
     if (font->height != newHeight)
     {
@@ -189,7 +192,7 @@ void Font::setHeight (float newHeight) throw()
 
 void Font::setHeightWithoutChangingWidth (float newHeight) throw()
 {
-    newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
+    newHeight = FontValues::limitFontHeight (newHeight);
 
     if (font->height != newHeight)
     {
@@ -215,7 +218,7 @@ void Font::setSizeAndStyle (float newHeight,
                             const float newHorizontalScale,
                             const float newKerningAmount) throw()
 {
-    newHeight = jlimit (minFontHeight, maxFontHeight, newHeight);
+    newHeight = FontValues::limitFontHeight (newHeight);
 
     if (font->height != newHeight
          || font->horizontalScale != newHorizontalScale
@@ -332,7 +335,7 @@ void Font::findFonts (Array<Font>& destArray) throw()
     const StringArray names (findAllTypefaceNames());
 
     for (int i = 0; i < names.size(); ++i)
-        destArray.add (Font (names[i], defaultFontHeight, Font::plain));
+        destArray.add (Font (names[i], FontValues::defaultFontHeight, Font::plain));
 }
 
 
@@ -349,7 +352,6 @@ public:
 
     ~TypefaceCache()
     {
-        clearUpDefaultFontNames();
         clearSingletonInstance();
     }
 

@@ -105,7 +105,7 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
         XmlDocument doc (asString);
         ScopedPointer <XmlElement> outer (doc.getDocumentElement (true));
 
-        if (outer != 0 && outer->hasTagName (T("svg")))
+        if (outer != 0 && outer->hasTagName ("svg"))
         {
             ScopedPointer <XmlElement> svg (doc.getDocumentElement());
 

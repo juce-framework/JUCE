@@ -47,7 +47,7 @@ struct TextAtom
 
     //==============================================================================
     bool isWhitespace() const       { return CharacterFunctions::isWhitespace (atomText[0]); }
-    bool isNewLine() const          { return atomText[0] == T('\r') || atomText[0] == T('\n'); }
+    bool isNewLine() const          { return atomText[0] == '\r' || atomText[0] == '\n'; }
 
     const String getText (const tchar passwordCharacter) const
     {
@@ -285,30 +285,30 @@ private:
 
             // create a whitespace atom unless it starts with non-ws
             if (CharacterFunctions::isWhitespace (text[i])
-                 && text[i] != T('\r')
-                 && text[i] != T('\n'))
+                 && text[i] != '\r'
+                 && text[i] != '\n')
             {
                 while (i < len
                         && CharacterFunctions::isWhitespace (text[i])
-                        && text[i] != T('\r')
-                        && text[i] != T('\n'))
+                        && text[i] != '\r'
+                        && text[i] != '\n')
                 {
                     ++i;
                 }
             }
             else
             {
-                if (text[i] == T('\r'))
+                if (text[i] == '\r')
                 {
                     ++i;
 
-                    if ((i < len) && (text[i] == T('\n')))
+                    if ((i < len) && (text[i] == '\n'))
                     {
                         ++start;
                         ++i;
                     }
                 }
-                else if (text[i] == T('\n'))
+                else if (text[i] == '\n')
                 {
                     ++i;
                 }
@@ -1585,7 +1585,7 @@ void TextEditor::insertTextAtCaret (const String& newText_)
     if (allowedCharacters.isNotEmpty())
         newText = newText.retainCharacters (allowedCharacters);
 
-    if ((! returnKeyStartsNewLine) && newText == T("\n"))
+    if ((! returnKeyStartsNewLine) && newText == "\n")
     {
         returnPressed();
         return;
@@ -1847,7 +1847,7 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
         {
             while (tokenEnd < totalLength)
             {
-                if (t [tokenEnd] != T('\r') && t [tokenEnd] != T('\n'))
+                if (t [tokenEnd] != '\r' && t [tokenEnd] != '\n')
                     ++tokenEnd;
                 else
                     break;
@@ -1855,7 +1855,7 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
 
             while (tokenStart > 0)
             {
-                if (t [tokenStart - 1] != T('\r') && t [tokenStart - 1] != T('\n'))
+                if (t [tokenStart - 1] != '\r' && t [tokenStart - 1] != '\n')
                     --tokenStart;
                 else
                     break;
@@ -1876,7 +1876,7 @@ void TextEditor::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, flo
 //==============================================================================
 bool TextEditor::keyPressed (const KeyPress& key)
 {
-    if (isReadOnly() && key != KeyPress (T('c'), ModifierKeys::commandModifier, 0))
+    if (isReadOnly() && key != KeyPress ('c', ModifierKeys::commandModifier, 0))
         return false;
 
     const bool moveInWholeWordSteps = key.getModifiers().isCtrlDown() || key.getModifiers().isAltDown();
@@ -1971,35 +1971,35 @@ bool TextEditor::keyPressed (const KeyPress& key)
 
         cut();
     }
-    else if (key == KeyPress (T('c'), ModifierKeys::commandModifier, 0)
+    else if (key == KeyPress ('c', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::ctrlModifier, 0))
     {
         newTransaction();
         copy();
     }
-    else if (key == KeyPress (T('x'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress ('x', ModifierKeys::commandModifier, 0))
     {
         newTransaction();
         copy();
         cut();
     }
-    else if (key == KeyPress (T('v'), ModifierKeys::commandModifier, 0)
+    else if (key == KeyPress ('v', ModifierKeys::commandModifier, 0)
               || key == KeyPress (KeyPress::insertKey, ModifierKeys::shiftModifier, 0))
     {
         newTransaction();
         paste();
     }
-    else if (key == KeyPress (T('z'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress ('z', ModifierKeys::commandModifier, 0))
     {
         newTransaction();
         doUndoRedo (false);
     }
-    else if (key == KeyPress (T('y'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress ('y', ModifierKeys::commandModifier, 0))
     {
         newTransaction();
         doUndoRedo (true);
     }
-    else if (key == KeyPress (T('a'), ModifierKeys::commandModifier, 0))
+    else if (key == KeyPress ('a', ModifierKeys::commandModifier, 0))
     {
         newTransaction();
         moveCursorTo (getTotalNumChars(), false);
@@ -2008,7 +2008,7 @@ bool TextEditor::keyPressed (const KeyPress& key)
     else if (key == KeyPress::returnKey)
     {
         newTransaction();
-        insertTextAtCaret (T("\n"));
+        insertTextAtCaret ("\n");
     }
     else if (key.isKeyCode (KeyPress::escapeKey))
     {

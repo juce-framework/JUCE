@@ -32,13 +32,13 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-IIRFilter::IIRFilter() throw()
+IIRFilter::IIRFilter()
     : active (false)
 {
     reset();
 }
 
-IIRFilter::IIRFilter (const IIRFilter& other) throw()
+IIRFilter::IIRFilter (const IIRFilter& other)
     : active (other.active)
 {
     const ScopedLock sl (other.processLock);
@@ -46,7 +46,7 @@ IIRFilter::IIRFilter (const IIRFilter& other) throw()
     reset();
 }
 
-IIRFilter::~IIRFilter() throw()
+IIRFilter::~IIRFilter()
 {
 }
 

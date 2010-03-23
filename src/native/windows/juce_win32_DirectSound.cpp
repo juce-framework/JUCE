@@ -217,7 +217,7 @@ static const String getDSErrorMessage (HRESULT hr)
         if (hr != S_OK)
         {
             String error ("DS error at line ");
-            error << lineNum << T(" - ") << getDSErrorMessage (hr);
+            error << lineNum << " - " << getDSErrorMessage (hr);
             log (error);
         }
     }
@@ -309,7 +309,7 @@ public:
         {
             JUCE_TRY
             {
-                log (T("closing dsound out: ") + name);
+                log ("closing dsound out: " + name);
                 hr = pOutputBuffer->Stop();
                 logError (hr);
             }
@@ -340,10 +340,8 @@ public:
 
     const String open()
     {
-        log (T("opening dsound out device: ") + name
-             + T("  rate=") + String (sampleRate)
-             + T(" bits=") + String (bitDepth)
-             + T(" buf=") + String (bufferSizeSamples));
+        log ("opening dsound out device: " + name + "  rate=" + String (sampleRate)
+              + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
         pDirectSound = 0;
         pOutputBuffer = 0;
@@ -717,7 +715,7 @@ public:
         {
             JUCE_TRY
             {
-                log (T("closing dsound in: ") + name);
+                log ("closing dsound in: " + name);
                 hr = pInputBuffer->Stop();
                 logError (hr);
             }
@@ -760,8 +758,8 @@ public:
 
     const String open()
     {
-        log (T("opening dsound in device: ") + name
-             + T("  rate=") + String (sampleRate) + T(" bits=") + String (bitDepth) + T(" buf=") + String (bufferSizeSamples));
+        log ("opening dsound in device: " + name
+             + "  rate=" + String (sampleRate) + " bits=" + String (bitDepth) + " buf=" + String (bufferSizeSamples));
 
         pDirectSound = 0;
         pDirectSoundCapture = 0;
@@ -800,7 +798,7 @@ public:
             captureDesc.dwBufferBytes = totalBytesPerBuffer;
             captureDesc.lpwfxFormat = &wfFormat;
 
-            log (T("opening dsound in step 2"));
+            log ("opening dsound in step 2");
             hr = pDirectSoundCapture->CreateCaptureBuffer (&captureDesc, &pInputBuffer, 0);
 
             logError (hr);
@@ -1336,7 +1334,7 @@ class DSoundAudioIODeviceType  : public AudioIODeviceType
 {
 public:
     DSoundAudioIODeviceType()
-        : AudioIODeviceType (T("DirectSound")),
+        : AudioIODeviceType ("DirectSound"),
           hasScanned (false)
     {
         initialiseDSoundFunctions();
@@ -1430,7 +1428,7 @@ private:
 
             int n = 2;
             while (outputDeviceNames.contains (desc))
-                desc = origDesc + T(" (") + String (n++) + T(")");
+                desc = origDesc + " (" + String (n++) + ")";
 
             outputDeviceNames.add (desc);
 
@@ -1466,7 +1464,7 @@ private:
 
             int n = 2;
             while (inputDeviceNames.contains (desc))
-                desc = origDesc + T(" (") + String (n++) + T(")");
+                desc = origDesc + " (" + String (n++) + ")";
 
             inputDeviceNames.add (desc);
 
@@ -1583,8 +1581,7 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
         if (error.isNotEmpty())
         {
-            error = T("Error opening ") + dlh.outputDeviceNames[i]
-                     + T(": \"") + error + T("\"");
+            error = "Error opening " + dlh.outputDeviceNames[i] + ": \"" + error + "\"";
             break;
         }
     }
@@ -1597,8 +1594,7 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
 
             if (error.isNotEmpty())
             {
-                error = T("Error opening ") + dlh.inputDeviceNames[i]
-                            + T(": \"") + error + T("\"");
+                error = "Error opening " + dlh.inputDeviceNames[i] + ": \"" + error + "\"";
                 break;
             }
         }

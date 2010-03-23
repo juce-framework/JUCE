@@ -30,7 +30,7 @@
 
 //==============================================================================
 AudioCDReader::AudioCDReader()
-    : AudioFormatReader (0, T("CD Audio"))
+    : AudioFormatReader (0, "CD Audio")
 {
 }
 

@@ -235,7 +235,7 @@ int GlyphArrangement::insertEllipsis (const Font& font, const float maxXPos,
     {
         Array<int> dotGlyphs;
         Array<float> dotXs;
-        font.getGlyphPositions (T(".."), dotGlyphs, dotXs);
+        font.getGlyphPositions ("..", dotGlyphs, dotXs);
 
         const float dx = dotXs[1];
         float xOffset = 0.0f, yOffset = 0.0f;
@@ -283,8 +283,8 @@ void GlyphArrangement::addJustifiedText (const Font& font,
     {
         int i = lineStartIndex;
 
-        if (glyphs.getUnchecked(i)->getCharacter() != T('\n')
-              && glyphs.getUnchecked(i)->getCharacter() != T('\r'))
+        if (glyphs.getUnchecked(i)->getCharacter() != '\n'
+              && glyphs.getUnchecked(i)->getCharacter() != '\r')
             ++i;
 
         const float lineMaxX = glyphs.getUnchecked (lineStartIndex)->getLeft() + maxLineWidth;
@@ -295,12 +295,12 @@ void GlyphArrangement::addJustifiedText (const Font& font,
             const PositionedGlyph* pg = glyphs.getUnchecked (i);
             const juce_wchar c = pg->getCharacter();
 
-            if (c == T('\r') || c == T('\n'))
+            if (c == '\r' || c == '\n')
             {
                 ++i;
 
-                if (c == T('\r') && i < glyphs.size()
-                     && glyphs.getUnchecked(i)->getCharacter() == T('\n'))
+                if (c == '\r' && i < glyphs.size()
+                     && glyphs.getUnchecked(i)->getCharacter() == '\n')
                     ++i;
 
                 break;
@@ -481,7 +481,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                 if ((glyphs.getUnchecked (i)->getRight() - lineStartX) * minimumHorizontalScale < width)
                                 {
                                     if (glyphs.getUnchecked (i)->isWhitespace()
-                                         || glyphs.getUnchecked (i)->getCharacter() == T('-'))
+                                         || glyphs.getUnchecked (i)->getCharacter() == '-')
                                     {
                                         ++i;
                                         break;
@@ -495,7 +495,7 @@ void GlyphArrangement::addFittedText (const Font& f,
                                     for (int back = 1; back < jmin (5, i - startIndex - 1); ++back)
                                     {
                                         if (glyphs.getUnchecked (i - back)->isWhitespace()
-                                             || glyphs.getUnchecked (i - back)->getCharacter() == T('-'))
+                                             || glyphs.getUnchecked (i - back)->getCharacter() == '-')
                                         {
                                             i -= back - 1;
                                             break;
@@ -718,8 +718,8 @@ void GlyphArrangement::justifyGlyphs (const int startIndex,
 void GlyphArrangement::spreadOutLine (const int start, const int num, const float targetWidth)
 {
     if (start + num < glyphs.size()
-         && glyphs.getUnchecked (start + num - 1)->getCharacter() != T('\r')
-         && glyphs.getUnchecked (start + num - 1)->getCharacter() != T('\n'))
+         && glyphs.getUnchecked (start + num - 1)->getCharacter() != '\r'
+         && glyphs.getUnchecked (start + num - 1)->getCharacter() != '\n')
     {
         int numSpaces = 0;
         int spacesAtEnd = 0;

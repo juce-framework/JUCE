@@ -233,9 +233,9 @@ void KeyPressMappingSet::invokeCommand (const CommandID commandID,
 //==============================================================================
 bool KeyPressMappingSet::restoreFromXml (const XmlElement& xmlVersion)
 {
-    if (xmlVersion.hasTagName (T("KEYMAPPINGS")))
+    if (xmlVersion.hasTagName ("KEYMAPPINGS"))
     {
-        if (xmlVersion.getBoolAttribute (T("basedOnDefaults"), true))
+        if (xmlVersion.getBoolAttribute ("basedOnDefaults", true))
         {
             // if the XML was created as a set of differences from the default mappings,
             // (i.e. by calling createXml (true)), then we need to first restore the defaults.
@@ -250,17 +250,17 @@ bool KeyPressMappingSet::restoreFromXml (const XmlElement& xmlVersion)
 
         forEachXmlChildElement (xmlVersion, map)
         {
-            const CommandID commandId = map->getStringAttribute (T("commandId")).getHexValue32();
+            const CommandID commandId = map->getStringAttribute ("commandId").getHexValue32();
 
             if (commandId != 0)
             {
-                const KeyPress key (KeyPress::createFromDescription (map->getStringAttribute (T("key"))));
+                const KeyPress key (KeyPress::createFromDescription (map->getStringAttribute ("key")));
 
-                if (map->hasTagName (T("MAPPING")))
+                if (map->hasTagName ("MAPPING"))
                 {
                     addKeyPress (commandId, key);
                 }
-                else if (map->hasTagName (T("UNMAPPING")))
+                else if (map->hasTagName ("UNMAPPING"))
                 {
                     if (containsMapping (commandId, key))
                         removeKeyPress (key);
@@ -284,9 +284,9 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
         defaultSet->resetToDefaultMappings();
     }
 
-    XmlElement* const doc = new XmlElement (T("KEYMAPPINGS"));
+    XmlElement* const doc = new XmlElement ("KEYMAPPINGS");
 
-    doc->setAttribute (T("basedOnDefaults"), saveDifferencesFromDefaultSet);
+    doc->setAttribute ("basedOnDefaults", saveDifferencesFromDefaultSet);
 
     int i;
     for (i = 0; i < mappings.size(); ++i)
@@ -300,9 +300,9 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
             {
                 XmlElement* const map = doc->createNewChildElement ("MAPPING");
 
-                map->setAttribute (T("commandId"), String::toHexString ((int) cm->commandID));
-                map->setAttribute (T("description"), commandManager->getDescriptionOfCommand (cm->commandID));
-                map->setAttribute (T("key"), cm->keypresses.getReference (j).getTextDescription());
+                map->setAttribute ("commandId", String::toHexString ((int) cm->commandID));
+                map->setAttribute ("description", commandManager->getDescriptionOfCommand (cm->commandID));
+                map->setAttribute ("key", cm->keypresses.getReference (j).getTextDescription());
             }
         }
     }
@@ -319,9 +319,9 @@ XmlElement* KeyPressMappingSet::createXml (const bool saveDifferencesFromDefault
                 {
                     XmlElement* const map = doc->createNewChildElement ("UNMAPPING");
 
-                    map->setAttribute (T("commandId"), String::toHexString ((int) cm->commandID));
-                    map->setAttribute (T("description"), commandManager->getDescriptionOfCommand (cm->commandID));
-                    map->setAttribute (T("key"), cm->keypresses.getReference (j).getTextDescription());
+                    map->setAttribute ("commandId", String::toHexString ((int) cm->commandID));
+                    map->setAttribute ("description", commandManager->getDescriptionOfCommand (cm->commandID));
+                    map->setAttribute ("key", cm->keypresses.getReference (j).getTextDescription());
                 }
             }
         }

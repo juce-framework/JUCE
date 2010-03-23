@@ -59,7 +59,7 @@ FileSearchPath& FileSearchPath::operator= (const String& path)
 void FileSearchPath::init (const String& path)
 {
     directories.clear();
-    directories.addTokens (path, T(";"), T("\""));
+    directories.addTokens (path, ";", "\"");
     directories.trim();
     directories.removeEmptyStrings();
 
@@ -81,10 +81,10 @@ const String FileSearchPath::toString() const
 {
     StringArray directories2 (directories);
     for (int i = directories2.size(); --i >= 0;)
-        if (directories2[i].containsChar (T(';')))
+        if (directories2[i].containsChar (';'))
             directories2.set (i, directories2[i].quoted());
 
-    return directories2.joinIntoString (T(";"));
+    return directories2.joinIntoString (";");
 }
 
 void FileSearchPath::add (const File& dir, const int insertIndex)

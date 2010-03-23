@@ -93,7 +93,7 @@ public:
         for (unsigned int i = 0; i < [filenames count]; ++i)
         {
             String filename (nsStringToJuce ((NSString*) [filenames objectAtIndex: i]));
-            if (filename.containsChar (T(' ')))
+            if (filename.containsChar (' '))
                 filename = filename.quoted('"');
 
             files.add (filename);
@@ -101,7 +101,7 @@ public:
 
         if (files.size() > 0 && JUCEApplication::getInstance() != 0)
         {
-            JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (T(" ")));
+            JUCEApplication::getInstance()->anotherInstanceStarted (files.joinIntoString (" "));
         }
     }
 

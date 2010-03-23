@@ -698,7 +698,7 @@ public:
         @param quoteCharacter   the character to add at the start and end
         @see isQuotedString, unquoted
     */
-    const String quoted (juce_wchar quoteCharacter = JUCE_T('"')) const;
+    const String quoted (juce_wchar quoteCharacter = '"') const;
 
 
     //==============================================================================

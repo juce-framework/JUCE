@@ -44,7 +44,7 @@
     class MyTask  : public ThreadWithProgressWindow
     {
     public:
-        MyTask()    : ThreadWithProgressWindow (T("busy..."), true, true)
+        MyTask()    : ThreadWithProgressWindow ("busy...", true, true)
         {
         }
 
@@ -112,7 +112,7 @@ public:
                               bool hasProgressBar,
                               bool hasCancelButton,
                               int timeOutMsWhenCancelling = 10000,
-                              const String& cancelButtonText = JUCE_T("Cancel"));
+                              const String& cancelButtonText = "Cancel");
 
     /** Destructor. */
     ~ThreadWithProgressWindow();

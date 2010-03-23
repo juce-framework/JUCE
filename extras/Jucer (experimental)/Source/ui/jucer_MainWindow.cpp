@@ -273,7 +273,7 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
 
         PopupMenu recentFiles;
         StoredSettings::getInstance()->recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
-        menu.addSubMenu (T("Open recent file"), recentFiles);
+        menu.addSubMenu ("Open recent file", recentFiles);
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::closeDocument);
@@ -415,36 +415,36 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
     switch (commandID)
     {
     case CommandIDs::newProject:
-        result.setInfo (T("New Project..."),
-                        T("Creates a new Jucer project"),
+        result.setInfo ("New Project...",
+                        "Creates a new Jucer project",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('o'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::open:
-        result.setInfo (T("Open..."),
-                        T("Opens a Jucer project"),
+        result.setInfo ("Open...",
+                        "Opens a Jucer project",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T('o'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::showPrefs:
-        result.setInfo (T("Preferences..."),
-                        T("Shows the preferences panel."),
+        result.setInfo ("Preferences...",
+                        "Shows the preferences panel.",
                         CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (T(','), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::closeAllDocuments:
-        result.setInfo (T("Close All Documents"),
-                        T("Closes all open documents"),
+        result.setInfo ("Close All Documents",
+                        "Closes all open documents",
                         CommandCategories::general, 0);
         result.setActive (OpenDocumentManager::getInstance()->getNumOpenDocuments() > 0);
         break;
 
     case CommandIDs::saveAll:
-        result.setInfo (T("Save All"),
-                        T("Saves all open documents"),
+        result.setInfo ("Save All",
+                        "Saves all open documents",
                         CommandCategories::general, 0);
         result.setActive (OpenDocumentManager::getInstance()->anyFilesNeedSaving());
         break;

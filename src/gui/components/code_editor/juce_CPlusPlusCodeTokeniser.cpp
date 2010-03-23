@@ -46,14 +46,14 @@ namespace CppTokeniser
 static bool isIdentifierStart (const tchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
-            || c == T('_') || c == T('@');
+            || c == '_' || c == '@';
 }
 
 static bool isIdentifierBody (const tchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
             || CharacterFunctions::isDigit (c)
-            || c == T('_') || c == T('@');
+            || c == '_' || c == '@';
 }
 
 static int parseIdentifier (CodeDocument::Iterator& source) throw()
@@ -314,7 +314,7 @@ static void skipComment (CodeDocument::Iterator& source) throw()
     {
         const juce_wchar c = source.nextChar();
 
-        if (c == 0 || (c == T('/') && lastWasStar))
+        if (c == 0 || (c == '/' && lastWasStar))
             break;
 
         lastWasStar = (c == '*');
@@ -337,20 +337,20 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         source.skip();
         break;
 
-    case T('0'):
-    case T('1'):
-    case T('2'):
-    case T('3'):
-    case T('4'):
-    case T('5'):
-    case T('6'):
-    case T('7'):
-    case T('8'):
-    case T('9'):
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
         result = CppTokeniser::parseNumber (source);
         break;
 
-    case T('.'):
+    case '.':
         result = CppTokeniser::parseNumber (source);
 
         if (result == tokenType_error)
@@ -358,41 +358,41 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 
         break;
 
-    case T(','):
-    case T(';'):
-    case T(':'):
+    case ',':
+    case ';':
+    case ':':
         source.skip();
         result = tokenType_punctuation;
         break;
 
-    case T('('):
-    case T(')'):
-    case T('{'):
-    case T('}'):
-    case T('['):
-    case T(']'):
+    case '(':
+    case ')':
+    case '{':
+    case '}':
+    case '[':
+    case ']':
         source.skip();
         result = tokenType_bracket;
         break;
 
-    case T('"'):
-    case T('\''):
+    case '"':
+    case '\'':
         CppTokeniser::skipQuotedString (source);
         result = tokenType_stringLiteral;
         break;
 
-    case T('+'):
+    case '+':
         result = tokenType_operator;
         source.skip();
 
-        if (source.peekNextChar() == T('+'))
+        if (source.peekNextChar() == '+')
             source.skip();
-        else if (source.peekNextChar() == T('='))
+        else if (source.peekNextChar() == '=')
             source.skip();
 
         break;
 
-    case T('-'):
+    case '-':
         source.skip();
         result = CppTokeniser::parseNumber (source);
 
@@ -400,39 +400,39 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
         {
             result = tokenType_operator;
 
-            if (source.peekNextChar() == T('-'))
+            if (source.peekNextChar() == '-')
                 source.skip();
-            else if (source.peekNextChar() == T('='))
+            else if (source.peekNextChar() == '=')
                 source.skip();
         }
         break;
 
-    case T('*'):
-    case T('%'):
-    case T('='):
-    case T('!'):
+    case '*':
+    case '%':
+    case '=':
+    case '!':
         result = tokenType_operator;
         source.skip();
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
             source.skip();
 
         break;
 
-    case T('/'):
+    case '/':
         result = tokenType_operator;
         source.skip();
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('/'))
+        else if (source.peekNextChar() == '/')
         {
             result = tokenType_comment;
             source.skipToEndOfLine();
         }
-        else if (source.peekNextChar() == T('*'))
+        else if (source.peekNextChar() == '*')
         {
             source.skip();
             result = tokenType_comment;
@@ -441,103 +441,103 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
 
         break;
 
-    case T('?'):
-    case T('~'):
+    case '?':
+    case '~':
         source.skip();
         result = tokenType_operator;
         break;
 
-    case T('<'):
+    case '<':
         source.skip();
         result = tokenType_operator;
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('<'))
+        else if (source.peekNextChar() == '<')
         {
             source.skip();
 
-            if (source.peekNextChar() == T('='))
+            if (source.peekNextChar() == '=')
                 source.skip();
         }
 
         break;
 
-    case T('>'):
+    case '>':
         source.skip();
         result = tokenType_operator;
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('<'))
+        else if (source.peekNextChar() == '<')
         {
             source.skip();
 
-            if (source.peekNextChar() == T('='))
+            if (source.peekNextChar() == '=')
                 source.skip();
         }
 
         break;
 
-    case T('|'):
+    case '|':
         source.skip();
         result = tokenType_operator;
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('|'))
+        else if (source.peekNextChar() == '|')
         {
             source.skip();
 
-            if (source.peekNextChar() == T('='))
+            if (source.peekNextChar() == '=')
                 source.skip();
         }
 
         break;
 
-    case T('&'):
+    case '&':
         source.skip();
         result = tokenType_operator;
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('&'))
+        else if (source.peekNextChar() == '&')
         {
             source.skip();
 
-            if (source.peekNextChar() == T('='))
+            if (source.peekNextChar() == '=')
                 source.skip();
         }
 
         break;
 
-    case T('^'):
+    case '^':
         source.skip();
         result = tokenType_operator;
 
-        if (source.peekNextChar() == T('='))
+        if (source.peekNextChar() == '=')
         {
             source.skip();
         }
-        else if (source.peekNextChar() == T('^'))
+        else if (source.peekNextChar() == '^')
         {
             source.skip();
 
-            if (source.peekNextChar() == T('='))
+            if (source.peekNextChar() == '=')
                 source.skip();
         }
 
         break;
 
-    case T('#'):
+    case '#':
         result = tokenType_preprocessor;
         source.skipToEndOfLine();
         break;

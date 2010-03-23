@@ -92,7 +92,7 @@ static const tchar* auIdentifierPrefix = T("AudioUnit:");
 
 static const String createAUPluginIdentifier (const ComponentDescription& desc)
 {
-    jassert (osTypeToString ('abcd') == T("abcd")); // agh, must have got the endianness wrong..
+    jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
     jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
 
     String s (auIdentifierPrefix);
@@ -158,11 +158,11 @@ static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, Comp
 
     if (fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
     {
-        String s (fileOrIdentifier.substring (jmax (fileOrIdentifier.lastIndexOfChar (T(':')),
-                                                    fileOrIdentifier.lastIndexOfChar (T('/'))) + 1));
+        String s (fileOrIdentifier.substring (jmax (fileOrIdentifier.lastIndexOfChar (':'),
+                                                    fileOrIdentifier.lastIndexOfChar ('/')) + 1));
 
         StringArray tokens;
-        tokens.addTokens (s, T(","), String::empty);
+        tokens.addTokens (s, ",", String::empty);
         tokens.trim();
         tokens.removeEmptyStrings();
 
@@ -378,7 +378,7 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier
     {
         ++insideCallback;
 
-        log (T("Opening AU: ") + fileOrIdentifier);
+        log ("Opening AU: " + fileOrIdentifier);
 
         if (getComponentDescFromFile (fileOrIdentifier))
         {
@@ -423,7 +423,7 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIden
         return true;
 
     const File file (fileOrIdentifier);
-    if (! file.hasFileExtension (T(".component")))
+    if (! file.hasFileExtension (".component"))
         return false;
 
     const char* const utf8 = fileOrIdentifier.toUTF8();
@@ -497,7 +497,7 @@ void AudioUnitPluginInstance::initialise()
     if (initialised || audioUnit == 0)
         return;
 
-    log (T("Initialising AU: ") + pluginName);
+    log ("Initialising AU: " + pluginName);
 
     parameterIds.clear();
 
@@ -1044,7 +1044,7 @@ private:
 
         HIViewRef attachView (WindowRef windowRef, HIViewRef rootView)
         {
-            log (T("Opening AU GUI: ") + owner->plugin.getName());
+            log ("Opening AU GUI: " + owner->plugin.getName());
 
             AudioUnitCarbonView viewComponent = owner->getViewComponent();
 
@@ -1069,7 +1069,7 @@ private:
 
         void removeView (HIViewRef)
         {
-            log (T("Closing AU GUI: ") + owner->plugin.getName());
+            log ("Closing AU GUI: " + owner->plugin.getName());
 
             owner->closeViewComponent();
         }
@@ -1297,7 +1297,7 @@ void AudioUnitPluginInstance::changeProgramName (int index, const String& newNam
 const String AudioUnitPluginInstance::getInputChannelName (const int index) const
 {
     if (((unsigned int) index) < (unsigned int) getNumInputChannels())
-        return T("Input ") + String (index + 1);
+        return "Input " + String (index + 1);
 
     return String::empty;
 }
@@ -1314,7 +1314,7 @@ bool AudioUnitPluginInstance::isInputChannelStereoPair (int index) const
 const String AudioUnitPluginInstance::getOutputChannelName (const int index) const
 {
     if (((unsigned int) index) < (unsigned int) getNumOutputChannels())
-        return T("Output ") + String (index + 1);
+        return "Output " + String (index + 1);
 
     return String::empty;
 }
@@ -1485,7 +1485,7 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOr
 
     const File f (fileOrIdentifier);
 
-    return f.hasFileExtension (T(".component"))
+    return f.hasFileExtension (".component")
              && f.isDirectory();
 }
 

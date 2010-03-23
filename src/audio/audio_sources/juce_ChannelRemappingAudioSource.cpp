@@ -163,7 +163,7 @@ void ChannelRemappingAudioSource::getNextAudioBlock (const AudioSourceChannelInf
 //==============================================================================
 XmlElement* ChannelRemappingAudioSource::createXml() const throw()
 {
-    XmlElement* e = new XmlElement (T("MAPPINGS"));
+    XmlElement* e = new XmlElement ("MAPPINGS");
 
     String ins, outs;
     int i;
@@ -171,28 +171,28 @@ XmlElement* ChannelRemappingAudioSource::createXml() const throw()
     const ScopedLock sl (lock);
 
     for (i = 0; i < remappedInputs.size(); ++i)
-        ins << remappedInputs.getUnchecked(i) << T(' ');
+        ins << remappedInputs.getUnchecked(i) << ' ';
 
     for (i = 0; i < remappedOutputs.size(); ++i)
-        outs << remappedOutputs.getUnchecked(i) << T(' ');
+        outs << remappedOutputs.getUnchecked(i) << ' ';
 
-    e->setAttribute (T("inputs"), ins.trimEnd());
-    e->setAttribute (T("outputs"), outs.trimEnd());
+    e->setAttribute ("inputs", ins.trimEnd());
+    e->setAttribute ("outputs", outs.trimEnd());
 
     return e;
 }
 
 void ChannelRemappingAudioSource::restoreFromXml (const XmlElement& e) throw()
 {
-    if (e.hasTagName (T("MAPPINGS")))
+    if (e.hasTagName ("MAPPINGS"))
     {
         const ScopedLock sl (lock);
 
         clearAllMappings();
 
         StringArray ins, outs;
-        ins.addTokens (e.getStringAttribute (T("inputs")), false);
-        outs.addTokens (e.getStringAttribute (T("outputs")), false);
+        ins.addTokens (e.getStringAttribute ("inputs"), false);
+        outs.addTokens (e.getStringAttribute ("outputs"), false);
 
         int i;
         for (i = 0; i < ins.size(); ++i)

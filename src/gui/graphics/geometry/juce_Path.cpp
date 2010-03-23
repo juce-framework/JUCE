@@ -1407,14 +1407,14 @@ const String Path::toString() const
         {
             String n (data.elements [i++], 3);
 
-            if (n.endsWithChar (T('0')))
+            if (n.endsWithChar ('0'))
             {
                 do
                 {
                     n = n.dropLastCharacters (1);
-                } while (n.endsWithChar (T('0')));
+                } while (n.endsWithChar ('0'));
 
-                if (n.endsWithChar (T('.')))
+                if (n.endsWithChar ('.'))
                     n = n.dropLastCharacters (1);
             }
 
@@ -1436,8 +1436,8 @@ void Path::restoreFromString (const String& stringVersion)
     clear();
     setUsingNonZeroWinding (true);
 
-    const tchar* t = stringVersion;
-    tchar marker = T('m');
+    const juce_wchar* t = stringVersion;
+    juce_wchar marker = 'm';
     int numValues = 2;
     float values [6];
 
@@ -1447,27 +1447,27 @@ void Path::restoreFromString (const String& stringVersion)
         const tchar firstChar = token[0];
         int startNum = 0;
 
-        if (firstChar == T('m') || firstChar == T('l'))
+        if (firstChar == 'm' || firstChar == 'l')
         {
             marker = firstChar;
             numValues = 2;
         }
-        else if (firstChar == T('q'))
+        else if (firstChar == 'q')
         {
             marker = firstChar;
             numValues = 4;
         }
-        else if (firstChar == T('c'))
+        else if (firstChar == 'c')
         {
             marker = firstChar;
             numValues = 6;
         }
-        else if (firstChar == T('z'))
+        else if (firstChar == 'z')
         {
             marker = firstChar;
             numValues = 0;
         }
-        else if (firstChar == T('a'))
+        else if (firstChar == 'a')
         {
             setUsingNonZeroWinding (false);
             continue;
@@ -1483,26 +1483,26 @@ void Path::restoreFromString (const String& stringVersion)
 
         switch (marker)
         {
-        case T('m'):
+        case 'm':
             startNewSubPath (values[0], values[1]);
             break;
 
-        case T('l'):
+        case 'l':
             lineTo (values[0], values[1]);
             break;
 
-        case T('q'):
+        case 'q':
             quadraticTo (values[0], values[1],
                          values[2], values[3]);
             break;
 
-        case T('c'):
+        case 'c':
             cubicTo (values[0], values[1],
                      values[2], values[3],
                      values[4], values[5]);
             break;
 
-        case T('z'):
+        case 'z':
             closeSubPath();
             break;
 

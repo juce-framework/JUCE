@@ -204,53 +204,53 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
     switch (commandID)
     {
     case CommandIDs::saveProject:
-        result.setInfo (T("Save Project"),
-                        T("Saves the current project"),
+        result.setInfo ("Save Project",
+                        "Saves the current project",
                         CommandCategories::general, 0);
         result.setActive (project != 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::saveProjectAs:
-        result.setInfo (T("Save Project As..."),
-                        T("Saves the current project to a different filename"),
+        result.setInfo ("Save Project As...",
+                        "Saves the current project to a different filename",
                         CommandCategories::general, 0);
         result.setActive (project != 0);
-        result.defaultKeypresses.add (KeyPress (T('s'), ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::closeProject:
-        result.setInfo (T("Close Project"),
-                        T("Closes the current project"),
+        result.setInfo ("Close Project",
+                        "Closes the current project",
                         CommandCategories::general, 0);
         result.setActive (project != 0);
-        result.defaultKeypresses.add (KeyPress (T('w'), ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case CommandIDs::openProjectInIDE:
        #if JUCE_MAC
-        result.setInfo (T("Save Project and Open in XCode..."),
+        result.setInfo ("Save Project and Open in XCode...",
        #elif JUCE_WINDOWS
-        result.setInfo (T("Save Project and Open in Visual Studio..."),
+        result.setInfo ("Save Project and Open in Visual Studio...",
        #else
-        result.setInfo (T("Save Project and Open as a Makefile..."),
+        result.setInfo ("Save Project and Open as a Makefile...",
        #endif
-                        T("Saves the project and launches it in an external IDE"),
+                        "Saves the project and launches it in an external IDE",
                         CommandCategories::general, 0);
         result.setActive (project != 0);
-        result.defaultKeypresses.add (KeyPress (T('l'), ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('l', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::showProjectSettings:
-        result.setInfo (T("Show Project Build Settings"),
-                        T("Shows the build options for the project"),
+        result.setInfo ("Show Project Build Settings",
+                        "Shows the build options for the project",
                         CommandCategories::general, 0);
         result.setActive (project != 0);
-        result.defaultKeypresses.add (KeyPress (T('i'), ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('i', ModifierKeys::commandModifier | ModifierKeys::shiftModifier, 0));
         break;
 
     case StandardApplicationCommandIDs::del:
-        result.setInfo (T("Delete"), String::empty, CommandCategories::general, 0);
+        result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
         result.setActive (projectTree != 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
         break;

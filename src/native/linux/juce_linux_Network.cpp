@@ -219,19 +219,19 @@ public:
 
             // NB - using charToString() here instead of just T(" "), because that was
             // causing a mysterious gcc internal compiler error...
-            const int statusCode = responseHeader.fromFirstOccurrenceOf (String::charToString (T(' ')), false, false)
+            const int statusCode = responseHeader.fromFirstOccurrenceOf (String::charToString (' '), false, false)
                                                  .substring (0, 3).getIntValue();
 
             //int contentLength = findHeaderItem (lines, T("Content-Length:")).getIntValue();
             //bool isChunked = findHeaderItem (lines, T("Transfer-Encoding:")).equalsIgnoreCase ("chunked");
 
-            String location (findHeaderItem (lines, T("Location:")));
+            String location (findHeaderItem (lines, "Location:"));
 
             if (statusCode >= 300 && statusCode < 400
                 && location.isNotEmpty())
             {
                 if (! location.startsWithIgnoreCase (T("http://")))
-                    location = T("http://") + location;
+                    location = "http://" + location;
 
                 if (levelsOfRedirection++ < 3)
                     return open (location, headers, postData, isPost, callback, callbackContext, timeOutMs);
@@ -397,7 +397,7 @@ private:
         if (nextSlash >= 0)
             path = url.substring (nextSlash);
         else
-            path = T("/");
+            path = "/";
 
         return true;
     }

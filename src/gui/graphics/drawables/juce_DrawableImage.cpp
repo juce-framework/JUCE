@@ -146,7 +146,7 @@ Drawable* DrawableImage::createCopy() const
 //==============================================================================
 ValueTree DrawableImage::createValueTree() const throw()
 {
-    ValueTree v (T("Image"));
+    ValueTree v ("Image");
 
     if (getName().isNotEmpty())
         v.setProperty ("id", getName(), 0);

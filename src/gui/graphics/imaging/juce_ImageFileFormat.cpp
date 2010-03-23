@@ -42,7 +42,7 @@ PNGImageFormat::~PNGImageFormat()   {}
 
 const String PNGImageFormat::getFormatName()
 {
-    return T("PNG");
+    return "PNG";
 }
 
 bool PNGImageFormat::canUnderstand (InputStream& in)
@@ -85,7 +85,7 @@ void JPEGImageFormat::setQuality (const float newQuality)
 
 const String JPEGImageFormat::getFormatName()
 {
-    return T("JPEG");
+    return "JPEG";
 }
 
 bool JPEGImageFormat::canUnderstand (InputStream& in)
@@ -125,7 +125,7 @@ public:
 
     const String getFormatName()
     {
-        return T("GIF");
+        return "GIF";
     }
 
     bool canUnderstand (InputStream& in)

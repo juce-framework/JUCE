@@ -44,7 +44,7 @@ ResourceFile::~ResourceFile()
 
 bool ResourceFile::isResourceFile (const File& file)
 {
-    if (file.hasFileExtension (T("cpp;h")))
+    if (file.hasFileExtension ("cpp;h"))
     {
         ScopedPointer <InputStream> in (file.createInputStream());
 

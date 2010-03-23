@@ -70,7 +70,7 @@ class ThreadPool::ThreadPoolThread  : public Thread
 {
 public:
     ThreadPoolThread (ThreadPool& pool_)
-        : Thread (T("Pool")),
+        : Thread ("Pool"),
           pool (pool_),
           busy (false)
     {

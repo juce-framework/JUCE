@@ -133,7 +133,7 @@ public:
     int findChildFiles (Array<File>& results,
                         int whatToLookFor,
                         bool searchRecursively,
-                        const String& wildCardPattern = JUCE_T("*")) const;
+                        const String& wildCardPattern = "*") const;
 
     //==============================================================================
     /** Finds out whether a file is inside one of the path's directories.

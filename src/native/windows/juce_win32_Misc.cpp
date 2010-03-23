@@ -29,7 +29,7 @@
 
 
 //==============================================================================
-void SystemClipboard::copyTextToClipboard (const String& text) throw()
+void SystemClipboard::copyTextToClipboard (const String& text)
 {
     if (OpenClipboard (0) != 0)
     {
@@ -57,7 +57,7 @@ void SystemClipboard::copyTextToClipboard (const String& text) throw()
     }
 }
 
-const String SystemClipboard::getTextFromClipboard() throw()
+const String SystemClipboard::getTextFromClipboard()
 {
     String result;
 

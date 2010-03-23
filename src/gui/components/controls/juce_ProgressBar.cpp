@@ -74,7 +74,7 @@ void ProgressBar::paint (Graphics& g)
     if (displayPercentage)
     {
         if (currentValue >= 0 && currentValue <= 1.0)
-            text << roundToInt (currentValue * 100.0) << T("%");
+            text << roundToInt (currentValue * 100.0) << '%';
     }
     else
     {

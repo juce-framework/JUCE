@@ -50,14 +50,14 @@ FilenameComponent::FilenameComponent (const String& name,
       wildcard (fileBrowserWildcard),
       enforcedSuffix (enforcedSuffix_)
 {
-    addAndMakeVisible (filenameBox = new ComboBox (T("fn")));
+    addAndMakeVisible (filenameBox = new ComboBox ("fn"));
     filenameBox->setEditableText (canEditFilename);
     filenameBox->addListener (this);
     filenameBox->setTextWhenNothingSelected (textWhenNothingSelected);
     filenameBox->setTextWhenNoChoicesAvailable (TRANS("(no recently seleced files)"));
 
     browseButton = 0;
-    setBrowseButtonText (T("..."));
+    setBrowseButtonText ("...");
 
     setCurrentFile (currentFile, true);
 }

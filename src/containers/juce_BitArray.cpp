@@ -877,7 +877,7 @@ const String BigInteger::toString (const int base, const int minimumNumCharacter
     if (base == 2 || base == 8 || base == 16)
     {
         const int bits = (base == 2) ? 1 : (base == 8 ? 3 : 4);
-        static const juce_wchar* const hexDigits = T("0123456789abcdef");
+        static const char* const hexDigits = "0123456789abcdef";
 
         for (;;)
         {
@@ -914,7 +914,7 @@ const String BigInteger::toString (const int base, const int minimumNumCharacter
 
     s = s.paddedLeft ('0', minimumNumCharacters);
 
-    return isNegative() ? T("-") + s : s;
+    return isNegative() ? "-" + s : s;
 }
 
 void BigInteger::parseString (const String& text, const int base)
@@ -950,10 +950,10 @@ void BigInteger::parseString (const String& text, const int base)
         {
             const juce_wchar c = *t++;
 
-            if (c >= T('0') && c <= T('9'))
+            if (c >= '0' && c <= '9')
             {
                 operator*= (ten);
-                operator+= ((int) (c - T('0')));
+                operator+= ((int) (c - '0'));
             }
             else if (c == 0)
             {
@@ -962,7 +962,7 @@ void BigInteger::parseString (const String& text, const int base)
         }
     }
 
-    setNegative (text.trimStart().startsWithChar (T('-')));
+    setNegative (text.trimStart().startsWithChar ('-'));
 }
 
 const MemoryBlock BigInteger::toMemoryBlock() const

@@ -353,7 +353,7 @@ void DocumentWindow::lookAndFeelChanged()
         if (getCloseButton() != 0)
         {
 #if JUCE_MAC
-            getCloseButton()->addShortcut (KeyPress (T('w'), ModifierKeys::commandModifier, 0));
+            getCloseButton()->addShortcut (KeyPress ('w', ModifierKeys::commandModifier, 0));
 #else
             getCloseButton()->addShortcut (KeyPress (KeyPress::F4Key, ModifierKeys::altModifier, 0));
 #endif

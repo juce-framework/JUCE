@@ -647,7 +647,7 @@ double Slider::getValueFromText (const String& text)
     if (t.endsWith (textSuffix))
         t = t.substring (0, t.length() - textSuffix.length());
 
-    while (t.startsWithChar (T('+')))
+    while (t.startsWithChar ('+'))
         t = t.substring (1).trimStart();
 
     return t.initialSectionContainingOnly (T("0123456789.,-"))

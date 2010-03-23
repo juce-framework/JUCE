@@ -42,7 +42,7 @@
 #endif
 
 //==============================================================================
-const juce_wchar  File::separator        = T('\\');
+const juce_wchar  File::separator        = '\\';
 const juce_wchar* File::separatorString  = T("\\");
 
 
@@ -302,8 +302,8 @@ const StringArray juce_getFileSystemRoots()
 //==============================================================================
 static const String getDriveFromPath (const String& path)
 {
-    if (path.isNotEmpty() && path[1] == T(':'))
-        return path.substring (0, 2) + T("\\");
+    if (path.isNotEmpty() && path[1] == ':')
+        return path.substring (0, 2) + '\\';
 
     return path;
 }
@@ -364,7 +364,7 @@ bool File::isOnHardDisk() const
 
     const unsigned int n = getWindowsDriveType (getFullPathName());
 
-    if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == T(':'))
+    if (fullPath.toLowerCase()[0] <= 'b' && fullPath[1] == ':')
         return n != DRIVE_REMOVABLE;
     else
         return n != DRIVE_CDROM && n != DRIVE_REMOTE;
@@ -486,8 +486,8 @@ const File File::getLinkedTarget() const
     String p (getFullPathName());
 
     if (! exists())
-        p += T(".lnk");
-    else if (getFileExtension() != T(".lnk"))
+        p += ".lnk";
+    else if (getFileExtension() != ".lnk")
         return result;
 
     ComSmartPtr <IShellLink> shellLink;

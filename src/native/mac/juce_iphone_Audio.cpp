@@ -34,7 +34,7 @@ class IPhoneAudioIODevice  : public AudioIODevice
 public:
     //==============================================================================
     IPhoneAudioIODevice (const String& deviceName)
-        : AudioIODevice (deviceName, T("Audio")),
+        : AudioIODevice (deviceName, "Audio"),
           audioUnit (0),
           isRunning (false),
           callback (0),
@@ -138,8 +138,7 @@ public:
         isRunning = true;
         propertyChanged (0, 0, 0);  // creates and starts the AU
 
-        lastError = audioUnit != 0 ? String::empty
-                                   : T("Couldn't open the device");
+        lastError = audioUnit != 0 ? "" : "Couldn't open the device";
         return lastError;
     }
 
@@ -529,7 +528,7 @@ class IPhoneAudioIODeviceType  : public AudioIODeviceType
 public:
     //==============================================================================
     IPhoneAudioIODeviceType()
-        : AudioIODeviceType (T("iPhone Audio"))
+        : AudioIODeviceType ("iPhone Audio")
     {
     }
 
