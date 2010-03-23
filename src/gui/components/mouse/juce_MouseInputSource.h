@@ -152,7 +152,7 @@ public:
         The unbounded mode is automatically turned off when the mouse button is released, or
         it can be turned off explicitly by calling this method again.
 
-        @param shouldUnboundedMovementBeEnabled     whether to turn this mode on or off
+        @param isEnabled                            whether to turn this mode on or off
         @param keepCursorVisibleUntilOffscreen      if set to false, the cursor will immediately be
                                                     hidden; if true, it will only be hidden when it
                                                     is moved beyond the edge of the screen

@@ -268,13 +268,17 @@ public:
         @param ignoreCaseWhenComparing      whether the comparison used is case-insensitive
         @param appendNumberToFirstInstance  whether the first of a group of similar strings
                                             also has a number appended to it.
-        @param preNumberString              when adding a number, this string is added before the number
-        @param postNumberString             this string is appended after any numbers that are added
+        @param preNumberString              when adding a number, this string is added before the number.
+                                            If you pass 0, a default string will be used, which adds
+                                            brackets around the number.
+        @param postNumberString             this string is appended after any numbers that are added.
+                                            If you pass 0, a default string will be used, which adds
+                                            brackets around the number.
     */
     void appendNumbersToDuplicates (bool ignoreCaseWhenComparing,
                                     bool appendNumberToFirstInstance,
-                                    const juce_wchar* preNumberString = JUCE_T(" ("),
-                                    const juce_wchar* postNumberString = JUCE_T(")"));
+                                    const juce_wchar* preNumberString = 0,
+                                    const juce_wchar* postNumberString = 0);
 
     //==============================================================================
     /** Joins the strings in the array together into one string.

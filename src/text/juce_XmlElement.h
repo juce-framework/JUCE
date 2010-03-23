@@ -294,8 +294,6 @@ public:
     /** Returns the value of a named attribute.
 
         @param attributeName        the name of the attribute to look up
-        @param defaultReturnValue   a value to return if the element doesn't have an attribute
-                                    with this name
     */
     const String& getStringAttribute (const String& attributeName) const throw();
 

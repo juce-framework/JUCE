@@ -452,10 +452,14 @@ void StringArray::removeDuplicates (const bool ignoreCase)
 
 void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const bool appendNumberToFirstInstance,
-                                             const juce_wchar* const preNumberString,
-                                             const juce_wchar* const postNumberString)
+                                             const juce_wchar* preNumberString,
+                                             const juce_wchar* postNumberString)
 {
-    jassert (preNumberString != 0 && postNumberString != 0); // These strings can't be null pointers..
+    if (preNumberString == 0)
+        preNumberString = T(" (");
+
+    if (postNumberString == 0)
+        postNumberString = T(")");
 
     for (int i = 0; i < size() - 1; ++i)
     {
