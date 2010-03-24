@@ -3,7 +3,7 @@
 <VisualStudioProject ProjectType="Visual C++"
                      Version="9.00"
                      Name="Amalgamator"
-                     ProjectGUID="{8EBCACB6-792B-92FF-1C9B-34A5D310E725}"
+                     ProjectGUID="{4285DA55-C038-FF64-E3EC-DA7F0E5D4310}"
                      TargetFrameworkVersion="131072">
   <Platforms>
     <Platform Name="Win32"/>

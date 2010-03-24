@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 8.00
 # Visual C++ Express 2005
-Project("{4D8D7276-61CD-98C8-9805-B0C09E338293}") = "HelloWorld", "HelloWorld.vcproj", "{E29E0A3E-FB4C-D74C-B035-BEF5617409AB}"
+Project("{B2F78CC9-CD50-16B6-2910-2265E55052A4}") = "HelloWorld", "HelloWorld.vcproj", "{6ABB053F-FD6B-A828-D0FF-2D3BE343D9F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E29E0A3E-FB4C-D74C-B035-BEF5617409AB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E29E0A3E-FB4C-D74C-B035-BEF5617409AB}.Debug|Win32.Build.0 = Debug|Win32
-		{E29E0A3E-FB4C-D74C-B035-BEF5617409AB}.Release|Win32.ActiveCfg = Release|Win32
-		{E29E0A3E-FB4C-D74C-B035-BEF5617409AB}.Release|Win32.Build.0 = Release|Win32
+		{6ABB053F-FD6B-A828-D0FF-2D3BE343D9F7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6ABB053F-FD6B-A828-D0FF-2D3BE343D9F7}.Debug|Win32.Build.0 = Debug|Win32
+		{6ABB053F-FD6B-A828-D0FF-2D3BE343D9F7}.Release|Win32.ActiveCfg = Release|Win32
+		{6ABB053F-FD6B-A828-D0FF-2D3BE343D9F7}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

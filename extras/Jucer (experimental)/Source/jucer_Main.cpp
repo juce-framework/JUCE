@@ -43,37 +43,6 @@ public:
     }
 
     //==============================================================================
-    void resaveJucerFile (const File file)
-    {
-        if (! file.exists())
-        {
-            std::cout << "The file doesn't exist!" << std::endl;
-            return;
-        }
-
-        if (! file.hasFileExtension (Project::projectFileExtension))
-        {
-            std::cout << "Not a valid jucer project file!" << std::endl;
-            return;
-        }
-
-        ScopedPointer <Project> newDoc (new Project (file));
-
-        if (! newDoc->loadFrom (file, true))
-        {
-            std::cout << "Failed to load the project file!" << std::endl;
-            return;
-        }
-
-        String error (newDoc->saveDocument (file));
-
-        if (error.isNotEmpty())
-        {
-            std::cout << "Error when writing project: " << error << std::endl;
-            return;
-        }
-    }
-
     void initialise (const String& commandLine)
     {
         /* Running a command-line of the form "Jucer --resave foobar.jucer" will try to load that
@@ -149,6 +118,38 @@ public:
 
 private:
     ScopedPointer <MainWindow> theMainWindow;
+
+    void resaveJucerFile (const File& file)
+    {
+        if (! file.exists())
+        {
+            std::cout << "The file " << file.getFullPathName() << " doesn't exist!" << std::endl;
+            return;
+        }
+
+        if (! file.hasFileExtension (Project::projectFileExtension))
+        {
+            std::cout << file.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
+            return;
+        }
+
+        ScopedPointer <Project> newDoc (new Project (file));
+
+        if (! newDoc->loadFrom (file, true))
+        {
+            std::cout << "Failed to load the project file: " << file.getFullPathName() << std::endl;
+            return;
+        }
+
+        std::cout << "The Jucer - Re-saving file: " << file.getFullPathName() << std::endl;
+        String error (newDoc->saveDocument (file));
+
+        if (error.isNotEmpty())
+        {
+            std::cout << "Error when writing project: " << error << std::endl;
+            return;
+        }
+    }
 };
 
 
