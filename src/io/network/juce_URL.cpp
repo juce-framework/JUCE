@@ -537,30 +537,22 @@ const StringPairArray& URL::getMimeTypesOfUploadFiles() const
 //==============================================================================
 const String URL::removeEscapeChars (const String& s)
 {
-    const int len = s.length();
-    HeapBlock <char> resultUTF8 (len * 4);
-    char* r = resultUTF8;
+    String result (s.replaceCharacter ('+', ' '));
+    int nextPercent = 0;
 
-    for (int i = 0; i < len; ++i)
+    for (;;)
     {
-        char c = (char) s[i];
-        if (c == 0)
+        nextPercent = result.indexOfChar (nextPercent, '%');
+
+        if (nextPercent < 0)
             break;
 
-        if (c == '+')
-        {
-            c = ' ';
-        }
-        else if (c == '%')
-        {
-            c = (char) s.substring (i + 1, i + 3).getHexValue32();
-            i += 2;
-        }
-
-        *r++ = c;
+        juce_wchar replacementChar = result.substring (nextPercent + 1, nextPercent + 3).getHexValue32();
+        result = result.replaceSection (nextPercent, 3, String::charToString (replacementChar));
+        ++nextPercent;
     }
 
-    return String::fromUTF8 (resultUTF8);
+    return result;
 }
 
 const String URL::addEscapeChars (const String& s, const bool isParameter)
