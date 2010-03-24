@@ -124,8 +124,7 @@ void FILTERCLASSNAME::releaseResources()
     // spare memory, etc.
 }
 
-void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer,
-                                    MidiBuffer& midiMessages)
+void FILTERCLASSNAME::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...

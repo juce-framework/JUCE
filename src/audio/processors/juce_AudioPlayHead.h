@@ -105,6 +105,12 @@ public:
             (When isRecording is true, then isPlaying will also be true).
         */
         bool isRecording;
+
+        //==============================================================================
+        bool operator== (const CurrentPositionInfo& other) const throw();
+        bool operator!= (const CurrentPositionInfo& other) const throw();
+
+        void resetToDefault();
     };
 
     //==============================================================================

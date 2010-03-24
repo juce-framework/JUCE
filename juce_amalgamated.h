@@ -17610,6 +17610,11 @@ public:
 		bool isPlaying;
 
 		bool isRecording;
+
+		bool operator== (const CurrentPositionInfo& other) const throw();
+		bool operator!= (const CurrentPositionInfo& other) const throw();
+
+		void resetToDefault();
 	};
 
 	virtual bool getCurrentPosition (CurrentPositionInfo& result) = 0;

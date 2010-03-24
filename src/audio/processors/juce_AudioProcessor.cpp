@@ -302,5 +302,33 @@ void AudioProcessorListener::audioProcessorParameterChangeGestureEnd (AudioProce
 {
 }
 
+//==============================================================================
+bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& other) const throw()
+{
+    return timeInSeconds == other.timeInSeconds
+        && ppqPosition == other.ppqPosition
+        && editOriginTime == other.editOriginTime
+        && ppqPositionOfLastBarStart == other.ppqPositionOfLastBarStart
+        && frameRate == other.frameRate
+        && isPlaying == other.isPlaying
+        && isRecording == other.isRecording
+        && bpm == other.bpm
+        && timeSigNumerator == other.timeSigNumerator
+        && timeSigDenominator == other.timeSigDenominator;
+}
+
+bool AudioPlayHead::CurrentPositionInfo::operator!= (const CurrentPositionInfo& other) const throw()
+{
+    return ! operator== (other);
+}
+
+void AudioPlayHead::CurrentPositionInfo::resetToDefault()
+{
+    zerostruct (*this);
+    timeSigNumerator = 4;
+    timeSigDenominator = 4;
+    bpm = 120;
+}
+
 
 END_JUCE_NAMESPACE

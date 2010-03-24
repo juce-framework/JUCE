@@ -1,7 +1,7 @@
 
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
-Project("{2C5B2BD0-DCDD-8F96-4518-F341656FE506}") = "Plugin Host", "Plugin Host.vcproj", "{4B76605A-510D-D729-CAC3-8E6F2C89BE71}"
+Project("{F57C92E4-2379-4C6D-78F7-AFF26BF4F962}") = "Plugin Host", "Plugin Host.vcproj", "{7CD310E8-9077-342C-EB06-869D4775A4F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Debug|Win32.ActiveCfg = Debug|Win32
-		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Debug|Win32.Build.0 = Debug|Win32
-		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Release|Win32.ActiveCfg = Release|Win32
-		{4B76605A-510D-D729-CAC3-8E6F2C89BE71}.Release|Win32.Build.0 = Release|Win32
+		{7CD310E8-9077-342C-EB06-869D4775A4F4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7CD310E8-9077-342C-EB06-869D4775A4F4}.Debug|Win32.Build.0 = Debug|Win32
+		{7CD310E8-9077-342C-EB06-869D4775A4F4}.Release|Win32.ActiveCfg = Release|Win32
+		{7CD310E8-9077-342C-EB06-869D4775A4F4}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

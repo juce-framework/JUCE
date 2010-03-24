@@ -399,7 +399,7 @@ public:
 
         if (fillEntireClipAsTiles)
         {
-#if JUCE_IPHONE || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+#if JUCE_IPHONE
             CGContextDrawTiledImage (context, imageRect, image);
 #else
   #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VisualStudioProject ProjectType="Visual C++"
+                     Version="8.00"
+                     Name="JuceDemoPlugin"
+                     ProjectGUID="{BC07A08E-8205-B220-39D4-B2685FFC59CA}"
+                     TargetFrameworkVersion="131072">
+  <Platforms>
+    <Platform Name="Win32"/>
+  </Platforms>
+  <ToolFiles/>
+  <Configurations>
+    <Configuration Name="Debug&#124;Win32"
+                   OutputDirectory=".\Debug"
+                   IntermediateDirectory=".\Debug"
+                   ConfigurationType="2"
+                   UseOfMFC="0"
+                   ATLMinimizesCRunTimeLibraryUsage="false"
+                   CharacterSet="2">
+      <Tool Name="VCPreBuildEventTool"/>
+      <Tool Name="VCCustomBuildTool"/>
+      <Tool Name="VCXMLDataGeneratorTool"/>
+      <Tool Name="VCWebServiceProxyGeneratorTool"/>
+      <Tool Name="VCMIDLTool"
+            PreprocessorDefinitions="_DEBUG"
+            MkTypLibCompatible="true"
+            SuppressStartupBanner="true"
+            TargetEnvironment="1"
+            TypeLibraryName=".\Debug\JuceDemoPlugin.tlb"
+            HeaderFileName=""/>
+      <Tool Name="VCCLCompilerTool"
+            Optimization="0"
+            BufferSecurityCheck=""
+            DebugInformationFormat="4"
+            AdditionalIncludeDirectories="c:\SDKs\vstsdk2.4;..\..\JuceLibraryCode"
+            PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
+            RuntimeLibrary="1"
+            RuntimeTypeInfo="true"
+            UsePrecompiledHeader="0"
+            PrecompiledHeaderFile=".\Debug\JuceDemoPlugin.pch"
+            AssemblerListingLocation=".\Debug\"
+            ObjectFile=".\Debug\"
+            ProgramDataBaseFileName=".\Debug\"
+            WarningLevel="3"
+            SuppressStartupBanner="true"/>
+      <Tool Name="VCManagedResourceCompilerTool"/>
+      <Tool Name="VCResourceCompilerTool"
+            PreprocessorDefinitions="_DEBUG"/>
+      <Tool Name="VCPreLinkEventTool"/>
+      <Tool Name="VCLinkerTool"
+            OutputFile=".\Debug\JuceDemoPlugin.dll"
+            SuppressStartupBanner="true"
+            IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"
+            GenerateDebugInformation="true"
+            ProgramDatabaseFile=".\Debug\JuceDemoPlugin.pdb"
+            SubSystem="2"
+            RandomizedBaseAddress="1"
+            DataExecutionPrevention="0"
+            TargetMachine="1"/>
+      <Tool Name="VCALinkTool"/>
+      <Tool Name="VCManifestTool"/>
+      <Tool Name="VCXDCMakeTool"/>
+      <Tool Name="VCBscMakeTool"
+            SuppressStartupBanner="true"
+            OutputFile=".\Debug\JuceDemoPlugin.bsc"/>
+      <Tool Name="VCFxCopTool"/>
+      <Tool Name="VCAppVerifierTool"/>
+      <Tool Name="VCPostBuildEventTool"/>
+    </Configuration>
+    <Configuration Name="Release&#124;Win32"
+                   OutputDirectory=".\Release"
+                   IntermediateDirectory=".\Release"
+                   ConfigurationType="2"
+                   UseOfMFC="0"
+                   ATLMinimizesCRunTimeLibraryUsage="false"
+                   CharacterSet="2"
+                   WholeProgramOptimization="1">
+      <Tool Name="VCPreBuildEventTool"/>
+      <Tool Name="VCCustomBuildTool"/>
+      <Tool Name="VCXMLDataGeneratorTool"/>
+      <Tool Name="VCWebServiceProxyGeneratorTool"/>
+      <Tool Name="VCMIDLTool"
+            PreprocessorDefinitions="NDEBUG"
+            MkTypLibCompatible="true"
+            SuppressStartupBanner="true"
+            TargetEnvironment="1"
+            TypeLibraryName=".\Release\JuceDemoPlugin.tlb"
+            HeaderFileName=""/>
+      <Tool Name="VCCLCompilerTool"
+            Optimization="2"
+            InlineFunctionExpansion="1"
+            StringPooling="true"
+            AdditionalIncludeDirectories="c:\SDKs\vstsdk2.4;..\..\JuceLibraryCode"
+            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+            RuntimeLibrary="0"
+            RuntimeTypeInfo="true"
+            UsePrecompiledHeader="0"
+            PrecompiledHeaderFile=".\Release\JuceDemoPlugin.pch"
+            AssemblerListingLocation=".\Release\"
+            ObjectFile=".\Release\"
+            ProgramDataBaseFileName=".\Release\"
+            WarningLevel="3"
+            SuppressStartupBanner="true"/>
+      <Tool Name="VCManagedResourceCompilerTool"/>
+      <Tool Name="VCResourceCompilerTool"
+            PreprocessorDefinitions="NDEBUG"/>
+      <Tool Name="VCPreLinkEventTool"/>
+      <Tool Name="VCLinkerTool"
+            OutputFile=".\Release\JuceDemoPlugin.dll"
+            SuppressStartupBanner="true"
+            IgnoreDefaultLibraryNames=""
+            GenerateDebugInformation="false"
+            ProgramDatabaseFile=".\Release\JuceDemoPlugin.pdb"
+            SubSystem="2"
+            GenerateManifest="false"
+            OptimizeReferences="2"
+            EnableCOMDATFolding="2"
+            RandomizedBaseAddress="1"
+            DataExecutionPrevention="0"
+            TargetMachine="1"/>
+      <Tool Name="VCALinkTool"/>
+      <Tool Name="VCManifestTool"/>
+      <Tool Name="VCXDCMakeTool"/>
+      <Tool Name="VCBscMakeTool"
+            SuppressStartupBanner="true"
+            OutputFile=".\Release\JuceDemoPlugin.bsc"/>
+      <Tool Name="VCFxCopTool"/>
+      <Tool Name="VCAppVerifierTool"/>
+      <Tool Name="VCPostBuildEventTool"/>
+    </Configuration>
+  </Configurations>
+  <References/>
+  <Files>
+    <Filter Name="JuceDemoPlugin">
+      <Filter Name="Source">
+        <File RelativePath="..\..\Source\PluginProcessor.cpp"/>
+        <File RelativePath="..\..\Source\PluginProcessor.h"/>
+        <File RelativePath="..\..\Source\PluginEditor.cpp"/>
+        <File RelativePath="..\..\Source\PluginEditor.h"/>
+      </Filter>
+    </Filter>
+    <Filter Name="Juce Library Code">
+      <File RelativePath="..\..\JuceLibraryCode\AppConfig.h"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceHeader.h"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode1.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
+      <File RelativePath="..\..\JuceLibraryCode\JucePluginCharacteristics.h"/>
+    </Filter>
+    <Filter Name="Juce VST Wrapper">
+      <File RelativePath="..\..\..\..\..\..\juce\extras\audio plugins\wrapper\VST\juce_VST_Wrapper.cpp"/>
+    </Filter>
+  </Files>
+  <Globals/>
+</VisualStudioProject>
