@@ -41,18 +41,23 @@ StringArray::StringArray (const StringArray& other)
 {
 }
 
+StringArray::StringArray (const String& firstValue)
+{
+    strings.add (firstValue);
+}
+
 StringArray::StringArray (const juce_wchar** const initialStrings,
                           const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
-        add (initialStrings [i]);
+        strings.add (initialStrings [i]);
 }
 
 StringArray::StringArray (const char** const initialStrings,
                           const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
-        add (initialStrings [i]);
+        strings.add (initialStrings [i]);
 }
 
 StringArray::StringArray (const juce_wchar** const initialStrings)
@@ -60,7 +65,7 @@ StringArray::StringArray (const juce_wchar** const initialStrings)
     int i = 0;
 
     while (initialStrings[i] != 0)
-        add (initialStrings [i++]);
+        strings.add (initialStrings [i++]);
 }
 
 StringArray::StringArray (const char** const initialStrings)
@@ -68,7 +73,7 @@ StringArray::StringArray (const char** const initialStrings)
     int i = 0;
 
     while (initialStrings[i] != 0)
-        add (initialStrings [i++]);
+        strings.add (initialStrings [i++]);
 }
 
 StringArray& StringArray::operator= (const StringArray& other)
@@ -81,7 +86,7 @@ StringArray::~StringArray()
 {
 }
 
-bool StringArray::operator== (const StringArray& other) const
+bool StringArray::operator== (const StringArray& other) const throw()
 {
     if (other.size() != size())
         return false;
@@ -93,7 +98,7 @@ bool StringArray::operator== (const StringArray& other) const
     return true;
 }
 
-bool StringArray::operator!= (const StringArray& other) const
+bool StringArray::operator!= (const StringArray& other) const throw()
 {
     return ! operator== (other);
 }

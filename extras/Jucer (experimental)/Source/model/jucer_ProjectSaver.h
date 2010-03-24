@@ -479,6 +479,7 @@ private:
         for (int i = project.getNumExporters(); --i >= 0;)
         {
             ScopedPointer <ProjectExporter> exporter (project.createExporter (i));
+            std::cout << "Writing files for: " << exporter->getName() << std::endl;
 
             const File targetFolder (exporter->getTargetFolder());
 

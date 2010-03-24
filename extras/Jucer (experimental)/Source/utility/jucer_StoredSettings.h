@@ -57,7 +57,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    PropertiesFile* props;
+    ScopedPointer<PropertiesFile> props;
 };
 
 

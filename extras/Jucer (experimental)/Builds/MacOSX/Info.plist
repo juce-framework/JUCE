@@ -19,5 +19,20 @@
     <string>3.0.0</string>
     <key>CFBundleVersion</key>
     <string>3.0.0</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>jucer</string>
+        </array>
+        <key>CFBundleTypeName</key>
+        <string>jucer</string>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>NSPersistentStoreTypeKey</key>
+        <string>XML</string>
+      </dict>
+    </array>
   </dict>
 </plist>

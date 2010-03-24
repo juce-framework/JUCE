@@ -43,8 +43,50 @@ public:
     }
 
     //==============================================================================
+    void resaveJucerFile (const File file)
+    {
+        if (! file.exists())
+        {
+            std::cout << "The file doesn't exist!" << std::endl;
+            return;
+        }
+
+        if (! file.hasFileExtension (Project::projectFileExtension))
+        {
+            std::cout << "Not a valid jucer project file!" << std::endl;
+            return;
+        }
+
+        ScopedPointer <Project> newDoc (new Project (file));
+
+        if (! newDoc->loadFrom (file, true))
+        {
+            std::cout << "Failed to load the project file!" << std::endl;
+            return;
+        }
+
+        String error (newDoc->saveDocument (file));
+
+        if (error.isNotEmpty())
+        {
+            std::cout << "Error when writing project: " << error << std::endl;
+            return;
+        }
+    }
+
     void initialise (const String& commandLine)
     {
+        /* Running a command-line of the form "Jucer --resave foobar.jucer" will try to load that
+           jucer file and re-export all of its projects.
+        */
+        if (commandLine.startsWithIgnoreCase (T("-resave ")) || commandLine.startsWithIgnoreCase (T("--resave ")))
+        {
+            resaveJucerFile (File::getCurrentWorkingDirectory()
+                                  .getChildFile (commandLine.fromFirstOccurrenceOf (T(" "), false, false).unquoted()));
+            quit();
+            return;
+        }
+
         commandManager = new ApplicationCommandManager();
 
         theMainWindow = new MainWindow();

@@ -46,8 +46,10 @@ public:
     /** Creates a copy of another string array */
     StringArray (const StringArray& other);
 
-    /** Creates a copy of an array of string literals.
+    /** Creates an array containing a single string. */
+    explicit StringArray (const String& firstValue);
 
+    /** Creates a copy of an array of string literals.
         @param strings          an array of strings to add. Null pointers in the array will be
                                 treated as empty strings
         @param numberOfStrings  how many items there are in the array
@@ -55,7 +57,6 @@ public:
     StringArray (const juce_wchar** strings, int numberOfStrings);
 
     /** Creates a copy of an array of string literals.
-
         @param strings          an array of strings to add. Null pointers in the array will be
                                 treated as empty strings
         @param numberOfStrings  how many items there are in the array
@@ -63,7 +64,6 @@ public:
     StringArray (const char** strings, int numberOfStrings);
 
     /** Creates a copy of a null-terminated array of string literals.
-
         Each item from the array passed-in is added, until it encounters a null pointer,
         at which point it stops.
     */
@@ -84,20 +84,16 @@ public:
 
     //==============================================================================
     /** Compares two arrays.
-
         Comparisons are case-sensitive.
-
         @returns    true only if the other array contains exactly the same strings in the same order
     */
-    bool operator== (const StringArray& other) const;
+    bool operator== (const StringArray& other) const throw();
 
     /** Compares two arrays.
-
         Comparisons are case-sensitive.
-
         @returns    false if the other array contains exactly the same strings in the same order
     */
-    bool operator!= (const StringArray& other) const;
+    bool operator!= (const StringArray& other) const throw();
 
     //==============================================================================
     /** Returns the number of strings in the array */

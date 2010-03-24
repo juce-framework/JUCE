@@ -37,7 +37,7 @@ StoredSettings::StoredSettings()
 StoredSettings::~StoredSettings()
 {
     flush();
-    deleteAndZero (props);
+    props = 0;
     clearSingletonInstance();
 }
 
@@ -47,6 +47,7 @@ juce_ImplementSingleton (StoredSettings);
 //==============================================================================
 PropertiesFile& StoredSettings::getProps()
 {
+    jassert (props != 0);
     return *props;
 }
 
@@ -58,14 +59,16 @@ void StoredSettings::flush()
 
         props->removeValue ("keyMappings");
 
-        ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
+        if (commandManager != 0)
+        {
+            ScopedPointer <XmlElement> keys (commandManager->getKeyMappings()->createXml (true));
 
-        if (keys != 0)
-            props->setValue ("keyMappings", (XmlElement*) keys);
+            if (keys != 0)
+                props->setValue ("keyMappings", (XmlElement*) keys);
+        }
     }
 
-    deleteAndZero (props);
-
+    props = 0;
     props = PropertiesFile::createDefaultAppPropertiesFile ("Jucer2",
                                                             "settings",
                                                             String::empty,

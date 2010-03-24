@@ -3883,6 +3883,8 @@ public:
 
 	StringArray (const StringArray& other);
 
+	explicit StringArray (const String& firstValue);
+
 	StringArray (const juce_wchar** strings, int numberOfStrings);
 
 	StringArray (const char** strings, int numberOfStrings);
@@ -3895,9 +3897,9 @@ public:
 
 	StringArray& operator= (const StringArray& other);
 
-	bool operator== (const StringArray& other) const;
+	bool operator== (const StringArray& other) const throw();
 
-	bool operator!= (const StringArray& other) const;
+	bool operator!= (const StringArray& other) const throw();
 
 	inline int size() const throw()					 { return strings.size(); };
 
@@ -3948,8 +3950,8 @@ public:
 
 	void appendNumbersToDuplicates (bool ignoreCaseWhenComparing,
 									bool appendNumberToFirstInstance,
-									const juce_wchar* preNumberString = JUCE_T(" ("),
-									const juce_wchar* postNumberString = JUCE_T(")"));
+									const juce_wchar* preNumberString = 0,
+									const juce_wchar* postNumberString = 0);
 
 	const String joinIntoString (const String& separatorString,
 								 int startIndex = 0,

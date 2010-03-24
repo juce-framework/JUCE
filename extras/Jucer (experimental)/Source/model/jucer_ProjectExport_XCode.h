@@ -92,6 +92,12 @@ public:
         props.add (new TextPropertyComponent (getSetting ("objCExtraSuffix"), "Objective-C class name suffix", 64, false));
         props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
                                      "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
+
+        if (! iPhone)
+        {
+            props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
+            props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
+        }
     }
 
     void launchProject()
@@ -232,6 +238,30 @@ private:
 
         addPlistDictionaryKey (dict, "CFBundleShortVersionString",  project.getVersion().toString());
         addPlistDictionaryKey (dict, "CFBundleVersion",             project.getVersion().toString());
+
+        StringArray documentExtensions;
+        documentExtensions.addTokens (getSetting ("documentExtensions").toString(), ",", String::empty);
+        documentExtensions.trim();
+        documentExtensions.removeEmptyStrings (true);
+
+        if (documentExtensions.size() > 0)
+        {
+            dict->createNewChildElement ("key")->addTextElement ("CFBundleDocumentTypes");
+            XmlElement* dict2 = dict->createNewChildElement ("array")->createNewChildElement ("dict");
+
+            for (int i = 0; i < documentExtensions.size(); ++i)
+            {
+                String ex (documentExtensions[i]);
+                if (ex.startsWithChar ('.'))
+                    ex = ex.substring (1);
+
+                dict2->createNewChildElement ("key")->addTextElement ("CFBundleTypeExtensions");
+                dict2->createNewChildElement ("array")->createNewChildElement ("string")->addTextElement (ex);
+                addPlistDictionaryKey (dict2, "CFBundleTypeName", ex);
+                addPlistDictionaryKey (dict2, "CFBundleTypeRole", "Editor");
+                addPlistDictionaryKey (dict2, "NSPersistentStoreTypeKey", "XML");
+            }
+        }
 
         MemoryOutputStream mo;
         plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
