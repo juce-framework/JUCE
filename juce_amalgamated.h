@@ -3108,7 +3108,7 @@ private:
 		void* currentVal = *value1;
 	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5 && ! JUCE_64BIT
 		while (! OSAtomicCompareAndSwap32 (reinterpret_cast <int32_t> (currentVal), reinterpret_cast <int32_t> (value2),
-										   reinterpret_cast <int32_t*> (value1))) { currentVal = *value1; }
+										   reinterpret_cast <volatile int32_t*> (value1))) { currentVal = *value1; }
 	#else
 		while (! OSAtomicCompareAndSwapPtr (currentVal, value2, value1)) { currentVal = *value1; }
 	#endif
