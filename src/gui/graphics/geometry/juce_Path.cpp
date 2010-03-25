@@ -1360,7 +1360,7 @@ const String Path::toString() const
 {
     MemoryOutputStream s (2048, 2048);
     if (! useNonZeroWinding)
-        s << "a ";
+        s << 'a';
 
     size_t i = 0;
     float lastMarker = 0.0f;
@@ -1399,36 +1399,31 @@ const String Path::toString() const
 
         if (marker != lastMarker)
         {
-            s << markerChar << ' ';
+            if (s.getDataSize() != 0)
+                s << ' ';
+
+            s << markerChar;
             lastMarker = marker;
         }
 
         while (--numCoords >= 0 && i < numElements)
         {
-            String n (data.elements [i++], 3);
+            String coord (data.elements [i++], 3);
 
-            if (n.endsWithChar ('0'))
-            {
-                do
-                {
-                    n = n.dropLastCharacters (1);
-                } while (n.endsWithChar ('0'));
+            while (coord.endsWithChar ('0') && coord != "0")
+                coord = coord.dropLastCharacters (1);
 
-                if (n.endsWithChar ('.'))
-                    n = n.dropLastCharacters (1);
-            }
+            if (coord.endsWithChar ('.'))
+                coord = coord.dropLastCharacters (1);
 
-            s << n << ' ';
+            if (s.getDataSize() != 0)
+                s << ' ';
+
+            s << coord;
         }
     }
 
-    const char* const result = (const char*) s.getData();
-    size_t len = s.getDataSize();
-
-    while (len > 0 && CharacterFunctions::isWhitespace (result [len - 1]))
-        --len;
-
-    return String (result, len);
+    return s.toUTF8();
 }
 
 void Path::restoreFromString (const String& stringVersion)
@@ -1444,7 +1439,7 @@ void Path::restoreFromString (const String& stringVersion)
     while (*t != 0)
     {
         const String token (PathHelpers::nextToken (t));
-        const tchar firstChar = token[0];
+        const juce_wchar firstChar = token[0];
         int startNum = 0;
 
         if (firstChar == 'm' || firstChar == 'l')

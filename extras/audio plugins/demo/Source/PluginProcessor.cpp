@@ -210,6 +210,7 @@ void JuceDemoPluginAudioProcessor::prepareToPlay (double sampleRate, int samples
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    synth.setCurrentPlaybackSampleRate (sampleRate);
     keyboardState.reset();
     delayBuffer.clear();
 }

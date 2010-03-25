@@ -543,13 +543,13 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (const bool wantInputNames) const
+    const StringArray getDeviceNames (bool wantInputNames) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return wantInputNames ? inputNames : outputNames;
     }
 
-    int getDefaultDeviceIndex (const bool forInput) const
+    int getDefaultDeviceIndex (bool forInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
         return 0;
@@ -557,11 +557,11 @@ public:
 
     bool hasSeparateInputsAndOutputs() const    { return true; }
 
-    int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
-        JackAudioIODevice* const d = dynamic_cast <JackAudioIODevice*> (device);
+        JackAudioIODevice* d = dynamic_cast <JackAudioIODevice*> (device);
         if (d == 0)
             return -1;
 

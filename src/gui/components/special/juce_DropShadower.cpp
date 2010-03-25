@@ -252,10 +252,8 @@ void DropShadower::updateShadows()
             blurKernel.createGaussianBlur (blurRadius);
 
             blurKernel.applyToImage (*bigIm, 0,
-                                     xOffset,
-                                     yOffset,
-                                     bigIm->getWidth(),
-                                     bigIm->getHeight());
+                                     Rectangle<int> (xOffset, yOffset,
+                                                     bigIm->getWidth(), bigIm->getHeight()));
 
             ImageCache::addImageToCache (bigIm, hash);
         }

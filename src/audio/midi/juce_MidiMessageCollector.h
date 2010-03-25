@@ -56,7 +56,7 @@ public:
         You need to call this method before starting to use the collector, so that
         it knows the correct sample rate to use.
     */
-    void reset (const double sampleRate);
+    void reset (double sampleRate);
 
     /** Takes an incoming real-time message and adds it to the queue.
 
@@ -80,8 +80,7 @@ public:
         This method is fully thread-safe when overlapping calls are made with
         addMessageToQueue().
     */
-    void removeNextBlockOfMessages (MidiBuffer& destBuffer,
-                                    const int numSamples);
+    void removeNextBlockOfMessages (MidiBuffer& destBuffer, int numSamples);
 
 
     //==============================================================================

@@ -81,7 +81,7 @@ public:
     FileChooser (const String& dialogBoxTitle,
                  const File& initialFileOrDirectory = File::nonexistent,
                  const String& filePatternsAllowed = String::empty,
-                 const bool useOSNativeDialogBox = true);
+                 bool useOSNativeDialogBox = true);
 
     /** Destructor. */
     ~FileChooser();
@@ -122,7 +122,7 @@ public:
                     if they cancelled instead.
         @see browseForFileToOpen, browseForDirectory
     */
-    bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
+    bool browseForFileToSave (bool warnAboutOverwritingExistingFiles);
 
     /** Shows a dialog box to choose a directory.
 
@@ -178,22 +178,13 @@ private:
     Array<File> results;
     bool useNativeDialogBox;
 
-    bool showDialog (const bool selectsDirectories,
-                     const bool selectsFiles,
-                     const bool isSave,
-                     const bool warnAboutOverwritingExistingFiles,
-                     const bool selectMultipleFiles,
-                     FilePreviewComponent* const previewComponent);
+    bool showDialog (bool selectsDirectories, bool selectsFiles, bool isSave,
+                     bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
+                     FilePreviewComponent* previewComponent);
 
-    static void showPlatformDialog (Array<File>& results,
-                                    const String& title,
-                                    const File& file,
-                                    const String& filters,
-                                    bool selectsDirectories,
-                                    bool selectsFiles,
-                                    bool isSave,
-                                    bool warnAboutOverwritingExistingFiles,
-                                    bool selectMultipleFiles,
+    static void showPlatformDialog (Array<File>& results, const String& title, const File& file,
+                                    const String& filters, bool selectsDirectories, bool selectsFiles,
+                                    bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
                                     FilePreviewComponent* previewComponent);
 };
 

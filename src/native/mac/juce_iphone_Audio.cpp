@@ -541,19 +541,19 @@ public:
     {
     }
 
-    const StringArray getDeviceNames (const bool wantInputNames) const
+    const StringArray getDeviceNames (bool wantInputNames) const
     {
         StringArray s;
         s.add ("iPhone Audio");
         return s;
     }
 
-    int getDefaultDeviceIndex (const bool forInput) const
+    int getDefaultDeviceIndex (bool forInput) const
     {
         return 0;
     }
 
-    int getIndexOfDevice (AudioIODevice* device, const bool asInput) const
+    int getIndexOfDevice (AudioIODevice* device, bool asInput) const
     {
         return device != 0 ? 0 : -1;
     }

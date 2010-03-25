@@ -47,10 +47,7 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (const int byte1,
-                 const int byte2,
-                 const int byte3,
-                 const double timeStamp = 0) throw();
+    MidiMessage (int byte1, int byte2, int byte3, double timeStamp = 0) throw();
 
     /** Creates a 2-byte short midi message.
 
@@ -59,9 +56,7 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (const int byte1,
-                 const int byte2,
-                 const double timeStamp = 0) throw();
+    MidiMessage (int byte1, int byte2, double timeStamp = 0) throw();
 
     /** Creates a 1-byte short midi message.
 
@@ -69,13 +64,10 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (const int byte1,
-                 const double timeStamp = 0) throw();
+    MidiMessage (int byte1, double timeStamp = 0) throw();
 
     /** Creates a midi message from a block of data. */
-    MidiMessage (const uint8* const data,
-                 const int dataSize,
-                 const double timeStamp = 0) throw();
+    MidiMessage (const void* data, int numBytes, double timeStamp = 0);
 
     /** Reads the next midi message from some data.
 
@@ -84,7 +76,7 @@ public:
         you read a sequence of midi messages from a file or stream.
 
         @param data             the data to read from
-        @param size             the maximum number of bytes it's allowed to read
+        @param maxBytesToUse    the maximum number of bytes it's allowed to read
         @param numBytesUsed     returns the number of bytes that were actually needed
         @param lastStatusByte   in a sequence of midi messages, the initial byte
                                 can be dropped from a message if it's the same as the
@@ -94,24 +86,21 @@ public:
         @param timeStamp        the time to give the midi message - this value doesn't
                                 use any particular units, so will be application-specific
     */
-    MidiMessage (const uint8* data,
-                 int size,
-                 int& numBytesUsed,
-                 uint8 lastStatusByte,
-                 double timeStamp = 0) throw();
+    MidiMessage (const void* data, int maxBytesToUse,
+                 int& numBytesUsed, uint8 lastStatusByte,
+                 double timeStamp = 0);
 
     /** Creates a copy of another midi message. */
-    MidiMessage (const MidiMessage& other) throw();
+    MidiMessage (const MidiMessage& other);
 
     /** Creates a copy of another midi message, with a different timestamp. */
-    MidiMessage (const MidiMessage& other,
-                 const double newTimeStamp) throw();
+    MidiMessage (const MidiMessage& other, double newTimeStamp);
 
     /** Destructor. */
-    ~MidiMessage() throw();
+    ~MidiMessage();
 
     /** Copies this message from another one. */
-    MidiMessage& operator= (const MidiMessage& other) throw();
+    MidiMessage& operator= (const MidiMessage& other);
 
     //==============================================================================
     /** Returns a pointer to the raw midi data.
@@ -151,13 +140,13 @@ public:
 
         @see addToTimeStamp, getTimeStamp
     */
-    void setTimeStamp (const double newTimestamp) throw()       { timeStamp = newTimestamp; }
+    void setTimeStamp (double newTimestamp) throw()       { timeStamp = newTimestamp; }
 
     /** Adds a value to the message's timestamp.
 
         The units for the timestamp will be application-specific.
     */
-    void addToTimeStamp (const double delta) throw()            { timeStamp += delta; }
+    void addToTimeStamp (double delta) throw()            { timeStamp += delta; }
 
     //==============================================================================
     /** Returns the midi channel associated with the message.
@@ -173,7 +162,7 @@ public:
         @param channelNumber    the channel number to look for, in the range 1 to 16
         @see getChannel, setChannel
     */
-    bool isForChannel (const int channelNumber) const throw();
+    bool isForChannel (int channelNumber) const throw();
 
     /** Changes the message's midi channel.
 
@@ -181,7 +170,7 @@ public:
 
         @param newChannelNumber    the channel number to change it to, in the range 1 to 16
     */
-    void setChannel (const int newChannelNumber) throw();
+    void setChannel (int newChannelNumber) throw();
 
     //==============================================================================
     /** Returns true if this is a system-exclusive message.
@@ -215,7 +204,7 @@ public:
 
         @see isNoteOff, getNoteNumber, getVelocity, noteOn
     */
-    bool isNoteOn (const bool returnTrueForVelocity0 = false) const throw();
+    bool isNoteOn (bool returnTrueForVelocity0 = false) const throw();
 
     /** Creates a key-down message (using a floating-point velocity).
 
@@ -224,9 +213,7 @@ public:
         @param velocity     in the range 0 to 1.0
         @see isNoteOn
     */
-    static const MidiMessage noteOn (const int channel,
-                                     const int noteNumber,
-                                     const float velocity) throw();
+    static const MidiMessage noteOn (int channel, int noteNumber, float velocity) throw();
 
     /** Creates a key-down message (using an integer velocity).
 
@@ -235,9 +222,7 @@ public:
         @param velocity     in the range 0 to 127
         @see isNoteOn
     */
-    static const MidiMessage noteOn (const int channel,
-                                     const int noteNumber,
-                                     const uint8 velocity) throw();
+    static const MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) throw();
 
     /** Returns true if this message is a 'key-up' event.
 
@@ -246,7 +231,7 @@ public:
 
         @see isNoteOn, getNoteNumber, getVelocity, noteOff
     */
-    bool isNoteOff (const bool returnTrueForNoteOnVelocity0 = true) const throw();
+    bool isNoteOff (bool returnTrueForNoteOnVelocity0 = true) const throw();
 
     /** Creates a key-up message.
 
@@ -254,8 +239,7 @@ public:
         @param noteNumber   the key number, 0 to 127
         @see isNoteOff
     */
-    static const MidiMessage noteOff (const int channel,
-                                      const int noteNumber) throw();
+    static const MidiMessage noteOff (int channel, int noteNumber) throw();
 
     /** Returns true if this message is a 'key-down' or 'key-up' event.
 
@@ -276,7 +260,7 @@ public:
 
         If the message isn't a note on or off, this will do nothing.
     */
-    void setNoteNumber (const int newNoteNumber) throw();
+    void setNoteNumber (int newNoteNumber) throw();
 
     //==============================================================================
     /** Returns the velocity of a note-on or note-off message.
@@ -306,7 +290,7 @@ public:
         @param newVelocity  the new velocity, in the range 0 to 1.0
         @see getFloatVelocity, multiplyVelocity
     */
-    void setVelocity (const float newVelocity) throw();
+    void setVelocity (float newVelocity) throw();
 
     /** Multiplies the velocity of a note-on or note-off message by a given amount.
 
@@ -315,7 +299,7 @@ public:
         @param scaleFactor  the value by which to multiply the velocity
         @see setVelocity
     */
-    void multiplyVelocity (const float scaleFactor) throw();
+    void multiplyVelocity (float scaleFactor) throw();
 
     //==============================================================================
     /** Returns true if the message is a program (patch) change message.
@@ -339,8 +323,7 @@ public:
         @param programNumber    the midi program number, 0 to 127
         @see isProgramChange, getGMInstrumentName
     */
-    static const MidiMessage programChange (const int channel,
-                                            const int programNumber) throw();
+    static const MidiMessage programChange (int channel, int programNumber) throw();
 
     //==============================================================================
     /** Returns true if the message is a pitch-wheel move.
@@ -365,8 +348,7 @@ public:
         @param position     the wheel position, in the range 0 to 16383
         @see isPitchWheel
     */
-    static const MidiMessage pitchWheel (const int channel,
-                                         const int position) throw();
+    static const MidiMessage pitchWheel (int channel, int position) throw();
 
     //==============================================================================
     /** Returns true if the message is an aftertouch event.
@@ -395,9 +377,9 @@ public:
         @param aftertouchAmount     the amount of aftertouch, 0 to 127
         @see isAftertouch
     */
-    static const MidiMessage aftertouchChange (const int channel,
-                                               const int noteNumber,
-                                               const int aftertouchAmount) throw();
+    static const MidiMessage aftertouchChange (int channel,
+                                               int noteNumber,
+                                               int aftertouchAmount) throw();
 
     /** Returns true if the message is a channel-pressure change event.
 
@@ -422,8 +404,7 @@ public:
         @param pressure             the pressure, 0 to 127
         @see isChannelPressure
     */
-    static const MidiMessage channelPressureChange (const int channel,
-                                                    const int pressure) throw();
+    static const MidiMessage channelPressureChange (int channel, int pressure) throw();
 
     //==============================================================================
     /** Returns true if this is a midi controller message.
@@ -459,9 +440,9 @@ public:
         @param value            the controller value
         @see isController
     */
-    static const MidiMessage controllerEvent (const int channel,
-                                              const int controllerType,
-                                              const int value) throw();
+    static const MidiMessage controllerEvent (int channel,
+                                              int controllerType,
+                                              int value) throw();
 
     /** Checks whether this message is an all-notes-off message.
 
@@ -480,20 +461,20 @@ public:
         @param channel              the midi channel, in the range 1 to 16
         @see isAllNotesOff
     */
-    static const MidiMessage allNotesOff (const int channel) throw();
+    static const MidiMessage allNotesOff (int channel) throw();
 
     /** Creates an all-sound-off message.
 
         @param channel              the midi channel, in the range 1 to 16
         @see isAllSoundOff
     */
-    static const MidiMessage allSoundOff (const int channel) throw();
+    static const MidiMessage allSoundOff (int channel) throw();
 
     /** Creates an all-controllers-off message.
 
         @param channel              the midi channel, in the range 1 to 16
     */
-    static const MidiMessage allControllersOff (const int channel) throw();
+    static const MidiMessage allControllersOff (int channel) throw();
 
     //==============================================================================
     /** Returns true if this event is a meta-event.
@@ -557,7 +538,7 @@ public:
 
         @see isTextMetaEvent
     */
-    const String getTextFromTextMetaEvent() const throw();
+    const String getTextFromTextMetaEvent() const;
 
     //==============================================================================
     /** Returns true if this is a 'tempo' meta-event.
@@ -572,7 +553,7 @@ public:
         @returns the tick length (in seconds).
         @see isTempoMetaEvent
     */
-    double getTempoMetaEventTickLength (const short timeFormat) const throw();
+    double getTempoMetaEventTickLength (short timeFormat) const throw();
 
     /** Calculates the seconds-per-quarter-note from a tempo meta-event.
 
@@ -584,7 +565,7 @@ public:
 
         @see isTempoMetaEvent
     */
-    static const MidiMessage tempoMetaEvent (const int microsecondsPerQuarterNote) throw();
+    static const MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) throw();
 
     //==============================================================================
     /** Returns true if this is a 'time-signature' meta-event.
@@ -597,15 +578,13 @@ public:
 
         @see isTimeSignatureMetaEvent
     */
-    void getTimeSignatureInfo (int& numerator,
-                               int& denominator) const throw();
+    void getTimeSignatureInfo (int& numerator, int& denominator) const throw();
 
     /** Creates a time-signature meta-event.
 
         @see isTimeSignatureMetaEvent
     */
-    static const MidiMessage timeSignatureMetaEvent (const int numerator,
-                                                     const int denominator) throw();
+    static const MidiMessage timeSignatureMetaEvent (int numerator, int denominator);
 
     //==============================================================================
     /** Returns true if this is a 'key-signature' meta-event.
@@ -642,7 +621,7 @@ public:
         @param channel              the midi channel, in the range 1 to 16
         @see isMidiChannelMetaEvent
     */
-    static const MidiMessage midiChannelMetaEvent (const int channel) throw();
+    static const MidiMessage midiChannelMetaEvent (int channel) throw();
 
     //==============================================================================
     /** Returns true if this is an active-sense message. */
@@ -705,7 +684,7 @@ public:
 
         @see isSongPositionPointer, getSongPositionPointerMidiBeat
     */
-    static const MidiMessage songPositionPointer (const int positionInMidiBeats) throw();
+    static const MidiMessage songPositionPointer (int positionInMidiBeats) throw();
 
     //==============================================================================
     /** Returns true if this is a quarter-frame midi timecode message.
@@ -734,8 +713,7 @@ public:
         @param sequenceNumber   a value 0 to 7 for the upper nybble of the message's data byte
         @param value            a value 0 to 15 for the lower nybble of the message's data byte
     */
-    static const MidiMessage quarterFrame (const int sequenceNumber,
-                                           const int value) throw();
+    static const MidiMessage quarterFrame (int sequenceNumber, int value) throw();
 
     /** SMPTE timecode types.
 
@@ -766,10 +744,10 @@ public:
 
     /** Creates a full-frame MTC message.
     */
-    static const MidiMessage fullFrame (const int hours,
-                                        const int minutes,
-                                        const int seconds,
-                                        const int frames,
+    static const MidiMessage fullFrame (int hours,
+                                        int minutes,
+                                        int seconds,
+                                        int frames,
                                         SmpteTimecodeType timecodeType);
 
     //==============================================================================
@@ -833,7 +811,7 @@ public:
 
         @param volume   the volume, 0 to 1.0
     */
-    static const MidiMessage masterVolume (const float volume) throw();
+    static const MidiMessage masterVolume (float volume);
 
     //==============================================================================
     /** Creates a system-exclusive message.
@@ -841,7 +819,7 @@ public:
         The data passed in is wrapped with header and tail bytes of 0xf0 and 0xf7.
     */
     static const MidiMessage createSysExMessage (const uint8* sysexData,
-                                                 const int dataSize) throw();
+                                                 int dataSize);
 
 
     //==============================================================================

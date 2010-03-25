@@ -1756,14 +1756,14 @@ public:
         }
     }
 
-    const StringArray getDeviceNames (const bool /*wantInputNames*/) const
+    const StringArray getDeviceNames (bool /*wantInputNames*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         return deviceNames;
     }
 
-    int getDefaultDeviceIndex (const bool) const
+    int getDefaultDeviceIndex (bool) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
@@ -1791,7 +1791,7 @@ public:
         return -1;
     }
 
-    int getIndexOfDevice (AudioIODevice* d, const bool /*asInput*/) const
+    int getIndexOfDevice (AudioIODevice* d, bool /*asInput*/) const
     {
         jassert (hasScanned); // need to call scanForDevices() before doing this
 

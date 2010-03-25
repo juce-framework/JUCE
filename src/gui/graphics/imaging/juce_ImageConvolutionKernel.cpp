@@ -115,10 +115,7 @@ void ImageConvolutionKernel::createGaussianBlur (const float radius)
 //==============================================================================
 void ImageConvolutionKernel::applyToImage (Image& destImage,
                                            const Image* sourceImage,
-                                           int dx,
-                                           int dy,
-                                           int dw,
-                                           int dh) const
+                                           const Rectangle<int>& destinationArea) const
 {
     ScopedPointer <Image> imageCreated;
 
@@ -138,34 +135,27 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
             return;
     }
 
-    const int imageWidth = destImage.getWidth();
-    const int imageHeight = destImage.getHeight();
+    const Rectangle<int> area (destinationArea.getIntersection (destImage.getBounds()));
 
-    if (dx >= imageWidth || dy >= imageHeight)
+    if (area.isEmpty())
         return;
 
-    if (dx + dw > imageWidth)
-        dw = imageWidth - dx;
+    const int right = area.getRight();
+    const int bottom = area.getBottom();
 
-    if (dy + dh > imageHeight)
-        dh = imageHeight - dy;
-
-    const int dx2 = dx + dw;
-    const int dy2 = dy + dh;
-
-    const Image::BitmapData destData (destImage, dx, dy, dw, dh, true);
+    const Image::BitmapData destData (destImage, area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
     uint8* line = destData.data;
 
     const Image::BitmapData srcData (*sourceImage, 0, 0, sourceImage->getWidth(), sourceImage->getHeight());
 
     if (destData.pixelStride == 4)
     {
-        for (int y = dy; y < dy2; ++y)
+        for (int y = area.getY(); y < bottom; ++y)
         {
             uint8* dest = line;
             line += destData.lineStride;
 
-            for (int x = dx; x < dx2; ++x)
+            for (int x = area.getX(); x < right; ++x)
             {
                 float c1 = 0;
                 float c2 = 0;
@@ -176,7 +166,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                 {
                     const int sy = y + yy - (size >> 1);
 
-                    if (sy >= imageHeight)
+                    if (sy >= srcData.height)
                         break;
 
                     if (sy >= 0)
@@ -186,7 +176,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
                         for (int xx = 0; xx < size; ++xx)
                         {
-                            if (sx >= imageWidth)
+                            if (sx >= srcData.width)
                                 break;
 
                             if (sx >= 0)
@@ -216,12 +206,12 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
     }
     else if (destData.pixelStride == 3)
     {
-        for (int y = dy; y < dy2; ++y)
+        for (int y = area.getY(); y < bottom; ++y)
         {
             uint8* dest = line;
             line += destData.lineStride;
 
-            for (int x = dx; x < dx2; ++x)
+            for (int x = area.getX(); x < right; ++x)
             {
                 float c1 = 0;
                 float c2 = 0;
@@ -231,7 +221,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
                 {
                     const int sy = y + yy - (size >> 1);
 
-                    if (sy >= imageHeight)
+                    if (sy >= srcData.height)
                         break;
 
                     if (sy >= 0)
@@ -241,7 +231,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
 
                         for (int xx = 0; xx < size; ++xx)
                         {
-                            if (sx >= imageWidth)
+                            if (sx >= srcData.width)
                                 break;
 
                             if (sx >= 0)

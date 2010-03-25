@@ -89,7 +89,7 @@ public:
     FileChooserDialogBox (const String& title,
                           const String& instructions,
                           FileBrowserComponent& browserComponent,
-                          const bool warnAboutOverwritingExistingFiles,
+                          bool warnAboutOverwritingExistingFiles,
                           const Colour& backgroundColour);
 
     /** Destructor. */

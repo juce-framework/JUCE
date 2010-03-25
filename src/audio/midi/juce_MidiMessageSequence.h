@@ -101,7 +101,7 @@ public:
     int getNumEvents() const;
 
     /** Returns a pointer to one of the events. */
-    MidiEventHolder* getEventPointer (const int index) const;
+    MidiEventHolder* getEventPointer (int index) const;
 
     /** Returns the time of the note-up that matches the note-on at this index.
 
@@ -109,7 +109,7 @@ public:
 
         @see MidiMessageSequence::MidiEventHolder::noteOffObject
     */
-    double getTimeOfMatchingKeyUp (const int index) const;
+    double getTimeOfMatchingKeyUp (int index) const;
 
     /** Returns the index of the note-up that matches the note-on at this index.
 
@@ -117,17 +117,17 @@ public:
 
         @see MidiMessageSequence::MidiEventHolder::noteOffObject
     */
-    int getIndexOfMatchingKeyUp (const int index) const;
+    int getIndexOfMatchingKeyUp (int index) const;
 
     /** Returns the index of an event. */
-    int getIndexOf (MidiEventHolder* const event) const;
+    int getIndexOf (MidiEventHolder* event) const;
 
     /** Returns the index of the first event on or after the given timestamp.
 
         If the time is beyond the end of the sequence, this will return the
         number of events.
     */
-    int getNextIndexAtTime (const double timeStamp) const;
+    int getNextIndexAtTime (double timeStamp) const;
 
     //==============================================================================
     /** Returns the timestamp of the first event in the sequence.
@@ -146,7 +146,7 @@ public:
 
         If the index is out-of-range, this will return 0.0
     */
-    double getEventTime (const int index) const;
+    double getEventTime (int index) const;
 
     //==============================================================================
     /** Inserts a midi message into the sequence.
@@ -172,8 +172,7 @@ public:
         @param deleteMatchingNoteUp  whether to also remove the matching note-off
                                      if the event you're removing is a note-on
     */
-    void deleteEvent (const int index,
-                      const bool deleteMatchingNoteUp);
+    void deleteEvent (int index, bool deleteMatchingNoteUp);
 
     /** Merges another sequence into this one.
 
@@ -213,9 +212,9 @@ public:
                                         channel) will also be copied across.
         @see extractSysExMessages
     */
-    void extractMidiChannelMessages (const int channelNumberToExtract,
+    void extractMidiChannelMessages (int channelNumberToExtract,
                                      MidiMessageSequence& destSequence,
-                                     const bool alsoIncludeMetaEvents) const;
+                                     bool alsoIncludeMetaEvents) const;
 
     /** Copies all midi sys-ex messages to another sequence.
 
@@ -229,7 +228,7 @@ public:
 
         @param channelNumberToRemove    the midi channel to look for, in the range 1 to 16
     */
-    void deleteMidiChannelMessages (const int channelNumberToRemove);
+    void deleteMidiChannelMessages (int channelNumberToRemove);
 
     /** Removes any sys-ex messages from this sequence.
     */
@@ -239,7 +238,7 @@ public:
 
         @param deltaTime    the amount to add to each timestamp.
     */
-    void addTimeToMessages (const double deltaTime);
+    void addTimeToMessages (double deltaTime);
 
     //==============================================================================
     /** Scans through the sequence to determine the state of any midi controllers at
@@ -261,8 +260,7 @@ public:
                                 will be the minimum number of controller changes to recreate the
                                 state at the required time.
     */
-    void createControllerUpdatesForTime (const int channelNumber,
-                                         const double time,
+    void createControllerUpdatesForTime (int channelNumber, double time,
                                          OwnedArray<MidiMessage>& resultMessages);
 
     //==============================================================================
@@ -273,8 +271,8 @@ public:
     juce_UseDebuggingNewOperator
 
     /** @internal */
-    static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                const MidiMessageSequence::MidiEventHolder* const second) throw();
+    static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
+                                const MidiMessageSequence::MidiEventHolder* second) throw();
 
 private:
     //==============================================================================

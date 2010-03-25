@@ -128,7 +128,7 @@ public:
         real time.
     */
     virtual void sendBlockOfMessages (const MidiBuffer& buffer,
-                                      const double millisecondCounterToStartAt,
+                                      double millisecondCounterToStartAt,
                                       double samplesPerSecondForBuffer);
 
     /** Gets rid of any midi messages that had been added by sendBlockOfMessages().

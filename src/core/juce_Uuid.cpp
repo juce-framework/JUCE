@@ -82,7 +82,8 @@ Uuid& Uuid::operator= (const Uuid& other)
 
 bool Uuid::operator== (const Uuid& other) const
 {
-    return memcmp (value.asBytes, other.value.asBytes, 16) == 0;
+    return value.asInt64[0] == other.value.asInt64[0]
+        && value.asInt64[1] == other.value.asInt64[1];
 }
 
 bool Uuid::operator!= (const Uuid& other) const

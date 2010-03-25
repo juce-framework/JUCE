@@ -8395,13 +8395,15 @@ public:
 
 	const char* getData() const throw();
 
-	size_t getDataSize() const throw();
+	size_t getDataSize() const throw()		  { return size; }
 
 	void reset() throw();
 
+	const String toUTF8() const;
+
 	void flush();
 	bool write (const void* buffer, int howMany);
-	int64 getPosition();
+	int64 getPosition()				 { return position; }
 	bool setPosition (int64 newPosition);
 
 	juce_UseDebuggingNewOperator
@@ -13449,7 +13451,7 @@ class JUCE_API  AudioFormatReader
 {
 protected:
 
-	AudioFormatReader (InputStream* const sourceStream,
+	AudioFormatReader (InputStream* sourceStream,
 					   const String& formatName);
 
 public:
@@ -13461,7 +13463,7 @@ public:
 			   int numDestChannels,
 			   int64 startSampleInSource,
 			   int numSamplesToRead,
-			   const bool fillLeftoverChannelsWithCopies);
+			   bool fillLeftoverChannelsWithCopies);
 
 	virtual void readMaxLevels (int64 startSample,
 								int64 numSamples,
@@ -13472,9 +13474,9 @@ public:
 
 	int64 searchForLevel (int64 startSample,
 						  int64 numSamplesToSearch,
-						  const double magnitudeRangeMinimum,
-						  const double magnitudeRangeMaximum,
-						  const int minimumConsecutiveSamples);
+						  double magnitudeRangeMinimum,
+						  double magnitudeRangeMaximum,
+						  int minimumConsecutiveSamples);
 
 	double sampleRate;
 
@@ -13530,12 +13532,12 @@ class JUCE_API  AudioSampleBuffer
 {
 public:
 
-	AudioSampleBuffer (const int numChannels,
-					   const int numSamples) throw();
+	AudioSampleBuffer (int numChannels,
+					   int numSamples) throw();
 
 	AudioSampleBuffer (float** dataToReferTo,
-					   const int numChannels,
-					   const int numSamples) throw();
+					   int numChannels,
+					   int numSamples) throw();
 
 	AudioSampleBuffer (const AudioSampleBuffer& other) throw();
 
@@ -13563,113 +13565,113 @@ public:
 
 	float** getArrayOfChannels() const throw()	  { return channels; }
 
-	void setSize (const int newNumChannels,
-				  const int newNumSamples,
-				  const bool keepExistingContent = false,
-				  const bool clearExtraSpace = false,
-				  const bool avoidReallocating = false) throw();
+	void setSize (int newNumChannels,
+				  int newNumSamples,
+				  bool keepExistingContent = false,
+				  bool clearExtraSpace = false,
+				  bool avoidReallocating = false) throw();
 
 	void setDataToReferTo (float** dataToReferTo,
-						   const int numChannels,
-						   const int numSamples) throw();
+						   int numChannels,
+						   int numSamples) throw();
 
 	void clear() throw();
 
-	void clear (const int startSample,
-				const int numSamples) throw();
+	void clear (int startSample,
+				int numSamples) throw();
 
-	void clear (const int channel,
-				const int startSample,
-				const int numSamples) throw();
+	void clear (int channel,
+				int startSample,
+				int numSamples) throw();
 
-	void applyGain (const int channel,
-					const int startSample,
+	void applyGain (int channel,
+					int startSample,
 					int numSamples,
-					const float gain) throw();
+					float gain) throw();
 
-	void applyGain (const int startSample,
-					const int numSamples,
-					const float gain) throw();
+	void applyGain (int startSample,
+					int numSamples,
+					float gain) throw();
 
-	void applyGainRamp (const int channel,
-						const int startSample,
+	void applyGainRamp (int channel,
+						int startSample,
 						int numSamples,
 						float startGain,
 						float endGain) throw();
 
-	void addFrom (const int destChannel,
-				  const int destStartSample,
+	void addFrom (int destChannel,
+				  int destStartSample,
 				  const AudioSampleBuffer& source,
-				  const int sourceChannel,
-				  const int sourceStartSample,
+				  int sourceChannel,
+				  int sourceStartSample,
 				  int numSamples,
-				  const float gainToApplyToSource = 1.0f) throw();
+				  float gainToApplyToSource = 1.0f) throw();
 
-	void addFrom (const int destChannel,
-				  const int destStartSample,
+	void addFrom (int destChannel,
+				  int destStartSample,
 				  const float* source,
 				  int numSamples,
-				  const float gainToApplyToSource = 1.0f) throw();
+				  float gainToApplyToSource = 1.0f) throw();
 
-	void addFromWithRamp (const int destChannel,
-						  const int destStartSample,
+	void addFromWithRamp (int destChannel,
+						  int destStartSample,
 						  const float* source,
 						  int numSamples,
 						  float startGain,
 						  float endGain) throw();
 
-	void copyFrom (const int destChannel,
-				   const int destStartSample,
+	void copyFrom (int destChannel,
+				   int destStartSample,
 				   const AudioSampleBuffer& source,
-				   const int sourceChannel,
-				   const int sourceStartSample,
+				   int sourceChannel,
+				   int sourceStartSample,
 				   int numSamples) throw();
 
-	void copyFrom (const int destChannel,
-				   const int destStartSample,
+	void copyFrom (int destChannel,
+				   int destStartSample,
 				   const float* source,
 				   int numSamples) throw();
 
-	void copyFrom (const int destChannel,
-				   const int destStartSample,
+	void copyFrom (int destChannel,
+				   int destStartSample,
 				   const float* source,
 				   int numSamples,
-				   const float gain) throw();
+				   float gain) throw();
 
-	void copyFromWithRamp (const int destChannel,
-						   const int destStartSample,
+	void copyFromWithRamp (int destChannel,
+						   int destStartSample,
 						   const float* source,
 						   int numSamples,
 						   float startGain,
 						   float endGain) throw();
 
-	void findMinMax (const int channel,
-					 const int startSample,
+	void findMinMax (int channel,
+					 int startSample,
 					 int numSamples,
 					 float& minVal,
 					 float& maxVal) const throw();
 
-	float getMagnitude (const int channel,
-						const int startSample,
-						const int numSamples) const throw();
+	float getMagnitude (int channel,
+						int startSample,
+						int numSamples) const throw();
 
-	float getMagnitude (const int startSample,
-						const int numSamples) const throw();
+	float getMagnitude (int startSample,
+						int numSamples) const throw();
 
-	float getRMSLevel (const int channel,
-					   const int startSample,
-					   const int numSamples) const throw();
+	float getRMSLevel (int channel,
+					   int startSample,
+					   int numSamples) const throw();
 
 	void readFromAudioReader (AudioFormatReader* reader,
-							  const int startSample,
-							  const int numSamples,
-							  const int readerStartSample,
-							  const bool useReaderLeftChan,
-							  const bool useReaderRightChan) throw();
+							  int startSample,
+							  int numSamples,
+							  int readerStartSample,
+							  bool useReaderLeftChan,
+							  bool useReaderRightChan) throw();
 
 	void writeToAudioWriter (AudioFormatWriter* writer,
-							 const int startSample,
-							 const int numSamples) const throw();
+							 int startSample,
+							 int numSamples) const throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -13681,7 +13683,7 @@ private:
 	float* preallocatedChannelSpace [32];
 
 	void allocateData();
-	void allocateChannels (float** const dataToReferTo);
+	void allocateChannels (float** dataToReferTo);
 };
 
 #endif   // __JUCE_AUDIOSAMPLEBUFFER_JUCEHEADER__
@@ -13726,11 +13728,11 @@ class JUCE_API  AudioFormatWriter
 {
 protected:
 
-	AudioFormatWriter (OutputStream* const destStream,
+	AudioFormatWriter (OutputStream* destStream,
 					   const String& formatName,
-					   const double sampleRate,
-					   const unsigned int numberOfChannels,
-					   const unsigned int bitsPerSample);
+					   double sampleRate,
+					   unsigned int numberOfChannels,
+					   unsigned int bitsPerSample);
 
 public:
 	virtual ~AudioFormatWriter();
@@ -13746,7 +13748,7 @@ public:
 
 	bool writeFromAudioSource (AudioSource& source,
 							   int numSamplesToRead,
-							   const int samplesPerBlock = 2048);
+							   int samplesPerBlock = 2048);
 
 	double getSampleRate() const throw()	{ return sampleRate; }
 
@@ -14041,7 +14043,7 @@ public:
 	juce_DeclareSingleton (AudioFormatManager, false);
 
 	void registerFormat (AudioFormat* newFormat,
-						 const bool makeThisTheDefaultFormat);
+						 bool makeThisTheDefaultFormat);
 
 	void registerBasicFormats();
 
@@ -14049,7 +14051,7 @@ public:
 
 	int getNumKnownFormats() const;
 
-	AudioFormat* getKnownFormat (const int index) const;
+	AudioFormat* getKnownFormat (int index) const;
 
 	AudioFormat* findFormatForFileExtension (const String& fileExtension) const;
 
@@ -14089,10 +14091,10 @@ class JUCE_API  AudioSubsectionReader  : public AudioFormatReader
 {
 public:
 
-	AudioSubsectionReader (AudioFormatReader* const sourceReader,
-						   const int64 subsectionStartSample,
-						   const int64 subsectionLength,
-						   const bool deleteSourceWhenDeleted);
+	AudioSubsectionReader (AudioFormatReader* sourceReader,
+						   int64 subsectionStartSample,
+						   int64 subsectionLength,
+						   bool deleteSourceWhenDeleted);
 
 	~AudioSubsectionReader();
 
@@ -14136,13 +14138,13 @@ class JUCE_API  AudioThumbnail	: public ChangeBroadcaster,
 {
 public:
 
-	AudioThumbnail (const int sourceSamplesPerThumbnailSample,
+	AudioThumbnail (int sourceSamplesPerThumbnailSample,
 					AudioFormatManager& formatManagerToUse,
 					AudioThumbnailCache& cacheToUse);
 
 	~AudioThumbnail();
 
-	void setSource (InputSource* const newSource);
+	void setSource (InputSource* newSource);
 
 	void loadFrom (InputStream& input);
 
@@ -14157,7 +14159,7 @@ public:
 					  double startTimeSeconds,
 					  double endTimeSeconds,
 					  int channelNum,
-					  const float verticalZoomFactor);
+					  float verticalZoomFactor);
 
 	bool isFullyLoaded() const throw();
 
@@ -14182,18 +14184,10 @@ private:
 	bool cacheNeedsRefilling;
 
 	void clear();
-
 	AudioFormatReader* createReader() const;
-
-	void generateSection (AudioFormatReader& reader,
-						  int64 startSample,
-						  int numSamples);
-
+	void generateSection (AudioFormatReader& reader, int64 startSample, int numSamples);
 	char* getChannelData (int channel) const;
-
-	void refillCache (const int numSamples,
-					  double startTime,
-					  const double timePerPixel);
+	void refillCache (int numSamples, double startTime, double timePerPixel);
 
 	friend class AudioThumbnailCache;
 
@@ -14221,15 +14215,15 @@ class JUCE_API  AudioThumbnailCache   : public TimeSliceThread
 {
 public:
 
-	AudioThumbnailCache (const int maxNumThumbsToStore);
+	AudioThumbnailCache (int maxNumThumbsToStore);
 
 	~AudioThumbnailCache();
 
 	void clear();
 
-	bool loadThumb (AudioThumbnail& thumb, const int64 hashCode);
+	bool loadThumb (AudioThumbnail& thumb, int64 hashCode);
 
-	void storeThumb (const AudioThumbnail& thumb, const int64 hashCode);
+	void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
 
 	juce_UseDebuggingNewOperator
 
@@ -14239,8 +14233,8 @@ private:
 	int maxNumThumbsToStore;
 
 	friend class AudioThumbnail;
-	void addThumbnail (AudioThumbnail* const thumb);
-	void removeThumbnail (AudioThumbnail* const thumb);
+	void addThumbnail (AudioThumbnail* thumb);
+	void removeThumbnail (AudioThumbnail* thumb);
 };
 
 #endif   // __JUCE_AUDIOTHUMBNAILCACHE_JUCEHEADER__
@@ -14924,31 +14918,31 @@ public:
 
 	void reset() throw();
 
-	void processSamples (float* const samples,
-						 const int numSamples) throw();
+	void processSamples (float* samples,
+						 int numSamples) throw();
 
-	float processSingleSampleRaw (const float sample) throw();
+	float processSingleSampleRaw (float sample) throw();
 
-	void makeLowPass (const double sampleRate,
-					  const double frequency) throw();
+	void makeLowPass (double sampleRate,
+					  double frequency) throw();
 
-	void makeHighPass (const double sampleRate,
-					   const double frequency) throw();
+	void makeHighPass (double sampleRate,
+					   double frequency) throw();
 
-	void makeLowShelf (const double sampleRate,
-					   const double cutOffFrequency,
-					   const double Q,
-					   const float gainFactor) throw();
+	void makeLowShelf (double sampleRate,
+					   double cutOffFrequency,
+					   double Q,
+					   float gainFactor) throw();
 
-	void makeHighShelf (const double sampleRate,
-						const double cutOffFrequency,
-						const double Q,
-						const float gainFactor) throw();
+	void makeHighShelf (double sampleRate,
+						double cutOffFrequency,
+						double Q,
+						float gainFactor) throw();
 
-	void makeBandPass (const double sampleRate,
-					   const double centreFrequency,
-					   const double Q,
-					   const float gainFactor) throw();
+	void makeBandPass (double sampleRate,
+					   double centreFrequency,
+					   double Q,
+					   float gainFactor) throw();
 
 	void makeInactive() throw();
 
@@ -15122,11 +15116,11 @@ public:
 
 	virtual void scanForDevices() = 0;
 
-	virtual const StringArray getDeviceNames (const bool wantInputNames = false) const = 0;
+	virtual const StringArray getDeviceNames (bool wantInputNames = false) const = 0;
 
-	virtual int getDefaultDeviceIndex (const bool forInput) const = 0;
+	virtual int getDefaultDeviceIndex (bool forInput) const = 0;
 
-	virtual int getIndexOfDevice (AudioIODevice* device, const bool asInput) const = 0;
+	virtual int getIndexOfDevice (AudioIODevice* device, bool asInput) const = 0;
 
 	virtual bool hasSeparateInputsAndOutputs() const = 0;
 
@@ -15170,36 +15164,25 @@ class JUCE_API  MidiMessage
 {
 public:
 
-	MidiMessage (const int byte1,
-				 const int byte2,
-				 const int byte3,
-				 const double timeStamp = 0) throw();
+	MidiMessage (int byte1, int byte2, int byte3, double timeStamp = 0) throw();
 
-	MidiMessage (const int byte1,
-				 const int byte2,
-				 const double timeStamp = 0) throw();
+	MidiMessage (int byte1, int byte2, double timeStamp = 0) throw();
 
-	MidiMessage (const int byte1,
-				 const double timeStamp = 0) throw();
+	MidiMessage (int byte1, double timeStamp = 0) throw();
 
-	MidiMessage (const uint8* const data,
-				 const int dataSize,
-				 const double timeStamp = 0) throw();
+	MidiMessage (const void* data, int numBytes, double timeStamp = 0);
 
-	MidiMessage (const uint8* data,
-				 int size,
-				 int& numBytesUsed,
-				 uint8 lastStatusByte,
-				 double timeStamp = 0) throw();
+	MidiMessage (const void* data, int maxBytesToUse,
+				 int& numBytesUsed, uint8 lastStatusByte,
+				 double timeStamp = 0);
 
-	MidiMessage (const MidiMessage& other) throw();
+	MidiMessage (const MidiMessage& other);
 
-	MidiMessage (const MidiMessage& other,
-				 const double newTimeStamp) throw();
+	MidiMessage (const MidiMessage& other, double newTimeStamp);
 
-	~MidiMessage() throw();
+	~MidiMessage();
 
-	MidiMessage& operator= (const MidiMessage& other) throw();
+	MidiMessage& operator= (const MidiMessage& other);
 
 	uint8* getRawData() const throw()			   { return data; }
 
@@ -15207,15 +15190,15 @@ public:
 
 	double getTimeStamp() const throw()			 { return timeStamp; }
 
-	void setTimeStamp (const double newTimestamp) throw()	   { timeStamp = newTimestamp; }
+	void setTimeStamp (double newTimestamp) throw()	   { timeStamp = newTimestamp; }
 
-	void addToTimeStamp (const double delta) throw()		{ timeStamp += delta; }
+	void addToTimeStamp (double delta) throw()		{ timeStamp += delta; }
 
 	int getChannel() const throw();
 
-	bool isForChannel (const int channelNumber) const throw();
+	bool isForChannel (int channelNumber) const throw();
 
-	void setChannel (const int newChannelNumber) throw();
+	void setChannel (int newChannelNumber) throw();
 
 	bool isSysEx() const throw();
 
@@ -15223,63 +15206,55 @@ public:
 
 	int getSysExDataSize() const throw();
 
-	bool isNoteOn (const bool returnTrueForVelocity0 = false) const throw();
+	bool isNoteOn (bool returnTrueForVelocity0 = false) const throw();
 
-	static const MidiMessage noteOn (const int channel,
-									 const int noteNumber,
-									 const float velocity) throw();
+	static const MidiMessage noteOn (int channel, int noteNumber, float velocity) throw();
 
-	static const MidiMessage noteOn (const int channel,
-									 const int noteNumber,
-									 const uint8 velocity) throw();
+	static const MidiMessage noteOn (int channel, int noteNumber, uint8 velocity) throw();
 
-	bool isNoteOff (const bool returnTrueForNoteOnVelocity0 = true) const throw();
+	bool isNoteOff (bool returnTrueForNoteOnVelocity0 = true) const throw();
 
-	static const MidiMessage noteOff (const int channel,
-									  const int noteNumber) throw();
+	static const MidiMessage noteOff (int channel, int noteNumber) throw();
 
 	bool isNoteOnOrOff() const throw();
 
 	int getNoteNumber() const throw();
 
-	void setNoteNumber (const int newNoteNumber) throw();
+	void setNoteNumber (int newNoteNumber) throw();
 
 	uint8 getVelocity() const throw();
 
 	float getFloatVelocity() const throw();
 
-	void setVelocity (const float newVelocity) throw();
+	void setVelocity (float newVelocity) throw();
 
-	void multiplyVelocity (const float scaleFactor) throw();
+	void multiplyVelocity (float scaleFactor) throw();
 
 	bool isProgramChange() const throw();
 
 	int getProgramChangeNumber() const throw();
 
-	static const MidiMessage programChange (const int channel,
-											const int programNumber) throw();
+	static const MidiMessage programChange (int channel, int programNumber) throw();
 
 	bool isPitchWheel() const throw();
 
 	int getPitchWheelValue() const throw();
 
-	static const MidiMessage pitchWheel (const int channel,
-										 const int position) throw();
+	static const MidiMessage pitchWheel (int channel, int position) throw();
 
 	bool isAftertouch() const throw();
 
 	int getAfterTouchValue() const throw();
 
-	static const MidiMessage aftertouchChange (const int channel,
-											   const int noteNumber,
-											   const int aftertouchAmount) throw();
+	static const MidiMessage aftertouchChange (int channel,
+											   int noteNumber,
+											   int aftertouchAmount) throw();
 
 	bool isChannelPressure() const throw();
 
 	int getChannelPressureValue() const throw();
 
-	static const MidiMessage channelPressureChange (const int channel,
-													const int pressure) throw();
+	static const MidiMessage channelPressureChange (int channel, int pressure) throw();
 
 	bool isController() const throw();
 
@@ -15287,19 +15262,19 @@ public:
 
 	int getControllerValue() const throw();
 
-	static const MidiMessage controllerEvent (const int channel,
-											  const int controllerType,
-											  const int value) throw();
+	static const MidiMessage controllerEvent (int channel,
+											  int controllerType,
+											  int value) throw();
 
 	bool isAllNotesOff() const throw();
 
 	bool isAllSoundOff() const throw();
 
-	static const MidiMessage allNotesOff (const int channel) throw();
+	static const MidiMessage allNotesOff (int channel) throw();
 
-	static const MidiMessage allSoundOff (const int channel) throw();
+	static const MidiMessage allSoundOff (int channel) throw();
 
-	static const MidiMessage allControllersOff (const int channel) throw();
+	static const MidiMessage allControllersOff (int channel) throw();
 
 	bool isMetaEvent() const throw();
 
@@ -15319,23 +15294,21 @@ public:
 
 	bool isTextMetaEvent() const throw();
 
-	const String getTextFromTextMetaEvent() const throw();
+	const String getTextFromTextMetaEvent() const;
 
 	bool isTempoMetaEvent() const throw();
 
-	double getTempoMetaEventTickLength (const short timeFormat) const throw();
+	double getTempoMetaEventTickLength (short timeFormat) const throw();
 
 	double getTempoSecondsPerQuarterNote() const throw();
 
-	static const MidiMessage tempoMetaEvent (const int microsecondsPerQuarterNote) throw();
+	static const MidiMessage tempoMetaEvent (int microsecondsPerQuarterNote) throw();
 
 	bool isTimeSignatureMetaEvent() const throw();
 
-	void getTimeSignatureInfo (int& numerator,
-							   int& denominator) const throw();
+	void getTimeSignatureInfo (int& numerator, int& denominator) const throw();
 
-	static const MidiMessage timeSignatureMetaEvent (const int numerator,
-													 const int denominator) throw();
+	static const MidiMessage timeSignatureMetaEvent (int numerator, int denominator);
 
 	bool isKeySignatureMetaEvent() const throw();
 
@@ -15345,7 +15318,7 @@ public:
 
 	int getMidiChannelMetaEventChannel() const throw();
 
-	static const MidiMessage midiChannelMetaEvent (const int channel) throw();
+	static const MidiMessage midiChannelMetaEvent (int channel) throw();
 
 	bool isActiveSense() const throw();
 
@@ -15369,7 +15342,7 @@ public:
 
 	int getSongPositionPointerMidiBeat() const throw();
 
-	static const MidiMessage songPositionPointer (const int positionInMidiBeats) throw();
+	static const MidiMessage songPositionPointer (int positionInMidiBeats) throw();
 
 	bool isQuarterFrame() const throw();
 
@@ -15377,8 +15350,7 @@ public:
 
 	int getQuarterFrameValue() const throw();
 
-	static const MidiMessage quarterFrame (const int sequenceNumber,
-										   const int value) throw();
+	static const MidiMessage quarterFrame (int sequenceNumber, int value) throw();
 
 	enum SmpteTimecodeType
 	{
@@ -15396,10 +15368,10 @@ public:
 								 int& frames,
 								 SmpteTimecodeType& timecodeType) const throw();
 
-	static const MidiMessage fullFrame (const int hours,
-										const int minutes,
-										const int seconds,
-										const int frames,
+	static const MidiMessage fullFrame (int hours,
+										int minutes,
+										int seconds,
+										int frames,
 										SmpteTimecodeType timecodeType);
 
 	enum MidiMachineControlCommand
@@ -15430,10 +15402,10 @@ public:
 													 int seconds,
 													 int frames);
 
-	static const MidiMessage masterVolume (const float volume) throw();
+	static const MidiMessage masterVolume (float volume);
 
 	static const MidiMessage createSysExMessage (const uint8* sysexData,
-												 const int dataSize) throw();
+												 int dataSize);
 
 	static int readVariableLengthVal (const uint8* data,
 									  int& numBytesUsed) throw();
@@ -15577,7 +15549,7 @@ public:
 
 	int getLastEventTime() const throw();
 
-	void swap (MidiBuffer& other);
+	void swapWith (MidiBuffer& other);
 
 	class Iterator
 	{
@@ -15647,7 +15619,7 @@ public:
 							float rightVol);
 
 	virtual void sendBlockOfMessages (const MidiBuffer& buffer,
-									  const double millisecondCounterToStartAt,
+									  double millisecondCounterToStartAt,
 									  double samplesPerSecondForBuffer);
 
 	virtual void clearAllPendingMessages();
@@ -16970,10 +16942,10 @@ public:
 		bool useDefaultOutputChannels;
 	};
 
-	const String initialise (const int numInputChannelsNeeded,
-							 const int numOutputChannelsNeeded,
-							 const XmlElement* const savedState,
-							 const bool selectDefaultDeviceOnFailure,
+	const String initialise (int numInputChannelsNeeded,
+							 int numOutputChannelsNeeded,
+							 const XmlElement* savedState,
+							 bool selectDefaultDeviceOnFailure,
 							 const String& preferredDefaultDeviceName = String::empty,
 							 const AudioDeviceSetup* preferredSetupOptions = 0);
 
@@ -16982,7 +16954,7 @@ public:
 	void getAudioDeviceSetup (AudioDeviceSetup& setup);
 
 	const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-									  const bool treatAsChosenDevice);
+									  bool treatAsChosenDevice);
 
 	AudioIODevice* getCurrentAudioDevice() const throw()		{ return currentAudioDevice; }
 
@@ -16991,7 +16963,7 @@ public:
 	AudioIODeviceType* getCurrentDeviceTypeObject() const;
 
 	void setCurrentAudioDeviceType (const String& type,
-									const bool treatAsChosenDevice);
+									bool treatAsChosenDevice);
 
 	void closeAudioDevice();
 
@@ -17004,7 +16976,7 @@ public:
 	double getCpuUsage() const;
 
 	void setMidiInputEnabled (const String& midiInputDeviceName,
-							  const bool enabled);
+							  bool enabled);
 
 	bool isMidiInputEnabled (const String& midiInputDeviceName) const;
 
@@ -17026,7 +16998,7 @@ public:
 
 	void playTestSound();
 
-	void enableInputLevelMeasurement (const bool enableMeasurement);
+	void enableInputLevelMeasurement (bool enableMeasurement);
 
 	double getCurrentInputLevel() const;
 
@@ -17089,7 +17061,7 @@ private:
 								   float** outputChannelData,
 								   int totalNumOutputChannels,
 								   int numSamples);
-	void audioDeviceAboutToStartInt (AudioIODevice* const device);
+	void audioDeviceAboutToStartInt (AudioIODevice* device);
 	void audioDeviceStoppedInt();
 
 	void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);
@@ -17139,29 +17111,29 @@ class JUCE_API  AudioDataConverters
 {
 public:
 
-	static void convertFloatToInt16LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 2);
-	static void convertFloatToInt16BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 2);
+	static void convertFloatToInt16LE (const float* source, void* dest, int numSamples, int destBytesPerSample = 2);
+	static void convertFloatToInt16BE (const float* source, void* dest, int numSamples, int destBytesPerSample = 2);
 
-	static void convertFloatToInt24LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 3);
-	static void convertFloatToInt24BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 3);
+	static void convertFloatToInt24LE (const float* source, void* dest, int numSamples, int destBytesPerSample = 3);
+	static void convertFloatToInt24BE (const float* source, void* dest, int numSamples, int destBytesPerSample = 3);
 
-	static void convertFloatToInt32LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
-	static void convertFloatToInt32BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
+	static void convertFloatToInt32LE (const float* source, void* dest, int numSamples, int destBytesPerSample = 4);
+	static void convertFloatToInt32BE (const float* source, void* dest, int numSamples, int destBytesPerSample = 4);
 
-	static void convertFloatToFloat32LE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
-	static void convertFloatToFloat32BE (const float* source, void* dest, int numSamples, const int destBytesPerSample = 4);
+	static void convertFloatToFloat32LE (const float* source, void* dest, int numSamples, int destBytesPerSample = 4);
+	static void convertFloatToFloat32BE (const float* source, void* dest, int numSamples, int destBytesPerSample = 4);
 
-	static void convertInt16LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 2);
-	static void convertInt16BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 2);
+	static void convertInt16LEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 2);
+	static void convertInt16BEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 2);
 
-	static void convertInt24LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 3);
-	static void convertInt24BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 3);
+	static void convertInt24LEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 3);
+	static void convertInt24BEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 3);
 
-	static void convertInt32LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
-	static void convertInt32BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
+	static void convertInt32LEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 4);
+	static void convertInt32BEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 4);
 
-	static void convertFloat32LEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
-	static void convertFloat32BEToFloat (const void* source, float* dest, int numSamples, const int srcBytesPerSample = 4);
+	static void convertFloat32LEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 4);
+	static void convertFloat32BEToFloat (const void* source, float* dest, int numSamples, int srcBytesPerSample = 4);
 
 	enum DataFormat
 	{
@@ -17175,17 +17147,17 @@ public:
 		float32BE,
 	};
 
-	static void convertFloatToFormat (const DataFormat destFormat,
+	static void convertFloatToFormat (DataFormat destFormat,
 									  const float* source, void* dest, int numSamples);
 
-	static void convertFormatToFloat (const DataFormat sourceFormat,
+	static void convertFormatToFloat (DataFormat sourceFormat,
 									  const void* source, float* dest, int numSamples);
 
 	static void interleaveSamples (const float** source, float* dest,
-								   const int numSamples, const int numChannels);
+								   int numSamples, int numChannels);
 
 	static void deinterleaveSamples (const float* source, float** dest,
-									 const int numSamples, const int numChannels);
+									 int numSamples, int numChannels);
 };
 
 #endif   // __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -17246,27 +17218,26 @@ public:
 
 	int getNumEvents() const;
 
-	MidiEventHolder* getEventPointer (const int index) const;
+	MidiEventHolder* getEventPointer (int index) const;
 
-	double getTimeOfMatchingKeyUp (const int index) const;
+	double getTimeOfMatchingKeyUp (int index) const;
 
-	int getIndexOfMatchingKeyUp (const int index) const;
+	int getIndexOfMatchingKeyUp (int index) const;
 
-	int getIndexOf (MidiEventHolder* const event) const;
+	int getIndexOf (MidiEventHolder* event) const;
 
-	int getNextIndexAtTime (const double timeStamp) const;
+	int getNextIndexAtTime (double timeStamp) const;
 
 	double getStartTime() const;
 
 	double getEndTime() const;
 
-	double getEventTime (const int index) const;
+	double getEventTime (int index) const;
 
 	void addEvent (const MidiMessage& newMessage,
 				   double timeAdjustment = 0);
 
-	void deleteEvent (const int index,
-					  const bool deleteMatchingNoteUp);
+	void deleteEvent (int index, bool deleteMatchingNoteUp);
 
 	void addSequence (const MidiMessageSequence& other,
 					  double timeAdjustmentDelta,
@@ -17275,28 +17246,27 @@ public:
 
 	void updateMatchedPairs();
 
-	void extractMidiChannelMessages (const int channelNumberToExtract,
+	void extractMidiChannelMessages (int channelNumberToExtract,
 									 MidiMessageSequence& destSequence,
-									 const bool alsoIncludeMetaEvents) const;
+									 bool alsoIncludeMetaEvents) const;
 
 	void extractSysExMessages (MidiMessageSequence& destSequence) const;
 
-	void deleteMidiChannelMessages (const int channelNumberToRemove);
+	void deleteMidiChannelMessages (int channelNumberToRemove);
 
 	void deleteSysExMessages();
 
-	void addTimeToMessages (const double deltaTime);
+	void addTimeToMessages (double deltaTime);
 
-	void createControllerUpdatesForTime (const int channelNumber,
-										 const double time,
+	void createControllerUpdatesForTime (int channelNumber, double time,
 										 OwnedArray<MidiMessage>& resultMessages);
 
 	void swapWith (MidiMessageSequence& other) throw();
 
 	juce_UseDebuggingNewOperator
 
-	static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-								const MidiMessageSequence::MidiEventHolder* const second) throw();
+	static int compareElements (const MidiMessageSequence::MidiEventHolder* first,
+								const MidiMessageSequence::MidiEventHolder* second) throw();
 
 private:
 
@@ -17313,17 +17283,17 @@ class JUCE_API  MidiFile
 {
 public:
 
-	MidiFile() throw();
+	MidiFile();
 
-	~MidiFile() throw();
+	~MidiFile();
 
 	int getNumTracks() const throw();
 
 	const MidiMessageSequence* getTrack (const int index) const throw();
 
-	void addTrack (const MidiMessageSequence& trackSequence) throw();
+	void addTrack (const MidiMessageSequence& trackSequence);
 
-	void clear() throw();
+	void clear();
 
 	short getTimeFormat() const throw();
 
@@ -17347,7 +17317,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 	static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-								const MidiMessageSequence::MidiEventHolder* const second) throw();
+								const MidiMessageSequence::MidiEventHolder* const second);
 
 private:
 	OwnedArray <MidiMessageSequence> tracks;
@@ -17423,7 +17393,7 @@ private:
 	CriticalSection lock;
 	uint16 noteStates [128];
 	MidiBuffer eventsToAdd;
-	VoidArray listeners;
+	Array <MidiKeyboardStateListener*> listeners;
 
 	void noteOnInternal  (const int midiChannel, const int midiNoteNumber, const float velocity);
 	void noteOffInternal  (const int midiChannel, const int midiNoteNumber);
@@ -17455,12 +17425,11 @@ public:
 
 	~MidiMessageCollector();
 
-	void reset (const double sampleRate);
+	void reset (double sampleRate);
 
 	void addMessageToQueue (const MidiMessage& message);
 
-	void removeNextBlockOfMessages (MidiBuffer& destBuffer,
-									const int numSamples);
+	void removeNextBlockOfMessages (MidiBuffer& destBuffer, int numSamples);
 
 	void handleNoteOn (MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity);
 	void handleNoteOff (MidiKeyboardState* source, int midiChannel, int midiNoteNumber);
@@ -17865,7 +17834,7 @@ public:
 	virtual bool doesPluginStillExist (const PluginDescription& desc) = 0;
 
 	virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
-													 const bool recursive) = 0;
+													 bool recursive) = 0;
 
 	virtual const FileSearchPath getDefaultLocationsToSearch() = 0;
 
@@ -17895,7 +17864,7 @@ public:
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
 	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
+	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
 	bool doesPluginStillExist (const PluginDescription& desc);
 	const FileSearchPath getDefaultLocationsToSearch();
 
@@ -18167,7 +18136,7 @@ public:
 	AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
 	bool fileMightContainThisPluginType (const String& fileOrIdentifier);
 	const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
+	const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
 	bool doesPluginStillExist (const PluginDescription& desc);
 	const FileSearchPath getDefaultLocationsToSearch();
 
@@ -18253,7 +18222,7 @@ public:
 
 	int getNumTypes() const throw()				 { return types.size(); }
 
-	PluginDescription* getType (const int index) const throw()	  { return types [index]; }
+	PluginDescription* getType (int index) const throw()		{ return types [index]; }
 
 	PluginDescription* getTypeForFile (const String& fileOrIdentifier) const throw();
 
@@ -18261,10 +18230,10 @@ public:
 
 	bool addType (const PluginDescription& type);
 
-	void removeType (const int index) throw();
+	void removeType (int index) throw();
 
 	bool scanAndAddFile (const String& possiblePluginFileOrIdentifier,
-						 const bool dontRescanIfAlreadyInList,
+						 bool dontRescanIfAlreadyInList,
 						 OwnedArray <PluginDescription>& typesFound,
 						 AudioPluginFormat& formatToUse);
 
@@ -18285,7 +18254,7 @@ public:
 	void addToMenu (PopupMenu& menu,
 					const SortMethod sortMethod) const;
 
-	int getIndexChosenByMenu (const int menuResultCode) const;
+	int getIndexChosenByMenu (int menuResultCode) const;
 
 	void sort (const SortMethod method);
 
@@ -18323,12 +18292,12 @@ public:
 	PluginDirectoryScanner (KnownPluginList& listToAddResultsTo,
 							AudioPluginFormat& formatToLookFor,
 							FileSearchPath directoriesToSearch,
-							const bool searchRecursively,
+							bool searchRecursively,
 							const File& deadMansPedalFile);
 
 	~PluginDirectoryScanner();
 
-	bool scanNextFile (const bool dontRescanIfAlreadyInList);
+	bool scanNextFile (bool dontRescanIfAlreadyInList);
 
 	const String getNextPluginFileThatWillBeScanned() const throw();
 
@@ -18604,7 +18573,7 @@ public:
 
 	PluginListComponent (KnownPluginList& listToRepresent,
 						 const File& deadMansPedalFile,
-						 PropertiesFile* const propertiesToUse);
+						 PropertiesFile* propertiesToUse);
 
 	~PluginListComponent();
 
@@ -18683,9 +18652,9 @@ public:
 
 		bool isPrepared;
 
-		Node (const uint32 id, AudioProcessor* const processor);
+		Node (uint32 id, AudioProcessor* processor);
 
-		void prepare (const double sampleRate, const int blockSize, AudioProcessorGraph* const graph);
+		void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
 		void unprepare();
 
 		Node (const Node&);
@@ -18717,35 +18686,34 @@ public:
 
 	Node* getNodeForId (const uint32 nodeId) const;
 
-	Node* addNode (AudioProcessor* const newProcessor,
-				   uint32 nodeId = 0);
+	Node* addNode (AudioProcessor* newProcessor, uint32 nodeId = 0);
 
-	bool removeNode (const uint32 nodeId);
+	bool removeNode (uint32 nodeId);
 
 	int getNumConnections() const					   { return connections.size(); }
 
-	const Connection* getConnection (const int index) const		 { return connections [index]; }
+	const Connection* getConnection (int index) const		   { return connections [index]; }
 
-	const Connection* getConnectionBetween (const uint32 sourceNodeId,
-											const int sourceChannelIndex,
-											const uint32 destNodeId,
-											const int destChannelIndex) const;
+	const Connection* getConnectionBetween (uint32 sourceNodeId,
+											int sourceChannelIndex,
+											uint32 destNodeId,
+											int destChannelIndex) const;
 
-	bool isConnected (const uint32 possibleSourceNodeId,
-					  const uint32 possibleDestNodeId) const;
+	bool isConnected (uint32 possibleSourceNodeId,
+					  uint32 possibleDestNodeId) const;
 
-	bool canConnect (const uint32 sourceNodeId, const int sourceChannelIndex,
-					 const uint32 destNodeId, const int destChannelIndex) const;
+	bool canConnect (uint32 sourceNodeId, int sourceChannelIndex,
+					 uint32 destNodeId, int destChannelIndex) const;
 
-	bool addConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
-						const uint32 destNodeId, const int destChannelIndex);
+	bool addConnection (uint32 sourceNodeId, int sourceChannelIndex,
+						uint32 destNodeId, int destChannelIndex);
 
-	void removeConnection (const int index);
+	void removeConnection (int index);
 
-	bool removeConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
-						   const uint32 destNodeId, const int destChannelIndex);
+	bool removeConnection (uint32 sourceNodeId, int sourceChannelIndex,
+						   uint32 destNodeId, int destChannelIndex);
 
-	bool disconnectNode (const uint32 nodeId);
+	bool disconnectNode (uint32 nodeId);
 
 	bool removeIllegalConnections();
 
@@ -18811,7 +18779,7 @@ public:
 		void getStateInformation (JUCE_NAMESPACE::MemoryBlock& destData);
 		void setStateInformation (const void* data, int sizeInBytes);
 
-		void setParentGraph (AudioProcessorGraph* const graph);
+		void setParentGraph (AudioProcessorGraph* graph);
 
 		juce_UseDebuggingNewOperator
 
@@ -18879,9 +18847,7 @@ private:
 	void clearRenderingSequence();
 	void buildRenderingSequence();
 
-	bool isAnInputTo (const uint32 possibleInputId,
-					  const uint32 possibleDestinationId,
-					  const int recursionCheck) const;
+	bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
 	AudioProcessorGraph (const AudioProcessorGraph&);
 	AudioProcessorGraph& operator= (const AudioProcessorGraph&);
@@ -19133,9 +19099,9 @@ public:
 								  int startSample,
 								  int numSamples) = 0;
 
-	bool isPlayingChannel (const int midiChannel) const;
+	bool isPlayingChannel (int midiChannel) const;
 
-	void setCurrentPlaybackSampleRate (const double newRate);
+	void setCurrentPlaybackSampleRate (double newRate);
 
 	juce_UseDebuggingNewOperator
 
@@ -19167,23 +19133,23 @@ public:
 
 	int getNumVoices() const					{ return voices.size(); }
 
-	SynthesiserVoice* getVoice (const int index) const;
+	SynthesiserVoice* getVoice (int index) const;
 
-	void addVoice (SynthesiserVoice* const newVoice);
+	void addVoice (SynthesiserVoice* newVoice);
 
-	void removeVoice (const int index);
+	void removeVoice (int index);
 
 	void clearSounds();
 
 	int getNumSounds() const					{ return sounds.size(); }
 
-	SynthesiserSound* getSound (const int index) const		  { return sounds [index]; }
+	SynthesiserSound* getSound (int index) const			{ return sounds [index]; }
 
 	void addSound (const SynthesiserSound::Ptr& newSound);
 
-	void removeSound (const int index);
+	void removeSound (int index);
 
-	void setNoteStealingEnabled (const bool shouldStealNotes);
+	void setNoteStealingEnabled (bool shouldStealNotes);
 
 	bool isNoteStealingEnabled() const				  { return shouldStealNotes; }
 
@@ -19226,11 +19192,11 @@ protected:
 	virtual SynthesiserVoice* findFreeVoice (SynthesiserSound* soundToPlay,
 											 const bool stealIfNoneAvailable) const;
 
-	void startVoice (SynthesiserVoice* const voice,
-					 SynthesiserSound* const sound,
-					 const int midiChannel,
-					 const int midiNoteNumber,
-					 const float velocity);
+	void startVoice (SynthesiserVoice* voice,
+					 SynthesiserSound* sound,
+					 int midiChannel,
+					 int midiNoteNumber,
+					 float velocity);
 
 	int findFreeVoice (const bool) const { return 0; }
 
@@ -19253,10 +19219,10 @@ public:
 	SamplerSound (const String& name,
 				  AudioFormatReader& source,
 				  const BigInteger& midiNotes,
-				  const int midiNoteForNormalPitch,
-				  const double attackTimeSecs,
-				  const double releaseTimeSecs,
-				  const double maxSampleLengthSeconds);
+				  int midiNoteForNormalPitch,
+				  double attackTimeSecs,
+				  double releaseTimeSecs,
+				  double maxSampleLengthSeconds);
 
 	~SamplerSound();
 
@@ -22155,14 +22121,14 @@ class JUCE_API  DirectoryContentsList   : public ChangeBroadcaster,
 {
 public:
 
-	DirectoryContentsList (const FileFilter* const fileFilter,
+	DirectoryContentsList (const FileFilter* fileFilter,
 						   TimeSliceThread& threadToUse);
 
 	~DirectoryContentsList();
 
 	void setDirectory (const File& directory,
-					   const bool includeDirectories,
-					   const bool includeFiles);
+					   bool includeDirectories,
+					   bool includeFiles);
 
 	const File& getDirectory() const;
 
@@ -22172,7 +22138,7 @@ public:
 
 	bool isStillLoading() const;
 
-	void setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles);
+	void setIgnoresHiddenFiles (bool shouldIgnoreHiddenFiles);
 
 	bool ignoresHiddenFiles() const		 { return ignoreHiddenFiles; }
 
@@ -22194,17 +22160,16 @@ public:
 
 	int getNumFiles() const;
 
-	bool getFileInfo (const int index,
-					  FileInfo& resultInfo) const;
+	bool getFileInfo (int index, FileInfo& resultInfo) const;
 
-	const File getFile (const int index) const;
+	const File getFile (int index) const;
 
 	const FileFilter* getFilter() const			 { return fileFilter; }
 
 	bool useTimeSlice();
 	TimeSliceThread& getTimeSliceThread()		   { return thread; }
-	static int compareElements (const DirectoryContentsList::FileInfo* const first,
-								const DirectoryContentsList::FileInfo* const second);
+	static int compareElements (const DirectoryContentsList::FileInfo* first,
+								const DirectoryContentsList::FileInfo* second);
 
 	juce_UseDebuggingNewOperator
 
@@ -22222,9 +22187,9 @@ private:
 
 	void changed();
 	bool checkNextFile (bool& hasChanged);
-	bool addFile (const String& filename, const bool isDir, const bool isHidden,
+	bool addFile (const String& filename, bool isDir, bool isHidden,
 				  const int64 fileSize, const Time& modTime,
-				  const Time& creationTime, const bool isReadOnly);
+				  const Time& creationTime, bool isReadOnly);
 
 	DirectoryContentsList (const DirectoryContentsList&);
 	DirectoryContentsList& operator= (const DirectoryContentsList&);
@@ -22268,9 +22233,9 @@ public:
 
 	virtual void scrollToTop() = 0;
 
-	void addListener (FileBrowserListener* const listener) throw();
+	void addListener (FileBrowserListener* listener) throw();
 
-	void removeListener (FileBrowserListener* const listener) throw();
+	void removeListener (FileBrowserListener* listener) throw();
 
 	enum ColourIds
 	{
@@ -22383,9 +22348,9 @@ public:
 
 	bool isSaveMode() const throw();
 
-	void addListener (FileBrowserListener* const listener) throw();
+	void addListener (FileBrowserListener* listener) throw();
 
-	void removeListener (FileBrowserListener* const listener) throw();
+	void removeListener (FileBrowserListener* listener) throw();
 
 	void resized();
 	void buttonClicked (Button* b);
@@ -22454,7 +22419,7 @@ public:
 	FileChooser (const String& dialogBoxTitle,
 				 const File& initialFileOrDirectory = File::nonexistent,
 				 const String& filePatternsAllowed = String::empty,
-				 const bool useOSNativeDialogBox = true);
+				 bool useOSNativeDialogBox = true);
 
 	~FileChooser();
 
@@ -22462,7 +22427,7 @@ public:
 
 	bool browseForMultipleFilesToOpen (FilePreviewComponent* previewComponent = 0);
 
-	bool browseForFileToSave (const bool warnAboutOverwritingExistingFiles);
+	bool browseForFileToSave (bool warnAboutOverwritingExistingFiles);
 
 	bool browseForDirectory();
 
@@ -22480,22 +22445,13 @@ private:
 	Array<File> results;
 	bool useNativeDialogBox;
 
-	bool showDialog (const bool selectsDirectories,
-					 const bool selectsFiles,
-					 const bool isSave,
-					 const bool warnAboutOverwritingExistingFiles,
-					 const bool selectMultipleFiles,
-					 FilePreviewComponent* const previewComponent);
+	bool showDialog (bool selectsDirectories, bool selectsFiles, bool isSave,
+					 bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
+					 FilePreviewComponent* previewComponent);
 
-	static void showPlatformDialog (Array<File>& results,
-									const String& title,
-									const File& file,
-									const String& filters,
-									bool selectsDirectories,
-									bool selectsFiles,
-									bool isSave,
-									bool warnAboutOverwritingExistingFiles,
-									bool selectMultipleFiles,
+	static void showPlatformDialog (Array<File>& results, const String& title, const File& file,
+									const String& filters, bool selectsDirectories, bool selectsFiles,
+									bool isSave, bool warnAboutOverwritingExistingFiles, bool selectMultipleFiles,
 									FilePreviewComponent* previewComponent);
 };
 
@@ -23081,7 +23037,7 @@ public:
 	FileChooserDialogBox (const String& title,
 						  const String& instructions,
 						  FileBrowserComponent& browserComponent,
-						  const bool warnAboutOverwritingExistingFiles,
+						  bool warnAboutOverwritingExistingFiles,
 						  const Colour& backgroundColour);
 
 	~FileChooserDialogBox();
@@ -23207,9 +23163,9 @@ public:
 
 	FilenameComponent (const String& name,
 					   const File& currentFile,
-					   const bool canEditFilename,
-					   const bool isDirectory,
-					   const bool isForSaving,
+					   bool canEditFilename,
+					   bool isDirectory,
+					   bool isForSaving,
 					   const String& fileBrowserWildcard,
 					   const String& enforcedSuffix,
 					   const String& textWhenNothingSelected);
@@ -23219,10 +23175,10 @@ public:
 	const File getCurrentFile() const;
 
 	void setCurrentFile (File newFile,
-						 const bool addToRecentlyUsedList,
-						 const bool sendChangeNotification = true);
+						 bool addToRecentlyUsedList,
+						 bool sendChangeNotification = true);
 
-	void setFilenameIsEditable (const bool shouldBeEditable);
+	void setFilenameIsEditable (bool shouldBeEditable);
 
 	void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
 
@@ -23232,13 +23188,13 @@ public:
 
 	void addRecentlyUsedFile (const File& file);
 
-	void setMaxNumberOfRecentFiles (const int newMaximum);
+	void setMaxNumberOfRecentFiles (int newMaximum);
 
 	void setBrowseButtonText (const String& browseButtonText);
 
-	void addListener (FilenameComponentListener* const listener) throw();
+	void addListener (FilenameComponentListener* listener) throw();
 
-	void removeListener (FilenameComponentListener* const listener) throw();
+	void removeListener (FilenameComponentListener* listener) throw();
 
 	void setTooltip (const String& newTooltip);
 
@@ -28228,7 +28184,7 @@ class JUCE_API  ImageConvolutionKernel
 {
 public:
 
-	ImageConvolutionKernel (const int size);
+	ImageConvolutionKernel (int size);
 
 	~ImageConvolutionKernel();
 
@@ -28238,20 +28194,17 @@ public:
 
 	void setKernelValue (int x, int y, float value) throw();
 
-	void setOverallSum (const float desiredTotalSum);
+	void setOverallSum (float desiredTotalSum);
 
-	void rescaleAllValues (const float multiplier);
+	void rescaleAllValues (float multiplier);
 
-	void createGaussianBlur (const float blurRadius);
+	void createGaussianBlur (float blurRadius);
 
 	int getKernelSize() const		   { return size; }
 
 	void applyToImage (Image& destImage,
 					   const Image* sourceImage,
-					   int x,
-					   int y,
-					   int width,
-					   int height) const;
+					   const Rectangle<int>& destinationArea) const;
 
 	juce_UseDebuggingNewOperator
 

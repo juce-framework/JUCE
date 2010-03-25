@@ -51,17 +51,14 @@ void GlowEffect::setGlowProperties (const float newRadius,
 
 void GlowEffect::applyEffect (Image& image, Graphics& g)
 {
-    const int w = image.getWidth();
-    const int h = image.getHeight();
-
-    Image temp (image.getFormat(), w, h, true);
+    Image temp (image.getFormat(), image.getWidth(), image.getHeight(), true);
 
     ImageConvolutionKernel blurKernel (roundToInt (radius * 2.0f));
 
     blurKernel.createGaussianBlur (radius);
     blurKernel.rescaleAllValues (radius);
 
-    blurKernel.applyToImage (temp, &image, 0, 0, w, h);
+    blurKernel.applyToImage (temp, &image, image.getBounds());
 
     g.setColour (colour);
     g.drawImageAt (&temp, 0, 0, true);

@@ -44,7 +44,7 @@ public:
         @param size     the length of each dimension of the kernel, so e.g. if the size
                         is 5, it will create a 5x5 kernel
     */
-    ImageConvolutionKernel (const int size);
+    ImageConvolutionKernel (int size);
 
     /** Destructor. */
     ~ImageConvolutionKernel();
@@ -68,10 +68,10 @@ public:
 
         This will multiply all values in the kernel by (desiredTotalSum / currentTotalSum).
     */
-    void setOverallSum (const float desiredTotalSum);
+    void setOverallSum (float desiredTotalSum);
 
     /** Multiplies all values in the kernel by a value. */
-    void rescaleAllValues (const float multiplier);
+    void rescaleAllValues (float multiplier);
 
     /** Intialises the kernel for a gaussian blur.
 
@@ -80,7 +80,7 @@ public:
                             edges. Ideally the kernel should be just larger than
                             (blurRadius * 2).
     */
-    void createGaussianBlur (const float blurRadius);
+    void createGaussianBlur (float blurRadius);
 
     //==============================================================================
     /** Returns the size of the kernel.
@@ -97,17 +97,11 @@ public:
                                 destination image will be used as the source. If an image is
                                 specified, it must be exactly the same size and type as the destination
                                 image.
-        @param x                the region of the image to apply the filter to
-        @param y                the region of the image to apply the filter to
-        @param width            the region of the image to apply the filter to
-        @param height           the region of the image to apply the filter to
+        @param destinationArea  the region of the image to apply the filter to
     */
     void applyToImage (Image& destImage,
                        const Image* sourceImage,
-                       int x,
-                       int y,
-                       int width,
-                       int height) const;
+                       const Rectangle<int>& destinationArea) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

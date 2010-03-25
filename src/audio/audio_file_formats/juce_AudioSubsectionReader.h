@@ -57,10 +57,10 @@ public:
         @param deleteSourceWhenDeleted  if true, the sourceReader object will be deleted when
                                         this object is deleted.
     */
-    AudioSubsectionReader (AudioFormatReader* const sourceReader,
-                           const int64 subsectionStartSample,
-                           const int64 subsectionLength,
-                           const bool deleteSourceWhenDeleted);
+    AudioSubsectionReader (AudioFormatReader* sourceReader,
+                           int64 subsectionStartSample,
+                           int64 subsectionLength,
+                           bool deleteSourceWhenDeleted);
 
     /** Destructor. */
     ~AudioSubsectionReader();

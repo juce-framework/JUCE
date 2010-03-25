@@ -766,7 +766,7 @@ public:
             {
                 const ScopedLock sl (incomingMidiLock);
                 midiEvents.clear();
-                incomingEvents.swap (midiEvents);
+                incomingEvents.swapWith (midiEvents);
             }
 
             {

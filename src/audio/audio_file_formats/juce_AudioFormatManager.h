@@ -68,7 +68,7 @@ public:
         return this one when called.
     */
     void registerFormat (AudioFormat* newFormat,
-                         const bool makeThisTheDefaultFormat);
+                         bool makeThisTheDefaultFormat);
 
     /** Handy method to make it easy to register the formats that come with Juce.
 
@@ -83,7 +83,7 @@ public:
     int getNumKnownFormats() const;
 
     /** Returns one of the registered file formats. */
-    AudioFormat* getKnownFormat (const int index) const;
+    AudioFormat* getKnownFormat (int index) const;
 
     /** Looks for which of the known formats is listed as being for a given file
         extension.

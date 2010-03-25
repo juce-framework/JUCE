@@ -89,7 +89,7 @@ public:
                                   into inputs and outputs, this indicates whether to use
                                   the input or output name to refer to a pair of devices.
     */
-    virtual const StringArray getDeviceNames (const bool wantInputNames = false) const = 0;
+    virtual const StringArray getDeviceNames (bool wantInputNames = false) const = 0;
 
     /** Returns the name of the default device.
 
@@ -98,13 +98,13 @@ public:
         @param forInput     if true, this means that a default input device should be
                             returned; if false, it should return the default output
     */
-    virtual int getDefaultDeviceIndex (const bool forInput) const = 0;
+    virtual int getDefaultDeviceIndex (bool forInput) const = 0;
 
     /** Returns the index of a given device in the list of device names.
         If asInput is true, it shows the index in the inputs list, otherwise it
         looks for it in the outputs list.
     */
-    virtual int getIndexOfDevice (AudioIODevice* device, const bool asInput) const = 0;
+    virtual int getIndexOfDevice (AudioIODevice* device, bool asInput) const = 0;
 
     /** Returns true if two different devices can be used for the input and output.
     */

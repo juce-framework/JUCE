@@ -50,10 +50,10 @@ public:
     //==============================================================================
     /** Creates an empty MidiFile object.
     */
-    MidiFile() throw();
+    MidiFile();
 
     /** Destructor. */
-    ~MidiFile() throw();
+    ~MidiFile();
 
     //==============================================================================
     /** Returns the number of tracks in the file.
@@ -75,13 +75,13 @@ public:
 
         @see getNumTracks, getTrack
     */
-    void addTrack (const MidiMessageSequence& trackSequence) throw();
+    void addTrack (const MidiMessageSequence& trackSequence);
 
     /** Removes all midi tracks from the file.
 
         @see getNumTracks
     */
-    void clear() throw();
+    void clear();
 
     /** Returns the raw time format code that will be written to a stream.
 
@@ -179,7 +179,7 @@ public:
 
     /** @internal */
     static int compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                                const MidiMessageSequence::MidiEventHolder* const second) throw();
+                                const MidiMessageSequence::MidiEventHolder* const second);
 
 private:
     OwnedArray <MidiMessageSequence> tracks;

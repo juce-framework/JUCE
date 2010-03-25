@@ -155,7 +155,7 @@ public:
         This is a quick operation, because no memory allocating or copying is done, it
         just swaps the internal state of the two buffers.
     */
-    void swap (MidiBuffer& other);
+    void swapWith (MidiBuffer& other);
 
     //==============================================================================
     /**

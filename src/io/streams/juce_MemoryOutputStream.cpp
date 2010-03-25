@@ -96,16 +96,6 @@ const char* MemoryOutputStream::getData() const throw()
     return d;
 }
 
-size_t MemoryOutputStream::getDataSize() const throw()
-{
-    return size;
-}
-
-int64 MemoryOutputStream::getPosition()
-{
-    return position;
-}
-
 bool MemoryOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition <= (int64) size)
@@ -119,6 +109,11 @@ bool MemoryOutputStream::setPosition (int64 newPosition)
         // trying to make it bigger isn't a good thing to do..
         return false;
     }
+}
+
+const String MemoryOutputStream::toUTF8() const
+{
+    return String (getData(), getDataSize());
 }
 
 END_JUCE_NAMESPACE

@@ -1142,7 +1142,7 @@ bool CDController::readAudio (CDReadBuffer* rb, CDReadBuffer* overlapBuffer)
 
             for (int i = 0; i < maxToCheck; ++i)
             {
-                if (!memcmp (p, rb->buffer + i, checkLen))
+                if (memcmp (p, rb->buffer + i, checkLen) == 0)
                 {
                     i += checkLen;
                     rb->dataStartOffset = i;

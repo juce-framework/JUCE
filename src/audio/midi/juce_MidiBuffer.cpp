@@ -56,7 +56,7 @@ MidiBuffer& MidiBuffer::operator= (const MidiBuffer& other) throw()
     return *this;
 }
 
-void MidiBuffer::swap (MidiBuffer& other)
+void MidiBuffer::swapWith (MidiBuffer& other)
 {
     data.swapWith (other.data);
     swapVariables <int> (bytesUsed, other.bytesUsed);
@@ -140,13 +140,11 @@ void MidiBuffer::addEvent (const uint8* const newData,
         const int bytesToMove = bytesUsed - (int) (d - getData());
 
         if (bytesToMove > 0)
-            memmove (d + numBytes + 6,
-                     d,
-                     bytesToMove);
+            memmove (d + numBytes + 6, d, bytesToMove);
 
-        *(int*) d = sampleNumber;
+        *reinterpret_cast <int*> (d) = sampleNumber;
         d += 4;
-        *(uint16*) d = (uint16) numBytes;
+        *reinterpret_cast <uint16*> (d) = (uint16) numBytes;
         d += 2;
 
         memcpy (d, newData, numBytes);
@@ -187,7 +185,7 @@ int MidiBuffer::getNumEvents() const throw()
     while (d < end)
     {
         d += 4;
-        d += 2 + *(const uint16*) d;
+        d += 2 + *reinterpret_cast <const uint16*> (d);
         ++n;
     }
 
@@ -209,10 +207,10 @@ int MidiBuffer::getLastEventTime() const throw()
 
     for (;;)
     {
-        const uint8* nextOne = d + 6 + * (const uint16*) (d + 4);
+        const uint8* nextOne = d + 6 + *reinterpret_cast <const uint16*> (d + 4);
 
         if (nextOne >= endData)
-            return *(const int*) d;
+            return *reinterpret_cast <const int*> (d);
 
         d = nextOne;
     }
@@ -222,10 +220,10 @@ uint8* MidiBuffer::findEventAfter (uint8* d, const int samplePosition) const thr
 {
     const uint8* const endData = getData() + bytesUsed;
 
-    while (d < endData && *(int*) d <= samplePosition)
+    while (d < endData && *reinterpret_cast <const int*> (d) <= samplePosition)
     {
         d += 4;
-        d += 2 + *(uint16*) d;
+        d += 2 + *reinterpret_cast <const uint16*> (d);
     }
 
     return d;
@@ -248,23 +246,21 @@ void MidiBuffer::Iterator::setNextSamplePosition (const int samplePosition) thro
     data = buffer.getData();
     const uint8* dataEnd = data + buffer.bytesUsed;
 
-    while (data < dataEnd && *reinterpret_cast<const int*> (data) < samplePosition)
+    while (data < dataEnd && *reinterpret_cast <const int*> (data) < samplePosition)
     {
         data += 4;
         data += 2 + *(uint16*) data;
     }
 }
 
-bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData,
-                                         int& numBytes,
-                                         int& samplePosition) throw()
+bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData, int& numBytes, int& samplePosition) throw()
 {
     if (data >= buffer.getData() + buffer.bytesUsed)
         return false;
 
-    samplePosition = *(int*) data;
+    samplePosition = *reinterpret_cast <const int*> (data);
     data += 4;
-    numBytes = *(uint16*) data;
+    numBytes = *reinterpret_cast <const uint16*> (data);
     data += 2;
     midiData = data;
     data += numBytes;
@@ -272,8 +268,7 @@ bool MidiBuffer::Iterator::getNextEvent (const uint8* &midiData,
     return true;
 }
 
-bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result,
-                                         int& samplePosition) throw()
+bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePosition) throw()
 {
     if (data >= buffer.getData() + buffer.bytesUsed)
         return false;

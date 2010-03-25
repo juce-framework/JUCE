@@ -67,10 +67,10 @@ public:
     SamplerSound (const String& name,
                   AudioFormatReader& source,
                   const BigInteger& midiNotes,
-                  const int midiNoteForNormalPitch,
-                  const double attackTimeSecs,
-                  const double releaseTimeSecs,
-                  const double maxSampleLengthSeconds);
+                  int midiNoteForNormalPitch,
+                  double attackTimeSecs,
+                  double releaseTimeSecs,
+                  double maxSampleLengthSeconds);
 
     /** Destructor. */
     ~SamplerSound();

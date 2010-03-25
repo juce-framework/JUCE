@@ -65,26 +65,26 @@ public:
 
     /** Performs the filter operation on the given set of samples.
     */
-    void processSamples (float* const samples,
-                         const int numSamples) throw();
+    void processSamples (float* samples,
+                         int numSamples) throw();
 
     /** Processes a single sample, without any locking or checking.
 
         Use this if you need fast processing of a single value, but be aware that
         this isn't thread-safe in the way that processSamples() is.
     */
-    float processSingleSampleRaw (const float sample) throw();
+    float processSingleSampleRaw (float sample) throw();
 
     //==============================================================================
     /** Sets the filter up to act as a low-pass filter.
     */
-    void makeLowPass (const double sampleRate,
-                      const double frequency) throw();
+    void makeLowPass (double sampleRate,
+                      double frequency) throw();
 
     /** Sets the filter up to act as a high-pass filter.
     */
-    void makeHighPass (const double sampleRate,
-                       const double frequency) throw();
+    void makeHighPass (double sampleRate,
+                       double frequency) throw();
 
     //==============================================================================
     /** Sets the filter up to act as a low-pass shelf filter with variable Q and gain.
@@ -93,10 +93,10 @@ public:
         greater than 1.0 will boost the low frequencies, values less than 1.0 will
         attenuate them.
     */
-    void makeLowShelf (const double sampleRate,
-                       const double cutOffFrequency,
-                       const double Q,
-                       const float gainFactor) throw();
+    void makeLowShelf (double sampleRate,
+                       double cutOffFrequency,
+                       double Q,
+                       float gainFactor) throw();
 
     /** Sets the filter up to act as a high-pass shelf filter with variable Q and gain.
 
@@ -104,10 +104,10 @@ public:
         greater than 1.0 will boost the high frequencies, values less than 1.0 will
         attenuate them.
     */
-    void makeHighShelf (const double sampleRate,
-                        const double cutOffFrequency,
-                        const double Q,
-                        const float gainFactor) throw();
+    void makeHighShelf (double sampleRate,
+                        double cutOffFrequency,
+                        double Q,
+                        float gainFactor) throw();
 
     /** Sets the filter up to act as a band pass filter centred around a
         frequency, with a variable Q and gain.
@@ -116,10 +116,10 @@ public:
         values greater than 1.0 will boost the centre frequencies, values less than
         1.0 will attenuate them.
     */
-    void makeBandPass (const double sampleRate,
-                       const double centreFrequency,
-                       const double Q,
-                       const float gainFactor) throw();
+    void makeBandPass (double sampleRate,
+                       double centreFrequency,
+                       double Q,
+                       float gainFactor) throw();
 
     /** Clears the filter's coefficients so that it becomes inactive.
     */

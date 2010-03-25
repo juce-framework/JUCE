@@ -49,7 +49,7 @@ public:
         The maxNumThumbsToStore parameter lets you specify how many previews should
         be kept in memory at once.
     */
-    AudioThumbnailCache (const int maxNumThumbsToStore);
+    AudioThumbnailCache (int maxNumThumbsToStore);
 
     /** Destructor. */
     ~AudioThumbnailCache();
@@ -65,14 +65,14 @@ public:
         This is called automatically by the AudioThumbnail class, so you shouldn't
         normally need to call it directly.
     */
-    bool loadThumb (AudioThumbnail& thumb, const int64 hashCode);
+    bool loadThumb (AudioThumbnail& thumb, int64 hashCode);
 
     /** Stores the cachable data from the specified thumb in this cache.
 
         This is called automatically by the AudioThumbnail class, so you shouldn't
         normally need to call it directly.
     */
-    void storeThumb (const AudioThumbnail& thumb, const int64 hashCode);
+    void storeThumb (const AudioThumbnail& thumb, int64 hashCode);
 
 
     //==============================================================================
@@ -84,8 +84,8 @@ private:
     int maxNumThumbsToStore;
 
     friend class AudioThumbnail;
-    void addThumbnail (AudioThumbnail* const thumb);
-    void removeThumbnail (AudioThumbnail* const thumb);
+    void addThumbnail (AudioThumbnail* thumb);
+    void removeThumbnail (AudioThumbnail* thumb);
 };
 
 

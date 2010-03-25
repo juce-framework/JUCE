@@ -174,10 +174,10 @@ public:
 
         @returns an error message if anything went wrong, or an empty string if it worked ok.
     */
-    const String initialise (const int numInputChannelsNeeded,
-                             const int numOutputChannelsNeeded,
-                             const XmlElement* const savedState,
-                             const bool selectDefaultDeviceOnFailure,
+    const String initialise (int numInputChannelsNeeded,
+                             int numOutputChannelsNeeded,
+                             const XmlElement* savedState,
+                             bool selectDefaultDeviceOnFailure,
                              const String& preferredDefaultDeviceName = String::empty,
                              const AudioDeviceSetup* preferredSetupOptions = 0);
 
@@ -215,7 +215,7 @@ public:
         @see getAudioDeviceSetup
     */
     const String setAudioDeviceSetup (const AudioDeviceSetup& newSetup,
-                                      const bool treatAsChosenDevice);
+                                      bool treatAsChosenDevice);
 
 
     /** Returns the currently-active audio device. */
@@ -240,7 +240,7 @@ public:
         For a list of types, see getAvailableDeviceTypes().
     */
     void setCurrentAudioDeviceType (const String& type,
-                                    const bool treatAsChosenDevice);
+                                    bool treatAsChosenDevice);
 
 
     /** Closes the currently-open device.
@@ -312,7 +312,7 @@ public:
         @see addMidiInputCallback, isMidiInputEnabled
     */
     void setMidiInputEnabled (const String& midiInputDeviceName,
-                              const bool enabled);
+                              bool enabled);
 
     /** Returns true if a given midi input device is being used.
 
@@ -403,7 +403,7 @@ public:
         only intended for giving rough feedback, and not for any kind of accurate
         measurement.
     */
-    void enableInputLevelMeasurement (const bool enableMeasurement);
+    void enableInputLevelMeasurement (bool enableMeasurement);
 
     /** Returns the current input level.
 
@@ -474,7 +474,7 @@ private:
                                    float** outputChannelData,
                                    int totalNumOutputChannels,
                                    int numSamples);
-    void audioDeviceAboutToStartInt (AudioIODevice* const device);
+    void audioDeviceAboutToStartInt (AudioIODevice* device);
     void audioDeviceStoppedInt();
 
     void handleIncomingMidiMessageInt (MidiInput* source, const MidiMessage& message);

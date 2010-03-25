@@ -55,7 +55,7 @@ public:
     */
     PluginListComponent (KnownPluginList& listToRepresent,
                          const File& deadMansPedalFile,
-                         PropertiesFile* const propertiesToUse);
+                         PropertiesFile* propertiesToUse);
 
     /** Destructor. */
     ~PluginListComponent();

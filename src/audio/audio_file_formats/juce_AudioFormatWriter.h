@@ -60,11 +60,11 @@ protected:
         @param bitsPerSample    the bit depth of the stream - the base class just stores
                                 this value, it doesn't do anything with it
     */
-    AudioFormatWriter (OutputStream* const destStream,
+    AudioFormatWriter (OutputStream* destStream,
                        const String& formatName,
-                       const double sampleRate,
-                       const unsigned int numberOfChannels,
-                       const unsigned int bitsPerSample);
+                       double sampleRate,
+                       unsigned int numberOfChannels,
+                       unsigned int bitsPerSample);
 
 public:
     /** Destructor. */
@@ -125,7 +125,7 @@ public:
     */
     bool writeFromAudioSource (AudioSource& source,
                                int numSamplesToRead,
-                               const int samplesPerBlock = 2048);
+                               int samplesPerBlock = 2048);
 
     //==============================================================================
     /** Returns the sample rate being used. */

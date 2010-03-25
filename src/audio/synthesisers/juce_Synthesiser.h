@@ -186,7 +186,7 @@ public:
 
         If it's not currently playing, this will return false.
     */
-    bool isPlayingChannel (const int midiChannel) const;
+    bool isPlayingChannel (int midiChannel) const;
 
     /** Changes the voice's reference sample rate.
 
@@ -196,7 +196,7 @@ public:
         This method is called by the synth, and subclasses can access the current rate with
         the currentSampleRate member.
     */
-    void setCurrentPlaybackSampleRate (const double newRate);
+    void setCurrentPlaybackSampleRate (double newRate);
 
 
     //==============================================================================
@@ -281,7 +281,7 @@ public:
     int getNumVoices() const                                        { return voices.size(); }
 
     /** Returns one of the voices that have been added. */
-    SynthesiserVoice* getVoice (const int index) const;
+    SynthesiserVoice* getVoice (int index) const;
 
     /** Adds a new voice to the synth.
 
@@ -291,10 +291,10 @@ public:
         it later on when no longer needed. The caller should not retain a pointer to the
         voice.
     */
-    void addVoice (SynthesiserVoice* const newVoice);
+    void addVoice (SynthesiserVoice* newVoice);
 
     /** Deletes one of the voices. */
-    void removeVoice (const int index);
+    void removeVoice (int index);
 
     //==============================================================================
     /** Deletes all sounds. */
@@ -304,7 +304,7 @@ public:
     int getNumSounds() const                                        { return sounds.size(); }
 
     /** Returns one of the sounds. */
-    SynthesiserSound* getSound (const int index) const              { return sounds [index]; }
+    SynthesiserSound* getSound (int index) const                    { return sounds [index]; }
 
     /** Adds a new sound to the synthesiser.
 
@@ -314,7 +314,7 @@ public:
     void addSound (const SynthesiserSound::Ptr& newSound);
 
     /** Removes and deletes one of the sounds. */
-    void removeSound (const int index);
+    void removeSound (int index);
 
     //==============================================================================
     /** If set to true, then the synth will try to take over an existing voice if
@@ -323,7 +323,7 @@ public:
         The value of this boolean is passed into findFreeVoice(), so the result will
         depend on the implementation of this method.
     */
-    void setNoteStealingEnabled (const bool shouldStealNotes);
+    void setNoteStealingEnabled (bool shouldStealNotes);
 
     /** Returns true if note-stealing is enabled.
         @see setNoteStealingEnabled
@@ -462,11 +462,11 @@ protected:
         You'll probably never need to call this, it's used internally by noteOn(), but
         may be needed by subclasses for custom behaviours.
     */
-    void startVoice (SynthesiserVoice* const voice,
-                     SynthesiserSound* const sound,
-                     const int midiChannel,
-                     const int midiNoteNumber,
-                     const float velocity);
+    void startVoice (SynthesiserVoice* voice,
+                     SynthesiserSound* sound,
+                     int midiChannel,
+                     int midiNoteNumber,
+                     float velocity);
 
     /** xxx Temporary method here to cause a compiler error - note the new parameters for this method. */
     int findFreeVoice (const bool) const { return 0; }

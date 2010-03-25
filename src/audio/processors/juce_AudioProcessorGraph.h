@@ -106,9 +106,9 @@ public:
 
         bool isPrepared;
 
-        Node (const uint32 id, AudioProcessor* const processor);
+        Node (uint32 id, AudioProcessor* processor);
 
-        void prepare (const double sampleRate, const int blockSize, AudioProcessorGraph* const graph);
+        void prepare (double sampleRate, int blockSize, AudioProcessorGraph* graph);
         void unprepare();
 
         Node (const Node&);
@@ -193,66 +193,65 @@ public:
 
         If this succeeds, it returns a pointer to the newly-created node.
     */
-    Node* addNode (AudioProcessor* const newProcessor,
-                   uint32 nodeId = 0);
+    Node* addNode (AudioProcessor* newProcessor, uint32 nodeId = 0);
 
     /** Deletes a node within the graph which has the specified ID.
 
         This will also delete any connections that are attached to this node.
     */
-    bool removeNode (const uint32 nodeId);
+    bool removeNode (uint32 nodeId);
 
     //==============================================================================
     /** Returns the number of connections in the graph. */
     int getNumConnections() const                                       { return connections.size(); }
 
     /** Returns a pointer to one of the connections in the graph. */
-    const Connection* getConnection (const int index) const             { return connections [index]; }
+    const Connection* getConnection (int index) const                   { return connections [index]; }
 
     /** Searches for a connection between some specified channels.
 
         If no such connection is found, this returns 0.
     */
-    const Connection* getConnectionBetween (const uint32 sourceNodeId,
-                                            const int sourceChannelIndex,
-                                            const uint32 destNodeId,
-                                            const int destChannelIndex) const;
+    const Connection* getConnectionBetween (uint32 sourceNodeId,
+                                            int sourceChannelIndex,
+                                            uint32 destNodeId,
+                                            int destChannelIndex) const;
 
     /** Returns true if there is a connection between any of the channels of
         two specified nodes.
     */
-    bool isConnected (const uint32 possibleSourceNodeId,
-                      const uint32 possibleDestNodeId) const;
+    bool isConnected (uint32 possibleSourceNodeId,
+                      uint32 possibleDestNodeId) const;
 
     /** Returns true if it would be legal to connect the specified points.
     */
-    bool canConnect (const uint32 sourceNodeId, const int sourceChannelIndex,
-                     const uint32 destNodeId, const int destChannelIndex) const;
+    bool canConnect (uint32 sourceNodeId, int sourceChannelIndex,
+                     uint32 destNodeId, int destChannelIndex) const;
 
     /** Attempts to connect two specified channels of two nodes.
 
         If this isn't allowed (e.g. because you're trying to connect a midi channel
         to an audio one or other such nonsense), then it'll return false.
     */
-    bool addConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
-                        const uint32 destNodeId, const int destChannelIndex);
+    bool addConnection (uint32 sourceNodeId, int sourceChannelIndex,
+                        uint32 destNodeId, int destChannelIndex);
 
     /** Deletes the connection with the specified index.
 
         Returns true if a connection was actually deleted.
     */
-    void removeConnection (const int index);
+    void removeConnection (int index);
 
     /** Deletes any connection between two specified points.
 
         Returns true if a connection was actually deleted.
     */
-    bool removeConnection (const uint32 sourceNodeId, const int sourceChannelIndex,
-                           const uint32 destNodeId, const int destChannelIndex);
+    bool removeConnection (uint32 sourceNodeId, int sourceChannelIndex,
+                           uint32 destNodeId, int destChannelIndex);
 
     /** Removes all connections from the specified node.
     */
-    bool disconnectNode (const uint32 nodeId);
+    bool disconnectNode (uint32 nodeId);
 
     /** Performs a sanity checks of all the connections.
 
@@ -354,7 +353,7 @@ public:
         void setStateInformation (const void* data, int sizeInBytes);
 
         /** @internal */
-        void setParentGraph (AudioProcessorGraph* const graph);
+        void setParentGraph (AudioProcessorGraph* graph);
 
         juce_UseDebuggingNewOperator
 
@@ -425,9 +424,7 @@ private:
     void clearRenderingSequence();
     void buildRenderingSequence();
 
-    bool isAnInputTo (const uint32 possibleInputId,
-                      const uint32 possibleDestinationId,
-                      const int recursionCheck) const;
+    bool isAnInputTo (uint32 possibleInputId, uint32 possibleDestinationId, int recursionCheck) const;
 
     AudioProcessorGraph (const AudioProcessorGraph&);
     AudioProcessorGraph& operator= (const AudioProcessorGraph&);

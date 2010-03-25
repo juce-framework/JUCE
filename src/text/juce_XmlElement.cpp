@@ -390,7 +390,7 @@ const String XmlElement::createDocument (const String& dtdToUse,
     MemoryOutputStream mem (2048, 4096);
     writeToStream (mem, dtdToUse, allOnOneLine, includeXmlHeader, encodingType, lineWrapLength);
 
-    return String (mem.getData(), mem.getDataSize());
+    return mem.toUTF8();
 }
 
 void XmlElement::writeToStream (OutputStream& output,

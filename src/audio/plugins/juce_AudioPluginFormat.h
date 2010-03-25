@@ -95,7 +95,7 @@ public:
         than manually.
     */
     virtual const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch,
-                                                     const bool recursive) = 0;
+                                                     bool recursive) = 0;
 
     /** Returns the typical places to look for this kind of plugin.
 

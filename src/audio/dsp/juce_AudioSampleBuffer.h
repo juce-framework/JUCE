@@ -48,8 +48,8 @@ public:
         The buffer will allocate its memory internally, and this will be released
         when the buffer is deleted.
     */
-    AudioSampleBuffer (const int numChannels,
-                       const int numSamples) throw();
+    AudioSampleBuffer (int numChannels,
+                       int numSamples) throw();
 
     /** Creates a buffer using a pre-allocated block of memory.
 
@@ -67,8 +67,8 @@ public:
                                 size of the arrays passed in
     */
     AudioSampleBuffer (float** dataToReferTo,
-                       const int numChannels,
-                       const int numSamples) throw();
+                       int numChannels,
+                       int numSamples) throw();
 
     /** Copies another buffer.
 
@@ -152,11 +152,11 @@ public:
         a new allocation will be done so that the buffer uses takes up the minimum amount
         of memory that it needs.
     */
-    void setSize (const int newNumChannels,
-                  const int newNumSamples,
-                  const bool keepExistingContent = false,
-                  const bool clearExtraSpace = false,
-                  const bool avoidReallocating = false) throw();
+    void setSize (int newNumChannels,
+                  int newNumSamples,
+                  bool keepExistingContent = false,
+                  bool clearExtraSpace = false,
+                  bool avoidReallocating = false) throw();
 
 
     /** Makes this buffer point to a pre-allocated set of channel data arrays.
@@ -178,8 +178,8 @@ public:
                                 size of the arrays passed in
     */
     void setDataToReferTo (float** dataToReferTo,
-                           const int numChannels,
-                           const int numSamples) throw();
+                           int numChannels,
+                           int numSamples) throw();
 
     //==============================================================================
     /** Clears all the samples in all channels. */
@@ -190,36 +190,36 @@ public:
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void clear (const int startSample,
-                const int numSamples) throw();
+    void clear (int startSample,
+                int numSamples) throw();
 
     /** Clears a specified region of just one channel.
 
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void clear (const int channel,
-                const int startSample,
-                const int numSamples) throw();
+    void clear (int channel,
+                int startSample,
+                int numSamples) throw();
 
     /** Applies a gain multiple to a region of one channel.
 
         For speed, this doesn't check whether the channel and sample number
         are in-range, so be careful!
     */
-    void applyGain (const int channel,
-                    const int startSample,
+    void applyGain (int channel,
+                    int startSample,
                     int numSamples,
-                    const float gain) throw();
+                    float gain) throw();
 
     /** Applies a gain multiple to a region of all the channels.
 
         For speed, this doesn't check whether the sample numbers
         are in-range, so be careful!
     */
-    void applyGain (const int startSample,
-                    const int numSamples,
-                    const float gain) throw();
+    void applyGain (int startSample,
+                    int numSamples,
+                    float gain) throw();
 
     /** Applies a range of gains to a region of a channel.
 
@@ -230,8 +230,8 @@ public:
         For speed, this doesn't check whether the sample numbers
         are in-range, so be careful!
     */
-    void applyGainRamp (const int channel,
-                        const int startSample,
+    void applyGainRamp (int channel,
+                        int startSample,
                         int numSamples,
                         float startGain,
                         float endGain) throw();
@@ -249,13 +249,13 @@ public:
 
         @see copyFrom
     */
-    void addFrom (const int destChannel,
-                  const int destStartSample,
+    void addFrom (int destChannel,
+                  int destStartSample,
                   const AudioSampleBuffer& source,
-                  const int sourceChannel,
-                  const int sourceStartSample,
+                  int sourceChannel,
+                  int sourceStartSample,
                   int numSamples,
-                  const float gainToApplyToSource = 1.0f) throw();
+                  float gainToApplyToSource = 1.0f) throw();
 
     /** Adds samples from an array of floats to one of the channels.
 
@@ -268,11 +268,11 @@ public:
 
         @see copyFrom
     */
-    void addFrom (const int destChannel,
-                  const int destStartSample,
+    void addFrom (int destChannel,
+                  int destStartSample,
                   const float* source,
                   int numSamples,
-                  const float gainToApplyToSource = 1.0f) throw();
+                  float gainToApplyToSource = 1.0f) throw();
 
     /** Adds samples from an array of floats, applying a gain ramp to them.
 
@@ -285,8 +285,8 @@ public:
         @param endGain              the gain to apply to the final sample. The gain is linearly
                                     interpolated between the first and last samples.
     */
-    void addFromWithRamp (const int destChannel,
-                          const int destStartSample,
+    void addFromWithRamp (int destChannel,
+                          int destStartSample,
                           const float* source,
                           int numSamples,
                           float startGain,
@@ -303,11 +303,11 @@ public:
 
         @see addFrom
     */
-    void copyFrom (const int destChannel,
-                   const int destStartSample,
+    void copyFrom (int destChannel,
+                   int destStartSample,
                    const AudioSampleBuffer& source,
-                   const int sourceChannel,
-                   const int sourceStartSample,
+                   int sourceChannel,
+                   int sourceStartSample,
                    int numSamples) throw();
 
     /** Copies samples from an array of floats into one of the channels.
@@ -319,8 +319,8 @@ public:
 
         @see addFrom
     */
-    void copyFrom (const int destChannel,
-                   const int destStartSample,
+    void copyFrom (int destChannel,
+                   int destStartSample,
                    const float* source,
                    int numSamples) throw();
 
@@ -334,11 +334,11 @@ public:
 
         @see addFrom
     */
-    void copyFrom (const int destChannel,
-                   const int destStartSample,
+    void copyFrom (int destChannel,
+                   int destStartSample,
                    const float* source,
                    int numSamples,
-                   const float gain) throw();
+                   float gain) throw();
 
     /** Copies samples from an array of floats into one of the channels, applying a gain ramp.
 
@@ -353,8 +353,8 @@ public:
 
         @see addFrom
     */
-    void copyFromWithRamp (const int destChannel,
-                           const int destStartSample,
+    void copyFromWithRamp (int destChannel,
+                           int destStartSample,
                            const float* source,
                            int numSamples,
                            float startGain,
@@ -369,28 +369,28 @@ public:
         @param minVal       on return, the lowest value that was found
         @param maxVal       on return, the highest value that was found
     */
-    void findMinMax (const int channel,
-                     const int startSample,
+    void findMinMax (int channel,
+                     int startSample,
                      int numSamples,
                      float& minVal,
                      float& maxVal) const throw();
 
     /** Finds the highest absolute sample value within a region of a channel.
     */
-    float getMagnitude (const int channel,
-                        const int startSample,
-                        const int numSamples) const throw();
+    float getMagnitude (int channel,
+                        int startSample,
+                        int numSamples) const throw();
 
     /** Finds the highest absolute sample value within a region on all channels.
     */
-    float getMagnitude (const int startSample,
-                        const int numSamples) const throw();
+    float getMagnitude (int startSample,
+                        int numSamples) const throw();
 
     /** Returns the root mean squared level for a region of a channel.
     */
-    float getRMSLevel (const int channel,
-                       const int startSample,
-                       const int numSamples) const throw();
+    float getRMSLevel (int channel,
+                       int startSample,
+                       int numSamples) const throw();
 
     //==============================================================================
     /** Fills a section of the buffer using an AudioReader as its source.
@@ -403,11 +403,11 @@ public:
         @see writeToAudioWriter
     */
     void readFromAudioReader (AudioFormatReader* reader,
-                              const int startSample,
-                              const int numSamples,
-                              const int readerStartSample,
-                              const bool useReaderLeftChan,
-                              const bool useReaderRightChan) throw();
+                              int startSample,
+                              int numSamples,
+                              int readerStartSample,
+                              bool useReaderLeftChan,
+                              bool useReaderRightChan) throw();
 
     /** Writes a section of this buffer to an audio writer.
 
@@ -417,8 +417,8 @@ public:
         @see readFromAudioReader
     */
     void writeToAudioWriter (AudioFormatWriter* writer,
-                             const int startSample,
-                             const int numSamples) const throw();
+                             int startSample,
+                             int numSamples) const throw();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -431,7 +431,7 @@ private:
     float* preallocatedChannelSpace [32];
 
     void allocateData();
-    void allocateChannels (float** const dataToReferTo);
+    void allocateChannels (float** dataToReferTo);
 };
 
 

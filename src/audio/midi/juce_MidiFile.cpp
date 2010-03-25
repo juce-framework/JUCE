@@ -163,17 +163,17 @@ namespace MidiFileHelpers
 }
 
 //==============================================================================
-MidiFile::MidiFile() throw()
+MidiFile::MidiFile()
    : timeFormat ((short) (unsigned short) 0xe728)
 {
 }
 
-MidiFile::~MidiFile() throw()
+MidiFile::~MidiFile()
 {
     clear();
 }
 
-void MidiFile::clear() throw()
+void MidiFile::clear()
 {
     tracks.clear();
 }
@@ -189,7 +189,7 @@ const MidiMessageSequence* MidiFile::getTrack (const int index) const throw()
     return tracks [index];
 }
 
-void MidiFile::addTrack (const MidiMessageSequence& trackSequence) throw()
+void MidiFile::addTrack (const MidiMessageSequence& trackSequence)
 {
     tracks.add (new MidiMessageSequence (trackSequence));
 }
@@ -202,7 +202,7 @@ short MidiFile::getTimeFormat() const throw()
 
 void MidiFile::setTicksPerQuarterNote (const int ticks) throw()
 {
-    timeFormat = (short)ticks;
+    timeFormat = (short) ticks;
 }
 
 void MidiFile::setSmpteTimeFormat (const int framesPerSecond,
@@ -307,7 +307,7 @@ bool MidiFile::readFrom (InputStream& sourceStream)
 
 // a comparator that puts all the note-offs before note-ons that have the same time
 int MidiFile::compareElements (const MidiMessageSequence::MidiEventHolder* const first,
-                               const MidiMessageSequence::MidiEventHolder* const second) throw()
+                               const MidiMessageSequence::MidiEventHolder* const second)
 {
     const double diff = (first->message.getTimeStamp() - second->message.getTimeStamp());
 

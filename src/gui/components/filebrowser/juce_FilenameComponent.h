@@ -97,9 +97,9 @@ public:
     */
     FilenameComponent (const String& name,
                        const File& currentFile,
-                       const bool canEditFilename,
-                       const bool isDirectory,
-                       const bool isForSaving,
+                       bool canEditFilename,
+                       bool isDirectory,
+                       bool isForSaving,
                        const String& fileBrowserWildcard,
                        const String& enforcedSuffix,
                        const String& textWhenNothingSelected);
@@ -120,12 +120,12 @@ public:
         change.
     */
     void setCurrentFile (File newFile,
-                         const bool addToRecentlyUsedList,
-                         const bool sendChangeNotification = true);
+                         bool addToRecentlyUsedList,
+                         bool sendChangeNotification = true);
 
     /** Changes whether the use can type into the filename box.
     */
-    void setFilenameIsEditable (const bool shouldBeEditable);
+    void setFilenameIsEditable (bool shouldBeEditable);
 
     /** Sets a file or directory to be the default starting point for the browser to show.
 
@@ -162,7 +162,7 @@ public:
 
     /** Changes the limit for the number of files that will be stored in the recent-file list.
     */
-    void setMaxNumberOfRecentFiles (const int newMaximum);
+    void setMaxNumberOfRecentFiles (int newMaximum);
 
     /** Changes the text shown on the 'browse' button.
 
@@ -174,10 +174,10 @@ public:
 
     //==============================================================================
     /** Adds a listener that will be called when the selected file is changed. */
-    void addListener (FilenameComponentListener* const listener) throw();
+    void addListener (FilenameComponentListener* listener) throw();
 
     /** Removes a previously-registered listener. */
-    void removeListener (FilenameComponentListener* const listener) throw();
+    void removeListener (FilenameComponentListener* listener) throw();
 
     /** Gives the component a tooltip. */
     void setTooltip (const String& newTooltip);

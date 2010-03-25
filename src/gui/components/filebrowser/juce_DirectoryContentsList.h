@@ -66,7 +66,7 @@ public:
                                 that the thread you give it has been started, or you
                                 won't get any files!
     */
-    DirectoryContentsList (const FileFilter* const fileFilter,
+    DirectoryContentsList (const FileFilter* fileFilter,
                            TimeSliceThread& threadToUse);
 
     /** Destructor. */
@@ -80,8 +80,8 @@ public:
         also start the background thread scanning it for files.
     */
     void setDirectory (const File& directory,
-                       const bool includeDirectories,
-                       const bool includeFiles);
+                       bool includeDirectories,
+                       bool includeFiles);
 
     /** Returns the directory that's currently being used. */
     const File& getDirectory() const;
@@ -99,7 +99,7 @@ public:
 
         By default these are ignored.
     */
-    void setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles);
+    void setIgnoresHiddenFiles (bool shouldIgnoreHiddenFiles);
 
     /** Returns true if hidden files are ignored.
         @see setIgnoresHiddenFiles
@@ -166,8 +166,7 @@ public:
 
         @see getNumFiles, getFile
     */
-    bool getFileInfo (const int index,
-                      FileInfo& resultInfo) const;
+    bool getFileInfo (int index, FileInfo& resultInfo) const;
 
     /** Returns one of the files in the list.
 
@@ -175,7 +174,7 @@ public:
                         return value will be File::nonexistent
         @see getNumFiles, getFileInfo
     */
-    const File getFile (const int index) const;
+    const File getFile (int index) const;
 
     /** Returns the file filter being used.
 
@@ -189,8 +188,8 @@ public:
     /** @internal */
     TimeSliceThread& getTimeSliceThread()                   { return thread; }
     /** @internal */
-    static int compareElements (const DirectoryContentsList::FileInfo* const first,
-                                const DirectoryContentsList::FileInfo* const second);
+    static int compareElements (const DirectoryContentsList::FileInfo* first,
+                                const DirectoryContentsList::FileInfo* second);
 
     juce_UseDebuggingNewOperator
 
@@ -208,9 +207,9 @@ private:
 
     void changed();
     bool checkNextFile (bool& hasChanged);
-    bool addFile (const String& filename, const bool isDir, const bool isHidden,
+    bool addFile (const String& filename, bool isDir, bool isHidden,
                   const int64 fileSize, const Time& modTime,
-                  const Time& creationTime, const bool isReadOnly);
+                  const Time& creationTime, bool isReadOnly);
 
     DirectoryContentsList (const DirectoryContentsList&);
     DirectoryContentsList& operator= (const DirectoryContentsList&);

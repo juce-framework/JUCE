@@ -64,7 +64,7 @@ public:
     /** Returns one of the types.
         @see getNumTypes
     */
-    PluginDescription* getType (const int index) const throw()      { return types [index]; }
+    PluginDescription* getType (int index) const throw()            { return types [index]; }
 
     /** Looks for a type in the list which comes from this file.
     */
@@ -81,7 +81,7 @@ public:
     bool addType (const PluginDescription& type);
 
     /** Removes a type. */
-    void removeType (const int index) throw();
+    void removeType (int index) throw();
 
     /** Looks for all types that can be loaded from a given file, and adds them
         to the list.
@@ -96,7 +96,7 @@ public:
         in the array.
     */
     bool scanAndAddFile (const String& possiblePluginFileOrIdentifier,
-                         const bool dontRescanIfAlreadyInList,
+                         bool dontRescanIfAlreadyInList,
                          OwnedArray <PluginDescription>& typesFound,
                          AudioPluginFormat& formatToUse);
 
@@ -141,7 +141,7 @@ public:
 
         @see addToMenu
     */
-    int getIndexChosenByMenu (const int menuResultCode) const;
+    int getIndexChosenByMenu (int menuResultCode) const;
 
     //==============================================================================
     /** Sorts the list. */

@@ -74,7 +74,7 @@ public:
                             thread and storage that is used to by the thumbnail, and the cache
                             object can be shared between multiple thumbnails
     */
-    AudioThumbnail (const int sourceSamplesPerThumbnailSample,
+    AudioThumbnail (int sourceSamplesPerThumbnailSample,
                     AudioFormatManager& formatManagerToUse,
                     AudioThumbnailCache& cacheToUse);
 
@@ -94,7 +94,7 @@ public:
         The source that is passed in will be deleted by this object when it is no
         longer needed
     */
-    void setSource (InputSource* const newSource);
+    void setSource (InputSource* newSource);
 
     /** Reloads the low res thumbnail data from an input stream.
 
@@ -134,7 +134,7 @@ public:
                       double startTimeSeconds,
                       double endTimeSeconds,
                       int channelNum,
-                      const float verticalZoomFactor);
+                      float verticalZoomFactor);
 
     /** Returns true if the low res preview is fully generated.
     */
@@ -165,18 +165,10 @@ private:
     bool cacheNeedsRefilling;
 
     void clear();
-
     AudioFormatReader* createReader() const;
-
-    void generateSection (AudioFormatReader& reader,
-                          int64 startSample,
-                          int numSamples);
-
+    void generateSection (AudioFormatReader& reader, int64 startSample, int numSamples);
     char* getChannelData (int channel) const;
-
-    void refillCache (const int numSamples,
-                      double startTime,
-                      const double timePerPixel);
+    void refillCache (int numSamples, double startTime, double timePerPixel);
 
     friend class AudioThumbnailCache;
 

@@ -47,7 +47,7 @@ public:
     AudioPluginInstance* createInstanceFromDescription (const PluginDescription& desc);
     bool fileMightContainThisPluginType (const String& fileOrIdentifier);
     const String getNameOfPluginFromIdentifier (const String& fileOrIdentifier);
-    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, const bool recursive);
+    const StringArray searchPathsForPlugins (const FileSearchPath& directoriesToSearch, bool recursive);
     bool doesPluginStillExist (const PluginDescription& desc);
     const FileSearchPath getDefaultLocationsToSearch();
 

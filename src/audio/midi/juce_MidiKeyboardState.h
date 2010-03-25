@@ -201,7 +201,7 @@ private:
     CriticalSection lock;
     uint16 noteStates [128];
     MidiBuffer eventsToAdd;
-    VoidArray listeners;
+    Array <MidiKeyboardStateListener*> listeners;
 
     void noteOnInternal  (const int midiChannel, const int midiNoteNumber, const float velocity);
     void noteOffInternal  (const int midiChannel, const int midiNoteNumber);

@@ -53,7 +53,7 @@ protected:
         @param formatName       the description that will be returned by the getFormatName()
                                 method
     */
-    AudioFormatReader (InputStream* const sourceStream,
+    AudioFormatReader (InputStream* sourceStream,
                        const String& formatName);
 
 public:
@@ -110,7 +110,7 @@ public:
                int numDestChannels,
                int64 startSampleInSource,
                int numSamplesToRead,
-               const bool fillLeftoverChannelsWithCopies);
+               bool fillLeftoverChannelsWithCopies);
 
     /** Finds the highest and lowest sample levels from a section of the audio stream.
 
@@ -160,9 +160,9 @@ public:
     */
     int64 searchForLevel (int64 startSample,
                           int64 numSamplesToSearch,
-                          const double magnitudeRangeMinimum,
-                          const double magnitudeRangeMaximum,
-                          const int minimumConsecutiveSamples);
+                          double magnitudeRangeMinimum,
+                          double magnitudeRangeMaximum,
+                          int minimumConsecutiveSamples);
 
     //==============================================================================
     /** The sample-rate of the stream. */
