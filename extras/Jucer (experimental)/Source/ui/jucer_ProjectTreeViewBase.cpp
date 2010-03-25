@@ -62,7 +62,8 @@ const File ProjectTreeViewBase::getFile() const
 
 void ProjectTreeViewBase::browseToAddExistingFiles()
 {
-    FileChooser fc ("Add Files to Jucer Project", getFile(), String::empty, false);
+    const File location (item.isGroup() ? item.determineGroupFolder() : getFile());
+    FileChooser fc ("Add Files to Jucer Project", location, String::empty, false);
 
     if (fc.browseForMultipleFilesOrDirectories())
     {

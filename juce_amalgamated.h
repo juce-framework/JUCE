@@ -526,6 +526,14 @@
 
 #if JUCE_LINUX
   #include <signal.h>
+
+  #if __INTEL_COMPILER
+	#if __ia64__
+	  #include <ia64intrin.h>
+	#else
+	  #include <ia32intrin.h>
+	#endif
+  #endif
 #endif
 
 #if JUCE_MSVC && JUCE_DEBUG
@@ -3089,53 +3097,72 @@ private:
 
 #if (JUCE_MAC || JUCE_IPHONE)	   //  Mac and iPhone...
 
-inline void  Atomic::increment (int32& variable)		{ OSAtomicIncrement32 ((int32_t*) &variable); }
-inline int32 Atomic::incrementAndReturn (int32& variable)	   { return OSAtomicIncrement32 ((int32_t*) &variable); }
-inline void  Atomic::decrement (int32& variable)		{ OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int32 Atomic::decrementAndReturn (int32& variable)	   { return OSAtomicDecrement32 ((int32_t*) &variable); }
-inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, (int32_t*) &destination); }
-inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-{
-	void* currentVal = *value1;
-#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5 && ! JUCE_64BIT
-	while (! OSAtomicCompareAndSwap32 ((int32_t) currentVal, (int32_t) value2, (int32_t*) value1)) { currentVal = *value1; }
-#else
-	while (! OSAtomicCompareAndSwapPtr (currentVal, value2, value1)) { currentVal = *value1; }
-#endif
-	return currentVal;
-}
+	inline void  Atomic::increment (int32& variable)		{ OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
+	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
+	inline void  Atomic::decrement (int32& variable)		{ OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
+	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
+	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																	{ return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, static_cast <int32_t*> (&destination)); }
+	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
+	{
+		void* currentVal = *value1;
+	#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5 && ! JUCE_64BIT
+		while (! OSAtomicCompareAndSwap32 (reinterpret_cast <int32_t> (currentVal), reinterpret_cast <int32_t> (value2),
+										   reinterpret_cast <int32_t*> (value1))) { currentVal = *value1; }
+	#else
+		while (! OSAtomicCompareAndSwapPtr (currentVal, value2, value1)) { currentVal = *value1; }
+	#endif
+		return currentVal;
+	}
 
 #elif JUCE_LINUX			// Linux...
 
-inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
-inline int32 Atomic::incrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, 1); }
-inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
-inline int32 Atomic::decrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, -1); }
-inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
-inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-{
-	void* currentVal = *value1;
-	while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
-	return currentVal;
-}
+  #if __INTEL_COMPILER
+	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (static_cast <void*> (&variable)); }
+	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (static_cast <void*> (&variable)); }
+	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (static_cast <void*> (&variable)); }
+	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (static_cast <void*> (&variable)); }
+	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																	{ return _InterlockedCompareExchange (static_cast <void*> (&destination), newValue, oldValue); }
+
+	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
+	{
+	#if __ia64__
+		return reinterpret_cast<void*> (_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value1), reinterpret_cast<__int64> (value2)));
+	#else
+		return reinterpret_cast<void*> (_InterlockedExchange (reinterpret_cast<volatile int*> (value1), reinterpret_cast<long> (value2)));
+	#endif
+	}
+
+  #else
+	inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
+	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, 1); }
+	inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
+	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, -1); }
+	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																	{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+
+	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
+	{
+		void* currentVal = *value1;
+		while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
+		return currentVal;
+	}
+  #endif
 
 #elif JUCE_USE_INTRINSICS		   // Windows...
 
-// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is
-// declared in juce_win32_Threads.cpp)
-#pragma intrinsic (_InterlockedIncrement)
-#pragma intrinsic (_InterlockedDecrement)
-#pragma intrinsic (_InterlockedCompareExchange)
+	// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is declared in juce_win32_Threads.cpp)
+	#pragma intrinsic (_InterlockedIncrement)
+	#pragma intrinsic (_InterlockedDecrement)
+	#pragma intrinsic (_InterlockedCompareExchange)
 
-inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
-
+	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
+	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
+	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+																	{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
 #endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__

@@ -95,6 +95,14 @@
 
 #if JUCE_LINUX
   #include <signal.h>
+
+  #if __INTEL_COMPILER
+    #if __ia64__
+      #include <ia64intrin.h>
+    #else
+      #include <ia32intrin.h>
+    #endif
+  #endif
 #endif
 
 #if JUCE_MSVC && JUCE_DEBUG
