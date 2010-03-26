@@ -245,7 +245,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         const File exe (juce_getExecutableFile());
         const File parent (exe.getParentDirectory());
 
-        return parent.getFullPathName().endsWithIgnoreCase (T("Contents/MacOS"))
+        return parent.getFullPathName().endsWithIgnoreCase ("Contents/MacOS")
                 ? parent.getParentDirectory().getParentDirectory()
                 : exe;
     }

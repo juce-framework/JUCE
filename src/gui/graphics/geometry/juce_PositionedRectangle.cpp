@@ -291,7 +291,7 @@ void PositionedRectangle::decodePosString (const String& s, uint8& mode, double&
     if (s.containsChar ('%'))
     {
         mode |= proportionOfParentSize;
-        value = s.removeCharacters (T("%rcRC")).getDoubleValue() / 100.0;
+        value = s.removeCharacters ("%rcRC").getDoubleValue() / 100.0;
     }
     else
     {
@@ -302,7 +302,7 @@ void PositionedRectangle::decodePosString (const String& s, uint8& mode, double&
         else
             mode |= absoluteFromParentTopLeft;
 
-        value = s.removeCharacters (T("rcRC")).getDoubleValue();
+        value = s.removeCharacters ("rcRC").getDoubleValue();
     }
 }
 
@@ -311,7 +311,7 @@ void PositionedRectangle::decodeSizeString (const String& s, uint8& mode, double
     if (s.containsChar ('%'))
     {
         mode = proportionalSize;
-        value = s.upToFirstOccurrenceOf (T("%"), false, false).getDoubleValue() / 100.0;
+        value = s.upToFirstOccurrenceOf ("%", false, false).getDoubleValue() / 100.0;
     }
     else if (s.containsChar ('M'))
     {

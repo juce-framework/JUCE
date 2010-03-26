@@ -563,6 +563,12 @@ bool String::equalsIgnoreCase (const juce_wchar* t) const throw()
                   : isEmpty();
 }
 
+bool String::equalsIgnoreCase (const char* t) const throw()
+{
+    return t != 0 ? CharacterFunctions::compareIgnoreCase (text, t) == 0
+                  : isEmpty();
+}
+
 bool String::equalsIgnoreCase (const String& other) const throw()
 {
     return text == other.text
@@ -807,17 +813,16 @@ int String::lastIndexOfChar (const juce_wchar character) const throw()
     return -1;
 }
 
-int String::indexOf (const juce_wchar* const t) const throw()
+int String::indexOf (const String& t) const throw()
 {
-    const juce_wchar* const r = CharacterFunctions::find (text, t);
-    return (r == 0) ? -1
-                    : (int) (r - text);
+    const juce_wchar* const r = CharacterFunctions::find (text, t.text);
+    return r == 0 ? -1 : (int) (r - text);
 }
 
 int String::indexOfChar (const int startIndex,
                          const juce_wchar character) const throw()
 {
-    if (startIndex >= 0 && startIndex >= length())
+    if (startIndex > 0 && startIndex >= length())
         return -1;
 
     const juce_wchar* t = text + jmax (0, startIndex);
@@ -834,19 +839,18 @@ int String::indexOfChar (const int startIndex,
     }
 }
 
-int String::indexOfAnyOf (const juce_wchar* const charactersToLookFor,
+int String::indexOfAnyOf (const String& charactersToLookFor,
                           const int startIndex,
                           const bool ignoreCase) const throw()
 {
-    if (charactersToLookFor == 0
-         || (startIndex >= 0 && startIndex >= length()))
+    if (startIndex > 0 && startIndex >= length())
         return -1;
 
     const juce_wchar* t = text + jmax (0, startIndex);
 
     while (*t != 0)
     {
-        if (CharacterFunctions::indexOfChar (charactersToLookFor, *t, ignoreCase) >= 0)
+        if (CharacterFunctions::indexOfChar (charactersToLookFor.text, *t, ignoreCase) >= 0)
             return (int) (t - text);
 
         ++t;
@@ -855,54 +859,51 @@ int String::indexOfAnyOf (const juce_wchar* const charactersToLookFor,
     return -1;
 }
 
-int String::indexOf (const int startIndex,
-                     const juce_wchar* const other) const throw()
+int String::indexOf (const int startIndex, const String& other) const throw()
 {
-    if (other == 0 || startIndex >= length())
+    if (startIndex > 0 && startIndex >= length())
         return -1;
 
-    const juce_wchar* const found = CharacterFunctions::find (text + jmax (0, startIndex), other);
+    const juce_wchar* const found = CharacterFunctions::find (text + jmax (0, startIndex), other.text);
 
-    return (found == 0) ? -1
-                        : (int) (found - text);
+    return found == 0 ? -1 : (int) (found - text);
 }
 
-int String::indexOfIgnoreCase (const juce_wchar* const other) const throw()
+int String::indexOfIgnoreCase (const String& other) const throw()
 {
-    if (other != 0 && *other != 0)
+    if (other.isNotEmpty())
     {
-        const int len = CharacterFunctions::length (other);
+        const int len = other.length();
         const int end = length() - len;
 
         for (int i = 0; i <= end; ++i)
-            if (CharacterFunctions::compareIgnoreCase (text + i, other, len) == 0)
+            if (CharacterFunctions::compareIgnoreCase (text + i, other.text, len) == 0)
                 return i;
     }
 
     return -1;
 }
 
-int String::indexOfIgnoreCase (const int startIndex,
-                               const juce_wchar* const other) const throw()
+int String::indexOfIgnoreCase (const int startIndex, const String& other) const throw()
 {
-    if (other != 0 && *other != 0)
+    if (other.isNotEmpty())
     {
-        const int len = CharacterFunctions::length (other);
+        const int len = other.length();
         const int end = length() - len;
 
         for (int i = jmax (0, startIndex); i <= end; ++i)
-            if (CharacterFunctions::compareIgnoreCase (text + i, other, len) == 0)
+            if (CharacterFunctions::compareIgnoreCase (text + i, other.text, len) == 0)
                 return i;
     }
 
     return -1;
 }
 
-int String::lastIndexOf (const juce_wchar* const other) const throw()
+int String::lastIndexOf (const String& other) const throw()
 {
-    if (other != 0 && *other != 0)
+    if (other.isNotEmpty())
     {
-        const int len = CharacterFunctions::length (other);
+        const int len = other.length();
         int i = length() - len;
 
         if (i >= 0)
@@ -911,7 +912,7 @@ int String::lastIndexOf (const juce_wchar* const other) const throw()
 
             while (i >= 0)
             {
-                if (CharacterFunctions::compare (n--, other, len) == 0)
+                if (CharacterFunctions::compare (n--, other.text, len) == 0)
                     return i;
 
                 --i;
@@ -922,11 +923,11 @@ int String::lastIndexOf (const juce_wchar* const other) const throw()
     return -1;
 }
 
-int String::lastIndexOfIgnoreCase (const juce_wchar* const other) const throw()
+int String::lastIndexOfIgnoreCase (const String& other) const throw()
 {
-    if (other != 0 && *other != 0)
+    if (other.isNotEmpty())
     {
-        const int len = CharacterFunctions::length (other);
+        const int len = other.length();
         int i = length() - len;
 
         if (i >= 0)
@@ -935,7 +936,7 @@ int String::lastIndexOfIgnoreCase (const juce_wchar* const other) const throw()
 
             while (i >= 0)
             {
-                if (CharacterFunctions::compareIgnoreCase (n--, other, len) == 0)
+                if (CharacterFunctions::compareIgnoreCase (n--, other.text, len) == 0)
                     return i;
 
                 --i;
@@ -946,17 +947,16 @@ int String::lastIndexOfIgnoreCase (const juce_wchar* const other) const throw()
     return -1;
 }
 
-int String::lastIndexOfAnyOf (const juce_wchar* const charactersToLookFor,
-                              const bool ignoreCase) const throw()
+int String::lastIndexOfAnyOf (const String& charactersToLookFor, const bool ignoreCase) const throw()
 {
     for (int i = length(); --i >= 0;)
-        if (CharacterFunctions::indexOfChar (charactersToLookFor, text[i], ignoreCase) >= 0)
+        if (CharacterFunctions::indexOfChar (charactersToLookFor.text, text[i], ignoreCase) >= 0)
             return i;
 
     return -1;
 }
 
-bool String::contains (const juce_wchar* const other) const throw()
+bool String::contains (const String& other) const throw()
 {
     return indexOf (other) >= 0;
 }
@@ -967,32 +967,32 @@ bool String::containsChar (const juce_wchar character) const throw()
 
     for (;;)
     {
-        if (*t == character)
-            return true;
-
         if (*t == 0)
             return false;
+
+        if (*t == character)
+            return true;
 
         ++t;
     }
 }
 
-bool String::containsIgnoreCase (const juce_wchar* const t) const throw()
+bool String::containsIgnoreCase (const String& t) const throw()
 {
     return indexOfIgnoreCase (t) >= 0;
 }
 
-int String::indexOfWholeWord (const juce_wchar* const word) const throw()
+int String::indexOfWholeWord (const String& word) const throw()
 {
-    if (word != 0 && *word != 0)
+    if (word.isNotEmpty())
     {
-        const int wordLen = CharacterFunctions::length (word);
+        const int wordLen = word.length();
         const int end = length() - wordLen;
         const juce_wchar* t = text;
 
         for (int i = 0; i <= end; ++i)
         {
-            if (CharacterFunctions::compare (t, word, wordLen) == 0
+            if (CharacterFunctions::compare (t, word.text, wordLen) == 0
                   && (i == 0 || ! CharacterFunctions::isLetterOrDigit (* (t - 1)))
                   && ! CharacterFunctions::isLetterOrDigit (t [wordLen]))
             {
@@ -1006,17 +1006,17 @@ int String::indexOfWholeWord (const juce_wchar* const word) const throw()
     return -1;
 }
 
-int String::indexOfWholeWordIgnoreCase (const juce_wchar* const word) const throw()
+int String::indexOfWholeWordIgnoreCase (const String& word) const throw()
 {
-    if (word != 0 && *word != 0)
+    if (word.isNotEmpty())
     {
-        const int wordLen = CharacterFunctions::length (word);
+        const int wordLen = word.length();
         const int end = length() - wordLen;
         const juce_wchar* t = text;
 
         for (int i = 0; i <= end; ++i)
         {
-            if (CharacterFunctions::compareIgnoreCase (t, word, wordLen) == 0
+            if (CharacterFunctions::compareIgnoreCase (t, word.text, wordLen) == 0
                   && (i == 0 || ! CharacterFunctions::isLetterOrDigit (* (t - 1)))
                   && ! CharacterFunctions::isLetterOrDigit (t [wordLen]))
             {
@@ -1030,12 +1030,12 @@ int String::indexOfWholeWordIgnoreCase (const juce_wchar* const word) const thro
     return -1;
 }
 
-bool String::containsWholeWord (const juce_wchar* const wordToLookFor) const throw()
+bool String::containsWholeWord (const String& wordToLookFor) const throw()
 {
     return indexOfWholeWord (wordToLookFor) >= 0;
 }
 
-bool String::containsWholeWordIgnoreCase (const juce_wchar* const wordToLookFor) const throw()
+bool String::containsWholeWordIgnoreCase (const String& wordToLookFor) const throw()
 {
     return indexOfWholeWordIgnoreCase (wordToLookFor) >= 0;
 }
@@ -1085,13 +1085,13 @@ static int indexOfMatch (const juce_wchar* const wildcard,
     return -1;
 }
 
-bool String::matchesWildcard (const juce_wchar* wildcard, const bool ignoreCase) const throw()
+bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) const throw()
 {
     int i = 0;
 
     for (;;)
     {
-        const juce_wchar wc = wildcard [i];
+        const juce_wchar wc = wildcard.text [i];
         const juce_wchar c = text [i];
 
         if (wc == c
@@ -1106,7 +1106,7 @@ bool String::matchesWildcard (const juce_wchar* wildcard, const bool ignoreCase)
         else
         {
             return wc == '*' && (wildcard [i + 1] == 0
-                                  || indexOfMatch (wildcard + i + 1,
+                                  || indexOfMatch (wildcard.text + i + 1,
                                                    text + i,
                                                    ignoreCase) >= 0);
         }
@@ -1114,16 +1114,16 @@ bool String::matchesWildcard (const juce_wchar* wildcard, const bool ignoreCase)
 }
 
 //==============================================================================
-const String String::repeatedString (const juce_wchar* const stringToRepeat, int numberOfTimesToRepeat)
+const String String::repeatedString (const String& stringToRepeat, int numberOfTimesToRepeat)
 {
-    const int len = CharacterFunctions::length (stringToRepeat);
+    const int len = stringToRepeat.length();
     String result ((size_t) (len * numberOfTimesToRepeat + 1), (int) 0);
     juce_wchar* n = result.text;
     *n = 0;
 
     while (--numberOfTimesToRepeat >= 0)
     {
-        StringHolder::copyChars (n, stringToRepeat, len);
+        StringHolder::copyChars (n, stringToRepeat.text, len);
         n += len;
     }
 
@@ -1169,8 +1169,7 @@ const String String::paddedRight (const juce_wchar padCharacter, int minimumLeng
 }
 
 //==============================================================================
-const String String::replaceSection (int index, int numCharsToReplace,
-                                     const juce_wchar* const stringToInsert) const
+const String String::replaceSection (int index, int numCharsToReplace, const String& stringToInsert) const
 {
     if (index < 0)
     {
@@ -1200,7 +1199,7 @@ const String String::replaceSection (int index, int numCharsToReplace,
         numCharsToReplace = len - index;
     }
 
-    const int newStringLen = (stringToInsert != 0) ? CharacterFunctions::length (stringToInsert) : 0;
+    const int newStringLen = stringToInsert.length();
     const int newTotalLen = len + newStringLen - numCharsToReplace;
 
     if (newTotalLen <= 0)
@@ -1211,7 +1210,7 @@ const String String::replaceSection (int index, int numCharsToReplace,
     StringHolder::copyChars (result.text, text, index);
 
     if (newStringLen > 0)
-        StringHolder::copyChars (result.text + index, stringToInsert, newStringLen);
+        StringHolder::copyChars (result.text + index, stringToInsert.text, newStringLen);
 
     const int endStringLen = newTotalLen - (index + newStringLen);
 
@@ -1223,12 +1222,10 @@ const String String::replaceSection (int index, int numCharsToReplace,
     return result;
 }
 
-const String String::replace (const juce_wchar* const stringToReplace,
-                              const juce_wchar* const stringToInsert,
-                              const bool ignoreCase) const
+const String String::replace (const String& stringToReplace, const String& stringToInsert, const bool ignoreCase) const
 {
-    const int stringToReplaceLen = CharacterFunctions::length (stringToReplace);
-    const int stringToInsertLen = CharacterFunctions::length (stringToInsert);
+    const int stringToReplaceLen = stringToReplace.length();
+    const int stringToInsertLen = stringToInsert.length();
 
     int i = 0;
     String result (*this);
@@ -1265,11 +1262,11 @@ const String String::replaceCharacter (const juce_wchar charToReplace, const juc
 }
 
 const String String::replaceCharacters (const String& charactersToReplace,
-                                        const juce_wchar* const charactersToInsertInstead) const
+                                        const String& charactersToInsertInstead) const
 {
     String result (*this, size_t());
     juce_wchar* t = result.text;
-    const int len2 = CharacterFunctions::length (charactersToInsertInstead);
+    const int len2 = charactersToInsertInstead.length();
 
     // the two strings passed in are supposed to be the same length!
     jassert (len2 == charactersToReplace.length());
@@ -1288,16 +1285,14 @@ const String String::replaceCharacters (const String& charactersToReplace,
 }
 
 //==============================================================================
-bool String::startsWith (const juce_wchar* const other) const throw()
+bool String::startsWith (const String& other) const throw()
 {
-    return other != 0
-            && CharacterFunctions::compare (text, other, CharacterFunctions::length (other)) == 0;
+    return CharacterFunctions::compare (text, other.text, other.length()) == 0;
 }
 
-bool String::startsWithIgnoreCase (const juce_wchar* const other) const throw()
+bool String::startsWithIgnoreCase (const String& other) const throw()
 {
-    return other != 0
-            && CharacterFunctions::compareIgnoreCase (text, other, CharacterFunctions::length (other)) == 0;
+    return CharacterFunctions::compareIgnoreCase (text, other.text, other.length()) == 0;
 }
 
 bool String::startsWithChar (const juce_wchar character) const throw()
@@ -1315,28 +1310,22 @@ bool String::endsWithChar (const juce_wchar character) const throw()
             && text [length() - 1] == character;
 }
 
-bool String::endsWith (const juce_wchar* const other) const throw()
+bool String::endsWith (const String& other) const throw()
 {
-    if (other == 0)
-        return false;
-
     const int thisLen = length();
-    const int otherLen = CharacterFunctions::length (other);
+    const int otherLen = other.length();
 
     return thisLen >= otherLen
-            && CharacterFunctions::compare (text + thisLen - otherLen, other) == 0;
+            && CharacterFunctions::compare (text + thisLen - otherLen, other.text) == 0;
 }
 
-bool String::endsWithIgnoreCase (const juce_wchar* const other) const throw()
+bool String::endsWithIgnoreCase (const String& other) const throw()
 {
-    if (other == 0)
-        return false;
-
     const int thisLen = length();
-    const int otherLen = CharacterFunctions::length (other);
+    const int otherLen = other.length();
 
     return thisLen >= otherLen
-            && CharacterFunctions::compareIgnoreCase (text + thisLen - otherLen, other) == 0;
+            && CharacterFunctions::compareIgnoreCase (text + thisLen - otherLen, other.text) == 0;
 }
 
 //==============================================================================
@@ -1414,7 +1403,7 @@ const String String::getLastCharacters (const int numCharacters) const
     return String (text + jmax (0, length() - jmax (0, numCharacters)));
 }
 
-const String String::fromFirstOccurrenceOf (const juce_wchar* const sub,
+const String String::fromFirstOccurrenceOf (const String& sub,
                                             const bool includeSubString,
                                             const bool ignoreCase) const
 {
@@ -1424,10 +1413,10 @@ const String String::fromFirstOccurrenceOf (const juce_wchar* const sub,
     if (i < 0)
         return empty;
     else
-        return substring (includeSubString ? i : i + CharacterFunctions::length (sub));
+        return substring (includeSubString ? i : i + sub.length());
 }
 
-const String String::fromLastOccurrenceOf (const juce_wchar* const sub,
+const String String::fromLastOccurrenceOf (const String& sub,
                                            const bool includeSubString,
                                            const bool ignoreCase) const
 {
@@ -1436,11 +1425,11 @@ const String String::fromLastOccurrenceOf (const juce_wchar* const sub,
 
     if (i < 0)
         return *this;
-    else
-        return substring (includeSubString ? i : i + CharacterFunctions::length (sub));
+
+    return substring (includeSubString ? i : i + sub.length());
 }
 
-const String String::upToFirstOccurrenceOf (const juce_wchar* const sub,
+const String String::upToFirstOccurrenceOf (const String& sub,
                                             const bool includeSubString,
                                             const bool ignoreCase) const
 {
@@ -1449,11 +1438,11 @@ const String String::upToFirstOccurrenceOf (const juce_wchar* const sub,
 
     if (i < 0)
         return *this;
-    else
-        return substring (0, includeSubString ? i + CharacterFunctions::length (sub) : i);
+
+    return substring (0, includeSubString ? i + sub.length() : i);
 }
 
-const String String::upToLastOccurrenceOf (const juce_wchar* const sub,
+const String String::upToLastOccurrenceOf (const String& sub,
                                            const bool includeSubString,
                                            const bool ignoreCase) const
 {
@@ -1462,7 +1451,7 @@ const String String::upToLastOccurrenceOf (const juce_wchar* const sub,
     if (i < 0)
         return *this;
 
-    return substring (0, includeSubString ? i + CharacterFunctions::length (sub) : i);
+    return substring (0, includeSubString ? i + sub.length() : i);
 }
 
 bool String::isQuotedString() const
@@ -1561,16 +1550,14 @@ const String String::trimEnd() const
     return String (text, (int) (++endT - text));
 }
 
-const String String::trimCharactersAtStart (const juce_wchar* charactersToTrim) const
+const String String::trimCharactersAtStart (const String& charactersToTrim) const
 {
-    jassert (charactersToTrim != 0);
-
     if (isEmpty())
         return empty;
 
     const juce_wchar* t = text;
 
-    while (CharacterFunctions::indexOfCharFast (charactersToTrim, *t) >= 0)
+    while (charactersToTrim.containsChar (*t))
         ++t;
 
     if (t == text)
@@ -1579,26 +1566,22 @@ const String String::trimCharactersAtStart (const juce_wchar* charactersToTrim) 
         return String (t);
 }
 
-const String String::trimCharactersAtEnd (const juce_wchar* charactersToTrim) const
+const String String::trimCharactersAtEnd (const String& charactersToTrim) const
 {
-    jassert (charactersToTrim != 0);
-
     if (isEmpty())
         return empty;
 
     const juce_wchar* endT = text + (length() - 1);
 
-    while ((endT >= text) && CharacterFunctions::indexOfCharFast (charactersToTrim, *endT) >= 0)
+    while (endT >= text && charactersToTrim.containsChar (*endT))
         --endT;
 
     return String (text, (int) (++endT - text));
 }
 
 //==============================================================================
-const String String::retainCharacters (const juce_wchar* const charactersToRetain) const
+const String String::retainCharacters (const String& charactersToRetain) const
 {
-    jassert (charactersToRetain != 0);
-
     if (isEmpty())
         return empty;
 
@@ -1608,7 +1591,7 @@ const String String::retainCharacters (const juce_wchar* const charactersToRetai
 
     while (*src != 0)
     {
-        if (CharacterFunctions::indexOfCharFast (charactersToRetain, *src) >= 0)
+        if (charactersToRetain.containsChar (*src))
             *dst++ = *src;
 
         ++src;
@@ -1618,10 +1601,8 @@ const String String::retainCharacters (const juce_wchar* const charactersToRetai
     return result;
 }
 
-const String String::removeCharacters (const juce_wchar* const charactersToRemove) const
+const String String::removeCharacters (const String& charactersToRemove) const
 {
-    jassert (charactersToRemove != 0);
-
     if (isEmpty())
         return empty;
 
@@ -1631,7 +1612,7 @@ const String String::removeCharacters (const juce_wchar* const charactersToRemov
 
     while (*src != 0)
     {
-        if (CharacterFunctions::indexOfCharFast (charactersToRemove, *src) < 0)
+        if (! charactersToRemove.containsChar (*src))
             *dst++ = *src;
 
         ++src;
@@ -1641,21 +1622,19 @@ const String String::removeCharacters (const juce_wchar* const charactersToRemov
     return result;
 }
 
-const String String::initialSectionContainingOnly (const juce_wchar* const permittedCharacters) const
+const String String::initialSectionContainingOnly (const String& permittedCharacters) const
 {
-    return substring (0, CharacterFunctions::getIntialSectionContainingOnly (text, permittedCharacters));
+    return substring (0, CharacterFunctions::getIntialSectionContainingOnly (text, permittedCharacters.text));
 }
 
-const String String::initialSectionNotContaining (const juce_wchar* const charactersToStopAt) const
+const String String::initialSectionNotContaining (const String& charactersToStopAt) const
 {
-    jassert (charactersToStopAt != 0);
-
     const juce_wchar* const t = text;
     int i = 0;
 
     while (t[i] != 0)
     {
-        if (CharacterFunctions::indexOfCharFast (charactersToStopAt, t[i]) >= 0)
+        if (charactersToStopAt.containsChar (t[i]))
             return String (text, i);
 
         ++i;
@@ -1664,27 +1643,23 @@ const String String::initialSectionNotContaining (const juce_wchar* const charac
     return empty;
 }
 
-bool String::containsOnly (const juce_wchar* const chars) const throw()
+bool String::containsOnly (const String& chars) const throw()
 {
-    jassert (chars != 0);
-
     const juce_wchar* t = text;
 
     while (*t != 0)
-        if (CharacterFunctions::indexOfCharFast (chars, *t++) < 0)
+        if (! chars.containsChar (*t++))
             return false;
 
     return true;
 }
 
-bool String::containsAnyOf (const juce_wchar* const chars) const throw()
+bool String::containsAnyOf (const String& chars) const throw()
 {
-    jassert (chars != 0);
-
     const juce_wchar* t = text;
 
     while (*t != 0)
-        if (CharacterFunctions::indexOfCharFast (chars, *t++) >= 0)
+        if (chars.containsChar (*t++))
             return true;
 
     return false;

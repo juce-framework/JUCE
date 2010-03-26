@@ -68,7 +68,7 @@ URL::URL (const String& url_)
         }
         while (i >= 0);
 
-        url = url.upToFirstOccurrenceOf (T("?"), false, false);
+        url = url.upToFirstOccurrenceOf ("?", false, false);
     }
 }
 
@@ -132,7 +132,7 @@ static int findStartOfDomain (const String& url)
     int i = 0;
 
     while (CharacterFunctions::isLetterOrDigit (url[i])
-           || CharacterFunctions::indexOfChar (T("+-."), url[i], false) >= 0)
+           || CharacterFunctions::indexOfChar (L"+-.", url[i], false) >= 0)
         ++i;
 
     return url[i] == ':' ? i + 1 : 0;
@@ -197,17 +197,17 @@ const URL URL::withNewSubPath (const String& newPath) const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    if (possibleURL.startsWithIgnoreCase (T("http:"))
-         || possibleURL.startsWithIgnoreCase (T("ftp:")))
+    if (possibleURL.startsWithIgnoreCase ("http:")
+         || possibleURL.startsWithIgnoreCase ("ftp:"))
         return true;
 
-    if (possibleURL.startsWithIgnoreCase (T("file:"))
+    if (possibleURL.startsWithIgnoreCase ("file:")
          || possibleURL.containsChar ('@')
          || possibleURL.endsWithChar ('.')
          || (! possibleURL.containsChar ('.')))
         return false;
 
-    if (possibleURL.startsWithIgnoreCase (T("www."))
+    if (possibleURL.startsWithIgnoreCase ("www.")
          && possibleURL.substring (5).containsChar ('.'))
         return true;
 
@@ -589,7 +589,7 @@ bool URL::launchInDefaultBrowser() const
 {
     String u (toString (true));
 
-    if (u.contains (T("@")) && ! u.contains (T(":")))
+    if (u.containsChar ('@') && ! u.containsChar (':'))
         u = "mailto:" + u;
 
     return juce_launchFile (u, String::empty);

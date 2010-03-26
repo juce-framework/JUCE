@@ -292,8 +292,8 @@ public:
                             "bicompression=\"WMV3\" bisizeimage=\"0\" bixpelspermeter=\"0\" biypelspermeter=\"0\" biclrused=\"0\" biclrimportant=\"0\"/> "
                             "</videoinfoheader></wmmediatype></streamconfig></profile>");
 
-                        prof = prof.replace (T("$WIDTH"), String (width))
-                                   .replace (T("$HEIGHT"), String (height));
+                        prof = prof.replace ("$WIDTH", String (width))
+                                   .replace ("$HEIGHT", String (height));
 
                         ComSmartPtr <IWMProfile> currentProfile;
                         hr = profileManager->LoadProfileByData ((const WCHAR*) prof, &currentProfile);

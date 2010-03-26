@@ -152,8 +152,8 @@ var::operator bool() const
         case boolType:      return value.boolValue;
         case doubleType:    return value.doubleValue != 0;
         case stringType:    return value.stringValue->getIntValue() != 0
-                                    || value.stringValue->trim().equalsIgnoreCase (T("true"))
-                                    || value.stringValue->trim().equalsIgnoreCase (T("yes"));
+                                    || value.stringValue->trim().equalsIgnoreCase ("true")
+                                    || value.stringValue->trim().equalsIgnoreCase ("yes");
         case objectType:    return value.objectValue != 0;
         default:            jassertfalse; break;
     }
@@ -359,7 +359,7 @@ var::identifier::identifier (const String& name_)
 {
     /* An identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
-    jassert (name.containsOnly (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")) && name.isNotEmpty());
+    jassert (name.containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") && name.isNotEmpty());
 }
 
 var::identifier::identifier (const char* const name_)
@@ -368,7 +368,7 @@ var::identifier::identifier (const char* const name_)
 {
     /* An identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
-    jassert (name.containsOnly (T("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")) && name.isNotEmpty());
+    jassert (name.containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") && name.isNotEmpty());
 }
 
 var::identifier::~identifier()

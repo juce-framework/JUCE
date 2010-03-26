@@ -431,7 +431,7 @@ const String Toolbar::toString() const
 bool Toolbar::restoreFromString (ToolbarItemFactory& factoryToUse,
                                  const String& savedVersion)
 {
-    if (! savedVersion.startsWith (T("TB:")))
+    if (! savedVersion.startsWith ("TB:"))
         return false;
 
     StringArray tokens;

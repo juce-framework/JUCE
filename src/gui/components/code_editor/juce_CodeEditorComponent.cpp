@@ -250,7 +250,7 @@ private:
                     break;
 
                 const int spacesNeeded = spacesPerTab - ((tabPos + x) % spacesPerTab);
-                t.text = t.text.replaceSection (tabPos, 1, String::repeatedString (T(" "), spacesNeeded));
+                t.text = t.text.replaceSection (tabPos, 1, String::repeatedString (" ", spacesNeeded));
             }
 
             x += t.text.length();
@@ -632,7 +632,7 @@ void CodeEditorComponent::insertTabAtCaret()
     {
         const int caretCol = indexToColumn (caretPos.getLineNumber(), caretPos.getIndexInLine());
         const int spacesNeeded = spacesPerTab - (caretCol % spacesPerTab);
-        insertTextAtCaret (String::repeatedString (T(" "), spacesNeeded));
+        insertTextAtCaret (String::repeatedString (" ", spacesNeeded));
     }
     else
     {

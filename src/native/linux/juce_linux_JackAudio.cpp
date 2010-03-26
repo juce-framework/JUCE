@@ -193,8 +193,8 @@ public:
             {
                 const String portName (ports [j++]);
 
-                if (portName.upToFirstOccurrenceOf (T(":"), false, false) == getName())
-                    names.add (portName.fromFirstOccurrenceOf (T(":"), false, false));
+                if (portName.upToFirstOccurrenceOf (":", false, false) == getName())
+                    names.add (portName.fromFirstOccurrenceOf (":", false, false));
             }
 
             free (ports);
@@ -240,7 +240,7 @@ public:
                 {
                     const String portName (ports[i]);
 
-                    if (inputChannels[i] && portName.upToFirstOccurrenceOf (T(":"), false, false) == getName())
+                    if (inputChannels[i] && portName.upToFirstOccurrenceOf (":", false, false) == getName())
                     {
                         int error = JUCE_NAMESPACE::jack_connect (client, ports[i], JUCE_NAMESPACE::jack_port_name ((jack_port_t*) inputPorts[i]));
                         if (error != 0)
@@ -264,7 +264,7 @@ public:
                 {
                     const String portName (ports[i]);
 
-                    if (outputChannels[i] && portName.upToFirstOccurrenceOf (T(":"), false, false) == getName())
+                    if (outputChannels[i] && portName.upToFirstOccurrenceOf (":", false, false) == getName())
                     {
                         int error = JUCE_NAMESPACE::jack_connect (client, JUCE_NAMESPACE::jack_port_name ((jack_port_t*) outputPorts[i]), ports[i]);
                         if (error != 0)
@@ -500,7 +500,7 @@ public:
                 while (ports[j] != 0)
                 {
                     String clientName (ports[j]);
-                    clientName = clientName.upToFirstOccurrenceOf (T(":"), false, false);
+                    clientName = clientName.upToFirstOccurrenceOf (":", false, false);
 
                     if (clientName != String (JUCE_JACK_CLIENT_NAME)
                          && ! inputNames.contains (clientName))
@@ -524,7 +524,7 @@ public:
                 while (ports[j] != 0)
                 {
                     String clientName (ports[j]);
-                    clientName = clientName.upToFirstOccurrenceOf (T(":"), false, false);
+                    clientName = clientName.upToFirstOccurrenceOf (":", false, false);
 
                     if (clientName != String (JUCE_JACK_CLIENT_NAME)
                          && ! outputNames.contains (clientName))

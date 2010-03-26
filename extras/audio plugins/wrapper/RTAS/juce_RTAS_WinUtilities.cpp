@@ -100,7 +100,7 @@ static HWND findMDIParentOf (HWND w)
         zeromem (windowType, sizeof (windowType));
         GetClassName (parent, windowType, 31);
 
-        if (String (windowType).equalsIgnoreCase (T("MDIClient")))
+        if (String (windowType).equalsIgnoreCase ("MDIClient"))
         {
             w = parent;
             break;

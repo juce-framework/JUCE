@@ -133,7 +133,7 @@ void* juce_openInternetFile (const String& url,
 
             InternetSetOption (sessionHandle, INTERNET_OPTION_CONNECT_TIMEOUT, &timeOutMs, sizeof (timeOutMs));
 
-            const bool isFtp = url.startsWithIgnoreCase (T("ftp:"));
+            const bool isFtp = url.startsWithIgnoreCase ("ftp:");
 
 #if WORKAROUND_TIMEOUT_BUG
             HINTERNET connection = 0;
@@ -179,7 +179,7 @@ void* juce_openInternetFile (const String& url,
 
                     DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
 
-                    if (url.startsWithIgnoreCase (T("https:")))
+                    if (url.startsWithIgnoreCase ("https:"))
                         flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
                                                         //  IE7 seems to automatically work out when it's https)
 

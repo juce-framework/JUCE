@@ -199,9 +199,9 @@ public:
 
                             // Surely there must be a better way to do this?
                             const String name (face->family_name);
-                            newFace->setSerif (! (name.containsIgnoreCase (T("Sans"))
-                                                   || name.containsIgnoreCase (T("Verdana"))
-                                                   || name.containsIgnoreCase (T("Arial"))));
+                            newFace->setSerif (! (name.containsIgnoreCase ("Sans")
+                                                   || name.containsIgnoreCase ("Verdana")
+                                                   || name.containsIgnoreCase ("Arial")));
                         }
 
                         FT_Done_Face (face);

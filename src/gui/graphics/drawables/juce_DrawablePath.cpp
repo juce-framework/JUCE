@@ -133,7 +133,7 @@ static const FillType readFillTypeFromTree (const ValueTree& v)
 {
     const String type (v["type"].toString());
 
-    if (type.equalsIgnoreCase (T("solid")))
+    if (type.equalsIgnoreCase ("solid"))
     {
         const String colour (v ["colour"].toString());
         return FillType (Colour (colour.isEmpty() ? (uint32) 0xff000000
@@ -231,12 +231,12 @@ DrawablePath* DrawablePath::createFromValueTree (const ValueTree& tree) throw()
 
     p->strokeType
         = PathStrokeType (tree ["strokeWidth"],
-                          jointStyle.equalsIgnoreCase (T("curved")) ? PathStrokeType::curved
-                                                                    : (jointStyle.equalsIgnoreCase (T("bevel")) ? PathStrokeType::beveled
-                                                                                                                : PathStrokeType::mitered),
-                          endStyle.equalsIgnoreCase (T("square")) ? PathStrokeType::square
-                                                                  : (endStyle.equalsIgnoreCase (T("round")) ? PathStrokeType::rounded
-                                                                                                            : PathStrokeType::butt));
+                          jointStyle.equalsIgnoreCase ("curved") ? PathStrokeType::curved
+                                                                 : (jointStyle.equalsIgnoreCase ("bevel") ? PathStrokeType::beveled
+                                                                                                          : PathStrokeType::mitered),
+                          endStyle.equalsIgnoreCase ("square") ? PathStrokeType::square
+                                                               : (endStyle.equalsIgnoreCase ("round") ? PathStrokeType::rounded
+                                                                                                      : PathStrokeType::butt));
 
     p->path.clear();
     p->path.restoreFromString (tree ["path"]);

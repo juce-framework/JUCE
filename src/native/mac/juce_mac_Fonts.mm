@@ -65,13 +65,13 @@ public:
             for (NSString* i in familyFonts)
             {
                 const String fn (nsStringToJuce (i));
-                const String afterDash (fn.fromFirstOccurrenceOf (T("-"), false, false));
+                const String afterDash (fn.fromFirstOccurrenceOf ("-", false, false));
 
-                const bool probablyBold = afterDash.containsIgnoreCase (T("bold")) || fn.endsWithIgnoreCase (T("bold"));
-                const bool probablyItalic = afterDash.containsIgnoreCase (T("oblique"))
-                                             || afterDash.containsIgnoreCase (T("italic"))
-                                             || fn.endsWithIgnoreCase (T("oblique"))
-                                             || fn.endsWithIgnoreCase (T("italic"));
+                const bool probablyBold = afterDash.containsIgnoreCase ("bold") || fn.endsWithIgnoreCase ("bold");
+                const bool probablyItalic = afterDash.containsIgnoreCase ("oblique")
+                                             || afterDash.containsIgnoreCase ("italic")
+                                             || fn.endsWithIgnoreCase ("oblique")
+                                             || fn.endsWithIgnoreCase ("italic");
 
                 if (probablyBold == font.isBold()
                      && probablyItalic == font.isItalic())

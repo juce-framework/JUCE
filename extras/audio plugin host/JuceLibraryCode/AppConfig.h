@@ -28,6 +28,7 @@
 //#define  JUCE_USE_XINERAMA
 //#define  JUCE_USE_XSHM
 //#define  JUCE_USE_XRENDER
+//#define  JUCE_USE_XCURSOR
 #define    JUCE_PLUGINHOST_VST 1
 #define    JUCE_PLUGINHOST_AU 1
 //#define  JUCE_ONLY_BUILD_CORE_LIBRARY

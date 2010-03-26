@@ -108,5 +108,5 @@
                JUCE_PLUGINHOST_AU="disabled" JUCE_ONLY_BUILD_CORE_LIBRARY="default"
                JUCE_WEB_BROWSER="enabled" JUCE_SUPPORT_CARBON="default" JUCE_CHECK_MEMORY_LEAKS="default"
                JUCE_CATCH_UNHANDLED_EXCEPTIONS="default" JUCE_STRINGS_ARE_UNICODE="default"
-               JUCE_USE_XRENDER="default"/>
+               JUCE_USE_XRENDER="default" JUCE_USE_XCURSOR="default"/>
 </JUCERPROJECT>

@@ -1197,7 +1197,7 @@ void TextEditor::setText (const String& newText,
 
         // if you're adding text with line-feeds to a single-line text editor, it
         // ain't gonna look right!
-        jassert (multiline || ! newText.containsAnyOf (T("\r\n")));
+        jassert (multiline || ! newText.containsAnyOf ("\r\n"));
 
         if (cursorWasAtEnd && ! isMultiLine())
             moveCursorTo (getTotalNumChars(), false);
@@ -1592,9 +1592,9 @@ void TextEditor::insertTextAtCaret (const String& newText_)
     }
 
     if (! isMultiLine())
-        newText = newText.replaceCharacters (T("\r\n"), T("  "));
+        newText = newText.replaceCharacters ("\r\n", "  ");
     else
-        newText = newText.replace (T("\r\n"), T("\n"));
+        newText = newText.replace ("\r\n", "\n");
 
     const int newCaretPos = selection.getStart() + newText.length();
     const int insertIndex = selection.getStart();

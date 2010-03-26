@@ -158,7 +158,7 @@ static const String parseAbsolutePath (String path)
         else
         {
             // expand a name of type "~dave/abc"
-            const String userName (path.substring (1).upToFirstOccurrenceOf (T("/"), false, false));
+            const String userName (path.substring (1).upToFirstOccurrenceOf ("/", false, false));
 
             struct passwd* const pw = getpwnam (userName.toUTF8());
             if (pw != 0)
@@ -182,7 +182,7 @@ static const String parseAbsolutePath (String path)
             "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
             path if that's what was supplied, or would evaluate a partial path relative to the CWD.
         */
-        jassert (path.startsWith (T("./")) || path.startsWith (T("../"))); // (assume that a path "./xyz" is deliberately intended to be relative to the CWD)
+        jassert (path.startsWith ("./") || path.startsWith ("../")); // (assume that a path "./xyz" is deliberately intended to be relative to the CWD)
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
@@ -689,7 +689,7 @@ int File::findChildFiles (Array<File>& results,
             do
             {
                 if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden)
-                     && ! filename.containsOnly (T(".")))
+                     && ! filename.containsOnly ("."))
                 {
                     results.add (File (path + filename, 0));
                     ++total;
@@ -744,7 +744,7 @@ int File::getNumberOfChildFiles (const int whatToLookFor,
             do
             {
                 if (fileTypeMatches (whatToLookFor, itemIsDirectory, itemIsHidden)
-                     && ! filename.containsOnly (T(".")))
+                     && ! filename.containsOnly ("."))
                 {
                     ++count;
                 }
@@ -816,7 +816,7 @@ const File File::getNonexistentChildFile (const String& prefix_,
 
             if (openBracks > 0
                  && closeBracks > openBracks
-                 && prefix.substring (openBracks + 1, closeBracks).containsOnly (T("0123456789")))
+                 && prefix.substring (openBracks + 1, closeBracks).containsOnly ("0123456789"))
             {
                 num = prefix.substring (openBracks + 1, closeBracks).getIntValue() + 1;
                 prefix = prefix.substring (0, openBracks);
@@ -1008,13 +1008,13 @@ const String File::createLegalPathName (const String& original)
         s = s.substring (2);
     }
 
-    return start + s.removeCharacters (T("\"#@,;:<>*^|?"))
+    return start + s.removeCharacters ("\"#@,;:<>*^|?")
                     .substring (0, 1024);
 }
 
 const String File::createLegalFileName (const String& original)
 {
-    String s (original.removeCharacters (T("\"#@,;:<>*^|?\\/")));
+    String s (original.removeCharacters ("\"#@,;:<>*^|?\\/"));
 
     const int maxLength = 128; // only the length of the filename, not the whole path
     const int len = s.length();

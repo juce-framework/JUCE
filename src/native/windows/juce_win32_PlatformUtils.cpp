@@ -35,11 +35,11 @@ static HKEY findKeyForPath (String name,
 {
     HKEY rootKey = 0;
 
-    if (name.startsWithIgnoreCase (T("HKEY_CURRENT_USER\\")))
+    if (name.startsWithIgnoreCase ("HKEY_CURRENT_USER\\"))
         rootKey = HKEY_CURRENT_USER;
-    else if (name.startsWithIgnoreCase (T("HKEY_LOCAL_MACHINE\\")))
+    else if (name.startsWithIgnoreCase ("HKEY_LOCAL_MACHINE\\"))
         rootKey = HKEY_LOCAL_MACHINE;
-    else if (name.startsWithIgnoreCase (T("HKEY_CLASSES_ROOT\\")))
+    else if (name.startsWithIgnoreCase ("HKEY_CLASSES_ROOT\\"))
         rootKey = HKEY_CLASSES_ROOT;
 
     if (rootKey != 0)

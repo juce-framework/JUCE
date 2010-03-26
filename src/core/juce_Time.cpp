@@ -457,8 +457,8 @@ const String Time::getTimeZone() const throw()
         zone[0] = zone[1];
 
         if (zone[0].length() > 3
-             && zone[0].containsIgnoreCase (T("daylight"))
-             && zone[0].contains (T("GMT")))
+             && zone[0].containsIgnoreCase ("daylight")
+             && zone[0].contains ("GMT"))
             zone[0] = "BST";
     }
 

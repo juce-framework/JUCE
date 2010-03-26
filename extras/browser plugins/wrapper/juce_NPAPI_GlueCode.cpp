@@ -213,8 +213,8 @@ char* NP_GetMIMEDescription()
     static String mimeDesc;
 
     mimeDesc = String (T(JuceBrowserPlugin_MimeType))
-                + T(":") + String (T(JuceBrowserPlugin_FileSuffix))
-                + T(":") + String (T(JuceBrowserPlugin_Name));
+                + ":" + String (T(JuceBrowserPlugin_FileSuffix))
+                + ":" + String (T(JuceBrowserPlugin_Name));
 
     return (char*) (const char*) mimeDesc.toUTF8();
 }
@@ -934,10 +934,10 @@ private:
     {
         const String version (browser.uagent (npp));
 
-        if (! version.containsIgnoreCase (T(" AppleWebKit/")))
+        if (! version.containsIgnoreCase (" AppleWebKit/"))
             return true;
 
-        int versionNum = version.fromFirstOccurrenceOf (T(" AppleWebKit/"), false, true).getIntValue();
+        int versionNum = version.fromFirstOccurrenceOf (" AppleWebKit/", false, true).getIntValue();
 
         return versionNum == 0 || versionNum >= 420;
     }

@@ -462,7 +462,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     tokens.removeEmptyStrings();
     tokens.trim();
 
-    const bool fs = tokens[0].startsWithIgnoreCase (T("fs"));
+    const bool fs = tokens[0].startsWithIgnoreCase ("fs");
     const int firstCoord = fs ? 1 : 0;
 
     if (tokens.size() != firstCoord + 4)

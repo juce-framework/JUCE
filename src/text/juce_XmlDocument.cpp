@@ -722,19 +722,19 @@ void XmlDocument::readEntity (String& result)
 
 const String XmlDocument::expandEntity (const String& ent)
 {
-    if (ent.equalsIgnoreCase (T("amp")))
+    if (ent.equalsIgnoreCase ("amp"))
         return String::charToString ('&');
 
-    if (ent.equalsIgnoreCase (T("quot")))
+    if (ent.equalsIgnoreCase ("quot"))
         return String::charToString ('"');
 
-    if (ent.equalsIgnoreCase (T("apos")))
+    if (ent.equalsIgnoreCase ("apos"))
         return String::charToString ('\'');
 
-    if (ent.equalsIgnoreCase (T("lt")))
+    if (ent.equalsIgnoreCase ("lt"))
         return String::charToString ('<');
 
-    if (ent.equalsIgnoreCase (T("gt")))
+    if (ent.equalsIgnoreCase ("gt"))
         return String::charToString ('>');
 
     if (ent[0] == '#')
@@ -763,7 +763,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
 
             tokenisedDTD.addTokens (dtdText, true);
 
-            if (tokenisedDTD [tokenisedDTD.size() - 2].equalsIgnoreCase (T("system"))
+            if (tokenisedDTD [tokenisedDTD.size() - 2].equalsIgnoreCase ("system")
                  && tokenisedDTD [tokenisedDTD.size() - 1].isQuotedString())
             {
                 const String fn (tokenisedDTD [tokenisedDTD.size() - 1]);
@@ -810,7 +810,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
     {
         if (tokenisedDTD[i] == entity)
         {
-            if (tokenisedDTD[i - 1].equalsIgnoreCase (T("<!entity")))
+            if (tokenisedDTD[i - 1].equalsIgnoreCase ("<!entity"))
             {
                 String ent (tokenisedDTD [i + 1]);
 
@@ -824,7 +824,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
 
                 while (ampersand >= 0)
                 {
-                    const int semiColon = ent.indexOf (i + 1, T(";"));
+                    const int semiColon = ent.indexOf (i + 1, ";");
 
                     if (semiColon < 0)
                     {
@@ -858,14 +858,14 @@ const String XmlDocument::getParameterEntity (const String& entity)
         if (tokenisedDTD[i] == entity)
         {
             if (tokenisedDTD [i - 1] == "%"
-                && tokenisedDTD [i - 2].equalsIgnoreCase (T("<!entity")))
+                && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
             {
                 String ent (tokenisedDTD [i + 1]);
 
                 while (ent.endsWithChar ('>'))
                     ent = ent.dropLastCharacters (1);
 
-                if (ent.equalsIgnoreCase (T("system")))
+                if (ent.equalsIgnoreCase ("system"))
                 {
                     String filename (tokenisedDTD [i + 2]);
 

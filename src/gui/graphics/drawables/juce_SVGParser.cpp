@@ -87,25 +87,25 @@ public:
 
                 const String aspect (xml.getStringAttribute ("preserveAspectRatio"));
 
-                if (aspect.containsIgnoreCase (T("none")))
+                if (aspect.containsIgnoreCase ("none"))
                 {
                     placementFlags = RectanglePlacement::stretchToFit;
                 }
                 else
                 {
-                    if (aspect.containsIgnoreCase (T("slice")))
+                    if (aspect.containsIgnoreCase ("slice"))
                         placementFlags |= RectanglePlacement::fillDestination;
 
-                    if (aspect.containsIgnoreCase (T("xMin")))
+                    if (aspect.containsIgnoreCase ("xMin"))
                         placementFlags |= RectanglePlacement::xLeft;
-                    else if (aspect.containsIgnoreCase (T("xMax")))
+                    else if (aspect.containsIgnoreCase ("xMax"))
                         placementFlags |= RectanglePlacement::xRight;
                     else
                         placementFlags |= RectanglePlacement::xMid;
 
-                    if (aspect.containsIgnoreCase (T("yMin")))
+                    if (aspect.containsIgnoreCase ("yMin"))
                         placementFlags |= RectanglePlacement::yTop;
-                    else if (aspect.containsIgnoreCase (T("yMax")))
+                    else if (aspect.containsIgnoreCase ("yMax"))
                         placementFlags |= RectanglePlacement::yBottom;
                     else
                         placementFlags |= RectanglePlacement::yMid;
@@ -213,7 +213,7 @@ private:
         const String d (xml.getStringAttribute ("d").trimStart());
         Path path;
 
-        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase (T("evenodd")))
+        if (getStyleAttribute (&xml, "fill-rule").trim().equalsIgnoreCase ("evenodd"))
             path.setUsingNonZeroWinding (false);
 
         int index = 0;
@@ -225,7 +225,7 @@ private:
 
         const String validCommandChars ("MmLlHhVvCcSsQqTtAaZz");
 
-        for (;;)
+        while (d[index] != 0)
         {
             float x, y, x2, y2, x3, y3;
 
@@ -695,10 +695,10 @@ private:
         if (fillOpacity.isNotEmpty())
             opacity *= (jlimit (0.0f, 1.0f, fillOpacity.getFloatValue()));
 
-        if (fill.startsWithIgnoreCase (T("url")))
+        if (fill.startsWithIgnoreCase ("url"))
         {
-            const String id (fill.fromFirstOccurrenceOf (T("#"), false, false)
-                                 .upToLastOccurrenceOf (T(")"), false, false).trim());
+            const String id (fill.fromFirstOccurrenceOf ("#", false, false)
+                                 .upToLastOccurrenceOf (")", false, false).trim());
 
             const XmlElement* const fillXml = findElementForId (topLevelXml, id);
 
@@ -736,7 +736,7 @@ private:
                 float dx = 0.0f;
                 float dy = 0.0f;
 
-                const bool userSpace = fillXml->getStringAttribute ("gradientUnits").equalsIgnoreCase (T("userSpaceOnUse"));
+                const bool userSpace = fillXml->getStringAttribute ("gradientUnits").equalsIgnoreCase ("userSpaceOnUse");
 
                 if (! userSpace)
                 {
@@ -778,7 +778,7 @@ private:
             }
         }
 
-        if (fill.equalsIgnoreCase (T("none")))
+        if (fill.equalsIgnoreCase ("none"))
             return Colours::transparentBlack;
 
         int i = 0;
@@ -792,21 +792,21 @@ private:
         const String cap (getStyleAttribute (xml, "stroke-linecap"));
         const String join (getStyleAttribute (xml, "stroke-linejoin"));
 
-        //const String mitreLimit (getStyleAttribute (xml, T("stroke-miterlimit")));
-        //const String dashArray (getStyleAttribute (xml, T("stroke-dasharray")));
-        //const String dashOffset (getStyleAttribute (xml, T("stroke-dashoffset")));
+        //const String mitreLimit (getStyleAttribute (xml, "stroke-miterlimit"));
+        //const String dashArray (getStyleAttribute (xml, "stroke-dasharray"));
+        //const String dashOffset (getStyleAttribute (xml, "stroke-dashoffset"));
 
         PathStrokeType::JointStyle joinStyle = PathStrokeType::mitered;
         PathStrokeType::EndCapStyle capStyle = PathStrokeType::butt;
 
-        if (join.equalsIgnoreCase (T("round")))
+        if (join.equalsIgnoreCase ("round"))
             joinStyle = PathStrokeType::curved;
-        else if (join.equalsIgnoreCase (T("bevel")))
+        else if (join.equalsIgnoreCase ("bevel"))
             joinStyle = PathStrokeType::beveled;
 
-        if (cap.equalsIgnoreCase (T("round")))
+        if (cap.equalsIgnoreCase ("round"))
             capStyle = PathStrokeType::rounded;
-        else if (cap.equalsIgnoreCase (T("square")))
+        else if (cap.equalsIgnoreCase ("square"))
             capStyle = PathStrokeType::square;
 
         float ox = 0.0f, oy = 0.0f;
@@ -1137,8 +1137,8 @@ private:
         while (t.isNotEmpty())
         {
             StringArray tokens;
-            tokens.addTokens (t.fromFirstOccurrenceOf (T("("), false, false)
-                               .upToFirstOccurrenceOf (T(")"), false, false),
+            tokens.addTokens (t.fromFirstOccurrenceOf ("(", false, false)
+                               .upToFirstOccurrenceOf (")", false, false),
                               ", ", String::empty);
 
             tokens.removeEmptyStrings (true);
@@ -1150,24 +1150,24 @@ private:
 
             AffineTransform trans;
 
-            if (t.startsWithIgnoreCase (T("matrix")))
+            if (t.startsWithIgnoreCase ("matrix"))
             {
                 trans = AffineTransform (numbers[0], numbers[2], numbers[4],
                                          numbers[1], numbers[3], numbers[5]);
             }
-            else if (t.startsWithIgnoreCase (T("translate")))
+            else if (t.startsWithIgnoreCase ("translate"))
             {
                 jassert (tokens.size() == 2);
                 trans = AffineTransform::translation (numbers[0], numbers[1]);
             }
-            else if (t.startsWithIgnoreCase (T("scale")))
+            else if (t.startsWithIgnoreCase ("scale"))
             {
                 if (tokens.size() == 1)
                     trans = AffineTransform::scale (numbers[0], numbers[0]);
                 else
                     trans = AffineTransform::scale (numbers[0], numbers[1]);
             }
-            else if (t.startsWithIgnoreCase (T("rotate")))
+            else if (t.startsWithIgnoreCase ("rotate"))
             {
                 if (tokens.size() != 3)
                     trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi));
@@ -1175,19 +1175,19 @@ private:
                     trans = AffineTransform::rotation (numbers[0] / (180.0f / float_Pi),
                                                        numbers[1], numbers[2]);
             }
-            else if (t.startsWithIgnoreCase (T("skewX")))
+            else if (t.startsWithIgnoreCase ("skewX"))
             {
                 trans = AffineTransform (1.0f, tanf (numbers[0] * (float_Pi / 180.0f)), 0.0f,
                                          0.0f, 1.0f, 0.0f);
             }
-            else if (t.startsWithIgnoreCase (T("skewY")))
+            else if (t.startsWithIgnoreCase ("skewY"))
             {
                 trans = AffineTransform (1.0f, 0.0f, 0.0f,
                                          tanf (numbers[0] * (float_Pi / 180.0f)), 1.0f, 0.0f);
             }
 
             result = trans.followedBy (result);
-            t = t.fromFirstOccurrenceOf (T(")"), false, false).trimStart();
+            t = t.fromFirstOccurrenceOf (")", false, false).trimStart();
         }
 
         return result;

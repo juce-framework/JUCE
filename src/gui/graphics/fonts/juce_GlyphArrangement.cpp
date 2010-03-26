@@ -361,7 +361,7 @@ void GlyphArrangement::addFittedText (const Font& f,
     // doesn't make much sense if this is outside a sensible range of 0.5 to 1.0
     jassert (minimumHorizontalScale > 0 && minimumHorizontalScale <= 1.0f);
 
-    if (text.containsAnyOf (T("\r\n")))
+    if (text.containsAnyOf ("\r\n"))
     {
         GlyphArrangement ga;
         ga.addJustifiedText (f, text, x, y, width, layout);
@@ -420,7 +420,7 @@ void GlyphArrangement::addFittedText (const Font& f,
             const int originalStartIndex = startIndex;
             int numLines = 1;
 
-            if (length <= 12 && ! txt.containsAnyOf (T(" -\t\r\n")))
+            if (length <= 12 && ! txt.containsAnyOf (" -\t\r\n"))
                 maximumLines = 1;
 
             maximumLines = jmin (maximumLines, length);

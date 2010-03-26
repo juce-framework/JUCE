@@ -2639,7 +2639,7 @@ private:
             }
 
             for (int i = 0; i < lines.size(); ++i)
-                dragAndDropFiles.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf (T("file://"), false, true)));
+                dragAndDropFiles.add (URL::removeEscapeChars (lines[i].fromFirstOccurrenceOf ("file://", false, true)));
 
             dragAndDropFiles.trim();
             dragAndDropFiles.removeEmptyStrings();

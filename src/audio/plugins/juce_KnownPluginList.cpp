@@ -230,9 +230,9 @@ public:
             diff = first->manufacturerName.compareLexicographically (second->manufacturerName);
         else if (method == KnownPluginList::sortByFileSystemLocation)
             diff = first->fileOrIdentifier.replaceCharacter ('\\', '/')
-                                          .upToLastOccurrenceOf (T("/"), false, false)
+                                          .upToLastOccurrenceOf ("/", false, false)
                                           .compare (second->fileOrIdentifier.replaceCharacter ('\\', '/')
-                                                                            .upToLastOccurrenceOf (T("/"), false, false));
+                                                                            .upToLastOccurrenceOf ("/", false, false));
 
         if (diff == 0)
             diff = first->name.compareLexicographically (second->name);
@@ -299,8 +299,8 @@ private:
         }
         else
         {
-            const String firstSubFolder (path.upToFirstOccurrenceOf (T("/"), false, false));
-            const String remainingPath (path.fromFirstOccurrenceOf (T("/"), false, false));
+            const String firstSubFolder (path.upToFirstOccurrenceOf ("/", false, false));
+            const String remainingPath (path.fromFirstOccurrenceOf ("/", false, false));
 
             for (int i = subFolders.size(); --i >= 0;)
             {
@@ -346,7 +346,7 @@ public:
         {
             String path (allPlugins.getUnchecked(i)
                             ->fileOrIdentifier.replaceCharacter ('\\', '/')
-                                              .upToLastOccurrenceOf (T("/"), false, false));
+                                              .upToLastOccurrenceOf ("/", false, false));
 
             if (path.substring (1, 2) == ":")
                 path = path.substring (2);
@@ -369,7 +369,7 @@ public:
 
 #if JUCE_MAC
             // avoid the special AU formatting nonsense on Mac..
-            m.addSubMenu (sub->folder.fromFirstOccurrenceOf (T(":"), false, false), subMenu);
+            m.addSubMenu (sub->folder.fromFirstOccurrenceOf (":", false, false), subMenu);
 #else
             m.addSubMenu (sub->folder, subMenu);
 #endif

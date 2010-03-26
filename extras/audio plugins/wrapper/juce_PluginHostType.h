@@ -93,30 +93,30 @@ private:
         const String hostFilename (File (hostPath).getFileName());
 
 #if JUCE_MAC
-        if (hostPath.containsIgnoreCase (T("Live 6.")))        return AbletonLive6;
-        if (hostPath.containsIgnoreCase (T("Live 7.")))        return AbletonLive7;
-        if (hostPath.containsIgnoreCase (T("Live 8.")))        return AbletonLive8;
-        if (hostFilename.containsIgnoreCase (T("Live")))       return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase (T("Pro Tools")))  return DigidesignProTools;
-        if (hostFilename.containsIgnoreCase (T("Cubase 4")))   return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase (T("Cubase 5")))   return SteinbergCubase5;
-        if (hostFilename.contains (T("Logic")))                return AppleLogic;
+        if (hostPath.containsIgnoreCase ("Live 6."))        return AbletonLive6;
+        if (hostPath.containsIgnoreCase ("Live 7."))        return AbletonLive7;
+        if (hostPath.containsIgnoreCase ("Live 8."))        return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live"))       return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("Pro Tools"))  return DigidesignProTools;
+        if (hostFilename.containsIgnoreCase ("Cubase 4"))   return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase 5"))   return SteinbergCubase5;
+        if (hostFilename.contains ("Logic"))                return AppleLogic;
 
 #elif JUCE_WINDOWS
-        if (hostFilename.containsIgnoreCase (T("Live 6.")))    return AbletonLive6;
-        if (hostFilename.containsIgnoreCase (T("Live 7.")))    return AbletonLive7;
-        if (hostFilename.containsIgnoreCase (T("Live 8.")))    return AbletonLive8;
-        if (hostFilename.containsIgnoreCase (T("Live ")))      return AbletonLiveGeneric;
-        if (hostFilename.containsIgnoreCase (T("ProTools")))   return DigidesignProTools;
-        if (hostPath.containsIgnoreCase (T("SONAR 8")))        return CakewalkSonar8;
-        if (hostFilename.containsIgnoreCase (T("SONAR")))      return CakewalkSonarGeneric;
-        if (hostPath.containsIgnoreCase (T("Tracktion 3")))    return MackieTracktion3;
-        if (hostFilename.containsIgnoreCase (T("Tracktion")))  return MackieTracktionGeneric;
-        if (hostFilename.containsIgnoreCase (T("Cubase4")))    return SteinbergCubase4;
-        if (hostFilename.containsIgnoreCase (T("Cubase5")))    return SteinbergCubase5;
-        if (hostFilename.containsIgnoreCase (T("Cubase")))     return SteinbergCubaseGeneric;
-        if (hostFilename.containsIgnoreCase (T("Wavelab")))    return SteinbergWavelabGeneric;
-        if (hostFilename.containsIgnoreCase (T("reaper")))     return Reaper;
+        if (hostFilename.containsIgnoreCase ("Live 6."))    return AbletonLive6;
+        if (hostFilename.containsIgnoreCase ("Live 7."))    return AbletonLive7;
+        if (hostFilename.containsIgnoreCase ("Live 8."))    return AbletonLive8;
+        if (hostFilename.containsIgnoreCase ("Live "))      return AbletonLiveGeneric;
+        if (hostFilename.containsIgnoreCase ("ProTools"))   return DigidesignProTools;
+        if (hostPath.containsIgnoreCase ("SONAR 8"))        return CakewalkSonar8;
+        if (hostFilename.containsIgnoreCase ("SONAR"))      return CakewalkSonarGeneric;
+        if (hostPath.containsIgnoreCase ("Tracktion 3"))    return MackieTracktion3;
+        if (hostFilename.containsIgnoreCase ("Tracktion"))  return MackieTracktionGeneric;
+        if (hostFilename.containsIgnoreCase ("Cubase4"))    return SteinbergCubase4;
+        if (hostFilename.containsIgnoreCase ("Cubase5"))    return SteinbergCubase5;
+        if (hostFilename.containsIgnoreCase ("Cubase"))     return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
+        if (hostFilename.containsIgnoreCase ("reaper"))     return Reaper;
 
 #elif JUCE_LINUX
         jassertfalse   // not yet done!

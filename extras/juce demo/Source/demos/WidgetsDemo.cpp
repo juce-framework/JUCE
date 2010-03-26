@@ -151,7 +151,7 @@ public:
         else
             g.fillAll (Colours::blue.withAlpha (0.2f));
 
-        String desc (T("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window"));
+        String desc ("drag this box onto the desktop to show how the same component can move from being lightweight to being a separate window");
 
         g.setFont (15.0f);
         g.setColour (Colours::black);
@@ -199,7 +199,7 @@ public:
         g.setFont (14.0f, Font::italic);
         g.setColour (Colours::black);
 
-        g.drawFittedText (T("this is a customised menu item (also demonstrating the Timer class)..."),
+        g.drawFittedText ("this is a customised menu item (also demonstrating the Timer class)...",
                           4, 0, getWidth() - 8, getHeight(),
                           Justification::centred, 3);
     }
@@ -242,7 +242,7 @@ class ColourChangeButton  : public TextButton,
 {
 public:
     ColourChangeButton()
-        : TextButton (T("click to change colour..."))
+        : TextButton ("click to change colour...")
     {
         setSize (10, 24);
         changeWidthToFitText();
@@ -257,12 +257,12 @@ public:
         // create two colour selector components for our background and
         // text colour..
         ColourSelector colourSelector1;
-        colourSelector1.setName (T("background"));
+        colourSelector1.setName ("background");
         colourSelector1.setCurrentColour (findColour (TextButton::buttonColourId));
         colourSelector1.addChangeListener (this);
 
         ColourSelector colourSelector2;
-        colourSelector2.setName (T("text"));
+        colourSelector2.setName ("text");
         colourSelector2.setCurrentColour (findColour (TextButton::textColourOffId));
         colourSelector2.addChangeListener (this);
 
@@ -271,10 +271,10 @@ public:
         PopupMenu m, sub1, sub2;
 
         sub1.addCustomItem (1234, &colourSelector1, 300, 300, false);
-        m.addSubMenu (T("background colour"), sub1);
+        m.addSubMenu ("background colour", sub1);
 
         sub2.addCustomItem (1234, &colourSelector2, 300, 300, false);
-        m.addSubMenu (T("text colour"), sub2);
+        m.addSubMenu ("text colour", sub2);
 
         // and show the menu (modally)..
         m.showAt (this);
@@ -284,7 +284,7 @@ public:
     {
         ColourSelector* cs = (ColourSelector*) source;
 
-        if (cs->getName() == T("text"))
+        if (cs->getName() == "text")
             setColour (TextButton::textColourOffId, cs->getCurrentColour());
         else
             setColour (TextButton::buttonColourId, cs->getCurrentColour());
@@ -319,9 +319,9 @@ static Component* createSlidersPage()
     for (i = 0; i < numSliders; ++i)
     {
         if (i == 2)
-            page->addAndMakeVisible (sliders[i] = new SnappingSlider (T("slider")));
+            page->addAndMakeVisible (sliders[i] = new SnappingSlider ("slider"));
         else
-            page->addAndMakeVisible (sliders[i] = new Slider (T("slider")));
+            page->addAndMakeVisible (sliders[i] = new Slider ("slider"));
 
         sliders[i]->setRange (0.0, 100.0, 0.1);
         sliders[i]->setPopupMenuEnabled (true);
@@ -332,14 +332,14 @@ static Component* createSlidersPage()
     sliders[0]->setTextBoxStyle (Slider::TextBoxBelow, false, 100, 20);
     sliders[0]->setBounds (10, 25, 70, 200);
     sliders[0]->setDoubleClickReturnValue (true, 50.0); // double-clicking this slider will set it to 50.0
-    sliders[0]->setTextValueSuffix (T(" units"));
+    sliders[0]->setTextValueSuffix (" units");
 
     sliders[1]->setSliderStyle (Slider::LinearVertical);
     sliders[1]->setVelocityBasedMode (true);
     sliders[1]->setSkewFactor (0.5);
     sliders[1]->setTextBoxStyle (Slider::TextBoxAbove, true, 100, 20);
     sliders[1]->setBounds (85, 25, 70, 200);
-    sliders[1]->setTextValueSuffix (T(" rels"));
+    sliders[1]->setTextValueSuffix (" rels");
 
     sliders[2]->setSliderStyle (Slider::LinearHorizontal);
     sliders[2]->setTextBoxStyle (Slider::TextBoxLeft, false, 80, 20);
@@ -349,7 +349,7 @@ static Component* createSlidersPage()
     sliders[3]->setTextBoxStyle (Slider::NoTextBox, false, 0, 0);
     sliders[3]->setBounds (180, 65, 150, 20);
     sliders[3]->setPopupDisplayEnabled (true, page);
-    sliders[3]->setTextValueSuffix (T(" nuns required to change a lightbulb"));
+    sliders[3]->setTextValueSuffix (" nuns required to change a lightbulb");
 
     sliders[4]->setSliderStyle (Slider::IncDecButtons);
     sliders[4]->setTextBoxStyle (Slider::TextBoxLeft, false, 50, 20);
@@ -360,11 +360,11 @@ static Component* createSlidersPage()
     sliders[5]->setRotaryParameters (float_Pi * 1.2f, float_Pi * 2.8f, false);
     sliders[5]->setTextBoxStyle (Slider::TextBoxRight, false, 70, 20);
     sliders[5]->setBounds (190, 145, 120, 40);
-    sliders[5]->setTextValueSuffix (T(" mm"));
+    sliders[5]->setTextValueSuffix (" mm");
 
     sliders[6]->setSliderStyle (Slider::LinearBar);
     sliders[6]->setBounds (180, 195, 100, 30);
-    sliders[6]->setTextValueSuffix (T(" gallons"));
+    sliders[6]->setTextValueSuffix (" gallons");
 
     sliders[7]->setSliderStyle (Slider::TwoValueHorizontal);
     sliders[7]->setBounds (360, 20, 160, 40);
@@ -408,7 +408,7 @@ static Component* createSlidersPage()
     }
 
     // Create a description label...
-    Label* label = new Label (T("hint"), T("Try right-clicking on a slider for an options menu. \n\nAlso, holding down CTRL while dragging will turn on a slider's velocity-sensitive mode"));
+    Label* label = new Label ("hint", "Try right-clicking on a slider for an options menu. \n\nAlso, holding down CTRL while dragging will turn on a slider's velocity-sensitive mode");
     label->setBounds (20, 245, 350, 150);
     page->addAndMakeVisible (label);
 
@@ -420,18 +420,18 @@ static Component* createRadioButtonPage()
 {
     DemoPageComp* page = new DemoPageComp();
 
-    GroupComponent* group = new GroupComponent (T("group"), T("radio buttons"));
+    GroupComponent* group = new GroupComponent ("group", "radio buttons");
     group->setBounds (20, 20, 220, 140);
     page->addAndMakeVisible (group);
 
     int i;
     for (i = 0; i < 4; ++i)
     {
-        ToggleButton* tb = new ToggleButton (T("radio button #") + String (i + 1));
+        ToggleButton* tb = new ToggleButton ("radio button #" + String (i + 1));
         page->addAndMakeVisible (tb);
         tb->setRadioGroupId (1234);
         tb->setBounds (45, 46 + i * 22, 180, 22);
-        tb->setTooltip (T("a set of mutually-exclusive radio buttons"));
+        tb->setTooltip ("a set of mutually-exclusive radio buttons");
 
         if (i == 0)
             tb->setToggleState (true, false);
@@ -453,7 +453,7 @@ static Component* createRadioButtonPage()
         over.setStrokeFill (Colours::black);
         over.setStrokeThickness (4.0f);
 
-        DrawableButton* db = new DrawableButton (String (i + 5) + T(" points"), DrawableButton::ImageAboveTextLabel);
+        DrawableButton* db = new DrawableButton (String (i + 5) + " points", DrawableButton::ImageAboveTextLabel);
         db->setImages (&normal, &over, 0);
 
         page->addAndMakeVisible (db);
@@ -469,7 +469,7 @@ static Component* createRadioButtonPage()
 
     for (i = 0; i < 4; ++i)
     {
-        TextButton* tb = new TextButton (T("button ") + String (i + 1));
+        TextButton* tb = new TextButton ("button " + String (i + 1));
 
         page->addAndMakeVisible (tb);
         tb->setClickingTogglesState (true);
@@ -517,12 +517,12 @@ public:
 
         //==============================================================================
         // create an image-above-text button from these drawables..
-        DrawableButton* db = new DrawableButton (T("Button 1"), DrawableButton::ImageAboveTextLabel);
+        DrawableButton* db = new DrawableButton ("Button 1", DrawableButton::ImageAboveTextLabel);
         db->setImages (&normal, &over, &down);
 
         addAndMakeVisible (db);
         db->setBounds (10, 30, 80, 80);
-        db->setTooltip (T("this is a DrawableButton with a label"));
+        db->setTooltip ("this is a DrawableButton with a label");
 
         //==============================================================================
         // create an image-only button from these drawables..
@@ -532,7 +532,7 @@ public:
 
         addAndMakeVisible (db);
         db->setBounds (90, 30, 80, 80);
-        db->setTooltip (T("this is an image-only DrawableButton"));
+        db->setTooltip ("this is an image-only DrawableButton");
         db->addButtonListener (buttonListener);
 
         //==============================================================================
@@ -542,7 +542,7 @@ public:
 
         addAndMakeVisible (db);
         db->setBounds (200, 30, 110, 25);
-        db->setTooltip (T("this is a DrawableButton on a standard button background"));
+        db->setTooltip ("this is a DrawableButton on a standard button background");
 
         //==============================================================================
         db = new DrawableButton (T("Button 4"), DrawableButton::ImageOnButtonBackground);
@@ -552,19 +552,19 @@ public:
 
         addAndMakeVisible (db);
         db->setBounds (200, 70, 50, 50);
-        db->setTooltip (T("this is a DrawableButton on a standard button background"));
+        db->setTooltip ("this is a DrawableButton on a standard button background");
         db->addButtonListener (buttonListener);
 
         //==============================================================================
         HyperlinkButton* hyperlink
-            = new HyperlinkButton (T("this is a HyperlinkButton"),
-                                    URL (T("http://www.rawmaterialsoftware.com/juce")));
+            = new HyperlinkButton ("this is a HyperlinkButton",
+                                    URL ("http://www.rawmaterialsoftware.com/juce"));
 
         hyperlink->setBounds (10, 130, 200, 24);
         addAndMakeVisible (hyperlink);
 
         //==============================================================================
-        ImageButton* imageButton = new ImageButton (T("imagebutton"));
+        ImageButton* imageButton = new ImageButton ("imagebutton");
         addAndMakeVisible (imageButton);
 
         Image* juceImage = ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize);
@@ -578,7 +578,7 @@ public:
                                 0.5f);
 
         imageButton->setTopLeftPosition (10, 160);
-        imageButton->setTooltip (T("image button - showing alpha-channel hit-testing and colour overlay when clicked"));
+        imageButton->setTooltip ("image button - showing alpha-channel hit-testing and colour overlay when clicked");
 
         //==============================================================================
         ColourChangeButton* colourChangeButton = new ColourChangeButton();
@@ -586,7 +586,7 @@ public:
         colourChangeButton->setTopLeftPosition (350, 30);
 
         //==============================================================================
-        animateButton = new TextButton (T("click to animate..."));
+        animateButton = new TextButton ("click to animate...");
         addAndMakeVisible (animateButton);
         animateButton->changeWidthToFitText (24);
         animateButton->setTopLeftPosition (350, 70);
@@ -630,15 +630,15 @@ static Component* createMiscPage()
     TextEditor* textEditor1 = new TextEditor();
     page->addAndMakeVisible (textEditor1);
     textEditor1->setBounds (10, 25, 200, 24);
-    textEditor1->setText (T("single-line text box"));
+    textEditor1->setText ("single-line text box");
 
-    TextEditor* textEditor2 = new TextEditor (T("password"), (tchar) 0x2022);
+    TextEditor* textEditor2 = new TextEditor ("password", (tchar) 0x2022);
     page->addAndMakeVisible (textEditor2);
     textEditor2->setBounds (10, 55, 200, 24);
-    textEditor2->setText (T("password"));
+    textEditor2->setText ("password");
 
     //==============================================================================
-    ComboBox* comboBox = new ComboBox (T("combo"));
+    ComboBox* comboBox = new ComboBox ("combo");
     page->addAndMakeVisible (comboBox);
     comboBox->setBounds (300, 25, 200, 24);
     comboBox->setEditableText (true);
@@ -646,7 +646,7 @@ static Component* createMiscPage()
 
     int i;
     for (i = 1; i < 100; ++i)
-        comboBox->addItem (T("combo box item ") + String (i), i);
+        comboBox->addItem ("combo box item " + String (i), i);
 
     comboBox->setSelectedId (1);
 
@@ -684,7 +684,7 @@ public:
         info->setBounds (80, 80, 450, 100);
         info->setInterceptsMouseClicks (false, false);
 
-        addAndMakeVisible (depthSlider = new Slider (T("toolbar depth:")));
+        addAndMakeVisible (depthSlider = new Slider ("toolbar depth:"));
         depthSlider->setRange (10.0, 200.0, 1.0);
         depthSlider->setValue (50, false);
         depthSlider->setSliderStyle (Slider::LinearHorizontal);
@@ -693,12 +693,12 @@ public:
         depthSlider->setBounds (80, 210, 300, 22);
         (new Label (depthSlider->getName(), depthSlider->getName()))->attachToComponent (depthSlider, false);
 
-        addAndMakeVisible (orientationButton = new TextButton (T("vertical/horizontal")));
+        addAndMakeVisible (orientationButton = new TextButton ("vertical/horizontal"));
         orientationButton->addButtonListener (this);
         orientationButton->changeWidthToFitText (22);
         orientationButton->setTopLeftPosition (depthSlider->getX(), depthSlider->getBottom() + 20);
 
-        addAndMakeVisible (customiseButton = new TextButton (T("customise...")));
+        addAndMakeVisible (customiseButton = new TextButton ("customise..."));
         customiseButton->addButtonListener (this);
         customiseButton->changeWidthToFitText (22);
         customiseButton->setTopLeftPosition (orientationButton->getRight() + 20, orientationButton->getY());
@@ -814,28 +814,28 @@ private:
             switch (itemId)
             {
             case doc_new:
-                return createButtonFromZipFileSVG (itemId, T("new"), T("document-new.svg"));
+                return createButtonFromZipFileSVG (itemId, "new", "document-new.svg");
 
             case doc_open:
-                return createButtonFromZipFileSVG (itemId, T("open"), T("document-open.svg"));
+                return createButtonFromZipFileSVG (itemId, "open", "document-open.svg");
 
             case doc_save:
-                return createButtonFromZipFileSVG (itemId, T("save"), T("document-save.svg"));
+                return createButtonFromZipFileSVG (itemId, "save", "document-save.svg");
 
             case doc_saveAs:
-                return createButtonFromZipFileSVG (itemId, T("save as"), T("document-save-as.svg"));
+                return createButtonFromZipFileSVG (itemId, "save as", "document-save-as.svg");
 
             case edit_copy:
-                return createButtonFromZipFileSVG (itemId, T("copy"), T("edit-copy.svg"));
+                return createButtonFromZipFileSVG (itemId, "copy", "edit-copy.svg");
 
             case edit_cut:
-                return createButtonFromZipFileSVG (itemId, T("cut"), T("edit-cut.svg"));
+                return createButtonFromZipFileSVG (itemId, "cut", "edit-cut.svg");
 
             case edit_paste:
-                return createButtonFromZipFileSVG (itemId, T("paste"), T("edit-paste.svg"));
+                return createButtonFromZipFileSVG (itemId, "paste", "edit-paste.svg");
 
             case juceLogoButton:
-                return new ToolbarButton (itemId, T("juce!"), Drawable::createFromImageData (BinaryData::juce_png, BinaryData::juce_pngSize), 0);
+                return new ToolbarButton (itemId, "juce!", Drawable::createFromImageData (BinaryData::juce_png, BinaryData::juce_pngSize), 0);
 
             case customComboBox:
                 return new CustomToolbarComboBox (itemId);
@@ -887,12 +887,12 @@ private:
         {
         public:
             CustomToolbarComboBox (const int toolbarItemId)
-                : ToolbarItemComponent (toolbarItemId, T("Custom Toolbar Item"), false)
+                : ToolbarItemComponent (toolbarItemId, "Custom Toolbar Item", false)
             {
-                addAndMakeVisible (comboBox = new ComboBox (T("demo toolbar combo box")));
+                addAndMakeVisible (comboBox = new ComboBox ("demo toolbar combo box"));
 
                 for (int i = 1; i < 20; ++i)
-                    comboBox->addItem (T("Toolbar ComboBox item ") + String (i), i);
+                    comboBox->addItem ("Toolbar ComboBox item " + String (i), i);
 
                 comboBox->setSelectedId (1);
                 comboBox->setEditableText (true);
@@ -944,11 +944,11 @@ public:
     DemoTabbedComponent (ApplicationCommandManager* commandManager)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
-        addTab (T("sliders"),       getRandomBrightColour(), createSlidersPage(),      true);
-        addTab (T("toolbars"),      getRandomBrightColour(), new ToolbarDemoComp (commandManager),    true);
-        addTab (T("buttons"),       getRandomBrightColour(), new ButtonsPage (this),   true);
-        addTab (T("radio buttons"), getRandomBrightColour(), createRadioButtonPage(),  true);
-        addTab (T("misc widgets"),  getRandomBrightColour(), createMiscPage(),         true);
+        addTab ("sliders",       getRandomBrightColour(), createSlidersPage(),      true);
+        addTab ("toolbars",      getRandomBrightColour(), new ToolbarDemoComp (commandManager),    true);
+        addTab ("buttons",       getRandomBrightColour(), new ButtonsPage (this),   true);
+        addTab ("radio buttons", getRandomBrightColour(), createRadioButtonPage(),  true);
+        addTab ("misc widgets",  getRandomBrightColour(), createMiscPage(),         true);
     }
 
     ~DemoTabbedComponent()
@@ -969,7 +969,7 @@ public:
             addChildComponent (bmc);
         }
 
-        bmc->showAt (button, T("This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing at a component or somewhere on the screen.\n\nThe message bubbles will disappear after a timeout period, or when the mouse is clicked."),
+        bmc->showAt (button, "This is a demo of the BubbleMessageComponent, which lets you pop up a message pointing at a component or somewhere on the screen.\n\nThe message bubbles will disappear after a timeout period, or when the mouse is clicked.",
                      2000, true, true);
     }
 
@@ -985,11 +985,11 @@ class DemoBackgroundThread  : public ThreadWithProgressWindow
 {
 public:
     DemoBackgroundThread()
-        : ThreadWithProgressWindow (T("busy doing some important things..."),
+        : ThreadWithProgressWindow ("busy doing some important things...",
                                     true,
                                     true)
     {
-        setStatusMessage (T("Getting ready..."));
+        setStatusMessage ("Getting ready...");
     }
 
     ~DemoBackgroundThread()
@@ -999,7 +999,7 @@ public:
     void run()
     {
         setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
-        setStatusMessage (T("Preparing to do some stuff..."));
+        setStatusMessage ("Preparing to do some stuff...");
         wait (2000);
 
         const int thingsToDo = 10;
@@ -1014,13 +1014,13 @@ public:
             // this will update the progress bar on the dialog box
             setProgress (i / (double) thingsToDo);
 
-            setStatusMessage (String (thingsToDo - i) + T(" things left to do..."));
+            setStatusMessage (String (thingsToDo - i) + " things left to do...");
 
             wait (500);
         }
 
         setProgress (-1.0); // setting a value beyond the range 0 -> 1 will show a spinning bar..
-        setStatusMessage (T("Finishing off the last few bits and pieces!"));
+        setStatusMessage ("Finishing off the last few bits and pieces!");
         wait (2000);
     }
 };
@@ -1031,7 +1031,7 @@ class ColourSelectorDialogWindow  : public DialogWindow
 {
 public:
     ColourSelectorDialogWindow()
-        : DialogWindow (T("Colour selector demo"),
+        : DialogWindow ("Colour selector demo",
                         Colours::lightgrey,
                         true)
     {
@@ -1068,7 +1068,7 @@ public:
                        "If you've got an Apple Remote, press some buttons now...",
                        AlertWindow::NoIcon)
     {
-        addButton (T("done"), 0);
+        addButton ("done", 0);
 
         // (To open the device in non-exclusive mode, pass 'false' in here)..
         if (! start (true))
@@ -1147,13 +1147,13 @@ public:
     //==============================================================================
     WidgetsDemo (ApplicationCommandManager* commandManager)
     {
-        setName (T("Widgets"));
+        setName ("Widgets");
 
         addAndMakeVisible (tabs = new DemoTabbedComponent (commandManager));
 
         //==============================================================================
-        menuButton = new TextButton (T("click for a popup menu.."),
-                                     T("click for a demo of the different types of item you can put into a popup menu..."));
+        menuButton = new TextButton ("click for a popup menu..",
+                                     "click for a demo of the different types of item you can put into a popup menu...");
 
         addAndMakeVisible (menuButton);
         menuButton->setBounds (10, 10, 200, 24);
@@ -1162,7 +1162,7 @@ public:
                                                     // hold down the button and drag straight onto the menu
 
         //==============================================================================
-        enableButton = new ToggleButton (T("enable/disable components"));
+        enableButton = new ToggleButton ("enable/disable components");
         addAndMakeVisible (enableButton);
         enableButton->setBounds (230, 10, 180, 24);
         enableButton->setTooltip (T("toggle button"));
@@ -1193,71 +1193,71 @@ public:
         else if (button == menuButton)
         {
             PopupMenu m;
-            m.addItem (1, T("Normal item"));
-            m.addItem (2, T("Disabled item"), false);
-            m.addItem (3, T("Ticked item"), true, true);
-            m.addColouredItem (4, T("Coloured item"), Colours::green);
+            m.addItem (1, "Normal item");
+            m.addItem (2, "Disabled item", false);
+            m.addItem (3, "Ticked item", true, true);
+            m.addColouredItem (4, "Coloured item", Colours::green);
             m.addSeparator();
             m.addCustomItem (5, new CustomMenuComponent());
 
             m.addSeparator();
 
             PopupMenu tabsMenu;
-            tabsMenu.addItem (1001, T("Show tabs at the top"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtTop);
-            tabsMenu.addItem (1002, T("Show tabs at the bottom"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtBottom);
-            tabsMenu.addItem (1003, T("Show tabs at the left"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtLeft);
-            tabsMenu.addItem (1004, T("Show tabs at the right"), true, tabs->getOrientation() == TabbedButtonBar::TabsAtRight);
-            m.addSubMenu (T("Tab position"), tabsMenu);
+            tabsMenu.addItem (1001, "Show tabs at the top", true, tabs->getOrientation() == TabbedButtonBar::TabsAtTop);
+            tabsMenu.addItem (1002, "Show tabs at the bottom", true, tabs->getOrientation() == TabbedButtonBar::TabsAtBottom);
+            tabsMenu.addItem (1003, "Show tabs at the left", true, tabs->getOrientation() == TabbedButtonBar::TabsAtLeft);
+            tabsMenu.addItem (1004, "Show tabs at the right", true, tabs->getOrientation() == TabbedButtonBar::TabsAtRight);
+            m.addSubMenu ("Tab position", tabsMenu);
 
             m.addSeparator();
 
             PopupMenu dialogMenu;
-            dialogMenu.addItem (100, T("Show a plain alert-window..."));
-            dialogMenu.addItem (101, T("Show an alert-window with a 'warning' icon..."));
-            dialogMenu.addItem (102, T("Show an alert-window with an 'info' icon..."));
-            dialogMenu.addItem (103, T("Show an alert-window with a 'question' icon..."));
+            dialogMenu.addItem (100, "Show a plain alert-window...");
+            dialogMenu.addItem (101, "Show an alert-window with a 'warning' icon...");
+            dialogMenu.addItem (102, "Show an alert-window with an 'info' icon...");
+            dialogMenu.addItem (103, "Show an alert-window with a 'question' icon...");
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (110, T("Show an ok/cancel alert-window..."));
+            dialogMenu.addItem (110, "Show an ok/cancel alert-window...");
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (111, T("Show an alert-window with some extra components..."));
+            dialogMenu.addItem (111, "Show an alert-window with some extra components...");
 
             dialogMenu.addSeparator();
 
-            dialogMenu.addItem (112, T("Show a ThreadWithProgressWindow demo..."));
+            dialogMenu.addItem (112, "Show a ThreadWithProgressWindow demo...");
 
-            m.addSubMenu (T("AlertWindow demonstrations"), dialogMenu);
+            m.addSubMenu ("AlertWindow demonstrations", dialogMenu);
 
             m.addSeparator();
 
-            m.addItem (120, T("Show a colour selector demo..."));
+            m.addItem (120, "Show a colour selector demo...");
             m.addSeparator();
 
 #if JUCE_MAC
-            m.addItem (140, T("Run the Apple Remote Control test..."));
+            m.addItem (140, "Run the Apple Remote Control test...");
             m.addSeparator();
 #endif
 
             PopupMenu nativeFileChoosers;
-            nativeFileChoosers.addItem (121, T("'Load' file browser..."));
-            nativeFileChoosers.addItem (124, T("'Load' file browser with an image file preview..."));
-            nativeFileChoosers.addItem (122, T("'Save' file browser..."));
-            nativeFileChoosers.addItem (123, T("'Choose directory' file browser..."));
+            nativeFileChoosers.addItem (121, "'Load' file browser...");
+            nativeFileChoosers.addItem (124, "'Load' file browser with an image file preview...");
+            nativeFileChoosers.addItem (122, "'Save' file browser...");
+            nativeFileChoosers.addItem (123, "'Choose directory' file browser...");
 
             PopupMenu juceFileChoosers;
-            juceFileChoosers.addItem (131, T("'Load' file browser..."));
-            juceFileChoosers.addItem (134, T("'Load' file browser with an image file preview..."));
-            juceFileChoosers.addItem (132, T("'Save' file browser..."));
-            juceFileChoosers.addItem (133, T("'Choose directory' file browser..."));
+            juceFileChoosers.addItem (131, "'Load' file browser...");
+            juceFileChoosers.addItem (134, "'Load' file browser with an image file preview...");
+            juceFileChoosers.addItem (132, "'Save' file browser...");
+            juceFileChoosers.addItem (133, "'Choose directory' file browser...");
 
             PopupMenu fileChoosers;
-            fileChoosers.addSubMenu (T("Operating system dialogs"), nativeFileChoosers);
-            fileChoosers.addSubMenu (T("Juce dialogs"), juceFileChoosers);
+            fileChoosers.addSubMenu ("Operating system dialogs", nativeFileChoosers);
+            fileChoosers.addSubMenu ("Juce dialogs", juceFileChoosers);
 
-            m.addSubMenu (T("File chooser dialogs"), fileChoosers);
+            m.addSubMenu ("File chooser dialogs", fileChoosers);
 
             int result = m.showAt (menuButton);
 
@@ -1277,46 +1277,46 @@ public:
                         icon = AlertWindow::QuestionIcon;
 
                     AlertWindow::showMessageBox (icon,
-                                                 T("This is an AlertWindow"),
-                                                 T("And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah."),
-                                                 T("ok"));
+                                                 "This is an AlertWindow",
+                                                 "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
+                                                 "ok");
                 }
                 else if (result == 110)
                 {
                     bool userPickedOk
                         = AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
-                                                        T("This is an ok/cancel AlertWindow"),
-                                                        T("And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah."));
+                                                        "This is an ok/cancel AlertWindow",
+                                                        "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.");
 
                     (void) userPickedOk; // (just avoids a compiler warning about unused variables)
                 }
                 else if (result == 111)
                 {
-                    AlertWindow w (T("AlertWindow demo.."),
-                                   T("This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes."),
+                    AlertWindow w ("AlertWindow demo..",
+                                   "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
                                    AlertWindow::QuestionIcon);
 
-                    w.addTextEditor (T("text"), T("enter some text here"), T("text field:"));
+                    w.addTextEditor ("text", "enter some text here", "text field:");
 
                     StringArray options;
-                    options.add (T("option 1"));
-                    options.add (T("option 2"));
-                    options.add (T("option 3"));
-                    options.add (T("option 4"));
-                    w.addComboBox (T("option"), options, T("some options"));
+                    options.add ("option 1");
+                    options.add ("option 2");
+                    options.add ("option 3");
+                    options.add ("option 4");
+                    w.addComboBox ("option", options, "some options");
 
-                    w.addButton (T("ok"), 1, KeyPress (KeyPress::returnKey, 0, 0));
-                    w.addButton (T("cancel"), 0, KeyPress (KeyPress::escapeKey, 0, 0));
+                    w.addButton ("ok", 1, KeyPress (KeyPress::returnKey, 0, 0));
+                    w.addButton ("cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
 
                     if (w.runModalLoop() != 0) // is they picked 'ok'
                     {
                         // this is the item they chose in the drop-down list..
-                        const int optionIndexChosen = w.getComboBoxComponent (T("option"))->getSelectedItemIndex();
+                        const int optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
                         (void) optionIndexChosen; // (just avoids a compiler warning about unused variables)
 
 
                         // this is the text they entered..
-                        String text = w.getTextEditorContents (T("text"));
+                        String text = w.getTextEditorContents ("text");
 
                     }
                 }
@@ -1328,15 +1328,15 @@ public:
                     {
                         // thread finished normally..
                         AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                     T("Progress window"),
-                                                     T("Thread finished ok!"));
+                                                     "Progress window",
+                                                     "Thread finished ok!");
                     }
                     else
                     {
                         // user pressed the cancel button..
                         AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                                     T("Progress window"),
-                                                     T("You pressed cancel!"));
+                                                     "Progress window",
+                                                     "You pressed cancel!");
                     }
 
                 }
@@ -1363,9 +1363,9 @@ public:
 
                     if (result == 121)
                     {
-                        FileChooser fc (T("Choose a file to open..."),
+                        FileChooser fc ("Choose a file to open...",
                                         File::getCurrentWorkingDirectory(),
-                                        T("*"),
+                                        "*",
                                         useNativeVersion);
 
                         if (fc.browseForFileToOpen())
@@ -1373,8 +1373,8 @@ public:
                             File chosenFile = fc.getResult();
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         T("File Chooser..."),
-                                                         T("You picked: ") + chosenFile.getFullPathName());
+                                                         "File Chooser...",
+                                                         "You picked: " + chosenFile.getFullPathName());
                         }
                     }
                     else if (result == 124)
@@ -1382,9 +1382,9 @@ public:
                         ImagePreviewComponent imagePreview;
                         imagePreview.setSize (200, 200);
 
-                        FileChooser fc (T("Choose an image to open..."),
+                        FileChooser fc ("Choose an image to open...",
                                         File::getCurrentWorkingDirectory(),
-                                        T("*.jpg;*.jpeg;*.png;*.gif"),
+                                        "*.jpg;*.jpeg;*.png;*.gif",
                                         useNativeVersion);
 
                         if (fc.browseForFileToOpen (&imagePreview))
@@ -1392,15 +1392,15 @@ public:
                             File chosenFile = fc.getResult();
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         T("File Chooser..."),
-                                                         T("You picked: ") + chosenFile.getFullPathName());
+                                                         "File Chooser...",
+                                                         "You picked: " + chosenFile.getFullPathName());
                         }
                     }
                     else if (result == 122)
                     {
-                        FileChooser fc (T("Choose a file to save..."),
+                        FileChooser fc ("Choose a file to save...",
                                         File::getCurrentWorkingDirectory(),
-                                        T("*"),
+                                        "*",
                                         useNativeVersion);
 
                         if (fc.browseForFileToSave (true))
@@ -1408,15 +1408,15 @@ public:
                             File chosenFile = fc.getResult();
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         T("File Chooser..."),
-                                                         T("You picked: ") + chosenFile.getFullPathName());
+                                                         "File Chooser...",
+                                                         "You picked: " + chosenFile.getFullPathName());
                         }
                     }
                     else if (result == 123)
                     {
-                        FileChooser fc (T("Choose a directory..."),
+                        FileChooser fc ("Choose a directory...",
                                         File::getCurrentWorkingDirectory(),
-                                        T("*"),
+                                        "*",
                                         useNativeVersion);
 
                         if (fc.browseForDirectory())
@@ -1424,8 +1424,8 @@ public:
                             File chosenDirectory = fc.getResult();
 
                             AlertWindow::showMessageBox (AlertWindow::InfoIcon,
-                                                         T("File Chooser..."),
-                                                         T("You picked: ") + chosenDirectory.getFullPathName());
+                                                         "File Chooser...",
+                                                         "You picked: " + chosenDirectory.getFullPathName());
                         }
                     }
                 }

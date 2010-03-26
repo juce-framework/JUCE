@@ -73,13 +73,13 @@ static void getDeviceProperties (const String& deviceID,
 
     snd_ctl_t* handle;
 
-    if (snd_ctl_open (&handle, deviceID.upToLastOccurrenceOf (T(","), false, false).toUTF8(), SND_CTL_NONBLOCK) >= 0)
+    if (snd_ctl_open (&handle, deviceID.upToLastOccurrenceOf (",", false, false).toUTF8(), SND_CTL_NONBLOCK) >= 0)
     {
         snd_pcm_info_t* info;
         snd_pcm_info_alloca (&info);
 
         snd_pcm_info_set_stream (info, SND_PCM_STREAM_PLAYBACK);
-        snd_pcm_info_set_device (info, deviceID.fromLastOccurrenceOf (T(","), false, false).getIntValue());
+        snd_pcm_info_set_device (info, deviceID.fromLastOccurrenceOf (",", false, false).getIntValue());
         snd_pcm_info_set_subdevice (info, 0);
 
         if (snd_ctl_pcm_info (handle, info) >= 0)
@@ -867,7 +867,7 @@ public:
                 {
                     String cardId (snd_ctl_card_info_get_id (info));
 
-                    if (cardId.removeCharacters (T("0123456789")).isEmpty())
+                    if (cardId.removeCharacters ("0123456789").isEmpty())
                         cardId = String (cardNum);
 
                     int device = -1;

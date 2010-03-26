@@ -135,21 +135,21 @@ const KeyPress KeyPress::createFromDescription (const String& desc) throw()
 {
     int modifiers = 0;
 
-    if (desc.containsWholeWordIgnoreCase (T("ctrl"))
-         || desc.containsWholeWordIgnoreCase (T("control"))
-         || desc.containsWholeWordIgnoreCase (T("ctl")))
+    if (desc.containsWholeWordIgnoreCase ("ctrl")
+         || desc.containsWholeWordIgnoreCase ("control")
+         || desc.containsWholeWordIgnoreCase ("ctl"))
         modifiers |= ModifierKeys::ctrlModifier;
 
-    if (desc.containsWholeWordIgnoreCase (T("shift"))
-         || desc.containsWholeWordIgnoreCase (T("shft")))
+    if (desc.containsWholeWordIgnoreCase ("shift")
+         || desc.containsWholeWordIgnoreCase ("shft"))
         modifiers |= ModifierKeys::shiftModifier;
 
-    if (desc.containsWholeWordIgnoreCase (T("alt"))
-         || desc.containsWholeWordIgnoreCase (T("option")))
+    if (desc.containsWholeWordIgnoreCase ("alt")
+         || desc.containsWholeWordIgnoreCase ("option"))
         modifiers |= ModifierKeys::altModifier;
 
-    if (desc.containsWholeWordIgnoreCase (T("command"))
-         || desc.containsWholeWordIgnoreCase (T("cmd")))
+    if (desc.containsWholeWordIgnoreCase ("command")
+         || desc.containsWholeWordIgnoreCase ("cmd"))
         modifiers |= ModifierKeys::commandModifier;
 
     int key = 0;
@@ -184,9 +184,9 @@ const KeyPress KeyPress::createFromDescription (const String& desc) throw()
                 key = numberPadDecimalPoint;
             else if (lastChar == '=')
                 key = numberPadEquals;
-            else if (desc.endsWith (T("separator")))
+            else if (desc.endsWith ("separator"))
                 key = numberPadSeparator;
-            else if (desc.endsWith (T("delete")))
+            else if (desc.endsWith ("delete"))
                 key = numberPadDelete;
         }
 
@@ -200,9 +200,9 @@ const KeyPress KeyPress::createFromDescription (const String& desc) throw()
             if (key == 0)
             {
                 // give up and use the hex code..
-                const int hexCode = desc.fromFirstOccurrenceOf (T("#"), false, false)
+                const int hexCode = desc.fromFirstOccurrenceOf ("#", false, false)
                                         .toLowerCase()
-                                        .retainCharacters (T("0123456789abcdef"))
+                                        .retainCharacters ("0123456789abcdef")
                                         .getHexValue32();
 
                 if (hexCode > 0)

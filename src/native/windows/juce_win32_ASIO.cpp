@@ -229,7 +229,7 @@ public:
         // unfortunate workaround for certain manufacturers whose drivers crash horribly if you make
         // dynamic changes to the buffer size...
         shouldUsePreferredSize = shouldUsePreferredSize
-                                   || getName().containsIgnoreCase (T("Digidesign"));
+                                   || getName().containsIgnoreCase ("Digidesign");
 
         if (shouldUsePreferredSize)
         {
@@ -1768,11 +1768,11 @@ public:
         jassert (hasScanned); // need to call scanForDevices() before doing this
 
         for (int i = deviceNames.size(); --i >= 0;)
-            if (deviceNames[i].containsIgnoreCase (T("asio4all")))
+            if (deviceNames[i].containsIgnoreCase ("asio4all"))
                 return i; // asio4all is a safe choice for a default..
 
 #if JUCE_DEBUG
-        if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase (T("digidesign")))
+        if (deviceNames.size() > 1 && deviceNames[0].containsIgnoreCase ("digidesign"))
             return 1; // (the digi m-box driver crashes the app when you run
                       // it in the debugger, which can be a bit annoying)
 #endif

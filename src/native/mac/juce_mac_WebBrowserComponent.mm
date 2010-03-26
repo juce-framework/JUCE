@@ -117,8 +117,8 @@ public:
         {
             for (int i = 0; i < headers->size(); ++i)
             {
-                const String headerName ((*headers)[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
-                const String headerValue ((*headers)[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
+                const String headerName ((*headers)[i].upToFirstOccurrenceOf (":", false, false).trim());
+                const String headerValue ((*headers)[i].fromFirstOccurrenceOf (":", false, false).trim());
 
                 [r setValue: juceStringToNS (headerValue)
                    forHTTPHeaderField: juceStringToNS (headerName)];

@@ -61,7 +61,7 @@ XmlElement::XmlElement (const String& tagName_) throw()
     jassert (tagName_.containsNonWhitespaceChars())
 
     // The tag can't contain spaces or other characters that would create invalid XML!
-    jassert (! tagName_.containsAnyOf (T(" <>/&")));
+    jassert (! tagName_.containsAnyOf (" <>/&"));
 }
 
 XmlElement::XmlElement (int /*dummy*/) throw()

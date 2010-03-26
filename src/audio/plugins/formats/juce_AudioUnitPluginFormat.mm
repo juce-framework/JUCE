@@ -88,7 +88,7 @@ static OSType stringToOSType (const String& s1)
          | ((OSType) (unsigned char) s[3]);
 }
 
-static const tchar* auIdentifierPrefix = T("AudioUnit:");
+static const char* auIdentifierPrefix = "AudioUnit:";
 
 static const String createAUPluginIdentifier (const ComponentDescription& desc)
 {
@@ -133,8 +133,8 @@ static void getAUDetails (ComponentRecord* comp, String& name, String& manufactu
                 const String all ((const char*) nameString + 1, nameString[0]);
                 DBG ("name: "+ all);
 
-                manufacturer = all.upToFirstOccurrenceOf (T(":"), false, false).trim();
-                name = all.fromFirstOccurrenceOf (T(":"), false, false).trim();
+                manufacturer = all.upToFirstOccurrenceOf (":", false, false).trim();
+                name = all.fromFirstOccurrenceOf (":", false, false).trim();
             }
 
             if (infoString != 0 && infoString[0] != 0)

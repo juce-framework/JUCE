@@ -184,7 +184,7 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 
 //==============================================================================
 const juce_wchar File::separator = '/';
-const juce_wchar* File::separatorString = T("/");
+const juce_wchar* File::separatorString = L"/";
 
 //==============================================================================
 const File File::getCurrentWorkingDirectory()

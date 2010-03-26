@@ -245,7 +245,7 @@ public:
     void addMenuItem (PopupMenu::MenuItemIterator& iter, NSMenu* menuToAddTo,
                       const int topLevelMenuId, const int topLevelIndex)
     {
-        NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf (T("<end>"), false, true));
+        NSString* text = juceStringToNS (iter.itemName.upToFirstOccurrenceOf ("<end>", false, true));
 
         if (text == 0)
             text = @"";

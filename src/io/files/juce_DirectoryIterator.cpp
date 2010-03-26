@@ -67,7 +67,7 @@ DirectoryIterator::DirectoryIterator (const File& directory,
     {
         do
         {
-            if (! filename.containsOnly (T(".")))
+            if (! filename.containsOnly ("."))
             {
                 bool addToList = false;
 

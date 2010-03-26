@@ -288,7 +288,7 @@ AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
     addAndMakeVisible (liveAudioDisplayComp = new LiveAudioInputDisplayComp());
 
     addAndMakeVisible (startTestButton = new TextButton (String::empty));
-    startTestButton->setButtonText (T("Test Latency"));
+    startTestButton->setButtonText ("Test Latency");
     startTestButton->addButtonListener (this);
 
     addAndMakeVisible (testResultsBox = new TextEditor (String::empty));
@@ -301,7 +301,7 @@ AudioDemoLatencyPage::AudioDemoLatencyPage (AudioDeviceManager& deviceManager_)
     testResultsBox->setColour (TextEditor::backgroundColourId, Colour (0x32ffffff));
     testResultsBox->setColour (TextEditor::outlineColourId, Colour (0x1c000000));
     testResultsBox->setColour (TextEditor::shadowColourId, Colour (0x16000000));
-    testResultsBox->setText (T("Running this test measures the round-trip latency between the audio output and input devices you\'ve got selected.\n\nIt\'ll play a sound, then try to measure the time at which the sound arrives back at the audio input. Obviously for this to work you need to have your microphone somewhere near your speakers..."));
+    testResultsBox->setText ("Running this test measures the round-trip latency between the audio output and input devices you\'ve got selected.\n\nIt\'ll play a sound, then try to measure the time at which the sound arrives back at the audio input. Obviously for this to work you need to have your microphone somewhere near your speakers...");
 
 
     //[UserPreSize]

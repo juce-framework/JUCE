@@ -1021,6 +1021,7 @@ public:
 
 	static int compareIgnoreCase (const char* const s1, const char* const s2) throw();
 	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2) throw();
+	static int compareIgnoreCase (const juce_wchar* s1, const char* s2) throw();
 
 	static int compareIgnoreCase (const char* const s1, const char* const s2, const int maxChars) throw();
 	static int compareIgnoreCase (const juce_wchar* s1, const juce_wchar* s2, int maxChars) throw();
@@ -1136,6 +1137,8 @@ public:
 
 	bool equalsIgnoreCase (const juce_wchar* other) const throw();
 
+	bool equalsIgnoreCase (const char* other) const throw();
+
 	int compare (const String& other) const throw();
 
 	int compare (const char* other) const throw();
@@ -1146,39 +1149,39 @@ public:
 
 	int compareLexicographically (const String& other) const throw();
 
-	bool startsWith (const juce_wchar* text) const throw();
+	bool startsWith (const String& text) const throw();
 
 	bool startsWithChar (juce_wchar character) const throw();
 
-	bool startsWithIgnoreCase (const juce_wchar* text) const throw();
+	bool startsWithIgnoreCase (const String& text) const throw();
 
-	bool endsWith (const juce_wchar* text) const throw();
+	bool endsWith (const String& text) const throw();
 
 	bool endsWithChar (juce_wchar character) const throw();
 
-	bool endsWithIgnoreCase (const juce_wchar* text) const throw();
+	bool endsWithIgnoreCase (const String& text) const throw();
 
-	bool contains (const juce_wchar* text) const throw();
+	bool contains (const String& text) const throw();
 
 	bool containsChar (juce_wchar character) const throw();
 
-	bool containsIgnoreCase (const juce_wchar* text) const throw();
+	bool containsIgnoreCase (const String& text) const throw();
 
-	bool containsWholeWord (const juce_wchar* wordToLookFor) const throw();
+	bool containsWholeWord (const String& wordToLookFor) const throw();
 
-	bool containsWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
+	bool containsWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
-	int indexOfWholeWord (const juce_wchar* wordToLookFor) const throw();
+	int indexOfWholeWord (const String& wordToLookFor) const throw();
 
-	int indexOfWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
+	int indexOfWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
-	bool containsAnyOf (const juce_wchar* charactersItMightContain) const throw();
+	bool containsAnyOf (const String& charactersItMightContain) const throw();
 
-	bool containsOnly (const juce_wchar* charactersItMightContain) const throw();
+	bool containsOnly (const String& charactersItMightContain) const throw();
 
 	bool containsNonWhitespaceChars() const throw();
 
-	bool matchesWildcard (const juce_wchar* wildcard, bool ignoreCase) const throw();
+	bool matchesWildcard (const String& wildcard, bool ignoreCase) const throw();
 
 	// Substring location methods..
 
@@ -1186,27 +1189,27 @@ public:
 
 	int indexOfChar (int startIndex, juce_wchar characterToLookFor) const throw();
 
-	int indexOfAnyOf (const juce_wchar* charactersToLookFor,
+	int indexOfAnyOf (const String& charactersToLookFor,
 					  int startIndex = 0,
 					  bool ignoreCase = false) const throw();
 
-	int indexOf (const juce_wchar* text) const throw();
+	int indexOf (const String& text) const throw();
 
 	int indexOf (int startIndex,
-				 const juce_wchar* textToLookFor) const throw();
+				 const String& textToLookFor) const throw();
 
-	int indexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
+	int indexOfIgnoreCase (const String& textToLookFor) const throw();
 
 	int indexOfIgnoreCase (int startIndex,
-						   const juce_wchar* textToLookFor) const throw();
+						   const String& textToLookFor) const throw();
 
 	int lastIndexOfChar (juce_wchar character) const throw();
 
-	int lastIndexOf (const juce_wchar* textToLookFor) const throw();
+	int lastIndexOf (const String& textToLookFor) const throw();
 
-	int lastIndexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
+	int lastIndexOfIgnoreCase (const String& textToLookFor) const throw();
 
-	int lastIndexOfAnyOf (const juce_wchar* charactersToLookFor,
+	int lastIndexOfAnyOf (const String& charactersToLookFor,
 						  bool ignoreCase = false) const throw();
 
 	// Substring extraction and manipulation methods..
@@ -1229,19 +1232,19 @@ public:
 
 	const String getLastCharacters (int numCharacters) const;
 
-	const String fromFirstOccurrenceOf (const juce_wchar* substringToStartFrom,
+	const String fromFirstOccurrenceOf (const String& substringToStartFrom,
 										bool includeSubStringInResult,
 										bool ignoreCase) const;
 
-	const String fromLastOccurrenceOf (const juce_wchar* substringToFind,
+	const String fromLastOccurrenceOf (const String& substringToFind,
 									   bool includeSubStringInResult,
 									   bool ignoreCase) const;
 
-	const String upToFirstOccurrenceOf (const juce_wchar* substringToEndWith,
+	const String upToFirstOccurrenceOf (const String& substringToEndWith,
 										bool includeSubStringInResult,
 										bool ignoreCase) const;
 
-	const String upToLastOccurrenceOf (const juce_wchar* substringToFind,
+	const String upToLastOccurrenceOf (const String& substringToFind,
 									   bool includeSubStringInResult,
 									   bool ignoreCase) const;
 
@@ -1249,9 +1252,9 @@ public:
 	const String trimStart() const;
 	const String trimEnd() const;
 
-	const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const;
+	const String trimCharactersAtStart (const String& charactersToTrim) const;
 
-	const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const;
+	const String trimCharactersAtEnd (const String& charactersToTrim) const;
 
 	const String toUpperCase() const;
 
@@ -1259,25 +1262,25 @@ public:
 
 	const String replaceSection (int startIndex,
 								 int numCharactersToReplace,
-								 const juce_wchar* stringToInsert) const;
+								 const String& stringToInsert) const;
 
-	const String replace (const juce_wchar* stringToReplace,
-						  const juce_wchar* stringToInsertInstead,
+	const String replace (const String& stringToReplace,
+						  const String& stringToInsertInstead,
 						  bool ignoreCase = false) const;
 
 	const String replaceCharacter (juce_wchar characterToReplace,
 								   juce_wchar characterToInsertInstead) const;
 
 	const String replaceCharacters (const String& charactersToReplace,
-									const juce_wchar* charactersToInsertInstead) const;
+									const String& charactersToInsertInstead) const;
 
-	const String retainCharacters (const juce_wchar* charactersToRetain) const;
+	const String retainCharacters (const String& charactersToRetain) const;
 
-	const String removeCharacters (const juce_wchar* charactersToRemove) const;
+	const String removeCharacters (const String& charactersToRemove) const;
 
-	const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const;
+	const String initialSectionContainingOnly (const String& permittedCharacters) const;
 
-	const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const;
+	const String initialSectionNotContaining (const String& charactersToStopAt) const;
 
 	bool isQuotedString() const;
 
@@ -1285,7 +1288,7 @@ public:
 
 	const String quoted (juce_wchar quoteCharacter = '"') const;
 
-	static const String repeatedString (const juce_wchar* stringToRepeat,
+	static const String repeatedString (const String& stringToRepeat,
 										int numberOfTimesToRepeat);
 
 	const String paddedLeft (juce_wchar padCharacter, int minimumLength) const;

@@ -94,7 +94,7 @@ AudioCDReader::~AudioCDReader()
 static int getTrackNumber (const File& file)
 {
     return file.getFileName()
-               .initialSectionContainingOnly (T("0123456789"))
+               .initialSectionContainingOnly ("0123456789")
                .getIntValue();
 }
 

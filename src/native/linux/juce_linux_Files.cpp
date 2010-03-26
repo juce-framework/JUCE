@@ -399,11 +399,11 @@ void juce_findFileClose (void* handle)
 bool juce_launchFile (const String& fileName,
                       const String& parameters)
 {
-    String cmdString (fileName.replace (T(" "), T("\\ "),false));
+    String cmdString (fileName.replace (" ", "\\ ",false));
     cmdString << " " << parameters;
 
     if (URL::isProbablyAWebsiteURL (fileName)
-         || cmdString.startsWithIgnoreCase (T("file:"))
+         || cmdString.startsWithIgnoreCase ("file:")
          || URL::isProbablyAnEmailAddress (fileName))
     {
         // create a command that tries to launch a bunch of likely browsers

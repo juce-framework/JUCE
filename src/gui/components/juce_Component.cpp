@@ -1826,7 +1826,7 @@ void Component::copyAllExplicitColoursTo (Component& target) const
     {
         const var::identifier name (properties.getName(i));
 
-        if (name.name.startsWith (T("jcclr_")))
+        if (name.name.startsWith ("jcclr_"))
             if (target.properties.set (name, properties [name]))
                 changed = true;
     }

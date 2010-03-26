@@ -43,7 +43,7 @@ public:
 
     int getItemWidth() const
     {
-        return xml->getIntAttribute (T("width"), -1);
+        return xml->getIntAttribute ("width", -1);
     }
 
     const String getUniqueName() const
@@ -69,7 +69,7 @@ public:
                 g.fillAll (Colours::blue.withAlpha (0.3f));
 
             // use a "colour" attribute in the xml tag for this node to set the text colour..
-            g.setColour (Colour (xml->getStringAttribute (T("colour"), T("ff000000")).getHexValue32()));
+            g.setColour (Colour (xml->getStringAttribute ("colour", "ff000000").getHexValue32()));
 
             g.setFont (height * 0.7f);
 
@@ -111,7 +111,7 @@ public:
 
     const String getDragSourceDescription()
     {
-        return T("TreeView Items");
+        return "TreeView Items";
     }
 };
 
@@ -140,7 +140,7 @@ public:
           directoryList (0),
           thread ("Demo file tree thread")
     {
-        setName (T("Tree Views"));
+        setName ("Tree Views");
 
         const String treeXmlString (BinaryData::treedemo_xml);
         XmlDocument parser (treeXmlString);
@@ -158,7 +158,7 @@ public:
         directoryList->setDirectory (folder, true, true);
         thread.startThread (3);
 
-        addAndMakeVisible (typeButton = new TextButton (T("Type of treeview...")));
+        addAndMakeVisible (typeButton = new TextButton ("Type of treeview..."));
         typeButton->addButtonListener (this);
         typeButton->setAlwaysOnTop (true);
         typeButton->setTriggeredOnMouseDown (true);
@@ -224,13 +224,13 @@ public:
     void buttonClicked (Button*)
     {
         PopupMenu m;
-        m.addItem (1, T("Custom treeview showing an XML tree"));
-        m.addItem (2, T("FileTreeComponent showing the file system"));
+        m.addItem (1, "Custom treeview showing an XML tree");
+        m.addItem (2, "FileTreeComponent showing the file system");
         m.addSeparator();
-        m.addItem (3, T("Show root item"), true,
+        m.addItem (3, "Show root item", true,
                    treeView != 0 ? treeView->isRootItemVisible()
                                  : fileTreeComp->isRootItemVisible());
-        m.addItem (4, T("Show open/close buttons"), true,
+        m.addItem (4, "Show open/close buttons", true,
                    treeView != 0 ? treeView->areOpenCloseButtonsVisible()
                                  : fileTreeComp->areOpenCloseButtonsVisible());
 

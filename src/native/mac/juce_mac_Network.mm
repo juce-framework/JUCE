@@ -86,9 +86,9 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     String script;
     script << "tell application \"Mail\"\r\n"
               "set newMessage to make new outgoing message with properties {subject:\""
-           << emailSubject.replace (T("\""), T("\\\""))
+           << emailSubject.replace ("\"", "\\\"")
            << "\", content:\""
-           << bodyText.replace (T("\""), T("\\\""))
+           << bodyText.replace ("\"", "\\\"")
            << "\" & return & return}\r\n"
               "tell newMessage\r\n"
               "set visible to true\r\n"
@@ -101,7 +101,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
     {
         script << "tell content\r\n"
                   "make new attachment with properties {file name:\""
-               << filesToAttach[i].replace (T("\""), T("\\\""))
+               << filesToAttach[i].replace ("\"", "\\\"")
                << "\"} at after the last paragraph\r\n"
                   "end tell\r\n";
     }
@@ -352,8 +352,8 @@ void* juce_openInternetFile (const String& url,
 
     for (int i = 0; i < headerLines.size(); ++i)
     {
-        const String key (headerLines[i].upToFirstOccurrenceOf (T(":"), false, false).trim());
-        const String value (headerLines[i].fromFirstOccurrenceOf (T(":"), false, false).trim());
+        const String key (headerLines[i].upToFirstOccurrenceOf (":", false, false).trim());
+        const String value (headerLines[i].fromFirstOccurrenceOf (":", false, false).trim());
 
         if (key.isNotEmpty() && value.isNotEmpty())
             [req addValue: juceStringToNS (value) forHTTPHeaderField: juceStringToNS (key)];

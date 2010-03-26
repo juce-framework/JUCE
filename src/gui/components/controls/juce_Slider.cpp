@@ -650,7 +650,7 @@ double Slider::getValueFromText (const String& text)
     while (t.startsWithChar ('+'))
         t = t.substring (1).trimStart();
 
-    return t.initialSectionContainingOnly (T("0123456789.,-"))
+    return t.initialSectionContainingOnly ("0123456789.,-")
             .getDoubleValue();
 }
 

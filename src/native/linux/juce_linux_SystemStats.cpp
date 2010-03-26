@@ -92,22 +92,22 @@ static const String getCpuInfo (const char* key, bool lastOne = false) throw()
 
 bool SystemStats::hasMMX() throw()
 {
-    return getCpuInfo ("flags").contains (T("mmx"));
+    return getCpuInfo ("flags").contains ("mmx");
 }
 
 bool SystemStats::hasSSE() throw()
 {
-    return getCpuInfo ("flags").contains (T("sse"));
+    return getCpuInfo ("flags").contains ("sse");
 }
 
 bool SystemStats::hasSSE2() throw()
 {
-    return getCpuInfo ("flags").contains (T("sse2"));
+    return getCpuInfo ("flags").contains ("sse2");
 }
 
 bool SystemStats::has3DNow() throw()
 {
-    return getCpuInfo ("flags").contains (T("3dnow"));
+    return getCpuInfo ("flags").contains ("3dnow");
 }
 
 const String SystemStats::getCpuVendor() throw()

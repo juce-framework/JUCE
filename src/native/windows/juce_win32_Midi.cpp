@@ -476,7 +476,7 @@ MidiOutput* MidiOutput::openDevice (int index)
         {
             // use the microsoft sw synth as a default - best not to allow deviceId
             // to be MIDI_MAPPER, or else device sharing breaks
-            if (String (mc.szPname, sizeof (mc.szPname)).containsIgnoreCase (T("microsoft")))
+            if (String (mc.szPname, sizeof (mc.szPname)).containsIgnoreCase ("microsoft"))
                 deviceId = i;
 
             if (index == n)

@@ -150,6 +150,9 @@ public:
     /** Case-insensitive comparison with another string. */
     bool equalsIgnoreCase (const juce_wchar* other) const throw();
 
+    /** Case-insensitive comparison with another string. */
+    bool equalsIgnoreCase (const char* other) const throw();
+
     /** Case-sensitive comparison with another string.
         @returns     0 if the two strings are identical; negative if this string
                      comes before the other one alphabetically, or positive if it
@@ -192,7 +195,7 @@ public:
     /** Tests whether the string begins with another string.
         Uses a case-sensitive comparison.
     */
-    bool startsWith (const juce_wchar* text) const throw();
+    bool startsWith (const String& text) const throw();
 
     /** Tests whether the string begins with a particular character.
         Uses a case-sensitive comparison.
@@ -202,12 +205,12 @@ public:
     /** Tests whether the string begins with another string.
         Uses a case-insensitive comparison.
     */
-    bool startsWithIgnoreCase (const juce_wchar* text) const throw();
+    bool startsWithIgnoreCase (const String& text) const throw();
 
     /** Tests whether the string ends with another string.
         Uses a case-sensitive comparison.
     */
-    bool endsWith (const juce_wchar* text) const throw();
+    bool endsWith (const String& text) const throw();
 
     /** Tests whether the string ends with a particular character.
         Uses a case-sensitive comparison.
@@ -217,12 +220,12 @@ public:
     /** Tests whether the string ends with another string.
         Uses a case-insensitive comparison.
     */
-    bool endsWithIgnoreCase (const juce_wchar* text) const throw();
+    bool endsWithIgnoreCase (const String& text) const throw();
 
     /** Tests whether the string contains another substring.
         Uses a case-sensitive comparison.
     */
-    bool contains (const juce_wchar* text) const throw();
+    bool contains (const String& text) const throw();
 
     /** Tests whether the string contains a particular character.
         Uses a case-sensitive comparison.
@@ -232,7 +235,7 @@ public:
     /** Tests whether the string contains another substring.
         Uses a case-insensitive comparison.
     */
-    bool containsIgnoreCase (const juce_wchar* text) const throw();
+    bool containsIgnoreCase (const String& text) const throw();
 
     /** Tests whether the string contains another substring as a distict word.
 
@@ -240,7 +243,7 @@ public:
                     non-alphanumeric characters
         @see indexOfWholeWord, containsWholeWordIgnoreCase
     */
-    bool containsWholeWord (const juce_wchar* wordToLookFor) const throw();
+    bool containsWholeWord (const String& wordToLookFor) const throw();
 
     /** Tests whether the string contains another substring as a distict word.
 
@@ -248,7 +251,7 @@ public:
                     non-alphanumeric characters
         @see indexOfWholeWordIgnoreCase, containsWholeWord
     */
-    bool containsWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
+    bool containsWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
     /** Finds an instance of another substring if it exists as a distict word.
 
@@ -257,7 +260,7 @@ public:
                     found, then it will return -1
         @see indexOfWholeWordIgnoreCase, containsWholeWord
     */
-    int indexOfWholeWord (const juce_wchar* wordToLookFor) const throw();
+    int indexOfWholeWord (const String& wordToLookFor) const throw();
 
     /** Finds an instance of another substring if it exists as a distict word.
 
@@ -266,7 +269,7 @@ public:
                     found, then it will return -1
         @see indexOfWholeWord, containsWholeWordIgnoreCase
     */
-    int indexOfWholeWordIgnoreCase (const juce_wchar* wordToLookFor) const throw();
+    int indexOfWholeWordIgnoreCase (const String& wordToLookFor) const throw();
 
     /** Looks for any of a set of characters in the string.
 
@@ -275,7 +278,7 @@ public:
         @returns    true if the string contains any of the characters from
                     the string that is passed in.
     */
-    bool containsAnyOf (const juce_wchar* charactersItMightContain) const throw();
+    bool containsAnyOf (const String& charactersItMightContain) const throw();
 
     /** Looks for a set of characters in the string.
 
@@ -284,7 +287,7 @@ public:
         @returns    true if the all the characters in the string are also found in the
                     string that is passed in.
     */
-    bool containsOnly (const juce_wchar* charactersItMightContain) const throw();
+    bool containsOnly (const String& charactersItMightContain) const throw();
 
     /** Returns true if this string contains any non-whitespace characters.
 
@@ -302,7 +305,7 @@ public:
         This isn't a full-blown regex though! The only wildcard characters supported
         are "*" and "?". It's mainly intended for filename pattern matching.
     */
-    bool matchesWildcard (const juce_wchar* wildcard, bool ignoreCase) const throw();
+    bool matchesWildcard (const String& wildcard, bool ignoreCase) const throw();
 
     //==============================================================================
     // Substring location methods..
@@ -339,7 +342,7 @@ public:
 
         @see indexOfChar, lastIndexOfAnyOf
     */
-    int indexOfAnyOf (const juce_wchar* charactersToLookFor,
+    int indexOfAnyOf (const String& charactersToLookFor,
                       int startIndex = 0,
                       bool ignoreCase = false) const throw();
 
@@ -349,7 +352,7 @@ public:
 
         @returns    the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOf (const juce_wchar* text) const throw();
+    int indexOf (const String& text) const throw();
 
     /** Searches for a substring within this string.
 
@@ -360,7 +363,7 @@ public:
         @returns                the index of the first occurrence of this substring, or -1 if it's not found.
     */
     int indexOf (int startIndex,
-                 const juce_wchar* textToLookFor) const throw();
+                 const String& textToLookFor) const throw();
 
     /** Searches for a substring within this string.
 
@@ -368,7 +371,7 @@ public:
 
         @returns    the index of the first occurrence of this substring, or -1 if it's not found.
     */
-    int indexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
+    int indexOfIgnoreCase (const String& textToLookFor) const throw();
 
     /** Searches for a substring within this string.
 
@@ -379,7 +382,7 @@ public:
         @returns                the index of the first occurrence of this substring, or -1 if it's not found.
     */
     int indexOfIgnoreCase (int startIndex,
-                           const juce_wchar* textToLookFor) const throw();
+                           const String& textToLookFor) const throw();
 
     /** Searches for a character inside this string (working backwards from the end of the string).
 
@@ -397,7 +400,7 @@ public:
         @returns            the index of the start of the last occurrence of the
                             substring within this string, or -1 if it's not found.
     */
-    int lastIndexOf (const juce_wchar* textToLookFor) const throw();
+    int lastIndexOf (const String& textToLookFor) const throw();
 
     /** Searches for a substring inside this string (working backwards from the end of the string).
 
@@ -406,7 +409,7 @@ public:
         @returns            the index of the start of the last occurrence of the
                             substring within this string, or -1 if it's not found.
     */
-    int lastIndexOfIgnoreCase (const juce_wchar* textToLookFor) const throw();
+    int lastIndexOfIgnoreCase (const String& textToLookFor) const throw();
 
     /** Returns the index of the last character in this string that matches one of the
         characters passed-in to this method.
@@ -420,7 +423,7 @@ public:
 
         @see lastIndexOf, indexOfAnyOf
     */
-    int lastIndexOfAnyOf (const juce_wchar* charactersToLookFor,
+    int lastIndexOfAnyOf (const String& charactersToLookFor,
                           bool ignoreCase = false) const throw();
 
 
@@ -507,7 +510,7 @@ public:
 
         @see upToFirstOccurrenceOf, fromLastOccurrenceOf
     */
-    const String fromFirstOccurrenceOf (const juce_wchar* substringToStartFrom,
+    const String fromFirstOccurrenceOf (const String& substringToStartFrom,
                                         bool includeSubStringInResult,
                                         bool ignoreCase) const;
 
@@ -519,7 +522,7 @@ public:
 
         @see fromFirstOccurrenceOf, upToLastOccurrenceOf
     */
-    const String fromLastOccurrenceOf (const juce_wchar* substringToFind,
+    const String fromLastOccurrenceOf (const String& substringToFind,
                                        bool includeSubStringInResult,
                                        bool ignoreCase) const;
 
@@ -536,7 +539,7 @@ public:
 
         @see upToLastOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToFirstOccurrenceOf (const juce_wchar* substringToEndWith,
+    const String upToFirstOccurrenceOf (const String& substringToEndWith,
                                         bool includeSubStringInResult,
                                         bool ignoreCase) const;
 
@@ -547,7 +550,7 @@ public:
 
         @see upToFirstOccurrenceOf, fromFirstOccurrenceOf
     */
-    const String upToLastOccurrenceOf (const juce_wchar* substringToFind,
+    const String upToLastOccurrenceOf (const String& substringToFind,
                                        bool includeSubStringInResult,
                                        bool ignoreCase) const;
 
@@ -565,7 +568,7 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimStart, trimCharactersAtEnd
     */
-    const String trimCharactersAtStart (const juce_wchar* charactersToTrim) const;
+    const String trimCharactersAtStart (const String& charactersToTrim) const;
 
     /** Returns a copy of this string, having removed a specified set of characters from its end.
         Characters are removed from the end of the string until it finds one that is not in the
@@ -573,7 +576,7 @@ public:
         @param charactersToTrim     the set of characters to remove. This must not be null.
         @see trim, trimEnd, trimCharactersAtStart
     */
-    const String trimCharactersAtEnd (const juce_wchar* charactersToTrim) const;
+    const String trimCharactersAtEnd (const String& charactersToTrim) const;
 
     //==============================================================================
     /** Returns an upper-case version of this string. */
@@ -600,7 +603,7 @@ public:
     */
     const String replaceSection (int startIndex,
                                  int numCharactersToReplace,
-                                 const juce_wchar* stringToInsert) const;
+                                 const String& stringToInsert) const;
 
     /** Replaces all occurrences of a substring with another string.
 
@@ -609,8 +612,8 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String replace (const juce_wchar* stringToReplace,
-                          const juce_wchar* stringToInsertInstead,
+    const String replace (const String& stringToReplace,
+                          const String& stringToInsertInstead,
                           bool ignoreCase = false) const;
 
     /** Returns a string with all occurrences of a character replaced with a different one. */
@@ -623,12 +626,12 @@ public:
         by the character at the equivalent position in newCharacters (so the two strings
         passed in must be the same length).
 
-        e.g. translate ("abc", "def") replaces 'a' with 'd', 'b' with 'e', etc.
+        e.g. replaceCharacters ("abc", "def") replaces 'a' with 'd', 'b' with 'e', etc.
 
         Note that this is a const method, and won't affect the string itself.
     */
     const String replaceCharacters (const String& charactersToReplace,
-                                    const juce_wchar* charactersToInsertInstead) const;
+                                    const String& charactersToInsertInstead) const;
 
     /** Returns a version of this string that only retains a fixed set of characters.
 
@@ -639,7 +642,7 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String retainCharacters (const juce_wchar* charactersToRetain) const;
+    const String retainCharacters (const String& charactersToRetain) const;
 
     /** Returns a version of this string with a set of characters removed.
 
@@ -650,21 +653,21 @@ public:
 
         Note that this is a const method, and won't alter the string itself.
     */
-    const String removeCharacters (const juce_wchar* charactersToRemove) const;
+    const String removeCharacters (const String& charactersToRemove) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that doesn't appear in the string passed in.
     */
-    const String initialSectionContainingOnly (const juce_wchar* permittedCharacters) const;
+    const String initialSectionContainingOnly (const String& permittedCharacters) const;
 
     /** Returns a section from the start of the string that only contains a certain set of characters.
 
         This returns the leftmost section of the string, up to (and not including) the
         first character that occurs in the string passed in.
     */
-    const String initialSectionNotContaining (const juce_wchar* charactersToStopAt) const;
+    const String initialSectionNotContaining (const String& charactersToStopAt) const;
 
     //==============================================================================
     /** Checks whether the string might be in quotation marks.
@@ -707,7 +710,7 @@ public:
         @param stringToRepeat         the string to repeat
         @param numberOfTimesToRepeat  how many times to repeat it
     */
-    static const String repeatedString (const juce_wchar* stringToRepeat,
+    static const String repeatedString (const String& stringToRepeat,
                                         int numberOfTimesToRepeat);
 
     /** Returns a copy of this string with the specified character repeatedly added to its

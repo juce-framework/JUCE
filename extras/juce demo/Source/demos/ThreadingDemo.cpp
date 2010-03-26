@@ -122,7 +122,7 @@ class DemoThread    : public BouncingBallComp,
 
 public:
     DemoThread()
-        : Thread (T("Juce Demo Thread"))
+        : Thread ("Juce Demo Thread")
     {
         interval = Random::getSystemRandom().nextInt (50) + 6;
 
@@ -171,7 +171,7 @@ class DemoThreadPoolJob  : public BouncingBallComp,
 {
 public:
     DemoThreadPoolJob()
-        : ThreadPoolJob (T("Demo Threadpool Job"))
+        : ThreadPoolJob ("Demo Threadpool Job")
     {
     }
 
@@ -224,7 +224,7 @@ public:
     {
         isUsingPool = false;
 
-        setName (T("Multithreading"));
+        setName ("Multithreading");
 
         setOpaque (true);
     }
@@ -246,7 +246,7 @@ public:
         pool.removeAllJobs (true, 4000);
         deleteAllChildren();
 
-        addAndMakeVisible (controlButton = new TextButton (T("Thread type")));
+        addAndMakeVisible (controlButton = new TextButton ("Thread type"));
         controlButton->changeWidthToFitText (20);
         controlButton->setTopLeftPosition (20, 20);
         controlButton->setTriggeredOnMouseDown (true);
@@ -332,8 +332,8 @@ public:
     void buttonClicked (Button* button)
     {
         PopupMenu m;
-        m.addItem (1, T("Use one thread per ball"), true, ! isUsingPool);
-        m.addItem (2, T("Use a thread pool"), true, isUsingPool);
+        m.addItem (1, "Use one thread per ball", true, ! isUsingPool);
+        m.addItem (2, "Use a thread pool", true, isUsingPool);
 
         const int res = m.showAt (button);
 

@@ -43,7 +43,7 @@ public:
         loadData();
 
         // Create our table component and add it to this component..
-        addAndMakeVisible (table = new TableListBox (T("demo table"), this));
+        addAndMakeVisible (table = new TableListBox ("demo table", this));
 
         // give it a border
         table->setColour (ListBox::outlineColourId, Colours::grey);
@@ -52,9 +52,9 @@ public:
         // Add some columns to the table header, based on the column list in our database..
         forEachXmlChildElement (*columnList, columnXml)
         {
-            table->getHeader()->addColumn (columnXml->getStringAttribute T("name"),
-                                           columnXml->getIntAttribute T("columnId"),
-                                           columnXml->getIntAttribute T("width"),
+            table->getHeader()->addColumn (columnXml->getStringAttribute ("name"),
+                                           columnXml->getIntAttribute ("columnId"),
+                                           columnXml->getIntAttribute ("width"),
                                            50, 400,
                                            TableHeaderComponent::defaultFlags);
         }
@@ -182,12 +182,12 @@ public:
     // changes the combo box
     int getRating (const int rowNumber, const int columnId) const
     {
-        return dataList->getChildElement (rowNumber)->getIntAttribute (T("Rating"));
+        return dataList->getChildElement (rowNumber)->getIntAttribute ("Rating");
     }
 
     void setRating (const int rowNumber, const int columnId, const int newRating)
     {
-        dataList->getChildElement (rowNumber)->setAttribute (T("Rating"), newRating);
+        dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
     }
 
     //==============================================================================
@@ -221,13 +221,13 @@ private:
         {
             // just put a combo box inside this component
             addAndMakeVisible (comboBox = new ComboBox (String::empty));
-            comboBox->addItem (T("fab"), 1);
-            comboBox->addItem (T("groovy"), 2);
-            comboBox->addItem (T("hep"), 3);
-            comboBox->addItem (T("neat"), 4);
-            comboBox->addItem (T("wild"), 5);
-            comboBox->addItem (T("swingin"), 6);
-            comboBox->addItem (T("mad for it"), 7);
+            comboBox->addItem ("fab", 1);
+            comboBox->addItem ("groovy", 2);
+            comboBox->addItem ("hep", 3);
+            comboBox->addItem ("neat", 4);
+            comboBox->addItem ("wild", 5);
+            comboBox->addItem ("swingin", 6);
+            comboBox->addItem ("mad for it", 7);
 
             // when the combo is changed, we'll get a callback.
             comboBox->addListener (this);
@@ -280,8 +280,8 @@ private:
                            .compareLexicographically (second->getStringAttribute (attributeToSort));
 
             if (result == 0)
-                result = first->getStringAttribute (T("ID"))
-                           .compareLexicographically (second->getStringAttribute (T("ID")));
+                result = first->getStringAttribute ("ID")
+                           .compareLexicographically (second->getStringAttribute ("ID"));
 
             return direction * result;
         }
@@ -298,8 +298,8 @@ private:
         XmlDocument dataDoc (String ((const char*) BinaryData::demo_table_data_xml));
         demoData = dataDoc.getDocumentElement();
 
-        dataList = demoData->getChildByName (T("DATA"));
-        columnList = demoData->getChildByName (T("COLUMNS"));
+        dataList = demoData->getChildByName ("DATA");
+        columnList = demoData->getChildByName ("COLUMNS");
 
         numRows = dataList->getNumChildElements();
     }
@@ -309,8 +309,8 @@ private:
     {
         forEachXmlChildElement (*columnList, columnXml)
         {
-            if (columnXml->getIntAttribute T("columnId") == columnId)
-                return columnXml->getStringAttribute T("name");
+            if (columnXml->getIntAttribute ("columnId") == columnId)
+                return columnXml->getStringAttribute ("name");
         }
 
         return String::empty;

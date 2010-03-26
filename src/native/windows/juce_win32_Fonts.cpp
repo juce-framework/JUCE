@@ -38,7 +38,7 @@ static int CALLBACK wfontEnum2 (ENUMLOGFONTEXW* lpelfe,
     {
         const String fontName (lpelfe->elfLogFont.lfFaceName);
 
-        ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters (T("@")));
+        ((StringArray*) lParam)->addIfNotAlreadyThere (fontName.removeCharacters ("@"));
     }
 
     return 1;

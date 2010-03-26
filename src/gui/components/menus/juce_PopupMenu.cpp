@@ -191,7 +191,7 @@ public:
         {
             String mainText (itemInfo.text);
             String endText;
-            const int endIndex = mainText.indexOf (T("<end>"));
+            const int endIndex = mainText.indexOf ("<end>");
 
             if (endIndex >= 0)
             {
