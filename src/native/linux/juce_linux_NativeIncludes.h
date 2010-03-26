@@ -91,6 +91,11 @@
  #include <X11/extensions/Xcomposite.h>
 #endif
 
+#if JUCE_USE_XCURSOR
+ // If you're missing this header, try installing the libxcursor-dev package
+ #include <X11/Xcursor/Xcursor.h>
+#endif
+
 #if JUCE_OPENGL
  /* Got an include error here?
 

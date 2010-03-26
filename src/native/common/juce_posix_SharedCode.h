@@ -362,7 +362,7 @@ const File juce_getExecutableFile()
 {
     Dl_info exeInfo;
     dladdr ((const void*) juce_getExecutableFile, &exeInfo);
-    return File (String::fromUTF8 (exeInfo.dli_fname));
+    return File::getCurrentWorkingDirectory().getChildFile (String::fromUTF8 (exeInfo.dli_fname));
 }
 
 //==============================================================================

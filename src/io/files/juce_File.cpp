@@ -182,7 +182,7 @@ static const String parseAbsolutePath (String path)
             "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
             path if that's what was supplied, or would evaluate a partial path relative to the CWD.
         */
-        jassert (path.startsWith (T("./"))); // (assume that a path "./xyz" is deliberately intended to be relative to the CWD)
+        jassert (path.startsWith (T("./")) || path.startsWith (T("../"))); // (assume that a path "./xyz" is deliberately intended to be relative to the CWD)
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }

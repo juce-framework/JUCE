@@ -490,7 +490,7 @@ private:
             compiler->setAttribute ("ProgramDataBaseFileName", windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("WarningLevel", "3");
             compiler->setAttribute ("SuppressStartupBanner", "true");
-            
+
             if (getExtraCompilerFlags().toString().isNotEmpty())
                 compiler->setAttribute ("AdditionalOptions", getExtraCompilerFlags().toString().trim());
         }
@@ -531,7 +531,7 @@ private:
             linker->setAttribute ("TargetMachine", "1");
 
             String extraLinkerOptions (getExtraLinkerFlags().toString());
-            
+
             if (isRTAS())
             {
                 extraLinkerOptions += " /FORCE:multiple";

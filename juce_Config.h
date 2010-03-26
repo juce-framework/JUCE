@@ -188,6 +188,13 @@
   //#define JUCE_USE_XRENDER 1
 #endif
 
+/** JUCE_USE_XCURSOR: Uses XCursor to allow ARGB cursor on Linux. This is best left turned on
+    unless you have a good reason to disable it.
+*/
+#ifndef JUCE_USE_XCURSOR
+  #define JUCE_USE_XCURSOR 1
+#endif
+
 //=============================================================================
 /** JUCE_PLUGINHOST_VST: Enables the VST audio plugin hosting classes. This requires the
     Steinberg VST SDK to be installed on your machine, and should be left turned off unless

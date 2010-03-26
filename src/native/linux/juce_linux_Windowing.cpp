@@ -28,6 +28,11 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
+// These are defined in juce_linux_Messaging.cpp
+extern Display* display;
+extern XContext improbableNumber;
+
+//==============================================================================
 namespace Atoms
 {
     enum ProtocolItems
@@ -55,88 +60,41 @@ namespace Atoms
         {
             atomsInitialised = true;
 
-            Protocols                      = XInternAtom (display, "WM_PROTOCOLS", True);
-            ProtocolList [TAKE_FOCUS]      = XInternAtom (display, "WM_TAKE_FOCUS", True);
-            ProtocolList [DELETE_WINDOW]   = XInternAtom (display, "WM_DELETE_WINDOW", True);
-            ChangeState                    = XInternAtom (display, "WM_CHANGE_STATE", True);
-            State                          = XInternAtom (display, "WM_STATE", True);
-            ActiveWin                      = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
-            Pid                            = XInternAtom (display, "_NET_WM_PID", False);
-            WindowType                     = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
-            WindowState                    = XInternAtom (display, "_NET_WM_WINDOW_STATE", True);
+            Protocols                       = XInternAtom (display, "WM_PROTOCOLS", True);
+            ProtocolList [TAKE_FOCUS]       = XInternAtom (display, "WM_TAKE_FOCUS", True);
+            ProtocolList [DELETE_WINDOW]    = XInternAtom (display, "WM_DELETE_WINDOW", True);
+            ChangeState                     = XInternAtom (display, "WM_CHANGE_STATE", True);
+            State                           = XInternAtom (display, "WM_STATE", True);
+            ActiveWin                       = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
+            Pid                             = XInternAtom (display, "_NET_WM_PID", False);
+            WindowType                      = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
+            WindowState                     = XInternAtom (display, "_NET_WM_WINDOW_STATE", True);
 
-            XdndAware               = XInternAtom (display, "XdndAware", False);
-            XdndEnter               = XInternAtom (display, "XdndEnter", False);
-            XdndLeave               = XInternAtom (display, "XdndLeave", False);
-            XdndPosition            = XInternAtom (display, "XdndPosition", False);
-            XdndStatus              = XInternAtom (display, "XdndStatus", False);
-            XdndDrop                = XInternAtom (display, "XdndDrop", False);
-            XdndFinished            = XInternAtom (display, "XdndFinished", False);
-            XdndSelection           = XInternAtom (display, "XdndSelection", False);
+            XdndAware                       = XInternAtom (display, "XdndAware", False);
+            XdndEnter                       = XInternAtom (display, "XdndEnter", False);
+            XdndLeave                       = XInternAtom (display, "XdndLeave", False);
+            XdndPosition                    = XInternAtom (display, "XdndPosition", False);
+            XdndStatus                      = XInternAtom (display, "XdndStatus", False);
+            XdndDrop                        = XInternAtom (display, "XdndDrop", False);
+            XdndFinished                    = XInternAtom (display, "XdndFinished", False);
+            XdndSelection                   = XInternAtom (display, "XdndSelection", False);
 
-            XdndTypeList            = XInternAtom (display, "XdndTypeList", False);
-            XdndActionList          = XInternAtom (display, "XdndActionList", False);
-            XdndActionCopy          = XInternAtom (display, "XdndActionCopy", False);
-            XdndActionDescription   = XInternAtom (display, "XdndActionDescription", False);
+            XdndTypeList                    = XInternAtom (display, "XdndTypeList", False);
+            XdndActionList                  = XInternAtom (display, "XdndActionList", False);
+            XdndActionCopy                  = XInternAtom (display, "XdndActionCopy", False);
+            XdndActionDescription           = XInternAtom (display, "XdndActionDescription", False);
 
-            allowedMimeTypes [0] = XInternAtom (display, "text/plain", False);
-            allowedMimeTypes [1] = XInternAtom (display, "text/uri-list", False);
+            allowedMimeTypes[0]             = XInternAtom (display, "text/plain", False);
+            allowedMimeTypes[1]             = XInternAtom (display, "text/uri-list", False);
 
-            allowedActions [0] = XInternAtom (display, "XdndActionMove", False);
-            allowedActions [1] = XdndActionCopy;
-            allowedActions [2] = XInternAtom (display, "XdndActionLink", False);
-            allowedActions [3] = XInternAtom (display, "XdndActionAsk", False);
-            allowedActions [4] = XInternAtom (display, "XdndActionPrivate", False);
+            allowedActions[0]               = XInternAtom (display, "XdndActionMove", False);
+            allowedActions[1]               = XdndActionCopy;
+            allowedActions[2]               = XInternAtom (display, "XdndActionLink", False);
+            allowedActions[3]               = XInternAtom (display, "XdndActionAsk", False);
+            allowedActions[4]               = XInternAtom (display, "XdndActionPrivate", False);
         }
     }
 }
-
-//==============================================================================
-enum SystemTrayValues
-{
-    SYSTEM_TRAY_REQUEST_DOCK = 0,
-    SYSTEM_TRAY_BEGIN_MESSAGE = 1,
-    SYSTEM_TRAY_CANCEL_MESSAGE = 2
-};
-
-static XErrorHandler oldHandler = 0;
-static int trappedErrorCode = 0;
-
-extern "C" int errorTrapHandler (Display* dpy, XErrorEvent* err)
-{
-    trappedErrorCode = err->error_code;
-    return 0;
-}
-
-static void trapErrors()
-{
-    trappedErrorCode = 0;
-    oldHandler = XSetErrorHandler (errorTrapHandler);
-}
-
-static bool untrapErrors()
-{
-    XSetErrorHandler (oldHandler);
-    return (trappedErrorCode == 0);
-}
-
-
-//==============================================================================
-static bool isActiveApplication = false;
-
-bool Process::isForegroundProcess()
-{
-    return isActiveApplication;
-}
-
-//==============================================================================
-// These are defined in juce_linux_Messaging.cpp
-extern Display* display;
-extern XContext improbableNumber;
-
-static const int eventMask = NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
-                              | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-                              | ExposureMask | StructureNotifyMask | FocusChangeMask;
 
 //==============================================================================
 namespace Keys
@@ -191,69 +149,80 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
 
 //==============================================================================
 #if JUCE_USE_XSHM
-static bool isShmAvailable() throw()
+namespace XSHMHelpers
 {
-    static bool isChecked = false;
-    static bool isAvailable = false;
-
-    if (! isChecked)
+    static int trappedErrorCode = 0;
+    extern "C" int errorTrapHandler (Display*, XErrorEvent* err)
     {
-        isChecked = true;
-
-        int major, minor;
-        Bool pixmaps;
-
-        ScopedXLock xlock;
-
-        if (XShmQueryVersion (display, &major, &minor, &pixmaps))
-        {
-            trapErrors();
-
-            XShmSegmentInfo segmentInfo;
-            zerostruct (segmentInfo);
-            XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
-                                              24, ZPixmap, 0, &segmentInfo, 50, 50);
-
-            if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
-                                             xImage->bytes_per_line * xImage->height,
-                                             IPC_CREAT | 0777)) >= 0)
-            {
-                segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
-
-                if (segmentInfo.shmaddr != (void*) -1)
-                {
-                    segmentInfo.readOnly = False;
-                    xImage->data = segmentInfo.shmaddr;
-                    XSync (display, False);
-
-                    if (XShmAttach (display, &segmentInfo) != 0)
-                    {
-                        XSync (display, False);
-                        XShmDetach (display, &segmentInfo);
-
-                        isAvailable = true;
-                    }
-                }
-
-                XFlush (display);
-                XDestroyImage (xImage);
-
-                shmdt (segmentInfo.shmaddr);
-            }
-
-            shmctl (segmentInfo.shmid, IPC_RMID, 0);
-
-            isAvailable &= untrapErrors();
-        }
+        trappedErrorCode = err->error_code;
+        return 0;
     }
 
-    return isAvailable;
+    static bool isShmAvailable() throw()
+    {
+        static bool isChecked = false;
+        static bool isAvailable = false;
+
+        if (! isChecked)
+        {
+            isChecked = true;
+            int major, minor;
+            Bool pixmaps;
+
+            ScopedXLock xlock;
+
+            if (XShmQueryVersion (display, &major, &minor, &pixmaps))
+            {
+                trappedErrorCode = 0;
+                XErrorHandler oldHandler = XSetErrorHandler (errorTrapHandler);
+
+                XShmSegmentInfo segmentInfo;
+                zerostruct (segmentInfo);
+                XImage* xImage = XShmCreateImage (display, DefaultVisual (display, DefaultScreen (display)),
+                                                  24, ZPixmap, 0, &segmentInfo, 50, 50);
+
+                if ((segmentInfo.shmid = shmget (IPC_PRIVATE,
+                                                 xImage->bytes_per_line * xImage->height,
+                                                 IPC_CREAT | 0777)) >= 0)
+                {
+                    segmentInfo.shmaddr = (char*) shmat (segmentInfo.shmid, 0, 0);
+
+                    if (segmentInfo.shmaddr != (void*) -1)
+                    {
+                        segmentInfo.readOnly = False;
+                        xImage->data = segmentInfo.shmaddr;
+                        XSync (display, False);
+
+                        if (XShmAttach (display, &segmentInfo) != 0)
+                        {
+                            XSync (display, False);
+                            XShmDetach (display, &segmentInfo);
+
+                            isAvailable = true;
+                        }
+                    }
+
+                    XFlush (display);
+                    XDestroyImage (xImage);
+
+                    shmdt (segmentInfo.shmaddr);
+                }
+
+                shmctl (segmentInfo.shmid, IPC_RMID, 0);
+
+                XSetErrorHandler (oldHandler);
+                if (trappedErrorCode != 0)
+                    isAvailable = false;
+            }
+        }
+
+        return isAvailable;
+    }
 }
 #endif
 
 //==============================================================================
 #if JUCE_USE_XRENDER
-
 namespace XRender
 {
     typedef Status (*tXRenderQueryVersion) (Display*, int*, int*);
@@ -268,26 +237,21 @@ namespace XRender
 
     static bool isAvailable()
     {
-        static bool isChecked = false;
-        static bool isAvailable = false;
+        static bool hasLoaded = false;
 
-        if (! isChecked)
+        if (! hasLoaded)
         {
             ScopedXLock xlock;
+            hasLoaded = true;
 
-            isChecked = true;
+            void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW);
 
-            if (xRenderQueryVersion == 0)
+            if (h != 0)
             {
-                void* h = dlopen ("libXrender.so", RTLD_GLOBAL | RTLD_NOW);
-
-                if (h != 0)
-                {
-                    xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
-                    xRenderFindStandardFormat   = (tXrenderFindStandardFormat)  dlsym (h, "XrenderFindStandardFormat");
-                    xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
-                    xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
-                }
+                xRenderQueryVersion         = (tXRenderQueryVersion)        dlsym (h, "XRenderQueryVersion");
+                xRenderFindStandardFormat   = (tXrenderFindStandardFormat)  dlsym (h, "XrenderFindStandardFormat");
+                xRenderFindFormat           = (tXRenderFindFormat)          dlsym (h, "XRenderFindFormat");
+                xRenderFindVisualFormat     = (tXRenderFindVisualFormat)    dlsym (h, "XRenderFindVisualFormat");
             }
 
             if (xRenderQueryVersion != 0
@@ -297,11 +261,13 @@ namespace XRender
             {
                 int major, minor;
                 if (xRenderQueryVersion (display, &major, &minor))
-                    isAvailable = true;
+                    return true;
             }
+
+            xRenderQueryVersion = 0;
         }
 
-        return isAvailable;
+        return xRenderQueryVersion != 0;
     }
 
     static XRenderPictFormat* findPictureFormat()
@@ -344,9 +310,7 @@ namespace XRender
         return pictFormat;
     }
 }
-
 #endif
-
 
 //==============================================================================
 namespace Visuals
@@ -409,7 +373,7 @@ namespace Visuals
         if (desiredDepth == 32)
         {
 #if JUCE_USE_XSHM
-            if (isShmAvailable())
+            if (XSHMHelpers::isShmAvailable())
             {
 #if JUCE_USE_XRENDER
                 if (XRender::isAvailable())
@@ -497,7 +461,7 @@ public:
 #if JUCE_USE_XSHM
         usingXShm = false;
 
-        if ((imageDepth > 16) && isShmAvailable())
+        if ((imageDepth > 16) && XSHMHelpers::isShmAvailable())
         {
             zerostruct (segmentInfo);
 
@@ -1771,7 +1735,7 @@ public:
             ev.xclient.message_type = XInternAtom (display, "_NET_SYSTEM_TRAY_OPCODE", False);
             ev.xclient.format = 32;
             ev.xclient.data.l[0] = CurrentTime;
-            ev.xclient.data.l[1] = SYSTEM_TRAY_REQUEST_DOCK;
+            ev.xclient.data.l[1] = 0 /*SYSTEM_TRAY_REQUEST_DOCK*/;
             ev.xclient.data.l[2] = windowH;
             ev.xclient.data.l[3] = 0;
             ev.xclient.data.l[4] = 0;
@@ -1806,6 +1770,7 @@ public:
     bool dontRepaint;
 
     static ModifierKeys currentModifiers;
+    static bool isActiveApplication;
 
 private:
     //==============================================================================
@@ -1819,7 +1784,7 @@ private:
 #if JUCE_USE_XSHM
             shmCompletedDrawing = true;
 
-            useARGBImagesForRendering = isShmAvailable();
+            useARGBImagesForRendering = XSHMHelpers::isShmAvailable();
 
             if (useARGBImagesForRendering)
             {
@@ -2247,7 +2212,7 @@ private:
         swa.background_pixmap = None;
         swa.colormap = colormap;
         swa.override_redirect = getComponent()->isAlwaysOnTop() ? True : False;
-        swa.event_mask = eventMask;
+        swa.event_mask = getAllEventsMask();
 
         Window wndH = XCreateWindow (display, root,
                                      0, 0, 1, 1,
@@ -2363,8 +2328,15 @@ private:
         XSync (display, false);
 
         XEvent event;
-        while (XCheckWindowEvent (display, windowH, eventMask, &event) == True)
+        while (XCheckWindowEvent (display, windowH, getAllEventsMask(), &event) == True)
         {}
+    }
+
+    static int getAllEventsMask() throw()
+    {
+        return NoEventMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask
+                 | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
+                 | ExposureMask | StructureNotifyMask | FocusChangeMask;
     }
 
     static int64 getEventTime (::Time t)
@@ -2712,8 +2684,15 @@ private:
 };
 
 ModifierKeys LinuxComponentPeer::currentModifiers;
+bool LinuxComponentPeer::isActiveApplication = false;
 int LinuxComponentPeer::pointerMap[5];
 Point<int> LinuxComponentPeer::lastMousePos;
+
+//==============================================================================
+bool Process::isForegroundProcess()
+{
+    return LinuxComponentPeer::isActiveApplication;
+}
 
 //==============================================================================
 void ModifierKeys::updateCurrentModifiers() throw()
@@ -2964,29 +2943,87 @@ bool Desktop::isScreenSaverEnabled() throw()
 void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
 {
     ScopedXLock xlock;
-    Window root = RootWindow (display, DefaultScreen (display));
     const unsigned int imageW = image.getWidth();
     const unsigned int imageH = image.getHeight();
-    unsigned int cursorW, cursorH;
 
+#if JUCE_USE_XCURSOR
+    {
+        typedef XcursorBool (*tXcursorSupportsARGB) (Display*);
+        typedef XcursorImage* (*tXcursorImageCreate) (int, int);
+        typedef void (*tXcursorImageDestroy) (XcursorImage*);
+        typedef Cursor (*tXcursorImageLoadCursor) (Display*, const XcursorImage*);
+
+        static tXcursorSupportsARGB xXcursorSupportsARGB = 0;
+        static tXcursorImageCreate xXcursorImageCreate = 0;
+        static tXcursorImageDestroy xXcursorImageDestroy = 0;
+        static tXcursorImageLoadCursor xXcursorImageLoadCursor = 0;
+        static bool hasBeenLoaded = false;
+
+        if (! hasBeenLoaded)
+        {
+            hasBeenLoaded = true;
+            void* h = dlopen ("libXcursor.so", RTLD_GLOBAL | RTLD_NOW);
+
+            if (h != 0)
+            {
+                xXcursorSupportsARGB    = (tXcursorSupportsARGB)    dlsym (h, "XcursorSupportsARGB");
+                xXcursorImageCreate     = (tXcursorImageCreate)     dlsym (h, "XcursorImageCreate");
+                xXcursorImageLoadCursor = (tXcursorImageLoadCursor) dlsym (h, "XcursorImageLoadCursor");
+                xXcursorImageDestroy    = (tXcursorImageDestroy)    dlsym (h, "XcursorImageDestroy");
+
+                if (xXcursorSupportsARGB == 0 || xXcursorImageCreate == 0
+                      || xXcursorImageLoadCursor == 0 || xXcursorImageDestroy == 0
+                      || ! xXcursorSupportsARGB (display))
+                    xXcursorSupportsARGB = 0;
+            }
+        }
+
+        if (xXcursorSupportsARGB != 0)
+        {
+            XcursorImage* xcImage = xXcursorImageCreate (imageW, imageH);
+
+            if (xcImage != 0)
+            {
+                xcImage->xhot = hotspotX;
+                xcImage->yhot = hotspotY;
+                XcursorPixel* dest = xcImage->pixels;
+
+                for (int y = 0; y < (int) imageH; ++y)
+                    for (int x = 0; x < (int) imageW; ++x)
+                        *dest++ = image.getPixelAt (x, y).getARGB();
+
+                void* result = (void*) xXcursorImageLoadCursor (display, xcImage);
+                xXcursorImageDestroy (xcImage);
+
+                if (result != 0)
+                    return result;
+            }
+        }
+    }
+#endif
+
+    Window root = RootWindow (display, DefaultScreen (display));
+    unsigned int cursorW, cursorH;
     if (! XQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
         return 0;
 
     Image im (Image::ARGB, cursorW, cursorH, true);
-    Graphics g (im);
-
-    if (imageW > cursorW || imageH > cursorH)
     {
-        hotspotX = (hotspotX * cursorW) / imageW;
-        hotspotY = (hotspotY * cursorH) / imageH;
+        Graphics g (im);
 
-        g.drawImageWithin (&image, 0, 0, imageW, imageH,
-                           RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
-                           false);
-    }
-    else
-    {
-        g.drawImageAt (&image, 0, 0);
+        if (imageW > cursorW || imageH > cursorH)
+        {
+            hotspotX = (hotspotX * cursorW) / imageW;
+            hotspotY = (hotspotY * cursorH) / imageH;
+
+            g.drawImageWithin (&image, 0, 0, imageW, imageH,
+                               RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
+                               false);
+        }
+        else
+        {
+            g.drawImageAt (&image, 0, 0);
+        }
     }
 
     const int stride = (cursorW + 7) >> 3;
@@ -3059,7 +3096,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            const ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) dragHandData, dragHandDataSize));
+            const ScopedPointer <Image> im (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize));
             return juce_createMouseCursorFromImage (*im, 8, 7);
         }
 
@@ -3073,7 +3110,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            const ScopedPointer <Image> im (ImageFileFormat::loadFrom ((const char*) copyCursorData, copyCursorSize));
+            const ScopedPointer <Image> im (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize));
             return juce_createMouseCursorFromImage (*im, 1, 3);
         }
 

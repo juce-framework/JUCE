@@ -264,6 +264,10 @@
   //#define JUCE_USE_XRENDER 1
 #endif
 
+#ifndef JUCE_USE_XCURSOR
+  #define JUCE_USE_XCURSOR 1
+#endif
+
 #ifndef JUCE_PLUGINHOST_VST
 //  #define JUCE_PLUGINHOST_VST 1
 #endif

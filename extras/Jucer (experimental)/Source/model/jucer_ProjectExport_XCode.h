@@ -393,7 +393,7 @@ private:
         settings.add ("HEADER_SEARCH_PATHS = \"" + getHeaderSearchPaths (config).joinIntoString (" ") + " $(inherited)\"");
         settings.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         settings.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
-        
+
         if (getExtraCompilerFlags().toString().isNotEmpty())
             settings.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
 
