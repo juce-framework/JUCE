@@ -148,6 +148,11 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
             props.getLast()->setTooltip ("If you're building an RTAS, this must be the folder containing the RTAS SDK. This should be an absolute path.");
         }
     }
+
+    props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false));
+    props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler");
+    props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false));
+    props.getLast()->setTooltip ("Extra command-line flags to be passed to the linker. You might want to use this for adding additional libraries");
 }
 
 const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const

@@ -184,7 +184,8 @@ private:
         for (int i = 0; i < libs.size(); ++i)
             out << " -l" << libs[i];
 
-        out << newLine;
+        out << " " << getExtraLinkerFlags().toString().trim()
+            << newLine;
     }
 
     void writeConfig (OutputStream& out, const Project::BuildConfiguration& config)
@@ -207,7 +208,7 @@ private:
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 
-        out << "  CXXFLAGS += $(CFLAGS)" << newLine;
+        out << "  CXXFLAGS += $(CFLAGS) " << getExtraCompilerFlags().toString().trim() << newLine;
 
         writeLinkerFlags (out, config);
 

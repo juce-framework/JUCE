@@ -75,6 +75,9 @@ public:
     bool isRTAS() const                     { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
     bool isAU() const                       { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
 
+    Value getExtraCompilerFlags() const     { return getSetting ("extraCompilerFlags"); }
+    Value getExtraLinkerFlags() const       { return getSetting ("extraLinkerFlags"); }
+
     Array<RelativePath> juceWrapperFiles;
 
 protected:

@@ -490,6 +490,9 @@ private:
             compiler->setAttribute ("ProgramDataBaseFileName", windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("WarningLevel", "3");
             compiler->setAttribute ("SuppressStartupBanner", "true");
+            
+            if (getExtraCompilerFlags().toString().isNotEmpty())
+                compiler->setAttribute ("AdditionalOptions", getExtraCompilerFlags().toString().trim());
         }
 
         createToolElement (xml, "VCManagedResourceCompilerTool");
@@ -527,14 +530,19 @@ private:
             linker->setAttribute ("DataExecutionPrevention", "0");
             linker->setAttribute ("TargetMachine", "1");
 
+            String extraLinkerOptions (getExtraLinkerFlags().toString());
+            
             if (isRTAS())
             {
-                linker->setAttribute ("AdditionalOptions", "/FORCE:multiple");
+                extraLinkerOptions += " /FORCE:multiple";
                 linker->setAttribute ("DelayLoadDLLs", "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; DSPManager.dll");
                 linker->setAttribute ("ModuleDefinitionFile", getJucePathFromTargetFolder()
                                             .getChildFile ("extras/audio plugins/wrapper/RTAS/juce_RTAS_WinExports.def")
                                             .toWindowsStyle());
             }
+
+            if (extraLinkerOptions.isNotEmpty())
+                linker->setAttribute ("AdditionalOptions", extraLinkerOptions.trim());
         }
         else
         {
@@ -699,8 +707,8 @@ private:
                 << " /YX /FD /c " << extraDebugFlags << " /Zm1024" << newLine
                 << "# ADD CPP /nologo " << (isDebug ? "/MTd" : "/MT") << " /W3 /GR /GX /" << optimisationFlag
                 << " /I " << getHeaderSearchPaths (config).joinIntoString (" /I ")
-                << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c " << extraDebugFlags
-                << " /Zm1024" << newLine;
+                << " /D " << defines << " /D \"_UNICODE\" /D \"UNICODE\" /FD /c /Zm1024 " << extraDebugFlags
+                << " " << getExtraCompilerFlags().toString().trim() << newLine;
 
             if (! isDebug)
                 out << "# SUBTRACT CPP /YX" << newLine;
@@ -729,8 +737,9 @@ private:
                     << "kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib "
                     << (isDebug ? " /debug" : "")
                     << " /nologo /machine:I386 /out:\"" << targetBinary << "\" "
-                    << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console"
-                                                                     : "/subsystem:windows")) << newLine;
+                    << (isDLL ? "/dll" : (project.isCommandLineApp() ? "/subsystem:console "
+                                                                     : "/subsystem:windows "))
+                    << getExtraLinkerFlags().toString().trim() << newLine;
             }
         }
 

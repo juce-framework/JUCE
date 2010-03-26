@@ -361,6 +361,9 @@ private:
 
         if (project.getJuceLinkageMode() == Project::useLinkedJuce)
             getLinkerFlagsForStaticLibrary (getJuceLibFile(), flags, librarySearchPaths);
+
+        flags.add (getExtraLinkerFlags().toString());
+        flags.removeEmptyStrings (true);
     }
 
     const StringArray getProjectSettings (const Project::BuildConfiguration& config)
@@ -390,6 +393,9 @@ private:
         settings.add ("HEADER_SEARCH_PATHS = \"" + getHeaderSearchPaths (config).joinIntoString (" ") + " $(inherited)\"");
         settings.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
         settings.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
+        
+        if (getExtraCompilerFlags().toString().isNotEmpty())
+            settings.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
 
         switch ((int) project.getProjectType().getValue())
         {
