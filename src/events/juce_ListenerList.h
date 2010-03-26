@@ -95,7 +95,7 @@ public:
         jassert (listenerToAdd != 0);
 
         if (listenerToAdd != 0)
-            listeners.add (listenerToAdd);
+            listeners.addIfNotAlreadyThere (listenerToAdd);
     }
 
     /** Removes a listener from the list.

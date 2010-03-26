@@ -6103,7 +6103,7 @@ public:
 		jassert (listenerToAdd != 0);
 
 		if (listenerToAdd != 0)
-			listeners.add (listenerToAdd);
+			listeners.addIfNotAlreadyThere (listenerToAdd);
 	}
 
 	void remove (ListenerClass* const listenerToRemove)
