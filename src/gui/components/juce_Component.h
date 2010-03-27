@@ -81,7 +81,7 @@ public:
 
         @see getName, setName
     */
-    Component (const String& componentName);
+    explicit Component (const String& componentName);
 
     /** Returns the name of this component.
 

@@ -47,7 +47,7 @@ public:
 
         Once created, add some tabs with the addTab() method.
     */
-    TabbedComponent (const TabbedButtonBar::Orientation orientation);
+    explicit TabbedComponent (const TabbedButtonBar::Orientation orientation);
 
     /** Destructor. */
     ~TabbedComponent();

@@ -68,7 +68,7 @@ public:
         When created, you'll need to set up the slider's style and range with setSliderStyle(),
         setRange(), etc.
     */
-    Slider (const String& componentName);
+    explicit Slider (const String& componentName);
 
     /** Destructor. */
     ~Slider();

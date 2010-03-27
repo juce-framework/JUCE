@@ -45,7 +45,7 @@ public:
         @param fileToRead   the file to read from - if the file can't be accessed for some
                             reason, then the stream will just contain no data
     */
-    FileInputStream (const File& fileToRead);
+    explicit FileInputStream (const File& fileToRead);
 
     /** Destructor. */
     ~FileInputStream();

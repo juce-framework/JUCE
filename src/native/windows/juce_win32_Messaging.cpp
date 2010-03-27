@@ -213,7 +213,7 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
 static BOOL CALLBACK BroadcastEnumWindowProc (HWND hwnd, LPARAM lParam)
 {
     if (hwnd != juce_messageWindowHandle)
-        (reinterpret_cast <VoidArray*> (lParam))->add ((void*) hwnd);
+        reinterpret_cast <VoidArray*> (lParam)->add ((void*) hwnd);
 
     return TRUE;
 }

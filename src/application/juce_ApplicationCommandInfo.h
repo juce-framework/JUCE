@@ -48,7 +48,7 @@
 struct JUCE_API  ApplicationCommandInfo
 {
     //==============================================================================
-    ApplicationCommandInfo (CommandID commandID) throw();
+    explicit ApplicationCommandInfo (CommandID commandID) throw();
 
     //==============================================================================
     /** Sets a number of the structures values at once.

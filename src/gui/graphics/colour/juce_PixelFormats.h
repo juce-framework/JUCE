@@ -546,6 +546,10 @@ public:
     {
     }
 
+    //==============================================================================
+    /** The indexes of the different components in the byte layout of this type of colour. */
+    enum { indexA = 0 };
+
 private:
     //==============================================================================
     uint8 a : 8;

@@ -55,7 +55,7 @@ public:
         When first created, the thread is not running. Use the startThread()
         method to start it.
     */
-    Thread (const String& threadName);
+    explicit Thread (const String& threadName);
 
     /** Destructor.
 
@@ -199,6 +199,8 @@ public:
 
         This puts the thread to sleep until either the timeout period expires, or
         another thread calls the notify() method to wake it up.
+
+        A negative time-out value means that the method will wait indefinitely.
 
         @returns    true if the event has been signalled, false if the timeout expires.
     */

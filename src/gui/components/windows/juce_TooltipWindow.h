@@ -67,8 +67,8 @@ public:
 
         @see TooltipClient, LookAndFeel::drawTooltip, LookAndFeel::getTooltipSize
     */
-    TooltipWindow (Component* parentComponent = 0,
-                   int millisecondsBeforeTipAppears = 700);
+    explicit TooltipWindow (Component* parentComponent = 0,
+                            int millisecondsBeforeTipAppears = 700);
 
     /** Destructor. */
     ~TooltipWindow();

@@ -58,7 +58,7 @@ public:
                 int rightGap) throw();
 
     /** Creates a border with the given gap on all sides. */
-    BorderSize (int allGaps) throw();
+    explicit BorderSize (int allGaps) throw();
 
     /** Destructor. */
     ~BorderSize() throw();

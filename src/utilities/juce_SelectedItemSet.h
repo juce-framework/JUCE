@@ -55,7 +55,7 @@ public:
     }
 
     /** Creates a set based on an array of items. */
-    SelectedItemSet (const Array <SelectableItemType>& items)
+    explicit SelectedItemSet (const Array <SelectableItemType>& items)
         : selectedItems (items)
     {
     }

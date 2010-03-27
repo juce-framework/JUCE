@@ -108,35 +108,37 @@ int InputStream::readCompressedInt()
 
 int64 InputStream::readInt64()
 {
-    char temp[8];
+    union { uint8 asBytes[8]; uint64 asInt64; } n;
 
-    if (read (temp, 8) == 8)
-        return (int64) ByteOrder::swapIfBigEndian (*reinterpret_cast <uint64*> (temp));
+    if (read (n.asBytes, 8) == 8)
+        return (int64) ByteOrder::swapIfBigEndian (n.asInt64);
 
     return 0;
 }
 
 int64 InputStream::readInt64BigEndian()
 {
-    char temp[8];
+    union { uint8 asBytes[8]; uint64 asInt64; } n;
 
-    if (read (temp, 8) == 8)
-        return (int64) ByteOrder::swapIfLittleEndian (*reinterpret_cast <uint64*> (temp));
+    if (read (n.asBytes, 8) == 8)
+        return (int64) ByteOrder::swapIfLittleEndian (n.asInt64);
 
     return 0;
 }
 
 float InputStream::readFloat()
 {
-    union { int asInt; float asFloat; } n;
-    n.asInt = readInt();
+    // the union below relies on these types being the same size...
+    static_jassert (sizeof (int32) == sizeof (float));
+    union { int32 asInt; float asFloat; } n;
+    n.asInt = (int32) readInt();
     return n.asFloat;
 }
 
 float InputStream::readFloatBigEndian()
 {
-    union { int asInt; float asFloat; } n;
-    n.asInt = readIntBigEndian();
+    union { int32 asInt; float asFloat; } n;
+    n.asInt = (int32) readIntBigEndian();
     return n.asFloat;
 }
 

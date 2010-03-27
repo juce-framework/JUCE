@@ -138,10 +138,10 @@ public:
     static StringHolder empty;
 
 private:
-    static inline StringHolder* bufferFromText (juce_wchar* const text) throw()
+    static inline StringHolder* bufferFromText (void* const text) throw()
     {
         // (Can't use offsetof() here because of warnings about this not being a POD)
-        return reinterpret_cast <StringHolder*> (reinterpret_cast <char*> (text)
+        return reinterpret_cast <StringHolder*> (static_cast <char*> (text)
                     - (reinterpret_cast <size_t> (reinterpret_cast <StringHolder*> (1)->text) - 1));
     }
 };
@@ -1364,9 +1364,7 @@ const String String::substring (int start, int end) const
         return empty;
 
     int len = 0;
-    const juce_wchar* const t = text;
-
-    while (len <= end && t [len] != 0)
+    while (len <= end && text [len] != 0)
         ++len;
 
     if (end >= len)
@@ -1389,8 +1387,8 @@ const String String::substring (const int start) const
 
     if (start >= len)
         return empty;
-    else
-        return String (text + start, len - start);
+
+    return String (text + start, len - start);
 }
 
 const String String::dropLastCharacters (const int numberToDrop) const
@@ -1409,11 +1407,10 @@ const String String::fromFirstOccurrenceOf (const String& sub,
 {
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
-
     if (i < 0)
         return empty;
-    else
-        return substring (includeSubString ? i : i + sub.length());
+
+    return substring (includeSubString ? i : i + sub.length());
 }
 
 const String String::fromLastOccurrenceOf (const String& sub,
@@ -1422,7 +1419,6 @@ const String String::fromLastOccurrenceOf (const String& sub,
 {
     const int i = ignoreCase ? lastIndexOfIgnoreCase (sub)
                              : lastIndexOf (sub);
-
     if (i < 0)
         return *this;
 
@@ -1435,7 +1431,6 @@ const String String::upToFirstOccurrenceOf (const String& sub,
 {
     const int i = ignoreCase ? indexOfIgnoreCase (sub)
                              : indexOf (sub);
-
     if (i < 0)
         return *this;
 
@@ -1517,8 +1512,8 @@ const String String::trim() const
         return empty;
     else if (start > 0 || end < len)
         return String (text + start, end - start);
-    else
-        return *this;
+
+    return *this;
 }
 
 const String String::trimStart() const
@@ -1533,8 +1528,8 @@ const String String::trimStart() const
 
     if (t == text)
         return *this;
-    else
-        return String (t);
+
+    return String (t);
 }
 
 const String String::trimEnd() const
@@ -1552,9 +1547,6 @@ const String String::trimEnd() const
 
 const String String::trimCharactersAtStart (const String& charactersToTrim) const
 {
-    if (isEmpty())
-        return empty;
-
     const juce_wchar* t = text;
 
     while (charactersToTrim.containsChar (*t))
@@ -1562,8 +1554,8 @@ const String String::trimCharactersAtStart (const String& charactersToTrim) cons
 
     if (t == text)
         return *this;
-    else
-        return String (t);
+
+    return String (t);
 }
 
 const String String::trimCharactersAtEnd (const String& charactersToTrim) const
@@ -1624,7 +1616,17 @@ const String String::removeCharacters (const String& charactersToRemove) const
 
 const String String::initialSectionContainingOnly (const String& permittedCharacters) const
 {
-    return substring (0, CharacterFunctions::getIntialSectionContainingOnly (text, permittedCharacters.text));
+    int i = 0;
+
+    for (;;)
+    {
+        if (! permittedCharacters.containsChar (text[i]))
+            break;
+
+        ++i;
+    }
+
+    return substring (0, i);
 }
 
 const String String::initialSectionNotContaining (const String& charactersToStopAt) const
@@ -1940,7 +1942,7 @@ const char* String::toUTF8() const
         String* const mutableThis = const_cast <String*> (this);
         mutableThis->text = StringHolder::makeUniqueWithSize (mutableThis->text, currentLen + 1 + utf8BytesNeeded / sizeof (juce_wchar));
 
-        char* const otherCopy = (char*) (text + currentLen);
+        char* const otherCopy = reinterpret_cast <char*> (text + currentLen);
         copyToUTF8 (otherCopy, std::numeric_limits<int>::max());
 
         return otherCopy;
@@ -2128,12 +2130,11 @@ const char* String::toCString() const
     }
     else
     {
-        int len = length();
-
+        const int len = length();
         String* const mutableThis = const_cast <String*> (this);
         mutableThis->text = StringHolder::makeUniqueWithSize (mutableThis->text, (len + 1) * 2);
 
-        char* otherCopy = (char*) (text + len + 1);
+        char* otherCopy = reinterpret_cast <char*> (text + len + 1);
         CharacterFunctions::copy (otherCopy, text, len);
         otherCopy [len] = 0;
         return otherCopy;

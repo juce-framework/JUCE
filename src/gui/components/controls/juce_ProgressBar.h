@@ -59,7 +59,7 @@ public:
                             you'd better be careful not to delete this variable while the
                             ProgressBar still exists!
     */
-    ProgressBar (double& progress);
+    explicit ProgressBar (double& progress);
 
     /** Destructor. */
     ~ProgressBar();

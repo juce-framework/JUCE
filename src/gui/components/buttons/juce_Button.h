@@ -79,7 +79,7 @@ protected:
                                     initially set to this string, but these can be changed later
                                     using the setName() and setButtonText() methods)
     */
-    Button (const String& buttonName);
+    explicit Button (const String& buttonName);
 
 public:
     /** Destructor. */

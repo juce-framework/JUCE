@@ -161,7 +161,7 @@ static const String getConnectedEndpointName (MIDIEndpointRef endpoint)
                     if (s.isNotEmpty())
                     {
                         if (result.isNotEmpty())
-                            result += (", ");
+                            result += ", ";
 
                         result += s;
                     }

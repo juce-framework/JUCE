@@ -49,7 +49,7 @@ public:
         The maxNumThumbsToStore parameter lets you specify how many previews should
         be kept in memory at once.
     */
-    AudioThumbnailCache (int maxNumThumbsToStore);
+    explicit AudioThumbnailCache (int maxNumThumbsToStore);
 
     /** Destructor. */
     ~AudioThumbnailCache();

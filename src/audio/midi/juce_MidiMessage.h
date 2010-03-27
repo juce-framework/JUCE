@@ -896,7 +896,13 @@ public:
 private:
     double timeStamp;
     uint8* data;
-    int message, size;
+    int size;
+
+    union
+    {
+        uint8 asBytes[4];
+        uint32 asInt32;
+    } preallocatedData;
 };
 
 

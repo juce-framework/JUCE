@@ -870,13 +870,13 @@ public:
 
 	static uint64 swapIfLittleEndian (uint64 value);
 
-	static uint32 littleEndianInt (const char* bytes);
+	static uint32 littleEndianInt (const void* bytes);
 
-	static uint16 littleEndianShort (const char* bytes);
+	static uint16 littleEndianShort (const void* bytes);
 
-	static uint32 bigEndianInt (const char* bytes);
+	static uint32 bigEndianInt (const void* bytes);
 
-	static uint16 bigEndianShort (const char* bytes);
+	static uint16 bigEndianShort (const void* bytes);
 
 	static int littleEndian24Bit (const char* bytes);
 
@@ -944,10 +944,10 @@ inline uint64 ByteOrder::swap (uint64 value)
  inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)				   { return swap (v); }
  inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)				   { return swap (v); }
  inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)				   { return swap (v); }
- inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return *reinterpret_cast <const uint32*> (bytes); }
- inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return *reinterpret_cast <const uint16*> (bytes); }
- inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return swap (*reinterpret_cast <const uint32*> (bytes)); }
- inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return swap (*reinterpret_cast <const uint16*> (bytes)); }
+ inline uint32 ByteOrder::littleEndianInt (const void* const bytes)			 { return *static_cast <const uint32*> (bytes); }
+ inline uint16 ByteOrder::littleEndianShort (const void* const bytes)			   { return *static_cast <const uint16*> (bytes); }
+ inline uint32 ByteOrder::bigEndianInt (const void* const bytes)				{ return swap (*static_cast <const uint32*> (bytes)); }
+ inline uint16 ByteOrder::bigEndianShort (const void* const bytes)			  { return swap (*static_cast <const uint16*> (bytes)); }
  inline bool ByteOrder::isBigEndian()							   { return false; }
 #else
  inline uint16 ByteOrder::swapIfBigEndian (const uint16 v)				  { return swap (v); }
@@ -956,10 +956,10 @@ inline uint64 ByteOrder::swap (uint64 value)
  inline uint16 ByteOrder::swapIfLittleEndian (const uint16 v)				   { return v; }
  inline uint32 ByteOrder::swapIfLittleEndian (const uint32 v)				   { return v; }
  inline uint64 ByteOrder::swapIfLittleEndian (const uint64 v)				   { return v; }
- inline uint32 ByteOrder::littleEndianInt (const char* const bytes)			 { return swap (*reinterpret_cast <const uint32*> (bytes)); }
- inline uint16 ByteOrder::littleEndianShort (const char* const bytes)			   { return swap (*reinterpret_cast <const uint16*> (bytes)); }
- inline uint32 ByteOrder::bigEndianInt (const char* const bytes)				{ return *reinterpret_cast <const uint32*> (bytes); }
- inline uint16 ByteOrder::bigEndianShort (const char* const bytes)			  { return *reinterpret_cast <const uint16*> (bytes); }
+ inline uint32 ByteOrder::littleEndianInt (const void* const bytes)			 { return swap (*static_cast <const uint32*> (bytes)); }
+ inline uint16 ByteOrder::littleEndianShort (const void* const bytes)			   { return swap (*static_cast <const uint16*> (bytes)); }
+ inline uint32 ByteOrder::bigEndianInt (const void* const bytes)				{ return *static_cast <const uint32*> (bytes); }
+ inline uint16 ByteOrder::bigEndianShort (const void* const bytes)			  { return *static_cast <const uint16*> (bytes); }
  inline bool ByteOrder::isBigEndian()							   { return true; }
 #endif
 
@@ -1513,8 +1513,8 @@ public:
 	{
 	}
 
-	HeapBlock (const size_t numElements)
-		: data (reinterpret_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
+	explicit HeapBlock (const size_t numElements)
+		: data (static_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
 	{
 	}
 
@@ -1548,13 +1548,13 @@ public:
 	void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		::juce_free (data);
-		data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+		data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
 	}
 
 	void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		::juce_free (data);
-		data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
+		data = static_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
 	}
 
 	void allocate (const size_t newNumElements, const bool initialiseToZero)
@@ -1562,17 +1562,17 @@ public:
 		::juce_free (data);
 
 		if (initialiseToZero)
-			data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
+			data = static_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
 		else
-			data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
+			data = static_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
 	}
 
 	void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
 	{
 		if (data == 0)
-			data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+			data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
 		else
-			data = reinterpret_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
+			data = static_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
 	}
 
 	void free()
@@ -4509,7 +4509,7 @@ class JUCE_API  XmlElement
 {
 public:
 
-	XmlElement (const String& tagName) throw();
+	explicit XmlElement (const String& tagName) throw();
 
 	XmlElement (const XmlElement& other) throw();
 
@@ -6430,9 +6430,9 @@ class JUCE_API  ScopedLock
 {
 public:
 
-	inline ScopedLock (const CriticalSection& lock) throw()	 : lock_ (lock) { lock.enter(); }
+	inline explicit ScopedLock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.enter(); }
 
-	inline ~ScopedLock() throw()				{ lock_.exit(); }
+	inline ~ScopedLock() throw()					{ lock_.exit(); }
 
 private:
 
@@ -6446,9 +6446,9 @@ class ScopedUnlock
 {
 public:
 
-	inline ScopedUnlock (const CriticalSection& lock) throw()	 : lock_ (lock) { lock.exit(); }
+	inline explicit ScopedUnlock (const CriticalSection& lock) throw()	: lock_ (lock) { lock.exit(); }
 
-	inline ~ScopedUnlock() throw()				{ lock_.enter(); }
+	inline ~ScopedUnlock() throw()					{ lock_.enter(); }
 
 private:
 
@@ -6615,7 +6615,7 @@ class JUCE_API  ValueTree
 {
 public:
 
-	ValueTree (const String& type);
+	explicit ValueTree (const String& type);
 
 	ValueTree (const ValueTree& other);
 
@@ -7117,7 +7117,7 @@ class JUCE_API  Random
 {
 public:
 
-	Random (int64 seedValue) throw();
+	explicit Random (int64 seedValue) throw();
 
 	~Random() throw();
 
@@ -7518,15 +7518,15 @@ public:
 
 	MD5& operator= (const MD5& other);
 
-	MD5 (const MemoryBlock& data);
+	explicit MD5 (const MemoryBlock& data);
 
 	MD5 (const char* data, const size_t numBytes);
 
-	MD5 (const String& text);
+	explicit MD5 (const String& text);
 
 	MD5 (InputStream& input, int64 numBytesToRead = -1);
 
-	MD5 (const File& file);
+	explicit MD5 (const File& file);
 
 	~MD5();
 
@@ -7580,6 +7580,11 @@ public:
 												 int numRandomSeeds = 0);
 
 	static bool isProbablyPrime (const BigInteger& number, int certainty);
+
+private:
+	Primes();
+	Primes (const Primes&);
+	Primes& operator= (const Primes&);
 };
 
 #endif   // __JUCE_PRIMES_JUCEHEADER__
@@ -7599,7 +7604,7 @@ public:
 
 	RSAKey();
 
-	RSAKey (const String& stringRepresentation);
+	explicit RSAKey (const String& stringRepresentation);
 
 	~RSAKey();
 
@@ -7679,7 +7684,7 @@ class JUCE_API  FileInputStream  : public InputStream
 {
 public:
 
-	FileInputStream (const File& fileToRead);
+	explicit FileInputStream (const File& fileToRead);
 
 	~FileInputStream();
 
@@ -8641,7 +8646,7 @@ class JUCE_API  InterProcessLock
 {
 public:
 
-	InterProcessLock (const String& name);
+	explicit InterProcessLock (const String& name);
 
 	~InterProcessLock();
 
@@ -8702,6 +8707,11 @@ public:
 	static void lowerPrivilege();
 
 	static bool JUCE_CALLTYPE isRunningUnderDebugger();
+
+private:
+	Process();
+	Process (const Process&);
+	Process& operator= (const Process&);
 };
 
 #endif   // __JUCE_PROCESS_JUCEHEADER__
@@ -8755,7 +8765,7 @@ class JUCE_API  Thread
 {
 public:
 
-	Thread (const String& threadName);
+	explicit Thread (const String& threadName);
 
 	virtual ~Thread();
 
@@ -8883,9 +8893,9 @@ class JUCE_API  ScopedReadLock
 {
 public:
 
-	inline ScopedReadLock (const ReadWriteLock& lock) throw()	   : lock_ (lock) { lock.enterRead(); }
+	inline explicit ScopedReadLock (const ReadWriteLock& lock) throw()	: lock_ (lock) { lock.enterRead(); }
 
-	inline ~ScopedReadLock() throw()				{ lock_.exitRead(); }
+	inline ~ScopedReadLock() throw()					  { lock_.exitRead(); }
 
 private:
 
@@ -8910,11 +8920,11 @@ class JUCE_API  ScopedTryLock
 {
 public:
 
-	inline ScopedTryLock (const CriticalSection& lock) throw()	  : lock_ (lock), lockWasSuccessful (lock.tryEnter()) {}
+	inline explicit ScopedTryLock (const CriticalSection& lock) throw()   : lock_ (lock), lockWasSuccessful (lock.tryEnter()) {}
 
-	inline ~ScopedTryLock() throw()				 { if (lockWasSuccessful) lock_.exit(); }
+	inline ~ScopedTryLock() throw()					   { if (lockWasSuccessful) lock_.exit(); }
 
-	bool isLocked() const throw()				   { return lockWasSuccessful; }
+	bool isLocked() const throw()					 { return lockWasSuccessful; }
 
 private:
 
@@ -8940,9 +8950,9 @@ class JUCE_API  ScopedWriteLock
 {
 public:
 
-	inline ScopedWriteLock (const ReadWriteLock& lock) throw()	   : lock_ (lock) { lock.enterWrite(); }
+	inline explicit ScopedWriteLock (const ReadWriteLock& lock) throw() : lock_ (lock) { lock.enterWrite(); }
 
-	inline ~ScopedWriteLock() throw()				{ lock_.exitWrite(); }
+	inline ~ScopedWriteLock() throw()				   { lock_.exitWrite(); }
 
 private:
 
@@ -8973,7 +8983,7 @@ class JUCE_API  ThreadPoolJob
 {
 public:
 
-	ThreadPoolJob (const String& name);
+	explicit ThreadPoolJob (const String& name);
 
 	virtual ~ThreadPoolJob();
 
@@ -9101,7 +9111,7 @@ class JUCE_API  TimeSliceThread   : public Thread
 {
 public:
 
-	TimeSliceThread (const String& threadName);
+	explicit TimeSliceThread (const String& threadName);
 
 	~TimeSliceThread();
 
@@ -10639,7 +10649,7 @@ public:
 protected:
 	String name;
 
-	Typeface (const String& name) throw();
+	explicit Typeface (const String& name) throw();
 
 private:
 	Typeface (const Typeface&);
@@ -10652,7 +10662,7 @@ public:
 
 	CustomTypeface();
 
-	CustomTypeface (InputStream& serialisedTypefaceStream);
+	explicit CustomTypeface (InputStream& serialisedTypefaceStream);
 
 	~CustomTypeface();
 
@@ -11407,6 +11417,8 @@ public:
 	{
 	}
 
+	enum { indexA = 0 };
+
 private:
 
 	uint8 a : 8;
@@ -11832,7 +11844,7 @@ class JUCE_API  Graphics
 {
 public:
 
-	Graphics (Image& imageToDrawOnto) throw();
+	explicit Graphics (Image& imageToDrawOnto) throw();
 
 	~Graphics() throw();
 
@@ -12176,7 +12188,7 @@ public:
 				int bottomGap,
 				int rightGap) throw();
 
-	BorderSize (int allGaps) throw();
+	explicit BorderSize (int allGaps) throw();
 
 	~BorderSize() throw();
 
@@ -12234,7 +12246,7 @@ public:
 
 	virtual ~Component();
 
-	Component (const String& componentName);
+	explicit Component (const String& componentName);
 
 	const String& getName() const throw()		   { return componentName_; }
 
@@ -12813,7 +12825,7 @@ namespace StandardApplicationCommandIDs
 struct JUCE_API  ApplicationCommandInfo
 {
 
-	ApplicationCommandInfo (CommandID commandID) throw();
+	explicit ApplicationCommandInfo (CommandID commandID) throw();
 
 	void setInfo (const String& shortName,
 				  const String& description,
@@ -14251,7 +14263,7 @@ class JUCE_API  AudioThumbnailCache   : public TimeSliceThread
 {
 public:
 
-	AudioThumbnailCache (int maxNumThumbsToStore);
+	explicit AudioThumbnailCache (int maxNumThumbsToStore);
 
 	~AudioThumbnailCache();
 
@@ -15174,7 +15186,7 @@ public:
 	virtual ~AudioIODeviceType();
 
 protected:
-	AudioIODeviceType (const String& typeName);
+	explicit AudioIODeviceType (const String& typeName);
 
 private:
 	String typeName;
@@ -15468,7 +15480,13 @@ public:
 private:
 	double timeStamp;
 	uint8* data;
-	int message, size;
+	int size;
+
+	union
+	{
+		uint8 asBytes[4];
+		uint32 asInt32;
+	} preallocatedData;
 };
 
 #endif   // __JUCE_MIDIMESSAGE_JUCEHEADER__
@@ -15526,7 +15544,7 @@ protected:
 	String name;
 	void* internal;
 
-	MidiInput (const String& name);
+	explicit MidiInput (const String& name);
 
 private:
 	MidiInput (const MidiInput&);
@@ -15552,7 +15570,7 @@ public:
 
 	MidiBuffer() throw();
 
-	MidiBuffer (const MidiMessage& message) throw();
+	explicit MidiBuffer (const MidiMessage& message) throw();
 
 	MidiBuffer (const MidiBuffer& other) throw();
 
@@ -15621,8 +15639,11 @@ private:
 	MemoryBlock data;
 	int bytesUsed;
 
-	uint8* getData() const throw()	   { return reinterpret_cast <uint8*> (data.getData()); }
+	uint8* getData() const throw();
 	uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
+	static int getEventTime (const void* d) throw();
+	static uint16 getEventDataSize (const void* d) throw();
+	static uint16 getEventTotalSize (const void* d) throw();
 };
 
 #endif   // __JUCE_MIDIBUFFER_JUCEHEADER__
@@ -15765,8 +15786,8 @@ class JUCE_API  TooltipWindow  : public Component,
 {
 public:
 
-	TooltipWindow (Component* parentComponent = 0,
-				   int millisecondsBeforeTipAppears = 700);
+	explicit TooltipWindow (Component* parentComponent = 0,
+							int millisecondsBeforeTipAppears = 700);
 
 	~TooltipWindow();
 
@@ -15826,7 +15847,7 @@ class JUCE_API  Button  : public Component,
 {
 protected:
 
-	Button (const String& buttonName);
+	explicit Button (const String& buttonName);
 
 public:
 	virtual ~Button();
@@ -16105,7 +16126,7 @@ class JUCE_API  Viewport  : public Component,
 {
 public:
 
-	Viewport (const String& componentName = String::empty);
+	explicit Viewport (const String& componentName = String::empty);
 
 	~Viewport();
 
@@ -16401,8 +16422,8 @@ class JUCE_API  TextEditor  : public Component,
 {
 public:
 
-	TextEditor (const String& componentName = String::empty,
-				tchar passwordCharacter = 0);
+	explicit TextEditor (const String& componentName = String::empty,
+						 tchar passwordCharacter = 0);
 
 	virtual ~TextEditor();
 
@@ -16821,7 +16842,7 @@ class JUCE_API  ComboBox  : public Component,
 {
 public:
 
-	ComboBox (const String& componentName);
+	explicit ComboBox (const String& componentName);
 
 	~ComboBox();
 
@@ -17194,6 +17215,11 @@ public:
 
 	static void deinterleaveSamples (const float* source, float** dest,
 									 int numSamples, int numChannels);
+
+private:
+	AudioDataConverters();
+	AudioDataConverters (const AudioDataConverters&);
+	AudioDataConverters& operator= (const AudioDataConverters&);
 };
 
 #endif   // __JUCE_AUDIODATACONVERTERS_JUCEHEADER__
@@ -20015,7 +20041,7 @@ class JUCE_API  ImageButton  : public Button
 {
 public:
 
-	ImageButton (const String& name);
+	explicit ImageButton (const String& name);
 
 	~ImageButton();
 
@@ -20979,7 +21005,7 @@ class JUCE_API  ProgressBar  : public Component,
 {
 public:
 
-	ProgressBar (double& progress);
+	explicit ProgressBar (double& progress);
 
 	~ProgressBar();
 
@@ -21058,7 +21084,7 @@ class JUCE_API  Slider  : public Component,
 {
 public:
 
-	Slider (const String& componentName);
+	explicit Slider (const String& componentName);
 
 	~Slider();
 
@@ -23481,7 +23507,7 @@ class JUCE_API  KeyPressMappingSet  : public KeyListener,
 {
 public:
 
-	KeyPressMappingSet (ApplicationCommandManager* commandManager) throw();
+	explicit KeyPressMappingSet (ApplicationCommandManager* commandManager) throw();
 
 	KeyPressMappingSet (const KeyPressMappingSet& other) throw();
 
@@ -23873,7 +23899,7 @@ class JUCE_API  TabbedComponent  : public Component
 {
 public:
 
-	TabbedComponent (const TabbedButtonBar::Orientation orientation);
+	explicit TabbedComponent (const TabbedButtonBar::Orientation orientation);
 
 	~TabbedComponent();
 
@@ -25349,7 +25375,7 @@ public:
 	{
 	}
 
-	SelectedItemSet (const Array <SelectableItemType>& items)
+	explicit SelectedItemSet (const Array <SelectableItemType>& items)
 		: selectedItems (items)
 	{
 	}
@@ -25531,7 +25557,7 @@ class LassoComponent  : public Component
 {
 public:
 
-	LassoComponent (const int outlineThickness_ = 1)
+	explicit LassoComponent (const int outlineThickness_ = 1)
 		: source (0),
 		  outlineThickness (outlineThickness_)
 	{
@@ -26960,7 +26986,7 @@ class JUCE_API  WebBrowserComponent	  : public Component
 {
 public:
 
-	WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
+	explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
 
 	~WebBrowserComponent();
 

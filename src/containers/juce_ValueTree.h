@@ -77,7 +77,7 @@ public:
         Like an XmlElement, each ValueTree node has a type, which you can access with
         getType() and hasType().
     */
-    ValueTree (const String& type);
+    explicit ValueTree (const String& type);
 
     /** Creates a reference to another ValueTree. */
     ValueTree (const ValueTree& other);

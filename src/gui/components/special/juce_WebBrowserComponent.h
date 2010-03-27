@@ -56,7 +56,7 @@ public:
                             the browser using resources in the background when it's not
                             actually being used.
     */
-    WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
+    explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true);
 
     /** Destructor. */
     ~WebBrowserComponent();

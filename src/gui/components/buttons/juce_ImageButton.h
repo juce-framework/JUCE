@@ -49,7 +49,7 @@ public:
 
         @param name                 the name to give the component
     */
-    ImageButton (const String& name);
+    explicit ImageButton (const String& name);
 
     /** Destructor. */
     ~ImageButton();

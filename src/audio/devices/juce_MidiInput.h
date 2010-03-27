@@ -177,7 +177,7 @@ protected:
     String name;
     void* internal;
 
-    MidiInput (const String& name);
+    explicit MidiInput (const String& name);
 
 private:
     MidiInput (const MidiInput&);

@@ -89,8 +89,8 @@ public:
 
         If you want an array of zero values, you can use the calloc() method instead.
     */
-    HeapBlock (const size_t numElements)
-        : data (reinterpret_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
+    explicit HeapBlock (const size_t numElements)
+        : data (static_cast <ElementType*> (::juce_malloc (numElements * sizeof (ElementType))))
     {
     }
 
@@ -180,7 +180,7 @@ public:
     void malloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         ::juce_free (data);
-        data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+        data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
     }
 
     /** Allocates a specified amount of memory and clears it.
@@ -189,7 +189,7 @@ public:
     void calloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         ::juce_free (data);
-        data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
+        data = static_cast <ElementType*> (::juce_calloc (newNumElements * elementSize));
     }
 
     /** Allocates a specified amount of memory and optionally clears it.
@@ -201,9 +201,9 @@ public:
         ::juce_free (data);
 
         if (initialiseToZero)
-            data = reinterpret_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
+            data = static_cast <ElementType*> (::juce_calloc (newNumElements * sizeof (ElementType)));
         else
-            data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
+            data = static_cast <ElementType*> (::juce_malloc (newNumElements * sizeof (ElementType)));
     }
 
     /** Re-allocates a specified amount of memory.
@@ -214,9 +214,9 @@ public:
     void realloc (const size_t newNumElements, const size_t elementSize = sizeof (ElementType))
     {
         if (data == 0)
-            data = reinterpret_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
+            data = static_cast <ElementType*> (::juce_malloc (newNumElements * elementSize));
         else
-            data = reinterpret_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
+            data = static_cast <ElementType*> (::juce_realloc (data, newNumElements * elementSize));
     }
 
     /** Frees any currently-allocated data.

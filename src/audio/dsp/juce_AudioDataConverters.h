@@ -87,6 +87,11 @@ public:
 
     static void deinterleaveSamples (const float* source, float** dest,
                                      int numSamples, int numChannels);
+
+private:
+    AudioDataConverters();
+    AudioDataConverters (const AudioDataConverters&);
+    AudioDataConverters& operator= (const AudioDataConverters&);
 };
 
 

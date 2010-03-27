@@ -47,7 +47,7 @@ public:
     MidiBuffer() throw();
 
     /** Creates a MidiBuffer containing a single midi message. */
-    MidiBuffer (const MidiMessage& message) throw();
+    explicit MidiBuffer (const MidiMessage& message) throw();
 
     /** Creates a copy of another MidiBuffer. */
     MidiBuffer (const MidiBuffer& other) throw();
@@ -229,8 +229,11 @@ private:
     MemoryBlock data;
     int bytesUsed;
 
-    uint8* getData() const throw()       { return reinterpret_cast <uint8*> (data.getData()); }
+    uint8* getData() const throw();
     uint8* findEventAfter (uint8* d, const int samplePosition) const throw();
+    static int getEventTime (const void* d) throw();
+    static uint16 getEventDataSize (const void* d) throw();
+    static uint16 getEventTotalSize (const void* d) throw();
 };
 
 

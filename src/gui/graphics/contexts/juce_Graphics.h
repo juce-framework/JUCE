@@ -64,7 +64,7 @@ public:
 
         Obviously you shouldn't delete the image before this context is deleted.
     */
-    Graphics (Image& imageToDrawOnto) throw();
+    explicit Graphics (Image& imageToDrawOnto) throw();
 
     /** Destructor. */
     ~Graphics() throw();

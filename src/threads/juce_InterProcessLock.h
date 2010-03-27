@@ -43,7 +43,7 @@ public:
 
         @param name     a name that processes will use to identify this lock object
     */
-    InterProcessLock (const String& name);
+    explicit InterProcessLock (const String& name);
 
     /** Destructor.
 

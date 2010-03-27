@@ -57,7 +57,7 @@ public:
 
         After creating your job, add it to a thread pool with ThreadPool::addJob().
     */
-    ThreadPoolJob (const String& name);
+    explicit ThreadPoolJob (const String& name);
 
     /** Destructor. */
     virtual ~ThreadPoolJob();

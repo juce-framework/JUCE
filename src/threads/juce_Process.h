@@ -91,6 +91,12 @@ public:
     /** Returns true if this process is being hosted by a debugger.
     */
     static bool JUCE_CALLTYPE isRunningUnderDebugger();
+
+
+private:
+    Process();
+    Process (const Process&);
+    Process& operator= (const Process&);
 };
 
 

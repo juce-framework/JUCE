@@ -64,6 +64,12 @@ public:
         safe value might be anything over about 20-30.
     */
     static bool isProbablyPrime (const BigInteger& number, int certainty);
+
+
+private:
+    Primes();
+    Primes (const Primes&);
+    Primes& operator= (const Primes&);
 };
 
 

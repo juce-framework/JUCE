@@ -107,7 +107,7 @@ public:
 
         @see ApplicationCommandManager
     */
-    KeyPressMappingSet (ApplicationCommandManager* commandManager) throw();
+    explicit KeyPressMappingSet (ApplicationCommandManager* commandManager) throw();
 
     /** Creates an copy of a KeyPressMappingSet. */
     KeyPressMappingSet (const KeyPressMappingSet& other) throw();

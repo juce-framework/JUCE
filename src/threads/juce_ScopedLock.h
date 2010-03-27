@@ -66,7 +66,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline ScopedLock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.enter(); }
+    inline explicit ScopedLock (const CriticalSection& lock) throw()    : lock_ (lock) { lock.enter(); }
 
     /** Destructor.
 
@@ -75,7 +75,7 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedLock() throw()                                { lock_.exit(); }
+    inline ~ScopedLock() throw()                                        { lock_.exit(); }
 
 
 private:
@@ -139,7 +139,7 @@ public:
         otherwise there are no guarantees what will happen! Best just to use it
         as a local stack object, rather than creating one with the new() operator.
     */
-    inline ScopedUnlock (const CriticalSection& lock) throw()     : lock_ (lock) { lock.exit(); }
+    inline explicit ScopedUnlock (const CriticalSection& lock) throw()    : lock_ (lock) { lock.exit(); }
 
     /** Destructor.
 
@@ -148,7 +148,7 @@ public:
         Make sure this object is created and deleted by the same thread,
         otherwise there are no guarantees what will happen!
     */
-    inline ~ScopedUnlock() throw()                                { lock_.enter(); }
+    inline ~ScopedUnlock() throw()                                        { lock_.enter(); }
 
 
 private:

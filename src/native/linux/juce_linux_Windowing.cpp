@@ -1114,15 +1114,15 @@ public:
 
         const int width = image.getWidth();
         const int height = image.getHeight();
-        HeapBlock <uint32> colour (width * height);
+        HeapBlock <char> colour (width * height);
         int index = 0;
 
         for (int y = 0; y < height; ++y)
             for (int x = 0; x < width; ++x)
-                colour[index++] = image.getPixelAt (x, y).getARGB();
+                colour[index++] = static_cast<char> (image.getPixelAt (x, y).getARGB());
 
         XImage* ximage = XCreateImage (display, CopyFromParent, 24, ZPixmap,
-                                       0, reinterpret_cast<char*> (colour.getData()),
+                                       0, colour.getData(),
                                        width, height, 32, 0);
 
         Pixmap pixmap = XCreatePixmap (display, DefaultRootWindow (display),
@@ -1142,7 +1142,7 @@ public:
         const int width = image.getWidth();
         const int height = image.getHeight();
         const int stride = (width + 7) >> 3;
-        HeapBlock <uint8> mask;
+        HeapBlock <char> mask;
         mask.calloc (stride * height);
         const bool msbfirst = (BitmapBitOrder (display) == MSBFirst);
 
@@ -1150,7 +1150,7 @@ public:
         {
             for (int x = 0; x < width; ++x)
             {
-                const uint8 bit = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+                const char bit = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
                 const int offset = y * stride + (x >> 3);
 
                 if (image.getPixelAt (x, y).getAlpha() >= 128)
@@ -1159,7 +1159,7 @@ public:
         }
 
         return XCreatePixmapFromBitmapData (display, DefaultRootWindow (display),
-                                            reinterpret_cast<char*> (mask.getData()), width, height, 1, 0, 1);
+                                            mask.getData(), width, height, 1, 0, 1);
     }
 
     void setIcon (const Image& newIcon)
@@ -3027,7 +3027,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     }
 
     const int stride = (cursorW + 7) >> 3;
-    HeapBlock <uint8> maskPlane, sourcePlane;
+    HeapBlock <char> maskPlane, sourcePlane;
     maskPlane.calloc (stride * cursorH);
     sourcePlane.calloc (stride * cursorH);
 
@@ -3037,7 +3037,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     {
         for (int x = cursorW; --x >= 0;)
         {
-            const uint8 mask = (uint8) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
+            const char mask = (char) (1 << (msbfirst ? (7 - (x & 7)) : (x & 7)));
             const int offset = y * stride + (x >> 3);
 
             const Colour c (im.getPixelAt (x, y));
@@ -3050,8 +3050,8 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
         }
     }
 
-    Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, reinterpret_cast <char*> (sourcePlane.getData()), cursorW, cursorH, 0xffff, 0, 1);
-    Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, reinterpret_cast <char*> (maskPlane.getData()), cursorW, cursorH, 0xffff, 0, 1);
+    Pixmap sourcePixmap = XCreatePixmapFromBitmapData (display, root, sourcePlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
+    Pixmap maskPixmap = XCreatePixmapFromBitmapData (display, root, maskPlane.getData(), cursorW, cursorH, 0xffff, 0, 1);
 
     XColor white, black;
     black.red = black.green = black.blue = 0;

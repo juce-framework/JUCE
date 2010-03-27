@@ -106,7 +106,7 @@ public:
         The fill colour is used to fill the lasso'ed rectangle, and the outline
         colour is used to draw a line around its edge.
     */
-    LassoComponent (const int outlineThickness_ = 1)
+    explicit LassoComponent (const int outlineThickness_ = 1)
         : source (0),
           outlineThickness (outlineThickness_)
     {

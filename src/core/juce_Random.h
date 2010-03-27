@@ -45,7 +45,7 @@ public:
 
         new Random (Time::currentTimeMillis())
     */
-    Random (int64 seedValue) throw();
+    explicit Random (int64 seedValue) throw();
 
     /** Destructor. */
     ~Random() throw();

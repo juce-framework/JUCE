@@ -112,7 +112,7 @@ public:
 protected:
     String name;
 
-    Typeface (const String& name) throw();
+    explicit Typeface (const String& name) throw();
 
 private:
     Typeface (const Typeface&);
@@ -141,7 +141,7 @@ public:
         The stream must have been created by writeToStream().
         @see writeToStream
     */
-    CustomTypeface (InputStream& serialisedTypefaceStream);
+    explicit CustomTypeface (InputStream& serialisedTypefaceStream);
 
     /** Destructor. */
     ~CustomTypeface();

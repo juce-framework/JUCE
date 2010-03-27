@@ -586,11 +586,9 @@ public:
         y = y_;
         generate (scratchBuffer, x, width);
 
-        const uint8* mask = reinterpret_cast <uint8*> (scratchBuffer.getData());
-        if (sizeof (SrcPixelType) == sizeof (PixelARGB))
-            mask += PixelARGB::indexA;
-
-        et.clipLineToMask (x, y_, mask, sizeof (SrcPixelType), width);
+        et.clipLineToMask (x, y_,
+                           reinterpret_cast<uint8*> (scratchBuffer.getData()) + SrcPixelType::indexA,
+                           sizeof (SrcPixelType), width);
     }
 
 private:

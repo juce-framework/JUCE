@@ -89,8 +89,8 @@ public:
                                     for a black splodge (not all fonts include this, though), or 0x2022,
                                     which is a bullet (probably the best choice for linux).
     */
-    TextEditor (const String& componentName = String::empty,
-                tchar passwordCharacter = 0);
+    explicit TextEditor (const String& componentName = String::empty,
+                         tchar passwordCharacter = 0);
 
     /** Destructor. */
     virtual ~TextEditor();

@@ -145,7 +145,7 @@ class JUCE_API  XmlElement
 public:
     //==============================================================================
     /** Creates an XmlElement with this tag name. */
-    XmlElement (const String& tagName) throw();
+    explicit XmlElement (const String& tagName) throw();
 
     /** Creates a (deep) copy of another element. */
     XmlElement (const XmlElement& other) throw();

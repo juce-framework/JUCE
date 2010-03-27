@@ -132,7 +132,7 @@ public:
     virtual ~AudioIODeviceType();
 
 protected:
-    AudioIODeviceType (const String& typeName);
+    explicit AudioIODeviceType (const String& typeName);
 
 private:
     String typeName;

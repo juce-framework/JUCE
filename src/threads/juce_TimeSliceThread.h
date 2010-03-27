@@ -83,7 +83,7 @@ public:
         When first created, the thread is not running. Use the startThread()
         method to start it.
     */
-    TimeSliceThread (const String& threadName);
+    explicit TimeSliceThread (const String& threadName);
 
     /** Destructor.
 

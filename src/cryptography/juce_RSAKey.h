@@ -50,7 +50,7 @@ public:
 
         This reloads a key from a string created by the toString() method.
     */
-    RSAKey (const String& stringRepresentation);
+    explicit RSAKey (const String& stringRepresentation);
 
     /** Destructor. */
     ~RSAKey();
