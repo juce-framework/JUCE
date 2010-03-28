@@ -86,21 +86,19 @@ private:
 #elif JUCE_LINUX                        // Linux...
 
   #if __INTEL_COMPILER
-    inline void  Atomic::increment (int32& variable)                { _InterlockedIncrement (static_cast <void*> (&variable)); }
-    inline int32 Atomic::incrementAndReturn (int32& variable)       { return _InterlockedIncrement (static_cast <void*> (&variable)); }
-    inline void  Atomic::decrement (int32& variable)                { _InterlockedDecrement (static_cast <void*> (&variable)); }
-    inline int32 Atomic::decrementAndReturn (int32& variable)       { return _InterlockedDecrement (static_cast <void*> (&variable)); }
+    inline void  Atomic::increment (int32& variable)                { _InterlockedIncrement (&variable); }
+    inline int32 Atomic::incrementAndReturn (int32& variable)       { return _InterlockedIncrement (&variable); }
+    inline void  Atomic::decrement (int32& variable)                { _InterlockedDecrement (&variable); }
+    inline int32 Atomic::decrementAndReturn (int32& variable)       { return _InterlockedDecrement (&variable); }
     inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-                                                                    { return _InterlockedCompareExchange (static_cast <void*> (&destination), newValue, oldValue); }
+                                                                    { return _InterlockedCompareExchange (&destination, newValue, oldValue); }
 
     inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
     {
       #if __ia64__
-        return reinterpret_cast<void*> (_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value1),
-                                                                reinterpret_cast<__int64> (value2)));
+        return reinterpret_cast<void*> (_InterlockedExchange64 (const_cast<void**> (value1), reinterpret_cast<__int64> (value2)));
       #else
-        return reinterpret_cast<void*> (_InterlockedExchange (reinterpret_cast<volatile int*> (value1),
-                                                              reinterpret_cast<long> (value2)));
+        return reinterpret_cast<void*> (_InterlockedExchange (const_cast<void**> (value1), reinterpret_cast<long> (value2)));
       #endif
     }
 
