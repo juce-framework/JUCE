@@ -94,9 +94,7 @@ void PositionedGlyph::createPath (Path& path) const
 
 bool PositionedGlyph::hitTest (float px, float py) const
 {
-    if (px >= getLeft() && px < getRight()
-        && py >= getTop() && py < getBottom()
-        && ! isWhitespace())
+    if (getBounds().contains (px, py) && ! isWhitespace())
     {
         Typeface* const t = font.getTypeface();
 
@@ -366,15 +364,14 @@ void GlyphArrangement::addFittedText (const Font& f,
         GlyphArrangement ga;
         ga.addJustifiedText (f, text, x, y, width, layout);
 
-        float l, t, r, b;
-        ga.getBoundingBox (0, -1, l, t, r, b, false);
+        const Rectangle<float> bb (ga.getBoundingBox (0, -1, false));
 
-        float dy = y - t;
+        float dy = y - bb.getY();
 
         if (layout.testFlags (Justification::verticallyCentred))
-            dy += (height - (b - t)) * 0.5f;
+            dy += (height - bb.getHeight()) * 0.5f;
         else if (layout.testFlags (Justification::bottom))
-            dy += height - (b - t);
+            dy += height - bb.getHeight();
 
         ga.moveRangeOfGlyphs (0, -1, 0.0f, dy);
 
@@ -610,22 +607,14 @@ void GlyphArrangement::stretchRangeOfGlyphs (int startIndex, int num,
     }
 }
 
-void GlyphArrangement::getBoundingBox (int startIndex, int num,
-                                       float& left,
-                                       float& top,
-                                       float& right,
-                                       float& bottom,
-                                       const bool includeWhitespace) const
+const Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num, const bool includeWhitespace) const
 {
     jassert (startIndex >= 0);
 
     if (num < 0 || startIndex + num > glyphs.size())
         num = glyphs.size() - startIndex;
 
-    left = 0.0f;
-    top = 0.0f;
-    right = 0.0f;
-    bottom = 0.0f;
+    Rectangle<float> result;
     bool isFirst = true;
 
     while (--num >= 0)
@@ -637,56 +626,47 @@ void GlyphArrangement::getBoundingBox (int startIndex, int num,
             if (isFirst)
             {
                 isFirst = false;
-                left    = pg->getLeft();
-                top     = pg->getTop();
-                right   = pg->getRight();
-                bottom  = pg->getBottom();
+                result = pg->getBounds();
             }
             else
             {
-                left    = jmin (left, pg->getLeft());
-                top     = jmin (top, pg->getTop());
-                right   = jmax (right, pg->getRight());
-                bottom  = jmax (bottom, pg->getBottom());
+                result = result.getUnion (pg->getBounds());
             }
         }
     }
+
+    return result;
 }
 
-void GlyphArrangement::justifyGlyphs (const int startIndex,
-                                      const int num,
-                                      const float x, const float y,
-                                      const float width, const float height,
+void GlyphArrangement::justifyGlyphs (const int startIndex, const int num,
+                                      const float x, const float y, const float width, const float height,
                                       const Justification& justification)
 {
     jassert (num >= 0 && startIndex >= 0);
 
     if (glyphs.size() > 0 && num > 0)
     {
-        float left, top, right, bottom;
-        getBoundingBox (startIndex, num, left, top, right, bottom,
-                        ! justification.testFlags (Justification::horizontallyJustified
-                                                    | Justification::horizontallyCentred));
-
+        const Rectangle<float> bb (getBoundingBox (startIndex, num, ! justification.testFlags (Justification::horizontallyJustified
+                                                                                                | Justification::horizontallyCentred)));
         float deltaX = 0.0f;
 
         if (justification.testFlags (Justification::horizontallyJustified))
-            deltaX = x - left;
+            deltaX = x - bb.getX();
         else if (justification.testFlags (Justification::horizontallyCentred))
-            deltaX = x + (width - (right - left)) * 0.5f - left;
+            deltaX = x + (width - bb.getWidth()) * 0.5f - bb.getX();
         else if (justification.testFlags (Justification::right))
-            deltaX = (x + width) - right;
+            deltaX = (x + width) - bb.getRight();
         else
-            deltaX = x - left;
+            deltaX = x - bb.getX();
 
         float deltaY = 0.0f;
 
         if (justification.testFlags (Justification::top))
-            deltaY = y - top;
+            deltaY = y - bb.getY();
         else if (justification.testFlags (Justification::bottom))
-            deltaY = (y + height) - bottom;
+            deltaY = (y + height) - bb.getBottom();
         else
-            deltaY = y + (height - (bottom - top)) * 0.5f - top;
+            deltaY = y + (height - bb.getHeight()) * 0.5f - bb.getY();
 
         moveRangeOfGlyphs (startIndex, num, deltaX, deltaY);
 

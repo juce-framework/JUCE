@@ -146,9 +146,9 @@ public:
 
     //==============================================================================
     /** Calls a member function on each listener in the list, with 1 parameter. */
-    template <typename P1, typename P2>
+    template <typename P1>
     void call (void (ListenerClass::*callbackFunction) (P1),
-               P2& param1)
+               typename TypeHelpers::ParameterType<P1>::type param1)
     {
         for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
             (iter.getListener()->*callbackFunction) (param1);
@@ -156,10 +156,10 @@ public:
 
     /** Calls a member function on each listener in the list, with one parameter and a bail-out-checker.
         See the class description for info about writing a bail-out checker. */
-    template <class BailOutCheckerType, typename P1, typename P2>
+    template <class BailOutCheckerType, typename P1>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1),
-                      P2& param1)
+                      typename TypeHelpers::ParameterType<P1>::type param1)
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
             (iter.getListener()->*callbackFunction) (param1);
@@ -167,9 +167,10 @@ public:
 
     //==============================================================================
     /** Calls a member function on each listener in the list, with 2 parameters. */
-    template <typename P1, typename P2, typename P3, typename P4>
+    template <typename P1, typename P2>
     void call (void (ListenerClass::*callbackFunction) (P1, P2),
-               P3& param1, P4& param2)
+               typename TypeHelpers::ParameterType<P1>::type param1,
+               typename TypeHelpers::ParameterType<P2>::type param2)
     {
         for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2);
@@ -177,10 +178,11 @@ public:
 
     /** Calls a member function on each listener in the list, with 2 parameters and a bail-out-checker.
         See the class description for info about writing a bail-out checker. */
-    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4>
+    template <class BailOutCheckerType, typename P1, typename P2>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2),
-                      P3& param1, P4& param2)
+                      typename TypeHelpers::ParameterType<P1>::type param1,
+                      typename TypeHelpers::ParameterType<P2>::type param2)
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2);
@@ -188,9 +190,11 @@ public:
 
     //==============================================================================
     /** Calls a member function on each listener in the list, with 3 parameters. */
-    template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+    template <typename P1, typename P2, typename P3>
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
-               P4& param1, P5& param2, P6& param3)
+               typename TypeHelpers::ParameterType<P1>::type param1,
+               typename TypeHelpers::ParameterType<P2>::type param2,
+               typename TypeHelpers::ParameterType<P3>::type param3)
     {
         for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
@@ -198,10 +202,12 @@ public:
 
     /** Calls a member function on each listener in the list, with 3 parameters and a bail-out-checker.
         See the class description for info about writing a bail-out checker. */
-    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
+    template <class BailOutCheckerType, typename P1, typename P2, typename P3>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3),
-                      P4& param1, P5& param2, P6& param3)
+                      typename TypeHelpers::ParameterType<P1>::type param1,
+                      typename TypeHelpers::ParameterType<P2>::type param2,
+                      typename TypeHelpers::ParameterType<P3>::type param3)
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3);
@@ -209,9 +215,12 @@ public:
 
     //==============================================================================
     /** Calls a member function on each listener in the list, with 4 parameters. */
-    template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+    template <typename P1, typename P2, typename P3, typename P4>
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-               P5& param1, P6& param2, P7& param3, P8& param4)
+               typename TypeHelpers::ParameterType<P1>::type param1,
+               typename TypeHelpers::ParameterType<P2>::type param2,
+               typename TypeHelpers::ParameterType<P3>::type param3,
+               typename TypeHelpers::ParameterType<P4>::type param4)
     {
         for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
@@ -219,10 +228,13 @@ public:
 
     /** Calls a member function on each listener in the list, with 4 parameters and a bail-out-checker.
         See the class description for info about writing a bail-out checker. */
-    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
+    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-                      P5& param1, P6& param2, P7& param3, P8& param4)
+                      typename TypeHelpers::ParameterType<P1>::type param1,
+                      typename TypeHelpers::ParameterType<P2>::type param2,
+                      typename TypeHelpers::ParameterType<P3>::type param3,
+                      typename TypeHelpers::ParameterType<P4>::type param4)
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
@@ -230,9 +242,13 @@ public:
 
     //==============================================================================
     /** Calls a member function on each listener in the list, with 5 parameters. */
-    template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+    template <typename P1, typename P2, typename P3, typename P4, typename P5>
     void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-               P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+               typename TypeHelpers::ParameterType<P1>::type param1,
+               typename TypeHelpers::ParameterType<P2>::type param2,
+               typename TypeHelpers::ParameterType<P3>::type param3,
+               typename TypeHelpers::ParameterType<P4>::type param4,
+               typename TypeHelpers::ParameterType<P5>::type param5)
     {
         for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
@@ -240,10 +256,14 @@ public:
 
     /** Calls a member function on each listener in the list, with 5 parameters and a bail-out-checker.
         See the class description for info about writing a bail-out checker. */
-    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+    template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5>
     void callChecked (const BailOutCheckerType& bailOutChecker,
                       void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-                      P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+                      typename TypeHelpers::ParameterType<P1>::type param1,
+                      typename TypeHelpers::ParameterType<P2>::type param2,
+                      typename TypeHelpers::ParameterType<P3>::type param3,
+                      typename TypeHelpers::ParameterType<P4>::type param4,
+                      typename TypeHelpers::ParameterType<P5>::type param5)
     {
         for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
             (iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);

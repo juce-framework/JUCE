@@ -46,13 +46,13 @@ public:
     {
     }
 
-    void currentTabChanged (const int newCurrentTabIndex,
+    void currentTabChanged (int newCurrentTabIndex,
                             const String& newTabName)
     {
         owner->changeCallback (newCurrentTabIndex, newTabName);
     }
 
-    void popupMenuClickOnTab (const int tabIndex,
+    void popupMenuClickOnTab (int tabIndex,
                               const String& tabName)
     {
         owner->popupMenuClickOnTab (tabIndex, tabName);
@@ -63,7 +63,7 @@ public:
         return owner->tabs->getTabBackgroundColour (tabIndex);
     }
 
-    TabBarButton* createTabButton (const String& tabName, const int tabIndex)
+    TabBarButton* createTabButton (const String& tabName, int tabIndex)
     {
         return owner->createTabButton (tabName, tabIndex);
     }

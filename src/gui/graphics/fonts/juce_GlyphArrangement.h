@@ -56,11 +56,12 @@ public:
     float getTop() const                        { return y - font.getAscent(); }
     /** Returns the y position of the bottom of the glyph. */
     float getBottom() const                     { return y + font.getDescent(); }
+    /** Returns the bounds of the glyph. */
+    const Rectangle<float> getBounds() const    { return Rectangle<float> (x, getTop(), w, font.getHeight()); }
 
     //==============================================================================
     /** Shifts the glyph's position by a relative amount. */
-    void moveBy (const float deltaX,
-                 const float deltaY);
+    void moveBy (float deltaX, float deltaY);
 
     //==============================================================================
     /** Draws the glyph into a graphics context. */
@@ -125,7 +126,7 @@ public:
 
     //==============================================================================
     /** Returns the total number of glyphs in the arrangement. */
-    int getNumGlyphs() const                                    { return glyphs.size(); }
+    int getNumGlyphs() const throw()                            { return glyphs.size(); }
 
     /** Returns one of the glyphs from the arrangement.
 
@@ -133,7 +134,7 @@ public:
                         careful not to pass an out-of-range index here, as it
                         doesn't do any bounds-checking.
     */
-    PositionedGlyph& getGlyph (const int index) const;
+    PositionedGlyph& getGlyph (int index) const;
 
     //==============================================================================
     /** Clears all text from the arrangement and resets it.
@@ -150,8 +151,7 @@ public:
     */
     void addLineOfText (const Font& font,
                         const String& text,
-                        const float x,
-                        const float y);
+                        float x, float y);
 
     /** Adds a line of text, truncating it if it's wider than a specified size.
 
@@ -161,10 +161,9 @@ public:
     */
     void addCurtailedLineOfText (const Font& font,
                                  const String& text,
-                                 float x,
-                                 const float y,
-                                 const float maxWidthPixels,
-                                 const bool useEllipsis);
+                                 float x, float y,
+                                 float maxWidthPixels,
+                                 bool useEllipsis);
 
     /** Adds some multi-line text, breaking lines at word-boundaries if they are too wide.
 
@@ -182,7 +181,7 @@ public:
     void addJustifiedText (const Font& font,
                            const String& text,
                            float x, float y,
-                           const float maxLineWidth,
+                           float maxLineWidth,
                            const Justification& horizontalLayout);
 
     /** Tries to fit some text withing a given space.
@@ -202,12 +201,10 @@ public:
     */
     void addFittedText (const Font& font,
                         const String& text,
-                        const float x, const float y,
-                        const float width, const float height,
+                        float x, float y, float width, float height,
                         const Justification& layout,
                         int maximumLinesToUse,
-                        const float minimumHorizontalScale = 0.7f);
-
+                        float minimumHorizontalScale = 0.7f);
 
     /** Appends another glyph arrangement to this one. */
     void addGlyphArrangement (const GlyphArrangement& other);
@@ -246,20 +243,10 @@ public:
         @param startIndex               the first glyph to test
         @param numGlyphs                the number of glyphs to include; if this is < 0, all glyphs after
                                         startIndex will be included
-        @param left                     on return, the leftmost co-ordinate of the rectangle
-        @param top                      on return, the top co-ordinate of the rectangle
-        @param right                    on return, the rightmost co-ordinate of the rectangle
-        @param bottom                   on return, the bottom co-ordinate of the rectangle
         @param includeWhitespace        if true, the extent of any whitespace characters will also
                                         be taken into account
     */
-    void getBoundingBox (int startIndex,
-                         int numGlyphs,
-                         float& left,
-                         float& top,
-                         float& right,
-                         float& bottom,
-                         const bool includeWhitespace) const;
+    const Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
 
     /** Shifts a set of glyphs by a given amount.
 
@@ -270,8 +257,7 @@ public:
         @param deltaY       the amount to add to their y-positions
     */
     void moveRangeOfGlyphs (int startIndex, int numGlyphs,
-                            const float deltaX,
-                            const float deltaY);
+                            float deltaX, float deltaY);
 
     /** Removes a set of glyphs from the arrangement.
 
@@ -289,7 +275,7 @@ public:
         @param horizontalScaleFactor    how much to scale their horizontal width by
     */
     void stretchRangeOfGlyphs (int startIndex, int numGlyphs,
-                               const float horizontalScaleFactor);
+                               float horizontalScaleFactor);
 
     /** Justifies a set of glyphs within a given space.
 
@@ -299,11 +285,8 @@ public:
         If the Justification::horizontallyJustified flag is specified, each line will
         be stretched out to fill the specified width.
     */
-    void justifyGlyphs (const int startIndex, const int numGlyphs,
-                        const float x,
-                        const float y,
-                        const float width,
-                        const float height,
+    void justifyGlyphs (int startIndex, int numGlyphs,
+                        float x, float y, float width, float height,
                         const Justification& justification);
 
 
@@ -313,10 +296,10 @@ public:
 private:
     OwnedArray <PositionedGlyph> glyphs;
 
-    int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex);
+    int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
     int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
                           const Justification& justification, float minimumHorizontalScale);
-    void spreadOutLine (const int start, const int numGlyphs, const float targetWidth);
+    void spreadOutLine (int start, int numGlyphs, float targetWidth);
 };
 
 

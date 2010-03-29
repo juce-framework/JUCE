@@ -54,14 +54,14 @@ MD5& MD5::operator= (const MD5& other)
 MD5::MD5 (const MemoryBlock& data)
 {
     ProcessContext context;
-    context.processBlock ((const uint8*) data.getData(), data.getSize());
+    context.processBlock (data.getData(), data.getSize());
     context.finish (result);
 }
 
-MD5::MD5 (const char* data, const size_t numBytes)
+MD5::MD5 (const void* data, const size_t numBytes)
 {
     ProcessContext context;
-    context.processBlock ((const uint8*) data, numBytes);
+    context.processBlock (data, numBytes);
     context.finish (result);
 }
 
@@ -76,11 +76,9 @@ MD5::MD5 (const String& text)
     {
         // force the string into integer-sized unicode characters, to try to make it
         // get the same results on all platforms + compilers.
-        uint32 unicodeChar = (uint32) t[i];
-        ByteOrder::swapIfBigEndian (unicodeChar);
+        uint32 unicodeChar = ByteOrder::swapIfBigEndian ((uint32) t[i]);
 
-        context.processBlock ((const uint8*) &unicodeChar,
-                              sizeof (unicodeChar));
+        context.processBlock (&unicodeChar, sizeof (unicodeChar));
     }
 
     context.finish (result);
@@ -95,7 +93,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
 
     while (numBytesToRead > 0)
     {
-        char tempBuffer [512];
+        uint8 tempBuffer [512];
         const int bytesRead = input.read (tempBuffer, (int) jmin (numBytesToRead, (int64) sizeof (tempBuffer)));
 
         if (bytesRead <= 0)
@@ -103,7 +101,7 @@ void MD5::processStream (InputStream& input, int64 numBytesToRead)
 
         numBytesToRead -= bytesRead;
 
-        context.processBlock ((const uint8*) tempBuffer, bytesRead);
+        context.processBlock (tempBuffer, bytesRead);
     }
 
     context.finish (result);
@@ -131,18 +129,10 @@ MD5::~MD5()
 //==============================================================================
 namespace MD5Functions
 {
-    static void encode (uint8* const output, const uint32* const input, const int numBytes) throw()
-    {
-        uint32* const o = (uint32*) output;
-
-        for (int i = 0; i < (numBytes >> 2); ++i)
-            o[i] = ByteOrder::swapIfBigEndian (input [i]);
-    }
-
-    static void decode (uint32* const output, const uint8* const input, const int numBytes) throw()
+    static void encode (void* const output, const void* const input, const int numBytes) throw()
     {
         for (int i = 0; i < (numBytes >> 2); ++i)
-            output[i] = ByteOrder::littleEndianInt ((const char*) input + (i << 2));
+            static_cast<uint32*> (output)[i] = ByteOrder::swapIfBigEndian (static_cast<const uint32*> (input) [i]);
     }
 
     static inline uint32 F (const uint32 x, const uint32 y, const uint32 z) throw()   { return (x & y) | (~x & z); }
@@ -189,7 +179,7 @@ MD5::ProcessContext::ProcessContext()
     count[1] = 0;
 }
 
-void MD5::ProcessContext::processBlock (const uint8* const data, size_t dataSize)
+void MD5::ProcessContext::processBlock (const void* const data, const size_t dataSize)
 {
     int bufferPos = ((count[0] >> 3) & 0x3F);
 
@@ -201,31 +191,24 @@ void MD5::ProcessContext::processBlock (const uint8* const data, size_t dataSize
     count[1] += (uint32) (dataSize >> 29);
 
     const size_t spaceLeft = 64 - bufferPos;
-
     size_t i = 0;
 
     if (dataSize >= spaceLeft)
     {
         memcpy (buffer + bufferPos, data, spaceLeft);
-
         transform (buffer);
 
-        i = spaceLeft;
-
-        while (i + 64 <= dataSize)
-        {
-            transform (data + i);
-            i += 64;
-        }
+        for (i = spaceLeft; i + 64 <= dataSize; i += 64)
+            transform (static_cast <const char*> (data) + i);
 
         bufferPos = 0;
     }
 
-    memcpy (buffer + bufferPos, data + i, dataSize - i);
+    memcpy (buffer + bufferPos, static_cast <const char*> (data) + i, dataSize - i);
 }
 
 //==============================================================================
-void MD5::ProcessContext::finish (uint8* const result)
+void MD5::ProcessContext::finish (void* const result)
 {
     unsigned char encodedLength[8];
     MD5Functions::encode (encodedLength, count, 8);
@@ -247,7 +230,7 @@ void MD5::ProcessContext::finish (uint8* const result)
     zerostruct (buffer);
 }
 
-void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
+void MD5::ProcessContext::transform (const void* const bufferToTransform)
 {
     using namespace MD5Functions;
 
@@ -257,7 +240,7 @@ void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
     uint32 d = state[3];
     uint32 x[16];
 
-    decode (x, bufferToTransform, 64);
+    encode (x, bufferToTransform, 64);
 
     enum Constants
     {
@@ -265,73 +248,41 @@ void MD5::ProcessContext::transform (const uint8* const bufferToTransform)
         S31 = 4, S32 = 11, S33 = 16, S34 = 23, S41 = 6, S42 = 10, S43 = 15, S44 = 21
     };
 
-    FF (a, b, c, d, x[ 0], S11, 0xd76aa478); /* 1 */
-    FF (d, a, b, c, x[ 1], S12, 0xe8c7b756); /* 2 */
-    FF (c, d, a, b, x[ 2], S13, 0x242070db); /* 3 */
-    FF (b, c, d, a, x[ 3], S14, 0xc1bdceee); /* 4 */
-    FF (a, b, c, d, x[ 4], S11, 0xf57c0faf); /* 5 */
-    FF (d, a, b, c, x[ 5], S12, 0x4787c62a); /* 6 */
-    FF (c, d, a, b, x[ 6], S13, 0xa8304613); /* 7 */
-    FF (b, c, d, a, x[ 7], S14, 0xfd469501); /* 8 */
-    FF (a, b, c, d, x[ 8], S11, 0x698098d8); /* 9 */
-    FF (d, a, b, c, x[ 9], S12, 0x8b44f7af); /* 10 */
-    FF (c, d, a, b, x[10], S13, 0xffff5bb1); /* 11 */
-    FF (b, c, d, a, x[11], S14, 0x895cd7be); /* 12 */
-    FF (a, b, c, d, x[12], S11, 0x6b901122); /* 13 */
-    FF (d, a, b, c, x[13], S12, 0xfd987193); /* 14 */
-    FF (c, d, a, b, x[14], S13, 0xa679438e); /* 15 */
-    FF (b, c, d, a, x[15], S14, 0x49b40821); /* 16 */
+    FF (a, b, c, d, x[ 0], S11, 0xd76aa478);     FF (d, a, b, c, x[ 1], S12, 0xe8c7b756);
+    FF (c, d, a, b, x[ 2], S13, 0x242070db);     FF (b, c, d, a, x[ 3], S14, 0xc1bdceee);
+    FF (a, b, c, d, x[ 4], S11, 0xf57c0faf);     FF (d, a, b, c, x[ 5], S12, 0x4787c62a);
+    FF (c, d, a, b, x[ 6], S13, 0xa8304613);     FF (b, c, d, a, x[ 7], S14, 0xfd469501);
+    FF (a, b, c, d, x[ 8], S11, 0x698098d8);     FF (d, a, b, c, x[ 9], S12, 0x8b44f7af);
+    FF (c, d, a, b, x[10], S13, 0xffff5bb1);     FF (b, c, d, a, x[11], S14, 0x895cd7be);
+    FF (a, b, c, d, x[12], S11, 0x6b901122);     FF (d, a, b, c, x[13], S12, 0xfd987193);
+    FF (c, d, a, b, x[14], S13, 0xa679438e);     FF (b, c, d, a, x[15], S14, 0x49b40821);
 
-    GG (a, b, c, d, x[ 1], S21, 0xf61e2562); /* 17 */
-    GG (d, a, b, c, x[ 6], S22, 0xc040b340); /* 18 */
-    GG (c, d, a, b, x[11], S23, 0x265e5a51); /* 19 */
-    GG (b, c, d, a, x[ 0], S24, 0xe9b6c7aa); /* 20 */
-    GG (a, b, c, d, x[ 5], S21, 0xd62f105d); /* 21 */
-    GG (d, a, b, c, x[10], S22,  0x2441453); /* 22 */
-    GG (c, d, a, b, x[15], S23, 0xd8a1e681); /* 23 */
-    GG (b, c, d, a, x[ 4], S24, 0xe7d3fbc8); /* 24 */
-    GG (a, b, c, d, x[ 9], S21, 0x21e1cde6); /* 25 */
-    GG (d, a, b, c, x[14], S22, 0xc33707d6); /* 26 */
-    GG (c, d, a, b, x[ 3], S23, 0xf4d50d87); /* 27 */
-    GG (b, c, d, a, x[ 8], S24, 0x455a14ed); /* 28 */
-    GG (a, b, c, d, x[13], S21, 0xa9e3e905); /* 29 */
-    GG (d, a, b, c, x[ 2], S22, 0xfcefa3f8); /* 30 */
-    GG (c, d, a, b, x[ 7], S23, 0x676f02d9); /* 31 */
-    GG (b, c, d, a, x[12], S24, 0x8d2a4c8a); /* 32 */
+    GG (a, b, c, d, x[ 1], S21, 0xf61e2562);     GG (d, a, b, c, x[ 6], S22, 0xc040b340);
+    GG (c, d, a, b, x[11], S23, 0x265e5a51);     GG (b, c, d, a, x[ 0], S24, 0xe9b6c7aa);
+    GG (a, b, c, d, x[ 5], S21, 0xd62f105d);     GG (d, a, b, c, x[10], S22, 0x02441453);
+    GG (c, d, a, b, x[15], S23, 0xd8a1e681);     GG (b, c, d, a, x[ 4], S24, 0xe7d3fbc8);
+    GG (a, b, c, d, x[ 9], S21, 0x21e1cde6);     GG (d, a, b, c, x[14], S22, 0xc33707d6);
+    GG (c, d, a, b, x[ 3], S23, 0xf4d50d87);     GG (b, c, d, a, x[ 8], S24, 0x455a14ed);
+    GG (a, b, c, d, x[13], S21, 0xa9e3e905);     GG (d, a, b, c, x[ 2], S22, 0xfcefa3f8);
+    GG (c, d, a, b, x[ 7], S23, 0x676f02d9);     GG (b, c, d, a, x[12], S24, 0x8d2a4c8a);
 
-    HH (a, b, c, d, x[ 5], S31, 0xfffa3942); /* 33 */
-    HH (d, a, b, c, x[ 8], S32, 0x8771f681); /* 34 */
-    HH (c, d, a, b, x[11], S33, 0x6d9d6122); /* 35 */
-    HH (b, c, d, a, x[14], S34, 0xfde5380c); /* 36 */
-    HH (a, b, c, d, x[ 1], S31, 0xa4beea44); /* 37 */
-    HH (d, a, b, c, x[ 4], S32, 0x4bdecfa9); /* 38 */
-    HH (c, d, a, b, x[ 7], S33, 0xf6bb4b60); /* 39 */
-    HH (b, c, d, a, x[10], S34, 0xbebfbc70); /* 40 */
-    HH (a, b, c, d, x[13], S31, 0x289b7ec6); /* 41 */
-    HH (d, a, b, c, x[ 0], S32, 0xeaa127fa); /* 42 */
-    HH (c, d, a, b, x[ 3], S33, 0xd4ef3085); /* 43 */
-    HH (b, c, d, a, x[ 6], S34,  0x4881d05); /* 44 */
-    HH (a, b, c, d, x[ 9], S31, 0xd9d4d039); /* 45 */
-    HH (d, a, b, c, x[12], S32, 0xe6db99e5); /* 46 */
-    HH (c, d, a, b, x[15], S33, 0x1fa27cf8); /* 47 */
-    HH (b, c, d, a, x[ 2], S34, 0xc4ac5665); /* 48 */
+    HH (a, b, c, d, x[ 5], S31, 0xfffa3942);     HH (d, a, b, c, x[ 8], S32, 0x8771f681);
+    HH (c, d, a, b, x[11], S33, 0x6d9d6122);     HH (b, c, d, a, x[14], S34, 0xfde5380c);
+    HH (a, b, c, d, x[ 1], S31, 0xa4beea44);     HH (d, a, b, c, x[ 4], S32, 0x4bdecfa9);
+    HH (c, d, a, b, x[ 7], S33, 0xf6bb4b60);     HH (b, c, d, a, x[10], S34, 0xbebfbc70);
+    HH (a, b, c, d, x[13], S31, 0x289b7ec6);     HH (d, a, b, c, x[ 0], S32, 0xeaa127fa);
+    HH (c, d, a, b, x[ 3], S33, 0xd4ef3085);     HH (b, c, d, a, x[ 6], S34, 0x04881d05);
+    HH (a, b, c, d, x[ 9], S31, 0xd9d4d039);     HH (d, a, b, c, x[12], S32, 0xe6db99e5);
+    HH (c, d, a, b, x[15], S33, 0x1fa27cf8);     HH (b, c, d, a, x[ 2], S34, 0xc4ac5665);
 
-    II (a, b, c, d, x[ 0], S41, 0xf4292244); /* 49 */
-    II (d, a, b, c, x[ 7], S42, 0x432aff97); /* 50 */
-    II (c, d, a, b, x[14], S43, 0xab9423a7); /* 51 */
-    II (b, c, d, a, x[ 5], S44, 0xfc93a039); /* 52 */
-    II (a, b, c, d, x[12], S41, 0x655b59c3); /* 53 */
-    II (d, a, b, c, x[ 3], S42, 0x8f0ccc92); /* 54 */
-    II (c, d, a, b, x[10], S43, 0xffeff47d); /* 55 */
-    II (b, c, d, a, x[ 1], S44, 0x85845dd1); /* 56 */
-    II (a, b, c, d, x[ 8], S41, 0x6fa87e4f); /* 57 */
-    II (d, a, b, c, x[15], S42, 0xfe2ce6e0); /* 58 */
-    II (c, d, a, b, x[ 6], S43, 0xa3014314); /* 59 */
-    II (b, c, d, a, x[13], S44, 0x4e0811a1); /* 60 */
-    II (a, b, c, d, x[ 4], S41, 0xf7537e82); /* 61 */
-    II (d, a, b, c, x[11], S42, 0xbd3af235); /* 62 */
-    II (c, d, a, b, x[ 2], S43, 0x2ad7d2bb); /* 63 */
-    II (b, c, d, a, x[ 9], S44, 0xeb86d391); /* 64 */
+    II (a, b, c, d, x[ 0], S41, 0xf4292244);     II (d, a, b, c, x[ 7], S42, 0x432aff97);
+    II (c, d, a, b, x[14], S43, 0xab9423a7);     II (b, c, d, a, x[ 5], S44, 0xfc93a039);
+    II (a, b, c, d, x[12], S41, 0x655b59c3);     II (d, a, b, c, x[ 3], S42, 0x8f0ccc92);
+    II (c, d, a, b, x[10], S43, 0xffeff47d);     II (b, c, d, a, x[ 1], S44, 0x85845dd1);
+    II (a, b, c, d, x[ 8], S41, 0x6fa87e4f);     II (d, a, b, c, x[15], S42, 0xfe2ce6e0);
+    II (c, d, a, b, x[ 6], S43, 0xa3014314);     II (b, c, d, a, x[13], S44, 0x4e0811a1);
+    II (a, b, c, d, x[ 4], S41, 0xf7537e82);     II (d, a, b, c, x[11], S42, 0xbd3af235);
+    II (c, d, a, b, x[ 2], S43, 0x2ad7d2bb);     II (b, c, d, a, x[ 9], S44, 0xeb86d391);
 
     state[0] += a;
     state[1] += b;

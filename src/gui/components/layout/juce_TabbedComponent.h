@@ -47,7 +47,7 @@ public:
 
         Once created, add some tabs with the addTab() method.
     */
-    explicit TabbedComponent (const TabbedButtonBar::Orientation orientation);
+    explicit TabbedComponent (TabbedButtonBar::Orientation orientation);
 
     /** Destructor. */
     ~TabbedComponent();
@@ -60,7 +60,7 @@ public:
 
         @see TabbedButtonBar::setOrientation
     */
-    void setOrientation (const TabbedButtonBar::Orientation orientation);
+    void setOrientation (TabbedButtonBar::Orientation orientation);
 
     /** Returns the current tab placement.
 
@@ -74,7 +74,7 @@ public:
         of the bar; if they're along the left or right edges, it'll be the width
         of the bar.
     */
-    void setTabBarDepth (const int newDepth);
+    void setTabBarDepth (int newDepth);
 
     /** Returns the current thickness of the tab bar.
 
@@ -89,13 +89,13 @@ public:
 
         To set the colour of the line, use setColour (outlineColourId, ...).
     */
-    void setOutline (const int newThickness);
+    void setOutline (int newThickness);
 
     /** Specifies a gap to leave around the edge of the content component.
 
         Each edge of the content component will be indented by the given number of pixels.
     */
-    void setIndent (const int indentThickness);
+    void setIndent (int indentThickness);
 
     //==============================================================================
     /** Removes all the tabs from the bar.
@@ -114,16 +114,15 @@ public:
     */
     void addTab (const String& tabName,
                  const Colour& tabBackgroundColour,
-                 Component* const contentComponent,
-                 const bool deleteComponentWhenNotNeeded,
-                 const int insertIndex = -1);
+                 Component* contentComponent,
+                 bool deleteComponentWhenNotNeeded,
+                 int insertIndex = -1);
 
     /** Changes the name of one of the tabs. */
-    void setTabName (const int tabIndex,
-                     const String& newName);
+    void setTabName (int tabIndex, const String& newName);
 
     /** Gets rid of one of the tabs. */
-    void removeTab (const int tabIndex);
+    void removeTab (int tabIndex);
 
     /** Returns the number of tabs in the bar. */
     int getNumTabs() const;
@@ -136,13 +135,13 @@ public:
         Be sure not to use or delete the components that are returned, as this may interfere
         with the TabbedComponent's use of them.
     */
-    Component* getTabContentComponent (const int tabIndex) const throw();
+    Component* getTabContentComponent (int tabIndex) const throw();
 
     /** Returns the colour of one of the tabs. */
-    const Colour getTabBackgroundColour (const int tabIndex) const throw();
+    const Colour getTabBackgroundColour (int tabIndex) const throw();
 
     /** Changes the background colour of one of the tabs. */
-    void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
+    void setTabBackgroundColour (int tabIndex, const Colour& newColour);
 
     //==============================================================================
     /** Changes the currently-selected tab.
@@ -151,7 +150,7 @@ public:
 
         @see TabbedButtonBar::setCurrentTabIndex
     */
-    void setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage = true);
+    void setCurrentTabIndex (int newTabIndex, bool sendChangeMessage = true);
 
     /** Returns the index of the currently selected tab.
 
@@ -176,14 +175,14 @@ public:
 
         @see setCurrentTabIndex
     */
-    virtual void currentTabChanged (const int newCurrentTabIndex,
+    virtual void currentTabChanged (int newCurrentTabIndex,
                                     const String& newCurrentTabName);
 
     /** Callback method to indicate that the user has right-clicked on a tab.
 
         (Or ctrl-clicked on the Mac)
     */
-    virtual void popupMenuClickOnTab (const int tabIndex,
+    virtual void popupMenuClickOnTab (int tabIndex,
                                       const String& tabName);
 
     /** Returns the tab button bar component that is being used.
@@ -225,8 +224,7 @@ protected:
         If you need to use custom tab components, you can override this method and
         return your own class instead of the default.
     */
-    virtual TabBarButton* createTabButton (const String& tabName,
-                                           const int tabIndex);
+    virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
 private:
     //==============================================================================
@@ -236,7 +234,7 @@ private:
     int outlineThickness, edgeIndent;
 
     friend class TabCompButtonBar;
-    void changeCallback (const int newCurrentTabIndex, const String& newTabName);
+    void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
     TabbedComponent (const TabbedComponent&);
     TabbedComponent& operator= (const TabbedComponent&);

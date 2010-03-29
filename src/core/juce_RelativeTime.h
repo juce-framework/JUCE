@@ -46,7 +46,7 @@ public:
         @param seconds  the number of seconds, which may be +ve or -ve.
         @see milliseconds, minutes, hours, days, weeks
     */
-    explicit RelativeTime (const double seconds = 0.0) throw();
+    explicit RelativeTime (double seconds = 0.0) throw();
 
     /** Copies another relative time. */
     RelativeTime (const RelativeTime& other) throw();
@@ -62,37 +62,37 @@ public:
 
         @see minutes, hours, days, weeks
     */
-    static const RelativeTime milliseconds (const int milliseconds) throw();
+    static const RelativeTime milliseconds (int milliseconds) throw();
 
     /** Creates a new RelativeTime object representing a number of milliseconds.
 
         @see minutes, hours, days, weeks
     */
-    static const RelativeTime milliseconds (const int64 milliseconds) throw();
+    static const RelativeTime milliseconds (int64 milliseconds) throw();
 
     /** Creates a new RelativeTime object representing a number of minutes.
 
         @see milliseconds, hours, days, weeks
     */
-    static const RelativeTime minutes (const double numberOfMinutes) throw();
+    static const RelativeTime minutes (double numberOfMinutes) throw();
 
     /** Creates a new RelativeTime object representing a number of hours.
 
         @see milliseconds, minutes, days, weeks
     */
-    static const RelativeTime hours (const double numberOfHours) throw();
+    static const RelativeTime hours (double numberOfHours) throw();
 
     /** Creates a new RelativeTime object representing a number of days.
 
         @see milliseconds, minutes, hours, weeks
     */
-    static const RelativeTime days (const double numberOfDays) throw();
+    static const RelativeTime days (double numberOfDays) throw();
 
     /** Creates a new RelativeTime object representing a number of weeks.
 
         @see milliseconds, minutes, hours, days
     */
-    static const RelativeTime weeks (const double numberOfWeeks) throw();
+    static const RelativeTime weeks (double numberOfWeeks) throw();
 
     //==============================================================================
     /** Returns the number of milliseconds this time represents.
@@ -171,9 +171,9 @@ public:
     const RelativeTime  operator-  (const RelativeTime& timeToSubtract) const throw();
 
     /** Adds a number of seconds to this RelativeTime and returns the result. */
-    const RelativeTime  operator+  (const double secondsToAdd) const throw();
+    const RelativeTime  operator+  (double secondsToAdd) const throw();
     /** Subtracts a number of seconds from this RelativeTime and returns the result. */
-    const RelativeTime  operator-  (const double secondsToSubtract) const throw();
+    const RelativeTime  operator-  (double secondsToSubtract) const throw();
 
     /** Adds another RelativeTime to this one. */
     const RelativeTime& operator+= (const RelativeTime& timeToAdd) throw();
@@ -181,10 +181,10 @@ public:
     const RelativeTime& operator-= (const RelativeTime& timeToSubtract) throw();
 
     /** Adds a number of seconds to this time. */
-    const RelativeTime& operator+= (const double secondsToAdd) throw();
+    const RelativeTime& operator+= (double secondsToAdd) throw();
 
     /** Subtracts a number of seconds from this time. */
-    const RelativeTime& operator-= (const double secondsToSubtract) throw();
+    const RelativeTime& operator-= (double secondsToSubtract) throw();
 
 
     //==============================================================================

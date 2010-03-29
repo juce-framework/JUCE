@@ -297,7 +297,7 @@ public:
         SwapBuffers (dc);
     }
 
-    bool setSwapInterval (const int numFramesPerSwap)
+    bool setSwapInterval (int numFramesPerSwap)
     {
         makeActive();
 

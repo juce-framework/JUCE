@@ -62,10 +62,10 @@ public:
         resized, and if that doesn't provide enough space to meet the requirements, the algorithm
         will then try resizing the items with an order of 1, then 2, and so on.
     */
-    void addItem (const double currentSize,
-                  const double minSize,
-                  const double maxSize,
-                  const int order = 0);
+    void addItem (double currentSize,
+                  double minSize,
+                  double maxSize,
+                  int order = 0);
 
     /** Resizes all the items to fit this amount of space.
 
@@ -76,13 +76,13 @@ public:
         After calling this method, you can retrieve the new sizes with the getItemSize()
         method.
     */
-    void resizeToFit (const double targetSize);
+    void resizeToFit (double targetSize);
 
     /** Returns the number of items that have been added. */
     int getNumItems() const throw()                         { return items.size(); }
 
     /** Returns the size of one of the items. */
-    double getItemSize (const int index) const throw();
+    double getItemSize (int index) const throw();
 
 
     //==============================================================================

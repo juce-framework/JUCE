@@ -47,8 +47,8 @@ public:
     //==============================================================================
     /** Creates the tab button. */
     TabBarButton (const String& name,
-                  TabbedButtonBar* const ownerBar,
-                  const int tabIndex);
+                  TabbedButtonBar* ownerBar,
+                  int tabIndex);
 
     /** Destructor. */
     ~TabBarButton();
@@ -60,7 +60,7 @@ public:
         specifies its height. If it's vertical, it should return the height, and
         the depth is actually its width.
     */
-    virtual int getBestTabLength (const int depth);
+    virtual int getBestTabLength (int depth);
 
     //==============================================================================
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
@@ -126,7 +126,7 @@ public:
 
         You can change the orientation later if you need to.
     */
-    TabbedButtonBar (const Orientation orientation);
+    TabbedButtonBar (Orientation orientation);
 
     /** Destructor. */
     ~TabbedButtonBar();
@@ -138,7 +138,7 @@ public:
         but this determines which direction the tabs go in, and which side they're
         stuck to.
     */
-    void setOrientation (const Orientation orientation);
+    void setOrientation (Orientation orientation);
 
     /** Returns the current orientation.
 
@@ -164,18 +164,17 @@ public:
                  int insertIndex = -1);
 
     /** Changes the name of one of the tabs. */
-    void setTabName (const int tabIndex,
+    void setTabName (int tabIndex,
                      const String& newName);
 
     /** Gets rid of one of the tabs. */
-    void removeTab (const int tabIndex);
+    void removeTab (int tabIndex);
 
     /** Moves a tab to a new index in the list.
 
         Pass -1 as the index to move it to the end of the list.
     */
-    void moveTab (const int currentIndex,
-                  const int newIndex);
+    void moveTab (int currentIndex, int newIndex);
 
     /** Returns the number of tabs in the bar. */
     int getNumTabs() const;
@@ -191,7 +190,7 @@ public:
 
         To deselect all the tabs, use an index of -1.
     */
-    void setCurrentTabIndex (int newTabIndex, const bool sendChangeMessage = true);
+    void setCurrentTabIndex (int newTabIndex, bool sendChangeMessage = true);
 
     /** Returns the name of the currently selected tab.
 
@@ -211,34 +210,33 @@ public:
         on to the pointer that is returned. A null pointer may be returned if the index is
         out of range.
     */
-    TabBarButton* getTabButton (const int index) const;
+    TabBarButton* getTabButton (int index) const;
 
     //==============================================================================
     /** Callback method to indicate the selected tab has been changed.
 
         @see setCurrentTabIndex
     */
-    virtual void currentTabChanged (const int newCurrentTabIndex,
+    virtual void currentTabChanged (int newCurrentTabIndex,
                                     const String& newCurrentTabName);
 
     /** Callback method to indicate that the user has right-clicked on a tab.
 
         (Or ctrl-clicked on the Mac)
     */
-    virtual void popupMenuClickOnTab (const int tabIndex,
-                                      const String& tabName);
+    virtual void popupMenuClickOnTab (int tabIndex, const String& tabName);
 
     /** Returns the colour of a tab.
 
         This is the colour that was specified in addTab().
     */
-    const Colour getTabBackgroundColour (const int tabIndex);
+    const Colour getTabBackgroundColour (int tabIndex);
 
     /** Changes the background colour of a tab.
 
         @see addTab, getTabBackgroundColour
     */
-    void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
+    void setTabBackgroundColour (int tabIndex, const Colour& newColour);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the component.
@@ -276,8 +274,7 @@ protected:
         If you need to use custom tab components, you can override this method and
         return your own class instead of the default.
     */
-    virtual TabBarButton* createTabButton (const String& tabName,
-                                           const int tabIndex);
+    virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
 private:
     Orientation orientation;

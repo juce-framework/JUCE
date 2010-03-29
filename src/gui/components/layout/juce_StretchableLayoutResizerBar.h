@@ -56,9 +56,9 @@ public:
                                     right; false for a horizontal one that you drag up and
                                     down
     */
-    StretchableLayoutResizerBar (StretchableLayoutManager* const layoutToUse,
-                                 const int itemIndexInLayout,
-                                 const bool isBarVertical);
+    StretchableLayoutResizerBar (StretchableLayoutManager* layoutToUse,
+                                 int itemIndexInLayout,
+                                 bool isBarVertical);
 
     /** Destructor. */
     ~StretchableLayoutResizerBar();

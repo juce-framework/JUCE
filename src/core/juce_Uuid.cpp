@@ -31,6 +31,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Random.h"
 #include "juce_Time.h"
 #include "juce_SystemStats.h"
+#include "../containers/juce_MemoryBlock.h"
 
 
 //==============================================================================
@@ -99,7 +100,7 @@ bool Uuid::isNull() const throw()
 //==============================================================================
 const String Uuid::toString() const
 {
-    return String::toHexString (value.asBytes, 16, 0);
+    return String::toHexString (value.asBytes, sizeof (value.asBytes), 0);
 }
 
 Uuid::Uuid (const String& uuidString)
@@ -109,48 +110,11 @@ Uuid::Uuid (const String& uuidString)
 
 Uuid& Uuid::operator= (const String& uuidString)
 {
-    int destIndex = 0;
-    int i = 0;
-
-    for (;;)
-    {
-        int byte = 0;
-
-        for (int loop = 2; --loop >= 0;)
-        {
-            byte <<= 4;
-
-            for (;;)
-            {
-                const tchar c = uuidString [i++];
-
-                if (c >= '0' && c <= '9')
-                {
-                    byte |= c - '0';
-                    break;
-                }
-                else if (c >= 'a' && c <= 'z')
-                {
-                    byte |= c - ('a' - 10);
-                    break;
-                }
-                else if (c >= 'A' && c <= 'Z')
-                {
-                    byte |= c - ('A' - 10);
-                    break;
-                }
-                else if (c == 0)
-                {
-                    while (destIndex < 16)
-                        value.asBytes [destIndex++] = 0;
-
-                    return *this;
-                }
-            }
-        }
-
-        value.asBytes [destIndex++] = (uint8) byte;
-    }
+    MemoryBlock mb;
+    mb.loadFromHexString (uuidString);
+    mb.ensureSize (sizeof (value.asBytes), true);
+    mb.copyTo (value.asBytes, 0, sizeof (value.asBytes));
+    return *this;
 }
 
 //==============================================================================
@@ -162,9 +126,9 @@ Uuid::Uuid (const uint8* const rawData)
 Uuid& Uuid::operator= (const uint8* const rawData)
 {
     if (rawData != 0)
-        memcpy (value.asBytes, rawData, 16);
+        memcpy (value.asBytes, rawData, sizeof (value.asBytes));
     else
-        zeromem (value.asBytes, 16);
+        zeromem (value.asBytes, sizeof (value.asBytes));
 
     return *this;
 }

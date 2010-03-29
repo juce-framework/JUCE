@@ -38,10 +38,11 @@ namespace Atoms
     enum ProtocolItems
     {
         TAKE_FOCUS = 0,
-        DELETE_WINDOW = 1
+        DELETE_WINDOW = 1,
+        PING = 2
     };
 
-    static Atom Protocols, ProtocolList[2], ChangeState, State,
+    static Atom Protocols, ProtocolList[3], ChangeState, State,
                 ActiveWin, Pid, WindowType, WindowState,
                 XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus,
                 XdndDrop, XdndFinished, XdndSelection, XdndTypeList, XdndActionList,
@@ -63,12 +64,13 @@ namespace Atoms
             Protocols                       = XInternAtom (display, "WM_PROTOCOLS", True);
             ProtocolList [TAKE_FOCUS]       = XInternAtom (display, "WM_TAKE_FOCUS", True);
             ProtocolList [DELETE_WINDOW]    = XInternAtom (display, "WM_DELETE_WINDOW", True);
+            ProtocolList [PING]             = XInternAtom (display, "_NET_WM_PING", True);
             ChangeState                     = XInternAtom (display, "WM_CHANGE_STATE", True);
             State                           = XInternAtom (display, "WM_STATE", True);
             ActiveWin                       = XInternAtom (display, "_NET_ACTIVE_WINDOW", False);
             Pid                             = XInternAtom (display, "_NET_WM_PID", False);
             WindowType                      = XInternAtom (display, "_NET_WM_WINDOW_TYPE", True);
-            WindowState                     = XInternAtom (display, "_NET_WM_WINDOW_STATE", True);
+            WindowState                     = XInternAtom (display, "_NET_WM_STATE", True);
 
             XdndAware                       = XInternAtom (display, "XdndAware", False);
             XdndEnter                       = XInternAtom (display, "XdndEnter", False);
@@ -1580,7 +1582,6 @@ public:
             }
 
             case ReparentNotify:
-            case GravityNotify:
             {
                 parentWindow = 0;
                 Window wRoot = 0;
@@ -1595,6 +1596,14 @@ public:
                 if (parentWindow == windowH || parentWindow == wRoot)
                     parentWindow = 0;
 
+                updateBounds();
+                updateBorderSize();
+                handleMovedOrResized();
+                break;
+            }
+
+            case GravityNotify:
+            {
                 updateBounds();
                 updateBorderSize();
                 handleMovedOrResized();
@@ -1633,7 +1642,16 @@ public:
                 {
                     const Atom atom = (Atom) clientMsg->data.l[0];
 
-                    if (atom == Atoms::ProtocolList [Atoms::TAKE_FOCUS])
+                    if (atom == Atoms::ProtocolList [Atoms::PING])
+                    {
+                        Window root = RootWindow (display, DefaultScreen (display));
+
+                        event->xclient.window = root;
+
+                        XSendEvent (display, root, False, NoEventMask, event);
+                        XFlush (display);
+                    }
+                    else if (atom == Atoms::ProtocolList [Atoms::TAKE_FOCUS])
                     {
                         XWindowAttributes atts;
 
@@ -2175,11 +2193,10 @@ private:
 
         if ((styleFlags & windowAppearsOnTaskbar) == 0)
         {
-/*          Atom skipTaskbar = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", False);
+            Atom skipTaskbar = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", False);
 
-            XChangeProperty (display, wndH, wm_WindowState, XA_ATOM, 32, PropModeReplace,
+            XChangeProperty (display, wndH, Atoms::WindowState, XA_ATOM, 32, PropModeReplace,
                              (unsigned char*) &skipTaskbar, 1);
-*/
         }
     }
 

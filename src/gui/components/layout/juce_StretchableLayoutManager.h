@@ -109,10 +109,10 @@ public:
                                 indicates a proportion of the available space
         @see getItemLayout
     */
-    void setItemLayout (const int itemIndex,
-                        const double minimumSize,
-                        const double maximumSize,
-                        const double preferredSize);
+    void setItemLayout (int itemIndex,
+                        double minimumSize,
+                        double maximumSize,
+                        double preferredSize);
 
     /** For a numbered item, this returns its size limits and preferred size.
 
@@ -129,7 +129,7 @@ public:
         @returns false if the item's properties hadn't been set
         @see setItemLayout
     */
-    bool getItemLayout (const int itemIndex,
+    bool getItemLayout (int itemIndex,
                         double& minimumSize,
                         double& maximumSize,
                         double& preferredSize) const;
@@ -170,11 +170,11 @@ public:
                                 the x and width parameters; if 'vertically' is false, their y-positions
                                 and heights are adjusted to fit the y and height parameters.
     */
-    void layOutComponents (Component** const components,
+    void layOutComponents (Component** components,
                            int numComponents,
                            int x, int y, int width, int height,
-                           const bool vertically,
-                           const bool resizeOtherDimension);
+                           bool vertically,
+                           bool resizeOtherDimension);
 
     //==============================================================================
     /** Returns the current position of one of the items.
@@ -190,7 +190,7 @@ public:
 
         @see getItemCurrentSize, setItemPosition
     */
-    int getItemCurrentPosition (const int itemIndex) const;
+    int getItemCurrentPosition (int itemIndex) const;
 
     /** Returns the current size of one of the items.
 
@@ -201,7 +201,7 @@ public:
 
         @see getItemCurrentRelativeSize
     */
-    int getItemCurrentAbsoluteSize (const int itemIndex) const;
+    int getItemCurrentAbsoluteSize (int itemIndex) const;
 
     /** Returns the current size of one of the items.
 
@@ -213,7 +213,7 @@ public:
 
         @see getItemCurrentAbsoluteSize
     */
-    double getItemCurrentRelativeSize (const int itemIndex) const;
+    double getItemCurrentRelativeSize (int itemIndex) const;
 
     //==============================================================================
     /** Moves one of the items, shifting along any other items as necessary in
@@ -231,7 +231,7 @@ public:
                                 because other items may have minimum sizes that constrain how
                                 far it can go
     */
-    void setItemPosition (const int itemIndex,
+    void setItemPosition (int itemIndex,
                           int newPosition);
 
 
@@ -251,19 +251,11 @@ private:
 
     //==============================================================================
     static int sizeToRealSize (double size, int totalSpace);
-
-    ItemLayoutProperties* getInfoFor (const int itemIndex) const;
-
-    void setTotalSize (const int newTotalSize);
-
-    int fitComponentsIntoSpace (const int startIndex,
-                                const int endIndex,
-                                const int availableSpace,
-                                int startPos);
-
-    int getMinimumSizeOfItems (const int startIndex, const int endIndex) const;
-    int getMaximumSizeOfItems (const int startIndex, const int endIndex) const;
-
+    ItemLayoutProperties* getInfoFor (int itemIndex) const;
+    void setTotalSize (int newTotalSize);
+    int fitComponentsIntoSpace (int startIndex, int endIndex, int availableSpace, int startPos);
+    int getMinimumSizeOfItems (int startIndex, int endIndex) const;
+    int getMaximumSizeOfItems (int startIndex, int endIndex) const;
     void updatePrefSizesToMatchCurrentPositions();
 
     StretchableLayoutManager (const StretchableLayoutManager&);

@@ -115,12 +115,14 @@ namespace PNGHelpers
 
     static void readCallback (png_structp png, png_bytep data, png_size_t length)
     {
-        static_cast<InputStream*> (png->io_ptr)->read (data, (int) length);
+        if (png != 0 && png->io_ptr != 0)
+            static_cast<InputStream*> (png->io_ptr)->read (data, (int) length);
     }
 
     static void writeDataCallback (png_structp png, png_bytep data, png_size_t length)
     {
-        static_cast<OutputStream*> (png->io_ptr)->write (data, (int) length);
+        if (png != 0 && png->io_ptr != 0)
+            static_cast<OutputStream*> (png->io_ptr)->write (data, (int) length);
     }
 
     struct PNGErrorStruct {};

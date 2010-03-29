@@ -97,8 +97,7 @@ void PluginListComponent::paintListBoxItem (int row,
         g.setColour (Colours::black);
         ga.draw (g);
 
-        float x, y, r, b;
-        ga.getBoundingBox (0, -1, x, y, r, b, false);
+        const Rectangle<float> bb (ga.getBoundingBox (0, -1, false));
 
         String desc;
         desc << pd->pluginFormatName
@@ -120,7 +119,7 @@ void PluginListComponent::paintListBoxItem (int row,
         g.setColour (Colours::grey);
 
         ga.clear();
-        ga.addCurtailedLineOfText (Font (height * 0.6f), desc, r + 10.0f, height * 0.8f, width - r - 12.0f, true);
+        ga.addCurtailedLineOfText (Font (height * 0.6f), desc, bb.getRight() + 10.0f, height * 0.8f, width - bb.getRight() - 12.0f, true);
         ga.draw (g);
     }
 }

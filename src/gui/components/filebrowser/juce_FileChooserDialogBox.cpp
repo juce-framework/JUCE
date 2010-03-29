@@ -164,10 +164,9 @@ void FileChooserDialogBox::ContentComponent::resized()
 {
     getLookAndFeel().createFileChooserHeaderText (getName(), instructions, text, getWidth());
 
-    float left, top, right, bottom;
-    text.getBoundingBox (0, text.getNumGlyphs(), left, top, right, bottom, false);
+    const Rectangle<float> bb (text.getBoundingBox (0, text.getNumGlyphs(), false));
 
-    const int y = roundToInt (bottom) + 10;
+    const int y = roundToInt (bb.getBottom()) + 10;
     const int buttonHeight = 26;
     const int buttonY = getHeight() - buttonHeight - 8;
 

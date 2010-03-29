@@ -840,6 +840,26 @@ inline int roundFloatToInt (const float value) throw()
 	return roundToInt (value);
 }
 
+namespace TypeHelpers
+{
+	template <typename Type> struct ParameterType		   { typedef const Type& type; };
+	template <typename Type> struct ParameterType <Type&>	   { typedef Type& type; };
+	template <typename Type> struct ParameterType <Type*>	   { typedef Type* type; };
+	template <>		  struct ParameterType <char>		{ typedef char type; };
+	template <>		  struct ParameterType <unsigned char>   { typedef unsigned char type; };
+	template <>		  struct ParameterType <short>	   { typedef short type; };
+	template <>		  struct ParameterType <unsigned short>  { typedef unsigned short type; };
+	template <>		  struct ParameterType <int>		 { typedef int type; };
+	template <>		  struct ParameterType <unsigned int>	{ typedef unsigned int type; };
+	template <>		  struct ParameterType <long>		{ typedef long type; };
+	template <>		  struct ParameterType <unsigned long>   { typedef unsigned long type; };
+	template <>		  struct ParameterType <int64>	   { typedef int64 type; };
+	template <>		  struct ParameterType <uint64>	  { typedef uint64 type; };
+	template <>		  struct ParameterType <bool>		{ typedef bool type; };
+	template <>		  struct ParameterType <float>	   { typedef float type; };
+	template <>		  struct ParameterType <double>	  { typedef double type; };
+}
+
 #endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
 /*** End of inlined file: juce_MathsFunctions.h ***/
 
@@ -2065,7 +2085,7 @@ public:
 							 : ElementType();
 	}
 
-	int indexOf (const ElementType& elementToLookFor) const
+	int indexOf (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
@@ -2082,7 +2102,7 @@ public:
 		return -1;
 	}
 
-	bool contains (const ElementType& elementToLookFor) const
+	bool contains (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
@@ -2099,14 +2119,14 @@ public:
 		return false;
 	}
 
-	void add (const ElementType& newElement)
+	void add (typename TypeHelpers::ParameterType<ElementType>::type newElement)
 	{
 		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 		new (data.elements + numUsed++) ElementType (newElement);
 	}
 
-	void insert (int indexToInsertAt, const ElementType& newElement)
+	void insert (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement)
 	{
 		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
@@ -2128,7 +2148,7 @@ public:
 		}
 	}
 
-	void insertMultiple (int indexToInsertAt, const ElementType& newElement,
+	void insertMultiple (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement,
 						 int numberOfTimesToInsertIt)
 	{
 		if (numberOfTimesToInsertIt > 0)
@@ -2183,7 +2203,7 @@ public:
 		}
 	}
 
-	void addIfNotAlreadyThere (const ElementType& newElement)
+	void addIfNotAlreadyThere (typename TypeHelpers::ParameterType<ElementType>::type newElement)
 	{
 		const ScopedLockType lock (getLock());
 
@@ -2191,7 +2211,7 @@ public:
 			add (newElement);
 	}
 
-	void set (const int indexToChange, const ElementType& newValue)
+	void set (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
 	{
 		jassert (indexToChange >= 0);
 		const ScopedLockType lock (getLock());
@@ -2207,7 +2227,7 @@ public:
 		}
 	}
 
-	void setUnchecked (const int indexToChange, const ElementType& newValue)
+	void setUnchecked (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
 	{
 		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
@@ -2258,14 +2278,14 @@ public:
 	}
 
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator, const ElementType& newElement)
+	void addSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type newElement)
 	{
 		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
 	}
 
 	template <class ElementComparator>
-	int indexOfSorted (ElementComparator& comparator, const ElementType& elementToLookFor) const
+	int indexOfSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
@@ -2325,7 +2345,7 @@ public:
 		}
 	}
 
-	void removeValue (const ElementType& valueToRemove)
+	void removeValue (typename TypeHelpers::ParameterType<ElementType>::type valueToRemove)
 	{
 		const ScopedLockType lock (getLock());
 		ElementType* e = data.elements;
@@ -3125,21 +3145,19 @@ private:
 #elif JUCE_LINUX			// Linux...
 
   #if __INTEL_COMPILER
-	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (static_cast <void*> (&variable)); }
-	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (static_cast <void*> (&variable)); }
-	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (static_cast <void*> (&variable)); }
-	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (static_cast <void*> (&variable)); }
+	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (&variable); }
+	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (&variable); }
+	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (&variable); }
+	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (&variable); }
 	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																	{ return _InterlockedCompareExchange (static_cast <void*> (&destination), newValue, oldValue); }
+																	{ return _InterlockedCompareExchange (&destination, newValue, oldValue); }
 
 	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
 	{
 	  #if __ia64__
-		return reinterpret_cast<void*> (_InterlockedExchange64 (reinterpret_cast<volatile __int64*> (value1),
-																reinterpret_cast<__int64> (value2)));
+		return reinterpret_cast<void*> (_InterlockedExchange64 (const_cast<void**> (value1), reinterpret_cast<__int64> (value2)));
 	  #else
-		return reinterpret_cast<void*> (_InterlockedExchange (reinterpret_cast<volatile int*> (value1),
-															  reinterpret_cast<long> (value2)));
+		return reinterpret_cast<void*> (_InterlockedExchange (const_cast<void**> (value1), reinterpret_cast<long> (value2)));
 	  #endif
 	}
 
@@ -4082,7 +4100,7 @@ class JUCE_API  RelativeTime
 {
 public:
 
-	explicit RelativeTime (const double seconds = 0.0) throw();
+	explicit RelativeTime (double seconds = 0.0) throw();
 
 	RelativeTime (const RelativeTime& other) throw();
 
@@ -4090,17 +4108,17 @@ public:
 
 	~RelativeTime() throw();
 
-	static const RelativeTime milliseconds (const int milliseconds) throw();
+	static const RelativeTime milliseconds (int milliseconds) throw();
 
-	static const RelativeTime milliseconds (const int64 milliseconds) throw();
+	static const RelativeTime milliseconds (int64 milliseconds) throw();
 
-	static const RelativeTime minutes (const double numberOfMinutes) throw();
+	static const RelativeTime minutes (double numberOfMinutes) throw();
 
-	static const RelativeTime hours (const double numberOfHours) throw();
+	static const RelativeTime hours (double numberOfHours) throw();
 
-	static const RelativeTime days (const double numberOfDays) throw();
+	static const RelativeTime days (double numberOfDays) throw();
 
-	static const RelativeTime weeks (const double numberOfWeeks) throw();
+	static const RelativeTime weeks (double numberOfWeeks) throw();
 
 	int64 inMilliseconds() const throw();
 
@@ -4127,15 +4145,15 @@ public:
 	const RelativeTime  operator+  (const RelativeTime& timeToAdd) const throw();
 	const RelativeTime  operator-  (const RelativeTime& timeToSubtract) const throw();
 
-	const RelativeTime  operator+  (const double secondsToAdd) const throw();
-	const RelativeTime  operator-  (const double secondsToSubtract) const throw();
+	const RelativeTime  operator+  (double secondsToAdd) const throw();
+	const RelativeTime  operator-  (double secondsToSubtract) const throw();
 
 	const RelativeTime& operator+= (const RelativeTime& timeToAdd) throw();
 	const RelativeTime& operator-= (const RelativeTime& timeToSubtract) throw();
 
-	const RelativeTime& operator+= (const double secondsToAdd) throw();
+	const RelativeTime& operator+= (double secondsToAdd) throw();
 
-	const RelativeTime& operator-= (const double secondsToSubtract) throw();
+	const RelativeTime& operator-= (double secondsToSubtract) throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -6147,86 +6165,106 @@ public:
 			(iter.getListener()->*callbackFunction) ();
 	}
 
-	template <typename P1, typename P2>
+	template <typename P1>
 	void call (void (ListenerClass::*callbackFunction) (P1),
-			   P2& param1)
+			   typename TypeHelpers::ParameterType<P1>::type param1)
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
+	}
+
+	template <class BailOutCheckerType, typename P1>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1),
+					  typename TypeHelpers::ParameterType<P1>::type param1)
+	{
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1);
+	}
+
+	template <typename P1, typename P2>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2),
+			   typename TypeHelpers::ParameterType<P1>::type param1,
+			   typename TypeHelpers::ParameterType<P2>::type param2)
+	{
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
 	template <class BailOutCheckerType, typename P1, typename P2>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
-					  void (ListenerClass::*callbackFunction) (P1),
-					  P2& param1)
+					  void (ListenerClass::*callbackFunction) (P1, P2),
+					  typename TypeHelpers::ParameterType<P1>::type param1,
+					  typename TypeHelpers::ParameterType<P2>::type param2)
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1);
+			(iter.getListener()->*callbackFunction) (param1, param2);
+	}
+
+	template <typename P1, typename P2, typename P3>
+	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
+			   typename TypeHelpers::ParameterType<P1>::type param1,
+			   typename TypeHelpers::ParameterType<P2>::type param2,
+			   typename TypeHelpers::ParameterType<P3>::type param3)
+	{
+		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3);
+	}
+
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3>
+	void callChecked (const BailOutCheckerType& bailOutChecker,
+					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
+					  typename TypeHelpers::ParameterType<P1>::type param1,
+					  typename TypeHelpers::ParameterType<P2>::type param2,
+					  typename TypeHelpers::ParameterType<P3>::type param3)
+	{
+		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
+			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
 	template <typename P1, typename P2, typename P3, typename P4>
-	void call (void (ListenerClass::*callbackFunction) (P1, P2),
-			   P3& param1, P4& param2)
+	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
+			   typename TypeHelpers::ParameterType<P1>::type param1,
+			   typename TypeHelpers::ParameterType<P2>::type param2,
+			   typename TypeHelpers::ParameterType<P3>::type param3,
+			   typename TypeHelpers::ParameterType<P4>::type param4)
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1, param2);
+			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
 	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
-					  void (ListenerClass::*callbackFunction) (P1, P2),
-					  P3& param1, P4& param2)
-	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1, param2);
-	}
-
-	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
-			   P4& param1, P5& param2, P6& param3)
-	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1, param2, param3);
-	}
-
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6>
-	void callChecked (const BailOutCheckerType& bailOutChecker,
-					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
-					  P4& param1, P5& param2, P6& param3)
-	{
-		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1, param2, param3);
-	}
-
-	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-			   P5& param1, P6& param2, P7& param3, P8& param4)
-	{
-		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
-			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
-	}
-
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8>
-	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-					  P5& param1, P6& param2, P7& param3, P8& param4)
+					  typename TypeHelpers::ParameterType<P1>::type param1,
+					  typename TypeHelpers::ParameterType<P2>::type param2,
+					  typename TypeHelpers::ParameterType<P3>::type param3,
+					  typename TypeHelpers::ParameterType<P4>::type param4)
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
-	template <typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+	template <typename P1, typename P2, typename P3, typename P4, typename P5>
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-			   P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+			   typename TypeHelpers::ParameterType<P1>::type param1,
+			   typename TypeHelpers::ParameterType<P2>::type param2,
+			   typename TypeHelpers::ParameterType<P3>::type param3,
+			   typename TypeHelpers::ParameterType<P4>::type param4,
+			   typename TypeHelpers::ParameterType<P5>::type param5)
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5, typename P6, typename P7, typename P8, typename P9, typename P10>
+	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-					  P6& param1, P7& param2, P8& param3, P9& param4, P10& param5)
+					  typename TypeHelpers::ParameterType<P1>::type param1,
+					  typename TypeHelpers::ParameterType<P2>::type param2,
+					  typename TypeHelpers::ParameterType<P3>::type param3,
+					  typename TypeHelpers::ParameterType<P4>::type param4,
+					  typename TypeHelpers::ParameterType<P5>::type param5)
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
@@ -7386,9 +7424,9 @@ public:
 
 	static int getMACAddresses (int64* addresses, int maxNum,
 #if JUCE_MAC
-								const bool littleEndian = true);
+								bool littleEndian = true);
 #else
-								const bool littleEndian = false);
+								bool littleEndian = false);
 #endif
 
 	static const StringArray getMACAddressStrings();
@@ -7520,7 +7558,7 @@ public:
 
 	explicit MD5 (const MemoryBlock& data);
 
-	MD5 (const char* data, const size_t numBytes);
+	MD5 (const void* data, const size_t numBytes);
 
 	explicit MD5 (const String& text);
 
@@ -7551,9 +7589,9 @@ private:
 
 		ProcessContext();
 
-		void processBlock (const uint8* const data, size_t dataSize);
-		void transform (const uint8* const buffer);
-		void finish (uint8* const result);
+		void processBlock (const void* data, size_t dataSize);
+		void transform (const void* buffer);
+		void finish (void* const result);
 	};
 
 	void processStream (InputStream& input, int64 numBytesToRead);
@@ -11649,6 +11687,8 @@ private:
 	// this isn't a class you should ever instantiate - it's just here for the
 	// static values in it.
 	Colours();
+	Colours (const Colours&);
+	Colours& operator= (const Colours&);
 };
 
 #endif   // __JUCE_COLOURS_JUCEHEADER__
@@ -16130,15 +16170,13 @@ public:
 
 	~Viewport();
 
-	void setViewedComponent (Component* const newViewedComponent);
+	void setViewedComponent (Component* newViewedComponent);
 
 	Component* getViewedComponent() const throw()		   { return contentComp; }
 
-	void setViewPosition (const int xPixelsOffset,
-						  const int yPixelsOffset);
+	void setViewPosition (int xPixelsOffset, int yPixelsOffset);
 
-	void setViewPositionProportionately (const double proportionX,
-										 const double proportionY);
+	void setViewPositionProportionately (double proportionX, double proportionY);
 
 	bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
 
@@ -16157,20 +16195,20 @@ public:
 	virtual void visibleAreaChanged (int visibleX, int visibleY,
 									 int visibleW, int visibleH);
 
-	void setScrollBarsShown (const bool showVerticalScrollbarIfNeeded,
-							 const bool showHorizontalScrollbarIfNeeded);
+	void setScrollBarsShown (bool showVerticalScrollbarIfNeeded,
+							 bool showHorizontalScrollbarIfNeeded);
 
 	bool isVerticalScrollBarShown() const throw()		   { return showVScrollbar; }
 
 	bool isHorizontalScrollBarShown() const throw()		 { return showHScrollbar; }
 
-	void setScrollBarThickness (const int thickness);
+	void setScrollBarThickness (int thickness);
 
 	int getScrollBarThickness() const throw();
 
-	void setSingleStepSizes (const int stepX, const int stepY);
+	void setSingleStepSizes (int stepX, int stepY);
 
-	void setScrollBarButtonVisibility (const bool buttonsVisible);
+	void setScrollBarButtonVisibility (bool buttonsVisible);
 
 	ScrollBar* getVerticalScrollBar() const throw()		 { return verticalScrollBar; }
 
@@ -20302,18 +20340,18 @@ public:
 
 	~ComponentAnimator();
 
-	void animateComponent (Component* const component,
+	void animateComponent (Component* component,
 						   const Rectangle<int>& finalPosition,
-						   const int millisecondsToSpendMoving,
-						   const double startSpeed = 1.0,
-						   const double endSpeed = 1.0);
+						   int millisecondsToSpendMoving,
+						   double startSpeed = 1.0,
+						   double endSpeed = 1.0);
 
-	void cancelAnimation (Component* const component,
-						  const bool moveComponentToItsFinalPosition);
+	void cancelAnimation (Component* component,
+						  bool moveComponentToItsFinalPosition);
 
-	void cancelAllAnimations (const bool moveComponentsToTheirFinalPositions);
+	void cancelAllAnimations (bool moveComponentsToTheirFinalPositions);
 
-	const Rectangle<int> getComponentDestination (Component* const component);
+	const Rectangle<int> getComponentDestination (Component* component);
 
 	bool isAnimating (Component* component) const;
 
@@ -20323,7 +20361,7 @@ private:
 	VoidArray tasks;
 	uint32 lastTime;
 
-	void* findTaskFor (Component* const component) const;
+	void* findTaskFor (Component* component) const;
 	void timerCallback();
 };
 
@@ -22771,8 +22809,8 @@ class JUCE_API  ResizableBorderComponent  : public Component
 {
 public:
 
-	ResizableBorderComponent (Component* const componentToResize,
-							  ComponentBoundsConstrainer* const constrainer);
+	ResizableBorderComponent (Component* componentToResize,
+							  ComponentBoundsConstrainer* constrainer);
 
 	~ResizableBorderComponent();
 
@@ -22816,8 +22854,8 @@ class JUCE_API  ResizableCornerComponent  : public Component
 {
 public:
 
-	ResizableCornerComponent (Component* const componentToResize,
-							  ComponentBoundsConstrainer* const constrainer);
+	ResizableCornerComponent (Component* componentToResize,
+							  ComponentBoundsConstrainer* constrainer);
 
 	~ResizableCornerComponent();
 
@@ -22972,9 +23010,9 @@ public:
 	float getBaselineY() const		  { return y; }
 	float getTop() const			{ return y - font.getAscent(); }
 	float getBottom() const			 { return y + font.getDescent(); }
+	const Rectangle<float> getBounds() const	{ return Rectangle<float> (x, getTop(), w, font.getHeight()); }
 
-	void moveBy (const float deltaX,
-				 const float deltaY);
+	void moveBy (float deltaX, float deltaY);
 
 	void draw (const Graphics& g) const;
 
@@ -23010,37 +23048,34 @@ public:
 
 	~GlyphArrangement();
 
-	int getNumGlyphs() const					{ return glyphs.size(); }
+	int getNumGlyphs() const throw()				{ return glyphs.size(); }
 
-	PositionedGlyph& getGlyph (const int index) const;
+	PositionedGlyph& getGlyph (int index) const;
 
 	void clear();
 
 	void addLineOfText (const Font& font,
 						const String& text,
-						const float x,
-						const float y);
+						float x, float y);
 
 	void addCurtailedLineOfText (const Font& font,
 								 const String& text,
-								 float x,
-								 const float y,
-								 const float maxWidthPixels,
-								 const bool useEllipsis);
+								 float x, float y,
+								 float maxWidthPixels,
+								 bool useEllipsis);
 
 	void addJustifiedText (const Font& font,
 						   const String& text,
 						   float x, float y,
-						   const float maxLineWidth,
+						   float maxLineWidth,
 						   const Justification& horizontalLayout);
 
 	void addFittedText (const Font& font,
 						const String& text,
-						const float x, const float y,
-						const float width, const float height,
+						float x, float y, float width, float height,
 						const Justification& layout,
 						int maximumLinesToUse,
-						const float minimumHorizontalScale = 0.7f);
+						float minimumHorizontalScale = 0.7f);
 
 	void addGlyphArrangement (const GlyphArrangement& other);
 
@@ -23052,28 +23087,18 @@ public:
 
 	int findGlyphIndexAt (float x, float y) const;
 
-	void getBoundingBox (int startIndex,
-						 int numGlyphs,
-						 float& left,
-						 float& top,
-						 float& right,
-						 float& bottom,
-						 const bool includeWhitespace) const;
+	const Rectangle<float> getBoundingBox (int startIndex, int numGlyphs, bool includeWhitespace) const;
 
 	void moveRangeOfGlyphs (int startIndex, int numGlyphs,
-							const float deltaX,
-							const float deltaY);
+							float deltaX, float deltaY);
 
 	void removeRangeOfGlyphs (int startIndex, int numGlyphs);
 
 	void stretchRangeOfGlyphs (int startIndex, int numGlyphs,
-							   const float horizontalScaleFactor);
+							   float horizontalScaleFactor);
 
-	void justifyGlyphs (const int startIndex, const int numGlyphs,
-						const float x,
-						const float y,
-						const float width,
-						const float height,
+	void justifyGlyphs (int startIndex, int numGlyphs,
+						float x, float y, float width, float height,
 						const Justification& justification);
 
 	juce_UseDebuggingNewOperator
@@ -23081,10 +23106,10 @@ public:
 private:
 	OwnedArray <PositionedGlyph> glyphs;
 
-	int insertEllipsis (const Font& font, const float maxXPos, const int startIndex, int endIndex);
+	int insertEllipsis (const Font& font, float maxXPos, int startIndex, int endIndex);
 	int fitLineIntoSpace (int start, int numGlyphs, float x, float y, float w, float h, const Font& font,
 						  const Justification& justification, float minimumHorizontalScale);
-	void spreadOutLine (const int start, const int numGlyphs, const float targetWidth);
+	void spreadOutLine (int start, int numGlyphs, float targetWidth);
 };
 
 #endif   // __JUCE_GLYPHARRANGEMENT_JUCEHEADER__
@@ -23773,12 +23798,12 @@ class JUCE_API  TabBarButton  : public Button
 public:
 
 	TabBarButton (const String& name,
-				  TabbedButtonBar* const ownerBar,
-				  const int tabIndex);
+				  TabbedButtonBar* ownerBar,
+				  int tabIndex);
 
 	~TabBarButton();
 
-	virtual int getBestTabLength (const int depth);
+	virtual int getBestTabLength (int depth);
 
 	void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown);
 	void clicked (const ModifierKeys& mods);
@@ -23813,11 +23838,11 @@ public:
 		TabsAtRight
 	};
 
-	TabbedButtonBar (const Orientation orientation);
+	TabbedButtonBar (Orientation orientation);
 
 	~TabbedButtonBar();
 
-	void setOrientation (const Orientation orientation);
+	void setOrientation (Orientation orientation);
 
 	Orientation getOrientation() const throw()			  { return orientation; }
 
@@ -23827,35 +23852,33 @@ public:
 				 const Colour& tabBackgroundColour,
 				 int insertIndex = -1);
 
-	void setTabName (const int tabIndex,
+	void setTabName (int tabIndex,
 					 const String& newName);
 
-	void removeTab (const int tabIndex);
+	void removeTab (int tabIndex);
 
-	void moveTab (const int currentIndex,
-				  const int newIndex);
+	void moveTab (int currentIndex, int newIndex);
 
 	int getNumTabs() const;
 
 	const StringArray getTabNames() const;
 
-	void setCurrentTabIndex (int newTabIndex, const bool sendChangeMessage = true);
+	void setCurrentTabIndex (int newTabIndex, bool sendChangeMessage = true);
 
 	const String& getCurrentTabName() const throw()			 { return tabs [currentTabIndex]; }
 
 	int getCurrentTabIndex() const throw()				  { return currentTabIndex; }
 
-	TabBarButton* getTabButton (const int index) const;
+	TabBarButton* getTabButton (int index) const;
 
-	virtual void currentTabChanged (const int newCurrentTabIndex,
+	virtual void currentTabChanged (int newCurrentTabIndex,
 									const String& newCurrentTabName);
 
-	virtual void popupMenuClickOnTab (const int tabIndex,
-									  const String& tabName);
+	virtual void popupMenuClickOnTab (int tabIndex, const String& tabName);
 
-	const Colour getTabBackgroundColour (const int tabIndex);
+	const Colour getTabBackgroundColour (int tabIndex);
 
-	void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
+	void setTabBackgroundColour (int tabIndex, const Colour& newColour);
 
 	enum ColourIds
 	{
@@ -23876,8 +23899,7 @@ public:
 
 protected:
 
-	virtual TabBarButton* createTabButton (const String& tabName,
-										   const int tabIndex);
+	virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
 private:
 	Orientation orientation;
@@ -23899,46 +23921,45 @@ class JUCE_API  TabbedComponent  : public Component
 {
 public:
 
-	explicit TabbedComponent (const TabbedButtonBar::Orientation orientation);
+	explicit TabbedComponent (TabbedButtonBar::Orientation orientation);
 
 	~TabbedComponent();
 
-	void setOrientation (const TabbedButtonBar::Orientation orientation);
+	void setOrientation (TabbedButtonBar::Orientation orientation);
 
 	TabbedButtonBar::Orientation getOrientation() const throw();
 
-	void setTabBarDepth (const int newDepth);
+	void setTabBarDepth (int newDepth);
 
 	int getTabBarDepth() const throw()			  { return tabDepth; }
 
-	void setOutline (const int newThickness);
+	void setOutline (int newThickness);
 
-	void setIndent (const int indentThickness);
+	void setIndent (int indentThickness);
 
 	void clearTabs();
 
 	void addTab (const String& tabName,
 				 const Colour& tabBackgroundColour,
-				 Component* const contentComponent,
-				 const bool deleteComponentWhenNotNeeded,
-				 const int insertIndex = -1);
+				 Component* contentComponent,
+				 bool deleteComponentWhenNotNeeded,
+				 int insertIndex = -1);
 
-	void setTabName (const int tabIndex,
-					 const String& newName);
+	void setTabName (int tabIndex, const String& newName);
 
-	void removeTab (const int tabIndex);
+	void removeTab (int tabIndex);
 
 	int getNumTabs() const;
 
 	const StringArray getTabNames() const;
 
-	Component* getTabContentComponent (const int tabIndex) const throw();
+	Component* getTabContentComponent (int tabIndex) const throw();
 
-	const Colour getTabBackgroundColour (const int tabIndex) const throw();
+	const Colour getTabBackgroundColour (int tabIndex) const throw();
 
-	void setTabBackgroundColour (const int tabIndex, const Colour& newColour);
+	void setTabBackgroundColour (int tabIndex, const Colour& newColour);
 
-	void setCurrentTabIndex (const int newTabIndex, const bool sendChangeMessage = true);
+	void setCurrentTabIndex (int newTabIndex, bool sendChangeMessage = true);
 
 	int getCurrentTabIndex() const;
 
@@ -23946,10 +23967,10 @@ public:
 
 	Component* getCurrentContentComponent() const throw()	   { return panelComponent; }
 
-	virtual void currentTabChanged (const int newCurrentTabIndex,
+	virtual void currentTabChanged (int newCurrentTabIndex,
 									const String& newCurrentTabName);
 
-	virtual void popupMenuClickOnTab (const int tabIndex,
+	virtual void popupMenuClickOnTab (int tabIndex,
 									  const String& tabName);
 
 	TabbedButtonBar& getTabbedButtonBar() const throw()		 { return *tabs; }
@@ -23971,8 +23992,7 @@ protected:
 
 	TabbedButtonBar* tabs;
 
-	virtual TabBarButton* createTabButton (const String& tabName,
-										   const int tabIndex);
+	virtual TabBarButton* createTabButton (const String& tabName, int tabIndex);
 
 private:
 
@@ -23982,7 +24002,7 @@ private:
 	int outlineThickness, edgeIndent;
 
 	friend class TabCompButtonBar;
-	void changeCallback (const int newCurrentTabIndex, const String& newTabName);
+	void changeCallback (int newCurrentTabIndex, const String& newTabName);
 
 	TabbedComponent (const TabbedComponent&);
 	TabbedComponent& operator= (const TabbedComponent&);
@@ -24244,18 +24264,18 @@ public:
 
 	~MultiDocumentPanel();
 
-	bool closeAllDocuments (const bool checkItsOkToCloseFirst);
+	bool closeAllDocuments (bool checkItsOkToCloseFirst);
 
-	bool addDocument (Component* const component,
+	bool addDocument (Component* component,
 					  const Colour& backgroundColour,
-					  const bool deleteWhenRemoved);
+					  bool deleteWhenRemoved);
 
 	bool closeDocument (Component* component,
-						const bool checkItsOkToCloseFirst);
+						bool checkItsOkToCloseFirst);
 
 	int getNumDocuments() const throw();
 
-	Component* getDocument (const int index) const throw();
+	Component* getDocument (int index) const throw();
 
 	Component* getActiveDocument() const throw();
 
@@ -24263,9 +24283,9 @@ public:
 
 	virtual void activeDocumentChanged();
 
-	void setMaximumNumDocuments (const int maximumNumDocuments);
+	void setMaximumNumDocuments (int maximumNumDocuments);
 
-	void useFullscreenWhenOneDocument (const bool shouldUseTabs);
+	void useFullscreenWhenOneDocument (bool shouldUseTabs);
 
 	bool isFullscreenWhenOneDocument() const throw();
 
@@ -24275,7 +24295,7 @@ public:
 		MaximisedWindowsWithTabs	/**< In this mode, a TabbedComponent is used to show one document at a time. */
 	};
 
-	void setLayoutMode (const LayoutMode newLayoutMode);
+	void setLayoutMode (LayoutMode newLayoutMode);
 
 	LayoutMode getLayoutMode() const throw()				{ return mode; }
 
@@ -24337,31 +24357,31 @@ public:
 
 	~StretchableLayoutManager();
 
-	void setItemLayout (const int itemIndex,
-						const double minimumSize,
-						const double maximumSize,
-						const double preferredSize);
+	void setItemLayout (int itemIndex,
+						double minimumSize,
+						double maximumSize,
+						double preferredSize);
 
-	bool getItemLayout (const int itemIndex,
+	bool getItemLayout (int itemIndex,
 						double& minimumSize,
 						double& maximumSize,
 						double& preferredSize) const;
 
 	void clearAllItems();
 
-	void layOutComponents (Component** const components,
+	void layOutComponents (Component** components,
 						   int numComponents,
 						   int x, int y, int width, int height,
-						   const bool vertically,
-						   const bool resizeOtherDimension);
+						   bool vertically,
+						   bool resizeOtherDimension);
 
-	int getItemCurrentPosition (const int itemIndex) const;
+	int getItemCurrentPosition (int itemIndex) const;
 
-	int getItemCurrentAbsoluteSize (const int itemIndex) const;
+	int getItemCurrentAbsoluteSize (int itemIndex) const;
 
-	double getItemCurrentRelativeSize (const int itemIndex) const;
+	double getItemCurrentRelativeSize (int itemIndex) const;
 
-	void setItemPosition (const int itemIndex,
+	void setItemPosition (int itemIndex,
 						  int newPosition);
 
 	juce_UseDebuggingNewOperator
@@ -24378,19 +24398,11 @@ private:
 	int totalSize;
 
 	static int sizeToRealSize (double size, int totalSpace);
-
-	ItemLayoutProperties* getInfoFor (const int itemIndex) const;
-
-	void setTotalSize (const int newTotalSize);
-
-	int fitComponentsIntoSpace (const int startIndex,
-								const int endIndex,
-								const int availableSpace,
-								int startPos);
-
-	int getMinimumSizeOfItems (const int startIndex, const int endIndex) const;
-	int getMaximumSizeOfItems (const int startIndex, const int endIndex) const;
-
+	ItemLayoutProperties* getInfoFor (int itemIndex) const;
+	void setTotalSize (int newTotalSize);
+	int fitComponentsIntoSpace (int startIndex, int endIndex, int availableSpace, int startPos);
+	int getMinimumSizeOfItems (int startIndex, int endIndex) const;
+	int getMaximumSizeOfItems (int startIndex, int endIndex) const;
 	void updatePrefSizesToMatchCurrentPositions();
 
 	StretchableLayoutManager (const StretchableLayoutManager&);
@@ -24412,9 +24424,9 @@ class JUCE_API  StretchableLayoutResizerBar  : public Component
 {
 public:
 
-	StretchableLayoutResizerBar (StretchableLayoutManager* const layoutToUse,
-								 const int itemIndexInLayout,
-								 const bool isBarVertical);
+	StretchableLayoutResizerBar (StretchableLayoutManager* layoutToUse,
+								 int itemIndexInLayout,
+								 bool isBarVertical);
 
 	~StretchableLayoutResizerBar();
 
@@ -24454,16 +24466,16 @@ public:
 
 	~StretchableObjectResizer();
 
-	void addItem (const double currentSize,
-				  const double minSize,
-				  const double maxSize,
-				  const int order = 0);
+	void addItem (double currentSize,
+				  double minSize,
+				  double maxSize,
+				  int order = 0);
 
-	void resizeToFit (const double targetSize);
+	void resizeToFit (double targetSize);
 
 	int getNumItems() const throw()			 { return items.size(); }
 
-	double getItemSize (const int index) const throw();
+	double getItemSize (int index) const throw();
 
 	juce_UseDebuggingNewOperator
 
@@ -26630,10 +26642,10 @@ class JUCE_API  OpenGLPixelFormat
 {
 public:
 
-	OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
-					   const int alphaBits = 8,
-					   const int depthBufferBits = 16,
-					   const int stencilBufferBits = 0);
+	OpenGLPixelFormat (int bitsPerRGBComponent = 8,
+					   int alphaBits = 8,
+					   int depthBufferBits = 16,
+					   int stencilBufferBits = 0);
 
 	OpenGLPixelFormat (const OpenGLPixelFormat&);
 	OpenGLPixelFormat& operator= (const OpenGLPixelFormat&);
@@ -26672,7 +26684,7 @@ public:
 
 	virtual void swapBuffers() = 0;
 
-	virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
+	virtual bool setSwapInterval (int numFramesPerSwap) = 0;
 
 	virtual int getSwapInterval() const = 0;
 

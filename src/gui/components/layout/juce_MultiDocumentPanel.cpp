@@ -101,7 +101,7 @@ public:
     {
     }
 
-    void currentTabChanged (const int, const String&)
+    void currentTabChanged (int, const String&)
     {
         // (unable to use the syntax findParentComponentOfClass <MultiDocumentPanel> () because of a VC6 compiler bug)
         MultiDocumentPanel* const owner = findParentComponentOfClass ((MultiDocumentPanel*) 0);

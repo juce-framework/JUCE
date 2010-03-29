@@ -47,10 +47,10 @@ public:
         The default constructor just initialises the object as a simple 8-bit
         RGBA format.
     */
-    OpenGLPixelFormat (const int bitsPerRGBComponent = 8,
-                       const int alphaBits = 8,
-                       const int depthBufferBits = 16,
-                       const int stencilBufferBits = 0);
+    OpenGLPixelFormat (int bitsPerRGBComponent = 8,
+                       int alphaBits = 8,
+                       int depthBufferBits = 16,
+                       int stencilBufferBits = 0);
 
     OpenGLPixelFormat (const OpenGLPixelFormat&);
     OpenGLPixelFormat& operator= (const OpenGLPixelFormat&);
@@ -117,7 +117,7 @@ public:
 
         Returns true if it sets the value successfully.
     */
-    virtual bool setSwapInterval (const int numFramesPerSwap) = 0;
+    virtual bool setSwapInterval (int numFramesPerSwap) = 0;
 
     /** Returns the current swap-sync interval.
         See setSwapInterval() for info about the value returned.

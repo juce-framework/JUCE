@@ -118,7 +118,7 @@ public:
 
         @see closeDocument
     */
-    bool closeAllDocuments (const bool checkItsOkToCloseFirst);
+    bool closeAllDocuments (bool checkItsOkToCloseFirst);
 
     /** Adds a document component to the panel.
 
@@ -137,9 +137,9 @@ public:
                                     or closeAllDocuments(), then it will be deleted. If false, then
                                     the caller must handle the component's deletion
     */
-    bool addDocument (Component* const component,
+    bool addDocument (Component* component,
                       const Colour& backgroundColour,
-                      const bool deleteWhenRemoved);
+                      bool deleteWhenRemoved);
 
     /** Closes one of the documents.
 
@@ -156,7 +156,7 @@ public:
         @see addDocument, closeAllDocuments
     */
     bool closeDocument (Component* component,
-                        const bool checkItsOkToCloseFirst);
+                        bool checkItsOkToCloseFirst);
 
     /** Returns the number of open document windows.
 
@@ -171,7 +171,7 @@ public:
 
         @see getNumDocuments
     */
-    Component* getDocument (const int index) const throw();
+    Component* getDocument (int index) const throw();
 
     /** Returns the document component that is currently focused or on top.
 
@@ -198,7 +198,7 @@ public:
         If this is zero or less there's no limit (the default). addDocument() will fail
         if this number is exceeded.
     */
-    void setMaximumNumDocuments (const int maximumNumDocuments);
+    void setMaximumNumDocuments (int maximumNumDocuments);
 
     /** Sets an option to make the document fullscreen if there's only one document open.
 
@@ -207,7 +207,7 @@ public:
         will always be shown, even if there's only one document. If there's more than
         one document open, then this option makes no difference.
     */
-    void useFullscreenWhenOneDocument (const bool shouldUseTabs);
+    void useFullscreenWhenOneDocument (bool shouldUseTabs);
 
     /** Returns the result of the last time useFullscreenWhenOneDocument() was called.
     */
@@ -225,7 +225,7 @@ public:
 
         @see LayoutMode, getLayoutMode
     */
-    void setLayoutMode (const LayoutMode newLayoutMode);
+    void setLayoutMode (LayoutMode newLayoutMode);
 
     /** Returns the current layout mode. */
     LayoutMode getLayoutMode() const throw()                            { return mode; }

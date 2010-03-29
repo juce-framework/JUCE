@@ -174,9 +174,9 @@ public:
     */
     static int getMACAddresses (int64* addresses, int maxNum,
 #if JUCE_MAC
-                                const bool littleEndian = true);
+                                bool littleEndian = true);
 #else
-                                const bool littleEndian = false);
+                                bool littleEndian = false);
 #endif
 
     /** Returns a list of MAC addresses found on this machine.

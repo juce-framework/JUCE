@@ -61,8 +61,8 @@ public:
 
         @see ComponentBoundsConstrainer
     */
-    ResizableCornerComponent (Component* const componentToResize,
-                              ComponentBoundsConstrainer* const constrainer);
+    ResizableCornerComponent (Component* componentToResize,
+                              ComponentBoundsConstrainer* constrainer);
 
     /** Destructor. */
     ~ResizableCornerComponent();

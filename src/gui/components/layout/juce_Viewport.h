@@ -72,7 +72,7 @@ public:
                                         by the Viewport when it's no longer needed
         @see getViewedComponent
     */
-    void setViewedComponent (Component* const newViewedComponent);
+    void setViewedComponent (Component* newViewedComponent);
 
     /** Returns the component that's currently being used inside the Viewport.
 
@@ -91,8 +91,7 @@ public:
 
         @see getViewPositionX, getViewPositionY, setViewPositionProportionately
     */
-    void setViewPosition (const int xPixelsOffset,
-                          const int yPixelsOffset);
+    void setViewPosition (int xPixelsOffset, int yPixelsOffset);
 
     /** Changes the view position as a proportion of the distance it can move.
 
@@ -101,8 +100,7 @@ public:
         to the right as it's possible to go whilst keeping the child component
         on-screen.
     */
-    void setViewPositionProportionately (const double proportionX,
-                                         const double proportionY);
+    void setViewPositionProportionately (double proportionX, double proportionY);
 
     /** If the specified position is at the edges of the viewport, this method scrolls
         the viewport to bring that position nearer to the centre.
@@ -174,8 +172,8 @@ public:
         If set to false, the scrollbars won't ever appear. When true (the default)
         they will appear only when needed.
     */
-    void setScrollBarsShown (const bool showVerticalScrollbarIfNeeded,
-                             const bool showHorizontalScrollbarIfNeeded);
+    void setScrollBarsShown (bool showVerticalScrollbarIfNeeded,
+                             bool showHorizontalScrollbarIfNeeded);
 
     /** True if the vertical scrollbar is enabled.
         @see setScrollBarsShown
@@ -193,7 +191,7 @@ public:
 
         @see LookAndFeel::getDefaultScrollbarWidth
     */
-    void setScrollBarThickness (const int thickness);
+    void setScrollBarThickness (int thickness);
 
     /** Returns the thickness of the scrollbars.
 
@@ -204,13 +202,13 @@ public:
     /** Changes the distance that a single-step click on a scrollbar button
         will move the viewport.
     */
-    void setSingleStepSizes (const int stepX, const int stepY);
+    void setSingleStepSizes (int stepX, int stepY);
 
     /** Shows or hides the buttons on any scrollbars that are used.
 
         @see ScrollBar::setButtonVisibility
     */
-    void setScrollBarButtonVisibility (const bool buttonsVisible);
+    void setScrollBarButtonVisibility (bool buttonsVisible);
 
     /** Returns a pointer to the scrollbar component being used.
 

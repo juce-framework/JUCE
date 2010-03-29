@@ -300,6 +300,37 @@ inline int roundFloatToInt (const float value) throw()
     return roundToInt (value);
 }
 
+//==============================================================================
+/** The namespace contains a few template classes for helping work out class type variations.
+*/
+namespace TypeHelpers
+{
+    /** The ParameterType struct is used to find the best type to use when passing some kind
+        of object as a parameter.
+
+        E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename TypeHelpers::ParameterType<MyObject>::type)"
+        would evaluate to "myfunction (int, const MyObject&)", keeping primitive types passed-by-value, but passing
+        objects as a const reference, to avoid copying. Of course, this is only useful in certain esoteric
+        template situations.
+    */
+    template <typename Type> struct ParameterType                   { typedef const Type& type; };
+    template <typename Type> struct ParameterType <Type&>           { typedef Type& type; };
+    template <typename Type> struct ParameterType <Type*>           { typedef Type* type; };
+    template <>              struct ParameterType <char>            { typedef char type; };
+    template <>              struct ParameterType <unsigned char>   { typedef unsigned char type; };
+    template <>              struct ParameterType <short>           { typedef short type; };
+    template <>              struct ParameterType <unsigned short>  { typedef unsigned short type; };
+    template <>              struct ParameterType <int>             { typedef int type; };
+    template <>              struct ParameterType <unsigned int>    { typedef unsigned int type; };
+    template <>              struct ParameterType <long>            { typedef long type; };
+    template <>              struct ParameterType <unsigned long>   { typedef unsigned long type; };
+    template <>              struct ParameterType <int64>           { typedef int64 type; };
+    template <>              struct ParameterType <uint64>          { typedef uint64 type; };
+    template <>              struct ParameterType <bool>            { typedef bool type; };
+    template <>              struct ParameterType <float>           { typedef float type; };
+    template <>              struct ParameterType <double>          { typedef double type; };
+}
+
 
 //==============================================================================
 

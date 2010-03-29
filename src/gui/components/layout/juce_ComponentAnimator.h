@@ -86,11 +86,11 @@ public:
                                     To move the component at a constant rate for its entire
                                     animation, set both the start and end speeds to 1.0
     */
-    void animateComponent (Component* const component,
+    void animateComponent (Component* component,
                            const Rectangle<int>& finalPosition,
-                           const int millisecondsToSpendMoving,
-                           const double startSpeed = 1.0,
-                           const double endSpeed = 1.0);
+                           int millisecondsToSpendMoving,
+                           double startSpeed = 1.0,
+                           double endSpeed = 1.0);
 
     /** Stops a component if it's currently being animated.
 
@@ -98,8 +98,8 @@ public:
         be immediately moved to its destination position and size. If false, it will be
         left in whatever location it currently occupies.
     */
-    void cancelAnimation (Component* const component,
-                          const bool moveComponentToItsFinalPosition);
+    void cancelAnimation (Component* component,
+                          bool moveComponentToItsFinalPosition);
 
     /** Clears all of the active animations.
 
@@ -107,7 +107,7 @@ public:
         be immediately set to their final positions. If false, they will be
         left in whatever locations they currently occupy.
     */
-    void cancelAllAnimations (const bool moveComponentsToTheirFinalPositions);
+    void cancelAllAnimations (bool moveComponentsToTheirFinalPositions);
 
     /** Returns the destination position for a component.
 
@@ -117,7 +117,7 @@ public:
         If the specified component isn't currently being animated, this method will just
         return its current position.
     */
-    const Rectangle<int> getComponentDestination (Component* const component);
+    const Rectangle<int> getComponentDestination (Component* component);
 
     /** Returns true if the specified component is currently being animated.
     */
@@ -130,7 +130,7 @@ private:
     VoidArray tasks;
     uint32 lastTime;
 
-    void* findTaskFor (Component* const component) const;
+    void* findTaskFor (Component* component) const;
     void timerCallback();
 };
 

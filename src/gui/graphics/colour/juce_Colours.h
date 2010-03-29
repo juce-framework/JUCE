@@ -104,6 +104,8 @@ private:
     // this isn't a class you should ever instantiate - it's just here for the
     // static values in it.
     Colours();
+    Colours (const Colours&);
+    Colours& operator= (const Colours&);
 };
 
 #endif   // __JUCE_COLOURS_JUCEHEADER__
