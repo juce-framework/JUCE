@@ -52,10 +52,10 @@ public:
 
     //==============================================================================
     /** Changes the text that's shown at the top of the component. */
-    void setText (const String& newText) throw();
+    void setText (const String& newText);
 
     /** Returns the currently displayed text label. */
-    const String getText() const throw();
+    const String getText() const;
 
     /** Sets the positioning of the text label.
 

@@ -4857,6 +4857,11 @@ public:
 		return Range (newStart, jmax (newStart, end));
 	}
 
+	const Range movedToStartAt (const ValueType newStart) const throw()
+	{
+		return Range (newStart, newStart + getLength());
+	}
+
 	void setEnd (const ValueType newEnd) throw()
 	{
 		end = newEnd;
@@ -4867,6 +4872,11 @@ public:
 	const Range withEnd (const ValueType newEnd) const throw()
 	{
 		return Range (jmin (start, newEnd), newEnd);
+	}
+
+	const Range movedToEndAt (const ValueType newEnd) const throw()
+	{
+		return Range (newEnd - getLength(), newEnd);
 	}
 
 	void setLength (const ValueType newLength) throw()
@@ -4903,6 +4913,9 @@ public:
 		return Range (start - amountToSubtract, end - amountToSubtract);
 	}
 
+	bool operator== (const Range& other) const throw()	  { return start == other.start && end == other.end; }
+	bool operator!= (const Range& other) const throw()	  { return start != other.start || end != other.end; }
+
 	bool contains (const ValueType position) const throw()
 	{
 		return position >= start && position < end;
@@ -4928,6 +4941,14 @@ public:
 	{
 		return Range (jmin (start, other.start),
 					  jmax (end, other.end));
+	}
+
+	const Range constrainRange (const Range& rangeToConstrain) const throw()
+	{
+		const ValueType otherLen = rangeToConstrain.getLength();
+		return otherLen >= getLength()
+				? *this
+				: rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
 	}
 
 	juce_UseDebuggingNewOperator
@@ -9735,13 +9756,13 @@ public:
 
 	bool isKeyCode (int keyCodeToCompare) const throw()	 { return keyCode == keyCodeToCompare; }
 
-	static const KeyPress createFromDescription (const String& textVersion) throw();
+	static const KeyPress createFromDescription (const String& textVersion);
 
-	const String getTextDescription() const throw();
+	const String getTextDescription() const;
 
-	bool isCurrentlyDown() const throw();
+	bool isCurrentlyDown() const;
 
-	static bool isKeyCurrentlyDown (int keyCode) throw();
+	static bool isKeyCurrentlyDown (int keyCode);
 
 	// Key codes
 	//
@@ -16082,41 +16103,47 @@ public:
 
 	bool isVertical() const throw()				 { return vertical; }
 
-	void setOrientation (bool shouldBeVertical) throw();
+	void setOrientation (bool shouldBeVertical);
 
 	void setButtonVisibility (bool buttonsAreVisible);
 
 	void setAutoHide (bool shouldHideWhenFullRange);
 
-	void setRangeLimits (double minimum,
-						 double maximum) throw();
+	void setRangeLimits (const Range<double>& newRangeLimit);
 
-	double getMinimumRangeLimit() const throw()			 { return minimum; }
+	void setRangeLimits (double minimum, double maximum);
 
-	double getMaximumRangeLimit() const throw()			 { return maximum; }
+	const Range<double> getRangeLimit() const throw()		   { return totalRange; }
 
-	void setCurrentRange (double newStart,
-						  double newSize) throw();
+	double getMinimumRangeLimit() const throw()			 { return totalRange.getStart(); }
 
-	void setCurrentRangeStart (double newStart) throw();
+	double getMaximumRangeLimit() const throw()			 { return totalRange.getEnd(); }
 
-	double getCurrentRangeStart() const throw()			 { return rangeStart; }
+	void setCurrentRange (const Range<double>& newRange);
 
-	double getCurrentRangeSize() const throw()			  { return rangeSize; }
+	void setCurrentRange (double newStart, double newSize);
 
-	void setSingleStepSize (double newSingleStepSize) throw();
+	void setCurrentRangeStart (double newStart);
 
-	void moveScrollbarInSteps (int howManySteps) throw();
+	const Range<double> getCurrentRange() const throw()		 { return visibleRange; }
 
-	void moveScrollbarInPages (int howManyPages) throw();
+	double getCurrentRangeStart() const throw()			 { return visibleRange.getStart(); }
 
-	void scrollToTop() throw();
+	double getCurrentRangeSize() const throw()			  { return visibleRange.getLength(); }
 
-	void scrollToBottom() throw();
+	void setSingleStepSize (double newSingleStepSize);
+
+	void moveScrollbarInSteps (int howManySteps);
+
+	void moveScrollbarInPages (int howManyPages);
+
+	void scrollToTop();
+
+	void scrollToBottom();
 
 	void setButtonRepeatSpeed (int initialDelayInMillisecs,
 							   int repeatDelayInMillisecs,
-							   int minimumDelayInMillisecs = -1) throw();
+							   int minimumDelayInMillisecs = -1);
 
 	enum ColourIds
 	{
@@ -16125,9 +16152,9 @@ public:
 		trackColourId		   = 0x1000401	 /**< A base colour to use for the slot area of the bar. The look and feel will probably use variations on this colour. */
 	};
 
-	void addListener (ScrollBarListener* listener) throw();
+	void addListener (ScrollBarListener* listener);
 
-	void removeListener (ScrollBarListener* listener) throw();
+	void removeListener (ScrollBarListener* listener);
 
 	bool keyPressed (const KeyPress& key);
 	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
@@ -16143,8 +16170,7 @@ public:
 
 private:
 
-	double minimum, maximum;
-	double rangeStart, rangeSize;
+	Range <double> totalRange, visibleRange;
 	double singleStepSize, dragStartRange;
 	int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
 	int dragStartMousePos, lastMousePos;
@@ -16154,7 +16180,7 @@ private:
 	Button* downButton;
 	ListenerList <ScrollBarListener> listeners;
 
-	void updateThumbPosition() throw();
+	void updateThumbPosition();
 	void timerCallback();
 
 	ScrollBar (const ScrollBar&);
@@ -22337,9 +22363,9 @@ public:
 
 	virtual void scrollToTop() = 0;
 
-	void addListener (FileBrowserListener* listener) throw();
+	void addListener (FileBrowserListener* listener);
 
-	void removeListener (FileBrowserListener* listener) throw();
+	void removeListener (FileBrowserListener* listener);
 
 	enum ColourIds
 	{
@@ -22452,9 +22478,9 @@ public:
 
 	bool isSaveMode() const throw();
 
-	void addListener (FileBrowserListener* listener) throw();
+	void addListener (FileBrowserListener* listener);
 
-	void removeListener (FileBrowserListener* listener) throw();
+	void removeListener (FileBrowserListener* listener);
 
 	void resized();
 	void buttonClicked (Button* b);
@@ -23271,7 +23297,7 @@ public:
 
 	void setFilenameIsEditable (bool shouldBeEditable);
 
-	void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+	void setDefaultBrowseTarget (const File& newDefaultDirectory);
 
 	const StringArray getRecentlyUsedFilenames() const;
 
@@ -23283,9 +23309,9 @@ public:
 
 	void setBrowseButtonText (const String& browseButtonText);
 
-	void addListener (FilenameComponentListener* listener) throw();
+	void addListener (FilenameComponentListener* listener);
 
-	void removeListener (FilenameComponentListener* listener) throw();
+	void removeListener (FilenameComponentListener* listener);
 
 	void setTooltip (const String& newTooltip);
 
@@ -23348,7 +23374,7 @@ public:
 
 	void setPath (const FileSearchPath& newPath);
 
-	void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+	void setDefaultBrowseTarget (const File& newDefaultDirectory);
 
 	enum ColourIds
 	{
@@ -23382,8 +23408,8 @@ private:
 	Button* upButton;
 	Button* downButton;
 
-	void changed() throw();
-	void updateButtons() throw();
+	void changed();
+	void updateButtons();
 
 	FileSearchPathListComponent (const FileSearchPathListComponent&);
 	FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);
@@ -23415,7 +23441,7 @@ public:
 
 	void scrollToTop();
 
-	void setDragAndDropDescription (const String& description) throw();
+	void setDragAndDropDescription (const String& description);
 
 	const String& getDragAndDropDescription() const throw()	  { return dragAndDropDescription; }
 
@@ -23495,8 +23521,8 @@ public:
 private:
 	StringArray fileWildcards, directoryWildcards;
 
-	static void parse (const String& pattern, StringArray& result) throw();
-	static bool match (const File& file, const StringArray& wildcards) throw();
+	static void parse (const String& pattern, StringArray& result);
+	static bool match (const File& file, const StringArray& wildcards);
 };
 
 #endif   // __JUCE_WILDCARDFILEFILTER_JUCEHEADER__
@@ -23536,35 +23562,33 @@ class JUCE_API  KeyPressMappingSet  : public KeyListener,
 {
 public:
 
-	explicit KeyPressMappingSet (ApplicationCommandManager* commandManager) throw();
+	explicit KeyPressMappingSet (ApplicationCommandManager* commandManager);
 
-	KeyPressMappingSet (const KeyPressMappingSet& other) throw();
+	KeyPressMappingSet (const KeyPressMappingSet& other);
 
 	~KeyPressMappingSet();
 
 	ApplicationCommandManager* getCommandManager() const throw()	{ return commandManager; }
 
-	const Array <KeyPress> getKeyPressesAssignedToCommand (CommandID commandID) const throw();
+	const Array <KeyPress> getKeyPressesAssignedToCommand (CommandID commandID) const;
 
 	void addKeyPress (CommandID commandID,
 					  const KeyPress& newKeyPress,
-					  int insertIndex = -1) throw();
+					  int insertIndex = -1);
 
-	void resetToDefaultMappings() throw();
+	void resetToDefaultMappings();
 
-	void resetToDefaultMapping (CommandID commandID) throw();
+	void resetToDefaultMapping (CommandID commandID);
 
-	void clearAllKeyPresses() throw();
+	void clearAllKeyPresses();
 
-	void clearAllKeyPresses (CommandID commandID) throw();
+	void clearAllKeyPresses (CommandID commandID);
 
-	void removeKeyPress (CommandID commandID,
-						 int keyPressIndex) throw();
+	void removeKeyPress (CommandID commandID, int keyPressIndex);
 
-	void removeKeyPress (const KeyPress& keypress) throw();
+	void removeKeyPress (const KeyPress& keypress);
 
-	bool containsMapping (CommandID commandID,
-						  const KeyPress& keyPress) const throw();
+	bool containsMapping (CommandID commandID, const KeyPress& keyPress) const throw();
 
 	CommandID findCommandForKeyPress (const KeyPress& keyPress) const throw();
 
@@ -23748,9 +23772,9 @@ public:
 
 	~GroupComponent();
 
-	void setText (const String& newText) throw();
+	void setText (const String& newText);
 
-	const String getText() const throw();
+	const String getText() const;
 
 	void setTextLabelPosition (const Justification& justification);
 

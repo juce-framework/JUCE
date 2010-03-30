@@ -56,7 +56,7 @@ bool WildcardFileFilter::isDirectorySuitable (const File& file) const
 }
 
 //==============================================================================
-void WildcardFileFilter::parse (const String& pattern, StringArray& result) throw()
+void WildcardFileFilter::parse (const String& pattern, StringArray& result)
 {
     result.addTokens (pattern.toLowerCase(), ";,", "\"'");
 
@@ -70,7 +70,7 @@ void WildcardFileFilter::parse (const String& pattern, StringArray& result) thro
             result.set (i, "*");
 }
 
-bool WildcardFileFilter::match (const File& file, const StringArray& wildcards) throw()
+bool WildcardFileFilter::match (const File& file, const StringArray& wildcards)
 {
     const String filename (file.getFileName());
 

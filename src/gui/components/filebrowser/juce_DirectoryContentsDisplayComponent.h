@@ -41,8 +41,7 @@ class JUCE_API  DirectoryContentsDisplayComponent
 {
 public:
     //==============================================================================
-    /**
-    */
+    /** Creates a DirectoryContentsDisplayComponent for a given list of files. */
     DirectoryContentsDisplayComponent (DirectoryContentsList& listToShow);
 
     /** Destructor. */
@@ -65,16 +64,14 @@ public:
 
     //==============================================================================
     /** Adds a listener to be told when files are selected or clicked.
-
         @see removeListener
     */
-    void addListener (FileBrowserListener* listener) throw();
+    void addListener (FileBrowserListener* listener);
 
     /** Removes a listener.
-
         @see addListener
     */
-    void removeListener (FileBrowserListener* listener) throw();
+    void removeListener (FileBrowserListener* listener);
 
 
     //==============================================================================

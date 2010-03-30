@@ -45,12 +45,12 @@ FileBrowserListener::~FileBrowserListener()
 {
 }
 
-void DirectoryContentsDisplayComponent::addListener (FileBrowserListener* const listener) throw()
+void DirectoryContentsDisplayComponent::addListener (FileBrowserListener* const listener)
 {
     listeners.add (listener);
 }
 
-void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* const listener) throw()
+void DirectoryContentsDisplayComponent::removeListener (FileBrowserListener* const listener)
 {
     listeners.remove (listener);
 }

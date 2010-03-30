@@ -50,7 +50,7 @@ namespace KeyboardFocusHelpers
     public:
         ScreenPositionComparator() {}
 
-        static int compareElements (const Component* const first, const Component* const second) throw()
+        static int compareElements (const Component* const first, const Component* const second)
         {
             int explicitOrder1 = first->getExplicitFocusOrder();
             if (explicitOrder1 <= 0)
@@ -100,7 +100,7 @@ namespace KeyboardFocusHelpers
     }
 }
 
-static Component* getIncrementedComponent (Component* const current, const int delta) throw()
+static Component* getIncrementedComponent (Component* const current, const int delta)
 {
     Component* focusContainer = current->getParentComponent();
 

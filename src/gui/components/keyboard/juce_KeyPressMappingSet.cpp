@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_) throw()
+KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const commandManager_)
     : commandManager (commandManager_)
 {
     // A manager is needed to get the descriptions of commands, and will be called when
@@ -44,7 +44,7 @@ KeyPressMappingSet::KeyPressMappingSet (ApplicationCommandManager* const command
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
-KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other) throw()
+KeyPressMappingSet::KeyPressMappingSet (const KeyPressMappingSet& other)
     : commandManager (other.commandManager)
 {
     Desktop::getInstance().addFocusChangeListener (this);
@@ -56,7 +56,7 @@ KeyPressMappingSet::~KeyPressMappingSet()
 }
 
 //==============================================================================
-const Array <KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const CommandID commandID) const throw()
+const Array <KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const CommandID commandID) const
 {
     for (int i = 0; i < mappings.size(); ++i)
         if (mappings.getUnchecked(i)->commandID == commandID)
@@ -67,7 +67,7 @@ const Array <KeyPress> KeyPressMappingSet::getKeyPressesAssignedToCommand (const
 
 void KeyPressMappingSet::addKeyPress (const CommandID commandID,
                                       const KeyPress& newKeyPress,
-                                      int insertIndex) throw()
+                                      int insertIndex)
 {
     // If you specify an upper-case letter but no shift key, how is the user supposed to press it!?
     // Stick to lower-case letters when defining a keypress, to avoid ambiguity.
@@ -107,7 +107,7 @@ void KeyPressMappingSet::addKeyPress (const CommandID commandID,
     }
 }
 
-void KeyPressMappingSet::resetToDefaultMappings() throw()
+void KeyPressMappingSet::resetToDefaultMappings()
 {
     mappings.clear();
 
@@ -125,7 +125,7 @@ void KeyPressMappingSet::resetToDefaultMappings() throw()
     sendChangeMessage (this);
 }
 
-void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID) throw()
+void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID)
 {
     clearAllKeyPresses (commandID);
 
@@ -138,7 +138,7 @@ void KeyPressMappingSet::resetToDefaultMapping (const CommandID commandID) throw
     }
 }
 
-void KeyPressMappingSet::clearAllKeyPresses() throw()
+void KeyPressMappingSet::clearAllKeyPresses()
 {
     if (mappings.size() > 0)
     {
@@ -147,7 +147,7 @@ void KeyPressMappingSet::clearAllKeyPresses() throw()
     }
 }
 
-void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID) throw()
+void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID)
 {
     for (int i = mappings.size(); --i >= 0;)
     {
@@ -159,7 +159,7 @@ void KeyPressMappingSet::clearAllKeyPresses (const CommandID commandID) throw()
     }
 }
 
-void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress) throw()
+void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress)
 {
     if (keypress.isValid())
     {
@@ -179,8 +179,7 @@ void KeyPressMappingSet::removeKeyPress (const KeyPress& keypress) throw()
     }
 }
 
-void KeyPressMappingSet::removeKeyPress (const CommandID commandID,
-                                         const int keyPressIndex) throw()
+void KeyPressMappingSet::removeKeyPress (const CommandID commandID, const int keyPressIndex)
 {
     for (int i = mappings.size(); --i >= 0;)
     {
@@ -203,8 +202,7 @@ CommandID KeyPressMappingSet::findCommandForKeyPress (const KeyPress& keyPress) 
     return 0;
 }
 
-bool KeyPressMappingSet::containsMapping (const CommandID commandID,
-                                          const KeyPress& keyPress) const throw()
+bool KeyPressMappingSet::containsMapping (const CommandID commandID, const KeyPress& keyPress) const throw()
 {
     for (int i = mappings.size(); --i >= 0;)
         if (mappings.getUnchecked(i)->commandID == commandID)

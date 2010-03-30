@@ -47,7 +47,7 @@ public:
                       DirectoryContentsList* const parentContentsList_,
                       const int indexInContentsList_,
                       const File& file_,
-                      TimeSliceThread& thread_) throw()
+                      TimeSliceThread& thread_)
         : file (file_),
           owner (owner_),
           parentContentsList (parentContentsList_),
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    ~FileListTreeItem() throw()
+    ~FileListTreeItem()
     {
         thread.removeTimeSliceClient (this);
 
@@ -116,7 +116,7 @@ public:
         }
     }
 
-    void setSubContentsList (DirectoryContentsList* newList) throw()
+    void setSubContentsList (DirectoryContentsList* newList)
     {
         jassert (subContentsList == 0);
         subContentsList = newList;
@@ -203,7 +203,7 @@ private:
     String fileSize;
     String modTime;
 
-    void updateIcon (const bool onlyUpdateIfCached) throw()
+    void updateIcon (const bool onlyUpdateIfCached)
     {
         if (icon == 0)
         {
@@ -261,7 +261,7 @@ void FileTreeComponent::scrollToTop()
     getViewport()->getVerticalScrollBar()->setCurrentRangeStart (0);
 }
 
-void FileTreeComponent::setDragAndDropDescription (const String& description) throw()
+void FileTreeComponent::setDragAndDropDescription (const String& description)
 {
     dragAndDropDescription = description;
 }

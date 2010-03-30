@@ -74,7 +74,7 @@ public:
         The string that you pass in here will be returned by the getDragSourceDescription()
         of the items in the tree. For more info, see TreeViewItem::getDragSourceDescription().
     */
-    void setDragAndDropDescription (const String& description) throw();
+    void setDragAndDropDescription (const String& description);
 
     /** Returns the last value that was set by setDragAndDropDescription().
     */

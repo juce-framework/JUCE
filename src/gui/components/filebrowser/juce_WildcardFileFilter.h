@@ -72,8 +72,8 @@ public:
 private:
     StringArray fileWildcards, directoryWildcards;
 
-    static void parse (const String& pattern, StringArray& result) throw();
-    static bool match (const File& file, const StringArray& wildcards) throw();
+    static void parse (const String& pattern, StringArray& result);
+    static bool match (const File& file, const StringArray& wildcards);
 };
 
 

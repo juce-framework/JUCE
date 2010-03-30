@@ -89,7 +89,7 @@ FileSearchPathListComponent::~FileSearchPathListComponent()
     deleteAllChildren();
 }
 
-void FileSearchPathListComponent::updateButtons() throw()
+void FileSearchPathListComponent::updateButtons()
 {
     const bool anythingSelected = listBox->getNumSelectedRows() > 0;
 
@@ -99,7 +99,7 @@ void FileSearchPathListComponent::updateButtons() throw()
     downButton->setEnabled (anythingSelected);
 }
 
-void FileSearchPathListComponent::changed() throw()
+void FileSearchPathListComponent::changed()
 {
     listBox->updateContent();
     listBox->repaint();
@@ -116,7 +116,7 @@ void FileSearchPathListComponent::setPath (const FileSearchPath& newPath)
     }
 }
 
-void FileSearchPathListComponent::setDefaultBrowseTarget (const File& newDefaultDirectory) throw()
+void FileSearchPathListComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
 {
     defaultBrowseTarget = newDefaultDirectory;
 }

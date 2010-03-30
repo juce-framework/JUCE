@@ -38,8 +38,7 @@ class ScrollbarButton  : public Button
 public:
     int direction;
 
-    ScrollbarButton (const int direction_,
-                     ScrollBar& owner_) throw()
+    ScrollbarButton (const int direction_, ScrollBar& owner_)
         : Button (String::empty),
           direction (direction_),
           owner (owner_)
@@ -51,9 +50,7 @@ public:
     {
     }
 
-    void paintButton (Graphics& g,
-                      bool isMouseOver,
-                      bool isMouseDown)
+    void paintButton (Graphics& g, bool isMouseOver, bool isMouseDown)
     {
         getLookAndFeel()
             .drawScrollbarButton (g, owner,
@@ -82,10 +79,8 @@ private:
 //==============================================================================
 ScrollBar::ScrollBar (const bool vertical_,
                       const bool buttonsAreVisible)
-    : minimum (0.0),
-      maximum (1.0),
-      rangeStart (0.0),
-      rangeSize (0.1),
+    : totalRange (0.0, 1.0),
+      visibleRange (0.0, 0.1),
       singleStepSize (0.1),
       thumbAreaStart (0),
       thumbAreaSize (0),
@@ -112,68 +107,73 @@ ScrollBar::~ScrollBar()
 }
 
 //==============================================================================
-void ScrollBar::setRangeLimits (const double newMinimum,
-                                const double newMaximum) throw()
+void ScrollBar::setRangeLimits (const Range<double>& newRangeLimit)
 {
-    minimum = newMinimum;
-    maximum = newMaximum;
-
-    jassert (maximum >= minimum); // these can't be the wrong way round!
-
-    setCurrentRangeStart (rangeStart);
-    updateThumbPosition();
+    if (totalRange != newRangeLimit)
+    {
+        totalRange = newRangeLimit;
+        setCurrentRange (visibleRange);
+        updateThumbPosition();
+    }
 }
 
-void ScrollBar::setCurrentRange (double newStart,
-                                 double newSize) throw()
+void ScrollBar::setRangeLimits (const double newMinimum, const double newMaximum)
 {
-    newSize  = jlimit (0.0, maximum - minimum, newSize);
-    newStart = jlimit (minimum, maximum - newSize, newStart);
+    jassert (newMaximum >= newMinimum); // these can't be the wrong way round!
+    setRangeLimits (Range<double> (newMinimum, newMaximum));
+}
 
-    if (rangeStart != newStart
-         || rangeSize != newSize)
+void ScrollBar::setCurrentRange (const Range<double>& newRange)
+{
+    const Range<double> constrainedRange (totalRange.constrainRange (newRange));
+
+    if (visibleRange != constrainedRange)
     {
-        rangeStart = newStart;
-        rangeSize = newSize;
+        visibleRange = constrainedRange;
 
         updateThumbPosition();
         triggerAsyncUpdate();
     }
 }
 
-void ScrollBar::setCurrentRangeStart (double newStart) throw()
+void ScrollBar::setCurrentRange (const double newStart, const double newSize)
 {
-    setCurrentRange (newStart, rangeSize);
+    setCurrentRange (Range<double> (newStart, newStart + newSize));
 }
 
-void ScrollBar::setSingleStepSize (const double newSingleStepSize) throw()
+void ScrollBar::setCurrentRangeStart (const double newStart)
+{
+    setCurrentRange (visibleRange.movedToStartAt (newStart));
+}
+
+void ScrollBar::setSingleStepSize (const double newSingleStepSize)
 {
     singleStepSize = newSingleStepSize;
 }
 
-void ScrollBar::moveScrollbarInSteps (const int howManySteps) throw()
+void ScrollBar::moveScrollbarInSteps (const int howManySteps)
 {
-    setCurrentRangeStart (rangeStart + howManySteps * singleStepSize);
+    setCurrentRange (visibleRange + howManySteps * singleStepSize);
 }
 
-void ScrollBar::moveScrollbarInPages (const int howManyPages) throw()
+void ScrollBar::moveScrollbarInPages (const int howManyPages)
 {
-    setCurrentRangeStart (rangeStart + howManyPages * rangeSize);
+    setCurrentRange (visibleRange + howManyPages * visibleRange.getLength());
 }
 
-void ScrollBar::scrollToTop() throw()
+void ScrollBar::scrollToTop()
 {
-    setCurrentRangeStart (minimum);
+    setCurrentRange (visibleRange.movedToStartAt (getMinimumRangeLimit()));
 }
 
-void ScrollBar::scrollToBottom() throw()
+void ScrollBar::scrollToBottom()
 {
-    setCurrentRangeStart (maximum - rangeSize);
+    setCurrentRange (visibleRange.movedToEndAt (getMaximumRangeLimit()));
 }
 
 void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
                                       const int repeatDelayInMillisecs_,
-                                      const int minimumDelayInMillisecs_) throw()
+                                      const int minimumDelayInMillisecs_)
 {
     initialDelayInMillisecs = initialDelayInMillisecs_;
     repeatDelayInMillisecs = repeatDelayInMillisecs_;
@@ -187,26 +187,26 @@ void ScrollBar::setButtonRepeatSpeed (const int initialDelayInMillisecs_,
 }
 
 //==============================================================================
-void ScrollBar::addListener (ScrollBarListener* const listener) throw()
+void ScrollBar::addListener (ScrollBarListener* const listener)
 {
     listeners.add (listener);
 }
 
-void ScrollBar::removeListener (ScrollBarListener* const listener) throw()
+void ScrollBar::removeListener (ScrollBarListener* const listener)
 {
     listeners.remove (listener);
 }
 
 void ScrollBar::handleAsyncUpdate()
 {
-    listeners.call (&ScrollBarListener::scrollBarMoved, this, rangeStart);
+    listeners.call (&ScrollBarListener::scrollBarMoved, this, visibleRange.getStart());
 }
 
 //==============================================================================
-void ScrollBar::updateThumbPosition() throw()
+void ScrollBar::updateThumbPosition()
 {
-    int newThumbSize = roundToInt ((maximum > minimum) ? (rangeSize * thumbAreaSize) / (maximum - minimum)
-                                                       : thumbAreaSize);
+    int newThumbSize = roundToInt (totalRange.getLength() > 0 ? (visibleRange.getLength() * thumbAreaSize) / totalRange.getLength()
+                                                              : thumbAreaSize);
 
     if (newThumbSize < getLookAndFeel().getMinimumScrollbarThumbSize (*this))
         newThumbSize = jmin (getLookAndFeel().getMinimumScrollbarThumbSize (*this), thumbAreaSize - 1);
@@ -216,11 +216,11 @@ void ScrollBar::updateThumbPosition() throw()
 
     int newThumbStart = thumbAreaStart;
 
-    if (maximum - minimum > rangeSize)
-        newThumbStart += roundToInt (((rangeStart - minimum) * (thumbAreaSize - newThumbSize))
-                                         / ((maximum - minimum) - rangeSize));
+    if (totalRange.getLength() > visibleRange.getLength())
+        newThumbStart += roundToInt (((visibleRange.getStart() - totalRange.getStart()) * (thumbAreaSize - newThumbSize))
+                                         / (totalRange.getLength() - visibleRange.getLength()));
 
-    setVisible (alwaysVisible || (maximum - minimum > rangeSize && rangeSize > 0.0));
+    setVisible (alwaysVisible || (totalRange.getLength() > visibleRange.getLength() && visibleRange.getLength() > 0.0));
 
     if (thumbStart != newThumbStart  || thumbSize != newThumbSize)
     {
@@ -237,7 +237,7 @@ void ScrollBar::updateThumbPosition() throw()
     }
 }
 
-void ScrollBar::setOrientation (const bool shouldBeVertical) throw()
+void ScrollBar::setOrientation (const bool shouldBeVertical)
 {
     if (vertical != shouldBeVertical)
     {
@@ -351,7 +351,7 @@ void ScrollBar::mouseDown (const MouseEvent& e)
     isDraggingThumb = false;
     lastMousePos = vertical ? e.y : e.x;
     dragStartMousePos = lastMousePos;
-    dragStartRange = rangeStart;
+    dragStartRange = visibleRange.getStart();
 
     if (dragStartMousePos < thumbStart)
     {
@@ -377,7 +377,7 @@ void ScrollBar::mouseDrag (const MouseEvent& e)
         const int deltaPixels = ((vertical) ? e.y : e.x) - dragStartMousePos;
 
         setCurrentRangeStart (dragStartRange
-                                + deltaPixels * ((maximum - minimum) - rangeSize)
+                                + deltaPixels * (totalRange.getLength() - visibleRange.getLength())
                                     / (thumbAreaSize - thumbSize));
     }
     else
@@ -404,7 +404,7 @@ void ScrollBar::mouseWheelMove (const MouseEvent&,
     else if (increment > 0)
         increment = jmax (increment * 10.0f, 1.0f);
 
-    setCurrentRangeStart (rangeStart - singleStepSize * increment);
+    setCurrentRange (visibleRange - singleStepSize * increment);
 }
 
 void ScrollBar::timerCallback()
@@ -414,9 +414,9 @@ void ScrollBar::timerCallback()
         startTimer (40);
 
         if (lastMousePos < thumbStart)
-            setCurrentRangeStart (rangeStart - rangeSize);
+            setCurrentRange (visibleRange - visibleRange.getLength());
         else if (lastMousePos > thumbStart + thumbSize)
-            setCurrentRangeStart (rangeStart + rangeSize);
+            setCurrentRangeStart (visibleRange.getEnd());
     }
     else
     {

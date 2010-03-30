@@ -131,7 +131,7 @@ public:
 
         This is only used if the current file hasn't been set.
     */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+    void setDefaultBrowseTarget (const File& newDefaultDirectory);
 
     /** Returns all the entries on the recent files list.
 
@@ -174,10 +174,10 @@ public:
 
     //==============================================================================
     /** Adds a listener that will be called when the selected file is changed. */
-    void addListener (FilenameComponentListener* listener) throw();
+    void addListener (FilenameComponentListener* listener);
 
     /** Removes a previously-registered listener. */
-    void removeListener (FilenameComponentListener* listener) throw();
+    void removeListener (FilenameComponentListener* listener);
 
     /** Gives the component a tooltip. */
     void setTooltip (const String& newTooltip);

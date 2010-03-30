@@ -150,12 +150,12 @@ FileBrowserComponent::~FileBrowserComponent()
 }
 
 //==============================================================================
-void FileBrowserComponent::addListener (FileBrowserListener* const newListener) throw()
+void FileBrowserComponent::addListener (FileBrowserListener* const newListener)
 {
     listeners.add (newListener);
 }
 
-void FileBrowserComponent::removeListener (FileBrowserListener* const listener) throw()
+void FileBrowserComponent::removeListener (FileBrowserListener* const listener)
 {
     listeners.remove (listener);
 }

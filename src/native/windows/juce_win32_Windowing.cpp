@@ -330,7 +330,7 @@ long improbableWindowNumber = 0xf965aa01; // also referenced by messaging.cpp
 
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
+bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     SHORT k = (SHORT) keyCode;
 

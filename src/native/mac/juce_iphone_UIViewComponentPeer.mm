@@ -192,7 +192,7 @@ END_JUCE_NAMESPACE
 }
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
+bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     return false;
 }

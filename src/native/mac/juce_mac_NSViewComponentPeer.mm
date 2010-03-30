@@ -758,7 +758,7 @@ ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = 0;
 VoidArray NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
-bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
+bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     if (NSViewComponentPeer::keysCurrentlyDown.contains ((void*) keyCode))
         return true;

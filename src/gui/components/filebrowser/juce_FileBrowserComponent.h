@@ -160,13 +160,13 @@ public:
 
         @see removeListener
     */
-    void addListener (FileBrowserListener* listener) throw();
+    void addListener (FileBrowserListener* listener);
 
     /** Removes a listener.
 
         @see addListener
     */
-    void removeListener (FileBrowserListener* listener) throw();
+    void removeListener (FileBrowserListener* listener);
 
 
     //==============================================================================

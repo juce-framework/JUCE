@@ -119,7 +119,7 @@ namespace Keys
     static const int extendedKeyModifier = 0x10000000;
 }
 
-bool KeyPress::isKeyCurrentlyDown (const int keyCode) throw()
+bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
     int keysym;
 

@@ -88,7 +88,7 @@ bool KeyPress::operator!= (const KeyPress& other) const throw()
     return ! operator== (other);
 }
 
-bool KeyPress::isCurrentlyDown() const throw()
+bool KeyPress::isCurrentlyDown() const
 {
     return isKeyCurrentlyDown (keyCode)
             && (ModifierKeys::getCurrentModifiers().getRawFlags() & ModifierKeys::allKeyboardModifiers)
@@ -131,7 +131,7 @@ namespace KeyPressHelpers
 }
 
 //==============================================================================
-const KeyPress KeyPress::createFromDescription (const String& desc) throw()
+const KeyPress KeyPress::createFromDescription (const String& desc)
 {
     int modifiers = 0;
 
@@ -216,7 +216,7 @@ const KeyPress KeyPress::createFromDescription (const String& desc) throw()
     return KeyPress (key, ModifierKeys (modifiers), 0);
 }
 
-const String KeyPress::getTextDescription() const throw()
+const String KeyPress::getTextDescription() const
 {
     String desc;
 

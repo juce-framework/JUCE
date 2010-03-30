@@ -105,7 +105,7 @@ void FilenameComponent::setTooltip (const String& newTooltip)
     filenameBox->setTooltip (newTooltip);
 }
 
-void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory) throw()
+void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
 {
     defaultBrowseFile = newDefaultDirectory;
 }
@@ -237,12 +237,12 @@ void FilenameComponent::addRecentlyUsedFile (const File& file)
 }
 
 //==============================================================================
-void FilenameComponent::addListener (FilenameComponentListener* const listener) throw()
+void FilenameComponent::addListener (FilenameComponentListener* const listener)
 {
     listeners.add (listener);
 }
 
-void FilenameComponent::removeListener (FilenameComponentListener* const listener) throw()
+void FilenameComponent::removeListener (FilenameComponentListener* const listener)
 {
     listeners.remove (listener);
 }

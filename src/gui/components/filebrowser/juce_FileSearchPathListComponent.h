@@ -66,7 +66,7 @@ public:
 
         This is only used if the current file hasn't been set.
     */
-    void setDefaultBrowseTarget (const File& newDefaultDirectory) throw();
+    void setDefaultBrowseTarget (const File& newDefaultDirectory);
 
     /** A set of colour IDs to use to change the colour of various aspects of the label.
 
@@ -120,8 +120,8 @@ private:
     Button* upButton;
     Button* downButton;
 
-    void changed() throw();
-    void updateButtons() throw();
+    void changed();
+    void updateButtons();
 
     FileSearchPathListComponent (const FileSearchPathListComponent&);
     FileSearchPathListComponent& operator= (const FileSearchPathListComponent&);

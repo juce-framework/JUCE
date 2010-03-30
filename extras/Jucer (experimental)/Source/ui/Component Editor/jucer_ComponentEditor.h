@@ -38,7 +38,7 @@ class ComponentEditor   : public DocumentEditorComponent
 public:
     //==============================================================================
     ComponentEditor (OpenDocumentManager::Document* document,
-                     Project* project, 
+                     Project* project,
                      ComponentDocument* componentDocument);
 
     ~ComponentEditor();
@@ -46,7 +46,7 @@ public:
     //==============================================================================
     void paint (Graphics& g);
     void resized();
-    
+
     ComponentDocument& getDocument() const      { return *componentDocument; }
 
 private:
