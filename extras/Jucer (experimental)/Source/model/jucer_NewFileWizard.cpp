@@ -32,10 +32,10 @@
 static bool fillInNewCppFileTemplate (const File& file, const Project::Item& item, const char* templateName)
 {
     String s = item.getProject().getFileTemplate (templateName)
-                  .replace (T("FILENAME"), file.getFileName(), false)
-                  .replace (T("DATE"), Time::getCurrentTime().toString (true, true, true), false)
-                  .replace (T("AUTHOR"), SystemStats::getFullUserName(), false)
-                  .replace (T("HEADERGUARD"), makeHeaderGuardName (file), false);
+                  .replace ("FILENAME", file.getFileName(), false)
+                  .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
+                  .replace ("AUTHOR", SystemStats::getFullUserName(), false)
+                  .replace ("HEADERGUARD", makeHeaderGuardName (file), false);
 
     return overwriteFileWithNewDataIfDifferent (file, s);
 }

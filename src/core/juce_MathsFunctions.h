@@ -301,18 +301,25 @@ inline int roundFloatToInt (const float value) throw()
 }
 
 //==============================================================================
-/** The namespace contains a few template classes for helping work out class type variations.
+/** This namespace contains a few template classes for helping work out class type variations.
 */
 namespace TypeHelpers
 {
     /** The ParameterType struct is used to find the best type to use when passing some kind
         of object as a parameter.
 
-        E.g. "myFunction (typename TypeHelpers::ParameterType<int>::type, typename TypeHelpers::ParameterType<MyObject>::type)"
-        would evaluate to "myfunction (int, const MyObject&)", keeping primitive types passed-by-value, but passing
-        objects as a const reference, to avoid copying. Of course, this is only useful in certain esoteric
-        template situations.
+        Of course, this is only likely to be useful in certain esoteric template situations.
+
+        Because "typename TypeHelpers::ParameterType<SomeClass>::type" is a bit of a mouthful, there's
+        a PARAMETER_TYPE(SomeClass) macro that you can use to get the same effect.
+
+        E.g. "myFunction (PARAMETER_TYPE (int), PARAMETER_TYPE (MyObject))"
+        would evaluate to "myfunction (int, const MyObject&)", keeping any primitive types as
+        pass-by-value, but passing objects as a const reference, to avoid copying.
     */
+#if defined (_MSC_VER) && _MSC_VER <= 1400
+    #define PARAMETER_TYPE(a) a
+#else
     template <typename Type> struct ParameterType                   { typedef const Type& type; };
     template <typename Type> struct ParameterType <Type&>           { typedef Type& type; };
     template <typename Type> struct ParameterType <Type*>           { typedef Type* type; };
@@ -329,6 +336,9 @@ namespace TypeHelpers
     template <>              struct ParameterType <bool>            { typedef bool type; };
     template <>              struct ParameterType <float>           { typedef float type; };
     template <>              struct ParameterType <double>          { typedef double type; };
+
+    #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
+#endif
 }
 
 

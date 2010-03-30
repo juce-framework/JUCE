@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	12
+#define JUCE_BUILDNUMBER	13
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -842,6 +842,9 @@ inline int roundFloatToInt (const float value) throw()
 
 namespace TypeHelpers
 {
+#if defined (_MSC_VER) && _MSC_VER <= 1400
+	#define PARAMETER_TYPE(a) a
+#else
 	template <typename Type> struct ParameterType		   { typedef const Type& type; };
 	template <typename Type> struct ParameterType <Type&>	   { typedef Type& type; };
 	template <typename Type> struct ParameterType <Type*>	   { typedef Type* type; };
@@ -858,6 +861,9 @@ namespace TypeHelpers
 	template <>		  struct ParameterType <bool>		{ typedef bool type; };
 	template <>		  struct ParameterType <float>	   { typedef float type; };
 	template <>		  struct ParameterType <double>	  { typedef double type; };
+
+	#define PARAMETER_TYPE(a)	typename TypeHelpers::ParameterType<a>::type
+#endif
 }
 
 #endif   // __JUCE_MATHSFUNCTIONS_JUCEHEADER__
@@ -1953,6 +1959,13 @@ template <typename ElementType,
 		  typename TypeOfCriticalSectionToUse = DummyCriticalSection>
 class Array
 {
+private:
+  #if defined (_MSC_VER) && _MSC_VER <= 1400
+	typedef const ElementType& ParameterType;
+  #else
+	typedef PARAMETER_TYPE (ElementType) ParameterType;
+  #endif
+
 public:
 
 	Array() throw()
@@ -2085,7 +2098,7 @@ public:
 							 : ElementType();
 	}
 
-	int indexOf (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+	int indexOf (ParameterType elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
@@ -2102,7 +2115,7 @@ public:
 		return -1;
 	}
 
-	bool contains (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+	bool contains (ParameterType elementToLookFor) const
 	{
 		const ScopedLockType lock (getLock());
 		const ElementType* e = data.elements.getData();
@@ -2119,14 +2132,14 @@ public:
 		return false;
 	}
 
-	void add (typename TypeHelpers::ParameterType<ElementType>::type newElement)
+	void add (ParameterType newElement)
 	{
 		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
 		new (data.elements + numUsed++) ElementType (newElement);
 	}
 
-	void insert (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement)
+	void insert (int indexToInsertAt, ParameterType newElement)
 	{
 		const ScopedLockType lock (getLock());
 		data.ensureAllocatedSize (numUsed + 1);
@@ -2148,7 +2161,7 @@ public:
 		}
 	}
 
-	void insertMultiple (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement,
+	void insertMultiple (int indexToInsertAt, ParameterType newElement,
 						 int numberOfTimesToInsertIt)
 	{
 		if (numberOfTimesToInsertIt > 0)
@@ -2203,7 +2216,7 @@ public:
 		}
 	}
 
-	void addIfNotAlreadyThere (typename TypeHelpers::ParameterType<ElementType>::type newElement)
+	void addIfNotAlreadyThere (ParameterType newElement)
 	{
 		const ScopedLockType lock (getLock());
 
@@ -2211,7 +2224,7 @@ public:
 			add (newElement);
 	}
 
-	void set (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
+	void set (const int indexToChange, ParameterType newValue)
 	{
 		jassert (indexToChange >= 0);
 		const ScopedLockType lock (getLock());
@@ -2227,7 +2240,7 @@ public:
 		}
 	}
 
-	void setUnchecked (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
+	void setUnchecked (const int indexToChange, ParameterType newValue)
 	{
 		const ScopedLockType lock (getLock());
 		jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
@@ -2278,14 +2291,14 @@ public:
 	}
 
 	template <class ElementComparator>
-	void addSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type newElement)
+	void addSorted (ElementComparator& comparator, ParameterType newElement)
 	{
 		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
 	}
 
 	template <class ElementComparator>
-	int indexOfSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+	int indexOfSorted (ElementComparator& comparator, ParameterType elementToLookFor) const
 	{
 		(void) comparator;  // if you pass in an object with a static compareElements() method, this
 							// avoids getting warning messages about the parameter being unused
@@ -2345,7 +2358,7 @@ public:
 		}
 	}
 
-	void removeValue (typename TypeHelpers::ParameterType<ElementType>::type valueToRemove)
+	void removeValue (ParameterType valueToRemove)
 	{
 		const ScopedLockType lock (getLock());
 		ElementType* e = data.elements;
@@ -6110,6 +6123,15 @@ template <class ListenerClass,
 		  class ArrayType = Array <ListenerClass*> >
 class ListenerList
 {
+	// Horrible macros required to support VC6/7..
+	#if defined (_MSC_VER) && _MSC_VER <= 1400
+	  #define LL_TEMPLATE(a)   typename P##a, typename Q##a
+	  #define LL_PARAM(a)	  Q##a& param##a
+	#else
+	  #define LL_TEMPLATE(a)   typename P##a
+	  #define LL_PARAM(a)	  PARAMETER_TYPE(P##a) param##a
+	#endif
+
 public:
 
 	ListenerList()
@@ -6165,106 +6187,85 @@ public:
 			(iter.getListener()->*callbackFunction) ();
 	}
 
-	template <typename P1>
-	void call (void (ListenerClass::*callbackFunction) (P1),
-			   typename TypeHelpers::ParameterType<P1>::type param1)
+	template <LL_TEMPLATE(1)>
+	void call (void (ListenerClass::*callbackFunction) (P1), LL_PARAM(1))
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
-	template <class BailOutCheckerType, typename P1>
+	template <class BailOutCheckerType, LL_TEMPLATE(1)>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1),
-					  typename TypeHelpers::ParameterType<P1>::type param1)
+					  LL_PARAM(1))
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1);
 	}
 
-	template <typename P1, typename P2>
+	template <LL_TEMPLATE(1), LL_TEMPLATE(2)>
 	void call (void (ListenerClass::*callbackFunction) (P1, P2),
-			   typename TypeHelpers::ParameterType<P1>::type param1,
-			   typename TypeHelpers::ParameterType<P2>::type param2)
+			   LL_PARAM(1), LL_PARAM(2))
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
-	template <class BailOutCheckerType, typename P1, typename P2>
+	template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2)>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2),
-					  typename TypeHelpers::ParameterType<P1>::type param1,
-					  typename TypeHelpers::ParameterType<P2>::type param2)
+					  LL_PARAM(1), LL_PARAM(2))
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2);
 	}
 
-	template <typename P1, typename P2, typename P3>
+	template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3)>
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3),
-			   typename TypeHelpers::ParameterType<P1>::type param1,
-			   typename TypeHelpers::ParameterType<P2>::type param2,
-			   typename TypeHelpers::ParameterType<P3>::type param3)
+			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3>
+	template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3)>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3),
-					  typename TypeHelpers::ParameterType<P1>::type param1,
-					  typename TypeHelpers::ParameterType<P2>::type param2,
-					  typename TypeHelpers::ParameterType<P3>::type param3)
+					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3))
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3);
 	}
 
-	template <typename P1, typename P2, typename P3, typename P4>
+	template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4)>
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-			   typename TypeHelpers::ParameterType<P1>::type param1,
-			   typename TypeHelpers::ParameterType<P2>::type param2,
-			   typename TypeHelpers::ParameterType<P3>::type param3,
-			   typename TypeHelpers::ParameterType<P4>::type param4)
+			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4>
+	template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4)>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4),
-					  typename TypeHelpers::ParameterType<P1>::type param1,
-					  typename TypeHelpers::ParameterType<P2>::type param2,
-					  typename TypeHelpers::ParameterType<P3>::type param3,
-					  typename TypeHelpers::ParameterType<P4>::type param4)
+					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4))
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4);
 	}
 
-	template <typename P1, typename P2, typename P3, typename P4, typename P5>
+	template <LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5)>
 	void call (void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-			   typename TypeHelpers::ParameterType<P1>::type param1,
-			   typename TypeHelpers::ParameterType<P2>::type param2,
-			   typename TypeHelpers::ParameterType<P3>::type param3,
-			   typename TypeHelpers::ParameterType<P4>::type param4,
-			   typename TypeHelpers::ParameterType<P5>::type param5)
+			   LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
 	{
 		for (Iterator<DummyBailOutChecker, ThisType> iter (*this, DummyBailOutChecker()); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
 	}
 
-	template <class BailOutCheckerType, typename P1, typename P2, typename P3, typename P4, typename P5>
+	template <class BailOutCheckerType, LL_TEMPLATE(1), LL_TEMPLATE(2), LL_TEMPLATE(3), LL_TEMPLATE(4), LL_TEMPLATE(5)>
 	void callChecked (const BailOutCheckerType& bailOutChecker,
 					  void (ListenerClass::*callbackFunction) (P1, P2, P3, P4, P5),
-					  typename TypeHelpers::ParameterType<P1>::type param1,
-					  typename TypeHelpers::ParameterType<P2>::type param2,
-					  typename TypeHelpers::ParameterType<P3>::type param3,
-					  typename TypeHelpers::ParameterType<P4>::type param4,
-					  typename TypeHelpers::ParameterType<P5>::type param5)
+					  LL_PARAM(1), LL_PARAM(2), LL_PARAM(3), LL_PARAM(4), LL_PARAM(5))
 	{
 		for (Iterator<BailOutCheckerType, ThisType> iter (*this, bailOutChecker); iter.next();)
 			(iter.getListener()->*callbackFunction) (param1, param2, param3, param4, param5);
@@ -6326,6 +6327,9 @@ private:
 
 	ListenerList (const ListenerList&);
 	ListenerList& operator= (const ListenerList&);
+
+	#undef LL_TEMPLATE
+	#undef LL_PARAM
 };
 
 #endif   // __JUCE_LISTENERLIST_JUCEHEADER__

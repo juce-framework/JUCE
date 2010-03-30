@@ -182,15 +182,15 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     configTabBox->setCurrentTabIndex (-1);
 
     addAndMakeVisible (editConfigsButton = new TextButton (String::empty));
-    editConfigsButton->setButtonText (T("Add/Remove Configurations..."));
+    editConfigsButton->setButtonText ("Add/Remove Configurations...");
     editConfigsButton->addButtonListener (this);
 
     addAndMakeVisible (openProjectButton = new TextButton (String::empty));
-    openProjectButton->setButtonText (T("Open Project in "));
+    openProjectButton->setButtonText ("Open Project in ");
     openProjectButton->addButtonListener (this);
 
     addAndMakeVisible (editExportersButton = new TextButton (String::empty));
-    editExportersButton->setButtonText (T("Add/Remove Exporters..."));
+    editExportersButton->setButtonText ("Add/Remove Exporters...");
     editExportersButton->addButtonListener (this);
 
 

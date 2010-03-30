@@ -308,7 +308,7 @@ private:
 
     static const String escapeSpaces (const String& s)
     {
-        return s.replace (T(" "), T("\\ "));
+        return s.replace (" ", "\\ ");
     }
 
     const String getObjectFileFor (const RelativePath& file) const

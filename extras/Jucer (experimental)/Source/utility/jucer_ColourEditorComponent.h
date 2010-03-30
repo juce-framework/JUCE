@@ -109,7 +109,7 @@ private:
               defaultButton (0)
         {
             addAndMakeVisible (selector = new ColourSelectorWithSwatches());
-            selector->setName (T("Colour"));
+            selector->setName ("Colour");
             selector->setCurrentColour (owner->getColour());
             selector->addChangeListener (owner);
 

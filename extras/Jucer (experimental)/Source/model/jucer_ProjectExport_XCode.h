@@ -337,7 +337,7 @@ private:
 
         flags.add ("-l" + library.getFileNameWithoutExtension().substring (3));
 
-        String searchPath (library.toUnixStyle().upToLastOccurrenceOf (T("/"), false, false));
+        String searchPath (library.toUnixStyle().upToLastOccurrenceOf ("/", false, false));
         if (! library.isAbsolute())
             searchPath = "$(SRCROOT)/" + searchPath;
 
@@ -571,7 +571,7 @@ private:
                 const var::identifier name (o.getPropertyName(j));
                 String val (o.getProperty (name).toString());
 
-                if (val.isEmpty() || (val.containsAnyOf (T(" \t;<>()=,-\r\n"))
+                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,-\r\n")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = val.quoted();
@@ -892,10 +892,10 @@ private:
         v->setProperty ("name", "Copy to the different plugin folders", 0);
         v->setProperty ("shellPath", "/bin/sh", 0);
         v->setProperty ("shellScript", String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt, BinaryData::AudioPluginXCodeScript_txtSize)
-                                            .replace (T("\\"), T("\\\\"))
-                                            .replace (T("\""), T("\\\""))
-                                            .replace (T("\r\n"), T("\\n"))
-                                            .replace (T("\n"), T("\\n")), 0);
+                                            .replace ("\\", "\\\\")
+                                            .replace ("\"", "\\\"")
+                                            .replace ("\r\n", "\\n")
+                                            .replace ("\n", "\\n"), 0);
     }
 
     //==============================================================================

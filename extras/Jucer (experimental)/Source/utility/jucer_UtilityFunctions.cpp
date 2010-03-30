@@ -189,7 +189,7 @@ bool shouldPathsBeRelative (String path1, String path2)
         ++commonBitLength;
     }
 
-    return path1.substring (0, commonBitLength).removeCharacters (T("/:")).isNotEmpty();
+    return path1.substring (0, commonBitLength).removeCharacters ("/:").isNotEmpty();
 }
 
 const String createIncludeStatement (const File& includeFile, const File& targetFile)
@@ -201,8 +201,8 @@ const String createIncludeStatement (const File& includeFile, const File& target
 const String makeHeaderGuardName (const File& file)
 {
     return "__" + file.getFileName().toUpperCase()
-                                    .replaceCharacters (T(" ."), T("__"))
-                                    .retainCharacters (T("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"))
+                                    .replaceCharacters (" .", "__")
+                                    .retainCharacters ("_ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
             + "_"
             + String::toHexString (file.hashCode()).toUpperCase()
             + "__";
@@ -211,7 +211,7 @@ const String makeHeaderGuardName (const File& file)
 //==============================================================================
 bool isJuceFolder (const File& folder)
 {
-    return folder.getFileName().containsIgnoreCase (T("juce"))
+    return folder.getFileName().containsIgnoreCase ("juce")
              && folder.getChildFile ("juce.h").exists()
              && folder.getChildFile ("juce_Config.h").exists();
 }
@@ -327,9 +327,9 @@ const String makeValidCppIdentifier (String s,
                                      const bool allowTemplates)
 {
     if (removeColons)
-        s = s.replaceCharacters (T(".,;:/@"), T("______"));
+        s = s.replaceCharacters (".,;:/@", "______");
     else
-        s = s.replaceCharacters (T(".,;/@"), T("_____"));
+        s = s.replaceCharacters (".,;/@", "_____");
 
     int i;
     for (i = s.length(); --i > 0;)
@@ -337,7 +337,7 @@ const String makeValidCppIdentifier (String s,
              && CharacterFunctions::isLetter (s[i - 1])
              && CharacterFunctions::isUpperCase (s[i])
              && ! CharacterFunctions::isUpperCase (s[i - 1]))
-            s = s.substring (0, i) + T(" ") + s.substring (i);
+            s = s.substring (0, i) + " " + s.substring (i);
 
     String allowedChars ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_ 0123456789");
     if (allowTemplates)
@@ -474,7 +474,7 @@ const String justificationToCode (const Justification& justification)
 
 const String castToFloat (const String& expression)
 {
-    if (expression.containsOnly (T("0123456789.f")))
+    if (expression.containsOnly ("0123456789.f"))
     {
         String s (expression.getFloatValue());
 
@@ -492,7 +492,7 @@ const String indentCode (const String& code, const int numSpaces)
     if (numSpaces == 0)
         return code;
 
-    const String space (String::repeatedString (T(" "), numSpaces));
+    const String space (String::repeatedString (" ", numSpaces));
 
     StringArray lines;
     lines.addLines (code);

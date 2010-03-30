@@ -153,7 +153,10 @@
         <File RelativePath="..\..\Source\model\jucer_ResourceFile.h"/>
       </Filter>
       <Filter Name="UI">
-        <Filter Name="Component Editor"/>
+        <Filter Name="Component Editor">
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h"/>
+        </Filter>
         <Filter Name="Drawable Editor">
           <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>
           <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.h"/>

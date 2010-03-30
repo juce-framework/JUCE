@@ -71,7 +71,7 @@ public:
 
     const RelativePath withFileExtension (const String& extension) const
     {
-        return RelativePath (path.upToLastOccurrenceOf (T("."), ! extension.startsWithChar ('.'), false) + extension, root);
+        return RelativePath (path.upToLastOccurrenceOf (".", ! extension.startsWithChar ('.'), false) + extension, root);
     }
 
     const RelativePath getParentDirectory() const
@@ -80,7 +80,7 @@ public:
         if (path.endsWithChar ('/'))
             p = p.dropLastCharacters (1);
 
-        return RelativePath (p.upToLastOccurrenceOf (T("/"), false, false), root);
+        return RelativePath (p.upToLastOccurrenceOf ("/", false, false), root);
     }
 
     const RelativePath getChildFile (const String& subpath) const

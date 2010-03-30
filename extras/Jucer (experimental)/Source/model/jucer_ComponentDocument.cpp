@@ -56,7 +56,7 @@ bool ComponentDocument::isComponentFile (const File& file)
     in->read (initialData, amountToRead);
 
     return String::createStringFromData (initialData, amountToRead)
-                  .contains (String ("JUCER_" "COMPONENT")); // written like this to avoid thinking this file is a component!
+                  .contains ("JUCER_" "COMPONENT"); // written like this to avoid thinking this file is a component!
 }
 
 bool ComponentDocument::save()

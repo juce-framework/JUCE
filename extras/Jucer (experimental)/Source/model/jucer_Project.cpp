@@ -644,16 +644,16 @@ void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
     {
         String line (lines[i].trim());
 
-        if (line.startsWith (T("/** ")) && line.containsChar (':'))
+        if (line.startsWith ("/** ") && line.containsChar (':'))
         {
             ScopedPointer <JuceConfigFlag> config (new JuceConfigFlag());
-            config->symbol = line.substring (4).upToFirstOccurrenceOf (T(":"), false, false).trim();
+            config->symbol = line.substring (4).upToFirstOccurrenceOf (":", false, false).trim();
 
             if (config->symbol.length() > 4)
             {
-                config->description = line.fromFirstOccurrenceOf (T(":"), false, false).trimStart();
+                config->description = line.fromFirstOccurrenceOf (":", false, false).trimStart();
                 ++i;
-                while (! (lines[i].contains (T("*/")) || lines[i].contains (T("@see"))))
+                while (! (lines[i].contains ("*/") || lines[i].contains ("@see")))
                 {
                     if (lines[i].trim().isNotEmpty())
                         config->description = config->description.trim() + " " + lines[i].trim();
@@ -661,7 +661,7 @@ void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
                     ++i;
                 }
 
-                config->description = config->description.upToFirstOccurrenceOf (T("*/"), false, false);
+                config->description = config->description.upToFirstOccurrenceOf ("*/", false, false);
                 config->value.referTo (getJuceConfigFlag (config->symbol));
                 flags.add (config.release());
             }

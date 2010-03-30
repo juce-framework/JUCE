@@ -65,7 +65,12 @@
             file="Source/model/jucer_ResourceFile.h"/>
     </GROUP>
     <GROUP id="8J0PD9iW5" name="UI">
-      <GROUP id="d2joUoRvF" name="Component Editor"/>
+      <GROUP id="d2joUoRvF" name="Component Editor">
+        <FILE id="Q48V5uBKu" name="jucer_ComponentEditor.cpp" compile="1" resource="0"
+              file="Source/ui/Component Editor/jucer_ComponentEditor.cpp"/>
+        <FILE id="B1zNCvltV" name="jucer_ComponentEditor.h" compile="0" resource="0"
+              file="Source/ui/Component Editor/jucer_ComponentEditor.h"/>
+      </GROUP>
       <GROUP id="VLkoRqu1c" name="Drawable Editor">
         <FILE id="0eWoa5Ttv" name="jucer_DrawableEditor.cpp" compile="1" resource="0"
               file="Source/ui/Drawable Editor/jucer_DrawableEditor.cpp"/>

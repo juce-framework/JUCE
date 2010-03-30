@@ -49,7 +49,7 @@ public:
     {
         createMainCpp = createWindow = false;
 
-        switch (aw.getComboBoxComponent("files")->getSelectedItemIndex())
+        switch (aw.getComboBoxComponent ("files")->getSelectedItemIndex())
         {
             case 0:     createMainCpp = true;  break;
             case 1:     createMainCpp = createWindow = true;  break;
@@ -91,13 +91,13 @@ public:
             privateMembers = windowClassName + "* mainWindow;";
 
             String windowH = project.getFileTemplate ("jucer_WindowTemplate_h")
-                                .replace (T("INCLUDES"), createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
-                                .replace (T("WINDOWCLASS"), windowClassName, false)
-                                .replace (T("HEADERGUARD"), makeHeaderGuardName (mainWindowH), false);
+                                .replace ("INCLUDES", createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
+                                .replace ("WINDOWCLASS", windowClassName, false)
+                                .replace ("HEADERGUARD", makeHeaderGuardName (mainWindowH), false);
 
             String windowCpp = project.getFileTemplate ("jucer_WindowTemplate_cpp")
-                                .replace (T("INCLUDES"), createIncludeStatement (mainWindowH, mainWindowCpp), false)
-                                .replace (T("WINDOWCLASS"), windowClassName, false);
+                                .replace ("INCLUDES", createIncludeStatement (mainWindowH, mainWindowCpp), false)
+                                .replace ("WINDOWCLASS", windowClassName, false);
 
             if (! overwriteFileWithNewDataIfDifferent (mainWindowH, windowH))
                 failedFiles.add (mainWindowH.getFullPathName());
@@ -112,16 +112,16 @@ public:
         if (createMainCpp)
         {
             String mainCpp = project.getFileTemplate ("jucer_MainTemplate_cpp")
-                                .replace (T("APPHEADERS"), appHeaders, false)
-                                .replace (T("APPCLASSNAME"), makeValidCppIdentifier (appTitle + "Application", false, true, false), false)
-                                .replace (T("MEMBERINITIALISERS"), memberInitialisers, false)
-                                .replace (T("APPINITCODE"), initCode, false)
-                                .replace (T("APPSHUTDOWNCODE"), shutdownCode, false)
-                                .replace (T("APPNAME"), replaceCEscapeChars (appTitle), false)
-                                .replace (T("APPVERSION"), T("1.0"), false)
-                                .replace (T("ALLOWMORETHANONEINSTANCE"), T("true"), false)
-                                .replace (T("ANOTHERINSTANCECODE"), anotherInstanceStartedCode, false)
-                                .replace (T("PRIVATEMEMBERS"), privateMembers, false);
+                                .replace ("APPHEADERS", appHeaders, false)
+                                .replace ("APPCLASSNAME", makeValidCppIdentifier (appTitle + "Application", false, true, false), false)
+                                .replace ("MEMBERINITIALISERS", memberInitialisers, false)
+                                .replace ("APPINITCODE", initCode, false)
+                                .replace ("APPSHUTDOWNCODE", shutdownCode, false)
+                                .replace ("APPNAME", replaceCEscapeChars (appTitle), false)
+                                .replace ("APPVERSION", "1.0", false)
+                                .replace ("ALLOWMORETHANONEINSTANCE", "true", false)
+                                .replace ("ANOTHERINSTANCECODE", anotherInstanceStartedCode, false)
+                                .replace ("PRIVATEMEMBERS", privateMembers, false);
 
             if (! overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
@@ -158,7 +158,7 @@ public:
     {
         createMainCpp = false;
 
-        switch (aw.getComboBoxComponent("files")->getSelectedItemIndex())
+        switch (aw.getComboBoxComponent ("files")->getSelectedItemIndex())
         {
             case 0:     createMainCpp = true;  break;
             case 1:     break;
@@ -189,7 +189,7 @@ public:
             String appHeaders (createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
             String mainCpp = project.getFileTemplate ("jucer_MainConsoleAppTemplate_cpp")
-                                .replace (T("APPHEADERS"), appHeaders, false);
+                                .replace ("APPHEADERS", appHeaders, false);
 
             if (! overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
@@ -251,27 +251,27 @@ public:
         appHeaders << newLine << createIncludeStatement (project.getPluginCharacteristicsFile(), filterCppFile);
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
-                            .replace (T("FILTERHEADERS"), createIncludeStatement (filterHFile, filterCppFile)
+                            .replace ("FILTERHEADERS", createIncludeStatement (filterHFile, filterCppFile)
                                                             + newLine + createIncludeStatement (editorHFile, filterCppFile), false)
-                            .replace (T("FILTERCLASSNAME"), filterClassName, false)
-                            .replace (T("EDITORCLASSNAME"), editorClassName, false);
+                            .replace ("FILTERCLASSNAME", filterClassName, false)
+                            .replace ("EDITORCLASSNAME", editorClassName, false);
 
         String filterH = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_h")
-                            .replace (T("APPHEADERS"), appHeaders, false)
-                            .replace (T("FILTERCLASSNAME"), filterClassName, false)
-                            .replace (T("HEADERGUARD"), makeHeaderGuardName (filterHFile), false);
+                            .replace ("APPHEADERS", appHeaders, false)
+                            .replace ("FILTERCLASSNAME", filterClassName, false)
+                            .replace ("HEADERGUARD", makeHeaderGuardName (filterHFile), false);
 
         String editorCpp = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_cpp")
-                            .replace (T("EDITORCPPHEADERS"), createIncludeStatement (filterHFile, filterCppFile)
+                            .replace ("EDITORCPPHEADERS", createIncludeStatement (filterHFile, filterCppFile)
                                                                + newLine + createIncludeStatement (editorHFile, filterCppFile), false)
-                            .replace (T("FILTERCLASSNAME"), filterClassName, false)
-                            .replace (T("EDITORCLASSNAME"), editorClassName, false);
+                            .replace ("FILTERCLASSNAME", filterClassName, false)
+                            .replace ("EDITORCLASSNAME", editorClassName, false);
 
         String editorH = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_h")
-                            .replace (T("EDITORHEADERS"), appHeaders + newLine + createIncludeStatement (filterHFile, filterCppFile), false)
-                            .replace (T("FILTERCLASSNAME"), filterClassName, false)
-                            .replace (T("EDITORCLASSNAME"), editorClassName, false)
-                            .replace (T("HEADERGUARD"), makeHeaderGuardName (editorHFile), false);
+                            .replace ("EDITORHEADERS", appHeaders + newLine + createIncludeStatement (filterHFile, filterCppFile), false)
+                            .replace ("FILTERCLASSNAME", filterClassName, false)
+                            .replace ("EDITORCLASSNAME", editorClassName, false)
+                            .replace ("HEADERGUARD", makeHeaderGuardName (editorHFile), false);
 
         if (! overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
             failedFiles.add (filterCppFile.getFullPathName());
@@ -482,7 +482,7 @@ Project* ProjectWizard::runNewProjectWizard (Component* ownerWindow)
 
             if (isJuceFolder (juceFolderSelector.getCurrentFile()))
             {
-                wizard = createWizard (aw.getComboBoxComponent("type")->getSelectedItemIndex());
+                wizard = createWizard (aw.getComboBoxComponent ("type")->getSelectedItemIndex());
                 break;
             }
 

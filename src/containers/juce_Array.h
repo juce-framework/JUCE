@@ -59,6 +59,13 @@ template <typename ElementType,
           typename TypeOfCriticalSectionToUse = DummyCriticalSection>
 class Array
 {
+private:
+  #if defined (_MSC_VER) && _MSC_VER <= 1400
+    typedef const ElementType& ParameterType;
+  #else
+    typedef PARAMETER_TYPE (ElementType) ParameterType;
+  #endif
+
 public:
     //==============================================================================
     /** Creates an empty array. */
@@ -279,7 +286,7 @@ public:
         @param elementToLookFor   the value or object to look for
         @returns                  the index of the object, or -1 if it's not found
     */
-    int indexOf (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+    int indexOf (ParameterType elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
         const ElementType* e = data.elements.getData();
@@ -301,7 +308,7 @@ public:
         @param elementToLookFor     the value or object to look for
         @returns                    true if the item is found
     */
-    bool contains (typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+    bool contains (ParameterType elementToLookFor) const
     {
         const ScopedLockType lock (getLock());
         const ElementType* e = data.elements.getData();
@@ -324,7 +331,7 @@ public:
         @param newElement       the new object to add to the array
         @see set, insert, addIfNotAlreadyThere, addSorted, addArray
     */
-    void add (typename TypeHelpers::ParameterType<ElementType>::type newElement)
+    void add (ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
@@ -343,7 +350,7 @@ public:
         @param newElement         the new object to add to the array
         @see add, addSorted, set
     */
-    void insert (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement)
+    void insert (int indexToInsertAt, ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
         data.ensureAllocatedSize (numUsed + 1);
@@ -377,7 +384,7 @@ public:
         @param numberOfTimesToInsertIt  how many copies of the value to insert
         @see insert, add, addSorted, set
     */
-    void insertMultiple (int indexToInsertAt, typename TypeHelpers::ParameterType<ElementType>::type newElement,
+    void insertMultiple (int indexToInsertAt, ParameterType newElement,
                          int numberOfTimesToInsertIt)
     {
         if (numberOfTimesToInsertIt > 0)
@@ -452,7 +459,7 @@ public:
 
         @param newElement   the new object to add to the array
     */
-    void addIfNotAlreadyThere (typename TypeHelpers::ParameterType<ElementType>::type newElement)
+    void addIfNotAlreadyThere (ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
 
@@ -469,7 +476,7 @@ public:
         @param newValue         the new value to set for this index.
         @see add, insert
     */
-    void set (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
+    void set (const int indexToChange, ParameterType newValue)
     {
         jassert (indexToChange >= 0);
         const ScopedLockType lock (getLock());
@@ -494,7 +501,7 @@ public:
         @param newValue         the new value to set for this index.
         @see set, getUnchecked
     */
-    void setUnchecked (const int indexToChange, typename TypeHelpers::ParameterType<ElementType>::type newValue)
+    void setUnchecked (const int indexToChange, ParameterType newValue)
     {
         const ScopedLockType lock (getLock());
         jassert (((unsigned int) indexToChange) < (unsigned int) numUsed);
@@ -576,7 +583,7 @@ public:
         @see add, sort
     */
     template <class ElementComparator>
-    void addSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type newElement)
+    void addSorted (ElementComparator& comparator, ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
         insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
@@ -595,7 +602,7 @@ public:
         @see addSorted, sort
     */
     template <class ElementComparator>
-    int indexOfSorted (ElementComparator& comparator, typename TypeHelpers::ParameterType<ElementType>::type elementToLookFor) const
+    int indexOfSorted (ElementComparator& comparator, ParameterType elementToLookFor) const
     {
         (void) comparator;  // if you pass in an object with a static compareElements() method, this
                             // avoids getting warning messages about the parameter being unused
@@ -674,7 +681,7 @@ public:
         @param valueToRemove   the object to try to remove
         @see remove, removeRange
     */
-    void removeValue (typename TypeHelpers::ParameterType<ElementType>::type valueToRemove)
+    void removeValue (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
         ElementType* e = data.elements;

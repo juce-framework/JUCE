@@ -27,7 +27,7 @@
 #include "../ui/jucer_ProjectTreeViewBase.h"
 #include "../ui/jucer_OpenDocumentManager.h"
 
-static const tchar* resourceFileIdentifierString = T("JUCER_BINARY_RESOURCE");
+static const char* resourceFileIdentifierString = "JUCER_BINARY_RESOURCE";
 
 
 //==============================================================================
@@ -211,8 +211,8 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
     for (i = 0; i < files.size(); ++i)
     {
         String variableNameRoot (makeValidCppIdentifier (files.getUnchecked(i)->getFileName()
-                                                          .replaceCharacters (T(" ."), T("__"))
-                                                          .retainCharacters (T("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789")),
+                                                          .replaceCharacters (" .", "__")
+                                                          .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
                                                          false, true, false));
         String variableName (variableNameRoot);
 

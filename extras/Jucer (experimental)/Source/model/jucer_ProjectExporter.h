@@ -93,9 +93,9 @@ protected:
 
     const String getLibbedFilename (String name) const
     {
-        if (! name.startsWith (T("lib")))
+        if (! name.startsWith ("lib"))
             name = "lib" + name;
-        if (! name.endsWithIgnoreCase (T(".a")))
+        if (! name.endsWithIgnoreCase (".a"))
             name = name + ".a";
         return name;
     }

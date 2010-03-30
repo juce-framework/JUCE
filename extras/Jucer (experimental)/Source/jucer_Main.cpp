@@ -48,10 +48,10 @@ public:
         /* Running a command-line of the form "Jucer --resave foobar.jucer" will try to load that
            jucer file and re-export all of its projects.
         */
-        if (commandLine.startsWithIgnoreCase (T("-resave ")) || commandLine.startsWithIgnoreCase (T("--resave ")))
+        if (commandLine.startsWithIgnoreCase ("-resave ") || commandLine.startsWithIgnoreCase ("--resave "))
         {
             resaveJucerFile (File::getCurrentWorkingDirectory()
-                                  .getChildFile (commandLine.fromFirstOccurrenceOf (T(" "), false, false).unquoted()));
+                                  .getChildFile (commandLine.fromFirstOccurrenceOf (" ", false, false).unquoted()));
             quit();
             return;
         }
