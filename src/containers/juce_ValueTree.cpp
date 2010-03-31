@@ -296,18 +296,18 @@ ValueTree ValueTree::SharedObject::getChildWithName (const String& typeToMatch) 
 {
     for (int i = 0; i < children.size(); ++i)
         if (children.getUnchecked(i)->type == typeToMatch)
-            return (SharedObject*) children.getUnchecked(i);
+            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
 
-    return (SharedObject*) 0;
+    return ValueTree::invalid;
 }
 
 ValueTree ValueTree::SharedObject::getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const
 {
     for (int i = 0; i < children.size(); ++i)
         if (children.getUnchecked(i)->getProperty (propertyName) == propertyValue)
-            return (SharedObject*) children.getUnchecked(i);
+            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
 
-    return (SharedObject*) 0;
+    return ValueTree::invalid;
 }
 
 bool ValueTree::SharedObject::isAChildOf (const SharedObject* const possibleParent) const
@@ -391,6 +391,8 @@ void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
 
 
 //==============================================================================
+ValueTree ValueTree::invalid ((ValueTree::SharedObject*) 0);
+
 ValueTree::ValueTree (const String& type_)
     : object (new ValueTree::SharedObject (type_))
 {
@@ -456,7 +458,7 @@ const String ValueTree::getType() const
 
 ValueTree ValueTree::getParent() const
 {
-    return object != 0 ? ValueTree (object->parent) : ValueTree ((SharedObject*) 0);
+    return ValueTree (object != 0 ? object->parent : (SharedObject*) 0);
 }
 
 const var& ValueTree::operator[] (const var::identifier& name) const
@@ -565,17 +567,17 @@ int ValueTree::getNumChildren() const
 
 ValueTree ValueTree::getChild (int index) const
 {
-    return object != 0 ? (SharedObject*) object->children [index] : ValueTree ((SharedObject*) 0);
+    return ValueTree (object != 0 ? (SharedObject*) object->children [index] : (SharedObject*) 0);
 }
 
 ValueTree ValueTree::getChildWithName (const String& type) const
 {
-    return object != 0 ? object->getChildWithName (type) : ValueTree ((SharedObject*) 0);
+    return object != 0 ? object->getChildWithName (type) : ValueTree::invalid;
 }
 
 ValueTree ValueTree::getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const
 {
-    return object != 0 ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree ((SharedObject*) 0);
+    return object != 0 ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree::invalid;
 }
 
 bool ValueTree::isAChildOf (const ValueTree& possibleParent) const
@@ -699,7 +701,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
     String type (input.readString());
 
     if (type.isEmpty())
-        return ValueTree ((SharedObject*) 0);
+        return ValueTree::invalid;
 
     ValueTree v (type);
 

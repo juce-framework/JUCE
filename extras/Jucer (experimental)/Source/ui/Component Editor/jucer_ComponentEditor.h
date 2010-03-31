@@ -52,6 +52,8 @@ public:
 private:
     Project* project;
     ComponentDocument* componentDocument;
+
+    Viewport* viewport;
 };
 
 

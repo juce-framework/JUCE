@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	13
+#define JUCE_BUILDNUMBER	14
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -6772,6 +6772,8 @@ public:
 		}
 	}
 
+	static ValueTree invalid;
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -6838,7 +6840,7 @@ private:
 	ListenerList <Listener> listeners;
 
 public:
-	ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
+	explicit ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
@@ -25410,6 +25412,8 @@ template <class SelectableItemType>
 class JUCE_API  SelectedItemSet   : public ChangeBroadcaster
 {
 public:
+
+	typedef SelectableItemType ItemType;
 
 	SelectedItemSet()
 	{

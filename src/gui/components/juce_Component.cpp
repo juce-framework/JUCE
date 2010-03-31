@@ -1207,14 +1207,14 @@ Component* Component::removeChildComponent (const int index)
 //==============================================================================
 void Component::removeAllChildren()
 {
-    for (int i = childComponentList_.size(); --i >= 0;)
-        removeChildComponent (i);
+    while (childComponentList_.size() > 0)
+        removeChildComponent (childComponentList_.size() - 1);
 }
 
 void Component::deleteAllChildren()
 {
-    for (int i = childComponentList_.size(); --i >= 0;)
-        delete (removeChildComponent (i));
+    while (childComponentList_.size() > 0)
+        delete (removeChildComponent (childComponentList_.size() - 1));
 }
 
 //==============================================================================

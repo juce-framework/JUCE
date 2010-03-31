@@ -377,6 +377,9 @@ public:
         }
     }
 
+    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc. */
+    static ValueTree invalid;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -445,7 +448,7 @@ private:
 
 public:
     /** @internal */
-    ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
+    explicit ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
 };
 
 

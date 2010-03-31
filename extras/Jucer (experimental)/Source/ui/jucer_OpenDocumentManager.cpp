@@ -27,6 +27,7 @@
 #include "jucer_SourceCodeEditor.h"
 #include "Drawable Editor/jucer_DrawableEditor.h"
 #include "jucer_ItemPreviewComponent.h"
+#include "Component Editor/jucer_ComponentEditor.h"
 
 
 //==============================================================================
@@ -47,7 +48,7 @@ public:
     bool loadedOk() const                               { return true; }
     bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
-    bool refersToProject (Project& project) const  { return false; }
+    bool refersToProject (Project& project) const       { return false; }
     const String getName() const                        { return modDetector.getFile().getFileName(); }
     const String getType() const                        { return modDetector.getFile().getFileExtension() + " file"; }
     bool needsSaving() const                            { return codeDoc != 0 && codeDoc->hasChangedSinceSavePoint(); }
@@ -92,6 +93,66 @@ private:
 };
 
 //==============================================================================
+class ComponentDocumentType  : public OpenDocumentManager::Document
+{
+public:
+    ComponentDocumentType (Project* project_, const File& file_)
+        : project (project_),
+          modDetector (file_)
+    {
+        reloadFromFile();
+    }
+
+    ~ComponentDocumentType()
+    {
+        componentDoc = 0;
+    }
+
+    static bool isComponentFile (const File& file)  { return ComponentDocument::isComponentFile (file); }
+
+    bool loadedOk() const                           { return componentDoc != 0; }
+    bool isForFile (const File& file) const         { return modDetector.getFile() == file; }
+    bool isForNode (const ValueTree& node) const    { return false; }
+    bool refersToProject (Project& p) const         { return project == &p; }
+    const String getType() const                    { return "Jucer Component"; }
+    const String getName() const                    { return modDetector.getFile().getFileName(); }
+    bool needsSaving() const                        { return componentDoc != 0 && componentDoc->hasChangedSinceLastSave(); }
+    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
+
+    void reloadFromFile()
+    {
+        modDetector.updateHash();
+
+        if (componentDoc == 0)
+            componentDoc = new ComponentDocument (project, modDetector.getFile());
+
+        if (! componentDoc->reload())
+            componentDoc = 0;
+    }
+
+    bool save()
+    {
+        return componentDoc->save();
+    }
+
+    Component* createEditor()
+    {
+        if (componentDoc == 0)
+        {
+            jassertfalse;
+            return 0;
+        }
+
+        return new ComponentEditor (this, project, componentDoc);
+    }
+
+private:
+    Project* project;
+    FileModificationDetector modDetector;
+    ScopedPointer <ComponentDocument> componentDoc;
+};
+
+//==============================================================================
 class DrawableDocumentType  : public OpenDocumentManager::Document
 {
 public:
@@ -112,7 +173,7 @@ public:
     bool loadedOk() const                           { return drawableDoc != 0; }
     bool isForFile (const File& file) const         { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const    { return false; }
-    bool refersToProject (Project& p) const    { return project == &p; }
+    bool refersToProject (Project& p) const         { return project == &p; }
     const String getType() const                    { return "Drawable"; }
     const String getName() const                    { return modDetector.getFile().getFileName(); }
     bool needsSaving() const                        { return drawableDoc != 0 && drawableDoc->hasChangedSinceLastSave(); }
@@ -165,7 +226,7 @@ public:
     bool loadedOk() const                           { return true; }
     bool isForFile (const File& file_) const        { return file == file_; }
     bool isForNode (const ValueTree& node_) const   { return false; }
-    bool refersToProject (Project& p) const    { return project == &p; }
+    bool refersToProject (Project& p) const         { return project == &p; }
     bool needsSaving() const                        { return false; }
     bool save()                                     { return true; }
     bool hasFileBeenModifiedExternally()            { return fileModificationTime != file.getLastModificationTime(); }
@@ -227,7 +288,9 @@ OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project*
 
     Document* d = 0;
 
-    if (DrawableDocumentType::isDrawableFile (file))
+    if (ComponentDocumentType::isComponentFile (file))
+        d = new ComponentDocumentType (project, file);
+    else if (DrawableDocumentType::isDrawableFile (file))
         d = new DrawableDocumentType (project, file);
     else if (SourceCodeEditor::isTextFile (file))
         d = new SourceCodeDocument (file);

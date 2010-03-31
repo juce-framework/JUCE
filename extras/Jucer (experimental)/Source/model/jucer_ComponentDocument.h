@@ -41,8 +41,38 @@ public:
     static bool isComponentFile (const File& file);
 
     bool save();
+    bool reload();
+    bool hasChangedSinceLastSave();
+
+    typedef SelectedItemSet<uint32> SelectedItems;
 
     //==============================================================================
+    int getNumComponents() const;
+    const ValueTree getComponent (int index) const;
+    Component* createComponent (int index) const;
+    void updateComponent (Component* comp) const;
+    bool containsComponent (Component* comp) const;
+    const ValueTree getComponentState (Component* comp) const;
+    bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
+
+    void addNewComponentMenuItems (PopupMenu& menu) const;
+    void performNewComponentMenuItem (int menuResultCode);
+
+    //==============================================================================
+    enum ResizeZones
+    {
+        zoneL = 1,
+        zoneR = 2,
+        zoneT = 4,
+        zoneB = 8
+    };
+
+    void beginDrag (const Array<Component*>& items, const MouseEvent& e, int zones);
+    void continueDrag (const MouseEvent& e);
+    void endDrag (const MouseEvent& e);
+
+    //==============================================================================
+    ValueTree& getRoot()                                { return root; }
     UndoManager* getUndoManager() throw()               { return &undoManager; }
 
 private:
@@ -50,6 +80,12 @@ private:
     File cppFile;
     ValueTree root;
     UndoManager undoManager;
+
+    class DragHandler;
+    ScopedPointer <DragHandler> dragger;
+
+    void checkRootObject();
+    ValueTree getComponentGroup() const;
 };
 
 

@@ -49,6 +49,9 @@ class JUCE_API  SelectedItemSet   : public ChangeBroadcaster
 {
 public:
     //==============================================================================
+    typedef SelectableItemType ItemType;
+
+    //==============================================================================
     /** Creates an empty set. */
     SelectedItemSet()
     {
