@@ -364,6 +364,21 @@ public:
 
     void resize (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
     {
+        Rectangle<int> r (originalPos);
+
+        if ((zones & zoneL) != 0)
+            r.setLeft (r.getX() + distance.getX());
+
+        if ((zones & zoneT) != 0)
+            r.setTop (r.getY() + distance.getY());
+
+        if ((zones & zoneR) != 0)
+            r.setWidth (r.getWidth() + distance.getX());
+
+        if ((zones & zoneB) != 0)
+            r.setHeight (r.getHeight() + distance.getY());
+
+        v.setProperty (compBoundsProperty, componentBoundsToString (r), document.getUndoManager());
     }
 
 private:

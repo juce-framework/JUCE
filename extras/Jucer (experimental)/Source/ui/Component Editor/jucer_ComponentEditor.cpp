@@ -153,12 +153,12 @@ private:
     ComponentEditor& editor;
 
     //==============================================================================
-    class ComponentSelectorFrame    : public Component,
-                                      public ComponentListener
+    class ComponentResizeFrame    : public Component,
+                                    public ComponentListener
     {
     public:
-        ComponentSelectorFrame (ComponentCanvas& canvas_,
-                                Component* componentToAttachTo)
+        ComponentResizeFrame (ComponentCanvas& canvas_,
+                              Component* componentToAttachTo)
             : canvas (canvas_),
               component (componentToAttachTo),
               borderThickness (4)
@@ -167,7 +167,7 @@ private:
             componentToAttachTo->addComponentListener (this);
         }
 
-        ~ComponentSelectorFrame()
+        ~ComponentResizeFrame()
         {
             if (component != 0)
                 component->removeComponentListener (this);
@@ -181,13 +181,13 @@ private:
 
         void mouseEnter (const MouseEvent& e)
         {
-            repaint();
+            //repaint();
             updateDragZone (e.getPosition());
         }
 
         void mouseExit (const MouseEvent& e)
         {
-            repaint();
+            //repaint();
             updateDragZone (e.getPosition());
         }
 
@@ -227,8 +227,9 @@ private:
                 setBounds (component->getBounds().expanded (borderThickness, borderThickness));
         }
 
-        void resized()
+        bool hitTest (int x, int y)
         {
+            return ! getCentreArea().contains (x, y);
         }
 
         uint32 getTargetComponentUID() const  { return component == 0 ? 0 : component->getComponentUID(); }
@@ -239,14 +240,16 @@ private:
         int dragZone;
         const int borderThickness;
 
+        const Rectangle<int> getCentreArea() const
+        {
+            return Rectangle<int> (0, 0, getWidth(), getHeight()).reduced (borderThickness, borderThickness);
+        }
+
         void updateDragZone (const Point<int>& p)
         {
             int newZone = 0;
 
-            Rectangle<int> r (0, 0, getWidth(), getHeight());
-            r = r.reduced (borderThickness, borderThickness);
-
-            if (! r.contains (p))
+            if (! getCentreArea().contains (p))
             {
                 const int bw = jmax (borderThickness, proportionOfWidth (0.1f), jmin (10, proportionOfWidth (0.33f)));
                 const int bh = jmax (borderThickness, proportionOfHeight (0.1f), jmin (10, proportionOfHeight (0.33f)));
@@ -311,6 +314,8 @@ private:
         void mouseDown (const MouseEvent& e)
         {
             lasso = 0;
+            mouseDownCompUID = 0;
+            isDraggingClickedComp = false;
 
             if (e.mods.isPopupMenu())
             {
@@ -343,7 +348,20 @@ private:
         void mouseDrag (const MouseEvent& e)
         {
             if (lasso != 0)
+            {
                 lasso->dragLasso (e);
+            }
+            else if (mouseDownCompUID != 0 && (! e.mouseWasClicked()) && (! e.mods.isPopupMenu()))
+            {
+                if (! isDraggingClickedComp)
+                {
+                    isDraggingClickedComp = true;
+                    canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
+                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, 0);
+                }
+
+                canvas.getDocument().continueDrag (e);
+            }
         }
 
         void mouseUp (const MouseEvent& e)
@@ -356,9 +374,10 @@ private:
                 if (e.mouseWasClicked())
                     canvas.getSelection().deselectAll();
             }
-            else
+            else if (! e.mods.isPopupMenu())
             {
-                canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, ! e.mouseWasClicked(), mouseDownResult);
+                if (! isDraggingClickedComp)
+                    canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, ! e.mouseWasClicked(), mouseDownResult);
             }
         }
 
@@ -369,7 +388,7 @@ private:
             for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
             {
                 Component* c = canvas.getComponentHolder()->getChildComponent(i);
-                if (c != this && c->getBounds().intersects (lassoArea))
+                if (c->getBounds().intersects (lassoArea))
                     itemsFound.add (c->getComponentUID());
             }
         }
@@ -378,38 +397,43 @@ private:
 
         void changeListenerCallback (void*)
         {
-            updateSelectedComponentOverlays();
+            updateSelectedComponentResizeFrames();
+        }
+
+        void modifierKeysChanged (const ModifierKeys&)
+        {
+            Desktop::getInstance().getMainMouseSource().triggerFakeMove();
         }
 
     private:
         ComponentCanvas& canvas;
         ScopedPointer <LassoComponent <ComponentDocument::SelectedItems::ItemType> > lasso;
-        bool mouseDownResult;
+        bool mouseDownResult, isDraggingClickedComp;
         uint32 mouseDownCompUID;
 
-        ComponentSelectorFrame* getSelectorFrameFor (Component* c) const
+        ComponentResizeFrame* getSelectorFrameFor (Component* c) const
         {
             for (int i = getNumChildComponents(); --i >= 0;)
             {
-                ComponentSelectorFrame* overlay = dynamic_cast <ComponentSelectorFrame*> (getChildComponent(i));
-                if (overlay != 0 && overlay->getTargetComponentUID() == c->getComponentUID())
-                    return overlay;
+                ComponentResizeFrame* resizer = dynamic_cast <ComponentResizeFrame*> (getChildComponent(i));
+                if (resizer != 0 && resizer->getTargetComponentUID() == c->getComponentUID())
+                    return resizer;
             }
 
             return 0;
         }
 
-        void updateSelectedComponentOverlays()
+        void updateSelectedComponentResizeFrames()
         {
             ComponentDocument::SelectedItems& selection = canvas.getSelection();
 
             int i;
             for (i = getNumChildComponents(); --i >= 0;)
             {
-                ComponentSelectorFrame* overlay = dynamic_cast <ComponentSelectorFrame*> (getChildComponent(i));
+                ComponentResizeFrame* resizer = dynamic_cast <ComponentResizeFrame*> (getChildComponent(i));
 
-                if (overlay != 0 && ! selection.isSelected (overlay->getTargetComponentUID()))
-                    delete overlay;
+                if (resizer != 0 && ! selection.isSelected (resizer->getTargetComponentUID()))
+                    delete resizer;
             }
 
             for (i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
@@ -417,7 +441,7 @@ private:
                 Component* c = canvas.getComponentHolder()->getChildComponent(i);
 
                 if (c != this && selection.isSelected (c->getComponentUID()) && getSelectorFrameFor (c) == 0)
-                    addAndMakeVisible (new ComponentSelectorFrame (canvas, c));
+                    addAndMakeVisible (new ComponentResizeFrame (canvas, c));
             }
         }
     };
@@ -428,7 +452,7 @@ private:
 
     Component* getComponentForUID (const uint32 uid) const
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
+        for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
             if (componentHolder->getChildComponent (i)->getComponentUID() == uid)
                 return componentHolder->getChildComponent (i);
 

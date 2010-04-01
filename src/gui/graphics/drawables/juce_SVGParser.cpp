@@ -610,7 +610,7 @@ private:
 
         DrawablePath* dp = new DrawablePath();
         dp->setName (xml.getStringAttribute ("id"));
-        dp->setFill (FillType (Colours::transparentBlack));
+        dp->setFill (Colours::transparentBlack);
 
         path.applyTransform (transform);
         dp->setPath (path);

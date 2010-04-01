@@ -56,7 +56,7 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext()
 }
 
 //==============================================================================
-Graphics::Graphics (Image& imageToDrawOnto) throw()
+Graphics::Graphics (Image& imageToDrawOnto)
     : context (imageToDrawOnto.createLowLevelContext()),
       contextToDelete (context),
       saveStatePending (false)
@@ -69,12 +69,12 @@ Graphics::Graphics (LowLevelGraphicsContext* const internalContext) throw()
 {
 }
 
-Graphics::~Graphics() throw()
+Graphics::~Graphics()
 {
 }
 
 //==============================================================================
-void Graphics::resetToDefaultState() throw()
+void Graphics::resetToDefaultState()
 {
     saveStateIfPending();
     context->setFill (FillType());
@@ -82,61 +82,60 @@ void Graphics::resetToDefaultState() throw()
     context->setInterpolationQuality (defaultQuality);
 }
 
-bool Graphics::isVectorDevice() const throw()
+bool Graphics::isVectorDevice() const
 {
     return context->isVectorDevice();
 }
 
-bool Graphics::reduceClipRegion (const int x, const int y,
-                                 const int w, const int h) throw()
+bool Graphics::reduceClipRegion (const int x, const int y, const int w, const int h)
 {
     saveStateIfPending();
     return context->clipToRectangle (Rectangle<int> (x, y, w, h));
 }
 
-bool Graphics::reduceClipRegion (const RectangleList& clipRegion) throw()
+bool Graphics::reduceClipRegion (const RectangleList& clipRegion)
 {
     saveStateIfPending();
     return context->clipToRectangleList (clipRegion);
 }
 
-bool Graphics::reduceClipRegion (const Path& path, const AffineTransform& transform) throw()
+bool Graphics::reduceClipRegion (const Path& path, const AffineTransform& transform)
 {
     saveStateIfPending();
     context->clipToPath (path, transform);
     return ! context->isClipEmpty();
 }
 
-bool Graphics::reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion, const AffineTransform& transform) throw()
+bool Graphics::reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion, const AffineTransform& transform)
 {
     saveStateIfPending();
     context->clipToImageAlpha (image, sourceClipRegion, transform);
     return ! context->isClipEmpty();
 }
 
-void Graphics::excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw()
+void Graphics::excludeClipRegion (const Rectangle<int>& rectangleToExclude)
 {
     saveStateIfPending();
     context->excludeClipRectangle (rectangleToExclude);
 }
 
-bool Graphics::isClipEmpty() const throw()
+bool Graphics::isClipEmpty() const
 {
     return context->isClipEmpty();
 }
 
-const Rectangle<int> Graphics::getClipBounds() const throw()
+const Rectangle<int> Graphics::getClipBounds() const
 {
     return context->getClipBounds();
 }
 
-void Graphics::saveState() throw()
+void Graphics::saveState()
 {
     saveStateIfPending();
     saveStatePending = true;
 }
 
-void Graphics::restoreState() throw()
+void Graphics::restoreState()
 {
     if (saveStatePending)
         saveStatePending = false;
@@ -144,7 +143,7 @@ void Graphics::restoreState() throw()
         context->restoreState();
 }
 
-void Graphics::saveStateIfPending() throw()
+void Graphics::saveStateIfPending()
 {
     if (saveStatePending)
     {
@@ -153,63 +152,56 @@ void Graphics::saveStateIfPending() throw()
     }
 }
 
-void Graphics::setOrigin (const int newOriginX,
-                          const int newOriginY) throw()
+void Graphics::setOrigin (const int newOriginX, const int newOriginY)
 {
     saveStateIfPending();
     context->setOrigin (newOriginX, newOriginY);
 }
 
-bool Graphics::clipRegionIntersects (const int x, const int y,
-                                     const int w, const int h) const throw()
+bool Graphics::clipRegionIntersects (const int x, const int y, const int w, const int h) const
 {
     return context->clipRegionIntersects (Rectangle<int> (x, y, w, h));
 }
 
 //==============================================================================
-void Graphics::setColour (const Colour& newColour) throw()
+void Graphics::setColour (const Colour& newColour)
 {
     saveStateIfPending();
-    context->setFill (FillType (newColour));
+    context->setFill (newColour);
 }
 
-void Graphics::setOpacity (const float newOpacity) throw()
+void Graphics::setOpacity (const float newOpacity)
 {
     saveStateIfPending();
     context->setOpacity (newOpacity);
 }
 
-void Graphics::setGradientFill (const ColourGradient& gradient) throw()
+void Graphics::setGradientFill (const ColourGradient& gradient)
 {
-    saveStateIfPending();
-    context->setFill (FillType (gradient));
+    setFillType (gradient);
 }
 
-void Graphics::setTiledImageFill (const Image& imageToUse,
-                                  const int anchorX,
-                                  const int anchorY,
-                                  const float opacity) throw()
+void Graphics::setTiledImageFill (const Image& imageToUse, const int anchorX, const int anchorY, const float opacity)
 {
     saveStateIfPending();
     context->setFill (FillType (imageToUse, AffineTransform::translation ((float) anchorX, (float) anchorY)));
     context->setOpacity (opacity);
 }
 
-void Graphics::setFillType (const FillType& newFill) throw()
+void Graphics::setFillType (const FillType& newFill)
 {
     saveStateIfPending();
     context->setFill (newFill);
 }
 
 //==============================================================================
-void Graphics::setFont (const Font& newFont) throw()
+void Graphics::setFont (const Font& newFont)
 {
     saveStateIfPending();
     context->setFont (newFont);
 }
 
-void Graphics::setFont (const float newFontHeight,
-                        const int newFontStyleFlags) throw()
+void Graphics::setFont (const float newFontHeight, const int newFontStyleFlags)
 {
     saveStateIfPending();
     Font f (context->getFont());
@@ -218,9 +210,7 @@ void Graphics::setFont (const float newFontHeight,
 }
 
 //==============================================================================
-void Graphics::drawSingleLineText (const String& text,
-                                   const int startX,
-                                   const int baselineY) const throw()
+void Graphics::drawSingleLineText (const String& text, const int startX, const int baselineY) const
 {
     if (text.isNotEmpty()
          && startX < context->getClipBounds().getRight())
@@ -231,8 +221,7 @@ void Graphics::drawSingleLineText (const String& text,
     }
 }
 
-void Graphics::drawTextAsPath (const String& text,
-                               const AffineTransform& transform) const throw()
+void Graphics::drawTextAsPath (const String& text, const AffineTransform& transform) const
 {
     if (text.isNotEmpty())
     {
@@ -242,10 +231,7 @@ void Graphics::drawTextAsPath (const String& text,
     }
 }
 
-void Graphics::drawMultiLineText (const String& text,
-                                  const int startX,
-                                  const int baselineY,
-                                  const int maximumLineWidth) const throw()
+void Graphics::drawMultiLineText (const String& text, const int startX, const int baselineY, const int maximumLineWidth) const
 {
     if (text.isNotEmpty()
          && startX < context->getClipBounds().getRight())
@@ -259,37 +245,30 @@ void Graphics::drawMultiLineText (const String& text,
 }
 
 void Graphics::drawText (const String& text,
-                         const int x,
-                         const int y,
-                         const int width,
-                         const int height,
+                         const int x, const int y, const int width, const int height,
                          const Justification& justificationType,
-                         const bool useEllipsesIfTooBig) const throw()
+                         const bool useEllipsesIfTooBig) const
 {
     if (text.isNotEmpty() && context->clipRegionIntersects (Rectangle<int> (x, y, width, height)))
     {
         GlyphArrangement arr;
 
         arr.addCurtailedLineOfText (context->getFont(), text,
-                                    0.0f, 0.0f, (float)width,
+                                    0.0f, 0.0f, (float) width,
                                     useEllipsesIfTooBig);
 
         arr.justifyGlyphs (0, arr.getNumGlyphs(),
-                           (float) x, (float) y,
-                           (float) width, (float) height,
+                           (float) x, (float) y, (float) width, (float) height,
                            justificationType);
         arr.draw (*this);
     }
 }
 
 void Graphics::drawFittedText (const String& text,
-                               const int x,
-                               const int y,
-                               const int width,
-                               const int height,
+                               const int x, const int y, const int width, const int height,
                                const Justification& justification,
                                const int maximumNumberOfLines,
-                               const float minimumHorizontalScale) const throw()
+                               const float minimumHorizontalScale) const
 {
     if (text.isNotEmpty()
          && width > 0 && height > 0
@@ -298,8 +277,7 @@ void Graphics::drawFittedText (const String& text,
         GlyphArrangement arr;
 
         arr.addFittedText (context->getFont(), text,
-                           (float) x, (float) y,
-                           (float) width, (float) height,
+                           (float) x, (float) y, (float) width, (float) height,
                            justification,
                            maximumNumberOfLines,
                            minimumHorizontalScale);
@@ -309,10 +287,7 @@ void Graphics::drawFittedText (const String& text,
 }
 
 //==============================================================================
-void Graphics::fillRect (int x,
-                         int y,
-                         int width,
-                         int height) const throw()
+void Graphics::fillRect (int x, int y, int width, int height) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -320,15 +295,12 @@ void Graphics::fillRect (int x,
     context->fillRect (Rectangle<int> (x, y, width, height), false);
 }
 
-void Graphics::fillRect (const Rectangle<int>& r) const throw()
+void Graphics::fillRect (const Rectangle<int>& r) const
 {
     context->fillRect (r, false);
 }
 
-void Graphics::fillRect (const float x,
-                         const float y,
-                         const float width,
-                         const float height) const throw()
+void Graphics::fillRect (const float x, const float y, const float width, const float height) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -338,24 +310,24 @@ void Graphics::fillRect (const float x,
     fillPath (p);
 }
 
-void Graphics::setPixel (int x, int y) const throw()
+void Graphics::setPixel (int x, int y) const
 {
     context->fillRect (Rectangle<int> (x, y, 1, 1), false);
 }
 
-void Graphics::fillAll() const throw()
+void Graphics::fillAll() const
 {
     fillRect (context->getClipBounds());
 }
 
-void Graphics::fillAll (const Colour& colourToUse) const throw()
+void Graphics::fillAll (const Colour& colourToUse) const
 {
     if (! colourToUse.isTransparent())
     {
         const Rectangle<int> clip (context->getClipBounds());
 
         context->saveState();
-        context->setFill (FillType (colourToUse));
+        context->setFill (colourToUse);
         context->fillRect (clip, false);
         context->restoreState();
     }
@@ -363,8 +335,7 @@ void Graphics::fillAll (const Colour& colourToUse) const throw()
 
 
 //==============================================================================
-void Graphics::fillPath (const Path& path,
-                         const AffineTransform& transform) const throw()
+void Graphics::fillPath (const Path& path, const AffineTransform& transform) const
 {
     if ((! context->isClipEmpty()) && ! path.isEmpty())
         context->fillPath (path, transform);
@@ -372,7 +343,7 @@ void Graphics::fillPath (const Path& path,
 
 void Graphics::strokePath (const Path& path,
                            const PathStrokeType& strokeType,
-                           const AffineTransform& transform) const throw()
+                           const AffineTransform& transform) const
 {
     Path stroke;
     strokeType.createStrokedPath (stroke, path, transform);
@@ -380,11 +351,8 @@ void Graphics::strokePath (const Path& path,
 }
 
 //==============================================================================
-void Graphics::drawRect (const int x,
-                         const int y,
-                         const int width,
-                         const int height,
-                         const int lineThickness) const throw()
+void Graphics::drawRect (const int x, const int y, const int width, const int height,
+                         const int lineThickness) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -395,11 +363,7 @@ void Graphics::drawRect (const int x,
     context->fillRect (Rectangle<int> (x, y + height - lineThickness, width, lineThickness), false);
 }
 
-void Graphics::drawRect (const float x,
-                         const float y,
-                         const float width,
-                         const float height,
-                         const float lineThickness) const throw()
+void Graphics::drawRect (const float x, const float y, const float width, const float height, const float lineThickness) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -412,23 +376,14 @@ void Graphics::drawRect (const float x,
     fillPath (p);
 }
 
-void Graphics::drawRect (const Rectangle<int>& r,
-                         const int lineThickness) const throw()
+void Graphics::drawRect (const Rectangle<int>& r, const int lineThickness) const
 {
-    drawRect (r.getX(), r.getY(),
-              r.getWidth(), r.getHeight(),
-              lineThickness);
+    drawRect (r.getX(), r.getY(), r.getWidth(), r.getHeight(), lineThickness);
 }
 
-void Graphics::drawBevel (const int x,
-                          const int y,
-                          const int width,
-                          const int height,
-                          const int bevelThickness,
-                          const Colour& topLeftColour,
-                          const Colour& bottomRightColour,
-                          const bool useGradient,
-                          const bool sharpEdgeOnOutside) const throw()
+void Graphics::drawBevel (const int x, const int y, const int width, const int height,
+                          const int bevelThickness, const Colour& topLeftColour, const Colour& bottomRightColour,
+                          const bool useGradient, const bool sharpEdgeOnOutside) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -445,13 +400,13 @@ void Graphics::drawBevel (const int x,
             const float op = useGradient ? ramp * (sharpEdgeOnOutside ? bevelThickness - i : i)
                                          : oldOpacity;
 
-            context->setFill (FillType (topLeftColour.withMultipliedAlpha (op)));
+            context->setFill (topLeftColour.withMultipliedAlpha (op));
             context->fillRect (Rectangle<int> (x + i, y + i, width - i * 2, 1), false);
-            context->setFill (FillType (topLeftColour.withMultipliedAlpha (op * 0.75f)));
+            context->setFill (topLeftColour.withMultipliedAlpha (op * 0.75f));
             context->fillRect (Rectangle<int> (x + i, y + i + 1, 1, height - i * 2 - 2), false);
-            context->setFill (FillType (bottomRightColour.withMultipliedAlpha (op)));
+            context->setFill (bottomRightColour.withMultipliedAlpha (op));
             context->fillRect (Rectangle<int> (x + i, y + height - i - 1, width - i * 2, 1), false);
-            context->setFill (FillType (bottomRightColour.withMultipliedAlpha (op  * 0.75f)));
+            context->setFill (bottomRightColour.withMultipliedAlpha (op  * 0.75f));
             context->fillRect (Rectangle<int> (x + width - i - 1, y + i + 1, 1, height - i * 2 - 2), false);
         }
 
@@ -460,10 +415,7 @@ void Graphics::drawBevel (const int x,
 }
 
 //==============================================================================
-void Graphics::fillEllipse (const float x,
-                            const float y,
-                            const float width,
-                            const float height) const throw()
+void Graphics::fillEllipse (const float x, const float y, const float width, const float height) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -473,11 +425,8 @@ void Graphics::fillEllipse (const float x,
     fillPath (p);
 }
 
-void Graphics::drawEllipse (const float x,
-                            const float y,
-                            const float width,
-                            const float height,
-                            const float lineThickness) const throw()
+void Graphics::drawEllipse (const float x, const float y, const float width, const float height,
+                            const float lineThickness) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -487,11 +436,7 @@ void Graphics::drawEllipse (const float x,
     strokePath (p, PathStrokeType (lineThickness));
 }
 
-void Graphics::fillRoundedRectangle (const float x,
-                                     const float y,
-                                     const float width,
-                                     const float height,
-                                     const float cornerSize) const throw()
+void Graphics::fillRoundedRectangle (const float x, const float y, const float width, const float height, const float cornerSize) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -501,22 +446,13 @@ void Graphics::fillRoundedRectangle (const float x,
     fillPath (p);
 }
 
-void Graphics::fillRoundedRectangle (const Rectangle<int>& r,
-                                     const float cornerSize) const throw()
+void Graphics::fillRoundedRectangle (const Rectangle<float>& r, const float cornerSize) const
 {
-    fillRoundedRectangle ((float) r.getX(),
-                          (float) r.getY(),
-                          (float) r.getWidth(),
-                          (float) r.getHeight(),
-                          cornerSize);
+    fillRoundedRectangle (r.getX(), r.getY(), r.getWidth(), r.getHeight(), cornerSize);
 }
 
-void Graphics::drawRoundedRectangle (const float x,
-                                     const float y,
-                                     const float width,
-                                     const float height,
-                                     const float cornerSize,
-                                     const float lineThickness) const throw()
+void Graphics::drawRoundedRectangle (const float x, const float y, const float width, const float height,
+                                     const float cornerSize, const float lineThickness) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
@@ -526,25 +462,13 @@ void Graphics::drawRoundedRectangle (const float x,
     strokePath (p, PathStrokeType (lineThickness));
 }
 
-void Graphics::drawRoundedRectangle (const Rectangle<int>& r,
-                                     const float cornerSize,
-                                     const float lineThickness) const throw()
+void Graphics::drawRoundedRectangle (const Rectangle<float>& r, const float cornerSize, const float lineThickness) const
 {
-    drawRoundedRectangle ((float) r.getX(),
-                          (float) r.getY(),
-                          (float) r.getWidth(),
-                          (float) r.getHeight(),
-                          cornerSize, lineThickness);
+    drawRoundedRectangle (r.getX(), r.getY(), r.getWidth(), r.getHeight(), cornerSize, lineThickness);
 }
 
-
-void Graphics::drawArrow (const float startX,
-                          const float startY,
-                          const float endX,
-                          const float endY,
-                          const float lineThickness,
-                          const float arrowheadWidth,
-                          const float arrowheadLength) const throw()
+void Graphics::drawArrow (const float startX, const float startY, const float endX, const float endY,
+                          const float lineThickness, const float arrowheadWidth, const float arrowheadLength) const
 {
     Path p;
     p.addArrow (startX, startY, endX, endY,
@@ -552,12 +476,9 @@ void Graphics::drawArrow (const float startX,
     fillPath (p);
 }
 
-void Graphics::fillCheckerBoard (int x, int y,
-                                 int width, int height,
-                                 const int checkWidth,
-                                 const int checkHeight,
-                                 const Colour& colour1,
-                                 const Colour& colour2) const throw()
+void Graphics::fillCheckerBoard (int x, int y, int width, int height,
+                                 const int checkWidth, const int checkHeight,
+                                 const Colour& colour1, const Colour& colour2) const
 {
     jassert (checkWidth > 0 && checkHeight > 0); // can't be zero or less!
 
@@ -567,7 +488,7 @@ void Graphics::fillCheckerBoard (int x, int y,
 
         if (colour1 == colour2)
         {
-            context->setFill (FillType (colour1));
+            context->setFill (colour1);
             context->fillRect (Rectangle<int> (x, y, width, height), false);
         }
         else
@@ -584,7 +505,7 @@ void Graphics::fillCheckerBoard (int x, int y,
 
                 for (int xx = x; xx < right; xx += checkWidth)
                 {
-                    context->setFill (FillType (((cx++ & 1) == 0) ? colour1 : colour2));
+                    context->setFill (((cx++ & 1) == 0) ? colour1 : colour2);
                     context->fillRect (Rectangle<int> (xx, y, jmin (checkWidth, right - xx), jmin (checkHeight, bottom - y)),
                                        false);
                 }
@@ -599,50 +520,45 @@ void Graphics::fillCheckerBoard (int x, int y,
 }
 
 //==============================================================================
-void Graphics::drawVerticalLine (const int x, float top, float bottom) const throw()
+void Graphics::drawVerticalLine (const int x, float top, float bottom) const
 {
     context->drawVerticalLine (x, top, bottom);
 }
 
-void Graphics::drawHorizontalLine (const int y, float left, float right) const throw()
+void Graphics::drawHorizontalLine (const int y, float left, float right) const
 {
     context->drawHorizontalLine (y, left, right);
 }
 
-void Graphics::drawLine (float x1, float y1, float x2, float y2) const throw()
+void Graphics::drawLine (float x1, float y1, float x2, float y2) const
 {
     context->drawLine (x1, y1, x2, y2);
 }
 
-void Graphics::drawLine (const float startX,
-                         const float startY,
-                         const float endX,
-                         const float endY,
-                         const float lineThickness) const throw()
+void Graphics::drawLine (const float startX, const float startY,
+                         const float endX, const float endY,
+                         const float lineThickness) const
 {
     Path p;
     p.addLineSegment (startX, startY, endX, endY, lineThickness);
     fillPath (p);
 }
 
-void Graphics::drawLine (const Line& line) const throw()
+void Graphics::drawLine (const Line& line) const
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
 }
 
-void Graphics::drawLine (const Line& line,
-                         const float lineThickness) const throw()
+void Graphics::drawLine (const Line& line, const float lineThickness) const
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), lineThickness);
 }
 
-void Graphics::drawDashedLine (const float startX,
-                               const float startY,
-                               const float endX,
-                               const float endY,
+void Graphics::drawDashedLine (const float startX, const float startY,
+                               const float endX, const float endY,
                                const float* const dashLengths,
                                const int numDashLengths,
-                               const float lineThickness) const throw()
+                               const float lineThickness) const
 {
     const double dx = endX - startX;
     const double dy = endY - startY;
@@ -680,7 +596,7 @@ void Graphics::drawDashedLine (const float startX,
 }
 
 //==============================================================================
-void Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQuality) throw()
+void Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQuality)
 {
     saveStateIfPending();
     context->setInterpolationQuality (newQuality);
@@ -688,9 +604,8 @@ void Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQ
 
 //==============================================================================
 void Graphics::drawImageAt (const Image* const imageToDraw,
-                            const int topLeftX,
-                            const int topLeftY,
-                            const bool fillAlphaChannelWithCurrentBrush) const throw()
+                            const int topLeftX, const int topLeftY,
+                            const bool fillAlphaChannelWithCurrentBrush) const
 {
     if (imageToDraw != 0)
     {
@@ -705,12 +620,10 @@ void Graphics::drawImageAt (const Image* const imageToDraw,
 }
 
 void Graphics::drawImageWithin (const Image* const imageToDraw,
-                                const int destX,
-                                const int destY,
-                                const int destW,
-                                const int destH,
+                                const int destX, const int destY,
+                                const int destW, const int destH,
                                 const RectanglePlacement& placementWithinTarget,
-                                const bool fillAlphaChannelWithCurrentBrush) const throw()
+                                const bool fillAlphaChannelWithCurrentBrush) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (destX, destY, destW, destH));
@@ -744,7 +657,7 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
 void Graphics::drawImage (const Image* const imageToDraw,
                           int dx, int dy, int dw, int dh,
                           int sx, int sy, int sw, int sh,
-                          const bool fillAlphaChannelWithCurrentBrush) const throw()
+                          const bool fillAlphaChannelWithCurrentBrush) const
 {
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (dx, dy, dw, dh));
@@ -762,7 +675,7 @@ void Graphics::drawImage (const Image* const imageToDraw,
 void Graphics::drawImageTransformed (const Image* const imageToDraw,
                                      const Rectangle<int>& imageSubRegion,
                                      const AffineTransform& transform,
-                                     const bool fillAlphaChannelWithCurrentBrush) const throw()
+                                     const bool fillAlphaChannelWithCurrentBrush) const
 {
     if (imageToDraw != 0 && ! context->isClipEmpty())
     {

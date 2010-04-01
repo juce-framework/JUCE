@@ -9945,6 +9945,16 @@ public:
 	{
 	}
 
+	Rectangle (const Point<ValueType>& corner1, const Point<ValueType>& corner2) throw()
+	  : x (jmin (corner1.getX(), corner2.getX())),
+		y (jmin (corner1.getY(), corner2.getY())),
+		w (corner1.getX() - corner2.getX()),
+		h (corner1.getY() - corner2.getY())
+	{
+		if (w < 0) w = -w;
+		if (h < 0) h = -h;
+	}
+
 	Rectangle& operator= (const Rectangle& other) throw()
 	{
 		x = other.x; y = other.y;
@@ -11911,140 +11921,126 @@ class JUCE_API  Graphics
 {
 public:
 
-	explicit Graphics (Image& imageToDrawOnto) throw();
+	explicit Graphics (Image& imageToDrawOnto);
 
-	~Graphics() throw();
+	~Graphics();
 
-	void setColour (const Colour& newColour) throw();
+	void setColour (const Colour& newColour);
 
-	void setOpacity (const float newOpacity) throw();
+	void setOpacity (const float newOpacity);
 
-	void setGradientFill (const ColourGradient& gradient) throw();
+	void setGradientFill (const ColourGradient& gradient);
 
 	void setTiledImageFill (const Image& imageToUse,
-							int anchorX,
-							int anchorY,
-							float opacity) throw();
+							int anchorX, int anchorY,
+							float opacity);
 
-	void setFillType (const FillType& newFill) throw();
+	void setFillType (const FillType& newFill);
 
-	void setFont (const Font& newFont) throw();
+	void setFont (const Font& newFont);
 
-	void setFont (float newFontHeight,
-				  int fontStyleFlags = Font::plain) throw();
+	void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
 
 	void drawSingleLineText (const String& text,
-							 int startX, int baselineY) const throw();
+							 int startX, int baselineY) const;
 
 	void drawMultiLineText (const String& text,
 							int startX, int baselineY,
-							int maximumLineWidth) const throw();
+							int maximumLineWidth) const;
 
 	void drawTextAsPath (const String& text,
-						 const AffineTransform& transform) const throw();
+						 const AffineTransform& transform) const;
 
 	void drawText (const String& text,
 				   int x, int y, int width, int height,
 				   const Justification& justificationType,
-				   bool useEllipsesIfTooBig) const throw();
+				   bool useEllipsesIfTooBig) const;
 
 	void drawFittedText (const String& text,
 						 int x, int y, int width, int height,
 						 const Justification& justificationFlags,
 						 int maximumNumberOfLines,
-						 float minimumHorizontalScale = 0.7f) const throw();
+						 float minimumHorizontalScale = 0.7f) const;
 
-	void fillAll() const throw();
+	void fillAll() const;
 
-	void fillAll (const Colour& colourToUse) const throw();
+	void fillAll (const Colour& colourToUse) const;
 
-	void fillRect (int x, int y, int width, int height) const throw();
+	void fillRect (int x, int y, int width, int height) const;
 
-	void fillRect (const Rectangle<int>& rectangle) const throw();
+	void fillRect (const Rectangle<int>& rectangle) const;
 
-	void fillRect (float x, float y, float width, float height) const throw();
+	void fillRect (float x, float y, float width, float height) const;
 
 	void fillRoundedRectangle (float x, float y, float width, float height,
-							   float cornerSize) const throw();
+							   float cornerSize) const;
 
-	void fillRoundedRectangle (const Rectangle<int>& rectangle,
-							   float cornerSize) const throw();
+	void fillRoundedRectangle (const Rectangle<float>& rectangle,
+							   float cornerSize) const;
 
 	void fillCheckerBoard (int x, int y, int width, int height,
 						   int checkWidth, int checkHeight,
-						   const Colour& colour1, const Colour& colour2) const throw();
+						   const Colour& colour1, const Colour& colour2) const;
 
 	void drawRect (int x, int y, int width, int height,
-				   int lineThickness = 1) const throw();
+				   int lineThickness = 1) const;
 
 	void drawRect (float x, float y, float width, float height,
-				   float lineThickness = 1.0f) const throw();
+				   float lineThickness = 1.0f) const;
 
 	void drawRect (const Rectangle<int>& rectangle,
-				   int lineThickness = 1) const throw();
+				   int lineThickness = 1) const;
 
 	void drawRoundedRectangle (float x, float y, float width, float height,
-							   float cornerSize, float lineThickness) const throw();
+							   float cornerSize, float lineThickness) const;
 
-	void drawRoundedRectangle (const Rectangle<int>& rectangle,
-							   float cornerSize, float lineThickness) const throw();
+	void drawRoundedRectangle (const Rectangle<float>& rectangle,
+							   float cornerSize, float lineThickness) const;
 
 	void drawBevel (int x, int y, int width, int height,
 					int bevelThickness,
 					const Colour& topLeftColour = Colours::white,
 					const Colour& bottomRightColour = Colours::black,
 					bool useGradient = true,
-					bool sharpEdgeOnOutside = true) const throw();
+					bool sharpEdgeOnOutside = true) const;
 
-	void setPixel (int x, int y) const throw();
+	void setPixel (int x, int y) const;
 
-	void fillEllipse (float x, float y, float width, float height) const throw();
+	void fillEllipse (float x, float y, float width, float height) const;
 
 	void drawEllipse (float x, float y, float width, float height,
-					  float lineThickness) const throw();
+					  float lineThickness) const;
 
-	void drawLine (float startX,
-				   float startY,
-				   float endX,
-				   float endY) const throw();
+	void drawLine (float startX, float startY, float endX, float endY) const;
 
-	void drawLine (float startX,
-				   float startY,
-				   float endX,
-				   float endY,
-				   float lineThickness) const throw();
+	void drawLine (float startX, float startY, float endX, float endY,
+				   float lineThickness) const;
 
-	void drawLine (const Line& line) const throw();
+	void drawLine (const Line& line) const;
 
-	void drawLine (const Line& line,
-				   float lineThickness) const throw();
+	void drawLine (const Line& line, float lineThickness) const;
 
-	void drawDashedLine (float startX,
-						 float startY,
-						 float endX,
-						 float endY,
-						 const float* dashLengths,
-						 int numDashLengths,
-						 float lineThickness = 1.0f) const throw();
+	void drawDashedLine (float startX, float startY,
+						 float endX, float endY,
+						 const float* dashLengths, int numDashLengths,
+						 float lineThickness = 1.0f) const;
 
-	void drawVerticalLine (int x, float top, float bottom) const throw();
+	void drawVerticalLine (int x, float top, float bottom) const;
 
-	void drawHorizontalLine (int y, float left, float right) const throw();
+	void drawHorizontalLine (int y, float left, float right) const;
 
 	void fillPath (const Path& path,
-				   const AffineTransform& transform = AffineTransform::identity) const throw();
+				   const AffineTransform& transform = AffineTransform::identity) const;
 
 	void strokePath (const Path& path,
 					 const PathStrokeType& strokeType,
-					 const AffineTransform& transform = AffineTransform::identity) const throw();
+					 const AffineTransform& transform = AffineTransform::identity) const;
 
-	void drawArrow (float startX,
-					float startY,
-					float endX,
-					float endY,
+	void drawArrow (float startX, float startY,
+					float endX, float endY,
 					float lineThickness,
 					float arrowheadWidth,
-					float arrowheadLength) const throw();
+					float arrowheadLength) const;
 
 	enum ResamplingQuality
 	{
@@ -12053,59 +12049,52 @@ public:
 		highResamplingQuality	= 2	 /**< Uses bicubic interpolation for upsampling and area-averaging for downsampling. */
 	};
 
-	void setImageResamplingQuality (const ResamplingQuality newQuality) throw();
+	void setImageResamplingQuality (const ResamplingQuality newQuality);
 
-	void drawImageAt (const Image* const imageToDraw,
-					  int topLeftX, int topLeftY,
-					  bool fillAlphaChannelWithCurrentBrush = false) const throw();
+	void drawImageAt (const Image* const imageToDraw, int topLeftX, int topLeftY,
+					  bool fillAlphaChannelWithCurrentBrush = false) const;
 
 	void drawImage (const Image* const imageToDraw,
-					int destX,
-					int destY,
-					int destWidth,
-					int destHeight,
-					int sourceX,
-					int sourceY,
-					int sourceWidth,
-					int sourceHeight,
-					bool fillAlphaChannelWithCurrentBrush = false) const throw();
+					int destX, int destY, int destWidth, int destHeight,
+					int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+					bool fillAlphaChannelWithCurrentBrush = false) const;
 
 	void drawImageTransformed (const Image* imageToDraw,
 							   const Rectangle<int>& imageSubRegion,
 							   const AffineTransform& transform,
-							   bool fillAlphaChannelWithCurrentBrush = false) const throw();
+							   bool fillAlphaChannelWithCurrentBrush = false) const;
 
 	void drawImageWithin (const Image* imageToDraw,
 						  int destX, int destY, int destWidth, int destHeight,
 						  const RectanglePlacement& placementWithinTarget,
-						  bool fillAlphaChannelWithCurrentBrush = false) const throw();
+						  bool fillAlphaChannelWithCurrentBrush = false) const;
 
-	const Rectangle<int> getClipBounds() const throw();
+	const Rectangle<int> getClipBounds() const;
 
-	bool clipRegionIntersects (int x, int y, int width, int height) const throw();
+	bool clipRegionIntersects (int x, int y, int width, int height) const;
 
-	bool reduceClipRegion (int x, int y, int width, int height) throw();
+	bool reduceClipRegion (int x, int y, int width, int height);
 
-	bool reduceClipRegion (const RectangleList& clipRegion) throw();
+	bool reduceClipRegion (const RectangleList& clipRegion);
 
-	bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity) throw();
+	bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity);
 
 	bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
-						   const AffineTransform& transform) throw();
+						   const AffineTransform& transform);
 
-	void excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw();
+	void excludeClipRegion (const Rectangle<int>& rectangleToExclude);
 
-	bool isClipEmpty() const throw();
+	bool isClipEmpty() const;
 
-	void saveState() throw();
+	void saveState();
 
-	void restoreState() throw();
+	void restoreState();
 
-	void setOrigin (int newOriginX, int newOriginY) throw();
+	void setOrigin (int newOriginX, int newOriginY);
 
-	void resetToDefaultState() throw();
+	void resetToDefaultState();
 
-	bool isVectorDevice() const throw();
+	bool isVectorDevice() const;
 
 	juce_UseDebuggingNewOperator
 
@@ -12119,7 +12108,7 @@ private:
 	ScopedPointer <LowLevelGraphicsContext> contextToDelete;
 
 	bool saveStatePending;
-	void saveStateIfPending() throw();
+	void saveStateIfPending();
 
 	Graphics (const Graphics&);
 	Graphics& operator= (const Graphics& other);
@@ -25630,10 +25619,7 @@ public:
 	{
 		if (source != 0)
 		{
-			const int x1 = e.getMouseDownX();
-			const int y1 = e.getMouseDownY();
-
-			setBounds (jmin (x1, e.x), jmin (y1, e.y), abs (e.x - x1), abs (e.y - y1));
+			setBounds (Rectangle<int> (e.getMouseDownPosition(), e.getPosition()));
 			setVisible (true);
 
 			Array <SelectableItemType> itemsInLasso;

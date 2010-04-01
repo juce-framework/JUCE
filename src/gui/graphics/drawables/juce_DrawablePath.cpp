@@ -33,8 +33,8 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 DrawablePath::DrawablePath()
-    : mainFill (FillType (Colours::black)),
-      strokeFill (FillType (Colours::transparentBlack)),
+    : mainFill (Colours::black),
+      strokeFill (Colours::transparentBlack),
       strokeType (0.0f)
 {
 }
@@ -136,8 +136,8 @@ static const FillType readFillTypeFromTree (const ValueTree& v)
     if (type.equalsIgnoreCase ("solid"))
     {
         const String colour (v ["colour"].toString());
-        return FillType (Colour (colour.isEmpty() ? (uint32) 0xff000000
-                                                  : (uint32) colour.getHexValue32()));
+        return Colour (colour.isEmpty() ? (uint32) 0xff000000
+                                        : (uint32) colour.getHexValue32());
     }
     else if (type.equalsIgnoreCase ("gradient"))
     {
@@ -155,7 +155,7 @@ static const FillType readFillTypeFromTree (const ValueTree& v)
             g.addColour (colours[i * 2].getDoubleValue(),
                          Colour ((uint32)  colours[i * 2 + 1].getHexValue32()));
 
-        return FillType (g);
+        return g;
     }
 
     jassertfalse

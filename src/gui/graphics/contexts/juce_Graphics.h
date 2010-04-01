@@ -64,10 +64,10 @@ public:
 
         Obviously you shouldn't delete the image before this context is deleted.
     */
-    explicit Graphics (Image& imageToDrawOnto) throw();
+    explicit Graphics (Image& imageToDrawOnto);
 
     /** Destructor. */
-    ~Graphics() throw();
+    ~Graphics();
 
     //==============================================================================
     /** Changes the current drawing colour.
@@ -80,7 +80,7 @@ public:
 
         @see setOpacity
     */
-    void setColour (const Colour& newColour) throw();
+    void setColour (const Colour& newColour);
 
     /** Changes the opacity to use with the current colour.
 
@@ -91,25 +91,24 @@ public:
 
         A value of 0.0 is completely transparent, 1.0 is completely opaque.
     */
-    void setOpacity (const float newOpacity) throw();
+    void setOpacity (const float newOpacity);
 
     /** Sets the context to use a gradient for its fill pattern.
     */
-    void setGradientFill (const ColourGradient& gradient) throw();
+    void setGradientFill (const ColourGradient& gradient);
 
     /** Sets the context to use a tiled image pattern for filling.
         Make sure that you don't delete this image while it's still being used by
         this context!
     */
     void setTiledImageFill (const Image& imageToUse,
-                            int anchorX,
-                            int anchorY,
-                            float opacity) throw();
+                            int anchorX, int anchorY,
+                            float opacity);
 
     /** Changes the current fill settings.
         @see setColour, setGradientFill, setTiledImageFill
     */
-    void setFillType (const FillType& newFill) throw();
+    void setFillType (const FillType& newFill);
 
     //==============================================================================
     /** Changes the font to use for subsequent text-drawing functions.
@@ -119,7 +118,7 @@ public:
 
         @see drawSingleLineText, drawMultiLineText, drawTextAsPath, drawText, drawFittedText
     */
-    void setFont (const Font& newFont) throw();
+    void setFont (const Font& newFont);
 
     /** Changes the size and style of the currently-selected font.
 
@@ -128,8 +127,7 @@ public:
 
         @see Font
     */
-    void setFont (float newFontHeight,
-                  int fontStyleFlags = Font::plain) throw();
+    void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
 
     /** Draws a one-line text string.
 
@@ -142,7 +140,7 @@ public:
         @see drawMultiLineText, drawText, drawFittedText, GlyphArrangement::addLineOfText
     */
     void drawSingleLineText (const String& text,
-                             int startX, int baselineY) const throw();
+                             int startX, int baselineY) const;
 
     /** Draws text across multiple lines.
 
@@ -154,7 +152,7 @@ public:
     */
     void drawMultiLineText (const String& text,
                             int startX, int baselineY,
-                            int maximumLineWidth) const throw();
+                            int maximumLineWidth) const;
 
     /** Renders a string of text as a vector path.
 
@@ -165,7 +163,7 @@ public:
         @see setFont
     */
     void drawTextAsPath (const String& text,
-                         const AffineTransform& transform) const throw();
+                         const AffineTransform& transform) const;
 
     /** Draws a line of text within a specified rectangle.
 
@@ -179,7 +177,7 @@ public:
     void drawText (const String& text,
                    int x, int y, int width, int height,
                    const Justification& justificationType,
-                   bool useEllipsesIfTooBig) const throw();
+                   bool useEllipsesIfTooBig) const;
 
     /** Tries to draw a text string inside a given space.
 
@@ -204,7 +202,7 @@ public:
                          int x, int y, int width, int height,
                          const Justification& justificationFlags,
                          int maximumNumberOfLines,
-                         float minimumHorizontalScale = 0.7f) const throw();
+                         float minimumHorizontalScale = 0.7f) const;
 
     //==============================================================================
     /** Fills the context's entire clip region with the current colour or brush.
@@ -212,51 +210,51 @@ public:
         (See also the fillAll (const Colour&) method which is a quick way of filling
         it with a given colour).
     */
-    void fillAll() const throw();
+    void fillAll() const;
 
     /** Fills the context's entire clip region with a given colour.
 
         This leaves the context's current colour and brush unchanged, it just
         uses the specified colour temporarily.
     */
-    void fillAll (const Colour& colourToUse) const throw();
+    void fillAll (const Colour& colourToUse) const;
 
     //==============================================================================
     /** Fills a rectangle with the current colour or brush.
 
         @see drawRect, fillRoundedRectangle
     */
-    void fillRect (int x, int y, int width, int height) const throw();
+    void fillRect (int x, int y, int width, int height) const;
 
     /** Fills a rectangle with the current colour or brush. */
-    void fillRect (const Rectangle<int>& rectangle) const throw();
+    void fillRect (const Rectangle<int>& rectangle) const;
 
     /** Fills a rectangle with the current colour or brush.
 
         This uses sub-pixel positioning so is slower than the fillRect method which
         takes integer co-ordinates.
     */
-    void fillRect (float x, float y, float width, float height) const throw();
+    void fillRect (float x, float y, float width, float height) const;
 
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
 
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
     void fillRoundedRectangle (float x, float y, float width, float height,
-                               float cornerSize) const throw();
+                               float cornerSize) const;
 
     /** Uses the current colour or brush to fill a rectangle with rounded corners.
 
         @see drawRoundedRectangle, Path::addRoundedRectangle
     */
-    void fillRoundedRectangle (const Rectangle<int>& rectangle,
-                               float cornerSize) const throw();
+    void fillRoundedRectangle (const Rectangle<float>& rectangle,
+                               float cornerSize) const;
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
     */
     void fillCheckerBoard (int x, int y, int width, int height,
                            int checkWidth, int checkHeight,
-                           const Colour& colour1, const Colour& colour2) const throw();
+                           const Colour& colour1, const Colour& colour2) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -266,7 +264,7 @@ public:
         @see fillRect
     */
     void drawRect (int x, int y, int width, int height,
-                   int lineThickness = 1) const throw();
+                   int lineThickness = 1) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -276,7 +274,7 @@ public:
         @see fillRect
     */
     void drawRect (float x, float y, float width, float height,
-                   float lineThickness = 1.0f) const throw();
+                   float lineThickness = 1.0f) const;
 
     /** Draws four lines to form a rectangular outline, using the current colour or brush.
 
@@ -286,21 +284,21 @@ public:
         @see fillRect
     */
     void drawRect (const Rectangle<int>& rectangle,
-                   int lineThickness = 1) const throw();
+                   int lineThickness = 1) const;
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
 
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
     void drawRoundedRectangle (float x, float y, float width, float height,
-                               float cornerSize, float lineThickness) const throw();
+                               float cornerSize, float lineThickness) const;
 
     /** Uses the current colour or brush to draw the outline of a rectangle with rounded corners.
 
         @see fillRoundedRectangle, Path::addRoundedRectangle
     */
-    void drawRoundedRectangle (const Rectangle<int>& rectangle,
-                               float cornerSize, float lineThickness) const throw();
+    void drawRoundedRectangle (const Rectangle<float>& rectangle,
+                               float cornerSize, float lineThickness) const;
 
     /** Draws a 3D raised (or indented) bevel using two colours.
 
@@ -321,11 +319,11 @@ public:
                     const Colour& topLeftColour = Colours::white,
                     const Colour& bottomRightColour = Colours::black,
                     bool useGradient = true,
-                    bool sharpEdgeOnOutside = true) const throw();
+                    bool sharpEdgeOnOutside = true) const;
 
     /** Draws a pixel using the current colour or brush.
     */
-    void setPixel (int x, int y) const throw();
+    void setPixel (int x, int y) const;
 
     //==============================================================================
     /** Fills an ellipse with the current colour or brush.
@@ -334,47 +332,40 @@ public:
 
         @see drawEllipse, Path::addEllipse
     */
-    void fillEllipse (float x, float y, float width, float height) const throw();
+    void fillEllipse (float x, float y, float width, float height) const;
 
     /** Draws an elliptical stroke using the current colour or brush.
 
         @see fillEllipse, Path::addEllipse
     */
     void drawEllipse (float x, float y, float width, float height,
-                      float lineThickness) const throw();
+                      float lineThickness) const;
 
     //==============================================================================
     /** Draws a line between two points.
 
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
-    void drawLine (float startX,
-                   float startY,
-                   float endX,
-                   float endY) const throw();
+    void drawLine (float startX, float startY, float endX, float endY) const;
 
     /** Draws a line between two points with a given thickness.
 
         @see Path::addLineSegment
     */
-    void drawLine (float startX,
-                   float startY,
-                   float endX,
-                   float endY,
-                   float lineThickness) const throw();
+    void drawLine (float startX, float startY, float endX, float endY,
+                   float lineThickness) const;
 
     /** Draws a line between two points.
 
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
-    void drawLine (const Line& line) const throw();
+    void drawLine (const Line& line) const;
 
     /** Draws a line between two points with a given thickness.
 
         @see Path::addLineSegment
     */
-    void drawLine (const Line& line,
-                   float lineThickness) const throw();
+    void drawLine (const Line& line, float lineThickness) const;
 
     /** Draws a dashed line using a custom set of dash-lengths.
 
@@ -389,39 +380,36 @@ public:
         @param lineThickness    the thickness of the line to draw
         @see PathStrokeType::createDashedStroke
     */
-    void drawDashedLine (float startX,
-                         float startY,
-                         float endX,
-                         float endY,
-                         const float* dashLengths,
-                         int numDashLengths,
-                         float lineThickness = 1.0f) const throw();
+    void drawDashedLine (float startX, float startY,
+                         float endX, float endY,
+                         const float* dashLengths, int numDashLengths,
+                         float lineThickness = 1.0f) const;
 
     /** Draws a vertical line of pixels at a given x position.
 
         The x position is an integer, but the top and bottom of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
     */
-    void drawVerticalLine (int x, float top, float bottom) const throw();
+    void drawVerticalLine (int x, float top, float bottom) const;
 
     /** Draws a horizontal line of pixels at a given y position.
 
         The y position is an integer, but the left and right ends of the line can be sub-pixel
         positions, and these will be anti-aliased if necessary.
     */
-    void drawHorizontalLine (int y, float left, float right) const throw();
+    void drawHorizontalLine (int y, float left, float right) const;
 
     //==============================================================================
     /** Fills a path using the currently selected colour or brush.
     */
     void fillPath (const Path& path,
-                   const AffineTransform& transform = AffineTransform::identity) const throw();
+                   const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Draws a path's outline using the currently selected colour or brush.
     */
     void strokePath (const Path& path,
                      const PathStrokeType& strokeType,
-                     const AffineTransform& transform = AffineTransform::identity) const throw();
+                     const AffineTransform& transform = AffineTransform::identity) const;
 
     /** Draws a line with an arrowhead.
 
@@ -433,13 +421,11 @@ public:
         @param arrowheadWidth   the width of the arrow head (perpendicular to the line)
         @param arrowheadLength  the length of the arrow head (along the length of the line)
     */
-    void drawArrow (float startX,
-                    float startY,
-                    float endX,
-                    float endY,
+    void drawArrow (float startX, float startY,
+                    float endX, float endY,
                     float lineThickness,
                     float arrowheadWidth,
-                    float arrowheadLength) const throw();
+                    float arrowheadLength) const;
 
 
     //==============================================================================
@@ -460,7 +446,7 @@ public:
 
         @see Graphics::drawImage, Graphics::drawImageTransformed, Graphics::drawImageWithin
     */
-    void setImageResamplingQuality (const ResamplingQuality newQuality) throw();
+    void setImageResamplingQuality (const ResamplingQuality newQuality);
 
     /** Draws an image.
 
@@ -473,9 +459,8 @@ public:
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
         (or setColour() with an opaque colour) before drawing images.
     */
-    void drawImageAt (const Image* const imageToDraw,
-                      int topLeftX, int topLeftY,
-                      bool fillAlphaChannelWithCurrentBrush = false) const throw();
+    void drawImageAt (const Image* const imageToDraw, int topLeftX, int topLeftY,
+                      bool fillAlphaChannelWithCurrentBrush = false) const;
 
     /** Draws part of an image, rescaling it to fit in a given target region.
 
@@ -503,15 +488,9 @@ public:
         @see setImageResamplingQuality, drawImageAt, drawImageWithin, fillAlphaMap
     */
     void drawImage (const Image* const imageToDraw,
-                    int destX,
-                    int destY,
-                    int destWidth,
-                    int destHeight,
-                    int sourceX,
-                    int sourceY,
-                    int sourceWidth,
-                    int sourceHeight,
-                    bool fillAlphaChannelWithCurrentBrush = false) const throw();
+                    int destX, int destY, int destWidth, int destHeight,
+                    int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+                    bool fillAlphaChannelWithCurrentBrush = false) const;
 
     /** Draws part of an image, having applied an affine transform to it.
 
@@ -537,7 +516,7 @@ public:
     void drawImageTransformed (const Image* imageToDraw,
                                const Rectangle<int>& imageSubRegion,
                                const AffineTransform& transform,
-                               bool fillAlphaChannelWithCurrentBrush = false) const throw();
+                               bool fillAlphaChannelWithCurrentBrush = false) const;
 
     /** Draws an image to fit within a designated rectangle.
 
@@ -563,7 +542,7 @@ public:
     void drawImageWithin (const Image* imageToDraw,
                           int destX, int destY, int destWidth, int destHeight,
                           const RectanglePlacement& placementWithinTarget,
-                          bool fillAlphaChannelWithCurrentBrush = false) const throw();
+                          bool fillAlphaChannelWithCurrentBrush = false) const;
 
 
     //==============================================================================
@@ -571,7 +550,7 @@ public:
 
         @see getClipRegion, clipRegionIntersects
     */
-    const Rectangle<int> getClipBounds() const throw();
+    const Rectangle<int> getClipBounds() const;
 
     /** Checks whether a rectangle overlaps the context's clipping region.
 
@@ -579,28 +558,28 @@ public:
         method can be used to optimise a component's paint() method, by letting it
         avoid drawing complex objects that aren't within the region being repainted.
     */
-    bool clipRegionIntersects (int x, int y, int width, int height) const throw();
+    bool clipRegionIntersects (int x, int y, int width, int height) const;
 
     /** Intersects the current clipping region with another region.
 
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects
     */
-    bool reduceClipRegion (int x, int y, int width, int height) throw();
+    bool reduceClipRegion (int x, int y, int width, int height);
 
     /** Intersects the current clipping region with a rectangle list region.
 
         @returns true if the resulting clipping region is non-zero in size
         @see setOrigin, clipRegionIntersects
     */
-    bool reduceClipRegion (const RectangleList& clipRegion) throw();
+    bool reduceClipRegion (const RectangleList& clipRegion);
 
     /** Intersects the current clipping region with a path.
 
         @returns true if the resulting clipping region is non-zero in size
         @see reduceClipRegion
     */
-    bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity) throw();
+    bool reduceClipRegion (const Path& path, const AffineTransform& transform = AffineTransform::identity);
 
     /** Intersects the current clipping region with an image's alpha-channel.
 
@@ -617,23 +596,23 @@ public:
         @see reduceClipRegion
     */
     bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
-                           const AffineTransform& transform) throw();
+                           const AffineTransform& transform);
 
     /** Excludes a rectangle to stop it being drawn into. */
-    void excludeClipRegion (const Rectangle<int>& rectangleToExclude) throw();
+    void excludeClipRegion (const Rectangle<int>& rectangleToExclude);
 
     /** Returns true if no drawing can be done because the clip region is zero. */
-    bool isClipEmpty() const throw();
+    bool isClipEmpty() const;
 
     /** Saves the current graphics state on an internal stack.
 
         To restore the state, use restoreState().
     */
-    void saveState() throw();
+    void saveState();
 
     /** Restores a graphics state that was previously saved with saveState().
     */
-    void restoreState() throw();
+    void restoreState();
 
     /** Moves the position of the context's origin.
 
@@ -645,21 +624,19 @@ public:
 
         @see reduceClipRegion
     */
-    void setOrigin (int newOriginX, int newOriginY) throw();
+    void setOrigin (int newOriginX, int newOriginY);
 
     /** Resets the current colour, brush, and font to default settings. */
-    void resetToDefaultState() throw();
+    void resetToDefaultState();
 
     /** Returns true if this context is drawing to a vector-based device, such as a printer. */
-    bool isVectorDevice() const throw();
+    bool isVectorDevice() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
     /** Create a graphics that uses a given low-level renderer.
-
         For internal use only.
-
         NB. The context will NOT be deleted by this object when it is deleted.
     */
     Graphics (LowLevelGraphicsContext* const internalContext) throw();
@@ -673,7 +650,7 @@ private:
     ScopedPointer <LowLevelGraphicsContext> contextToDelete;
 
     bool saveStatePending;
-    void saveStateIfPending() throw();
+    void saveStateIfPending();
 
     Graphics (const Graphics&);
     Graphics& operator= (const Graphics& other);
