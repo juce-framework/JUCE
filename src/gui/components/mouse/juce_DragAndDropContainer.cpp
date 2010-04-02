@@ -342,7 +342,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
 
         if (dragImage == 0)
         {
-            dragImage = sourceComponent->createComponentSnapshot (Rectangle<int> (0, 0, sourceComponent->getWidth(), sourceComponent->getHeight()));
+            dragImage = sourceComponent->createComponentSnapshot (sourceComponent->getLocalBounds());
 
             if (dragImage->getFormat() != Image::ARGB)
             {
@@ -359,8 +359,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
             const int hi = 400;
 
             Point<int> relPos (sourceComponent->globalPositionToRelative (lastMouseDown));
-            Point<int> clipped (Rectangle<int> (0, 0, dragImage->getWidth(), dragImage->getHeight())
-                                    .getConstrainedPoint (relPos));
+            Point<int> clipped (dragImage->getBounds().getConstrainedPoint (relPos));
 
             for (int y = dragImage->getHeight(); --y >= 0;)
             {

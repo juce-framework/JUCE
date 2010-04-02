@@ -329,9 +329,9 @@ public:
     DragHandler (ComponentDocument& document_,
                  const Array<Component*>& items,
                  const MouseEvent& e,
-                 int zones_)
+                 const ResizableBorderComponent::Zone& zone_)
         : document (document_),
-          zones (zones_)
+          zone (zone_)
     {
         for (int i = 0; i < items.size(); ++i)
         {
@@ -349,48 +349,25 @@ public:
     void drag (const MouseEvent& e)
     {
         for (int i = 0; i < draggedComponents.size(); ++i)
-        {
-            if (zones == 0)
-                move (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i));
-            else
-                resize (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i));
-        }
+            move (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i));
     }
 
     void move (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
     {
-        v.setProperty (compBoundsProperty, componentBoundsToString (originalPos + distance), document.getUndoManager());
-    }
-
-    void resize (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
-    {
-        Rectangle<int> r (originalPos);
-
-        if ((zones & zoneL) != 0)
-            r.setLeft (r.getX() + distance.getX());
-
-        if ((zones & zoneT) != 0)
-            r.setTop (r.getY() + distance.getY());
-
-        if ((zones & zoneR) != 0)
-            r.setWidth (r.getWidth() + distance.getX());
-
-        if ((zones & zoneB) != 0)
-            r.setHeight (r.getHeight() + distance.getY());
-
-        v.setProperty (compBoundsProperty, componentBoundsToString (r), document.getUndoManager());
+        Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
+        v.setProperty (compBoundsProperty, componentBoundsToString (newBounds), document.getUndoManager());
     }
 
 private:
     ComponentDocument& document;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;
-    const int zones;
+    const ResizableBorderComponent::Zone zone;
 };
 
-void ComponentDocument::beginDrag (const Array<Component*>& items, const MouseEvent& e, int zones)
+void ComponentDocument::beginDrag (const Array<Component*>& items, const MouseEvent& e, const ResizableBorderComponent::Zone& zone)
 {
-    dragger = new DragHandler (*this, items, e, zones);
+    dragger = new DragHandler (*this, items, e, zone);
 }
 
 void ComponentDocument::continueDrag (const MouseEvent& e)

@@ -235,7 +235,7 @@ public:
          alpha (1.0f),
          scale (1.0f)
     {
-        image = comp->createComponentSnapshot (Rectangle<int> (0, 0, comp->getWidth(), comp->getHeight()));
+        image = comp->createComponentSnapshot (comp->getLocalBounds());
         setBounds (comp->getBounds());
         comp->getParentComponent()->addAndMakeVisible (this);
         toBehind (comp);
@@ -1703,7 +1703,7 @@ Image* Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
     Rectangle<int> r (areaToGrab);
 
     if (clipImageToComponentBounds)
-        r = r.getIntersection (Rectangle<int> (0, 0, getWidth(), getHeight()));
+        r = r.getIntersection (getLocalBounds());
 
     ScopedPointer<Image> componentImage (Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
                                                                    jmax (1, r.getWidth()),
@@ -1840,6 +1840,11 @@ void Component::colourChanged()
 }
 
 //==============================================================================
+const Rectangle<int> Component::getLocalBounds() const throw()
+{
+    return Rectangle<int> (0, 0, getWidth(), getHeight());
+}
+
 const Rectangle<int> Component::getUnclippedArea() const
 {
     int x = 0, y = 0, w = getWidth(), h = getHeight();
@@ -1889,8 +1894,7 @@ void Component::clipObscuredRegions (Graphics& g, const Rectangle<int>& clipRect
     }
 }
 
-void Component::getVisibleArea (RectangleList& result,
-                                const bool includeSiblings) const
+void Component::getVisibleArea (RectangleList& result, const bool includeSiblings) const
 {
     result.clear();
     const Rectangle<int> unclipped (getUnclippedArea());
@@ -1904,8 +1908,7 @@ void Component::getVisibleArea (RectangleList& result,
             const Component* const c = getTopLevelComponent();
 
             c->subtractObscuredRegions (result, c->relativePositionToOtherComponent (this, Point<int>()),
-                                        Rectangle<int> (0, 0, c->getWidth(), c->getHeight()),
-                                        this);
+                                        c->getLocalBounds(), this);
         }
 
         subtractObscuredRegions (result, Point<int>(), unclipped, 0);

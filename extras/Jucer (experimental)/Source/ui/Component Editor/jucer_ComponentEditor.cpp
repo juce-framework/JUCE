@@ -33,7 +33,7 @@ class ComponentCanvas   : public Component,
 {
 public:
     ComponentCanvas (ComponentEditor& editor_)
-        : editor (editor_)
+        : editor (editor_), borderThickness (4)
     {
         setOpaque (true);
         addAndMakeVisible (componentHolder = new Component());
@@ -54,12 +54,16 @@ public:
     void paint (Graphics& g)
     {
         g.fillAll (Colours::white);
+        g.setColour (Colour::greyLevel (0.9f));
+        g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
     }
 
     void resized()
     {
-        componentHolder->setSize (getWidth(), getHeight());
-        overlay->setSize (getWidth(), getHeight());
+        componentHolder->setBounds (borderThickness, borderThickness,
+                                    getWidth() - borderThickness * 2, getHeight() - borderThickness * 2);
+
+        overlay->setBounds (componentHolder->getBounds());
     }
 
     void zoom (float newScale, const Point<int>& centre)
@@ -151,6 +155,7 @@ public:
 
 private:
     ComponentEditor& editor;
+    const int borderThickness;
 
     //==============================================================================
     class ComponentResizeFrame    : public Component,
@@ -237,54 +242,24 @@ private:
     private:
         ComponentCanvas& canvas;
         Component::SafePointer<Component> component;
-        int dragZone;
+        ResizableBorderComponent::Zone dragZone;
         const int borderThickness;
 
         const Rectangle<int> getCentreArea() const
         {
-            return Rectangle<int> (0, 0, getWidth(), getHeight()).reduced (borderThickness, borderThickness);
+            return getLocalBounds().reduced (borderThickness, borderThickness);
         }
 
         void updateDragZone (const Point<int>& p)
         {
-            int newZone = 0;
-
-            if (! getCentreArea().contains (p))
-            {
-                const int bw = jmax (borderThickness, proportionOfWidth (0.1f), jmin (10, proportionOfWidth (0.33f)));
-                const int bh = jmax (borderThickness, proportionOfHeight (0.1f), jmin (10, proportionOfHeight (0.33f)));
-
-                if (p.getX() < bw)
-                    newZone |= ComponentDocument::zoneL;
-                else if (p.getX() >= getWidth() - bw)
-                    newZone |= ComponentDocument::zoneR;
-
-                if (p.getY() < bh)
-                    newZone |= ComponentDocument::zoneT;
-                else if (p.getY() >= getHeight() - bh)
-                    newZone |= ComponentDocument::zoneB;
-            }
+            ResizableBorderComponent::Zone newZone
+                = ResizableBorderComponent::Zone::fromPositionOnBorder (getLocalBounds(),
+                                                                        BorderSize (borderThickness), p);
 
             if (dragZone != newZone)
             {
                 dragZone = newZone;
-
-                MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
-
-                switch (newZone)
-                {
-                    case (ComponentDocument::zoneL | ComponentDocument::zoneT):   mc = MouseCursor::TopLeftCornerResizeCursor; break;
-                    case ComponentDocument::zoneT:                                mc = MouseCursor::TopEdgeResizeCursor; break;
-                    case (ComponentDocument::zoneR | ComponentDocument::zoneT):   mc = MouseCursor::TopRightCornerResizeCursor; break;
-                    case ComponentDocument::zoneL:                                mc = MouseCursor::LeftEdgeResizeCursor; break;
-                    case ComponentDocument::zoneR:                                mc = MouseCursor::RightEdgeResizeCursor; break;
-                    case (ComponentDocument::zoneL | ComponentDocument::zoneB):   mc = MouseCursor::BottomLeftCornerResizeCursor; break;
-                    case ComponentDocument::zoneB:                                mc = MouseCursor::BottomEdgeResizeCursor; break;
-                    case (ComponentDocument::zoneR | ComponentDocument::zoneB):   mc = MouseCursor::BottomRightCornerResizeCursor; break;
-                    default:                                                      mc = MouseCursor::NormalCursor; break;
-                }
-
-                setMouseCursor (mc);
+                setMouseCursor (newZone.getMouseCursor());
             }
         }
     };
@@ -357,7 +332,8 @@ private:
                 {
                     isDraggingClickedComp = true;
                     canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
-                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, 0);
+                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e,
+                                                    ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
                 }
 
                 canvas.getDocument().continueDrag (e);

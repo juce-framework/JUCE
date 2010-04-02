@@ -400,7 +400,7 @@ namespace NumberToStringConverters
         else
         {
 #if JUCE_WIN32
-  #if _MSC_VER <= 1200
+  #if _MSC_VER <= 1400
             len = _snwprintf (buffer, numChars, L"%.9g", n);
   #else
             len = _snwprintf_s (buffer, numChars, _TRUNCATE, L"%.9g", n);

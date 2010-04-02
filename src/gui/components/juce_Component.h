@@ -288,17 +288,13 @@ public:
 
     //==============================================================================
     /** Returns the x co-ordinate of the component's left edge.
-
         This is a distance in pixels from the left edge of the component's parent.
-
         @see getScreenX
     */
     inline int getX() const throw()                         { return bounds_.getX(); }
 
     /** Returns the y co-ordinate of the top of this component.
-
         This is a distance in pixels from the top edge of the component's parent.
-
         @see getScreenY
     */
     inline int getY() const throw()                         { return bounds_.getY(); }
@@ -310,7 +306,6 @@ public:
     inline int getHeight() const throw()                    { return bounds_.getHeight(); }
 
     /** Returns the x co-ordinate of the component's right-hand edge.
-
         This is a distance in pixels from the left edge of the component's parent.
     */
     int getRight() const throw()                            { return bounds_.getRight(); }
@@ -319,16 +314,20 @@ public:
     const Point<int> getPosition() const throw()            { return bounds_.getPosition(); }
 
     /** Returns the y co-ordinate of the bottom edge of this component.
-
         This is a distance in pixels from the top edge of the component's parent.
     */
     int getBottom() const throw()                           { return bounds_.getBottom(); }
 
     /** Returns this component's bounding box.
-
         The rectangle returned is relative to the top-left of the component's parent.
     */
     const Rectangle<int>& getBounds() const throw()         { return bounds_; }
+
+    /** Returns the component's bounds, relative to its own origin.
+        This is like getBounds(), but returns the rectangle in local co-ordinates, In practice, it'll
+        return a rectangle with position (0, 0), and the same size as this component.
+    */
+    const Rectangle<int> getLocalBounds() const throw();
 
     /** Returns the region of this component that's not obscured by other, opaque components.
 

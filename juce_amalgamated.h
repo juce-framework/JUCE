@@ -12362,6 +12362,8 @@ public:
 
 	const Rectangle<int>& getBounds() const throw()	 { return bounds_; }
 
+	const Rectangle<int> getLocalBounds() const throw();
+
 	void getVisibleArea (RectangleList& result,
 						 bool includeSiblings) const;
 
@@ -22839,6 +22841,46 @@ public:
 
 	const BorderSize getBorderThickness() const;
 
+	class Zone
+	{
+	public:
+
+		enum Zones
+		{
+			centre  = 0,
+			left	= 1,
+			top	 = 2,
+			right   = 4,
+			bottom  = 8
+		};
+
+		explicit Zone (int zoneFlags = 0) throw();
+		Zone (const Zone& other) throw();
+		Zone& operator= (const Zone& other) throw();
+
+		bool operator== (const Zone& other) const throw();
+		bool operator!= (const Zone& other) const throw();
+
+		static const Zone fromPositionOnBorder (const Rectangle<int>& totalSize,
+												const BorderSize& border,
+												const Point<int>& position);
+
+		const MouseCursor getMouseCursor() const throw();
+
+		bool isDraggingWholeObject() const throw()	  { return zone == centre; }
+		bool isDraggingLeftEdge() const throw()	 { return (zone & left) != 0; }
+		bool isDraggingRightEdge() const throw()	{ return (zone & right) != 0; }
+		bool isDraggingTopEdge() const throw()	  { return (zone & top) != 0; }
+		bool isDraggingBottomEdge() const throw()	   { return (zone & bottom) != 0; }
+
+		const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
+												const Point<int>& distance) const throw();
+
+	private:
+
+		int zone;
+	};
+
 	juce_UseDebuggingNewOperator
 
 protected:
@@ -22855,7 +22897,7 @@ private:
 	ComponentBoundsConstrainer* constrainer;
 	BorderSize borderSize;
 	Rectangle<int> originalBounds;
-	int mouseZone;
+	Zone mouseZone;
 
 	void updateMouseZone (const MouseEvent& e);
 

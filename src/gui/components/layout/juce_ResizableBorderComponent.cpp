@@ -33,13 +33,83 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/geometry/juce_Line.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
 
-enum ResizableBorderComponentZones
+
+//==============================================================================
+ResizableBorderComponent::Zone::Zone (int zoneFlags) throw()
+    : zone (zoneFlags)
 {
-    zoneL = 1,
-    zoneR = 2,
-    zoneT = 4,
-    zoneB = 8
-};
+}
+
+ResizableBorderComponent::Zone::Zone (const ResizableBorderComponent::Zone& other) throw() : zone (other.zone)    {}
+ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const ResizableBorderComponent::Zone& other) throw()                   { zone = other.zone; return *this; }
+bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent::Zone& other) const throw()       { return zone == other.zone; }
+bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const throw()       { return zone != other.zone; }
+
+const ResizableBorderComponent::Zone::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
+                                                                                                 const BorderSize& border,
+                                                                                                 const Point<int>& position)
+{
+    int z = 0;
+
+    if (totalSize.contains (position)
+         && ! border.subtractedFrom (totalSize).contains (position))
+    {
+        const int minW = jmax (totalSize.getWidth() / 10, jmin (10, totalSize.getWidth() / 3));
+        if (position.getX() < jmax (border.getLeft(), minW))
+            z |= left;
+        else if (position.getX() >= totalSize.getWidth() - jmax (border.getRight(), minW))
+            z |= right;
+
+        const int minH = jmax (totalSize.getHeight() / 10, jmin (10, totalSize.getHeight() / 3));
+        if (position.getY() < jmax (border.getTop(), minH))
+            z |= top;
+        else if (position.getY() >= totalSize.getHeight() - jmax (border.getBottom(), minH))
+            z |= bottom;
+    }
+
+    return Zone (z);
+}
+
+const MouseCursor ResizableBorderComponent::Zone::getMouseCursor() const throw()
+{
+    MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
+
+    switch (zone)
+    {
+        case (left | top):      mc = MouseCursor::TopLeftCornerResizeCursor; break;
+        case top:               mc = MouseCursor::TopEdgeResizeCursor; break;
+        case (right | top):     mc = MouseCursor::TopRightCornerResizeCursor; break;
+        case left:              mc = MouseCursor::LeftEdgeResizeCursor; break;
+        case right:             mc = MouseCursor::RightEdgeResizeCursor; break;
+        case (left | bottom):   mc = MouseCursor::BottomLeftCornerResizeCursor; break;
+        case bottom:            mc = MouseCursor::BottomEdgeResizeCursor; break;
+        case (right | bottom):  mc = MouseCursor::BottomRightCornerResizeCursor; break;
+        default:                break;
+    }
+
+    return mc;
+}
+
+const Rectangle<int> ResizableBorderComponent::Zone::resizeRectangleBy (Rectangle<int> b, const Point<int>& offset) const throw()
+{
+    if (isDraggingWholeObject())
+        return b + offset;
+
+    if (isDraggingLeftEdge())
+        b.setLeft (b.getX() + offset.getX());
+
+    if (isDraggingRightEdge())
+        b.setWidth (b.getWidth() + offset.getX());
+
+    if (isDraggingTopEdge())
+        b.setTop (b.getY() + offset.getY());
+
+    if (isDraggingBottomEdge())
+        b.setHeight (b.getHeight() + offset.getY());
+
+    return b;
+}
+
 
 //==============================================================================
 ResizableBorderComponent::ResizableBorderComponent (Component* const componentToResize,
@@ -95,26 +165,14 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
         return;
     }
 
-    Rectangle<int> bounds (originalBounds);
-
-    if ((mouseZone & zoneL) != 0)
-        bounds.setLeft (bounds.getX() + e.getDistanceFromDragStartX());
-
-    if ((mouseZone & zoneT) != 0)
-        bounds.setTop (bounds.getY() + e.getDistanceFromDragStartY());
-
-    if ((mouseZone & zoneR) != 0)
-        bounds.setWidth (bounds.getWidth() + e.getDistanceFromDragStartX());
-
-    if ((mouseZone & zoneB) != 0)
-        bounds.setHeight (bounds.getHeight() + e.getDistanceFromDragStartY());
+    const Rectangle<int> bounds (mouseZone.resizeRectangleBy (originalBounds, e.getOffsetFromDragStart()));
 
     if (constrainer != 0)
         constrainer->setBoundsForComponent (component, bounds,
-                                            (mouseZone & zoneT) != 0,
-                                            (mouseZone & zoneL) != 0,
-                                            (mouseZone & zoneB) != 0,
-                                            (mouseZone & zoneR) != 0);
+                                            mouseZone.isDraggingTopEdge(),
+                                            mouseZone.isDraggingLeftEdge(),
+                                            mouseZone.isDraggingBottomEdge(),
+                                            mouseZone.isDraggingRightEdge());
     else
         component->setBounds (bounds);
 }
@@ -149,49 +207,12 @@ const BorderSize ResizableBorderComponent::getBorderThickness() const
 
 void ResizableBorderComponent::updateMouseZone (const MouseEvent& e)
 {
-    int newZone = 0;
-
-    if (ResizableBorderComponent::hitTest (e.x, e.y))
-    {
-        if (e.x < jmax (borderSize.getLeft(),
-                        proportionOfWidth (0.1f),
-                        jmin (10, proportionOfWidth (0.33f))))
-            newZone |= zoneL;
-        else if (e.x >= jmin (getWidth() - borderSize.getRight(),
-                              proportionOfWidth (0.9f),
-                              getWidth() - jmin (10, proportionOfWidth (0.33f))))
-            newZone |= zoneR;
-
-        if (e.y < jmax (borderSize.getTop(),
-                        proportionOfHeight (0.1f),
-                        jmin (10, proportionOfHeight (0.33f))))
-            newZone |= zoneT;
-        else if (e.y >= jmin (getHeight() - borderSize.getBottom(),
-                              proportionOfHeight (0.9f),
-                              getHeight() - jmin (10, proportionOfHeight (0.33f))))
-            newZone |= zoneB;
-    }
+    Zone newZone (Zone::fromPositionOnBorder (getLocalBounds(), borderSize, e.getPosition()));
 
     if (mouseZone != newZone)
     {
         mouseZone = newZone;
-
-        MouseCursor::StandardCursorType mc = MouseCursor::NormalCursor;
-
-        switch (newZone)
-        {
-            case (zoneL | zoneT):   mc = MouseCursor::TopLeftCornerResizeCursor; break;
-            case zoneT:             mc = MouseCursor::TopEdgeResizeCursor; break;
-            case (zoneR | zoneT):   mc = MouseCursor::TopRightCornerResizeCursor; break;
-            case zoneL:             mc = MouseCursor::LeftEdgeResizeCursor; break;
-            case zoneR:             mc = MouseCursor::RightEdgeResizeCursor; break;
-            case (zoneL | zoneB):   mc = MouseCursor::BottomLeftCornerResizeCursor; break;
-            case zoneB:             mc = MouseCursor::BottomEdgeResizeCursor; break;
-            case (zoneR | zoneB):   mc = MouseCursor::BottomRightCornerResizeCursor; break;
-            default:                break;
-        }
-
-        setMouseCursor (mc);
+        setMouseCursor (newZone.getMouseCursor());
     }
 }
 

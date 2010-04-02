@@ -67,7 +67,8 @@ public:
         zoneB = 8
     };
 
-    void beginDrag (const Array<Component*>& items, const MouseEvent& e, int zones);
+    void beginDrag (const Array<Component*>& items, const MouseEvent& e,
+                    const ResizableBorderComponent::Zone& zone);
     void continueDrag (const MouseEvent& e);
     void endDrag (const MouseEvent& e);
 
