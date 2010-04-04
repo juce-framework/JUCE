@@ -466,3 +466,57 @@ void ComponentEditor::resized()
 {
     viewport->setBounds (0, 0, getWidth(), getHeight());
 }
+
+void ComponentEditor::getAllCommands (Array <CommandID>& commands)
+{
+    DocumentEditorComponent::getAllCommands (commands);
+
+    const CommandID ids[] = { CommandIDs::undo,
+                              CommandIDs::redo };
+
+    commands.addArray (ids, numElementsInArray (ids));
+}
+
+void ComponentEditor::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
+{
+    result.setActive (document != 0);
+
+    switch (commandID)
+    {
+    case CommandIDs::undo:
+        result.setInfo ("Undo", "Undoes the last change",
+                        CommandCategories::general, 0);
+        result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::redo:
+        result.setInfo ("Redo", "Redoes the last change",
+                        CommandCategories::general, 0);
+        result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
+        result.defaultKeypresses.add (KeyPress ('y', ModifierKeys::commandModifier, 0));
+        break;
+
+    default:
+        DocumentEditorComponent::getCommandInfo (commandID, result);
+        break;
+    }
+}
+
+bool ComponentEditor::perform (const InvocationInfo& info)
+{
+    switch (info.commandID)
+    {
+    case CommandIDs::undo:
+        jassertfalse //xxx
+        return true;
+
+    case CommandIDs::redo:
+        jassertfalse //xxx
+        return true;
+
+    default:
+        break;
+    }
+
+    return DocumentEditorComponent::perform (info);
+}

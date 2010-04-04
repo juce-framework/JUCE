@@ -45,9 +45,9 @@ ResizableBorderComponent::Zone& ResizableBorderComponent::Zone::operator= (const
 bool ResizableBorderComponent::Zone::operator== (const ResizableBorderComponent::Zone& other) const throw()       { return zone == other.zone; }
 bool ResizableBorderComponent::Zone::operator!= (const ResizableBorderComponent::Zone& other) const throw()       { return zone != other.zone; }
 
-const ResizableBorderComponent::Zone::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
-                                                                                                 const BorderSize& border,
-                                                                                                 const Point<int>& position)
+const ResizableBorderComponent::Zone ResizableBorderComponent::Zone::fromPositionOnBorder (const Rectangle<int>& totalSize,
+                                                                                           const BorderSize& border,
+                                                                                           const Point<int>& position)
 {
     int z = 0;
 

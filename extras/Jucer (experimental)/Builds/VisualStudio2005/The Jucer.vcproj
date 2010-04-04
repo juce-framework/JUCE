@@ -133,6 +133,10 @@
   <Files>
     <Filter Name="The Jucer">
       <Filter Name="Model">
+        <Filter Name="Component Types">
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ToggleButton.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_TextButton.h"/>
+        </Filter>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.h"/>
         <File RelativePath="..\..\Source\model\jucer_DrawableDocument.cpp"/>

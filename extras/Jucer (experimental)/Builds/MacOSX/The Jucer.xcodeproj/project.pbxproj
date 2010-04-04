@@ -58,6 +58,8 @@
 		D9FB1A5365FEEB854A0FF7BF = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = System/Library/Frameworks/QuickTime.framework; sourceTree = SDKROOT; };
 		12E1601866B3489844AFD645 = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Jucer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4C5CF1AA7EB9298043D89D3 = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = SOURCE_ROOT; };
+		A6FAA90B494DCD7CA5911196 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ToggleButton.h; path = "../../Source/model/Component Types/jucer_ToggleButton.h"; sourceTree = SOURCE_ROOT; };
+		E18C99BDD4EF3DFD767F3770 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TextButton.h; path = "../../Source/model/Component Types/jucer_TextButton.h"; sourceTree = SOURCE_ROOT; };
 		2D6D6985B452EA0B67A18914 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ComponentDocument.cpp; path = ../../Source/model/jucer_ComponentDocument.cpp; sourceTree = SOURCE_ROOT; };
 		E6CC3A04349F6B227FDAB26F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentDocument.h; path = ../../Source/model/jucer_ComponentDocument.h; sourceTree = SOURCE_ROOT; };
 		FF625CB50FB5C3536BA40604 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_DrawableDocument.cpp; path = ../../Source/model/jucer_DrawableDocument.cpp; sourceTree = SOURCE_ROOT; };
@@ -135,7 +137,11 @@
 		DD6476FF0F8BE833CD54C01F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode2.mm; path = ../../JuceLibraryCode/JuceLibraryCode2.mm; sourceTree = SOURCE_ROOT; };
 		268B4FFB1C675B679138545F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode3.mm; path = ../../JuceLibraryCode/JuceLibraryCode3.mm; sourceTree = SOURCE_ROOT; };
 		60A217F62952DE8A752BD79F = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = JuceLibraryCode4.mm; path = ../../JuceLibraryCode/JuceLibraryCode4.mm; sourceTree = SOURCE_ROOT; };
+		D3D6EC2C17524688F2E803EB = { isa = PBXGroup; children = (
+				A6FAA90B494DCD7CA5911196,
+				E18C99BDD4EF3DFD767F3770 ); name = "Component Types"; sourceTree = "<group>"; };
 		BF6238C9155879B9A9C47213 = { isa = PBXGroup; children = (
+				D3D6EC2C17524688F2E803EB,
 				2D6D6985B452EA0B67A18914,
 				E6CC3A04349F6B227FDAB26F,
 				FF625CB50FB5C3536BA40604,

@@ -27,6 +27,12 @@
   </CONFIGURATIONS>
   <MAINGROUP name="The Jucer" id="NhrJq66R">
     <GROUP id="EmpOiUg6" name="Model">
+      <GROUP id="7IAOlGP0H" name="Component Types">
+        <FILE id="EOwXntvc" name="jucer_ToggleButton.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_ToggleButton.h"/>
+        <FILE id="lO2yuwiGR" name="jucer_TextButton.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_TextButton.h"/>
+      </GROUP>
       <FILE id="e6IQOUwvq" name="jucer_ComponentDocument.cpp" compile="1"
             resource="0" file="Source/model/jucer_ComponentDocument.cpp"/>
       <FILE id="u5n6JTb4z" name="jucer_ComponentDocument.h" compile="0" resource="0"

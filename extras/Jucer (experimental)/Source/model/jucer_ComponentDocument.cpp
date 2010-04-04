@@ -24,6 +24,8 @@
 */
 
 #include "jucer_ComponentDocument.h"
+#include "Component Types/jucer_TextButton.h"
+#include "Component Types/jucer_ToggleButton.h"
 
 
 //==============================================================================
@@ -32,6 +34,11 @@ static const char* const componentGroupTag      = "COMPONENTS";
 
 static const char* const idProperty             = "id";
 static const char* const compBoundsProperty     = "position";
+static const char* const memberNameProperty     = "memberName";
+static const char* const compNameProperty       = "name";
+
+static const char* const metadataTagStart       = "JUCER_" "COMPONENT_METADATA_START"; // written like this to avoid thinking this file is a component!
+static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_END";
 
 //==============================================================================
 static const String componentBoundsToString (const Rectangle<int>& bounds)
@@ -45,66 +52,35 @@ static const Rectangle<int> stringToComponentBounds (const String& s)
 }
 
 //==============================================================================
-class ComponentTypeHandler
+ComponentTypeHandler::ComponentTypeHandler (const String& name_, const String& xmlTag_,
+                                            const String& memberNameRoot_)
+    : name (name_), xmlTag (xmlTag_),
+      memberNameRoot (memberNameRoot_)
 {
-public:
-    //==============================================================================
-    ComponentTypeHandler (const String& name_, const String& tag_)
-        : name (name_), tag (tag_)
-    {
-    }
+}
 
-    virtual ~ComponentTypeHandler()
-    {
-    }
-
-    const String& getName() const               { return name; }
-    const String& getTag() const                { return tag; }
-
-    virtual Component* createComponent() = 0;
-    virtual const Rectangle<int> getDefaultSize() = 0;
-
-    virtual void updateComponent (Component* comp, const ValueTree& state)
-    {
-        comp->setBounds (stringToComponentBounds (state [compBoundsProperty]));
-    }
-
-    virtual const ValueTree createNewItem()
-    {
-        ValueTree v (tag);
-        v.setProperty (idProperty, createAlphaNumericUID(), 0);
-        v.setProperty (compBoundsProperty,
-                       componentBoundsToString (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
-                                                                                           Random::getSystemRandom().nextInt (100) + 100))), 0);
-        return v;
-    }
-
-    //==============================================================================
-protected:
-    const String name, tag;
-};
-
-//==============================================================================
-class TextButtonHandler  : public ComponentTypeHandler
+ComponentTypeHandler::~ComponentTypeHandler()
 {
-public:
-    TextButtonHandler() : ComponentTypeHandler ("TextButton", "TEXTBUTTON")  {}
-    ~TextButtonHandler()  {}
+}
 
-    Component* createComponent()                { return new TextButton (String::empty); }
-    const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 150, 24); }
+void ComponentTypeHandler::updateComponent (Component* comp, const ValueTree& state)
+{
+    comp->setBounds (stringToComponentBounds (state [compBoundsProperty]));
+    comp->setName (state [compNameProperty]);
+}
 
-    void updateComponent (Component* comp, const ValueTree& state)
-    {
-        ComponentTypeHandler::updateComponent (comp, state);
-    }
+const ValueTree ComponentTypeHandler::createNewItem (ComponentDocument& document)
+{
+    ValueTree v (getXmlTag());
+    v.setProperty (idProperty, createAlphaNumericUID(), 0);
+    v.setProperty (compNameProperty, String::empty, 0);
+    v.setProperty (memberNameProperty, document.getNonExistentMemberName (getMemberNameRoot()), 0);
+    v.setProperty (compBoundsProperty,
+                   componentBoundsToString (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
+                                                                                       Random::getSystemRandom().nextInt (100) + 100))), 0);
+    return v;
+}
 
-    const ValueTree createNewItem()
-    {
-        ValueTree v (ComponentTypeHandler::createNewItem());
-        return v;
-    }
-};
 
 //==============================================================================
 class ComponentTypeManager  : public DeletedAtShutdown
@@ -113,6 +89,7 @@ public:
     ComponentTypeManager()
     {
         handlers.add (new TextButtonHandler());
+        handlers.add (new ToggleButtonHandler());
     }
 
     ~ComponentTypeManager()
@@ -137,7 +114,7 @@ public:
     ComponentTypeHandler* getHandlerFor (const String& type)
     {
         for (int i = handlers.size(); --i >= 0;)
-            if (handlers.getUnchecked(i)->getTag() == type)
+            if (handlers.getUnchecked(i)->getXmlTag() == type)
                 return handlers.getUnchecked(i);
 
         return 0;
@@ -164,13 +141,38 @@ juce_ImplementSingleton_SingleThreaded (ComponentTypeManager);
 
 //==============================================================================
 ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
-   : project (project_), cppFile (cppFile_), root (componentDocumentTag)
+   : project (project_), cppFile (cppFile_), root (componentDocumentTag),
+     changedSinceSaved (false)
 {
+    reload();
     checkRootObject();
+
+    root.addListener (this);
 }
 
 ComponentDocument::~ComponentDocument()
 {
+    root.removeListener (this);
+}
+
+void ComponentDocument::beginNewTransaction()
+{
+    undoManager.beginNewTransaction();
+}
+
+void ComponentDocument::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
+{
+    changedSinceSaved = true;
+}
+
+void ComponentDocument::valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)
+{
+    changedSinceSaved = true;
+}
+
+void ComponentDocument::valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)
+{
+    changedSinceSaved = true;
 }
 
 bool ComponentDocument::isComponentFile (const File& file)
@@ -178,39 +180,118 @@ bool ComponentDocument::isComponentFile (const File& file)
     if (! file.hasFileExtension (".cpp"))
         return false;
 
-    ScopedPointer <InputStream> in (file.createInputStream());
+    InputStream* in = file.createInputStream();
 
-    if (in == 0)
-        return false;
+    if (in != 0)
+    {
+        BufferedInputStream buf (in, 8192, true);
 
-    const int amountToRead = 1024;
-    HeapBlock <char> initialData;
-    initialData.calloc (amountToRead + 4);
-    in->read (initialData, amountToRead);
+        while (! buf.isExhausted())
+            if (buf.readNextLine().contains (metadataTagStart))
+                return true;
+    }
 
-    return String::createStringFromData (initialData, amountToRead)
-                  .contains ("JUCER_" "COMPONENT"); // written like this to avoid thinking this file is a component!
+    return false;
+}
+
+void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
+{
+    cpp << "/**  */"
+        << newLine << newLine;
+
+    header << "/**  */"
+           << newLine << newLine;
+}
+
+void ComponentDocument::writeMetadata (OutputStream& out)
+{
+    out << "#if 0" << newLine
+        << "/** Jucer-generated metadata section - Edit this data at own risk!" << newLine
+        << metadataTagStart << newLine << newLine;
+
+    ScopedPointer<XmlElement> xml (root.createXml());
+    jassert (xml != 0);
+
+    if (xml != 0)
+        xml->writeToStream (out, String::empty, false, false);
+
+    out << newLine
+        << metadataTagEnd << " */" << newLine
+        << "#endif" << newLine;
 }
 
 bool ComponentDocument::save()
 {
+    MemoryOutputStream cpp, header;
+    writeCode (cpp, header);
+    writeMetadata (cpp);
 
-    //XXX
-    return false;
+    bool savedOk = overwriteFileWithNewDataIfDifferent (cppFile, cpp)
+                    && overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
+
+    if (savedOk)
+        changedSinceSaved = false;
+
+    return savedOk;
 }
 
 bool ComponentDocument::reload()
 {
+    String xmlString;
 
-    //XXX
-    return true;
+    {
+        InputStream* in = cppFile.createInputStream();
+
+        if (in == 0)
+            return false;
+
+        BufferedInputStream buf (in, 8192, true);
+        String::Concatenator xml (xmlString);
+
+        while (! buf.isExhausted())
+        {
+            String line (buf.readNextLine());
+
+            if (line.contains (metadataTagStart))
+            {
+                while (! buf.isExhausted())
+                {
+                    line = buf.readNextLine();
+                    if (line.contains (metadataTagEnd))
+                        break;
+
+                    xml.append (line);
+                    xml.append (newLine);
+                }
+
+                break;
+            }
+        }
+    }
+
+    XmlDocument doc (xmlString);
+    ScopedPointer<XmlElement> xml (doc.getDocumentElement());
+
+    if (xml != 0 && xml->hasTagName (componentDocumentTag))
+    {
+        ValueTree newTree (ValueTree::fromXml (*xml));
+
+        if (newTree.isValid())
+        {
+            root = newTree;
+            checkRootObject();
+            undoManager.clearUndoHistory();
+            changedSinceSaved = false;
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool ComponentDocument::hasChangedSinceLastSave()
 {
-
-    //XXX
-    return false;
+    return changedSinceSaved;
 }
 
 void ComponentDocument::checkRootObject()
@@ -219,6 +300,9 @@ void ComponentDocument::checkRootObject()
 
     if (! getComponentGroup().isValid())
         root.addChild (ValueTree (componentGroupTag), -1, 0);
+
+    if (getClassName().toString().isEmpty())
+        getClassName() = "NewComponent";
 }
 
 //==============================================================================
@@ -242,7 +326,7 @@ void ComponentDocument::performNewComponentMenuItem (int menuResultCode)
         jassert (handler != 0);
 
         if (handler != 0)
-            getComponentGroup().addChild (handler->createNewItem(), -1, getUndoManager());
+            getComponentGroup().addChild (handler->createNewItem (*this), -1, getUndoManager());
     }
 }
 
@@ -260,6 +344,20 @@ int ComponentDocument::getNumComponents() const
 const ValueTree ComponentDocument::getComponent (int index) const
 {
     return getComponentGroup().getChild (index);
+}
+
+const ValueTree ComponentDocument::getComponentWithMemberName (const String& name) const
+{
+    const ValueTree comps (getComponentGroup());
+
+    for (int i = comps.getNumChildren(); --i >= 0;)
+    {
+        const ValueTree v (comps.getChild(i));
+        if (v [memberNameProperty] == name)
+            return v;
+    }
+
+    return ValueTree::invalid;
 }
 
 Component* ComponentDocument::createComponent (int index) const
@@ -322,6 +420,24 @@ bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Compo
     return storedState [idProperty] == comp->getProperties() [idProperty];
 }
 
+const String ComponentDocument::getNonExistentMemberName (String suggestedName)
+{
+    suggestedName = makeValidCppIdentifier (suggestedName, false, true, false);
+    const String original (suggestedName);
+    int num = 1;
+
+    while (getComponentWithMemberName (suggestedName).isValid())
+    {
+        suggestedName = original;
+        while (String ("0123456789").containsChar (suggestedName.getLastCharacter()))
+            suggestedName = suggestedName.dropLastCharacters (1);
+
+        suggestedName << num++;
+    }
+
+    return suggestedName;
+}
+
 //==============================================================================
 class ComponentDocument::DragHandler
 {
@@ -340,14 +456,19 @@ public:
             draggedComponents.add (v);
             originalPositions.add (stringToComponentBounds (v [compBoundsProperty]));
         }
+
+        document.beginNewTransaction();
     }
 
     ~DragHandler()
     {
+        document.beginNewTransaction();
     }
 
     void drag (const MouseEvent& e)
     {
+        document.getUndoManager()->undoCurrentTransactionOnly();
+
         for (int i = 0; i < draggedComponents.size(); ++i)
             move (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i));
     }

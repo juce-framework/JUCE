@@ -31,7 +31,7 @@
 
 
 //==============================================================================
-class ComponentDocument
+class ComponentDocument   : public ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -47,8 +47,14 @@ public:
     typedef SelectedItemSet<uint32> SelectedItems;
 
     //==============================================================================
+    Value getClassName()            { return getRootValue ("className"); }
+    Value getClassDescription()     { return getRootValue ("classDesc"); }
+    const String getNonExistentMemberName (String suggestedName);
+
+    //==============================================================================
     int getNumComponents() const;
     const ValueTree getComponent (int index) const;
+    const ValueTree getComponentWithMemberName (const String& name) const;
     Component* createComponent (int index) const;
     void updateComponent (Component* comp) const;
     bool containsComponent (Component* comp) const;
@@ -59,14 +65,6 @@ public:
     void performNewComponentMenuItem (int menuResultCode);
 
     //==============================================================================
-    enum ResizeZones
-    {
-        zoneL = 1,
-        zoneR = 2,
-        zoneT = 4,
-        zoneB = 8
-    };
-
     void beginDrag (const Array<Component*>& items, const MouseEvent& e,
                     const ResizableBorderComponent::Zone& zone);
     void continueDrag (const MouseEvent& e);
@@ -75,18 +73,52 @@ public:
     //==============================================================================
     ValueTree& getRoot()                                { return root; }
     UndoManager* getUndoManager() throw()               { return &undoManager; }
+    void beginNewTransaction();
+
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property);
+    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
+    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
 private:
     Project* project;
     File cppFile;
     ValueTree root;
     UndoManager undoManager;
+    bool changedSinceSaved;
 
     class DragHandler;
     ScopedPointer <DragHandler> dragger;
 
     void checkRootObject();
     ValueTree getComponentGroup() const;
+    Value getRootValue (const var::identifier& name)    { return root.getPropertyAsValue (name, getUndoManager()); }
+
+    void writeCode (OutputStream& cpp, OutputStream& header);
+    void writeMetadata (OutputStream& out);
+};
+
+
+//==============================================================================
+class ComponentTypeHandler
+{
+public:
+    //==============================================================================
+    ComponentTypeHandler (const String& name_, const String& xmlTag_, const String& memberNameRoot_);
+    virtual ~ComponentTypeHandler();
+
+    const String& getName() const               { return name; }
+    const String& getXmlTag() const             { return xmlTag; }
+    const String& getMemberNameRoot() const     { return memberNameRoot; }
+
+    virtual Component* createComponent() = 0;
+    virtual const Rectangle<int> getDefaultSize() = 0;
+
+    virtual void updateComponent (Component* comp, const ValueTree& state);
+    virtual const ValueTree createNewItem (ComponentDocument& document);
+
+    //==============================================================================
+protected:
+    const String name, xmlTag, memberNameRoot;
 };
 
 

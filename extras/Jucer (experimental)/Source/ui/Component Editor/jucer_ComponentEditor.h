@@ -44,6 +44,10 @@ public:
     ~ComponentEditor();
 
     //==============================================================================
+    void getAllCommands (Array <CommandID>& commands);
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
+    bool perform (const InvocationInfo& info);
+
     void paint (Graphics& g);
     void resized();
 
