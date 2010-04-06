@@ -66,6 +66,9 @@ MainWindow::MainWindow()
 
         DocumentEditorComponent dec (0);
         commandManager->registerAllCommandsForTarget (&dec);
+
+        ComponentEditor compEd (0, 0, 0);
+        commandManager->registerAllCommandsForTarget (&compEd);
     }
 
     commandManager->getKeyMappings()->resetToDefaultMappings();

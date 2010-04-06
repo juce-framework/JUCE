@@ -451,10 +451,22 @@ public:
     {
         for (int i = 0; i < items.size(); ++i)
         {
+            Component* comp = items.getUnchecked(i);
             jassert (items.getUnchecked(i) != 0);
-            const ValueTree v (document.getComponentState (items.getUnchecked(i)));
+            const ValueTree v (document.getComponentState (comp));
             draggedComponents.add (v);
-            originalPositions.add (stringToComponentBounds (v [compBoundsProperty]));
+
+            const Rectangle<int> pos (stringToComponentBounds (v [compBoundsProperty]));
+            originalPositions.add (pos);
+
+            const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
+                                             (float) pos.getWidth(), (float) pos.getHeight());
+            verticalSnapPositions.add (floatPos.getX());
+            verticalSnapPositions.add (floatPos.getCentreX());
+            verticalSnapPositions.add (floatPos.getRight());
+            horizontalSnapPositions.add (floatPos.getY());
+            verticalSnapPositions.add (floatPos.getCentreY());
+            horizontalSnapPositions.add (floatPos.getBottom());
         }
 
         document.beginNewTransaction();
@@ -479,10 +491,29 @@ public:
         v.setProperty (compBoundsProperty, componentBoundsToString (newBounds), document.getUndoManager());
     }
 
+    const Array<float> getVerticalSnapPositions (const Point<int>& distance) const
+    {
+        Array<float> p (verticalSnapPositions);
+        for (int i = p.size(); --i >= 0;)
+            p.set (i, p.getUnchecked(i) + distance.getX());
+
+        return p;
+    }
+
+    const Array<float> getHorizontalSnapPositions (const Point<int>& distance) const
+    {
+        Array<float> p (horizontalSnapPositions);
+        for (int i = p.size(); --i >= 0;)
+            p.set (i, p.getUnchecked(i) + distance.getY());
+
+        return p;
+    }
+
 private:
     ComponentDocument& document;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;
+    Array <float> verticalSnapPositions, horizontalSnapPositions;
     const ResizableBorderComponent::Zone zone;
 };
 

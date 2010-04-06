@@ -444,12 +444,12 @@ ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document,
       project (project_),
       componentDocument (componentDocument_)
 {
-    jassert (componentDocument != 0);
-
     setOpaque (true);
 
     addAndMakeVisible (viewport = new Viewport());
-    viewport->setViewedComponent (new ComponentCanvas (*this));
+
+    if (document != 0)
+        viewport->setViewedComponent (new ComponentCanvas (*this));
 }
 
 ComponentEditor::~ComponentEditor()
@@ -507,11 +507,11 @@ bool ComponentEditor::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::undo:
-        jassertfalse //xxx
+        getDocument().getUndoManager()->undo();
         return true;
 
     case CommandIDs::redo:
-        jassertfalse //xxx
+        getDocument().getUndoManager()->redo();
         return true;
 
     default:

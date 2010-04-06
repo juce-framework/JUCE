@@ -400,7 +400,7 @@ public:
                 setVisible (true);
 
                 oldWinProc = SubclassWindow (parentHWND, (WNDPROC) interceptingWinProc);
-                SetWindowLongPtr (parentHWND, GWL_USERDATA, (LONG_PTR) this);
+                SetWindowLongPtr (parentHWND, GWLP_USERDATA, (LONG_PTR) this);
 
                 resizeToParentWindow (window->width, window->height);
             }
