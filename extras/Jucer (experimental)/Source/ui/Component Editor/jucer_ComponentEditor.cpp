@@ -28,11 +28,12 @@
 
 
 //==============================================================================
-class ComponentCanvas   : public Component,
-                          public ValueTree::Listener
+class ComponentEditor::Canvas   : public Component,
+                                  public ValueTree::Listener,
+                                  public Timer
 {
 public:
-    ComponentCanvas (ComponentEditor& editor_)
+    Canvas (ComponentEditor& editor_)
         : editor (editor_), borderThickness (4)
     {
         setOpaque (true);
@@ -45,7 +46,7 @@ public:
         updateComponents();
     }
 
-    ~ComponentCanvas()
+    ~Canvas()
     {
         getDocument().getRoot().removeListener (this);
         deleteAllChildren();
@@ -60,10 +61,9 @@ public:
 
     void resized()
     {
-        componentHolder->setBounds (borderThickness, borderThickness,
-                                    getWidth() - borderThickness * 2, getHeight() - borderThickness * 2);
-
+        componentHolder->setBounds (getLocalBounds().reduced (borderThickness, borderThickness));
         overlay->setBounds (componentHolder->getBounds());
+        updateComponents();
     }
 
     void zoom (float newScale, const Point<int>& centre)
@@ -121,6 +121,8 @@ public:
                 doc.updateComponent (c);
             }
         }
+
+        startTimer (500);
     }
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
@@ -141,7 +143,8 @@ public:
 
     const Array<Component*> getSelectedComps() const
     {
-        Array <Component*> comps;
+        Array<Component*> comps;
+
         for (int i = 0; i < selection.getNumSelected(); ++i)
         {
             Component* c = getComponentForUID (selection.getSelectedItem (i));
@@ -153,6 +156,25 @@ public:
         return comps;
     }
 
+    void getSelectedItemProperties (Array <PropertyComponent*>& props)
+    {
+        //xxx needs to handle multiple selections..
+
+        if (selection.getNumSelected() == 1)
+        {
+            Component* c = getComponentForUID (selection.getSelectedItem (0));
+            getDocument().getComponentProperties (props, c);
+        }
+    }
+
+    void timerCallback()
+    {
+        stopTimer();
+
+        if (! Component::isMouseButtonDownAnywhere())
+            getDocument().beginNewTransaction();
+    }
+
 private:
     ComponentEditor& editor;
     const int borderThickness;
@@ -162,7 +184,7 @@ private:
                                     public ComponentListener
     {
     public:
-        ComponentResizeFrame (ComponentCanvas& canvas_,
+        ComponentResizeFrame (Canvas& canvas_,
                               Component* componentToAttachTo)
             : canvas (canvas_),
               component (componentToAttachTo),
@@ -240,7 +262,7 @@ private:
         uint32 getTargetComponentUID() const  { return component == 0 ? 0 : component->getComponentUID(); }
 
     private:
-        ComponentCanvas& canvas;
+        Canvas& canvas;
         Component::SafePointer<Component> component;
         ResizableBorderComponent::Zone dragZone;
         const int borderThickness;
@@ -270,7 +292,7 @@ private:
                               public ChangeListener
     {
     public:
-        OverlayComponent (ComponentCanvas& canvas_)
+        OverlayComponent (Canvas& canvas_)
             : canvas (canvas_)
         {
             setAlwaysOnTop (true);
@@ -382,7 +404,7 @@ private:
         }
 
     private:
-        ComponentCanvas& canvas;
+        Canvas& canvas;
         ScopedPointer <LassoComponent <ComponentDocument::SelectedItems::ItemType> > lasso;
         bool mouseDownResult, isDraggingClickedComp;
         uint32 mouseDownCompUID;
@@ -436,24 +458,76 @@ private:
     }
 };
 
+//==============================================================================
+class ComponentEditor::InfoPanel  : public Component,
+                                    public ChangeListener
+{
+public:
+    InfoPanel (ComponentEditor& editor_)
+      : editor (editor_)
+    {
+        setOpaque (true);
+
+        addAndMakeVisible (props = new PropertyPanel());
+
+        editor.getCanvas()->getSelection().addChangeListener (this);
+    }
+
+    ~InfoPanel()
+    {
+        editor.getCanvas()->getSelection().removeChangeListener (this);
+
+        props->clear();
+        deleteAllChildren();
+    }
+
+    void changeListenerCallback (void*)
+    {
+        Array <PropertyComponent*> newComps;
+        editor.getCanvas()->getSelectedItemProperties (newComps);
+
+        props->clear();
+        props->addProperties (newComps);
+    }
+
+    void paint (Graphics& g)
+    {
+        g.fillAll (Colour::greyLevel (0.92f));
+    }
+
+    void resized()
+    {
+        props->setSize (getWidth(), getHeight());
+    }
+
+private:
+    ComponentEditor& editor;
+    PropertyPanel* props;
+};
+
 
 //==============================================================================
 ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document,
                                   Project* project_, ComponentDocument* componentDocument_)
     : DocumentEditorComponent (document),
       project (project_),
-      componentDocument (componentDocument_)
+      componentDocument (componentDocument_),
+      infoPanel (0)
 {
     setOpaque (true);
 
     addAndMakeVisible (viewport = new Viewport());
 
     if (document != 0)
-        viewport->setViewedComponent (new ComponentCanvas (*this));
+    {
+        viewport->setViewedComponent (new Canvas (*this));
+        addAndMakeVisible (infoPanel = new InfoPanel (*this));
+    }
 }
 
 ComponentEditor::~ComponentEditor()
 {
+    deleteAndZero (infoPanel);
     deleteAllChildren();
 }
 
@@ -464,7 +538,16 @@ void ComponentEditor::paint (Graphics& g)
 
 void ComponentEditor::resized()
 {
-    viewport->setBounds (0, 0, getWidth(), getHeight());
+    const int infoPanelWidth = 200;
+    viewport->setBounds (0, 0, getWidth() - infoPanelWidth, getHeight());
+
+    if (infoPanel != 0)
+        infoPanel->setBounds (getWidth() - infoPanelWidth, 0, infoPanelWidth, getHeight());
+}
+
+ComponentEditor::Canvas* ComponentEditor::getCanvas() const
+{
+    return dynamic_cast <Canvas*> (viewport->getViewedComponent());
 }
 
 void ComponentEditor::getAllCommands (Array <CommandID>& commands)

@@ -41,17 +41,6 @@ static const char* const metadataTagStart       = "JUCER_" "COMPONENT_METADATA_S
 static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_END";
 
 //==============================================================================
-static const String componentBoundsToString (const Rectangle<int>& bounds)
-{
-    return bounds.toString();
-}
-
-static const Rectangle<int> stringToComponentBounds (const String& s)
-{
-    return Rectangle<int>::fromString (s);
-}
-
-//==============================================================================
 ComponentTypeHandler::ComponentTypeHandler (const String& name_, const String& xmlTag_,
                                             const String& memberNameRoot_)
     : name (name_), xmlTag (xmlTag_),
@@ -63,24 +52,37 @@ ComponentTypeHandler::~ComponentTypeHandler()
 {
 }
 
+Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const
+{
+    return state.getPropertyAsValue (name, document.getUndoManager());
+}
+
 void ComponentTypeHandler::updateComponent (Component* comp, const ValueTree& state)
 {
-    comp->setBounds (stringToComponentBounds (state [compBoundsProperty]));
+    if (comp->getParentComponent() != 0)
+    {
+        PositionedRectangle pos (state [compBoundsProperty].toString());
+        comp->setBounds (pos.getRectangle (comp->getParentComponent()->getLocalBounds()));
+    }
+
     comp->setName (state [compNameProperty]);
 }
 
-const ValueTree ComponentTypeHandler::createNewItem (ComponentDocument& document)
+void ComponentTypeHandler::initialiseNewItem (ValueTree& state, ComponentDocument& document)
 {
-    ValueTree v (getXmlTag());
-    v.setProperty (idProperty, createAlphaNumericUID(), 0);
-    v.setProperty (compNameProperty, String::empty, 0);
-    v.setProperty (memberNameProperty, document.getNonExistentMemberName (getMemberNameRoot()), 0);
-    v.setProperty (compBoundsProperty,
-                   componentBoundsToString (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
-                                                                                       Random::getSystemRandom().nextInt (100) + 100))), 0);
-    return v;
+    state.setProperty (compNameProperty, String::empty, 0);
+    state.setProperty (memberNameProperty, document.getNonExistentMemberName (getMemberNameRoot()), 0);
+    state.setProperty (compBoundsProperty,
+                       getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
+                                                                  Random::getSystemRandom().nextInt (100) + 100)).toString(), 0);
 }
 
+void ComponentTypeHandler::createPropertyEditors (ValueTree& state, ComponentDocument& document,
+                                                  Array <PropertyComponent*>& props)
+{
+    props.add (new TextPropertyComponent (getValue (compBoundsProperty, state, document), "Bounds", 512, false));
+    props.getLast()->setTooltip ("The component's position.");
+}
 
 //==============================================================================
 class ComponentTypeManager  : public DeletedAtShutdown
@@ -326,7 +328,13 @@ void ComponentDocument::performNewComponentMenuItem (int menuResultCode)
         jassert (handler != 0);
 
         if (handler != 0)
-            getComponentGroup().addChild (handler->createNewItem (*this), -1, getUndoManager());
+        {
+            ValueTree state (handler->getXmlTag());
+            state.setProperty (idProperty, createAlphaNumericUID(), 0);
+            handler->initialiseNewItem (state, *this);
+
+            getComponentGroup().addChild (state, -1, getUndoManager());
+        }
     }
 }
 
@@ -413,6 +421,20 @@ const ValueTree ComponentDocument::getComponentState (Component* comp) const
     return ValueTree::invalid;
 }
 
+void ComponentDocument::getComponentProperties (Array <PropertyComponent*>& props, Component* comp)
+{
+    ValueTree v (getComponentState (comp));
+
+    if (v.isValid())
+    {
+        ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandlerFor (v.getType());
+        jassert (handler != 0);
+
+        if (handler != 0)
+            handler->createPropertyEditors (v, *this, props);
+    }
+}
+
 bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Component* comp) const
 {
     jassert (comp != 0);
@@ -439,6 +461,12 @@ const String ComponentDocument::getNonExistentMemberName (String suggestedName)
 }
 
 //==============================================================================
+UndoManager* ComponentDocument::getUndoManager()
+{
+    return &undoManager;
+}
+
+//==============================================================================
 class ComponentDocument::DragHandler
 {
 public:
@@ -452,21 +480,37 @@ public:
         for (int i = 0; i < items.size(); ++i)
         {
             Component* comp = items.getUnchecked(i);
-            jassert (items.getUnchecked(i) != 0);
+            jassert (comp != 0);
+
+            parentComponentSize.setSize (comp->getParentWidth(), comp->getParentHeight());
+            jassert (! parentComponentSize.isEmpty());
+
             const ValueTree v (document.getComponentState (comp));
             draggedComponents.add (v);
 
-            const Rectangle<int> pos (stringToComponentBounds (v [compBoundsProperty]));
-            originalPositions.add (pos);
+            PositionedRectangle pos (v [compBoundsProperty].toString());
+            originalPositions.add (pos.getRectangle (parentComponentSize));
 
             const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
                                              (float) pos.getWidth(), (float) pos.getHeight());
-            verticalSnapPositions.add (floatPos.getX());
-            verticalSnapPositions.add (floatPos.getCentreX());
-            verticalSnapPositions.add (floatPos.getRight());
-            horizontalSnapPositions.add (floatPos.getY());
-            verticalSnapPositions.add (floatPos.getCentreY());
-            horizontalSnapPositions.add (floatPos.getBottom());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge())
+                verticalSnapPositions.add (floatPos.getX());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge() || zone.isDraggingRightEdge())
+                verticalSnapPositions.add (floatPos.getCentreX());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingRightEdge())
+                verticalSnapPositions.add (floatPos.getRight());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingTopEdge())
+                horizontalSnapPositions.add (floatPos.getY());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingTopEdge() || zone.isDraggingBottomEdge())
+                verticalSnapPositions.add (floatPos.getCentreY());
+
+            if (zone.isDraggingWholeObject() || zone.isDraggingBottomEdge())
+                horizontalSnapPositions.add (floatPos.getBottom());
         }
 
         document.beginNewTransaction();
@@ -488,7 +532,11 @@ public:
     void move (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
     {
         Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
-        v.setProperty (compBoundsProperty, componentBoundsToString (newBounds), document.getUndoManager());
+
+        PositionedRectangle pr (v [compBoundsProperty].toString());
+        pr.updateFrom (newBounds, parentComponentSize);
+
+        v.setProperty (compBoundsProperty, pr.toString(), document.getUndoManager());
     }
 
     const Array<float> getVerticalSnapPositions (const Point<int>& distance) const
@@ -510,6 +558,7 @@ public:
     }
 
 private:
+    Rectangle<int> parentComponentSize;
     ComponentDocument& document;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;

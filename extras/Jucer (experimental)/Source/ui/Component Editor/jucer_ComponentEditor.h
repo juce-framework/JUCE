@@ -53,11 +53,19 @@ public:
 
     ComponentDocument& getDocument() const      { return *componentDocument; }
 
+    Viewport* getViewport() const throw()       { return viewport; }
+
+    class Canvas;
+    Canvas* getCanvas() const;
+
 private:
+    class InfoPanel;
+
     Project* project;
     ComponentDocument* componentDocument;
 
     Viewport* viewport;
+    InfoPanel* infoPanel;
 };
 
 

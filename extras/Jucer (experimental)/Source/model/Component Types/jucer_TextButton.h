@@ -45,10 +45,16 @@ public:
         tb->setButtonText (state ["text"].toString());
     }
 
-    const ValueTree createNewItem (ComponentDocument& document)
+    void initialiseNewItem (ValueTree& state, ComponentDocument& document)
     {
-        ValueTree v (ComponentTypeHandler::createNewItem (document));
-        v.setProperty ("text", "New Toggle Button", 0);
-        return v;
+        ComponentTypeHandler::initialiseNewItem (state, document);
+        state.setProperty ("text", "New Toggle Button", 0);
+    }
+
+    void createPropertyEditors (ValueTree& state, ComponentDocument& document, Array <PropertyComponent*>& props)
+    {
+        ComponentTypeHandler::createPropertyEditors (state, document, props);
+        props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
+        props.getLast()->setTooltip ("The button's text.");
     }
 };

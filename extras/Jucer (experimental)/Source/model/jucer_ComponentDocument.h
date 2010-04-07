@@ -59,6 +59,7 @@ public:
     void updateComponent (Component* comp) const;
     bool containsComponent (Component* comp) const;
     const ValueTree getComponentState (Component* comp) const;
+    void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
@@ -72,7 +73,7 @@ public:
 
     //==============================================================================
     ValueTree& getRoot()                                { return root; }
-    UndoManager* getUndoManager() throw()               { return &undoManager; }
+    UndoManager* getUndoManager();
     void beginNewTransaction();
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property);
@@ -114,7 +115,10 @@ public:
     virtual const Rectangle<int> getDefaultSize() = 0;
 
     virtual void updateComponent (Component* comp, const ValueTree& state);
-    virtual const ValueTree createNewItem (ComponentDocument& document);
+    virtual void initialiseNewItem (ValueTree& state, ComponentDocument& document);
+    virtual void createPropertyEditors (ValueTree& state, ComponentDocument& document, Array <PropertyComponent*>& props);
+
+    Value getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const;
 
     //==============================================================================
 protected:
