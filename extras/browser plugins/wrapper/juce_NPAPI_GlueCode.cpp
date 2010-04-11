@@ -849,7 +849,7 @@ static const var createValueFromNPVariant (NPP npp, const NPVariant& v)
         return var (String::fromUTF8 ((const char*) (NPVARIANT_TO_STRING (v).utf8characters),
                                       (int) NPVARIANT_TO_STRING (v).utf8length));
 #endif
-    else if (NPVARIANT_IS_OBJECT (v))
+    else if (NPVARIANT_IS_OBJECT (v) && npp != 0)
         return var (new DynamicObjectWrappingNPObject (npp, NPVARIANT_TO_OBJECT (v)));
 
     return var();
@@ -872,7 +872,7 @@ static void createNPVariantFromValue (NPP npp, NPVariant& out, const var& v)
         memcpy (stringCopy, utf8, utf8Len);
         STRINGZ_TO_NPVARIANT (stringCopy, out);
     }
-    else if (v.isObject())
+    else if (v.isObject() && npp != 0)
         OBJECT_TO_NPVARIANT (NPObjectWrappingDynamicObject::create (npp, v), out);
     else
         VOID_TO_NPVARIANT (out);

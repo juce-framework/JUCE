@@ -8719,20 +8719,32 @@ public:
 
 	void exit();
 
+	class ScopedLockType
+	{
+	public:
+
+		inline explicit ScopedLockType (InterProcessLock& lock)		 : lock_ (lock) { lock.enter(); }
+
+		inline ~ScopedLockType()						{ lock_.exit(); }
+
+	private:
+
+		InterProcessLock& lock_;
+
+		ScopedLockType (const ScopedLockType&);
+		ScopedLockType& operator= (const ScopedLockType&);
+	};
+
 	juce_UseDebuggingNewOperator
 
 private:
 
-  #if JUCE_WINDOWS
-	void* internal;
-//  #elif JUCE_64BIT
-  //  long long internal;
-  #else
-	int internal;
-  #endif
+	class Pimpl;
+	friend class ScopedPointer <Pimpl>;
+	ScopedPointer <Pimpl> pimpl;
 
+	CriticalSection lock;
 	String name;
-	int reentrancyLevel;
 
 	InterProcessLock (const InterProcessLock&);
 	InterProcessLock& operator= (const InterProcessLock&);

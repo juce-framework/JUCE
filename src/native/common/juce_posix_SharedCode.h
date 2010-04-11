@@ -462,87 +462,110 @@ const String juce_getOutputFromCommand (const String& command)
     return result;
 }
 
+
 //==============================================================================
-InterProcessLock::InterProcessLock (const String& name_)
-    : internal (0),
-      name (name_),
-      reentrancyLevel (0)
+class InterProcessLock::Pimpl
 {
+public:
+    Pimpl (const String& name, const int timeOutMillisecs)
+        : handle (0), refCount (1)
+    {
 #if JUCE_MAC
-    // (don't use getSpecialLocation() to avoid the temp folder being different for each app)
-    const File temp (File ("~/Library/Caches/Juce").getChildFile (name));
+        // (don't use getSpecialLocation() to avoid the temp folder being different for each app)
+        const File temp (File ("~/Library/Caches/Juce").getChildFile (name));
 #else
-    const File temp (File::getSpecialLocation (File::tempDirectory).getChildFile (name));
+        const File temp (File::getSpecialLocation (File::tempDirectory).getChildFile (name));
 #endif
+        temp.create();
+        handle = open (temp.getFullPathName().toUTF8(), O_RDWR);
 
-    temp.create();
+        if (handle != 0)
+        {
+            struct flock fl;
+            zerostruct (fl);
+            fl.l_whence = SEEK_SET;
+            fl.l_type = F_WRLCK;
 
-    internal = open (temp.getFullPathName().toUTF8(), O_RDWR);
+            const int64 endTime = Time::currentTimeMillis() + timeOutMillisecs;
+
+            for (;;)
+            {
+                const int result = fcntl (handle, F_SETLK, &fl);
+
+                if (result >= 0)
+                    return;
+
+                if (errno != EINTR)
+                {
+                    if (timeOutMillisecs == 0
+                         || (timeOutMillisecs > 0 && Time::currentTimeMillis() >= endTime))
+                        break;
+
+                    Thread::sleep (10);
+                }
+            }
+        }
+
+        closeFile();
+    }
+
+    ~Pimpl()
+    {
+        closeFile();
+    }
+
+    void closeFile()
+    {
+        if (handle != 0)
+        {
+            struct flock fl;
+            zerostruct (fl);
+            fl.l_whence = SEEK_SET;
+            fl.l_type = F_UNLCK;
+
+            while (! (fcntl (handle, F_SETLKW, &fl) >= 0 || errno != EINTR))
+            {}
+
+            close (handle);
+            handle = 0;
+        }
+    }
+
+    int handle, refCount;
+};
+
+InterProcessLock::InterProcessLock (const String& name_)
+    : name (name_)
+{
 }
 
 InterProcessLock::~InterProcessLock()
 {
-    while (reentrancyLevel > 0)
-        this->exit();
-
-    close (internal);
 }
 
 bool InterProcessLock::enter (const int timeOutMillisecs)
 {
-    if (internal == 0)
-        return false;
+    const ScopedLock sl (lock);
 
-    if (reentrancyLevel != 0)
-        return true;
-
-    const int64 endTime = Time::currentTimeMillis() + timeOutMillisecs;
-
-    struct flock fl;
-    zerostruct (fl);
-    fl.l_whence = SEEK_SET;
-    fl.l_type = F_WRLCK;
-
-    for (;;)
+    if (pimpl == 0)
     {
-        const int result = fcntl (internal, F_SETLK, &fl);
+        pimpl = new Pimpl (name, timeOutMillisecs);
 
-        if (result >= 0)
-        {
-            ++reentrancyLevel;
-            return true;
-        }
-
-        if (errno != EINTR)
-        {
-            if (timeOutMillisecs == 0
-                 || (timeOutMillisecs > 0 && Time::currentTimeMillis() >= endTime))
-                break;
-
-            Thread::sleep (10);
-        }
+        if (pimpl->handle == 0)
+            pimpl = 0;
+    }
+    else
+    {
+        pimpl->refCount++;
     }
 
-    return false;
+    return pimpl != 0;
 }
 
 void InterProcessLock::exit()
 {
-    if (reentrancyLevel > 0 && internal != 0)
-    {
-        --reentrancyLevel;
+    const ScopedLock sl (lock);
 
-        struct flock fl;
-        zerostruct (fl);
-        fl.l_whence = SEEK_SET;
-        fl.l_type = F_UNLCK;
-
-        for (;;)
-        {
-            const int result = fcntl (internal, F_SETLKW, &fl);
-
-            if (result >= 0 || errno != EINTR)
-                break;
-        }
-    }
+    if (pimpl != 0 && --(pimpl->refCount) == 0)
+        pimpl = 0;
 }

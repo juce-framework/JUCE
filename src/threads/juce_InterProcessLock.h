@@ -27,7 +27,7 @@
 #define __JUCE_INTERPROCESSLOCK_JUCEHEADER__
 
 #include "../text/juce_String.h"
-
+#include "../containers/juce_ScopedPointer.h"
 
 //==============================================================================
 /**
@@ -67,22 +67,60 @@ public:
     */
     void exit();
 
+    //==============================================================================
+    /**
+        Automatically locks and unlocks an InterProcessLock object.
+
+        This works like a ScopedLock, but using an InterprocessLock rather than
+        a CriticalSection.
+
+        @see ScopedLock
+    */
+    class ScopedLockType
+    {
+    public:
+        //==============================================================================
+        /** Creates a scoped lock.
+
+            As soon as it is created, this will lock the InterProcessLock, and
+            when the ScopedLockType object is deleted, the InterProcessLock will
+            be unlocked.
+
+            Make sure this object is created and deleted by the same thread,
+            otherwise there are no guarantees what will happen! Best just to use it
+            as a local stack object, rather than creating one with the new() operator.
+        */
+        inline explicit ScopedLockType (InterProcessLock& lock)             : lock_ (lock) { lock.enter(); }
+
+        /** Destructor.
+
+            The InterProcessLock will be unlocked when the destructor is called.
+
+            Make sure this object is created and deleted by the same thread,
+            otherwise there are no guarantees what will happen!
+        */
+        inline ~ScopedLockType()                                            { lock_.exit(); }
+
+    private:
+        //==============================================================================
+        InterProcessLock& lock_;
+
+        ScopedLockType (const ScopedLockType&);
+        ScopedLockType& operator= (const ScopedLockType&);
+    };
+
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
-  #if JUCE_WINDOWS
-    void* internal;
-//  #elif JUCE_64BIT
-  //  long long internal;
-  #else
-    int internal;
-  #endif
+    class Pimpl;
+    friend class ScopedPointer <Pimpl>;
+    ScopedPointer <Pimpl> pimpl;
 
+    CriticalSection lock;
     String name;
-    int reentrancyLevel;
 
     InterProcessLock (const InterProcessLock&);
     InterProcessLock& operator= (const InterProcessLock&);

@@ -135,7 +135,6 @@ const String hexString8Digits (int value)
     return String::toHexString (value).paddedLeft ('0', 8);
 }
 
-
 const String createGUID (const String& seed)
 {
     String guid;
@@ -274,43 +273,25 @@ const String replaceCEscapeChars (const String& s)
 
         switch (c)
         {
-        case '\t':
-            r << "\\t";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\r':
-            r << "\\r";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\n':
-            r <<  "\\n";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\\':
-            r << "\\\\";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\'':
-            r << "\\\'";
-            lastWasHexEscapeCode = false;
-            break;
-        case '\"':
-            r << "\\\"";
-            lastWasHexEscapeCode = false;
-            break;
+        case '\t':  r << "\\t";  lastWasHexEscapeCode = false; break;
+        case '\r':  r << "\\r";  lastWasHexEscapeCode = false; break;
+        case '\n':  r << "\\n";  lastWasHexEscapeCode = false; break;
+        case '\\':  r << "\\\\"; lastWasHexEscapeCode = false; break;
+        case '\'':  r << "\\\'"; lastWasHexEscapeCode = false; break;
+        case '\"':  r << "\\\""; lastWasHexEscapeCode = false; break;
 
         default:
-            if (c < 128 &&
-                 ! (lastWasHexEscapeCode
-                     && String ("0123456789abcdefABCDEF").containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
+            if (c < 128
+                 && ! (lastWasHexEscapeCode
+                         && String ("0123456789abcdefABCDEF").containsChar (c))) // (have to avoid following a hex escape sequence with a valid hex digit)
             {
                 r << c;
                 lastWasHexEscapeCode = false;
             }
             else
             {
-                lastWasHexEscapeCode = true;
                 r << "\\x" << String::toHexString ((int) c);
+                lastWasHexEscapeCode = true;
             }
 
             break;
@@ -397,7 +378,7 @@ const String floatToCode (const float v)
 {
     String s ((double) (float) v, 4);
 
-    if (s.containsChar (T('.')))
+    if (s.containsChar ('.'))
         s << 'f';
     else
         s << ".0f";
@@ -409,7 +390,7 @@ const String doubleToCode (const double v)
 {
     String s (v, 7);
 
-    if (! s.containsChar (T('.')))
+    if (! s.containsChar ('.'))
         s << ".0";
 
     return s;
@@ -422,28 +403,27 @@ const String boolToCode (const bool b)
 
 const String colourToCode (const Colour& col)
 {
-    #define COL(col)  Colours::col,
-
     const Colour colours[] =
     {
+        #define COL(col)  Colours::col,
         #include "jucer_Colours.h"
+        #undef COL
         Colours::transparentBlack
     };
 
-    #undef COL
-    #define COL(col)  #col,
     static const char* colourNames[] =
     {
+        #define COL(col)  #col,
         #include "jucer_Colours.h"
+        #undef COL
         0
     };
-    #undef COL
 
     for (int i = 0; i < numElementsInArray (colourNames) - 1; ++i)
         if (col == colours[i])
             return "Colours::" + String (colourNames[i]);
 
-    return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + T(')');
+    return "Colour (0x" + hexString8Digits ((int) col.getARGB()) + ')';
 }
 
 const String justificationToCode (const Justification& justification)
@@ -522,4 +502,155 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
     }
 
     return -1;
+}
+
+//==============================================================================
+RelativePosition::RelativePosition()
+    : value (0), isRelative (false)
+{
+}
+
+RelativePosition::RelativePosition (double absoluteDistanceFromOrigin)
+    : value (absoluteDistanceFromOrigin), isRelative (false)
+{
+}
+
+RelativePosition::RelativePosition (double absoluteDistance, const String& source)
+    : nameOfSource1 (source), value (absoluteDistance), isRelative (false)
+{
+}
+
+RelativePosition::RelativePosition (double relativeProportion, const String& pos1, const String& pos2)
+    : nameOfSource1 (pos1), nameOfSource2 (pos2), value (relativeProportion), isRelative (true)
+{
+}
+
+RelativePosition::~RelativePosition()
+{
+}
+
+bool RelativePosition::isOrigin (const String& name)
+{
+    return name.isEmpty() || name == parentOriginMarkerName;
+}
+
+const String RelativePosition::checkName (const String& name)
+{
+    return name.isEmpty() ? parentOriginMarkerName : name;
+}
+
+double RelativePosition::getPosition (const String& name, PositionFinder& positionFinder) const
+{
+    if (isOrigin (name))
+        return 0.0;
+
+    RelativePosition* const pos = positionFinder.findPosition (nameOfSource1);
+
+    if (pos != 0)
+        return pos->resolve (positionFinder);
+
+    jassertfalse;
+    return 0.0;
+}
+
+double RelativePosition::resolve (PositionFinder& positionFinder) const
+{
+    const double pos1 = getPos1 (positionFinder);
+
+    return isRelative ? pos1 + (getPos2 (positionFinder) - pos1) * value
+                      : pos1 + value;
+}
+
+void RelativePosition::moveToAbsolute (double newPos, PositionFinder& positionFinder)
+{
+    const double pos1 = getPos1 (positionFinder);
+
+    if (isRelative)
+        value = (newPos - pos1) / (getPos2 (positionFinder) - pos1);
+    else
+        value = newPos - pos1;
+}
+
+RelativePosition::RelativePosition (const String& stringVersion)
+{
+    jassertfalse //todo
+}
+
+const String RelativePosition::toString (int decimalPlaces) const
+{
+    if (isRelative)
+    {
+        const String percent (value * 100.0, 2);
+
+        if (isOrigin (nameOfSource1))
+        {
+            if (nameOfSource2 == parentExtentMarkerName)
+                return percent + "%";
+            else
+                return percent + "% of " + checkName (nameOfSource2);
+        }
+        else
+            return percent + "% of " + checkName (nameOfSource1) + " to " + checkName (nameOfSource2);
+    }
+    else
+    {
+        if (isOrigin (nameOfSource1))
+            return String (value, decimalPlaces);
+        else if (value != 0)
+            return checkName (nameOfSource1) + " + " + String (value, decimalPlaces);
+        else
+            return checkName (nameOfSource1);
+    }
+}
+
+const char* RelativePosition::parentOriginMarkerName = "origin";
+const char* RelativePosition::parentExtentMarkerName = "size";
+
+
+//==============================================================================
+RelativeRectangle::RelativeRectangle()
+{
+}
+
+RelativeRectangle::RelativeRectangle (const Rectangle<int>& rect)
+    : left (rect.getX()),
+      right (rect.getRight()),
+      top (rect.getY()),
+      bottom (rect.getBottom())
+{
+}
+
+RelativeRectangle::RelativeRectangle (const String& stringVersion)
+{
+    jassertfalse // todo
+}
+
+const Rectangle<int> RelativeRectangle::resolve (RelativePosition::PositionFinder& positionFinder) const
+{
+    const int l = roundToInt (left.resolve (positionFinder));
+    const int r = roundToInt (right.resolve (positionFinder));
+    const int t = roundToInt (top.resolve (positionFinder));
+    const int b = roundToInt (bottom.resolve (positionFinder));
+
+    return Rectangle<int> (l, t, r - l, b - t);
+}
+
+void RelativeRectangle::moveToAbsolute (const Rectangle<int>& newPos, RelativePosition::PositionFinder& positionFinder)
+{
+    left.moveToAbsolute (newPos.getX(), positionFinder);
+    right.moveToAbsolute (newPos.getRight(), positionFinder);
+    top.moveToAbsolute (newPos.getY(), positionFinder);
+    bottom.moveToAbsolute (newPos.getBottom(), positionFinder);
+
+    // do it all again in case there were dependencies between some of the positions..
+    left.moveToAbsolute (newPos.getX(), positionFinder);
+    right.moveToAbsolute (newPos.getRight(), positionFinder);
+    top.moveToAbsolute (newPos.getY(), positionFinder);
+    bottom.moveToAbsolute (newPos.getBottom(), positionFinder);
+}
+
+const String RelativeRectangle::toString (int decimalPlaces) const
+{
+    return left.toString (decimalPlaces) + ", " + top.toString (decimalPlaces)
+             + ", " + right.toString (decimalPlaces) + ", " + bottom.toString (decimalPlaces);
 }

@@ -337,48 +337,89 @@ void* PlatformUtilities::getProcedureEntryPoint (void* h, const String& name)
 
 
 //==============================================================================
+class InterProcessLock::Pimpl
+{
+public:
+    Pimpl (const String& name, const int timeOutMillisecs)
+        : handle (0), refCount (1)
+    {
+        handle = CreateMutex (0, TRUE, "Global\\" + name.replaceCharacter ('\\','/'));
+
+        if (handle != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
+        {
+            if (timeOutMillisecs == 0)
+            {
+                close();
+                return;
+            }
+
+            switch (WaitForSingleObject (handle, timeOutMillisecs < 0 ? INFINITE : timeOutMillisecs))
+            {
+            case WAIT_OBJECT_0:
+            case WAIT_ABANDONED:
+                break;
+
+            case WAIT_TIMEOUT:
+            default:
+                close();
+                break;
+            }
+        }
+    }
+
+    ~Pimpl()
+    {
+        close();
+    }
+
+    void close()
+    {
+        if (handle != 0)
+        {
+            ReleaseMutex (handle);
+            CloseHandle (handle);
+            handle = 0;
+        }
+    }
+
+    HANDLE handle;
+    int refCount;
+};
+
 InterProcessLock::InterProcessLock (const String& name_)
-    : internal (0),
-      name (name_),
-      reentrancyLevel (0)
+    : name (name_)
 {
 }
 
 InterProcessLock::~InterProcessLock()
 {
-    exit();
 }
 
 bool InterProcessLock::enter (const int timeOutMillisecs)
 {
-    if (reentrancyLevel++ == 0)
-    {
-        internal = CreateMutex (0, TRUE, "Global\\" + name);
+    const ScopedLock sl (lock);
 
-        if (internal != 0 && GetLastError() == ERROR_ALREADY_EXISTS)
-        {
-            if (timeOutMillisecs == 0
-                 || WaitForSingleObject (internal, (timeOutMillisecs < 0) ? INFINITE : timeOutMillisecs)
-                       == WAIT_TIMEOUT)
-            {
-                ReleaseMutex (internal);
-                CloseHandle (internal);
-                internal = 0;
-            }
-        }
+    if (pimpl == 0)
+    {
+        pimpl = new Pimpl (name, timeOutMillisecs);
+
+        if (pimpl->handle == 0)
+            pimpl = 0;
+    }
+    else
+    {
+        pimpl->refCount++;
     }
 
-    return (internal != 0);
+    return pimpl != 0;
 }
 
 void InterProcessLock::exit()
 {
-    if (--reentrancyLevel == 0 && internal != 0)
-    {
-        ReleaseMutex (internal);
-        CloseHandle (internal);
-        internal = 0;
-    }
+    const ScopedLock sl (lock);
+
+    if (pimpl != 0 && --(pimpl->refCount) == 0)
+        pimpl = 0;
 }
 
 

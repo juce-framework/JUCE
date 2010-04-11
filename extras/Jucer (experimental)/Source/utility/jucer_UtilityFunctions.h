@@ -108,3 +108,59 @@ private:
     Time fileModificationTime;
     int64 fileHashCode, fileSize;
 };
+
+
+//==============================================================================
+class RelativePosition
+{
+public:
+    RelativePosition();
+    explicit RelativePosition (const String& stringVersion);
+    explicit RelativePosition (double absoluteDistanceFromOrigin);
+    RelativePosition (double absoluteDistance, const String& source);
+    RelativePosition (double relativeProportion, const String& pos1, const String& pos2);
+    ~RelativePosition();
+
+    class PositionFinder
+    {
+    public:
+        virtual ~PositionFinder() {}
+        virtual RelativePosition* findPosition (const String& name) = 0;
+    };
+
+    const String getName() const                        { return name; }
+    void setName (const String& newName)                { name = newName; }
+
+    double resolve (PositionFinder& positionFinder) const;
+    void moveToAbsolute (double newPos, PositionFinder& positionFinder);
+
+    const String toString (int decimalPlaces) const;
+
+    static const char* parentOriginMarkerName;
+    static const char* parentExtentMarkerName;
+
+private:
+    String name, nameOfSource1, nameOfSource2;
+    double value;
+    bool isRelative;
+
+    double getPos1 (PositionFinder& positionFinder) const      { return getPosition (nameOfSource1, positionFinder); }
+    double getPos2 (PositionFinder& positionFinder) const      { return getPosition (nameOfSource2, positionFinder); }
+    double getPosition (const String& name, PositionFinder& positionFinder) const;
+    static const String checkName (const String& name);
+    static bool isOrigin (const String& name);
+};
+
+class RelativeRectangle
+{
+public:
+    RelativeRectangle();
+    explicit RelativeRectangle (const Rectangle<int>& rect);
+    explicit RelativeRectangle (const String& stringVersion);
+
+    const Rectangle<int> resolve (RelativePosition::PositionFinder& positionFinder) const;
+    void moveToAbsolute (const Rectangle<int>& newPos, RelativePosition::PositionFinder& positionFinder);
+    const String toString (int decimalPlaces) const;
+
+    RelativePosition left, right, top, bottom;
+};
