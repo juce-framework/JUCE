@@ -64,8 +64,9 @@ void CriticalSection::exit() const throw()
 class WaitableEventImpl
 {
 public:
-    WaitableEventImpl()
-        : triggered (false)
+    WaitableEventImpl (const bool manualReset_)
+        : triggered (false),
+          manualReset (manualReset_)
     {
         pthread_cond_init (&condition, 0);
         pthread_mutex_init (&mutex, 0);
@@ -118,7 +119,9 @@ public:
             }
         }
 
-        triggered = false;
+        if (! manualReset)
+            triggered = false;
+
         pthread_mutex_unlock (&mutex);
         return true;
     }
@@ -142,13 +145,14 @@ private:
     pthread_cond_t condition;
     pthread_mutex_t mutex;
     bool triggered;
+    const bool manualReset;
 
     WaitableEventImpl (const WaitableEventImpl&);
     WaitableEventImpl& operator= (const WaitableEventImpl&);
 };
 
-WaitableEvent::WaitableEvent() throw()
-    : internal (new WaitableEventImpl())
+WaitableEvent::WaitableEvent (const bool manualReset) throw()
+    : internal (new WaitableEventImpl (manualReset))
 {
 }
 

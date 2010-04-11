@@ -99,6 +99,11 @@ void AudioFilterStreamer::audioDeviceAboutToStart (AudioIODevice* device)
 {
     sampleRate = device->getCurrentSampleRate();
 
+    filter.setPlayConfigDetails (device->getActiveInputChannels().countNumberOfSetBits(),
+                                 device->getActiveOutputChannels().countNumberOfSetBits(),
+                                 device->getCurrentSampleRate(),
+                                 device->getCurrentBufferSizeSamples());
+
     isPlaying = true;
 
     emptyBuffer.setSize (1 + filter.getNumOutputChannels(),

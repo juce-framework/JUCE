@@ -8811,7 +8811,7 @@ class JUCE_API  WaitableEvent
 {
 public:
 
-	WaitableEvent() throw();
+	WaitableEvent (bool manualReset = false) throw();
 
 	~WaitableEvent() throw();
 

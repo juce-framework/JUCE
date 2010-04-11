@@ -79,8 +79,8 @@ void CriticalSection::exit() const throw()
 }
 
 //==============================================================================
-WaitableEvent::WaitableEvent() throw()
-    : internal (CreateEvent (0, FALSE, FALSE, 0))
+WaitableEvent::WaitableEvent (const bool manualReset) throw()
+    : internal (CreateEvent (0, manualReset ? TRUE : FALSE, FALSE, 0))
 {
 }
 

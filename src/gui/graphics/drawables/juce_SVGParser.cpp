@@ -250,7 +250,10 @@ private:
                     }
 
                     if (lastCommandChar == 'M' || lastCommandChar == 'm')
+                    {
                         path.startNewSubPath (x, y);
+                        lastCommandChar = 'l';
+                    }
                     else
                         path.lineTo (x, y);
 
