@@ -182,6 +182,7 @@ public:
                       << (mode == stretched ? "RectanglePlacement::stretchToFit"
                                             : (mode == proportionalReducingOnly ? "RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize"
                                                                                 : "RectanglePlacement::centred"))
+                      << ", " << valueToFloat (opacity)
                       << ");\n\n";
 
                     paintMethodCode += r;

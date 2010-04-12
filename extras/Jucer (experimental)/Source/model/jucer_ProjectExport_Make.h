@@ -298,8 +298,9 @@ private:
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(OBJDIR)" << newLine
                     << "\t@echo $(notdir $<)" << newLine
-                    << "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"" << newLine
-                    << newLine;
+                    << (files.getReference(i).hasFileExtension (".c") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
+                                                                      : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
+                    << newLine << newLine;
             }
         }
 

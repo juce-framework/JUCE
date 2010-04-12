@@ -31,58 +31,6 @@
 
 //==============================================================================
 /**
-    A class that wraps an AudioProcessor as an AudioIODeviceCallback, so its
-    output can be streamed directly to/from some audio and midi inputs and outputs.
-
-    To use it, just create an instance of this for your filter, and register it
-    as the callback with an AudioIODevice or AudioDeviceManager object.
-
-    To receive midi input in your filter, you should also register it as a
-    MidiInputCallback with a suitable MidiInput or an AudioDeviceManager.
-
-    And for an even easier way of doing a standalone plugin, see the
-    AudioFilterStreamingDeviceManager class...
-*/
-class AudioFilterStreamer   : public AudioIODeviceCallback,
-                              public MidiInputCallback,
-                              public AudioPlayHead
-{
-public:
-    //==============================================================================
-    AudioFilterStreamer (AudioProcessor& filterToUse);
-    ~AudioFilterStreamer();
-
-
-    //==============================================================================
-    void audioDeviceIOCallback (const float** inputChannelData,
-                                int numInputChannels,
-                                float** outputChannelData,
-                                int numOutputChannels,
-                                int numSamples);
-
-    void audioDeviceAboutToStart (AudioIODevice* device);
-    void audioDeviceStopped();
-
-    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message);
-
-    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info);
-
-    juce_UseDebuggingNewOperator
-
-private:
-    //==============================================================================
-    AudioProcessor& filter;
-    bool isPlaying;
-    double sampleRate;
-    MidiMessageCollector midiCollector;
-
-    float* outChans [128];
-    float* inChans [128];
-    AudioSampleBuffer emptyBuffer;
-};
-
-//==============================================================================
-/**
     Wraps an AudioFilterStreamer in an AudioDeviceManager to make it easy to
     create a standalone filter.
 
@@ -115,7 +63,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    AudioFilterStreamer* streamer;
+    ScopedPointer <AudioProcessorPlayer> player;
 };
 
 
