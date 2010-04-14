@@ -43,7 +43,7 @@ DynamicLibraryLoader::~DynamicLibraryLoader()
 
 void* DynamicLibraryLoader::findProcAddress (const String& functionName)
 {
-    return (void*) GetProcAddress ((HMODULE) libHandle, functionName.toCString());
+    return GetProcAddress ((HMODULE) libHandle, functionName.toCString());
 }
 
 

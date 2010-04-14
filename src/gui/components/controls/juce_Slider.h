@@ -775,7 +775,6 @@ private:
     bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
     bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
     bool scrollWheelEnabled : 1, snapsToMousePos : 1;
-    Font font;
     Label* valueBox;
     Button* incButton;
     Button* decButton;

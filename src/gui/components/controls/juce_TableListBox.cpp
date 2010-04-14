@@ -426,7 +426,7 @@ Component* TableListBox::refreshComponentForRow (int rowNumber, bool isRowSelect
     if (existingComponentToUpdate == 0)
         existingComponentToUpdate = new TableListRowComp (*this);
 
-    ((TableListRowComp*) existingComponentToUpdate)->update (rowNumber, isRowSelected_);
+    static_cast <TableListRowComp*> (existingComponentToUpdate)->update (rowNumber, isRowSelected_);
 
     return existingComponentToUpdate;
 }

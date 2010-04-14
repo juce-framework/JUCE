@@ -650,7 +650,7 @@ public:
     void scrollToKeepItemVisible (TreeViewItem* item);
 
     /** Returns the treeview's Viewport object. */
-    Viewport* getViewport() const throw()                           { return viewport; }
+    Viewport* getViewport() const throw();
 
     /** Returns the number of pixels by which each nested level of the tree is indented.
         @see setIndentSize
@@ -751,11 +751,14 @@ public:
 private:
     friend class TreeViewItem;
     friend class TreeViewContentComponent;
-    Viewport* viewport;
+    class TreeViewport;
+    TreeViewport* viewport;
     CriticalSection nodeAlterationLock;
     TreeViewItem* rootItem;
-    Component* dragInsertPointHighlight;
-    Component* dragTargetGroupHighlight;
+    class InsertPointHighlight;
+    class TargetGroupHighlight;
+    InsertPointHighlight* dragInsertPointHighlight;
+    TargetGroupHighlight* dragTargetGroupHighlight;
     int indentSize;
     bool defaultOpenness : 1;
     bool needsRecalculating : 1;

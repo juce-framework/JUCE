@@ -78,7 +78,7 @@ public:
         return dataSize <= 0;
     }
 
-    void setInput (uint8* const newData, const int size) throw()
+    void setInput (const uint8* const newData, const int size) throw()
     {
         data = newData;
         dataSize = size;
@@ -89,7 +89,7 @@ public:
         using namespace zlibNamespace;
         if (streamIsValid)
         {
-            stream.next_in = data;
+            stream.next_in = const_cast <uint8*> (data);
             stream.next_out = dest;
             stream.avail_in = dataSize;
             stream.avail_out = destSize;
@@ -120,7 +120,7 @@ public:
 
 private:
     zlibNamespace::z_stream stream;
-    uint8* data;
+    const uint8* data;
     int dataSize, compLevel, strategy;
     bool setParams, streamIsValid;
 
@@ -169,7 +169,7 @@ bool GZIPCompressorOutputStream::write (const void* destBuffer, int howMany)
 {
     if (! helper->finished)
     {
-        helper->setInput ((uint8*) destBuffer, howMany);
+        helper->setInput (static_cast <const uint8*> (destBuffer), howMany);
 
         while (! helper->needsInput())
         {

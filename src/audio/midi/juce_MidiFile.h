@@ -188,7 +188,7 @@ private:
     MidiFile (const MidiFile&);
     MidiFile& operator= (const MidiFile&);
 
-    void readNextTrack (const char* data, int size);
+    void readNextTrack (const uint8* data, int size);
     void writeTrack (OutputStream& mainOut, const int trackNum);
 };
 

@@ -183,7 +183,7 @@ void OutputStream::writeText (const String& text, const bool asUnicode,
         if (writeUnicodeHeaderBytes)
             write ("\x0ff\x0fe", 2);
 
-        const juce_wchar* src = (const juce_wchar*) text;
+        const juce_wchar* src = text;
         bool lastCharWasReturn = false;
 
         while (*src != 0)

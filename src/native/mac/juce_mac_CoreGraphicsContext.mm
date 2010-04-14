@@ -597,7 +597,7 @@ private:
         --numGradientLookupEntries;
 
         CGShadingRef result = 0;
-        CGFunctionRef function = CGFunctionCreate ((void*) this, 1, 0, 4, 0, &gradientCallbacks);
+        CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &gradientCallbacks);
         CGPoint p1 (CGPointMake (gradient.x1, gradient.y1));
 
         if (gradient.isRadial)

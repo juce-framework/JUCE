@@ -120,13 +120,13 @@ class Coordinate
 public:
     //==============================================================================
     /** Creates a zero coordinate. */
-    Coordinate (bool isHorizontal);
+    explicit Coordinate (bool isHorizontal);
 
     /** Recreates a coordinate from its stringified version. */
-    explicit Coordinate (const String& stringVersion, bool isHorizontal);
+    Coordinate (const String& stringVersion, bool isHorizontal);
 
     /** Creates an absolute position from the parent origin. */
-    explicit Coordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
+    Coordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
 
     /** Creates an absolute position relative to a named marker. */
     Coordinate (double absolutePosition, const String& relativeToMarker, bool isHorizontal);
@@ -159,6 +159,9 @@ public:
 
     const Coordinate getAnchorPoint1() const;
     const Coordinate getAnchorPoint2() const;
+
+    const double getEditableValue() const;
+    void setEditableValue (const double newValue);
 
     //==============================================================================
     /*

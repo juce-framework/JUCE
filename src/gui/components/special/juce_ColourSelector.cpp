@@ -92,16 +92,8 @@ private:
 };
 
 //==============================================================================
-class ColourSpaceView  : public Component
+class ColourSelector::ColourSpaceView  : public Component
 {
-    ColourSelector* const owner;
-    float& h;
-    float& s;
-    float& v;
-    float lastHue;
-    ColourSpaceMarker* marker;
-    const int edge;
-
 public:
     ColourSpaceView (ColourSelector* owner_,
                      float& h_, float& s_, float& v_,
@@ -182,6 +174,14 @@ public:
     }
 
 private:
+    ColourSelector* const owner;
+    float& h;
+    float& s;
+    float& v;
+    float lastHue;
+    ColourSpaceMarker* marker;
+    const int edge;
+
     ScopedPointer <Image> colours;
 
     void updateMarker() const throw()
@@ -232,7 +232,7 @@ private:
 };
 
 //==============================================================================
-class HueSelectorComp  : public Component
+class ColourSelector::HueSelectorComp  : public Component
 {
 public:
     HueSelectorComp (ColourSelector* owner_,
@@ -469,8 +469,8 @@ void ColourSelector::update()
 
     if (colourSpace != 0)
     {
-        ((ColourSpaceView*) colourSpace)->updateIfNeeded();
-        ((HueSelectorComp*) hueSelector)->updateIfNeeded();
+        colourSpace->updateIfNeeded();
+        hueSelector->updateIfNeeded();
     }
 
     if ((flags & showColourAtTop) != 0)

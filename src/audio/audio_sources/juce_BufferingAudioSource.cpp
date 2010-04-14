@@ -58,9 +58,9 @@ public:
     {
         const ScopedLock sl (lock);
 
-        if (! sources.contains ((void*) source))
+        if (! sources.contains (source))
         {
-            sources.add ((void*) source);
+            sources.add (source);
             startThread();
 
             stopTimer();
@@ -72,14 +72,14 @@ public:
     void removeSource (BufferingAudioSource* source)
     {
         const ScopedLock sl (lock);
-        sources.removeValue ((void*) source);
+        sources.removeValue (source);
 
         if (sources.size() == 0)
             startTimer (5000);
     }
 
 private:
-    VoidArray sources;
+    Array <BufferingAudioSource*> sources;
     CriticalSection lock;
 
     void run()
@@ -95,7 +95,7 @@ private:
 
                 const ScopedLock sl (lock);
 
-                BufferingAudioSource* const b = (BufferingAudioSource*) sources[i];
+                BufferingAudioSource* const b = sources[i];
 
                 if (b != 0 && b->readNextBufferChunk())
                     busy = true;

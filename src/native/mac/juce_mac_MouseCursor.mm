@@ -39,7 +39,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
                                           hotSpot: NSMakePoint (hotspotX, hotspotY)];
     [im release];
 
-    return (void*) c;
+    return c;
 }
 
 static void* juce_cursorFromData (const unsigned char* data, const size_t size, float hx, float hy) throw()
@@ -135,7 +135,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     }
 
     [c retain];
-    return (void*) c;
+    return c;
 }
 
 void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()

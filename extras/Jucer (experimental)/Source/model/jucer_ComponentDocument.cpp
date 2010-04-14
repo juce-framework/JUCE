@@ -27,7 +27,6 @@
 #include "Component Types/jucer_TextButton.h"
 #include "Component Types/jucer_ToggleButton.h"
 
-
 //==============================================================================
 static const char* const componentDocumentTag   = "COMPONENT";
 static const char* const componentGroupTag      = "COMPONENTS";
@@ -39,6 +38,112 @@ static const char* const compNameProperty       = "name";
 
 static const char* const metadataTagStart       = "JUCER_" "COMPONENT_METADATA_START"; // written like this to avoid thinking this file is a component!
 static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_END";
+
+
+//==============================================================================
+class ComponentBoundsEditor  : public PropertyComponent
+{
+public:
+    enum Type
+    {
+        left, top, right, bottom
+    };
+
+    //==============================================================================
+    ComponentBoundsEditor (const String& name, Type type_, const Value& state_)
+        : PropertyComponent (name, 40), type (type_), state (state_)
+    {
+        addAndMakeVisible (label = new Label (String::empty, String::empty));
+
+        label->setEditable (true, true, false);
+        label->setColour (Label::backgroundColourId, Colours::white);
+        label->setColour (Label::outlineColourId, findColour (ComboBox::outlineColourId));
+        label->getTextValue().referTo (Value (new BoundsCoordValueSource (state, type)));
+    }
+
+    ~ComponentBoundsEditor()
+    {
+    }
+
+    void resized()
+    {
+        const Rectangle<int> content (getLookAndFeel().getPropertyComponentContentPosition (*this));
+
+        label->setBounds (content.getX(), content.getY(), content.getWidth(), content.getHeight() / 2);
+    }
+
+    void refresh()
+    {
+    }
+
+    //==============================================================================
+    class BoundsCoordValueSource   : public Value::ValueSource,
+                                     public Value::Listener
+    {
+    public:
+        BoundsCoordValueSource (const Value& sourceValue_, Type type_)
+           : sourceValue (sourceValue_), type (type_)
+        {
+            sourceValue.addListener (this);
+        }
+
+        ~BoundsCoordValueSource() {}
+
+        const var getValue() const
+        {
+            RectangleCoordinates r (sourceValue.toString());
+            Coordinate& coord = getCoord (r);
+            return coord.getEditableValue();
+        }
+
+        void setValue (const var& newValue)
+        {
+            RectangleCoordinates r (sourceValue.toString());
+            Coordinate& coord = getCoord (r);
+
+            coord.setEditableValue ((double) newValue);
+
+            const String newVal (r.toString());
+            if (sourceValue != newVal)
+                sourceValue = newVal;
+        }
+
+        void valueChanged (Value&)
+        {
+            sendChangeMessage (true);
+        }
+
+        //==============================================================================
+        juce_UseDebuggingNewOperator
+
+    protected:
+        Value sourceValue;
+        Type type;
+
+        Coordinate& getCoord (RectangleCoordinates& r) const
+        {
+            switch (type)
+            {
+                case left:   return r.left;
+                case right:  return r.right;
+                case top:    return r.top;
+                case bottom: return r.bottom;
+                default:     jassertfalse; break;
+            }
+
+            return r.left;
+        }
+
+        BoundsCoordValueSource (const BoundsCoordValueSource&);
+        const BoundsCoordValueSource& operator= (const BoundsCoordValueSource&);
+    };
+
+private:
+    Type type;
+    Value state;
+    Label* label;
+};
+
 
 //==============================================================================
 ComponentTypeHandler::ComponentTypeHandler (const String& name_, const String& xmlTag_,
@@ -82,8 +187,10 @@ void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, Value
 
 void ComponentTypeHandler::createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
 {
-    props.add (new TextPropertyComponent (getValue (compBoundsProperty, state, document), "Bounds", 512, false));
-    props.getLast()->setTooltip ("The component's position.");
+    props.add (new ComponentBoundsEditor ("Left", ComponentBoundsEditor::left, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor ("Right", ComponentBoundsEditor::right, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor ("Top", ComponentBoundsEditor::top, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor ("Bottom", ComponentBoundsEditor::bottom, getValue (compBoundsProperty, state, document)));
 }
 
 //==============================================================================

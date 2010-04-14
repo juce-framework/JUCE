@@ -1246,7 +1246,7 @@ public:
                     ::setlocale (LC_ALL, oldLocale);
                 }
 
-                const juce_wchar unicodeChar = *(const juce_wchar*) String::fromUTF8 (utf8, sizeof (utf8) - 1);
+                const juce_wchar unicodeChar = String::fromUTF8 (utf8, sizeof (utf8) - 1) [0];
                 int keyCode = (int) unicodeChar;
 
                 if (keyCode < 0x20)

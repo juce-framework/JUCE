@@ -153,7 +153,8 @@ public:
 
 private:
     Viewport* viewport;
-    Component* propertyHolderComponent;
+    class PropertyHolderComponent;
+    PropertyHolderComponent* propertyHolderComponent;
     String messageWhenEmpty;
 
     void updatePropHolderLayout() const;

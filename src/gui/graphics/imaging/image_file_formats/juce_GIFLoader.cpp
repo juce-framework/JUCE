@@ -114,12 +114,12 @@ GIFLoader::~GIFLoader()
 
 bool GIFLoader::getSizeFromHeader (int& w, int& h)
 {
-    unsigned char b [8];
+    char b[8];
 
     if (input.read (b, 6) == 6)
     {
-        if ((strncmp ("GIF87a", (char*) b, 6) == 0)
-             || (strncmp ("GIF89a", (char*) b, 6) == 0))
+        if ((strncmp ("GIF87a", b, 6) == 0)
+             || (strncmp ("GIF89a", b, 6) == 0))
         {
             if (input.read (b, 4) == 4)
             {

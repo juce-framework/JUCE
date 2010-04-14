@@ -1331,7 +1331,7 @@ int Component::runModalLoop()
         // use a callback so this can be called from non-gui threads
         return (int) (pointer_sized_int)
                     MessageManager::getInstance()
-                       ->callFunctionOnMessageThread (&runModalLoopCallback, (void*) this);
+                       ->callFunctionOnMessageThread (&runModalLoopCallback, this);
     }
 
     SafePointer<Component> prevFocused (getCurrentlyFocusedComponent());

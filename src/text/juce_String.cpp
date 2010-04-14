@@ -630,13 +630,13 @@ String& String::operator+= (const String& other)
 String& String::operator+= (const char ch)
 {
     const juce_wchar asString[] = { (juce_wchar) ch, 0 };
-    return operator+= ((const juce_wchar*) asString);
+    return operator+= (static_cast <const juce_wchar*> (asString));
 }
 
 String& String::operator+= (const juce_wchar ch)
 {
     const juce_wchar asString[] = { (juce_wchar) ch, 0 };
-    return operator+= ((const juce_wchar*) asString);
+    return operator+= (static_cast <const juce_wchar*> (asString));
 }
 
 String& String::operator+= (const int number)
@@ -1884,7 +1884,7 @@ int64 String::getHexValue64() const throw()
 //==============================================================================
 const String String::createStringFromData (const void* const data_, const int size)
 {
-    const char* const data = (const char*) data_;
+    const char* const data = static_cast <const char*> (data_);
 
     if (size <= 0 || data == 0)
     {
@@ -1905,7 +1905,7 @@ const String String::createStringFromData (const void* const data_, const int si
         result.preallocateStorage (numChars + 2);
 
         const uint16* const src = (const uint16*) (data + 2);
-        juce_wchar* const dst = const_cast <juce_wchar*> ((const juce_wchar*) result);
+        juce_wchar* const dst = const_cast <juce_wchar*> (static_cast <const juce_wchar*> (result));
 
         if (bigEndian)
         {
@@ -2190,7 +2190,7 @@ void String::Concatenator::append (const String& s)
     if (len > 0)
     {
         result.preallocateStorage (nextIndex + len);
-        s.copyToUnicode (((juce_wchar*) result) + nextIndex, len);
+        s.copyToUnicode (static_cast <juce_wchar*> (result) + nextIndex, len);
         nextIndex += len;
     }
 }

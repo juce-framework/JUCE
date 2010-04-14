@@ -213,10 +213,9 @@ int ZipFile::getNumEntries() const throw()
 
 const ZipFile::ZipEntry* ZipFile::getEntry (const int index) const throw()
 {
-    ZipEntryInfo* const zei = (ZipEntryInfo*) entries [index];
+    ZipEntryInfo* const zei = entries [index];
 
-    return (zei != 0) ? &(zei->entry)
-                      : 0;
+    return zei != 0 ? &(zei->entry) : 0;
 }
 
 int ZipFile::getIndexOfFileName (const String& fileName) const throw()
@@ -303,7 +302,7 @@ void ZipFile::init()
                     if (pos + 46 > size)
                         break;
 
-                    const char* const buffer = ((const char*) headerData.getData()) + pos;
+                    const char* const buffer = static_cast <const char*> (headerData.getData()) + pos;
 
                     const int fileNameLen = ByteOrder::littleEndianShort (buffer + 28);
 

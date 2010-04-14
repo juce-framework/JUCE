@@ -326,7 +326,7 @@ float CustomTypeface::getDescent() const
 float CustomTypeface::getStringWidth (const String& text)
 {
     float x = 0;
-    const juce_wchar* t = (const juce_wchar*) text;
+    const juce_wchar* t = text;
 
     while (*t != 0)
     {
@@ -343,7 +343,7 @@ void CustomTypeface::getGlyphPositions (const String& text, Array <int>& resultG
 {
     xOffsets.add (0);
     float x = 0;
-    const juce_wchar* t = (const juce_wchar*) text;
+    const juce_wchar* t = text;
 
     while (*t != 0)
     {

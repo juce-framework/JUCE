@@ -163,7 +163,7 @@ void* juce_fileOpen (const String& fileName, bool forWriting)
             h = 0;
     }
 
-    return (void*) h;
+    return h;
 }
 
 void juce_fileClose (void* handle)

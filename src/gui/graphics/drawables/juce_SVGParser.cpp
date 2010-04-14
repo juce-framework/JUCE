@@ -1034,7 +1034,7 @@ private:
     //==============================================================================
     static bool parseNextNumber (const String& source, String& value, int& index, const bool allowUnits)
     {
-        const tchar* const s = (const tchar*) source;
+        const juce_wchar* const s = source;
 
         while (CharacterFunctions::isWhitespace (s[index]) || s[index] == ',')
             ++index;

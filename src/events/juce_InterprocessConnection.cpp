@@ -217,7 +217,7 @@ void InterprocessConnection::handleMessage (const Message& message)
         {
         case 0:
             {
-                ScopedPointer <MemoryBlock> data ((MemoryBlock*) message.pointerParameter);
+                ScopedPointer <MemoryBlock> data (static_cast <MemoryBlock*> (message.pointerParameter));
                 messageReceived (*data);
                 break;
             }

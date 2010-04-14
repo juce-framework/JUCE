@@ -774,6 +774,16 @@ const String Coordinate::toString() const
     }
 }
 
+const double Coordinate::getEditableValue() const
+{
+    return isProportion ? value * 100.0 : value;
+}
+
+void Coordinate::setEditableValue (const double newValue)
+{
+    value = isProportion ? newValue / 100.0 : newValue;
+}
+
 //==============================================================================
 RectangleCoordinates::RectangleCoordinates()
     : left (true), right (true), top (false), bottom (false)

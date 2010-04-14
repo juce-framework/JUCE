@@ -51,7 +51,7 @@ public:
 
     static void createLines (Array <CodeDocumentLine*>& newLines, const String& text)
     {
-        const tchar* const t = (const tchar*) text;
+        const juce_wchar* const t = text;
         int pos = 0;
 
         while (t [pos] != 0)
@@ -709,26 +709,20 @@ void CodeDocument::checkLastLineStatus()
 //==============================================================================
 void CodeDocument::addListener (CodeDocument::Listener* const listener) throw()
 {
-    listeners.addIfNotAlreadyThere (listener);
+    listeners.add (listener);
 }
 
 void CodeDocument::removeListener (CodeDocument::Listener* const listener) throw()
 {
-    listeners.removeValue (listener);
+    listeners.remove (listener);
 }
 
 void CodeDocument::sendListenerChangeMessage (const int startLine, const int endLine)
 {
-    const Position startPos (this, startLine, 0);
-    const Position endPos (this, endLine, 0);
+    Position startPos (this, startLine, 0);
+    Position endPos (this, endLine, 0);
 
-    for (int i = listeners.size(); --i >= 0;)
-    {
-        Listener* const l = (Listener*) listeners[i];
-
-        if (l != 0)
-            l->codeDocumentChanged (startPos, endPos);
-    }
+    listeners.call (&Listener::codeDocumentChanged, startPos, endPos);
 }
 
 //==============================================================================

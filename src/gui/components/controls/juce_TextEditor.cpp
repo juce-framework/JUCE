@@ -277,7 +277,7 @@ private:
     {
         int i = 0;
         const int len = textToParse.length();
-        const tchar* const text = (const tchar*) textToParse;
+        const juce_wchar* const text = textToParse;
 
         while (i < len)
         {

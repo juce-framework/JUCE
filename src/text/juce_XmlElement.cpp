@@ -198,7 +198,7 @@ namespace XmlOutputFunctions
 
     static void escapeIllegalXmlChars (OutputStream& outputStream, const String& text, const bool changeNewLines)
     {
-        const juce_wchar* t = (const juce_wchar*) text;
+        const juce_wchar* t = text;
 
         for (;;)
         {

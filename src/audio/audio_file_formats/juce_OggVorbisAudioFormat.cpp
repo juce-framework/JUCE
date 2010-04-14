@@ -215,12 +215,12 @@ public:
     //==============================================================================
     static size_t oggReadCallback (void* ptr, size_t size, size_t nmemb, void* datasource)
     {
-        return (size_t) (((InputStream*) datasource)->read (ptr, (int) (size * nmemb)) / size);
+        return (size_t) (static_cast <InputStream*> (datasource)->read (ptr, (int) (size * nmemb)) / size);
     }
 
     static int oggSeekCallback (void* datasource, OggVorbisNamespace::ogg_int64_t offset, int whence)
     {
-        InputStream* const in = (InputStream*) datasource;
+        InputStream* const in = static_cast <InputStream*> (datasource);
 
         if (whence == SEEK_CUR)
             offset += in->getPosition();
@@ -238,7 +238,7 @@ public:
 
     static long oggTellCallback (void* datasource)
     {
-        return (long) ((InputStream*) datasource)->getPosition();
+        return (long) static_cast <InputStream*> (datasource)->getPosition();
     }
 
     juce_UseDebuggingNewOperator

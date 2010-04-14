@@ -378,7 +378,7 @@ MidiInput* MidiInput::openDevice (const int index, MidiInputCallback* const call
     if (err == MMSYSERR_NOERROR)
     {
         thread->hIn = h;
-        in->internal = (void*) thread.release();
+        in->internal = thread.release();
         return in.release();
     }
 
@@ -498,7 +498,7 @@ MidiOutput* MidiOutput::openDevice (int index)
             han->refCount++;
 
             MidiOutput* const out = new MidiOutput();
-            out->internal = (void*) han;
+            out->internal = han;
             return out;
         }
     }
@@ -517,7 +517,7 @@ MidiOutput* MidiOutput::openDevice (int index)
             MidiOutHandle::activeHandles.add (han);
 
             MidiOutput* const out = new MidiOutput();
-            out->internal = (void*) han;
+            out->internal = han;
             return out;
         }
         else if (res == MMSYSERR_ALLOCATED)

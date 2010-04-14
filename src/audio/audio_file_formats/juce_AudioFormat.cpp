@@ -512,7 +512,7 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
 
 //==============================================================================
 AudioFormat::AudioFormat (const String& name,
-                          const tchar** const extensions)
+                          const juce_wchar** const extensions)
   : formatName (name),
     fileExtensions (extensions)
 {

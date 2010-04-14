@@ -77,7 +77,7 @@ public:
     {
         for (int i = activeCursors.size(); --i >= 0;)
         {
-            SharedMouseCursorInternal* const r = (SharedMouseCursorInternal*) activeCursors.getUnchecked(i);
+            SharedMouseCursorInternal* const r = static_cast <SharedMouseCursorInternal*> (activeCursors.getUnchecked(i));
 
             if (r->standardType == type)
                 return r;

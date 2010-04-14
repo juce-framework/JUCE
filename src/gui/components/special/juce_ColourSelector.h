@@ -136,14 +136,17 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
+    class ColourSpaceView;
+    class HueSelectorComp;
+    class SwatchComponent;
     friend class ColourSpaceView;
     friend class HueSelectorComp;
+
     Colour colour;
     float h, s, v;
     Slider* sliders[4];
-    Component* colourSpace;
-    Component* hueSelector;
-    class SwatchComponent;
+    ColourSpaceView* colourSpace;
+    HueSelectorComp* hueSelector;
     OwnedArray <SwatchComponent> swatchComponents;
     const int flags;
     int topSpace, edgeGap;

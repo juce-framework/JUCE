@@ -69,11 +69,10 @@ const String PlatformUtilities::cfStringToJuceString (CFStringRef cfString)
 CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 {
     const int len = s.length();
-    const juce_wchar* t = (const juce_wchar*) s;
     HeapBlock <UniChar> temp (len + 2);
 
     for (int i = 0; i <= len; ++i)
-        temp[i] = t[i];
+        temp[i] = s[i];
 
     return CFStringCreateWithCharacters (kCFAllocatorDefault, temp, len);
 }
@@ -122,7 +121,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
         {
             result.preallocateStorage (bytesRead / sizeof (UniChar) + 2);
 
-            tchar* t = const_cast <tchar*> ((const tchar*) result);
+            tchar* t = result;
 
             unsigned int i;
             for (i = 0; i < bytesRead / sizeof (UniChar); ++i)

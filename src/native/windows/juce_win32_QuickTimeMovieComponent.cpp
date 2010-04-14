@@ -335,7 +335,7 @@ static Handle createHandleDataRef (Handle dataHandle, const char* fileName)
 static CFStringRef juceStringToCFString (const String& s)
 {
     const int len = s.length();
-    const juce_wchar* const t = (const juce_wchar*) s;
+    const juce_wchar* const t = s;
 
     HeapBlock <UniChar> temp (len + 2);
     for (int i = 0; i <= len; ++i)
@@ -390,7 +390,7 @@ bool juce_OpenQuickTimeMovieFromStream (InputStream* input, Movie& movie, Handle
     props[prop].propClass = kQTPropertyClass_DataLocation;
     props[prop].propID = kQTDataLocationPropertyID_DataReference;
     props[prop].propValueSize = sizeof (dr);
-    props[prop].propValueAddress = (void*) &dr;
+    props[prop].propValueAddress = &dr;
     ++prop;
 
     FileInputStream* const fin = dynamic_cast <FileInputStream*> (input);

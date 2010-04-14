@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class ScrollbarButton  : public Button
+class ScrollBar::ScrollbarButton  : public Button
 {
 public:
     int direction;
@@ -246,8 +246,8 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
 
         if (upButton != 0)
         {
-            ((ScrollbarButton*) upButton)->direction    = (vertical) ? 0 : 3;
-            ((ScrollbarButton*) downButton)->direction  = (vertical) ? 2 : 1;
+            upButton->direction    = vertical ? 0 : 3;
+            downButton->direction  = vertical ? 2 : 1;
         }
 
         updateThumbPosition();
@@ -256,13 +256,15 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
 
 void ScrollBar::setButtonVisibility (const bool buttonsAreVisible)
 {
-    deleteAndZero (upButton);
-    deleteAndZero (downButton);
+    delete upButton;
+    upButton = 0;
+    delete downButton;
+    downButton = 0;
 
     if (buttonsAreVisible)
     {
-        addAndMakeVisible (upButton   = new ScrollbarButton ((vertical) ? 0 : 3, *this));
-        addAndMakeVisible (downButton = new ScrollbarButton ((vertical) ? 2 : 1, *this));
+        addAndMakeVisible (upButton   = new ScrollbarButton (vertical ? 0 : 3, *this));
+        addAndMakeVisible (downButton = new ScrollbarButton (vertical ? 2 : 1, *this));
 
         setButtonRepeatSpeed (initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs);
     }

@@ -398,7 +398,7 @@ public:
     }
 
     const OpenGLPixelFormat getPixelFormat() const  { return pixelFormat; }
-    void* getRawContext() const throw()             { return (void*) glLayer; }
+    void* getRawContext() const throw()             { return glLayer; }
 
     void updateWindowPosition (int x, int y, int w, int h, int outerWindowHeight)
     {

@@ -13943,7 +13943,7 @@ public:
 
 protected:
 	AudioFormat (const String& formatName,
-				 const tchar** const fileExtensions);
+				 const juce_wchar** const fileExtensions);
 
 private:
 
@@ -16189,8 +16189,9 @@ private:
 	int dragStartMousePos, lastMousePos;
 	int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
 	bool vertical, isDraggingThumb, alwaysVisible;
-	Button* upButton;
-	Button* downButton;
+	class ScrollbarButton;
+	ScrollbarButton* upButton;
+	ScrollbarButton* downButton;
 	ListenerList <ScrollBarListener> listeners;
 
 	void updateThumbPosition();
@@ -17469,7 +17470,7 @@ private:
 	MidiFile (const MidiFile&);
 	MidiFile& operator= (const MidiFile&);
 
-	void readNextTrack (const char* data, int size);
+	void readNextTrack (const uint8* data, int size);
 	void writeTrack (OutputStream& mainOut, const int trackNum);
 };
 
@@ -19149,7 +19150,8 @@ public:
 
 private:
 	Viewport* viewport;
-	Component* propertyHolderComponent;
+	class PropertyHolderComponent;
+	PropertyHolderComponent* propertyHolderComponent;
 	String messageWhenEmpty;
 
 	void updatePropHolderLayout() const;
@@ -20803,7 +20805,7 @@ private:
 	UndoManager undoManager;
 	int currentActionIndex, indexOfSavedState;
 	int maximumLineLength;
-	VoidArray listeners;
+	ListenerList <Listener> listeners;
 	String newLineChars;
 
 	void sendListenerChangeMessage (int startLine, int endLine);
@@ -20979,7 +20981,8 @@ private:
 
 	CodeDocument::Position caretPos;
 	CodeDocument::Position selectionStart, selectionEnd;
-	Component* caret;
+	class CaretComponent;
+	CaretComponent* caret;
 	ScrollBar* verticalScrollBar;
 	ScrollBar* horizontalScrollBar;
 
@@ -21419,7 +21422,6 @@ private:
 	bool incDecButtonsSideBySide : 1, sendChangeOnlyOnRelease : 1, popupDisplayEnabled : 1;
 	bool menuEnabled : 1, menuShown : 1, mouseWasHidden : 1, incDecDragged : 1;
 	bool scrollWheelEnabled : 1, snapsToMousePos : 1;
-	Font font;
 	Label* valueBox;
 	Button* incButton;
 	Button* decButton;
@@ -22031,7 +22033,7 @@ public:
 
 	void scrollToKeepItemVisible (TreeViewItem* item);
 
-	Viewport* getViewport() const throw()			   { return viewport; }
+	Viewport* getViewport() const throw();
 
 	int getIndentSize() const throw()				   { return indentSize; }
 
@@ -22071,11 +22073,14 @@ public:
 private:
 	friend class TreeViewItem;
 	friend class TreeViewContentComponent;
-	Viewport* viewport;
+	class TreeViewport;
+	TreeViewport* viewport;
 	CriticalSection nodeAlterationLock;
 	TreeViewItem* rootItem;
-	Component* dragInsertPointHighlight;
-	Component* dragTargetGroupHighlight;
+	class InsertPointHighlight;
+	class TargetGroupHighlight;
+	InsertPointHighlight* dragInsertPointHighlight;
+	TargetGroupHighlight* dragTargetGroupHighlight;
 	int indentSize;
 	bool defaultOpenness : 1;
 	bool needsRecalculating : 1;
@@ -23459,9 +23464,9 @@ private:
 	ListBox* listBox;
 	Button* addButton;
 	Button* removeButton;
-	Button* changeButton;
-	Button* upButton;
-	Button* downButton;
+	TextButton* changeButton;
+	DrawableButton* upButton;
+	DrawableButton* downButton;
 
 	void changed();
 	void updateButtons();
@@ -26401,14 +26406,17 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
+	class ColourSpaceView;
+	class HueSelectorComp;
+	class SwatchComponent;
 	friend class ColourSpaceView;
 	friend class HueSelectorComp;
+
 	Colour colour;
 	float h, s, v;
 	Slider* sliders[4];
-	Component* colourSpace;
-	Component* hueSelector;
-	class SwatchComponent;
+	ColourSpaceView* colourSpace;
+	HueSelectorComp* hueSelector;
 	OwnedArray <SwatchComponent> swatchComponents;
 	const int flags;
 	int topSpace, edgeGap;

@@ -103,7 +103,7 @@ void ResizableWindow::setContentComponent (Component* const newContentComponent,
 {
     resizeToFitContent = resizeToFit;
 
-    if (newContentComponent != (Component*) contentComponent)
+    if (newContentComponent != static_cast <Component*> (contentComponent))
     {
         if (! deleteOldOne)
             removeChildComponent (contentComponent.release());

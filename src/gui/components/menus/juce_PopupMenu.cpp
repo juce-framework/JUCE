@@ -968,7 +968,7 @@ private:
 
         for (int i = getNumChildComponents(); --i >= 0;)
         {
-            PopupMenu::ItemComponent* const m = (PopupMenu::ItemComponent*) getChildComponent (i);
+            PopupMenu::ItemComponent* const m = static_cast <PopupMenu::ItemComponent*> (getChildComponent (i));
 
             if (m != 0
                 && m->itemInfo.itemId == itemId

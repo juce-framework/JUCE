@@ -77,7 +77,7 @@ void MixerAudioSource::removeInputSource (AudioSource* input, const bool deleteI
         {
             const ScopedLock sl (lock);
 
-            index = inputs.indexOf ((void*) input);
+            index = inputs.indexOf (input);
 
             if (index >= 0)
             {

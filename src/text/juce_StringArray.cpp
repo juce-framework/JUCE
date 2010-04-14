@@ -307,7 +307,7 @@ const String StringArray::joinIntoString (const String& separator, int start, in
     String result;
     result.preallocateStorage (charsNeeded);
 
-    juce_wchar* dest = (juce_wchar*) result;
+    juce_wchar* dest = result;
 
     while (start < last)
     {

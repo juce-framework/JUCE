@@ -34,13 +34,13 @@ BEGIN_JUCE_NAMESPACE
 void AudioDataConverters::convertFloatToInt16LE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
         for (int i = 0; i < numSamples; ++i)
         {
-            *(uint16*)intData = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
+            *(uint16*) intData = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
             intData += destBytesPerSample;
         }
     }
@@ -51,7 +51,7 @@ void AudioDataConverters::convertFloatToInt16LE (const float* source, void* dest
         for (int i = numSamples; --i >= 0;)
         {
             intData -= destBytesPerSample;
-            *(uint16*)intData = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
+            *(uint16*) intData = ByteOrder::swapIfBigEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
         }
     }
 }
@@ -59,7 +59,7 @@ void AudioDataConverters::convertFloatToInt16LE (const float* source, void* dest
 void AudioDataConverters::convertFloatToInt16BE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
@@ -76,7 +76,7 @@ void AudioDataConverters::convertFloatToInt16BE (const float* source, void* dest
         for (int i = numSamples; --i >= 0;)
         {
             intData -= destBytesPerSample;
-            *(uint16*)intData = ByteOrder::swapIfLittleEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
+            *(uint16*) intData = ByteOrder::swapIfLittleEndian ((uint16) (short) roundToInt (jlimit (-maxVal, maxVal, maxVal * source[i])));
         }
     }
 }
@@ -84,7 +84,7 @@ void AudioDataConverters::convertFloatToInt16BE (const float* source, void* dest
 void AudioDataConverters::convertFloatToInt24LE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fffff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
@@ -109,7 +109,7 @@ void AudioDataConverters::convertFloatToInt24LE (const float* source, void* dest
 void AudioDataConverters::convertFloatToInt24BE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fffff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
@@ -134,7 +134,7 @@ void AudioDataConverters::convertFloatToInt24BE (const float* source, void* dest
 void AudioDataConverters::convertFloatToInt32LE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fffffff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
@@ -159,7 +159,7 @@ void AudioDataConverters::convertFloatToInt32LE (const float* source, void* dest
 void AudioDataConverters::convertFloatToInt32BE (const float* source, void* dest, int numSamples, const int destBytesPerSample)
 {
     const double maxVal = (double) 0x7fffffff;
-    char* intData = (char*) dest;
+    char* intData = static_cast <char*> (dest);
 
     if (dest != (void*) source || destBytesPerSample <= 4)
     {
@@ -185,7 +185,7 @@ void AudioDataConverters::convertFloatToFloat32LE (const float* source, void* de
 {
     jassert (dest != (void*) source || destBytesPerSample <= 4); // This op can't be performed on in-place data!
 
-    char* d = (char*) dest;
+    char* d = static_cast <char*> (dest);
 
     for (int i = 0; i < numSamples; ++i)
     {
@@ -203,7 +203,7 @@ void AudioDataConverters::convertFloatToFloat32BE (const float* source, void* de
 {
     jassert (dest != (void*) source || destBytesPerSample <= 4); // This op can't be performed on in-place data!
 
-    char* d = (char*) dest;
+    char* d = static_cast <char*> (dest);
 
     for (int i = 0; i < numSamples; ++i)
     {
@@ -221,7 +221,7 @@ void AudioDataConverters::convertFloatToFloat32BE (const float* source, void* de
 void AudioDataConverters::convertInt16LEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -246,7 +246,7 @@ void AudioDataConverters::convertInt16LEToFloat (const void* const source, float
 void AudioDataConverters::convertInt16BEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -271,7 +271,7 @@ void AudioDataConverters::convertInt16BEToFloat (const void* const source, float
 void AudioDataConverters::convertInt24LEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fffff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -296,7 +296,7 @@ void AudioDataConverters::convertInt24LEToFloat (const void* const source, float
 void AudioDataConverters::convertInt24BEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fffff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -321,7 +321,7 @@ void AudioDataConverters::convertInt24BEToFloat (const void* const source, float
 void AudioDataConverters::convertInt32LEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fffffff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -346,7 +346,7 @@ void AudioDataConverters::convertInt32LEToFloat (const void* const source, float
 void AudioDataConverters::convertInt32BEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
     const float scale = 1.0f / 0x7fffffff;
-    const char* intData = (const char*) source;
+    const char* intData = static_cast <const char*> (source);
 
     if (source != (void*) dest || srcBytesPerSample >= 4)
     {
@@ -370,7 +370,7 @@ void AudioDataConverters::convertInt32BEToFloat (const void* const source, float
 
 void AudioDataConverters::convertFloat32LEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
-    const char* s = (const char*) source;
+    const char* s = static_cast <const char*> (source);
 
     for (int i = 0; i < numSamples; ++i)
     {
@@ -387,7 +387,7 @@ void AudioDataConverters::convertFloat32LEToFloat (const void* const source, flo
 
 void AudioDataConverters::convertFloat32BEToFloat (const void* const source, float* const dest, int numSamples, const int srcBytesPerSample)
 {
-    const char* s = (const char*) source;
+    const char* s = static_cast <const char*> (source);
 
     for (int i = 0; i < numSamples; ++i)
     {

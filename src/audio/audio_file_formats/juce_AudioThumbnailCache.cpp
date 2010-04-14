@@ -60,10 +60,7 @@ bool AudioThumbnailCache::loadThumb (AudioThumbnail& thumb, const int64 hashCode
     {
         if (thumbs[i]->hash == hashCode)
         {
-            MemoryInputStream in ((const char*) thumbs[i]->data.getData(),
-                                  thumbs[i]->data.getSize(),
-                                  false);
-
+            MemoryInputStream in (thumbs[i]->data, false);
             thumb.loadFrom (in);
 
             thumbs[i]->lastUsed = Time::getMillisecondCounter();

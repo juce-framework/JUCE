@@ -273,7 +273,7 @@ const var var::readFromStream (InputStream& input)
             {
                 MemoryBlock mb;
                 input.readIntoMemoryBlock (mb, numBytes - 1);
-                return var (String::fromUTF8 ((const char*) mb.getData(), (int) mb.getSize()));
+                return var (String::fromUTF8 (static_cast <const char*> (mb.getData()), (int) mb.getSize()));
             }
 
             default:    input.skipNextBytes (numBytes - 1); break;

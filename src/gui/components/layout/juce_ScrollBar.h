@@ -316,8 +316,9 @@ private:
     int dragStartMousePos, lastMousePos;
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
     bool vertical, isDraggingThumb, alwaysVisible;
-    Button* upButton;
-    Button* downButton;
+    class ScrollbarButton;
+    ScrollbarButton* upButton;
+    ScrollbarButton* downButton;
     ListenerList <ScrollBarListener> listeners;
 
     void updateThumbPosition();

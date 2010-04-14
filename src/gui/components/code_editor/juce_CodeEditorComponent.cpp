@@ -33,8 +33,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class CaretComponent   : public Component,
-                         public Timer
+class CodeEditorComponent::CaretComponent   : public Component,
+                                              public Timer
 {
 public:
     CaretComponent()
@@ -66,6 +66,10 @@ public:
         const Rectangle<int> pos (owner.getCharacterBounds (owner.getCaretPos()));
         setBounds (pos.getX(), pos.getY(), 2, pos.getHeight());
     }
+
+private:
+    CaretComponent (const CaretComponent&);
+    CaretComponent& operator= (const CaretComponent&);
 };
 
 //==============================================================================
@@ -348,7 +352,7 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
 
     triggerAsyncUpdate();
 
-    ((CaretComponent*) caret)->updatePosition (*this);
+    caret->updatePosition (*this);
     columnToTryToMaintain = -1;
 
     if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
@@ -368,7 +372,7 @@ void CodeEditorComponent::resized()
     columnsOnScreen = (int) ((getWidth() - scrollbarThickness) / charWidth);
     lines.clear();
     rebuildLineTokens();
-    ((CaretComponent*) caret)->updatePosition (*this);
+    caret->updatePosition (*this);
 
     verticalScrollBar->setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
     horizontalScrollBar->setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
@@ -511,7 +515,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
         deselectAll();
     }
 
-    ((CaretComponent*) caret)->updatePosition (*this);
+    caret->updatePosition (*this);
     scrollToKeepCaretOnScreen();
     updateScrollBars();
 }
@@ -542,7 +546,7 @@ void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
     if (newFirstLineOnScreen != firstLineOnScreen)
     {
         firstLineOnScreen = newFirstLineOnScreen;
-        ((CaretComponent*) caret)->updatePosition (*this);
+        caret->updatePosition (*this);
 
         updateCachedIterators (firstLineOnScreen);
         triggerAsyncUpdate();
@@ -556,7 +560,7 @@ void CodeEditorComponent::scrollToColumnInternal (double column)
     if (xOffset != newOffset)
     {
         xOffset = newOffset;
-        ((CaretComponent*) caret)->updatePosition (*this);
+        caret->updatePosition (*this);
         repaint();
     }
 }

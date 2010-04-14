@@ -183,7 +183,7 @@ int ThreadPool::getNumJobs() const
 ThreadPoolJob* ThreadPool::getJob (const int index) const
 {
     const ScopedLock sl (lock);
-    return (ThreadPoolJob*) jobs [index];
+    return jobs [index];
 }
 
 bool ThreadPool::contains (const ThreadPoolJob* const job) const

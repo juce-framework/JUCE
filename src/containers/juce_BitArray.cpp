@@ -920,7 +920,7 @@ const String BigInteger::toString (const int base, const int minimumNumCharacter
 void BigInteger::parseString (const String& text, const int base)
 {
     clear();
-    const juce_wchar* t = (const juce_wchar*) text;
+    const juce_wchar* t = text;
 
     if (base == 2 || base == 8 || base == 16)
     {

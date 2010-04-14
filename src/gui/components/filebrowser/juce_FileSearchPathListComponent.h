@@ -27,7 +27,8 @@
 #define __JUCE_FILESEARCHPATHLISTCOMPONENT_JUCEHEADER__
 
 #include "../controls/juce_ListBox.h"
-#include "../buttons/juce_Button.h"
+#include "../buttons/juce_DrawableButton.h"
+#include "../buttons/juce_TextButton.h"
 #include "../mouse/juce_FileDragAndDropTarget.h"
 #include "../../../io/files/juce_FileSearchPath.h"
 
@@ -116,9 +117,9 @@ private:
     ListBox* listBox;
     Button* addButton;
     Button* removeButton;
-    Button* changeButton;
-    Button* upButton;
-    Button* downButton;
+    TextButton* changeButton;
+    DrawableButton* upButton;
+    DrawableButton* downButton;
 
     void changed();
     void updateButtons();

@@ -265,7 +265,7 @@ public:
 
     static ModifierKeys currentModifiers;
     static ComponentPeer* currentlyFocusedPeer;
-    static VoidArray keysCurrentlyDown;
+    static Array<int> keysCurrentlyDown;
 };
 
 //==============================================================================
@@ -755,20 +755,20 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ModifierKeys NSViewComponentPeer::currentModifiers;
 ComponentPeer* NSViewComponentPeer::currentlyFocusedPeer = 0;
-VoidArray NSViewComponentPeer::keysCurrentlyDown;
+Array<int> NSViewComponentPeer::keysCurrentlyDown;
 
 //==============================================================================
 bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 {
-    if (NSViewComponentPeer::keysCurrentlyDown.contains ((void*) keyCode))
+    if (NSViewComponentPeer::keysCurrentlyDown.contains (keyCode))
         return true;
 
     if (keyCode >= 'A' && keyCode <= 'Z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toLowerCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((tchar) keyCode)))
         return true;
 
     if (keyCode >= 'a' && keyCode <= 'z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((void*) (int) CharacterFunctions::toUpperCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((tchar) keyCode)))
         return true;
 
     return false;
@@ -794,9 +794,9 @@ void NSViewComponentPeer::updateKeysDown (NSEvent* ev, bool isKeyDown)
     if (keyCode != 0)
     {
         if (isKeyDown)
-            keysCurrentlyDown.addIfNotAlreadyThere ((void*) keyCode);
+            keysCurrentlyDown.addIfNotAlreadyThere (keyCode);
         else
-            keysCurrentlyDown.removeValue ((void*) keyCode);
+            keysCurrentlyDown.removeValue (keyCode);
     }
 }
 

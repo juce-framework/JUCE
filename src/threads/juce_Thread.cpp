@@ -85,7 +85,7 @@ void Thread::threadEntryPoint (Thread* const thread)
 // used to wrap the incoming call from the platform-specific code
 void JUCE_API juce_threadEntryPoint (void* userData)
 {
-    Thread::threadEntryPoint ((Thread*) userData);
+    Thread::threadEntryPoint (static_cast <Thread*> (userData));
 }
 
 
@@ -114,7 +114,7 @@ void Thread::startThread()
 
     if (threadHandle_ == 0)
     {
-        threadHandle_ = juce_createThread ((void*) this);
+        threadHandle_ = juce_createThread (this);
         juce_setThreadPriority (threadHandle_, threadPriority_);
         startSuspensionEvent_.signal();
     }

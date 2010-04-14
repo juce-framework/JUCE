@@ -548,7 +548,7 @@ bool MidiMessage::isSysEx() const throw()
 const MidiMessage MidiMessage::createSysExMessage (const uint8* sysexData, const int dataSize)
 {
     MemoryBlock mm (dataSize + 2);
-    uint8* const m = (uint8*) mm.getData();
+    uint8* const m = static_cast <uint8*> (mm.getData());
 
     m[0] = 0xf0;
     memcpy (m + 1, sysexData, dataSize);
@@ -624,7 +624,7 @@ bool MidiMessage::isTextMetaEvent() const throw()
 
 const String MidiMessage::getTextFromTextMetaEvent() const
 {
-    return String ((const char*) getMetaEventData(), getMetaEventLength());
+    return String (reinterpret_cast <const char*> (getMetaEventData()), getMetaEventLength());
 }
 
 bool MidiMessage::isTrackNameEvent() const throw()

@@ -274,7 +274,7 @@ MidiOutput* MidiOutput::openDevice (int index)
                 if (OK (MIDIOutputPortCreate (globalMidiClient, pname, &port)))
                 {
                     mo = new MidiOutput();
-                    mo->internal = (void*) new MidiPortAndEndpoint (port, endPoint);
+                    mo->internal = new MidiPortAndEndpoint (port, endPoint);
                 }
             }
 
@@ -297,7 +297,7 @@ MidiOutput* MidiOutput::createNewDevice (const String& deviceName)
         if (OK (MIDISourceCreate (globalMidiClient, name, &endPoint)))
         {
             mo = new MidiOutput();
-            mo->internal = (void*) new MidiPortAndEndpoint (0, endPoint);
+            mo->internal = new MidiPortAndEndpoint (0, endPoint);
         }
 
         CFRelease (name);
@@ -560,7 +560,7 @@ MidiInput* MidiInput::openDevice (int index, MidiInputCallback* callback)
 
                             mi = new MidiInput (getDevices() [index]);
                             mpc->input = mi;
-                            mi->internal = (void*) mpc;
+                            mi->internal = mpc;
 
                             const ScopedLock sl (CoreMidiCallbacks::callbackLock);
                             CoreMidiCallbacks::activeCallbacks.add (mpc.release());
@@ -600,7 +600,7 @@ MidiInput* MidiInput::createNewDevice (const String& deviceName, MidiInputCallba
 
             mi = new MidiInput (deviceName);
             mpc->input = mi;
-            mi->internal = (void*) mpc;
+            mi->internal = mpc;
 
             const ScopedLock sl (CoreMidiCallbacks::callbackLock);
             CoreMidiCallbacks::activeCallbacks.add (mpc.release());

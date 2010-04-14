@@ -37,12 +37,14 @@ public:
     ValueRemapperSource (const Value& sourceValue_)
        : sourceValue (sourceValue_)
     {
+        sourceValue.addListener (this);
     }
 
     ValueRemapperSource (const Value& sourceValue_, const char** mappings)
        : sourceValue (sourceValue_)
     {
         addMappings (mappings);
+        sourceValue.addListener (this);
     }
 
     ~ValueRemapperSource() {}
@@ -75,21 +77,24 @@ public:
 
     void setValue (const var& newValue)
     {
+        var remappedVal (newValue);
+
         for (int i = 1; i < mappings.size(); i += 2)
         {
             if (newValue == mappings.getReference(i))
             {
-                sourceValue = mappings.getReference (i - 1);
-                return;
+                remappedVal = mappings.getReference (i - 1);
+                break;
             }
         }
 
-        sourceValue = newValue;
+        if (remappedVal != sourceValue)
+            sourceValue = remappedVal;
     }
 
     void valueChanged (Value&)
     {
-        sendChangeMessage (false);
+        sendChangeMessage (true);
     }
 
     //==============================================================================

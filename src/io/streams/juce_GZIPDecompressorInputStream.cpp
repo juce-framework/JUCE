@@ -196,7 +196,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
         if (destBuffer != 0)
         {
             int numRead = 0;
-            uint8* d = (uint8*) destBuffer;
+            uint8* d = static_cast <uint8*> (destBuffer);
 
             while (! helper->error)
             {
@@ -217,7 +217,7 @@ int GZIPDecompressorInputStream::read (void* destBuffer, int howMany)
 
                         if (activeBufferSize > 0)
                         {
-                            helper->setInput ((uint8*) buffer, activeBufferSize);
+                            helper->setInput (buffer, activeBufferSize);
                         }
                         else
                         {

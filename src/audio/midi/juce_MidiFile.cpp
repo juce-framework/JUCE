@@ -55,7 +55,7 @@ namespace MidiFileHelpers
         }
     }
 
-    static bool parseMidiHeader (const char* &data, short& timeFormat, short& fileType, short& numberOfTracks) throw()
+    static bool parseMidiHeader (const uint8* &data, short& timeFormat, short& fileType, short& numberOfTracks) throw()
     {
         unsigned int ch = (int) ByteOrder::bigEndianInt (data);
         data += 4;
@@ -266,12 +266,12 @@ bool MidiFile::readFrom (InputStream& sourceStream)
     if (sourceStream.readIntoMemoryBlock (data, maxSensibleMidiFileSize))
     {
         size_t size = data.getSize();
-        const char* d = (char*) data.getData();
+        const uint8* d = static_cast <const uint8*> (data.getData());
         short fileType, expectedTracks;
 
         if (size > 16 && MidiFileHelpers::parseMidiHeader (d, timeFormat, fileType, expectedTracks))
         {
-            size -= (int) (d - (char*) data.getData());
+            size -= (int) (d - static_cast <const uint8*> (data.getData()));
 
             int track = 0;
 
@@ -326,7 +326,7 @@ int MidiFile::compareElements (const MidiMessageSequence::MidiEventHolder* const
     }
 }
 
-void MidiFile::readNextTrack (const char* data, int size)
+void MidiFile::readNextTrack (const uint8* data, int size)
 {
     double time = 0;
     char lastStatusByte = 0;
@@ -336,13 +336,13 @@ void MidiFile::readNextTrack (const char* data, int size)
     while (size > 0)
     {
         int bytesUsed;
-        const int delay = MidiMessage::readVariableLengthVal ((const uint8*) data, bytesUsed);
+        const int delay = MidiMessage::readVariableLengthVal (data, bytesUsed);
         data += bytesUsed;
         size -= bytesUsed;
         time += delay;
 
         int messSize = 0;
-        const MidiMessage mm ((const uint8*) data, size, messSize, lastStatusByte, time);
+        const MidiMessage mm (data, size, messSize, lastStatusByte, time);
 
         if (messSize <= 0)
             break;

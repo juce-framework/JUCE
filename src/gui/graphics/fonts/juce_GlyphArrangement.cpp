@@ -200,7 +200,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font,
         font.getGlyphPositions (text, newGlyphs, xOffsets);
         const int textLen = newGlyphs.size();
 
-        const juce_wchar* const unicodeText = (const juce_wchar*) text;
+        const juce_wchar* const unicodeText = text;
 
         for (int i = 0; i < textLen; ++i)
         {

@@ -1066,7 +1066,7 @@ void CDController::prepare (SRB_ExecSCSICmd& s)
 void CDController::perform (SRB_ExecSCSICmd& s)
 {
     HANDLE event = CreateEvent (0, TRUE, FALSE, 0);
-    s.SRB_PostProc = (void*)event;
+    s.SRB_PostProc = event;
 
     ResetEvent (event);
 
@@ -1227,7 +1227,7 @@ bool CDDeviceHandle::readTOC (TOC* lpToc, bool useMSF)
     s.SRB_BufPointer = (BYTE*)lpToc;
     s.SRB_SenseLen = 0x0E;
     s.SRB_CDBLen = 0x0A;
-    s.SRB_PostProc = (void*)event;
+    s.SRB_PostProc = event;
     s.CDBByte[0] = 0x43;
     s.CDBByte[1] = (BYTE)(useMSF ? 0x02 : 0x00);
     s.CDBByte[7] = 0x03;
@@ -1306,7 +1306,7 @@ void CDDeviceHandle::openDrawer (bool shouldBeOpen)
     s.CDBByte[4] = (BYTE)((shouldBeOpen) ? 2 : 3);
 
     HANDLE event = CreateEvent (0, TRUE, FALSE, 0);
-    s.SRB_PostProc = (void*)event;
+    s.SRB_PostProc = event;
 
     ResetEvent (event);
 
@@ -1388,7 +1388,7 @@ static void GetAspiDeviceInfo (CDDeviceInfo* dev, BYTE ha, BYTE tgt, BYTE lun)
     s.SRB_BufPointer = buffer;
     s.SRB_SenseLen   = SENSE_LEN;
     s.SRB_CDBLen     = 6;
-    s.SRB_PostProc   = (void*)event;
+    s.SRB_PostProc   = event;
     s.CDBByte[0]     = SCSI_INQUIRY;
     s.CDBByte[4]     = 100;
 

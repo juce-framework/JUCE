@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class PropertyHolderComponent  : public Component
+class PropertyPanel::PropertyHolderComponent  : public Component
 {
 public:
     PropertyHolderComponent()
@@ -49,9 +49,12 @@ public:
     {
     }
 
-    void updateLayout (const int width);
-
+    void updateLayout (int width);
     void refreshAll() const;
+
+private:
+    PropertyHolderComponent (const PropertyHolderComponent&);
+    PropertyHolderComponent& operator= (const PropertyHolderComponent&);
 };
 
 //==============================================================================
@@ -180,9 +183,12 @@ public:
 private:
     int titleHeight;
     bool isOpen_;
+
+    PropertySectionComponent (const PropertySectionComponent&);
+    PropertySectionComponent& operator= (const PropertySectionComponent&);
 };
 
-void PropertyHolderComponent::updateLayout (const int width)
+void PropertyPanel::PropertyHolderComponent::updateLayout (const int width)
 {
     int y = 0;
 
@@ -203,7 +209,7 @@ void PropertyHolderComponent::updateLayout (const int width)
     repaint();
 }
 
-void PropertyHolderComponent::refreshAll() const
+void PropertyPanel::PropertyHolderComponent::refreshAll() const
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
@@ -289,19 +295,19 @@ void PropertyPanel::addSection (const String& sectionTitle,
 void PropertyPanel::updatePropHolderLayout() const
 {
     const int maxWidth = viewport->getMaximumVisibleWidth();
-    ((PropertyHolderComponent*) propertyHolderComponent)->updateLayout (maxWidth);
+    propertyHolderComponent->updateLayout (maxWidth);
 
     const int newMaxWidth = viewport->getMaximumVisibleWidth();
     if (maxWidth != newMaxWidth)
     {
         // need to do this twice because of scrollbars changing the size, etc.
-        ((PropertyHolderComponent*) propertyHolderComponent)->updateLayout (newMaxWidth);
+        propertyHolderComponent->updateLayout (newMaxWidth);
     }
 }
 
 void PropertyPanel::refreshAll() const
 {
-    ((PropertyHolderComponent*) propertyHolderComponent)->refreshAll();
+    propertyHolderComponent->refreshAll();
 }
 
 //==============================================================================

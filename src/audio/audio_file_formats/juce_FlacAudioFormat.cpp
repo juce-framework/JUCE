@@ -109,7 +109,7 @@ public:
         ok = FLAC__stream_decoder_init_stream (decoder,
                                                readCallback_, seekCallback_, tellCallback_, lengthCallback_,
                                                eofCallback_, writeCallback_, metadataCallback_, errorCallback_,
-                                               (void*) this) == FLAC__STREAM_DECODER_INIT_STATUS_OK;
+                                               this) == FLAC__STREAM_DECODER_INIT_STATUS_OK;
 
         if (ok)
         {
@@ -343,7 +343,7 @@ public:
         ok = FLAC__stream_encoder_init_stream (encoder,
                                                encodeWriteCallback, encodeSeekCallback,
                                                encodeTellCallback, encodeMetadataCallback,
-                                               (void*) this) == FLAC__STREAM_ENCODER_INIT_STATUS_OK;
+                                               this) == FLAC__STREAM_ENCODER_INIT_STATUS_OK;
     }
 
     ~FlacWriter()

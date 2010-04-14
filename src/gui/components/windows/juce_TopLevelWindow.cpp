@@ -319,7 +319,7 @@ int TopLevelWindow::getNumTopLevelWindows() throw()
 
 TopLevelWindow* TopLevelWindow::getTopLevelWindow (const int index) throw()
 {
-    return (TopLevelWindow*) TopLevelWindowManager::getInstance()->windows [index];
+    return static_cast <TopLevelWindow*> (TopLevelWindowManager::getInstance()->windows [index]);
 }
 
 TopLevelWindow* TopLevelWindow::getActiveTopLevelWindow() throw()

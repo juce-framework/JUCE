@@ -51,7 +51,7 @@ void* juce_createThread (void* userData)
     if (pthread_create (&handle, 0, threadEntryProc, userData) == 0)
     {
         pthread_detach (handle);
-        return (void*)handle;
+        return (void*) handle;
     }
 
     return 0;

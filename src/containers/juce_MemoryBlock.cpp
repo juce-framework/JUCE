@@ -239,7 +239,7 @@ void MemoryBlock::removeSection (size_t startByte, size_t numBytesToRemove) thro
 
 const String MemoryBlock::toString() const throw()
 {
-    return String ((const char*) data, size);
+    return String (static_cast <const char*> (getData()), size);
 }
 
 //==============================================================================
@@ -348,7 +348,8 @@ const String MemoryBlock::toBase64Encoding() const throw()
     const int initialLen = destString.length();
     destString.preallocateStorage (initialLen + 2 + numChars);
 
-    tchar* d = const_cast <tchar*> (((const tchar*) destString) + initialLen);
+    juce_wchar* d = destString;
+    d += initialLen;
     *d++ = '.';
 
     for (size_t i = 0; i < numChars; ++i)
@@ -371,7 +372,8 @@ bool MemoryBlock::fromBase64Encoding (const String& s) throw()
     setSize (numBytesNeeded, true);
 
     const int numChars = s.length() - startPos;
-    const tchar* const srcChars = ((const tchar*) s) + startPos;
+    const juce_wchar* srcChars = s;
+    srcChars += startPos;
     int pos = 0;
 
     for (int i = 0; i < numChars; ++i)

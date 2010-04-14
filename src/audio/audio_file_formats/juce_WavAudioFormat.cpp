@@ -426,7 +426,7 @@ public:
 
             if (bitsPerSample == 16)
             {
-                const short* src = (const short*) tempBuffer;
+                const short* src = reinterpret_cast <const short*> (tempBuffer);
 
                 if (numChannels > 1)
                 {
@@ -465,7 +465,7 @@ public:
             }
             else if (bitsPerSample == 24)
             {
-                const char* src = (const char*) tempBuffer;
+                const char* src = tempBuffer;
 
                 if (numChannels > 1)
                 {
@@ -705,7 +705,7 @@ public:
 
         const int bytes = numChannels * numSamples * bitsPerSample / 8;
         tempBlock.ensureSize (bytes, false);
-        char* buffer = (char*) tempBlock.getData();
+        char* buffer = static_cast <char*> (tempBlock.getData());
 
         const int* left = data[0];
         const int* right = data[1];
@@ -734,7 +734,7 @@ public:
         }
         else if (bitsPerSample == 24)
         {
-            char* b = (char*) buffer;
+            char* b = buffer;
 
             if (numChannels > 1)
             {

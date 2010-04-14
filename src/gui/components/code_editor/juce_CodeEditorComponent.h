@@ -260,7 +260,8 @@ private:
 
     CodeDocument::Position caretPos;
     CodeDocument::Position selectionStart, selectionEnd;
-    Component* caret;
+    class CaretComponent;
+    CaretComponent* caret;
     ScrollBar* verticalScrollBar;
     ScrollBar* horizontalScrollBar;
 

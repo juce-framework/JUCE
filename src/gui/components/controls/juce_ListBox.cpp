@@ -197,8 +197,8 @@ public:
 
     ListBoxRowComponent* getComponentForRow (const int row) const throw()
     {
-        return (ListBoxRowComponent*) getViewedComponent()
-                    ->getChildComponent (row % jmax (1, getViewedComponent()->getNumChildComponents()));
+        return static_cast <ListBoxRowComponent*>
+                (getViewedComponent()->getChildComponent (row % jmax (1, getViewedComponent()->getNumChildComponents())));
     }
 
     int getRowNumberOfComponent (Component* const rowComponent) const throw()
