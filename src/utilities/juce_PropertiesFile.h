@@ -30,6 +30,7 @@
 #include "../containers/juce_PropertySet.h"
 #include "../events/juce_Timer.h"
 #include "../events/juce_ChangeBroadcaster.h"
+#include "../threads/juce_InterProcessLock.h"
 
 
 //==============================================================================
@@ -76,10 +77,17 @@ public:
         @param optionFlags                  a combination of the flags in the FileFormatOptions
                                             enum, which specify the type of file to save, and other
                                             options.
+        @param processLock                  an optional InterprocessLock object that will be used to
+                                            prevent multiple threads or processes from writing to the file
+                                            at the same time. The PropertiesFile will keep a pointer to
+                                            this object but will not take ownership of it - the caller is
+                                            responsible for making sure that the lock doesn't get deleted
+                                            before the PropertiesFile has been deleted.
     */
     PropertiesFile (const File& file,
                     int millisecondsBeforeSaving,
-                    int optionFlags);
+                    int optionFlags,
+                    InterProcessLock* processLock = 0);
 
     /** Destructor.
 
@@ -146,7 +154,8 @@ public:
                                                            const String& folderName,
                                                            bool commonToAllUsers,
                                                            int millisecondsBeforeSaving,
-                                                           int propertiesFileOptions);
+                                                           int propertiesFileOptions,
+                                                           InterProcessLock *ipl = NULL);
 
     /** Handy utility to choose a file in the standard OS-dependent location for application
         settings files.
@@ -186,6 +195,10 @@ private:
     int timerInterval;
     const int options;
     bool loadedOk, needsWriting;
+
+    InterProcessLock* processLock;
+    typedef ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
+    ProcessScopedLock getProcessLock() const;
 
     void timerCallback();
 

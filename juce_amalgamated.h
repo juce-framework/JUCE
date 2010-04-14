@@ -13457,7 +13457,8 @@ public:
 
 	PropertiesFile (const File& file,
 					int millisecondsBeforeSaving,
-					int optionFlags);
+					int optionFlags,
+					InterProcessLock* processLock = 0);
 
 	~PropertiesFile();
 
@@ -13478,7 +13479,8 @@ public:
 														   const String& folderName,
 														   bool commonToAllUsers,
 														   int millisecondsBeforeSaving,
-														   int propertiesFileOptions);
+														   int propertiesFileOptions,
+														   InterProcessLock *ipl = NULL);
 
 	static const File getDefaultAppSettingsFile (const String& applicationName,
 												 const String& fileNameSuffix,
@@ -13496,6 +13498,10 @@ private:
 	int timerInterval;
 	const int options;
 	bool loadedOk, needsWriting;
+
+	InterProcessLock* processLock;
+	typedef ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
+	ProcessScopedLock getProcessLock() const;
 
 	void timerCallback();
 

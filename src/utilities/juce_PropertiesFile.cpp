@@ -35,7 +35,9 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/streams/juce_SubregionStream.h"
 #include "../io/streams/juce_GZIPDecompressorInputStream.h"
 #include "../io/streams/juce_GZIPCompressorOutputStream.h"
+#include "../containers/juce_ScopedPointer.h"
 #include "../core/juce_SystemStats.h"
+#include "../threads/juce_InterProcessLock.h"
 #include "../text/juce_XmlDocument.h"
 
 
@@ -52,18 +54,22 @@ namespace PropertyFileConstants
 }
 
 //==============================================================================
-PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSaving, const int options_)
+PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSaving,
+                                const int options_, InterProcessLock* const processLock_)
     : PropertySet (ignoreCaseOfKeyNames),
       file (f),
       timerInterval (millisecondsBeforeSaving),
       options (options_),
       loadedOk (false),
-      needsWriting (false)
+      needsWriting (false),
+      processLock (processLock_)
 {
     // You need to correctly specify just one storage format for the file
     jassert ((options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsBinary
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsCompressedBinary
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsXML);
+
+    ProcessScopedLock pl (getProcessLock());
 
     ScopedPointer<InputStream> fileStream (f.createInputStream());
 
@@ -125,8 +131,10 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
                 }
                 else
                 {
-                    // must be a pretty broken XML file we're trying to parse here!
-                    jassertfalse
+                    // must be a pretty broken XML file we're trying to parse here,
+                    // or a sign that this object needs an InterProcessLock,
+                    // or just a failure reading the file.  This last reason is why
+                    // we don't jassertfalse here.
                 }
             }
         }
@@ -141,6 +149,11 @@ PropertiesFile::~PropertiesFile()
 {
     if (! saveIfNeeded())
         jassertfalse;
+}
+
+PropertiesFile::ProcessScopedLock PropertiesFile::getProcessLock() const
+{
+    return ProcessScopedLock (processLock != 0 ? new InterProcessLock::ScopedLockType (*processLock) : 0);
 }
 
 bool PropertiesFile::saveIfNeeded()
@@ -192,6 +205,8 @@ bool PropertiesFile::save()
                                  getAllProperties().getAllValues() [i]);
         }
 
+        ProcessScopedLock pl (getProcessLock());
+
         if (doc.writeToFile (file, String::empty))
         {
             needsWriting = false;
@@ -200,6 +215,8 @@ bool PropertiesFile::save()
     }
     else
     {
+        ProcessScopedLock pl (getProcessLock());
+
         TemporaryFile tempFile (file);
         ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
 
@@ -304,7 +321,8 @@ PropertiesFile* PropertiesFile::createDefaultAppPropertiesFile (const String& ap
                                                                 const String& folderName,
                                                                 const bool commonToAllUsers,
                                                                 const int millisecondsBeforeSaving,
-                                                                const int propertiesFileOptions)
+                                                                const int propertiesFileOptions,
+                                                                InterProcessLock *processLock_)
 {
     const File file (getDefaultAppSettingsFile (applicationName,
                                                 fileNameSuffix,
@@ -316,7 +334,7 @@ PropertiesFile* PropertiesFile::createDefaultAppPropertiesFile (const String& ap
     if (file == File::nonexistent)
         return 0;
 
-    return new PropertiesFile (file, millisecondsBeforeSaving, propertiesFileOptions);
+    return new PropertiesFile (file, millisecondsBeforeSaving, propertiesFileOptions,processLock_);
 }
 
 

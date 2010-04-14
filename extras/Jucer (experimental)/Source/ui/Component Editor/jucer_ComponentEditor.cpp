@@ -701,6 +701,10 @@ private:
                 {
                     mouseDownCompUID = underMouse->getComponentUID();
                     mouseDownResult = canvas.getSelection().addToSelectionOnMouseDown (mouseDownCompUID, e.mods);
+
+                    updateSelectedComponentResizeFrames();
+                    hideSizeGuides();
+                    showSizeGuides();
                 }
             }
         }
