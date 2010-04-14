@@ -41,11 +41,12 @@ BEGIN_JUCE_NAMESPACE
  #define JUCE_USE_SSE_INSTRUCTIONS 1
 #endif
 
-#if JUCE_MSVC && JUCE_DEBUG
- #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
-#endif
-
 #if JUCE_MSVC
+ #if JUCE_DEBUG
+  #pragma optimize ("t", on)  // optimise just this file, to avoid sluggish graphics when debugging
+  #pragma warning (disable: 4714) // warning about forcedinline methods not being inlined
+ #endif
+
  #pragma warning (push)
  #pragma warning (disable: 4127) // "expression is constant" warning
 #endif
@@ -1653,6 +1654,10 @@ void LowLevelGraphicsSoftwareRenderer::drawGlyph (int glyphNumber, const AffineT
 
 #if JUCE_MSVC
  #pragma warning (pop)
+
+ #if JUCE_DEBUG
+  #pragma optimize ("", on)  // resets optimisations to the project defaults
+ #endif
 #endif
 
 END_JUCE_NAMESPACE

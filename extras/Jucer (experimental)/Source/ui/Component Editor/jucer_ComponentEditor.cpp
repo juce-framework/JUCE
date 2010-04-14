@@ -73,8 +73,8 @@ public:
         setName (coord.toString());
 
         ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state, component->getParentComponent()));
-        int anchor1 = coord.getAnchorPoint1().resolve (*markers);
-        int anchor2 = coord.getAnchorPoint2().resolve (*markers);
+        int anchor1 = roundToInt (coord.getAnchorPoint1().resolve (*markers));
+        int anchor2 = roundToInt (coord.getAnchorPoint2().resolve (*markers));
 
         Point<int> p1, p2;
 
@@ -113,7 +113,7 @@ public:
     void paint (Graphics& g)
     {
         Path p;
-        p.addLineSegment (lineEnd1.getX(), lineEnd1.getY(), lineEnd2.getX(), lineEnd2.getY(), 1.6f);
+        p.addLineSegment ((float) lineEnd1.getX(), (float) lineEnd1.getY(), (float) lineEnd2.getX(), (float) lineEnd2.getY(), 1.6f);
         const float startBlobSize = 2.0f;
         p.addEllipse (lineEnd1.getX() - startBlobSize, lineEnd1.getY() - startBlobSize, startBlobSize * 2.0f, startBlobSize * 2.0f);
         const float endBlobSize = 4.0f;
