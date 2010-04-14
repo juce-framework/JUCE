@@ -55,19 +55,21 @@ public:
     int getNumComponents() const;
     const ValueTree getComponent (int index) const;
     const ValueTree getComponentWithMemberName (const String& name) const;
-    Component* createComponent (int index) const;
-    void updateComponent (Component* comp) const;
+    Component* createComponent (int index);
+    void updateComponent (Component* comp);
     bool containsComponent (Component* comp) const;
     const ValueTree getComponentState (Component* comp) const;
     void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
+    Coordinate::MarkerResolver* createMarkerResolver (const ValueTree& state, Component* parentComponent);
+    const RectangleCoordinates getCoordsFor (const ValueTree& state) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     void performNewComponentMenuItem (int menuResultCode);
 
     //==============================================================================
     void beginDrag (const Array<Component*>& items, const MouseEvent& e,
-                    const ResizableBorderComponent::Zone& zone);
+                    Component* parentForOverlays, const ResizableBorderComponent::Zone& zone);
     void continueDrag (const MouseEvent& e);
     void endDrag (const MouseEvent& e);
 
@@ -114,9 +116,9 @@ public:
     virtual Component* createComponent() = 0;
     virtual const Rectangle<int> getDefaultSize() = 0;
 
-    virtual void updateComponent (Component* comp, const ValueTree& state);
-    virtual void initialiseNewItem (ValueTree& state, ComponentDocument& document);
-    virtual void createPropertyEditors (ValueTree& state, ComponentDocument& document, Array <PropertyComponent*>& props);
+    virtual void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state);
+    virtual void initialiseNewItem (ComponentDocument& document, ValueTree& state);
+    virtual void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props);
 
     Value getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const;
 

@@ -570,6 +570,9 @@ void InterProcessLock::exit()
 {
     const ScopedLock sl (lock);
 
+    // Trying to release the lock too many times!
+    jassert (pimpl != 0);
+
     if (pimpl != 0 && --(pimpl->refCount) == 0)
         pimpl = 0;
 }

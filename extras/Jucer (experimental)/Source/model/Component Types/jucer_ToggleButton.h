@@ -36,24 +36,24 @@ public:
     Component* createComponent()                { return new ToggleButton (String::empty); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void updateComponent (Component* comp, const ValueTree& state)
+    void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
     {
         ToggleButton* tb = dynamic_cast <ToggleButton*> (comp);
         jassert (tb != 0);
 
-        ComponentTypeHandler::updateComponent (comp, state);
+        ComponentTypeHandler::updateComponent (document, comp, state);
         tb->setButtonText (state ["text"].toString());
     }
 
-    void initialiseNewItem (ValueTree& state, ComponentDocument& document)
+    void initialiseNewItem (ComponentDocument& document, ValueTree& state)
     {
-        ComponentTypeHandler::initialiseNewItem (state, document);
+        ComponentTypeHandler::initialiseNewItem (document, state);
         state.setProperty ("text", "New Toggle Button", 0);
     }
 
-    void createPropertyEditors (ValueTree& state, ComponentDocument& document, Array <PropertyComponent*>& props)
+    void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
-        ComponentTypeHandler::createPropertyEditors (state, document, props);
+        ComponentTypeHandler::createPropertyEditors (document, state, props);
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
     }

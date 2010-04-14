@@ -141,6 +141,9 @@ public:
         const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
                                                 const Point<int>& distance) const throw();
 
+        /** Returns the raw flags for this zone. */
+        int getZoneFlags() const throw()                { return zone; }
+
     private:
         //==============================================================================
         int zone;

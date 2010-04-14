@@ -86,11 +86,14 @@ public:
             when the ScopedLockType object is deleted, the InterProcessLock will
             be unlocked.
 
+            Note that since an InterprocessLock can fail due to errors, you should check
+            isLocked() to make sure that the lock was successful before using it.
+
             Make sure this object is created and deleted by the same thread,
             otherwise there are no guarantees what will happen! Best just to use it
             as a local stack object, rather than creating one with the new() operator.
         */
-        inline explicit ScopedLockType (InterProcessLock& lock)             : lock_ (lock) { lock.enter(); }
+        explicit ScopedLockType (InterProcessLock& lock)                    : lock_ (lock) { lockWasSuccessful = lock.enter(); }
 
         /** Destructor.
 
@@ -101,9 +104,13 @@ public:
         */
         inline ~ScopedLockType()                                            { lock_.exit(); }
 
+        /** Returns true if the InterProcessLock was successfully locked. */
+        bool isLocked() const throw()                                       { return lockWasSuccessful; }
+
     private:
         //==============================================================================
         InterProcessLock& lock_;
+        bool lockWasSuccessful;
 
         ScopedLockType (const ScopedLockType&);
         ScopedLockType& operator= (const ScopedLockType&);

@@ -8723,13 +8723,16 @@ public:
 	{
 	public:
 
-		inline explicit ScopedLockType (InterProcessLock& lock)		 : lock_ (lock) { lock.enter(); }
+		explicit ScopedLockType (InterProcessLock& lock)			: lock_ (lock) { lockWasSuccessful = lock.enter(); }
 
 		inline ~ScopedLockType()						{ lock_.exit(); }
+
+		bool isLocked() const throw()					   { return lockWasSuccessful; }
 
 	private:
 
 		InterProcessLock& lock_;
+		bool lockWasSuccessful;
 
 		ScopedLockType (const ScopedLockType&);
 		ScopedLockType& operator= (const ScopedLockType&);
@@ -10060,6 +10063,11 @@ public:
 	const Rectangle operator+ (const Point<ValueType>& deltaPosition) const throw()
 	{
 		return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
+	}
+
+	const Rectangle operator- (const Point<ValueType>& deltaPosition) const throw()
+	{
+		return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
 	}
 
 	void expand (const ValueType deltaX,
@@ -22887,6 +22895,8 @@ public:
 
 		const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
 												const Point<int>& distance) const throw();
+
+		int getZoneFlags() const throw()		{ return zone; }
 
 	private:
 

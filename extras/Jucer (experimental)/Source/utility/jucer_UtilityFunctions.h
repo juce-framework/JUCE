@@ -111,56 +111,113 @@ private:
 
 
 //==============================================================================
-class RelativePosition
+/**
+    Holds a co-ordinate along the x or y axis, expressed either as an absolute
+    position, or relative to other named marker positions.
+*/
+class Coordinate
 {
 public:
-    RelativePosition();
-    explicit RelativePosition (const String& stringVersion);
-    explicit RelativePosition (double absoluteDistanceFromOrigin);
-    RelativePosition (double absoluteDistance, const String& source);
-    RelativePosition (double relativeProportion, const String& pos1, const String& pos2);
-    ~RelativePosition();
+    //==============================================================================
+    /** Creates a zero coordinate. */
+    Coordinate (bool isHorizontal);
 
-    class PositionFinder
+    /** Recreates a coordinate from its stringified version. */
+    explicit Coordinate (const String& stringVersion, bool isHorizontal);
+
+    /** Creates an absolute position from the parent origin. */
+    explicit Coordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
+
+    /** Creates an absolute position relative to a named marker. */
+    Coordinate (double absolutePosition, const String& relativeToMarker, bool isHorizontal);
+
+    /** Creates a relative position between two named markers. */
+    Coordinate (double relativePosition, const String& marker1, const String& marker2, bool isHorizontal);
+
+    /** Destructor. */
+    ~Coordinate();
+
+    //==============================================================================
+    /**
+        Provides an interface for looking up the position of a named marker.
+    */
+    class MarkerResolver
     {
     public:
-        virtual ~PositionFinder() {}
-        virtual RelativePosition* findPosition (const String& name) = 0;
+        virtual ~MarkerResolver() {}
+        virtual const Coordinate findMarker (const String& name, bool isHorizontal) = 0;
     };
 
-    const String getName() const                        { return name; }
-    void setName (const String& newName)                { name = newName; }
+    /** Calculates the absolute position of this co-ordinate. */
+    double resolve (MarkerResolver& markerResolver) const;
 
-    double resolve (PositionFinder& positionFinder) const;
-    void moveToAbsolute (double newPos, PositionFinder& positionFinder);
+    /** Returns true if this co-ordinate is expressed in terms of markers that form a recursive loop. */
+    bool isRecursive (MarkerResolver& markerResolver) const;
 
-    const String toString (int decimalPlaces) const;
+    /** Changes the value of this marker to make it resolve to the specified position. */
+    void moveToAbsolute (double newPos, MarkerResolver& markerResolver);
 
-    static const char* parentOriginMarkerName;
-    static const char* parentExtentMarkerName;
+    const Coordinate getAnchorPoint1() const;
+    const Coordinate getAnchorPoint2() const;
+
+    //==============================================================================
+    /*
+        Position string formats:
+            123                         = absolute pixels from parent origin
+            marker
+            marker + 123
+            marker - 123
+            50%                         = percentage between parent origin and parent extent
+            50% * marker                = percentage between parent origin and marker
+            50% * marker1 -> marker2    = percentage between two markers
+
+        standard marker names:
+            "origin"                            = parent origin
+            "size"                              = parent right or bottom
+            "top", "left", "bottom", "right"    = refer to the component's own left, right, top and bottom.
+    */
+    const String toString() const;
+
+    //==============================================================================
+    static const char* parentLeftMarkerName;
+    static const char* parentRightMarkerName;
+    static const char* parentTopMarkerName;
+    static const char* parentBottomMarkerName;
 
 private:
-    String name, nameOfSource1, nameOfSource2;
+    //==============================================================================
+    String anchor1, anchor2;
     double value;
-    bool isRelative;
+    bool isProportion, isHorizontal;
 
-    double getPos1 (PositionFinder& positionFinder) const      { return getPosition (nameOfSource1, positionFinder); }
-    double getPos2 (PositionFinder& positionFinder) const      { return getPosition (nameOfSource2, positionFinder); }
-    double getPosition (const String& name, PositionFinder& positionFinder) const;
-    static const String checkName (const String& name);
+    double resolve (MarkerResolver& markerResolver, int recursionCounter) const;
+    double getPosition (const String& name, MarkerResolver& markerResolver, int recursionCounter) const;
+    const String checkName (const String& name) const;
+    const String getOriginMarkerName() const;
+    const String getExtentMarkerName() const;
     static bool isOrigin (const String& name);
+    static void skipWhitespace (const String& s, int& i);
+    static const String readMarkerName (const String& s, int& i);
+    static double readNumber (const String& s, int& i);
 };
 
-class RelativeRectangle
+//==============================================================================
+/**
+    Describes a rectangle as a set of Coordinate values.
+*/
+class RectangleCoordinates
 {
 public:
-    RelativeRectangle();
-    explicit RelativeRectangle (const Rectangle<int>& rect);
-    explicit RelativeRectangle (const String& stringVersion);
+    //==============================================================================
+    RectangleCoordinates();
+    explicit RectangleCoordinates (const Rectangle<int>& rect);
+    explicit RectangleCoordinates (const String& stringVersion);
 
-    const Rectangle<int> resolve (RelativePosition::PositionFinder& positionFinder) const;
-    void moveToAbsolute (const Rectangle<int>& newPos, RelativePosition::PositionFinder& positionFinder);
-    const String toString (int decimalPlaces) const;
+    //==============================================================================
+    const Rectangle<int> resolve (Coordinate::MarkerResolver& markerResolver) const;
+    bool isRecursive (Coordinate::MarkerResolver& markerResolver) const;
+    void moveToAbsolute (const Rectangle<int>& newPos, Coordinate::MarkerResolver& markerResolver);
+    const String toString() const;
 
-    RelativePosition left, right, top, bottom;
+    Coordinate left, right, top, bottom;
 };

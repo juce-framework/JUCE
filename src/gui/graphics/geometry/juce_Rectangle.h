@@ -221,6 +221,12 @@ public:
         return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
     }
 
+    /** Returns a rectangle which is the same as this one moved by a given amount. */
+    const Rectangle operator- (const Point<ValueType>& deltaPosition) const throw()
+    {
+        return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
+    }
+
     /** Expands the rectangle by a given amount.
 
         Effectively, its new size is (x - deltaX, y - deltaY, w + deltaX * 2, h + deltaY * 2).

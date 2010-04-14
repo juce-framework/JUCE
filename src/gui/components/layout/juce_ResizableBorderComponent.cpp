@@ -99,13 +99,13 @@ const Rectangle<int> ResizableBorderComponent::Zone::resizeRectangleBy (Rectangl
         b.setLeft (b.getX() + offset.getX());
 
     if (isDraggingRightEdge())
-        b.setWidth (b.getWidth() + offset.getX());
+        b.setWidth (jmax (0, b.getWidth() + offset.getX()));
 
     if (isDraggingTopEdge())
         b.setTop (b.getY() + offset.getY());
 
     if (isDraggingBottomEdge())
-        b.setHeight (b.getHeight() + offset.getY());
+        b.setHeight (jmax (0, b.getHeight() + offset.getY()));
 
     return b;
 }

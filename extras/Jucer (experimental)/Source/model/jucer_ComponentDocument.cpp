@@ -57,28 +57,30 @@ Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& st
     return state.getPropertyAsValue (name, document.getUndoManager());
 }
 
-void ComponentTypeHandler::updateComponent (Component* comp, const ValueTree& state)
+void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
 {
     if (comp->getParentComponent() != 0)
     {
-        PositionedRectangle pos (state [compBoundsProperty].toString());
-        comp->setBounds (pos.getRectangle (comp->getParentComponent()->getLocalBounds()));
+        RectangleCoordinates pos (state [compBoundsProperty].toString());
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state, comp->getParentComponent()));
+        comp->setBounds (pos.resolve (*markers));
     }
 
     comp->setName (state [compNameProperty]);
 }
 
-void ComponentTypeHandler::initialiseNewItem (ValueTree& state, ComponentDocument& document)
+void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, ValueTree& state)
 {
     state.setProperty (compNameProperty, String::empty, 0);
     state.setProperty (memberNameProperty, document.getNonExistentMemberName (getMemberNameRoot()), 0);
-    state.setProperty (compBoundsProperty,
-                       getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
-                                                                  Random::getSystemRandom().nextInt (100) + 100)).toString(), 0);
+
+    const Rectangle<int> bounds (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
+                                                                            Random::getSystemRandom().nextInt (100) + 100)));
+
+    state.setProperty (compBoundsProperty, RectangleCoordinates (bounds).toString(), 0);
 }
 
-void ComponentTypeHandler::createPropertyEditors (ValueTree& state, ComponentDocument& document,
-                                                  Array <PropertyComponent*>& props)
+void ComponentTypeHandler::createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
 {
     props.add (new TextPropertyComponent (getValue (compBoundsProperty, state, document), "Bounds", 512, false));
     props.getLast()->setTooltip ("The component's position.");
@@ -100,7 +102,7 @@ public:
 
     juce_DeclareSingleton_SingleThreaded_Minimal (ComponentTypeManager);
 
-    Component* createFromStoredType (const ValueTree& value)
+    Component* createFromStoredType (ComponentDocument& document, const ValueTree& value)
     {
         ComponentTypeHandler* handler = getHandlerFor (value.getType());
         if (handler == 0)
@@ -108,7 +110,7 @@ public:
 
         Component* c = handler->createComponent();
         if (c != 0)
-            handler->updateComponent (c, value);
+            handler->updateComponent (document, c, value);
 
         return c;
     }
@@ -331,7 +333,7 @@ void ComponentDocument::performNewComponentMenuItem (int menuResultCode)
         {
             ValueTree state (handler->getXmlTag());
             state.setProperty (idProperty, createAlphaNumericUID(), 0);
-            handler->initialiseNewItem (state, *this);
+            handler->initialiseNewItem (*this, state);
 
             getComponentGroup().addChild (state, -1, getUndoManager());
         }
@@ -368,13 +370,13 @@ const ValueTree ComponentDocument::getComponentWithMemberName (const String& nam
     return ValueTree::invalid;
 }
 
-Component* ComponentDocument::createComponent (int index) const
+Component* ComponentDocument::createComponent (int index)
 {
     const ValueTree v (getComponentGroup().getChild (index));
 
     if (v.isValid())
     {
-        Component* c = ComponentTypeManager::getInstance()->createFromStoredType (v);
+        Component* c = ComponentTypeManager::getInstance()->createFromStoredType (*this, v);
         c->getProperties().set (idProperty, v[idProperty]);
         jassert (c->getProperties()[idProperty].toString().isNotEmpty());
         return c;
@@ -383,7 +385,46 @@ Component* ComponentDocument::createComponent (int index) const
     return 0;
 }
 
-void ComponentDocument::updateComponent (Component* comp) const
+//==============================================================================
+class ComponentMarkerResolver  : public Coordinate::MarkerResolver
+{
+public:
+    ComponentMarkerResolver (ComponentDocument& doc, const ValueTree& state_, Component* parentComponent_)
+        : owner (doc), state (state_), parentComponent (parentComponent_)
+    {}
+
+    ~ComponentMarkerResolver() {}
+
+    const Coordinate findMarker (const String& name, bool isHorizontal)
+    {
+        if (name == "left")             return RectangleCoordinates (state [compBoundsProperty]).left;
+        else if (name == "right")       return RectangleCoordinates (state [compBoundsProperty]).right;
+        else if (name == "top")         return RectangleCoordinates (state [compBoundsProperty]).top;
+        else if (name == "bottom")      return RectangleCoordinates (state [compBoundsProperty]).bottom;
+        else if (name == Coordinate::parentRightMarkerName)     return Coordinate ((double) parentComponent->getWidth(), isHorizontal);
+        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) parentComponent->getHeight(), isHorizontal);
+
+        return Coordinate (isHorizontal);
+    }
+
+private:
+    ComponentDocument& owner;
+    ValueTree state;
+    Component* parentComponent;
+};
+
+const RectangleCoordinates ComponentDocument::getCoordsFor (const ValueTree& state) const
+{
+    return RectangleCoordinates (state [compBoundsProperty]);
+}
+
+Coordinate::MarkerResolver* ComponentDocument::createMarkerResolver (const ValueTree& state, Component* parentComponent)
+{
+    jassert (parentComponent != 0);
+    return new ComponentMarkerResolver (*this, state, parentComponent);
+}
+
+void ComponentDocument::updateComponent (Component* comp)
 {
     const ValueTree v (getComponentState (comp));
 
@@ -393,7 +434,7 @@ void ComponentDocument::updateComponent (Component* comp) const
         jassert (handler != 0);
 
         if (handler != 0)
-            handler->updateComponent (comp, v);
+            handler->updateComponent (*this, comp, v);
     }
 }
 
@@ -431,7 +472,7 @@ void ComponentDocument::getComponentProperties (Array <PropertyComponent*>& prop
         jassert (handler != 0);
 
         if (handler != 0)
-            handler->createPropertyEditors (v, *this, props);
+            handler->createPropertyEditors (*this, v, props);
     }
 }
 
@@ -473,8 +514,10 @@ public:
     DragHandler (ComponentDocument& document_,
                  const Array<Component*>& items,
                  const MouseEvent& e,
-                 const ResizableBorderComponent::Zone& zone_)
-        : document (document_),
+                 const ResizableBorderComponent::Zone& zone_,
+                 Component* parentForOverlays)
+        : parentComponent (0),
+          document (document_),
           zone (zone_)
     {
         for (int i = 0; i < items.size(); ++i)
@@ -482,14 +525,20 @@ public:
             Component* comp = items.getUnchecked(i);
             jassert (comp != 0);
 
-            parentComponentSize.setSize (comp->getParentWidth(), comp->getParentHeight());
-            jassert (! parentComponentSize.isEmpty());
+            if (parentComponent == 0)
+                parentComponent = comp->getParentComponent();
 
             const ValueTree v (document.getComponentState (comp));
             draggedComponents.add (v);
 
-            PositionedRectangle pos (v [compBoundsProperty].toString());
-            originalPositions.add (pos.getRectangle (parentComponentSize));
+            Rectangle<int> pos;
+
+            {
+                RectangleCoordinates relativePos (v [compBoundsProperty].toString());
+                ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v, parentComponent));
+                pos = relativePos.resolve (*markers);
+                originalPositions.add (pos);
+            }
 
             const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
                                              (float) pos.getWidth(), (float) pos.getHeight());
@@ -525,18 +574,42 @@ public:
     {
         document.getUndoManager()->undoCurrentTransactionOnly();
 
-        for (int i = 0; i < draggedComponents.size(); ++i)
-            move (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i));
+        for (int n = 50;;)
+        {
+            // Need to repeatedly apply the new positions until they all settle down, in case some of
+            // the coords are relative to each other..
+            bool anyUpdated = false;
+
+            for (int i = 0; i < draggedComponents.size(); ++i)
+                if (dragItem (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i)))
+                    anyUpdated = true;
+
+            if (! anyUpdated)
+                break;
+
+            if (--n == 0)
+            {
+                jassertfalse;
+                break;
+            }
+        }
     }
 
-    void move (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
+    bool dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
     {
-        Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
+        const Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
 
-        PositionedRectangle pr (v [compBoundsProperty].toString());
-        pr.updateFrom (newBounds, parentComponentSize);
+        RectangleCoordinates pr (v [compBoundsProperty].toString());
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v, parentComponent));
 
-        v.setProperty (compBoundsProperty, pr.toString(), document.getUndoManager());
+        pr.moveToAbsolute (newBounds, *markers);
+        const String newBoundsString (pr.toString());
+
+        if (v[compBoundsProperty] == newBoundsString)
+            return false;
+
+        v.setProperty (compBoundsProperty, newBoundsString, document.getUndoManager());
+        return true;
     }
 
     const Array<float> getVerticalSnapPositions (const Point<int>& distance) const
@@ -558,7 +631,7 @@ public:
     }
 
 private:
-    Rectangle<int> parentComponentSize;
+    Component* parentComponent;
     ComponentDocument& document;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;
@@ -566,9 +639,10 @@ private:
     const ResizableBorderComponent::Zone zone;
 };
 
-void ComponentDocument::beginDrag (const Array<Component*>& items, const MouseEvent& e, const ResizableBorderComponent::Zone& zone)
+void ComponentDocument::beginDrag (const Array<Component*>& items, const MouseEvent& e,
+                                   Component* parentForOverlays, const ResizableBorderComponent::Zone& zone)
 {
-    dragger = new DragHandler (*this, items, e, zone);
+    dragger = new DragHandler (*this, items, e, zone, parentForOverlays);
 }
 
 void ComponentDocument::continueDrag (const MouseEvent& e)

@@ -28,6 +28,134 @@
 
 
 //==============================================================================
+class SizeGuideComponent   : public Component,
+                             public ComponentListener
+{
+public:
+    enum Type
+    {
+        left, right, top, bottom
+    };
+
+    SizeGuideComponent (ComponentDocument& document_, const ValueTree& state_, Component* component_,
+                        Component* parentForOverlays, Type type_)
+        : document (document_), state (state_), component (component_), type (type_),
+          font (10.0f)
+    {
+        component->addComponentListener (this);
+
+        setAlwaysOnTop (true);
+        parentForOverlays->addAndMakeVisible (this);
+        updatePosition();
+    }
+
+    ~SizeGuideComponent()
+    {
+        if (component != 0)
+            component->removeComponentListener (this);
+    }
+
+    void updatePosition()
+    {
+        RectangleCoordinates coords (document.getCoordsFor (state));
+        Coordinate coord (false);
+        bool isHorizontal = false;
+
+        switch (type)
+        {
+            case left:      coord = coords.left; isHorizontal = true; break;
+            case right:     coord = coords.right; isHorizontal = true; break;
+            case top:       coord = coords.top; break;
+            case bottom:    coord = coords.bottom; break;
+            default:        jassertfalse; break;
+        }
+
+        setName (coord.toString());
+
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state, component->getParentComponent()));
+        int anchor1 = coord.getAnchorPoint1().resolve (*markers);
+        int anchor2 = coord.getAnchorPoint2().resolve (*markers);
+
+        Point<int> p1, p2;
+
+        switch (type)
+        {
+            case left:      p1 = Point<int> (component->getX(), component->getY() + component->proportionOfHeight (0.33f));
+                            p2 = Point<int> (anchor1, p1.getY()); break;
+            case right:     p1 = Point<int> (component->getRight(), component->getY() + component->proportionOfHeight (0.66f));
+                            p2 = Point<int> (anchor1, p1.getY()); break;
+            case top:       p1 = Point<int> (component->getX() + component->proportionOfWidth (0.33f), component->getY());
+                            p2 = Point<int> (p1.getX(), anchor1); break;
+            case bottom:    p1 = Point<int> (component->getX() + component->proportionOfWidth (0.66f), component->getBottom());
+                            p2 = Point<int> (p1.getX(), anchor1); break;
+            default:        jassertfalse; break;
+        }
+
+        Rectangle<int> bounds (Rectangle<int> (p1, p2).expanded (4, 4));
+        Point<int> textPos ((p1.getX() + p2.getX()) / 2,
+                            (p1.getY() + p2.getY()) / 2);
+        int textW = (int) font.getStringWidth (getName());
+        int textH = (int) font.getHeight();
+        Rectangle<int> textRect (textPos.getX() - textW / 2, textPos.getY() - textH / 2, textW, textH);
+
+        if (isHorizontal)
+            textRect = textRect - Point<int> (0, textH / 2 + 4);
+
+        bounds = bounds.getUnion (textRect);
+        setBounds (bounds);
+
+        lineEnd1 = p1 - bounds.getPosition();
+        lineEnd2 = p2 - bounds.getPosition();
+        textArea = textRect - bounds.getPosition();
+        repaint();
+    }
+
+    void paint (Graphics& g)
+    {
+        Path p;
+        p.addLineSegment (lineEnd1.getX(), lineEnd1.getY(), lineEnd2.getX(), lineEnd2.getY(), 1.6f);
+        const float startBlobSize = 2.0f;
+        p.addEllipse (lineEnd1.getX() - startBlobSize, lineEnd1.getY() - startBlobSize, startBlobSize * 2.0f, startBlobSize * 2.0f);
+        const float endBlobSize = 4.0f;
+        p.addEllipse (lineEnd2.getX() - endBlobSize, lineEnd2.getY() - endBlobSize, endBlobSize * 2.0f, endBlobSize * 2.0f);
+
+        g.setColour (Colours::black.withAlpha (0.3f));
+        g.fillPath (p);
+
+        g.setFont (font);
+        g.setColour (Colours::white);
+
+        for (int y = -1; y <= 1; ++y)
+            for (int x = -1; x <= 1; ++x)
+                g.drawText (getName(), textArea.getX() + x, textArea.getY() + y, textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
+
+        g.setColour (Colours::black);
+        g.drawText (getName(), textArea.getX(), textArea.getY(), textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
+    }
+
+    void componentMovedOrResized (Component&, bool, bool)
+    {
+        updatePosition();
+    }
+
+    void componentBeingDeleted (Component&)
+    {
+        setVisible (false);
+        component = 0;
+    }
+
+private:
+    ComponentDocument& document;
+    ValueTree state;
+    Component* component;
+    Type type;
+    Font font;
+    Point<int> lineEnd1, lineEnd2;
+    Rectangle<int> textArea;
+};
+
+
+//==============================================================================
 class ComponentEditor::Canvas   : public Component,
                                   public ValueTree::Listener,
                                   public Timer
@@ -116,10 +244,8 @@ public:
                 c = doc.createComponent (i);
                 componentHolder->addAndMakeVisible (c);
             }
-            else
-            {
-                doc.updateComponent (c);
-            }
+
+            doc.updateComponent (c);
         }
 
         startTimer (500);
@@ -175,9 +301,57 @@ public:
             getDocument().beginNewTransaction();
     }
 
+    void mouseMove (const MouseEvent& e)
+    {
+        updateDragZone (e.getPosition());
+    }
+
+    void mouseDown (const MouseEvent& e)
+    {
+        updateDragZone (e.getPosition());
+        dragStartSize = getBounds();
+    }
+
+    void mouseDrag (const MouseEvent& e)
+    {
+        if (dragZone.isDraggingRightEdge() || dragZone.isDraggingBottomEdge())
+        {
+            showSizeGuides();
+            setSize (jmax (0, dragStartSize.getWidth() + e.getDistanceFromDragStartX()),
+                     jmax (0, dragStartSize.getHeight() + e.getDistanceFromDragStartY()));
+        }
+    }
+
+    void mouseUp (const MouseEvent& e)
+    {
+        hideSizeGuides();
+        updateDragZone (e.getPosition());
+    }
+
+    void updateDragZone (const Point<int>& p)
+    {
+        ResizableBorderComponent::Zone newZone
+            = ResizableBorderComponent::Zone::fromPositionOnBorder (getLocalBounds(),
+                                                                    BorderSize (borderThickness), p);
+
+        newZone = ResizableBorderComponent::Zone (newZone.getZoneFlags()
+                                                   & (ResizableBorderComponent::Zone::right | ResizableBorderComponent::Zone::bottom));
+
+        if (dragZone != newZone)
+        {
+            dragZone = newZone;
+            setMouseCursor (newZone.getMouseCursor());
+        }
+    }
+
+    void showSizeGuides()   { overlay->showSizeGuides(); }
+    void hideSizeGuides()   { overlay->hideSizeGuides(); }
+
 private:
     ComponentEditor& editor;
     const int borderThickness;
+    ResizableBorderComponent::Zone dragZone;
+    Rectangle<int> dragStartSize;
 
     //==============================================================================
     class ComponentResizeFrame    : public Component,
@@ -230,18 +404,23 @@ private:
             if (component != 0)
             {
                 updateDragZone (e.getPosition());
-                canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, dragZone);
+                canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, getParentComponent(), dragZone);
             }
         }
 
         void mouseDrag (const MouseEvent& e)
         {
             if (component != 0)
+            {
+                canvas.showSizeGuides();
                 canvas.getDocument().continueDrag (e);
+            }
         }
 
         void mouseUp (const MouseEvent& e)
         {
+            canvas.hideSizeGuides();
+
             if (component != 0)
                 canvas.getDocument().endDrag (e);
 
@@ -261,11 +440,29 @@ private:
 
         uint32 getTargetComponentUID() const  { return component == 0 ? 0 : component->getComponentUID(); }
 
+        void showSizeGuides()
+        {
+            if (sizeGuides.size() == 0)
+            {
+                const ValueTree v (canvas.getDocument().getComponentState (component));
+                sizeGuides.add (new SizeGuideComponent (canvas.getDocument(), v, component, getParentComponent(), SizeGuideComponent::left));
+                sizeGuides.add (new SizeGuideComponent (canvas.getDocument(), v, component, getParentComponent(), SizeGuideComponent::right));
+                sizeGuides.add (new SizeGuideComponent (canvas.getDocument(), v, component, getParentComponent(), SizeGuideComponent::top));
+                sizeGuides.add (new SizeGuideComponent (canvas.getDocument(), v, component, getParentComponent(), SizeGuideComponent::bottom));
+            }
+        }
+
+        void hideSizeGuides()
+        {
+            sizeGuides.clear();
+        }
+
     private:
         Canvas& canvas;
         Component::SafePointer<Component> component;
         ResizableBorderComponent::Zone dragZone;
         const int borderThickness;
+        OwnedArray <SizeGuideComponent> sizeGuides;
 
         const Rectangle<int> getCentreArea() const
         {
@@ -354,16 +551,19 @@ private:
                 {
                     isDraggingClickedComp = true;
                     canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
-                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e,
+                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, getParentComponent(),
                                                     ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
                 }
 
                 canvas.getDocument().continueDrag (e);
+                showSizeGuides();
             }
         }
 
         void mouseUp (const MouseEvent& e)
         {
+            hideSizeGuides();
+
             if (lasso != 0)
             {
                 lasso->endLasso();
@@ -377,6 +577,8 @@ private:
                 if (! isDraggingClickedComp)
                     canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, ! e.mouseWasClicked(), mouseDownResult);
             }
+
+            canvas.getDocument().endDrag (e);
         }
 
         void findLassoItemsInArea (Array <ComponentDocument::SelectedItems::ItemType>& itemsFound, int x, int y, int width, int height)
@@ -401,6 +603,26 @@ private:
         void modifierKeysChanged (const ModifierKeys&)
         {
             Desktop::getInstance().getMainMouseSource().triggerFakeMove();
+        }
+
+        void showSizeGuides()
+        {
+            for (int i = getNumChildComponents(); --i >= 0;)
+            {
+                ComponentResizeFrame* resizer = dynamic_cast <ComponentResizeFrame*> (getChildComponent(i));
+                if (resizer != 0)
+                    resizer->showSizeGuides();
+            }
+        }
+
+        void hideSizeGuides()
+        {
+            for (int i = getNumChildComponents(); --i >= 0;)
+            {
+                ComponentResizeFrame* resizer = dynamic_cast <ComponentResizeFrame*> (getChildComponent(i));
+                if (resizer != 0)
+                    resizer->hideSizeGuides();
+            }
         }
 
     private:

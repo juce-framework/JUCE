@@ -86,10 +86,7 @@ public:
     */
     inline ~ScopedTryLock() throw()                                       { if (lockWasSuccessful) lock_.exit(); }
 
-    /** Lock state
-
-    @return True if the CriticalSection is locked.
-    */
+    /** Returns true if the CriticalSection was successfully locked. */
     bool isLocked() const throw()                                         { return lockWasSuccessful; }
 
 private:

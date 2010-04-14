@@ -505,152 +505,326 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 }
 
 //==============================================================================
-RelativePosition::RelativePosition()
-    : value (0), isRelative (false)
+const char* Coordinate::parentLeftMarkerName   = "parent.left";
+const char* Coordinate::parentRightMarkerName  = "parent.right";
+const char* Coordinate::parentTopMarkerName    = "parent.top";
+const char* Coordinate::parentBottomMarkerName = "parent.bottom";
+
+Coordinate::Coordinate (bool isHorizontal_)
+    : value (0), isProportion (false), isHorizontal (isHorizontal_)
 {
 }
 
-RelativePosition::RelativePosition (double absoluteDistanceFromOrigin)
-    : value (absoluteDistanceFromOrigin), isRelative (false)
+Coordinate::Coordinate (double absoluteDistanceFromOrigin, bool isHorizontal_)
+    : value (absoluteDistanceFromOrigin), isProportion (false), isHorizontal (isHorizontal_)
 {
 }
 
-RelativePosition::RelativePosition (double absoluteDistance, const String& source)
-    : nameOfSource1 (source), value (absoluteDistance), isRelative (false)
+Coordinate::Coordinate (double absoluteDistance, const String& source, bool isHorizontal_)
+    : anchor1 (source), value (absoluteDistance), isProportion (false), isHorizontal (isHorizontal_)
 {
 }
 
-RelativePosition::RelativePosition (double relativeProportion, const String& pos1, const String& pos2)
-    : nameOfSource1 (pos1), nameOfSource2 (pos2), value (relativeProportion), isRelative (true)
+Coordinate::Coordinate (double relativeProportion, const String& pos1, const String& pos2, bool isHorizontal_)
+    : anchor1 (pos1), anchor2 (pos2), value (relativeProportion), isProportion (true), isHorizontal (isHorizontal_)
 {
 }
 
-RelativePosition::~RelativePosition()
+Coordinate::~Coordinate()
 {
 }
 
-bool RelativePosition::isOrigin (const String& name)
+const Coordinate Coordinate::getAnchorPoint1() const
 {
-    return name.isEmpty() || name == parentOriginMarkerName;
+    return Coordinate (0.0, anchor1, isHorizontal);
 }
 
-const String RelativePosition::checkName (const String& name)
+const Coordinate Coordinate::getAnchorPoint2() const
 {
-    return name.isEmpty() ? parentOriginMarkerName : name;
+    return Coordinate (0.0, anchor2, isHorizontal);
 }
 
-double RelativePosition::getPosition (const String& name, PositionFinder& positionFinder) const
+bool Coordinate::isOrigin (const String& name)
+{
+    return name.isEmpty() || name == parentLeftMarkerName || name == parentTopMarkerName;
+}
+
+const String Coordinate::getOriginMarkerName() const
+{
+    return isHorizontal ? parentLeftMarkerName : parentTopMarkerName;
+}
+
+const String Coordinate::getExtentMarkerName() const
+{
+    return isHorizontal ? parentRightMarkerName : parentBottomMarkerName;
+}
+
+const String Coordinate::checkName (const String& name) const
+{
+    return name.isEmpty() ? getOriginMarkerName() : name;
+}
+
+double Coordinate::getPosition (const String& name, MarkerResolver& markerResolver, int recursionCounter) const
 {
     if (isOrigin (name))
         return 0.0;
 
-    RelativePosition* const pos = positionFinder.findPosition (nameOfSource1);
+    return markerResolver.findMarker (name, isHorizontal)
+                         .resolve (markerResolver, recursionCounter + 1);
+}
 
-    if (pos != 0)
-        return pos->resolve (positionFinder);
+struct RecursivePositionException
+{
+};
 
-    jassertfalse;
+double Coordinate::resolve (MarkerResolver& markerResolver, int recursionCounter) const
+{
+    if (recursionCounter > 100)
+    {
+        jassertfalse
+        throw RecursivePositionException();
+    }
+
+    const double pos1 = getPosition (anchor1, markerResolver, recursionCounter);
+
+    return isProportion ? pos1 + (getPosition (anchor2, markerResolver, recursionCounter) - pos1) * value
+                        : pos1 + value;
+}
+
+double Coordinate::resolve (MarkerResolver& markerResolver) const
+{
+    try
+    {
+        return resolve (markerResolver, 0);
+    }
+    catch (RecursivePositionException&)
+    {}
+
     return 0.0;
 }
 
-double RelativePosition::resolve (PositionFinder& positionFinder) const
+void Coordinate::moveToAbsolute (double newPos, MarkerResolver& markerResolver)
 {
-    const double pos1 = getPos1 (positionFinder);
-
-    return isRelative ? pos1 + (getPos2 (positionFinder) - pos1) * value
-                      : pos1 + value;
-}
-
-void RelativePosition::moveToAbsolute (double newPos, PositionFinder& positionFinder)
-{
-    const double pos1 = getPos1 (positionFinder);
-
-    if (isRelative)
-        value = (newPos - pos1) / (getPos2 (positionFinder) - pos1);
-    else
-        value = newPos - pos1;
-}
-
-RelativePosition::RelativePosition (const String& stringVersion)
-{
-    jassertfalse //todo
-}
-
-const String RelativePosition::toString (int decimalPlaces) const
-{
-    if (isRelative)
+    try
     {
-        const String percent (value * 100.0, 2);
+        const double pos1 = getPosition (anchor1, markerResolver, 0);
 
-        if (isOrigin (nameOfSource1))
+        if (isProportion)
         {
-            if (nameOfSource2 == parentExtentMarkerName)
-                return percent + "%";
-            else
-                return percent + "% of " + checkName (nameOfSource2);
+            const double size = getPosition (anchor2, markerResolver, 0) - pos1;
+
+            if (size != 0)
+                value = (newPos - pos1) / size;
         }
         else
-            return percent + "% of " + checkName (nameOfSource1) + " to " + checkName (nameOfSource2);
+        {
+            value = newPos - pos1;
+        }
+    }
+    catch (RecursivePositionException&)
+    {}
+}
+
+bool Coordinate::isRecursive (MarkerResolver& markerResolver) const
+{
+    try
+    {
+        resolve (markerResolver, 0);
+    }
+    catch (RecursivePositionException&)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+void Coordinate::skipWhitespace (const String& s, int& i)
+{
+    while (CharacterFunctions::isWhitespace (s[i]))
+        ++i;
+}
+
+const String Coordinate::readMarkerName (const String& s, int& i)
+{
+    skipWhitespace (s, i);
+
+    if (CharacterFunctions::isLetter (s[i]) || s[i] == '_')
+    {
+        int start = i;
+
+        while (CharacterFunctions::isLetterOrDigit (s[i]) || s[i] == '_' || s[i] == '.')
+            ++i;
+
+        return s.substring (start, i);
+    }
+
+    return String::empty;
+}
+
+double Coordinate::readNumber (const String& s, int& i)
+{
+    skipWhitespace (s, i);
+
+    int start = i;
+
+    if (CharacterFunctions::isDigit (s[i]) || s[i] == '.' || s[i] == '-')
+        ++i;
+
+    while (CharacterFunctions::isDigit (s[i]) || s[i] == '.')
+        ++i;
+
+    if ((s[i] == 'e' || s[i] == 'E')
+         && (CharacterFunctions::isDigit (s[i + 1])
+              || s[i + 1] == '-'
+              || s[i + 1] == '+'))
+    {
+        i += 2;
+
+        while (CharacterFunctions::isDigit (s[i]))
+            ++i;
+    }
+
+    const double value = s.substring (start, i).getDoubleValue();
+
+    while (CharacterFunctions::isWhitespace (s[i]) || s[i] == ',')
+        ++i;
+
+    return value;
+}
+
+Coordinate::Coordinate (const String& s, bool isHorizontal_)
+    : value (0), isProportion (false), isHorizontal (isHorizontal_)
+{
+    int i = 0;
+
+    anchor1 = readMarkerName (s, i);
+
+    if (anchor1.isNotEmpty())
+    {
+        skipWhitespace (s, i);
+
+        if (s[i] == '+')
+            value = readNumber (s, ++i);
+        else if (s[i] == '-')
+            value = -readNumber (s, ++i);
     }
     else
     {
-        if (isOrigin (nameOfSource1))
-            return String (value, decimalPlaces);
-        else if (value != 0)
-            return checkName (nameOfSource1) + " + " + String (value, decimalPlaces);
-        else
-            return checkName (nameOfSource1);
+        value = readNumber (s, i);
+        skipWhitespace (s, i);
+
+        if (s[i] == '%')
+        {
+            isProportion = true;
+            value /= 100.0;
+            skipWhitespace (s, ++i);
+
+            if (s[i] == '*')
+            {
+                anchor1 = readMarkerName (s, ++i);
+                skipWhitespace (s, i);
+
+                if (s[i] == '-' && s[i + 1] == '>')
+                {
+                    i += 2;
+                    anchor2 = readMarkerName (s, i);
+                }
+                else
+                {
+                    anchor2 = anchor1;
+                    anchor1 = getOriginMarkerName();
+                }
+            }
+            else
+            {
+                anchor1 = getOriginMarkerName();
+                anchor2 = getExtentMarkerName();
+            }
+        }
     }
 }
 
-const char* RelativePosition::parentOriginMarkerName = "origin";
-const char* RelativePosition::parentExtentMarkerName = "size";
+const String Coordinate::toString() const
+{
+    if (isProportion)
+    {
+        const String percent (value * 100.0);
 
+        if (isOrigin (anchor1))
+        {
+            if (anchor2 == parentRightMarkerName || anchor2 == parentBottomMarkerName)
+                return percent + "%";
+            else
+                return percent + "% * " + checkName (anchor2);
+        }
+        else
+            return percent + "% * " + checkName (anchor1) + " -> " + checkName (anchor2);
+    }
+    else
+    {
+        if (isOrigin (anchor1))
+            return String (value);
+        else if (value > 0)
+            return checkName (anchor1) + " + " + String (value);
+        else if (value < 0)
+            return checkName (anchor1) + " - " + String (-value);
+        else
+            return checkName (anchor1);
+    }
+}
 
 //==============================================================================
-RelativeRectangle::RelativeRectangle()
+RectangleCoordinates::RectangleCoordinates()
+    : left (true), right (true), top (false), bottom (false)
 {
 }
 
-RelativeRectangle::RelativeRectangle (const Rectangle<int>& rect)
-    : left (rect.getX()),
-      right (rect.getRight()),
-      top (rect.getY()),
-      bottom (rect.getBottom())
+RectangleCoordinates::RectangleCoordinates (const Rectangle<int>& rect)
+    : left (rect.getX(), true),
+      right (rect.getWidth(), "left", true),
+      top (rect.getY(), false),
+      bottom (rect.getHeight(), "top", false)
 {
 }
 
-RelativeRectangle::RelativeRectangle (const String& stringVersion)
+RectangleCoordinates::RectangleCoordinates (const String& stringVersion)
+    : left (true), right (true), top (false), bottom (false)
 {
-    jassertfalse // todo
+    StringArray tokens;
+    tokens.addTokens (stringVersion, ",", String::empty);
+
+    left   = Coordinate (tokens [0], true);
+    top    = Coordinate (tokens [1], false);
+    right  = Coordinate (tokens [2], true);
+    bottom = Coordinate (tokens [3], false);
 }
 
-const Rectangle<int> RelativeRectangle::resolve (RelativePosition::PositionFinder& positionFinder) const
+bool RectangleCoordinates::isRecursive (Coordinate::MarkerResolver& markerResolver) const
 {
-    const int l = roundToInt (left.resolve (positionFinder));
-    const int r = roundToInt (right.resolve (positionFinder));
-    const int t = roundToInt (top.resolve (positionFinder));
-    const int b = roundToInt (bottom.resolve (positionFinder));
+    return left.isRecursive (markerResolver) || right.isRecursive (markerResolver)
+              || top.isRecursive (markerResolver) || bottom.isRecursive (markerResolver);
+}
+
+const Rectangle<int> RectangleCoordinates::resolve (Coordinate::MarkerResolver& markerResolver) const
+{
+    const int l = roundToInt (left.resolve (markerResolver));
+    const int r = roundToInt (right.resolve (markerResolver));
+    const int t = roundToInt (top.resolve (markerResolver));
+    const int b = roundToInt (bottom.resolve (markerResolver));
 
     return Rectangle<int> (l, t, r - l, b - t);
 }
 
-void RelativeRectangle::moveToAbsolute (const Rectangle<int>& newPos, RelativePosition::PositionFinder& positionFinder)
+void RectangleCoordinates::moveToAbsolute (const Rectangle<int>& newPos, Coordinate::MarkerResolver& markerResolver)
 {
-    left.moveToAbsolute (newPos.getX(), positionFinder);
-    right.moveToAbsolute (newPos.getRight(), positionFinder);
-    top.moveToAbsolute (newPos.getY(), positionFinder);
-    bottom.moveToAbsolute (newPos.getBottom(), positionFinder);
-
-    // do it all again in case there were dependencies between some of the positions..
-    left.moveToAbsolute (newPos.getX(), positionFinder);
-    right.moveToAbsolute (newPos.getRight(), positionFinder);
-    top.moveToAbsolute (newPos.getY(), positionFinder);
-    bottom.moveToAbsolute (newPos.getBottom(), positionFinder);
+    left.moveToAbsolute (newPos.getX(), markerResolver);
+    right.moveToAbsolute (newPos.getRight(), markerResolver);
+    top.moveToAbsolute (newPos.getY(), markerResolver);
+    bottom.moveToAbsolute (newPos.getBottom(), markerResolver);
 }
 
-const String RelativeRectangle::toString (int decimalPlaces) const
+const String RectangleCoordinates::toString() const
 {
-    return left.toString (decimalPlaces) + ", " + top.toString (decimalPlaces)
-             + ", " + right.toString (decimalPlaces) + ", " + bottom.toString (decimalPlaces);
+    return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
 }
