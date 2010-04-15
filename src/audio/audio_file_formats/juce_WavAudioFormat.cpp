@@ -36,17 +36,17 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const wavFormatName = "WAV file";
-static const tchar* const wavExtensions[] =    { T(".wav"), T(".bwf"), 0 };
+static const juce_wchar* const wavExtensions[] =    { T(".wav"), T(".bwf"), 0 };
 
 
 //==============================================================================
-const tchar* const WavAudioFormat::bwavDescription      = T("bwav description");
-const tchar* const WavAudioFormat::bwavOriginator       = T("bwav originator");
-const tchar* const WavAudioFormat::bwavOriginatorRef    = T("bwav originator ref");
-const tchar* const WavAudioFormat::bwavOriginationDate  = T("bwav origination date");
-const tchar* const WavAudioFormat::bwavOriginationTime  = T("bwav origination time");
-const tchar* const WavAudioFormat::bwavTimeReference    = T("bwav time reference");
-const tchar* const WavAudioFormat::bwavCodingHistory    = T("bwav coding history");
+const char* const WavAudioFormat::bwavDescription      = "bwav description";
+const char* const WavAudioFormat::bwavOriginator       = "bwav originator";
+const char* const WavAudioFormat::bwavOriginatorRef    = "bwav originator ref";
+const char* const WavAudioFormat::bwavOriginationDate  = "bwav origination date";
+const char* const WavAudioFormat::bwavOriginationTime  = "bwav origination time";
+const char* const WavAudioFormat::bwavTimeReference    = "bwav time reference";
+const char* const WavAudioFormat::bwavCodingHistory    = "bwav coding history";
 
 const StringPairArray WavAudioFormat::createBWAVMetadata (const String& description,
                                                           const String& originator,
@@ -820,7 +820,7 @@ public:
 
 //==============================================================================
 WavAudioFormat::WavAudioFormat()
-    : AudioFormat (TRANS (wavFormatName), (const tchar**) wavExtensions)
+    : AudioFormat (TRANS (wavFormatName), (const juce_wchar**) wavExtensions)
 {
 }
 

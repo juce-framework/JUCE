@@ -764,11 +764,11 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
         return true;
 
     if (keyCode >= 'A' && keyCode <= 'Z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toLowerCase ((juce_wchar) keyCode)))
         return true;
 
     if (keyCode >= 'a' && keyCode <= 'z'
-        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((tchar) keyCode)))
+        && NSViewComponentPeer::keysCurrentlyDown.contains ((int) CharacterFunctions::toUpperCase ((juce_wchar) keyCode)))
         return true;
 
     return false;

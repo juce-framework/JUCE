@@ -54,11 +54,11 @@ const String LocalisedStrings::translate (const String& text) const
 
 static int findCloseQuote (const String& text, int startPos)
 {
-    tchar lastChar = 0;
+    juce_wchar lastChar = 0;
 
     for (;;)
     {
-        const tchar c = text [startPos];
+        const juce_wchar c = text [startPos];
 
         if (c == 0 || (c == '"' && lastChar != '\\'))
             break;

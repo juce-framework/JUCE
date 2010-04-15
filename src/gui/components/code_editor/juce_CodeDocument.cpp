@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 class CodeDocumentLine
 {
 public:
-    CodeDocumentLine (const tchar* const line_,
+    CodeDocumentLine (const juce_wchar* const line_,
                       const int lineLength_,
                       const int numNewLineChars,
                       const int lineStartInFile_)
@@ -404,7 +404,7 @@ const CodeDocument::Position CodeDocument::Position::movedByLines (const int del
     return p;
 }
 
-const tchar CodeDocument::Position::getCharacter() const throw()
+const juce_wchar CodeDocument::Position::getCharacter() const throw()
 {
     const CodeDocumentLine* const l = owner->lines [line];
     return l == 0 ? 0 : l->line [getIndexInLine()];
@@ -603,7 +603,7 @@ bool CodeDocument::hasChangedSinceSavePoint() const throw()
 }
 
 //==============================================================================
-static int getCodeCharacterCategory (const tchar character) throw()
+static int getCodeCharacterCategory (const juce_wchar character) throw()
 {
     return (CharacterFunctions::isLetterOrDigit (character) || character == '_')
                 ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);
@@ -656,7 +656,7 @@ const CodeDocument::Position CodeDocument::findWordBreakBefore (const Position& 
 
     while (i < maxDistance)
     {
-        const tchar c = p.movedBy (-1).getCharacter();
+        const juce_wchar c = p.movedBy (-1).getCharacter();
 
         if (c == '\r' || c == '\n')
         {

@@ -167,11 +167,6 @@ void PropertySet::removeValue (const String& keyName) throw()
     }
 }
 
-void PropertySet::setValue (const String& keyName, const tchar* const value) throw()
-{
-    setValue (keyName, String (value));
-}
-
 void PropertySet::setValue (const String& keyName, const int value) throw()
 {
     setValue (keyName, String (value));

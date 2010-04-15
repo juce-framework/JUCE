@@ -43,13 +43,13 @@ CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser()
 namespace CppTokeniser
 {
 
-static bool isIdentifierStart (const tchar c) throw()
+static bool isIdentifierStart (const juce_wchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
             || c == '_' || c == '@';
 }
 
-static bool isIdentifierBody (const tchar c) throw()
+static bool isIdentifierBody (const juce_wchar c) throw()
 {
     return CharacterFunctions::isLetter (c)
             || CharacterFunctions::isDigit (c)
@@ -58,26 +58,26 @@ static bool isIdentifierBody (const tchar c) throw()
 
 static int parseIdentifier (CodeDocument::Iterator& source) throw()
 {
-    static const tchar* keywords2Char[] =
+    static const juce_wchar* keywords2Char[] =
         { T("if"), T("do"), T("or"), 0 };
 
-    static const tchar* keywords3Char[] =
+    static const juce_wchar* keywords3Char[] =
         { T("for"), T("int"), T("new"), T("try"), T("xor"), T("and"), T("asm"), T("not"), 0 };
 
-    static const tchar* keywords4Char[] =
+    static const juce_wchar* keywords4Char[] =
         { T("bool"), T("void"), T("this"), T("true"), T("long"), T("else"), T("char"),
           T("enum"), T("case"), T("goto"), T("auto"), 0 };
 
-    static const tchar* keywords5Char[] =
+    static const juce_wchar* keywords5Char[] =
         {  T("while"), T("bitor"), T("break"), T("catch"), T("class"), T("compl"), T("const"), T("false"),
             T("float"), T("short"), T("throw"), T("union"), T("using"), T("or_eq"), 0 };
 
-    static const tchar* keywords6Char[] =
+    static const juce_wchar* keywords6Char[] =
         { T("return"), T("struct"), T("and_eq"), T("bitand"), T("delete"), T("double"), T("extern"),
           T("friend"), T("inline"), T("not_eq"), T("public"), T("sizeof"), T("static"), T("signed"),
           T("switch"), T("typeid"), T("wchar_t"), T("xor_eq"), 0};
 
-    static const tchar* keywordsOther[] =
+    static const juce_wchar* keywordsOther[] =
         { T("const_cast"), T("continue"), T("default"), T("explicit"), T("mutable"), T("namespace"),
           T("operator"), T("private"), T("protected"), T("register"), T("reinterpret_cast"), T("static_cast"),
           T("template"), T("typedef"), T("typename"), T("unsigned"), T("virtual"), T("volatile"),
@@ -85,11 +85,11 @@ static int parseIdentifier (CodeDocument::Iterator& source) throw()
           T("@private"), T("@property"), T("@protected"), T("@class"), 0 };
 
     int tokenLength = 0;
-    tchar possibleIdentifier [19];
+    juce_wchar possibleIdentifier [19];
 
     while (isIdentifierBody (source.peekNextChar()))
     {
-        const tchar c = source.nextChar();
+        const juce_wchar c = source.nextChar();
 
         if (tokenLength < numElementsInArray (possibleIdentifier) - 1)
             possibleIdentifier [tokenLength] = c;
@@ -100,7 +100,7 @@ static int parseIdentifier (CodeDocument::Iterator& source) throw()
     if (tokenLength > 1 && tokenLength <= 16)
     {
         possibleIdentifier [tokenLength] = 0;
-        const tchar** k;
+        const juce_wchar** k;
 
         switch (tokenLength)
         {
@@ -329,7 +329,7 @@ int CPlusPlusCodeTokeniser::readNextToken (CodeDocument::Iterator& source)
     int result = tokenType_error;
     source.skipWhitespace();
 
-    tchar firstChar = source.peekNextChar();
+    juce_wchar firstChar = source.peekNextChar();
 
     switch (firstChar)
     {

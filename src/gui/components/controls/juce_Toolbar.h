@@ -303,7 +303,7 @@ private:
     Array <ToolbarItemComponent*> items;
 
     friend class ItemDragAndDropOverlayComponent;
-    static const tchar* const toolbarDragDescriptor;
+    static const char* const toolbarDragDescriptor;
 
     void addItemInternal (ToolbarItemFactory& factory, const int itemId, const int insertIndex);
 

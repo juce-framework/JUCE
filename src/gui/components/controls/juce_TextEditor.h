@@ -90,7 +90,7 @@ public:
                                     which is a bullet (probably the best choice for linux).
     */
     explicit TextEditor (const String& componentName = String::empty,
-                         tchar passwordCharacter = 0);
+                         juce_wchar passwordCharacter = 0);
 
     /** Destructor. */
     virtual ~TextEditor();
@@ -187,7 +187,7 @@ public:
     /** Returns true if scrollbars are enabled.
         @see setScrollbarsShown
     */
-    bool areScrollbarsShown() const                             { return scrollbarVisible; }
+    bool areScrollbarsShown() const                                 { return scrollbarVisible; }
 
 
     /** Changes the password character used to disguise the text.
@@ -199,12 +199,12 @@ public:
                                     for a black splodge (not all fonts include this, though), or 0x2022,
                                     which is a bullet (probably the best choice for linux).
     */
-    void setPasswordCharacter (tchar passwordCharacter);
+    void setPasswordCharacter (juce_wchar passwordCharacter);
 
     /** Returns the current password character.
         @see setPasswordCharacter
-l    */
-    tchar getPasswordCharacter() const                          { return passwordCharacter; }
+    */
+    juce_wchar getPasswordCharacter() const                         { return passwordCharacter; }
 
 
     //==============================================================================
@@ -640,7 +640,7 @@ private:
     VoidArray sections;
     String textToShowWhenEmpty;
     Colour colourForTextWhenEmpty;
-    tchar passwordCharacter;
+    juce_wchar passwordCharacter;
     Value textValue;
 
     enum

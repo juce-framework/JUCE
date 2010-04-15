@@ -71,7 +71,7 @@ const String SystemClipboard::getTextFromClipboard()
 
             if (data != 0)
             {
-                result = String (data, (int) (GlobalSize (bufH) / sizeof (tchar)));
+                result = String (data, (int) (GlobalSize (bufH) / sizeof (wchar_t)));
 
                 GlobalUnlock (bufH);
             }

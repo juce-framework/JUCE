@@ -32,8 +32,9 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-struct AnimationTask
+class ComponentAnimator::AnimationTask
 {
+public:
     AnimationTask (Component* const comp)
         : component (comp)
     {
@@ -112,10 +113,10 @@ ComponentAnimator::~ComponentAnimator()
 }
 
 //==============================================================================
-void* ComponentAnimator::findTaskFor (Component* const component) const
+ComponentAnimator::AnimationTask* ComponentAnimator::findTaskFor (Component* const component) const
 {
     for (int i = tasks.size(); --i >= 0;)
-        if (component == ((AnimationTask*) tasks.getUnchecked(i))->component.getComponent())
+        if (component == tasks.getUnchecked(i)->component.getComponent())
             return tasks.getUnchecked(i);
 
     return 0;
@@ -129,7 +130,7 @@ void ComponentAnimator::animateComponent (Component* const component,
 {
     if (component != 0)
     {
-        AnimationTask* at = (AnimationTask*) findTaskFor (component);
+        AnimationTask* at = findTaskFor (component);
 
         if (at == 0)
         {
@@ -168,7 +169,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
 {
     for (int i = tasks.size(); --i >= 0;)
     {
-        AnimationTask* const at = (AnimationTask*) tasks.getUnchecked(i);
+        AnimationTask* const at = tasks.getUnchecked(i);
 
         if (moveComponentsToTheirFinalPositions)
             at->moveToFinalDestination();
@@ -182,7 +183,7 @@ void ComponentAnimator::cancelAllAnimations (const bool moveComponentsToTheirFin
 void ComponentAnimator::cancelAnimation (Component* const component,
                                          const bool moveComponentToItsFinalPosition)
 {
-    AnimationTask* const at = (AnimationTask*) findTaskFor (component);
+    AnimationTask* const at = findTaskFor (component);
 
     if (at != 0)
     {
@@ -197,7 +198,7 @@ void ComponentAnimator::cancelAnimation (Component* const component,
 
 const Rectangle<int> ComponentAnimator::getComponentDestination (Component* const component)
 {
-    AnimationTask* const at = (AnimationTask*) findTaskFor (component);
+    AnimationTask* const at = findTaskFor (component);
 
     if (at != 0)
         return at->destination;
@@ -223,7 +224,7 @@ void ComponentAnimator::timerCallback()
 
     for (int i = tasks.size(); --i >= 0;)
     {
-        AnimationTask* const at = (AnimationTask*) tasks.getUnchecked(i);
+        AnimationTask* const at = tasks.getUnchecked(i);
 
         if (! at->useTimeslice (elapsed))
         {

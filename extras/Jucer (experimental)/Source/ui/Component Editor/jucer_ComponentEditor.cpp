@@ -72,10 +72,6 @@ public:
 
         setName (coord.toString());
 
-        //ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state, component->getParentComponent()));
-        //int anchor1 = roundToInt (coord.getAnchorPoint1().resolve (*markers));
-        //int anchor2 = roundToInt (coord.getAnchorPoint2().resolve (*markers));
-
         int textW = (int) font.getStringWidth (getName());
         int textH = (int) font.getHeight();
 
@@ -83,33 +79,33 @@ public:
 
         switch (type)
         {
-            case left:
-                p1 = Point<int> (component->getX(), 0);
-                p2 = Point<int> (component->getX(), component->getY());
-                textArea.setBounds (p1.getX() - textW - 2, 4, textW, textH);
-                break;
+        case left:
+            p1 = Point<int> (component->getX(), 0);
+            p2 = Point<int> (component->getX(), component->getY());
+            textArea.setBounds (p1.getX() - textW - 2, 4, textW, textH);
+            break;
 
-            case right:
-                p1 = Point<int> (component->getRight(), 0);
-                p2 = Point<int> (component->getRight(), component->getY());
-                textArea.setBounds (p1.getX() + 2, 4, textW, textH);
-                break;
+        case right:
+            p1 = Point<int> (component->getRight(), 0);
+            p2 = Point<int> (component->getRight(), component->getY());
+            textArea.setBounds (p1.getX() + 2, 4, textW, textH);
+            break;
 
-            case top:
-                p1 = Point<int> (0, component->getY());
-                p2 = Point<int> (component->getX(), component->getY());
-                textArea.setBounds (4, p1.getY() - textH - 2, textW, textH);
-                break;
+        case top:
+            p1 = Point<int> (0, component->getY());
+            p2 = Point<int> (component->getX(), component->getY());
+            textArea.setBounds (4, p1.getY() - textH - 2, textW, textH);
+            break;
 
-            case bottom:
-                p1 = Point<int> (0, component->getBottom());
-                p2 = Point<int> (component->getX(), component->getBottom());
-                textArea.setBounds (4, p1.getY() + 2, textW, textH);
-                break;
+        case bottom:
+            p1 = Point<int> (0, component->getBottom());
+            p2 = Point<int> (component->getX(), component->getBottom());
+            textArea.setBounds (4, p1.getY() + 2, textW, textH);
+            break;
 
-            default:
-                jassertfalse;
-                break;
+        default:
+            jassertfalse;
+            break;
         }
 
         Rectangle<int> bounds (Rectangle<int> (p1, p2).expanded (2, 2).getUnion (textArea));

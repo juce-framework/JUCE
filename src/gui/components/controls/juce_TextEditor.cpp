@@ -49,7 +49,7 @@ struct TextAtom
     bool isWhitespace() const       { return CharacterFunctions::isWhitespace (atomText[0]); }
     bool isNewLine() const          { return atomText[0] == '\r' || atomText[0] == '\n'; }
 
-    const String getText (const tchar passwordCharacter) const
+    const String getText (const juce_wchar passwordCharacter) const
     {
         if (passwordCharacter == 0)
             return atomText;
@@ -58,7 +58,7 @@ struct TextAtom
                                            atomText.length());
     }
 
-    const String getTrimmedText (const tchar passwordCharacter) const
+    const String getTrimmedText (const juce_wchar passwordCharacter) const
     {
         if (passwordCharacter == 0)
             return atomText.substring (0, numChars);
@@ -78,7 +78,7 @@ public:
     UniformTextSection (const String& text,
                         const Font& font_,
                         const Colour& colour_,
-                        const tchar passwordCharacter)
+                        const juce_wchar passwordCharacter)
       : font (font_),
         colour (colour_)
     {
@@ -118,7 +118,7 @@ public:
         return (TextAtom*) atoms.getUnchecked (index);
     }
 
-    void append (const UniformTextSection& other, const tchar passwordCharacter)
+    void append (const UniformTextSection& other, const juce_wchar passwordCharacter)
     {
         if (other.atoms.size() > 0)
         {
@@ -153,7 +153,7 @@ public:
     }
 
     UniformTextSection* split (const int indexToBreakAt,
-                               const tchar passwordCharacter)
+                               const juce_wchar passwordCharacter)
     {
         UniformTextSection* const section2 = new UniformTextSection (String::empty,
                                                                      font, colour,
@@ -248,7 +248,7 @@ public:
     }
 
     void setFont (const Font& newFont,
-                  const tchar passwordCharacter)
+                  const juce_wchar passwordCharacter)
     {
         if (font != newFont)
         {
@@ -273,7 +273,7 @@ private:
 
     //==============================================================================
     void initialiseAtoms (const String& textToParse,
-                          const tchar passwordCharacter)
+                          const juce_wchar passwordCharacter)
     {
         int i = 0;
         const int len = textToParse.length();
@@ -339,7 +339,7 @@ public:
     //==============================================================================
     TextEditorIterator (const VoidArray& sections_,
                         const float wordWrapWidth_,
-                        const tchar passwordCharacter_)
+                        const juce_wchar passwordCharacter_)
       : indexInText (0),
         lineY (0),
         lineHeight (0),
@@ -730,7 +730,7 @@ private:
     const VoidArray& sections;
     int sectionIndex, atomIndex;
     const float wordWrapWidth;
-    const tchar passwordCharacter;
+    const juce_wchar passwordCharacter;
     TextAtom tempAtom;
 
     TextEditorIterator& operator= (const TextEditorIterator&);
@@ -963,7 +963,7 @@ namespace TextEditorDefs
 
 //==============================================================================
 TextEditor::TextEditor (const String& name,
-                        const tchar passwordCharacter_)
+                        const juce_wchar passwordCharacter_)
     : Component (name),
       borderSize (1, 1, 1, 3),
       readOnly (false),
@@ -1154,7 +1154,7 @@ void TextEditor::setTextToShowWhenEmpty (const String& text, const Colour& colou
     colourForTextWhenEmpty = colourToUse;
 }
 
-void TextEditor::setPasswordCharacter (const tchar newPasswordCharacter)
+void TextEditor::setPasswordCharacter (const juce_wchar newPasswordCharacter)
 {
     if (passwordCharacter != newPasswordCharacter)
     {
@@ -2530,7 +2530,7 @@ int TextEditor::indexAtPosition (const float x, const float y)
 }
 
 //==============================================================================
-static int getCharacterCategory (const tchar character)
+static int getCharacterCategory (const juce_wchar character)
 {
     return CharacterFunctions::isLetterOrDigit (character)
                 ? 2 : (CharacterFunctions::isWhitespace (character) ? 0 : 1);

@@ -127,10 +127,11 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray tasks;
+    class AnimationTask;
+    Array <AnimationTask*> tasks;
     uint32 lastTime;
 
-    void* findTaskFor (Component* component) const;
+    AnimationTask* findTaskFor (Component* component) const;
     void timerCallback();
 };
 

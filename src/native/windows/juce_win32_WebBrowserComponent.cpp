@@ -89,7 +89,7 @@ public:
             if (headers != 0)
             {
                 V_VT (&headersVar) = VT_BSTR;
-                V_BSTR (&headersVar) = SysAllocString ((const tchar*) headers->joinIntoString ("\r\n"));
+                V_BSTR (&headersVar) = SysAllocString ((const OLECHAR*) headers->joinIntoString ("\r\n"));
             }
 
             if (postData != 0 && postData->getSize() > 0)

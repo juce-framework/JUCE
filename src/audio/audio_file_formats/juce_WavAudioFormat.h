@@ -51,21 +51,21 @@ public:
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavDescription;
+    static const char* const bwavDescription;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavOriginator;
+    static const char* const bwavOriginator;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavOriginatorRef;
+    static const char* const bwavOriginatorRef;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
@@ -74,7 +74,7 @@ public:
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavOriginationDate;
+    static const char* const bwavOriginationDate;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
@@ -83,7 +83,7 @@ public:
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavOriginationTime;
+    static const char* const bwavOriginationTime;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
@@ -95,7 +95,7 @@ public:
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavTimeReference;
+    static const char* const bwavTimeReference;
 
     /** Metadata property name used by wav readers and writers for adding
         a BWAV chunk to the file.
@@ -104,7 +104,7 @@ public:
 
         @see AudioFormatReader::metadataValues, createWriterFor
     */
-    static const tchar* const bwavCodingHistory;
+    static const char* const bwavCodingHistory;
 
     /** Utility function to fill out the appropriate metadata for a BWAV file.
 

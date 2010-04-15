@@ -4746,8 +4746,6 @@ public:
 
 	void setValue (const String& keyName, const String& value) throw();
 
-	void setValue (const String& keyName, const tchar* const value) throw();
-
 	void setValue (const String& keyName, const int value) throw();
 
 	void setValue (const String& keyName, const double value) throw();
@@ -14515,19 +14513,19 @@ public:
 
 	~WavAudioFormat();
 
-	static const tchar* const bwavDescription;
+	static const char* const bwavDescription;
 
-	static const tchar* const bwavOriginator;
+	static const char* const bwavOriginator;
 
-	static const tchar* const bwavOriginatorRef;
+	static const char* const bwavOriginatorRef;
 
-	static const tchar* const bwavOriginationDate;
+	static const char* const bwavOriginationDate;
 
-	static const tchar* const bwavOriginationTime;
+	static const char* const bwavOriginationTime;
 
-	static const tchar* const bwavTimeReference;
+	static const char* const bwavTimeReference;
 
-	static const tchar* const bwavCodingHistory;
+	static const char* const bwavCodingHistory;
 
 	static const StringPairArray createBWAVMetadata (const String& description,
 													 const String& originator,
@@ -16515,7 +16513,7 @@ class JUCE_API  TextEditor  : public Component,
 public:
 
 	explicit TextEditor (const String& componentName = String::empty,
-						 tchar passwordCharacter = 0);
+						 juce_wchar passwordCharacter = 0);
 
 	virtual ~TextEditor();
 
@@ -16544,9 +16542,9 @@ public:
 
 	bool areScrollbarsShown() const				 { return scrollbarVisible; }
 
-	void setPasswordCharacter (tchar passwordCharacter);
+	void setPasswordCharacter (juce_wchar passwordCharacter);
 
-	tchar getPasswordCharacter() const			  { return passwordCharacter; }
+	juce_wchar getPasswordCharacter() const			 { return passwordCharacter; }
 
 	void setPopupMenuEnabled (bool menuEnabled);
 
@@ -16729,7 +16727,7 @@ private:
 	VoidArray sections;
 	String textToShowWhenEmpty;
 	Colour colourForTextWhenEmpty;
-	tchar passwordCharacter;
+	juce_wchar passwordCharacter;
 	Value textValue;
 
 	enum
@@ -20413,10 +20411,11 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	VoidArray tasks;
+	class AnimationTask;
+	Array <AnimationTask*> tasks;
 	uint32 lastTime;
 
-	void* findTaskFor (Component* component) const;
+	AnimationTask* findTaskFor (Component* component) const;
 	void timerCallback();
 };
 
@@ -20537,7 +20536,7 @@ private:
 	Array <ToolbarItemComponent*> items;
 
 	friend class ItemDragAndDropOverlayComponent;
-	static const tchar* const toolbarDragDescriptor;
+	static const char* const toolbarDragDescriptor;
 
 	void addItemInternal (ToolbarItemFactory& factory, const int itemId, const int insertIndex);
 
@@ -20704,7 +20703,7 @@ public:
 
 		const Position movedByLines (int deltaLines) const throw();
 
-		const tchar getCharacter() const throw();
+		const juce_wchar getCharacter() const throw();
 
 		const String getLineText() const throw();
 
@@ -24628,41 +24627,41 @@ class JUCE_API  TextLayout
 {
 public:
 
-	TextLayout() throw();
+	TextLayout();
 
-	TextLayout (const TextLayout& other) throw();
+	TextLayout (const TextLayout& other);
 
-	TextLayout (const String& text, const Font& font) throw();
+	TextLayout (const String& text, const Font& font);
 
-	~TextLayout() throw();
+	~TextLayout();
 
-	TextLayout& operator= (const TextLayout& layoutToCopy) throw();
+	TextLayout& operator= (const TextLayout& layoutToCopy);
 
-	void clear() throw();
+	void clear();
 
 	void appendText (const String& textToAppend,
-					 const Font& fontToUse) throw();
+					 const Font& fontToUse);
 
 	void setText (const String& newText,
-				  const Font& fontToUse) throw();
+				  const Font& fontToUse);
 
 	void layout (int maximumWidth,
 				 const Justification& justification,
-				 bool attemptToBalanceLineLengths) throw();
+				 bool attemptToBalanceLineLengths);
 
-	int getWidth() const throw();
+	int getWidth() const;
 
-	int getHeight() const throw();
+	int getHeight() const;
 
-	int getNumLines() const throw()		 { return totalLines; }
+	int getNumLines() const			 { return totalLines; }
 
-	int getLineWidth (int lineNumber) const throw();
+	int getLineWidth (int lineNumber) const;
 
-	void draw (Graphics& g, int topLeftX, int topLeftY) const throw();
+	void draw (Graphics& g, int topLeftX, int topLeftY) const;
 
 	void drawWithin (Graphics& g,
 					 int x, int y, int w, int h,
-					 const Justification& layoutFlags) const throw();
+					 const Justification& layoutFlags) const;
 
 	juce_UseDebuggingNewOperator
 

@@ -64,12 +64,12 @@ namespace PathHelpers
         }
     }
 
-    static const String nextToken (const tchar*& t)
+    static const String nextToken (const juce_wchar*& t)
     {
         while (CharacterFunctions::isWhitespace (*t))
             ++t;
 
-        const tchar* const start = t;
+        const juce_wchar* const start = t;
 
         while (*t != 0 && ! CharacterFunctions::isWhitespace (*t))
             ++t;

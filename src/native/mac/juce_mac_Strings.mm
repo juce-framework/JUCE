@@ -121,11 +121,11 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
         {
             result.preallocateStorage (bytesRead / sizeof (UniChar) + 2);
 
-            tchar* t = result;
+            juce_wchar* t = result;
 
             unsigned int i;
             for (i = 0; i < bytesRead / sizeof (UniChar); ++i)
-                t[i] = (tchar) tempOut[i];
+                t[i] = (juce_wchar) tempOut[i];
 
             t[i] = 0;
         }

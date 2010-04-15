@@ -413,16 +413,12 @@ public:
     }
 
     // Add a glyph to a font
-    bool addGlyphToFont (const uint32 character,
-                         const tchar* fontName, bool bold, bool italic,
-                         CustomTypeface& dest)
+    bool addGlyphToFont (const uint32 character, const String& fontName,
+                         bool bold, bool italic, CustomTypeface& dest)
     {
         FT_Face face = createFT_Face (fontName, bold, italic);
 
-        if (face != 0)
-            return addGlyph (face, dest, character);
-
-        return false;
+        return face != 0 && addGlyph (face, dest, character);
     }
 
     //==============================================================================

@@ -175,7 +175,7 @@ public:
         /** Returns the character in the document at this position.
             @see getLineText
         */
-        const tchar getCharacter() const throw();
+        const juce_wchar getCharacter() const throw();
 
         /** Returns the line from the document that this position is within.
             @see getCharacter, getLineNumber

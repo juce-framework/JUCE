@@ -55,7 +55,7 @@ public:
         isNewLine = t.containsChar ('\n') || t.containsChar ('\r');
     }
 
-    Token (const Token& other) throw()
+    Token (const Token& other)
         : text (other.text),
           font (other.font),
           x (other.x),
@@ -69,7 +69,7 @@ public:
     {
     }
 
-    ~Token() throw()
+    ~Token()
     {
     }
 
@@ -92,27 +92,26 @@ public:
 
 
 //==============================================================================
-TextLayout::TextLayout() throw()
+TextLayout::TextLayout()
     : totalLines (0)
 {
     tokens.ensureStorageAllocated (64);
 }
 
-TextLayout::TextLayout (const String& text,
-                        const Font& font) throw()
+TextLayout::TextLayout (const String& text, const Font& font)
     : totalLines (0)
 {
     tokens.ensureStorageAllocated (64);
     appendText (text, font);
 }
 
-TextLayout::TextLayout (const TextLayout& other) throw()
+TextLayout::TextLayout (const TextLayout& other)
     : totalLines (0)
 {
     *this = other;
 }
 
-TextLayout& TextLayout::operator= (const TextLayout& other) throw()
+TextLayout& TextLayout::operator= (const TextLayout& other)
 {
     if (this != &other)
     {
@@ -127,28 +126,27 @@ TextLayout& TextLayout::operator= (const TextLayout& other) throw()
     return *this;
 }
 
-TextLayout::~TextLayout() throw()
+TextLayout::~TextLayout()
 {
     clear();
 }
 
 //==============================================================================
-void TextLayout::clear() throw()
+void TextLayout::clear()
 {
     tokens.clear();
     totalLines = 0;
 }
 
-void TextLayout::appendText (const String& text,
-                             const Font& font) throw()
+void TextLayout::appendText (const String& text, const Font& font)
 {
-    const tchar* t = text;
+    const juce_wchar* t = text;
     String currentString;
     int lastCharType = 0;
 
     for (;;)
     {
-        const tchar c = *t++;
+        const juce_wchar c = *t++;
         if (c == 0)
             break;
 
@@ -191,7 +189,7 @@ void TextLayout::appendText (const String& text,
         tokens.add (new Token (currentString, font, lastCharType == 2));
 }
 
-void TextLayout::setText (const String& text, const Font& font) throw()
+void TextLayout::setText (const String& text, const Font& font)
 {
     clear();
     appendText (text, font);
@@ -200,7 +198,7 @@ void TextLayout::setText (const String& text, const Font& font) throw()
 //==============================================================================
 void TextLayout::layout (int maxWidth,
                          const Justification& justification,
-                         const bool attemptToBalanceLineLengths) throw()
+                         const bool attemptToBalanceLineLengths)
 {
     if (attemptToBalanceLineLengths)
     {
@@ -316,7 +314,7 @@ void TextLayout::layout (int maxWidth,
 }
 
 //==============================================================================
-int TextLayout::getLineWidth (const int lineNumber) const throw()
+int TextLayout::getLineWidth (const int lineNumber) const
 {
     int maxW = 0;
 
@@ -331,7 +329,7 @@ int TextLayout::getLineWidth (const int lineNumber) const throw()
     return maxW;
 }
 
-int TextLayout::getWidth() const throw()
+int TextLayout::getWidth() const
 {
     int maxW = 0;
 
@@ -345,7 +343,7 @@ int TextLayout::getWidth() const throw()
     return maxW;
 }
 
-int TextLayout::getHeight() const throw()
+int TextLayout::getHeight() const
 {
     int maxH = 0;
 
@@ -363,7 +361,7 @@ int TextLayout::getHeight() const throw()
 //==============================================================================
 void TextLayout::draw (Graphics& g,
                        const int xOffset,
-                       const int yOffset) const throw()
+                       const int yOffset) const
 {
     for (int i = tokens.size(); --i >= 0;)
         tokens.getUnchecked(i)->draw (g, xOffset, yOffset);
@@ -371,7 +369,7 @@ void TextLayout::draw (Graphics& g,
 
 void TextLayout::drawWithin (Graphics& g,
                              int x, int y, int w, int h,
-                             const Justification& justification) const throw()
+                             const Justification& justification) const
 {
     justification.applyToRectangle (x, y, getWidth(), getHeight(),
                                     x, y, w, h);

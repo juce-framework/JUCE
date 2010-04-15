@@ -39,18 +39,13 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../application/juce_Application.h"
 #include "../../../containers/juce_ScopedPointer.h"
 
-static const int titleH = 24;
-static const int iconWidth = 80;
-
 
 //==============================================================================
 class AlertWindowTextEditor  : public TextEditor
 {
 public:
-    static const tchar passwordChar;
-
     AlertWindowTextEditor (const String& name, const bool isPasswordBox)
-        : TextEditor (name, isPasswordBox ? passwordChar :  0)
+        : TextEditor (name, isPasswordBox ? getDefaultPasswordChar() :  0)
     {
         setSelectAllWhenFocused (true);
     }
@@ -74,13 +69,17 @@ public:
 private:
     AlertWindowTextEditor (const AlertWindowTextEditor&);
     AlertWindowTextEditor& operator= (const AlertWindowTextEditor&);
+
+    static juce_wchar getDefaultPasswordChar() throw()
+    {
+      #if JUCE_LINUX
+        return 0x2022;
+      #else
+        return 0x25cf;
+      #endif
+    }
 };
 
-#if JUCE_LINUX
-const tchar AlertWindowTextEditor::passwordChar = 0x2022;
-#else
-const tchar AlertWindowTextEditor::passwordChar = 0x25cf;
-#endif
 
 //==============================================================================
 AlertWindow::AlertWindow (const String& title,
@@ -402,6 +401,9 @@ void AlertWindow::paint (Graphics& g)
 
 void AlertWindow::updateLayout (const bool onlyIncreaseSize)
 {
+    const int titleH = 24;
+    const int iconWidth = 80;
+
     const int wid = jmax (font.getStringWidth (text),
                           font.getStringWidth (getName()));
 

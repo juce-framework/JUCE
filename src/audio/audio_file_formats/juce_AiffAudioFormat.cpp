@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const aiffFormatName = "AIFF file";
-static const tchar* const aiffExtensions[] =    { T(".aiff"), T(".aif"), 0 };
+static const juce_wchar* const aiffExtensions[] =    { T(".aiff"), T(".aif"), 0 };
 
 
 //==============================================================================
@@ -93,8 +93,8 @@ public:
                              || (byte0 == 0x40 && sampleRateBytes[1] > 0x1C))
                             break;
 
-                        unsigned int sampRate = ByteOrder::bigEndianInt ((char*) sampleRateBytes + 2);
-                        sampRate >>= (16414 - ByteOrder::bigEndianShort ((char*) sampleRateBytes));
+                        unsigned int sampRate = ByteOrder::bigEndianInt (sampleRateBytes + 2);
+                        sampRate >>= (16414 - ByteOrder::bigEndianShort (sampleRateBytes));
                         sampleRate = (int) sampRate;
 
                         if (length <= 18)
@@ -190,7 +190,7 @@ public:
             {
                 if (littleEndian)
                 {
-                    const short* src = (const short*) tempBuffer;
+                    const short* src = reinterpret_cast <const short*> (tempBuffer);
 
                     if (numChannels > 1)
                     {
@@ -229,7 +229,7 @@ public:
                 }
                 else
                 {
-                    const char* src = (const char*) tempBuffer;
+                    const char* src = tempBuffer;
 
                     if (numChannels > 1)
                     {
@@ -360,9 +360,9 @@ public:
             }
             else if (bitsPerSample == 32)
             {
-                const unsigned int* src = (const unsigned int*) tempBuffer;
-                unsigned int* l = (unsigned int*) left;
-                unsigned int* r = (unsigned int*) right;
+                const unsigned int* src = reinterpret_cast <const unsigned int*> (tempBuffer);
+                unsigned int* l = reinterpret_cast <unsigned int*> (left);
+                unsigned int* r = reinterpret_cast <unsigned int*> (right);
 
                 if (littleEndian)
                 {
@@ -439,12 +439,12 @@ public:
                     }
                 }
 
-                left = (int*) l;
-                right = (int*) r;
+                left = reinterpret_cast <int*> (l);
+                right = reinterpret_cast <int*> (r);
             }
             else if (bitsPerSample == 8)
             {
-                const char* src = (const char*) tempBuffer;
+                const char* src = tempBuffer;
 
                 if (numChannels > 1)
                 {
@@ -628,7 +628,7 @@ public:
 
         const int bytes = numChannels * numSamples * bitsPerSample / 8;
         tempBlock.ensureSize (bytes, false);
-        char* buffer = (char*) tempBlock.getData();
+        char* buffer = static_cast <char*> (tempBlock.getData());
 
         const int* left = data[0];
         const int* right = data[1];
@@ -637,7 +637,7 @@ public:
 
         if (bitsPerSample == 16)
         {
-            short* b = (short*) buffer;
+            short* b = reinterpret_cast <short*> (buffer);
 
             if (numChannels > 1)
             {
@@ -657,7 +657,7 @@ public:
         }
         else if (bitsPerSample == 24)
         {
-            char* b = (char*) buffer;
+            char* b = buffer;
 
             if (numChannels > 1)
             {
@@ -680,7 +680,7 @@ public:
         }
         else if (bitsPerSample == 32)
         {
-            uint32* b = (uint32*) buffer;
+            uint32* b = reinterpret_cast <uint32*> (buffer);
 
             if (numChannels > 1)
             {
@@ -700,7 +700,7 @@ public:
         }
         else if (bitsPerSample == 8)
         {
-            char* b = (char*) buffer;
+            char* b = buffer;
 
             if (numChannels > 1)
             {
@@ -743,7 +743,7 @@ public:
 
 //==============================================================================
 AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (TRANS (aiffFormatName), (const tchar**) aiffExtensions)
+    : AudioFormat (TRANS (aiffFormatName), (const juce_wchar**) aiffExtensions)
 {
 }
 

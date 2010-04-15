@@ -391,7 +391,7 @@ void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
 
 
 //==============================================================================
-ValueTree ValueTree::invalid ((ValueTree::SharedObject*) 0);
+ValueTree ValueTree::invalid (static_cast <ValueTree::SharedObject*> (0));
 
 ValueTree::ValueTree (const String& type_)
     : object (new ValueTree::SharedObject (type_))

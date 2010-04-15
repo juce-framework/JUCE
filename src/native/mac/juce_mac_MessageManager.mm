@@ -62,7 +62,7 @@ public:
         CFRelease (runLoopSource);
 
         while (messages.size() > 0)
-            delete ((Message*) messages.remove(0));
+            delete static_cast <Message*> (messages.remove(0));
     }
 
     virtual NSApplicationTerminateReply shouldTerminate()
@@ -163,7 +163,7 @@ private:
 
     static void runLoopSourceCallback (void* info)
     {
-        ((AppDelegateRedirector*) info)->runLoopCallback();
+        static_cast <AppDelegateRedirector*> (info)->runLoopCallback();
     }
 };
 

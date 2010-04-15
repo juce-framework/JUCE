@@ -219,7 +219,7 @@ private:
         int index = 0;
         float lastX = 0, lastY = 0;
         float lastX2 = 0, lastY2 = 0;
-        tchar lastCommandChar = 0;
+        juce_wchar lastCommandChar = 0;
         bool isRelative = true;
         bool carryOn = true;
 
@@ -894,8 +894,8 @@ private:
         {
             const float dpi = 96.0f;
 
-            const tchar n1 = s [len - 2];
-            const tchar n2 = s [len - 1];
+            const juce_wchar n1 = s [len - 2];
+            const juce_wchar n2 = s [len - 1];
 
             if (n1 == 'i' && n2 == 'n')
                 n *= dpi;
@@ -993,7 +993,7 @@ private:
     }
 
     //==============================================================================
-    static bool isIdentifierChar (const tchar c)
+    static bool isIdentifierChar (const juce_wchar c)
     {
         return CharacterFunctions::isLetter (c) || c == '-';
     }
