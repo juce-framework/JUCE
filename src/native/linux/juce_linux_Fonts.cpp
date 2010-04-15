@@ -90,7 +90,8 @@ class FreeTypeInterface  : public DeletedAtShutdown
 public:
     //==============================================================================
     FreeTypeInterface()
-        : lastFace (0),
+        : ftLib (0),
+          lastFace (0),
           lastBold (false),
           lastItalic (false)
     {

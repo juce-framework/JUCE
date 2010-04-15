@@ -1150,7 +1150,7 @@ private:
                 disableMouseMoves = false;
         }
 
-        if (disableMouseMoves)
+        if (disableMouseMoves || (activeSubMenu != 0 && activeSubMenu->isOverChildren()))
             return;
 
         bool isMovingTowardsMenu = false;

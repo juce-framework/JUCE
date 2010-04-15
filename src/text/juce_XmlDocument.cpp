@@ -39,6 +39,7 @@ XmlDocument::XmlDocument (const String& documentText)
 }
 
 XmlDocument::XmlDocument (const File& file)
+    : ignoreEmptyTextElements (true)
 {
     inputSource = new FileInputSource (file);
 }

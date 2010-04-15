@@ -562,6 +562,9 @@ public:
     {
         ScopedXLock xlock;
 
+        if (gc != None)
+            XFreeGC (display, gc);
+
 #if JUCE_USE_XSHM
         if (usingXShm)
         {
@@ -585,19 +588,19 @@ public:
     {
         ScopedXLock xlock;
 
-        if (gc == 0)
+        if (gc == None)
         {
-          XGCValues gcvalues;
-          gcvalues.foreground = None;
-          gcvalues.background = None;
-          gcvalues.function = GXcopy;
-          gcvalues.plane_mask = AllPlanes;
-          gcvalues.clip_mask = None;
-          gcvalues.graphics_exposures = False;
+            XGCValues gcvalues;
+            gcvalues.foreground = None;
+            gcvalues.background = None;
+            gcvalues.function = GXcopy;
+            gcvalues.plane_mask = AllPlanes;
+            gcvalues.clip_mask = None;
+            gcvalues.graphics_exposures = False;
 
-          gc = XCreateGC (display, window,
-                          GCBackground | GCForeground | GCFunction | GCPlaneMask | GCClipMask | GCGraphicsExposures,
-                          &gcvalues);
+            gc = XCreateGC (display, window,
+                            GCBackground | GCForeground | GCFunction | GCPlaneMask | GCClipMask | GCGraphicsExposures,
+                            &gcvalues);
         }
 
         if (imageDepth == 16)
@@ -3085,7 +3088,7 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
 void juce_deleteMouseCursor (void* const cursorHandle, const bool) throw()
 {
     ScopedXLock xlock;
-    if (cursorHandle != None)
+    if (cursorHandle != 0)
         XFreeCursor (display, (Cursor) cursorHandle);
 }
 

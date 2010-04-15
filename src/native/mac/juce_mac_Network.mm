@@ -219,7 +219,7 @@ public:
 {
     [self stop];
 
-    delete runLoopThread;
+    deleteAndZero (runLoopThread);
     [connection release];
     [data release];
     [dataLock release];
@@ -250,7 +250,9 @@ public:
     DBG (nsStringToJuce ([error description]));
     hasFailed = true;
     initialised = true;
-    runLoopThread->signalThreadShouldExit();
+
+    if (runLoopThread != 0)
+        runLoopThread->signalThreadShouldExit();
 }
 
 - (void) connection: (NSURLConnection*) connection didReceiveData: (NSData*) newData
@@ -265,7 +267,9 @@ public:
 {
     hasFinished = true;
     initialised = true;
-    runLoopThread->signalThreadShouldExit();
+
+    if (runLoopThread != 0)
+        runLoopThread->signalThreadShouldExit();
 }
 
 - (BOOL) isOpen
@@ -313,7 +317,9 @@ public:
 - (void) stop
 {
     [connection cancel];
-    runLoopThread->stopThread (10000);
+
+    if (runLoopThread != 0)
+        runLoopThread->stopThread (10000);
 }
 
 @end
