@@ -238,6 +238,8 @@ bool CustomTypeface::loadGlyphIfPossible (const juce_wchar /*characterNeeded*/)
 
 void CustomTypeface::addGlyphsFromOtherTypeface (Typeface& typefaceToCopy, juce_wchar characterStartIndex, int numCharacters) throw()
 {
+    setCharacteristics (name, typefaceToCopy.getAscent(), isBold, isItalic, defaultCharacter);
+
     for (int i = 0; i < numCharacters; ++i)
     {
         const juce_wchar c = (juce_wchar) (characterStartIndex + i);
