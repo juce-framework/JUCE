@@ -32,7 +32,7 @@
 Image* juce_loadPNGImageFromStream (InputStream& inputStream);
 
 //==============================================================================
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
 {
     NSImage* im = CoreGraphicsImage::createNSImage (image);
     NSCursor* c = [[NSCursor alloc] initWithImage: im
@@ -42,9 +42,9 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     return c;
 }
 
-static void* juce_cursorFromData (const unsigned char* data, const size_t size, float hx, float hy) throw()
+static void* juce_cursorFromData (const MemoryBlock& data, const float hx, const float hy)
 {
-    MemoryInputStream stream (data, size, false);
+    MemoryInputStream stream (data, false);
     ScopedPointer <Image> im (juce_loadPNGImageFromStream (stream));
     jassert (im != 0);
 
@@ -58,16 +58,16 @@ static void* juce_cursorFromData (const unsigned char* data, const size_t size, 
 
 static void* juce_cursorFromWebKitFile (const char* filename, float hx, float hy)
 {
-    File f ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources");
+    const File f ("/System/Library/Frameworks/WebKit.framework/Frameworks/WebCore.framework/Resources");
 
     MemoryBlock mb;
     if (f.getChildFile (filename).loadFileAsData (mb))
-        return juce_cursorFromData ((const unsigned char*) mb.getData(), mb.getSize(), hx, hy);
+        return juce_cursorFromData (mb, hx, hy);
 
     return 0;
 }
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
     const ScopedAutoReleasePool pool;
     NSCursor* c = 0;
@@ -138,18 +138,18 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     return c;
 }
 
-void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard)
 {
     NSCursor* c = (NSCursor*) cursorHandle;
     [c release];
 }
 
-void MouseCursor::showInAllWindows() const throw()
+void MouseCursor::showInAllWindows() const
 {
     showInWindow (0);
 }
 
-void MouseCursor::showInWindow (ComponentPeer*) const throw()
+void MouseCursor::showInWindow (ComponentPeer*) const
 {
     NSCursor* const c = (NSCursor*) getHandle();
     [c set];
@@ -157,11 +157,11 @@ void MouseCursor::showInWindow (ComponentPeer*) const throw()
 
 #else
 
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()  { return 0; }
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()             { return 0; }
-void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()           {}
-void MouseCursor::showInAllWindows() const throw()                                              {}
-void MouseCursor::showInWindow (ComponentPeer*) const throw()                                   {}
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)          { return 0; }
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)                     { return 0; }
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard)                   {}
+void MouseCursor::showInAllWindows() const                                                      {}
+void MouseCursor::showInWindow (ComponentPeer*) const                                           {}
 
 #endif
 

@@ -287,6 +287,7 @@ public:
     ~Canvas()
     {
         getDocument().getRoot().removeListener (this);
+        componentHolder->deleteAllChildren();
         deleteAllChildren();
     }
 
@@ -305,11 +306,11 @@ public:
         g.setFont (border.getTop() - 5.0f);
         g.setColour (Colours::darkgrey);
 
-        const float x = border.getLeft();
-        const float y = border.getTop();
+        const int x = border.getLeft();
+        const int y = border.getTop();
 
-        g.drawHorizontalLine (y, 2.0f, getWidth() - border.getRight());
-        g.drawVerticalLine (x, 2.0f, getHeight() - border.getBottom());
+        g.drawHorizontalLine (y, 2.0f, (float) getWidth() - border.getRight());
+        g.drawVerticalLine (x, 2.0f, (float) getHeight() - border.getBottom());
 
         {
             TickIterator ticks (0, componentHolder->getWidth(), 1.0, 10, 50);
@@ -321,8 +322,8 @@ public:
             {
                 if (pos > 0)
                 {
-                    g.drawVerticalLine (x + pos, y - tickLength * y, y);
-                    g.drawSingleLineText (label, x + pos + 2, y - 6);
+                    g.drawVerticalLine (x + (int) pos, y - tickLength * y, (float) y);
+                    g.drawSingleLineText (label, x + (int) pos + 2, (int) y - 6);
                 }
             }
         }
@@ -337,10 +338,10 @@ public:
             {
                 if (pos > 0)
                 {
-                    g.drawHorizontalLine (y + pos, x - tickLength * x, x);
+                    g.drawHorizontalLine (y + (int) pos, x - tickLength * x, (float) x);
 
                     g.drawTextAsPath (label, AffineTransform::rotation (float_Pi / -2.0f)
-                                                             .translated (x - 6, y + pos - 2));
+                                                             .translated (x - 6.0f, y + pos - 2.0f));
                 }
             }
         }

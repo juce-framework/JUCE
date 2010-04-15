@@ -3247,7 +3247,7 @@ protected:
 
 private:
 
-	int refCounts;
+	int32 refCounts;
 };
 
 template <class ReferenceCountedObjectClass>
@@ -9265,7 +9265,6 @@ private:
 #define __JUCE_MOUSECURSOR_JUCEHEADER__
 
 class Image;
-class SharedMouseCursorInternal;
 class ComponentPeer;
 class Component;
 
@@ -9301,17 +9300,17 @@ public:
 		BottomRightCornerResizeCursor   /**< A platform-specific cursor for resizing the bottom-right-corner of a window. */
 	};
 
-	MouseCursor() throw();
+	MouseCursor();
 
-	MouseCursor (StandardCursorType type) throw();
+	MouseCursor (StandardCursorType type);
 
-	MouseCursor (const Image& image, int hotSpotX, int hotSpotY) throw();
+	MouseCursor (const Image& image, int hotSpotX, int hotSpotY);
 
-	MouseCursor (const MouseCursor& other) throw();
+	MouseCursor (const MouseCursor& other);
 
-	MouseCursor& operator= (const MouseCursor& other) throw();
+	MouseCursor& operator= (const MouseCursor& other);
 
-	~MouseCursor() throw();
+	~MouseCursor();
 
 	bool operator== (const MouseCursor& other) const throw();
 
@@ -9324,11 +9323,12 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
+	class SharedCursorHandle;
+	SharedCursorHandle* cursorHandle;
 
 	friend class MouseInputSourceInternal;
-	void showInWindow (ComponentPeer* window) const throw();
-	void showInAllWindows() const throw();
+	void showInWindow (ComponentPeer* window) const;
+	void showInAllWindows() const;
 	void* getHandle() const throw();
 };
 

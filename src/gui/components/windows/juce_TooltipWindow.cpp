@@ -42,6 +42,7 @@ TooltipWindow::TooltipWindow (Component* const parentComponent,
                               const int millisecondsBeforeTipAppears_)
     : Component ("tooltip"),
       millisecondsBeforeTipAppears (millisecondsBeforeTipAppears_),
+      mouseClicks (0),
       lastHideTime (0),
       lastComponentUnderMouse (0),
       changedCompsSinceShown (true)

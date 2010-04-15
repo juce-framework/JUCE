@@ -77,6 +77,7 @@ class CodeEditorComponent::CodeEditorLine
 {
 public:
     CodeEditorLine() throw()
+       : highlightColumnStart (0), highlightColumnEnd (0)
     {
     }
 

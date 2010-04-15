@@ -65,9 +65,9 @@
  #import <IOKit/pwr_mgt/IOPMLib.h>
  #include <Carbon/Carbon.h>
  #include <sys/dir.h>
- #include <sys/socket.h>
 #endif
 
+#include <sys/socket.h>
 #include <sys/sysctl.h>
 #include <sys/stat.h>
 #include <sys/param.h>

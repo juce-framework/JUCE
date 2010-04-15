@@ -28,7 +28,6 @@
 
 #include "../../../containers/juce_ReferenceCountedObject.h"
 class Image;
-class SharedMouseCursorInternal;
 class ComponentPeer;
 class Component;
 
@@ -75,10 +74,10 @@ public:
 
     //==============================================================================
     /** Creates the standard arrow cursor. */
-    MouseCursor() throw();
+    MouseCursor();
 
     /** Creates one of the standard mouse cursor */
-    MouseCursor (StandardCursorType type) throw();
+    MouseCursor (StandardCursorType type);
 
     /** Creates a custom cursor from an image.
 
@@ -89,17 +88,17 @@ public:
         @param hotSpotX the x position of the cursor's hotspot within the image
         @param hotSpotY the y position of the cursor's hotspot within the image
     */
-    MouseCursor (const Image& image, int hotSpotX, int hotSpotY) throw();
+    MouseCursor (const Image& image, int hotSpotX, int hotSpotY);
 
     //==============================================================================
     /** Creates a copy of another cursor object. */
-    MouseCursor (const MouseCursor& other) throw();
+    MouseCursor (const MouseCursor& other);
 
     /** Copies this cursor from another object. */
-    MouseCursor& operator= (const MouseCursor& other) throw();
+    MouseCursor& operator= (const MouseCursor& other);
 
     /** Destructor. */
-    ~MouseCursor() throw();
+    ~MouseCursor();
 
     /** Checks whether two mouse cursors are the same.
 
@@ -145,11 +144,12 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    ReferenceCountedObjectPtr <SharedMouseCursorInternal> cursorHandle;
+    class SharedCursorHandle;
+    SharedCursorHandle* cursorHandle;
 
     friend class MouseInputSourceInternal;
-    void showInWindow (ComponentPeer* window) const throw();
-    void showInAllWindows() const throw();
+    void showInWindow (ComponentPeer* window) const;
+    void showInAllWindows() const;
     void* getHandle() const throw();
 };
 

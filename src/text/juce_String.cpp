@@ -60,12 +60,26 @@ public:
     }
 
     //==============================================================================
-    static juce_wchar* create (const size_t numChars)
+    static juce_wchar* createUninitialised (const size_t numChars)
     {
         StringHolder* const s = reinterpret_cast <StringHolder*> (new char [sizeof (StringHolder) + numChars * sizeof (juce_wchar)]);
         s->refCount = 0;
         s->allocatedNumChars = numChars;
         return &(s->text[0]);
+    }
+
+    static juce_wchar* createCopy (const juce_wchar* const src, const size_t numChars)
+    {
+        juce_wchar* const dest = createUninitialised (numChars);
+        copyChars (dest, src, numChars);
+        return dest;
+    }
+
+    static juce_wchar* createCopy (const char* const src, const size_t numChars)
+    {
+        juce_wchar* const dest = createUninitialised (numChars);
+        CharacterFunctions::copy (dest, src, numChars + 1);
+        return dest;
     }
 
     static inline juce_wchar* getEmpty() throw()
@@ -98,8 +112,7 @@ public:
         if (b->refCount <= 0)
             return text;
 
-        juce_wchar* const newText = create (b->allocatedNumChars);
-        copyChars (newText, text, b->allocatedNumChars);
+        juce_wchar* const newText = createCopy (text, b->allocatedNumChars);
         release (b);
 
         return newText;
@@ -112,7 +125,7 @@ public:
         if (b->refCount <= 0 && b->allocatedNumChars >= numChars)
             return text;
 
-        juce_wchar* const newText = create (jmax (b->allocatedNumChars, numChars));
+        juce_wchar* const newText = createUninitialised (jmax (b->allocatedNumChars, numChars));
         copyChars (newText, text, b->allocatedNumChars);
         release (b);
 
@@ -154,8 +167,7 @@ void String::createInternal (const juce_wchar* const t, const size_t numChars)
 {
     jassert (t[numChars] == 0); // must have a null terminator
 
-    text = StringHolder::create (numChars);
-    StringHolder::copyChars (text, t, numChars);
+    text = StringHolder::createCopy (t, numChars);
 }
 
 void String::appendInternal (const juce_wchar* const newText, const int numExtraChars)
@@ -206,43 +218,31 @@ String& String::operator= (const String& other) throw()
 }
 
 String::String (const size_t numChars, const int /*dummyVariable*/)
-    : text (StringHolder::create (numChars))
+    : text (StringHolder::createUninitialised (numChars))
 {
 }
 
 String::String (const String& stringToCopy, const size_t charsToAllocate)
 {
     const size_t otherSize = StringHolder::getAllocatedNumChars (stringToCopy.text);
-    text = StringHolder::create (jmax (charsToAllocate, otherSize));
+    text = StringHolder::createUninitialised (jmax (charsToAllocate, otherSize));
     StringHolder::copyChars (text, stringToCopy.text, otherSize);
 }
 
 String::String (const char* const t)
 {
     if (t != 0 && *t != 0)
-    {
-        const int len = CharacterFunctions::length (t);
-        text = StringHolder::create (len);
-        CharacterFunctions::copy (text, t, len + 1);
-    }
+        text = StringHolder::createCopy (t, CharacterFunctions::length (t));
     else
-    {
         text = StringHolder::getEmpty();
-    }
 }
 
 String::String (const juce_wchar* const t)
 {
     if (t != 0 && *t != 0)
-    {
-        const int len = CharacterFunctions::length (t);
-        text = StringHolder::create (len);
-        StringHolder::copyChars (text, t, len);
-    }
+        text = StringHolder::createCopy (t, CharacterFunctions::length (t));
     else
-    {
         text = StringHolder::getEmpty();
-    }
 }
 
 String::String (const char* const t, const size_t maxChars)
@@ -253,15 +253,9 @@ String::String (const char* const t, const size_t maxChars)
             break;
 
     if (i > 0)
-    {
-        text = StringHolder::create (i);
-        CharacterFunctions::copy (text, t, i);
-        text[i] = 0;
-    }
+        text = StringHolder::createCopy (t, i);
     else
-    {
         text = StringHolder::getEmpty();
-    }
 }
 
 String::String (const juce_wchar* const t, const size_t maxChars)
@@ -272,14 +266,9 @@ String::String (const juce_wchar* const t, const size_t maxChars)
             break;
 
     if (i > 0)
-    {
-        text = StringHolder::create (i);
-        StringHolder::copyChars (text, t, i);
-    }
+        text = StringHolder::createCopy (t, i);
     else
-    {
         text = StringHolder::getEmpty();
-    }
 }
 
 const String String::charToString (const juce_wchar character)

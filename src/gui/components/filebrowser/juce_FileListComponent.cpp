@@ -84,15 +84,13 @@ class FileListItemComponent  : public Component,
 {
 public:
     //==============================================================================
-    FileListItemComponent (FileListComponent& owner_,
-                           TimeSliceThread& thread_) throw()
-        : owner (owner_),
-          thread (thread_),
-          icon (0)
+    FileListItemComponent (FileListComponent& owner_, TimeSliceThread& thread_)
+        : owner (owner_), thread (thread_),
+          highlighted (false), index (0), icon (0)
     {
     }
 
-    ~FileListItemComponent() throw()
+    ~FileListItemComponent()
     {
         thread.removeTimeSliceClient (this);
 
@@ -124,7 +122,7 @@ public:
     void update (const File& root,
                  const DirectoryContentsList::FileInfo* const fileInfo,
                  const int index_,
-                 const bool highlighted_) throw()
+                 const bool highlighted_)
     {
         thread.removeTimeSliceClient (this);
 
@@ -196,13 +194,13 @@ private:
     Image* icon;
     bool isDirectory;
 
-    void clearIcon() throw()
+    void clearIcon()
     {
         ImageCache::release (icon);
         icon = 0;
     }
 
-    void updateIcon (const bool onlyUpdateIfCached) throw()
+    void updateIcon (const bool onlyUpdateIfCached)
     {
         if (icon == 0)
         {

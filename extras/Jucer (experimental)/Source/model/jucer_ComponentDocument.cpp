@@ -63,6 +63,7 @@ public:
 
     ~ComponentBoundsEditor()
     {
+        deleteAllChildren();
     }
 
     void resized()

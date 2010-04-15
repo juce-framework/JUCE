@@ -2512,7 +2512,7 @@ Image* juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
 {
     const int maxW = GetSystemMetrics (SM_CXCURSOR);
     const int maxH = GetSystemMetrics (SM_CYCURSOR);
@@ -2568,13 +2568,13 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     return cursorH;
 }
 
-void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard) throw()
+void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard)
 {
     if (cursorHandle != 0 && ! isStandard)
         DestroyCursor ((HCURSOR) cursorHandle);
 }
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
     LPCTSTR cursorName = IDC_ARROW;
 
@@ -2661,12 +2661,12 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
 }
 
 //==============================================================================
-void MouseCursor::showInWindow (ComponentPeer*) const throw()
+void MouseCursor::showInWindow (ComponentPeer*) const
 {
     SetCursor ((HCURSOR) getHandle());
 }
 
-void MouseCursor::showInAllWindows() const throw()
+void MouseCursor::showInAllWindows() const
 {
     showInWindow (0);
 }

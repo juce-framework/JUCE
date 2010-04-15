@@ -2960,7 +2960,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 }
 
 //==============================================================================
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY) throw()
+void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
 {
     ScopedXLock xlock;
     const unsigned int imageW = image.getWidth();
@@ -3085,14 +3085,14 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     return result;
 }
 
-void juce_deleteMouseCursor (void* const cursorHandle, const bool) throw()
+void juce_deleteMouseCursor (void* const cursorHandle, const bool)
 {
     ScopedXLock xlock;
     if (cursorHandle != 0)
         XFreeCursor (display, (Cursor) cursorHandle);
 }
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) throw()
+void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
 {
     unsigned int shape;
 
@@ -3202,7 +3202,7 @@ void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type) thro
     return (void*) XCreateFontCursor (display, shape);
 }
 
-void MouseCursor::showInWindow (ComponentPeer* peer) const throw()
+void MouseCursor::showInWindow (ComponentPeer* peer) const
 {
     LinuxComponentPeer* const lp = dynamic_cast <LinuxComponentPeer*> (peer);
 
@@ -3210,7 +3210,7 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const throw()
         lp->showMouseCursor ((Cursor) getHandle());
 }
 
-void MouseCursor::showInAllWindows() const throw()
+void MouseCursor::showInAllWindows() const
 {
     for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         showInWindow (ComponentPeer::getPeer (i));
