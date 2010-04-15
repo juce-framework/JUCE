@@ -166,6 +166,10 @@ private:
 
     // (Required as an alternative to the overloaded & operator).
     const ScopedPointer* getAddress() const throw()                                 { return this; }
+
+    // This is private to stop people accidentally copying a const ScopedPointer (the compiler
+    // will let you do so by implicitly casting the source to its raw object pointer).
+    ScopedPointer (const ScopedPointer&);
 };
 
 //==============================================================================

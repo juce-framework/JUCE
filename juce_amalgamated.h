@@ -3484,6 +3484,10 @@ private:
 
 	// (Required as an alternative to the overloaded & operator).
 	const ScopedPointer* getAddress() const throw()				 { return this; }
+
+	// This is private to stop people accidentally copying a const ScopedPointer (the compiler
+	// will let you do so by implicitly casting the source to its raw object pointer).
+	ScopedPointer (const ScopedPointer&);
 };
 
 template <class ObjectType>
@@ -13480,7 +13484,7 @@ public:
 														   bool commonToAllUsers,
 														   int millisecondsBeforeSaving,
 														   int propertiesFileOptions,
-														   InterProcessLock *ipl = NULL);
+														   InterProcessLock* processLock = 0);
 
 	static const File getDefaultAppSettingsFile (const String& applicationName,
 												 const String& fileNameSuffix,
@@ -13500,8 +13504,8 @@ private:
 	bool loadedOk, needsWriting;
 
 	InterProcessLock* processLock;
-	typedef ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
-	ProcessScopedLock getProcessLock() const;
+	typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
+	InterProcessLock::ScopedLockType* createProcessLock() const;
 
 	void timerCallback();
 

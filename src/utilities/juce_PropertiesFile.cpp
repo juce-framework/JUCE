@@ -69,7 +69,7 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsCompressedBinary
              || (options_ & (storeAsBinary | storeAsCompressedBinary | storeAsXML)) == storeAsXML);
 
-    ProcessScopedLock pl (getProcessLock());
+    ProcessScopedLock pl (createProcessLock());
 
     ScopedPointer<InputStream> fileStream (f.createInputStream());
 
@@ -151,9 +151,9 @@ PropertiesFile::~PropertiesFile()
         jassertfalse;
 }
 
-PropertiesFile::ProcessScopedLock PropertiesFile::getProcessLock() const
+InterProcessLock::ScopedLockType* PropertiesFile::createProcessLock() const
 {
-    return ProcessScopedLock (processLock != 0 ? new InterProcessLock::ScopedLockType (*processLock) : 0);
+    return processLock != 0 ? new InterProcessLock::ScopedLockType (*processLock) : 0;
 }
 
 bool PropertiesFile::saveIfNeeded()
@@ -205,7 +205,7 @@ bool PropertiesFile::save()
                                  getAllProperties().getAllValues() [i]);
         }
 
-        ProcessScopedLock pl (getProcessLock());
+        ProcessScopedLock pl (createProcessLock());
 
         if (doc.writeToFile (file, String::empty))
         {
@@ -215,7 +215,7 @@ bool PropertiesFile::save()
     }
     else
     {
-        ProcessScopedLock pl (getProcessLock());
+        ProcessScopedLock pl (createProcessLock());
 
         TemporaryFile tempFile (file);
         ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());
@@ -322,7 +322,7 @@ PropertiesFile* PropertiesFile::createDefaultAppPropertiesFile (const String& ap
                                                                 const bool commonToAllUsers,
                                                                 const int millisecondsBeforeSaving,
                                                                 const int propertiesFileOptions,
-                                                                InterProcessLock *processLock_)
+                                                                InterProcessLock* processLock_)
 {
     const File file (getDefaultAppSettingsFile (applicationName,
                                                 fileNameSuffix,

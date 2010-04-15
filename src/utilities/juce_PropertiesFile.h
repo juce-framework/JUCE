@@ -155,7 +155,7 @@ public:
                                                            bool commonToAllUsers,
                                                            int millisecondsBeforeSaving,
                                                            int propertiesFileOptions,
-                                                           InterProcessLock *ipl = NULL);
+                                                           InterProcessLock* processLock = 0);
 
     /** Handy utility to choose a file in the standard OS-dependent location for application
         settings files.
@@ -197,8 +197,8 @@ private:
     bool loadedOk, needsWriting;
 
     InterProcessLock* processLock;
-    typedef ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
-    ProcessScopedLock getProcessLock() const;
+    typedef const ScopedPointer<InterProcessLock::ScopedLockType> ProcessScopedLock;
+    InterProcessLock::ScopedLockType* createProcessLock() const;
 
     void timerCallback();
 
