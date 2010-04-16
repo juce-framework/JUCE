@@ -95,10 +95,7 @@ void ActionListenerList::sendActionMessage (const String& message) const
     const ScopedLock sl (actionListenerLock_);
 
     for (int i = actionListeners_.size(); --i >= 0;)
-    {
-        postMessage (new ActionMessage (message,
-                                        (ActionListener*) actionListeners_.getUnchecked(i)));
-    }
+        postMessage (new ActionMessage (message, static_cast <ActionListener*> (actionListeners_.getUnchecked(i))));
 }
 
 void ActionListenerList::handleMessage (const Message& message)
@@ -106,7 +103,7 @@ void ActionListenerList::handleMessage (const Message& message)
     const ActionMessage& am = (const ActionMessage&) message;
 
     if (actionListeners_.contains (am.pointerParameter))
-        ((ActionListener*) am.pointerParameter)->actionListenerCallback (am.message);
+        static_cast <ActionListener*> (am.pointerParameter)->actionListenerCallback (am.message);
 }
 
 END_JUCE_NAMESPACE

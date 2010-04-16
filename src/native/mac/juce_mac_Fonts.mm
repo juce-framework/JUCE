@@ -135,7 +135,7 @@ public:
         if (atsFont == 0)
             atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
 
-        fontRef = CGFontCreateWithPlatformFont ((void*) &atsFont);
+        fontRef = CGFontCreateWithPlatformFont (&atsFont);
 
         const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
         unitsToHeightScaleFactor = 1.0f / totalHeight;
@@ -149,7 +149,7 @@ public:
             if (atsFont == 0)
                 atsFont = ATSFontFindFromPostScriptName ((CFStringRef) [nsFont fontName], kATSOptionFlagsDefault);
 
-            fontRef = CGFontCreateWithPlatformFont ((void*) &atsFont);
+            fontRef = CGFontCreateWithPlatformFont (&atsFont);
 
             const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
             unitsToHeightScaleFactor = 1.0f / totalHeight;

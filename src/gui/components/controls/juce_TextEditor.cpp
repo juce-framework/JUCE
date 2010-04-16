@@ -71,7 +71,7 @@ struct TextAtom
 
 //==============================================================================
 // a run of text with a single font and colour
-class UniformTextSection
+class TextEditor::UniformTextSection
 {
 public:
     //==============================================================================
@@ -92,7 +92,7 @@ public:
         atoms.ensureStorageAllocated (other.atoms.size());
 
         for (int i = 0; i < other.atoms.size(); ++i)
-            atoms.add (new TextAtom (*(const TextAtom*) other.atoms.getUnchecked(i)));
+            atoms.add (new TextAtom (*other.atoms.getUnchecked(i)));
     }
 
     ~UniformTextSection()
@@ -113,16 +113,16 @@ public:
         return atoms.size();
     }
 
-    TextAtom* getAtom (const int index) const
+    TextAtom* getAtom (const int index) const throw()
     {
-        return (TextAtom*) atoms.getUnchecked (index);
+        return atoms.getUnchecked (index);
     }
 
     void append (const UniformTextSection& other, const juce_wchar passwordCharacter)
     {
         if (other.atoms.size() > 0)
         {
-            TextAtom* const lastAtom = (TextAtom*) atoms.getLast();
+            TextAtom* const lastAtom = atoms.getLast();
             int i = 0;
 
             if (lastAtom != 0)
@@ -256,7 +256,7 @@ public:
 
             for (int i = atoms.size(); --i >= 0;)
             {
-                TextAtom* const atom = (TextAtom*) atoms.getUnchecked(i);
+                TextAtom* const atom = atoms.getUnchecked(i);
                 atom->width = newFont.getStringWidthFloat (atom->getText (passwordCharacter));
             }
         }
@@ -269,7 +269,7 @@ public:
     Colour colour;
 
 private:
-    VoidArray atoms;
+    Array <TextAtom*> atoms;
 
     //==============================================================================
     void initialiseAtoms (const String& textToParse,
@@ -333,13 +333,13 @@ private:
 };
 
 //==============================================================================
-class TextEditorIterator
+class TextEditor::Iterator
 {
 public:
     //==============================================================================
-    TextEditorIterator (const VoidArray& sections_,
-                        const float wordWrapWidth_,
-                        const juce_wchar passwordCharacter_)
+    Iterator (const Array <UniformTextSection*>& sections_,
+              const float wordWrapWidth_,
+              const juce_wchar passwordCharacter_)
       : indexInText (0),
         lineY (0),
         lineHeight (0),
@@ -358,14 +358,14 @@ public:
 
         if (sections.size() > 0)
         {
-            currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
+            currentSection = sections.getUnchecked (sectionIndex);
 
             if (currentSection != 0)
                 beginNewLine();
         }
     }
 
-    TextEditorIterator (const TextEditorIterator& other)
+    Iterator (const Iterator& other)
       : indexInText (other.indexInText),
         lineY (other.lineY),
         lineHeight (other.lineHeight),
@@ -383,7 +383,7 @@ public:
     {
     }
 
-    ~TextEditorIterator()
+    ~Iterator()
     {
     }
 
@@ -441,7 +441,7 @@ public:
                 }
 
                 atomIndex = 0;
-                currentSection = (const UniformTextSection*) sections.getUnchecked (sectionIndex);
+                currentSection = sections.getUnchecked (sectionIndex);
             }
             else
             {
@@ -457,7 +457,7 @@ public:
 
                     for (int section = sectionIndex + 1; section < sections.size(); ++section)
                     {
-                        const UniformTextSection* const s = (const UniformTextSection*) sections.getUnchecked (section);
+                        const UniformTextSection* const s = sections.getUnchecked (section);
 
                         if (s->getNumAtoms() == 0)
                             break;
@@ -540,7 +540,7 @@ public:
 
         int tempSectionIndex = sectionIndex;
         int tempAtomIndex = atomIndex;
-        const UniformTextSection* section = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
+        const UniformTextSection* section = sections.getUnchecked (tempSectionIndex);
 
         lineHeight = section->font.getHeight();
         maxDescent = section->font.getDescent();
@@ -560,7 +560,7 @@ public:
                     break;
 
                 tempAtomIndex = 0;
-                section = (const UniformTextSection*) sections.getUnchecked (tempSectionIndex);
+                section = sections.getUnchecked (tempSectionIndex);
                 checkSize = true;
             }
 
@@ -727,13 +727,13 @@ public:
     const UniformTextSection* currentSection;
 
 private:
-    const VoidArray& sections;
+    const Array <UniformTextSection*>& sections;
     int sectionIndex, atomIndex;
     const float wordWrapWidth;
     const juce_wchar passwordCharacter;
     TextAtom tempAtom;
 
-    TextEditorIterator& operator= (const TextEditorIterator&);
+    Iterator& operator= (const Iterator&);
 
     void moveToEndOfLastAtom()
     {
@@ -757,7 +757,7 @@ private:
 
 
 //==============================================================================
-class TextEditorInsertAction  : public UndoableAction
+class TextEditor::InsertAction  : public UndoableAction
 {
     TextEditor& owner;
     const String text;
@@ -765,17 +765,17 @@ class TextEditorInsertAction  : public UndoableAction
     const Font font;
     const Colour colour;
 
-    TextEditorInsertAction (const TextEditorInsertAction&);
-    TextEditorInsertAction& operator= (const TextEditorInsertAction&);
+    InsertAction (const InsertAction&);
+    InsertAction& operator= (const InsertAction&);
 
 public:
-    TextEditorInsertAction (TextEditor& owner_,
-                            const String& text_,
-                            const int insertIndex_,
-                            const Font& font_,
-                            const Colour& colour_,
-                            const int oldCaretPos_,
-                            const int newCaretPos_)
+    InsertAction (TextEditor& owner_,
+                  const String& text_,
+                  const int insertIndex_,
+                  const Font& font_,
+                  const Colour& colour_,
+                  const int oldCaretPos_,
+                  const int newCaretPos_)
         : owner (owner_),
           text (text_),
           insertIndex (insertIndex_),
@@ -786,7 +786,7 @@ public:
     {
     }
 
-    ~TextEditorInsertAction()
+    ~InsertAction()
     {
     }
 
@@ -809,22 +809,22 @@ public:
 };
 
 //==============================================================================
-class TextEditorRemoveAction  : public UndoableAction
+class TextEditor::RemoveAction  : public UndoableAction
 {
     TextEditor& owner;
     const Range<int> range;
     const int oldCaretPos, newCaretPos;
-    VoidArray removedSections;
+    Array <UniformTextSection*> removedSections;
 
-    TextEditorRemoveAction (const TextEditorRemoveAction&);
-    TextEditorRemoveAction& operator= (const TextEditorRemoveAction&);
+    RemoveAction (const RemoveAction&);
+    RemoveAction& operator= (const RemoveAction&);
 
 public:
-    TextEditorRemoveAction (TextEditor& owner_,
-                            const Range<int> range_,
-                            const int oldCaretPos_,
-                            const int newCaretPos_,
-                            const VoidArray& removedSections_)
+    RemoveAction (TextEditor& owner_,
+                  const Range<int> range_,
+                  const int oldCaretPos_,
+                  const int newCaretPos_,
+                  const Array <UniformTextSection*>& removedSections_)
         : owner (owner_),
           range (range_),
           oldCaretPos (oldCaretPos_),
@@ -833,11 +833,11 @@ public:
     {
     }
 
-    ~TextEditorRemoveAction()
+    ~RemoveAction()
     {
         for (int i = removedSections.size(); --i >= 0;)
         {
-            UniformTextSection* const section = (UniformTextSection*) removedSections.getUnchecked (i);
+            UniformTextSection* const section = removedSections.getUnchecked (i);
             section->clear();
             delete section;
         }
@@ -861,25 +861,17 @@ public:
         int n = 0;
 
         for (int i = removedSections.size(); --i >= 0;)
-        {
-            UniformTextSection* const section = (UniformTextSection*) removedSections.getUnchecked (i);
-            n += section->getTotalLength();
-        }
+            n += removedSections.getUnchecked (i)->getTotalLength();
 
         return n + 16;
     }
 };
 
 //==============================================================================
-class TextHolderComponent  : public Component,
-                             public Timer,
-                             public Value::Listener
+class TextEditor::TextHolderComponent  : public Component,
+                                         public Timer,
+                                         public Value::Listener
 {
-    TextEditor& owner;
-
-    TextHolderComponent (const TextHolderComponent&);
-    TextHolderComponent& operator= (const TextHolderComponent&);
-
 public:
     TextHolderComponent (TextEditor& owner_)
         : owner (owner_)
@@ -914,17 +906,17 @@ public:
     {
         owner.textWasChangedByValue();
     }
+
+private:
+    TextEditor& owner;
+
+    TextHolderComponent (const TextHolderComponent&);
+    TextHolderComponent& operator= (const TextHolderComponent&);
 };
 
 //==============================================================================
 class TextEditorViewport  : public Viewport
 {
-    TextEditor* const owner;
-    float lastWordWrapWidth;
-
-    TextEditorViewport (const TextEditorViewport&);
-    TextEditorViewport& operator= (const TextEditorViewport&);
-
 public:
     TextEditorViewport (TextEditor* const owner_)
         : owner (owner_),
@@ -946,6 +938,13 @@ public:
             owner->updateTextHolderSize();
         }
     }
+
+private:
+    TextEditor* const owner;
+    float lastWordWrapWidth;
+
+    TextEditorViewport (const TextEditorViewport&);
+    TextEditorViewport& operator= (const TextEditorViewport&);
 };
 
 //==============================================================================
@@ -1113,7 +1112,7 @@ void TextEditor::applyFontToAllText (const Font& newFont)
 
     for (int i = sections.size(); --i >= 0;)
     {
-        UniformTextSection* const uts = (UniformTextSection*) sections.getUnchecked(i);
+        UniformTextSection* const uts = sections.getUnchecked (i);
         uts->setFont (newFont, passwordCharacter);
         uts->colour = overallColour;
     }
@@ -1311,7 +1310,7 @@ void TextEditor::repaintText (const Range<int>& range)
 
         if (wordWrapWidth > 0)
         {
-            TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+            Iterator i (sections, wordWrapWidth, passwordCharacter);
 
             i.getCharPosition (range.getStart(), x, y, lh);
 
@@ -1429,7 +1428,7 @@ void TextEditor::updateTextHolderSize()
     {
         float maxWidth = 0.0f;
 
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter);
 
         while (i.next())
             maxWidth = jmax (maxWidth, i.atomRight);
@@ -1665,7 +1664,7 @@ void TextEditor::drawContent (Graphics& g)
         const Rectangle<int> clip (g.getClipBounds());
         Colour selectedTextColour;
 
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter);
 
         while (i.lineY + 200.0 < clip.getY() && i.next())
         {}
@@ -1677,7 +1676,7 @@ void TextEditor::drawContent (Graphics& g)
 
             selectedTextColour = findColour (highlightedTextColourId);
 
-            TextEditorIterator i2 (i);
+            Iterator i2 (i);
 
             while (i2.next() && i2.lineY < clip.getBottom())
             {
@@ -2223,13 +2222,8 @@ void TextEditor::insert (const String& text,
             if (um->getNumActionsInCurrentTransaction() > TextEditorDefs::maxActionsPerTransaction)
                 newTransaction();
 
-            um->perform (new TextEditorInsertAction (*this,
-                                                     text,
-                                                     insertIndex,
-                                                     font,
-                                                     colour,
-                                                     caretPosition,
-                                                     caretPositionToMoveTo));
+            um->perform (new InsertAction (*this, text, insertIndex, font, colour,
+                                           caretPosition, caretPositionToMoveTo));
         }
         else
         {
@@ -2241,7 +2235,7 @@ void TextEditor::insert (const String& text,
 
             for (int i = 0; i < sections.size(); ++i)
             {
-                nextIndex = index + ((UniformTextSection*) sections.getUnchecked(i))->getTotalLength();
+                nextIndex = index + sections.getUnchecked (i)->getTotalLength();
 
                 if (insertIndex == index)
                 {
@@ -2279,19 +2273,19 @@ void TextEditor::insert (const String& text,
 }
 
 void TextEditor::reinsert (const int insertIndex,
-                           const VoidArray& sectionsToInsert)
+                           const Array <UniformTextSection*>& sectionsToInsert)
 {
     int index = 0;
     int nextIndex = 0;
 
     for (int i = 0; i < sections.size(); ++i)
     {
-        nextIndex = index + ((UniformTextSection*) sections.getUnchecked(i))->getTotalLength();
+        nextIndex = index + sections.getUnchecked (i)->getTotalLength();
 
         if (insertIndex == index)
         {
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i, new UniformTextSection (*(UniformTextSection*) sectionsToInsert.getUnchecked(j)));
+                sections.insert (i, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
 
             break;
         }
@@ -2300,7 +2294,7 @@ void TextEditor::reinsert (const int insertIndex,
             splitSection (i, insertIndex - index);
 
             for (int j = sectionsToInsert.size(); --j >= 0;)
-                sections.insert (i + 1, new UniformTextSection (*(UniformTextSection*) sectionsToInsert.getUnchecked(j)));
+                sections.insert (i + 1, new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
 
             break;
         }
@@ -2311,7 +2305,7 @@ void TextEditor::reinsert (const int insertIndex,
     if (nextIndex == insertIndex)
     {
         for (int j = 0; j < sectionsToInsert.size(); ++j)
-            sections.add (new UniformTextSection (*(UniformTextSection*) sectionsToInsert.getUnchecked(j)));
+            sections.add (new UniformTextSection (*sectionsToInsert.getUnchecked(j)));
     }
 
     coalesceSimilarSections();
@@ -2329,7 +2323,7 @@ void TextEditor::remove (const Range<int>& range,
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            const int nextIndex = index + ((UniformTextSection*) sections[i])->getTotalLength();
+            const int nextIndex = index + sections.getUnchecked(i)->getTotalLength();
 
             if (range.getStart() > index && range.getStart() < nextIndex)
             {
@@ -2354,14 +2348,14 @@ void TextEditor::remove (const Range<int>& range,
 
         if (um != 0)
         {
-            VoidArray removedSections;
+            Array <UniformTextSection*> removedSections;
 
             for (int i = 0; i < sections.size(); ++i)
             {
                 if (range.getEnd() <= range.getStart())
                     break;
 
-                UniformTextSection* const section = (UniformTextSection*) sections.getUnchecked (i);
+                UniformTextSection* const section = sections.getUnchecked (i);
 
                 const int nextIndex = index + section->getTotalLength();
 
@@ -2374,11 +2368,8 @@ void TextEditor::remove (const Range<int>& range,
             if (um->getNumActionsInCurrentTransaction() > TextEditorDefs::maxActionsPerTransaction)
                 newTransaction();
 
-            um->perform (new TextEditorRemoveAction (*this,
-                                                     range,
-                                                     caretPosition,
-                                                     caretPositionToMoveTo,
-                                                     removedSections));
+            um->perform (new RemoveAction (*this, range, caretPosition,
+                                           caretPositionToMoveTo, removedSections));
         }
         else
         {
@@ -2386,7 +2377,7 @@ void TextEditor::remove (const Range<int>& range,
 
             for (int i = 0; i < sections.size(); ++i)
             {
-                UniformTextSection* const section = (UniformTextSection*) sections.getUnchecked (i);
+                UniformTextSection* const section = sections.getUnchecked (i);
 
                 const int nextIndex = index + section->getTotalLength();
 
@@ -2427,7 +2418,7 @@ const String TextEditor::getText() const
     String::Concatenator concatenator (t);
 
     for (int i = 0; i < sections.size(); ++i)
-        ((const UniformTextSection*) sections.getUnchecked(i))->appendAllText (concatenator);
+        sections.getUnchecked (i)->appendAllText (concatenator);
 
     return t;
 }
@@ -2444,7 +2435,7 @@ const String TextEditor::getTextInRange (const Range<int>& range) const
 
         for (int i = 0; i < sections.size(); ++i)
         {
-            const UniformTextSection* const s = (const UniformTextSection*) sections.getUnchecked(i);
+            const UniformTextSection* const s = sections.getUnchecked (i);
             const int nextIndex = index + s->getTotalLength();
 
             if (range.getStart() < nextIndex)
@@ -2474,7 +2465,7 @@ int TextEditor::getTotalNumChars() const
         totalNumChars = 0;
 
         for (int i = sections.size(); --i >= 0;)
-            totalNumChars += ((const UniformTextSection*) sections.getUnchecked(i))->getTotalLength();
+            totalNumChars += sections.getUnchecked (i)->getTotalLength();
     }
 
     return totalNumChars;
@@ -2491,7 +2482,7 @@ void TextEditor::getCharPosition (const int index, float& cx, float& cy, float& 
 
     if (wordWrapWidth > 0 && sections.size() > 0)
     {
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter);
 
         i.getCharPosition (index, cx, cy, lineHeight);
     }
@@ -2508,7 +2499,7 @@ int TextEditor::indexAtPosition (const float x, const float y)
 
     if (wordWrapWidth > 0)
     {
-        TextEditorIterator i (sections, wordWrapWidth, passwordCharacter);
+        Iterator i (sections, wordWrapWidth, passwordCharacter);
 
         while (i.next())
         {
@@ -2589,16 +2580,15 @@ void TextEditor::splitSection (const int sectionIndex,
     jassert (sections[sectionIndex] != 0);
 
     sections.insert (sectionIndex + 1,
-                      ((UniformTextSection*) sections.getUnchecked (sectionIndex))
-                           ->split (charToSplitAt, passwordCharacter));
+                     sections.getUnchecked (sectionIndex)->split (charToSplitAt, passwordCharacter));
 }
 
 void TextEditor::coalesceSimilarSections()
 {
     for (int i = 0; i < sections.size() - 1; ++i)
     {
-        UniformTextSection* const s1 = (UniformTextSection*) sections.getUnchecked (i);
-        UniformTextSection* const s2 = (UniformTextSection*) sections.getUnchecked (i + 1);
+        UniformTextSection* const s1 = sections.getUnchecked (i);
+        UniformTextSection* const s2 = sections.getUnchecked (i + 1);
 
         if (s1->font == s2->font
              && s1->colour == s2->colour)

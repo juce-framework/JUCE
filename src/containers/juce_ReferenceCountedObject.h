@@ -216,7 +216,6 @@ public:
     }
 
     /** Returns the object that this pointer references.
-
         The pointer returned may be zero, of course.
     */
     inline operator ReferenceCountedObjectClass*() const throw()
@@ -242,6 +241,13 @@ public:
         return referencedObject;
     }
 
+    /** Returns the object that this pointer references.
+        The pointer returned may be zero, of course.
+    */
+    inline ReferenceCountedObjectClass* getObject() const throw()
+    {
+        return referencedObject;
+    }
 
 private:
     //==============================================================================

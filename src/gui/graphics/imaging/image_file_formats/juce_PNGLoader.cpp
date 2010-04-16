@@ -272,7 +272,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out)
                   PNG_COMPRESSION_TYPE_BASE,
                   PNG_FILTER_TYPE_BASE);
 
-    HeapBlock <png_byte> rowData (width * 4);
+    HeapBlock <uint8> rowData (width * 4);
 
     png_color_8 sig_bit;
     sig_bit.red = 8;
@@ -290,7 +290,7 @@ bool juce_writePNGImageToStream (const Image& image, OutputStream& out)
 
     for (int y = 0; y < height; ++y)
     {
-        uint8* dst = (uint8*) rowData;
+        uint8* dst = rowData;
         const uint8* src = srcData.getLinePointer (y);
 
         if (image.hasAlphaChannel())

@@ -313,7 +313,7 @@ void* PlatformUtilities::loadDynamicLibrary (const String& name)
 
     JUCE_TRY
     {
-        result = (void*) LoadLibrary (name);
+        result = LoadLibrary (name);
     }
     JUCE_CATCH_ALL
 

@@ -196,7 +196,7 @@ namespace JPEGHelpers
 
     static void jpegWriteTerminate (j_compress_ptr cinfo)
     {
-        JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
+        JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 
         const size_t numToWrite = jpegBufferSize - dest->free_in_buffer;
         dest->output->write (dest->buffer, (int) numToWrite);
@@ -204,11 +204,11 @@ namespace JPEGHelpers
 
     static boolean jpegWriteFlush (j_compress_ptr cinfo)
     {
-        JuceJpegDest* const dest = (JuceJpegDest*) cinfo->dest;
+        JuceJpegDest* const dest = static_cast <JuceJpegDest*> (cinfo->dest);
 
         const int numToWrite = jpegBufferSize;
 
-        dest->next_output_byte = (JOCTET*) dest->buffer;
+        dest->next_output_byte = reinterpret_cast <JOCTET*> (dest->buffer);
         dest->free_in_buffer = jpegBufferSize;
 
         return dest->output->write (dest->buffer, numToWrite);
@@ -245,7 +245,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in)
         jpegDecompStruct.src->resync_to_restart = jpeg_resync_to_restart;
         jpegDecompStruct.src->term_source       = dummyCallback1;
 
-        jpegDecompStruct.src->next_input_byte   = (const unsigned char*) mb.getData();
+        jpegDecompStruct.src->next_input_byte   = static_cast <const unsigned char*> (mb.getData());
         jpegDecompStruct.src->bytes_in_buffer   = mb.getSize();
 
         try
@@ -341,7 +341,7 @@ bool juce_writeJPEGImageToStream (const Image& image,
 
     dest.output = &out;
     HeapBlock <char> tempBuffer (jpegBufferSize);
-    dest.buffer = (char*) tempBuffer;
+    dest.buffer = tempBuffer;
     dest.next_output_byte = (JOCTET*) dest.buffer;
     dest.free_in_buffer = jpegBufferSize;
     dest.init_destination = jpegWriteInit;

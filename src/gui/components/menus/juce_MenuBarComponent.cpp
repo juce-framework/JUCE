@@ -340,7 +340,7 @@ void MenuBarComponent::mouseUp (const MouseEvent& e)
 
     updateItemUnderMouse (e2.x, e2.y);
 
-    if (itemUnderMouse < 0 && dynamic_cast <DummyMenuComponent*> ((Component*) currentPopup) != 0)
+    if (itemUnderMouse < 0 && dynamic_cast <DummyMenuComponent*> (static_cast <Component*> (currentPopup)) != 0)
         hideCurrentMenu();
 }
 

@@ -87,7 +87,7 @@ void ChangeListenerList::sendSynchronousChangeMessage (void* const objectThatHas
 
     for (int i = listeners.size(); --i >= 0;)
     {
-        ChangeListener* const l = (ChangeListener*) listeners.getUnchecked (i);
+        ChangeListener* const l = static_cast <ChangeListener*> (listeners.getUnchecked (i));
 
         {
             const ScopedUnlock tempUnlocker (lock);

@@ -2001,7 +2001,7 @@ private:
     MouseCursor cursor_;
     ImageEffectFilter* effect_;
     Image* bufferedImage_;
-    VoidArray* mouseListeners_;
+    Array <MouseListener*>* mouseListeners_;
     VoidArray* keyListeners_;
     ListenerList <ComponentListener> componentListeners;
     NamedValueSet properties;

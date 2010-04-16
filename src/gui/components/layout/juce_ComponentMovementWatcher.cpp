@@ -116,7 +116,7 @@ void ComponentMovementWatcher::registerWithParentComps() throw()
 void ComponentMovementWatcher::unregister() throw()
 {
     for (int i = registeredParentComps.size(); --i >= 0;)
-        ((Component*) registeredParentComps.getUnchecked(i))->removeComponentListener (this);
+        static_cast <Component*> (registeredParentComps.getUnchecked(i))->removeComponentListener (this);
 
     registeredParentComps.clear();
 }

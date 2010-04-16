@@ -210,7 +210,7 @@ void* juce_openInternetFile (const String& url,
 
                                 if (bytesToDo > 0
                                      && ! InternetWriteFile (request,
-                                                             ((const char*) postData.getData()) + bytesSent,
+                                                             static_cast <const char*> (postData.getData()) + bytesSent,
                                                              bytesToDo, &bytesDone))
                                 {
                                     break;
@@ -248,8 +248,7 @@ void* juce_openInternetFile (const String& url,
 int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
 {
     DWORD bytesRead = 0;
-
-    const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
+    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
 
     if (crs != 0)
         InternetReadFile (crs->request,
@@ -263,11 +262,8 @@ int juce_seekInInternetFile (void* handle, int newPosition)
 {
     if (handle != 0)
     {
-        const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
-
-        return InternetSetFilePointer (crs->request,
-                                       newPosition, 0,
-                                       FILE_BEGIN, 0);
+        const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
+        return InternetSetFilePointer (crs->request, newPosition, 0, FILE_BEGIN, 0);
     }
     else
     {
@@ -277,19 +273,14 @@ int juce_seekInInternetFile (void* handle, int newPosition)
 
 int64 juce_getInternetFileContentLength (void* handle)
 {
-    const ConnectionAndRequestStruct* const crs = (const ConnectionAndRequestStruct*) handle;
+    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
 
     if (crs != 0)
     {
-        DWORD index = 0;
-        DWORD result = 0;
-        DWORD size = sizeof (result);
+        DWORD index = 0, result = 0, size = sizeof (result);
 
-        if (HttpQueryInfo (crs->request,
-                           HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
-                           &result,
-                           &size,
-                           &index))
+        if (HttpQueryInfo (crs->request, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+                           &result, &size, &index))
         {
             return (int64) result;
         }
@@ -302,7 +293,7 @@ void juce_closeInternetFile (void* handle)
 {
     if (handle != 0)
     {
-        ConnectionAndRequestStruct* const crs = (ConnectionAndRequestStruct*) handle;
+        ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
         InternetCloseHandle (crs->request);
         InternetCloseHandle (crs->connection);
         delete crs;
@@ -457,9 +448,8 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
         message.nRecipCount = 1;
         message.lpRecips = &recip;
 
-        MemoryBlock mb (sizeof (MapiFileDesc) * filesToAttach.size());
-        mb.fillWith (0);
-        MapiFileDesc* files = (MapiFileDesc*) mb.getData();
+        HeapBlock <MapiFileDesc> files;
+        files.calloc (filesToAttach.size());
 
         message.nFileCount = filesToAttach.size();
         message.lpFiles = files;
