@@ -607,7 +607,7 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
         {
             for (int j = 0; j < 2; ++j)
             {
-                float* const d = (float*) (chans[j]);
+                float* const d = reinterpret_cast <float*> (chans[j]);
 
                 if (d != 0)
                 {

@@ -60,18 +60,18 @@ public:
 
     static SharedCursorHandle* createStandard (const MouseCursor::StandardCursorType type)
     {
-        const ScopedLock sl (lock);
+        const ScopedLock sl (getLock());
 
-        for (int i = standardCursors.size(); --i >= 0;)
+        for (int i = getCursors().size(); --i >= 0;)
         {
-            SharedCursorHandle* const sc = standardCursors.getUnchecked(i);
+            SharedCursorHandle* const sc = getCursors().getUnchecked(i);
 
             if (sc->standardType == type)
                 return sc->retain();
         }
 
         SharedCursorHandle* const sc = new SharedCursorHandle (type);
-        standardCursors.add (sc);
+        getCursors().add (sc);
         return sc;
     }
 
@@ -87,8 +87,8 @@ public:
         {
             if (isStandard)
             {
-                const ScopedLock sl (lock);
-                standardCursors.removeValue (this);
+                const ScopedLock sl (getLock());
+                getCursors().removeValue (this);
             }
 
             delete this;
@@ -107,8 +107,17 @@ private:
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
 
-    static CriticalSection lock;
-    static Array <SharedCursorHandle*> standardCursors;
+    static CriticalSection& getLock()
+    {
+        static CriticalSection lock;
+        return lock;
+    }
+
+    static Array <SharedCursorHandle*>& getCursors()
+    {
+        static Array <SharedCursorHandle*> cursors;
+        return cursors;
+    }
 
     ~SharedCursorHandle()
     {
@@ -117,10 +126,6 @@ private:
 
     SharedCursorHandle& operator= (const SharedCursorHandle&);
 };
-
-CriticalSection MouseCursor::SharedCursorHandle::lock;
-Array <MouseCursor::SharedCursorHandle*> MouseCursor::SharedCursorHandle::standardCursors;
-
 
 //==============================================================================
 MouseCursor::MouseCursor()

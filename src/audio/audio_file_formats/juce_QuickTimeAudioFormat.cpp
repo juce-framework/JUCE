@@ -309,18 +309,6 @@ private:
     HeapBlock <AudioBufferList> bufferList;
     Handle dataHandle;
 
-    /*OSErr readMovieStream (long offset, long size, void* dataPtr)
-    {
-        input->setPosition (offset);
-        input->read (dataPtr, size);
-        return noErr;
-    }
-
-    static OSErr readMovieStreamProc (long offset, long size, void* dataPtr, void* userRef)
-    {
-        return ((QTAudioReader*) userRef)->readMovieStream (offset, size, dataPtr);
-    }*/
-
     //==============================================================================
     void checkThreadIsAttached()
     {

@@ -170,7 +170,7 @@ void SamplerVoice::controllerMoved (const int /*controllerNumber*/,
 //==============================================================================
 void SamplerVoice::renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples)
 {
-    const SamplerSound* const playingSound = (SamplerSound*) (SynthesiserSound*) getCurrentlyPlayingSound();
+    const SamplerSound* const playingSound = static_cast <SamplerSound*> (getCurrentlyPlayingSound().getObject());
 
     if (playingSound != 0)
     {

@@ -404,7 +404,9 @@ bool StreamingSocket::connect (const String& remoteHostName,
 void StreamingSocket::close()
 {
 #if JUCE_WINDOWS
-    closesocket (handle);
+    if (handle != SOCKET_ERROR || connected)
+        closesocket (handle);
+
     connected = false;
 #else
     if (connected)
@@ -419,7 +421,8 @@ void StreamingSocket::close()
         }
     }
 
-    ::close (handle);
+    if (handle != -1)
+        ::close (handle);
 #endif
 
     hostName = String::empty;

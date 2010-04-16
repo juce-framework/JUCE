@@ -3337,6 +3337,11 @@ public:
 		return referencedObject;
 	}
 
+	inline ReferenceCountedObjectClass* getObject() const throw()
+	{
+		return referencedObject;
+	}
+
 private:
 
 	ReferenceCountedObjectClass* referencedObject;
@@ -12773,7 +12778,7 @@ private:
 	MouseCursor cursor_;
 	ImageEffectFilter* effect_;
 	Image* bufferedImage_;
-	VoidArray* mouseListeners_;
+	Array <MouseListener*>* mouseListeners_;
 	VoidArray* keyListeners_;
 	ListenerList <ComponentListener> componentListeners;
 	NamedValueSet properties;
@@ -16492,7 +16497,6 @@ public:
 /*** End of inlined file: juce_TextInputTarget.h ***/
 
 class TextEditor;
-class TextHolderComponent;
 
 class JUCE_API  TextEditorListener
 {
@@ -16698,6 +16702,14 @@ protected:
 
 private:
 
+	class Iterator;
+	class UniformTextSection;
+	class TextHolderComponent;
+	class InsertAction;
+	class RemoveAction;
+	friend class InsertAction;
+	friend class RemoveAction;
+
 	ScopedPointer <Viewport> viewport;
 	TextHolderComponent* textHolder;
 	BorderSize borderSize;
@@ -16726,7 +16738,7 @@ private:
 	Font currentFont;
 	mutable int totalNumChars;
 	int caretPosition;
-	VoidArray sections;
+	Array <UniformTextSection*> sections;
 	String textToShowWhenEmpty;
 	Colour colourForTextWhenEmpty;
 	juce_wchar passwordCharacter;
@@ -16742,15 +16754,12 @@ private:
 	String allowedCharacters;
 	ListenerList <TextEditorListener> listeners;
 
-	friend class TextEditorInsertAction;
-	friend class TextEditorRemoveAction;
-
 	void coalesceSimilarSections();
 	void splitSection (int sectionIndex, int charToSplitAt);
 	void clearInternal (UndoManager* um);
 	void insert (const String& text, int insertIndex, const Font& font,
 				 const Colour& colour, UndoManager* um, int caretPositionToMoveTo);
-	void reinsert (int insertIndex, const VoidArray& sections);
+	void reinsert (int insertIndex, const Array <UniformTextSection*>& sections);
 	void remove (const Range<int>& range, UndoManager* um, int caretPositionToMoveTo);
 	void getCharPosition (int index, float& x, float& y, float& lineHeight) const;
 	void updateCaretPosition();
