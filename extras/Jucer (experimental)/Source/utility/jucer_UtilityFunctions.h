@@ -163,6 +163,15 @@ public:
     const double getEditableValue() const;
     void setEditableValue (const double newValue);
 
+    bool isProportional() const throw()                 { return isProportion; }
+    void toggleProportionality (MarkerResolver& markerResolver);
+
+    const String getAnchor1() const                     { return anchor1; }
+    void changeAnchor1 (const String& newMarkerName, MarkerResolver& markerResolver);
+
+    const String getAnchor2() const                     { return anchor2; }
+    void changeAnchor2 (const String& newMarkerName, MarkerResolver& markerResolver);
+
     //==============================================================================
     /*
         Position string formats:

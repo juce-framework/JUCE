@@ -41,7 +41,8 @@ static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_E
 
 
 //==============================================================================
-class ComponentBoundsEditor  : public PropertyComponent
+class ComponentBoundsEditor  : public PropertyComponent,
+                               public ButtonListener
 {
 public:
     enum Type
@@ -50,15 +51,28 @@ public:
     };
 
     //==============================================================================
-    ComponentBoundsEditor (const String& name, Type type_, const Value& state_)
-        : PropertyComponent (name, 40), type (type_), state (state_)
+    ComponentBoundsEditor (ComponentDocument& document_, const String& name, Type type_,
+                           const ValueTree& compState_, const Value& boundsValue_)
+        : PropertyComponent (name, 40), document (document_), type (type_),
+          compState (compState_), boundsValue (boundsValue_)
     {
         addAndMakeVisible (label = new Label (String::empty, String::empty));
 
         label->setEditable (true, true, false);
         label->setColour (Label::backgroundColourId, Colours::white);
         label->setColour (Label::outlineColourId, findColour (ComboBox::outlineColourId));
-        label->getTextValue().referTo (Value (new BoundsCoordValueSource (state, type)));
+        label->getTextValue().referTo (Value (new BoundsCoordValueSource (boundsValue, type)));
+
+        addAndMakeVisible (proportionButton = new TextButton ("%"));
+        proportionButton->addButtonListener (this);
+
+        addAndMakeVisible (anchorButton1 = new TextButton (String::empty));
+        anchorButton1->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnTop | Button::ConnectedOnRight | Button::ConnectedOnBottom);
+        anchorButton1->addButtonListener (this);
+
+        addAndMakeVisible (anchorButton2 = new TextButton (String::empty));
+        anchorButton2->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnTop | Button::ConnectedOnRight | Button::ConnectedOnBottom);
+        anchorButton2->addButtonListener (this);
     }
 
     ~ComponentBoundsEditor()
@@ -68,13 +82,37 @@ public:
 
     void resized()
     {
-        const Rectangle<int> content (getLookAndFeel().getPropertyComponentContentPosition (*this));
+        const Rectangle<int> r (getLookAndFeel().getPropertyComponentContentPosition (*this));
 
-        label->setBounds (content.getX(), content.getY(), content.getWidth(), content.getHeight() / 2);
+        label->setBounds (r.getX(), r.getY(), r.getWidth() / 2, r.getHeight() / 2);
+        proportionButton->setBounds (r.getX() + r.getWidth() / 2, r.getY(),
+                                     r.getWidth() / 2, r.getHeight() / 2);
+        anchorButton1->setBounds (r.getX(), r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
+        anchorButton2->setBounds (r.getX() + r.getWidth() / 2, r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
     }
 
     void refresh()
     {
+    }
+
+    void buttonClicked (Button* button)
+    {
+        if (button == proportionButton)
+        {
+            RectangleCoordinates r (boundsValue.toString());
+            Coordinate& coord = getCoord (r);
+
+            ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (compState));
+
+            coord.toggleProportionality (*markers);
+            boundsValue = r.toString();
+        }
+        else if (button == anchorButton1)
+        {
+        }
+        else if (button == anchorButton2)
+        {
+        }
     }
 
     //==============================================================================
@@ -94,6 +132,10 @@ public:
         {
             RectangleCoordinates r (sourceValue.toString());
             Coordinate& coord = getCoord (r);
+
+            if (coord.isProportional())
+                return String (coord.getEditableValue()) + "%";
+
             return coord.getEditableValue();
         }
 
@@ -123,26 +165,41 @@ public:
 
         Coordinate& getCoord (RectangleCoordinates& r) const
         {
-            switch (type)
-            {
-                case left:   return r.left;
-                case right:  return r.right;
-                case top:    return r.top;
-                case bottom: return r.bottom;
-                default:     jassertfalse; break;
-            }
-
-            return r.left;
+            return getCoordForType (type, r);
         }
 
         BoundsCoordValueSource (const BoundsCoordValueSource&);
         const BoundsCoordValueSource& operator= (const BoundsCoordValueSource&);
     };
 
+    static Coordinate& getCoordForType (const Type type, RectangleCoordinates& r)
+    {
+        switch (type)
+        {
+            case left:   return r.left;
+            case right:  return r.right;
+            case top:    return r.top;
+            case bottom: return r.bottom;
+            default:     jassertfalse; break;
+        }
+
+        return r.left;
+    }
+
 private:
+    ComponentDocument& document;
     Type type;
-    Value state;
+    ValueTree compState;
+    Value boundsValue;
     Label* label;
+    TextButton* proportionButton;
+    TextButton* anchorButton1;
+    TextButton* anchorButton2;
+
+    Coordinate& getCoord (RectangleCoordinates& r)
+    {
+        return getCoordForType (type, r);
+    }
 };
 
 
@@ -165,12 +222,9 @@ Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& st
 
 void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
 {
-    if (comp->getParentComponent() != 0)
-    {
-        RectangleCoordinates pos (state [compBoundsProperty].toString());
-        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state, comp->getParentComponent()));
-        comp->setBounds (pos.resolve (*markers));
-    }
+    RectangleCoordinates pos (state [compBoundsProperty].toString());
+    ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state));
+    comp->setBounds (pos.resolve (*markers));
 
     comp->setName (state [compNameProperty]);
 }
@@ -188,10 +242,10 @@ void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, Value
 
 void ComponentTypeHandler::createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
 {
-    props.add (new ComponentBoundsEditor ("Left", ComponentBoundsEditor::left, getValue (compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor ("Right", ComponentBoundsEditor::right, getValue (compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor ("Top", ComponentBoundsEditor::top, getValue (compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor ("Bottom", ComponentBoundsEditor::bottom, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor (document, "Left",   ComponentBoundsEditor::left,   state, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor (document, "Right",  ComponentBoundsEditor::right,  state, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor (document, "Top",    ComponentBoundsEditor::top,    state, getValue (compBoundsProperty, state, document)));
+    props.add (new ComponentBoundsEditor (document, "Bottom", ComponentBoundsEditor::bottom, state, getValue (compBoundsProperty, state, document)));
 }
 
 //==============================================================================
@@ -415,6 +469,12 @@ void ComponentDocument::checkRootObject()
 
     if (getClassName().toString().isEmpty())
         getClassName() = "NewComponent";
+
+    if ((int) getCanvasWidth().getValue() <= 0)
+        getCanvasWidth() = 640;
+
+    if ((int) getCanvasHeight().getValue() <= 0)
+        getCanvasHeight() = 480;
 }
 
 //==============================================================================
@@ -497,8 +557,10 @@ Component* ComponentDocument::createComponent (int index)
 class ComponentMarkerResolver  : public Coordinate::MarkerResolver
 {
 public:
-    ComponentMarkerResolver (ComponentDocument& doc, const ValueTree& state_, Component* parentComponent_)
-        : owner (doc), state (state_), parentComponent (parentComponent_)
+    ComponentMarkerResolver (ComponentDocument& doc, const ValueTree& state_, int parentWidth_, int parentHeight_)
+        : owner (doc), state (state_),
+          parentWidth (parentWidth_),
+          parentHeight (parentHeight_)
     {}
 
     ~ComponentMarkerResolver() {}
@@ -509,8 +571,8 @@ public:
         else if (name == "right")       return RectangleCoordinates (state [compBoundsProperty]).right;
         else if (name == "top")         return RectangleCoordinates (state [compBoundsProperty]).top;
         else if (name == "bottom")      return RectangleCoordinates (state [compBoundsProperty]).bottom;
-        else if (name == Coordinate::parentRightMarkerName)     return Coordinate ((double) parentComponent->getWidth(), isHorizontal);
-        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) parentComponent->getHeight(), isHorizontal);
+        else if (name == Coordinate::parentRightMarkerName)     return Coordinate (parentWidth, isHorizontal);
+        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate (parentHeight, isHorizontal);
 
         return Coordinate (isHorizontal);
     }
@@ -518,7 +580,7 @@ public:
 private:
     ComponentDocument& owner;
     ValueTree state;
-    Component* parentComponent;
+    int parentWidth, parentHeight;
 };
 
 const RectangleCoordinates ComponentDocument::getCoordsFor (const ValueTree& state) const
@@ -526,10 +588,9 @@ const RectangleCoordinates ComponentDocument::getCoordsFor (const ValueTree& sta
     return RectangleCoordinates (state [compBoundsProperty]);
 }
 
-Coordinate::MarkerResolver* ComponentDocument::createMarkerResolver (const ValueTree& state, Component* parentComponent)
+Coordinate::MarkerResolver* ComponentDocument::createMarkerResolver (const ValueTree& state)
 {
-    jassert (parentComponent != 0);
-    return new ComponentMarkerResolver (*this, state, parentComponent);
+    return new ComponentMarkerResolver (*this, state, getCanvasWidth().getValue(), getCanvasHeight().getValue());
 }
 
 void ComponentDocument::updateComponent (Component* comp)
@@ -624,17 +685,13 @@ public:
                  const MouseEvent& e,
                  const ResizableBorderComponent::Zone& zone_,
                  Component* parentForOverlays)
-        : parentComponent (0),
-          document (document_),
+        : document (document_),
           zone (zone_)
     {
         for (int i = 0; i < items.size(); ++i)
         {
             Component* comp = items.getUnchecked(i);
             jassert (comp != 0);
-
-            if (parentComponent == 0)
-                parentComponent = comp->getParentComponent();
 
             const ValueTree v (document.getComponentState (comp));
             draggedComponents.add (v);
@@ -643,7 +700,7 @@ public:
 
             {
                 RectangleCoordinates relativePos (v [compBoundsProperty].toString());
-                ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v, parentComponent));
+                ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v));
                 pos = relativePos.resolve (*markers);
                 originalPositions.add (pos);
             }
@@ -708,7 +765,7 @@ public:
         const Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
 
         RectangleCoordinates pr (v [compBoundsProperty].toString());
-        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v, parentComponent));
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v));
 
         pr.moveToAbsolute (newBounds, *markers);
         const String newBoundsString (pr.toString());
@@ -739,7 +796,6 @@ public:
     }
 
 private:
-    Component* parentComponent;
     ComponentDocument& document;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;

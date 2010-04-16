@@ -49,6 +49,10 @@ public:
     //==============================================================================
     Value getClassName()            { return getRootValue ("className"); }
     Value getClassDescription()     { return getRootValue ("classDesc"); }
+
+    Value getCanvasWidth()          { return root.getPropertyAsValue ("width", 0); } // (deliberately not undoable)
+    Value getCanvasHeight()         { return root.getPropertyAsValue ("height", 0); }
+
     const String getNonExistentMemberName (String suggestedName);
 
     //==============================================================================
@@ -61,7 +65,7 @@ public:
     const ValueTree getComponentState (Component* comp) const;
     void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
-    Coordinate::MarkerResolver* createMarkerResolver (const ValueTree& state, Component* parentComponent);
+    Coordinate::MarkerResolver* createMarkerResolver (const ValueTree& state);
     const RectangleCoordinates getCoordsFor (const ValueTree& state) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;

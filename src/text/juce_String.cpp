@@ -1931,7 +1931,7 @@ const char* String::toUTF8() const
         String* const mutableThis = const_cast <String*> (this);
         mutableThis->text = StringHolder::makeUniqueWithSize (mutableThis->text, currentLen + 1 + utf8BytesNeeded / sizeof (juce_wchar));
 
-        char* const otherCopy = reinterpret_cast <char*> (text + currentLen);
+        char* const otherCopy = reinterpret_cast <char*> (mutableThis->text + currentLen);
         copyToUTF8 (otherCopy, std::numeric_limits<int>::max());
 
         return otherCopy;
@@ -2123,7 +2123,7 @@ const char* String::toCString() const
         String* const mutableThis = const_cast <String*> (this);
         mutableThis->text = StringHolder::makeUniqueWithSize (mutableThis->text, (len + 1) * 2);
 
-        char* otherCopy = reinterpret_cast <char*> (text + len + 1);
+        char* otherCopy = reinterpret_cast <char*> (mutableThis->text + len + 1);
         CharacterFunctions::copy (otherCopy, text, len);
         otherCopy [len] = 0;
         return otherCopy;

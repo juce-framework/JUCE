@@ -272,7 +272,8 @@ class ComponentEditor::Canvas   : public Component,
 {
 public:
     Canvas (ComponentEditor& editor_)
-        : editor (editor_), border (14), resizerThickness (4)
+        : editor (editor_), border (14), resizerThickness (4),
+          dragStartWidth (0), dragStartHeight (0)
     {
         setOpaque (true);
         addAndMakeVisible (componentHolder = new Component());
@@ -301,48 +302,48 @@ public:
         g.setFont (border.getBottom() - 5.0f);
         g.setColour (Colours::grey);
         g.drawText (String (componentHolder->getWidth()) + " x " + String (componentHolder->getHeight()),
-                    0, 0, getWidth() - border.getRight(), getHeight(), Justification::bottomRight, false);
+                    0, 0, jmax (getWidth() - border.getRight(), jmin (60, getWidth())), getHeight(), Justification::bottomRight, false);
 
         g.setFont (border.getTop() - 5.0f);
         g.setColour (Colours::darkgrey);
 
-        const int x = border.getLeft();
-        const int y = border.getTop();
+        g.drawHorizontalLine (border.getTop() - 1, 2.0f, (float) getWidth() - border.getRight());
+        g.drawVerticalLine (border.getLeft() - 1, 2.0f, (float) getHeight() - border.getBottom());
+        drawXAxis (g, Rectangle<int> (border.getLeft(), 0, componentHolder->getWidth(), border.getTop()));
+        drawYAxis (g, Rectangle<int> (0, border.getTop(), border.getLeft(), componentHolder->getHeight()));
+    }
 
-        g.drawHorizontalLine (y, 2.0f, (float) getWidth() - border.getRight());
-        g.drawVerticalLine (x, 2.0f, (float) getHeight() - border.getBottom());
+    void drawXAxis (Graphics& g, const Rectangle<int>& r)
+    {
+        TickIterator ticks (0, r.getWidth(), 1.0, 10, 50);
 
+        float pos, tickLength;
+        String label;
+
+        while (ticks.getNextTick (pos, tickLength, label))
         {
-            TickIterator ticks (0, componentHolder->getWidth(), 1.0, 10, 50);
-
-            float pos, tickLength;
-            String label;
-
-            while (ticks.getNextTick (pos, tickLength, label))
+            if (pos > 0)
             {
-                if (pos > 0)
-                {
-                    g.drawVerticalLine (x + (int) pos, y - tickLength * y, (float) y);
-                    g.drawSingleLineText (label, x + (int) pos + 2, (int) y - 6);
-                }
+                g.drawVerticalLine (r.getX() + (int) pos, r.getBottom() - tickLength * r.getHeight(), (float) r.getBottom());
+                g.drawSingleLineText (label, r.getX() + (int) pos + 2, (int) r.getBottom() - 6);
             }
         }
+    }
 
+    void drawYAxis (Graphics& g, const Rectangle<int>& r)
+    {
+        TickIterator ticks (0, r.getHeight(), 1.0, 10, 80);
+
+        float pos, tickLength;
+        String label;
+
+        while (ticks.getNextTick (pos, tickLength, label))
         {
-            TickIterator ticks (0, componentHolder->getHeight(), 1.0, 10, 80);
-
-            float pos, tickLength;
-            String label;
-
-            while (ticks.getNextTick (pos, tickLength, label))
+            if (pos > 0)
             {
-                if (pos > 0)
-                {
-                    g.drawHorizontalLine (y + (int) pos, x - tickLength * x, (float) x);
-
-                    g.drawTextAsPath (label, AffineTransform::rotation (float_Pi / -2.0f)
-                                                             .translated (x - 6.0f, y + pos - 2.0f));
-                }
+                g.drawHorizontalLine (r.getY() + (int) pos, r.getRight() - tickLength * r.getWidth(), (float) r.getRight());
+                g.drawTextAsPath (label, AffineTransform::rotation (float_Pi / -2.0f)
+                                                         .translated (r.getRight() - 6.0f, r.getY() + pos - 2.0f));
             }
         }
     }
@@ -380,6 +381,8 @@ public:
     void updateComponents()
     {
         ComponentDocument& doc = getDocument();
+        setSize ((int) doc.getCanvasWidth().getValue() + border.getLeftAndRight(),
+                 (int) doc.getCanvasHeight().getValue() + border.getTopAndBottom());
 
         int i;
         for (i = componentHolder->getNumChildComponents(); --i >= 0;)
@@ -469,19 +472,18 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         updateDragZone (e.getPosition());
-        dragStartSize = getBounds();
+        dragStartWidth = getDocument().getCanvasWidth().getValue();
+        dragStartHeight = getDocument().getCanvasHeight().getValue();
         showSizeGuides();
     }
 
     void mouseDrag (const MouseEvent& e)
     {
-        if (dragZone.isDraggingRightEdge() || dragZone.isDraggingBottomEdge())
-        {
-            setSize (dragZone.isDraggingRightEdge() ? jmax (0, dragStartSize.getWidth() + e.getDistanceFromDragStartX())
-                                                    : dragStartSize.getWidth(),
-                     dragZone.isDraggingBottomEdge() ? jmax (0, dragStartSize.getHeight() + e.getDistanceFromDragStartY())
-                                                     : dragStartSize.getHeight());
-        }
+        if (dragZone.isDraggingRightEdge())
+            getDocument().getCanvasWidth() = jmax (1, dragStartWidth + e.getDistanceFromDragStartX());
+
+        if (dragZone.isDraggingBottomEdge())
+            getDocument().getCanvasHeight() = jmax (1, dragStartHeight + e.getDistanceFromDragStartY());
     }
 
     void mouseUp (const MouseEvent& e)
@@ -511,7 +513,7 @@ private:
     const BorderSize border;
     const int resizerThickness;
     ResizableBorderComponent::Zone dragZone;
-    Rectangle<int> dragStartSize;
+    int dragStartWidth, dragStartHeight;
 
     const Rectangle<int> getContentArea() const
     {

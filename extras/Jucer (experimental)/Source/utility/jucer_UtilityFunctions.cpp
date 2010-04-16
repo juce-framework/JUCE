@@ -784,6 +784,31 @@ void Coordinate::setEditableValue (const double newValue)
     value = isProportion ? newValue / 100.0 : newValue;
 }
 
+void Coordinate::toggleProportionality (MarkerResolver& markerResolver)
+{
+    const double oldValue = resolve (markerResolver);
+
+    isProportion = ! isProportion;
+    anchor1 = getOriginMarkerName();
+    anchor2 = getExtentMarkerName();
+
+    moveToAbsolute (oldValue, markerResolver);
+}
+
+void Coordinate::changeAnchor1 (const String& newMarkerName, MarkerResolver& markerResolver)
+{
+    const double oldValue = resolve (markerResolver);
+    anchor1 = newMarkerName;
+    moveToAbsolute (oldValue, markerResolver);
+}
+
+void Coordinate::changeAnchor2 (const String& newMarkerName, MarkerResolver& markerResolver)
+{
+    const double oldValue = resolve (markerResolver);
+    anchor2 = newMarkerName;
+    moveToAbsolute (oldValue, markerResolver);
+}
+
 //==============================================================================
 RectangleCoordinates::RectangleCoordinates()
     : left (true), right (true), top (false), bottom (false)
