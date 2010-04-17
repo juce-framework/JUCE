@@ -62,14 +62,43 @@ private:
 
 
 //==============================================================================
-#if (JUCE_MAC || JUCE_IPHONE)           //  Mac and iPhone...
+// If we've got gcc4.2 or later, we can use its atomic intrinsics...
+#if JUCE_GCC && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
+
+    inline void  Atomic::increment (int32& variable)                { __sync_add_and_fetch (&variable, 1); }
+    inline int32 Atomic::incrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, 1); }
+    inline void  Atomic::decrement (int32& variable)                { __sync_add_and_fetch (&variable, -1); }
+    inline int32 Atomic::decrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, -1); }
+    inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                                    { return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+
+    inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
+    {
+        void* currentVal = *value1;
+        while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
+        return currentVal;
+    }
+
+#elif (JUCE_MAC || JUCE_IPHONE)  //  Older Mac builds using gcc4.0 or earlier...
 
     inline void  Atomic::increment (int32& variable)                { OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
     inline int32 Atomic::incrementAndReturn (int32& variable)       { return OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
     inline void  Atomic::decrement (int32& variable)                { OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
     inline int32 Atomic::decrementAndReturn (int32& variable)       { return OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
+
     inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-                                                                    { return OSAtomicCompareAndSwap32Barrier (oldValue, newValue, static_cast <int32_t*> (&destination)); }
+    {
+        for (;;) // Annoying workaround for OSX only having a bool CAS operation..
+        {
+            if (OSAtomicCompareAndSwap32Barrier (oldValue, newValue, static_cast <int32_t*> (&destination)))
+                return oldValue;
+
+            const uint32 result = destination;
+            if (result != oldValue)
+                return result;
+        }
+    }
+
     inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
     {
         void* currentVal = *value1;
@@ -83,7 +112,7 @@ private:
     }
 
 //==============================================================================
-#elif JUCE_LINUX                        // Linux...
+#elif JUCE_LINUX                        // Linux with compilers other than gcc4.2 or later...
 
   #if __INTEL_COMPILER
     inline void  Atomic::increment (int32& variable)                { _InterlockedIncrement (&variable); }
@@ -103,19 +132,7 @@ private:
     }
 
   #else
-    inline void  Atomic::increment (int32& variable)                { __sync_add_and_fetch (&variable, 1); }
-    inline int32 Atomic::incrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, 1); }
-    inline void  Atomic::decrement (int32& variable)                { __sync_add_and_fetch (&variable, -1); }
-    inline int32 Atomic::decrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, -1); }
-    inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-                                                                    { return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
-
-    inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-    {
-        void* currentVal = *value1;
-        while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
-        return currentVal;
-    }
+    #error "Linux build requires gcc4.2 or later for atomic operations"
   #endif
 
 //==============================================================================
