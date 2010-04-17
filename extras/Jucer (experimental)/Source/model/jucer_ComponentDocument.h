@@ -28,6 +28,7 @@
 
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
+#include "jucer_Coordinate.h"
 
 
 //==============================================================================
@@ -66,7 +67,9 @@ public:
     void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
     Coordinate::MarkerResolver* createMarkerResolver (const ValueTree& state);
-    const RectangleCoordinates getCoordsFor (const ValueTree& state) const;
+    const StringArray getComponentMarkers (bool horizontal) const;
+    const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
+    bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     void performNewComponentMenuItem (int menuResultCode);
@@ -92,9 +95,6 @@ private:
     ValueTree root;
     UndoManager undoManager;
     bool changedSinceSaved;
-
-    class DragHandler;
-    ScopedPointer <DragHandler> dragger;
 
     void checkRootObject();
     ValueTree getComponentGroup() const;

@@ -18,6 +18,7 @@
 		93C9F3F27602A33DDC9C2250 = { isa = PBXBuildFile; fileRef = 2767E1D082874D301D5D5F43; };
 		2E6836738CE7EB452FDC7E9A = { isa = PBXBuildFile; fileRef = D9FB1A5365FEEB854A0FF7BF; };
 		CD4226951C3F7FE19CF8A7CE = { isa = PBXBuildFile; fileRef = 2D6D6985B452EA0B67A18914; };
+		1DF9688E29753A0459E6C32A = { isa = PBXBuildFile; fileRef = 45C80436FD5A8438D0E6BE17; };
 		1174D3512AF8207950094C56 = { isa = PBXBuildFile; fileRef = FF625CB50FB5C3536BA40604; };
 		087CCE9E7146F1EC4F241254 = { isa = PBXBuildFile; fileRef = DA142548FCADFAC50648ED3C; };
 		E9935BFB0EFA8CCCD41DC08E = { isa = PBXBuildFile; fileRef = D47A40CB3CF6AAE14B3C7796; };
@@ -62,6 +63,8 @@
 		E18C99BDD4EF3DFD767F3770 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TextButton.h; path = "../../Source/model/Component Types/jucer_TextButton.h"; sourceTree = SOURCE_ROOT; };
 		2D6D6985B452EA0B67A18914 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ComponentDocument.cpp; path = ../../Source/model/jucer_ComponentDocument.cpp; sourceTree = SOURCE_ROOT; };
 		E6CC3A04349F6B227FDAB26F = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentDocument.h; path = ../../Source/model/jucer_ComponentDocument.h; sourceTree = SOURCE_ROOT; };
+		45C80436FD5A8438D0E6BE17 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Coordinate.cpp; path = ../../Source/model/jucer_Coordinate.cpp; sourceTree = SOURCE_ROOT; };
+		420E4189E7DE25E9D0D8E5B8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Coordinate.h; path = ../../Source/model/jucer_Coordinate.h; sourceTree = SOURCE_ROOT; };
 		FF625CB50FB5C3536BA40604 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_DrawableDocument.cpp; path = ../../Source/model/jucer_DrawableDocument.cpp; sourceTree = SOURCE_ROOT; };
 		A490098DA6400B3881F336D0 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_DrawableDocument.h; path = ../../Source/model/jucer_DrawableDocument.h; sourceTree = SOURCE_ROOT; };
 		DA142548FCADFAC50648ED3C = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_NewFileWizard.cpp; path = ../../Source/model/jucer_NewFileWizard.cpp; sourceTree = SOURCE_ROOT; };
@@ -144,6 +147,8 @@
 				D3D6EC2C17524688F2E803EB,
 				2D6D6985B452EA0B67A18914,
 				E6CC3A04349F6B227FDAB26F,
+				45C80436FD5A8438D0E6BE17,
+				420E4189E7DE25E9D0D8E5B8,
 				FF625CB50FB5C3536BA40604,
 				A490098DA6400B3881F336D0,
 				DA142548FCADFAC50648ED3C,
@@ -319,6 +324,7 @@
 		87CCE4CB1FAB40B6F21DEACE = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; };
 		5362E03ADF975A126C1F2F7B = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				CD4226951C3F7FE19CF8A7CE,
+				1DF9688E29753A0459E6C32A,
 				1174D3512AF8207950094C56,
 				087CCE9E7146F1EC4F241254,
 				E9935BFB0EFA8CCCD41DC08E,

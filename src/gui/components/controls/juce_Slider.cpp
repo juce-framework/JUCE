@@ -632,12 +632,17 @@ void Slider::setTextValueSuffix (const String& suffix)
     }
 }
 
+const String Slider::getTextValueSuffix() const
+{
+    return textSuffix;
+}
+
 const String Slider::getTextFromValue (double v)
 {
-    if (numDecimalPlaces > 0)
-        return String (v, numDecimalPlaces) + textSuffix;
+    if (getNumDecimalPlacesToDisplay() > 0)
+        return String (v, getNumDecimalPlacesToDisplay()) + getTextValueSuffix();
     else
-        return String (roundToInt (v)) + textSuffix;
+        return String (roundToInt (v)) + getTextValueSuffix();
 }
 
 double Slider::getValueFromText (const String& text)

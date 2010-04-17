@@ -164,7 +164,7 @@ private:
 
     void writeLinkerFlags (OutputStream& out, const Project::BuildConfiguration& config)
     {
-        out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR) -mwindows";
+        out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
         {
             Array<RelativePath> libraryPaths;

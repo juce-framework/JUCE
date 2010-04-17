@@ -620,6 +620,9 @@ public:
     */
     void setTextValueSuffix (const String& suffix);
 
+    /** Returns the suffix that was set by setTextValueSuffix(). */
+    const String getTextValueSuffix() const;
+
     //==============================================================================
     /** Allows a user-defined mapping of distance along the slider to its value.
 
@@ -747,6 +750,11 @@ protected:
     void colourChanged();
     /** @internal */
     void valueChanged (Value& value);
+
+    /** Returns the best number of decimal places to use when displaying numbers.
+        This is calculated from the slider's interval setting.
+    */
+    int getNumDecimalPlacesToDisplay() const throw()        { return numDecimalPlaces; }
 
 private:
     ListenerList <SliderListener> listeners;

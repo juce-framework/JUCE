@@ -78,7 +78,8 @@ public:
     static juce_wchar* createCopy (const char* const src, const size_t numChars)
     {
         juce_wchar* const dest = createUninitialised (numChars);
-        CharacterFunctions::copy (dest, src, numChars + 1);
+        CharacterFunctions::copy (dest, src, numChars);
+        dest [numChars] = 0;
         return dest;
     }
 

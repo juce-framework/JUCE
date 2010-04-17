@@ -47,7 +47,7 @@ public:
 
     /** If the current value of destination is equal to requiredCurrentValue, this
         will set it to newValue; otherwise, it will leave it unchanged.
-        @returns the new value of destination
+        @returns the original value of destination
     */
     static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
 

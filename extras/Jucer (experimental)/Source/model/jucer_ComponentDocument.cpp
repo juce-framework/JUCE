@@ -27,6 +27,7 @@
 #include "Component Types/jucer_TextButton.h"
 #include "Component Types/jucer_ToggleButton.h"
 
+
 //==============================================================================
 static const char* const componentDocumentTag   = "COMPONENT";
 static const char* const componentGroupTag      = "COMPONENTS";
@@ -42,7 +43,8 @@ static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_E
 
 //==============================================================================
 class ComponentBoundsEditor  : public PropertyComponent,
-                               public ButtonListener
+                               public ButtonListener,
+                               public Value::Listener
 {
 public:
     enum Type
@@ -68,15 +70,21 @@ public:
 
         addAndMakeVisible (anchorButton1 = new TextButton (String::empty));
         anchorButton1->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnTop | Button::ConnectedOnRight | Button::ConnectedOnBottom);
+        anchorButton1->setTriggeredOnMouseDown (true);
         anchorButton1->addButtonListener (this);
 
         addAndMakeVisible (anchorButton2 = new TextButton (String::empty));
         anchorButton2->setConnectedEdges (Button::ConnectedOnLeft | Button::ConnectedOnTop | Button::ConnectedOnRight | Button::ConnectedOnBottom);
+        anchorButton2->setTriggeredOnMouseDown (true);
         anchorButton2->addButtonListener (this);
+
+        boundsValue.addListener (this);
+        valueChanged (boundsValue);
     }
 
     ~ComponentBoundsEditor()
     {
+        boundsValue.removeListener (this);
         deleteAllChildren();
     }
 
@@ -87,8 +95,16 @@ public:
         label->setBounds (r.getX(), r.getY(), r.getWidth() / 2, r.getHeight() / 2);
         proportionButton->setBounds (r.getX() + r.getWidth() / 2, r.getY(),
                                      r.getWidth() / 2, r.getHeight() / 2);
-        anchorButton1->setBounds (r.getX(), r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
-        anchorButton2->setBounds (r.getX() + r.getWidth() / 2, r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
+
+        if (anchorButton2->isVisible())
+        {
+            anchorButton1->setBounds (r.getX(), r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
+            anchorButton2->setBounds (r.getX() + r.getWidth() / 2, r.getY() + r.getHeight() / 2, r.getWidth() / 2, r.getHeight() / 2);
+        }
+        else
+        {
+            anchorButton1->setBounds (r.getX(), r.getY() + r.getHeight() / 2, r.getWidth(), r.getHeight() / 2);
+        }
     }
 
     void refresh()
@@ -97,22 +113,47 @@ public:
 
     void buttonClicked (Button* button)
     {
+        RectangleCoordinates r (boundsValue.toString());
+        Coordinate& coord = getCoord (r);
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (compState));
+
         if (button == proportionButton)
         {
-            RectangleCoordinates r (boundsValue.toString());
-            Coordinate& coord = getCoord (r);
-
-            ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (compState));
-
             coord.toggleProportionality (*markers);
             boundsValue = r.toString();
         }
         else if (button == anchorButton1)
         {
+            const String marker (pickMarker (anchorButton1, coord.getAnchor1()));
+
+            if (marker.isNotEmpty())
+            {
+                coord.changeAnchor1 (marker, *markers);
+                boundsValue = r.toString();
+            }
         }
         else if (button == anchorButton2)
         {
+            const String marker (pickMarker (anchorButton2, coord.getAnchor2()));
+
+            if (marker.isNotEmpty())
+            {
+                coord.changeAnchor2 (marker, *markers);
+                boundsValue = r.toString();
+            }
         }
+    }
+
+    void valueChanged (Value&)
+    {
+        RectangleCoordinates r (boundsValue.toString());
+        Coordinate& coord = getCoord (r);
+
+        anchorButton1->setButtonText (coord.getAnchor1());
+
+        anchorButton2->setVisible (coord.isProportional());
+        anchorButton2->setButtonText (coord.getAnchor2());
+        resized();
     }
 
     //==============================================================================
@@ -184,6 +225,22 @@ public:
         }
 
         return r.left;
+    }
+
+    const String pickMarker (Component* button, const String& currentMarker)
+    {
+        const StringArray markers (document.getComponentMarkers (type == left || type == right));
+
+        PopupMenu m;
+        for (int i = 0; i < markers.size(); ++i)
+            m.addItem (i + 1, markers[i], true, currentMarker == markers[i]);
+
+        const int r = m.showAt (button);
+
+        if (r > 0)
+            return markers [r - 1];
+
+        return String::empty;
     }
 
 private:
@@ -588,9 +645,42 @@ const RectangleCoordinates ComponentDocument::getCoordsFor (const ValueTree& sta
     return RectangleCoordinates (state [compBoundsProperty]);
 }
 
+bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinates& pr)
+{
+    const String newBoundsString (pr.toString());
+
+    if (state[compBoundsProperty] == newBoundsString)
+        return false;
+
+    state.setProperty (compBoundsProperty, newBoundsString, getUndoManager());
+    return true;
+}
+
 Coordinate::MarkerResolver* ComponentDocument::createMarkerResolver (const ValueTree& state)
 {
     return new ComponentMarkerResolver (*this, state, getCanvasWidth().getValue(), getCanvasHeight().getValue());
+}
+
+const StringArray ComponentDocument::getComponentMarkers (bool horizontal) const
+{
+    StringArray s;
+
+    if (horizontal)
+    {
+        s.add (Coordinate::parentLeftMarkerName);
+        s.add (Coordinate::parentRightMarkerName);
+        s.add ("left");
+        s.add ("right");
+    }
+    else
+    {
+        s.add (Coordinate::parentTopMarkerName);
+        s.add (Coordinate::parentBottomMarkerName);
+        s.add ("top");
+        s.add ("bottom");
+    }
+
+    return s;
 }
 
 void ComponentDocument::updateComponent (Component* comp)
@@ -674,152 +764,4 @@ const String ComponentDocument::getNonExistentMemberName (String suggestedName)
 UndoManager* ComponentDocument::getUndoManager()
 {
     return &undoManager;
-}
-
-//==============================================================================
-class ComponentDocument::DragHandler
-{
-public:
-    DragHandler (ComponentDocument& document_,
-                 const Array<Component*>& items,
-                 const MouseEvent& e,
-                 const ResizableBorderComponent::Zone& zone_,
-                 Component* parentForOverlays)
-        : document (document_),
-          zone (zone_)
-    {
-        for (int i = 0; i < items.size(); ++i)
-        {
-            Component* comp = items.getUnchecked(i);
-            jassert (comp != 0);
-
-            const ValueTree v (document.getComponentState (comp));
-            draggedComponents.add (v);
-
-            Rectangle<int> pos;
-
-            {
-                RectangleCoordinates relativePos (v [compBoundsProperty].toString());
-                ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v));
-                pos = relativePos.resolve (*markers);
-                originalPositions.add (pos);
-            }
-
-            const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
-                                             (float) pos.getWidth(), (float) pos.getHeight());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge())
-                verticalSnapPositions.add (floatPos.getX());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge() || zone.isDraggingRightEdge())
-                verticalSnapPositions.add (floatPos.getCentreX());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingRightEdge())
-                verticalSnapPositions.add (floatPos.getRight());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingTopEdge())
-                horizontalSnapPositions.add (floatPos.getY());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingTopEdge() || zone.isDraggingBottomEdge())
-                verticalSnapPositions.add (floatPos.getCentreY());
-
-            if (zone.isDraggingWholeObject() || zone.isDraggingBottomEdge())
-                horizontalSnapPositions.add (floatPos.getBottom());
-        }
-
-        document.beginNewTransaction();
-    }
-
-    ~DragHandler()
-    {
-        document.beginNewTransaction();
-    }
-
-    void drag (const MouseEvent& e)
-    {
-        document.getUndoManager()->undoCurrentTransactionOnly();
-
-        for (int n = 50;;)
-        {
-            // Need to repeatedly apply the new positions until they all settle down, in case some of
-            // the coords are relative to each other..
-            bool anyUpdated = false;
-
-            for (int i = 0; i < draggedComponents.size(); ++i)
-                if (dragItem (draggedComponents.getReference(i), e.getOffsetFromDragStart(), originalPositions.getReference(i)))
-                    anyUpdated = true;
-
-            if (! anyUpdated)
-                break;
-
-            if (--n == 0)
-            {
-                jassertfalse;
-                break;
-            }
-        }
-    }
-
-    bool dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
-    {
-        const Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
-
-        RectangleCoordinates pr (v [compBoundsProperty].toString());
-        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (v));
-
-        pr.moveToAbsolute (newBounds, *markers);
-        const String newBoundsString (pr.toString());
-
-        if (v[compBoundsProperty] == newBoundsString)
-            return false;
-
-        v.setProperty (compBoundsProperty, newBoundsString, document.getUndoManager());
-        return true;
-    }
-
-    const Array<float> getVerticalSnapPositions (const Point<int>& distance) const
-    {
-        Array<float> p (verticalSnapPositions);
-        for (int i = p.size(); --i >= 0;)
-            p.set (i, p.getUnchecked(i) + distance.getX());
-
-        return p;
-    }
-
-    const Array<float> getHorizontalSnapPositions (const Point<int>& distance) const
-    {
-        Array<float> p (horizontalSnapPositions);
-        for (int i = p.size(); --i >= 0;)
-            p.set (i, p.getUnchecked(i) + distance.getY());
-
-        return p;
-    }
-
-private:
-    ComponentDocument& document;
-    Array <ValueTree> draggedComponents;
-    Array <Rectangle<int> > originalPositions;
-    Array <float> verticalSnapPositions, horizontalSnapPositions;
-    const ResizableBorderComponent::Zone zone;
-};
-
-void ComponentDocument::beginDrag (const Array<Component*>& items, const MouseEvent& e,
-                                   Component* parentForOverlays, const ResizableBorderComponent::Zone& zone)
-{
-    dragger = new DragHandler (*this, items, e, zone, parentForOverlays);
-}
-
-void ComponentDocument::continueDrag (const MouseEvent& e)
-{
-    if (dragger != 0)
-        dragger->drag (e);
-}
-
-void ComponentDocument::endDrag (const MouseEvent& e)
-{
-    if (dragger != 0)
-    {
-        dragger->drag (e);
-        dragger = 0;
-    }
 }

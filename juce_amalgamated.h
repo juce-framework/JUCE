@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	14
+#define JUCE_BUILDNUMBER	15
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -21367,6 +21367,8 @@ public:
 
 	void setTextValueSuffix (const String& suffix);
 
+	const String getTextValueSuffix() const;
+
 	virtual double proportionOfLengthToValue (double proportion);
 
 	virtual double valueToProportionOfLength (double value);
@@ -21414,6 +21416,8 @@ protected:
 	void handleAsyncUpdate();
 	void colourChanged();
 	void valueChanged (Value& value);
+
+	int getNumDecimalPlacesToDisplay() const throw()	{ return numDecimalPlaces; }
 
 private:
 	ListenerList <SliderListener> listeners;

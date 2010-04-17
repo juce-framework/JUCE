@@ -139,6 +139,8 @@
         </Filter>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.h"/>
+        <File RelativePath="..\..\Source\model\jucer_Coordinate.cpp"/>
+        <File RelativePath="..\..\Source\model\jucer_Coordinate.h"/>
         <File RelativePath="..\..\Source\model\jucer_DrawableDocument.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_DrawableDocument.h"/>
         <File RelativePath="..\..\Source\model\jucer_NewFileWizard.cpp"/>

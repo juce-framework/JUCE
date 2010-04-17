@@ -565,7 +565,7 @@ public:
     /** Returns a copy of this string, having removed a specified set of characters from its start.
         Characters are removed from the start of the string until it finds one that is not in the
         specified set, and then it stops.
-        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @param charactersToTrim     the set of characters to remove.
         @see trim, trimStart, trimCharactersAtEnd
     */
     const String trimCharactersAtStart (const String& charactersToTrim) const;
@@ -573,7 +573,7 @@ public:
     /** Returns a copy of this string, having removed a specified set of characters from its end.
         Characters are removed from the end of the string until it finds one that is not in the
         specified set, and then it stops.
-        @param charactersToTrim     the set of characters to remove. This must not be null.
+        @param charactersToTrim     the set of characters to remove.
         @see trim, trimEnd, trimCharactersAtStart
     */
     const String trimCharactersAtEnd (const String& charactersToTrim) const;

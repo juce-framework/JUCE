@@ -54,7 +54,11 @@ FileBasedDocument::~FileBasedDocument()
 //==============================================================================
 void FileBasedDocument::setChangedFlag (const bool hasChanged)
 {
-    changedSinceSave = hasChanged;
+    if (changedSinceSave != hasChanged)
+    {
+        changedSinceSave = hasChanged;
+        sendChangeMessage (this);
+    }
 }
 
 void FileBasedDocument::changed()
@@ -69,7 +73,7 @@ void FileBasedDocument::setFile (const File& newFile)
     if (documentFile != newFile)
     {
         documentFile = newFile;
-        changedSinceSave = true;
+        changed();
     }
 }
 

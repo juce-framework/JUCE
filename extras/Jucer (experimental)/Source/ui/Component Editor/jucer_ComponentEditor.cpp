@@ -160,112 +160,6 @@ private:
 };
 
 //==============================================================================
-static const double tickSizes[] = { 1.0, 2.0, 5.0,
-                                    10.0, 20.0, 50.0,
-                                    100.0, 200.0, 500.0, 1000.0 };
-
-class TickIterator
-{
-public:
-    TickIterator (const double startValue_, const double endValue_, const double valuePerPixel_,
-                  int minPixelsPerTick, int minWidthForLabels)
-        : startValue (startValue_),
-          endValue (endValue_),
-          valuePerPixel (valuePerPixel_)
-    {
-        tickLevelIndex  = findLevelIndexForValue (valuePerPixel * minPixelsPerTick);
-        labelLevelIndex = findLevelIndexForValue (valuePerPixel * minWidthForLabels);
-
-        tickPosition = pixelsToValue (-minWidthForLabels);
-        tickPosition = snapValueDown (tickPosition, tickLevelIndex);
-    }
-
-    bool getNextTick (float& pixelX, float& tickLength, String& label)
-    {
-        const double tickUnits = tickSizes [tickLevelIndex];
-        tickPosition += tickUnits;
-
-        const int totalLevels = sizeof (tickSizes) / sizeof (*tickSizes);
-        int highestIndex = tickLevelIndex;
-
-        while (++highestIndex < totalLevels)
-        {
-            const double ticksAtThisLevel = tickPosition / tickSizes [highestIndex];
-
-            if (fabs (ticksAtThisLevel - floor (ticksAtThisLevel + 0.5)) > 0.000001)
-                break;
-        }
-
-        --highestIndex;
-
-        if (highestIndex >= labelLevelIndex)
-            label = getDescriptionOfValue (tickPosition, labelLevelIndex);
-        else
-            label = String::empty;
-
-        tickLength = (highestIndex + 1 - tickLevelIndex) / (float) (totalLevels + 1 - tickLevelIndex);
-        pixelX = valueToPixels (tickPosition);
-
-        return tickPosition < endValue;
-    }
-
-private:
-    double tickPosition;
-    int tickLevelIndex, labelLevelIndex;
-    const double startValue, endValue, valuePerPixel;
-
-    int findLevelIndexForValue (const double value) const
-    {
-        int i;
-        for (i = 0; i < sizeof (tickSizes) / sizeof (*tickSizes); ++i)
-            if (tickSizes [i] >= value)
-                break;
-
-        return i;
-    }
-
-    double pixelsToValue (int pixels) const
-    {
-        return startValue + pixels * valuePerPixel;
-    }
-
-    float valueToPixels (double value) const
-    {
-        return (float) ((value - startValue) / valuePerPixel);
-    }
-
-    static double snapValueToNearest (const double t, const int valueLevelIndex)
-    {
-        const double unitsPerInterval = tickSizes [valueLevelIndex];
-        return unitsPerInterval * floor (t / unitsPerInterval + 0.5);
-    }
-
-    static double snapValueDown (const double t, const int valueLevelIndex)
-    {
-        const double unitsPerInterval = tickSizes [valueLevelIndex];
-        return unitsPerInterval * floor (t / unitsPerInterval);
-    }
-
-    static inline int roundDoubleToInt (const double value)
-    {
-        union { int asInt[2]; double asDouble; } n;
-        n.asDouble = value + 6755399441055744.0;
-
-    #if TARGET_RT_BIG_ENDIAN
-        return n.asInt [1];
-    #else
-        return n.asInt [0];
-    #endif
-    }
-
-    static const String getDescriptionOfValue (const double value, const int valueLevelIndex)
-    {
-        return String (roundToInt (value));
-    }
-};
-
-
-//==============================================================================
 class ComponentEditor::Canvas   : public Component,
                                   public ValueTree::Listener,
                                   public Timer
@@ -287,6 +181,7 @@ public:
 
     ~Canvas()
     {
+        dragger = 0;
         getDocument().getRoot().removeListener (this);
         componentHolder->deleteAllChildren();
         deleteAllChildren();
@@ -508,10 +403,260 @@ public:
     void showSizeGuides()   { overlay->showSizeGuides(); }
     void hideSizeGuides()   { overlay->hideSizeGuides(); }
 
+    //==============================================================================
+    class DragOperation
+    {
+    public:
+        DragOperation (Canvas& canvas_,
+                       const Array<Component*>& items,
+                       const MouseEvent& e,
+                       const ResizableBorderComponent::Zone& zone_)
+            : canvas (canvas_),
+              zone (zone_)
+        {
+            for (int i = 0; i < items.size(); ++i)
+            {
+                Component* comp = items.getUnchecked(i);
+                jassert (comp != 0);
+
+                const ValueTree v (getDocument().getComponentState (comp));
+                draggedComponents.add (v);
+
+                Rectangle<int> pos;
+
+                {
+                    RectangleCoordinates relativePos (getDocument().getCoordsFor (v));
+                    ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createMarkerResolver (v));
+                    pos = relativePos.resolve (*markers);
+                    originalPositions.add (pos);
+                }
+
+                const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
+                                                 (float) pos.getWidth(), (float) pos.getHeight());
+
+                if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge())
+                    verticalSnapPositions.add (SnapLine (floatPos.getX(), floatPos.getY(), floatPos.getBottom()));
+
+                if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
+                    verticalSnapPositions.add (SnapLine (floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+
+                if (zone.isDraggingWholeObject() || zone.isDraggingRightEdge())
+                    verticalSnapPositions.add (SnapLine (floatPos.getRight(), floatPos.getY(), floatPos.getBottom()));
+
+                if (zone.isDraggingWholeObject() || zone.isDraggingTopEdge())
+                    horizontalSnapPositions.add (SnapLine (floatPos.getY(), floatPos.getX(), floatPos.getRight()));
+
+                if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
+                    horizontalSnapPositions.add (SnapLine (floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+
+                if (zone.isDraggingWholeObject() || zone.isDraggingBottomEdge())
+                    horizontalSnapPositions.add (SnapLine (floatPos.getBottom(), floatPos.getX(), floatPos.getRight()));
+            }
+
+            verticalSnapTargets.add (SnapLine (0, 0, 10000.0f));
+            verticalSnapTargets.add (SnapLine (getDocument().getCanvasWidth().getValue(), 0, 10000.0f));
+
+            if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
+                verticalSnapTargets.add (SnapLine ((float) getDocument().getCanvasWidth().getValue() / 2.0f, 0, 10000.0f));
+
+            horizontalSnapTargets.add (SnapLine (0, 0, 10000.0f));
+            horizontalSnapTargets.add (SnapLine (getDocument().getCanvasHeight().getValue(), 0, 10000.0f));
+
+            if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
+                horizontalSnapTargets.add (SnapLine ((float) getDocument().getCanvasHeight().getValue() / 2.0f, 0, 10000.0f));
+
+            getDocument().beginNewTransaction();
+        }
+
+        ~DragOperation()
+        {
+            getDocument().beginNewTransaction();
+        }
+
+        struct SnapLine
+        {
+            SnapLine (float position_, float start_, float end_)
+                : position (position_), start (start_), end (end_)
+            {}
+
+            float position, start, end;
+        };
+
+        class SnapGuideComponent  : public Component
+        {
+        public:
+            SnapGuideComponent (const SnapLine& line_, bool isVertical_, Component* parent)
+                : line (line_), isVertical (isVertical_)
+            {
+                if (isVertical)
+                    setBounds (roundToInt (line.position), roundToInt (line.start), 1, roundToInt (line.end - line.start));
+                else
+                    setBounds (roundToInt (line.start), roundToInt (line.position), roundToInt (line.end - line.start), 1);
+
+                parent->addAndMakeVisible (this);
+            }
+
+            void paint (Graphics& g)
+            {
+                g.fillAll (Colours::blue.withAlpha (0.3f));
+            }
+
+        private:
+            const SnapLine line;
+            const bool isVertical;
+
+            SnapGuideComponent (const SnapGuideComponent&);
+            SnapGuideComponent& operator= (const SnapGuideComponent&);
+        };
+
+        void drag (const MouseEvent& e)
+        {
+            const float snapThreshold = 8.0f;
+
+            getDocument().getUndoManager()->undoCurrentTransactionOnly();
+
+            Point<int> distance (e.getOffsetFromDragStart());
+            snapGuides.clear();
+
+            SnapLine snap (0, 0, 0);
+            const float snapX = findBestSnapDistance (verticalSnapTargets, getVerticalSnapPositions (distance), snap);
+            if (fabsf (snapX) < snapThreshold)
+            {
+                distance = Point<int> (distance.getX() + snapX, distance.getY());
+
+                if (snap.position != 0)
+                    snapGuides.add (new SnapGuideComponent (snap, true, canvas.overlay));
+            }
+
+            const float snapY = findBestSnapDistance (horizontalSnapTargets, getHorizontalSnapPositions (distance), snap);
+            if (fabsf (snapY) < snapThreshold)
+            {
+                distance = Point<int> (distance.getX(), distance.getY() + snapY);
+
+                if (snap.position != 0)
+                    snapGuides.add (new SnapGuideComponent (snap, false, canvas.overlay));
+            }
+
+            for (int n = 50;;)
+            {
+                // Need to repeatedly apply the new positions until they all settle down, in case some of
+                // the coords are relative to each other..
+                bool anyUpdated = false;
+
+                for (int i = 0; i < draggedComponents.size(); ++i)
+                    if (dragItem (draggedComponents.getReference(i), distance, originalPositions.getReference(i)))
+                        anyUpdated = true;
+
+                if (! anyUpdated)
+                    break;
+
+                if (--n == 0)
+                {
+                    jassertfalse;
+                    break;
+                }
+            }
+        }
+
+        bool dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<int>& originalPos)
+        {
+            const Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
+
+            RectangleCoordinates pr (getDocument().getCoordsFor (v));
+            ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createMarkerResolver (v));
+
+            pr.moveToAbsolute (newBounds, *markers);
+
+            return getDocument().setCoordsFor (v, pr);
+        }
+
+        const Array<SnapLine> getVerticalSnapPositions (const Point<int>& distance) const
+        {
+            Array<SnapLine> p (verticalSnapPositions);
+            for (int i = p.size(); --i >= 0;)
+                p.getReference(i).position += distance.getX();
+
+            return p;
+        }
+
+        const Array<SnapLine> getHorizontalSnapPositions (const Point<int>& distance) const
+        {
+            Array<SnapLine> p (horizontalSnapPositions);
+            for (int i = p.size(); --i >= 0;)
+                p.getReference(i).position += distance.getY();
+
+            return p;
+        }
+
+        static float findBestSnapDistance (const Array<SnapLine>& targets, const Array<SnapLine>& sources, SnapLine& line)
+        {
+            if (targets.size() == 0 || sources.size() == 0)
+                return 0.0f;
+
+            float best = 1.0e10f;
+            float absBest = fabsf (best);
+            line = SnapLine (1.0e10f, 0, 0);
+
+            for (int i = 0; i < targets.size(); ++i)
+            {
+                for (int j = 0; j < sources.size(); ++j)
+                {
+                    SnapLine& target = targets.getReference(i);
+                    SnapLine& source = sources.getReference(j);
+                    const float diff = target.position - source.position;
+                    const float absDiff = fabsf (diff);
+
+                    if (absDiff < absBest)
+                    {
+                        line = SnapLine (target.position, jmin (target.start, source.start), jmax (target.end, source.end));
+                        best = diff;
+                        absBest = absDiff;
+                    }
+                }
+            }
+
+            jassert (absBest < 1.0e10f);
+            return best;
+        }
+
+    private:
+        Canvas& canvas;
+        Array <ValueTree> draggedComponents;
+        Array <Rectangle<int> > originalPositions;
+
+        Array <SnapLine> verticalSnapPositions, horizontalSnapPositions;
+        Array <SnapLine> verticalSnapTargets, horizontalSnapTargets;
+        const ResizableBorderComponent::Zone zone;
+        OwnedArray<Component> snapGuides;
+
+        ComponentDocument& getDocument() throw()         { return canvas.getDocument(); }
+    };
+
+    void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone)
+    {
+        dragger = new DragOperation (*this, getSelectedComps(), e, zone);
+    }
+
+    void continueDrag (const MouseEvent& e)
+    {
+        if (dragger != 0)
+            dragger->drag (e);
+    }
+
+    void endDrag (const MouseEvent& e)
+    {
+        if (dragger != 0)
+        {
+            dragger->drag (e);
+            dragger = 0;
+        }
+    }
+
 private:
     ComponentEditor& editor;
     const BorderSize border;
     const int resizerThickness;
+    ScopedPointer <DragOperation> dragger;
     ResizableBorderComponent::Zone dragZone;
     int dragStartWidth, dragStartHeight;
 
@@ -571,7 +716,7 @@ private:
             if (component != 0)
             {
                 updateDragZone (e.getPosition());
-                canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, getParentComponent(), dragZone);
+                canvas.beginDrag (e, dragZone);
                 canvas.showSizeGuides();
             }
         }
@@ -579,7 +724,7 @@ private:
         void mouseDrag (const MouseEvent& e)
         {
             if (component != 0)
-                canvas.getDocument().continueDrag (e);
+                canvas.continueDrag (e);
         }
 
         void mouseUp (const MouseEvent& e)
@@ -587,7 +732,7 @@ private:
             canvas.hideSizeGuides();
 
             if (component != 0)
-                canvas.getDocument().endDrag (e);
+                canvas.endDrag (e);
 
             updateDragZone (e.getPosition());
         }
@@ -720,11 +865,10 @@ private:
                 {
                     isDraggingClickedComp = true;
                     canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
-                    canvas.getDocument().beginDrag (canvas.getSelectedComps(), e, getParentComponent(),
-                                                    ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
+                    canvas.beginDrag (e, ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
                 }
 
-                canvas.getDocument().continueDrag (e);
+                canvas.continueDrag (e);
                 showSizeGuides();
             }
         }
@@ -747,7 +891,7 @@ private:
                     canvas.getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, ! e.mouseWasClicked(), mouseDownResult);
             }
 
-            canvas.getDocument().endDrag (e);
+            canvas.endDrag (e);
         }
 
         void findLassoItemsInArea (Array <ComponentDocument::SelectedItems::ItemType>& itemsFound, int x, int y, int width, int height)

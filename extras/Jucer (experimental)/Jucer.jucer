@@ -37,6 +37,10 @@
             resource="0" file="Source/model/jucer_ComponentDocument.cpp"/>
       <FILE id="u5n6JTb4z" name="jucer_ComponentDocument.h" compile="0" resource="0"
             file="Source/model/jucer_ComponentDocument.h"/>
+      <FILE id="lxuyJGZcw" name="jucer_Coordinate.cpp" compile="1" resource="0"
+            file="Source/model/jucer_Coordinate.cpp"/>
+      <FILE id="CyKbwNlwe" name="jucer_Coordinate.h" compile="0" resource="0"
+            file="Source/model/jucer_Coordinate.h"/>
       <FILE id="XxIww5OtT" name="jucer_DrawableDocument.cpp" compile="1"
             resource="0" file="Source/model/jucer_DrawableDocument.cpp"/>
       <FILE id="lbB698APl" name="jucer_DrawableDocument.h" compile="0" resource="0"
