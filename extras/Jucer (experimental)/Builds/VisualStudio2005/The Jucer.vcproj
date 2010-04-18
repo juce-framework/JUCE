@@ -134,8 +134,20 @@
     <Filter Name="The Jucer">
       <Filter Name="Model">
         <Filter Name="Component Types">
-          <File RelativePath="..\..\Source\model\Component Types\jucer_ToggleButton.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ComponentTypeManager.cpp"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ComponentTypeManager.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ComponentTypes.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ComboBox.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_GenericComponent.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_GroupComponent.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_JucerComponent.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_Label.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_Slider.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_TabbedComponent.h"/>
           <File RelativePath="..\..\Source\model\Component Types\jucer_TextButton.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_TextEditor.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_ToggleButton.h"/>
+          <File RelativePath="..\..\Source\model\Component Types\jucer_Viewport.h"/>
         </Filter>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.h"/>

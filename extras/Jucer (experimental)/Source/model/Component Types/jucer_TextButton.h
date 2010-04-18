@@ -23,38 +23,37 @@
   ==============================================================================
 */
 
+#ifdef ADD_TO_LIST
+  ADD_TO_LIST (TextButtonHandler);
+#else
+
 #include "../jucer_ComponentDocument.h"
 
-
 //==============================================================================
-class TextButtonHandler  : public ComponentTypeHandler
+class TextButtonHandler  : public ComponentTypeHelper<TextButton>
 {
 public:
-    TextButtonHandler() : ComponentTypeHandler ("TextButton", "TEXTBUTTON", "textButton")  {}
+    TextButtonHandler() : ComponentTypeHelper<TextButton> ("TextButton", "TEXTBUTTON", "textButton")  {}
     ~TextButtonHandler()  {}
 
     Component* createComponent()                { return new TextButton (String::empty); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 150, 24); }
 
-    void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
+    void update (ComponentDocument& document, TextButton* comp, const ValueTree& state)
     {
-        TextButton* tb = dynamic_cast <TextButton*> (comp);
-        jassert (tb != 0);
-
-        ComponentTypeHandler::updateComponent (document, comp, state);
-        tb->setButtonText (state ["text"].toString());
+        comp->setButtonText (state ["text"].toString());
     }
 
-    void initialiseNewItem (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
-        ComponentTypeHandler::initialiseNewItem (document, state);
-        state.setProperty ("text", "New Toggle Button", 0);
+        state.setProperty ("text", "New Button", 0);
     }
 
-    void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
-        ComponentTypeHandler::createPropertyEditors (document, state, props);
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
     }
 };
+
+#endif

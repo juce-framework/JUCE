@@ -28,10 +28,34 @@
   <MAINGROUP name="The Jucer" id="NhrJq66R">
     <GROUP id="EmpOiUg6" name="Model">
       <GROUP id="7IAOlGP0H" name="Component Types">
-        <FILE id="EOwXntvc" name="jucer_ToggleButton.h" compile="0" resource="0"
-              file="Source/model/Component Types/jucer_ToggleButton.h"/>
+        <FILE id="dhwVkC0LQ" name="jucer_ComponentTypeManager.cpp" compile="1"
+              resource="0" file="Source/model/Component Types/jucer_ComponentTypeManager.cpp"/>
+        <FILE id="rSuW9uAYG" name="jucer_ComponentTypeManager.h" compile="0"
+              resource="0" file="Source/model/Component Types/jucer_ComponentTypeManager.h"/>
+        <FILE id="X1JJNqL9d" name="jucer_ComponentTypes.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_ComponentTypes.h"/>
+        <FILE id="0kW52xWY0" name="jucer_ComboBox.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_ComboBox.h"/>
+        <FILE id="IgbLRcOlP" name="jucer_GenericComponent.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_GenericComponent.h"/>
+        <FILE id="dO5A44NtK" name="jucer_GroupComponent.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_GroupComponent.h"/>
+        <FILE id="5ooKsX1Oy" name="jucer_JucerComponent.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_JucerComponent.h"/>
+        <FILE id="J1dHwtOob" name="jucer_Label.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_Label.h"/>
+        <FILE id="K2f4ViI8f" name="jucer_Slider.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_Slider.h"/>
+        <FILE id="Yq56kjAjr" name="jucer_TabbedComponent.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_TabbedComponent.h"/>
         <FILE id="lO2yuwiGR" name="jucer_TextButton.h" compile="0" resource="0"
               file="Source/model/Component Types/jucer_TextButton.h"/>
+        <FILE id="9kpY6Dy8E" name="jucer_TextEditor.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_TextEditor.h"/>
+        <FILE id="EOwXntvc" name="jucer_ToggleButton.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_ToggleButton.h"/>
+        <FILE id="dnB5Epzjx" name="jucer_Viewport.h" compile="0" resource="0"
+              file="Source/model/Component Types/jucer_Viewport.h"/>
       </GROUP>
       <FILE id="e6IQOUwvq" name="jucer_ComponentDocument.cpp" compile="1"
             resource="0" file="Source/model/jucer_ComponentDocument.cpp"/>

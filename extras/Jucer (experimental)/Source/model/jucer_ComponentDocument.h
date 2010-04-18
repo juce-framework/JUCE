@@ -89,6 +89,11 @@ public:
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
+    static const char* const idProperty;
+    static const char* const compBoundsProperty;
+    static const char* const memberNameProperty;
+    static const char* const compNameProperty;
+
 private:
     Project* project;
     File cppFile;
@@ -104,32 +109,6 @@ private:
     void writeMetadata (OutputStream& out);
 };
 
-
-//==============================================================================
-class ComponentTypeHandler
-{
-public:
-    //==============================================================================
-    ComponentTypeHandler (const String& name_, const String& xmlTag_, const String& memberNameRoot_);
-    virtual ~ComponentTypeHandler();
-
-    const String& getName() const               { return name; }
-    const String& getXmlTag() const             { return xmlTag; }
-    const String& getMemberNameRoot() const     { return memberNameRoot; }
-
-    virtual Component* createComponent() = 0;
-    virtual const Rectangle<int> getDefaultSize() = 0;
-
-    virtual void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state);
-    virtual void initialiseNewItem (ComponentDocument& document, ValueTree& state);
-    virtual void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props);
-
-    Value getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const;
-
-    //==============================================================================
-protected:
-    const String name, xmlTag, memberNameRoot;
-};
 
 
 #endif   // __JUCER_COMPONENTDOCUMENT_JUCEHEADER__

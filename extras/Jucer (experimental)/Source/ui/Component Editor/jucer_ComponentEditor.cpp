@@ -27,16 +27,19 @@
 #include "jucer_ComponentEditor.h"
 
 
+const float snapDistance = 8.0f;
+static const Colour resizableBorderColour (0x7066aaff);
+static const Colour alignmentMarkerColour (0x77ff0000);
+
+
 //==============================================================================
 class SizeGuideComponent   : public Component,
                              public ComponentListener
 {
 public:
-    enum Type
-    {
-        left, right, top, bottom
-    };
+    enum Type    { left, right, top, bottom };
 
+    //==============================================================================
     SizeGuideComponent (ComponentDocument& document_, const ValueTree& state_, Component* component_,
                         Component& parentForOverlays, Type type_)
         : document (document_), state (state_), component (component_), type (type_),
@@ -55,6 +58,39 @@ public:
             component->removeComponentListener (this);
     }
 
+    //==============================================================================
+    void paint (Graphics& g)
+    {
+        const float dashes[] = { 4.0f, 3.0f };
+
+        g.setColour (resizableBorderColour);
+        g.drawDashedLine (lineEnd1.getX() + 0.5f, lineEnd1.getY() + 0.5f,
+                          lineEnd2.getX() + 0.5f, lineEnd2.getY() + 0.5f,
+                          dashes, 2, 1.0f);
+
+        g.setFont (font);
+        g.setColour (Colours::white);
+
+        for (int y = -1; y <= 1; ++y)
+            for (int x = -1; x <= 1; ++x)
+                g.drawText (getName(), textArea.getX() + x, textArea.getY() + y, textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
+
+        g.setColour (Colours::black);
+        g.drawText (getName(), textArea.getX(), textArea.getY(), textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
+    }
+
+    void componentMovedOrResized (Component&, bool, bool)
+    {
+        updatePosition();
+    }
+
+    void componentBeingDeleted (Component&)
+    {
+        setVisible (false);
+        component = 0;
+    }
+
+    //==============================================================================
     void updatePosition()
     {
         RectangleCoordinates coords (document.getCoordsFor (state));
@@ -118,37 +154,6 @@ public:
         repaint();
     }
 
-    void paint (Graphics& g)
-    {
-        const float dashes[] = { 4.0f, 3.0f };
-
-        g.setColour (Colours::grey.withAlpha (0.4f));
-        g.drawDashedLine (lineEnd1.getX() + 0.5f, lineEnd1.getY() + 0.5f,
-                          lineEnd2.getX() + 0.5f, lineEnd2.getY() + 0.5f,
-                          dashes, 2, 1.0f);
-
-        g.setFont (font);
-        g.setColour (Colours::white);
-
-        for (int y = -1; y <= 1; ++y)
-            for (int x = -1; x <= 1; ++x)
-                g.drawText (getName(), textArea.getX() + x, textArea.getY() + y, textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
-
-        g.setColour (Colours::black);
-        g.drawText (getName(), textArea.getX(), textArea.getY(), textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
-    }
-
-    void componentMovedOrResized (Component&, bool, bool)
-    {
-        updatePosition();
-    }
-
-    void componentBeingDeleted (Component&)
-    {
-        setVisible (false);
-        component = 0;
-    }
-
 private:
     ComponentDocument& document;
     ValueTree state;
@@ -165,6 +170,7 @@ class ComponentEditor::Canvas   : public Component,
                                   public Timer
 {
 public:
+    //==============================================================================
     Canvas (ComponentEditor& editor_)
         : editor (editor_), border (14), resizerThickness (4),
           dragStartWidth (0), dragStartHeight (0)
@@ -187,6 +193,21 @@ public:
         deleteAllChildren();
     }
 
+    //==============================================================================
+    ComponentEditor& getEditor()                            { return editor; }
+    ComponentDocument& getDocument()                        { return editor.getDocument(); }
+    ComponentDocument::SelectedItems& getSelection()        { return selection; }
+    Component* getComponentHolder() const                   { return componentHolder; }
+
+    void timerCallback()
+    {
+        stopTimer();
+
+        if (! Component::isMouseButtonDownAnywhere())
+            getDocument().beginNewTransaction();
+    }
+
+    //==============================================================================
     void paint (Graphics& g)
     {
         g.fillAll (Colours::white);
@@ -211,7 +232,6 @@ public:
     void drawXAxis (Graphics& g, const Rectangle<int>& r)
     {
         TickIterator ticks (0, r.getWidth(), 1.0, 10, 50);
-
         float pos, tickLength;
         String label;
 
@@ -228,7 +248,6 @@ public:
     void drawYAxis (Graphics& g, const Rectangle<int>& r)
     {
         TickIterator ticks (0, r.getHeight(), 1.0, 10, 80);
-
         float pos, tickLength;
         String label;
 
@@ -243,34 +262,17 @@ public:
         }
     }
 
+    const Rectangle<int> getContentArea() const
+    {
+        return border.subtractedFrom (getLocalBounds());
+    }
+
+    //==============================================================================
     void resized()
     {
         componentHolder->setBounds (getContentArea());
         overlay->setBounds (componentHolder->getBounds());
         updateComponents();
-    }
-
-    void zoom (float newScale, const Point<int>& centre)
-    {
-    }
-
-    ComponentEditor& getEditor()                            { return editor; }
-    ComponentDocument& getDocument()                        { return editor.getDocument(); }
-    ComponentDocument::SelectedItems& getSelection()        { return selection; }
-
-    Component* findComponentFor (const ValueTree& state)
-    {
-        ComponentDocument& doc = getDocument();
-
-        for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = componentHolder->getChildComponent (i);
-
-            if (doc.isStateForComponent (state, c))
-                return c;
-        }
-
-        return 0;
     }
 
     void updateComponents()
@@ -295,7 +297,7 @@ public:
         for (i = 0; i < num; ++i)
         {
             const ValueTree v (doc.getComponent (i));
-            Component* c = findComponentFor (v);
+            Component* c = getComponentForState (v);
 
             if (c == 0)
             {
@@ -323,23 +325,7 @@ public:
     {
     }
 
-    Component* getComponentHolder() const       { return componentHolder; }
-
-    const Array<Component*> getSelectedComps() const
-    {
-        Array<Component*> comps;
-
-        for (int i = 0; i < selection.getNumSelected(); ++i)
-        {
-            Component* c = getComponentForUID (selection.getSelectedItem (i));
-            jassert (c != 0);
-            if (c != 0)
-                comps.add (c);
-        }
-
-        return comps;
-    }
-
+    //==============================================================================
     void getSelectedItemProperties (Array <PropertyComponent*>& props)
     {
         //xxx needs to handle multiple selections..
@@ -347,18 +333,12 @@ public:
         if (selection.getNumSelected() == 1)
         {
             Component* c = getComponentForUID (selection.getSelectedItem (0));
+            jassert (c != 0);
             getDocument().getComponentProperties (props, c);
         }
     }
 
-    void timerCallback()
-    {
-        stopTimer();
-
-        if (! Component::isMouseButtonDownAnywhere())
-            getDocument().beginNewTransaction();
-    }
-
+    //==============================================================================
     void mouseMove (const MouseEvent& e)
     {
         updateDragZone (e.getPosition());
@@ -409,30 +389,19 @@ public:
     public:
         DragOperation (Canvas& canvas_,
                        const Array<Component*>& items,
+                       const Array<Component*>& itemsToSnapTo,
                        const MouseEvent& e,
                        const ResizableBorderComponent::Zone& zone_)
             : canvas (canvas_),
               zone (zone_)
         {
-            for (int i = 0; i < items.size(); ++i)
+            int i;
+            for (i = 0; i < items.size(); ++i)
             {
-                Component* comp = items.getUnchecked(i);
-                jassert (comp != 0);
-
-                const ValueTree v (getDocument().getComponentState (comp));
+                jassert (items.getUnchecked(i) != 0);
+                const ValueTree v (getDocument().getComponentState (items.getUnchecked(i)));
                 draggedComponents.add (v);
-
-                Rectangle<int> pos;
-
-                {
-                    RectangleCoordinates relativePos (getDocument().getCoordsFor (v));
-                    ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createMarkerResolver (v));
-                    pos = relativePos.resolve (*markers);
-                    originalPositions.add (pos);
-                }
-
-                const Rectangle<float> floatPos ((float) pos.getX(), (float) pos.getY(),
-                                                 (float) pos.getWidth(), (float) pos.getHeight());
+                const Rectangle<float> floatPos (getComponentPosition (v));
 
                 if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge())
                     verticalSnapPositions.add (SnapLine (floatPos.getX(), floatPos.getY(), floatPos.getBottom()));
@@ -453,17 +422,51 @@ public:
                     horizontalSnapPositions.add (SnapLine (floatPos.getBottom(), floatPos.getX(), floatPos.getRight()));
             }
 
-            verticalSnapTargets.add (SnapLine (0, 0, 10000.0f));
-            verticalSnapTargets.add (SnapLine (getDocument().getCanvasWidth().getValue(), 0, 10000.0f));
+            if (isDraggingLeftRight())
+            {
+                verticalSnapTargets.add (SnapLine (0, 0, 10000.0f));
+                verticalSnapTargets.add (SnapLine (getDocument().getCanvasWidth().getValue(), 0, 10000.0f));
 
-            if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapTargets.add (SnapLine ((float) getDocument().getCanvasWidth().getValue() / 2.0f, 0, 10000.0f));
+                if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
+                    verticalSnapTargets.add (SnapLine ((float) getDocument().getCanvasWidth().getValue() / 2.0f, 0, 10000.0f));
+            }
 
-            horizontalSnapTargets.add (SnapLine (0, 0, 10000.0f));
-            horizontalSnapTargets.add (SnapLine (getDocument().getCanvasHeight().getValue(), 0, 10000.0f));
+            if (isDraggingUpDown())
+            {
+                horizontalSnapTargets.add (SnapLine (0, 0, 10000.0f));
+                horizontalSnapTargets.add (SnapLine (getDocument().getCanvasHeight().getValue(), 0, 10000.0f));
 
-            if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapTargets.add (SnapLine ((float) getDocument().getCanvasHeight().getValue() / 2.0f, 0, 10000.0f));
+                if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
+                    horizontalSnapTargets.add (SnapLine ((float) getDocument().getCanvasHeight().getValue() / 2.0f, 0, 10000.0f));
+            }
+
+            for (i = 0; i < itemsToSnapTo.size(); ++i)
+            {
+                jassert (itemsToSnapTo.getUnchecked(i) != 0);
+                const ValueTree v (getDocument().getComponentState (itemsToSnapTo.getUnchecked(i)));
+                const Rectangle<float> floatPos (getComponentPosition (v));
+
+                if (isDraggingLeftRight())
+                {
+                    verticalSnapTargets.add (SnapLine (floatPos.getX(), floatPos.getY(), floatPos.getBottom()));
+                    verticalSnapTargets.add (SnapLine (floatPos.getRight(), floatPos.getY(), floatPos.getBottom()));
+                }
+
+                if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
+                    verticalSnapTargets.add (SnapLine (floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+
+                if (isDraggingUpDown())
+                {
+                    horizontalSnapTargets.add (SnapLine (floatPos.getY(), floatPos.getX(), floatPos.getRight()));
+                    horizontalSnapTargets.add (SnapLine (floatPos.getBottom(), floatPos.getX(), floatPos.getRight()));
+                }
+
+                if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
+                    horizontalSnapTargets.add (SnapLine (floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+            }
+
+            mergeSnapLines (verticalSnapTargets);
+            mergeSnapLines (horizontalSnapTargets);
 
             getDocument().beginNewTransaction();
         }
@@ -473,69 +476,65 @@ public:
             getDocument().beginNewTransaction();
         }
 
+        //==============================================================================
         struct SnapLine
         {
-            SnapLine (float position_, float start_, float end_)
+            SnapLine() : position (0), start (0), end (0)  {}
+
+            SnapLine (const float position_, const float start_, const float end_)
                 : position (position_), start (start_), end (end_)
             {}
 
             float position, start, end;
         };
 
-        class SnapGuideComponent  : public Component
+        //==============================================================================
+        class AlignmentHintComponent  : public Component
         {
         public:
-            SnapGuideComponent (const SnapLine& line_, bool isVertical_, Component* parent)
+            AlignmentHintComponent (const SnapLine& line_, bool isVertical_, Component* parent)
                 : line (line_), isVertical (isVertical_)
             {
+                const int extraEndLength = 5;
+                setAlwaysOnTop (true);
+
                 if (isVertical)
-                    setBounds (roundToInt (line.position), roundToInt (line.start), 1, roundToInt (line.end - line.start));
+                    setBounds (roundToInt (line.position), roundToInt (line.start) - extraEndLength, 1, roundToInt (line.end - line.start) + extraEndLength * 2);
                 else
-                    setBounds (roundToInt (line.start), roundToInt (line.position), roundToInt (line.end - line.start), 1);
+                    setBounds (roundToInt (line.start) - extraEndLength, roundToInt (line.position), roundToInt (line.end - line.start) + extraEndLength * 2, 1);
 
                 parent->addAndMakeVisible (this);
             }
 
             void paint (Graphics& g)
             {
-                g.fillAll (Colours::blue.withAlpha (0.3f));
+                g.fillAll (alignmentMarkerColour);
             }
 
         private:
             const SnapLine line;
             const bool isVertical;
 
-            SnapGuideComponent (const SnapGuideComponent&);
-            SnapGuideComponent& operator= (const SnapGuideComponent&);
+            AlignmentHintComponent (const AlignmentHintComponent&);
+            AlignmentHintComponent& operator= (const AlignmentHintComponent&);
         };
 
+        //==============================================================================
         void drag (const MouseEvent& e)
         {
-            const float snapThreshold = 8.0f;
-
             getDocument().getUndoManager()->undoCurrentTransactionOnly();
 
             Point<int> distance (e.getOffsetFromDragStart());
+            if (! isDraggingLeftRight())
+                distance = Point<int> (0, distance.getY());
+
+            if (! isDraggingUpDown())
+                distance = Point<int> (distance.getX(), 0);
+
             snapGuides.clear();
 
-            SnapLine snap (0, 0, 0);
-            const float snapX = findBestSnapDistance (verticalSnapTargets, getVerticalSnapPositions (distance), snap);
-            if (fabsf (snapX) < snapThreshold)
-            {
-                distance = Point<int> (distance.getX() + snapX, distance.getY());
-
-                if (snap.position != 0)
-                    snapGuides.add (new SnapGuideComponent (snap, true, canvas.overlay));
-            }
-
-            const float snapY = findBestSnapDistance (horizontalSnapTargets, getHorizontalSnapPositions (distance), snap);
-            if (fabsf (snapY) < snapThreshold)
-            {
-                distance = Point<int> (distance.getX(), distance.getY() + snapY);
-
-                if (snap.position != 0)
-                    snapGuides.add (new SnapGuideComponent (snap, false, canvas.overlay));
-            }
+            performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
+            performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
 
             for (int n = 50;;)
             {
@@ -570,11 +569,102 @@ public:
             return getDocument().setCoordsFor (v, pr);
         }
 
+        //==============================================================================
+    private:
+        Canvas& canvas;
+        Array <ValueTree> draggedComponents;
+        Array <Rectangle<int> > originalPositions;
+        Array <SnapLine> verticalSnapPositions, horizontalSnapPositions;
+        Array <SnapLine> verticalSnapTargets, horizontalSnapTargets;
+        const ResizableBorderComponent::Zone zone;
+        OwnedArray<Component> snapGuides;
+
+        ComponentDocument& getDocument() throw()         { return canvas.getDocument(); }
+
+        const Rectangle<float> getComponentPosition (const ValueTree& state)
+        {
+            RectangleCoordinates relativePos (getDocument().getCoordsFor (state));
+            ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createMarkerResolver (state));
+            const Rectangle<int> intPos (relativePos.resolve (*markers));
+            originalPositions.add (intPos);
+
+            return Rectangle<float> ((float) intPos.getX(), (float) intPos.getY(),
+                                     (float) intPos.getWidth(), (float) intPos.getHeight());
+        }
+
+        static void mergeSnapLines (Array <SnapLine>& lines)
+        {
+            for (int i = lines.size(); --i > 0;)
+            {
+                SnapLine& s1 = lines.getReference(i);
+
+                for (int j = i; --j >= 0;)
+                {
+                    SnapLine& s2 = lines.getReference(j);
+
+                    if (s1.position == s2.position)
+                    {
+                        s2.start = jmin (s1.start, s2.start);
+                        s2.end = jmax (s1.end, s2.end);
+                        lines.remove (i);
+                    }
+                }
+            }
+        }
+
+        void performSnap (const Array<SnapLine>& targets, const Array<SnapLine>& sources, bool isVertical, Point<int>& distance)
+        {
+            if (targets.size() == 0 || sources.size() == 0)
+                return;
+
+            float best = std::numeric_limits<float>::max();
+            float absBest = fabsf (best);
+            Array <SnapLine> lines;
+
+            for (int i = 0; i < targets.size(); ++i)
+            {
+                const SnapLine& target = targets.getReference(i);
+
+                for (int j = 0; j < sources.size(); ++j)
+                {
+                    const SnapLine& source = sources.getReference(j);
+                    const float diff = target.position - source.position;
+                    const float absDiff = fabsf (diff);
+
+                    if (absDiff <= absBest)
+                    {
+                        if (absDiff < absBest)
+                            lines.clearQuick();
+
+                        lines.add (SnapLine (target.position, jmin (target.start, source.start), jmax (target.end, source.end)));
+                        best = diff;
+                        absBest = absDiff;
+                    }
+                }
+            }
+
+            jassert (absBest < std::numeric_limits<float>::max());
+
+            if (absBest < snapDistance)
+            {
+                distance += isVertical ? Point<int> (roundToInt (best), 0) : Point<int> (0, roundToInt (best));
+
+                for (int i = lines.size(); --i >= 0;)
+                    if (lines.getReference(i).position != 0)
+                        snapGuides.add (new AlignmentHintComponent (lines.getReference(i), isVertical, canvas.overlay));
+            }
+        }
+
         const Array<SnapLine> getVerticalSnapPositions (const Point<int>& distance) const
         {
             Array<SnapLine> p (verticalSnapPositions);
             for (int i = p.size(); --i >= 0;)
-                p.getReference(i).position += distance.getX();
+            {
+                SnapLine& s = p.getReference(i);
+                s.position += distance.getX();
+                s.start += distance.getY();
+                s.end += distance.getY();
+            }
 
             return p;
         }
@@ -583,58 +673,27 @@ public:
         {
             Array<SnapLine> p (horizontalSnapPositions);
             for (int i = p.size(); --i >= 0;)
-                p.getReference(i).position += distance.getY();
+            {
+                SnapLine& s = p.getReference(i);
+                s.position += distance.getY();
+                s.start += distance.getX();
+                s.end += distance.getX();
+            }
 
             return p;
         }
 
-        static float findBestSnapDistance (const Array<SnapLine>& targets, const Array<SnapLine>& sources, SnapLine& line)
-        {
-            if (targets.size() == 0 || sources.size() == 0)
-                return 0.0f;
+        bool isDraggingLeftRight() const        { return zone.isDraggingWholeObject() || zone.isDraggingLeftEdge() || zone.isDraggingRightEdge(); }
+        bool isDraggingUpDown() const           { return zone.isDraggingWholeObject() || zone.isDraggingTopEdge() || zone.isDraggingBottomEdge(); }
 
-            float best = 1.0e10f;
-            float absBest = fabsf (best);
-            line = SnapLine (1.0e10f, 0, 0);
-
-            for (int i = 0; i < targets.size(); ++i)
-            {
-                for (int j = 0; j < sources.size(); ++j)
-                {
-                    SnapLine& target = targets.getReference(i);
-                    SnapLine& source = sources.getReference(j);
-                    const float diff = target.position - source.position;
-                    const float absDiff = fabsf (diff);
-
-                    if (absDiff < absBest)
-                    {
-                        line = SnapLine (target.position, jmin (target.start, source.start), jmax (target.end, source.end));
-                        best = diff;
-                        absBest = absDiff;
-                    }
-                }
-            }
-
-            jassert (absBest < 1.0e10f);
-            return best;
-        }
-
-    private:
-        Canvas& canvas;
-        Array <ValueTree> draggedComponents;
-        Array <Rectangle<int> > originalPositions;
-
-        Array <SnapLine> verticalSnapPositions, horizontalSnapPositions;
-        Array <SnapLine> verticalSnapTargets, horizontalSnapTargets;
-        const ResizableBorderComponent::Zone zone;
-        OwnedArray<Component> snapGuides;
-
-        ComponentDocument& getDocument() throw()         { return canvas.getDocument(); }
+        DragOperation (const DragOperation&);
+        DragOperation& operator= (const DragOperation&);
     };
 
+    //==============================================================================
     void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone)
     {
-        dragger = new DragOperation (*this, getSelectedComps(), e, zone);
+        dragger = new DragOperation (*this, getSelectedComps(), getUnselectedComps(), e, zone);
     }
 
     void continueDrag (const MouseEvent& e)
@@ -660,11 +719,6 @@ private:
     ResizableBorderComponent::Zone dragZone;
     int dragStartWidth, dragStartHeight;
 
-    const Rectangle<int> getContentArea() const
-    {
-        return border.subtractedFrom (getLocalBounds());
-    }
-
     //==============================================================================
     class ComponentResizeFrame    : public Component,
                                     public ComponentListener
@@ -688,26 +742,13 @@ private:
 
         void paint (Graphics& g)
         {
-            g.setColour (Colours::red.withAlpha (0.1f));
+            g.setColour (resizableBorderColour);
             g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
         }
 
-        void mouseEnter (const MouseEvent& e)
-        {
-            //repaint();
-            updateDragZone (e.getPosition());
-        }
-
-        void mouseExit (const MouseEvent& e)
-        {
-            //repaint();
-            updateDragZone (e.getPosition());
-        }
-
-        void mouseMove (const MouseEvent& e)
-        {
-            updateDragZone (e.getPosition());
-        }
+        void mouseEnter (const MouseEvent& e)           { updateDragZone (e.getPosition()); }
+        void mouseExit (const MouseEvent& e)            { updateDragZone (e.getPosition()); }
+        void mouseMove (const MouseEvent& e)            { updateDragZone (e.getPosition()); }
 
         void mouseDown (const MouseEvent& e)
         {
@@ -815,6 +856,7 @@ private:
             deleteAllChildren();
         }
 
+        //==============================================================================
         void mouseDown (const MouseEvent& e)
         {
             lasso = 0;
@@ -831,10 +873,17 @@ private:
             }
             else
             {
-                Component* underMouse = canvas.getComponentHolder()->getComponentAt (e.x, e.y);
+                Component* underMouse = 0;
 
-                if (underMouse == canvas.getComponentHolder())
-                    underMouse = 0;
+                for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
+                {
+                    Component* const c = canvas.getComponentHolder()->getChildComponent(i);
+                    if (c->getBounds().contains (e.getPosition()))
+                    {
+                        underMouse = c;
+                        break;
+                    }
+                }
 
                 if (underMouse == 0 || e.mods.isAltDown())
                 {
@@ -906,7 +955,7 @@ private:
             }
         }
 
-        ComponentDocument::SelectedItems& getLassoSelection()   { return canvas.getSelection(); }
+        ComponentDocument::SelectedItems& getLassoSelection()       { return canvas.getSelection(); }
 
         void changeListenerCallback (void*)
         {
@@ -939,6 +988,7 @@ private:
         }
 
     private:
+        //==============================================================================
         Canvas& canvas;
         ScopedPointer <LassoComponent <ComponentDocument::SelectedItems::ItemType> > lasso;
         bool mouseDownResult, isDraggingClickedComp;
@@ -979,6 +1029,7 @@ private:
         }
     };
 
+    //==============================================================================
     Component* componentHolder;
     OverlayComponent* overlay;
     ComponentDocument::SelectedItems selection;
@@ -990,6 +1041,47 @@ private:
                 return componentHolder->getChildComponent (i);
 
         return 0;
+    }
+
+    Component* getComponentForState (const ValueTree& state)
+    {
+        ComponentDocument& doc = getDocument();
+
+        for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
+        {
+            Component* const c = componentHolder->getChildComponent (i);
+
+            if (doc.isStateForComponent (state, c))
+                return c;
+        }
+
+        return 0;
+    }
+
+    const Array<Component*> getSelectedComps() const
+    {
+        Array<Component*> comps;
+
+        for (int i = 0; i < selection.getNumSelected(); ++i)
+        {
+            Component* c = getComponentForUID (selection.getSelectedItem (i));
+            jassert (c != 0);
+            if (c != 0)
+                comps.add (c);
+        }
+
+        return comps;
+    }
+
+    const Array<Component*> getUnselectedComps() const
+    {
+        Array<Component*> comps;
+
+        for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
+            if (! selection.isSelected (componentHolder->getChildComponent(i)->getComponentUID()))
+                comps.add (componentHolder->getChildComponent(i));
+
+        return comps;
     }
 };
 

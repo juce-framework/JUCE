@@ -26,7 +26,7 @@
 #include "../../../core/juce_TargetPlatform.h"
 #include "../../../../juce_Config.h"
 
-#if JUCE_PLUGINHOST_AU && (! (defined (LINUX) || defined (_WIN32)))
+#if JUCE_PLUGINHOST_AU && ! (JUCE_LINUX || JUCE_WINDOWS)
 
 #include <AudioUnit/AudioUnit.h>
 #include <AudioUnit/AUCocoaUIView.h>
@@ -47,6 +47,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../events/juce_Timer.h"
 #include "../../../core/juce_PlatformUtilities.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
+#include "../../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../../gui/components/special/juce_NSViewComponent.h"
 #if JUCE_MAC && JUCE_SUPPORT_CARBON
 #include "../../../native/mac/juce_mac_CarbonViewWrapperComponent.h"

@@ -43,6 +43,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
+  $(OBJDIR)/jucer_ComponentTypeManager.o \
   $(OBJDIR)/jucer_ComponentDocument.o \
   $(OBJDIR)/jucer_Coordinate.o \
   $(OBJDIR)/jucer_DrawableDocument.o \
@@ -87,6 +88,11 @@ clean:
 	-@rm -f $(OUTDIR)/$(TARGET)
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
+
+$(OBJDIR)/jucer_ComponentTypeManager.o: ../../Source/model/Component\ Types/jucer_ComponentTypeManager.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentDocument.o: ../../Source/model/jucer_ComponentDocument.cpp
 	-@mkdir -p $(OBJDIR)

@@ -28,7 +28,7 @@
 
 #if JUCE_PLUGINHOST_VST
 
-#if (defined (_WIN32) || defined (_WIN64))
+#if JUCE_WINDOWS
  #undef _WIN32_WINNT
  #define _WIN32_WINNT 0x500
  #undef STRICT
@@ -36,7 +36,7 @@
  #include <windows.h>
  #include <float.h>
  #pragma warning (disable : 4312 4355)
-#elif defined (LINUX) || defined (__linux__)
+#elif JUCE_LINUX
  #include <float.h>
  #include <sys/time.h>
  #include <X11/Xlib.h>
@@ -72,6 +72,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../events/juce_AsyncUpdater.h"
 #include "../../../events/juce_MessageManager.h"
 #include "../../../gui/components/layout/juce_ComponentMovementWatcher.h"
+#include "../../../gui/components/windows/juce_ComponentPeer.h"
 #include "../../../application/juce_Application.h"
 #include "../../../core/juce_PlatformUtilities.h"
 
