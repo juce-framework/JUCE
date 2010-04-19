@@ -48,11 +48,13 @@ public:
     typedef SelectedItemSet<uint32> SelectedItems;
 
     //==============================================================================
-    Value getClassName()            { return getRootValue ("className"); }
-    Value getClassDescription()     { return getRootValue ("classDesc"); }
+    Value getClassName()            { return getRootValueNonUndoable ("className"); }
+    Value getClassDescription()     { return getRootValueNonUndoable ("classDesc"); }
 
-    Value getCanvasWidth()          { return root.getPropertyAsValue ("width", 0); } // (deliberately not undoable)
-    Value getCanvasHeight()         { return root.getPropertyAsValue ("height", 0); }
+    Value getCanvasWidth()          { return getRootValueNonUndoable ("width"); }
+    Value getCanvasHeight()         { return getRootValueNonUndoable ("height"); }
+
+    void createClassProperties (Array <PropertyComponent*>& props);
 
     const String getNonExistentMemberName (String suggestedName);
 
@@ -103,7 +105,9 @@ private:
 
     void checkRootObject();
     ValueTree getComponentGroup() const;
-    Value getRootValue (const var::identifier& name)    { return root.getPropertyAsValue (name, getUndoManager()); }
+
+    Value getRootValueUndoable (const var::identifier& name)        { return root.getPropertyAsValue (name, getUndoManager()); }
+    Value getRootValueNonUndoable (const var::identifier& name)     { return root.getPropertyAsValue (name, 0); }
 
     void writeCode (OutputStream& cpp, OutputStream& header);
     void writeMetadata (OutputStream& out);

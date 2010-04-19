@@ -443,3 +443,19 @@ UndoManager* ComponentDocument::getUndoManager()
 {
     return &undoManager;
 }
+
+//==============================================================================
+void ComponentDocument::createClassProperties (Array <PropertyComponent*>& props)
+{
+    props.add (new TextPropertyComponent (getClassName(), "Class Name", 256, false));
+    props.getLast()->setTooltip ("The C++ class name for the component class.");
+
+    props.add (new TextPropertyComponent (getClassDescription(), "Description", 512, false));
+    props.getLast()->setTooltip ("A freeform description of the component.");
+
+    props.add (new SliderPropertyComponent (getCanvasWidth(), "Initial Width", 1.0, 8192.0, 1.0));
+    props.getLast()->setTooltip ("The initial width of the component when it is created.");
+
+    props.add (new SliderPropertyComponent (getCanvasHeight(), "Initial Height", 1.0, 8192.0, 1.0));
+    props.getLast()->setTooltip ("The initial height of the component when it is created.");
+}

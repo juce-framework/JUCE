@@ -63,7 +63,7 @@ public:
         If you need to customise the slider in other ways, your constructor can
         access the slider member variable and change it directly.
     */
-    SliderPropertyComponent (Value& valueToControl,
+    SliderPropertyComponent (const Value& valueToControl,
                              const String& propertyName,
                              double rangeMin,
                              double rangeMax,

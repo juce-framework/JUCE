@@ -1086,52 +1086,152 @@ private:
 };
 
 //==============================================================================
-class ComponentEditor::InfoPanel  : public Component,
-                                    public ChangeListener
+class ComponentEditor::ClassInfoHolder  : public Component
 {
 public:
-    InfoPanel (ComponentEditor& editor_)
-      : editor (editor_)
+    ClassInfoHolder (ComponentEditor& editor_)
+        : editor (editor_)
     {
-        setOpaque (true);
+        addAndMakeVisible (panel = new PropertyPanelWithTooltips());
 
-        addAndMakeVisible (props = new PropertyPanel());
-
-        editor.getCanvas()->getSelection().addChangeListener (this);
+        Array <PropertyComponent*> props;
+        editor.getDocument().createClassProperties (props);
+        panel->getPanel()->addSection ("Component Properties", props, true);
     }
 
-    ~InfoPanel()
+    ~ClassInfoHolder()
     {
-        editor.getCanvas()->getSelection().removeChangeListener (this);
-
-        props->clear();
         deleteAllChildren();
-    }
-
-    void changeListenerCallback (void*)
-    {
-        Array <PropertyComponent*> newComps;
-        editor.getCanvas()->getSelectedItemProperties (newComps);
-
-        props->clear();
-        props->addProperties (newComps);
-    }
-
-    void paint (Graphics& g)
-    {
-        g.fillAll (Colour::greyLevel (0.92f));
     }
 
     void resized()
     {
-        props->setSize (getWidth(), getHeight());
+        panel->setBounds (getLocalBounds());
     }
 
 private:
     ComponentEditor& editor;
-    PropertyPanel* props;
+    PropertyPanelWithTooltips* panel;
 };
 
+//==============================================================================
+class ComponentEditor::LayoutEditorHolder  : public Component
+{
+public:
+    LayoutEditorHolder (ComponentEditor& editor_)
+        : editor (editor_), infoPanel (0)
+    {
+        addAndMakeVisible (viewport = new Viewport());
+    }
+
+    ~LayoutEditorHolder()
+    {
+        deleteAndZero (infoPanel);
+        deleteAllChildren();
+    }
+
+    void createCanvas()
+    {
+        viewport->setViewedComponent (new Canvas (editor));
+        addAndMakeVisible (infoPanel = new InfoPanel (editor));
+    }
+
+    void resized()
+    {
+        const int infoPanelWidth = 200;
+        viewport->setBounds (0, 0, getWidth() - infoPanelWidth, getHeight());
+
+        if (infoPanel != 0)
+            infoPanel->setBounds (getWidth() - infoPanelWidth, 0, infoPanelWidth, getHeight());
+    }
+
+    Viewport* getViewport() const   { return viewport; }
+
+private:
+    class InfoPanel  : public Component,
+                       public ChangeListener
+    {
+    public:
+        InfoPanel (ComponentEditor& editor_)
+          : editor (editor_)
+        {
+            setOpaque (true);
+
+            addAndMakeVisible (props = new PropertyPanel());
+
+            editor.getCanvas()->getSelection().addChangeListener (this);
+        }
+
+        ~InfoPanel()
+        {
+            editor.getCanvas()->getSelection().removeChangeListener (this);
+
+            props->clear();
+            deleteAllChildren();
+        }
+
+        void changeListenerCallback (void*)
+        {
+            Array <PropertyComponent*> newComps;
+            editor.getCanvas()->getSelectedItemProperties (newComps);
+
+            props->clear();
+            props->addProperties (newComps);
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colour::greyLevel (0.92f));
+        }
+
+        void resized()
+        {
+            props->setSize (getWidth(), getHeight());
+        }
+
+    private:
+        ComponentEditor& editor;
+        PropertyPanel* props;
+    };
+
+    ComponentEditor& editor;
+    Viewport* viewport;
+    InfoPanel* infoPanel;
+};
+
+//==============================================================================
+class ComponentEditor::BackgroundEditorHolder  : public Component
+{
+public:
+    BackgroundEditorHolder (ComponentEditor& editor_)
+        : editor (editor_)
+    {
+    }
+
+    ~BackgroundEditorHolder()
+    {
+    }
+
+private:
+    ComponentEditor& editor;
+};
+
+//==============================================================================
+class ComponentEditor::CodeEditorHolder  : public Component
+{
+public:
+    CodeEditorHolder (ComponentEditor& editor_)
+        : editor (editor_)
+    {
+    }
+
+    ~CodeEditorHolder()
+    {
+    }
+
+private:
+    ComponentEditor& editor;
+};
 
 //==============================================================================
 ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document,
@@ -1139,22 +1239,35 @@ ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document,
     : DocumentEditorComponent (document),
       project (project_),
       componentDocument (componentDocument_),
-      infoPanel (0)
+      classInfoHolder (0),
+      layoutEditorHolder (0),
+      backgroundEditorHolder (0),
+      codeEditorHolder (0)
 {
     setOpaque (true);
 
-    addAndMakeVisible (viewport = new Viewport());
-
-    if (document != 0)
+    if (componentDocument != 0)
     {
-        viewport->setViewedComponent (new Canvas (*this));
-        addAndMakeVisible (infoPanel = new InfoPanel (*this));
+        classInfoHolder = new ClassInfoHolder (*this);
+        layoutEditorHolder = new LayoutEditorHolder (*this);
+        backgroundEditorHolder = new BackgroundEditorHolder (*this);
+        codeEditorHolder = new CodeEditorHolder (*this);
+        layoutEditorHolder->createCanvas();
     }
+
+    addAndMakeVisible (tabs = new TabbedComponent (TabbedButtonBar::TabsAtRight));
+    tabs->setTabBarDepth (22);
+
+    tabs->addTab ("Class Settings", Colour::greyLevel (0.88f), classInfoHolder, true);
+    tabs->addTab ("Components", Colours::white, layoutEditorHolder, true);
+    tabs->addTab ("Background", Colours::white, backgroundEditorHolder, true);
+    tabs->addTab ("Source Code", Colours::white, codeEditorHolder, true);
+
+    tabs->setCurrentTabIndex (1);
 }
 
 ComponentEditor::~ComponentEditor()
 {
-    deleteAndZero (infoPanel);
     deleteAllChildren();
 }
 
@@ -1165,16 +1278,17 @@ void ComponentEditor::paint (Graphics& g)
 
 void ComponentEditor::resized()
 {
-    const int infoPanelWidth = 200;
-    viewport->setBounds (0, 0, getWidth() - infoPanelWidth, getHeight());
-
-    if (infoPanel != 0)
-        infoPanel->setBounds (getWidth() - infoPanelWidth, 0, infoPanelWidth, getHeight());
+    tabs->setBounds (getLocalBounds());
 }
 
 ComponentEditor::Canvas* ComponentEditor::getCanvas() const
 {
-    return dynamic_cast <Canvas*> (viewport->getViewedComponent());
+    return dynamic_cast <Canvas*> (getViewport()->getViewedComponent());
+}
+
+Viewport* ComponentEditor::getViewport() const
+{
+    return layoutEditorHolder->getViewport();
 }
 
 void ComponentEditor::getAllCommands (Array <CommandID>& commands)

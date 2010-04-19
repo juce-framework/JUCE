@@ -3072,10 +3072,10 @@ void Component::moveKeyboardFocusToSibling (const bool moveToNext)
             {
                 if (nextComp->isCurrentlyBlockedByAnotherModalComponent())
                 {
-                    SafePointer<Component> safePointer (this);
+                    SafePointer<Component> nextCompPointer (nextComp);
                     internalModalInputAttempt();
 
-                    if (safePointer == 0 || nextComp->isCurrentlyBlockedByAnotherModalComponent())
+                    if (nextCompPointer == 0 || nextComp->isCurrentlyBlockedByAnotherModalComponent())
                         return;
                 }
 

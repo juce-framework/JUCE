@@ -62,24 +62,7 @@ private:
 
 
 //==============================================================================
-// If we've got gcc4.2 or later, we can use its atomic intrinsics...
-#if JUCE_GCC && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2))
-
-    inline void  Atomic::increment (int32& variable)                { __sync_add_and_fetch (&variable, 1); }
-    inline int32 Atomic::incrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, 1); }
-    inline void  Atomic::decrement (int32& variable)                { __sync_add_and_fetch (&variable, -1); }
-    inline int32 Atomic::decrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, -1); }
-    inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-                                                                    { return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
-
-    inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-    {
-        void* currentVal = *value1;
-        while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
-        return currentVal;
-    }
-
-#elif (JUCE_MAC || JUCE_IPHONE)  //  Older Mac builds using gcc4.0 or earlier...
+#if JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))  //  Older Mac builds using gcc4.1 or earlier...
 
     inline void  Atomic::increment (int32& variable)                { OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
     inline int32 Atomic::incrementAndReturn (int32& variable)       { return OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
@@ -112,9 +95,8 @@ private:
     }
 
 //==============================================================================
-#elif JUCE_LINUX                        // Linux with compilers other than gcc4.2 or later...
+#elif JUCE_LINUX && __INTEL_COMPILER  // Linux with Intel compiler...
 
-  #if __INTEL_COMPILER
     inline void  Atomic::increment (int32& variable)                { _InterlockedIncrement (&variable); }
     inline int32 Atomic::incrementAndReturn (int32& variable)       { return _InterlockedIncrement (&variable); }
     inline void  Atomic::decrement (int32& variable)                { _InterlockedDecrement (&variable); }
@@ -131,9 +113,22 @@ private:
       #endif
     }
 
-  #else
-    #error "Linux build requires gcc4.2 or later for atomic operations"
-  #endif
+//==============================================================================
+#elif JUCE_GCC       // On GCC, use intrinsics...
+
+    inline void  Atomic::increment (int32& variable)                { __sync_add_and_fetch (&variable, 1); }
+    inline int32 Atomic::incrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, 1); }
+    inline void  Atomic::decrement (int32& variable)                { __sync_add_and_fetch (&variable, -1); }
+    inline int32 Atomic::decrementAndReturn (int32& variable)       { return __sync_add_and_fetch (&variable, -1); }
+    inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
+                                                                    { return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
+
+    inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
+    {
+        void* currentVal = *value1;
+        while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
+        return currentVal;
+    }
 
 //==============================================================================
 #elif JUCE_USE_INTRINSICS               // Windows...

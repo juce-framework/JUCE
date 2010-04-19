@@ -27,27 +27,21 @@
 
 
 //[MiscUserDefs] You can add your own user definitions and misc code here...
-class PropertiesWithHelpComponent  : public Component,
-                                     public Timer
+class PropertiesWithHelpComponent  : public PropertyPanelWithTooltips
 {
 public:
     PropertiesWithHelpComponent (Project& project_, int tabIndex_)
-        : project (project_), lastComp (0), tabIndex (tabIndex_)
+        : project (project_), tabIndex (tabIndex_)
     {
-        addAndMakeVisible (panel = new PropertyPanel());
-        startTimer (150);
     }
 
     ~PropertiesWithHelpComponent()
     {
-        deleteAllChildren();
     }
-
-    PropertyPanel* getPanel() const        { return panel; }
 
     void rebuildProperties()
     {
-        panel->clear();
+        getPanel()->clear();
         Array <PropertyComponent*> props;
 
         if (tabIndex == 0)
@@ -91,7 +85,7 @@ public:
                 exp->createPropertyEditors (props);
         }
 
-        panel->addProperties (props);
+        getPanel()->addProperties (props);
     }
 
     void visibilityChanged()
@@ -100,71 +94,9 @@ public:
             rebuildProperties();
     }
 
-    void paint (Graphics& g)
-    {
-        g.setColour (Colour::greyLevel (0.15f));
-        g.setFont (13.0f);
-
-        TextLayout tl;
-        tl.appendText (lastTip, Font (14.0f));
-        tl.layout (getWidth() - 10, Justification::left, true); // try to make it look nice
-        if (tl.getNumLines() > 3)
-            tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
-
-        tl.drawWithin (g, 5, panel->getBottom() + 2, getWidth() - 10,
-                       getHeight() - panel->getBottom() - 4,
-                       Justification::centredLeft);
-    }
-
-    void resized()
-    {
-        panel->setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
-    }
-
-    void timerCallback()
-    {
-        Component* const newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
-
-        if (newComp != lastComp)
-        {
-            lastComp = newComp;
-
-            String newTip (findTip (newComp));
-
-            if (newTip != lastTip)
-            {
-                lastTip = newTip;
-                repaint (0, panel->getBottom(), getWidth(), getHeight());
-            }
-        }
-    }
-
 private:
     Project& project;
-    PropertyPanel* panel;
-    TextLayout layout;
-    Component* lastComp;
-    String lastTip;
     int tabIndex;
-
-    const String findTip (Component* c)
-    {
-        while (c != 0 && c != this)
-        {
-            TooltipClient* tc = dynamic_cast <TooltipClient*> (c);
-            if (tc != 0)
-            {
-                String tip (tc->getTooltip());
-
-                if (tip.isNotEmpty())
-                    return tip;
-            }
-
-            c = c->getParentComponent();
-        }
-
-        return String::empty;
-    }
 };
 
 //[/MiscUserDefs]

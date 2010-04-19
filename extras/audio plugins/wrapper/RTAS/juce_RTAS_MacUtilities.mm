@@ -110,9 +110,6 @@ void removeSubWindow (void* nsWindow, Component* comp)
     [hostWindow removeChildWindow: pluginWindow];
     comp->removeFromDesktop();
     [hostWindow release];
-
-    for (int i = 20; --i >= 0;)
-        MessageManager::getInstance()->runDispatchLoopUntil (1);
 }
 
 static bool isJuceWindow (WindowRef w)

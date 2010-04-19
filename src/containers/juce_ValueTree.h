@@ -130,6 +130,13 @@ public:
     */
     const var& getProperty (const var::identifier& name) const;
 
+    /** Returns the value of a named property, or a user-specified default if the property doesn't exist.
+        If no such property has been set, this will return the value of defaultReturnValue.
+        You can also use operator[] and getProperty to get a property.
+        @see var, getProperty, setProperty, hasProperty
+    */
+    const var getProperty (const var::identifier& name, const var& defaultReturnValue) const;
+
     /** Returns the value of a named property.
         If no such property has been set, this will return a void variant. This is the same as
         calling getProperty().
@@ -406,6 +413,7 @@ private:
         void sendChildChangeMessage (ValueTree& tree);
         void sendParentChangeMessage();
         const var& getProperty (const var::identifier& name) const;
+        const var getProperty (const var::identifier& name, const var& defaultReturnValue) const;
         void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
         bool hasProperty (const var::identifier& name) const;
         void removeProperty (const var::identifier& name, UndoManager* const undoManager);

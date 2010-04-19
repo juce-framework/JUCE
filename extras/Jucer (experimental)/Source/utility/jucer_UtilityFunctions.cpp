@@ -349,21 +349,21 @@ const String makeValidCppIdentifier (String s,
         n = "_" + n;
 
     // make sure it's not a reserved c++ keyword..
-    static const tchar* const reservedWords[] =
+    static const char* const reservedWords[] =
     {
-        T("auto"), T("const"), T("double"), T("float"), T("int"), T("short"), T("struct"),
-        T("return"), T("static"), T("union"), T("while"), T("asm"), T("dynamic_cast"),
-        T("unsigned"), T("break"), T("continue"), T("else"), T("for"), T("long"), T("signed"),
-        T("switch"), T("void"), T("case"), T("default"), T("enum"), T("goto"), T("register"),
-        T("sizeof"), T("typedef"), T("volatile"), T("char"), T("do"), T("extern"), T("if"),
-        T("namespace"), T("reinterpret_cast"), T("try"), T("bool"), T("explicit"), T("new"),
-        T("static_cast"), T("typeid"), T("catch"), T("false"), T("operator"), T("template"),
-        T("typename"), T("class"), T("friend"), T("private"), T("this"), T("using"), T("const_cast"),
-        T("inline"), T("public"), T("throw"), T("virtual"), T("delete"), T("mutable"), T("protected"),
-        T("true"), T("wchar_t"), T("and"), T("bitand"), T("compl"), T("not_eq"), T("or_eq"),
-        T("xor_eq"), T("and_eq"), T("bitor"), T("not"), T("or"), T("xor"), T("cin"), T("endl"),
-        T("INT_MIN"), T("iomanip"), T("main"), T("npos"), T("std"), T("cout"), T("include"),
-        T("INT_MAX"), T("iostream"), T("MAX_RAND"), T("NULL"), T("string"), T("id")
+        "auto", "const", "double", "float", "int", "short", "struct",
+        "return", "static", "union", "while", "asm", "dynamic_cast",
+        "unsigned", "break", "continue", "else", "for", "long", "signed",
+        "switch", "void", "case", "default", "enum", "goto", "register",
+        "sizeof", "typedef", "volatile", "char", "do", "extern", "if",
+        "namespace", "reinterpret_cast", "try", "bool", "explicit", "new",
+        "static_cast", "typeid", "catch", "false", "operator", "template",
+        "typename", "class", "friend", "private", "this", "using", "const_cast",
+        "inline", "public", "throw", "virtual", "delete", "mutable", "protected",
+        "true", "wchar_t", "and", "bitand", "compl", "not_eq", "or_eq",
+        "xor_eq", "and_eq", "bitor", "not", "or", "xor", "cin", "endl",
+        "INT_MIN", "iomanip", "main", "npos", "std", "cout", "include",
+        "INT_MAX", "iostream", "MAX_RAND", "NULL", "string", "id", "std"
     };
 
     for (i = 0; i < numElementsInArray (reservedWords); ++i)
@@ -502,4 +502,76 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
     }
 
     return -1;
+}
+
+
+//==============================================================================
+PropertyPanelWithTooltips::PropertyPanelWithTooltips()
+    : lastComp (0)
+{
+    addAndMakeVisible (panel = new PropertyPanel());
+    startTimer (150);
+}
+
+PropertyPanelWithTooltips::~PropertyPanelWithTooltips()
+{
+    deleteAllChildren();
+}
+
+void PropertyPanelWithTooltips::paint (Graphics& g)
+{
+    g.setColour (Colour::greyLevel (0.15f));
+    g.setFont (13.0f);
+
+    TextLayout tl;
+    tl.appendText (lastTip, Font (14.0f));
+    tl.layout (getWidth() - 10, Justification::left, true); // try to make it look nice
+    if (tl.getNumLines() > 3)
+        tl.layout (getWidth() - 10, Justification::left, false); // too big, so just squash it in..
+
+    tl.drawWithin (g, 5, panel->getBottom() + 2, getWidth() - 10,
+                   getHeight() - panel->getBottom() - 4,
+                   Justification::centredLeft);
+}
+
+void PropertyPanelWithTooltips::resized()
+{
+    panel->setBounds (0, 0, getWidth(), jmax (getHeight() - 60, proportionOfHeight (0.6f)));
+}
+
+void PropertyPanelWithTooltips::timerCallback()
+{
+    Component* const newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+
+    if (newComp != lastComp)
+    {
+        lastComp = newComp;
+
+        String newTip (findTip (newComp));
+
+        if (newTip != lastTip)
+        {
+            lastTip = newTip;
+            repaint (0, panel->getBottom(), getWidth(), getHeight());
+        }
+    }
+}
+
+const String PropertyPanelWithTooltips::findTip (Component* c)
+{
+    while (c != 0 && c != this)
+    {
+        TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
+        if (tc != 0)
+        {
+            const String tip (tc->getTooltip());
+
+            if (tip.isNotEmpty())
+                return tip;
+        }
+
+        c = c->getParentComponent();
+    }
+
+    return String::empty;
 }

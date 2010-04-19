@@ -47,7 +47,7 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
     slider->addListener (this);
 }
 
-SliderPropertyComponent::SliderPropertyComponent (Value& valueToControl,
+SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
                                                   const String& name,
                                                   const double rangeMin,
                                                   const double rangeMax,

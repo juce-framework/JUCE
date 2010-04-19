@@ -110,6 +110,30 @@ private:
 };
 
 //==============================================================================
+class PropertyPanelWithTooltips  : public Component,
+                                   public Timer
+{
+public:
+    PropertyPanelWithTooltips();
+    ~PropertyPanelWithTooltips();
+
+    PropertyPanel* getPanel() const        { return panel; }
+
+    void paint (Graphics& g);
+    void resized();
+    void timerCallback();
+
+private:
+    PropertyPanel* panel;
+    TextLayout layout;
+    Component* lastComp;
+    String lastTip;
+
+    const String findTip (Component* c);
+};
+
+
+//==============================================================================
 static const double tickSizes[] = { 1.0, 2.0, 5.0,
                                     10.0, 20.0, 50.0,
                                     100.0, 200.0, 500.0, 1000.0 };

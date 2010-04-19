@@ -232,6 +232,11 @@ const var& ValueTree::SharedObject::getProperty (const var::identifier& name) co
     return properties [name];
 }
 
+const var ValueTree::SharedObject::getProperty (const var::identifier& name, const var& defaultReturnValue) const
+{
+    return properties.getWithDefault (name, defaultReturnValue);
+}
+
 void ValueTree::SharedObject::setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager)
 {
     if (undoManager == 0)
@@ -471,6 +476,11 @@ const var& ValueTree::getProperty (const var::identifier& name) const
     return object == 0 ? var::null : object->getProperty (name);
 }
 
+const var ValueTree::getProperty (const var::identifier& name, const var& defaultReturnValue) const
+{
+    return object == 0 ? defaultReturnValue : object->getProperty (name, defaultReturnValue);
+}
+
 void ValueTree::setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager)
 {
     jassert (name.name.isNotEmpty());
@@ -501,10 +511,10 @@ int ValueTree::getNumProperties() const
     return object == 0 ? 0 : object->properties.size();
 }
 
-const var::identifier ValueTree::getPropertyName (int index) const
+const var::identifier ValueTree::getPropertyName (const int index) const
 {
-    return (object == 0) ? var::identifier()
-                         : object->properties.getName (index);
+    return object == 0 ? var::identifier()
+                       : object->properties.getName (index);
 }
 
 //==============================================================================

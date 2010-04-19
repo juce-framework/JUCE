@@ -184,7 +184,15 @@ public:
         delete juceFilter;
 
         if (--numInstances == 0)
+        {
+#if JUCE_MAC
+            // Hack to allow any NSWindows to clear themselves up before returning to PT..
+            for (int i = 20; --i >= 0;)
+                MessageManager::getInstance()->runDispatchLoopUntil (1);
+#endif
+
             shutdownJuce_GUI();
+        }
     }
 
     //==============================================================================

@@ -29,6 +29,7 @@
 
 #include "../jucer_ComponentDocument.h"
 
+
 //==============================================================================
 class TextButtonHandler  : public ComponentTypeHelper<TextButton>
 {
