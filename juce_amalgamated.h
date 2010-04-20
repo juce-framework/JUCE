@@ -6698,6 +6698,8 @@ class JUCE_API  ValueTree
 {
 public:
 
+	ValueTree() throw();
+
 	explicit ValueTree (const String& type);
 
 	ValueTree (const ValueTree& other);
@@ -6794,7 +6796,7 @@ public:
 		}
 	}
 
-	static ValueTree invalid;
+	static const ValueTree invalid;
 
 	juce_UseDebuggingNewOperator
 
@@ -6805,7 +6807,7 @@ private:
 	class JUCE_API  SharedObject	: public ReferenceCountedObject
 	{
 	public:
-		SharedObject (const String& type);
+		explicit SharedObject (const String& type);
 		SharedObject (const SharedObject& other);
 		~SharedObject();
 
@@ -10280,6 +10282,12 @@ public:
 		const int y2 = (int) floorf ((float) (y + h + 0.9999f));
 
 		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+	}
+
+	const Rectangle<float> toFloat() const throw()
+	{
+		return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
+								 static_cast<float> (w), static_cast<float> (h));
 	}
 
 	static bool intersectRectangles (ValueType& x1, ValueType& y1, ValueType& w1, ValueType& h1,
@@ -26234,8 +26242,6 @@ private:
 #ifndef __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
 #define __JUCE_AUDIODEVICESELECTORCOMPONENT_JUCEHEADER__
 
-class MidiInputSelectorComponentListBox;
-
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
 												public ComboBoxListener,
 												public ButtonListener,
@@ -26273,6 +26279,7 @@ private:
 	const bool showChannelsAsStereoPairs;
 	const bool hideAdvancedOptionsWithButton;
 
+	class MidiInputSelectorComponentListBox;
 	MidiInputSelectorComponentListBox* midiInputsList;
 	Label* midiInputsLabel;
 	ComboBox* midiOutputSelector;

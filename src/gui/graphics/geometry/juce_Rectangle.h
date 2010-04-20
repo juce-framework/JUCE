@@ -466,6 +466,7 @@ public:
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.
         This is only relevent for floating-point rectangles, of course.
+        @see toFloat()
     */
     const Rectangle<int> getSmallestIntegerContainer() const throw()
     {
@@ -475,6 +476,16 @@ public:
         const int y2 = (int) floorf ((float) (y + h + 0.9999f));
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+    }
+
+    /** Casts this rectangle to a Rectangle<float>.
+        Obviously this is mainly useful for rectangles that use integer types.
+        @see getSmallestIntegerContainer
+    */
+    const Rectangle<float> toFloat() const throw()
+    {
+        return Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
+                                 static_cast<float> (w), static_cast<float> (h));
     }
 
     //==============================================================================

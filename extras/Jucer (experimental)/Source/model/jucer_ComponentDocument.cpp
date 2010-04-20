@@ -30,6 +30,9 @@
 //==============================================================================
 static const char* const componentDocumentTag   = "COMPONENT";
 static const char* const componentGroupTag      = "COMPONENTS";
+static const char* const markersGroupXTag       = "MARKERS_X";
+static const char* const markersGroupYTag       = "MARKERS_Y";
+static const char* const markerTag              = "MARKER";
 
 static const char* const metadataTagStart       = "JUCER_" "COMPONENT_METADATA_START"; // written like this to avoid thinking this file is a component!
 static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_END";
@@ -38,15 +41,21 @@ const char* const ComponentDocument::idProperty             = "id";
 const char* const ComponentDocument::compBoundsProperty     = "position";
 const char* const ComponentDocument::memberNameProperty     = "memberName";
 const char* const ComponentDocument::compNameProperty       = "name";
+const char* const ComponentDocument::markerNameProperty     = "name";
+const char* const ComponentDocument::markerPosProperty      = "position";
 
 
 //==============================================================================
 ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
-   : project (project_), cppFile (cppFile_), root (componentDocumentTag),
+   : project (project_), cppFile (cppFile_),
+     root (componentDocumentTag),
      changedSinceSaved (false)
 {
     reload();
     checkRootObject();
+
+    markersX = new MarkerList (*this, true);
+    markersY = new MarkerList (*this, false);
 
     root.addListener (this);
 }
@@ -195,12 +204,19 @@ bool ComponentDocument::hasChangedSinceLastSave()
     return changedSinceSaved;
 }
 
+void ComponentDocument::createSubTreeIfNotThere (const String& name)
+{
+    if (! root.getChildWithName (name).isValid())
+        root.addChild (ValueTree (name), -1, 0);
+}
+
 void ComponentDocument::checkRootObject()
 {
     jassert (root.hasType (componentDocumentTag));
 
-    if (! getComponentGroup().isValid())
-        root.addChild (ValueTree (componentGroupTag), -1, 0);
+    createSubTreeIfNotThere (componentGroupTag);
+    createSubTreeIfNotThere (markersGroupXTag);
+    createSubTreeIfNotThere (markersGroupYTag);
 
     if (getClassName().toString().isEmpty())
         getClassName() = "NewComponent";
@@ -334,7 +350,7 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
     return true;
 }
 
-Coordinate::MarkerResolver* ComponentDocument::createMarkerResolver (const ValueTree& state)
+Coordinate::MarkerResolver* ComponentDocument::createComponentMarkerResolver (const ValueTree& state)
 {
     return new ComponentMarkerResolver (*this, state, getCanvasWidth().getValue(), getCanvasHeight().getValue());
 }
@@ -436,6 +452,85 @@ const String ComponentDocument::getNonExistentMemberName (String suggestedName)
     }
 
     return suggestedName;
+}
+
+//==============================================================================
+ComponentDocument::MarkerList::MarkerList (ComponentDocument& document_, const bool isX_)
+    : document (document_),
+      group (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag)),
+      isX (isX_)
+{
+    jassert (group.isValid());
+}
+
+ValueTree ComponentDocument::MarkerList::getGroup() const
+{
+    return group;
+}
+
+int ComponentDocument::MarkerList::size() const
+{
+    return group.getNumChildren();
+}
+
+ValueTree ComponentDocument::MarkerList::getMarker (int index) const
+{
+    return group.getChild (index);
+}
+
+ValueTree ComponentDocument::MarkerList::getMarkerNamed (const String& name) const
+{
+    return group.getChildWithProperty (markerNameProperty, name);
+}
+
+bool ComponentDocument::MarkerList::contains (const ValueTree& markerState) const
+{
+    return markerState.isAChildOf (group);
+}
+
+const Coordinate ComponentDocument::MarkerList::getCoordinate (const ValueTree& markerState) const
+{
+    return Coordinate (markerState [markerPosProperty].toString(), isX);
+}
+
+void ComponentDocument::MarkerList::setCoordinate (ValueTree& markerState, const Coordinate& newCoord)
+{
+    markerState.setProperty (markerPosProperty, newCoord.toString(), document.getUndoManager());
+}
+
+void ComponentDocument::MarkerList::createMarker (const String& name, int position)
+{
+    ValueTree marker (markerTag);
+    marker.setProperty (markerNameProperty, document.getNonexistentMarkerName (name), 0);
+    marker.setProperty (markerPosProperty, Coordinate (position, isX).toString(), 0);
+    group.addChild (marker, -1, document.getUndoManager());
+}
+
+void ComponentDocument::MarkerList::deleteMarker (ValueTree& markerState)
+{
+    group.removeChild (markerState, document.getUndoManager());
+}
+
+const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, bool isHorizontal)
+{
+    if (isHorizontal == isX)
+    {
+        if (name == Coordinate::parentRightMarkerName)          return Coordinate ((double) document.getCanvasWidth().getValue(), isHorizontal);
+        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) document.getCanvasHeight().getValue(), isHorizontal);
+    }
+
+    return Coordinate (isX);
+}
+
+const String ComponentDocument::getNonexistentMarkerName (const String& name)
+{
+    String n (makeValidCppIdentifier (name, false, true, false));
+    int suffix = 2;
+
+    while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid())
+        n = n.trimCharactersAtEnd ("0123456789") + String (suffix++);
+
+    return n;
 }
 
 //==============================================================================

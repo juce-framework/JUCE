@@ -26,8 +26,7 @@
 #ifndef __JUCE_COMPONENTEDITOR_H_6CAE6B7E__
 #define __JUCE_COMPONENTEDITOR_H_6CAE6B7E__
 
-#include "../../model/jucer_ComponentDocument.h"
-#include "../jucer_DocumentEditorComponent.h"
+#include "jucer_ComponentEditorCanvas.h"
 
 
 //==============================================================================
@@ -55,8 +54,7 @@ public:
 
     Viewport* getViewport() const;
 
-    class Canvas;
-    Canvas* getCanvas() const;
+    ComponentEditorCanvas* getCanvas() const;
 
 private:
     class ClassInfoHolder;
@@ -72,6 +70,9 @@ private:
     LayoutEditorHolder* layoutEditorHolder;
     BackgroundEditorHolder* backgroundEditorHolder;
     CodeEditorHolder* codeEditorHolder;
+
+    ComponentEditor (const ComponentEditor&);
+    ComponentEditor& operator= (const ComponentEditor&);
 };
 
 

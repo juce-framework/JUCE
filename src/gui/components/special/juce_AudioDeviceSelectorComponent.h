@@ -29,7 +29,6 @@
 #include "../controls/juce_ComboBox.h"
 #include "../controls/juce_ListBox.h"
 #include "../../../audio/devices/juce_AudioDeviceManager.h"
-class MidiInputSelectorComponentListBox;
 
 //==============================================================================
 /**
@@ -104,6 +103,7 @@ private:
     const bool showChannelsAsStereoPairs;
     const bool hideAdvancedOptionsWithButton;
 
+    class MidiInputSelectorComponentListBox;
     MidiInputSelectorComponentListBox* midiInputsList;
     Label* midiInputsLabel;
     ComboBox* midiOutputSelector;

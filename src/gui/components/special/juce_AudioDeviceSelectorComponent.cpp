@@ -80,8 +80,8 @@ private:
 
 
 //==============================================================================
-class MidiInputSelectorComponentListBox  : public ListBox,
-                                           public ListBoxModel
+class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public ListBox,
+                                                                         public ListBoxModel
 {
 public:
     //==============================================================================

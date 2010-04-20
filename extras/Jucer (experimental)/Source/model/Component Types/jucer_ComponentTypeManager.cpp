@@ -100,7 +100,7 @@ public:
     {
         RectangleCoordinates r (boundsValue.toString());
         Coordinate& coord = getCoord (r);
-        ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (compState));
+        ScopedPointer<Coordinate::MarkerResolver> markers (document.createComponentMarkerResolver (compState));
 
         if (button == proportionButton)
         {
@@ -265,7 +265,7 @@ Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& st
 void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
 {
     RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
-    ScopedPointer<Coordinate::MarkerResolver> markers (document.createMarkerResolver (state));
+    ScopedPointer<Coordinate::MarkerResolver> markers (document.createComponentMarkerResolver (state));
     comp->setBounds (pos.resolve (*markers));
 
     comp->setName (state [ComponentDocument::compNameProperty]);

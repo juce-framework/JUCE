@@ -113,9 +113,16 @@ public:
     bool undo()
     {
         if (isDeleting)
+        {
             target->addChild (child, childIndex, 0);
+        }
         else
+        {
+            // If you hit this, it seems that your object's state is getting confused - probably
+            // because you've interleaved some undoable and non-undoable operations?
+            jassert (childIndex < target->children.size());
             target->removeChild (childIndex, 0);
+        }
 
         return true;
     }
@@ -356,6 +363,9 @@ void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoMana
             }
             else
             {
+                if (index < 0)
+                    index = children.size();
+
                 undoManager->perform (new ValueTreeChildChangeAction (this, index, child));
             }
         }
@@ -396,7 +406,12 @@ void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
 
 
 //==============================================================================
-ValueTree ValueTree::invalid (static_cast <ValueTree::SharedObject*> (0));
+ValueTree::ValueTree() throw()
+    : object (0)
+{
+}
+
+const ValueTree ValueTree::invalid;
 
 ValueTree::ValueTree (const String& type_)
     : object (new ValueTree::SharedObject (type_))

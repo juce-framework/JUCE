@@ -56,6 +56,10 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
         if (filter != 0)
         {
+            filter->setPlayConfigDetails (JucePlugin_MaxNumInputChannels,
+                                          JucePlugin_MaxNumOutputChannels,
+                                          44100, 512);
+
             PropertySet* const globalSettings = getGlobalSettings();
 
             deviceManager = new AudioFilterStreamingDeviceManager();

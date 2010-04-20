@@ -52,6 +52,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_ProjectExporter.o \
   $(OBJDIR)/jucer_ProjectWizard.o \
   $(OBJDIR)/jucer_ResourceFile.o \
+  $(OBJDIR)/jucer_ComponentEditorCanvas.o \
   $(OBJDIR)/jucer_ComponentEditor.o \
   $(OBJDIR)/jucer_DrawableEditor.o \
   $(OBJDIR)/jucer_DocumentEditorComponent.o \
@@ -130,6 +131,11 @@ $(OBJDIR)/jucer_ProjectWizard.o: ../../Source/model/jucer_ProjectWizard.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ResourceFile.o: ../../Source/model/jucer_ResourceFile.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_ComponentEditorCanvas.o: ../../Source/ui/Component\ Editor/jucer_ComponentEditorCanvas.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

@@ -54,6 +54,10 @@ public:
 
 protected:
     OpenDocumentManager::Document* document;
+
+private:
+    DocumentEditorComponent (const DocumentEditorComponent&);
+    DocumentEditorComponent& operator= (const DocumentEditorComponent&);
 };
 
 

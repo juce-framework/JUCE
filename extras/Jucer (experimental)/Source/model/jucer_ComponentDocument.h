@@ -68,13 +68,44 @@ public:
     const ValueTree getComponentState (Component* comp) const;
     void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
-    Coordinate::MarkerResolver* createMarkerResolver (const ValueTree& state);
+    Coordinate::MarkerResolver* createComponentMarkerResolver (const ValueTree& state);
     const StringArray getComponentMarkers (bool horizontal) const;
     const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
     bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     void performNewComponentMenuItem (int menuResultCode);
+
+    //==============================================================================
+    class MarkerList    : public Coordinate::MarkerResolver
+    {
+    public:
+        MarkerList (ComponentDocument& document, bool isX);
+
+        ValueTree getGroup() const;
+        int size() const;
+        ValueTree getMarker (int index) const;
+        ValueTree getMarkerNamed (const String& name) const;
+        bool contains (const ValueTree& markerState) const;
+        const Coordinate getCoordinate (const ValueTree& markerState) const;
+        void setCoordinate (ValueTree& markerState, const Coordinate& newCoord);
+        void createMarker (const String& name, int position);
+        void deleteMarker (ValueTree& markerState);
+
+        // for Coordinate::MarkerResolver:
+        const Coordinate findMarker (const String& name, bool isHorizontal);
+
+    private:
+        ComponentDocument& document;
+        ValueTree group;
+        const bool isX;
+    };
+
+    MarkerList& getMarkerListX()            { return *markersX; }
+    MarkerList& getMarkerListY()            { return *markersY; }
+    MarkerList& getMarkerList (bool isX)    { return isX ? *markersX : *markersY; }
+
+    const String getNonexistentMarkerName (const String& name);
 
     //==============================================================================
     void beginDrag (const Array<Component*>& items, const MouseEvent& e,
@@ -95,15 +126,19 @@ public:
     static const char* const compBoundsProperty;
     static const char* const memberNameProperty;
     static const char* const compNameProperty;
+    static const char* const markerNameProperty;
+    static const char* const markerPosProperty;
 
 private:
     Project* project;
     File cppFile;
     ValueTree root;
+    ScopedPointer<MarkerList> markersX, markersY;
     UndoManager undoManager;
     bool changedSinceSaved;
 
     void checkRootObject();
+    void createSubTreeIfNotThere (const String& name);
     ValueTree getComponentGroup() const;
 
     Value getRootValueUndoable (const var::identifier& name)        { return root.getPropertyAsValue (name, getUndoManager()); }

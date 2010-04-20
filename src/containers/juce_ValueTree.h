@@ -73,6 +73,16 @@ class JUCE_API  ValueTree
 {
 public:
     //==============================================================================
+    /** Creates an empty, invalid ValueTree.
+
+        A ValueTree that is created with this constructor can't actually be used for anything,
+        it's just a default 'null' ValueTree that can be returned to indicate some sort of failure.
+        To create a real one, use the constructor that takes a string.
+
+        @see ValueTree::invalid
+    */
+    ValueTree() throw();
+
     /** Creates an empty ValueTree with the given type name.
         Like an XmlElement, each ValueTree node has a type, which you can access with
         getType() and hasType().
@@ -384,8 +394,10 @@ public:
         }
     }
 
-    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc. */
-    static ValueTree invalid;
+    /** An invalid ValueTree that can be used if you need to return one as an error condition, etc.
+        This invalid object is equivalent to ValueTree created with its default constructor.
+    */
+    static const ValueTree invalid;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -397,7 +409,7 @@ private:
     class JUCE_API  SharedObject    : public ReferenceCountedObject
     {
     public:
-        SharedObject (const String& type);
+        explicit SharedObject (const String& type);
         SharedObject (const SharedObject& other);
         ~SharedObject();
 
