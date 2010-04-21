@@ -184,7 +184,9 @@ public:
                                                   keyCode: 0];
 
             [menu performKeyEquivalent: f35Event];
-            [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
+
+            if ([menu indexOfItem: item] >= 0)
+                [menu removeItem: item]; // (this throws if the item isn't actually in the menu)
         }
 
         [menu release];

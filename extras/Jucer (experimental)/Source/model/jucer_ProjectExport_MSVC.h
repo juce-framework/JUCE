@@ -838,6 +838,9 @@ private:
             << "{{{" << newLine
             << "}}}" << newLine;
     }
+
+    MSVCProjectExporter (const MSVCProjectExporter&);
+    MSVCProjectExporter& operator= (const MSVCProjectExporter&);
 };
 
 

@@ -6750,7 +6750,7 @@ public:
 
 	void addChild (ValueTree child, int index, UndoManager* const undoManager);
 
-	void removeChild (ValueTree& child, UndoManager* const undoManager);
+	void removeChild (const ValueTree& child, UndoManager* const undoManager);
 
 	void removeChild (const int childIndex, UndoManager* const undoManager);
 
@@ -6855,6 +6855,9 @@ private:
 
 	private:
 		ElementComparator& comparator;
+
+		ComparatorAdapter (const ComparatorAdapter&);
+		ComparatorAdapter& operator= (const ComparatorAdapter&);
 	};
 
 	friend class SharedObject;

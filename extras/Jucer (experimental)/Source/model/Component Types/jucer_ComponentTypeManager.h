@@ -54,6 +54,10 @@ public:
     //==============================================================================
 protected:
     const String name, xmlTag, memberNameRoot;
+
+private:
+    ComponentTypeHandler (const ComponentTypeHandler&);
+    ComponentTypeHandler& operator= (const ComponentTypeHandler&);
 };
 
 

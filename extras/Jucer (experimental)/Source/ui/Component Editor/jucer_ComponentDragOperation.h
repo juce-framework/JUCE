@@ -206,15 +206,13 @@ public:
         const Rectangle<int> newBounds (zone.resizeRectangleBy (originalPos, distance));
 
         RectangleCoordinates pr (getDocument().getCoordsFor (v));
-        ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createComponentMarkerResolver (v));
-
-        pr.moveToAbsolute (newBounds, *markers);
+        pr.moveToAbsolute (newBounds, getDocument());
 
         return getDocument().setCoordsFor (v, pr);
     }
 
-    //==============================================================================
 private:
+    //==============================================================================
     ComponentEditorCanvas& canvas;
     Array <ValueTree> draggedComponents;
     Array <Rectangle<int> > originalPositions;
@@ -229,8 +227,7 @@ private:
     const Rectangle<float> getComponentPosition (const ValueTree& state)
     {
         RectangleCoordinates relativePos (getDocument().getCoordsFor (state));
-        ScopedPointer<Coordinate::MarkerResolver> markers (getDocument().createComponentMarkerResolver (state));
-        const Rectangle<int> intPos (relativePos.resolve (*markers));
+        const Rectangle<int> intPos (relativePos.resolve (getDocument()));
         originalPositions.add (intPos);
 
         return intPos.toFloat();

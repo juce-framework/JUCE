@@ -251,8 +251,9 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 
     case StandardApplicationCommandIDs::del:
         result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
-        result.setActive (projectTree != 0);
         result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
+        result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
+        result.setActive (projectTree != 0);
         break;
 
     default:

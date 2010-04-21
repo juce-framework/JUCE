@@ -54,9 +54,6 @@ ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
     reload();
     checkRootObject();
 
-    markersX = new MarkerList (*this, true);
-    markersY = new MarkerList (*this, false);
-
     root.addListener (this);
 }
 
@@ -189,6 +186,8 @@ bool ComponentDocument::reload()
         if (newTree.isValid())
         {
             root = newTree;
+            markersX = 0;
+            markersY = 0;
             checkRootObject();
             undoManager.clearUndoHistory();
             changedSinceSaved = false;
@@ -217,6 +216,12 @@ void ComponentDocument::checkRootObject()
     createSubTreeIfNotThere (componentGroupTag);
     createSubTreeIfNotThere (markersGroupXTag);
     createSubTreeIfNotThere (markersGroupYTag);
+
+    if (markersX == 0)
+        markersX = new MarkerList (*this, true);
+
+    if (markersY == 0)
+        markersY = new MarkerList (*this, false);
 
     if (getClassName().toString().isEmpty())
         getClassName() = "NewComponent";
@@ -305,34 +310,38 @@ Component* ComponentDocument::createComponent (int index)
 }
 
 //==============================================================================
-class ComponentMarkerResolver  : public Coordinate::MarkerResolver
+const Coordinate ComponentDocument::findMarker (const String& name, bool isHorizontal) const
 {
-public:
-    ComponentMarkerResolver (ComponentDocument& doc, const ValueTree& state_, int parentWidth_, int parentHeight_)
-        : owner (doc), state (state_),
-          parentWidth (parentWidth_),
-          parentHeight (parentHeight_)
-    {}
+    if (name == Coordinate::parentRightMarkerName)     return Coordinate ((double) getCanvasWidth().getValue(), isHorizontal);
+    if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) getCanvasHeight().getValue(), isHorizontal);
 
-    ~ComponentMarkerResolver() {}
-
-    const Coordinate findMarker (const String& name, bool isHorizontal)
+    if (name.containsChar ('.'))
     {
-        if (name == "left")             return RectangleCoordinates (state [ComponentDocument::compBoundsProperty]).left;
-        else if (name == "right")       return RectangleCoordinates (state [ComponentDocument::compBoundsProperty]).right;
-        else if (name == "top")         return RectangleCoordinates (state [ComponentDocument::compBoundsProperty]).top;
-        else if (name == "bottom")      return RectangleCoordinates (state [ComponentDocument::compBoundsProperty]).bottom;
-        else if (name == Coordinate::parentRightMarkerName)     return Coordinate (parentWidth, isHorizontal);
-        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate (parentHeight, isHorizontal);
+        const String compName (name.upToFirstOccurrenceOf (".", false, false).trim());
+        const String edge (name.fromFirstOccurrenceOf (".", false, false).trim());
 
-        return Coordinate (isHorizontal);
+        if (compName.isNotEmpty() && edge.isNotEmpty())
+        {
+            const ValueTree comp (getComponentWithMemberName (compName));
+
+            if (comp.isValid())
+            {
+                const RectangleCoordinates coords (getCoordsFor (comp));
+
+                if (edge == "left")   return coords.left;
+                if (edge == "right")  return coords.right;
+                if (edge == "top")    return coords.top;
+                if (edge == "bottom") return coords.bottom;
+            }
+        }
     }
 
-private:
-    ComponentDocument& owner;
-    ValueTree state;
-    int parentWidth, parentHeight;
-};
+    const ValueTree marker (getMarkerList (isHorizontal).getMarkerNamed (name));
+    if (marker.isValid())
+        return getMarkerList (isHorizontal).getCoordinate (marker);
+
+    return Coordinate (isHorizontal);
+}
 
 const RectangleCoordinates ComponentDocument::getCoordsFor (const ValueTree& state) const
 {
@@ -350,31 +359,97 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
     return true;
 }
 
-Coordinate::MarkerResolver* ComponentDocument::createComponentMarkerResolver (const ValueTree& state)
+void ComponentDocument::addMarkerMenuItem (int i, Coordinate& coord, const String& name, PopupMenu& menu, bool isAnchor1,
+                                           const ValueTree& componentState, const String& coordName)
 {
-    return new ComponentMarkerResolver (*this, state, getCanvasWidth().getValue(), getCanvasHeight().getValue());
+    const String componentName (componentState [memberNameProperty].toString());
+    Coordinate requestedCoord (findMarker (name, coord.isHorizontal()));
+    const String fullCoordName (componentName + "." + coordName);
+
+    menu.addItem (i, name,
+                  ! (name == fullCoordName || requestedCoord.referencesIndirectly (fullCoordName, *this)),
+                  name == (isAnchor1 ? coord.getAnchor1() : coord.getAnchor2()));
 }
 
-const StringArray ComponentDocument::getComponentMarkers (bool horizontal) const
+void ComponentDocument::getComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
+                                                     Coordinate& coord, PopupMenu& menu, bool isAnchor1)
 {
-    StringArray s;
+    const String componentName (componentState [memberNameProperty].toString());
 
-    if (horizontal)
+    if (coord.isHorizontal())
     {
-        s.add (Coordinate::parentLeftMarkerName);
-        s.add (Coordinate::parentRightMarkerName);
-        s.add ("left");
-        s.add ("right");
+        addMarkerMenuItem (1, coord, Coordinate::parentLeftMarkerName, menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (2, coord, Coordinate::parentRightMarkerName, menu, isAnchor1, componentState, coordName);
+        menu.addSeparator();
+        addMarkerMenuItem (3, coord, componentName + ".left", menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (4, coord, componentName + ".right", menu, isAnchor1, componentState, coordName);
     }
     else
     {
-        s.add (Coordinate::parentTopMarkerName);
-        s.add (Coordinate::parentBottomMarkerName);
-        s.add ("top");
-        s.add ("bottom");
+        addMarkerMenuItem (1, coord, Coordinate::parentTopMarkerName, menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (2, coord, Coordinate::parentBottomMarkerName, menu, isAnchor1, componentState, coordName);
+        menu.addSeparator();
+        addMarkerMenuItem (3, coord, componentName + ".top", menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (4, coord, componentName + ".bottom", menu, isAnchor1, componentState, coordName);
     }
 
-    return s;
+    menu.addSeparator();
+    const MarkerList& markerList = getMarkerList (coord.isHorizontal());
+
+    int i;
+    for (i = 0; i < markerList.size(); ++i)
+        addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)), menu, isAnchor1, componentState, coordName);
+
+    menu.addSeparator();
+    for (i = 0; i < getNumComponents(); ++i)
+    {
+        const String compName (getComponent (i) [memberNameProperty].toString());
+
+        if (compName != componentName)
+        {
+            if (coord.isHorizontal())
+            {
+                addMarkerMenuItem (10000 + i, coord, compName + ".left", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10001 + i, coord, compName + ".right", menu, isAnchor1, componentState, coordName);
+            }
+            else
+            {
+                addMarkerMenuItem (10002 + i, coord, compName + ".top", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10003 + i, coord, compName + ".bottom", menu, isAnchor1, componentState, coordName);
+            }
+        }
+    }
+}
+
+const String ComponentDocument::getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int i) const
+{
+    const String componentName (componentState [memberNameProperty].toString());
+
+    if (i == 1)  return coord.isHorizontal() ? Coordinate::parentLeftMarkerName : Coordinate::parentTopMarkerName;
+    if (i == 2)  return coord.isHorizontal() ? Coordinate::parentRightMarkerName : Coordinate::parentBottomMarkerName;
+    if (i == 3)  return componentName + (coord.isHorizontal() ? ".left" : ".top");
+    if (i == 4)  return componentName + (coord.isHorizontal() ? ".right" : ".bottom");
+
+    const MarkerList& markerList = getMarkerList (coord.isHorizontal());
+
+    if (i >= 100 && i < 10000)
+        return markerList.getName (markerList.getMarker (i - 100));
+
+    if (i >= 10000)
+    {
+        const String compName (getComponent ((i - 10000) / 4) [memberNameProperty].toString());
+        switch (i & 3)
+        {
+            case 0:     return compName + ".left";
+            case 1:     return compName + ".right";
+            case 2:     return compName + ".top";
+            case 3:     return compName + ".bottom";
+            default:    break;
+        }
+    }
+
+    jassertfalse;
+    return String::empty;
 }
 
 void ComponentDocument::updateComponent (Component* comp)
@@ -436,6 +511,12 @@ bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Compo
     return storedState [idProperty] == comp->getProperties() [idProperty];
 }
 
+void ComponentDocument::removeComponent (const ValueTree& state)
+{
+    jassert (state.isAChildOf (getComponentGroup()));
+    getComponentGroup().removeChild (state, getUndoManager());
+}
+
 const String ComponentDocument::getNonExistentMemberName (String suggestedName)
 {
     suggestedName = makeValidCppIdentifier (suggestedName, false, true, false);
@@ -460,10 +541,10 @@ ComponentDocument::MarkerList::MarkerList (ComponentDocument& document_, const b
       group (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag)),
       isX (isX_)
 {
-    jassert (group.isValid());
+    jassert (group.isAChildOf (document_.getRoot()));
 }
 
-ValueTree ComponentDocument::MarkerList::getGroup() const
+ValueTree& ComponentDocument::MarkerList::getGroup()
 {
     return group;
 }
@@ -493,6 +574,16 @@ const Coordinate ComponentDocument::MarkerList::getCoordinate (const ValueTree& 
     return Coordinate (markerState [markerPosProperty].toString(), isX);
 }
 
+const String ComponentDocument::MarkerList::getName (const ValueTree& markerState) const
+{
+    return markerState [markerNameProperty].toString();
+}
+
+Value ComponentDocument::MarkerList::getNameAsValue (const ValueTree& markerState) const
+{
+    return markerState.getPropertyAsValue (markerNameProperty, document.getUndoManager());
+}
+
 void ComponentDocument::MarkerList::setCoordinate (ValueTree& markerState, const Coordinate& newCoord)
 {
     markerState.setProperty (markerPosProperty, newCoord.toString(), document.getUndoManager());
@@ -511,12 +602,16 @@ void ComponentDocument::MarkerList::deleteMarker (ValueTree& markerState)
     group.removeChild (markerState, document.getUndoManager());
 }
 
-const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, bool isHorizontal)
+const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, bool isHorizontal) const
 {
     if (isHorizontal == isX)
     {
-        if (name == Coordinate::parentRightMarkerName)          return Coordinate ((double) document.getCanvasWidth().getValue(), isHorizontal);
-        else if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) document.getCanvasHeight().getValue(), isHorizontal);
+        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isHorizontal);
+        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isHorizontal);
+
+        const ValueTree marker (document.getMarkerList (isHorizontal).getMarkerNamed (name));
+        if (marker.isValid())
+            return document.getMarkerList (isHorizontal).getCoordinate (marker);
     }
 
     return Coordinate (isX);
@@ -534,7 +629,7 @@ const String ComponentDocument::getNonexistentMarkerName (const String& name)
 }
 
 //==============================================================================
-UndoManager* ComponentDocument::getUndoManager()
+UndoManager* ComponentDocument::getUndoManager() const
 {
     return &undoManager;
 }

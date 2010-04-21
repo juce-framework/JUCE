@@ -71,6 +71,9 @@ PropertiesFile::PropertiesFile (const File& f, const int millisecondsBeforeSavin
 
     ProcessScopedLock pl (createProcessLock());
 
+    if (pl != 0 && ! pl->isLocked())
+        return; // locking failure..
+
     ScopedPointer<InputStream> fileStream (f.createInputStream());
 
     if (fileStream != 0)
@@ -207,6 +210,9 @@ bool PropertiesFile::save()
 
         ProcessScopedLock pl (createProcessLock());
 
+        if (pl != 0 && ! pl->isLocked())
+            return false; // locking failure..
+
         if (doc.writeToFile (file, String::empty))
         {
             needsWriting = false;
@@ -216,6 +222,9 @@ bool PropertiesFile::save()
     else
     {
         ProcessScopedLock pl (createProcessLock());
+
+        if (pl != 0 && ! pl->isLocked())
+            return false; // locking failure..
 
         TemporaryFile tempFile (file);
         ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());

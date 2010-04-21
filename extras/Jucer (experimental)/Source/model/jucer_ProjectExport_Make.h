@@ -316,6 +316,9 @@ private:
     {
         return file.withFileExtension (".o").getFileName();
     }
+
+    MakefileProjectExporter (const MakefileProjectExporter&);
+    MakefileProjectExporter& operator= (const MakefileProjectExporter&);
 };
 
 

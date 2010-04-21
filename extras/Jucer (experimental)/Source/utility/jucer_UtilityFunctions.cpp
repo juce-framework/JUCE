@@ -575,3 +575,55 @@ const String PropertyPanelWithTooltips::findTip (Component* c)
 
     return String::empty;
 }
+
+//==============================================================================
+FloatingLabelComponent::FloatingLabelComponent()
+    : font (10.0f)
+{
+    setInterceptsMouseClicks (false ,false);
+}
+
+void FloatingLabelComponent::remove()
+{
+    if (getParentComponent() != 0)
+        getParentComponent()->removeChildComponent (this);
+}
+
+void FloatingLabelComponent::update (Component* parent, const String& text, const Colour& textColour, int x, int y, bool toRight, bool below)
+{
+    colour = textColour;
+
+    Rectangle<int> r;
+
+    if (text != getName())
+    {
+        setName (text);
+        glyphs.clear();
+        glyphs.addJustifiedText (font, text, 0, 0, 200.0f, Justification::left);
+        glyphs.justifyGlyphs (0, std::numeric_limits<int>::max(), 0, 0, 1000, 1000, Justification::topLeft);
+
+        r = glyphs.getBoundingBox (0, std::numeric_limits<int>::max(), false)
+                  .getSmallestIntegerContainer().expanded (2, 2);
+    }
+    else
+    {
+        r = getLocalBounds();
+    }
+
+    r.setPosition (x + (toRight ? 3 : -(r.getWidth() + 3)), y + (below ? 2 : -(r.getHeight() + 2)));
+    setBounds (r);
+    parent->addAndMakeVisible (this);
+}
+
+void FloatingLabelComponent::paint (Graphics& g)
+{
+    g.setFont (font);
+    g.setColour (Colours::white);
+
+    for (int y = -1; y <= 1; ++y)
+        for (int x = -1; x <= 1; ++x)
+            glyphs.draw (g, AffineTransform::translation (1.0f + x, 1.0f + y));
+
+    g.setColour (colour);
+    glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));
+}

@@ -99,6 +99,10 @@ protected:
             name = name + ".a";
         return name;
     }
+
+private:
+    ProjectExporter (const ProjectExporter&);
+    ProjectExporter& operator= (const ProjectExporter&);
 };
 
 

@@ -115,13 +115,13 @@ public:
 
         //==============================================================================
         SizeGuideComponent (ComponentEditorCanvas& canvas_, const ValueTree& state_, Component* component_, Type type_)
-            : OverlayItemComponent (canvas_), state (state_), component (component_), type (type_),
-              font (10.0f)
+            : OverlayItemComponent (canvas_), state (state_), component (component_), type (type_)
         {
             component->addComponentListener (this);
 
             setAlwaysOnTop (true);
             canvas.addAndMakeVisible (this);
+            setInterceptsMouseClicks (false, false);
             updatePosition();
         }
 
@@ -137,25 +137,10 @@ public:
             const float dashes[] = { 4.0f, 3.0f };
 
             g.setColour (resizableBorderColour);
-            g.drawDashedLine (lineEnd1.getX() + 0.5f, lineEnd1.getY() + 0.5f,
-                              lineEnd2.getX() + 0.5f, lineEnd2.getY() + 0.5f,
-                              dashes, 2, 1.0f);
-
-            g.setFont (font);
-            g.setColour (Colours::white);
-
-            for (int y = -1; y <= 1; ++y)
-                for (int x = -1; x <= 1; ++x)
-                    g.drawText (getName(), textArea.getX() + x, textArea.getY() + y, textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
-
-            g.setColour (Colours::black);
-            g.drawText (getName(), textArea.getX(), textArea.getY(), textArea.getWidth(), textArea.getHeight(), Justification::centred, 1);
+            g.drawDashedLine (0.5f, 0.5f, getWidth() - 0.5f, getHeight() - 0.5f, dashes, 2, 1.0f);
         }
 
-        void componentMovedOrResized (Component&, bool, bool)
-        {
-            updatePosition();
-        }
+        void componentMovedOrResized (Component&, bool, bool)   { updatePosition(); }
 
         void componentBeingDeleted (Component&)
         {
@@ -166,72 +151,32 @@ public:
         //==============================================================================
         void updatePosition()
         {
-            RectangleCoordinates coords (getDocument().getCoordsFor (state));
-            Coordinate coord (false);
-            bool isHorizontal = false;
-
-            switch (type)
+            if (component != 0)
             {
-                case left:      coord = coords.left; isHorizontal = true; break;
-                case right:     coord = coords.right; isHorizontal = true; break;
-                case top:       coord = coords.top; break;
-                case bottom:    coord = coords.bottom; break;
-                default:        jassertfalse; break;
+                RectangleCoordinates coords (getDocument().getCoordsFor (state));
+                Coordinate coord (false);
+                Rectangle<int> r;
+
+                switch (type)
+                {
+                    case left:    coord = coords.left;   r.setBounds (component->getX(), 0, 1, component->getY()); break;
+                    case right:   coord = coords.right;  r.setBounds (component->getRight(), 0, 1, component->getY()); break;
+                    case top:     coord = coords.top;    r.setBounds (0, component->getY(), component->getX(), 1); break;
+                    case bottom:  coord = coords.bottom; r.setBounds (0, component->getBottom(), component->getX(), 1); break;
+                    default:      jassertfalse; break;
+                }
+
+                setBoundsInTargetSpace (r);
+                label.update (getParentComponent(), coord.toString(), resizableBorderColour.withAlpha (0.9f), getX(), getY(), type != left, type != top);
             }
-
-            setName (coord.toString());
-
-            int textW = (int) font.getStringWidth (getName());
-            int textH = (int) font.getHeight();
-
-            Point<int> p1, p2;
-
-            switch (type)
-            {
-            case left:
-                p1 = Point<int> (component->getX(), 0);
-                p2 = Point<int> (component->getX(), component->getY());
-                textArea.setBounds (p1.getX() - textW - 2, 4, textW, textH);
-                break;
-
-            case right:
-                p1 = Point<int> (component->getRight(), 0);
-                p2 = Point<int> (component->getRight(), component->getY());
-                textArea.setBounds (p1.getX() + 2, 4, textW, textH);
-                break;
-
-            case top:
-                p1 = Point<int> (0, component->getY());
-                p2 = Point<int> (component->getX(), component->getY());
-                textArea.setBounds (4, p1.getY() - textH - 2, textW, textH);
-                break;
-
-            case bottom:
-                p1 = Point<int> (0, component->getBottom());
-                p2 = Point<int> (component->getX(), component->getBottom());
-                textArea.setBounds (4, p1.getY() + 2, textW, textH);
-                break;
-
-            default:
-                jassertfalse;
-                break;
-            }
-
-            setBoundsInTargetSpace (Rectangle<int> (p1, p2).expanded (2, 2).getUnion (textArea));
-
-            lineEnd1 = component->getParentComponent()->relativePositionToOtherComponent (this, p1);
-            lineEnd2 = component->getParentComponent()->relativePositionToOtherComponent (this, p2);
-            textArea.setPosition (component->getParentComponent()->relativePositionToOtherComponent (this, textArea.getPosition()));
-            repaint();
         }
 
     private:
         ValueTree state;
         Component* component;
         Type type;
-        Font font;
+        FloatingLabelComponent label;
         Point<int> lineEnd1, lineEnd2;
-        Rectangle<int> textArea;
     };
 
     void showSizeGuides()
@@ -295,21 +240,33 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (Colours::darkgreen);
+        g.setColour (Colours::darkgreen.withAlpha (isMouseOverOrDragging() ? 0.8f : 0.4f));
         g.fillPath (path);
     }
 
     void updatePosition()
     {
-        ComponentDocument& doc = getDocument();
-        Coordinate coord (doc.getMarkerList (isX).getCoordinate (marker));
-        const int pos = roundToInt (coord.resolve (doc.getMarkerList (isX)));
-        const int width = 10;
+        Coordinate coord (getMarkerList().getCoordinate (marker));
+        const int pos = roundToInt (coord.resolve (getMarkerList()));
+        const int width = 8;
 
         if (isX)
             setBoundsInTargetSpace (Rectangle<int> (pos - width, -headSize, width * 2, getParentHeight()));
         else
             setBoundsInTargetSpace (Rectangle<int> (-headSize, pos - width, getParentWidth(), width * 2));
+
+        labelText = "name: " + getMarkerList().getName (marker) + "\nposition: " + coord.toString();
+        updateLabel();
+    }
+
+    void updateLabel()
+    {
+        if (isMouseOverOrDragging() && (getWidth() > 1 || getHeight() > 1))
+            label.update (getParentComponent(), labelText, Colours::darkgreen,
+                          isX ? getBounds().getCentreX() : getX() + headSize,
+                          isX ? getY() + headSize : getBounds().getCentreY(), true, true);
+        else
+            label.remove();
     }
 
     bool hitTest (int x, int y)
@@ -334,10 +291,15 @@ public:
             path.addLineSegment (2.0f, centre, getWidth() + 1.0f, centre, lineThickness);
             path.addTriangle (0.0f, centre * 2.0f - 1.0f, 0.0f, 1.0f, headSize + 1.0f, centre);
         }
+
+        updateLabel();
     }
 
     void mouseDown (const MouseEvent& e)
     {
+        toFront (false);
+        updateLabel();
+
         if (e.mods.isPopupMenu())
         {
             isDragging = false;
@@ -347,9 +309,8 @@ public:
             isDragging = true;
             getDocument().beginNewTransaction();
 
-            ComponentDocument& doc = getDocument();
-            Coordinate coord (doc.getMarkerList(isX).getCoordinate (marker));
-            dragStartPos = coord.resolve (doc.getMarkerList (isX));
+            Coordinate coord (getMarkerList().getCoordinate (marker));
+            dragStartPos = coord.resolve (getMarkerList());
         }
     }
 
@@ -360,26 +321,46 @@ public:
             ComponentDocument& doc = getDocument();
             doc.getUndoManager()->undoCurrentTransactionOnly();
 
-            Coordinate coord (doc.getMarkerList (isX).getCoordinate (marker));
-            coord.moveToAbsolute (jmax (0.0, dragStartPos + (isX ? e.getDistanceFromDragStartX()
-                                                                 : e.getDistanceFromDragStartY())), 
-                                  doc.getMarkerList (isX));
-            doc.getMarkerList(isX).setCoordinate (marker, coord);
+            Rectangle<int> axis;
+            if (isX)
+                axis.setBounds (0, 0, getParentWidth(), headSize);
+            else
+                axis.setBounds (0, 0, headSize, getParentHeight());
+
+            if (axis.expanded (30, 30).contains (e.x, e.y))
+            {
+                Coordinate coord (getMarkerList().getCoordinate (marker));
+                coord.moveToAbsolute (jmax (0.0, dragStartPos + (isX ? e.getDistanceFromDragStartX()
+                                                                     : e.getDistanceFromDragStartY())),
+                                      getMarkerList());
+                getMarkerList().setCoordinate (marker, coord);
+            }
+            else
+            {
+                getMarkerList().deleteMarker (marker);
+            }
         }
     }
 
     void mouseUp (const MouseEvent& e)
     {
         getDocument().beginNewTransaction();
+        updateLabel();
     }
 
     void mouseEnter (const MouseEvent& e)
     {
+        updateLabel();
+        repaint();
     }
 
     void mouseExit (const MouseEvent& e)
     {
+        updateLabel();
+        repaint();
     }
+
+    ComponentDocument::MarkerList& getMarkerList()      { return getDocument().getMarkerList (isX); }
 
     void valueTreePropertyChanged (ValueTree&, const var::identifier&)    { updatePosition(); }
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   {}
@@ -393,12 +374,94 @@ private:
     Path path;
     double dragStartPos;
     bool isDragging;
+    FloatingLabelComponent label;
+    String labelText;
+};
+
+//==============================================================================
+class ComponentEditorCanvas::ComponentHolder    : public Component
+{
+public:
+    ComponentHolder() {}
+    ~ComponentHolder() {}
+
+    void updateComponents (ComponentDocument& doc, SelectedItems& selection)
+    {
+        int i;
+        for (i = getNumChildComponents(); --i >= 0;)
+        {
+            Component* c = getChildComponent (i);
+
+            if (! doc.containsComponent (c))
+            {
+                selection.deselect (c->getComponentUID());
+                delete c;
+            }
+        }
+
+        Array <Component*> componentsInOrder;
+
+        const int num = doc.getNumComponents();
+        for (i = 0; i < num; ++i)
+        {
+            const ValueTree v (doc.getComponent (i));
+            Component* c = getComponentForState (doc, v);
+
+            if (c == 0)
+            {
+                c = doc.createComponent (i);
+                addAndMakeVisible (c);
+            }
+
+            doc.updateComponent (c);
+            componentsInOrder.add (c);
+        }
+
+        // Make sure the z-order is correct..
+        for (i = 0; i < num - 1; ++i)
+            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+    }
+
+    Component* getComponentForState (ComponentDocument& doc, const ValueTree& state)
+    {
+        for (int i = getNumChildComponents(); --i >= 0;)
+        {
+            Component* const c = getChildComponent (i);
+
+            if (doc.isStateForComponent (state, c))
+                return c;
+        }
+
+        return 0;
+    }
+
+    Component* findComponentAt (const Point<int>& pos) const
+    {
+        for (int i = getNumChildComponents(); --i >= 0;)
+        {
+            Component* const c = getChildComponent(i);
+            if (c->getBounds().contains (pos))
+                return c;
+        }
+
+        return 0;
+    }
+
+    void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& lassoArea)
+    {
+        for (int i = getNumChildComponents(); --i >= 0;)
+        {
+            Component* c = getChildComponent(i);
+            if (c->getBounds().intersects (lassoArea))
+                itemsFound.add (c->getComponentUID());
+        }
+    }
 };
 
 
 //==============================================================================
 class ComponentEditorCanvas::OverlayComponent  : public Component,
-                                                 public LassoSource <ComponentDocument::SelectedItems::ItemType>,
+                                                 public LassoSource <SelectedItems::ItemType>,
                                                  public ChangeListener,
                                                  public ValueTree::Listener
 {
@@ -433,31 +496,39 @@ public:
         mouseDownCompUID = 0;
         isDraggingClickedComp = false;
 
+        Component* underMouse = canvas.getComponentHolder()->findComponentAt (e.getEventRelativeTo (canvas.getComponentHolder()).getPosition());
+
         if (e.mods.isPopupMenu())
         {
-            PopupMenu m;
-            getDocument().addNewComponentMenuItems (m);
+            if (underMouse != 0)
+            {
+                if (! canvas.getSelection().isSelected (underMouse->getComponentUID()))
+                    canvas.getSelection().selectOnly (underMouse->getComponentUID());
+            }
 
-            const int r = m.show();
-            getDocument().performNewComponentMenuItem (r);
+            PopupMenu m;
+
+            if (underMouse != 0)
+            {
+                m.addCommandItem (commandManager, CommandIDs::toFront);
+                m.addCommandItem (commandManager, CommandIDs::toBack);
+                m.addSeparator();
+                m.addCommandItem (commandManager, StandardApplicationCommandIDs::del);
+                const int r = m.show();
+                (void) r;
+            }
+            else
+            {
+                getDocument().addNewComponentMenuItems (m);
+                const int r = m.show();
+                getDocument().performNewComponentMenuItem (r);
+            }
         }
         else
         {
-            Component* underMouse = 0;
-
-            for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
-            {
-                Component* const c = canvas.getComponentHolder()->getChildComponent(i);
-                if (c->getBounds().contains (e.getPosition()))
-                {
-                    underMouse = c;
-                    break;
-                }
-            }
-
             if (underMouse == 0 || e.mods.isAltDown())
             {
-                addAndMakeVisible (lasso = new LassoComponent <ComponentDocument::SelectedItems::ItemType>());
+                addAndMakeVisible (lasso = new LassoComponent <SelectedItems::ItemType>());
                 lasso->beginLasso (e, this);
             }
             else
@@ -529,19 +600,13 @@ public:
         }
     }
 
-    void findLassoItemsInArea (Array <ComponentDocument::SelectedItems::ItemType>& itemsFound, int x, int y, int width, int height)
+    void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, int x, int y, int width, int height)
     {
-        const Rectangle<int> lassoArea (x, y, width, height);
-
-        for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = canvas.getComponentHolder()->getChildComponent(i);
-            if (c->getBounds().intersects (lassoArea))
-                itemsFound.add (c->getComponentUID());
-        }
+        canvas.getComponentHolder()->findLassoItemsInArea (itemsFound, Rectangle<int> (x, y, width, height)
+                                                                        + relativePositionToOtherComponent (canvas.getComponentHolder(), Point<int>()));
     }
 
-    ComponentDocument::SelectedItems& getLassoSelection()       { return canvas.getSelection(); }
+    SelectedItems& getLassoSelection()       { return canvas.getSelection(); }
 
     void resized()
     {
@@ -586,13 +651,13 @@ private:
     //==============================================================================
     ComponentEditorCanvas& canvas;
     ValueTree markerRootX, markerRootY;
-    ScopedPointer <LassoComponent <ComponentDocument::SelectedItems::ItemType> > lasso;
+    ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
     bool mouseDownResult, isDraggingClickedComp;
     uint32 mouseDownCompUID;
 
     ComponentDocument& getDocument()            { return canvas.getDocument(); }
 
-    Component* getComponentWithUID (const int uid) const
+    Component* getComponentWithUID (const uint32 uid) const
     {
         for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
         {
@@ -607,7 +672,7 @@ private:
 
     void updateResizeFrames()
     {
-        ComponentDocument::SelectedItems& selection = canvas.getSelection();
+        SelectedItems& selection = canvas.getSelection();
 
         Array<int> requiredIds;
         int i;
@@ -643,11 +708,12 @@ private:
     void updateMarkers (bool isX)
     {
         ComponentDocument& doc = getDocument();
+        ComponentDocument::MarkerList& markerList = doc.getMarkerList (isX);
         Array<ValueTree> requiredMarkers;
 
         int i;
         for (i = doc.getMarkerList (isX).size(); --i >= 0;)
-            requiredMarkers.add (doc.getMarkerList (isX).getMarker (i));
+            requiredMarkers.add (markerList.getMarker (i));
 
         for (i = getNumChildComponents(); --i >= 0;)
         {
@@ -657,12 +723,16 @@ private:
             {
                 if (requiredMarkers.contains (marker->marker))
                 {
+                    marker->setVisible (true);
                     marker->updatePosition();
                     requiredMarkers.removeValue (marker->marker);
                 }
                 else
                 {
-                    delete marker;
+                    if (marker->isMouseButtonDown())
+                        marker->setBounds (-1, -1, 1, 1);
+                    else
+                        delete marker;
                 }
             }
         }
@@ -681,57 +751,6 @@ private:
     {
         updateMarkers (true);
         updateMarkers (false);
-    }
-};
-
-//==============================================================================
-class ComponentEditorCanvas::ComponentHolder    : public Component
-{
-public:
-    ComponentHolder() {}
-    ~ComponentHolder() {}
-
-    void updateComponents (ComponentDocument& doc, ComponentDocument::SelectedItems& selection)
-    {
-        int i;
-        for (i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = getChildComponent (i);
-
-            if (! doc.containsComponent (c))
-            {
-                selection.deselect (c->getComponentUID());
-                delete c;
-            }
-        }
-
-        const int num = doc.getNumComponents();
-        for (i = 0; i < num; ++i)
-        {
-            const ValueTree v (doc.getComponent (i));
-            Component* c = getComponentForState (doc, v);
-
-            if (c == 0)
-            {
-                c = doc.createComponent (i);
-                addAndMakeVisible (c);
-            }
-
-            doc.updateComponent (c);
-        }
-    }
-
-    Component* getComponentForState (ComponentDocument& doc, const ValueTree& state)
-    {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent (i);
-
-            if (doc.isStateForComponent (state, c))
-                return c;
-        }
-
-        return 0;
     }
 };
 
@@ -848,10 +867,10 @@ ComponentEditorCanvas::~ComponentEditorCanvas()
 }
 
 //==============================================================================
-ComponentEditor& ComponentEditorCanvas::getEditor()                            { return editor; }
-ComponentDocument& ComponentEditorCanvas::getDocument()                        { return editor.getDocument(); }
-ComponentDocument::SelectedItems& ComponentEditorCanvas::getSelection()        { return selection; }
-Component* ComponentEditorCanvas::getComponentHolder() const                   { return componentHolder; }
+ComponentEditor& ComponentEditorCanvas::getEditor()                                         { return editor; }
+ComponentDocument& ComponentEditorCanvas::getDocument()                                     { return editor.getDocument(); }
+ComponentEditorCanvas::SelectedItems& ComponentEditorCanvas::getSelection()                 { return selection; }
+ComponentEditorCanvas::ComponentHolder* ComponentEditorCanvas::getComponentHolder() const   { return componentHolder; }
 
 void ComponentEditorCanvas::timerCallback()
 {
@@ -942,6 +961,73 @@ void ComponentEditorCanvas::getSelectedItemProperties (Array <PropertyComponent*
         jassert (c != 0);
         getDocument().getComponentProperties (props, c);
     }
+}
+
+void ComponentEditorCanvas::deleteSelection()
+{
+    getDocument().beginNewTransaction();
+
+    for (int i = selection.getNumSelected(); --i >= 0;)
+    {
+        Component* c = getComponentForUID (selection.getSelectedItem (0));
+
+        if (c != 0)
+            getDocument().removeComponent (getDocument().getComponentState (c));
+    }
+
+    selection.deselectAll();
+
+    getDocument().beginNewTransaction();
+}
+
+void ComponentEditorCanvas::selectionToFront()
+{
+    getDocument().beginNewTransaction();
+
+    int index = 0;
+    for (int i = getDocument().getNumComponents(); --i >= 0;)
+    {
+        const ValueTree comp (getDocument().getComponent (index));
+        Component* c = componentHolder->getComponentForState (getDocument(), comp);
+
+        if (c != 0 && selection.isSelected (c->getComponentUID()))
+        {
+            ValueTree parent (comp.getParent());
+            parent.removeChild (comp, getDocument().getUndoManager());
+            parent.addChild (comp, -1, getDocument().getUndoManager());
+        }
+        else
+        {
+            ++index;
+        }
+    }
+
+    getDocument().beginNewTransaction();
+}
+
+void ComponentEditorCanvas::selectionToBack()
+{
+    getDocument().beginNewTransaction();
+
+    int index = getDocument().getNumComponents() - 1;
+    for (int i = getDocument().getNumComponents(); --i >= 0;)
+    {
+        const ValueTree comp (getDocument().getComponent (index));
+        Component* c = componentHolder->getComponentForState (getDocument(), comp);
+
+        if (c != 0 && selection.isSelected (c->getComponentUID()))
+        {
+            ValueTree parent (comp.getParent());
+            parent.removeChild (comp, getDocument().getUndoManager());
+            parent.addChild (comp, 0, getDocument().getUndoManager());
+        }
+        else
+        {
+            --index;
+        }
+    }
+
+    getDocument().beginNewTransaction();
 }
 
 //==============================================================================

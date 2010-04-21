@@ -110,6 +110,8 @@ AudioIODeviceType* juce_createAudioIODeviceType_JACK();
 
 void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>& list)
 {
+    (void) list; // (to avoid 'unused param' warnings)
+
     #if JUCE_WINDOWS
      #if JUCE_WASAPI
      if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)

@@ -247,6 +247,9 @@ private:
     Project* const project;
     const File file;
     Time fileModificationTime;
+
+    UnknownDocument (const UnknownDocument&);
+    UnknownDocument& operator= (const UnknownDocument&);
 };
 
 

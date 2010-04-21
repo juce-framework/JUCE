@@ -537,9 +537,11 @@ void Component::toFront (const bool setAsForeground)
     }
     else if (parentComponent_ != 0)
     {
-        if (parentComponent_->childComponentList_.getLast() != this)
+        Array<Component*>& childList = parentComponent_->childComponentList_;
+
+        if (childList.getLast() != this)
         {
-            const int index = parentComponent_->childComponentList_.indexOf (this);
+            const int index = childList.indexOf (this);
 
             if (index >= 0)
             {
@@ -547,18 +549,15 @@ void Component::toFront (const bool setAsForeground)
 
                 if (! flags.alwaysOnTopFlag)
                 {
-                    insertIndex = parentComponent_->childComponentList_.size() - 1;
+                    insertIndex = childList.size() - 1;
 
-                    while (insertIndex > 0
-                            && parentComponent_->childComponentList_.getUnchecked (insertIndex)->isAlwaysOnTop())
-                    {
+                    while (insertIndex > 0 && childList.getUnchecked (insertIndex)->isAlwaysOnTop())
                         --insertIndex;
-                    }
                 }
 
                 if (index != insertIndex)
                 {
-                    parentComponent_->childComponentList_.move (index, insertIndex);
+                    childList.move (index, insertIndex);
                     sendFakeMouseMove();
 
                     repaintParent();
@@ -576,28 +575,31 @@ void Component::toFront (const bool setAsForeground)
 
 void Component::toBehind (Component* const other)
 {
-    if (other != 0)
+    if (other != 0 && other != this)
     {
         // the two components must belong to the same parent..
         jassert (parentComponent_ == other->parentComponent_);
 
         if (parentComponent_ != 0)
         {
-            const int index = parentComponent_->childComponentList_.indexOf (this);
-            int otherIndex  = parentComponent_->childComponentList_.indexOf (other);
+            Array<Component*>& childList = parentComponent_->childComponentList_;
 
-            if (index >= 0
-                 && otherIndex >= 0
-                 && index != otherIndex - 1
-                 && other != this)
+            const int index = childList.indexOf (this);
+
+            if (index >= 0 && childList [index + 1] != other)
             {
-                if (index < otherIndex)
-                    --otherIndex;
+                int otherIndex = childList.indexOf (other);
 
-                parentComponent_->childComponentList_.move (index, otherIndex);
+                if (otherIndex >= 0)
+                {
+                    if (index < otherIndex)
+                        --otherIndex;
 
-                sendFakeMouseMove();
-                repaintParent();
+                    childList.move (index, otherIndex);
+
+                    sendFakeMouseMove();
+                    repaintParent();
+                }
             }
         }
         else if (isOnDesktop())
@@ -619,14 +621,15 @@ void Component::toBehind (Component* const other)
 
 void Component::toBack()
 {
+    Array<Component*>& childList = parentComponent_->childComponentList_;
+
     if (isOnDesktop())
     {
         jassertfalse //xxx need to add this to native window
     }
-    else if (parentComponent_ != 0
-         && parentComponent_->childComponentList_.getFirst() != this)
+    else if (parentComponent_ != 0 && childList.getFirst() != this)
     {
-        const int index = parentComponent_->childComponentList_.indexOf (this);
+        const int index = childList.indexOf (this);
 
         if (index > 0)
         {
@@ -634,8 +637,8 @@ void Component::toBack()
 
             if (flags.alwaysOnTopFlag)
             {
-                while (insertIndex < parentComponent_->childComponentList_.size()
-                        && ! parentComponent_->childComponentList_.getUnchecked (insertIndex)->isAlwaysOnTop())
+                while (insertIndex < childList.size()
+                        && ! childList.getUnchecked (insertIndex)->isAlwaysOnTop())
                 {
                     ++insertIndex;
                 }
@@ -643,7 +646,7 @@ void Component::toBack()
 
             if (index != insertIndex)
             {
-                parentComponent_->childComponentList_.move (index, insertIndex);
+                childList.move (index, insertIndex);
 
                 sendFakeMouseMove();
                 repaintParent();

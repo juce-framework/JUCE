@@ -351,7 +351,6 @@ private:
             << "#define JucePlugin_IsSynth              " << ((bool) project.getPluginIsSynth().getValue() ? 1 : 0) << newLine
             << "#define JucePlugin_WantsMidiInput       " << ((bool) project.getPluginWantsMidiInput().getValue() ? 1 : 0) << newLine
             << "#define JucePlugin_ProducesMidiOutput   " << ((bool) project.getPluginProducesMidiOut().getValue() ? 1 : 0) << newLine
-            << "#define JucePlugin_IsSynth              " << ((bool) project.getPluginIsSynth().getValue() ? 1 : 0) << newLine
             << "#define JucePlugin_SilenceInProducesSilenceOut  " << ((bool) project.getPluginSilenceInProducesSilenceOut().getValue() ? 1 : 0) << newLine
             << "#define JucePlugin_TailLengthSeconds    " << (double) project.getPluginTailLengthSeconds().getValue() << newLine
             << "#define JucePlugin_EditorRequiresKeyboardFocus  " << ((bool) project.getPluginEditorNeedsKeyFocus().getValue() ? 1 : 0) << newLine

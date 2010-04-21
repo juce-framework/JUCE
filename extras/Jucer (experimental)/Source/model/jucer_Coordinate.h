@@ -64,17 +64,21 @@ public:
     {
     public:
         virtual ~MarkerResolver() {}
-        virtual const Coordinate findMarker (const String& name, bool isHorizontal) = 0;
+        virtual const Coordinate findMarker (const String& name, bool isHorizontal) const = 0;
     };
 
     /** Calculates the absolute position of this co-ordinate. */
-    double resolve (MarkerResolver& markerResolver) const;
+    double resolve (const MarkerResolver& markerResolver) const;
 
-    /** Returns true if this co-ordinate is expressed in terms of markers that form a recursive loop. */
-    bool isRecursive (MarkerResolver& markerResolver) const;
+    /** Returns true if this co-ordinate is expressed directly in terms of the specified marker. */
+    bool referencesDirectly (const String& markerName) const;
+
+    /** Returns true if this co-ordinate is expressed in terms of the specified marker at any
+        level in its evaluation. */
+    bool referencesIndirectly (const String& markerName, const MarkerResolver& markerResolver) const;
 
     /** Changes the value of this marker to make it resolve to the specified position. */
-    void moveToAbsolute (double newPos, MarkerResolver& markerResolver);
+    void moveToAbsolute (double newPos, const MarkerResolver& markerResolver);
 
     const Coordinate getAnchorPoint1() const;
     const Coordinate getAnchorPoint2() const;
@@ -82,14 +86,16 @@ public:
     const double getEditableValue() const;
     void setEditableValue (const double newValue);
 
+    bool isHorizontal() const throw()                   { return horizontal; }
+
     bool isProportional() const throw()                 { return isProportion; }
-    void toggleProportionality (MarkerResolver& markerResolver);
+    void toggleProportionality (const MarkerResolver& markerResolver);
 
     const String getAnchor1() const                     { return checkName (anchor1); }
-    void changeAnchor1 (const String& newMarkerName, MarkerResolver& markerResolver);
+    void changeAnchor1 (const String& newMarkerName, const MarkerResolver& markerResolver);
 
     const String getAnchor2() const                     { return checkName (anchor2); }
-    void changeAnchor2 (const String& newMarkerName, MarkerResolver& markerResolver);
+    void changeAnchor2 (const String& newMarkerName, const MarkerResolver& markerResolver);
 
     //==============================================================================
     /*
@@ -103,9 +109,8 @@ public:
             50% * marker1 -> marker2    = percentage between two markers
 
         standard marker names:
-            "origin"                            = parent origin
-            "size"                              = parent right or bottom
-            "top", "left", "bottom", "right"    = refer to the component's own left, right, top and bottom.
+            "parent.top", "parent.left", "parent.bottom", "parent.right"
+            "componentName.top", "componentName.left", "componentName.bottom", "componentName.right"
     */
     const String toString() const;
 
@@ -119,10 +124,10 @@ private:
     //==============================================================================
     String anchor1, anchor2;
     double value;
-    bool isProportion, isHorizontal;
+    bool isProportion, horizontal;
 
-    double resolve (MarkerResolver& markerResolver, int recursionCounter) const;
-    double getPosition (const String& name, MarkerResolver& markerResolver, int recursionCounter) const;
+    double resolve (const MarkerResolver& markerResolver, int recursionCounter) const;
+    double getPosition (const String& name, const MarkerResolver& markerResolver, int recursionCounter) const;
     const String checkName (const String& name) const;
     const String getOriginMarkerName() const;
     const String getExtentMarkerName() const;
@@ -141,13 +146,12 @@ class RectangleCoordinates
 public:
     //==============================================================================
     RectangleCoordinates();
-    explicit RectangleCoordinates (const Rectangle<int>& rect);
+    explicit RectangleCoordinates (const Rectangle<int>& rect, const String& componentName);
     explicit RectangleCoordinates (const String& stringVersion);
 
     //==============================================================================
-    const Rectangle<int> resolve (Coordinate::MarkerResolver& markerResolver) const;
-    bool isRecursive (Coordinate::MarkerResolver& markerResolver) const;
-    void moveToAbsolute (const Rectangle<int>& newPos, Coordinate::MarkerResolver& markerResolver);
+    const Rectangle<int> resolve (const Coordinate::MarkerResolver& markerResolver) const;
+    void moveToAbsolute (const Rectangle<int>& newPos, const Coordinate::MarkerResolver& markerResolver);
     const String toString() const;
 
     Coordinate left, right, top, bottom;

@@ -622,7 +622,7 @@ void ValueTree::removeChild (const int childIndex, UndoManager* const undoManage
         object->removeChild (childIndex, undoManager);
 }
 
-void ValueTree::removeChild (ValueTree& child, UndoManager* const undoManager)
+void ValueTree::removeChild (const ValueTree& child, UndoManager* const undoManager)
 {
     if (object != 0)
         object->removeChild (object->children.indexOf (child.object), undoManager);

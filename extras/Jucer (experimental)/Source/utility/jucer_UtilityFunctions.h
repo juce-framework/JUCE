@@ -132,6 +132,21 @@ private:
     const String findTip (Component* c);
 };
 
+//==============================================================================
+class FloatingLabelComponent    : public Component
+{
+public:
+    FloatingLabelComponent();
+
+    void remove();
+    void update (Component* parent, const String& text, const Colour& textColour, int x, int y, bool toRight, bool below);
+    void paint (Graphics& g);
+
+private:
+    Font font;
+    Colour colour;
+    GlyphArrangement glyphs;
+};
 
 //==============================================================================
 static const double tickSizes[] = { 1.0, 2.0, 5.0,
@@ -236,4 +251,7 @@ private:
     {
         return String (roundToInt (value));
     }
+
+    TickIterator (const TickIterator&);
+    TickIterator& operator= (const TickIterator&);
 };

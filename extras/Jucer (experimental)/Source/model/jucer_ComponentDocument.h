@@ -32,7 +32,8 @@
 
 
 //==============================================================================
-class ComponentDocument   : public ValueTree::Listener
+class ComponentDocument   : public ValueTree::Listener,
+                            public Coordinate::MarkerResolver
 {
 public:
     //==============================================================================
@@ -45,14 +46,12 @@ public:
     bool reload();
     bool hasChangedSinceLastSave();
 
-    typedef SelectedItemSet<uint32> SelectedItems;
-
     //==============================================================================
-    Value getClassName()            { return getRootValueNonUndoable ("className"); }
-    Value getClassDescription()     { return getRootValueNonUndoable ("classDesc"); }
+    Value getClassName() const              { return getRootValueNonUndoable ("className"); }
+    Value getClassDescription() const       { return getRootValueNonUndoable ("classDesc"); }
 
-    Value getCanvasWidth()          { return getRootValueNonUndoable ("width"); }
-    Value getCanvasHeight()         { return getRootValueNonUndoable ("height"); }
+    Value getCanvasWidth() const            { return getRootValueNonUndoable ("width"); }
+    Value getCanvasHeight() const           { return getRootValueNonUndoable ("height"); }
 
     void createClassProperties (Array <PropertyComponent*>& props);
 
@@ -68,10 +67,16 @@ public:
     const ValueTree getComponentState (Component* comp) const;
     void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
-    Coordinate::MarkerResolver* createComponentMarkerResolver (const ValueTree& state);
-    const StringArray getComponentMarkers (bool horizontal) const;
+    void removeComponent (const ValueTree& state);
     const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
     bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
+
+    // for Coordinate::MarkerResolver:
+    const Coordinate findMarker (const String& name, bool isHorizontal) const;
+
+    void getComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
+                                      Coordinate& coord, PopupMenu& menu, bool isAnchor1);
+    const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     void performNewComponentMenuItem (int menuResultCode);
@@ -82,28 +87,33 @@ public:
     public:
         MarkerList (ComponentDocument& document, bool isX);
 
-        ValueTree getGroup() const;
+        ValueTree& getGroup();
         int size() const;
         ValueTree getMarker (int index) const;
         ValueTree getMarkerNamed (const String& name) const;
         bool contains (const ValueTree& markerState) const;
         const Coordinate getCoordinate (const ValueTree& markerState) const;
+        const String getName (const ValueTree& markerState) const;
+        Value getNameAsValue (const ValueTree& markerState) const;
         void setCoordinate (ValueTree& markerState, const Coordinate& newCoord);
         void createMarker (const String& name, int position);
         void deleteMarker (ValueTree& markerState);
 
         // for Coordinate::MarkerResolver:
-        const Coordinate findMarker (const String& name, bool isHorizontal);
+        const Coordinate findMarker (const String& name, bool isHorizontal) const;
 
     private:
         ComponentDocument& document;
         ValueTree group;
         const bool isX;
+
+        MarkerList (const MarkerList&);
+        MarkerList& operator= (const MarkerList&);
     };
 
-    MarkerList& getMarkerListX()            { return *markersX; }
-    MarkerList& getMarkerListY()            { return *markersY; }
-    MarkerList& getMarkerList (bool isX)    { return isX ? *markersX : *markersY; }
+    MarkerList& getMarkerListX() const            { return *markersX; }
+    MarkerList& getMarkerListY() const            { return *markersY; }
+    MarkerList& getMarkerList (bool isX) const    { return isX ? *markersX : *markersY; }
 
     const String getNonexistentMarkerName (const String& name);
 
@@ -115,7 +125,7 @@ public:
 
     //==============================================================================
     ValueTree& getRoot()                                { return root; }
-    UndoManager* getUndoManager();
+    UndoManager* getUndoManager() const;
     void beginNewTransaction();
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property);
@@ -134,15 +144,17 @@ private:
     File cppFile;
     ValueTree root;
     ScopedPointer<MarkerList> markersX, markersY;
-    UndoManager undoManager;
+    mutable UndoManager undoManager;
     bool changedSinceSaved;
 
     void checkRootObject();
     void createSubTreeIfNotThere (const String& name);
     ValueTree getComponentGroup() const;
+    void addMarkerMenuItem (int i, Coordinate& coord, const String& name, PopupMenu& menu, bool isAnchor1,
+                            const ValueTree& componentState, const String& coordName);
 
-    Value getRootValueUndoable (const var::identifier& name)        { return root.getPropertyAsValue (name, getUndoManager()); }
-    Value getRootValueNonUndoable (const var::identifier& name)     { return root.getPropertyAsValue (name, 0); }
+    Value getRootValueUndoable (const var::identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
+    Value getRootValueNonUndoable (const var::identifier& name) const     { return root.getPropertyAsValue (name, 0); }
 
     void writeCode (OutputStream& cpp, OutputStream& header);
     void writeMetadata (OutputStream& out);

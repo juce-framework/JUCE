@@ -100,11 +100,10 @@ public:
     {
         RectangleCoordinates r (boundsValue.toString());
         Coordinate& coord = getCoord (r);
-        ScopedPointer<Coordinate::MarkerResolver> markers (document.createComponentMarkerResolver (compState));
 
         if (button == proportionButton)
         {
-            coord.toggleProportionality (*markers);
+            coord.toggleProportionality (document);
             boundsValue = r.toString();
         }
         else if (button == anchorButton1)
@@ -113,7 +112,7 @@ public:
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor1 (marker, *markers);
+                coord.changeAnchor1 (marker, document);
                 boundsValue = r.toString();
             }
         }
@@ -123,7 +122,7 @@ public:
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor2 (marker, *markers);
+                coord.changeAnchor2 (marker, document);
                 boundsValue = r.toString();
             }
         }
@@ -212,18 +211,18 @@ public:
         return r.left;
     }
 
-    const String pickMarker (Component* button, const String& currentMarker)
+    const String pickMarker (TextButton* button, const String& currentMarker)
     {
-        const StringArray markers (document.getComponentMarkers (type == left || type == right));
+        RectangleCoordinates b (boundsValue.toString());
 
         PopupMenu m;
-        for (int i = 0; i < markers.size(); ++i)
-            m.addItem (i + 1, markers[i], true, currentMarker == markers[i]);
+        document.getComponentMarkerMenuItems (compState, getTypeName(),
+                                              getCoord (b), m, button == anchorButton1);
 
         const int r = m.showAt (button);
 
         if (r > 0)
-            return markers [r - 1];
+            return document.getChosenMarkerMenuItem (compState, getCoord (b), r);
 
         return String::empty;
     }
@@ -241,6 +240,20 @@ private:
     Coordinate& getCoord (RectangleCoordinates& r)
     {
         return getCoordForType (type, r);
+    }
+
+    const String getTypeName() const
+    {
+        switch (type)
+        {
+            case left:      return "left";
+            case right:     return "right";
+            case top:       return "top";
+            case bottom:    return "bottom";
+            default:        jassertfalse; break;
+        }
+
+        return String::empty;
     }
 };
 
@@ -265,8 +278,7 @@ Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& st
 void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
 {
     RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
-    ScopedPointer<Coordinate::MarkerResolver> markers (document.createComponentMarkerResolver (state));
-    comp->setBounds (pos.resolve (*markers));
+    comp->setBounds (pos.resolve (document));
 
     comp->setName (state [ComponentDocument::compNameProperty]);
 }
@@ -279,11 +291,54 @@ void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, Value
     const Rectangle<int> bounds (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
                                                                             Random::getSystemRandom().nextInt (100) + 100)));
 
-    state.setProperty (ComponentDocument::compBoundsProperty, RectangleCoordinates (bounds).toString(), 0);
+    state.setProperty (ComponentDocument::compBoundsProperty, RectangleCoordinates (bounds, state [ComponentDocument::memberNameProperty]).toString(), 0);
 }
+
+
+//==============================================================================
+class CompMemberNameValueSource   : public Value::ValueSource,
+                                    public Value::Listener
+{
+public:
+    CompMemberNameValueSource (ComponentDocument& document_, const ValueTree& state_)
+       : sourceValue (state_.getPropertyAsValue (ComponentDocument::memberNameProperty, document_.getUndoManager())),
+         document (document_),
+         state (state_)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~CompMemberNameValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+    const var getValue() const   { return sourceValue.toString(); }
+
+    void setValue (const var& newValue)
+    {
+        String newVal (newValue.toString());
+
+        //xxx check for uniqueness + rename any coords that use the name..
+
+
+        newVal = makeValidCppIdentifier (newVal, false, true, false);
+
+        if (sourceValue != newVal)
+            sourceValue = newVal;
+    }
+
+private:
+    Value sourceValue;
+    ComponentDocument& document;
+    ValueTree state;
+
+    CompMemberNameValueSource (const CompMemberNameValueSource&);
+    const CompMemberNameValueSource& operator= (const CompMemberNameValueSource&);
+};
 
 void ComponentTypeHandler::createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
 {
+    props.add (new TextPropertyComponent (Value (new CompMemberNameValueSource (document, state)), "Member Name", 256, false));
+
     props.add (new ComponentBoundsEditor (document, "Left",   ComponentBoundsEditor::left,   state, getValue (ComponentDocument::compBoundsProperty, state, document)));
     props.add (new ComponentBoundsEditor (document, "Right",  ComponentBoundsEditor::right,  state, getValue (ComponentDocument::compBoundsProperty, state, document)));
     props.add (new ComponentBoundsEditor (document, "Top",    ComponentBoundsEditor::top,    state, getValue (ComponentDocument::compBoundsProperty, state, document)));

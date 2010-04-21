@@ -238,7 +238,10 @@ void ComponentEditor::getAllCommands (Array <CommandID>& commands)
     DocumentEditorComponent::getAllCommands (commands);
 
     const CommandID ids[] = { CommandIDs::undo,
-                              CommandIDs::redo };
+                              CommandIDs::redo,
+                              CommandIDs::toFront,
+                              CommandIDs::toBack,
+                              StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -250,16 +253,28 @@ void ComponentEditor::getCommandInfo (CommandID commandID, ApplicationCommandInf
     switch (commandID)
     {
     case CommandIDs::undo:
-        result.setInfo ("Undo", "Undoes the last change",
-                        CommandCategories::general, 0);
+        result.setInfo ("Undo", "Undoes the last change", CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::commandModifier, 0));
         break;
 
     case CommandIDs::redo:
-        result.setInfo ("Redo", "Redoes the last change",
-                        CommandCategories::general, 0);
+        result.setInfo ("Redo", "Redoes the last change", CommandCategories::general, 0);
         result.defaultKeypresses.add (KeyPress ('z', ModifierKeys::shiftModifier | ModifierKeys::commandModifier, 0));
         result.defaultKeypresses.add (KeyPress ('y', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::toFront:
+        result.setInfo ("Bring to Front", "Brings the selected items to the front", CommandCategories::editing, 0);
+        break;
+
+    case CommandIDs::toBack:
+        result.setInfo ("Send to Back", "Moves the selected items to the back", CommandCategories::editing, 0);
+        break;
+
+    case StandardApplicationCommandIDs::del:
+        result.setInfo ("Delete", String::empty, CommandCategories::general, 0);
+        result.defaultKeypresses.add (KeyPress (KeyPress::deleteKey, 0, 0));
+        result.defaultKeypresses.add (KeyPress (KeyPress::backspaceKey, 0, 0));
         break;
 
     default:
@@ -278,6 +293,18 @@ bool ComponentEditor::perform (const InvocationInfo& info)
 
     case CommandIDs::redo:
         getDocument().getUndoManager()->redo();
+        return true;
+
+    case CommandIDs::toFront:
+        getCanvas()->selectionToFront();
+        return true;
+
+    case CommandIDs::toBack:
+        getCanvas()->selectionToBack();
+        return true;
+
+    case StandardApplicationCommandIDs::del:
+        getCanvas()->deleteSelection();
         return true;
 
     default:

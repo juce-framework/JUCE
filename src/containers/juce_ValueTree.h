@@ -239,7 +239,7 @@ public:
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void removeChild (ValueTree& child, UndoManager* const undoManager);
+    void removeChild (const ValueTree& child, UndoManager* const undoManager);
 
     /** Removes a child from this node's child-list.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -457,6 +457,9 @@ private:
 
     private:
         ElementComparator& comparator;
+
+        ComparatorAdapter (const ComparatorAdapter&);
+        ComparatorAdapter& operator= (const ComparatorAdapter&);
     };
 
     friend class SharedObject;

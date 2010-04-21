@@ -44,8 +44,12 @@ public:
     //==============================================================================
     ComponentEditor& getEditor();
     ComponentDocument& getDocument();
-    ComponentDocument::SelectedItems& getSelection();
-    Component* getComponentHolder() const;
+
+    typedef SelectedItemSet<uint32> SelectedItems;
+    SelectedItems& getSelection();
+
+    class ComponentHolder;
+    ComponentHolder* getComponentHolder() const;
 
     //==============================================================================
     void timerCallback();
@@ -64,6 +68,9 @@ public:
 
     //==============================================================================
     void getSelectedItemProperties (Array <PropertyComponent*>& props);
+    void deleteSelection();
+    void selectionToFront();
+    void selectionToBack();
 
     //==============================================================================
     void showSizeGuides();
@@ -98,7 +105,6 @@ private:
     friend class OverlayItemComponent;
     class ComponentResizeFrame;
     class MarkerComponent;
-    class ComponentHolder;
     class WholeComponentResizer;
     class OverlayComponent;
 
@@ -106,7 +112,7 @@ private:
     ComponentHolder* componentHolder;
     OverlayComponent* overlay;
     WholeComponentResizer* resizeFrame;
-    ComponentDocument::SelectedItems selection;
+    SelectedItems selection;
 
     Component* getComponentForUID (const uint32 uid) const;
     const Array<Component*> getSelectedComps() const;
