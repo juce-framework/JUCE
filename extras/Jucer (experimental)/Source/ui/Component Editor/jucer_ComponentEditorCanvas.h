@@ -45,7 +45,7 @@ public:
     ComponentEditor& getEditor();
     ComponentDocument& getDocument();
 
-    typedef SelectedItemSet<uint32> SelectedItems;
+    typedef SelectedItemSet<String> SelectedItems;
     SelectedItems& getSelection();
 
     class ComponentHolder;
@@ -67,8 +67,10 @@ public:
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
 
     //==============================================================================
+    const StringArray getSelectedIds() const;
     void getSelectedItemProperties (Array <PropertyComponent*>& props);
     void deleteSelection();
+    void deselectNonComponents();
     void selectionToFront();
     void selectionToBack();
 
@@ -114,7 +116,6 @@ private:
     WholeComponentResizer* resizeFrame;
     SelectedItems selection;
 
-    Component* getComponentForUID (const uint32 uid) const;
     const Array<Component*> getSelectedComps() const;
     const Array<Component*> getUnselectedComps() const;
 };

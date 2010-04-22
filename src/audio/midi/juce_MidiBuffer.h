@@ -157,6 +157,12 @@ public:
     */
     void swapWith (MidiBuffer& other);
 
+    /** Preallocates some memory for the buffer to use.
+        This helps to avoid needing to reallocate space when the buffer has messages
+        added to it.
+    */
+    void ensureSize (size_t minimumNumBytes);
+
     //==============================================================================
     /**
         Used to iterate through the events in a MidiBuffer.

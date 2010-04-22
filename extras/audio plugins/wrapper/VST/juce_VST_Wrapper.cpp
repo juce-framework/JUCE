@@ -779,6 +779,8 @@ public:
         deleteTempChannels();
 
         filter->prepareToPlay (rate, blockSize);
+
+        midiEvents.ensureSize (2048);
         midiEvents.clear();
 
         setInitialDelay (filter->getLatencySamples());

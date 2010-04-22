@@ -6726,19 +6726,19 @@ public:
 
 	const var& operator[] (const var::identifier& name) const;
 
-	void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
+	void setProperty (const var::identifier& name, const var& newValue, UndoManager* undoManager);
 
 	bool hasProperty (const var::identifier& name) const;
 
-	void removeProperty (const var::identifier& name, UndoManager* const undoManager);
+	void removeProperty (const var::identifier& name, UndoManager* undoManager);
 
-	void removeAllProperties (UndoManager* const undoManager);
+	void removeAllProperties (UndoManager* undoManager);
 
 	int getNumProperties() const;
 
 	const var::identifier getPropertyName (int index) const;
 
-	Value getPropertyAsValue (const var::identifier& name, UndoManager* const undoManager) const;
+	Value getPropertyAsValue (const var::identifier& name, UndoManager* undoManager) const;
 
 	int getNumChildren() const;
 
@@ -6748,15 +6748,19 @@ public:
 
 	ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
 
-	void addChild (ValueTree child, int index, UndoManager* const undoManager);
+	void addChild (ValueTree child, int index, UndoManager* undoManager);
 
-	void removeChild (const ValueTree& child, UndoManager* const undoManager);
+	void removeChild (const ValueTree& child, UndoManager* undoManager);
 
-	void removeChild (const int childIndex, UndoManager* const undoManager);
+	void removeChild (int childIndex, UndoManager* undoManager);
 
-	void removeAllChildren (UndoManager* const undoManager);
+	void removeAllChildren (UndoManager* undoManager);
+
+	void moveChild (int currentIndex, int newIndex, UndoManager* undoManager);
 
 	bool isAChildOf (const ValueTree& possibleParent) const;
+
+	int indexOf (const ValueTree& child) const;
 
 	ValueTree getParent() const;
 
@@ -6801,8 +6805,12 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	friend class ValueTreeSetPropertyAction;
-	friend class ValueTreeChildChangeAction;
+	class SetPropertyAction;
+	friend class SetPropertyAction;
+	class AddOrRemoveChildAction;
+	friend class AddOrRemoveChildAction;
+	class MoveChildAction;
+	friend class MoveChildAction;
 
 	class JUCE_API  SharedObject	: public ReferenceCountedObject
 	{
@@ -6824,16 +6832,18 @@ private:
 		void sendParentChangeMessage();
 		const var& getProperty (const var::identifier& name) const;
 		const var getProperty (const var::identifier& name, const var& defaultReturnValue) const;
-		void setProperty (const var::identifier& name, const var& newValue, UndoManager* const undoManager);
+		void setProperty (const var::identifier& name, const var& newValue, UndoManager*);
 		bool hasProperty (const var::identifier& name) const;
-		void removeProperty (const var::identifier& name, UndoManager* const undoManager);
-		void removeAllProperties (UndoManager* const undoManager);
-		bool isAChildOf (const SharedObject* const possibleParent) const;
+		void removeProperty (const var::identifier& name, UndoManager*);
+		void removeAllProperties (UndoManager*);
+		bool isAChildOf (const SharedObject* possibleParent) const;
+		int indexOf (const ValueTree& child) const;
 		ValueTree getChildWithName (const String& type) const;
 		ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
-		void addChild (SharedObject* child, int index, UndoManager* const undoManager);
-		void removeChild (const int childIndex, UndoManager* const undoManager);
-		void removeAllChildren (UndoManager* const undoManager);
+		void addChild (SharedObject* child, int index, UndoManager*);
+		void removeChild (int childIndex, UndoManager*);
+		void removeAllChildren (UndoManager*);
+		void moveChild (int currentIndex, int newIndex, UndoManager*);
 		XmlElement* createXml() const;
 
 		juce_UseDebuggingNewOperator
@@ -6861,14 +6871,13 @@ private:
 	};
 
 	friend class SharedObject;
-
 	typedef ReferenceCountedObjectPtr <SharedObject> SharedObjectPtr;
 
-	ReferenceCountedObjectPtr <SharedObject> object;
+	SharedObjectPtr object;
 	ListenerList <Listener> listeners;
 
 public:
-	explicit ValueTree (SharedObject* const object_);  // (can be made private when VC6 support is finally dropped)
+	explicit ValueTree (SharedObject*);  // (can be made private when VC6 support is finally dropped)
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
@@ -15722,6 +15731,8 @@ public:
 	int getLastEventTime() const throw();
 
 	void swapWith (MidiBuffer& other);
+
+	void ensureSize (size_t minimumNumBytes);
 
 	class Iterator
 	{

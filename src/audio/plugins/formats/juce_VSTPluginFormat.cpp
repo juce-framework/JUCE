@@ -1140,7 +1140,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
         // copy any incoming midi..
         const ScopedLock sl (midiInLock);
 
-        midiMessages = incomingMidi;
+        midiMessages.swapWith (incomingMidi);
         incomingMidi.clear();
     }
 }

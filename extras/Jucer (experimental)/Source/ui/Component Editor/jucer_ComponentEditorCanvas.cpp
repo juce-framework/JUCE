@@ -104,7 +104,7 @@ public:
             setBoundsInTargetSpace (component->getBounds().expanded (borderThickness, borderThickness));
     }
 
-    uint32 getTargetComponentUID() const  { return component == 0 ? 0 : component->getComponentUID(); }
+    const String getTargetComponentID() const  { return component == 0 ? String::empty : ComponentDocument::getJucerIDFor (component); }
 
     //==============================================================================
     class SizeGuideComponent   : public OverlayItemComponent,
@@ -300,6 +300,8 @@ public:
         toFront (false);
         updateLabel();
 
+        canvas.getSelection().selectOnly (marker [ComponentDocument::idProperty]);
+
         if (e.mods.isPopupMenu())
         {
             isDragging = false;
@@ -394,7 +396,7 @@ public:
 
             if (! doc.containsComponent (c))
             {
-                selection.deselect (c->getComponentUID());
+                selection.deselect (ComponentDocument::getJucerIDFor (c));
                 delete c;
             }
         }
@@ -418,17 +420,35 @@ public:
         }
 
         // Make sure the z-order is correct..
-        for (i = 0; i < num - 1; ++i)
-            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+        if (num > 0)
+        {
+            componentsInOrder.getLast()->toFront (false);
+
+            for (i = num - 1; --i >= 0;)
+                componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+        }
     }
 
-    Component* getComponentForState (ComponentDocument& doc, const ValueTree& state)
+    Component* getComponentForState (ComponentDocument& doc, const ValueTree& state) const
     {
         for (int i = getNumChildComponents(); --i >= 0;)
         {
             Component* const c = getChildComponent (i);
 
             if (doc.isStateForComponent (state, c))
+                return c;
+        }
+
+        return 0;
+    }
+
+    Component* findComponentWithID (const String& uid) const
+    {
+        for (int i = getNumChildComponents(); --i >= 0;)
+        {
+            Component* const c = getChildComponent(i);
+
+            if (ComponentDocument::getJucerIDFor (c) == uid)
                 return c;
         }
 
@@ -453,7 +473,7 @@ public:
         {
             Component* c = getChildComponent(i);
             if (c->getBounds().intersects (lassoArea))
-                itemsFound.add (c->getComponentUID());
+                itemsFound.add (ComponentDocument::getJucerIDFor (c));
         }
     }
 };
@@ -493,7 +513,7 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         lasso = 0;
-        mouseDownCompUID = 0;
+        mouseDownCompUID = String::empty;
         isDraggingClickedComp = false;
 
         Component* underMouse = canvas.getComponentHolder()->findComponentAt (e.getEventRelativeTo (canvas.getComponentHolder()).getPosition());
@@ -502,8 +522,8 @@ public:
         {
             if (underMouse != 0)
             {
-                if (! canvas.getSelection().isSelected (underMouse->getComponentUID()))
-                    canvas.getSelection().selectOnly (underMouse->getComponentUID());
+                if (! canvas.getSelection().isSelected (ComponentDocument::getJucerIDFor (underMouse)))
+                    canvas.getSelection().selectOnly (ComponentDocument::getJucerIDFor (underMouse));
             }
 
             PopupMenu m;
@@ -528,12 +548,14 @@ public:
         {
             if (underMouse == 0 || e.mods.isAltDown())
             {
+                canvas.deselectNonComponents();
                 addAndMakeVisible (lasso = new LassoComponent <SelectedItems::ItemType>());
                 lasso->beginLasso (e, this);
             }
             else
             {
-                mouseDownCompUID = underMouse->getComponentUID();
+                mouseDownCompUID = ComponentDocument::getJucerIDFor (underMouse);
+                canvas.deselectNonComponents();
                 mouseDownResult = canvas.getSelection().addToSelectionOnMouseDown (mouseDownCompUID, e.mods);
 
                 updateResizeFrames();
@@ -549,7 +571,7 @@ public:
         {
             lasso->dragLasso (e);
         }
-        else if (mouseDownCompUID != 0 && (! e.mouseWasClicked()) && (! e.mods.isPopupMenu()))
+        else if (mouseDownCompUID.isNotEmpty() && (! e.mouseWasClicked()) && (! e.mods.isPopupMenu()))
         {
             if (! isDraggingClickedComp)
             {
@@ -653,40 +675,24 @@ private:
     ValueTree markerRootX, markerRootY;
     ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
     bool mouseDownResult, isDraggingClickedComp;
-    uint32 mouseDownCompUID;
+    SelectedItems::ItemType mouseDownCompUID;
 
     ComponentDocument& getDocument()            { return canvas.getDocument(); }
-
-    Component* getComponentWithUID (const uint32 uid) const
-    {
-        for (int i = canvas.getComponentHolder()->getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = canvas.getComponentHolder()->getChildComponent(i);
-
-            if (c->getComponentUID() == uid)
-                return c;
-        }
-
-        return 0;
-    }
 
     void updateResizeFrames()
     {
         SelectedItems& selection = canvas.getSelection();
+        StringArray requiredIds (canvas.getSelectedIds());
 
-        Array<int> requiredIds;
         int i;
-        for (i = selection.getNumSelected(); --i >= 0;)
-            requiredIds.add (selection.getSelectedItem(i));
-
         for (i = getNumChildComponents(); --i >= 0;)
         {
             ComponentResizeFrame* resizer = dynamic_cast <ComponentResizeFrame*> (getChildComponent(i));
 
             if (resizer != 0)
             {
-                if (selection.isSelected (resizer->getTargetComponentUID()))
-                    requiredIds.removeValue (resizer->getTargetComponentUID());
+                if (selection.isSelected (resizer->getTargetComponentID()))
+                    requiredIds.removeString (resizer->getTargetComponentID());
                 else
                     delete resizer;
             }
@@ -694,7 +700,7 @@ private:
 
         for (i = requiredIds.size(); --i >= 0;)
         {
-            Component* c = getComponentWithUID (requiredIds.getUnchecked(i));
+            Component* c = canvas.getComponentHolder()->findComponentWithID (requiredIds[i]);
 
             if (c != 0)
             {
@@ -951,16 +957,19 @@ void ComponentEditorCanvas::updateComponents()
 }
 
 //==============================================================================
+const StringArray ComponentEditorCanvas::getSelectedIds() const
+{
+    StringArray ids;
+    const int num = selection.getNumSelected();
+    for (int i = 0; i < num; ++i)
+        ids.add (selection.getSelectedItem(i));
+
+    return ids;
+}
+
 void ComponentEditorCanvas::getSelectedItemProperties (Array <PropertyComponent*>& props)
 {
-    //xxx needs to handle multiple selections..
-
-    if (selection.getNumSelected() == 1)
-    {
-        Component* c = getComponentForUID (selection.getSelectedItem (0));
-        jassert (c != 0);
-        getDocument().getComponentProperties (props, c);
-    }
+    getDocument().createItemProperties (props, getSelectedIds());
 }
 
 void ComponentEditorCanvas::deleteSelection()
@@ -969,7 +978,7 @@ void ComponentEditorCanvas::deleteSelection()
 
     for (int i = selection.getNumSelected(); --i >= 0;)
     {
-        Component* c = getComponentForUID (selection.getSelectedItem (0));
+        Component* c = componentHolder->findComponentWithID (selection.getSelectedItem (0));
 
         if (c != 0)
             getDocument().removeComponent (getDocument().getComponentState (c));
@@ -978,6 +987,13 @@ void ComponentEditorCanvas::deleteSelection()
     selection.deselectAll();
 
     getDocument().beginNewTransaction();
+}
+
+void ComponentEditorCanvas::deselectNonComponents()
+{
+    for (int i = getSelection().getNumSelected(); --i >= 0;)
+        if (! getDocument().getComponentWithID (getSelection().getSelectedItem (i)).isValid())
+            getSelection().deselect (getSelection().getSelectedItem (i));
 }
 
 void ComponentEditorCanvas::selectionToFront()
@@ -990,11 +1006,10 @@ void ComponentEditorCanvas::selectionToFront()
         const ValueTree comp (getDocument().getComponent (index));
         Component* c = componentHolder->getComponentForState (getDocument(), comp);
 
-        if (c != 0 && selection.isSelected (c->getComponentUID()))
+        if (c != 0 && selection.isSelected (ComponentDocument::getJucerIDFor (c)))
         {
             ValueTree parent (comp.getParent());
-            parent.removeChild (comp, getDocument().getUndoManager());
-            parent.addChild (comp, -1, getDocument().getUndoManager());
+            parent.moveChild (parent.indexOf (comp), -1, getDocument().getUndoManager());
         }
         else
         {
@@ -1015,11 +1030,10 @@ void ComponentEditorCanvas::selectionToBack()
         const ValueTree comp (getDocument().getComponent (index));
         Component* c = componentHolder->getComponentForState (getDocument(), comp);
 
-        if (c != 0 && selection.isSelected (c->getComponentUID()))
+        if (c != 0 && selection.isSelected (ComponentDocument::getJucerIDFor (c)))
         {
             ValueTree parent (comp.getParent());
-            parent.removeChild (comp, getDocument().getUndoManager());
-            parent.addChild (comp, 0, getDocument().getUndoManager());
+            parent.moveChild (parent.indexOf (comp), 0, getDocument().getUndoManager());
         }
         else
         {
@@ -1036,22 +1050,13 @@ void ComponentEditorCanvas::hideSizeGuides()   { overlay->hideSizeGuides(); }
 
 
 //==============================================================================
-Component* ComponentEditorCanvas::getComponentForUID (const uint32 uid) const
-{
-    for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
-        if (componentHolder->getChildComponent (i)->getComponentUID() == uid)
-            return componentHolder->getChildComponent (i);
-
-    return 0;
-}
-
 const Array<Component*> ComponentEditorCanvas::getSelectedComps() const
 {
     Array<Component*> comps;
 
     for (int i = 0; i < selection.getNumSelected(); ++i)
     {
-        Component* c = getComponentForUID (selection.getSelectedItem (i));
+        Component* c = componentHolder->findComponentWithID (selection.getSelectedItem (i));
         jassert (c != 0);
         if (c != 0)
             comps.add (c);
@@ -1065,7 +1070,7 @@ const Array<Component*> ComponentEditorCanvas::getUnselectedComps() const
     Array<Component*> comps;
 
     for (int i = componentHolder->getNumChildComponents(); --i >= 0;)
-        if (! selection.isSelected (componentHolder->getChildComponent(i)->getComponentUID()))
+        if (! selection.isSelected (ComponentDocument::getJucerIDFor (componentHolder->getChildComponent(i))))
             comps.add (componentHolder->getChildComponent(i));
 
     return comps;

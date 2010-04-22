@@ -506,6 +506,8 @@ protected:
 
         juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
+
+        midiEvents.ensureSize (2048);
     }
 
     void handleAsyncUpdate()

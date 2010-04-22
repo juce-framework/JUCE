@@ -282,16 +282,12 @@ const ValueTree ComponentDocument::getComponent (int index) const
 
 const ValueTree ComponentDocument::getComponentWithMemberName (const String& name) const
 {
-    const ValueTree comps (getComponentGroup());
+    return getComponentGroup().getChildWithProperty (memberNameProperty, name);
+}
 
-    for (int i = comps.getNumChildren(); --i >= 0;)
-    {
-        const ValueTree v (comps.getChild(i));
-        if (v [memberNameProperty] == name)
-            return v;
-    }
-
-    return ValueTree::invalid;
+const ValueTree ComponentDocument::getComponentWithID (const String& uid) const
+{
+    return getComponentGroup().getChildWithProperty (idProperty, uid);
 }
 
 Component* ComponentDocument::createComponent (int index)
@@ -301,8 +297,8 @@ Component* ComponentDocument::createComponent (int index)
     if (v.isValid())
     {
         Component* c = ComponentTypeManager::getInstance()->createFromStoredType (*this, v);
-        c->getProperties().set (idProperty, v[idProperty]);
-        jassert (c->getProperties()[idProperty].toString().isNotEmpty());
+        c->getProperties().set (jucerIDProperty, v[idProperty]);
+        jassert (getJucerIDFor (c).isNotEmpty());
         return c;
     }
 
@@ -490,25 +486,11 @@ const ValueTree ComponentDocument::getComponentState (Component* comp) const
     return ValueTree::invalid;
 }
 
-void ComponentDocument::getComponentProperties (Array <PropertyComponent*>& props, Component* comp)
-{
-    ValueTree v (getComponentState (comp));
-
-    if (v.isValid())
-    {
-        ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandlerFor (v.getType());
-        jassert (handler != 0);
-
-        if (handler != 0)
-            handler->createPropertyEditors (*this, v, props);
-    }
-}
-
 bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Component* comp) const
 {
     jassert (comp != 0);
     jassert (! storedState [idProperty].isVoid());
-    return storedState [idProperty] == comp->getProperties() [idProperty];
+    return storedState [idProperty] == getJucerIDFor (comp);
 }
 
 void ComponentDocument::removeComponent (const ValueTree& state)
@@ -594,6 +576,7 @@ void ComponentDocument::MarkerList::createMarker (const String& name, int positi
     ValueTree marker (markerTag);
     marker.setProperty (markerNameProperty, document.getNonexistentMarkerName (name), 0);
     marker.setProperty (markerPosProperty, Coordinate (position, isX).toString(), 0);
+    marker.setProperty (idProperty, createAlphaNumericUID(), 0);
     group.addChild (marker, -1, document.getUndoManager());
 }
 
@@ -617,6 +600,24 @@ const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, 
     return Coordinate (isX);
 }
 
+void ComponentDocument::MarkerList::createMarkerProperties (Array <PropertyComponent*>& props, ValueTree& marker)
+{
+    props.add (new TextPropertyComponent (getNameAsValue (marker), "Marker Name", 256, false));
+}
+
+bool ComponentDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)
+{
+    ValueTree marker (group.getChildWithProperty (idProperty, itemId));
+
+    if (marker.isValid())
+    {
+        createMarkerProperties (props, marker);
+        return true;
+    }
+
+    return false;
+}
+
 const String ComponentDocument::getNonexistentMarkerName (const String& name)
 {
     String n (makeValidCppIdentifier (name, false, true, false));
@@ -629,9 +630,56 @@ const String ComponentDocument::getNonexistentMarkerName (const String& name)
 }
 
 //==============================================================================
+bool ComponentDocument::createItemProperties (Array <PropertyComponent*>& props, const String& itemId)
+{
+    ValueTree comp (getComponentWithID (itemId));
+
+    if (comp.isValid())
+    {
+        ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandlerFor (comp.getType());
+        jassert (handler != 0);
+
+        if (handler != 0)
+            handler->createPropertyEditors (*this, comp, props);
+
+        return true;
+    }
+
+    if (markersX->createProperties (props, itemId)
+         || markersY->createProperties (props, itemId))
+        return true;
+
+    return false;
+}
+
+void ComponentDocument::createItemProperties (Array <PropertyComponent*>& props, const StringArray& selectedItemIds)
+{
+    if (selectedItemIds.size() != 1)
+        return; //xxx
+
+    for (int i = 0; i < selectedItemIds.size(); ++i)
+        createItemProperties (props, selectedItemIds[i]);
+}
+
+//==============================================================================
 UndoManager* ComponentDocument::getUndoManager() const
 {
     return &undoManager;
+}
+
+//==============================================================================
+const char* const ComponentDocument::jucerIDProperty = "jucerID";
+
+const String ComponentDocument::getJucerIDFor (Component* c)
+{
+    if (c == 0)
+    {
+        jassertfalse;
+        return String::empty;
+    }
+
+    jassert (c->getProperties().contains (jucerIDProperty));
+    return c->getProperties() [jucerIDProperty];
 }
 
 //==============================================================================

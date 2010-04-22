@@ -31,11 +31,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class ValueTreeSetPropertyAction  : public UndoableAction
+class ValueTree::SetPropertyAction  : public UndoableAction
 {
 public:
-    ValueTreeSetPropertyAction (const ValueTree::SharedObjectPtr& target_, const var::identifier& name_,
-                                const var& newValue_, const bool isAddingNewProperty_, const bool isDeletingProperty_)
+    SetPropertyAction (const SharedObjectPtr& target_, const var::identifier& name_,
+                       const var& newValue_, const bool isAddingNewProperty_, const bool isDeletingProperty_)
         : target (target_), name (name_), newValue (newValue_),
           isAddingNewProperty (isAddingNewProperty_),
           isDeletingProperty (isDeletingProperty_)
@@ -44,7 +44,7 @@ public:
             oldValue = target_->getProperty (name_);
     }
 
-    ~ValueTreeSetPropertyAction() {}
+    ~SetPropertyAction() {}
 
     bool perform()
     {
@@ -74,22 +74,22 @@ public:
     }
 
 private:
-    const ValueTree::SharedObjectPtr target;
+    const SharedObjectPtr target;
     const var::identifier name;
     const var newValue;
     var oldValue;
     const bool isAddingNewProperty, isDeletingProperty;
 
-    ValueTreeSetPropertyAction (const ValueTreeSetPropertyAction&);
-    ValueTreeSetPropertyAction& operator= (const ValueTreeSetPropertyAction&);
+    SetPropertyAction (const SetPropertyAction&);
+    SetPropertyAction& operator= (const SetPropertyAction&);
 };
 
 //==============================================================================
-class ValueTreeChildChangeAction  : public UndoableAction
+class ValueTree::AddOrRemoveChildAction  : public UndoableAction
 {
 public:
-    ValueTreeChildChangeAction (const ValueTree::SharedObjectPtr& target_, const int childIndex_,
-                                const ValueTree::SharedObjectPtr& newChild_)
+    AddOrRemoveChildAction (const SharedObjectPtr& target_, const int childIndex_,
+                            const SharedObjectPtr& newChild_)
         : target (target_),
           child (newChild_ != 0 ? newChild_ : target_->children [childIndex_]),
           childIndex (childIndex_),
@@ -98,7 +98,7 @@ public:
         jassert (child != 0);
     }
 
-    ~ValueTreeChildChangeAction() {}
+    ~AddOrRemoveChildAction() {}
 
     bool perform()
     {
@@ -133,12 +133,51 @@ public:
     }
 
 private:
-    const ValueTree::SharedObjectPtr target, child;
+    const SharedObjectPtr target, child;
     const int childIndex;
     const bool isDeleting;
 
-    ValueTreeChildChangeAction (const ValueTreeChildChangeAction&);
-    ValueTreeChildChangeAction& operator= (const ValueTreeChildChangeAction&);
+    AddOrRemoveChildAction (const AddOrRemoveChildAction&);
+    AddOrRemoveChildAction& operator= (const AddOrRemoveChildAction&);
+};
+
+//==============================================================================
+class ValueTree::MoveChildAction  : public UndoableAction
+{
+public:
+    MoveChildAction (const SharedObjectPtr& target_,
+                     const int startIndex_, const int endIndex_)
+        : target (target_),
+          startIndex (startIndex_),
+          endIndex (endIndex_)
+    {
+    }
+
+    ~MoveChildAction() {}
+
+    bool perform()
+    {
+        target->moveChild (startIndex, endIndex, 0);
+        return true;
+    }
+
+    bool undo()
+    {
+        target->moveChild (endIndex, startIndex, 0);
+        return true;
+    }
+
+    int getSizeInUnits()
+    {
+        return (int) sizeof (*this); //xxx should be more accurate
+    }
+
+private:
+    const SharedObjectPtr target, child;
+    const int startIndex, endIndex;
+
+    MoveChildAction (const MoveChildAction&);
+    MoveChildAction& operator= (const MoveChildAction&);
 };
 
 
@@ -258,11 +297,11 @@ void ValueTree::SharedObject::setProperty (const var::identifier& name, const va
         if (existingValue != 0)
         {
             if (*existingValue != newValue)
-                undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, false, false));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, false, false));
         }
         else
         {
-            undoManager->perform (new ValueTreeSetPropertyAction (this, name, newValue, true, false));
+            undoManager->perform (new SetPropertyAction (this, name, newValue, true, false));
         }
     }
 }
@@ -282,7 +321,7 @@ void ValueTree::SharedObject::removeProperty (const var::identifier& name, UndoM
     else
     {
         if (properties.contains (name))
-            undoManager->perform (new ValueTreeSetPropertyAction (this, name, var::null, false, true));
+            undoManager->perform (new SetPropertyAction (this, name, var::null, false, true));
     }
 }
 
@@ -300,7 +339,7 @@ void ValueTree::SharedObject::removeAllProperties (UndoManager* const undoManage
     else
     {
         for (int i = properties.size(); --i >= 0;)
-            undoManager->perform (new ValueTreeSetPropertyAction (this, properties.getName(i), var::null, false, true));
+            undoManager->perform (new SetPropertyAction (this, properties.getName(i), var::null, false, true));
     }
 }
 
@@ -337,6 +376,11 @@ bool ValueTree::SharedObject::isAChildOf (const SharedObject* const possiblePare
     return false;
 }
 
+int ValueTree::SharedObject::indexOf (const ValueTree& child) const
+{
+    return children.indexOf (child.object);
+}
+
 void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoManager* const undoManager)
 {
     if (child != 0 && child->parent != this)
@@ -366,7 +410,7 @@ void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoMana
                 if (index < 0)
                     index = children.size();
 
-                undoManager->perform (new ValueTreeChildChangeAction (this, index, child));
+                undoManager->perform (new AddOrRemoveChildAction (this, index, child));
             }
         }
         else
@@ -393,7 +437,7 @@ void ValueTree::SharedObject::removeChild (const int childIndex, UndoManager* co
         }
         else
         {
-            undoManager->perform (new ValueTreeChildChangeAction (this, childIndex, 0));
+            undoManager->perform (new AddOrRemoveChildAction (this, childIndex, 0));
         }
     }
 }
@@ -404,6 +448,28 @@ void ValueTree::SharedObject::removeAllChildren (UndoManager* const undoManager)
         removeChild (children.size() - 1, undoManager);
 }
 
+void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoManager* undoManager)
+{
+    // The source index must be a valid index!
+    jassert (((unsigned int) currentIndex) < (unsigned int) children.size());
+
+    if (currentIndex != newIndex
+         && ((unsigned int) currentIndex) < (unsigned int) children.size())
+    {
+        if (undoManager == 0)
+        {
+            children.move (currentIndex, newIndex);
+            sendChildChangeMessage();
+        }
+        else
+        {
+            if (((unsigned int) newIndex) >= (unsigned int) children.size())
+                newIndex = children.size() - 1;
+
+            undoManager->perform (new MoveChildAction (this, currentIndex, newIndex));
+        }
+    }
+}
 
 //==============================================================================
 ValueTree::ValueTree() throw()
@@ -610,6 +676,11 @@ bool ValueTree::isAChildOf (const ValueTree& possibleParent) const
     return object != 0 && object->isAChildOf (possibleParent.object);
 }
 
+int ValueTree::indexOf (const ValueTree& child) const
+{
+    return object != 0 ? object->indexOf (child) : -1;
+}
+
 void ValueTree::addChild (ValueTree child, int index, UndoManager* const undoManager)
 {
     if (object != 0)
@@ -632,6 +703,12 @@ void ValueTree::removeAllChildren (UndoManager* const undoManager)
 {
     if (object != 0)
         object->removeAllChildren (undoManager);
+}
+
+void ValueTree::moveChild (int currentIndex, int newIndex, UndoManager* undoManager)
+{
+    if (object != 0)
+        object->moveChild (currentIndex, newIndex, undoManager);
 }
 
 //==============================================================================

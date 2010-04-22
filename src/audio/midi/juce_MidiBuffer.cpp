@@ -191,6 +191,11 @@ void MidiBuffer::addEvents (const MidiBuffer& otherBuffer,
     }
 }
 
+void MidiBuffer::ensureSize (size_t minimumNumBytes)
+{
+    data.ensureSize (minimumNumBytes);
+}
+
 bool MidiBuffer::isEmpty() const throw()
 {
     return bytesUsed == 0;

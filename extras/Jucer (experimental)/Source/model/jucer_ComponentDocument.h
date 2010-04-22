@@ -61,11 +61,11 @@ public:
     int getNumComponents() const;
     const ValueTree getComponent (int index) const;
     const ValueTree getComponentWithMemberName (const String& name) const;
+    const ValueTree getComponentWithID (const String& uid) const;
     Component* createComponent (int index);
     void updateComponent (Component* comp);
     bool containsComponent (Component* comp) const;
     const ValueTree getComponentState (Component* comp) const;
-    void getComponentProperties (Array <PropertyComponent*>& props, Component* comp);
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
     void removeComponent (const ValueTree& state);
     const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
@@ -102,6 +102,9 @@ public:
         // for Coordinate::MarkerResolver:
         const Coordinate findMarker (const String& name, bool isHorizontal) const;
 
+        bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
+        void createMarkerProperties (Array <PropertyComponent*>& props, ValueTree& marker);
+
     private:
         ComponentDocument& document;
         ValueTree group;
@@ -116,6 +119,9 @@ public:
     MarkerList& getMarkerList (bool isX) const    { return isX ? *markersX : *markersY; }
 
     const String getNonexistentMarkerName (const String& name);
+
+    //==============================================================================
+    void createItemProperties (Array <PropertyComponent*>& props, const StringArray& selectedItemIds);
 
     //==============================================================================
     void beginDrag (const Array<Component*>& items, const MouseEvent& e,
@@ -139,6 +145,9 @@ public:
     static const char* const markerNameProperty;
     static const char* const markerPosProperty;
 
+    static const char* const jucerIDProperty;
+    static const String getJucerIDFor (Component* c);
+
 private:
     Project* project;
     File cppFile;
@@ -158,6 +167,8 @@ private:
 
     void writeCode (OutputStream& cpp, OutputStream& header);
     void writeMetadata (OutputStream& out);
+
+    bool createItemProperties (Array <PropertyComponent*>& props, const String& itemId);
 };
 
 

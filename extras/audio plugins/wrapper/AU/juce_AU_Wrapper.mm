@@ -654,7 +654,9 @@ public:
             juceFilter->prepareToPlay (GetSampleRate(),
                                        GetMaxFramesPerSlice());
 
+            midiEvents.ensureSize (2048);
             midiEvents.clear();
+            incomingEvents.ensureSize (2048);
             incomingEvents.clear();
 
             channels.calloc (jmax (juceFilter->getNumInputChannels(),
