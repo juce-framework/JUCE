@@ -1860,24 +1860,15 @@ static int findInsertIndexInSortedArray (ElementComparator& comparator,
 }
 
 template <class ElementType>
-class IntegerElementComparator
+class DefaultElementComparator
 {
-public:
-	static int compareElements (const ElementType first,
-								const ElementType second) throw()
-	{
-		return (first < second) ? -1 : ((first == second) ? 0 : 1);
-	}
-};
+private:
+	typedef PARAMETER_TYPE (ElementType) ParameterType;
 
-template <class ElementType>
-class FloatElementComparator
-{
 public:
-	static int compareElements (const ElementType first,
-								const ElementType second) throw()
+	static int compareElements (ParameterType first, ParameterType second)
 	{
-		return (first < second) ? -1 : ((first == second) ? 0 : 1);
+		return (first < second) ? -1 : ((first < second) ? 1 : 0);
 	}
 };
 
@@ -2295,6 +2286,12 @@ public:
 	{
 		const ScopedLockType lock (getLock());
 		insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
+	}
+
+	void addUsingDefaultSort (ParameterType newElement)
+	{
+		DefaultElementComparator <ElementType> comparator;
+		addSorted (comparator, newElement);
 	}
 
 	template <class ElementComparator>
@@ -5890,9 +5887,8 @@ public:
 		{
 			removeRange (firstValue, numValuesToAdd);
 
-			IntegerElementComparator<Type> sorter;
-			values.addSorted (sorter, firstValue);
-			values.addSorted (sorter, firstValue + numValuesToAdd);
+			values.addUsingDefaultSort (firstValue);
+			values.addUsingDefaultSort (firstValue + numValuesToAdd);
 
 			simplify();
 		}
@@ -5926,13 +5922,11 @@ public:
 				}
 			}
 
-			IntegerElementComparator<Type> sorter;
-
 			if (onAtStart)
-				values.addSorted (sorter, firstValue);
+				values.addUsingDefaultSort (firstValue);
 
 			if (onAtEnd)
-				values.addSorted (sorter, lastValue);
+				values.addUsingDefaultSort (lastValue);
 
 			simplify();
 		}
@@ -26231,16 +26225,17 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	class ActiveXControlData;
-	friend class ActiveXControlData;
-	void* control;
+	class Pimpl;
+	friend class Pimpl;
+	friend class ScopedPointer <Pimpl>;
+	ScopedPointer <Pimpl> control;
 	bool mouseEventsAllowed;
-
-	ActiveXControlComponent (const ActiveXControlComponent&);
-	ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 
 	void setControlBounds (const Rectangle<int>& bounds) const;
 	void setControlVisible (bool b) const;
+
+	ActiveXControlComponent (const ActiveXControlComponent&);
+	ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 };
 
 #endif

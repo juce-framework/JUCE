@@ -155,8 +155,7 @@ public:
         minBufferSize = wasapi_refTimeToSamples (minPeriod, defaultSampleRate);
         defaultBufferSize = wasapi_refTimeToSamples (defaultPeriod, defaultSampleRate);
 
-        FloatElementComparator<double> comparator;
-        rates.addSorted (comparator, defaultSampleRate);
+        rates.addUsingDefaultSort (defaultSampleRate);
 
         static const double ratesToTest[] = { 44100.0, 48000.0, 88200.0, 96000.0 };
 
@@ -170,7 +169,7 @@ public:
             if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
                                                           (WAVEFORMATEX*) &format, 0)))
                 if (! rates.contains (ratesToTest[i]))
-                    rates.addSorted (comparator, ratesToTest[i]);
+                    rates.addUsingDefaultSort (ratesToTest[i]);
         }
     }
 
@@ -321,6 +320,9 @@ private:
 
         return false;
     }
+
+    WASAPIDeviceBase (const WASAPIDeviceBase&);
+    WASAPIDeviceBase& operator= (const WASAPIDeviceBase&);
 };
 
 //==============================================================================
@@ -467,6 +469,10 @@ public:
     ComSmartPtr <IAudioCaptureClient> captureClient;
     MemoryBlock reservoir;
     int reservoirSize, reservoirCapacity;
+
+private:
+    WASAPIInputDevice (const WASAPIInputDevice&);
+    WASAPIInputDevice& operator= (const WASAPIInputDevice&);
 };
 
 //==============================================================================
@@ -559,6 +565,10 @@ public:
     }
 
     ComSmartPtr <IAudioRenderClient> renderClient;
+
+private:
+    WASAPIOutputDevice (const WASAPIOutputDevice&);
+    WASAPIOutputDevice& operator= (const WASAPIOutputDevice&);
 };
 
 //==============================================================================
@@ -621,16 +631,15 @@ public:
                 sampleRates = d->rates;
             }
 
-            IntegerElementComparator<int> comparator;
-            bufferSizes.addSorted (comparator, defaultBufferSize);
+            bufferSizes.addUsingDefaultSort (defaultBufferSize);
             if (minBufferSize != defaultBufferSize)
-                bufferSizes.addSorted (comparator, minBufferSize);
+                bufferSizes.addUsingDefaultSort (minBufferSize);
 
             int n = 64;
             for (int i = 0; i < 40; ++i)
             {
                 if (n >= minBufferSize && n <= 2048 && ! bufferSizes.contains (n))
-                    bufferSizes.addSorted (comparator, n);
+                    bufferSizes.addUsingDefaultSort (n);
 
                 n += (n < 512) ? 32 : (n < 1024 ? 64 : 128);
             }

@@ -258,58 +258,30 @@ static int findInsertIndexInSortedArray (ElementComparator& comparator,
 //==============================================================================
 /**
     A simple ElementComparator class that can be used to sort an array of
-    integer primitive objects.
+    objects that support the '<' operator.
+
+    This will work for primitive types and objects that implement operator<().
 
     Example: @code
     Array <int> myArray;
-
-    IntegerElementComparator<int> sorter;
+    DefaultElementComparator<int> sorter;
     myArray.sort (sorter);
     @endcode
 
-    For floating point values, see the FloatElementComparator class instead.
-
-    @see FloatElementComparator, ElementComparator
+    @see ElementComparator
 */
 template <class ElementType>
-class IntegerElementComparator
+class DefaultElementComparator
 {
+private:
+    typedef PARAMETER_TYPE (ElementType) ParameterType;
+
 public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
+    static int compareElements (ParameterType first, ParameterType second)
     {
-        return (first < second) ? -1 : ((first == second) ? 0 : 1);
+        return (first < second) ? -1 : ((first < second) ? 1 : 0);
     }
 };
-
-
-//==============================================================================
-/**
-    A simple ElementComparator class that can be used to sort an array of numeric
-    double or floating point primitive objects.
-
-    Example: @code
-    Array <double> myArray;
-
-    FloatElementComparator<double> sorter;
-    myArray.sort (sorter);
-    @endcode
-
-    For integer values, see the IntegerElementComparator class instead.
-
-    @see IntegerElementComparator, ElementComparator
-*/
-template <class ElementType>
-class FloatElementComparator
-{
-public:
-    static int compareElements (const ElementType first,
-                                const ElementType second) throw()
-    {
-        return (first < second) ? -1 : ((first == second) ? 0 : 1);
-    }
-};
-
 
 
 #endif   // __JUCE_ELEMENTCOMPARATOR_JUCEHEADER__

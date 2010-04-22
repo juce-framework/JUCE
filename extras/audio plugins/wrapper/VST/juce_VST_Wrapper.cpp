@@ -788,7 +788,7 @@ public:
         AudioEffectX::resume();
 
 #if JucePlugin_ProducesMidiOutput
-        outgoingEvents.ensureSize (64);
+        outgoingEvents.ensureSize (512);
 #endif
 
 #if JucePlugin_WantsMidiInput && ! JUCE_USE_VSTSDK_2_4

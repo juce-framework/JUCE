@@ -287,8 +287,8 @@ private:
         }
 
     private:
-        const String attributeToSort;
-        const int direction;
+        String attributeToSort;
+        int direction;
     };
 
     //==============================================================================

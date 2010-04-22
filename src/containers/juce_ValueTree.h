@@ -264,6 +264,7 @@ public:
         @param newIndex         the index at which you'd like this item to end up. If this
                                 is less than zero, the value will be moved to the end
                                 of the list
+        @param undoManager      the optional UndoManager to use to store this transaction
     */
     void moveChild (int currentIndex, int newIndex, UndoManager* undoManager);
 

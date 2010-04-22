@@ -329,7 +329,7 @@ public:
     /** Appends a new element at the end of the array.
 
         @param newElement       the new object to add to the array
-        @see set, insert, addIfNotAlreadyThere, addSorted, addArray
+        @see set, insert, addIfNotAlreadyThere, addSorted, addUsingDefaultSort, addArray
     */
     void add (ParameterType newElement)
     {
@@ -348,7 +348,7 @@ public:
         @param indexToInsertAt    the index at which the new element should be
                                   inserted (pass in -1 to add it to the end)
         @param newElement         the new object to add to the array
-        @see add, addSorted, set
+        @see add, addSorted, addUsingDefaultSort, set
     */
     void insert (int indexToInsertAt, ParameterType newElement)
     {
@@ -580,13 +580,28 @@ public:
         @param comparator   the comparator to use to compare the elements - see the sort()
                             method for details about the form this object should take
         @param newElement   the new element to insert to the array
-        @see add, sort
+        @see addUsingDefaultSort, add, sort
     */
     template <class ElementComparator>
     void addSorted (ElementComparator& comparator, ParameterType newElement)
     {
         const ScopedLockType lock (getLock());
         insert (findInsertIndexInSortedArray (comparator, data.elements.getData(), newElement, 0, numUsed), newElement);
+    }
+
+    /** Inserts a new element into the array, assuming that the array is sorted.
+
+        This will use the DefaultElementComparator class for sorting, so your ElementType
+        must be suitable for use with that class. If the array isn't sorted, the behaviour of this
+        method will be unpredictable.
+
+        @param newElement   the new element to insert to the array
+        @see addSorted, sort
+    */
+    void addUsingDefaultSort (ParameterType newElement)
+    {
+        DefaultElementComparator <ElementType> comparator;
+        addSorted (comparator, newElement);
     }
 
     /** Finds the index of an element in the array, assuming that the array is sorted.

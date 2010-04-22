@@ -877,8 +877,6 @@ private:
 
             Drawable* image = iconsFromZipFile [iconNames.indexOf (filename)]->createCopy();
             return new ToolbarButton (itemId, text, image, 0);
-
-            return 0;
         }
 
         // Demonstrates how to put a custom component into a toolbar - this one contains

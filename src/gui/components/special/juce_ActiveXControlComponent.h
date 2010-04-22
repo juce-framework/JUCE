@@ -116,16 +116,17 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    class ActiveXControlData;
-    friend class ActiveXControlData;
-    void* control;
+    class Pimpl;
+    friend class Pimpl;
+    friend class ScopedPointer <Pimpl>;
+    ScopedPointer <Pimpl> control;
     bool mouseEventsAllowed;
-
-    ActiveXControlComponent (const ActiveXControlComponent&);
-    ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 
     void setControlBounds (const Rectangle<int>& bounds) const;
     void setControlVisible (bool b) const;
+
+    ActiveXControlComponent (const ActiveXControlComponent&);
+    ActiveXControlComponent& operator= (const ActiveXControlComponent&);
 };
 
 #endif

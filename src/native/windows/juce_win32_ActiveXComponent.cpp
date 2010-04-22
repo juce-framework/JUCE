@@ -171,7 +171,6 @@ namespace ActiveXHelpers
 
         HRESULT __stdcall GetWindowContext (LPOLEINPLACEFRAME* lplpFrame, LPOLEINPLACEUIWINDOW* lplpDoc, LPRECT, LPRECT, LPOLEINPLACEFRAMEINFO lpFrameInfo)
         {
-            // frame->AddRef();   // MS docs are unclear about whether this is needed, but it seems to lead to a memory leak..
             *lplpFrame = frame;
             *lplpDoc = 0;
             lpFrameInfo->fMDIApp = FALSE;
@@ -292,7 +291,7 @@ namespace ActiveXHelpers
 }
 
 //==============================================================================
-class ActiveXControlComponent::ActiveXControlData  : public ComponentMovementWatcher
+class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
 {
     ActiveXControlComponent* const owner;
     bool wasShowing;
@@ -304,8 +303,7 @@ public:
     IOleObject* control;
 
     //==============================================================================
-    ActiveXControlData (HWND hwnd,
-                        ActiveXControlComponent* const owner_)
+    Pimpl (HWND hwnd, ActiveXControlComponent* const owner_)
         : ComponentMovementWatcher (owner_),
           owner (owner_),
           wasShowing (owner_ != 0 && owner_->isShowing()),
@@ -316,7 +314,7 @@ public:
     {
     }
 
-    ~ActiveXControlData()
+    ~Pimpl()
     {
         if (control != 0)
         {
@@ -359,20 +357,15 @@ public:
         componentPeerChanged();
     }
 
-    static bool doesWindowMatch (const ActiveXControlComponent* const ax, HWND hwnd)
-    {
-        return ((ActiveXControlData*) ax->control) != 0
-                 && ((ActiveXControlData*) ax->control)->controlHWND == hwnd;
-    }
-
     // intercepts events going to an activeX control, so we can sneakily use the mouse events
     static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         for (int i = ActiveXHelpers::activeXComps.size(); --i >= 0;)
         {
-            const ActiveXControlComponent* const ax = (const ActiveXControlComponent*) ActiveXHelpers::activeXComps.getUnchecked(i);
+            const ActiveXControlComponent* const ax
+                    = static_cast <const ActiveXControlComponent*> (ActiveXHelpers::activeXComps.getUnchecked(i));
 
-            if (doesWindowMatch (ax, hwnd))
+            if (ax->control != 0 && ax->control->controlHWND == hwnd)
             {
                 switch (message)
                 {
@@ -404,7 +397,7 @@ public:
                     break;
                 }
 
-                return CallWindowProc ((WNDPROC) (ax->originalWndProc), hwnd, message, wParam, lParam);
+                return CallWindowProc ((WNDPROC) ax->originalWndProc, hwnd, message, wParam, lParam);
             }
         }
 
@@ -414,7 +407,6 @@ public:
 
 ActiveXControlComponent::ActiveXControlComponent()
     : originalWndProc (0),
-      control (0),
       mouseEventsAllowed (true)
 {
     ActiveXHelpers::activeXComps.add (this);
@@ -445,16 +437,16 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
         const Point<int> pos (relativePositionToOtherComponent (getTopLevelComponent(), Point<int>()));
         HWND hwnd = (HWND) peer->getNativeHandle();
 
-        ScopedPointer <ActiveXControlData> info (new ActiveXControlData (hwnd, this));
+        ScopedPointer<Pimpl> newControl (new Pimpl (hwnd, this));
 
         HRESULT hr;
         if ((hr = OleCreate (*(const IID*) controlIID, IID_IOleObject, 1 /*OLERENDER_DRAW*/, 0,
-                             info->clientSite, info->storage,
-                             (void**) &(info->control))) == S_OK)
+                             newControl->clientSite, newControl->storage,
+                             (void**) &(newControl->control))) == S_OK)
         {
-            info->control->SetHostNames (L"Juce", 0);
+            newControl->control->SetHostNames (L"Juce", 0);
 
-            if (OleSetContainedObject (info->control, TRUE) == S_OK)
+            if (OleSetContainedObject (newControl->control, TRUE) == S_OK)
             {
                 RECT rect;
                 rect.left = pos.getX();
@@ -462,17 +454,17 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
                 rect.right = pos.getX() + getWidth();
                 rect.bottom = pos.getY() + getHeight();
 
-                if (info->control->DoVerb (OLEIVERB_SHOW, 0, info->clientSite, 0, hwnd, &rect) == S_OK)
+                if (newControl->control->DoVerb (OLEIVERB_SHOW, 0, newControl->clientSite, 0, hwnd, &rect) == S_OK)
                 {
-                    control = info.release();
+                    control = newControl;
                     setControlBounds (Rectangle<int> (pos.getX(), pos.getY(), getWidth(), getHeight()));
 
-                    ((ActiveXControlData*) control)->controlHWND = ActiveXHelpers::getHWND (this);
+                    control->controlHWND = ActiveXHelpers::getHWND (this);
 
-                    if (((ActiveXControlData*) control)->controlHWND != 0)
+                    if (control->controlHWND != 0)
                     {
-                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC);
-                        SetWindowLongPtr ((HWND) ((ActiveXControlData*) control)->controlHWND, GWLP_WNDPROC, (LONG_PTR) ActiveXControlData::activeXHookWndProc);
+                        originalWndProc = (void*) (pointer_sized_int) GetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC);
+                        SetWindowLongPtr ((HWND) control->controlHWND, GWLP_WNDPROC, (LONG_PTR) Pimpl::activeXHookWndProc);
                     }
 
                     return true;
@@ -486,24 +478,16 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
 void ActiveXControlComponent::deleteControl()
 {
-    ActiveXControlData* const info = (ActiveXControlData*) control;
-
-    if (info != 0)
-    {
-        delete info;
-        control = 0;
-        originalWndProc = 0;
-    }
+    control = 0;
+    originalWndProc = 0;
 }
 
 void* ActiveXControlComponent::queryInterface (const void* iid) const
 {
-    ActiveXControlData* const info = (ActiveXControlData*) control;
-
     void* result = 0;
 
-    if (info != 0 && info->control != 0
-         && info->control->QueryInterface (*(const IID*) iid, &result) == S_OK)
+    if (control != 0 && control->control != 0
+         && SUCCEEDED (control->control->QueryInterface (*(const IID*) iid, &result)))
         return result;
 
     return 0;
@@ -511,18 +495,14 @@ void* ActiveXControlComponent::queryInterface (const void* iid) const
 
 void ActiveXControlComponent::setControlBounds (const Rectangle<int>& newBounds) const
 {
-    HWND hwnd = ((ActiveXControlData*) control)->controlHWND;
-
-    if (hwnd != 0)
-        MoveWindow (hwnd, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
+    if (control->controlHWND != 0)
+        MoveWindow (control->controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
 }
 
 void ActiveXControlComponent::setControlVisible (const bool shouldBeVisible) const
 {
-    HWND hwnd = ((ActiveXControlData*) control)->controlHWND;
-
-    if (hwnd != 0)
-        ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
+    if (control->controlHWND != 0)
+        ShowWindow (control->controlHWND, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
 }
 
 void ActiveXControlComponent::setMouseEventsAllowed (const bool eventsCanReachControl)
