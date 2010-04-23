@@ -455,7 +455,7 @@ private:
             choices.add (T("Tabs at right"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             const TabbedButtonBar::Orientation orientations[] = { TabbedButtonBar::TabsAtTop,
                                                                   TabbedButtonBar::TabsAtBottom,
@@ -528,7 +528,7 @@ private:
                 choices.add (T("Tab ") + String (i) + T(": \"") + comp->getTabNames() [i] + T("\""));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new InitialTabChangeAction (component, *document.getComponentLayout(), newIndex),
                               T("Change initial tab"));
@@ -589,7 +589,7 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -921,7 +921,7 @@ private:
             choices.add (T("Named content component"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new TabContentTypeChangeAction (component, *document.getComponentLayout(), tabIndex, newIndex == 0),
                               T("Change tab content type"));

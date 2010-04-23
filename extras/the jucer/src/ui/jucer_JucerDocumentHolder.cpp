@@ -287,7 +287,7 @@ private:
             choices.add (T("Keep component size fixed"));
         }
 
-        void setIndex (const int newIndex)  { document.setFixedSize (newIndex != 0); }
+        void setIndex (int newIndex)        { document.setFixedSize (newIndex != 0); }
         int getIndex() const                { return document.isFixedSize() ? 1 : 0; }
     };
 };

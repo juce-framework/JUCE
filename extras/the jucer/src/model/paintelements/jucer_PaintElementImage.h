@@ -312,7 +312,7 @@ public:
             Rectangle<int> r (getCurrentBounds (parentArea));
             Rectangle<float> bounds (image->getBounds());
 
-            r.setSize ((int) (bounds.getWidth() + 1.0f), (int) (bounds.getHeight() + 1.0f));
+            r.setSize ((int) (bounds.getWidth() + 0.999f), (int) (bounds.getHeight() + 0.999f));
 
             setCurrentBounds (r, parentArea, true);
         }
@@ -443,7 +443,7 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -484,7 +484,7 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             element->setStretchMode ((StretchMode) newIndex, true);
         }

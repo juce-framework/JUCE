@@ -259,7 +259,7 @@ public:
         document.removeChangeListener (this);
     }
 
-    void setState (const bool newState)
+    void setState (bool newState)
     {
         document.setStatePaintRoutineEnabled (stateMethod, newState);
     }

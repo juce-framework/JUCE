@@ -568,8 +568,8 @@ void PaintRoutine::dropImageAt (const File& f, int x, int y)
 
             pei->setResource (resourceName, true);
 
-            const int imageW = (int) (bounds.getRight() + 1.0f);
-            const int imageH = (int) (bounds.getBottom() + 1.0f);
+            const int imageW = (int) (bounds.getRight() + 0.999f);
+            const int imageH = (int) (bounds.getBottom() + 0.999f);
 
             RelativePositionedRectangle pr;
             pr.rect.setX (x - imageW / 2);

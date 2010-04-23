@@ -265,7 +265,7 @@ private:
             choices.add (T("edit on double-click"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new LabelEditableChangeAction (component, *document.getComponentLayout(), newIndex),
                               T("Change Label editability"));
@@ -325,7 +325,7 @@ private:
             choices.add (T("loss of focus commits changes"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new LabelFocusLossChangeAction (component, *document.getComponentLayout(), newIndex == 0),
                               T("Change Label focus behaviour"));
@@ -522,7 +522,7 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -598,7 +598,7 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             Font f (label->getFont());
 

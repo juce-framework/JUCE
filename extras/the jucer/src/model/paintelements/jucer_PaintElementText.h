@@ -441,7 +441,7 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             Font f (element->getFont());
 
@@ -486,7 +486,7 @@ private:
             element->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 

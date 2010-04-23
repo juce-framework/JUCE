@@ -116,7 +116,7 @@ Path::Path (const Path& other)
 {
     if (numElements > 0)
     {
-        data.setAllocatedSize (numElements);
+        data.setAllocatedSize ((int) numElements);
         memcpy (data.elements, other.data.elements, numElements * sizeof (float));
     }
 }
@@ -125,7 +125,7 @@ Path& Path::operator= (const Path& other)
 {
     if (this != &other)
     {
-        data.ensureAllocatedSize (other.numElements);
+        data.ensureAllocatedSize ((int) other.numElements);
 
         numElements = other.numElements;
         pathXMin = other.pathXMin;
@@ -228,7 +228,7 @@ void Path::startNewSubPath (const float x, const float y)
         pathYMax = jmax (pathYMax, y);
     }
 
-    data.ensureAllocatedSize (numElements + 3);
+    data.ensureAllocatedSize ((int) numElements + 3);
 
     data.elements [numElements++] = moveMarker;
     data.elements [numElements++] = x;
@@ -242,7 +242,7 @@ void Path::lineTo (const float x, const float y)
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize (numElements + 3);
+    data.ensureAllocatedSize ((int) numElements + 3);
 
     data.elements [numElements++] = lineMarker;
     data.elements [numElements++] = x;
@@ -263,7 +263,7 @@ void Path::quadraticTo (const float x1, const float y1,
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize (numElements + 5);
+    data.ensureAllocatedSize ((int) numElements + 5);
 
     data.elements [numElements++] = quadMarker;
     data.elements [numElements++] = x1;
@@ -288,7 +288,7 @@ void Path::cubicTo (const float x1, const float y1,
     if (numElements == 0)
         startNewSubPath (0, 0);
 
-    data.ensureAllocatedSize (numElements + 7);
+    data.ensureAllocatedSize ((int) numElements + 7);
 
     data.elements [numElements++] = cubicMarker;
     data.elements [numElements++] = x1;
@@ -309,14 +309,14 @@ void Path::closeSubPath()
     if (numElements > 0
          && data.elements [numElements - 1] != closeSubPathMarker)
     {
-        data.ensureAllocatedSize (numElements + 1);
+        data.ensureAllocatedSize ((int) numElements + 1);
         data.elements [numElements++] = closeSubPathMarker;
     }
 }
 
 const Point<float> Path::getCurrentPosition() const
 {
-    int i = numElements - 1;
+    size_t i = numElements - 1;
 
     if (i > 0 && data.elements[i] == closeSubPathMarker)
     {
@@ -349,7 +349,7 @@ void Path::addRectangle (const float x, const float y,
     if (h < 0)
         swapVariables (y1, y2);
 
-    data.ensureAllocatedSize (numElements + 13);
+    data.ensureAllocatedSize ((int) numElements + 13);
 
     if (numElements == 0)
     {
@@ -1085,7 +1085,7 @@ const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
     if (cornerRadius <= 0.01f)
         return *this;
 
-    int indexOfPathStart = 0, indexOfPathStartThis = 0;
+    size_t indexOfPathStart = 0, indexOfPathStartThis = 0;
     size_t n = 0;
     bool lastWasLine = false, firstWasLine = false;
     Path p;

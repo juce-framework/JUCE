@@ -117,7 +117,7 @@ public:
     }
 
     //==============================================================================
-    void setIndex (const int newIndex)      { owner->setNonZeroWinding (newIndex == 0, true); }
+    void setIndex (int newIndex)            { owner->setNonZeroWinding (newIndex == 0, true); }
     int getIndex() const                    { return owner->isNonZeroWinding() ? 0 : 1; }
 
     void changeListenerCallback (void*)     { refresh(); }
@@ -1214,7 +1214,7 @@ public:
     }
 
     //==============================================================================
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         Path::Iterator::PathElementType type = Path::Iterator::startNewSubPath;
 
@@ -1350,7 +1350,7 @@ public:
         refresh();
     }
 
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         owner->setSubpathClosed (index, newIndex == 0, true);
     }

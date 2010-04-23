@@ -220,7 +220,7 @@ private:
             owner->getDocument()->removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 

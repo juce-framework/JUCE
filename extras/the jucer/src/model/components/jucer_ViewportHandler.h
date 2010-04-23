@@ -316,7 +316,7 @@ private:
         {
         }
 
-        void setState (const bool newState)
+        void setState (bool newState)
         {
             document.perform (new ViewportScrollbarChangeAction (component, *document.getComponentLayout(), vertical, newState),
                               T("Change Viewport scrollbar"));
@@ -388,7 +388,7 @@ private:
             document.removeChangeListener (this);
         }
 
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             document.getUndoManager().undoCurrentTransactionOnly();
 
@@ -452,7 +452,7 @@ private:
             choices.add (T("Named content component"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new ViewportContentTypeChangeAction (component, *document.getComponentLayout(), newIndex),
                               T("Change Viewport content type"));

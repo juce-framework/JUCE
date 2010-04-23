@@ -56,7 +56,7 @@ public:
         owner->getDocument()->removeChangeListener (this);
     }
 
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         JucerFillType fill (isForStroke ? owner->getStrokeType().fill
                                         : owner->getFillType());
@@ -294,7 +294,7 @@ public:
     }
 
     //==============================================================================
-    void setState (const bool newState)     { owner->enableStroke (newState, true); }
+    void setState (bool newState)           { owner->enableStroke (newState, true); }
     bool getState() const                   { return owner->isStrokeEnabled(); }
 
     void changeListenerCallback (void*)     { refresh(); }
@@ -320,7 +320,7 @@ public:
         owner->getDocument()->removeChangeListener (this);
     }
 
-    void setValue (const double newValue)
+    void setValue (double newValue)
     {
         owner->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 
@@ -359,7 +359,7 @@ public:
         owner->getDocument()->removeChangeListener (this);
     }
 
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         const PathStrokeType::JointStyle joints[] = { PathStrokeType::mitered,
                                                       PathStrokeType::curved,
@@ -418,7 +418,7 @@ public:
         owner->getDocument()->removeChangeListener (this);
     }
 
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         const PathStrokeType::EndCapStyle ends[] = { PathStrokeType::butt,
                                                      PathStrokeType::square,
@@ -566,7 +566,7 @@ public:
         element->getDocument()->removeChangeListener (this);
     }
 
-    void setValue (const double newValue)
+    void setValue (double newValue)
     {
         element->getDocument()->getUndoManager().undoCurrentTransactionOnly();
 

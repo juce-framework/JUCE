@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	15
+#define JUCE_BUILDNUMBER	16
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -189,11 +189,11 @@
 #endif
 
 #ifndef JUCE_FORCE_DEBUG
-  //#define JUCE_FORCE_DEBUG 1
+  #define JUCE_FORCE_DEBUG 0
 #endif
 
 #ifndef JUCE_LOG_ASSERTIONS
-//  #define JUCE_LOG_ASSERTIONS 1
+  #define JUCE_LOG_ASSERTIONS 0
 #endif
 
 #ifndef JUCE_ASIO
@@ -201,7 +201,7 @@
 #endif
 
 #ifndef JUCE_WASAPI
-//  #define JUCE_WASAPI 1
+  #define JUCE_WASAPI 0
 #endif
 
 #ifndef JUCE_DIRECTSOUND
@@ -213,7 +213,7 @@
 #endif
 
 #ifndef JUCE_JACK
-  #define JUCE_JACK 1
+  #define JUCE_JACK 0
 #endif
 
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
@@ -241,15 +241,15 @@
 #endif
 
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 1
+  #define JUCE_USE_CDREADER 0
 #endif
 
 #if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
-//  #define JUCE_USE_CAMERA 1
+  #define JUCE_USE_CAMERA 0
 #endif
 
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
-//  #define JUCE_ENABLE_REPAINT_DEBUGGING 1
+  #define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
 #ifndef JUCE_USE_XINERAMA
@@ -261,7 +261,7 @@
 #endif
 
 #ifndef JUCE_USE_XRENDER
-  //#define JUCE_USE_XRENDER 1
+  #define JUCE_USE_XRENDER 0
 #endif
 
 #ifndef JUCE_USE_XCURSOR
@@ -269,15 +269,15 @@
 #endif
 
 #ifndef JUCE_PLUGINHOST_VST
-//  #define JUCE_PLUGINHOST_VST 1
+  #define JUCE_PLUGINHOST_VST 0
 #endif
 
 #ifndef JUCE_PLUGINHOST_AU
-//  #define JUCE_PLUGINHOST_AU 1
+  #define JUCE_PLUGINHOST_AU 0
 #endif
 
 #ifndef JUCE_ONLY_BUILD_CORE_LIBRARY
-  //#define JUCE_ONLY_BUILD_CORE_LIBRARY  1
+  #define JUCE_ONLY_BUILD_CORE_LIBRARY  0
 #endif
 
 #ifndef JUCE_WEB_BROWSER

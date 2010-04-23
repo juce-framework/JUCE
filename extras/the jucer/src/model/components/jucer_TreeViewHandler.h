@@ -178,7 +178,7 @@ private:
         {
         }
 
-        void setState (const bool newState)
+        void setState (bool newState)
         {
             document.perform (new TreeviewRootChangeAction (component, *document.getComponentLayout(), newState),
                               T("Change TreeView root item"));
@@ -231,7 +231,7 @@ private:
             choices.add (T("Items closed by default"));
         }
 
-        void setIndex (const int newIndex)
+        void setIndex (int newIndex)
         {
             document.perform (new TreeviewOpennessChangeAction (component, *document.getComponentLayout(), newIndex == 0),
                               T("Change TreeView openness"));

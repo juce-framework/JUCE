@@ -202,7 +202,7 @@ public:
         else if (columnId == 2)
             return direction * first->originalFilename.compare (second->originalFilename);
         else if (columnId == 3)
-            return direction * first->data.getSize() - second->data.getSize();
+            return direction * (int) first->data.getSize() - (int) second->data.getSize();
 
         return 0;
     }

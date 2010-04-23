@@ -84,7 +84,7 @@ public:
     virtual const String getResource() const = 0;
 
     //==============================================================================
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         if (newIndex == 0)
         {

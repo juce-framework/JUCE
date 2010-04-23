@@ -56,7 +56,7 @@ public:
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-    void setIndex (const int newIndex);
+    void setIndex (int newIndex);
     int getIndex() const;
 };
 

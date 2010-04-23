@@ -204,7 +204,7 @@ Image* BinaryResources::getImageFromCache (const String& name) const
     const BinaryResources::BinaryResource* const res = getResource (name);
 
     if (res != 0 && res->data.getSize() > 0)
-        return ImageCache::getFromMemory (res->data.getData(), res->data.getSize());
+        return ImageCache::getFromMemory (res->data.getData(), (int) res->data.getSize());
 
     return 0;
 }

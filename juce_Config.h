@@ -45,7 +45,7 @@
     it to be true or false.
 */
 #ifndef JUCE_FORCE_DEBUG
-  //#define JUCE_FORCE_DEBUG 1
+  #define JUCE_FORCE_DEBUG 0
 #endif
 
 //=============================================================================
@@ -59,7 +59,7 @@
     @see jassert, jassertfalse, Logger
 */
 #ifndef JUCE_LOG_ASSERTIONS
-//  #define JUCE_LOG_ASSERTIONS 1
+  #define JUCE_LOG_ASSERTIONS 0
 #endif
 
 //=============================================================================
@@ -77,7 +77,7 @@
 /** JUCE_WASAPI: Enables WASAPI audio devices (Windows Vista and above).
 */
 #ifndef JUCE_WASAPI
-//  #define JUCE_WASAPI 1
+  #define JUCE_WASAPI 0
 #endif
 
 /** JUCE_DIRECTSOUND: Enables DirectSound audio (MS Windows only).
@@ -93,7 +93,7 @@
 
 /** JUCE_JACK: Enables JACK audio devices (Linux only). */
 #ifndef JUCE_JACK
-  #define JUCE_JACK 1
+  #define JUCE_JACK 0
 #endif
 
 //=============================================================================
@@ -148,14 +148,14 @@
     reduce code size.
 */
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 1
+  #define JUCE_USE_CDREADER 0
 #endif
 
 //=============================================================================
 /** JUCE_USE_CAMERA: Enables web-cam support using the CameraDevice class (Mac and Windows).
 */
 #if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
-//  #define JUCE_USE_CAMERA 1
+  #define JUCE_USE_CAMERA 0
 #endif
 
 //=============================================================================
@@ -164,7 +164,7 @@
     often your components are being drawn.
 */
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
-//  #define JUCE_ENABLE_REPAINT_DEBUGGING 1
+  #define JUCE_ENABLE_REPAINT_DEBUGGING 0
 #endif
 
 //=============================================================================
@@ -185,7 +185,7 @@
 /** JUCE_USE_XRENDER: Uses XRender to allow semi-transparent windowing on Linux.
 */
 #ifndef JUCE_USE_XRENDER
-  //#define JUCE_USE_XRENDER 1
+  #define JUCE_USE_XRENDER 0
 #endif
 
 /** JUCE_USE_XCURSOR: Uses XCursor to allow ARGB cursor on Linux. This is best left turned on
@@ -203,7 +203,7 @@
     @see VSTPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_AU
 */
 #ifndef JUCE_PLUGINHOST_VST
-//  #define JUCE_PLUGINHOST_VST 1
+  #define JUCE_PLUGINHOST_VST 0
 #endif
 
 /** JUCE_PLUGINHOST_AU: Enables the AudioUnit plugin hosting classes. This is Mac-only,
@@ -212,7 +212,7 @@
     @see AudioUnitPluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST
 */
 #ifndef JUCE_PLUGINHOST_AU
-//  #define JUCE_PLUGINHOST_AU 1
+  #define JUCE_PLUGINHOST_AU 0
 #endif
 
 //=============================================================================
@@ -220,7 +220,7 @@
     This should be enabled if you're writing a console application.
 */
 #ifndef JUCE_ONLY_BUILD_CORE_LIBRARY
-  //#define JUCE_ONLY_BUILD_CORE_LIBRARY  1
+  #define JUCE_ONLY_BUILD_CORE_LIBRARY  0
 #endif
 
 /** JUCE_WEB_BROWSER: This lets you disable the WebBrowserComponent class (Mac and Windows).

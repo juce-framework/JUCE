@@ -193,7 +193,7 @@ private:
         }
 
         //==============================================================================
-        void setState (const bool newState)
+        void setState (bool newState)
         {
             document.perform (new ComboEditableChangeAction (component, *document.getComponentLayout(), newState),
                               T("Change combo box editability"));

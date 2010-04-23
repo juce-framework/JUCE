@@ -108,7 +108,7 @@ private:
         {
         }
 
-        void setState (const bool newState)
+        void setState (bool newState)
         {
             document.perform (new ToggleStateChangeAction (component, *document.getComponentLayout(), newState),
                               T("Change ToggleButton state"));

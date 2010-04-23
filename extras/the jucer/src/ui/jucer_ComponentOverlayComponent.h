@@ -67,10 +67,10 @@ public:
     void checkBounds (Rectangle<int>& bounds,
                       const Rectangle<int>& previousBounds,
                       const Rectangle<int>& limits,
-                      const bool isStretchingTop,
-                      const bool isStretchingLeft,
-                      const bool isStretchingBottom,
-                      const bool isStretchingRight);
+                      bool isStretchingTop,
+                      bool isStretchingLeft,
+                      bool isStretchingBottom,
+                      bool isStretchingRight);
 
     void applyBoundsToComponent (Component* component, const Rectangle<int>& bounds);
 

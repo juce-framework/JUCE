@@ -323,7 +323,7 @@ public:
         }
 
         //==============================================================================
-        void setState (const bool newState)
+        void setState (bool newState)
         {
             setImageKeepProportions (layout, component, newState, true);
         }
@@ -405,7 +405,7 @@ public:
         }
 
         //==============================================================================
-        void setValue (const double newValue)
+        void setValue (double newValue)
         {
             setImageOpacity (layout, owner, role, (float) newValue, true);
         }

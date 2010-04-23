@@ -67,7 +67,7 @@ public:
 
 
     //==============================================================================
-    void setIndex (const int newIndex)
+    void setIndex (int newIndex)
     {
         const int types[] = { Justification::centred,
                               Justification::centredLeft,
