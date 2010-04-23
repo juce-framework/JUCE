@@ -405,13 +405,13 @@ void ComponentDocument::getComponentMarkerMenuItems (const ValueTree& componentS
         {
             if (coord.isHorizontal())
             {
-                addMarkerMenuItem (10000 + i, coord, compName + ".left", menu, isAnchor1, componentState, coordName);
-                addMarkerMenuItem (10001 + i, coord, compName + ".right", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10000 + i * 4, coord, compName + ".left", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10001 + i * 4, coord, compName + ".right", menu, isAnchor1, componentState, coordName);
             }
             else
             {
-                addMarkerMenuItem (10002 + i, coord, compName + ".top", menu, isAnchor1, componentState, coordName);
-                addMarkerMenuItem (10003 + i, coord, compName + ".bottom", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10002 + i * 4, coord, compName + ".top", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10003 + i * 4, coord, compName + ".bottom", menu, isAnchor1, componentState, coordName);
             }
         }
     }

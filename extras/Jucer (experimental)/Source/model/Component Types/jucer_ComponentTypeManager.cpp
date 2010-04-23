@@ -26,29 +26,27 @@
 #include "jucer_ComponentTypeManager.h"
 #include "jucer_ComponentTypes.h"
 
+
 //==============================================================================
-class ComponentBoundsEditor  : public PropertyComponent,
-                               public ButtonListener,
-                               public Value::Listener
+class CoordinateEditor  : public PropertyComponent,
+                          public ButtonListener,
+                          public Value::Listener
 {
 public:
-    enum Type
-    {
-        left, top, right, bottom
-    };
-
     //==============================================================================
-    ComponentBoundsEditor (ComponentDocument& document_, const String& name, Type type_,
-                           const ValueTree& compState_, const Value& boundsValue_)
-        : PropertyComponent (name, 40), document (document_), type (type_),
-          compState (compState_), boundsValue (boundsValue_)
+    CoordinateEditor (ComponentDocument& document_, const String& name,
+                      const Value& coordValue_, bool isHorizontal_)
+        : PropertyComponent (name, 40), document (document_),
+          coordValue (coordValue_),
+          textValue (Value (new CoordEditableValueSource (coordValue_, isHorizontal_))),
+         isHorizontal (isHorizontal_)
     {
         addAndMakeVisible (label = new Label (String::empty, String::empty));
 
         label->setEditable (true, true, false);
         label->setColour (Label::backgroundColourId, Colours::white);
         label->setColour (Label::outlineColourId, findColour (ComboBox::outlineColourId));
-        label->getTextValue().referTo (Value (new BoundsCoordValueSource (boundsValue, type)));
+        label->getTextValue().referTo (textValue);
 
         addAndMakeVisible (proportionButton = new TextButton ("%"));
         proportionButton->addButtonListener (this);
@@ -63,13 +61,13 @@ public:
         anchorButton2->setTriggeredOnMouseDown (true);
         anchorButton2->addButtonListener (this);
 
-        boundsValue.addListener (this);
-        valueChanged (boundsValue);
+        coordValue.addListener (this);
+        valueChanged (coordValue);
     }
 
-    ~ComponentBoundsEditor()
+    ~CoordinateEditor()
     {
-        boundsValue.removeListener (this);
+        coordValue.removeListener (this);
         deleteAllChildren();
     }
 
@@ -92,52 +90,139 @@ public:
         }
     }
 
-    void refresh()
-    {
-    }
+    void refresh() {}
 
     void buttonClicked (Button* button)
     {
-        RectangleCoordinates r (boundsValue.toString());
-        Coordinate& coord = getCoord (r);
+        Coordinate coord (getCoordinate());
 
         if (button == proportionButton)
         {
             coord.toggleProportionality (document);
-            boundsValue = r.toString();
+            coordValue = coord.toString();
         }
         else if (button == anchorButton1)
         {
-            const String marker (pickMarker (anchorButton1, coord.getAnchor1()));
+            const String marker (pickMarker (anchorButton1, coord.getAnchor1(), true));
 
             if (marker.isNotEmpty())
             {
                 coord.changeAnchor1 (marker, document);
-                boundsValue = r.toString();
+                coordValue = coord.toString();
             }
         }
         else if (button == anchorButton2)
         {
-            const String marker (pickMarker (anchorButton2, coord.getAnchor2()));
+            const String marker (pickMarker (anchorButton2, coord.getAnchor2(), false));
 
             if (marker.isNotEmpty())
             {
                 coord.changeAnchor2 (marker, document);
-                boundsValue = r.toString();
+                coordValue = coord.toString();
             }
         }
     }
 
     void valueChanged (Value&)
     {
-        RectangleCoordinates r (boundsValue.toString());
-        Coordinate& coord = getCoord (r);
+        Coordinate coord (getCoordinate());
 
         anchorButton1->setButtonText (coord.getAnchor1());
 
         anchorButton2->setVisible (coord.isProportional());
         anchorButton2->setButtonText (coord.getAnchor2());
         resized();
+    }
+
+    const Coordinate getCoordinate() const
+    {
+        return Coordinate (coordValue.toString(), isHorizontal);
+    }
+
+    virtual const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1) = 0;
+
+protected:
+    ComponentDocument& document;
+    Value coordValue, textValue;
+    Label* label;
+    TextButton* proportionButton;
+    TextButton* anchorButton1;
+    TextButton* anchorButton2;
+    bool isHorizontal;
+
+    //==============================================================================
+    class CoordEditableValueSource   : public Value::ValueSource,
+                                       public Value::Listener
+    {
+    public:
+        CoordEditableValueSource (const Value& sourceValue_, bool isHorizontal_)
+           : sourceValue (sourceValue_), isHorizontal (isHorizontal_)
+        {
+            sourceValue.addListener (this);
+        }
+
+        ~CoordEditableValueSource() {}
+
+        const var getValue() const
+        {
+            Coordinate coord (sourceValue.toString(), isHorizontal);
+
+            if (coord.isProportional())
+                return String (coord.getEditableValue()) + "%";
+
+            return coord.getEditableValue();
+        }
+
+        void setValue (const var& newValue)
+        {
+            Coordinate coord (sourceValue.toString(), isHorizontal);
+            coord.setEditableValue ((double) newValue);
+
+            const String newVal (coord.toString());
+            if (sourceValue != newVal)
+                sourceValue = newVal;
+        }
+
+        void valueChanged (Value&)
+        {
+            sendChangeMessage (true);
+        }
+
+        //==============================================================================
+        juce_UseDebuggingNewOperator
+
+    protected:
+        Value sourceValue;
+        bool isHorizontal;
+
+        CoordEditableValueSource (const CoordEditableValueSource&);
+        const CoordEditableValueSource& operator= (const CoordEditableValueSource&);
+    };
+};
+
+
+//==============================================================================
+class ComponentBoundsEditor  : public CoordinateEditor
+{
+public:
+    enum Type
+    {
+        left, top, right, bottom
+    };
+
+    //==============================================================================
+    ComponentBoundsEditor (ComponentDocument& document_, const String& name, Type type_,
+                           const ValueTree& compState_, const Value& coordValue_)
+        : CoordinateEditor (document_, name,
+                            Value (new BoundsCoordValueSource (coordValue_, type_)),
+                            type_ == left || type_ == right),
+          type (type_),
+          compState (compState_)
+    {
+    }
+
+    ~ComponentBoundsEditor()
+    {
     }
 
     //==============================================================================
@@ -156,20 +241,14 @@ public:
         const var getValue() const
         {
             RectangleCoordinates r (sourceValue.toString());
-            Coordinate& coord = getCoord (r);
-
-            if (coord.isProportional())
-                return String (coord.getEditableValue()) + "%";
-
-            return coord.getEditableValue();
+            return getCoord (r).toString();
         }
 
         void setValue (const var& newValue)
         {
             RectangleCoordinates r (sourceValue.toString());
             Coordinate& coord = getCoord (r);
-
-            coord.setEditableValue ((double) newValue);
+            coord = Coordinate (newValue.toString(), coord.isHorizontal());
 
             const String newVal (r.toString());
             if (sourceValue != newVal)
@@ -188,6 +267,20 @@ public:
         Value sourceValue;
         Type type;
 
+        static Coordinate& getCoordForType (const Type type, RectangleCoordinates& r)
+        {
+            switch (type)
+            {
+                case left:   return r.left;
+                case right:  return r.right;
+                case top:    return r.top;
+                case bottom: return r.bottom;
+                default:     jassertfalse; break;
+            }
+
+            return r.left;
+        }
+
         Coordinate& getCoord (RectangleCoordinates& r) const
         {
             return getCoordForType (type, r);
@@ -197,50 +290,24 @@ public:
         const BoundsCoordValueSource& operator= (const BoundsCoordValueSource&);
     };
 
-    static Coordinate& getCoordForType (const Type type, RectangleCoordinates& r)
+    const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1)
     {
-        switch (type)
-        {
-            case left:   return r.left;
-            case right:  return r.right;
-            case top:    return r.top;
-            case bottom: return r.bottom;
-            default:     jassertfalse; break;
-        }
-
-        return r.left;
-    }
-
-    const String pickMarker (TextButton* button, const String& currentMarker)
-    {
-        RectangleCoordinates b (boundsValue.toString());
+        Coordinate coord (getCoordinate());
 
         PopupMenu m;
-        document.getComponentMarkerMenuItems (compState, getTypeName(),
-                                              getCoord (b), m, button == anchorButton1);
+        document.getComponentMarkerMenuItems (compState, getTypeName(), coord, m, isAnchor1);
 
         const int r = m.showAt (button);
 
         if (r > 0)
-            return document.getChosenMarkerMenuItem (compState, getCoord (b), r);
+            return document.getChosenMarkerMenuItem (compState, coord, r);
 
         return String::empty;
     }
 
 private:
-    ComponentDocument& document;
     Type type;
     ValueTree compState;
-    Value boundsValue;
-    Label* label;
-    TextButton* proportionButton;
-    TextButton* anchorButton1;
-    TextButton* anchorButton2;
-
-    Coordinate& getCoord (RectangleCoordinates& r)
-    {
-        return getCoordForType (type, r);
-    }
 
     const String getTypeName() const
     {

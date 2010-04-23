@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@
 */
 #define JUCE_MAJOR_VERSION      1
 #define JUCE_MINOR_VERSION      51
-#define JUCE_BUILDNUMBER        15
+#define JUCE_BUILDNUMBER        16
 
 /** Current Juce version number.
 
