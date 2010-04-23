@@ -1,7 +1,15 @@
 
 ==============================================================================
 
-                            JUCE version 1.50
+                            JUCE version 1.51
+
+==============================================================================
+Changelist for version 1.51
+
+- Huge amounts of code cleaning-up and bugfixing! Modernised vast amounts of old code to follow C++ best practice guidelines recommended by leading C++ gurus...
+- Initial support for the iPhone/iPad!
+- Initial incarnation of a future replacement for the Jucer - this is unfinished, but already has fantastic project-creation and management features to let you auto-generate multiple-IDE project files.
+- Numerous new features such as WASAPI, Jack, CoreGraphics, lots of great new classes such as ValueTree, CodeEditorComponent, NamedValueSet, entirely re-written graphics engine with new clipping abilities, foundations for support of multi-touch input devices.
 
 ==============================================================================
 Changelist for version 1.50
