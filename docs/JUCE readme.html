@@ -67,7 +67,7 @@ The <code>juce/extras/juce demo/build</code> folder contains projects and worksp
 
 <h3>The "amalgamated" version of Juce</h3>
 
-<p>A recent new feature is that Juce can be used as a monolithic C++ file, instead of a statically linked
+<p>One of Juce's features is that it can be linked into your project as a monolithic C++ file, instead of a statically linked
 library. This means that you can write a juce application without actually needing to build the
 library beforehand, but instead by just adding <code>juce_amalgamated.cpp</code> to the project, and including 
 <code>juce_amalagamated.h</code> instead of <code>juce.h</code>. The demo apps are designed using this approach, because it means
@@ -78,7 +78,19 @@ your project in the traditional way, using it as a separate library.</p>
 same effect as the normal amalgamated file, but which actually pulls in all the juce cpp files via #include statements
 rather than by pre-munging them into one file. This makes debugging a lot easier</p>
 
-<h2>Building your application with JUCE</h2>
+<h2>Creating a new application with JUCE</h2>
+
+<h3>Using the new Jucer</h3>
+<p><strong>NOTE!</strong> By far the easiest way to create a new cross-platform Juce app (or audio plugin) is to use the new and 
+not-yet-finished Jucer to generate all the project files for you... This replacement for the old Jucer is still work-in-progress and 
+at the "experimental" stage, but it has enough project management features to already be extemely useful. To use it, you'll need to build
+and run it - that's pretty easy to do: just open an appropriate project from the <code>juce/extras/Jucer (experimental)/Builds</code> folder,
+and compile/run it. The new Jucer has a wizard that will create a new Juce project for you, sorting out all the messy paths and project set-up,
+and will spit out a collection of project files for the various IDEs that you can simply open and build.</p>
+<p>When complete, the new Jucer will be a big part of future Juce versions, and is already used to auto-generate the makefiles and project 
+files for all the projects in the juce/extras folder.</p>
+
+<p>However, if you want to create a Juce project manually (i.e. the hard way), here are some instructions:</p>
 
 <h3><a name="buildvc2005"></a>Compiling with Microsoft Visual Studio</h3>
 
