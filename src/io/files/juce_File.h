@@ -924,8 +924,15 @@ private:
     const String getPathUpToLastSlash() const;
 
     void createDirectoryInternal (const String& fileName) const;
+    bool copyInternal (const File& dest) const;
+    bool moveInternal (const File& dest) const;
+    bool setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const;
+    void getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const;
+    bool setFileReadOnlyInternal (bool shouldBeReadOnly) const;
+
     static const String parseAbsolutePath (const String& path);
     static bool fileTypeMatches (int whatToLookFor, bool isDir, bool isHidden);
+
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__

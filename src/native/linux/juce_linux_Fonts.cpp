@@ -108,7 +108,7 @@ public:
         if (fontDirs.size() == 0)
         {
             XmlDocument fontsConfig (File ("/etc/fonts/fonts.conf"));
-            XmlElement* const fontsInfo = fontsConfig.getDocumentElement();
+            const ScopedPointer<XmlElement> fontsInfo (fontsConfig.getDocumentElement());
 
             if (fontsInfo != 0)
             {
@@ -116,8 +116,6 @@ public:
                 {
                     fontDirs.add (e->getAllSubText().trim());
                 }
-
-                delete fontsInfo;
             }
         }
 

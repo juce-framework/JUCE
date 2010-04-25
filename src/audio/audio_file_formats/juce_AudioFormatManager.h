@@ -28,7 +28,7 @@
 
 #include "juce_AudioFormat.h"
 #include "../../core/juce_Singleton.h"
-#include "../../containers/juce_VoidArray.h"
+#include "../../containers/juce_OwnedArray.h"
 
 
 //==============================================================================
@@ -137,7 +137,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    VoidArray knownFormats;
+    OwnedArray<AudioFormat> knownFormats;
     int defaultFormatIndex;
 };
 

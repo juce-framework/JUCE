@@ -37,21 +37,9 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_TemporaryFile.h"
 #include "../../core/juce_SystemStats.h"
 #include "../../core/juce_Random.h"
+#include "../../core/juce_PlatformUtilities.h"
 #include "../../containers/juce_ScopedPointer.h"
 
-
-//==============================================================================
-bool juce_canWriteToFile (const String& fileName);
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly);
-void juce_getFileTimes (const String& fileName, int64& modificationTime, int64& accessTime, int64& creationTime);
-bool juce_setFileTimes (const String& fileName, int64 modificationTime, int64 accessTime, int64 creationTime);
-bool juce_copyFile (const String& source, const String& dest);
-bool juce_moveFile (const String& source, const String& dest);
-bool juce_launchFile (const String& fileName, const String& parameters);
-
-
-//==============================================================================
-const File File::nonexistent;
 
 //==============================================================================
 File::File (const String& fullPathName)
@@ -85,6 +73,9 @@ File& File::operator= (const File& other)
     fullPath = other.fullPath;
     return *this;
 }
+
+const File File::nonexistent;
+
 
 //==============================================================================
 const String File::parseAbsolutePath (const String& p)
@@ -218,24 +209,6 @@ bool File::operator> (const File& other) const
 }
 
 //==============================================================================
-bool File::hasWriteAccess() const
-{
-    if (exists())
-        return juce_canWriteToFile (fullPath);
-
-#if ! JUCE_WINDOWS
-    else if ((! isDirectory()) && fullPath.containsChar (separator))
-        return getParentDirectory().hasWriteAccess();
-    else
-        return false;
-#else
-    // on windows, it seems that even read-only directories can still be written into,
-    // so checking the parent directory's permissions would return the wrong result..
-    else
-        return true;
-#endif
-}
-
 bool File::setReadOnly (const bool shouldBeReadOnly,
                         const bool applyRecursively) const
 {
@@ -250,7 +223,7 @@ bool File::setReadOnly (const bool shouldBeReadOnly,
             worked = subFiles.getReference(i).setReadOnly (shouldBeReadOnly, true) && worked;
     }
 
-    return juce_setFileReadOnly (fullPath, shouldBeReadOnly) && worked;
+    return setFileReadOnlyInternal (shouldBeReadOnly) && worked;
 }
 
 bool File::deleteRecursively() const
@@ -280,18 +253,13 @@ bool File::moveFileTo (const File& newFile) const
         if (! newFile.deleteFile())
             return false;
 
-    return juce_moveFile (fullPath, newFile.fullPath);
+    return moveInternal (newFile);
 }
 
 bool File::copyFileTo (const File& newFile) const
 {
-    if (*this == newFile)
-        return true;
-
-    if (! newFile.deleteFile())
-        return false;
-
-    return juce_copyFile (fullPath, newFile.fullPath);
+    return (*this == newFile)
+            || (exists() && newFile.deleteFile() && copyInternal (newFile));
 }
 
 bool File::copyDirectoryTo (const File& newDirectory) const
@@ -519,38 +487,27 @@ bool File::createDirectory() const
 const Time File::getCreationTime() const
 {
     int64 m, a, c;
-    juce_getFileTimes (fullPath, m, a, c);
+    getFileTimesInternal (m, a, c);
     return Time (c);
-}
-
-bool File::setCreationTime (const Time& t) const
-{
-    return juce_setFileTimes (fullPath, 0, 0, t.toMilliseconds());
 }
 
 const Time File::getLastModificationTime() const
 {
     int64 m, a, c;
-    juce_getFileTimes (fullPath, m, a, c);
+    getFileTimesInternal (m, a, c);
     return Time (m);
-}
-
-bool File::setLastModificationTime (const Time& t) const
-{
-    return juce_setFileTimes (fullPath, t.toMilliseconds(), 0, 0);
 }
 
 const Time File::getLastAccessTime() const
 {
     int64 m, a, c;
-    juce_getFileTimes (fullPath, m, a, c);
+    getFileTimesInternal (m, a, c);
     return Time (a);
 }
 
-bool File::setLastAccessTime (const Time& t) const
-{
-    return juce_setFileTimes (fullPath, 0, t.toMilliseconds(), 0);
-}
+bool File::setLastModificationTime (const Time& t) const    { return setFileTimesInternal (t.toMilliseconds(), 0, 0); }
+bool File::setLastAccessTime (const Time& t) const          { return setFileTimesInternal (0, t.toMilliseconds(), 0); }
+bool File::setCreationTime (const Time& t) const            { return setFileTimesInternal (0, 0, t.toMilliseconds()); }
 
 //==============================================================================
 bool File::loadFileAsData (MemoryBlock& destBlock) const
@@ -793,7 +750,7 @@ const File File::withFileExtension (const String& newExtension) const
 //==============================================================================
 bool File::startAsProcess (const String& parameters) const
 {
-    return exists() && juce_launchFile (fullPath, parameters);
+    return exists() && PlatformUtilities::openDocument (fullPath, parameters);
 }
 
 //==============================================================================

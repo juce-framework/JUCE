@@ -229,7 +229,6 @@ public:
         for (int i = rowComponentItems.size(); --i >= 0;)
         {
             Component* const comp = rowComponents.getUnchecked(i);
-
             bool keep = false;
 
             if (isParentOf (comp))

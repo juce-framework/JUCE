@@ -228,5 +228,28 @@ public:
     T* p;
 };
 
+//==============================================================================
+template <class ComClass>
+class ComBaseClassHelper   : public ComClass
+{
+public:
+    ComBaseClassHelper()  : refCount (1) {}
+    virtual ~ComBaseClassHelper() {}
+
+    HRESULT __stdcall QueryInterface (REFIID refId, void __RPC_FAR* __RPC_FAR* result)
+    {
+        if (refId == __uuidof (ComClass))   { AddRef(); *result = dynamic_cast <ComClass*> (this); return S_OK; }
+        if (refId == IID_IUnknown)          { AddRef(); *result = dynamic_cast <IUnknown*> (this); return S_OK; }
+
+        *result = 0;
+        return E_NOINTERFACE;
+    }
+
+    ULONG __stdcall AddRef()    { return ++refCount; }
+    ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+
+protected:
+    int refCount;
+};
 
 #endif   // __JUCE_WIN32_NATIVEINCLUDES_JUCEHEADER__

@@ -37,14 +37,6 @@
 #endif
 
 //==============================================================================
-bool juce_isOnLine()
-{
-    DWORD connectionType;
-
-    return InternetGetConnectedState (&connectionType, 0) != 0
-            || (connectionType & (INTERNET_CONNECTION_LAN | INTERNET_CONNECTION_PROXY)) != 0;
-}
-
 struct ConnectionAndRequestStruct
 {
     HINTERNET connection, request;
@@ -293,10 +285,9 @@ void juce_closeInternetFile (void* handle)
 {
     if (handle != 0)
     {
-        ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
+        ScopedPointer <ConnectionAndRequestStruct> crs (static_cast <ConnectionAndRequestStruct*> (handle));
         InternetCloseHandle (crs->request);
         InternetCloseHandle (crs->connection);
-        delete crs;
     }
 }
 

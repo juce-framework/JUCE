@@ -42,6 +42,11 @@ public:
     /** Plays the operating system's default alert 'beep' sound. */
     static void beep();
 
+    /** Tries to launch the system's default reader for a given file or URL. */
+    static bool openDocument (const String& documentURL, const String& parameters);
+
+    /** Tries to launch the system's default email app to let the user create an email.
+    */
     static bool launchEmailWithAttachments (const String& targetEmailAddress,
                                             const String& emailSubject,
                                             const String& bodyText,

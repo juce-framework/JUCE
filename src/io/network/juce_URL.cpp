@@ -30,7 +30,9 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_URL.h"
 #include "../../core/juce_Random.h"
+#include "../../core/juce_PlatformUtilities.h"
 #include "../../text/juce_XmlDocument.h"
+#include "../../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -282,21 +284,11 @@ public:
         juce_closeInternetFile (handle);
     }
 
-    bool isError() const
-    {
-        return handle == 0;
-    }
-
     //==============================================================================
-    int64 getTotalLength()
-    {
-        return juce_getInternetFileContentLength (handle);
-    }
-
-    bool isExhausted()
-    {
-        return finished;
-    }
+    bool isError() const        { return handle == 0; }
+    int64 getTotalLength()      { return juce_getInternetFileContentLength (handle); }
+    bool isExhausted()          { return finished; }
+    int64 getPosition()         { return position; }
 
     int read (void* dest, int bytes)
     {
@@ -314,11 +306,6 @@ public:
 
             return bytesRead;
         }
-    }
-
-    int64 getPosition()
-    {
-        return position;
     }
 
     bool setPosition (int64 wantedPos)
@@ -370,76 +357,58 @@ private:
 
     void createHeadersAndPostData (const URL& url)
     {
+        MemoryOutputStream data (256, 256, &postData);
+
         if (url.getFilesToUpload().size() > 0)
         {
             // need to upload some files, so do it as multi-part...
-            String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
+            const String boundary (String::toHexString (Random::getSystemRandom().nextInt64()));
 
             headers << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
 
-            appendUTF8ToPostData ("--" + boundary);
+            data << "--" << boundary;
 
             int i;
             for (i = 0; i < url.getParameters().size(); ++i)
             {
-                String s;
-                s << "\r\nContent-Disposition: form-data; name=\""
-                  << url.getParameters().getAllKeys() [i]
-                  << "\"\r\n\r\n"
-                  << url.getParameters().getAllValues() [i]
-                  << "\r\n--"
-                  << boundary;
-
-                appendUTF8ToPostData (s);
+                data << "\r\nContent-Disposition: form-data; name=\""
+                     << url.getParameters().getAllKeys() [i]
+                     << "\"\r\n\r\n"
+                     << url.getParameters().getAllValues() [i]
+                     << "\r\n--"
+                     << boundary;
             }
 
             for (i = 0; i < url.getFilesToUpload().size(); ++i)
             {
-                const File f (url.getFilesToUpload().getAllValues() [i]);
+                const File file (url.getFilesToUpload().getAllValues() [i]);
                 const String paramName (url.getFilesToUpload().getAllKeys() [i]);
 
-                String s;
-                s << "\r\nContent-Disposition: form-data; name=\""
-                  << paramName
-                  << "\"; filename=\""
-                  << f.getFileName()
-                  << "\"\r\n";
+                data << "\r\nContent-Disposition: form-data; name=\"" << paramName
+                     << "\"; filename=\"" << file.getFileName() << "\"\r\n";
 
                 const String mimeType (url.getMimeTypesOfUploadFiles()
                                           .getValue (paramName, String::empty));
 
                 if (mimeType.isNotEmpty())
-                    s << "Content-Type: " << mimeType << "\r\n";
+                    data << "Content-Type: " << mimeType << "\r\n";
 
-                s << "Content-Transfer-Encoding: binary\r\n\r\n";
-
-                appendUTF8ToPostData (s);
-
-                f.loadFileAsData (postData);
-
-                s = "\r\n--" + boundary;
-
-                appendUTF8ToPostData (s);
+                data << "Content-Transfer-Encoding: binary\r\n\r\n"
+                     << file << "\r\n--" << boundary;
             }
 
-            appendUTF8ToPostData ("--\r\n");
+            data << "--\r\n";
         }
         else
         {
-            appendUTF8ToPostData (getMangledParameters (url.getParameters()));
-            appendUTF8ToPostData (url.getPostData());
+            data << getMangledParameters (url.getParameters())
+                 << url.getPostData();
 
             // just a short text attachment, so use simple url encoding..
             headers = "Content-Type: application/x-www-form-urlencoded\r\nContent-length: "
                         + String ((unsigned int) postData.getSize())
                         + "\r\n";
         }
-    }
-
-    void appendUTF8ToPostData (const String& text)
-    {
-        postData.append (text.toUTF8(),
-                         (int) strlen (text.toUTF8()));
     }
 
     WebInputStream (const WebInputStream&);
@@ -583,8 +552,6 @@ const String URL::addEscapeChars (const String& s, const bool isParameter)
 }
 
 //==============================================================================
-extern bool juce_launchFile (const String& fileName, const String& parameters);
-
 bool URL::launchInDefaultBrowser() const
 {
     String u (toString (true));
@@ -592,7 +559,7 @@ bool URL::launchInDefaultBrowser() const
     if (u.containsChar ('@') && ! u.containsChar (':'))
         u = "mailto:" + u;
 
-    return juce_launchFile (u, String::empty);
+    return PlatformUtilities::openDocument (u, String::empty);
 }
 
 END_JUCE_NAMESPACE

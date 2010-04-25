@@ -29,33 +29,12 @@
 
 namespace ActiveXHelpers
 {
-    class JuceIStorage   : public IStorage
+    //==============================================================================
+    class JuceIStorage   : public ComBaseClassHelper <IStorage>
     {
-        int refCount;
-
     public:
-        JuceIStorage() : refCount (1) {}
-
-        virtual ~JuceIStorage()
-        {
-            jassert (refCount == 0);
-        }
-
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-        {
-            if (id == IID_IUnknown || id == IID_IStorage)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-
-            *result = 0;
-            return E_NOINTERFACE;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+        JuceIStorage() {}
+        ~JuceIStorage() {}
 
         HRESULT __stdcall CreateStream (const WCHAR*, DWORD, DWORD, DWORD, IStream**)           { return E_NOTIMPL; }
         HRESULT __stdcall OpenStream (const WCHAR*, void*, DWORD, DWORD, IStream**)             { return E_NOTIMPL; }
@@ -76,39 +55,14 @@ namespace ActiveXHelpers
         juce_UseDebuggingNewOperator
     };
 
-
-    class JuceOleInPlaceFrame   : public IOleInPlaceFrame
+    //==============================================================================
+    class JuceOleInPlaceFrame   : public ComBaseClassHelper <IOleInPlaceFrame>
     {
-        int refCount;
         HWND window;
 
     public:
-        JuceOleInPlaceFrame (HWND window_)
-            : refCount (1),
-              window (window_)
-        {
-        }
-
-        virtual ~JuceOleInPlaceFrame()
-        {
-            jassert (refCount == 0);
-        }
-
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-        {
-            if (id == IID_IUnknown || id == IID_IOleInPlaceFrame)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-
-            *result = 0;
-            return E_NOINTERFACE;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
+        JuceOleInPlaceFrame (HWND window_)   : window (window_) {}
+        ~JuceOleInPlaceFrame() {}
 
         HRESULT __stdcall GetWindow (HWND* lphwnd)                      { *lphwnd = window; return S_OK; }
         HRESULT __stdcall ContextSensitiveHelp (BOOL)                   { return E_NOTIMPL; }
@@ -126,42 +80,22 @@ namespace ActiveXHelpers
         juce_UseDebuggingNewOperator
     };
 
-
-    class JuceIOleInPlaceSite   : public IOleInPlaceSite
+    //==============================================================================
+    class JuceIOleInPlaceSite   : public ComBaseClassHelper <IOleInPlaceSite>
     {
-        int refCount;
         HWND window;
         JuceOleInPlaceFrame* frame;
 
     public:
         JuceIOleInPlaceSite (HWND window_)
-            : refCount (1),
-              window (window_)
-        {
-            frame = new JuceOleInPlaceFrame (window);
-        }
+            : window (window_),
+              frame (new JuceOleInPlaceFrame (window))
+        {}
 
-        virtual ~JuceIOleInPlaceSite()
+        ~JuceIOleInPlaceSite()
         {
-            jassert (refCount == 0);
             frame->Release();
         }
-
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-        {
-            if (id == IID_IUnknown || id == IID_IOleInPlaceSite)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-
-            *result = 0;
-            return E_NOINTERFACE;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
 
         HRESULT __stdcall GetWindow (HWND* lphwnd)      { *lphwnd = window; return S_OK; }
         HRESULT __stdcall ContextSensitiveHelp (BOOL)   { return E_NOTIMPL; }
@@ -190,46 +124,32 @@ namespace ActiveXHelpers
         juce_UseDebuggingNewOperator
     };
 
-
-    class JuceIOleClientSite  : public IOleClientSite
+    //==============================================================================
+    class JuceIOleClientSite  : public ComBaseClassHelper <IOleClientSite>
     {
-        int refCount;
         JuceIOleInPlaceSite* inplaceSite;
 
     public:
         JuceIOleClientSite (HWND window)
-            : refCount (1)
-        {
-            inplaceSite = new JuceIOleInPlaceSite (window);
-        }
+            : inplaceSite (new JuceIOleInPlaceSite (window))
+        {}
 
-        virtual ~JuceIOleClientSite()
+        ~JuceIOleClientSite()
         {
-            jassert (refCount == 0);
             inplaceSite->Release();
         }
 
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
+        HRESULT __stdcall QueryInterface (REFIID type, void __RPC_FAR* __RPC_FAR* result)
         {
-            if (id == IID_IUnknown || id == IID_IOleClientSite)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-            else if (id == IID_IOleInPlaceSite)
+            if (type == IID_IOleInPlaceSite)
             {
                 inplaceSite->AddRef();
-                *result = inplaceSite;
+                *result = static_cast <IOleInPlaceSite*> (inplaceSite);
                 return S_OK;
             }
 
-            *result = 0;
-            return E_NOINTERFACE;
+            return ComBaseClassHelper <IOleClientSite>::QueryInterface (type, result);
         }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
 
         HRESULT __stdcall SaveObject()                                  { return E_NOTIMPL; }
         HRESULT __stdcall GetMoniker (DWORD, DWORD, IMoniker**)         { return E_NOTIMPL; }

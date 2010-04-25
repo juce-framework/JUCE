@@ -33,50 +33,19 @@
 */
 
 //==============================================================================
-void juce_getFileTimes (const String& fileName,
-                        int64& modificationTime,
-                        int64& accessTime,
-                        int64& creationTime)
-{
-    modificationTime = 0;
-    accessTime = 0;
-    creationTime = 0;
-
-    struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
-    if (res == 0)
-    {
-        modificationTime = (int64) info.st_mtime * 1000;
-        accessTime = (int64) info.st_atime * 1000;
-        creationTime = (int64) info.st_ctime * 1000;
-    }
-}
-
-bool juce_setFileTimes (const String& fileName,
-                        int64 modificationTime,
-                        int64 accessTime,
-                        int64 creationTime)
-{
-    struct utimbuf times;
-    times.actime = (time_t) (accessTime / 1000);
-    times.modtime = (time_t) (modificationTime / 1000);
-
-    return utime (fileName.toUTF8(), &times) == 0;
-}
-
-bool juce_copyFile (const String& src, const String& dst)
+bool File::copyInternal (const File& dest) const
 {
     const ScopedAutoReleasePool pool;
     NSFileManager* fm = [NSFileManager defaultManager];
 
-    return [fm fileExistsAtPath: juceStringToNS (src)]
+    return [fm fileExistsAtPath: juceStringToNS (fullPath)]
 #if defined (MAC_OS_X_VERSION_10_6) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-            && [fm copyItemAtPath: juceStringToNS (src)
-                           toPath: juceStringToNS (dst)
+            && [fm copyItemAtPath: juceStringToNS (fullPath)
+                           toPath: juceStringToNS (dest.getFullPathName())
                             error: nil];
 #else
-            && [fm copyPath: juceStringToNS (src)
-                     toPath: juceStringToNS (dst)
+            && [fm copyPath: juceStringToNS (fullPath)
+                     toPath: juceStringToNS (dest.getFullPathName())
                     handler: nil];
 #endif
 }
@@ -345,27 +314,22 @@ public:
 
             const String path (parentDir + filenameFound);
 
-            if (isDir != 0 || fileSize != 0)
+            if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
             {
                 struct stat info;
                 const bool statOk = juce_stat (path, info);
 
-                if (isDir != 0)     *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
-                if (isHidden != 0)  *isHidden = juce_isHiddenFile (path);
-                if (fileSize != 0)  *fileSize = statOk ? info.st_size : 0;
+                if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+                if (fileSize != 0)      *fileSize = statOk ? info.st_size : 0;
+                if (modTime != 0)       *modTime = statOk ? (int64) info.st_mtime * 1000 : 0;
+                if (creationTime != 0)  *creationTime = statOk ? (int64) info.st_ctime * 1000 : 0;
             }
 
-            if (modTime != 0 || creationTime != 0)
-            {
-                int64 m, a, c;
-                juce_getFileTimes (path, m, a, c);
-
-                if (modTime != 0)       *modTime = m;
-                if (creationTime != 0)  *creationTime = c;
-            }
+            if (isHidden != 0)
+                *isHidden = juce_isHiddenFile (path);
 
             if (isReadOnly != 0)
-                *isReadOnly = ! juce_canWriteToFile (path);
+                *isReadOnly = access (path.toUTF8(), W_OK) != 0;
 
             return true;
         }
@@ -419,7 +383,7 @@ bool juce_launchExecutable (const String& pathAndArguments)
     return true;
 }
 
-bool juce_launchFile (const String& fileName, const String& parameters)
+bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
 {
 #if JUCE_IPHONE
     return [[UIApplication sharedApplication] openURL: [NSURL fileURLWithPath: juceStringToNS (fileName)]];

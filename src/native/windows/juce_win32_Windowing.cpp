@@ -844,15 +844,8 @@ private:
     {
     public:
         //==============================================================================
-        TemporaryImage()
-            : image (0)
-        {
-        }
-
-        ~TemporaryImage()
-        {
-            delete image;
-        }
+        TemporaryImage() {}
+        ~TemporaryImage() {}
 
         //==============================================================================
         WindowsBitmapImage* getImage (const bool transparent, const int w, const int h) throw()
@@ -860,10 +853,7 @@ private:
             const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
 
             if (image == 0 || image->getWidth() < w || image->getHeight() < h || image->getFormat() != format)
-            {
-                delete image;
                 image = new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false);
-            }
 
             startTimer (3000);
             return image;
@@ -873,11 +863,11 @@ private:
         void timerCallback()
         {
             stopTimer();
-            deleteAndZero (image);
+            image = 0;
         }
 
     private:
-        WindowsBitmapImage* image;
+        ScopedPointer <WindowsBitmapImage> image;
 
         TemporaryImage (const TemporaryImage&);
         TemporaryImage& operator= (const TemporaryImage&);
@@ -1526,35 +1516,15 @@ private:
     }
 
     //==============================================================================
-    class JuceDropTarget    : public IDropTarget
+    class JuceDropTarget    : public ComBaseClassHelper <IDropTarget>
     {
     public:
         JuceDropTarget (Win32ComponentPeer* const owner_)
-            : owner (owner_),
-              refCount (1)
+            : owner (owner_)
         {
         }
 
-        virtual ~JuceDropTarget()
-        {
-            jassert (refCount == 0);
-        }
-
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-        {
-            if (id == IID_IUnknown || id == IID_IDropTarget)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-
-            *result = 0;
-            return E_NOINTERFACE;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
+        ~JuceDropTarget() {}
 
         HRESULT __stdcall DragEnter (IDataObject* pDataObject, DWORD /*grfKeyState*/, POINTL mousePos, DWORD* pdwEffect)
         {
@@ -1587,7 +1557,6 @@ private:
 
     private:
         Win32ComponentPeer* const owner;
-        int refCount;
         StringArray files;
 
         void updateFileList (IDataObject* const pDataObject)
@@ -2411,15 +2380,13 @@ static Image* createImageFromHICON (HICON icon) throw()
 
     if (GetIconInfo (icon, &info))
     {
-        Image* const mask = createImageFromHBITMAP (info.hbmMask);
-
+        ScopedPointer<Image> mask (createImageFromHBITMAP (info.hbmMask));
         if (mask == 0)
             return 0;
 
-        Image* const image = createImageFromHBITMAP (info.hbmColor);
-
+        ScopedPointer<Image> image (createImageFromHBITMAP (info.hbmColor));
         if (image == 0)
-            return mask;
+            return mask.release();
 
         for (int y = image->getHeight(); --y >= 0;)
         {
@@ -2432,8 +2399,7 @@ static Image* createImageFromHICON (HICON icon) throw()
             }
         }
 
-        delete mask;
-        return image;
+        return image.release();
     }
 
     return 0;
@@ -2673,36 +2639,11 @@ void MouseCursor::showInAllWindows() const
 
 //==============================================================================
 //==============================================================================
-class JuceDropSource   : public IDropSource
+class JuceDropSource   : public ComBaseClassHelper <IDropSource>
 {
-    int refCount;
-
 public:
-    JuceDropSource()
-        : refCount (1)
-    {
-    }
-
-    virtual ~JuceDropSource()
-    {
-        jassert (refCount == 0);
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IDropSource)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
+    JuceDropSource() {}
+    ~JuceDropSource() {}
 
     HRESULT __stdcall QueryContinueDrag (BOOL escapePressed, DWORD keys)
     {
@@ -2722,36 +2663,16 @@ public:
 };
 
 
-class JuceEnumFormatEtc   : public IEnumFORMATETC
+class JuceEnumFormatEtc   : public ComBaseClassHelper <IEnumFORMATETC>
 {
 public:
     JuceEnumFormatEtc (const FORMATETC* const format_)
-        : refCount (1),
-          format (format_),
+        : format (format_),
           index (0)
     {
     }
 
-    virtual ~JuceEnumFormatEtc()
-    {
-        jassert (refCount == 0);
-    }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IEnumFORMATETC)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
+    ~JuceEnumFormatEtc()  {}
 
     HRESULT __stdcall Clone (IEnumFORMATETC** result)
     {
@@ -2802,7 +2723,6 @@ public:
     }
 
 private:
-    int refCount;
     const FORMATETC* const format;
     int index;
 
@@ -2821,12 +2741,11 @@ private:
     JuceEnumFormatEtc& operator= (const JuceEnumFormatEtc&);
 };
 
-class JuceDataObject  : public IDataObject
+class JuceDataObject  : public ComBaseClassHelper <IDataObject>
 {
     JuceDropSource* const dropSource;
     const FORMATETC* const format;
     const STGMEDIUM* const medium;
-    int refCount;
 
     JuceDataObject (const JuceDataObject&);
     JuceDataObject& operator= (const JuceDataObject&);
@@ -2837,8 +2756,7 @@ public:
                     const STGMEDIUM* const medium_)
         : dropSource (dropSource_),
           format (format_),
-          medium (medium_),
-          refCount (1)
+          medium (medium_)
     {
     }
 
@@ -2846,22 +2764,6 @@ public:
     {
         jassert (refCount == 0);
     }
-
-    HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-    {
-        if (id == IID_IUnknown || id == IID_IDataObject)
-        {
-            AddRef();
-            *result = this;
-            return S_OK;
-        }
-
-        *result = 0;
-        return E_NOINTERFACE;
-    }
-
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
 
     HRESULT __stdcall GetData (FORMATETC __RPC_FAR* pFormatEtc, STGMEDIUM __RPC_FAR* pMedium)
     {

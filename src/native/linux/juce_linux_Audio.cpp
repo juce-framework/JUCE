@@ -652,14 +652,12 @@ public:
           outputId (outputId_),
           isOpen_ (false),
           isStarted (false),
-          internal (0)
+          internal (new ALSAThread (inputId_, outputId_))
     {
-        internal = new ALSAThread (inputId, outputId);
     }
 
     ~ALSAAudioIODevice()
     {
-        delete internal;
     }
 
     const StringArray getOutputChannelNames()
@@ -817,7 +815,7 @@ public:
 
 private:
     bool isOpen_, isStarted;
-    ALSAThread* internal;
+    ScopedPointer<ALSAThread> internal;
 };
 
 

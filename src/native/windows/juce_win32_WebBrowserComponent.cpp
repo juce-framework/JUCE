@@ -68,6 +68,7 @@ public:
 
                 EventHandler* handler = new EventHandler (owner);
                 connectionPoint->Advise (handler, &adviseCookie);
+                handler->Release();
             }
         }
     }
@@ -142,14 +143,13 @@ private:
     DWORD adviseCookie;
 
     //==============================================================================
-    class EventHandler  : public IDispatch,
+    class EventHandler  : public ComBaseClassHelper <IDispatch>,
                           public ComponentMovementWatcher
     {
     public:
         EventHandler (WebBrowserComponent* owner_)
             : ComponentMovementWatcher (owner_),
-              owner (owner_),
-              refCount (0)
+              owner (owner_)
         {
         }
 
@@ -158,22 +158,6 @@ private:
         }
 
         //==============================================================================
-        HRESULT __stdcall QueryInterface (REFIID id, void __RPC_FAR* __RPC_FAR* result)
-        {
-            if (id == IID_IUnknown || id == IID_IDispatch || id == DIID_DWebBrowserEvents2)
-            {
-                AddRef();
-                *result = this;
-                return S_OK;
-            }
-
-            *result = 0;
-            return E_NOINTERFACE;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { jassert (refCount > 0); const int r = --refCount; if (r == 0) delete this; return r; }
-
         HRESULT __stdcall GetTypeInfoCount (UINT __RPC_FAR*)                                            { return E_NOTIMPL; }
         HRESULT __stdcall GetTypeInfo (UINT, LCID, ITypeInfo __RPC_FAR *__RPC_FAR*)                     { return E_NOTIMPL; }
         HRESULT __stdcall GetIDsOfNames (REFIID, LPOLESTR __RPC_FAR*, UINT, LCID, DISPID __RPC_FAR*)    { return E_NOTIMPL; }
@@ -223,7 +207,6 @@ private:
 
     private:
         WebBrowserComponent* const owner;
-        int refCount;
 
         EventHandler (const EventHandler&);
         EventHandler& operator= (const EventHandler&);

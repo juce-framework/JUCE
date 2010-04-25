@@ -33,66 +33,26 @@ static const short U_NFS_SUPER_MAGIC = 0x6969;     // linux/nfs_fs.h
 static const short U_SMB_SUPER_MAGIC = 0x517B;     // linux/smb_fs.h
 
 //==============================================================================
-void juce_getFileTimes (const String& fileName,
-                        int64& modificationTime,
-                        int64& accessTime,
-                        int64& creationTime)
+bool File::copyInternal (const File& dest) const
 {
-    modificationTime = 0;
-    accessTime = 0;
-    creationTime = 0;
+    FileInputStream in (*this);
 
-    struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
-    if (res == 0)
+    if (dest.deleteFile())
     {
-        modificationTime = (int64) info.st_mtime * 1000;
-        accessTime = (int64) info.st_atime * 1000;
-        creationTime = (int64) info.st_ctime * 1000;
-    }
-}
-
-bool juce_setFileTimes (const String& fileName,
-                        int64 modificationTime,
-                        int64 accessTime,
-                        int64 creationTime)
-{
-    struct utimbuf times;
-    times.actime = (time_t) (accessTime / 1000);
-    times.modtime = (time_t) (modificationTime / 1000);
-
-    return utime (fileName.toUTF8(), &times) == 0;
-}
-
-bool juce_copyFile (const String& s, const String& d)
-{
-    const File source (s), dest (d);
-
-    FileInputStream* in = source.createInputStream();
-    bool ok = false;
-
-    if (in != 0)
-    {
-        if (dest.deleteFile())
         {
-            FileOutputStream* const out = dest.createOutputStream();
+            FileOutputStream out (dest);
 
-            if (out != 0)
-            {
-                const int bytesCopied = out->writeFromInputStream (*in, -1);
-                delete out;
+            if (out.failedToOpen())
+                return false;
 
-                ok = (bytesCopied == source.getSize());
-
-                if (! ok)
-                    dest.deleteFile();
-            }
+            if (out.writeFromInputStream (in, -1) == getSize())
+                return true;
         }
 
-        delete in;
+        dest.deleteFile();
     }
 
-    return ok;
+    return false;
 }
 
 void File::findFileSystemRoots (Array<File>& destArray)
@@ -105,11 +65,8 @@ bool File::isOnCDRomDrive() const
 {
     struct statfs buf;
 
-    if (statfs (getFullPathName().toUTF8(), &buf) == 0)
-        return (buf.f_type == U_ISOFS_SUPER_MAGIC);
-
-    // Assume not if this fails for some reason
-    return false;
+    return statfs (getFullPathName().toUTF8(), &buf) == 0
+             && buf.f_type == U_ISOFS_SUPER_MAGIC;
 }
 
 bool File::isOnHardDisk() const
@@ -292,30 +249,24 @@ public:
             if (fnmatch (wildcardUTF8, de->d_name, FNM_CASEFOLD) == 0)
             {
                 filenameFound = String::fromUTF8 (de->d_name);
-
                 const String path (parentDir + filenameFound);
 
-                if (isDir != 0 || fileSize != 0)
+                if (isDir != 0 || fileSize != 0 || modTime != 0 || creationTime != 0)
                 {
                     struct stat info;
-                    const bool statOk = (stat (path.toUTF8(), &info) == 0);
+                    const bool statOk = juce_stat (path, info);
 
-                    if (isDir != 0)     *isDir = path.isEmpty() || (statOk && ((info.st_mode & S_IFDIR) != 0));
-                    if (isHidden != 0)  *isHidden = (de->d_name[0] == '.');
-                    if (fileSize != 0)  *fileSize = statOk ? info.st_size : 0;
+                    if (isDir != 0)         *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+                    if (fileSize != 0)      *fileSize = statOk ? info.st_size : 0;
+                    if (modTime != 0)       *modTime = statOk ? (int64) info.st_mtime * 1000 : 0;
+                    if (creationTime != 0)  *creationTime = statOk ? (int64) info.st_ctime * 1000 : 0;
                 }
 
-                if (modTime != 0 || creationTime != 0)
-                {
-                    int64 m, a, c;
-                    juce_getFileTimes (path, m, a, c);
-
-                    if (modTime != 0)       *modTime = m;
-                    if (creationTime != 0)  *creationTime = c;
-                }
+                if (isHidden != 0)
+                    *isHidden = filenameFound.startsWithChar ('.');
 
                 if (isReadOnly != 0)
-                    *isReadOnly = ! juce_canWriteToFile (path);
+                    *isReadOnly = access (path.toUTF8(), W_OK) != 0;
 
                 return true;
             }
@@ -349,8 +300,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool juce_launchFile (const String& fileName,
-                      const String& parameters)
+bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
 {
     String cmdString (fileName.replace (" ", "\\ ",false));
     cmdString << " " << parameters;

@@ -624,32 +624,13 @@ private:
     }
 
     //==============================================================================
-    class GrabberCallback   : public ISampleGrabberCB
+    class GrabberCallback   : public ComBaseClassHelper <ISampleGrabberCB>
     {
     public:
         GrabberCallback (DShowCameraDeviceInteral& owner_)
             : owner (owner_)
         {
         }
-
-        HRESULT __stdcall QueryInterface (REFIID id, void** result)
-        {
-            if (id == IID_IUnknown)
-                *result = dynamic_cast <IUnknown*> (this);
-            else if (id == IID_ISampleGrabberCB)
-                *result = dynamic_cast <ISampleGrabberCB*> (this);
-            else
-            {
-                *result = 0;
-                return E_NOINTERFACE;
-            }
-
-            AddRef();
-            return S_OK;
-        }
-
-        ULONG __stdcall AddRef()    { return ++refCount; }
-        ULONG __stdcall Release()   { const int r = --refCount; if (r == 0) delete this; return r; }
 
         //==============================================================================
         STDMETHODIMP SampleCB (double /*SampleTime*/, IMediaSample* /*pSample*/)
@@ -664,7 +645,6 @@ private:
         }
 
     private:
-        int refCount;
         DShowCameraDeviceInteral& owner;
 
         GrabberCallback (const GrabberCallback&);
@@ -691,13 +671,13 @@ CameraDevice::CameraDevice (const String& name_, int /*index*/)
 CameraDevice::~CameraDevice()
 {
     stopRecording();
-    delete (DShowCameraDeviceInteral*) internal;
+    delete static_cast <DShowCameraDeviceInteral*> (internal);
     internal = 0;
 }
 
 Component* CameraDevice::createViewerComponent()
 {
-    return new DShowCameraDeviceInteral::DShowCaptureViewerComp ((DShowCameraDeviceInteral*) internal);
+    return new DShowCameraDeviceInteral::DShowCaptureViewerComp (static_cast <DShowCameraDeviceInteral*> (internal));
 }
 
 const String CameraDevice::getFileExtension()
@@ -837,16 +817,15 @@ CameraDevice* CameraDevice::openDevice (int index,
 
         if (filter != 0)
         {
-            CameraDevice* const cam = new CameraDevice (name, index);
+            ScopedPointer <CameraDevice> cam (new CameraDevice (name, index));
+
             DShowCameraDeviceInteral* const intern
                 = new DShowCameraDeviceInteral (cam, captureGraphBuilder, filter,
                                                 minWidth, minHeight, maxWidth, maxHeight);
             cam->internal = intern;
 
             if (intern->ok)
-                return cam;
-            else
-                delete cam;
+                return cam.release();
         }
     }
 

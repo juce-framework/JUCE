@@ -247,27 +247,58 @@ int64 File::getSize() const
 }
 
 //==============================================================================
-bool juce_canWriteToFile (const String& fileName)
+bool File::hasWriteAccess() const
 {
-    return access (fileName.toUTF8(), W_OK) == 0;
+    if (exists())
+        return access (fullPath.toUTF8(), W_OK) == 0;
+
+    if ((! isDirectory()) && fullPath.containsChar (separator))
+        return getParentDirectory().hasWriteAccess();
+
+    return false;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
+bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
 {
     struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
+    const int res = stat (fullPath.toUTF8(), &info);
     if (res != 0)
         return false;
 
     info.st_mode &= 0777;   // Just permissions
 
-    if (isReadOnly)
+    if (shouldBeReadOnly)
         info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
     else
         // Give everybody write permission?
         info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
 
-    return chmod (fileName.toUTF8(), info.st_mode) == 0;
+    return chmod (fullPath.toUTF8(), info.st_mode) == 0;
+}
+
+void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const
+{
+    modificationTime = 0;
+    accessTime = 0;
+    creationTime = 0;
+
+    struct stat info;
+    const int res = stat (fullPath.toUTF8(), &info);
+    if (res == 0)
+    {
+        modificationTime = (int64) info.st_mtime * 1000;
+        accessTime = (int64) info.st_atime * 1000;
+        creationTime = (int64) info.st_ctime * 1000;
+    }
+}
+
+bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const
+{
+    struct utimbuf times;
+    times.actime = (time_t) (accessTime / 1000);
+    times.modtime = (time_t) (modificationTime / 1000);
+
+    return utime (fullPath.toUTF8(), &times) == 0;
 }
 
 bool File::deleteFile() const
@@ -280,20 +311,17 @@ bool File::deleteFile() const
         return remove (fullPath.toUTF8()) == 0;
 }
 
-bool juce_copyFile (const String& s, const String& d);
-
-bool juce_moveFile (const String& source, const String& dest)
+bool File::moveInternal (const File& dest) const
 {
-    if (rename (source.toUTF8(), dest.toUTF8()) == 0)
+    if (rename (fullPath.toUTF8(), dest.getFullPathName().toUTF8()) == 0)
         return true;
 
-    if (juce_canWriteToFile (source)
-         && juce_copyFile (source, dest))
+    if (hasWriteAccess() && copyInternal (dest))
     {
-        if (File (source).deleteFile())
+        if (deleteFile())
             return true;
 
-        File (dest).deleteFile();
+        dest.deleteFile();
     }
 
     return false;

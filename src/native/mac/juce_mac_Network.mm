@@ -326,11 +326,6 @@ public:
 BEGIN_JUCE_NAMESPACE
 
 
-bool juce_isOnLine()
-{
-    return true;
-}
-
 void* juce_openInternetFile (const String& url,
                              const String& headers,
                              const MemoryBlock& postData,

@@ -210,7 +210,15 @@ public:
     {
         if (! transform.isSingularity())
         {
-            Image* singleChannelImage = createAlphaChannelImage (sourceImage);
+            ScopedPointer<Image> imageToDelete;
+            const Image* singleChannelImage = &sourceImage;
+
+            if (sourceImage.getFormat() != Image::SingleChannel)
+            {
+                imageToDelete = sourceImage.createCopyOfAlphaChannel();
+                singleChannelImage = imageToDelete;
+            }
+
             CGImageRef image = CoreGraphicsImage::createImage (*singleChannelImage, true, greyColourSpace);
 
             flip();
@@ -224,7 +232,6 @@ public:
             flip();
 
             CGImageRelease (image);
-            deleteAlphaChannelImage (sourceImage, singleChannelImage);
         }
     }
 
@@ -695,20 +702,6 @@ private:
                 break;
             }
         }
-    }
-
-    static Image* createAlphaChannelImage (const Image& im)
-    {
-        if (im.getFormat() == Image::SingleChannel)
-            return const_cast <Image*> (&im);
-
-        return im.createCopyOfAlphaChannel();
-    }
-
-    static void deleteAlphaChannelImage (const Image& im, Image* const alphaIm)
-    {
-        if (im.getFormat() != Image::SingleChannel)
-            delete alphaIm;
     }
 
     void flip() const

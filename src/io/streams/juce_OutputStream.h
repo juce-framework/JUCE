@@ -28,7 +28,7 @@
 
 #include "../../text/juce_String.h"
 #include "juce_InputStream.h"
-
+class File;
 
 //==============================================================================
 /**
@@ -199,7 +199,7 @@ public:
                                     less than zero, it will keep reading until the input
                                     is exhausted)
     */
-    virtual int writeFromInputStream (InputStream& source, int maxNumBytesToWrite);
+    virtual int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -218,6 +218,11 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, char character);
 /** Writes a null-terminated text string to a stream. */
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* text);
 
+/** Writes a block of data from a MemoryBlock to a stream. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock& data);
+
+/** Writes the contents of a file to a stream. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead);
 
 
 #endif   // __JUCE_OUTPUTSTREAM_JUCEHEADER__

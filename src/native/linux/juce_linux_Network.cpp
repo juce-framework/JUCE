@@ -412,11 +412,6 @@ private:
 };
 
 //==============================================================================
-bool juce_isOnLine()
-{
-    return true;
-}
-
 void* juce_openInternetFile (const String& url,
                              const String& headers,
                              const MemoryBlock& postData,
@@ -437,10 +432,7 @@ void* juce_openInternetFile (const String& url,
 
 void juce_closeInternetFile (void* handle)
 {
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
-
-    if (s != 0)
-        delete s;
+    delete static_cast <JUCE_HTTPSocketStream*> (handle);
 }
 
 int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)

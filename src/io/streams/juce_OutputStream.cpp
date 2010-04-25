@@ -31,6 +31,8 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_OutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
 #include "../../containers/juce_VoidArray.h"
+#include "../../containers/juce_ScopedPointer.h"
+#include "../files/juce_FileInputStream.h"
 
 
 //==============================================================================
@@ -228,20 +230,19 @@ void OutputStream::writeText (const String& text, const bool asUnicode,
     }
 }
 
-int OutputStream::writeFromInputStream (InputStream& source, int numBytesToWrite)
+int OutputStream::writeFromInputStream (InputStream& source, int64 numBytesToWrite)
 {
     if (numBytesToWrite < 0)
-        numBytesToWrite = 0x7fffffff;
+        numBytesToWrite = std::numeric_limits<int64>::max();
 
     int numWritten = 0;
 
     while (numBytesToWrite > 0 && ! source.isExhausted())
     {
         char buffer [8192];
+        const int num = source.read (buffer, (int) jmin (numBytesToWrite, (int64) sizeof (buffer)));
 
-        const int num = (int) source.read (buffer, (int) jmin ((size_t) numBytesToWrite, sizeof (buffer)));
-
-        if (num == 0)
+        if (num <= 0)
             break;
 
         write (buffer, num);
@@ -273,6 +274,22 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char charact
 OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const char* const text)
 {
     stream.write (text, (int) strlen (text));
+    return stream;
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock& data)
+{
+    stream.write (data.getData(), (int) data.getSize());
+    return stream;
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const File& fileToRead)
+{
+    const ScopedPointer<FileInputStream> in (fileToRead.createInputStream());
+
+    if (in != 0)
+        stream.writeFromInputStream (*in, -1);
+
     return stream;
 }
 

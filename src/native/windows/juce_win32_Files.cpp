@@ -65,28 +65,32 @@ bool File::isDirectory() const
     return ((attr & FILE_ATTRIBUTE_DIRECTORY) != 0) && (attr != INVALID_FILE_ATTRIBUTES);
 }
 
-bool juce_canWriteToFile (const String& fileName)
+bool File::hasWriteAccess() const
 {
-    const DWORD attr = GetFileAttributes (fileName);
-    return (attr & FILE_ATTRIBUTE_READONLY) == 0;
+    if (exists())
+        return (GetFileAttributes (fullPath) & FILE_ATTRIBUTE_READONLY) == 0;
+
+    // on windows, it seems that even read-only directories can still be written into,
+    // so checking the parent directory's permissions would return the wrong result..
+    return true;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
+bool File::setFileReadOnlyInternal (const bool shouldBeReadOnly) const
 {
-    DWORD attr = GetFileAttributes (fileName);
+    DWORD attr = GetFileAttributes (fullPath);
 
     if (attr == INVALID_FILE_ATTRIBUTES)
         return false;
 
-    if (isReadOnly != juce_canWriteToFile (fileName))
+    if (shouldBeReadOnly == ((attr & FILE_ATTRIBUTE_READONLY) != 0))
         return true;
 
-    if (isReadOnly)
+    if (shouldBeReadOnly)
         attr |= FILE_ATTRIBUTE_READONLY;
     else
         attr &= ~FILE_ATTRIBUTE_READONLY;
 
-    return SetFileAttributes (fileName, attr) != FALSE;
+    return SetFileAttributes (fullPath, attr) != FALSE;
 }
 
 bool File::isHidden() const
@@ -126,14 +130,14 @@ bool File::moveToTrash() const
     return SHFileOperation (&fos) == 0;
 }
 
-bool juce_moveFile (const String& source, const String& dest)
+bool File::copyInternal (const File& dest) const
 {
-    return MoveFile (source, dest) != 0;
+    return CopyFile (fullPath, dest.getFullPathName(), false) != 0;
 }
 
-bool juce_copyFile (const String& source, const String& dest)
+bool File::moveInternal (const File& dest) const
 {
-    return CopyFile (source, dest, false) != 0;
+    return MoveFile (fullPath, dest.getFullPathName()) != 0;
 }
 
 void File::createDirectoryInternal (const String& fileName) const
@@ -237,14 +241,11 @@ static void timeToFileTime (const int64 time, FILETIME* const ft)
     reinterpret_cast<ULARGE_INTEGER*> (ft)->QuadPart = time * 10000 + literal64bit (116444736000000000);
 }
 
-void juce_getFileTimes (const String& fileName,
-                        int64& modificationTime,
-                        int64& accessTime,
-                        int64& creationTime)
+void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int64& creationTime) const
 {
     WIN32_FILE_ATTRIBUTE_DATA attributes;
 
-    if (GetFileAttributesEx (fileName, GetFileExInfoStandard, &attributes))
+    if (GetFileAttributesEx (fullPath, GetFileExInfoStandard, &attributes))
     {
         modificationTime = fileTimeToTime (&attributes.ftLastWriteTime);
         creationTime = fileTimeToTime (&attributes.ftCreationTime);
@@ -256,12 +257,9 @@ void juce_getFileTimes (const String& fileName,
     }
 }
 
-bool juce_setFileTimes (const String& fileName,
-                        int64 modificationTime,
-                        int64 accessTime,
-                        int64 creationTime)
+bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const
 {
-    void* const h = juce_fileOpen (fileName, true);
+    void* const h = juce_fileOpen (fullPath, true);
     bool ok = false;
 
     if (h != 0)
@@ -600,7 +598,7 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 
 
 //==============================================================================
-bool juce_launchFile (const String& fileName, const String& parameters)
+bool PlatformUtilities::openDocument (const String& fileName, const String& parameters)
 {
     HINSTANCE hInstance = 0;
 
