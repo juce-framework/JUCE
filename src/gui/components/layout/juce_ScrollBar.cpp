@@ -91,7 +91,7 @@ ScrollBar::ScrollBar (const bool vertical_,
       minimumDelayInMillisecs (10),
       vertical (vertical_),
       isDraggingThumb (false),
-      alwaysVisible (false),
+      autohides (true),
       upButton (0),
       downButton (0)
 {
@@ -221,7 +221,7 @@ void ScrollBar::updateThumbPosition()
         newThumbStart += roundToInt (((visibleRange.getStart() - totalRange.getStart()) * (thumbAreaSize - newThumbSize))
                                          / (totalRange.getLength() - visibleRange.getLength()));
 
-    setVisible (alwaysVisible || (totalRange.getLength() > visibleRange.getLength() && visibleRange.getLength() > 0.0));
+    setVisible ((! autohides) || (totalRange.getLength() > visibleRange.getLength() && visibleRange.getLength() > 0.0));
 
     if (thumbStart != newThumbStart  || thumbSize != newThumbSize)
     {
@@ -274,8 +274,13 @@ void ScrollBar::setButtonVisibility (const bool buttonsAreVisible)
 
 void ScrollBar::setAutoHide (const bool shouldHideWhenFullRange)
 {
-    alwaysVisible = ! shouldHideWhenFullRange;
+    autohides = shouldHideWhenFullRange;
     updateThumbPosition();
+}
+
+bool ScrollBar::autoHides() const throw()
+{
+    return autohides;
 }
 
 //==============================================================================

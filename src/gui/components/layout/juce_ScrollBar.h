@@ -116,8 +116,15 @@ public:
         The default behaviour is for a scrollbar to become invisible when the thumb
         fills the whole of its range (i.e. when it can't be moved). Setting this
         value to false forces the bar to always be visible.
+        @see autoHides()
     */
     void setAutoHide (bool shouldHideWhenFullRange);
+
+    /** Returns true if this scrollbar is set to auto-hide when its thumb is as big
+        as its maximum range.
+        @see setAutoHide
+    */
+    bool autoHides() const throw();
 
     //==============================================================================
     /** Sets the minimum and maximum values that the bar will move between.
@@ -315,7 +322,7 @@ private:
     int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
     int dragStartMousePos, lastMousePos;
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
-    bool vertical, isDraggingThumb, alwaysVisible;
+    bool vertical, isDraggingThumb, autohides;
     class ScrollbarButton;
     ScrollbarButton* upButton;
     ScrollbarButton* downButton;

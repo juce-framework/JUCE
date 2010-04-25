@@ -16208,6 +16208,8 @@ public:
 
 	void setAutoHide (bool shouldHideWhenFullRange);
 
+	bool autoHides() const throw();
+
 	void setRangeLimits (const Range<double>& newRangeLimit);
 
 	void setRangeLimits (double minimum, double maximum);
@@ -16274,7 +16276,7 @@ private:
 	int thumbAreaStart, thumbAreaSize, thumbStart, thumbSize;
 	int dragStartMousePos, lastMousePos;
 	int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
-	bool vertical, isDraggingThumb, alwaysVisible;
+	bool vertical, isDraggingThumb, autohides;
 	class ScrollbarButton;
 	ScrollbarButton* upButton;
 	ScrollbarButton* downButton;

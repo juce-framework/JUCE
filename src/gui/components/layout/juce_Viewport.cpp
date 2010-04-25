@@ -183,8 +183,8 @@ void Viewport::updateVisibleRegion()
             && contentComp->getWidth() <= getWidth()
             && contentComp->getHeight() <= getHeight())
         {
-            horizontalScrollBar->setVisible (false);
-            verticalScrollBar->setVisible (false);
+            horizontalScrollBar->setVisible (! horizontalScrollBar->autoHides());
+            verticalScrollBar->setVisible (! verticalScrollBar->autoHides());
         }
 
         horizontalScrollBar->setRangeLimits (0.0, contentComp->getWidth());
@@ -192,14 +192,14 @@ void Viewport::updateVisibleRegion()
         horizontalScrollBar->setSingleStepSize (singleStepX);
 
         if (! (contentComp->getWidth() > 0 && showHScrollbar && getHeight() > getScrollBarThickness()))
-            horizontalScrollBar->setVisible (false);
+            horizontalScrollBar->setVisible (! horizontalScrollBar->autoHides());
 
         verticalScrollBar->setRangeLimits (0.0, contentComp->getHeight());
         verticalScrollBar->setCurrentRange (newVY, getMaximumVisibleHeight());
         verticalScrollBar->setSingleStepSize (singleStepY);
 
         if (! (contentComp->getHeight() > 0 && showVScrollbar && getWidth() > getScrollBarThickness()))
-            verticalScrollBar->setVisible (false);
+            verticalScrollBar->setVisible (! verticalScrollBar->autoHides());
 
         if (verticalScrollBar->isVisible())
         {
@@ -244,8 +244,8 @@ void Viewport::updateVisibleRegion()
     }
     else
     {
-        horizontalScrollBar->setVisible (false);
-        verticalScrollBar->setVisible (false);
+        horizontalScrollBar->setVisible (! horizontalScrollBar->autoHides());
+        verticalScrollBar->setVisible (! verticalScrollBar->autoHides());
     }
 }
 
