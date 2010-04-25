@@ -30,23 +30,13 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_DirectoryContentsList.h"
 #include "../../graphics/imaging/juce_ImageCache.h"
 
-void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly);
-bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly);
-void juce_findFileClose (void* handle);
-
 
 //==============================================================================
 DirectoryContentsList::DirectoryContentsList (const FileFilter* const fileFilter_,
                                               TimeSliceThread& thread_)
    : fileFilter (fileFilter_),
      thread (thread_),
-     includeDirectories (false),
-     includeFiles (false),
-     ignoreHiddenFiles (true),
+     fileTypeFlags (File::ignoreHiddenFiles | File::findFiles),
      fileFindHandle (0),
      shouldStop (true)
 {
@@ -59,7 +49,13 @@ DirectoryContentsList::~DirectoryContentsList()
 
 void DirectoryContentsList::setIgnoresHiddenFiles (const bool shouldIgnoreHiddenFiles)
 {
-    ignoreHiddenFiles = shouldIgnoreHiddenFiles;
+    setTypeFlags (shouldIgnoreHiddenFiles ? (fileTypeFlags | File::ignoreHiddenFiles)
+                                          : (fileTypeFlags & ~File::ignoreHiddenFiles));
+}
+
+bool DirectoryContentsList::ignoresHiddenFiles() const
+{
+    return (fileTypeFlags & File::ignoreHiddenFiles) != 0;
 }
 
 //==============================================================================
@@ -69,19 +65,32 @@ const File& DirectoryContentsList::getDirectory() const
 }
 
 void DirectoryContentsList::setDirectory (const File& directory,
-                                          const bool includeDirectories_,
-                                          const bool includeFiles_)
+                                          const bool includeDirectories,
+                                          const bool includeFiles)
 {
-    if (directory != root
-         || includeDirectories != includeDirectories_
-         || includeFiles != includeFiles_)
+    jassert (includeDirectories || includeFiles); // you have to speciify at least one of these!
+
+    if (directory != root)
     {
         clear();
-
         root = directory;
-        includeDirectories = includeDirectories_;
-        includeFiles = includeFiles_;
 
+        // (this forces a refresh when setTypeFlags() is called, rather than triggering two refreshes)
+        fileTypeFlags &= ~(File::findDirectories | File::findFiles);
+    }
+
+    int newFlags = fileTypeFlags;
+    if (includeDirectories) newFlags |= File::findDirectories;  else newFlags &= ~File::findDirectories;
+    if (includeFiles)       newFlags |= File::findFiles;        else newFlags &= ~File::findFiles;
+
+    setTypeFlags (newFlags);
+}
+
+void DirectoryContentsList::setTypeFlags (const int newFlags)
+{
+    if (fileTypeFlags != newFlags)
+    {
+        fileTypeFlags = newFlags;
         refresh();
     }
 }
@@ -91,11 +100,7 @@ void DirectoryContentsList::clear()
     shouldStop = true;
     thread.removeTimeSliceClient (this);
 
-    if (fileFindHandle != 0)
-    {
-        juce_findFileClose (fileFindHandle);
-        fileFindHandle = 0;
-    }
+    fileFindHandle = 0;
 
     if (files.size() > 0)
     {
@@ -110,36 +115,8 @@ void DirectoryContentsList::refresh()
 
     if (root.isDirectory())
     {
-        String fileFound;
-        bool fileFoundIsDir, isHidden, isReadOnly;
-        int64 fileSize;
-        Time modTime, creationTime;
-
-        String path (root.getFullPathName());
-        if (! path.endsWithChar (File::separator))
-            path += File::separator;
-
-        jassert (fileFindHandle == 0);
-
-        fileFindHandle = juce_findFileStart (path, "*", fileFound,
-                                             &fileFoundIsDir,
-                                             &isHidden,
-                                             &fileSize,
-                                             &modTime,
-                                             &creationTime,
-                                             &isReadOnly);
-
-        if (fileFindHandle != 0 && fileFound.isNotEmpty())
-        {
-            if (addFile (fileFound, fileFoundIsDir, isHidden,
-                         fileSize, modTime, creationTime, isReadOnly))
-            {
-                changed();
-            }
-        }
-
+        fileFindHandle = new DirectoryIterator (root, false, "*", fileTypeFlags);
         shouldStop = false;
-
         thread.addTimeSliceClient (this);
     }
 }
@@ -216,20 +193,15 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
 {
     if (fileFindHandle != 0)
     {
-        String fileFound;
         bool fileFoundIsDir, isHidden, isReadOnly;
         int64 fileSize;
         Time modTime, creationTime;
 
-        if (juce_findFileNext (fileFindHandle, fileFound,
-                               &fileFoundIsDir, &isHidden,
-                               &fileSize,
-                               &modTime,
-                               &creationTime,
-                               &isReadOnly))
+        if (fileFindHandle->next (&fileFoundIsDir, &isHidden, &fileSize,
+                                  &modTime, &creationTime, &isReadOnly))
         {
-            if (addFile (fileFound, fileFoundIsDir, isHidden, fileSize,
-                         modTime, creationTime, isReadOnly))
+            if (addFile (fileFindHandle->getFile(), fileFoundIsDir,
+                         fileSize, modTime, creationTime, isReadOnly))
             {
                 hasChanged = true;
             }
@@ -238,7 +210,6 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
         }
         else
         {
-            juce_findFileClose (fileFindHandle);
             fileFindHandle = 0;
         }
     }
@@ -257,29 +228,20 @@ int DirectoryContentsList::compareElements (const DirectoryContentsList::FileInf
     return first->filename.compareIgnoreCase (second->filename);
 }
 
-bool DirectoryContentsList::addFile (const String& filename,
+bool DirectoryContentsList::addFile (const File& file,
                                      const bool isDir,
-                                     const bool isHidden,
                                      const int64 fileSize,
                                      const Time& modTime,
                                      const Time& creationTime,
                                      const bool isReadOnly)
 {
-    if (filename == ".."
-         || filename == "."
-         || (ignoreHiddenFiles && isHidden))
-        return false;
-
-    const File file (root.getChildFile (filename));
-
-    if (((isDir && includeDirectories) || ((! isDir) && includeFiles))
-         && (fileFilter == 0
-              || ((! isDir) && fileFilter->isFileSuitable (file))
-              || (isDir && fileFilter->isDirectorySuitable (file))))
+    if (fileFilter == 0
+         || ((! isDir) && fileFilter->isFileSuitable (file))
+         || (isDir && fileFilter->isDirectorySuitable (file)))
     {
         ScopedPointer <FileInfo> info (new FileInfo());
 
-        info->filename = filename;
+        info->filename = file.getFileName();
         info->fileSize = fileSize;
         info->modificationTime = modTime;
         info->creationTime = creationTime;

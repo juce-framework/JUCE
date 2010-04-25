@@ -759,9 +759,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
     {
         if (dtdText.isNotEmpty())
         {
-            while (dtdText.endsWithChar ('>'))
-                dtdText = dtdText.dropLastCharacters (1);
-
+            dtdText = dtdText.trimCharactersAtEnd (">");
             tokenisedDTD.addTokens (dtdText, true);
 
             if (tokenisedDTD [tokenisedDTD.size() - 2].equalsIgnoreCase ("system")
@@ -813,12 +811,7 @@ const String XmlDocument::expandExternalEntity (const String& entity)
         {
             if (tokenisedDTD[i - 1].equalsIgnoreCase ("<!entity"))
             {
-                String ent (tokenisedDTD [i + 1]);
-
-                while (ent.endsWithChar ('>'))
-                    ent = ent.dropLastCharacters (1);
-
-                ent = ent.trim().unquoted();
+                String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">").trim().unquoted());
 
                 // check for sub-entities..
                 int ampersand = ent.indexOfChar ('&');
@@ -861,24 +854,12 @@ const String XmlDocument::getParameterEntity (const String& entity)
             if (tokenisedDTD [i - 1] == "%"
                 && tokenisedDTD [i - 2].equalsIgnoreCase ("<!entity"))
             {
-                String ent (tokenisedDTD [i + 1]);
-
-                while (ent.endsWithChar ('>'))
-                    ent = ent.dropLastCharacters (1);
+                const String ent (tokenisedDTD [i + 1].trimCharactersAtEnd (">"));
 
                 if (ent.equalsIgnoreCase ("system"))
-                {
-                    String filename (tokenisedDTD [i + 2]);
-
-                    while (filename.endsWithChar ('>'))
-                        filename = filename.dropLastCharacters (1);
-
-                    return getFileContents (filename);
-                }
+                    return getFileContents (tokenisedDTD [i + 2].trimCharactersAtEnd (">"));
                 else
-                {
                     return ent.trim().unquoted();
-                }
             }
         }
     }

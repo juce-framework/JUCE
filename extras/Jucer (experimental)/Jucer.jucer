@@ -123,6 +123,8 @@
       </GROUP>
       <FILE id="uuKrNBIAS" name="jucer_CommandIDs.h" compile="0" resource="0"
             file="Source/ui/jucer_CommandIDs.h"/>
+      <FILE id="nKydCEjQp" name="jucer_CoordinatePropertyComponent.h" compile="0"
+            resource="0" file="Source/ui/jucer_CoordinatePropertyComponent.h"/>
       <FILE id="p410VfaaI" name="jucer_DocumentEditorComponent.cpp" compile="1"
             resource="0" file="Source/ui/jucer_DocumentEditorComponent.cpp"/>
       <FILE id="OyWSiFRV8" name="jucer_DocumentEditorComponent.h" compile="0"

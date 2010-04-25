@@ -142,7 +142,7 @@ public:
         {
             newFile = root.getChildFile (fileInfo->filename);
             newFileSize = File::descriptionOfSizeInBytes (fileInfo->fileSize);
-            newModTime = fileInfo->modificationTime.formatted (T("%d %b '%y %H:%M"));
+            newModTime = fileInfo->modificationTime.formatted ("%d %b '%y %H:%M");
         }
 
         if (newFile != file

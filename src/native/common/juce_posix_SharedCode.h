@@ -188,7 +188,7 @@ void JUCE_CALLTYPE Thread::sleep (int millisecs)
 
 //==============================================================================
 const juce_wchar File::separator = '/';
-const juce_wchar* File::separatorString = L"/";
+const String File::separatorString ("/");
 
 //==============================================================================
 const File File::getCurrentWorkingDirectory()
@@ -215,47 +215,35 @@ bool File::setAsCurrentWorkingDirectory() const
 }
 
 //==============================================================================
-bool juce_copyFile (const String& s, const String& d);
-
 static bool juce_stat (const String& fileName, struct stat& info)
 {
     return fileName.isNotEmpty()
             && (stat (fileName.toUTF8(), &info) == 0);
 }
 
-bool juce_isDirectory (const String& fileName)
+bool File::isDirectory() const
 {
     struct stat info;
 
-    return fileName.isEmpty()
-            || (juce_stat (fileName, info)
-                  && ((info.st_mode & S_IFDIR) != 0));
+    return fullPath.isEmpty()
+            || (juce_stat (fullPath, info) && ((info.st_mode & S_IFDIR) != 0));
 }
 
-bool juce_fileExists (const String& fileName, const bool dontCountDirectories)
+bool File::exists() const
 {
-    if (fileName.isEmpty())
-        return false;
-
-    const char* const fileNameUTF8 = fileName.toUTF8();
-    bool exists = access (fileNameUTF8, F_OK) == 0;
-
-    if (exists && dontCountDirectories)
-    {
-        struct stat info;
-        const int res = stat (fileNameUTF8, &info);
-
-        if (res == 0 && (info.st_mode & S_IFDIR) != 0)
-            exists = false;
-    }
-
-    return exists;
+    return fullPath.isNotEmpty()
+            && access (fullPath.toUTF8(), F_OK) == 0;
 }
 
-int64 juce_getFileSize (const String& fileName)
+bool File::existsAsFile() const
+{
+    return exists() && ! isDirectory();
+}
+
+int64 File::getSize() const
 {
     struct stat info;
-    return juce_stat (fileName, info) ? info.st_size : 0;
+    return juce_stat (fullPath, info) ? info.st_size : 0;
 }
 
 //==============================================================================
@@ -264,13 +252,35 @@ bool juce_canWriteToFile (const String& fileName)
     return access (fileName.toUTF8(), W_OK) == 0;
 }
 
-bool juce_deleteFile (const String& fileName)
+bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
 {
-    if (juce_isDirectory (fileName))
-        return rmdir (fileName.toUTF8()) == 0;
+    struct stat info;
+    const int res = stat (fileName.toUTF8(), &info);
+    if (res != 0)
+        return false;
+
+    info.st_mode &= 0777;   // Just permissions
+
+    if (isReadOnly)
+        info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
     else
-        return remove (fileName.toUTF8()) == 0;
+        // Give everybody write permission?
+        info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
+
+    return chmod (fileName.toUTF8(), info.st_mode) == 0;
 }
+
+bool File::deleteFile() const
+{
+    if (! exists())
+        return true;
+    else if (isDirectory())
+        return rmdir (fullPath.toUTF8()) == 0;
+    else
+        return remove (fullPath.toUTF8()) == 0;
+}
+
+bool juce_copyFile (const String& s, const String& d);
 
 bool juce_moveFile (const String& source, const String& dest)
 {
@@ -280,29 +290,29 @@ bool juce_moveFile (const String& source, const String& dest)
     if (juce_canWriteToFile (source)
          && juce_copyFile (source, dest))
     {
-        if (juce_deleteFile (source))
+        if (File (source).deleteFile())
             return true;
 
-        juce_deleteFile (dest);
+        File (dest).deleteFile();
     }
 
     return false;
 }
 
-void juce_createDirectory (const String& fileName)
+void File::createDirectoryInternal (const String& fileName) const
 {
     mkdir (fileName.toUTF8(), 0777);
 }
 
-void* juce_fileOpen (const String& fileName, bool forWriting)
+void* juce_fileOpen (const File& file, bool forWriting)
 {
     int flags = O_RDONLY;
 
     if (forWriting)
     {
-        if (juce_fileExists (fileName, false))
+        if (file.exists())
         {
-            const int f = open (fileName.toUTF8(), O_RDWR, 00644);
+            const int f = open (file.getFullPathName().toUTF8(), O_RDWR, 00644);
 
             if (f != -1)
                 lseek (f, 0, SEEK_END);
@@ -315,7 +325,7 @@ void* juce_fileOpen (const String& fileName, bool forWriting)
         }
     }
 
-    return (void*) open (fileName.toUTF8(), flags, 00644);
+    return (void*) open (file.getFullPathName().toUTF8(), flags, 00644);
 }
 
 void juce_fileClose (void* handle)
@@ -348,18 +358,18 @@ int64 juce_fileSetPosition (void* handle, int64 pos)
     return -1;
 }
 
-int64 juce_fileGetPosition (void* handle)
+int64 FileOutputStream::getPositionInternal() const
 {
-    if (handle != 0)
-        return lseek ((int) (pointer_sized_int) handle, 0, SEEK_CUR);
+    if (fileHandle != 0)
+        return lseek ((int) (pointer_sized_int) fileHandle, 0, SEEK_CUR);
 
     return -1;
 }
 
-void juce_fileFlush (void* handle)
+void FileOutputStream::flushInternal()
 {
-    if (handle != 0)
-        fsync ((int) (pointer_sized_int) handle);
+    if (fileHandle != 0)
+        fsync ((int) (pointer_sized_int) fileHandle);
 }
 
 const File juce_getExecutableFile()
@@ -371,10 +381,8 @@ const File juce_getExecutableFile()
 
 //==============================================================================
 // if this file doesn't exist, find a parent of it that does..
-static bool doStatFS (const File* file, struct statfs& result)
+static bool juce_doStatFS (File f, struct statfs& result)
 {
-    File f (*file);
-
     for (int i = 5; --i >= 0;)
     {
         if (f.exists())
@@ -389,7 +397,7 @@ static bool doStatFS (const File* file, struct statfs& result)
 int64 File::getBytesFreeOnVolume() const
 {
     struct statfs buf;
-    if (doStatFS (this, buf))
+    if (juce_doStatFS (*this, buf))
         return (int64) buf.f_bsize * (int64) buf.f_bavail; // Note: this returns space available to non-super user
 
     return 0;
@@ -398,17 +406,14 @@ int64 File::getBytesFreeOnVolume() const
 int64 File::getVolumeTotalSize() const
 {
     struct statfs buf;
-    if (doStatFS (this, buf))
+    if (juce_doStatFS (*this, buf))
         return (int64) buf.f_bsize * (int64) buf.f_blocks;
 
     return 0;
 }
 
-const String juce_getVolumeLabel (const String& filenameOnVolume,
-                                  int& volumeSerialNumber)
+const String File::getVolumeLabel() const
 {
-    volumeSerialNumber = 0;
-
 #if JUCE_MAC
     struct VolAttrBuf
     {
@@ -422,16 +427,13 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
     attrList.bitmapcount = ATTR_BIT_MAP_COUNT;
     attrList.volattr = ATTR_VOL_INFO | ATTR_VOL_NAME;
 
-    File f (filenameOnVolume);
+    File f (*this);
 
     for (;;)
     {
-        if (getattrlist (f.getFullPathName().toUTF8(),
-                         &attrList, &attrBuf, sizeof(attrBuf), 0) == 0)
-        {
+        if (getattrlist (f.getFullPathName().toUTF8(), &attrList, &attrBuf, sizeof (attrBuf), 0) == 0)
             return String::fromUTF8 (((const char*) &attrBuf.mountPointRef) + attrBuf.mountPointRef.attr_dataoffset,
                                      (int) attrBuf.mountPointRef.attr_length);
-        }
 
         const File parent (f.getParentDirectory());
 
@@ -445,6 +447,10 @@ const String juce_getVolumeLabel (const String& filenameOnVolume,
     return String::empty;
 }
 
+int File::getVolumeSerialNumber() const
+{
+    return 0; // xxx
+}
 
 //==============================================================================
 void juce_runSystemCommand (const String& command)

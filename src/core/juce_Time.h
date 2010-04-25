@@ -245,7 +245,7 @@ public:
 
         @see toString
     */
-    const String formatted (const juce_wchar* format) const throw();
+    const String formatted (const String& format) const throw();
 
     //==============================================================================
     /** Adds a RelativeTime to this time and returns the result. */

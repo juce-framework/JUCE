@@ -42,8 +42,8 @@
 #define __JUCE_STANDARDHEADER_JUCEHEADER__
 
 #define JUCE_MAJOR_VERSION	  1
-#define JUCE_MINOR_VERSION	  51
-#define JUCE_BUILDNUMBER	16
+#define JUCE_MINOR_VERSION	  52
+#define JUCE_BUILDNUMBER	0
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -189,7 +189,7 @@
 #endif
 
 #ifndef JUCE_FORCE_DEBUG
-  #define JUCE_FORCE_DEBUG 0
+  //#define JUCE_FORCE_DEBUG 0
 #endif
 
 #ifndef JUCE_LOG_ASSERTIONS
@@ -4256,7 +4256,7 @@ public:
 						   bool includeSeconds = true,
 						   bool use24HourClock = false) const throw();
 
-	const String formatted (const juce_wchar* format) const throw();
+	const String formatted (const String& format) const throw();
 
 	const Time operator+ (const RelativeTime& delta) const throw()  { return Time (millisSinceEpoch + delta.inMilliseconds()); }
 
@@ -4379,6 +4379,8 @@ public:
 
 	bool operator== (const File& otherFile) const;
 	bool operator!= (const File& otherFile) const;
+	bool operator< (const File& otherFile) const;
+	bool operator> (const File& otherFile) const;
 
 	bool hasWriteAccess() const;
 
@@ -4516,7 +4518,7 @@ public:
 
 	static const juce_wchar separator;
 
-	static const juce_wchar* separatorString;
+	static const String separatorString;
 
 	static const String createLegalFileName (const String& fileNameToFix);
 
@@ -4528,6 +4530,8 @@ public:
 
 	static const File createFileWithoutCheckingPath (const String& path);
 
+	static const String addTrailingSeparator (const String& path);
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -4538,6 +4542,10 @@ private:
 	friend class DirectoryIterator;
 	File (const String&, int);
 	const String getPathUpToLastSlash() const;
+
+	void createDirectoryInternal (const String& fileName) const;
+	static const String parseAbsolutePath (const String& path);
+	static bool fileTypeMatches (int whatToLookFor, bool isDir, bool isHidden);
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__
@@ -7744,6 +7752,9 @@ public:
 
 	bool next();
 
+	bool next (bool* isDirectory, bool* isHidden, int64* fileSize,
+			   Time* modTime, Time* creationTime, bool* isReadOnly);
+
 	const File getFile() const;
 
 	float getEstimatedProgress() const;
@@ -7751,12 +7762,39 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Array <File> filesFound;
-	Array <File> dirsFound;
-	String wildCard;
+	friend class File;
+
+	class NativeIterator
+	{
+	public:
+		NativeIterator (const File& directory, const String& wildCard);
+		~NativeIterator();
+
+		bool next (String& filenameFound,
+				   bool* isDirectory, bool* isHidden, int64* fileSize,
+				   Time* modTime, Time* creationTime, bool* isReadOnly);
+
+		juce_UseDebuggingNewOperator
+
+	private:
+		class Pimpl;
+		friend class DirectoryIterator;
+		friend class ScopedPointer<Pimpl>;
+		ScopedPointer<Pimpl> pimpl;
+
+		NativeIterator (const NativeIterator&);
+		NativeIterator& operator= (const NativeIterator&);
+	};
+
+	friend class ScopedPointer<NativeIterator::Pimpl>;
+	NativeIterator fileFinder;
+	String wildCard, path;
 	int index;
+	mutable int totalNumFiles;
 	const int whatToLookFor;
+	const bool isRecursive;
 	ScopedPointer <DirectoryIterator> subIterator;
+	File currentFile;
 
 	DirectoryIterator (const DirectoryIterator&);
 	DirectoryIterator& operator= (const DirectoryIterator&);
@@ -7841,6 +7879,9 @@ private:
 	int64 currentPosition;
 	int bufferSize, bytesInBuffer;
 	HeapBlock <char> buffer;
+
+	void flushInternal();
+	int64 getPositionInternal() const;
 
 	FileOutputStream (const FileOutputStream&);
 	FileOutputStream& operator= (const FileOutputStream&);
@@ -22342,7 +22383,7 @@ public:
 
 	void setIgnoresHiddenFiles (bool shouldIgnoreHiddenFiles);
 
-	bool ignoresHiddenFiles() const		 { return ignoreHiddenFiles; }
+	bool ignoresHiddenFiles() const;
 
 	struct FileInfo
 	{
@@ -22379,19 +22420,20 @@ private:
 	File root;
 	const FileFilter* fileFilter;
 	TimeSliceThread& thread;
-	bool includeDirectories, includeFiles, ignoreHiddenFiles;
+	int fileTypeFlags;
 
 	CriticalSection fileListLock;
 	OwnedArray <FileInfo> files;
 
-	void* volatile fileFindHandle;
+	ScopedPointer <DirectoryIterator> fileFindHandle;
 	bool volatile shouldStop;
 
 	void changed();
 	bool checkNextFile (bool& hasChanged);
-	bool addFile (const String& filename, bool isDir, bool isHidden,
+	bool addFile (const File& file, bool isDir,
 				  const int64 fileSize, const Time& modTime,
 				  const Time& creationTime, bool isReadOnly);
+	void setTypeFlags (int newFlags);
 
 	DirectoryContentsList (const DirectoryContentsList&);
 	DirectoryContentsList& operator= (const DirectoryContentsList&);

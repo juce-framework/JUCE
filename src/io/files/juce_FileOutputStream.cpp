@@ -29,11 +29,9 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_FileOutputStream.h"
 
-void* juce_fileOpen (const String& path, bool forWriting);
+void* juce_fileOpen (const File& file, bool forWriting);
 void juce_fileClose (void* handle);
 int juce_fileWrite (void* handle, const void* buffer, int size);
-void juce_fileFlush (void* handle);
-int64 juce_fileGetPosition (void* handle);
 int64 juce_fileSetPosition (void* handle, int64 pos);
 
 
@@ -44,11 +42,11 @@ FileOutputStream::FileOutputStream (const File& f,
       bufferSize (bufferSize_),
       bytesInBuffer (0)
 {
-    fileHandle = juce_fileOpen (f.getFullPathName(), true);
+    fileHandle = juce_fileOpen (f, true);
 
     if (fileHandle != 0)
     {
-        currentPosition = juce_fileGetPosition (fileHandle);
+        currentPosition = getPositionInternal();
 
         if (currentPosition < 0)
         {
@@ -92,7 +90,7 @@ void FileOutputStream::flush()
         bytesInBuffer = 0;
     }
 
-    juce_fileFlush (fileHandle);
+    flushInternal();
 }
 
 bool FileOutputStream::write (const void* const src, const int numBytes)

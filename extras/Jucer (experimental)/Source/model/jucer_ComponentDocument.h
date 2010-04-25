@@ -74,7 +74,7 @@ public:
     // for Coordinate::MarkerResolver:
     const Coordinate findMarker (const String& name, bool isHorizontal) const;
 
-    void getComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
+    void addComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
                                       Coordinate& coord, PopupMenu& menu, bool isAnchor1);
     const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId) const;
 
@@ -104,6 +104,9 @@ public:
 
         bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
         void createMarkerProperties (Array <PropertyComponent*>& props, ValueTree& marker);
+
+        void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
+        const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
 
     private:
         ComponentDocument& document;
@@ -159,8 +162,8 @@ private:
     void checkRootObject();
     void createSubTreeIfNotThere (const String& name);
     ValueTree getComponentGroup() const;
-    void addMarkerMenuItem (int i, Coordinate& coord, const String& name, PopupMenu& menu, bool isAnchor1,
-                            const ValueTree& componentState, const String& coordName);
+    void addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
+                            bool isAnchor1, const String& fullCoordName);
 
     Value getRootValueUndoable (const var::identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
     Value getRootValueNonUndoable (const var::identifier& name) const     { return root.getPropertyAsValue (name, 0); }

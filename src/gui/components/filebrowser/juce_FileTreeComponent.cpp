@@ -63,7 +63,7 @@ public:
              && parentContentsList_->getFileInfo (indexInContentsList_, fileInfo))
         {
             fileSize = File::descriptionOfSizeInBytes (fileInfo.fileSize);
-            modTime = fileInfo.modificationTime.formatted (T("%d %b '%y %H:%M"));
+            modTime = fileInfo.modificationTime.formatted ("%d %b '%y %H:%M");
             isDirectory = fileInfo.isDirectory;
         }
         else

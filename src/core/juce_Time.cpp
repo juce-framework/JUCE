@@ -341,7 +341,7 @@ const String Time::toString (const bool includeDate,
     return result.trimEnd();
 }
 
-const String Time::formatted (const juce_wchar* const format) const throw()
+const String Time::formatted (const String& format) const throw()
 {
     String buffer;
     int bufferSize = 128;

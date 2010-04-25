@@ -185,6 +185,7 @@
           <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableTreeviewItem.h"/>
         </Filter>
         <File RelativePath="..\..\Source\ui\jucer_CommandIDs.h"/>
+        <File RelativePath="..\..\Source\ui\jucer_CoordinatePropertyComponent.h"/>
         <File RelativePath="..\..\Source\ui\jucer_DocumentEditorComponent.cpp"/>
         <File RelativePath="..\..\Source\ui\jucer_DocumentEditorComponent.h"/>
         <File RelativePath="..\..\Source\ui\jucer_GroupInformationComponent.cpp"/>

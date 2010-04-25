@@ -461,10 +461,10 @@ void StringArray::appendNumbersToDuplicates (const bool ignoreCase,
                                              const juce_wchar* postNumberString)
 {
     if (preNumberString == 0)
-        preNumberString = T(" (");
+        preNumberString = L" (";
 
     if (postNumberString == 0)
-        postNumberString = T(")");
+        postNumberString = L")";
 
     for (int i = 0; i < size() - 1; ++i)
     {

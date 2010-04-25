@@ -30,6 +30,7 @@
 #include "../../../events/juce_ChangeBroadcaster.h"
 #include "../../../threads/juce_TimeSliceThread.h"
 #include "../../graphics/imaging/juce_Image.h"
+#include "../../../io/files/juce_DirectoryIterator.h"
 
 
 //==============================================================================
@@ -104,7 +105,7 @@ public:
     /** Returns true if hidden files are ignored.
         @see setIgnoresHiddenFiles
     */
-    bool ignoresHiddenFiles() const             { return ignoreHiddenFiles; }
+    bool ignoresHiddenFiles() const;
 
     //==============================================================================
     /** Contains cached information about one of the files in a DirectoryContentsList.
@@ -197,19 +198,20 @@ private:
     File root;
     const FileFilter* fileFilter;
     TimeSliceThread& thread;
-    bool includeDirectories, includeFiles, ignoreHiddenFiles;
+    int fileTypeFlags;
 
     CriticalSection fileListLock;
     OwnedArray <FileInfo> files;
 
-    void* volatile fileFindHandle;
+    ScopedPointer <DirectoryIterator> fileFindHandle;
     bool volatile shouldStop;
 
     void changed();
     bool checkNextFile (bool& hasChanged);
-    bool addFile (const String& filename, bool isDir, bool isHidden,
+    bool addFile (const File& file, bool isDir,
                   const int64 fileSize, const Time& modTime,
                   const Time& creationTime, bool isReadOnly);
+    void setTypeFlags (int newFlags);
 
     DirectoryContentsList (const DirectoryContentsList&);
     DirectoryContentsList& operator= (const DirectoryContentsList&);

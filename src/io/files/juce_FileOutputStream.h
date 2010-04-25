@@ -88,6 +88,9 @@ private:
     int bufferSize, bytesInBuffer;
     HeapBlock <char> buffer;
 
+    void flushInternal();
+    int64 getPositionInternal() const;
+
     FileOutputStream (const FileOutputStream&);
     FileOutputStream& operator= (const FileOutputStream&);
 };

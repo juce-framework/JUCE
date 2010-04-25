@@ -1542,10 +1542,7 @@ const String String::trimCharactersAtStart (const String& charactersToTrim) cons
     while (charactersToTrim.containsChar (*t))
         ++t;
 
-    if (t == text)
-        return *this;
-
-    return String (t);
+    return t == text ? *this : String (t);
 }
 
 const String String::trimCharactersAtEnd (const String& charactersToTrim) const
@@ -1553,12 +1550,17 @@ const String String::trimCharactersAtEnd (const String& charactersToTrim) const
     if (isEmpty())
         return empty;
 
-    const juce_wchar* endT = text + (length() - 1);
+    const int len = length();
+    const juce_wchar* endT = text + (len - 1);
+    int numToRemove = 0;
 
-    while (endT >= text && charactersToTrim.containsChar (*endT))
+    while (numToRemove < len && charactersToTrim.containsChar (*endT))
+    {
+        ++numToRemove;
         --endT;
+    }
 
-    return String (text, (int) (++endT - text));
+    return numToRemove > 0 ? String (text, len - numToRemove) : *this;
 }
 
 //==============================================================================

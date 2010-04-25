@@ -76,12 +76,27 @@ public:
     /** Destructor. */
     ~DirectoryIterator();
 
-    /** Call this to move the iterator along to the next file.
+    /** Moves the iterator along to the next file.
 
         @returns    true if a file was found (you can then use getFile() to see what it was) - or
                     false if there are no more matching files.
     */
     bool next();
+
+    /** Moves the iterator along to the next file, and returns various properties of that file.
+
+        If you need to find out details about the file, it's more efficient to call this method than
+        to call the normal next() method and then find out the details afterwards.
+
+        All the parameters are optional, so pass null pointers for any items that you're not
+        interested in.
+
+        @returns    true if a file was found (you can then use getFile() to see what it was) - or
+                    false if there are no more matching files. If it returns false, then none of the
+                    parameters will be filled-in.
+    */
+    bool next (bool* isDirectory, bool* isHidden, int64* fileSize,
+               Time* modTime, Time* creationTime, bool* isReadOnly);
 
     /** Returns the file that the iterator is currently pointing at.
 
@@ -96,17 +111,44 @@ public:
     */
     float getEstimatedProgress() const;
 
-
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    Array <File> filesFound;
-    Array <File> dirsFound;
-    String wildCard;
+    friend class File;
+
+    //==============================================================================
+    class NativeIterator
+    {
+    public:
+        NativeIterator (const File& directory, const String& wildCard);
+        ~NativeIterator();
+
+        bool next (String& filenameFound,
+                   bool* isDirectory, bool* isHidden, int64* fileSize,
+                   Time* modTime, Time* creationTime, bool* isReadOnly);
+
+        juce_UseDebuggingNewOperator
+
+    private:
+        class Pimpl;
+        friend class DirectoryIterator;
+        friend class ScopedPointer<Pimpl>;
+        ScopedPointer<Pimpl> pimpl;
+
+        NativeIterator (const NativeIterator&);
+        NativeIterator& operator= (const NativeIterator&);
+    };
+
+    friend class ScopedPointer<NativeIterator::Pimpl>;
+    NativeIterator fileFinder;
+    String wildCard, path;
     int index;
+    mutable int totalNumFiles;
     const int whatToLookFor;
+    const bool isRecursive;
     ScopedPointer <DirectoryIterator> subIterator;
+    File currentFile;
 
     DirectoryIterator (const DirectoryIterator&);
     DirectoryIterator& operator= (const DirectoryIterator&);

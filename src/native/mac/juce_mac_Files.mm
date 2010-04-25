@@ -64,24 +64,6 @@ bool juce_setFileTimes (const String& fileName,
     return utime (fileName.toUTF8(), &times) == 0;
 }
 
-bool juce_setFileReadOnly (const String& fileName, bool isReadOnly)
-{
-    struct stat info;
-    const int res = stat (fileName.toUTF8(), &info);
-    if (res != 0)
-        return false;
-
-    info.st_mode &= 0777;   // Just permissions
-
-    if (isReadOnly)
-        info.st_mode &= ~(S_IWUSR | S_IWGRP | S_IWOTH);
-    else
-        // Give everybody write permission?
-        info.st_mode |= S_IWUSR | S_IWGRP | S_IWOTH;
-
-    return chmod (fileName.toUTF8(), info.st_mode) == 0;
-}
-
 bool juce_copyFile (const String& src, const String& dst)
 {
     const ScopedAutoReleasePool pool;
@@ -99,19 +81,18 @@ bool juce_copyFile (const String& src, const String& dst)
 #endif
 }
 
-const StringArray juce_getFileSystemRoots()
+void File::findFileSystemRoots (Array<File>& destArray)
 {
-    StringArray s;
-    s.add ("/");
-    return s;
+    destArray.add (File ("/"));
 }
 
+
 //==============================================================================
-static bool isFileOnDriveType (const File* const f, const char** types)
+static bool isFileOnDriveType (const File& f, const char** types)
 {
     struct statfs buf;
 
-    if (doStatFS (f, buf))
+    if (juce_doStatFS (f, buf))
     {
         const String type (buf.f_fstypename);
 
@@ -127,14 +108,14 @@ bool File::isOnCDRomDrive() const
 {
     static const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", 0 };
 
-    return isFileOnDriveType (this, (const char**) cdTypes);
+    return isFileOnDriveType (*this, (const char**) cdTypes);
 }
 
 bool File::isOnHardDisk() const
 {
     static const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", 0 };
 
-    return ! (isOnCDRomDrive() || isFileOnDriveType (this, (const char**) nonHDTypes));
+    return ! (isOnCDRomDrive() || isFileOnDriveType (*this, (const char**) nonHDTypes));
 }
 
 bool File::isOnRemovableDrive() const
@@ -324,99 +305,97 @@ bool File::moveToTrash() const
 }
 
 //==============================================================================
-struct FindFileStruct
+class DirectoryIterator::NativeIterator::Pimpl
 {
-    NSDirectoryEnumerator* enumerator;
+public:
+    Pimpl (const File& directory, const String& wildCard_)
+        : parentDir (File::addTrailingSeparator (directory.getFullPathName())),
+          wildCard (wildCard_),
+          enumerator (0)
+    {
+        ScopedAutoReleasePool pool;
+
+        enumerator = [[[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory.getFullPathName())] retain];
+
+        wildcardUTF8 = wildCard.toUTF8();
+    }
+
+    ~Pimpl()
+    {
+        [enumerator release];
+    }
+
+    bool next (String& filenameFound,
+               bool* const isDir, bool* const isHidden, int64* const fileSize,
+               Time* const modTime, Time* const creationTime, bool* const isReadOnly)
+    {
+        ScopedAutoReleasePool pool;
+
+        for (;;)
+        {
+            NSString* file;
+            if (enumerator == 0 || (file = [enumerator nextObject]) == 0)
+                return false;
+
+            [enumerator skipDescendents];
+            filenameFound = nsStringToJuce (file);
+
+            if (fnmatch (wildcardUTF8, filenameFound.toUTF8(), FNM_CASEFOLD) != 0)
+                continue;
+
+            const String path (parentDir + filenameFound);
+
+            if (isDir != 0 || fileSize != 0)
+            {
+                struct stat info;
+                const bool statOk = juce_stat (path, info);
+
+                if (isDir != 0)     *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
+                if (isHidden != 0)  *isHidden = juce_isHiddenFile (path);
+                if (fileSize != 0)  *fileSize = statOk ? info.st_size : 0;
+            }
+
+            if (modTime != 0 || creationTime != 0)
+            {
+                int64 m, a, c;
+                juce_getFileTimes (path, m, a, c);
+
+                if (modTime != 0)       *modTime = m;
+                if (creationTime != 0)  *creationTime = c;
+            }
+
+            if (isReadOnly != 0)
+                *isReadOnly = ! juce_canWriteToFile (path);
+
+            return true;
+        }
+    }
+
+private:
     String parentDir, wildCard;
+    const char* wildcardUTF8;
+    NSDirectoryEnumerator* enumerator;
+
+    Pimpl (const Pimpl&);
+    Pimpl& operator= (const Pimpl&);
 };
 
-bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDir,  bool* isHidden, int64* fileSize, Time* modTime, Time* creationTime, bool* isReadOnly)
+DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)
+    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCard))
 {
-    ScopedAutoReleasePool pool;
-    FindFileStruct* ff = (FindFileStruct*) handle;
-    NSString* file;
-    const char* const wildcardUTF8 = ff->wildCard.toUTF8();
-
-    for (;;)
-    {
-        if (ff == 0 || (file = [ff->enumerator nextObject]) == 0)
-            return false;
-
-        [ff->enumerator skipDescendents];
-        resultFile = nsStringToJuce (file);
-
-        if (fnmatch (wildcardUTF8, resultFile.toUTF8(), FNM_CASEFOLD) != 0)
-            continue;
-
-        const String path (ff->parentDir + resultFile);
-
-        if (isDir != 0 || fileSize != 0)
-        {
-            struct stat info;
-            const bool statOk = juce_stat (path, info);
-
-            if (isDir != 0)
-                *isDir = statOk && ((info.st_mode & S_IFDIR) != 0);
-
-            if (isHidden != 0)
-                *isHidden = juce_isHiddenFile (path);
-
-            if (fileSize != 0)
-                *fileSize = statOk ? info.st_size : 0;
-        }
-
-        if (modTime != 0 || creationTime != 0)
-        {
-            int64 m, a, c;
-            juce_getFileTimes (path, m, a, c);
-
-            if (modTime != 0)
-                *modTime = m;
-
-            if (creationTime != 0)
-                *creationTime = c;
-        }
-
-        if (isReadOnly != 0)
-            *isReadOnly = ! juce_canWriteToFile (path);
-
-        return true;
-    }
 }
 
-void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDir, bool* isHidden, int64* fileSize, Time* modTime,
-                          Time* creationTime, bool* isReadOnly)
+DirectoryIterator::NativeIterator::~NativeIterator()
 {
-    ScopedAutoReleasePool pool;
-    NSDirectoryEnumerator* e = [[NSFileManager defaultManager] enumeratorAtPath: juceStringToNS (directory)];
-
-    if (e != 0)
-    {
-        ScopedPointer <FindFileStruct> ff (new FindFileStruct());
-        ff->enumerator = [e retain];
-        ff->parentDir = directory;
-        ff->wildCard = wildCard;
-
-        if (! ff->parentDir.endsWithChar (File::separator))
-            ff->parentDir += File::separator;
-
-        if (juce_findFileNext (ff, firstResultFile, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly))
-            return ff.release();
-
-        [e release];
-    }
-
-    return 0;
 }
 
-void juce_findFileClose (void* handle)
+bool DirectoryIterator::NativeIterator::next (String& filenameFound,
+                                              bool* const isDir, bool* const isHidden, int64* const fileSize,
+                                              Time* const modTime, Time* const creationTime, bool* const isReadOnly)
 {
-    ScopedAutoReleasePool pool;
-    ScopedPointer <FindFileStruct> ff ((FindFileStruct*) handle);
-    [ff->enumerator release];
+    return pimpl->next (filenameFound, isDir, isHidden, fileSize, modTime, creationTime, isReadOnly);
 }
+
 
 //==============================================================================
 bool juce_launchExecutable (const String& pathAndArguments)

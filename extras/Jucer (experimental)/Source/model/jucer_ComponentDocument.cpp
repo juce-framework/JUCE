@@ -25,6 +25,7 @@
 
 #include "jucer_ComponentDocument.h"
 #include "Component Types/jucer_ComponentTypeManager.h"
+#include "../ui/jucer_CoordinatePropertyComponent.h"
 
 
 //==============================================================================
@@ -355,38 +356,37 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
     return true;
 }
 
-void ComponentDocument::addMarkerMenuItem (int i, Coordinate& coord, const String& name, PopupMenu& menu, bool isAnchor1,
-                                           const ValueTree& componentState, const String& coordName)
+void ComponentDocument::addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
+                                           bool isAnchor1, const String& fullCoordName)
 {
-    const String componentName (componentState [memberNameProperty].toString());
     Coordinate requestedCoord (findMarker (name, coord.isHorizontal()));
-    const String fullCoordName (componentName + "." + coordName);
 
     menu.addItem (i, name,
                   ! (name == fullCoordName || requestedCoord.referencesIndirectly (fullCoordName, *this)),
                   name == (isAnchor1 ? coord.getAnchor1() : coord.getAnchor2()));
 }
 
-void ComponentDocument::getComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
+void ComponentDocument::addComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
                                                      Coordinate& coord, PopupMenu& menu, bool isAnchor1)
 {
     const String componentName (componentState [memberNameProperty].toString());
+    const String fullCoordName (componentName + "." + coordName);
 
     if (coord.isHorizontal())
     {
-        addMarkerMenuItem (1, coord, Coordinate::parentLeftMarkerName, menu, isAnchor1, componentState, coordName);
-        addMarkerMenuItem (2, coord, Coordinate::parentRightMarkerName, menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (1, coord, Coordinate::parentLeftMarkerName, menu, isAnchor1, fullCoordName);
+        addMarkerMenuItem (2, coord, Coordinate::parentRightMarkerName, menu, isAnchor1, fullCoordName);
         menu.addSeparator();
-        addMarkerMenuItem (3, coord, componentName + ".left", menu, isAnchor1, componentState, coordName);
-        addMarkerMenuItem (4, coord, componentName + ".right", menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (3, coord, componentName + ".left", menu, isAnchor1, fullCoordName);
+        addMarkerMenuItem (4, coord, componentName + ".right", menu, isAnchor1, fullCoordName);
     }
     else
     {
-        addMarkerMenuItem (1, coord, Coordinate::parentTopMarkerName, menu, isAnchor1, componentState, coordName);
-        addMarkerMenuItem (2, coord, Coordinate::parentBottomMarkerName, menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (1, coord, Coordinate::parentTopMarkerName, menu, isAnchor1, fullCoordName);
+        addMarkerMenuItem (2, coord, Coordinate::parentBottomMarkerName, menu, isAnchor1, fullCoordName);
         menu.addSeparator();
-        addMarkerMenuItem (3, coord, componentName + ".top", menu, isAnchor1, componentState, coordName);
-        addMarkerMenuItem (4, coord, componentName + ".bottom", menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (3, coord, componentName + ".top", menu, isAnchor1, fullCoordName);
+        addMarkerMenuItem (4, coord, componentName + ".bottom", menu, isAnchor1, fullCoordName);
     }
 
     menu.addSeparator();
@@ -394,7 +394,7 @@ void ComponentDocument::getComponentMarkerMenuItems (const ValueTree& componentS
 
     int i;
     for (i = 0; i < markerList.size(); ++i)
-        addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)), menu, isAnchor1, componentState, coordName);
+        addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)), menu, isAnchor1, fullCoordName);
 
     menu.addSeparator();
     for (i = 0; i < getNumComponents(); ++i)
@@ -405,13 +405,13 @@ void ComponentDocument::getComponentMarkerMenuItems (const ValueTree& componentS
         {
             if (coord.isHorizontal())
             {
-                addMarkerMenuItem (10000 + i * 4, coord, compName + ".left", menu, isAnchor1, componentState, coordName);
-                addMarkerMenuItem (10001 + i * 4, coord, compName + ".right", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10000 + i * 4, coord, compName + ".left", menu, isAnchor1, fullCoordName);
+                addMarkerMenuItem (10001 + i * 4, coord, compName + ".right", menu, isAnchor1, fullCoordName);
             }
             else
             {
-                addMarkerMenuItem (10002 + i * 4, coord, compName + ".top", menu, isAnchor1, componentState, coordName);
-                addMarkerMenuItem (10003 + i * 4, coord, compName + ".bottom", menu, isAnchor1, componentState, coordName);
+                addMarkerMenuItem (10002 + i * 4, coord, compName + ".top", menu, isAnchor1, fullCoordName);
+                addMarkerMenuItem (10003 + i * 4, coord, compName + ".bottom", menu, isAnchor1, fullCoordName);
             }
         }
     }
@@ -600,9 +600,84 @@ const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, 
     return Coordinate (isX);
 }
 
+void ComponentDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1)
+{
+    const String fullCoordName (getName (markerState));
+
+    if (coord.isHorizontal())
+    {
+        document.addMarkerMenuItem (1, coord, Coordinate::parentLeftMarkerName, menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (2, coord, Coordinate::parentRightMarkerName, menu, isAnchor1, fullCoordName);
+    }
+    else
+    {
+        document.addMarkerMenuItem (1, coord, Coordinate::parentTopMarkerName, menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (2, coord, Coordinate::parentBottomMarkerName, menu, isAnchor1, fullCoordName);
+    }
+
+    menu.addSeparator();
+    const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
+
+    for (int i = 0; i < markerList.size(); ++i)
+        document.addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)), menu, isAnchor1, fullCoordName);
+}
+
+const String ComponentDocument::MarkerList::getChosenMarkerMenuItem (const Coordinate& coord, int i) const
+{
+    if (i == 1)  return coord.isHorizontal() ? Coordinate::parentLeftMarkerName : Coordinate::parentTopMarkerName;
+    if (i == 2)  return coord.isHorizontal() ? Coordinate::parentRightMarkerName : Coordinate::parentBottomMarkerName;
+
+    const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
+
+    if (i >= 100 && i < 10000)
+        return markerList.getName (markerList.getMarker (i - 100));
+
+    jassertfalse;
+    return String::empty;
+}
+
+//==============================================================================
+class MarkerPositionComponent  : public CoordinatePropertyComponent
+{
+public:
+    //==============================================================================
+    MarkerPositionComponent (ComponentDocument& document_, const String& name, const ValueTree& markerState_,
+                             const Value& coordValue_, bool isHorizontal_)
+        : CoordinatePropertyComponent (document_, name, coordValue_, isHorizontal_),
+          markerState (markerState_)
+    {
+    }
+
+    ~MarkerPositionComponent()
+    {
+    }
+
+    const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1)
+    {
+        Coordinate coord (getCoordinate());
+
+        PopupMenu m;
+        document.getMarkerList (coord.isHorizontal())
+                .addMarkerMenuItems (markerState, coord, m, isAnchor1);
+
+        const int r = m.showAt (button);
+
+        if (r > 0)
+            return document.getMarkerList (coord.isHorizontal()).getChosenMarkerMenuItem (coord, r);
+
+        return String::empty;
+    }
+
+private:
+    ValueTree markerState;
+};
+
 void ComponentDocument::MarkerList::createMarkerProperties (Array <PropertyComponent*>& props, ValueTree& marker)
 {
     props.add (new TextPropertyComponent (getNameAsValue (marker), "Marker Name", 256, false));
+    props.add (new MarkerPositionComponent (document, "Position", marker,
+                                            marker.getPropertyAsValue (markerPosProperty, document.getUndoManager()),
+                                            contains (marker)));
 }
 
 bool ComponentDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)

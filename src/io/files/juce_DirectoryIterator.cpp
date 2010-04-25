@@ -30,79 +30,23 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DirectoryIterator.h"
 
-void* juce_findFileStart (const String& directory, const String& wildCard, String& firstResultFile,
-                          bool* isDirectory, bool* isHidden, int64* fileSize,
-                          Time* modTime, Time* creationTime, bool* isReadOnly);
-bool juce_findFileNext (void* handle, String& resultFile,
-                        bool* isDirectory, bool* isHidden, int64* fileSize,
-                        Time* modTime, Time* creationTime, bool* isReadOnly);
-void juce_findFileClose (void* handle);
-
 
 //==============================================================================
 DirectoryIterator::DirectoryIterator (const File& directory,
-                                      bool isRecursive,
-                                      const String& wc,
+                                      bool isRecursive_,
+                                      const String& wildCard_,
                                       const int whatToLookFor_)
-  : wildCard (wc),
+  : fileFinder (directory, isRecursive ? "*" : wildCard_),
+    wildCard (wildCard_),
+    path (File::addTrailingSeparator (directory.getFullPathName())),
     index (-1),
-    whatToLookFor (whatToLookFor_)
+    totalNumFiles (-1),
+    whatToLookFor (whatToLookFor_),
+    isRecursive (isRecursive_)
 {
     // you have to specify the type of files you're looking for!
     jassert ((whatToLookFor_ & (File::findFiles | File::findDirectories)) != 0);
     jassert (whatToLookFor_ > 0 && whatToLookFor_ <= 7);
-
-    String path (directory.getFullPathName());
-    if (! path.endsWithChar (File::separator))
-        path += File::separator;
-
-    String filename;
-    bool isDirectory, isHidden;
-
-    void* const handle = juce_findFileStart (path,
-                                             isRecursive ? "*" : wc,
-                                             filename, &isDirectory, &isHidden, 0, 0, 0, 0);
-
-    if (handle != 0)
-    {
-        do
-        {
-            if (! filename.containsOnly ("."))
-            {
-                bool addToList = false;
-
-                if (isDirectory)
-                {
-                    if (isRecursive
-                         && ((whatToLookFor_ & File::ignoreHiddenFiles) == 0
-                              || ! isHidden))
-                    {
-                        dirsFound.add (File (path + filename, 0));
-                    }
-
-                    addToList = (whatToLookFor_ & File::findDirectories) != 0;
-                }
-                else
-                {
-                    addToList = (whatToLookFor_ & File::findFiles) != 0;
-                }
-
-                // if it's recursive, we're not relying on the OS iterator
-                // to do the wildcard match, so do it now..
-                if (isRecursive && addToList)
-                    addToList = filename.matchesWildcard (wc, true);
-
-                if (addToList && (whatToLookFor_ & File::ignoreHiddenFiles) != 0)
-                    addToList = ! isHidden;
-
-                if (addToList)
-                    filesFound.add (File (path + filename, 0));
-            }
-
-        } while (juce_findFileNext (handle, filename, &isDirectory, &isHidden, 0, 0, 0, 0));
-
-        juce_findFileClose (handle);
-    }
 }
 
 DirectoryIterator::~DirectoryIterator()
@@ -111,27 +55,66 @@ DirectoryIterator::~DirectoryIterator()
 
 bool DirectoryIterator::next()
 {
+    return next (0, 0, 0, 0, 0, 0);
+}
+
+bool DirectoryIterator::next (bool* const isDirResult, bool* const isHiddenResult, int64* const fileSize,
+                              Time* const modTime, Time* const creationTime, bool* const isReadOnly)
+{
     if (subIterator != 0)
     {
-        if (subIterator->next())
+        if (subIterator->next (isDirResult, isHiddenResult, fileSize, modTime, creationTime, isReadOnly))
             return true;
 
         subIterator = 0;
     }
 
-    if (index >= filesFound.size() + dirsFound.size() - 1)
-        return false;
-
-    ++index;
-
-    if (index >= filesFound.size())
+    String filename;
+    bool isDirectory, isHidden;
+    while (fileFinder.next (filename, &isDirectory, &isHidden, fileSize, modTime, creationTime, isReadOnly))
     {
-        subIterator = new DirectoryIterator (dirsFound.getReference (index - filesFound.size()),
-                                             true, wildCard, whatToLookFor);
-        return next();
+        ++index;
+
+        if (! filename.containsOnly ("."))
+        {
+            const File fileFound (path + filename, 0);
+            bool matches = false;
+
+            if (isDirectory)
+            {
+                if (isRecursive && ((whatToLookFor & File::ignoreHiddenFiles) == 0 || ! isHidden))
+                    subIterator = new DirectoryIterator (fileFound, true, wildCard, whatToLookFor);
+
+                matches = (whatToLookFor & File::findDirectories) != 0;
+            }
+            else
+            {
+                matches = (whatToLookFor & File::findFiles) != 0;
+            }
+
+            // if recursive, we're not relying on the OS iterator to do the wildcard match, so do it now..
+            if (matches && isRecursive)
+                matches = filename.matchesWildcard (wildCard, ! File::areFileNamesCaseSensitive());
+
+            if (matches && (whatToLookFor & File::ignoreHiddenFiles) != 0)
+                matches = ! isHidden;
+
+            if (matches)
+            {
+                currentFile = fileFound;
+                if (isHiddenResult != 0)     *isHiddenResult = isHidden;
+                if (isDirResult != 0)        *isDirResult = isDirectory;
+
+                return true;
+            }
+            else if (subIterator != 0)
+            {
+                return next();
+            }
+        }
     }
 
-    return true;
+    return false;
 }
 
 const File DirectoryIterator::getFile() const
@@ -139,22 +122,21 @@ const File DirectoryIterator::getFile() const
     if (subIterator != 0)
         return subIterator->getFile();
 
-    return filesFound [index];
+    return currentFile;
 }
 
 float DirectoryIterator::getEstimatedProgress() const
 {
-    if (filesFound.size() + dirsFound.size() == 0)
-    {
-        return 0.0f;
-    }
-    else
-    {
-        const float detailedIndex = (subIterator != 0) ? index + subIterator->getEstimatedProgress()
-                                                       : (float) index;
+    if (totalNumFiles < 0)
+        totalNumFiles = File (path).getNumberOfChildFiles (File::findFilesAndDirectories);
 
-        return detailedIndex / (filesFound.size() + dirsFound.size());
-    }
+    if (totalNumFiles <= 0)
+        return 0.0f;
+
+    const float detailedIndex = (subIterator != 0) ? index + subIterator->getEstimatedProgress()
+                                                   : (float) index;
+
+    return detailedIndex / totalNumFiles;
 }
 
 END_JUCE_NAMESPACE

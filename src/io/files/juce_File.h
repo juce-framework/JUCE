@@ -30,6 +30,7 @@
 #include "../../core/juce_Time.h"
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_MemoryBlock.h"
+#include "../../containers/juce_ScopedPointer.h"
 class FileInputStream;
 class FileOutputStream;
 
@@ -320,6 +321,10 @@ public:
     bool operator== (const File& otherFile) const;
     /** Compares the pathnames for two files. */
     bool operator!= (const File& otherFile) const;
+    /** Compares the pathnames for two files. */
+    bool operator< (const File& otherFile) const;
+    /** Compares the pathnames for two files. */
+    bool operator> (const File& otherFile) const;
 
     //==============================================================================
     /** Checks whether a file can be created or written to.
@@ -864,7 +869,7 @@ public:
 
         On Windows, this will be '\', on Mac/Linux, it'll be '/'
     */
-    static const juce_wchar* separatorString;
+    static const String separatorString;
 
     //==============================================================================
     /** Removes illegal characters from a filename.
@@ -903,6 +908,9 @@ public:
     */
     static const File createFileWithoutCheckingPath (const String& path);
 
+    /** Adds a separator character to the end of a path if it doesn't already have one. */
+    static const String addTrailingSeparator (const String& path);
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -914,6 +922,10 @@ private:
     friend class DirectoryIterator;
     File (const String&, int);
     const String getPathUpToLastSlash() const;
+
+    void createDirectoryInternal (const String& fileName) const;
+    static const String parseAbsolutePath (const String& path);
+    static bool fileTypeMatches (int whatToLookFor, bool isDir, bool isHidden);
 };
 
 #endif   // __JUCE_FILE_JUCEHEADER__
