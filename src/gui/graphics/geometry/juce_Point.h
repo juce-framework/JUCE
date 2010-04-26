@@ -71,6 +71,12 @@ public:
     /** Returns true if the point is (0, 0). */
     bool isOrigin() const throw()                                       { return x == ValueType() && y == ValueType(); }
 
+    /** Returns a point which has the same Y position as this one, but a new X. */
+    const Point withX (const ValueType newX) const throw()              { return Point (newX, y); }
+
+    /** Returns a point which has the same X position as this one, but a new Y. */
+    const Point withY (const ValueType newY) const throw()              { return Point (x, newY); }
+
     /** Changes the point's x and y co-ordinates. */
     void setXY (const ValueType newX, const ValueType newY) throw()     { x = newX; y = newY; }
 
@@ -89,11 +95,33 @@ public:
     /** Subtracts another point's co-ordinates to this one. */
     Point& operator-= (const Point& other) throw()                      { x -= other.x; y -= other.y; return *this; }
 
+    /** Returns a point whose coordinates are multiplied by a given value. */
+    const Point operator* (const ValueType multiplier) const throw()    { return Point (x * multiplier, y * multiplier); }
+
+    /** Multiplies the point's co-ordinates by a value. */
+    Point& operator*= (const ValueType multiplier) throw()              { x *= multiplier; y *= multiplier; return *this; }
+
+    /** Returns a point whose coordinates are divided by a given value. */
+    const Point operator/ (const ValueType divisor) const throw()       { return Point (x / divisor, y / divisor); }
+
+    /** Divides the point's co-ordinates by a value. */
+    Point& operator/= (const ValueType divisor) throw()                 { x /= divisor; y /= divisor; return *this; }
+
     /** Returns the inverse of this point. */
     const Point operator-() const throw()                               { return Point (-x, -y); }
 
     /** Returns the straight-line distance between this point and another one. */
+    ValueType getDistanceFromOrigin() const throw()                     { return (ValueType) juce_hypot (x, y); }
+
+    /** Returns the straight-line distance between this point and another one. */
     ValueType getDistanceFrom (const Point& other) const throw()        { return (ValueType) juce_hypot (x - other.x, y - other.y); }
+
+    /** Returns the angle from this point to another one.
+
+        The return value is the number of radians clockwise from the 3 o'clock direction,
+        where this point is the centre and the other point is on the radius.
+    */
+    ValueType getAngleToPoint (const Point& other) const throw()        { return (ValueType) atan2 (other.x - x, other.y - y); }
 
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!

@@ -105,8 +105,6 @@
 
   #if defined (__ppc__) || defined (__ppc64__)
 	#define JUCE_PPC 1
-	#undef MAC_OS_X_VERSION_MAX_ALLOWED
-	#define MAC_OS_X_VERSION_MAX_ALLOWED	MAC_OS_X_VERSION_10_4
   #else
 	#define JUCE_INTEL 1
   #endif
@@ -9641,6 +9639,10 @@ public:
 
 	bool isOrigin() const throw()					   { return x == ValueType() && y == ValueType(); }
 
+	const Point withX (const ValueType newX) const throw()		  { return Point (newX, y); }
+
+	const Point withY (const ValueType newY) const throw()		  { return Point (x, newY); }
+
 	void setXY (const ValueType newX, const ValueType newY) throw()	 { x = newX; y = newY; }
 
 	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
@@ -9653,9 +9655,21 @@ public:
 
 	Point& operator-= (const Point& other) throw()			  { x -= other.x; y -= other.y; return *this; }
 
+	const Point operator* (const ValueType multiplier) const throw()	{ return Point (x * multiplier, y * multiplier); }
+
+	Point& operator*= (const ValueType multiplier) throw()		  { x *= multiplier; y *= multiplier; return *this; }
+
+	const Point operator/ (const ValueType divisor) const throw()	   { return Point (x / divisor, y / divisor); }
+
+	Point& operator/= (const ValueType divisor) throw()		 { x /= divisor; y /= divisor; return *this; }
+
 	const Point operator-() const throw()				   { return Point (-x, -y); }
 
+	ValueType getDistanceFromOrigin() const throw()			 { return (ValueType) juce_hypot (x, y); }
+
 	ValueType getDistanceFrom (const Point& other) const throw()	{ return (ValueType) juce_hypot (x - other.x, y - other.y); }
+
+	ValueType getAngleToPoint (const Point& other) const throw()	{ return (ValueType) atan2 (other.x - x, other.y - y); }
 
 	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
 
@@ -9979,6 +9993,225 @@ public:
 /*** Start of inlined file: juce_Path.h ***/
 #ifndef __JUCE_PATH_JUCEHEADER__
 #define __JUCE_PATH_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_Line.h ***/
+#ifndef __JUCE_LINE_JUCEHEADER__
+#define __JUCE_LINE_JUCEHEADER__
+
+template <typename ValueType>
+class Line
+{
+public:
+
+	Line() throw()  {}
+
+	Line (const Line& other) throw()
+		: start (other.start),
+		  end (other.end)
+	{
+	}
+
+	Line (ValueType startX, ValueType startY, ValueType endX, ValueType endY) throw()
+		: start (startX, startY),
+		  end (endX, endY)
+	{
+	}
+
+	Line (const Point<ValueType>& startPoint,
+		  const Point<ValueType>& endPoint) throw()
+		: start (startPoint),
+		  end (endPoint)
+	{
+	}
+
+	Line& operator= (const Line& other) throw()
+	{
+		start = other.start;
+		end = other.end;
+		return *this;
+	}
+
+	~Line() throw() {}
+
+	inline ValueType getStartX() const throw()				  { return start.getX(); }
+
+	inline ValueType getStartY() const throw()				  { return start.getY(); }
+
+	inline ValueType getEndX() const throw()				{ return end.getX(); }
+
+	inline ValueType getEndY() const throw()				{ return end.getY(); }
+
+	inline const Point<ValueType>& getStart() const throw()		 { return start; }
+
+	inline const Point<ValueType>& getEnd() const throw()		   { return end; }
+
+	void setStart (ValueType newStartX, ValueType newStartY) throw()	{ start.setXY (newStartX, newStartY); }
+
+	void setEnd (ValueType newEndX, ValueType newEndY) throw()		  { end.setXY (newEndX, newEndY); }
+
+	void setStart (const Point<ValueType>& newStart) throw()		{ start = newStart; }
+
+	void setEnd (const Point<ValueType>& newEnd) throw()			{ end = newEnd; }
+
+	void applyTransform (const AffineTransform& transform) throw()
+	{
+		start.applyTransform (transform);
+		end.applyTransform (transform);
+	}
+
+	ValueType getLength() const throw()					 { return start.getDistanceFrom (end); }
+
+	bool isVertical() const throw()					 { return start.getX() == end.getX(); }
+
+	bool isHorizontal() const throw()					   { return start.getY() == end.getY(); }
+
+	ValueType getAngle() const throw()					  { return start.getAngleToPoint (end); }
+
+	bool operator== (const Line& other) const throw()			   { return start == other.start && end == other.end; }
+
+	bool operator!= (const Line& other) const throw()			   { return start != other.start || end != other.end; }
+
+	bool intersects (const Line& line, Point<ValueType>& intersection) const throw()
+	{
+		return findIntersection (start, end, line.start, line.end, intersection);
+	}
+
+	const Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const throw()
+	{
+		return start + (end - start) * (distanceFromStart / getLength());
+	}
+
+	const Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
+											  ValueType perpendicularDistance) const throw()
+	{
+		const Point<ValueType> delta (end - start);
+		const double length = juce_hypot (delta.getX(), delta.getY());
+		if (length == 0)
+			return start;
+
+		return Point<ValueType> (start.getX() + (ValueType) ((delta.getX() * distanceFromStart - delta.getY() * perpendicularDistance) / length),
+								 start.getY() + (ValueType) ((delta.getY() * distanceFromStart + delta.getX() * perpendicularDistance) / length));
+	}
+
+	const Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const throw()
+	{
+		return start + (end - start) * proportionOfLength;
+	}
+
+	ValueType getDistanceFromLine (const Point<ValueType>& point) const throw()
+	{
+		const Point<ValueType> delta (end - start);
+		const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+
+		if (length > 0)
+		{
+			const double prop = ((point.getX() - start.getX()) * delta.getX()
+								  + (point.getY() - start.getY()) * delta.getY()) / length;
+
+			if (prop >= 0 && prop <= 1.0)
+				return point.getDistanceFrom (start + delta * (ValueType) prop);
+		}
+
+		return jmin (point.getDistanceFrom (start),
+					 point.getDistanceFrom (end));
+	}
+
+	ValueType findNearestPointTo (const Point<ValueType>& point) const throw()
+	{
+		const Point<ValueType> delta (end - start);
+		const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+
+		return length <= 0 ? 0
+						   : jlimit ((ValueType) 0, (ValueType) 1,
+									 (ValueType) (((point.getX() - start.getX()) * delta.getX()
+													+ (point.getY() - start.getY()) * delta.getY()) / length));
+	}
+
+	bool isPointAbove (const Point<ValueType>& point) const throw()
+	{
+		return start.getX() != end.getX()
+				&& point.getY() < ((end.getY() - start.getY())
+									* (point.getX() - start.getX())) / (end.getX() - start.getX()) + start.getY();
+	}
+
+	const Line withShortenedStart (ValueType distanceToShortenBy) const throw()
+	{
+		return Line (getPointAlongLine (jmin (distanceToShortenBy, getLength())), end);
+	}
+
+	const Line withShortenedEnd (ValueType distanceToShortenBy) const throw()
+	{
+		const ValueType length = getLength();
+		return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));
+	}
+
+	juce_UseDebuggingNewOperator
+
+private:
+	Point<ValueType> start, end;
+
+	static bool findIntersection (const Point<ValueType>& p1, const Point<ValueType>& p2,
+								  const Point<ValueType>& p3, const Point<ValueType>& p4,
+								  Point<ValueType>& intersection) throw()
+	{
+		if (p2 == p3)
+		{
+			intersection = p2;
+			return true;
+		}
+
+		const Point<ValueType> d1 (p2 - p1);
+		const Point<ValueType> d2 (p4 - p2);
+		const ValueType divisor = d1.getX() * d2.getY() - d2.getX() * d1.getY();
+
+		if (divisor == 0)
+		{
+			if (! (d1.isOrigin() || d2.isOrigin()))
+			{
+				if (d1.getY() == 0 && d2.getY() != 0)
+				{
+					const ValueType along = (p1.getY() - p3.getY()) / d2.getY();
+					intersection = p1.withX (p3.getX() + along * d2.getX());
+					return along >= 0 && along <= (ValueType) 1;
+				}
+				else if (d2.getY() == 0 && d1.getY() != 0)
+				{
+					const ValueType along = (p3.getY() - p1.getY()) / d1.getY();
+					intersection = p3.withX (p1.getX() + along * d1.getX());
+					return along >= 0 && along <= (ValueType) 1;
+				}
+				else if (d1.getX() == 0 && d2.getX() != 0)
+				{
+					const ValueType along = (p1.getX() - p3.getX()) / d2.getX();
+					intersection = p1.withY (p3.getY() + along * d2.getY());
+					return along >= 0 && along <= (ValueType) 1;
+				}
+				else if (d2.getX() == 0 && d1.getX() != 0)
+				{
+					const ValueType along = (p3.getX() - p1.getX()) / d1.getX();
+					intersection = p3.withY (p1.getY() + along * d1.getY());
+					return along >= 0 && along <= (ValueType) 1;
+				}
+			}
+
+			intersection = (p2 + p3) / (ValueType) 2;
+			return false;
+		}
+
+		const ValueType along1 = ((p1.getY() - p3.getY()) * d2.getX() - (p1.getX() - p3.getX()) * d2.getY()) / divisor;
+		intersection = p1 + d1 * along1;
+
+		if (along1 < 0 || along1 > (ValueType) 1)
+			return false;
+
+		const ValueType along2 = ((p1.getY() - p3.getY()) * d1.getX() - (p1.getX() - p3.getX()) * d1.getY()) / divisor;
+		return along2 >= 0 && along2 <= (ValueType) 1;
+	}
+};
+
+#endif   // __JUCE_LINE_JUCEHEADER__
+/*** End of inlined file: juce_Line.h ***/
 
 
 /*** Start of inlined file: juce_Rectangle.h ***/
@@ -10602,9 +10835,13 @@ public:
 	bool contains (float x, float y,
 				   float tolerence = 10.0f) const;
 
-	bool intersectsLine (float x1, float y1,
-						 float x2, float y2,
+	bool contains (const Point<float>& point,
+				   float tolerence = 10.0f) const;
+
+	bool intersectsLine (const Line<float>& line,
 						 float tolerence = 10.0f);
+
+	const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
 	void clear() throw();
 
@@ -11068,99 +11305,6 @@ private:
 
 #endif   // __JUCE_PATHSTROKETYPE_JUCEHEADER__
 /*** End of inlined file: juce_PathStrokeType.h ***/
-
-
-/*** Start of inlined file: juce_Line.h ***/
-#ifndef __JUCE_LINE_JUCEHEADER__
-#define __JUCE_LINE_JUCEHEADER__
-
-class JUCE_API  Line
-{
-public:
-
-	Line() throw();
-
-	Line (const Line& other) throw();
-
-	Line (float startX,
-		  float startY,
-		  float endX,
-		  float endY) throw();
-
-	Line (const Point<float>& start,
-		  const Point<float>& end) throw();
-
-	Line& operator= (const Line& other) throw();
-
-	~Line() throw();
-
-	inline float getStartX() const throw()				  { return startX; }
-
-	inline float getStartY() const throw()				  { return startY; }
-
-	inline float getEndX() const throw()				{ return endX; }
-
-	inline float getEndY() const throw()				{ return endY; }
-
-	const Point<float> getStart() const throw();
-
-	const Point<float> getEnd() const throw();
-
-	void setStart (float newStartX,
-				   float newStartY) throw();
-
-	void setEnd (float newEndX,
-				 float newEndY) throw();
-
-	void setStart (const Point<float>& newStart) throw();
-
-	void setEnd (const Point<float>& newEnd) throw();
-
-	void applyTransform (const AffineTransform& transform) throw();
-
-	float getLength() const throw();
-
-	bool isVertical() const throw();
-
-	bool isHorizontal() const throw();
-
-	float getAngle() const throw();
-
-	bool operator== (const Line& other) const throw();
-
-	bool operator!= (const Line& other) const throw();
-
-	bool intersects (const Line& line,
-					 float& intersectionX,
-					 float& intersectionY) const throw();
-
-	const Point<float> getPointAlongLine (float distanceFromStart) const throw();
-
-	const Point<float> getPointAlongLine (float distanceFromStart,
-										  float perpendicularDistance) const throw();
-
-	const Point<float> getPointAlongLineProportionally (float proportionOfLength) const throw();
-
-	float getDistanceFromLine (float x, float y) const throw();
-
-	float findNearestPointTo (float x, float y) const throw();
-
-	bool isPointAbove (float x, float y) const throw();
-
-	const Line withShortenedStart (float distanceToShortenBy) const throw();
-
-	const Line withShortenedEnd (float distanceToShortenBy) const throw();
-
-	bool clipToPath (const Path& path, bool keepSectionOutsidePath) throw();
-
-	juce_UseDebuggingNewOperator
-
-private:
-	float startX, startY, endX, endY;
-};
-
-#endif   // __JUCE_LINE_JUCEHEADER__
-/*** End of inlined file: juce_Line.h ***/
 
 
 /*** Start of inlined file: juce_Colours.h ***/
@@ -12097,9 +12241,9 @@ public:
 	void drawLine (float startX, float startY, float endX, float endY,
 				   float lineThickness) const;
 
-	void drawLine (const Line& line) const;
+	void drawLine (const Line<float>& line) const;
 
-	void drawLine (const Line& line, float lineThickness) const;
+	void drawLine (const Line<float>& line, float lineThickness) const;
 
 	void drawDashedLine (float startX, float startY,
 						 float endX, float endY,

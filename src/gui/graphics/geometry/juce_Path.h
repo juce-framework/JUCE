@@ -27,7 +27,7 @@
 #define __JUCE_PATH_JUCEHEADER__
 
 #include "juce_AffineTransform.h"
-#include "juce_Point.h"
+#include "juce_Line.h"
 #include "juce_Rectangle.h"
 #include "../contexts/juce_Justification.h"
 #include "../contexts/juce_EdgeTable.h"
@@ -114,6 +114,22 @@ public:
     bool contains (float x, float y,
                    float tolerence = 10.0f) const;
 
+    /** Checks whether a point lies within the path.
+
+        This is only relevent for closed paths (see closeSubPath()), and
+        may produce false results if used on a path which has open sub-paths.
+
+        The path's winding rule is taken into account by this method.
+
+        The tolerence parameter is passed to the PathFlatteningIterator that
+        is used to trace the path - for more info about it, see the notes for
+        the PathFlatteningIterator constructor.
+
+        @see closeSubPath, setUsingNonZeroWinding
+    */
+    bool contains (const Point<float>& point,
+                   float tolerence = 10.0f) const;
+
     /** Checks whether a line crosses the path.
 
         This will return positive if the line crosses any of the paths constituent
@@ -124,9 +140,21 @@ public:
         is used to trace the path - for more info about it, see the notes for
         the PathFlatteningIterator constructor.
     */
-    bool intersectsLine (float x1, float y1,
-                         float x2, float y2,
+    bool intersectsLine (const Line<float>& line,
                          float tolerence = 10.0f);
+
+    /** Cuts off parts of a line to keep the parts that are either inside or
+        outside this path.
+
+        Note that this isn't smart enough to cope with situations where the
+        line would need to be cut into multiple pieces to correctly clip against
+        a re-entrant shape.
+
+        @param keepSectionOutsidePath   if true, it's the section outside the path
+                                        that will be kept; if false its the section inside
+                                        the path
+    */
+    const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */

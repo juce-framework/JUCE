@@ -359,13 +359,13 @@ public:
 
         The line is 1 pixel wide and drawn with the current colour or brush.
     */
-    void drawLine (const Line& line) const;
+    void drawLine (const Line<float>& line) const;
 
     /** Draws a line between two points with a given thickness.
 
         @see Path::addLineSegment
     */
-    void drawLine (const Line& line, float lineThickness) const;
+    void drawLine (const Line<float>& line, float lineThickness) const;
 
     /** Draws a dashed line using a custom set of dash-lengths.
 

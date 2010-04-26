@@ -26,122 +26,138 @@
 #ifndef __JUCE_LINE_JUCEHEADER__
 #define __JUCE_LINE_JUCEHEADER__
 
-#include "juce_Path.h"
 #include "juce_Point.h"
 
 
 //==============================================================================
 /**
-    Represents a line, using 32-bit float co-ordinates.
+    Represents a line.
 
     This class contains a bunch of useful methods for various geometric
     tasks.
 
     @see Point, Rectangle, Path, Graphics::drawLine
 */
-class JUCE_API  Line
+template <typename ValueType>
+class Line
 {
 public:
     //==============================================================================
     /** Creates a line, using (0, 0) as its start and end points. */
-    Line() throw();
+    Line() throw()  {}
 
     /** Creates a copy of another line. */
-    Line (const Line& other) throw();
+    Line (const Line& other) throw()
+        : start (other.start),
+          end (other.end)
+    {
+    }
 
     /** Creates a line based on the co-ordinates of its start and end points. */
-    Line (float startX,
-          float startY,
-          float endX,
-          float endY) throw();
+    Line (ValueType startX, ValueType startY, ValueType endX, ValueType endY) throw()
+        : start (startX, startY),
+          end (endX, endY)
+    {
+    }
 
     /** Creates a line from its start and end points. */
-    Line (const Point<float>& start,
-          const Point<float>& end) throw();
+    Line (const Point<ValueType>& startPoint,
+          const Point<ValueType>& endPoint) throw()
+        : start (startPoint),
+          end (endPoint)
+    {
+    }
 
     /** Copies a line from another one. */
-    Line& operator= (const Line& other) throw();
+    Line& operator= (const Line& other) throw()
+    {
+        start = other.start;
+        end = other.end;
+        return *this;
+    }
 
     /** Destructor. */
-    ~Line() throw();
+    ~Line() throw() {}
 
     //==============================================================================
     /** Returns the x co-ordinate of the line's start point. */
-    inline float getStartX() const throw()                              { return startX; }
+    inline ValueType getStartX() const throw()                              { return start.getX(); }
 
     /** Returns the y co-ordinate of the line's start point. */
-    inline float getStartY() const throw()                              { return startY; }
+    inline ValueType getStartY() const throw()                              { return start.getY(); }
 
     /** Returns the x co-ordinate of the line's end point. */
-    inline float getEndX() const throw()                                { return endX; }
+    inline ValueType getEndX() const throw()                                { return end.getX(); }
 
     /** Returns the y co-ordinate of the line's end point. */
-    inline float getEndY() const throw()                                { return endY; }
+    inline ValueType getEndY() const throw()                                { return end.getY(); }
 
     /** Returns the line's start point. */
-    const Point<float> getStart() const throw();
+    inline const Point<ValueType>& getStart() const throw()                 { return start; }
 
     /** Returns the line's end point. */
-    const Point<float> getEnd() const throw();
+    inline const Point<ValueType>& getEnd() const throw()                   { return end; }
 
     /** Changes this line's start point */
-    void setStart (float newStartX,
-                   float newStartY) throw();
+    void setStart (ValueType newStartX, ValueType newStartY) throw()        { start.setXY (newStartX, newStartY); }
 
     /** Changes this line's end point */
-    void setEnd (float newEndX,
-                 float newEndY) throw();
+    void setEnd (ValueType newEndX, ValueType newEndY) throw()              { end.setXY (newEndX, newEndY); }
 
     /** Changes this line's start point */
-    void setStart (const Point<float>& newStart) throw();
+    void setStart (const Point<ValueType>& newStart) throw()                { start = newStart; }
 
     /** Changes this line's end point */
-    void setEnd (const Point<float>& newEnd) throw();
+    void setEnd (const Point<ValueType>& newEnd) throw()                    { end = newEnd; }
 
     /** Applies an affine transform to the line's start and end points. */
-    void applyTransform (const AffineTransform& transform) throw();
+    void applyTransform (const AffineTransform& transform) throw()
+    {
+        start.applyTransform (transform);
+        end.applyTransform (transform);
+    }
 
     //==============================================================================
     /** Returns the length of the line. */
-    float getLength() const throw();
+    ValueType getLength() const throw()                                     { return start.getDistanceFrom (end); }
 
     /** Returns true if the line's start and end x co-ordinates are the same. */
-    bool isVertical() const throw();
+    bool isVertical() const throw()                                         { return start.getX() == end.getX(); }
 
     /** Returns true if the line's start and end y co-ordinates are the same. */
-    bool isHorizontal() const throw();
+    bool isHorizontal() const throw()                                       { return start.getY() == end.getY(); }
 
     /** Returns the line's angle.
 
         This value is the number of radians clockwise from the 3 o'clock direction,
         where the line's start point is considered to be at the centre.
     */
-    float getAngle() const throw();
+    ValueType getAngle() const throw()                                      { return start.getAngleToPoint (end); }
 
     //==============================================================================
     /** Compares two lines. */
-    bool operator== (const Line& other) const throw();
+    bool operator== (const Line& other) const throw()                       { return start == other.start && end == other.end; }
 
     /** Compares two lines. */
-    bool operator!= (const Line& other) const throw();
+    bool operator!= (const Line& other) const throw()                       { return start != other.start || end != other.end; }
 
     //==============================================================================
     /** Finds the intersection between two lines.
 
         @param line             the other line
-        @param intersectionX    the x co-ordinate of the point where the lines meet (or
+        @param intersection     the position of the point where the lines meet (or
                                 where they would meet if they were infinitely long)
                                 the intersection (if the lines intersect). If the lines
                                 are parallel, this will just be set to the position
                                 of one of the line's endpoints.
-        @param intersectionY    the y co-ordinate of the point where the lines meet
         @returns    true if the line segments intersect; false if they dont. Even if they
                     don't intersect, the intersection co-ordinates returned will still
                     be valid
     */
-    bool intersects (const Line& line,
-                     float& intersectionX,
-                     float& intersectionY) const throw();
+    bool intersects (const Line& line, Point<ValueType>& intersection) const throw()
+    {
+        return findIntersection (start, end, line.start, line.end, intersection);
+    }
 
     //==============================================================================
     /** Returns the location of the point which is a given distance along this line.
@@ -151,7 +167,10 @@ public:
                                     than the line itself
         @see getPointAlongLineProportionally
     */
-    const Point<float> getPointAlongLine (float distanceFromStart) const throw();
+    const Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const throw()
+    {
+        return start + (end - start) * (distanceFromStart / getLength());
+    }
 
     /** Returns a point which is a certain distance along and to the side of this line.
 
@@ -166,8 +185,17 @@ public:
                                     end, then a positive value here will move to the
                                     right, negative value move to the left.
     */
-    const Point<float> getPointAlongLine (float distanceFromStart,
-                                          float perpendicularDistance) const throw();
+    const Point<ValueType> getPointAlongLine (ValueType distanceFromStart,
+                                              ValueType perpendicularDistance) const throw()
+    {
+        const Point<ValueType> delta (end - start);
+        const double length = juce_hypot (delta.getX(), delta.getY());
+        if (length == 0)
+            return start;
+
+        return Point<ValueType> (start.getX() + (ValueType) ((delta.getX() * distanceFromStart - delta.getY() * perpendicularDistance) / length),
+                                 start.getY() + (ValueType) ((delta.getY() * distanceFromStart + delta.getX() * perpendicularDistance) / length));
+    }
 
     /** Returns the location of the point which is a given distance along this line
         proportional to the line's length.
@@ -179,7 +207,10 @@ public:
                                     can be negative or greater than 1.0).
         @see getPointAlongLine
     */
-    const Point<float> getPointAlongLineProportionally (float proportionOfLength) const throw();
+    const Point<ValueType> getPointAlongLineProportionally (ValueType proportionOfLength) const throw()
+    {
+        return start + (end - start) * proportionOfLength;
+    }
 
     /** Returns the smallest distance between this line segment and a given point.
 
@@ -187,12 +218,26 @@ public:
         distance from the line; if the point is a long way beyond one of the line's
         end-point's, it'll return the straight-line distance to the nearest end-point.
 
-        @param x    x position of the point to test
-        @param y    y position of the point to test
         @returns the point's distance from the line
         @see getPositionAlongLineOfNearestPoint
     */
-    float getDistanceFromLine (float x, float y) const throw();
+    ValueType getDistanceFromLine (const Point<ValueType>& point) const throw()
+    {
+        const Point<ValueType> delta (end - start);
+        const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+
+        if (length > 0)
+        {
+            const double prop = ((point.getX() - start.getX()) * delta.getX()
+                                  + (point.getY() - start.getY()) * delta.getY()) / length;
+
+            if (prop >= 0 && prop <= 1.0)
+                return point.getDistanceFrom (start + delta * (ValueType) prop);
+        }
+
+        return jmin (point.getDistanceFrom (start),
+                     point.getDistanceFrom (end));
+    }
 
     /** Finds the point on this line which is nearest to a given point, and
         returns its position as a proportional position along the line.
@@ -204,7 +249,16 @@ public:
                     turn this number into a position, use getPointAlongLineProportionally().
         @see getDistanceFromLine, getPointAlongLineProportionally
     */
-    float findNearestPointTo (float x, float y) const throw();
+    ValueType findNearestPointTo (const Point<ValueType>& point) const throw()
+    {
+        const Point<ValueType> delta (end - start);
+        const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
+
+        return length <= 0 ? 0
+                           : jlimit ((ValueType) 0, (ValueType) 1,
+                                     (ValueType) (((point.getX() - start.getX()) * delta.getX()
+                                                    + (point.getY() - start.getY()) * delta.getY()) / length));
+    }
 
     /** Returns true if the given point lies above this line.
 
@@ -212,7 +266,12 @@ public:
         coordinate of this line at the given x (assuming the line extends infinitely
         in both directions).
     */
-    bool isPointAbove (float x, float y) const throw();
+    bool isPointAbove (const Point<ValueType>& point) const throw()
+    {
+        return start.getX() != end.getX()
+                && point.getY() < ((end.getY() - start.getY())
+                                    * (point.getX() - start.getX())) / (end.getX() - start.getX()) + start.getY();
+    }
 
     //==============================================================================
     /** Returns a shortened copy of this line.
@@ -220,36 +279,86 @@ public:
         This will chop off part of the start of this line by a certain amount, (leaving the
         end-point the same), and return the new line.
     */
-    const Line withShortenedStart (float distanceToShortenBy) const throw();
+    const Line withShortenedStart (ValueType distanceToShortenBy) const throw()
+    {
+        return Line (getPointAlongLine (jmin (distanceToShortenBy, getLength())), end);
+    }
 
     /** Returns a shortened copy of this line.
 
         This will chop off part of the end of this line by a certain amount, (leaving the
         start-point the same), and return the new line.
     */
-    const Line withShortenedEnd (float distanceToShortenBy) const throw();
-
-    /** Cuts off parts of this line to keep the parts that are either inside or
-        outside a path.
-
-        Note that this isn't smart enough to cope with situations where the
-        line would need to be cut into multiple pieces to correctly clip against
-        a re-entrant shape.
-
-        @param path                     the path to clip against
-        @param keepSectionOutsidePath   if true, it's the section outside the path
-                                        that will be kept; if false its the section inside
-                                        the path
-        @returns true if the line was changed.
-    */
-    bool clipToPath (const Path& path, bool keepSectionOutsidePath) throw();
+    const Line withShortenedEnd (ValueType distanceToShortenBy) const throw()
+    {
+        const ValueType length = getLength();
+        return Line (start, getPointAlongLine (length - jmin (distanceToShortenBy, length)));
+    }
 
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    float startX, startY, endX, endY;
+    Point<ValueType> start, end;
+
+    static bool findIntersection (const Point<ValueType>& p1, const Point<ValueType>& p2,
+                                  const Point<ValueType>& p3, const Point<ValueType>& p4,
+                                  Point<ValueType>& intersection) throw()
+    {
+        if (p2 == p3)
+        {
+            intersection = p2;
+            return true;
+        }
+
+        const Point<ValueType> d1 (p2 - p1);
+        const Point<ValueType> d2 (p4 - p2);
+        const ValueType divisor = d1.getX() * d2.getY() - d2.getX() * d1.getY();
+
+        if (divisor == 0)
+        {
+            if (! (d1.isOrigin() || d2.isOrigin()))
+            {
+                if (d1.getY() == 0 && d2.getY() != 0)
+                {
+                    const ValueType along = (p1.getY() - p3.getY()) / d2.getY();
+                    intersection = p1.withX (p3.getX() + along * d2.getX());
+                    return along >= 0 && along <= (ValueType) 1;
+                }
+                else if (d2.getY() == 0 && d1.getY() != 0)
+                {
+                    const ValueType along = (p3.getY() - p1.getY()) / d1.getY();
+                    intersection = p3.withX (p1.getX() + along * d1.getX());
+                    return along >= 0 && along <= (ValueType) 1;
+                }
+                else if (d1.getX() == 0 && d2.getX() != 0)
+                {
+                    const ValueType along = (p1.getX() - p3.getX()) / d2.getX();
+                    intersection = p1.withY (p3.getY() + along * d2.getY());
+                    return along >= 0 && along <= (ValueType) 1;
+                }
+                else if (d2.getX() == 0 && d1.getX() != 0)
+                {
+                    const ValueType along = (p3.getX() - p1.getX()) / d1.getX();
+                    intersection = p3.withY (p1.getY() + along * d1.getY());
+                    return along >= 0 && along <= (ValueType) 1;
+                }
+            }
+
+            intersection = (p2 + p3) / (ValueType) 2;
+            return false;
+        }
+
+        const ValueType along1 = ((p1.getY() - p3.getY()) * d2.getX() - (p1.getX() - p3.getX()) * d2.getY()) / divisor;
+        intersection = p1 + d1 * along1;
+
+        if (along1 < 0 || along1 > (ValueType) 1)
+            return false;
+
+        const ValueType along2 = ((p1.getY() - p3.getY()) * d1.getX() - (p1.getX() - p3.getX()) * d1.getY()) / divisor;
+        return along2 >= 0 && along2 <= (ValueType) 1;
+    }
 };
 
 

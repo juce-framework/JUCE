@@ -1040,8 +1040,7 @@ bool Path::contains (const float x, const float y, const float tolerence) const
 
     while (i.next())
     {
-        if ((i.y1 <= y && i.y2 > y)
-             || (i.y2 <= y && i.y1 > y))
+        if ((i.y1 <= y && i.y2 > y) || (i.y2 <= y && i.y1 > y))
         {
             const float intersectX = i.x1 + (i.x2 - i.x1) * (y - i.y1) / (i.y2 - i.y1);
 
@@ -1055,28 +1054,56 @@ bool Path::contains (const float x, const float y, const float tolerence) const
         }
     }
 
-    return (useNonZeroWinding) ? (negativeCrossings != positiveCrossings)
-                               : ((negativeCrossings + positiveCrossings) & 1) != 0;
+    return useNonZeroWinding ? (negativeCrossings != positiveCrossings)
+                             : ((negativeCrossings + positiveCrossings) & 1) != 0;
 }
 
-bool Path::intersectsLine (const float x1, const float y1,
-                           const float x2, const float y2,
-                           const float tolerence)
+bool Path::contains (const Point<float>& point, const float tolerence) const
+{
+    return contains (point.getX(), point.getY(), tolerence);
+}
+
+bool Path::intersectsLine (const Line<float>& line, const float tolerence)
 {
     PathFlatteningIterator i (*this, AffineTransform::identity, tolerence);
-
-    const Line line1 (x1, y1, x2, y2);
+    Point<float> intersection;
 
     while (i.next())
-    {
-        const Line line2 (i.x1, i.y1, i.x2, i.y2);
-
-        float ix, iy;
-        if (line1.intersects (line2, ix, iy))
+        if (line.intersects (Line<float> (i.x1, i.y1, i.x2, i.y2), intersection))
             return true;
-    }
 
     return false;
+}
+
+const Line<float> Path::getClippedLine (const Line<float>& line, const bool keepSectionOutsidePath) const
+{
+    Line<float> result (line);
+    const bool startInside = contains (line.getStart());
+    const bool endInside = contains (line.getEnd());
+
+    if (startInside == endInside)
+    {
+        if (keepSectionOutsidePath == startInside)
+            result = Line<float>();
+    }
+    else
+    {
+        PathFlatteningIterator i (*this, AffineTransform::identity);
+        Point<float> intersection;
+
+        while (i.next())
+        {
+            if (line.intersects (Line<float> (i.x1, i.y1, i.x2, i.y2), intersection))
+            {
+                if ((startInside && keepSectionOutsidePath) || (endInside && ! keepSectionOutsidePath))
+                    result.setStart (intersection);
+                else
+                    result.setEnd (intersection);
+            }
+        }
+    }
+
+    return result;
 }
 
 //==============================================================================

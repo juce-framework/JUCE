@@ -544,12 +544,12 @@ void Graphics::drawLine (const float startX, const float startY,
     fillPath (p);
 }
 
-void Graphics::drawLine (const Line& line) const
+void Graphics::drawLine (const Line<float>& line) const
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
 }
 
-void Graphics::drawLine (const Line& line, const float lineThickness) const
+void Graphics::drawLine (const Line<float>& line, const float lineThickness) const
 {
     drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), lineThickness);
 }

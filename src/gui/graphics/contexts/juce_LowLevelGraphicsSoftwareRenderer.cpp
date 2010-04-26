@@ -177,48 +177,40 @@ public:
         : lookupTable (lookupTable_), numEntries (numEntries_)
     {
         jassert (numEntries_ >= 0);
-        float x1 = gradient.x1;
-        float y1 = gradient.y1;
-        float x2 = gradient.x2;
-        float y2 = gradient.y2;
+        Point<float> p1 (gradient.x1, gradient.y1);
+        Point<float> p2 (gradient.x2, gradient.y2);
 
         if (! transform.isIdentity())
         {
-            const Line l (x2, y2, x1, y1);
-            const Point<float> p3 = l.getPointAlongLine (0.0f, 100.0f);
-            float x3 = p3.getX();
-            float y3 = p3.getY();
+            const Line<float> l (p2, p1);
+            Point<float> p3 = l.getPointAlongLine (0.0f, 100.0f);
 
-            transform.transformPoint (x1, y1);
-            transform.transformPoint (x2, y2);
-            transform.transformPoint (x3, y3);
+            p1.applyTransform (transform);
+            p2.applyTransform (transform);
+            p3.applyTransform (transform);
 
-            const Line l2 (x2, y2, x3, y3);
-            const float prop = l2.findNearestPointTo (x1, y1);
-            const Point<float> newP2 (l2.getPointAlongLineProportionally (prop));
-
-            x2 = newP2.getX();
-            y2 = newP2.getY();
+            const Line<float> l2 (p2, p3);
+            p2 = l2.getPointAlongLineProportionally (l2.findNearestPointTo (p1));
         }
 
-        vertical = fabs (x1 - x2) < 0.001f;
-        horizontal = fabs (y1 - y2) < 0.001f;
+        vertical = fabs (p1.getX() - p2.getX()) < 0.001f;
+        horizontal = fabs (p1.getY() - p2.getY()) < 0.001f;
 
         if (vertical)
         {
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (y2 - y1));
-            start = roundToInt (y1 * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.getY() - p1.getY()));
+            start = roundToInt (p1.getY() * scale);
         }
         else if (horizontal)
         {
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (x2 - x1));
-            start = roundToInt (x1 * scale);
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.getX() - p1.getX()));
+            start = roundToInt (p1.getX() * scale);
         }
         else
         {
-            grad = (y2 - y1) / (double) (x1 - x2);
-            yTerm = y1 - x1 / grad;
-            scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (y2 * grad - x2)));
+            grad = (p2.getY() - p1.getY()) / (double) (p1.getX() - p2.getX());
+            yTerm = p1.getY() - p1.getX() / grad;
+            scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (p2.getY() * grad - p2.getX())));
             grad *= scale;
         }
     }
