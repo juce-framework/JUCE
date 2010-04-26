@@ -108,6 +108,12 @@ public:
     */
     const String& operator[] (int index) const throw();
 
+    /** Returns a reference to one of the strings in the array.
+        This lets you modify a string in-place in the array, but you must be sure that
+        the index is in-range.
+    */
+    String& getReference (int index) throw();
+
     /** Searches for a string in the array.
 
         The comparison will be case-insensitive if the ignoreCase parameter is true.

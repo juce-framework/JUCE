@@ -128,7 +128,7 @@ public:
     {
         if (isEnabled() && owner.getModel() != 0 && ! (e.mouseWasClicked() || isDragging))
         {
-            const SparseSet <int> selectedRows (owner.getSelectedRows());
+            const SparseSet<int> selectedRows (owner.getSelectedRows());
 
             if (selectedRows.size() > 0)
             {
@@ -426,7 +426,7 @@ void ListBox::updateContent()
 
     if (selected [selected.size() - 1] >= totalItems)
     {
-        selected.removeRange (totalItems, std::numeric_limits<int>::max() - totalItems);
+        selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
         lastRowSelected = getSelectedRow (0);
         selectionChanged = true;
     }
@@ -462,7 +462,7 @@ void ListBox::selectRowInternal (const int row,
             if (deselectOthersFirst)
                 selected.clear();
 
-            selected.addRange (row, 1);
+            selected.addRange (Range<int> (row, row + 1));
 
             if (getHeight() == 0 || getWidth() == 0)
                 dontScroll = true;
@@ -511,7 +511,7 @@ void ListBox::deselectRow (const int row)
 {
     if (selected.contains (row))
     {
-        selected.removeRange (row, 1);
+        selected.removeRange (Range <int> (row, row + 1));
 
         if (row == lastRowSelected)
             lastRowSelected = getSelectedRow (0);
@@ -525,7 +525,7 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const bool sendNotificationEventToModel)
 {
     selected = setOfRowsToBeSelected;
-    selected.removeRange (totalItems, std::numeric_limits<int>::max() - totalItems);
+    selected.removeRange (Range <int> (totalItems, std::numeric_limits<int>::max()));
 
     if (! isRowSelected (lastRowSelected))
         lastRowSelected = getSelectedRow (0);
@@ -549,10 +549,10 @@ void ListBox::selectRangeOfRows (int firstRow, int lastRow)
         firstRow = jlimit (0, jmax (0, numRows), firstRow);
         lastRow = jlimit (0, jmax (0, numRows), lastRow);
 
-        selected.addRange (jmin (firstRow, lastRow),
-                           abs (firstRow - lastRow) + 1);
+        selected.addRange (Range <int> (jmin (firstRow, lastRow),
+                                        jmax (firstRow, lastRow) + 1));
 
-        selected.removeRange (lastRow, 1);
+        selected.removeRange (Range <int> (lastRow, lastRow + 1));
     }
 
     selectRowInternal (lastRow, false, false, true);

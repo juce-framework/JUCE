@@ -372,7 +372,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
     if (hasAlphaChannel())
     {
         const uint8 threshold = (uint8) jlimit (0, 255, roundToInt (alphaThreshold * 255.0f));
-        SparseSet <int> pixelsOnRow;
+        SparseSet<int> pixelsOnRow;
 
         const BitmapData srcData (*this, 0, 0, getWidth(), getHeight());
 
@@ -386,7 +386,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     if (((const PixelARGB*) lineData)->getAlpha() >= threshold)
-                        pixelsOnRow.addRange (x, 1);
+                        pixelsOnRow.addRange (Range<int> (x, x + 1));
 
                     lineData += srcData.pixelStride;
                 }
@@ -396,7 +396,7 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
                 for (int x = 0; x < imageWidth; ++x)
                 {
                     if (*lineData >= threshold)
-                        pixelsOnRow.addRange (x, 1);
+                        pixelsOnRow.addRange (Range<int> (x, x + 1));
 
                     lineData += srcData.pixelStride;
                 }
@@ -404,10 +404,8 @@ void Image::createSolidAreaMask (RectangleList& result, const float alphaThresho
 
             for (int i = 0; i < pixelsOnRow.getNumRanges(); ++i)
             {
-                int x, w;
-
-                if (pixelsOnRow.getRange (i, x, w))
-                    result.add (Rectangle<int> (x, y, w, 1));
+                const Range<int> range (pixelsOnRow.getRange (i));
+                result.add (Rectangle<int> (range.getStart(), y, range.getLength(), 1));
             }
 
             result.consolidate();

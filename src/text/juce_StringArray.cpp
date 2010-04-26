@@ -116,6 +116,12 @@ const String& StringArray::operator[] (const int index) const throw()
     return String::empty;
 }
 
+String& StringArray::getReference (const int index) throw()
+{
+    jassert (((unsigned int) index) < (unsigned int) strings.size());
+    return strings.getReference (index);
+}
+
 void StringArray::add (const String& newString)
 {
     strings.add (newString);

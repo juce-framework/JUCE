@@ -49,7 +49,7 @@ public:
         activeImage (0),
         loadingImage (0)
     {
-        HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph, CLSCTX_INPROC);
+        HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
         if (FAILED (hr))
             return;
 
@@ -80,7 +80,7 @@ public:
         if (FAILED (hr))
             return;
 
-        hr = smartTee.CoCreateInstance (CLSID_SmartTee, CLSCTX_INPROC_SERVER);
+        hr = smartTee.CoCreateInstance (CLSID_SmartTee);
         if (FAILED (hr))
             return;
 
@@ -92,7 +92,7 @@ public:
             return;
 
         ComSmartPtr <IBaseFilter> sampleGrabberBase;
-        hr = sampleGrabberBase.CoCreateInstance (CLSID_SampleGrabber, CLSCTX_INPROC_SERVER);
+        hr = sampleGrabberBase.CoCreateInstance (CLSID_SampleGrabber);
         if (FAILED (hr))
             return;
 
@@ -131,7 +131,7 @@ public:
         height = pVih->bmiHeader.biHeight;
 
         ComSmartPtr <IBaseFilter> nullFilter;
-        hr = nullFilter.CoCreateInstance (CLSID_NullRenderer, CLSCTX_INPROC_SERVER);
+        hr = nullFilter.CoCreateInstance (CLSID_NullRenderer);
         hr = graphBuilder->AddFilter (nullFilter, _T("Null Renderer"));
 
         if (connectFilters (sampleGrabberBase, nullFilter)
@@ -259,7 +259,7 @@ public:
         firstRecordedTime = Time();
         recordNextFrameTime = true;
 
-        HRESULT hr = asfWriter.CoCreateInstance (CLSID_WMAsfWriter, CLSCTX_INPROC_SERVER);
+        HRESULT hr = asfWriter.CoCreateInstance (CLSID_WMAsfWriter);
 
         if (SUCCEEDED (hr))
         {
@@ -737,7 +737,7 @@ static ComSmartPtr <IBaseFilter> enumerateCameras (StringArray* const names,
     ComSmartPtr <IBaseFilter> result;
 
     ComSmartPtr <ICreateDevEnum> pDevEnum;
-    HRESULT hr = pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum, CLSCTX_INPROC);
+    HRESULT hr = pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum);
 
     if (SUCCEEDED (hr))
     {
@@ -808,7 +808,7 @@ CameraDevice* CameraDevice::openDevice (int index,
                                         int maxWidth, int maxHeight)
 {
     ComSmartPtr <ICaptureGraphBuilder2> captureGraphBuilder;
-    HRESULT hr = captureGraphBuilder.CoCreateInstance (CLSID_CaptureGraphBuilder2, CLSCTX_INPROC);
+    HRESULT hr = captureGraphBuilder.CoCreateInstance (CLSID_CaptureGraphBuilder2);
 
     if (SUCCEEDED (hr))
     {

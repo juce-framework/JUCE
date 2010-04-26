@@ -502,7 +502,7 @@ const File File::getLinkedTarget() const
         return result;
 
     ComSmartPtr <IShellLink> shellLink;
-    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink, CLSCTX_INPROC_SERVER)))
+    if (SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink)))
     {
         ComSmartPtr <IPersistFile> persistFile;
         if (SUCCEEDED (shellLink->QueryInterface (IID_IPersistFile, (LPVOID*) &persistFile)))

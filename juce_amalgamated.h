@@ -1868,7 +1868,7 @@ private:
 public:
 	static int compareElements (ParameterType first, ParameterType second)
 	{
-		return (first < second) ? -1 : ((first < second) ? 1 : 0);
+		return (first < second) ? -1 : ((second < first) ? 1 : 0);
 	}
 };
 
@@ -3997,6 +3997,8 @@ public:
 
 	const String& operator[] (int index) const throw();
 
+	String& getReference (int index) throw();
+
 	bool contains (const String& stringToLookFor,
 				   bool ignoreCase = false) const;
 
@@ -4886,7 +4888,7 @@ public:
 	void setStart (const ValueType newStart) throw()
 	{
 		start = newStart;
-		if (newStart > end)
+		if (end < newStart)
 			end = newStart;
 	}
 
@@ -4956,7 +4958,7 @@ public:
 
 	bool contains (const ValueType position) const throw()
 	{
-		return position >= start && position < end;
+		return start <= position && position < end;
 	}
 
 	ValueType clipValue (const ValueType value) const throw()
@@ -4966,7 +4968,7 @@ public:
 
 	bool intersects (const Range& other) const throw()
 	{
-		return other.start < end && other.end > start;
+		return other.start < end && start < other.end;
 	}
 
 	const Range getIntersectionWith (const Range& other) const throw()
@@ -4984,7 +4986,7 @@ public:
 	const Range constrainRange (const Range& rangeToConstrain) const throw()
 	{
 		const ValueType otherLen = rangeToConstrain.getLength();
-		return otherLen >= getLength()
+		return getLength() <= otherLen
 				? *this
 				: rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
 	}
@@ -5802,20 +5804,20 @@ class SparseSet
 {
 public:
 
-	SparseSet() throw()
+	SparseSet()
 	{
 	}
 
-	SparseSet (const SparseSet<Type>& other) throw()
+	SparseSet (const SparseSet<Type>& other)
 		: values (other.values)
 	{
 	}
 
-	~SparseSet() throw()
+	~SparseSet()
 	{
 	}
 
-	void clear() throw()
+	void clear()
 	{
 		values.clear();
 	}
@@ -5825,43 +5827,37 @@ public:
 		return values.size() == 0;
 	}
 
-	Type size() const throw()
+	Type size() const
 	{
-		Type num = 0;
+		Type total (0);
 
 		for (int i = 0; i < values.size(); i += 2)
-			num += values[i + 1] - values[i];
+			total += values.getUnchecked (i + 1) - values.getUnchecked (i);
 
-		return num;
+		return total;
 	}
 
-	Type operator[] (int index) const throw()
+	Type operator[] (Type index) const
 	{
 		for (int i = 0; i < values.size(); i += 2)
 		{
-			const Type s = values.getUnchecked(i);
-			const Type e = values.getUnchecked(i + 1);
+			const Type start (values.getUnchecked (i));
+			const Type len (values.getUnchecked (i + 1) - start);
 
-			if (index < e - s)
-				return s + index;
+			if (index < len)
+				return start + index;
 
-			index -= e - s;
+			index -= len;
 		}
 
-		return (Type) 0;
+		return Type (0);
 	}
 
-	bool contains (const Type valueToLookFor) const throw()
+	bool contains (const Type valueToLookFor) const
 	{
-		bool on = false;
-
 		for (int i = 0; i < values.size(); ++i)
-		{
-			if (values.getUnchecked(i) > valueToLookFor)
-				return on;
-
-			on = ! on;
-		}
+			if (valueToLookFor < values.getUnchecked(i))
+				return (i & 1) != 0;
 
 		return false;
 	}
@@ -5871,67 +5867,64 @@ public:
 		return values.size() >> 1;
 	}
 
-	bool getRange (const int rangeIndex,
-				   Type& startValue,
-				   Type& numValues) const throw()
+	const Range<Type> getRange (const int rangeIndex) const
 	{
 		if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
-		{
-			startValue = values [rangeIndex << 1];
-			numValues = values [(rangeIndex << 1) + 1] - startValue;
-
-			return true;
-		}
-
-		return false;
+			return Range<Type> (values.getUnchecked (rangeIndex << 1),
+								values.getUnchecked ((rangeIndex << 1) + 1));
+		else
+			return Range<Type>();
 	}
 
-	bool getTotalRange (Type& lowestValue,
-						Type& highestValue) const throw()
+	const Range<Type> getTotalRange() const
 	{
 		if (values.size() > 0)
 		{
-			lowestValue = values.getUnchecked (0);
-			highestValue = values.getUnchecked (values.size() - 1);
-			return true;
+			jassert ((values.size() & 1) == 0);
+			return Range<Type> (values.getUnchecked (0),
+								values.getUnchecked (values.size() - 1));
 		}
 
-		return false;
+		return Range<Type>();
 	}
 
-	void addRange (const Type firstValue,
-				   const Type numValuesToAdd) throw()
+	void addRange (const Range<Type>& range)
 	{
-		jassert (numValuesToAdd >= 0);
-
-		if (numValuesToAdd > 0)
+		jassert (range.getLength() >= 0);
+		if (range.getLength() > 0)
 		{
-			removeRange (firstValue, numValuesToAdd);
+			removeRange (range);
 
-			values.addUsingDefaultSort (firstValue);
-			values.addUsingDefaultSort (firstValue + numValuesToAdd);
+			values.addUsingDefaultSort (range.getStart());
+			values.addUsingDefaultSort (range.getEnd());
 
 			simplify();
 		}
+
+		String s;
+		for (int i = 0; i < values.size(); ++i)
+			s << values[i] << " ";
+		DBG (s);
 	}
 
-	void removeRange (const Type firstValue,
-					  const Type numValuesToRemove) throw()
+	void removeRange (const Range<Type>& rangeToRemove)
 	{
-		jassert (numValuesToRemove >= 0);
+		jassert (rangeToRemove.getLength() >= 0);
 
-		if (numValuesToRemove >= 0
-			 && firstValue < values.getLast())
+		if (rangeToRemove.getLength() > 0
+			 && values.size() > 0
+			 && rangeToRemove.getStart() < values.getUnchecked (values.size() - 1)
+			 && values.getUnchecked(0) < rangeToRemove.getEnd())
 		{
-			const bool onAtStart = contains (firstValue - 1);
-			const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
+			const bool onAtStart = contains (rangeToRemove.getStart() - 1);
+			const Type lastValue (jmin (rangeToRemove.getEnd(), values.getLast()));
 			const bool onAtEnd = contains (lastValue);
 
 			for (int i = values.size(); --i >= 0;)
 			{
 				if (values.getUnchecked(i) <= lastValue)
 				{
-					while (values.getUnchecked(i) >= firstValue)
+					while (values.getUnchecked(i) >= rangeToRemove.getStart())
 					{
 						values.remove (i);
 
@@ -5943,55 +5936,38 @@ public:
 				}
 			}
 
-			if (onAtStart)
-				values.addUsingDefaultSort (firstValue);
-
-			if (onAtEnd)
-				values.addUsingDefaultSort (lastValue);
+			if (onAtStart)   values.addUsingDefaultSort (rangeToRemove.getStart());
+			if (onAtEnd)	 values.addUsingDefaultSort (lastValue);
 
 			simplify();
 		}
 	}
 
-	void invertRange (const Type firstValue,
-					  const Type numValues)
+	void invertRange (const Range<Type>& range)
 	{
 		SparseSet newItems;
-		newItems.addRange (firstValue, numValues);
+		newItems.addRange (range);
 
 		int i;
 		for (i = getNumRanges(); --i >= 0;)
-		{
-			const int start = values [i << 1];
-			const int end = values [(i << 1) + 1];
+			newItems.removeRange (getRange (i));
 
-			newItems.removeRange (start, end);
-		}
-
-		removeRange (firstValue, numValues);
+		removeRange (range);
 
 		for (i = newItems.getNumRanges(); --i >= 0;)
-		{
-			const int start = newItems.values [i << 1];
-			const int end = newItems.values [(i << 1) + 1];
-
-			addRange (start, end);
-		}
+			addRange (newItems.getRange(i));
 	}
 
-	bool overlapsRange (const Type firstValue,
-						const Type numValues) throw()
+	bool overlapsRange (const Range<Type>& range)
 	{
-		jassert (numValues >= 0);
-
-		if (numValues > 0)
+		if (range.getLength() > 0)
 		{
 			for (int i = getNumRanges(); --i >= 0;)
 			{
-				if (firstValue >= values.getUnchecked ((i << 1) + 1))
+				if (values.getUnchecked ((i << 1) + 1) <= range.getStart())
 					return false;
 
-				if (firstValue + numValues > values.getUnchecked (i << 1))
+				if (values.getUnchecked (i << 1) < range.getEnd())
 					return true;
 			}
 		}
@@ -5999,20 +5975,17 @@ public:
 		return false;
 	}
 
-	bool containsRange (const Type firstValue,
-						const Type numValues) throw()
+	bool containsRange (const Range<Type>& range)
 	{
-		jassert (numValues >= 0);
-
-		if (numValues > 0)
+		if (range.getLength() > 0)
 		{
 			for (int i = getNumRanges(); --i >= 0;)
 			{
-				if (firstValue >= values.getUnchecked ((i << 1) + 1))
+				if (values.getUnchecked ((i << 1) + 1) <= range.getStart())
 					return false;
 
-				if (firstValue >= values.getUnchecked (i << 1)
-					 && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
+				if (values.getUnchecked (i << 1) <= range.getStart()
+					 && range.getEnd() <= values.getUnchecked ((i << 1) + 1))
 					return true;
 			}
 		}
@@ -6036,13 +6009,13 @@ private:
 	// alternating start/end values of ranges of values that are present.
 	Array<Type, DummyCriticalSection> values;
 
-	void simplify() throw()
+	void simplify()
 	{
 		jassert ((values.size() & 1) == 0);
 
 		for (int i = values.size(); --i > 0;)
 			if (values.getUnchecked(i) == values.getUnchecked (i - 1))
-				values.removeRange (i - 1, 2);
+				values.removeRange (--i, 2);
 	}
 };
 

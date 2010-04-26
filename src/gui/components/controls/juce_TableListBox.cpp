@@ -191,7 +191,7 @@ public:
     {
         if (isEnabled() && owner.getModel() != 0 && ! (e.mouseWasClicked() || isDragging))
         {
-            const SparseSet <int> selectedRows (owner.getSelectedRows());
+            const SparseSet<int> selectedRows (owner.getSelectedRows());
 
             if (selectedRows.size() > 0)
             {

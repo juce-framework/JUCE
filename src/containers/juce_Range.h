@@ -104,7 +104,7 @@ public:
     void setStart (const ValueType newStart) throw()
     {
         start = newStart;
-        if (newStart > end)
+        if (end < newStart)
             end = newStart;
     }
 
@@ -204,7 +204,7 @@ public:
     /** Returns true if the given position lies inside this range. */
     bool contains (const ValueType position) const throw()
     {
-        return position >= start && position < end;
+        return start <= position && position < end;
     }
 
     /** Returns the nearest value to the one supplied, which lies within the range. */
@@ -216,7 +216,7 @@ public:
     /** Returns true if the given range intersects this one. */
     bool intersects (const Range& other) const throw()
     {
-        return other.start < end && other.end > start;
+        return other.start < end && start < other.end;
     }
 
     /** Returns the range that is the intersection of the two ranges, or an empty range
@@ -247,7 +247,7 @@ public:
     const Range constrainRange (const Range& rangeToConstrain) const throw()
     {
         const ValueType otherLen = rangeToConstrain.getLength();
-        return otherLen >= getLength()
+        return getLength() <= otherLen
                 ? *this
                 : rangeToConstrain.movedToStartAt (jlimit (start, end - otherLen, rangeToConstrain.getStart()));
     }

@@ -27,6 +27,7 @@
 #define __JUCE_SPARSESET_JUCEHEADER__
 
 #include "juce_ArrayAllocationBase.h"
+#include "juce_Range.h"
 #include "../threads/juce_CriticalSection.h"
 
 
@@ -47,24 +48,24 @@ class SparseSet
 public:
     //==============================================================================
     /** Creates a new empty set. */
-    SparseSet() throw()
+    SparseSet()
     {
     }
 
     /** Creates a copy of another SparseSet. */
-    SparseSet (const SparseSet<Type>& other) throw()
+    SparseSet (const SparseSet<Type>& other)
         : values (other.values)
     {
     }
 
     /** Destructor. */
-    ~SparseSet() throw()
+    ~SparseSet()
     {
     }
 
     //==============================================================================
     /** Clears the set. */
-    void clear() throw()
+    void clear()
     {
         values.clear();
     }
@@ -84,14 +85,14 @@ public:
         are a lot of items in the set. Use isEmpty() for a quick test of whether there
         are any items.
     */
-    Type size() const throw()
+    Type size() const
     {
-        Type num = 0;
+        Type total (0);
 
         for (int i = 0; i < values.size(); i += 2)
-            num += values[i + 1] - values[i];
+            total += values.getUnchecked (i + 1) - values.getUnchecked (i);
 
-        return num;
+        return total;
     }
 
     /** Returns one of the values in the set.
@@ -99,41 +100,34 @@ public:
         @param index    the index of the value to retrieve, in the range 0 to (size() - 1).
         @returns        the value at this index, or 0 if it's out-of-range
     */
-    Type operator[] (int index) const throw()
+    Type operator[] (Type index) const
     {
         for (int i = 0; i < values.size(); i += 2)
         {
-            const Type s = values.getUnchecked(i);
-            const Type e = values.getUnchecked(i + 1);
+            const Type start (values.getUnchecked (i));
+            const Type len (values.getUnchecked (i + 1) - start);
 
-            if (index < e - s)
-                return s + index;
+            if (index < len)
+                return start + index;
 
-            index -= e - s;
+            index -= len;
         }
 
-        return (Type) 0;
+        return Type (0);
     }
 
     /** Checks whether a particular value is in the set. */
-    bool contains (const Type valueToLookFor) const throw()
+    bool contains (const Type valueToLookFor) const
     {
-        bool on = false;
-
         for (int i = 0; i < values.size(); ++i)
-        {
-            if (values.getUnchecked(i) > valueToLookFor)
-                return on;
-
-            on = ! on;
-        }
+            if (valueToLookFor < values.getUnchecked(i))
+                return (i & 1) != 0;
 
         return false;
     }
 
     //==============================================================================
     /** Returns the number of contiguous blocks of values.
-
         @see getRange
     */
     int getNumRanges() const throw()
@@ -142,94 +136,78 @@ public:
     }
 
     /** Returns one of the contiguous ranges of values stored.
-
         @param rangeIndex   the index of the range to look up, between 0
                             and (getNumRanges() - 1)
-        @param startValue   on return, the value at the start of the range
-        @param numValues    on return, the number of values in the range
-
         @see getTotalRange
     */
-    bool getRange (const int rangeIndex,
-                   Type& startValue,
-                   Type& numValues) const throw()
+    const Range<Type> getRange (const int rangeIndex) const
     {
         if (((unsigned int) rangeIndex) < (unsigned int) getNumRanges())
-        {
-            startValue = values [rangeIndex << 1];
-            numValues = values [(rangeIndex << 1) + 1] - startValue;
-
-            return true;
-        }
-
-        return false;
+            return Range<Type> (values.getUnchecked (rangeIndex << 1),
+                                values.getUnchecked ((rangeIndex << 1) + 1));
+        else
+            return Range<Type>();
     }
 
-    /** Returns the lowest and highest values in the set.
-
+    /** Returns the range between the lowest and highest values in the set.
         @see getRange
     */
-    bool getTotalRange (Type& lowestValue,
-                        Type& highestValue) const throw()
+    const Range<Type> getTotalRange() const
     {
         if (values.size() > 0)
         {
-            lowestValue = values.getUnchecked (0);
-            highestValue = values.getUnchecked (values.size() - 1);
-            return true;
+            jassert ((values.size() & 1) == 0);
+            return Range<Type> (values.getUnchecked (0),
+                                values.getUnchecked (values.size() - 1));
         }
 
-        return false;
+        return Range<Type>();
     }
 
     //==============================================================================
     /** Adds a range of contiguous values to the set.
-
-        e.g. addRange (10, 4) will add (10, 11, 12, 13) to the set.
-
-        @param firstValue       the start of the range of values to add
-        @param numValuesToAdd   how many values to add
+        e.g. addRange (Range \<int\> (10, 14)) will add (10, 11, 12, 13) to the set.
     */
-    void addRange (const Type firstValue,
-                   const Type numValuesToAdd) throw()
+    void addRange (const Range<Type>& range)
     {
-        jassert (numValuesToAdd >= 0);
-
-        if (numValuesToAdd > 0)
+        jassert (range.getLength() >= 0);
+        if (range.getLength() > 0)
         {
-            removeRange (firstValue, numValuesToAdd);
+            removeRange (range);
 
-            values.addUsingDefaultSort (firstValue);
-            values.addUsingDefaultSort (firstValue + numValuesToAdd);
+            values.addUsingDefaultSort (range.getStart());
+            values.addUsingDefaultSort (range.getEnd());
 
             simplify();
         }
+
+        String s;
+        for (int i = 0; i < values.size(); ++i)
+            s << values[i] << " ";
+        DBG (s);
     }
 
     /** Removes a range of values from the set.
-
-        e.g. removeRange (10, 4) will remove (10, 11, 12, 13) from the set.
-
-        @param firstValue           the start of the range of values to remove
-        @param numValuesToRemove    how many values to remove
+        e.g. removeRange (Range\<int\> (10, 14)) will remove (10, 11, 12, 13) from the set.
     */
-    void removeRange (const Type firstValue,
-                      const Type numValuesToRemove) throw()
+    void removeRange (const Range<Type>& rangeToRemove)
     {
-        jassert (numValuesToRemove >= 0);
+        jassert (rangeToRemove.getLength() >= 0);
 
-        if (numValuesToRemove >= 0
-             && firstValue < values.getLast())
+        if (rangeToRemove.getLength() > 0
+             && values.size() > 0
+             && rangeToRemove.getStart() < values.getUnchecked (values.size() - 1)
+             && values.getUnchecked(0) < rangeToRemove.getEnd())
         {
-            const bool onAtStart = contains (firstValue - 1);
-            const Type lastValue = firstValue + jmin (numValuesToRemove, values.getLast() - firstValue);
+            const bool onAtStart = contains (rangeToRemove.getStart() - 1);
+            const Type lastValue (jmin (rangeToRemove.getEnd(), values.getLast()));
             const bool onAtEnd = contains (lastValue);
 
             for (int i = values.size(); --i >= 0;)
             {
                 if (values.getUnchecked(i) <= lastValue)
                 {
-                    while (values.getUnchecked(i) >= firstValue)
+                    while (values.getUnchecked(i) >= rangeToRemove.getStart())
                     {
                         values.remove (i);
 
@@ -241,57 +219,40 @@ public:
                 }
             }
 
-            if (onAtStart)
-                values.addUsingDefaultSort (firstValue);
-
-            if (onAtEnd)
-                values.addUsingDefaultSort (lastValue);
+            if (onAtStart)   values.addUsingDefaultSort (rangeToRemove.getStart());
+            if (onAtEnd)     values.addUsingDefaultSort (lastValue);
 
             simplify();
         }
     }
 
     /** Does an XOR of the values in a given range. */
-    void invertRange (const Type firstValue,
-                      const Type numValues)
+    void invertRange (const Range<Type>& range)
     {
         SparseSet newItems;
-        newItems.addRange (firstValue, numValues);
+        newItems.addRange (range);
 
         int i;
         for (i = getNumRanges(); --i >= 0;)
-        {
-            const int start = values [i << 1];
-            const int end = values [(i << 1) + 1];
+            newItems.removeRange (getRange (i));
 
-            newItems.removeRange (start, end);
-        }
-
-        removeRange (firstValue, numValues);
+        removeRange (range);
 
         for (i = newItems.getNumRanges(); --i >= 0;)
-        {
-            const int start = newItems.values [i << 1];
-            const int end = newItems.values [(i << 1) + 1];
-
-            addRange (start, end);
-        }
+            addRange (newItems.getRange(i));
     }
 
-    /** Checks whether any part of a given range overlaps any part of this one. */
-    bool overlapsRange (const Type firstValue,
-                        const Type numValues) throw()
+    /** Checks whether any part of a given range overlaps any part of this set. */
+    bool overlapsRange (const Range<Type>& range)
     {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
+        if (range.getLength() > 0)
         {
             for (int i = getNumRanges(); --i >= 0;)
             {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                if (values.getUnchecked ((i << 1) + 1) <= range.getStart())
                     return false;
 
-                if (firstValue + numValues > values.getUnchecked (i << 1))
+                if (values.getUnchecked (i << 1) < range.getEnd())
                     return true;
             }
         }
@@ -300,20 +261,17 @@ public:
     }
 
     /** Checks whether the whole of a given range is contained within this one. */
-    bool containsRange (const Type firstValue,
-                        const Type numValues) throw()
+    bool containsRange (const Range<Type>& range)
     {
-        jassert (numValues >= 0);
-
-        if (numValues > 0)
+        if (range.getLength() > 0)
         {
             for (int i = getNumRanges(); --i >= 0;)
             {
-                if (firstValue >= values.getUnchecked ((i << 1) + 1))
+                if (values.getUnchecked ((i << 1) + 1) <= range.getStart())
                     return false;
 
-                if (firstValue >= values.getUnchecked (i << 1)
-                     && firstValue + numValues <= values.getUnchecked ((i << 1) + 1))
+                if (values.getUnchecked (i << 1) <= range.getStart()
+                     && range.getEnd() <= values.getUnchecked ((i << 1) + 1))
                     return true;
             }
         }
@@ -339,13 +297,13 @@ private:
     // alternating start/end values of ranges of values that are present.
     Array<Type, DummyCriticalSection> values;
 
-    void simplify() throw()
+    void simplify()
     {
         jassert ((values.size() & 1) == 0);
 
         for (int i = values.size(); --i > 0;)
             if (values.getUnchecked(i) == values.getUnchecked (i - 1))
-                values.removeRange (i - 1, 2);
+                values.removeRange (--i, 2);
     }
 };
 

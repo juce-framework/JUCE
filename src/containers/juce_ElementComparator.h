@@ -279,7 +279,7 @@ private:
 public:
     static int compareElements (ParameterType first, ParameterType second)
     {
-        return (first < second) ? -1 : ((first < second) ? 1 : 0);
+        return (first < second) ? -1 : ((second < first) ? 1 : 0);
     }
 };
 

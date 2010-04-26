@@ -912,7 +912,7 @@ private:
     bool createDevices()
     {
         ComSmartPtr <IMMDeviceEnumerator> enumerator;
-        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator), CLSCTX_INPROC_SERVER)))
+        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
             return false;
 
         ComSmartPtr <IMMDeviceCollection> deviceCollection;
@@ -976,7 +976,7 @@ public:
         inputDeviceIds.clear();
 
         ComSmartPtr <IMMDeviceEnumerator> enumerator;
-        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator), CLSCTX_INPROC_SERVER)))
+        if (! OK (enumerator.CoCreateInstance (__uuidof (MMDeviceEnumerator))))
             return;
 
         const String defaultRenderer = getDefaultEndpoint (enumerator, false);
