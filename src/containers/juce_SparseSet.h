@@ -180,11 +180,6 @@ public:
 
             simplify();
         }
-
-        String s;
-        for (int i = 0; i < values.size(); ++i)
-            s << values[i] << " ";
-        DBG (s);
     }
 
     /** Removes a range of values from the set.

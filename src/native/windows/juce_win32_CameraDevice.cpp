@@ -569,7 +569,7 @@ private:
 
                 if (pinName == 0 || String (pinName).equalsIgnoreCase (String (info.achName)))
                 {
-                    pin.p->AddRef();
+                    pin->AddRef();
                     *result = pin;
                     return true;
                 }

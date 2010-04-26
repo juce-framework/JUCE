@@ -14,16 +14,16 @@
 //#define  JUCE_FORCE_DEBUG
 //#define  JUCE_LOG_ASSERTIONS
 //#define  JUCE_ASIO
-#define    JUCE_WASAPI 1
+//#define  JUCE_WASAPI
 //#define  JUCE_DIRECTSOUND
 //#define  JUCE_ALSA
-#define    JUCE_QUICKTIME 1
-#define    JUCE_OPENGL 1
+//#define  JUCE_QUICKTIME
+//#define  JUCE_OPENGL
 //#define  JUCE_USE_FLAC
 //#define  JUCE_USE_OGGVORBIS
 //#define  JUCE_USE_CDBURNER
 //#define  JUCE_USE_CDREADER
-#define    JUCE_USE_CAMERA 1
+//#define  JUCE_USE_CAMERA
 //#define  JUCE_ENABLE_REPAINT_DEBUGGING
 //#define  JUCE_USE_XINERAMA
 //#define  JUCE_USE_XSHM
@@ -32,7 +32,7 @@
 #define    JUCE_PLUGINHOST_VST 0
 #define    JUCE_PLUGINHOST_AU 0
 //#define  JUCE_ONLY_BUILD_CORE_LIBRARY
-#define    JUCE_WEB_BROWSER 1
+//#define  JUCE_WEB_BROWSER
 //#define  JUCE_SUPPORT_CARBON
 //#define  JUCE_CHECK_MEMORY_LEAKS
 //#define  JUCE_CATCH_UNHANDLED_EXCEPTIONS

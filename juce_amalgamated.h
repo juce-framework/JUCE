@@ -281,7 +281,7 @@
 #endif
 
 #ifndef JUCE_WEB_BROWSER
-  #define JUCE_WEB_BROWSER 0
+  #define JUCE_WEB_BROWSER 1
 #endif
 
 #ifndef JUCE_SUPPORT_CARBON
@@ -5900,11 +5900,6 @@ public:
 
 			simplify();
 		}
-
-		String s;
-		for (int i = 0; i < values.size(); ++i)
-			s << values[i] << " ";
-		DBG (s);
 	}
 
 	void removeRange (const Range<Type>& rangeToRemove)

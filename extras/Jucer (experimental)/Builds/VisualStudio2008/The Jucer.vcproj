@@ -151,6 +151,8 @@
         </Filter>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_ComponentDocument.h"/>
+        <File RelativePath="..\..\Source\model\jucer_CodeGenerator.cpp"/>
+        <File RelativePath="..\..\Source\model\jucer_CodeGenerator.h"/>
         <File RelativePath="..\..\Source\model\jucer_Coordinate.cpp"/>
         <File RelativePath="..\..\Source\model\jucer_Coordinate.h"/>
         <File RelativePath="..\..\Source\model\jucer_DrawableDocument.cpp"/>
@@ -265,6 +267,26 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
+          <FileConfiguration Name="Debug&#124;Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release&#124;Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.cpp">
+          <FileConfiguration Name="Debug&#124;Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+          <FileConfiguration Name="Release&#124;Win32"
+                             ExcludedFromBuild="true">
+            <Tool Name="VCCLCompilerTool"/>
+          </FileConfiguration>
+        </File>
+        <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.h">
           <FileConfiguration Name="Debug&#124;Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

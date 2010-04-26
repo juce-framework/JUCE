@@ -83,6 +83,9 @@ public:
 
             if (exp != 0)
                 exp->createPropertyEditors (props);
+
+            for (int i = props.size(); --i >= 0;)
+                props.getUnchecked(i)->setPreferredHeight (22);
         }
 
         getPanel()->addProperties (props);

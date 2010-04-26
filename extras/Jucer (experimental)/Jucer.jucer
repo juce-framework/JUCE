@@ -61,6 +61,10 @@
             resource="0" file="Source/model/jucer_ComponentDocument.cpp"/>
       <FILE id="u5n6JTb4z" name="jucer_ComponentDocument.h" compile="0" resource="0"
             file="Source/model/jucer_ComponentDocument.h"/>
+      <FILE id="YJF79TlHr" name="jucer_CodeGenerator.cpp" compile="1" resource="0"
+            file="Source/model/jucer_CodeGenerator.cpp"/>
+      <FILE id="Wr2TBw8wQ" name="jucer_CodeGenerator.h" compile="0" resource="0"
+            file="Source/model/jucer_CodeGenerator.h"/>
       <FILE id="lxuyJGZcw" name="jucer_Coordinate.cpp" compile="1" resource="0"
             file="Source/model/jucer_Coordinate.cpp"/>
       <FILE id="CyKbwNlwe" name="jucer_Coordinate.h" compile="0" resource="0"
@@ -205,6 +209,10 @@
             resource="1" file="Source/templates/jucer_AudioPluginFilterTemplate.cpp"/>
       <FILE id="R0cR4dCe" name="jucer_AudioPluginFilterTemplate.h" compile="0"
             resource="1" file="Source/templates/jucer_AudioPluginFilterTemplate.h"/>
+      <FILE id="KU4AroVSu" name="jucer_ComponentTemplate.cpp" compile="0"
+            resource="1" file="Source/templates/jucer_ComponentTemplate.cpp"/>
+      <FILE id="HiDPozmU" name="jucer_ComponentTemplate.h" compile="0" resource="1"
+            file="Source/templates/jucer_ComponentTemplate.h"/>
       <FILE id="pMNQAeUWK" name="jucer_MainConsoleAppTemplate.cpp" compile="0"
             resource="1" file="Source/templates/jucer_MainConsoleAppTemplate.cpp"/>
       <FILE id="IB8HRkRP1" name="jucer_MainTemplate.cpp" compile="0" resource="1"

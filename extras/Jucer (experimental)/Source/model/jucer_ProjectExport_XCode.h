@@ -525,10 +525,7 @@ private:
 
         if (iPhone)
         {
-            s.addTokens ("UIKit Foundation CoreGraphics AudioToolbox", false);
-
-            if ((int) project.getJuceConfigFlag ("JUCE_OPENGL").getValue() == 1)
-                s.addTokens ("QuartzCore OpenGLES", false);
+            s.addTokens ("UIKit Foundation CoreGraphics AudioToolbox QuartzCore OpenGLES", false);
         }
         else
         {

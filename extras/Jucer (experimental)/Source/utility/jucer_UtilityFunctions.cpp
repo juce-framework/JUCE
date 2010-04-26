@@ -486,7 +486,7 @@ const String indentCode (const String& code, const int numSpaces)
         lines.set (i, s);
     }
 
-    return lines.joinIntoString ("\n");
+    return lines.joinIntoString (newLine);
 }
 
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex)

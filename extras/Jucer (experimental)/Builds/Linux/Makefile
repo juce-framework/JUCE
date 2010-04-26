@@ -45,6 +45,7 @@ endif
 OBJECTS := \
   $(OBJDIR)/jucer_ComponentTypeManager.o \
   $(OBJDIR)/jucer_ComponentDocument.o \
+  $(OBJDIR)/jucer_CodeGenerator.o \
   $(OBJDIR)/jucer_Coordinate.o \
   $(OBJDIR)/jucer_DrawableDocument.o \
   $(OBJDIR)/jucer_NewFileWizard.o \
@@ -96,6 +97,11 @@ $(OBJDIR)/jucer_ComponentTypeManager.o: ../../Source/model/Component\ Types/juce
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_ComponentDocument.o: ../../Source/model/jucer_ComponentDocument.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_CodeGenerator.o: ../../Source/model/jucer_CodeGenerator.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
