@@ -178,12 +178,12 @@ void* MouseCursor::getHandle() const throw()
     return cursorHandle->getHandle();
 }
 
-void MouseCursor::showWaitCursor() throw()
+void MouseCursor::showWaitCursor()
 {
     Desktop::getInstance().getMainMouseSource().showMouseCursor (MouseCursor::WaitCursor);
 }
 
-void MouseCursor::hideWaitCursor() throw()
+void MouseCursor::hideWaitCursor()
 {
     Desktop::getInstance().getMainMouseSource().revealCursor();
 }

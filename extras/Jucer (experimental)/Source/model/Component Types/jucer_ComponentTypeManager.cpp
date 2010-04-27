@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -205,7 +205,7 @@ public:
     ~CompMemberNameValueSource() {}
 
     void valueChanged (Value&)      { sendChangeMessage (true); }
-    const var getValue() const   { return sourceValue.toString(); }
+    const var getValue() const      { return sourceValue.toString(); }
 
     void setValue (const var& newValue)
     {

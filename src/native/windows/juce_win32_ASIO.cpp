@@ -1196,7 +1196,7 @@ private:
     }
 
     //==============================================================================
-    void callback (const long index) throw()
+    void callback (const long index)
     {
         if (isStarted)
         {
@@ -1212,7 +1212,7 @@ private:
         calledback = true;
     }
 
-    void processBuffer() throw()
+    void processBuffer()
     {
         const ASIOBufferInfo* const infos = bufferInfos;
         const int bi = bufferIndex;
@@ -1342,7 +1342,7 @@ private:
     }
 
     //==============================================================================
-    static ASIOTime* bufferSwitchTimeInfoCallback0 (ASIOTime*, long index, long) throw()
+    static ASIOTime* bufferSwitchTimeInfoCallback0 (ASIOTime*, long index, long)
     {
         if (currentASIODev[0] != 0)
             currentASIODev[0]->callback (index);
@@ -1350,7 +1350,7 @@ private:
         return 0;
     }
 
-    static ASIOTime* bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long) throw()
+    static ASIOTime* bufferSwitchTimeInfoCallback1 (ASIOTime*, long index, long)
     {
         if (currentASIODev[1] != 0)
             currentASIODev[1]->callback (index);
@@ -1358,7 +1358,7 @@ private:
         return 0;
     }
 
-    static ASIOTime* bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long) throw()
+    static ASIOTime* bufferSwitchTimeInfoCallback2 (ASIOTime*, long index, long)
     {
         if (currentASIODev[2] != 0)
             currentASIODev[2]->callback (index);
@@ -1366,41 +1366,41 @@ private:
         return 0;
     }
 
-    static void bufferSwitchCallback0 (long index, long) throw()
+    static void bufferSwitchCallback0 (long index, long)
     {
         if (currentASIODev[0] != 0)
             currentASIODev[0]->callback (index);
     }
 
-    static void bufferSwitchCallback1 (long index, long) throw()
+    static void bufferSwitchCallback1 (long index, long)
     {
         if (currentASIODev[1] != 0)
             currentASIODev[1]->callback (index);
     }
 
-    static void bufferSwitchCallback2 (long index, long) throw()
+    static void bufferSwitchCallback2 (long index, long)
     {
         if (currentASIODev[2] != 0)
             currentASIODev[2]->callback (index);
     }
 
-    static long asioMessagesCallback0 (long selector, long value, void*, double*) throw()
+    static long asioMessagesCallback0 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 0);
     }
 
-    static long asioMessagesCallback1 (long selector, long value, void*, double*) throw()
+    static long asioMessagesCallback1 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 1);
     }
 
-    static long asioMessagesCallback2 (long selector, long value, void*, double*) throw()
+    static long asioMessagesCallback2 (long selector, long value, void*, double*)
     {
         return asioMessagesCallback (selector, value, 2);
     }
 
     //==============================================================================
-    static long asioMessagesCallback (long selector, long value, const int deviceIndex) throw()
+    static long asioMessagesCallback (long selector, long value, const int deviceIndex)
     {
         switch (selector)
         {

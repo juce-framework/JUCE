@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -25,7 +25,288 @@
 
 #include "../../jucer_Headers.h"
 #include "jucer_ComponentEditor.h"
+#include "../jucer_JucerTreeViewBase.h"
 
+
+//==============================================================================
+namespace ComponentTree
+{
+    //==============================================================================
+    class Base  : public JucerTreeViewBase,
+                  public ValueTree::Listener,
+                  public ChangeListener
+    {
+    public:
+        Base (ComponentEditor& editor_)
+            : editor (editor_)
+        {
+            editor.getCanvas()->getSelection().addChangeListener (this);
+        }
+
+        ~Base()
+        {
+            editor.getCanvas()->getSelection().removeChangeListener (this);
+        }
+
+        //==============================================================================
+        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)  {}
+        void valueTreeParentChanged (ValueTree& tree)       {}
+        void valueTreeChildrenChanged (ValueTree& tree)     {}
+
+        const String getUniqueName() const
+        {
+            jassert (getItemId().isNotEmpty());
+            return getItemId();
+        }
+
+        //==============================================================================
+        void itemOpennessChanged (bool isNowOpen)
+        {
+            if (isNowOpen)
+                refreshSubItems();
+        }
+
+        virtual void refreshSubItems() = 0;
+        virtual const String getItemId() const = 0;
+
+        void setName (const String& newName)            {}
+
+        void itemClicked (const MouseEvent& e)          {}
+        void itemDoubleClicked (const MouseEvent& e)    {}
+
+        void itemSelectionChanged (bool isNowSelected)
+        {
+            if (isNowSelected)
+                editor.getCanvas()->getSelection().addToSelection (getItemId());
+            else
+                editor.getCanvas()->getSelection().deselect (getItemId());
+        }
+
+        void changeListenerCallback (void*)             { updateSelectionState(); }
+
+        void updateSelectionState()
+        {
+            setSelected (editor.getCanvas()->getSelection().isSelected (getItemId()), false);
+        }
+
+        bool isMissing()                            { return false; }
+        const String getTooltip()                   { return String::empty; }
+
+    protected:
+        //==============================================================================
+        ComponentEditor& editor;
+    };
+
+
+    //==============================================================================
+    class ComponentItem  : public Base
+    {
+    public:
+        ComponentItem (ComponentEditor& editor_, const ValueTree& componentState_)
+            : Base (editor_), componentState (componentState_)
+        {
+            componentState.addListener (this);
+            updateSelectionState();
+        }
+
+        ~ComponentItem()
+        {
+            componentState.removeListener (this);
+        }
+
+        //==============================================================================
+        const String getItemId() const              { return componentState [ComponentDocument::idProperty]; }
+
+        bool mightContainSubItems()                 { return false; }
+        void refreshSubItems()                      {}
+
+        const String getDisplayName() const         { return getRenamingName(); }
+        const String getRenamingName() const        { return componentState [ComponentDocument::memberNameProperty]; }
+
+        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+
+        const String getDragSourceDescription()     { return componentItemDragType; }
+
+        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+        {
+            if (property == ComponentDocument::memberNameProperty)
+                repaintItem();
+        }
+
+    private:
+        //==============================================================================
+        ValueTree componentState;
+    };
+
+    //==============================================================================
+    class ComponentList  : public Base
+    {
+    public:
+        ComponentList (ComponentEditor& editor_)
+            : Base (editor_), componentTree (editor.getDocument().getComponentGroup())
+        {
+            componentTree.addListener (this);
+        }
+
+        ~ComponentList()
+        {
+            componentTree.removeListener (this);
+        }
+
+        //==============================================================================
+        const String getItemId() const              { return "components"; }
+        bool mightContainSubItems()                 { return true; }
+
+        void valueTreeChildrenChanged (ValueTree& tree)
+        {
+            if (tree == componentTree)
+                refreshSubItems();
+        }
+
+        void refreshSubItems()
+        {
+            ScopedPointer <XmlElement> openness (getOpennessState());
+            clearSubItems();
+
+            ComponentDocument& doc = editor.getDocument();
+
+            const int num = doc.getNumComponents();
+            for (int i = 0; i < num; ++i)
+                addSubItem (new ComponentItem (editor, doc.getComponent (i)));
+
+            if (openness != 0)
+                restoreOpennessState (*openness);
+        }
+
+        const String getDisplayName() const         { return getRenamingName(); }
+        const String getRenamingName() const        { return "Components"; }
+        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const String getDragSourceDescription()     { return String::empty; }
+
+    private:
+        ValueTree componentTree;
+    };
+
+
+    //==============================================================================
+    class MarkerItem  : public Base
+    {
+    public:
+        MarkerItem (ComponentEditor& editor_, const ValueTree& markerState_)
+            : Base (editor_), markerState (markerState_)
+        {
+            markerState.addListener (this);
+            updateSelectionState();
+        }
+
+        ~MarkerItem()
+        {
+            markerState.removeListener (this);
+        }
+
+        //==============================================================================
+        const String getItemId() const              { return markerState [ComponentDocument::idProperty]; }
+
+        bool mightContainSubItems()                 { return false; }
+        void refreshSubItems()                      {}
+
+        const String getDisplayName() const         { return getRenamingName(); }
+        const String getRenamingName() const        { return markerState [ComponentDocument::markerNameProperty]; }
+
+        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+
+        const String getDragSourceDescription()     { return componentItemDragType; }
+
+        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+        {
+            if (property == ComponentDocument::markerNameProperty)
+                repaintItem();
+        }
+
+    private:
+        //==============================================================================
+        ValueTree markerState;
+    };
+
+    //==============================================================================
+    class MarkerList  : public Base
+    {
+    public:
+        MarkerList (ComponentEditor& editor_, bool isX_)
+            : Base (editor_), markerList (editor_.getDocument().getMarkerList (isX_).getGroup()), isX (isX_)
+        {
+            markerList.addListener (this);
+        }
+
+        ~MarkerList()
+        {
+            markerList.removeListener (this);
+        }
+
+        //==============================================================================
+        const String getItemId() const              { return isX ? "markersX" : "markersY"; }
+        bool mightContainSubItems()                 { return true; }
+
+        void valueTreeChildrenChanged (ValueTree& tree)
+        {
+            refreshSubItems();
+        }
+
+        void refreshSubItems()
+        {
+            ScopedPointer <XmlElement> openness (getOpennessState());
+            clearSubItems();
+
+            ComponentDocument::MarkerList& markers = editor.getDocument().getMarkerList (isX);
+
+            const int num = markers.size();
+            for (int i = 0; i < num; ++i)
+                addSubItem (new MarkerItem (editor, markers.getMarker (i)));
+
+            if (openness != 0)
+                restoreOpennessState (*openness);
+        }
+
+        const String getDisplayName() const         { return getRenamingName(); }
+        const String getRenamingName() const        { return isX ? "Markers (X-axis)" : "Markers (Y-axis)"; }
+        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const String getDragSourceDescription()     { return String::empty; }
+
+    private:
+        ValueTree markerList;
+        bool isX;
+    };
+
+    //==============================================================================
+    class Root  : public Base
+    {
+    public:
+        Root (ComponentEditor& editor_)  : Base (editor_)  {}
+        ~Root()    {}
+
+        //==============================================================================
+        const String getItemId() const              { return "root"; }
+        bool mightContainSubItems()                 { return true; }
+
+        void refreshSubItems()
+        {
+            ScopedPointer <XmlElement> openness (getOpennessState());
+            clearSubItems();
+
+            addSubItem (new ComponentList (editor));
+            addSubItem (new MarkerList (editor, true));
+            addSubItem (new MarkerList (editor, false));
+
+            if (openness != 0)
+                restoreOpennessState (*openness);
+        }
+
+        const String getDisplayName() const         { return getRenamingName(); }
+        const String getRenamingName() const        { return editor.getDocument().getClassName().toString(); }
+        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const String getDragSourceDescription()     { return String::empty; }
+    };
+}
 
 //==============================================================================
 class ComponentEditor::ClassInfoHolder  : public Component
@@ -56,18 +337,32 @@ private:
     PropertyPanelWithTooltips* panel;
 };
 
+
 //==============================================================================
-class ComponentEditor::LayoutEditorHolder  : public Component
+class ComponentEditor::LayoutEditorHolder  : public Component,
+                                             public ToolbarItemFactory
 {
 public:
     LayoutEditorHolder (ComponentEditor& editor_)
-        : editor (editor_), infoPanel (0)
+        : editor (editor_), infoPanel (0), tree (0)
     {
+        addAndMakeVisible (toolbar = new Toolbar());
+        toolbar->addDefaultItems (*this);
+        toolbar->setStyle (Toolbar::textOnly);
+
         addAndMakeVisible (viewport = new Viewport());
+
+        addChildComponent (tree = new TreeView());
+        tree->setRootItemVisible (true);
+        tree->setMultiSelectEnabled (true);
+        tree->setDefaultOpenness (true);
+        tree->setColour (TreeView::backgroundColourId, Colours::white);
+        tree->setIndentSize (15);
     }
 
     ~LayoutEditorHolder()
     {
+        tree->deleteRootItem();
         deleteAndZero (infoPanel);
         deleteAllChildren();
     }
@@ -76,20 +371,94 @@ public:
     {
         viewport->setViewedComponent (new ComponentEditorCanvas (editor));
         addAndMakeVisible (infoPanel = new InfoPanel (editor));
+        tree->setRootItem (new ComponentTree::Root (editor));
+        resized();
     }
 
     void resized()
     {
-        const int infoPanelWidth = 200;
-        viewport->setBounds (0, 0, getWidth() - infoPanelWidth, getHeight());
+        const int toolbarHeight = 22;
 
-        if (infoPanel != 0)
-            infoPanel->setBounds (getWidth() - infoPanelWidth, 0, infoPanelWidth, getHeight());
+        toolbar->setBounds (0, 0, getWidth(), toolbarHeight);
+
+        int infoPanelWidth = 200;
+        if (infoPanel != 0 && infoPanel->isVisible())
+            infoPanel->setBounds (getWidth() - infoPanelWidth, toolbar->getBottom(), infoPanelWidth, getHeight() - toolbar->getBottom());
+        else
+            infoPanelWidth = 0;
+
+        if (tree->isVisible())
+        {
+            tree->setBounds (0, toolbar->getBottom(), infoPanelWidth, getHeight() - toolbar->getBottom());
+            viewport->setBounds (infoPanelWidth, toolbar->getBottom(), getWidth() - infoPanelWidth * 2, getHeight() - toolbar->getBottom());
+        }
+        else
+        {
+            viewport->setBounds (0, toolbar->getBottom(), getWidth() - infoPanelWidth, getHeight() - toolbar->getBottom());
+        }
+    }
+
+    void showOrHideProperties()
+    {
+        infoPanel->setVisible (! infoPanel->isVisible());
+        resized();
+    }
+
+    void showOrHideTree()
+    {
+        tree->setVisible (! tree->isVisible());
+        resized();
     }
 
     Viewport* getViewport() const   { return viewport; }
 
+    //==============================================================================
+    enum DemoToolbarItemIds
+    {
+        createComponent     = 1,
+        showInfo            = 2,
+        showComponentTree   = 3,
+    };
+
+    void getAllToolbarItemIds (Array <int>& ids)
+    {
+        ids.add (createComponent);
+        ids.add (showInfo);
+        ids.add (showComponentTree);
+
+        ids.add (separatorBarId);
+        ids.add (spacerId);
+        ids.add (flexibleSpacerId);
+    }
+
+    void getDefaultItemSet (Array <int>& ids)
+    {
+        ids.add (createComponent);
+        ids.add (flexibleSpacerId);
+        ids.add (showInfo);
+        ids.add (showComponentTree);
+    }
+
+    ToolbarItemComponent* createItem (int itemId)
+    {
+        String name;
+        int commandId = 0;
+
+        switch (itemId)
+        {
+            case createComponent:   name = "new"; break;
+            case showInfo:          name = "info"; commandId = CommandIDs::showOrHideProperties; break;
+            case showComponentTree: name = "tree"; commandId = CommandIDs::showOrHideTree; break;
+            default:                jassertfalse; return 0;
+        }
+
+        ToolbarButton* b = new ToolbarButton (itemId, name, new DrawablePath(), 0);
+        b->setCommandToTrigger (commandManager, commandId, true);
+        return b;
+    }
+
 private:
+    //==============================================================================
     class InfoPanel  : public Component,
                        public ChangeListener
     {
@@ -136,9 +505,11 @@ private:
         PropertyPanel* props;
     };
 
+    Toolbar* toolbar;
     ComponentEditor& editor;
     Viewport* viewport;
     InfoPanel* infoPanel;
+    TreeView* tree;
 };
 
 //==============================================================================
@@ -233,6 +604,44 @@ Viewport* ComponentEditor::getViewport() const
     return layoutEditorHolder->getViewport();
 }
 
+//==============================================================================
+class TestComponent     : public ComponentEditorCanvas::ComponentHolder
+{
+public:
+    TestComponent (ComponentDocument& document_)
+        : document (document_)
+    {
+        setSize (document.getCanvasWidth().getValue(),
+                 document.getCanvasHeight().getValue());
+    }
+
+    ~TestComponent()
+    {
+    }
+
+    void resized()
+    {
+        document.getCanvasWidth() = getWidth();
+        document.getCanvasHeight() = getHeight();
+
+        ComponentEditorCanvas::ComponentHolder::resized();
+        updateComponents (document, selected);
+    }
+
+private:
+    ComponentDocument document;
+    ComponentEditorCanvas::SelectedItems selected;
+};
+
+void ComponentEditor::test()
+{
+    TestComponent testComp (getDocument());
+
+    DialogWindow::showModalDialog ("Testing: " + getDocument().getClassName().toString(),
+                                   &testComp, this, Colours::lightgrey, true, true);
+}
+
+//==============================================================================
 void ComponentEditor::getAllCommands (Array <CommandID>& commands)
 {
     DocumentEditorComponent::getAllCommands (commands);
@@ -241,6 +650,9 @@ void ComponentEditor::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::redo,
                               CommandIDs::toFront,
                               CommandIDs::toBack,
+                              CommandIDs::test,
+                              CommandIDs::showOrHideProperties,
+                              CommandIDs::showOrHideTree,
                               StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -269,6 +681,19 @@ void ComponentEditor::getCommandInfo (CommandID commandID, ApplicationCommandInf
 
     case CommandIDs::toBack:
         result.setInfo ("Send to Back", "Moves the selected items to the back", CommandCategories::editing, 0);
+        break;
+
+    case CommandIDs::test:
+        result.setInfo ("Test", "Test the current component", CommandCategories::editing, 0);
+        result.defaultKeypresses.add (KeyPress ('t', ModifierKeys::commandModifier, 0));
+        break;
+
+    case CommandIDs::showOrHideProperties:
+        result.setInfo ("Show/Hide Tree", "Shows or hides the component tree view", CommandCategories::editing, 0);
+        break;
+
+    case CommandIDs::showOrHideTree:
+        result.setInfo ("Show/Hide Properties", "Shows or hides the component properties panel", CommandCategories::editing, 0);
         break;
 
     case StandardApplicationCommandIDs::del:
@@ -301,6 +726,18 @@ bool ComponentEditor::perform (const InvocationInfo& info)
 
     case CommandIDs::toBack:
         getCanvas()->selectionToBack();
+        return true;
+
+    case CommandIDs::test:
+        test();
+        return true;
+
+    case CommandIDs::showOrHideProperties:
+        layoutEditorHolder->showOrHideProperties();
+        return true;
+
+    case CommandIDs::showOrHideTree:
+        layoutEditorHolder->showOrHideTree();
         return true;
 
     case StandardApplicationCommandIDs::del:

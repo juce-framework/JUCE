@@ -3,24 +3,21 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  %%creationTime%%
-
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created for JUCE version: %%juceVersion%%
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  JUCE and the Jucer are copyright 2004-10 by Raw Material Software ltd.
 
   ==============================================================================
 */
 
-//[Headers] You can add your own extra header files here...
-//[/Headers]
+//[CppHeaders] You can add your own extra header files here...
+//[/CppHeaders]
 
 %%includeFilesCPP%%
 
@@ -53,18 +50,14 @@
 //[MiscUserCode] You can add your own definitions of your custom methods or any other code here...
 //[/MiscUserCode]
 
+%%staticMemberDefinitions%%
 
 //==============================================================================
+//=======================  Jucer Information Section  ==========================
+//==============================================================================
 #if 0
-/*  -- Jucer information section --
-
-    This is where the Jucer puts all of its metadata, so don't change anything in here!
-
-BEGIN_JUCER_METADATA
+/*  This section stores the Jucer's metadata - edit it at your own risk!
 
 %%metadata%%
-END_JUCER_METADATA
 */
 #endif
-
-%%staticMemberDefinitions%%

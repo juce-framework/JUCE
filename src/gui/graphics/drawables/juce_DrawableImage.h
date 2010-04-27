@@ -108,9 +108,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    ValueTree createValueTree() const throw();
+    ValueTree createValueTree() const;
     /** @internal */
-    static DrawableImage* createFromValueTree (const ValueTree& tree) throw();
+    static DrawableImage* createFromValueTree (const ValueTree& tree);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

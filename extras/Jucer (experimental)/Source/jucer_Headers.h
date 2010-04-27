@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -47,6 +47,7 @@ static const char* const newLine = "\r\n";
 
 const char* const projectItemDragType   = "Project Items";
 const char* const drawableItemDragType  = "Drawable Items";
+const char* const componentItemDragType = "Components";
 
 const char* const textFileExtensions    = "cpp;h;hpp;mm;m;c;txt;xml;plist;rtf;html;htm;php;py;rb;cs";
 const char* const sourceFileExtensions  = "cpp;mm;m;c;h;hpp";

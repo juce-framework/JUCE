@@ -183,13 +183,13 @@ public:
     /** Tries to create a Drawable from a previously-saved ValueTree.
         The ValueTree must have been created by the createValueTree() method.
     */
-    static Drawable* createFromValueTree (const ValueTree& tree) throw();
+    static Drawable* createFromValueTree (const ValueTree& tree);
 
     /** Creates a ValueTree to represent this Drawable.
         The VarTree that is returned can be turned back into a Drawable with
         createFromValueTree().
     */
-    virtual ValueTree createValueTree() const throw() = 0;
+    virtual ValueTree createValueTree() const = 0;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

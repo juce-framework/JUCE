@@ -3,18 +3,15 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  %%creationTime%%
-
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
   and re-saved.
 
-  Jucer version: 1.12
+  Created for JUCE version: %%juceVersion%%
 
   ------------------------------------------------------------------------------
 
-  The Jucer is part of the JUCE library - "Jules' Utility Class Extensions"
-  Copyright 2004-6 by Raw Material Software ltd.
+  JUCE and the Jucer are copyright 2004-10 by Raw Material Software ltd.
 
   ==============================================================================
 */
@@ -23,7 +20,7 @@
 #define %%headerGuard%%
 
 //[Headers]     -- You can add your own extra header files here --
-#include "juce.h"
+%%defaultJuceInclude%%
 //[/Headers]
 
 %%includeFilesH%%
@@ -62,7 +59,7 @@ private:
     //==============================================================================
     // (prevent copy constructor and operator= being generated..)
     %%className%% (const %%className%%&);
-    const %%className%%& operator= (const %%className%%&);
+    %%className%%& operator= (const %%className%%&);
 };
 
 

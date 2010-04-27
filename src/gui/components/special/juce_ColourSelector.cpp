@@ -184,7 +184,7 @@ private:
 
     ScopedPointer <Image> colours;
 
-    void updateMarker() const throw()
+    void updateMarker() const
     {
         marker->setBounds (roundToInt ((getWidth() - edge * 2) * s),
                            roundToInt ((getHeight() - edge * 2) * (1.0f - v)),

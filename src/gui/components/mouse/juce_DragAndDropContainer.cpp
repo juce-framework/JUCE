@@ -386,10 +386,9 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         else
         {
             if (imageOffsetFromMouse == 0)
-                imageOffset = Point<int> (dragImage->getWidth() / -2,
-                                          dragImage->getHeight() / -2);
+                imageOffset = -dragImage->getBounds().getCentre();
             else
-                imageOffset = *imageOffsetFromMouse;
+                imageOffset = -(dragImage->getBounds().getConstrainedPoint (-*imageOffsetFromMouse));
         }
 
         dragImageComponent = new DragImageComponent (dragImage.release(), sourceDescription, sourceComponent,

@@ -54,7 +54,7 @@ public:
     /** Creates a gradient fill type.
         @see setGradient
     */
-    FillType (const ColourGradient& gradient) throw();
+    FillType (const ColourGradient& gradient);
 
     /** Creates a tiled image fill type. The transform allows you to set the scaling, offset
         and rotation of the pattern.
@@ -63,10 +63,10 @@ public:
     FillType (const Image& image, const AffineTransform& transform) throw();
 
     /** Creates a copy of another FillType. */
-    FillType (const FillType& other) throw();
+    FillType (const FillType& other);
 
     /** Makes a copy of another FillType. */
-    FillType& operator= (const FillType& other) throw();
+    FillType& operator= (const FillType& other);
 
     /** Destructor. */
     ~FillType() throw();
@@ -85,7 +85,7 @@ public:
     void setColour (const Colour& newColour) throw();
 
     /** Turns this object into a gradient fill. */
-    void setGradient (const ColourGradient& newGradient) throw();
+    void setGradient (const ColourGradient& newGradient);
 
     /** Turns this object into a tiled image fill type. The transform allows you to set
         the scaling, offset and rotation of the pattern.

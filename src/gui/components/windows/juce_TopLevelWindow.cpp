@@ -95,7 +95,7 @@ public:
         }
     }
 
-    bool addWindow (TopLevelWindow* const w) throw()
+    bool addWindow (TopLevelWindow* const w)
     {
         windows.add (w);
         startTimer (10);
@@ -103,7 +103,7 @@ public:
         return isWindowActive (w);
     }
 
-    void removeWindow (TopLevelWindow* const w) throw()
+    void removeWindow (TopLevelWindow* const w)
     {
         startTimer (10);
 
@@ -121,7 +121,7 @@ public:
 private:
     TopLevelWindow* currentActive;
 
-    bool isWindowActive (TopLevelWindow* const tlw) const throw()
+    bool isWindowActive (TopLevelWindow* const tlw) const
     {
         return (tlw == currentActive
                  || tlw->isParentOf (currentActive)
@@ -176,7 +176,7 @@ void TopLevelWindow::focusOfChildComponentChanged (FocusChangeType)
         TopLevelWindowManager::getInstance()->startTimer (10);
 }
 
-void TopLevelWindow::setWindowActive (const bool isNowActive) throw()
+void TopLevelWindow::setWindowActive (const bool isNowActive)
 {
     if (windowIsActive_ != isNowActive)
     {

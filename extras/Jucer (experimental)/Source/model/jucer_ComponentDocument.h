@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -29,6 +29,7 @@
 #include "../jucer_Headers.h"
 #include "jucer_Project.h"
 #include "jucer_Coordinate.h"
+#include "jucer_CodeGenerator.h"
 
 
 //==============================================================================
@@ -38,6 +39,7 @@ class ComponentDocument   : public ValueTree::Listener,
 public:
     //==============================================================================
     ComponentDocument (Project* project, const File& cppFile);
+    ComponentDocument (const ComponentDocument& other);
     ~ComponentDocument();
 
     static bool isComponentFile (const File& file);
@@ -45,6 +47,7 @@ public:
     bool save();
     bool reload();
     bool hasChangedSinceLastSave();
+    const File getCppFile() const           { return cppFile; }
 
     //==============================================================================
     Value getClassName() const              { return getRootValueNonUndoable ("className"); }
@@ -133,7 +136,12 @@ public:
     void endDrag (const MouseEvent& e);
 
     //==============================================================================
-    ValueTree& getRoot()                                { return root; }
+    CodeGenerator::CustomisedCodeSnippets& getCustomisedCodeSnippets() throw()         { return customisedCodeSnippets; }
+
+    //==============================================================================
+    ValueTree& getRoot()                                        { return root; }
+    ValueTree getComponentGroup() const;
+
     UndoManager* getUndoManager() const;
     void beginNewTransaction();
 
@@ -156,12 +164,12 @@ private:
     File cppFile;
     ValueTree root;
     ScopedPointer<MarkerList> markersX, markersY;
+    CodeGenerator::CustomisedCodeSnippets customisedCodeSnippets;
     mutable UndoManager undoManager;
     bool changedSinceSaved;
 
     void checkRootObject();
     void createSubTreeIfNotThere (const String& name);
-    ValueTree getComponentGroup() const;
     void addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
                             bool isAnchor1, const String& fullCoordName);
 

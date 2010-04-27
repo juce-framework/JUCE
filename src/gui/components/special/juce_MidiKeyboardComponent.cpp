@@ -536,7 +536,7 @@ void MidiKeyboardComponent::drawBlackNote (int /*midiNoteNumber*/,
     }
 }
 
-void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNumForMiddleC_) throw()
+void MidiKeyboardComponent::setOctaveForMiddleC (const int octaveNumForMiddleC_)
 {
     octaveNumForMiddleC = octaveNumForMiddleC_;
     repaint();

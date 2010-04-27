@@ -44,7 +44,7 @@ ColourGradient::ColourGradient (const Colour& colour1,
                                 const Colour& colour2,
                                 const float x2_,
                                 const float y2_,
-                                const bool isRadial_) throw()
+                                const bool isRadial_)
     : x1 (x1_),
       y1 (y1_),
       x2 (x2_),
@@ -58,18 +58,18 @@ ColourGradient::ColourGradient (const Colour& colour1,
     colours.add (colour2.getARGB());
 }
 
-ColourGradient::~ColourGradient() throw()
+ColourGradient::~ColourGradient()
 {
 }
 
 //==============================================================================
-void ColourGradient::clearColours() throw()
+void ColourGradient::clearColours()
 {
     colours.clear();
 }
 
 void ColourGradient::addColour (const double proportionAlongGradient,
-                                const Colour& colour) throw()
+                                const Colour& colour)
 {
     // must be within the two end-points
     jassert (proportionAlongGradient >= 0 && proportionAlongGradient <= 1.0);
@@ -136,7 +136,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
 }
 
 //==============================================================================
-int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& lookupTable) const throw()
+int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& lookupTable) const
 {
 #ifdef JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of

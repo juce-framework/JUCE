@@ -174,7 +174,7 @@ class ScreenSaverDefeater   : public Timer,
                               public DeletedAtShutdown
 {
 public:
-    ScreenSaverDefeater() throw()
+    ScreenSaverDefeater()
     {
         startTimer (10000);
         timerCallback();

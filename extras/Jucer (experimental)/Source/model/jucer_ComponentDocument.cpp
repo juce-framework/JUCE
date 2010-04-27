@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -48,11 +48,23 @@ const char* const ComponentDocument::markerPosProperty      = "position";
 
 //==============================================================================
 ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
-   : project (project_), cppFile (cppFile_),
+   : project (project_),
+     cppFile (cppFile_),
      root (componentDocumentTag),
      changedSinceSaved (false)
 {
     reload();
+    checkRootObject();
+
+    root.addListener (this);
+}
+
+ComponentDocument::ComponentDocument (const ComponentDocument& other)
+   : project (other.project),
+     cppFile (other.cppFile),
+     root (other.root.createCopy()),
+     changedSinceSaved (false)
+{
     checkRootObject();
 
     root.addListener (this);
@@ -104,18 +116,39 @@ bool ComponentDocument::isComponentFile (const File& file)
 
 void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
 {
-    cpp << "/**  */"
-        << newLine << newLine;
+    CodeGenerator codeGen;
 
-    header << "/**  */"
-           << newLine << newLine;
+    codeGen.className = getClassName().toString();
+    codeGen.parentClasses = "public Component";
+
+    {
+        MemoryOutputStream metaData;
+        writeMetadata (metaData);
+        codeGen.jucerMetadata = metaData.toUTF8();
+    }
+
+    {
+        String code (BinaryData::jucer_ComponentTemplate_cpp);
+        String oldContent;
+
+        codeGen.applyToCode (code, cppFile, false, project);
+        customisedCodeSnippets.applyTo (code);
+        cpp << code;
+    }
+
+    {
+        String code (BinaryData::jucer_ComponentTemplate_h);
+        String oldContent;
+
+        codeGen.applyToCode (code, cppFile.withFileExtension (".h"), false, project);
+        customisedCodeSnippets.applyTo (code);
+        header << code;
+    }
 }
 
 void ComponentDocument::writeMetadata (OutputStream& out)
 {
-    out << "#if 0" << newLine
-        << "/** Jucer-generated metadata section - Edit this data at own risk!" << newLine
-        << metadataTagStart << newLine << newLine;
+    out << metadataTagStart << newLine << newLine;
 
     ScopedPointer<XmlElement> xml (root.createXml());
     jassert (xml != 0);
@@ -124,15 +157,13 @@ void ComponentDocument::writeMetadata (OutputStream& out)
         xml->writeToStream (out, String::empty, false, false);
 
     out << newLine
-        << metadataTagEnd << " */" << newLine
-        << "#endif" << newLine;
+        << metadataTagEnd << newLine;
 }
 
 bool ComponentDocument::save()
 {
     MemoryOutputStream cpp, header;
     writeCode (cpp, header);
-    writeMetadata (cpp);
 
     bool savedOk = overwriteFileWithNewDataIfDifferent (cppFile, cpp)
                     && overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
@@ -192,6 +223,8 @@ bool ComponentDocument::reload()
             checkRootObject();
             undoManager.clearUndoHistory();
             changedSinceSaved = false;
+
+            customisedCodeSnippets.reloadFrom (cppFile.loadFileAsString());
             return true;
         }
     }
@@ -523,6 +556,7 @@ ComponentDocument::MarkerList::MarkerList (ComponentDocument& document_, const b
       group (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag)),
       isX (isX_)
 {
+    jassert (group.isValid());
     jassert (group.isAChildOf (document_.getRoot()));
 }
 

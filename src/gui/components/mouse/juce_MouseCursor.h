@@ -127,7 +127,7 @@ public:
 
         @see MessageManager::setTimeBeforeShowingWaitCursor
     */
-    static void showWaitCursor() throw();
+    static void showWaitCursor();
 
     /** If showWaitCursor has been called, this will return the mouse to its
         normal state.
@@ -137,7 +137,7 @@ public:
 
         @see showWaitCursor
     */
-    static void hideWaitCursor() throw();
+    static void hideWaitCursor();
 
 
     //==============================================================================

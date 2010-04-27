@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -84,6 +84,20 @@ public:
     void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone);
     void continueDrag (const MouseEvent& e);
     void endDrag (const MouseEvent& e);
+
+    //==============================================================================
+    class ComponentHolder    : public Component
+    {
+    public:
+        ComponentHolder();
+        ~ComponentHolder();
+
+        void updateComponents (ComponentDocument& doc, SelectedItems& selection);
+        Component* getComponentForState (ComponentDocument& doc, const ValueTree& state) const;
+        Component* findComponentWithID (const String& uid) const;
+        Component* findComponentAt (const Point<int>& pos) const;
+        void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& lassoArea);
+    };
 
 private:
     ComponentEditor& editor;

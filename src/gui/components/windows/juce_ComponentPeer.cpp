@@ -45,8 +45,7 @@ static VoidArray heavyweightPeers;
 
 
 //==============================================================================
-ComponentPeer::ComponentPeer (Component* const component_,
-                              const int styleFlags_) throw()
+ComponentPeer::ComponentPeer (Component* const component_, const int styleFlags_)
     : component (component_),
       styleFlags (styleFlags_),
       lastPaintTime (0),
@@ -507,12 +506,12 @@ void ComponentPeer::bringModalComponentToFront()
 }
 
 //==============================================================================
-void ComponentPeer::clearMaskedRegion() throw()
+void ComponentPeer::clearMaskedRegion()
 {
     maskedRegion.clear();
 }
 
-void ComponentPeer::addMaskedRegion (int x, int y, int w, int h) throw()
+void ComponentPeer::addMaskedRegion (int x, int y, int w, int h)
 {
     maskedRegion.add (x, y, w, h);
 }

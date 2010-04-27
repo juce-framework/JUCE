@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -86,29 +86,6 @@ void CodeGenerator::removeCallback (const String& returnType, const String& prot
     }
 }
 
-void CodeGenerator::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
-{
-    const String initialiser (imageMemberName + " (0)");
-
-    if (! memberInitialisers.contains (initialiser, false))
-    {
-        memberInitialisers.add (initialiser);
-
-        privateMemberDeclarations
-            << "Image* " << imageMemberName << ";" << newLine;
-
-        if (resourceName.isNotEmpty())
-        {
-            constructorCode
-                << imageMemberName << " = ImageCache::getFromMemory ("
-                << resourceName << ", " << resourceName << "Size);" << newLine;
-
-            destructorCode
-                << "ImageCache::release (" << imageMemberName << ");" << newLine;
-        }
-    }
-}
-
 const StringArray CodeGenerator::getExtraParentClasses() const
 {
     StringArray s;
@@ -189,16 +166,15 @@ const String CodeGenerator::getClassDeclaration() const
     if (parentClassLines.contains ("public Button", false))
         parentClassLines.removeString ("public Component", false);
 
-    String r ("class ");
-    r << className << "  : ";
-
-    r += parentClassLines.joinIntoString ("," + String (newLine) + String::repeatedString (" ", r.length()));
-
+    String r;
+    r << "class " << className << "  : ";
+    r << parentClassLines.joinIntoString ("," + String (newLine) + String::repeatedString (" ", r.length()));
     return r;
 }
 
 const String CodeGenerator::getInitialiserList() const
 {
+    String s;
     StringArray inits (memberInitialisers);
 
     if (parentClassInitialiser.isNotEmpty())
@@ -208,26 +184,24 @@ const String CodeGenerator::getInitialiserList() const
     inits.removeEmptyStrings();
     inits.removeDuplicates (false);
 
-    String s;
-
-    if (inits.size() == 0)
-        return s;
-
-    s << "    : ";
-
-    for (int i = 0; i < inits.size(); ++i)
+    if (inits.size() > 0)
     {
-        String init (inits[i]);
+        s << "    : ";
 
-        while (init.endsWithChar (','))
-            init = init.dropLastCharacters (1);
+        for (int i = 0; i < inits.size(); ++i)
+        {
+            String init (inits[i]);
 
-        s << init;
+            while (init.endsWithChar (','))
+                init = init.dropLastCharacters (1);
 
-        if (i < inits.size() - 1)
-            s << "," << newLine << "      ";
-        else
-            s << newLine;
+            s << init;
+
+            if (i < inits.size() - 1)
+                s << "," << newLine << "      ";
+            else
+                s << newLine;
+        }
     }
 
     return s;
@@ -263,56 +237,6 @@ static bool getUserSection (const StringArray& lines, const String& tag, StringA
     return true;
 }
 
-static void copyAcrossUserSections (String& dest, const String& src)
-{
-    StringArray srcLines, dstLines;
-    srcLines.addLines (src);
-    dstLines.addLines (dest);
-
-    for (int i = 0; i < dstLines.size(); ++i)
-    {
-        if (dstLines[i].trimStart().startsWith ("//["))
-        {
-            String tag (dstLines[i].trimStart().substring (3));
-            tag = tag.upToFirstOccurrenceOf ("]", false, false);
-
-            jassert (! tag.startsWithChar ('/'));
-
-            if (! tag.startsWithChar ('/'))
-            {
-                const int endLine = indexOfLineStartingWith (dstLines,
-                                                             "//[/" + tag + "]",
-                                                             i + 1);
-
-                if (endLine > i)
-                {
-                    StringArray sourceLines;
-
-                    if (getUserSection (srcLines, tag, sourceLines))
-                    {
-                        int j;
-                        for (j = endLine - i; --j > 0;)
-                            dstLines.remove (i + 1);
-
-                        for (j = 0; j < sourceLines.size(); ++j)
-                            dstLines.insert (++i, sourceLines [j].trimEnd());
-
-                        ++i;
-                    }
-                    else
-                    {
-                        i = endLine;
-                    }
-                }
-            }
-        }
-
-        dstLines.set (i, dstLines[i].trimEnd());
-    }
-
-    dest = dstLines.joinIntoString (newLine) + newLine;
-}
-
 //==============================================================================
 static void replaceTemplate (String& text, const String& itemName, const String& value)
 {
@@ -339,20 +263,11 @@ static void replaceTemplate (String& text, const String& itemName, const String&
 }
 
 //==============================================================================
-void CodeGenerator::applyToCode (String& code,
-                                 const String& fileNameRoot,
-                                 const bool isForPreview,
-                                 const String& oldFileWithUserData) const
+void CodeGenerator::applyToCode (String& code, const File& targetFile, 
+                                 bool isForPreview, Project* project) const
 {
-    // header guard..
-    String headerGuard ("__JUCER_HEADER_");
-    headerGuard << className.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                << "_" << fileNameRoot.toUpperCase().retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-                << "_" << String::toHexString (Random::getSystemRandom().nextInt()).toUpperCase() << "__";
-
-    replaceTemplate (code, "headerGuard", headerGuard);
-
-    replaceTemplate (code, "creationTime", Time::getCurrentTime().toString (true, true, true));
+    replaceTemplate (code, "juceVersion", SystemStats::getJUCEVersion());
+    replaceTemplate (code, "headerGuard", makeHeaderGuardName (targetFile));
 
     replaceTemplate (code, "className", className);
     replaceTemplate (code, "constructorParams", constructorParams);
@@ -363,6 +278,11 @@ void CodeGenerator::applyToCode (String& code,
     replaceTemplate (code, "publicMemberDeclarations", getCallbackDeclarations() + newLine + publicMemberDeclarations);
 
     replaceTemplate (code, "methodDefinitions", getCallbackDefinitions());
+
+    if (project != 0)
+        replaceTemplate (code, "defaultJuceInclude", createIncludeStatement (project->getAppIncludeFile(), targetFile));
+    else
+        replaceTemplate (code, "defaultJuceInclude", "#include \"juce_amalgamated.h\"");
 
     replaceTemplate (code, "includeFilesH", getIncludeFileCode (includeFilesH));
     replaceTemplate (code, "includeFilesCPP", getIncludeFileCode (includeFilesCPP));
@@ -380,6 +300,146 @@ void CodeGenerator::applyToCode (String& code,
         replaceTemplate (code, "metadata", "  << Metadata isn't shown in the code preview >>" + String (newLine));
         replaceTemplate (code, "staticMemberDefinitions", "// Static member declarations and resources would go here... (these aren't shown in the code preview)");
     }
-
-    copyAcrossUserSections (code, oldFileWithUserData);
 }
+
+
+//==============================================================================
+CodeGenerator::CustomisedCodeSnippets::CustomisedCodeSnippets()
+{
+}
+
+CodeGenerator::CustomisedCodeSnippets::~CustomisedCodeSnippets()
+{
+}
+
+void CodeGenerator::CustomisedCodeSnippets::reloadFrom (const String& fileContent)
+{
+    sectionNames.clear();
+    sectionContent.clear();
+    
+    StringArray lines;
+    lines.addLines (fileContent);
+
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].trimStart().startsWith ("//["))
+        {
+            String tag (lines[i].trimStart().substring (3));
+            tag = tag.upToFirstOccurrenceOf ("]", false, false).trim();
+
+            jassert (! (tag.isEmpty() || tag.startsWithChar ('/')));
+
+            if (! (tag.isEmpty() || tag.startsWithChar ('/')))
+            {
+                const int endLine = indexOfLineStartingWith (lines, "//[/" + tag + "]", i + 1);
+
+                if (endLine > i)
+                {
+                    String content (lines.joinIntoString (newLine, i + 1, endLine - i - 1));
+                    
+                    sectionNames.add (tag);
+                    
+                    CodeDocument* doc = new CodeDocument();
+                    sectionContent.add (doc);
+                    
+                    doc->replaceAllContent (content);
+
+                    i = endLine;
+                }
+            }
+        }
+    }
+}
+
+void CodeGenerator::CustomisedCodeSnippets::applyTo (String& fileContent) const
+{
+    StringArray lines;
+    lines.addLines (fileContent);
+
+    for (int i = 0; i < lines.size(); ++i)
+    {
+        if (lines[i].trimStart().startsWith ("//["))
+        {
+            String tag (lines[i].trimStart().substring (3));
+            tag = tag.upToFirstOccurrenceOf ("]", false, false);
+
+            jassert (! tag.startsWithChar ('/'));
+
+            if (! tag.startsWithChar ('/'))
+            {
+                const int endLine = indexOfLineStartingWith (lines, "//[/" + tag + "]", i + 1);
+
+                if (endLine > i)
+                {
+                    StringArray sourceLines;
+                    sourceLines.addLines (getSectionContent (tag));
+
+                    if (sourceLines.size() > 0)
+                    {
+                        lines.removeRange (i + 1, endLine - i - 1);
+
+                        for (int j = 0; j < sourceLines.size(); ++j)
+                            lines.insert (++i, sourceLines [j].trimEnd());
+
+                        ++i;
+                    }
+                    else
+                    {
+                        i = endLine;
+                    }
+                }
+            }
+        }
+
+        lines.set (i, lines[i].trimEnd());
+    }
+
+    if (lines[lines.size() - 1].isNotEmpty())
+        lines.add (String::empty);
+
+    fileContent = lines.joinIntoString (newLine);
+}
+
+bool CodeGenerator::CustomisedCodeSnippets::areAnySnippetsUnsaved() const
+{
+    return true; //xxx
+}
+
+CodeDocument* CodeGenerator::CustomisedCodeSnippets::getDocumentFor (const String& sectionName, bool createIfNotFound)
+{
+    const int index = sectionNames.indexOf (sectionName);
+
+    if (index >= 0)
+        return sectionContent [index];
+
+    if (createIfNotFound)
+    {
+        sectionNames.add (sectionName);
+        sectionContent.add (new CodeDocument());
+        return sectionContent.getLast();
+    }
+
+    return 0;
+}
+
+const String CodeGenerator::CustomisedCodeSnippets::getSectionContent (const String& sectionName) const
+{
+    const int index = sectionNames.indexOf (sectionName);
+
+    if (index >= 0)
+        return sectionContent[index]->getAllContent();
+
+    return String::empty;
+}
+
+void CodeGenerator::CustomisedCodeSnippets::removeSection (const String& sectionName)
+{
+    const int index = sectionNames.indexOf (sectionName);
+
+    if (index >= 0)
+    {
+        sectionNames.remove (index);
+        sectionContent.remove (index);
+    }
+}
+

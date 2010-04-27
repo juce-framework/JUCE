@@ -77,7 +77,7 @@ public:
     }
 
     //==============================================================================
-    void handle (const uint32 message, const uint32 timeStamp) throw()
+    void handle (const uint32 message, const uint32 timeStamp)
     {
         const int byte = message & 0xff;
         if (byte < 0x80)
@@ -106,7 +106,7 @@ public:
         notify();
     }
 
-    void handleSysEx (MIDIHDR* const hdr, const uint32 timeStamp) throw()
+    void handleSysEx (MIDIHDR* const hdr, const uint32 timeStamp)
     {
         const int num = hdr->dwBytesRecorded;
 
@@ -135,7 +135,7 @@ public:
         }
     }
 
-    void writeBlock (const int i) throw()
+    void writeBlock (const int i)
     {
         hdr[i].dwBytesRecorded = 0;
         MMRESULT res = midiInPrepareHeader (hIn, &hdr[i], sizeof (MIDIHDR));
@@ -202,7 +202,7 @@ public:
         }
     }
 
-    void start() throw()
+    void start()
     {
         jassert (hIn != 0);
         if (hIn != 0 && ! isStarted)
@@ -229,7 +229,7 @@ public:
         }
     }
 
-    void stop() throw()
+    void stop()
     {
         if (isStarted)
         {
@@ -291,7 +291,7 @@ private:
     int pendingLength;
     char pending [MidiConstants::midiBufferSize];
 
-    double timeStampToTime (uint32 timeStamp) throw()
+    double timeStampToTime (uint32 timeStamp)
     {
         timeStamp += startTime;
 

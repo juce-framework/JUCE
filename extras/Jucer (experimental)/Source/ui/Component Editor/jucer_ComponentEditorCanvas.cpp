@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -332,8 +332,8 @@ public:
             if (axis.expanded (30, 30).contains (e.x, e.y))
             {
                 Coordinate coord (getMarkerList().getCoordinate (marker));
-                coord.moveToAbsolute (jmax (0.0, dragStartPos + (isX ? e.getDistanceFromDragStartX()
-                                                                     : e.getDistanceFromDragStartY())),
+                coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e.getDistanceFromDragStartX()
+                                                                               : e.getDistanceFromDragStartY()))),
                                       getMarkerList());
                 getMarkerList().setCoordinate (marker, coord);
             }
@@ -378,104 +378,6 @@ private:
     bool isDragging;
     FloatingLabelComponent label;
     String labelText;
-};
-
-//==============================================================================
-class ComponentEditorCanvas::ComponentHolder    : public Component
-{
-public:
-    ComponentHolder() {}
-    ~ComponentHolder() {}
-
-    void updateComponents (ComponentDocument& doc, SelectedItems& selection)
-    {
-        int i;
-        for (i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = getChildComponent (i);
-
-            if (! doc.containsComponent (c))
-            {
-                selection.deselect (ComponentDocument::getJucerIDFor (c));
-                delete c;
-            }
-        }
-
-        Array <Component*> componentsInOrder;
-
-        const int num = doc.getNumComponents();
-        for (i = 0; i < num; ++i)
-        {
-            const ValueTree v (doc.getComponent (i));
-            Component* c = getComponentForState (doc, v);
-
-            if (c == 0)
-            {
-                c = doc.createComponent (i);
-                addAndMakeVisible (c);
-            }
-
-            doc.updateComponent (c);
-            componentsInOrder.add (c);
-        }
-
-        // Make sure the z-order is correct..
-        if (num > 0)
-        {
-            componentsInOrder.getLast()->toFront (false);
-
-            for (i = num - 1; --i >= 0;)
-                componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
-        }
-    }
-
-    Component* getComponentForState (ComponentDocument& doc, const ValueTree& state) const
-    {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent (i);
-
-            if (doc.isStateForComponent (state, c))
-                return c;
-        }
-
-        return 0;
-    }
-
-    Component* findComponentWithID (const String& uid) const
-    {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent(i);
-
-            if (ComponentDocument::getJucerIDFor (c) == uid)
-                return c;
-        }
-
-        return 0;
-    }
-
-    Component* findComponentAt (const Point<int>& pos) const
-    {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = getChildComponent(i);
-            if (c->getBounds().contains (pos))
-                return c;
-        }
-
-        return 0;
-    }
-
-    void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& lassoArea)
-    {
-        for (int i = getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = getChildComponent(i);
-            if (c->getBounds().intersects (lassoArea))
-                itemsFound.add (ComponentDocument::getJucerIDFor (c));
-        }
-    }
 };
 
 
@@ -1096,6 +998,106 @@ void ComponentEditorCanvas::endDrag (const MouseEvent& e)
         dragger = 0;
     }
 }
+
+//==============================================================================
+ComponentEditorCanvas::ComponentHolder::ComponentHolder()
+{
+}
+
+ComponentEditorCanvas::ComponentHolder::~ComponentHolder()
+{
+}
+
+void ComponentEditorCanvas::ComponentHolder::updateComponents (ComponentDocument& doc, SelectedItems& selection)
+{
+    int i;
+    for (i = getNumChildComponents(); --i >= 0;)
+    {
+        Component* c = getChildComponent (i);
+
+        if (! doc.containsComponent (c))
+        {
+            selection.deselect (ComponentDocument::getJucerIDFor (c));
+            delete c;
+        }
+    }
+
+    Array <Component*> componentsInOrder;
+
+    const int num = doc.getNumComponents();
+    for (i = 0; i < num; ++i)
+    {
+        const ValueTree v (doc.getComponent (i));
+        Component* c = getComponentForState (doc, v);
+
+        if (c == 0)
+        {
+            c = doc.createComponent (i);
+            addAndMakeVisible (c);
+        }
+
+        doc.updateComponent (c);
+        componentsInOrder.add (c);
+    }
+
+    // Make sure the z-order is correct..
+    if (num > 0)
+    {
+        componentsInOrder.getLast()->toFront (false);
+
+        for (i = num - 1; --i >= 0;)
+            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+    }
+}
+
+Component* ComponentEditorCanvas::ComponentHolder::getComponentForState (ComponentDocument& doc, const ValueTree& state) const
+{
+    for (int i = getNumChildComponents(); --i >= 0;)
+    {
+        Component* const c = getChildComponent (i);
+
+        if (doc.isStateForComponent (state, c))
+            return c;
+    }
+
+    return 0;
+}
+
+Component* ComponentEditorCanvas::ComponentHolder::findComponentWithID (const String& uid) const
+{
+    for (int i = getNumChildComponents(); --i >= 0;)
+    {
+        Component* const c = getChildComponent(i);
+
+        if (ComponentDocument::getJucerIDFor (c) == uid)
+            return c;
+    }
+
+    return 0;
+}
+
+Component* ComponentEditorCanvas::ComponentHolder::findComponentAt (const Point<int>& pos) const
+{
+    for (int i = getNumChildComponents(); --i >= 0;)
+    {
+        Component* const c = getChildComponent(i);
+        if (c->getBounds().contains (pos))
+            return c;
+    }
+
+    return 0;
+}
+
+void ComponentEditorCanvas::ComponentHolder::findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& lassoArea)
+{
+    for (int i = getNumChildComponents(); --i >= 0;)
+    {
+        Component* c = getChildComponent(i);
+        if (c->getBounds().intersects (lassoArea))
+            itemsFound.add (ComponentDocument::getJucerIDFor (c));
+    }
+}
+
 
 //==============================================================================
 ComponentEditorCanvas::OverlayItemComponent::OverlayItemComponent (ComponentEditorCanvas& canvas_)

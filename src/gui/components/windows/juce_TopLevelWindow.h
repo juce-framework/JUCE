@@ -161,7 +161,7 @@ private:
     bool useDropShadow, useNativeTitleBar, windowIsActive_;
     ScopedPointer <DropShadower> shadower;
 
-    void setWindowActive (bool isNowActive) throw();
+    void setWindowActive (bool isNowActive);
 
     TopLevelWindow (const TopLevelWindow&);
     TopLevelWindow& operator= (const TopLevelWindow&);

@@ -263,7 +263,7 @@ public:
 
         @see getOctaveForMiddleC
     */
-    void setOctaveForMiddleC (int octaveNumForMiddleC) throw();
+    void setOctaveForMiddleC (int octaveNumForMiddleC);
 
     /** This returns the value set by setOctaveForMiddleC().
         @see setOctaveForMiddleC

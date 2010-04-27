@@ -42,7 +42,7 @@ FillType::FillType (const Colour& colour_) throw()
 {
 }
 
-FillType::FillType (const ColourGradient& gradient_) throw()
+FillType::FillType (const ColourGradient& gradient_)
     : colour (0xff000000), gradient (new ColourGradient (gradient_)), image (0)
 {
 }
@@ -52,14 +52,14 @@ FillType::FillType (const Image& image_, const AffineTransform& transform_) thro
 {
 }
 
-FillType::FillType (const FillType& other) throw()
+FillType::FillType (const FillType& other)
     : colour (other.colour),
       gradient (other.gradient != 0 ? new ColourGradient (*other.gradient) : 0),
       image (other.image), transform (other.transform)
 {
 }
 
-FillType& FillType::operator= (const FillType& other) throw()
+FillType& FillType::operator= (const FillType& other)
 {
     if (this != &other)
     {
@@ -83,7 +83,7 @@ void FillType::setColour (const Colour& newColour) throw()
     colour = newColour;
 }
 
-void FillType::setGradient (const ColourGradient& newGradient) throw()
+void FillType::setGradient (const ColourGradient& newGradient)
 {
     if (gradient != 0)
     {

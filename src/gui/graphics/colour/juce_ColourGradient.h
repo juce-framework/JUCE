@@ -61,7 +61,7 @@ public:
     */
     ColourGradient (const Colour& colour1, float x1, float y1,
                     const Colour& colour2, float x2, float y2,
-                    bool isRadial) throw();
+                    bool isRadial);
 
     /** Creates an uninitialised gradient.
 
@@ -71,7 +71,7 @@ public:
     ColourGradient() throw();
 
     /** Destructor */
-    ~ColourGradient() throw();
+    ~ColourGradient();
 
     //==============================================================================
     /** Removes any colours that have been added.
@@ -79,7 +79,7 @@ public:
         This will also remove any start and end colours, so the gradient won't work. You'll
         need to add more colours with addColour().
     */
-    void clearColours() throw();
+    void clearColours();
 
     /** Adds a colour at a point along the length of the gradient.
 
@@ -92,7 +92,7 @@ public:
         @param colour                       the colour that should be used at this point
     */
     void addColour (double proportionAlongGradient,
-                    const Colour& colour) throw();
+                    const Colour& colour);
 
     /** Multiplies the alpha value of all the colours by the given scale factor */
     void multiplyOpacity (float multiplier) throw();
@@ -123,7 +123,7 @@ public:
         This will resize the HeapBlock, fill it with the colours, and will return the number of
         colours that it added.
     */
-    int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const throw();
+    int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const;
 
     /** Returns true if all colours are opaque. */
     bool isOpaque() const throw();

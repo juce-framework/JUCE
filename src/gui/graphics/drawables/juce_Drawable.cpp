@@ -133,7 +133,7 @@ Drawable* Drawable::createFromImageFile (const File& file)
 }
 
 //==============================================================================
-Drawable* Drawable::createFromValueTree (const ValueTree& tree) throw()
+Drawable* Drawable::createFromValueTree (const ValueTree& tree)
 {
     Drawable* d = DrawablePath::createFromValueTree (tree);
 

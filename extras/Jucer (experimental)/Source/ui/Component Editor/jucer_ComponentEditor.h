@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -53,8 +53,9 @@ public:
     ComponentDocument& getDocument() const      { return *componentDocument; }
 
     Viewport* getViewport() const;
-
     ComponentEditorCanvas* getCanvas() const;
+
+    void test();
 
 private:
     class ClassInfoHolder;

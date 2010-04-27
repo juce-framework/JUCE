@@ -36,29 +36,29 @@ RectangleList::RectangleList() throw()
 {
 }
 
-RectangleList::RectangleList (const Rectangle<int>& rect) throw()
+RectangleList::RectangleList (const Rectangle<int>& rect)
 {
     if (! rect.isEmpty())
         rects.add (rect);
 }
 
-RectangleList::RectangleList (const RectangleList& other) throw()
+RectangleList::RectangleList (const RectangleList& other)
     : rects (other.rects)
 {
 }
 
-RectangleList& RectangleList::operator= (const RectangleList& other) throw()
+RectangleList& RectangleList::operator= (const RectangleList& other)
 {
     rects = other.rects;
     return *this;
 }
 
-RectangleList::~RectangleList() throw()
+RectangleList::~RectangleList()
 {
 }
 
 //==============================================================================
-void RectangleList::clear() throw()
+void RectangleList::clear()
 {
     rects.clearQuick();
 }
@@ -84,7 +84,7 @@ RectangleList::Iterator::Iterator (const RectangleList& list) throw()
 {
 }
 
-RectangleList::Iterator::~Iterator() throw()
+RectangleList::Iterator::~Iterator()
 {
 }
 
@@ -101,7 +101,7 @@ bool RectangleList::Iterator::next() throw()
 
 
 //==============================================================================
-void RectangleList::add (const Rectangle<int>& rect) throw()
+void RectangleList::add (const Rectangle<int>& rect)
 {
     if (! rect.isEmpty())
     {
@@ -155,12 +155,12 @@ void RectangleList::add (const Rectangle<int>& rect) throw()
     }
 }
 
-void RectangleList::addWithoutMerging (const Rectangle<int>& rect) throw()
+void RectangleList::addWithoutMerging (const Rectangle<int>& rect)
 {
     rects.add (rect);
 }
 
-void RectangleList::add (const int x, const int y, const int w, const int h) throw()
+void RectangleList::add (const int x, const int y, const int w, const int h)
 {
     if (rects.size() == 0)
     {
@@ -173,13 +173,13 @@ void RectangleList::add (const int x, const int y, const int w, const int h) thr
     }
 }
 
-void RectangleList::add (const RectangleList& other) throw()
+void RectangleList::add (const RectangleList& other)
 {
     for (int i = 0; i < other.rects.size(); ++i)
         add (other.rects.getReference (i));
 }
 
-void RectangleList::subtract (const Rectangle<int>& rect) throw()
+void RectangleList::subtract (const Rectangle<int>& rect)
 {
     const int originalNumRects = rects.size();
 
@@ -265,13 +265,13 @@ void RectangleList::subtract (const Rectangle<int>& rect) throw()
     }
 }
 
-void RectangleList::subtract (const RectangleList& otherList) throw()
+void RectangleList::subtract (const RectangleList& otherList)
 {
     for (int i = otherList.rects.size(); --i >= 0;)
         subtract (otherList.rects.getReference (i));
 }
 
-bool RectangleList::clipTo (const Rectangle<int>& rect) throw()
+bool RectangleList::clipTo (const Rectangle<int>& rect)
 {
     bool notEmpty = false;
 
@@ -295,7 +295,7 @@ bool RectangleList::clipTo (const Rectangle<int>& rect) throw()
     return notEmpty;
 }
 
-bool RectangleList::clipTo (const RectangleList& other) throw()
+bool RectangleList::clipTo (const RectangleList& other)
 {
     if (rects.size() == 0)
         return false;
@@ -320,7 +320,7 @@ bool RectangleList::clipTo (const RectangleList& other) throw()
     return ! isEmpty();
 }
 
-bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw()
+bool RectangleList::getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const
 {
     destRegion.clear();
 
@@ -345,7 +345,7 @@ void RectangleList::swapWith (RectangleList& otherList) throw()
 
 
 //==============================================================================
-void RectangleList::consolidate() throw()
+void RectangleList::consolidate()
 {
     int i;
     for (i = 0; i < getNumRectangles() - 1; ++i)
@@ -427,7 +427,7 @@ bool RectangleList::containsPoint (const int x, const int y) const throw()
     return false;
 }
 
-bool RectangleList::containsRectangle (const Rectangle<int>& rectangleToCheck) const throw()
+bool RectangleList::containsRectangle (const Rectangle<int>& rectangleToCheck) const
 {
     if (rects.size() > 1)
     {
@@ -511,7 +511,7 @@ void RectangleList::offsetAll (const int dx, const int dy) throw()
 }
 
 //==============================================================================
-const Path RectangleList::toPath() const throw()
+const Path RectangleList::toPath() const
 {
     Path p;
 

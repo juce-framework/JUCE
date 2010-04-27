@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -27,6 +27,7 @@
 #define __JUCER_CODEGENERATOR_H_F79AEF58__
 
 #include "../jucer_Headers.h"
+#include "jucer_Project.h"
 
 
 //==============================================================================
@@ -38,16 +39,7 @@ public:
     ~CodeGenerator();
 
     //==============================================================================
-    void applyToCode (String& codeTemplate,
-                      const String& fileNameRoot,
-                      const bool isForPreview,
-                      const String& oldFileContents) const;
-
-    int getUniqueSuffix();
-
-    //==============================================================================
     String className;
-    String componentName;
     String parentClassInitialiser;  // optional parent class initialiser to go before the items in the initialisers list
     StringArray memberInitialisers;
     String parentClasses;
@@ -75,13 +67,40 @@ public:
 
     void removeCallback (const String& returnType, const String& prototype);
 
-    void addImageResourceLoader (const String& imageMemberName, const String& resourceName);
-
     const String getCallbackDeclarations() const;
     const String getCallbackDefinitions() const;
     const StringArray getExtraParentClasses() const;
 
+    int getUniqueSuffix();
+
+    //==============================================================================
+    // An object to load and store all the user-defined bits of code as documents.
+    class CustomisedCodeSnippets
+    {
+    public:
+        CustomisedCodeSnippets();
+        ~CustomisedCodeSnippets();
+
+        void reloadFrom (const String& fileContent);
+        void applyTo (String& fileContent) const;
+        bool areAnySnippetsUnsaved() const;
+
+        CodeDocument* getDocumentFor (const String& sectionName, bool createIfNotFound);
+        const String getSectionContent (const String& sectionName) const;
+        void removeSection (const String& sectionName);
+
+    private:
+        StringArray sectionNames;
+        OwnedArray <CodeDocument> sectionContent;
+    };
+
+    //==============================================================================
+    void applyToCode (String& codeTemplate, const File& targetFile,
+                      bool isForPreview, Project* project) const;
+
+
 private:
+    //==============================================================================
     const String getClassDeclaration() const;
     const String getInitialiserList() const;
     int suffix;

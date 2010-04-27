@@ -183,7 +183,7 @@ Drawable* DrawableComposite::createCopy() const
 }
 
 //==============================================================================
-ValueTree DrawableComposite::createValueTree() const throw()
+ValueTree DrawableComposite::createValueTree() const
 {
     ValueTree v ("Group");
 
@@ -213,7 +213,7 @@ ValueTree DrawableComposite::createValueTree() const throw()
     return v;
 }
 
-DrawableComposite* DrawableComposite::createFromValueTree (const ValueTree& tree) throw()
+DrawableComposite* DrawableComposite::createFromValueTree (const ValueTree& tree)
 {
     if (! tree.hasType ("Group"))
         return 0;

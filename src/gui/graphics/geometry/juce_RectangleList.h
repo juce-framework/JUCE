@@ -48,16 +48,16 @@ public:
     RectangleList() throw();
 
     /** Creates a copy of another list */
-    RectangleList (const RectangleList& other) throw();
+    RectangleList (const RectangleList& other);
 
     /** Creates a list containing just one rectangle. */
-    RectangleList (const Rectangle<int>& rect) throw();
+    RectangleList (const Rectangle<int>& rect);
 
     /** Copies this list from another one. */
-    RectangleList& operator= (const RectangleList& other) throw();
+    RectangleList& operator= (const RectangleList& other);
 
     /** Destructor. */
-    ~RectangleList() throw();
+    ~RectangleList();
 
     //==============================================================================
     /** Returns true if the region is empty. */
@@ -76,14 +76,14 @@ public:
 
     //==============================================================================
     /** Removes all rectangles to leave an empty region. */
-    void clear() throw();
+    void clear();
 
     /** Merges a new rectangle into the list.
 
         The rectangle being added will first be clipped to remove any parts of it
         that overlap existing rectangles in the list.
     */
-    void add (int x, int y, int width, int height) throw();
+    void add (int x, int y, int width, int height);
 
     /** Merges a new rectangle into the list.
 
@@ -91,35 +91,35 @@ public:
         that overlap existing rectangles in the list, and adjacent rectangles will be
         merged into it.
     */
-    void add (const Rectangle<int>& rect) throw();
+    void add (const Rectangle<int>& rect);
 
     /** Dumbly adds a rectangle to the list without checking for overlaps.
 
         This simply adds the rectangle to the end, it doesn't merge it or remove
         any overlapping bits.
     */
-    void addWithoutMerging (const Rectangle<int>& rect) throw();
+    void addWithoutMerging (const Rectangle<int>& rect);
 
     /** Merges another rectangle list into this one.
 
         Any overlaps between the two lists will be clipped, so that the result is
         the union of both lists.
     */
-    void add (const RectangleList& other) throw();
+    void add (const RectangleList& other);
 
     /** Removes a rectangular region from the list.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
     */
-    void subtract (const Rectangle<int>& rect) throw();
+    void subtract (const Rectangle<int>& rect);
 
     /** Removes all areas in another RectangleList from this one.
 
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
     */
-    void subtract (const RectangleList& otherList) throw();
+    void subtract (const RectangleList& otherList);
 
     /** Removes any areas of the region that lie outside a given rectangle.
 
@@ -130,7 +130,7 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const Rectangle<int>& rect) throw();
+    bool clipTo (const Rectangle<int>& rect);
 
     /** Removes any areas of the region that lie outside a given rectangle list.
 
@@ -141,7 +141,7 @@ public:
 
         @see getIntersectionWith
     */
-    bool clipTo (const RectangleList& other) throw();
+    bool clipTo (const RectangleList& other);
 
     /** Creates a region which is the result of clipping this one to a given rectangle.
 
@@ -152,7 +152,7 @@ public:
 
         @see clipTo
     */
-    bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw();
+    bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const;
 
     /** Swaps the contents of this and another list.
 
@@ -174,7 +174,7 @@ public:
                     defined by this object
         @see intersectsRectangle, containsPoint
     */
-    bool containsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
+    bool containsRectangle (const Rectangle<int>& rectangleToCheck) const;
 
     /** Checks whether the region contains any part of a given rectangle.
 
@@ -200,14 +200,14 @@ public:
         possible, to simplify lists that might have been fragmented by repeated
         add/subtract calls.
     */
-    void consolidate() throw();
+    void consolidate();
 
     /** Adds an x and y value to all the co-ordinates. */
     void offsetAll (int dx, int dy) throw();
 
     //==============================================================================
     /** Creates a Path object to represent this region. */
-    const Path toPath() const throw();
+    const Path toPath() const;
 
 
     //==============================================================================
@@ -217,7 +217,7 @@ public:
     public:
         //==============================================================================
         Iterator (const RectangleList& list) throw();
-        ~Iterator() throw();
+        ~Iterator();
 
         //==============================================================================
         /** Advances to the next rectangle, and returns true if it's not finished.

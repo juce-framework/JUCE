@@ -44,29 +44,29 @@ DrawablePath::~DrawablePath()
 }
 
 //==============================================================================
-void DrawablePath::setPath (const Path& newPath) throw()
+void DrawablePath::setPath (const Path& newPath)
 {
     path = newPath;
     updateOutline();
 }
 
-void DrawablePath::setFill (const FillType& newFill) throw()
+void DrawablePath::setFill (const FillType& newFill)
 {
     mainFill = newFill;
 }
 
-void DrawablePath::setStrokeFill (const FillType& newFill) throw()
+void DrawablePath::setStrokeFill (const FillType& newFill)
 {
     strokeFill = newFill;
 }
 
-void DrawablePath::setStrokeType (const PathStrokeType& newStrokeType) throw()
+void DrawablePath::setStrokeType (const PathStrokeType& newStrokeType)
 {
     strokeType = newStrokeType;
     updateOutline();
 }
 
-void DrawablePath::setStrokeThickness (const float newThickness) throw()
+void DrawablePath::setStrokeThickness (const float newThickness)
 {
     setStrokeType (PathStrokeType (newThickness, strokeType.getJointStyle(), strokeType.getEndStyle()));
 }
@@ -195,7 +195,7 @@ static ValueTree createTreeForFillType (const String& tagName, const FillType& f
     return v;
 }
 
-ValueTree DrawablePath::createValueTree() const throw()
+ValueTree DrawablePath::createValueTree() const
 {
     ValueTree v ("Path");
 
@@ -215,7 +215,7 @@ ValueTree DrawablePath::createValueTree() const throw()
     return v;
 }
 
-DrawablePath* DrawablePath::createFromValueTree (const ValueTree& tree) throw()
+DrawablePath* DrawablePath::createFromValueTree (const ValueTree& tree)
 {
     if (! tree.hasType ("Path"))
         return 0;

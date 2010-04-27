@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_DrawableText.h"
 
 
@@ -86,7 +85,7 @@ Drawable* DrawableText::createCopy() const
 }
 
 //==============================================================================
-ValueTree DrawableText::createValueTree() const throw()
+ValueTree DrawableText::createValueTree() const
 {
     ValueTree v ("Text");
 
@@ -97,7 +96,7 @@ ValueTree DrawableText::createValueTree() const throw()
     return v;
 }
 
-DrawableText* DrawableText::createFromValueTree (const ValueTree& tree) throw()
+DrawableText* DrawableText::createFromValueTree (const ValueTree& tree)
 {
     if (! tree.hasType ("Text"))
         return 0;

@@ -9367,9 +9367,9 @@ public:
 
 	bool operator!= (const MouseCursor& other) const throw();
 
-	static void showWaitCursor() throw();
+	static void showWaitCursor();
 
-	static void hideWaitCursor() throw();
+	static void hideWaitCursor();
 
 	juce_UseDebuggingNewOperator
 
@@ -11974,16 +11974,16 @@ public:
 
 	ColourGradient (const Colour& colour1, float x1, float y1,
 					const Colour& colour2, float x2, float y2,
-					bool isRadial) throw();
+					bool isRadial);
 
 	ColourGradient() throw();
 
-	~ColourGradient() throw();
+	~ColourGradient();
 
-	void clearColours() throw();
+	void clearColours();
 
 	void addColour (double proportionAlongGradient,
-					const Colour& colour) throw();
+					const Colour& colour);
 
 	void multiplyOpacity (float multiplier) throw();
 
@@ -11995,7 +11995,7 @@ public:
 
 	const Colour getColourAtPosition (float position) const throw();
 
-	int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const throw();
+	int createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& resultLookupTable) const;
 
 	bool isOpaque() const throw();
 
@@ -12027,13 +12027,13 @@ public:
 
 	FillType (const Colour& colour) throw();
 
-	FillType (const ColourGradient& gradient) throw();
+	FillType (const ColourGradient& gradient);
 
 	FillType (const Image& image, const AffineTransform& transform) throw();
 
-	FillType (const FillType& other) throw();
+	FillType (const FillType& other);
 
-	FillType& operator= (const FillType& other) throw();
+	FillType& operator= (const FillType& other);
 
 	~FillType() throw();
 
@@ -12045,7 +12045,7 @@ public:
 
 	void setColour (const Colour& newColour) throw();
 
-	void setGradient (const ColourGradient& newGradient) throw();
+	void setGradient (const ColourGradient& newGradient);
 
 	void setTiledImage (const Image& image, const AffineTransform& transform) throw();
 
@@ -12369,13 +12369,13 @@ public:
 
 	RectangleList() throw();
 
-	RectangleList (const RectangleList& other) throw();
+	RectangleList (const RectangleList& other);
 
-	RectangleList (const Rectangle<int>& rect) throw();
+	RectangleList (const Rectangle<int>& rect);
 
-	RectangleList& operator= (const RectangleList& other) throw();
+	RectangleList& operator= (const RectangleList& other);
 
-	~RectangleList() throw();
+	~RectangleList();
 
 	bool isEmpty() const throw();
 
@@ -12383,31 +12383,31 @@ public:
 
 	const Rectangle<int> getRectangle (const int index) const throw();
 
-	void clear() throw();
+	void clear();
 
-	void add (int x, int y, int width, int height) throw();
+	void add (int x, int y, int width, int height);
 
-	void add (const Rectangle<int>& rect) throw();
+	void add (const Rectangle<int>& rect);
 
-	void addWithoutMerging (const Rectangle<int>& rect) throw();
+	void addWithoutMerging (const Rectangle<int>& rect);
 
-	void add (const RectangleList& other) throw();
+	void add (const RectangleList& other);
 
-	void subtract (const Rectangle<int>& rect) throw();
+	void subtract (const Rectangle<int>& rect);
 
-	void subtract (const RectangleList& otherList) throw();
+	void subtract (const RectangleList& otherList);
 
-	bool clipTo (const Rectangle<int>& rect) throw();
+	bool clipTo (const Rectangle<int>& rect);
 
-	bool clipTo (const RectangleList& other) throw();
+	bool clipTo (const RectangleList& other);
 
-	bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const throw();
+	bool getIntersectionWith (const Rectangle<int>& rect, RectangleList& destRegion) const;
 
 	void swapWith (RectangleList& otherList) throw();
 
 	bool containsPoint (int x, int y) const throw();
 
-	bool containsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
+	bool containsRectangle (const Rectangle<int>& rectangleToCheck) const;
 
 	bool intersectsRectangle (const Rectangle<int>& rectangleToCheck) const throw();
 
@@ -12415,18 +12415,18 @@ public:
 
 	const Rectangle<int> getBounds() const throw();
 
-	void consolidate() throw();
+	void consolidate();
 
 	void offsetAll (int dx, int dy) throw();
 
-	const Path toPath() const throw();
+	const Path toPath() const;
 
 	class Iterator
 	{
 	public:
 
 		Iterator (const RectangleList& list) throw();
-		~Iterator() throw();
+		~Iterator();
 
 		bool next() throw();
 
@@ -20197,9 +20197,9 @@ public:
 
 	static Drawable* createFromSVG (const XmlElement& svgDocument);
 
-	static Drawable* createFromValueTree (const ValueTree& tree) throw();
+	static Drawable* createFromValueTree (const ValueTree& tree);
 
-	virtual ValueTree createValueTree() const throw() = 0;
+	virtual ValueTree createValueTree() const = 0;
 
 	juce_UseDebuggingNewOperator
 
@@ -22947,7 +22947,7 @@ private:
 	bool useDropShadow, useNativeTitleBar, windowIsActive_;
 	ScopedPointer <DropShadower> shadower;
 
-	void setWindowActive (bool isNowActive) throw();
+	void setWindowActive (bool isNowActive);
 
 	TopLevelWindow (const TopLevelWindow&);
 	TopLevelWindow& operator= (const TopLevelWindow&);
@@ -26812,7 +26812,7 @@ public:
 
 	void setKeyPressBaseOctave (int newOctaveNumber);
 
-	void setOctaveForMiddleC (int octaveNumForMiddleC) throw();
+	void setOctaveForMiddleC (int octaveNumForMiddleC);
 
 	int getOctaveForMiddleC() const throw()		 { return octaveNumForMiddleC; }
 
@@ -27405,8 +27405,7 @@ public:
 
 	};
 
-	ComponentPeer (Component* component,
-				   int styleFlags) throw();
+	ComponentPeer (Component* component, int styleFlags);
 
 	virtual ~ComponentPeer();
 
@@ -27503,9 +27502,9 @@ public:
 	void handleFileDragExit (const StringArray& files);
 	void handleFileDragDrop (const StringArray& files, const Point<int>& position);
 
-	void clearMaskedRegion() throw();
+	void clearMaskedRegion();
 
-	void addMaskedRegion (int x, int y, int w, int h) throw();
+	void addMaskedRegion (int x, int y, int w, int h);
 
 	static int getNumPeers() throw();
 
@@ -27985,8 +27984,8 @@ public:
 	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
-	ValueTree createValueTree() const throw();
-	static DrawableComposite* createFromValueTree (const ValueTree& tree) throw();
+	ValueTree createValueTree() const;
+	static DrawableComposite* createFromValueTree (const ValueTree& tree);
 
 	juce_UseDebuggingNewOperator
 
@@ -28038,8 +28037,8 @@ public:
 	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
-	ValueTree createValueTree() const throw();
-	static DrawableImage* createFromValueTree (const ValueTree& tree) throw();
+	ValueTree createValueTree() const;
+	static DrawableImage* createFromValueTree (const ValueTree& tree);
 
 	juce_UseDebuggingNewOperator
 
@@ -28072,21 +28071,21 @@ public:
 
 	virtual ~DrawablePath();
 
-	void setPath (const Path& newPath) throw();
+	void setPath (const Path& newPath);
 
 	const Path& getPath() const throw()			 { return path; }
 
-	void setFill (const FillType& newFill) throw();
+	void setFill (const FillType& newFill);
 
 	const FillType& getFill() const throw()			 { return mainFill; }
 
-	void setStrokeFill (const FillType& newStrokeFill) throw();
+	void setStrokeFill (const FillType& newStrokeFill);
 
 	const FillType& getStrokeFill() const throw()		   { return strokeFill; }
 
-	void setStrokeType (const PathStrokeType& newStrokeType) throw();
+	void setStrokeType (const PathStrokeType& newStrokeType);
 
-	void setStrokeThickness (float newThickness) throw();
+	void setStrokeThickness (float newThickness);
 
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
@@ -28094,8 +28093,8 @@ public:
 	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
-	ValueTree createValueTree() const throw();
-	static DrawablePath* createFromValueTree (const ValueTree& tree) throw();
+	ValueTree createValueTree() const;
+	static DrawablePath* createFromValueTree (const ValueTree& tree);
 
 	juce_UseDebuggingNewOperator
 
@@ -28143,8 +28142,8 @@ public:
 	const Rectangle<float> getBounds() const;
 	bool hitTest (float x, float y) const;
 	Drawable* createCopy() const;
-	ValueTree createValueTree() const throw();
-	static DrawableText* createFromValueTree (const ValueTree& tree) throw();
+	ValueTree createValueTree() const;
+	static DrawableText* createFromValueTree (const ValueTree& tree);
 
 	juce_UseDebuggingNewOperator
 

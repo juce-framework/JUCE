@@ -87,8 +87,7 @@ public:
         The component is the one that we intend to represent, and the style flags are
         a combination of the values in the StyleFlags enum
     */
-    ComponentPeer (Component* component,
-                   int styleFlags) throw();
+    ComponentPeer (Component* component, int styleFlags);
 
     /** Destructor. */
     virtual ~ComponentPeer();
@@ -310,7 +309,7 @@ public:
 
         @see addMaskedRegion
     */
-    void clearMaskedRegion() throw();
+    void clearMaskedRegion();
 
     /** Adds a rectangle to the set of areas not to paint over.
 
@@ -321,7 +320,7 @@ public:
         The masked region is cleared each time before a paint happens, so a component
         will have to make sure it calls this every time it's painted.
     */
-    void addMaskedRegion (int x, int y, int w, int h) throw();
+    void addMaskedRegion (int x, int y, int w, int h);
 
     //==============================================================================
     /** Returns the number of currently-active peers.

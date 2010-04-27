@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ public:
     virtual bool isMissing() = 0;
     virtual Image* getIcon() const = 0;
 
-    void showRenameBox();
+    virtual void showRenameBox();
 
     // Text editor listener for renaming..
     void textEditorTextChanged (TextEditor& editor)         {}

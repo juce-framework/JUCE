@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library - "Jules' Utility Class Extensions"
-   Copyright 2004-9 by Raw Material Software Ltd.
+   Copyright 2004-10 by Raw Material Software Ltd.
 
   ------------------------------------------------------------------------------
 
@@ -301,7 +301,6 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         menu.addCommandItem (commandManager, CommandIDs::undo);
         menu.addCommandItem (commandManager, CommandIDs::redo);
         menu.addSeparator();
-
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);
         menu.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
@@ -322,19 +321,13 @@ const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
         // "View" menu
 
         menu.addCommandItem (commandManager, CommandIDs::showProjectSettings);
-
-        //menu.addCommandItem (commandManager, CommandIDs::test);
         menu.addSeparator();
+
+        menu.addCommandItem (commandManager, CommandIDs::test);
+        menu.addSeparator();
+
         menu.addCommandItem (commandManager, CommandIDs::showGrid);
         menu.addCommandItem (commandManager, CommandIDs::enableSnapToGrid);
-
-   /*     const int currentSnapSize = getActiveDocument() != 0 ? getActiveDocument()->getSnappingGridSize() : 0;
-
-        PopupMenu m;
-        for (int i = 0; i < numElementsInArray (snapSizes); ++i)
-            m.addItem (300 + i, String (snapSizes[i]) + " pixels", true, snapSizes[i] == currentSnapSize);
-
-        menu.addSubMenu ("Grid size", m, getActiveDocument() != 0);*/
 
         menu.addSeparator();
         menu.addCommandItem (commandManager, CommandIDs::zoomIn);

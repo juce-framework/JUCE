@@ -52,7 +52,7 @@ public:
 
         @see setFillColour, setStrokeType
     */
-    void setPath (const Path& newPath) throw();
+    void setPath (const Path& newPath);
 
     /** Returns the current path. */
     const Path& getPath() const throw()                         { return path; }
@@ -65,7 +65,7 @@ public:
 
         @see setPath, setStrokeFill
     */
-    void setFill (const FillType& newFill) throw();
+    void setFill (const FillType& newFill);
 
     /** Returns the current fill type.
         @see setFill
@@ -75,7 +75,7 @@ public:
     /** Sets the fill type with which the outline will be drawn.
         @see setFill
     */
-    void setStrokeFill (const FillType& newStrokeFill) throw();
+    void setStrokeFill (const FillType& newStrokeFill);
 
     /** Returns the current stroke fill.
         @see setStrokeFill
@@ -86,12 +86,12 @@ public:
         If the stroke has 0 thickness, no stroke will be drawn.
         @see setStrokeThickness, setStrokeColour
     */
-    void setStrokeType (const PathStrokeType& newStrokeType) throw();
+    void setStrokeType (const PathStrokeType& newStrokeType);
 
     /** Changes the stroke thickness.
         This is a shortcut for calling setStrokeType.
     */
-    void setStrokeThickness (float newThickness) throw();
+    void setStrokeThickness (float newThickness);
 
     /** Returns the current outline style. */
     const PathStrokeType& getStrokeType() const throw()         { return strokeType; }
@@ -107,9 +107,9 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    ValueTree createValueTree() const throw();
+    ValueTree createValueTree() const;
     /** @internal */
-    static DrawablePath* createFromValueTree (const ValueTree& tree) throw();
+    static DrawablePath* createFromValueTree (const ValueTree& tree);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

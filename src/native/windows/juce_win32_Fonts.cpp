@@ -127,13 +127,13 @@ class FontDCHolder  : private DeletedAtShutdown
 {
 public:
     //==============================================================================
-    FontDCHolder() throw()
+    FontDCHolder()
         : dc (0), numKPs (0), size (0),
           bold (false), italic (false)
     {
     }
 
-    ~FontDCHolder() throw()
+    ~FontDCHolder()
     {
         if (dc != 0)
         {
@@ -147,7 +147,7 @@ public:
     juce_DeclareSingleton_SingleThreaded_Minimal (FontDCHolder);
 
     //==============================================================================
-    HDC loadFont (const String& fontName_, const bool bold_, const bool italic_, const int size_) throw()
+    HDC loadFont (const String& fontName_, const bool bold_, const bool italic_, const int size_)
     {
         if (fontName != fontName_ || bold != bold_ || italic != italic_ || size != size_)
         {
@@ -218,7 +218,7 @@ public:
     }
 
     //==============================================================================
-    KERNINGPAIR* getKerningPairs (int& numKPs_) throw()
+    KERNINGPAIR* getKerningPairs (int& numKPs_)
     {
         if (kps == 0)
         {
