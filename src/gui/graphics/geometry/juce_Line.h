@@ -36,6 +36,11 @@
     This class contains a bunch of useful methods for various geometric
     tasks.
 
+    The ValueType template parameter should be a primitive type - float or double
+    are what it's designed for. Integer types will work in a basic way, but some methods
+    that perform mathematical operations may not compile, or they may not produce
+    sensible results.
+
     @see Point, Rectangle, Path, Graphics::drawLine
 */
 template <typename ValueType>

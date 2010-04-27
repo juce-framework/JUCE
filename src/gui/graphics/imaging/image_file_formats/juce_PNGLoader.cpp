@@ -82,11 +82,11 @@ namespace pnglibNamespace
     #include "pnglib/pngwutil.c"
   }
 #else
-  #define PNG_INTERNAL
-  #define PNG_SETJMP_NOT_SUPPORTED
-
-  #include <png.h>
-  #include <pngconf.h>
+  extern "C"
+  {
+    #include <png.h>
+    #include <pngconf.h>
+  }
 #endif
 }
 

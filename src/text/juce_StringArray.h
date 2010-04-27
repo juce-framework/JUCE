@@ -227,6 +227,19 @@ public:
     void removeString (const String& stringToRemove,
                        bool ignoreCase = false);
 
+    /** Removes a range of elements from the array.
+
+        This will remove a set of elements, starting from the given index,
+        and move subsequent elements down to close the gap.
+
+        If the range extends beyond the bounds of the array, it will
+        be safely clipped to the size of the array.
+
+        @param startIndex       the index of the first element to remove
+        @param numberToRemove   how many elements should be removed
+    */
+    void removeRange (int startIndex, int numberToRemove);
+
     /** Removes any duplicated elements from the array.
 
         If any string appears in the array more than once, only the first occurrence of

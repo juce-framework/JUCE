@@ -230,6 +230,11 @@ void StringArray::removeString (const String& stringToRemove,
     }
 }
 
+void StringArray::removeRange (int startIndex, int numberToRemove)
+{
+    strings.removeRange (startIndex, numberToRemove);
+}
+
 //==============================================================================
 void StringArray::removeEmptyStrings (const bool removeWhitespaceStrings)
 {

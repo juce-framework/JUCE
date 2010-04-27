@@ -42,6 +42,7 @@ ToolbarButton::ToolbarButton (const int itemId_,
      normalImage (normalImage_),
      toggledOnImage (toggledOnImage_)
 {
+    jassert (normalImage_ != 0);
 }
 
 ToolbarButton::~ToolbarButton()

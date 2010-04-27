@@ -3424,7 +3424,7 @@ private:
 #define __JUCE_SCOPEDPOINTER_JUCEHEADER__
 
 template <class ObjectType>
-class JUCE_API  ScopedPointer
+class ScopedPointer
 {
 public:
 
@@ -4031,6 +4031,8 @@ public:
 
 	void removeString (const String& stringToRemove,
 					   bool ignoreCase = false);
+
+	void removeRange (int startIndex, int numberToRemove);
 
 	void removeDuplicates (bool ignoreCase);
 

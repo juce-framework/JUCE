@@ -191,7 +191,11 @@ ValueTree::SharedObject::SharedObject (const SharedObject& other)
     : type (other.type), properties (other.properties), parent (0)
 {
     for (int i = 0; i < other.children.size(); ++i)
-        children.add (new SharedObject (*other.children.getUnchecked(i)));
+    {
+        SharedObject* const child = new SharedObject (*other.children.getUnchecked(i));
+        child->parent = this;
+        children.add (child);
+    }
 }
 
 ValueTree::SharedObject::~SharedObject()
