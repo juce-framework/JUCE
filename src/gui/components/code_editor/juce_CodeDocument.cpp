@@ -431,6 +431,7 @@ void CodeDocument::Position::setPositionMaintained (const bool isMaintained) thr
             }
             else
             {
+                // If this happens, you may have deleted the document while there are Position objects that are still using it...
                 jassert (owner->positionsToMaintain.contains (this));
                 owner->positionsToMaintain.removeValue (this);
             }

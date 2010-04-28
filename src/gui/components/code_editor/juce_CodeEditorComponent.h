@@ -175,6 +175,9 @@ public:
     */
     void setFont (const Font& newFont);
 
+    /** Returns the font that the editor is using. */
+    const Font& getFont() const throw()                 { return font; }
+
     /** Resets the syntax highlighting colours to the default ones provided by the
         code tokeniser.
         @see CodeTokeniser::getDefaultColour
@@ -217,6 +220,9 @@ public:
     /** Changes the size of the scrollbars. */
     void setScrollbarThickness (int thickness) throw();
 
+    /** Returns the thickness of the scrollbars. */
+    int getScrollbarThickness() const throw()           { return scrollbarThickness; }
+
     //==============================================================================
     /** @internal */
     void resized();
@@ -234,6 +240,10 @@ public:
     void mouseDoubleClick (const MouseEvent& e);
     /** @internal */
     void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+    /** @internal */
+    void focusGained (FocusChangeType cause);
+    /** @internal */
+    void focusLost (FocusChangeType cause);
     /** @internal */
     void timerCallback();
     /** @internal */

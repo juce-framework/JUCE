@@ -536,14 +536,158 @@ public:
     CodeEditorHolder (ComponentEditor& editor_)
         : editor (editor_)
     {
+        addAndMakeVisible (viewport = new Viewport());
+        viewport->setScrollBarsShown (true, false);
+        viewport->setViewedComponent (new ContentHolder (editor));
     }
 
     ~CodeEditorHolder()
     {
     }
 
+    void resized()
+    {
+        viewport->setBounds (getLocalBounds());
+
+        int visWidth = viewport->getMaximumVisibleWidth();
+        dynamic_cast <ContentHolder*> (viewport->getViewedComponent())->updateSize (visWidth);
+
+        if (viewport->getMaximumVisibleWidth() != visWidth)
+            dynamic_cast <ContentHolder*> (viewport->getViewedComponent())->updateSize (viewport->getMaximumVisibleWidth());
+    }
+
 private:
     ComponentEditor& editor;
+    enum { updateCommandId = 0x23427fa1 };
+
+    class EditorHolder  : public Component,
+                          public CodeDocument::Listener
+    {
+    public:
+        EditorHolder (const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr doc,
+                      const String& name, const String& textBefore, const String& textAfter)
+            : Component (name), document (doc), cppTokeniser(), codeEditor (doc->getDocument(), &cppTokeniser)
+        {
+            linesBefore.addLines (textBefore);
+            linesAfter.addLines (textAfter);
+
+            addAndMakeVisible (&codeEditor);
+            doc->getDocument().addListener (this);
+        }
+
+        ~EditorHolder()
+        {
+            document->getDocument().removeListener (this);
+        }
+
+        void paint (Graphics& g)
+        {
+            g.setFont (codeEditor.getFont());
+            g.setColour (Colours::darkgrey);
+
+            const int fontHeight = codeEditor.getLineHeight();
+            const int fontAscent = (int) codeEditor.getFont().getAscent();
+            const int textX = 5;
+
+            int i;
+            for (i = 0; i < linesBefore.size(); ++i)
+                g.drawSingleLineText (linesBefore[i], textX, i * fontHeight + fontAscent);
+
+            for (i = 0; i < linesAfter.size(); ++i)
+                g.drawSingleLineText (linesAfter[i], textX, codeEditor.getBottom() + i * fontHeight + fontAscent);
+        }
+
+        void updateSize (int width)
+        {
+            const int fontHeight = codeEditor.getLineHeight();
+
+            codeEditor.setBounds (0, fontHeight * linesBefore.size() + 1,
+                                  width, 2 + codeEditor.getScrollbarThickness()
+                                           + fontHeight * jmax (1, document->getDocument().getNumLines()));
+
+            setSize (width, (linesBefore.size() + linesAfter.size()) * fontHeight + codeEditor.getHeight());
+        }
+
+        void codeDocumentChanged (const CodeDocument::Position&, const CodeDocument::Position&)
+        {
+            int oldHeight = getHeight();
+            updateSize (getWidth());
+            if (getHeight() != oldHeight)
+                getParentComponent()->handleCommandMessage (updateCommandId);
+        }
+
+        const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr document;
+        CPlusPlusCodeTokeniser cppTokeniser;
+        CodeEditorComponent codeEditor;
+        StringArray linesBefore, linesAfter;
+    };
+
+    class ContentHolder  : public Component,
+                           public ChangeListener
+    {
+    public:
+        ContentHolder (ComponentEditor& editor_)
+            : editor (editor_)
+        {
+            setOpaque (true);
+            editor.getDocument().getCustomCodeList().addChangeListener (this);
+            changeListenerCallback (0);
+        }
+
+        ~ContentHolder()
+        {
+            editor.getDocument().getCustomCodeList().removeChangeListener (this);
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::lightgrey);
+        }
+
+        void updateSize (int width)
+        {
+            int y = 2;
+
+            for (int i = 0; i < editors.size(); ++i)
+            {
+                editors.getUnchecked(i)->updateSize (width - 8);
+                editors.getUnchecked(i)->setTopLeftPosition (4, y + 1);
+                y = editors.getUnchecked(i)->getBottom() + 1;
+            }
+
+            setSize (width, y + 2);
+        }
+
+        void changeListenerCallback (void*)
+        {
+            editors.clear();
+
+            CodeGenerator::CustomCodeList::Iterator iter (editor.getDocument().getCppTemplate(),
+                                                          editor.getDocument().getCustomCodeList());
+
+            while (iter.next())
+            {
+                EditorHolder* ed = new EditorHolder (iter.codeDocument, iter.sectionName, iter.textBefore, iter.textAfter);
+                editors.add (ed);
+                addAndMakeVisible (ed);
+            }
+
+            updateSize (getWidth());
+        }
+
+        void handleCommandMessage (int commandId)
+        {
+            if (commandId == updateCommandId)
+                updateSize (getWidth());
+            else
+                Component::handleCommandMessage (commandId);
+        }
+
+        OwnedArray <EditorHolder> editors;
+        ComponentEditor& editor;
+    };
+
+    Viewport* viewport;
 };
 
 //==============================================================================

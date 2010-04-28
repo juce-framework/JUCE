@@ -47,6 +47,7 @@ public:
     bool save();
     bool reload();
     bool hasChangedSinceLastSave();
+    void changed();
     const File getCppFile() const           { return cppFile; }
 
     //==============================================================================
@@ -136,7 +137,10 @@ public:
     void endDrag (const MouseEvent& e);
 
     //==============================================================================
-    CodeGenerator::CustomisedCodeSnippets& getCustomisedCodeSnippets() throw()         { return customisedCodeSnippets; }
+    CodeGenerator::CustomCodeList& getCustomCodeList() throw()         { return customCode; }
+
+    const String getCppTemplate() const;
+    const String getHeaderTemplate() const;
 
     //==============================================================================
     ValueTree& getRoot()                                        { return root; }
@@ -164,7 +168,7 @@ private:
     File cppFile;
     ValueTree root;
     ScopedPointer<MarkerList> markersX, markersY;
-    CodeGenerator::CustomisedCodeSnippets customisedCodeSnippets;
+    CodeGenerator::CustomCodeList customCode;
     mutable UndoManager undoManager;
     bool changedSinceSaved;
 

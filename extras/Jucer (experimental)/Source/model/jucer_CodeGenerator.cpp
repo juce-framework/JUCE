@@ -304,15 +304,79 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
 
 
 //==============================================================================
-CodeGenerator::CustomisedCodeSnippets::CustomisedCodeSnippets()
+CodeGenerator::CustomCodeList::Iterator::Iterator (const String& documentText, CustomCodeList& customCode_)
+    : customCode (customCode_), i (0), codeDocument (0)
+{
+    lines.addLines (documentText);
+    
+}
+
+CodeGenerator::CustomCodeList::Iterator::~Iterator()
 {
 }
 
-CodeGenerator::CustomisedCodeSnippets::~CustomisedCodeSnippets()
+bool CodeGenerator::CustomCodeList::Iterator::next()
+{
+    textBefore = String::empty;
+    textAfter = String::empty;
+    
+    while (i < lines.size())
+    {
+        textBefore += lines[i] + "\n";
+
+        if (lines[i].trimStart().startsWith ("//["))
+        {
+            String tag (lines[i].trimStart().substring (3));
+            tag = tag.upToFirstOccurrenceOf ("]", false, false).trim();
+
+            if (! (tag.isEmpty() || tag.startsWithChar ('/')))
+            {
+                const int endLine = indexOfLineStartingWith (lines, "//[/" + tag + "]", i + 1);
+
+                if (endLine > i)
+                {
+                    sectionName = tag;
+                    codeDocument = customCode.getDocumentFor (tag, true);
+                    i = endLine;
+
+                    bool isLastTag = true;
+                    for (int j = i + 1; j < lines.size(); ++j)
+                    {
+                        if (lines[j].trimStart().startsWith ("//["))
+                        {
+                            isLastTag = false;
+                            break;
+                        }
+                    }
+
+                    if (isLastTag)
+                    {
+                        textAfter = lines.joinIntoString (newLine, i, lines.size() - i);
+                        i = lines.size();
+                    }
+
+                    return true;
+                }
+            }
+        }
+        
+        ++i;
+    }
+    
+    return false;
+}
+
+
+//==============================================================================
+CodeGenerator::CustomCodeList::CustomCodeList()
 {
 }
 
-void CodeGenerator::CustomisedCodeSnippets::reloadFrom (const String& fileContent)
+CodeGenerator::CustomCodeList::~CustomCodeList()
+{
+}
+
+void CodeGenerator::CustomCodeList::reloadFrom (const String& fileContent)
 {
     sectionNames.clear();
     sectionContent.clear();
@@ -339,19 +403,23 @@ void CodeGenerator::CustomisedCodeSnippets::reloadFrom (const String& fileConten
                     
                     sectionNames.add (tag);
                     
-                    CodeDocument* doc = new CodeDocument();
+                    CodeDocumentRef::Ptr doc (new CodeDocumentRef (new CodeDocument()));
                     sectionContent.add (doc);
                     
-                    doc->replaceAllContent (content);
+                    doc->getDocument().replaceAllContent (content);
+                    doc->getDocument().clearUndoHistory();
+                    doc->getDocument().setSavePoint();
 
                     i = endLine;
                 }
             }
         }
     }
+    
+    sendSynchronousChangeMessage (this);
 }
 
-void CodeGenerator::CustomisedCodeSnippets::applyTo (String& fileContent) const
+void CodeGenerator::CustomCodeList::applyTo (String& fileContent) const
 {
     StringArray lines;
     lines.addLines (fileContent);
@@ -400,12 +468,31 @@ void CodeGenerator::CustomisedCodeSnippets::applyTo (String& fileContent) const
     fileContent = lines.joinIntoString (newLine);
 }
 
-bool CodeGenerator::CustomisedCodeSnippets::areAnySnippetsUnsaved() const
+bool CodeGenerator::CustomCodeList::needsSaving() const
 {
-    return true; //xxx
+    for (int i = sectionContent.size(); --i >= 0;)
+        if (sectionContent.getUnchecked(i)->getDocument().hasChangedSinceSavePoint())
+            return true;
+
+    return false;
 }
 
-CodeDocument* CodeGenerator::CustomisedCodeSnippets::getDocumentFor (const String& sectionName, bool createIfNotFound)
+int CodeGenerator::CustomCodeList::getNumSections() const
+{
+    return sectionNames.size();
+}
+
+const String CodeGenerator::CustomCodeList::getSectionName (int index) const
+{
+    return sectionNames [index];
+}
+
+const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr CodeGenerator::CustomCodeList::getDocument (int index) const
+{
+    return sectionContent [index];
+}
+
+const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr CodeGenerator::CustomCodeList::getDocumentFor (const String& sectionName, bool createIfNotFound)
 {
     const int index = sectionNames.indexOf (sectionName);
 
@@ -415,24 +502,26 @@ CodeDocument* CodeGenerator::CustomisedCodeSnippets::getDocumentFor (const Strin
     if (createIfNotFound)
     {
         sectionNames.add (sectionName);
-        sectionContent.add (new CodeDocument());
-        return sectionContent.getLast();
+
+        const CodeDocumentRef::Ptr doc (new CodeDocumentRef (new CodeDocument()));
+        sectionContent.add (doc);
+        return doc;
     }
 
     return 0;
 }
 
-const String CodeGenerator::CustomisedCodeSnippets::getSectionContent (const String& sectionName) const
+const String CodeGenerator::CustomCodeList::getSectionContent (const String& sectionName) const
 {
     const int index = sectionNames.indexOf (sectionName);
 
     if (index >= 0)
-        return sectionContent[index]->getAllContent();
+        return sectionContent[index]->getDocument().getAllContent();
 
     return String::empty;
 }
 
-void CodeGenerator::CustomisedCodeSnippets::removeSection (const String& sectionName)
+void CodeGenerator::CustomCodeList::removeSection (const String& sectionName)
 {
     const int index = sectionNames.indexOf (sectionName);
 

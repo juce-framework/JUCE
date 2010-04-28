@@ -80,19 +80,24 @@ void ComponentDocument::beginNewTransaction()
     undoManager.beginNewTransaction();
 }
 
-void ComponentDocument::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
+void ComponentDocument::changed()
 {
     changedSinceSaved = true;
+}
+
+void ComponentDocument::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
+{
+    changed();
 }
 
 void ComponentDocument::valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)
 {
-    changedSinceSaved = true;
+    changed();
 }
 
 void ComponentDocument::valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)
 {
-    changedSinceSaved = true;
+    changed();
 }
 
 bool ComponentDocument::isComponentFile (const File& file)
@@ -114,6 +119,9 @@ bool ComponentDocument::isComponentFile (const File& file)
     return false;
 }
 
+const String ComponentDocument::getCppTemplate() const      { return String (BinaryData::jucer_ComponentTemplate_cpp); }
+const String ComponentDocument::getHeaderTemplate() const   { return String (BinaryData::jucer_ComponentTemplate_h); }
+
 void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
 {
     CodeGenerator codeGen;
@@ -128,20 +136,20 @@ void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
     }
 
     {
-        String code (BinaryData::jucer_ComponentTemplate_cpp);
+        String code (getCppTemplate());
         String oldContent;
 
         codeGen.applyToCode (code, cppFile, false, project);
-        customisedCodeSnippets.applyTo (code);
+        customCode.applyTo (code);
         cpp << code;
     }
 
     {
-        String code (BinaryData::jucer_ComponentTemplate_h);
+        String code (getHeaderTemplate());
         String oldContent;
 
         codeGen.applyToCode (code, cppFile.withFileExtension (".h"), false, project);
-        customisedCodeSnippets.applyTo (code);
+        customCode.applyTo (code);
         header << code;
     }
 }
@@ -224,7 +232,7 @@ bool ComponentDocument::reload()
             undoManager.clearUndoHistory();
             changedSinceSaved = false;
 
-            customisedCodeSnippets.reloadFrom (cppFile.loadFileAsString());
+            customCode.reloadFrom (cppFile.loadFileAsString());
             return true;
         }
     }
@@ -234,7 +242,7 @@ bool ComponentDocument::reload()
 
 bool ComponentDocument::hasChangedSinceLastSave()
 {
-    return changedSinceSaved;
+    return changedSinceSaved || customCode.needsSaving();
 }
 
 void ComponentDocument::createSubTreeIfNotThere (const String& name)

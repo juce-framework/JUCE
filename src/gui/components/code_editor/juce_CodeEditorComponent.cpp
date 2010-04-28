@@ -37,7 +37,8 @@ class CodeEditorComponent::CaretComponent   : public Component,
                                               public Timer
 {
 public:
-    CaretComponent()
+    CaretComponent (CodeEditorComponent& owner_)
+        : owner (owner_)
     {
         setAlwaysOnTop (true);
         setInterceptsMouseClicks (false, false);
@@ -49,27 +50,29 @@ public:
 
     void paint (Graphics& g)
     {
-        if (getParentComponent()->hasKeyboardFocus (true))
-            g.fillAll (findColour (CodeEditorComponent::caretColourId));
+        g.fillAll (findColour (CodeEditorComponent::caretColourId));
     }
 
     void timerCallback()
     {
-        setVisible (! isVisible());
+        setVisible (shouldBeShown() && ! isVisible());
     }
 
-    void updatePosition (CodeEditorComponent& owner)
+    void updatePosition()
     {
         startTimer (400);
-        setVisible (true);
+        setVisible (shouldBeShown());
 
-        const Rectangle<int> pos (owner.getCharacterBounds (owner.getCaretPos()));
-        setBounds (pos.getX(), pos.getY(), 2, pos.getHeight());
+        setBounds (owner.getCharacterBounds (owner.getCaretPos()).withWidth (2));
     }
 
 private:
+    CodeEditorComponent& owner;
+
     CaretComponent (const CaretComponent&);
     CaretComponent& operator= (const CaretComponent&);
+
+    bool shouldBeShown() const      { return owner.hasKeyboardFocus (true); }
 };
 
 //==============================================================================
@@ -314,7 +317,7 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& document_,
     addAndMakeVisible (horizontalScrollBar = new ScrollBar (false));
     horizontalScrollBar->setSingleStepSize (1.0);
 
-    addAndMakeVisible (caret = new CaretComponent());
+    addAndMakeVisible (caret = new CaretComponent (*this));
 
     Font f (12.0f);
     f.setTypefaceName (Font::getDefaultMonospacedFontName());
@@ -353,7 +356,7 @@ void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& aff
 
     triggerAsyncUpdate();
 
-    caret->updatePosition (*this);
+    caret->updatePosition();
     columnToTryToMaintain = -1;
 
     if (affectedTextEnd.getPosition() >= selectionStart.getPosition()
@@ -373,7 +376,7 @@ void CodeEditorComponent::resized()
     columnsOnScreen = (int) ((getWidth() - scrollbarThickness) / charWidth);
     lines.clear();
     rebuildLineTokens();
-    caret->updatePosition (*this);
+    caret->updatePosition();
 
     verticalScrollBar->setBounds (getWidth() - scrollbarThickness, 0, scrollbarThickness, getHeight() - scrollbarThickness);
     horizontalScrollBar->setBounds (gutter, getHeight() - scrollbarThickness, getWidth() - scrollbarThickness - gutter, scrollbarThickness);
@@ -516,7 +519,7 @@ void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, con
         deselectAll();
     }
 
-    caret->updatePosition (*this);
+    caret->updatePosition();
     scrollToKeepCaretOnScreen();
     updateScrollBars();
 }
@@ -547,7 +550,7 @@ void CodeEditorComponent::scrollToLineInternal (int newFirstLineOnScreen)
     if (newFirstLineOnScreen != firstLineOnScreen)
     {
         firstLineOnScreen = newFirstLineOnScreen;
-        caret->updatePosition (*this);
+        caret->updatePosition();
 
         updateCachedIterators (firstLineOnScreen);
         triggerAsyncUpdate();
@@ -561,7 +564,7 @@ void CodeEditorComponent::scrollToColumnInternal (double column)
     if (xOffset != newOffset)
     {
         xOffset = newOffset;
-        caret->updatePosition (*this);
+        caret->updatePosition();
         repaint();
     }
 }
@@ -1071,8 +1074,16 @@ void CodeEditorComponent::mouseDoubleClick (const MouseEvent& e)
 
 void CodeEditorComponent::mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
 {
-    verticalScrollBar->mouseWheelMove (e, 0, wheelIncrementY);
-    horizontalScrollBar->mouseWheelMove (e, wheelIncrementX, 0);
+    if ((verticalScrollBar->isVisible() && wheelIncrementY != 0)
+         || (horizontalScrollBar->isVisible() && wheelIncrementX != 0))
+    {
+        verticalScrollBar->mouseWheelMove (e, 0, wheelIncrementY);
+        horizontalScrollBar->mouseWheelMove (e, wheelIncrementX, 0);
+    }
+    else
+    {
+        Component::mouseWheelMove (e, wheelIncrementX, wheelIncrementY);
+    }
 }
 
 void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart)
@@ -1081,6 +1092,17 @@ void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, doub
         scrollToLineInternal ((int) newRangeStart);
     else
         scrollToColumnInternal (newRangeStart);
+}
+
+//==============================================================================
+void CodeEditorComponent::focusGained (FocusChangeType cause)
+{
+    caret->updatePosition();
+}
+
+void CodeEditorComponent::focusLost (FocusChangeType cause)
+{
+    caret->updatePosition();
 }
 
 //==============================================================================

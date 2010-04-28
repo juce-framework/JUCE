@@ -1178,19 +1178,23 @@ void NSViewComponentPeer::toFront (bool makeActiveWindow)
 
 void NSViewComponentPeer::toBehind (ComponentPeer* other)
 {
-    NSViewComponentPeer* o = (NSViewComponentPeer*) other;
+    NSViewComponentPeer* const otherPeer = dynamic_cast <NSViewComponentPeer*> (other);
+    jassert (otherPeer != 0); // wrong type of window?
 
-    if (isSharedWindow)
+    if (otherPeer != 0)
     {
-        [[view superview] addSubview: view
-                          positioned: NSWindowBelow
-                          relativeTo: o->view];
-    }
-    else
-    {
-        [window orderWindow: NSWindowBelow
-                 relativeTo: o->window != 0 ? [o->window windowNumber]
-                                            : nil ];
+        if (isSharedWindow)
+        {
+            [[view superview] addSubview: view
+                              positioned: NSWindowBelow
+                              relativeTo: otherPeer->view];
+        }
+        else
+        {
+            [window orderWindow: NSWindowBelow
+                     relativeTo: otherPeer->window != 0 ? [otherPeer->window windowNumber]
+                                                        : nil ];
+        }
     }
 }
 

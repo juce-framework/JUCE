@@ -10313,6 +10313,14 @@ public:
 
 	void setHeight (const ValueType newHeight) throw()		  { h = newHeight; }
 
+	const Rectangle withX (const ValueType newX) const throw()					  { return Rectangle (newX, y, w, h); }
+
+	const Rectangle withY (const ValueType newY) const throw()					  { return Rectangle (x, newY, w, h); }
+
+	const Rectangle withWidth (const ValueType newWidth) const throw()				  { return Rectangle (x, y, newWidth, h); }
+
+	const Rectangle withHeight (const ValueType newHeight) const throw()				{ return Rectangle (x, y, w, newHeight); }
+
 	void setLeft (const ValueType newLeft) throw()
 	{
 		w = jmax (ValueType(), x + w - newLeft);
@@ -21156,6 +21164,8 @@ public:
 
 	void setFont (const Font& newFont);
 
+	const Font& getFont() const throw()		 { return font; }
+
 	void resetToDefaultColours();
 
 	void setColourForTokenType (int tokenType, const Colour& colour);
@@ -21174,6 +21184,8 @@ public:
 
 	void setScrollbarThickness (int thickness) throw();
 
+	int getScrollbarThickness() const throw()	   { return scrollbarThickness; }
+
 	void resized();
 	void paint (Graphics& g);
 	bool keyPressed (const KeyPress& key);
@@ -21182,6 +21194,8 @@ public:
 	void mouseUp (const MouseEvent& e);
 	void mouseDoubleClick (const MouseEvent& e);
 	void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY);
+	void focusGained (FocusChangeType cause);
+	void focusLost (FocusChangeType cause);
 	void timerCallback();
 	void scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRangeStart);
 	void handleAsyncUpdate();

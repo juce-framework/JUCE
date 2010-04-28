@@ -592,15 +592,19 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
 
 void UIViewComponentPeer::toBehind (ComponentPeer* other)
 {
-    UIViewComponentPeer* o = (UIViewComponentPeer*) other;
+    UIViewComponentPeer* const otherPeer = dynamic_cast <UIViewComponentPeer*> (other);
+    jassert (otherPeer != 0); // wrong type of window?
 
-    if (isSharedWindow)
+    if (otherPeer != 0)
     {
-        [[view superview] insertSubview: view belowSubview: o->view];
-    }
-    else
-    {
-        jassertfalse // don't know how to do this
+        if (isSharedWindow)
+        {
+            [[view superview] insertSubview: view belowSubview: otherPeer->view];
+        }
+        else
+        {
+            jassertfalse // don't know how to do this
+        }
     }
 }
 

@@ -75,23 +75,61 @@ public:
 
     //==============================================================================
     // An object to load and store all the user-defined bits of code as documents.
-    class CustomisedCodeSnippets
+    class CustomCodeList    : public ChangeBroadcaster
     {
     public:
-        CustomisedCodeSnippets();
-        ~CustomisedCodeSnippets();
+        CustomCodeList();
+        ~CustomCodeList();
 
         void reloadFrom (const String& fileContent);
         void applyTo (String& fileContent) const;
-        bool areAnySnippetsUnsaved() const;
+        bool needsSaving() const;
 
-        CodeDocument* getDocumentFor (const String& sectionName, bool createIfNotFound);
+        //==============================================================================
+        // Ref-counted wrapper for a code document..
+        class CodeDocumentRef   : public ReferenceCountedObject
+        {
+        public:
+            CodeDocumentRef (CodeDocument* doc_) : doc (doc_) {}
+
+            CodeDocument& getDocument() const throw()       { return *doc; }
+
+            typedef ReferenceCountedObjectPtr<CodeDocumentRef> Ptr;
+
+        private:
+            CodeDocument* doc;
+        };
+
+        //==============================================================================
+        int getNumSections() const;
+        const String getSectionName (int index) const;
+
+        const CodeDocumentRef::Ptr getDocument (int index) const;
+
+        const CodeDocumentRef::Ptr getDocumentFor (const String& sectionName, bool createIfNotFound);
         const String getSectionContent (const String& sectionName) const;
         void removeSection (const String& sectionName);
 
+        class Iterator
+        {
+        public:
+            Iterator (const String& documentText, CustomCodeList& customCode);
+            ~Iterator();
+
+            bool next();
+
+            String textBefore, textAfter, sectionName;
+            CodeDocumentRef::Ptr codeDocument;
+
+        private:
+            CustomCodeList& customCode;
+            StringArray lines;
+            int i;
+        };
+
     private:
         StringArray sectionNames;
-        OwnedArray <CodeDocument> sectionContent;
+        ReferenceCountedArray <CodeDocumentRef> sectionContent;
     };
 
     //==============================================================================

@@ -161,6 +161,18 @@ public:
     /** Changes the rectangle's height */
     void setHeight (const ValueType newHeight) throw()              { h = newHeight; }
 
+    /** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
+    const Rectangle withX (const ValueType newX) const throw()                                      { return Rectangle (newX, y, w, h); }
+
+    /** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
+    const Rectangle withY (const ValueType newY) const throw()                                      { return Rectangle (x, newY, w, h); }
+
+    /** Returns a rectangle which has the same position and height as this one, but with a different width. */
+    const Rectangle withWidth (const ValueType newWidth) const throw()                              { return Rectangle (x, y, newWidth, h); }
+
+    /** Returns a rectangle which has the same position and width as this one, but with a different height. */
+    const Rectangle withHeight (const ValueType newHeight) const throw()                            { return Rectangle (x, y, w, newHeight); }
+
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
     */
