@@ -73,6 +73,9 @@ void JuceDemoPluginAudioProcessorEditor::resized()
     midiKeyboard->setBounds (4, getHeight() - keyboardHeight - 4, getWidth() - 8, keyboardHeight);
 
     resizer->setBounds (getWidth() - 16, getHeight() - 16, 16, 16);
+
+    getProcessor()->lastUIWidth = getWidth();
+    getProcessor()->lastUIHeight = getHeight();
 }
 
 //==============================================================================

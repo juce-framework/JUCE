@@ -60,6 +60,11 @@ const File FileListComponent::getSelectedFile (int index) const
     return fileList.getFile (getSelectedRow (index));
 }
 
+void FileListComponent::deselectAllFiles()
+{
+    deselectAllRows();
+}
+
 void FileListComponent::scrollToTop()
 {
     getVerticalScrollBar()->setCurrentRangeStart (0);

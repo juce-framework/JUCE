@@ -58,8 +58,7 @@ public:
     void mouseUp (const MouseEvent& e);
     void visibilityChanged();
 
-    void findLassoItemsInArea (Array <PaintElement*>& results,
-                               int x, int y, int w, int h);
+    void findLassoItemsInArea (Array <PaintElement*>& results, const Rectangle<int>& area);
 
     SelectedItemSet <PaintElement*>& getLassoSelection();
 

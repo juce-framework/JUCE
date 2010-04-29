@@ -56,7 +56,7 @@ public:
         component itself).
     */
     virtual void findLassoItemsInArea (Array <SelectableItemType>& itemsFound,
-                                       int x, int y, int width, int height) = 0;
+                                       const Rectangle<int>& area) = 0;
 
     /** Returns the SelectedItemSet that the lasso should update.
 
@@ -141,6 +141,7 @@ public:
             originalSelection = lassoSource->getLassoSelection().getItemArray();
 
         setSize (0, 0);
+        dragStartPos = e.getMouseDownPosition();
     }
 
     /** Call this in your mouseDrag event, to update the lasso's position.
@@ -159,11 +160,11 @@ public:
     {
         if (source != 0)
         {
-            setBounds (Rectangle<int> (e.getMouseDownPosition(), e.getPosition()));
+            setBounds (Rectangle<int> (dragStartPos, e.getPosition()));
             setVisible (true);
 
             Array <SelectableItemType> itemsInLasso;
-            source->findLassoItemsInArea (itemsInLasso, getX(), getY(), getWidth(), getHeight());
+            source->findLassoItemsInArea (itemsInLasso, getBounds());
 
             if (e.mods.isShiftDown())
             {
@@ -236,6 +237,7 @@ private:
     Array <SelectableItemType> originalSelection;
     LassoSource <SelectableItemType>* source;
     int outlineThickness;
+    Point<int> dragStartPos;
 };
 
 

@@ -122,6 +122,20 @@ bool ComponentDocument::isComponentFile (const File& file)
 const String ComponentDocument::getCppTemplate() const      { return String (BinaryData::jucer_ComponentTemplate_cpp); }
 const String ComponentDocument::getHeaderTemplate() const   { return String (BinaryData::jucer_ComponentTemplate_h); }
 
+const String ComponentDocument::getCppContent()
+{
+    MemoryOutputStream cpp, header;
+    writeCode (cpp, header);
+    return cpp.toUTF8();
+}
+
+const String ComponentDocument::getHeaderContent()
+{
+    MemoryOutputStream cpp, header;
+    writeCode (cpp, header);
+    return header.toUTF8();
+}
+
 void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
 {
     CodeGenerator codeGen;

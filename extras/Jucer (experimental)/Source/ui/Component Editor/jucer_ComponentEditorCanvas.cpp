@@ -485,6 +485,14 @@ public:
             canvas.continueDrag (e);
             showSizeGuides();
         }
+
+        Viewport* viewport = Component::findParentComponentOfClass ((Viewport*) 0);
+
+        if (viewport != 0)
+        {
+            MouseEvent e2 (e.getEventRelativeTo (viewport));
+            viewport->autoScroll (e2.x, e2.y, 8, 16);
+        }
     }
 
     void mouseUp (const MouseEvent& e)
@@ -524,10 +532,10 @@ public:
         }
     }
 
-    void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, int x, int y, int width, int height)
+    void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area)
     {
-        canvas.getComponentHolder()->findLassoItemsInArea (itemsFound, Rectangle<int> (x, y, width, height)
-                                                                        + relativePositionToOtherComponent (canvas.getComponentHolder(), Point<int>()));
+        canvas.getComponentHolder()
+            ->findLassoItemsInArea (itemsFound, area + relativePositionToOtherComponent (canvas.getComponentHolder(), Point<int>()));
     }
 
     SelectedItems& getLassoSelection()       { return canvas.getSelection(); }
@@ -770,7 +778,7 @@ ComponentEditorCanvas::~ComponentEditorCanvas()
 {
     dragger = 0;
     getDocument().getRoot().removeListener (this);
-    componentHolder->deleteAllChildren();
+    //deleteAndZero (componentHolder);
     deleteAllChildren();
 }
 
@@ -1006,6 +1014,7 @@ ComponentEditorCanvas::ComponentHolder::ComponentHolder()
 
 ComponentEditorCanvas::ComponentHolder::~ComponentHolder()
 {
+    deleteAllChildren();
 }
 
 void ComponentEditorCanvas::ComponentHolder::updateComponents (ComponentDocument& doc, SelectedItems& selection)
@@ -1055,7 +1064,6 @@ Component* ComponentEditorCanvas::ComponentHolder::getComponentForState (Compone
     for (int i = getNumChildComponents(); --i >= 0;)
     {
         Component* const c = getChildComponent (i);
-
         if (doc.isStateForComponent (state, c))
             return c;
     }
@@ -1068,7 +1076,6 @@ Component* ComponentEditorCanvas::ComponentHolder::findComponentWithID (const St
     for (int i = getNumChildComponents(); --i >= 0;)
     {
         Component* const c = getChildComponent(i);
-
         if (ComponentDocument::getJucerIDFor (c) == uid)
             return c;
     }

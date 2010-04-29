@@ -5035,7 +5035,7 @@ public:
 		if (this != &other)
 		{
 			ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
-			swapWithArray (other);
+			swapWithArray (otherCopy);
 		}
 
 		return *this;
@@ -10363,9 +10363,21 @@ public:
 		return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
 	}
 
+	Rectangle& operator+= (const Point<ValueType>& deltaPosition) throw()
+	{
+		x += deltaPosition.getX(); y += deltaPosition.getY();
+		return *this;
+	}
+
 	const Rectangle operator- (const Point<ValueType>& deltaPosition) const throw()
 	{
 		return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
+	}
+
+	Rectangle& operator-= (const Point<ValueType>& deltaPosition) throw()
+	{
+		x -= deltaPosition.getX(); y -= deltaPosition.getY();
+		return *this;
 	}
 
 	void expand (const ValueType deltaX,
@@ -16449,13 +16461,15 @@ public:
 
 	bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
 
-	int getViewPositionX() const throw()			{ return lastVX; }
+	const Point<int> getViewPosition() const throw()	{ return lastViewPos.getPosition(); }
 
-	int getViewPositionY() const throw()			{ return lastVY; }
+	int getViewPositionX() const throw()			{ return lastViewPos.getX(); }
 
-	int getViewWidth() const throw()			{ return lastVW; }
+	int getViewPositionY() const throw()			{ return lastViewPos.getY(); }
 
-	int getViewHeight() const throw()			   { return lastVH; }
+	int getViewWidth() const throw()			{ return lastViewPos.getWidth(); }
+
+	int getViewHeight() const throw()			   { return lastViewPos.getHeight(); }
 
 	int getMaximumVisibleWidth() const throw();
 
@@ -16494,7 +16508,7 @@ public:
 
 private:
 	Component::SafePointer<Component> contentComp;
-	int lastVX, lastVY, lastVW, lastVH;
+	Rectangle<int> lastViewPos;
 	int scrollBarThickness;
 	int singleStepX, singleStepY;
 	bool showHScrollbar, showVScrollbar;
@@ -16503,6 +16517,7 @@ private:
 	ScrollBar* horizontalScrollBar;
 
 	void updateVisibleRegion();
+
 	Viewport (const Viewport&);
 	Viewport& operator= (const Viewport&);
 };
@@ -22620,6 +22635,8 @@ public:
 
 	virtual const File getSelectedFile (int index) const = 0;
 
+	virtual void deselectAllFiles() = 0;
+
 	virtual void scrollToTop() = 0;
 
 	void addListener (FileBrowserListener* listener);
@@ -22720,6 +22737,8 @@ public:
 	int getNumSelectedFiles() const throw();
 
 	const File getSelectedFile (int index) const throw();
+
+	void deselectAllFiles();
 
 	bool currentFileIsValid() const;
 
@@ -23530,6 +23549,8 @@ public:
 
 	const File getSelectedFile (int index = 0) const;
 
+	void deselectAllFiles();
+
 	void scrollToTop();
 
 	void changeListenerCallback (void*);
@@ -23739,6 +23760,8 @@ public:
 	int getNumSelectedFiles() const		 { return TreeView::getNumSelectedItems(); }
 
 	const File getSelectedFile (int index = 0) const;
+
+	void deselectAllFiles();
 
 	void scrollToTop();
 
@@ -25890,7 +25913,7 @@ public:
 	virtual ~LassoSource() {}
 
 	virtual void findLassoItemsInArea (Array <SelectableItemType>& itemsFound,
-									   int x, int y, int width, int height) = 0;
+									   const Rectangle<int>& area) = 0;
 
 	virtual SelectedItemSet <SelectableItemType>& getLassoSelection() = 0;
 };
@@ -25923,17 +25946,18 @@ public:
 			originalSelection = lassoSource->getLassoSelection().getItemArray();
 
 		setSize (0, 0);
+		dragStartPos = e.getMouseDownPosition();
 	}
 
 	void dragLasso (const MouseEvent& e)
 	{
 		if (source != 0)
 		{
-			setBounds (Rectangle<int> (e.getMouseDownPosition(), e.getPosition()));
+			setBounds (Rectangle<int> (dragStartPos, e.getPosition()));
 			setVisible (true);
 
 			Array <SelectableItemType> itemsInLasso;
-			source->findLassoItemsInArea (itemsInLasso, getX(), getY(), getWidth(), getHeight());
+			source->findLassoItemsInArea (itemsInLasso, getBounds());
 
 			if (e.mods.isShiftDown())
 			{
@@ -25987,6 +26011,7 @@ private:
 	Array <SelectableItemType> originalSelection;
 	LassoSource <SelectableItemType>* source;
 	int outlineThickness;
+	Point<int> dragStartPos;
 };
 
 #endif   // __JUCE_LASSOCOMPONENT_JUCEHEADER__

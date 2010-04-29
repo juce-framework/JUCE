@@ -142,6 +142,9 @@ public:
     const String getCppTemplate() const;
     const String getHeaderTemplate() const;
 
+    const String getCppContent();
+    const String getHeaderContent();
+
     //==============================================================================
     ValueTree& getRoot()                                        { return root; }
     ValueTree getComponentGroup() const;

@@ -80,7 +80,7 @@ public:
         if (this != &other)
         {
             ReferenceCountedArray<ObjectClass, TypeOfCriticalSectionToUse> otherCopy (other);
-            swapWithArray (other);
+            swapWithArray (otherCopy);
         }
 
         return *this;

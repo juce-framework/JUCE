@@ -302,27 +302,32 @@ public:
                 {
                     const KeyPress& kp = keyPresses.getReference(0);
 
-                    juce_wchar key = kp.getTextCharacter();
+                    if (kp.getKeyCode() != KeyPress::backspaceKey
+                         && kp.getKeyCode() != KeyPress::deleteKey) // (adding these is annoying because it flashes the menu bar
+                                                                    // every time you press the key while editing text)
+                    {
+                        juce_wchar key = kp.getTextCharacter();
 
-                    if (kp.getKeyCode() == KeyPress::backspaceKey)
-                        key = NSBackspaceCharacter;
-                    else if (kp.getKeyCode() == KeyPress::deleteKey)
-                        key = NSDeleteCharacter;
-                    else if (key == 0)
-                        key = (juce_wchar) kp.getKeyCode();
+                        if (kp.getKeyCode() == KeyPress::backspaceKey)
+                            key = NSBackspaceCharacter;
+                        else if (kp.getKeyCode() == KeyPress::deleteKey)
+                            key = NSDeleteCharacter;
+                        else if (key == 0)
+                            key = (juce_wchar) kp.getKeyCode();
 
-                    unsigned int mods = 0;
-                    if (kp.getModifiers().isShiftDown())
-                        mods |= NSShiftKeyMask;
-                    if (kp.getModifiers().isCtrlDown())
-                        mods |= NSControlKeyMask;
-                    if (kp.getModifiers().isAltDown())
-                        mods |= NSAlternateKeyMask;
-                    if (kp.getModifiers().isCommandDown())
-                        mods |= NSCommandKeyMask;
+                        unsigned int mods = 0;
+                        if (kp.getModifiers().isShiftDown())
+                            mods |= NSShiftKeyMask;
+                        if (kp.getModifiers().isCtrlDown())
+                            mods |= NSControlKeyMask;
+                        if (kp.getModifiers().isAltDown())
+                            mods |= NSAlternateKeyMask;
+                        if (kp.getModifiers().isCommandDown())
+                            mods |= NSCommandKeyMask;
 
-                    [item setKeyEquivalent: juceStringToNS (String::charToString (key))];
-                    [item setKeyEquivalentModifierMask: mods];
+                        [item setKeyEquivalent: juceStringToNS (String::charToString (key))];
+                        [item setKeyEquivalentModifierMask: mods];
+                    }
                 }
             }
         }

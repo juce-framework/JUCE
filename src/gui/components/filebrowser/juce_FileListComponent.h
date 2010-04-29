@@ -70,6 +70,9 @@ public:
     */
     const File getSelectedFile (int index = 0) const;
 
+    /** Deselects any files that are currently selected. */
+    void deselectAllFiles();
+
     /** Scrolls to the top of the list. */
     void scrollToTop();
 

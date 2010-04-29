@@ -277,7 +277,7 @@ XmlElement* AudioProcessor::getXmlFromBinary (const void* data,
                                               const int sizeInBytes)
 {
     if (sizeInBytes > 8
-         && ByteOrder::littleEndianInt ((const char*) data) == magicXmlNumber)
+         && ByteOrder::littleEndianInt (data) == magicXmlNumber)
     {
         const int stringLength = (int) ByteOrder::littleEndianInt (((const char*) data) + 4);
 

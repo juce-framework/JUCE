@@ -60,8 +60,7 @@ public:
 
     ComponentLayout& getLayout() const throw()                  { return layout; }
 
-    void findLassoItemsInArea (Array <Component*>& results,
-                               int x, int y, int w, int h);
+    void findLassoItemsInArea (Array <Component*>& results, const Rectangle<int>& area);
 
     SelectedItemSet <Component*>& getLassoSelection();
 

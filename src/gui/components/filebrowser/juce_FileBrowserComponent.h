@@ -114,6 +114,10 @@ public:
     */
     const File getSelectedFile (int index) const throw();
 
+    /** Deselects any files that are currently selected.
+    */
+    void deselectAllFiles();
+
     /** Returns true if the currently selected file(s) are usable.
 
         This can be used to decide whether the user can press "ok" for the

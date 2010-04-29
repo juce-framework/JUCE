@@ -191,14 +191,14 @@ void DrawableEditor::Canvas::mouseUp (const MouseEvent& e)
     }
 }
 
-void DrawableEditor::Canvas::findLassoItemsInArea (Array <int64>& itemsFound, int x, int y, int width, int height)
+void DrawableEditor::Canvas::findLassoItemsInArea (Array <int64>& itemsFound, const Rectangle<int>& area)
 {
     for (int i = getNumChildComponents(); --i >= 0;)
     {
         DrawableObjectComponent* d = dynamic_cast <DrawableObjectComponent*> (getChildComponent(i));
 
         if (d != 0)
-            d->findLassoItemsInArea (itemsFound, Rectangle<int> (x, y, width, height));
+            d->findLassoItemsInArea (itemsFound, area);
     }
 }
 

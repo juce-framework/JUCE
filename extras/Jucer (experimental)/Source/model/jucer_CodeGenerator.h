@@ -90,14 +90,13 @@ public:
         class CodeDocumentRef   : public ReferenceCountedObject
         {
         public:
-            CodeDocumentRef (CodeDocument* doc_) : doc (doc_) {}
-
-            CodeDocument& getDocument() const throw()       { return *doc; }
+            CodeDocumentRef (CodeDocument* doc_) : doc (doc_)   {}
+            CodeDocument& getDocument() const throw()           { return *doc; }
 
             typedef ReferenceCountedObjectPtr<CodeDocumentRef> Ptr;
 
         private:
-            CodeDocument* doc;
+            CodeDocument* const doc;
         };
 
         //==============================================================================

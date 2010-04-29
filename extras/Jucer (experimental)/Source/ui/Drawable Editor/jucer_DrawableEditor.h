@@ -67,7 +67,7 @@ public:
         void childBoundsChanged (Component* child);
         void updateSize();
 
-        void findLassoItemsInArea (Array <int64>& itemsFound, int x, int y, int width, int height);
+        void findLassoItemsInArea (Array <int64>& itemsFound, const Rectangle<int>& area);
         SelectedItemSet <int64>& getLassoSelection();
 
     private:

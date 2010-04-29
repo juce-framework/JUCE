@@ -530,15 +530,20 @@ private:
 };
 
 //==============================================================================
-class ComponentEditor::CodeEditorHolder  : public Component
+class ComponentEditor::CodeEditorHolder  : public Component,
+                                           public ButtonListener
 {
 public:
     CodeEditorHolder (ComponentEditor& editor_)
-        : editor (editor_)
+        : editor (editor_), switchFileButton (String::empty), showingHeader (true)
     {
-        addAndMakeVisible (viewport = new Viewport());
-        viewport->setScrollBarsShown (true, false);
-        viewport->setViewedComponent (new ContentHolder (editor));
+        addAndMakeVisible (&viewport);
+        viewport.setScrollBarsShown (true, false);
+
+        addAndMakeVisible (&switchFileButton);
+
+        buttonClicked (0);
+        switchFileButton.addButtonListener (this);
     }
 
     ~CodeEditorHolder()
@@ -547,26 +552,36 @@ public:
 
     void resized()
     {
-        viewport->setBounds (getLocalBounds());
+        viewport.setBounds (getLocalBounds());
 
-        int visWidth = viewport->getMaximumVisibleWidth();
-        dynamic_cast <ContentHolder*> (viewport->getViewedComponent())->updateSize (visWidth);
+        int visWidth = viewport.getMaximumVisibleWidth();
+        dynamic_cast <ContentHolder*> (viewport.getViewedComponent())->updateSize (visWidth);
 
-        if (viewport->getMaximumVisibleWidth() != visWidth)
-            dynamic_cast <ContentHolder*> (viewport->getViewedComponent())->updateSize (viewport->getMaximumVisibleWidth());
+        if (viewport.getMaximumVisibleWidth() != visWidth)
+            dynamic_cast <ContentHolder*> (viewport.getViewedComponent())->updateSize (viewport.getMaximumVisibleWidth());
+
+        switchFileButton.setBounds (getWidth() - 150, 4, 120, 20);
+    }
+
+    void buttonClicked (Button*)
+    {
+        showingHeader = ! showingHeader;
+        viewport.setViewedComponent (new ContentHolder (editor.getDocument(), showingHeader));
+        resized();
+        switchFileButton.setButtonText (showingHeader ? "Show CPP file" : "Show header file");
     }
 
 private:
-    ComponentEditor& editor;
     enum { updateCommandId = 0x23427fa1 };
 
+    //==============================================================================
     class EditorHolder  : public Component,
                           public CodeDocument::Listener
     {
     public:
         EditorHolder (const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr doc,
-                      const String& name, const String& textBefore, const String& textAfter)
-            : Component (name), document (doc), cppTokeniser(), codeEditor (doc->getDocument(), &cppTokeniser)
+                      const String& textBefore, const String& textAfter)
+            : document (doc), cppTokeniser(), codeEditor (doc->getDocument(), &cppTokeniser)
         {
             linesBefore.addLines (textBefore);
             linesAfter.addLines (textAfter);
@@ -603,7 +618,7 @@ private:
 
             codeEditor.setBounds (0, fontHeight * linesBefore.size() + 1,
                                   width, 2 + codeEditor.getScrollbarThickness()
-                                           + fontHeight * jmax (1, document->getDocument().getNumLines()));
+                                           + fontHeight * jlimit (1, 50, document->getDocument().getNumLines()));
 
             setSize (width, (linesBefore.size() + linesAfter.size()) * fontHeight + codeEditor.getHeight());
         }
@@ -616,27 +631,29 @@ private:
                 getParentComponent()->handleCommandMessage (updateCommandId);
         }
 
+    private:
         const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr document;
         CPlusPlusCodeTokeniser cppTokeniser;
         CodeEditorComponent codeEditor;
         StringArray linesBefore, linesAfter;
     };
 
+    //==============================================================================
     class ContentHolder  : public Component,
                            public ChangeListener
     {
     public:
-        ContentHolder (ComponentEditor& editor_)
-            : editor (editor_)
+        ContentHolder (ComponentDocument& document_, bool isHeader_)
+            : document (document_), isHeader (isHeader_)
         {
             setOpaque (true);
-            editor.getDocument().getCustomCodeList().addChangeListener (this);
+            document.getCustomCodeList().addChangeListener (this);
             changeListenerCallback (0);
         }
 
         ~ContentHolder()
         {
-            editor.getDocument().getCustomCodeList().removeChangeListener (this);
+            document.getCustomCodeList().removeChangeListener (this);
         }
 
         void paint (Graphics& g)
@@ -647,12 +664,12 @@ private:
         void updateSize (int width)
         {
             int y = 2;
-
             for (int i = 0; i < editors.size(); ++i)
             {
-                editors.getUnchecked(i)->updateSize (width - 8);
-                editors.getUnchecked(i)->setTopLeftPosition (4, y + 1);
-                y = editors.getUnchecked(i)->getBottom() + 1;
+                EditorHolder* const ed = editors.getUnchecked(i);
+                ed->updateSize (width - 8);
+                ed->setTopLeftPosition (4, y + 1);
+                y = ed->getBottom() + 1;
             }
 
             setSize (width, y + 2);
@@ -662,12 +679,13 @@ private:
         {
             editors.clear();
 
-            CodeGenerator::CustomCodeList::Iterator iter (editor.getDocument().getCppTemplate(),
-                                                          editor.getDocument().getCustomCodeList());
+            CodeGenerator::CustomCodeList::Iterator iter (isHeader ? document.getHeaderContent()
+                                                                   : document.getCppContent(),
+                                                          document.getCustomCodeList());
 
             while (iter.next())
             {
-                EditorHolder* ed = new EditorHolder (iter.codeDocument, iter.sectionName, iter.textBefore, iter.textAfter);
+                EditorHolder* ed = new EditorHolder (iter.codeDocument, iter.textBefore, iter.textAfter);
                 editors.add (ed);
                 addAndMakeVisible (ed);
             }
@@ -683,11 +701,16 @@ private:
                 Component::handleCommandMessage (commandId);
         }
 
+    private:
         OwnedArray <EditorHolder> editors;
-        ComponentEditor& editor;
+        ComponentDocument& document;
+        bool isHeader;
     };
 
-    Viewport* viewport;
+    ComponentEditor& editor;
+    Viewport viewport;
+    TextButton switchFileButton;
+    bool showingHeader;
 };
 
 //==============================================================================

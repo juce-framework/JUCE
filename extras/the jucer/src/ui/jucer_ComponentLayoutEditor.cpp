@@ -402,10 +402,9 @@ ComponentOverlayComponent* ComponentLayoutEditor::getOverlayCompFor (Component* 
     return 0;
 }
 
-void ComponentLayoutEditor::findLassoItemsInArea (Array <Component*>& results,
-                                                  int x, int y, int w, int h)
+void ComponentLayoutEditor::findLassoItemsInArea (Array <Component*>& results, const Rectangle<int>& area)
 {
-    const Rectangle<int> lasso (x - subCompHolder->getX(), y - subCompHolder->getY(), w, h);
+    const Rectangle<int> lasso (area - subCompHolder->getPosition());
 
     for (int i = 0; i < subCompHolder->getNumChildComponents(); ++i)
     {

@@ -59,6 +59,9 @@ public:
     */
     virtual const File getSelectedFile (int index) const = 0;
 
+    /** Deselects any selected files. */
+    virtual void deselectAllFiles() = 0;
+
     /** Scrolls this view to the top. */
     virtual void scrollToTop() = 0;
 

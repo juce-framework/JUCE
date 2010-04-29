@@ -120,28 +120,32 @@ public:
     bool autoScroll (int mouseX, int mouseY, int distanceFromEdge, int maximumSpeed);
 
     /** Returns the position within the child component of the top-left of its visible area.
+    */
+    const Point<int> getViewPosition() const throw()        { return lastViewPos.getPosition(); }
+
+    /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition
     */
-    int getViewPositionX() const throw()                    { return lastVX; }
+    int getViewPositionX() const throw()                    { return lastViewPos.getX(); }
 
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewHeight, setViewPosition
     */
-    int getViewPositionY() const throw()                    { return lastVY; }
+    int getViewPositionY() const throw()                    { return lastViewPos.getY(); }
 
     /** Returns the width of the visible area of the child component.
 
         This may be less than the width of this Viewport if there's a vertical scrollbar
         or if the child component is itself smaller.
     */
-    int getViewWidth() const throw()                        { return lastVW; }
+    int getViewWidth() const throw()                        { return lastViewPos.getWidth(); }
 
     /** Returns the height of the visible area of the child component.
 
         This may be less than the height of this Viewport if there's a horizontal scrollbar
         or if the child component is itself smaller.
     */
-    int getViewHeight() const throw()                       { return lastVH; }
+    int getViewHeight() const throw()                       { return lastViewPos.getHeight(); }
 
     /** Returns the width available within this component for the contents.
 
@@ -241,7 +245,7 @@ public:
 
 private:
     Component::SafePointer<Component> contentComp;
-    int lastVX, lastVY, lastVW, lastVH;
+    Rectangle<int> lastViewPos;
     int scrollBarThickness;
     int singleStepX, singleStepY;
     bool showHScrollbar, showVScrollbar;
@@ -250,6 +254,7 @@ private:
     ScrollBar* horizontalScrollBar;
 
     void updateVisibleRegion();
+
     Viewport (const Viewport&);
     Viewport& operator= (const Viewport&);
 };

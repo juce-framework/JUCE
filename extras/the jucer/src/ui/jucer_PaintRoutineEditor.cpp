@@ -260,11 +260,8 @@ void PaintRoutineEditor::mouseUp (const MouseEvent& e)
     }
 }
 
-void PaintRoutineEditor::findLassoItemsInArea (Array <PaintElement*>& results,
-                                               int x, int y, int w, int h)
+void PaintRoutineEditor::findLassoItemsInArea (Array <PaintElement*>& results, const Rectangle<int>& lasso)
 {
-    const Rectangle<int> lasso (x, y, w, h);
-
     for (int i = 0; i < getNumChildComponents(); ++i)
     {
         PaintElement* const e = dynamic_cast <PaintElement*> (getChildComponent (i));

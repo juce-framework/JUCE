@@ -250,10 +250,13 @@ const File FileTreeComponent::getSelectedFile (const int index) const
 {
     const FileListTreeItem* const item = dynamic_cast <const FileListTreeItem*> (getSelectedItem (index));
 
-    if (item != 0)
-        return item->file;
+    return item != 0 ? item->file
+                     : File::nonexistent;
+}
 
-    return File::nonexistent;
+void FileTreeComponent::deselectAllFiles()
+{
+    clearSelectedItems();
 }
 
 void FileTreeComponent::scrollToTop()

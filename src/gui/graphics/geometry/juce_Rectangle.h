@@ -233,10 +233,24 @@ public:
         return Rectangle (x + deltaPosition.getX(), y + deltaPosition.getY(), w, h);
     }
 
+    /** Moves this rectangle by a given amount. */
+    Rectangle& operator+= (const Point<ValueType>& deltaPosition) throw()
+    {
+        x += deltaPosition.getX(); y += deltaPosition.getY();
+        return *this;
+    }
+
     /** Returns a rectangle which is the same as this one moved by a given amount. */
     const Rectangle operator- (const Point<ValueType>& deltaPosition) const throw()
     {
         return Rectangle (x - deltaPosition.getX(), y - deltaPosition.getY(), w, h);
+    }
+
+    /** Moves this rectangle by a given amount. */
+    Rectangle& operator-= (const Point<ValueType>& deltaPosition) throw()
+    {
+        x -= deltaPosition.getX(); y -= deltaPosition.getY();
+        return *this;
     }
 
     /** Expands the rectangle by a given amount.

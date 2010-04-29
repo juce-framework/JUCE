@@ -195,6 +195,11 @@ const File FileBrowserComponent::getHighlightedFile() const throw()
     return fileListComponent->getSelectedFile (0);
 }
 
+void FileBrowserComponent::deselectAllFiles()
+{
+    fileListComponent->deselectAllFiles();
+}
+
 //==============================================================================
 bool FileBrowserComponent::isFileSuitable (const File& file) const
 {

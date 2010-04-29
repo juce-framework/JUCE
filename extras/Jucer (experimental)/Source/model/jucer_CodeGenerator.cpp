@@ -378,9 +378,9 @@ CodeGenerator::CustomCodeList::~CustomCodeList()
 
 void CodeGenerator::CustomCodeList::reloadFrom (const String& fileContent)
 {
-    sectionNames.clear();
-    sectionContent.clear();
-    
+    StringArray newNames;
+    ReferenceCountedArray<CodeDocumentRef> newContent;
+
     StringArray lines;
     lines.addLines (fileContent);
 
@@ -400,22 +400,28 @@ void CodeGenerator::CustomCodeList::reloadFrom (const String& fileContent)
                 if (endLine > i)
                 {
                     String content (lines.joinIntoString (newLine, i + 1, endLine - i - 1));
+                    newNames.add (tag);
                     
-                    sectionNames.add (tag);
-                    
-                    CodeDocumentRef::Ptr doc (new CodeDocumentRef (new CodeDocument()));
-                    sectionContent.add (doc);
-                    
-                    doc->getDocument().replaceAllContent (content);
-                    doc->getDocument().clearUndoHistory();
-                    doc->getDocument().setSavePoint();
+                    CodeDocumentRef::Ptr doc (getDocumentFor (tag, false));
+                    if (doc == 0)
+                    {
+                        CodeDocument* const codeDoc = new CodeDocument();
+                        doc = new CodeDocumentRef (codeDoc);
+                        codeDoc->replaceAllContent (content);
+                        codeDoc->clearUndoHistory();
+                        codeDoc->setSavePoint();
+                    }
 
+                    newContent.add (doc);
                     i = endLine;
                 }
             }
         }
     }
-    
+
+    sectionNames = newNames;
+    sectionContent = newContent;
+
     sendSynchronousChangeMessage (this);
 }
 
