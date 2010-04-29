@@ -316,6 +316,9 @@
  #include "../src/gui/components/windows/juce_ThreadWithProgressWindow.cpp"
  #include "../src/gui/components/windows/juce_TooltipWindow.cpp"
  #include "../src/gui/components/windows/juce_TopLevelWindow.cpp"
+#endif
+
+#if JUCE_BUILD_MISC  // (put these in misc to balance the file sizes and avoid problems in iphone build)
  #include "../src/gui/graphics/colour/juce_Colour.cpp"
  #include "../src/gui/graphics/colour/juce_ColourGradient.cpp"
  #include "../src/gui/graphics/colour/juce_Colours.cpp"

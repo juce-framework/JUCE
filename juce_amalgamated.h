@@ -3136,7 +3136,8 @@ private:
 	Atomic& operator= (const Atomic&);
 };
 
-#if JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2))  //  Older Mac builds using gcc4.1 or earlier...
+#if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
+	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))  //  Older OSX builds using gcc4.1 or earlier...
 
 	inline void  Atomic::increment (int32& variable)		{ OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
 	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
