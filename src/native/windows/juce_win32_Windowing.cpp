@@ -2407,6 +2407,13 @@ static Image* createImageFromHICON (HICON icon) throw()
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw()
 {
+    WindowsBitmapImage bitmap (Image::ARGB, image.getWidth(), image.getHeight(), true);
+
+    {
+        Graphics g (bitmap);
+        g.drawImageAt (&image, 0, 0);
+    }
+
     HBITMAP mask = CreateBitmap (image.getWidth(), image.getHeight(), 1, 1, 0);
 
     ICONINFO info;
@@ -2414,45 +2421,9 @@ static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int ho
     info.xHotspot = hotspotX;
     info.yHotspot = hotspotY;
     info.hbmMask = mask;
-    HICON hi = 0;
+    info.hbmColor = bitmap.hBitmap;
 
-    if (SystemStats::getOperatingSystemType() >= SystemStats::WinXP)
-    {
-        WindowsBitmapImage bitmap (Image::ARGB, image.getWidth(), image.getHeight(), true);
-        Graphics g (bitmap);
-        g.drawImageAt (&image, 0, 0);
-
-        info.hbmColor = bitmap.hBitmap;
-        hi = CreateIconIndirect (&info);
-    }
-    else
-    {
-        HBITMAP colour = CreateCompatibleBitmap (GetDC (0), image.getWidth(), image.getHeight());
-
-        HDC colDC = CreateCompatibleDC (GetDC (0));
-        HDC alphaDC = CreateCompatibleDC (GetDC (0));
-        SelectObject (colDC, colour);
-        SelectObject (alphaDC, mask);
-
-        for (int y = image.getHeight(); --y >= 0;)
-        {
-            for (int x = image.getWidth(); --x >= 0;)
-            {
-                const Colour c (image.getPixelAt (x, y));
-
-                SetPixel (colDC, x, y, COLORREF (c.getRed() | (c.getGreen() << 8) | (c.getBlue() << 16)));
-                SetPixel (alphaDC, x, y, COLORREF (0xffffff - (c.getAlpha() | (c.getAlpha() << 8) | (c.getAlpha() << 16))));
-            }
-        }
-
-        DeleteDC (colDC);
-        DeleteDC (alphaDC);
-
-        info.hbmColor = colour;
-        hi = CreateIconIndirect (&info);
-        DeleteObject (colour);
-    }
-
+    HICON hi = CreateIconIndirect (&info);
     DeleteObject (mask);
     return hi;
 }
@@ -2478,13 +2449,13 @@ Image* juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
+void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY)
 {
     const int maxW = GetSystemMetrics (SM_CXCURSOR);
     const int maxH = GetSystemMetrics (SM_CYCURSOR);
 
     const Image* im = &image;
-    Image* newIm = 0;
+    ScopedPointer<Image> newIm;
 
     if (image.getWidth() > maxW || image.getHeight() > maxH)
     {
@@ -2495,127 +2466,67 @@ void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hot
     }
 
     void* cursorH = 0;
-
     const SystemStats::OperatingSystemType os = SystemStats::getOperatingSystemType();
 
-    if (os == SystemStats::WinXP)
-    {
-        cursorH = createHICONFromImage (*im, FALSE, hotspotX, hotspotY);
-    }
-    else
-    {
-        const int stride = (maxW + 7) >> 3;
-        HeapBlock <uint8> andPlane, xorPlane;
-        andPlane.calloc (stride * maxH);
-        xorPlane.calloc (stride * maxH);
-        int index = 0;
-
-        for (int y = 0; y < maxH; ++y)
-        {
-            for (int x = 0; x < maxW; ++x)
-            {
-                const unsigned char bit = (unsigned char) (1 << (7 - (x & 7)));
-
-                const Colour pixelColour (im->getPixelAt (x, y));
-
-                if (pixelColour.getAlpha() < 127)
-                    andPlane [index + (x >> 3)] |= bit;
-                else if (pixelColour.getBrightness() >= 0.5f)
-                    xorPlane [index + (x >> 3)] |= bit;
-            }
-
-            index += stride;
-        }
-
-        cursorH = CreateCursor (0, hotspotX, hotspotY, maxW, maxH, andPlane, xorPlane);
-    }
-
-    delete newIm;
-    return cursorH;
+    return createHICONFromImage (*im, FALSE, hotspotX, hotspotY);
 }
 
-void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard)
+void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)
 {
     if (cursorHandle != 0 && ! isStandard)
         DestroyCursor ((HCURSOR) cursorHandle);
 }
 
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type)
+void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType type)
 {
     LPCTSTR cursorName = IDC_ARROW;
 
     switch (type)
     {
-    case MouseCursor::NormalCursor:
-        cursorName = IDC_ARROW;
-        break;
+        case NormalCursor:                  break;
+        case NoCursor:                      return 0;
+        case WaitCursor:                    cursorName = IDC_WAIT; break;
+        case IBeamCursor:                   cursorName = IDC_IBEAM; break;
+        case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
+        case CrosshairCursor:               cursorName = IDC_CROSS; break;
+        case CopyingCursor:                 break; // can't seem to find one of these in the win32 list..
 
-    case MouseCursor::NoCursor:
-        return 0;
+        case LeftRightResizeCursor:
+        case LeftEdgeResizeCursor:
+        case RightEdgeResizeCursor:         cursorName = IDC_SIZEWE; break;
 
-    case MouseCursor::DraggingHandCursor:
-    {
-        static void* dragHandCursor = 0;
+        case UpDownResizeCursor:
+        case TopEdgeResizeCursor:
+        case BottomEdgeResizeCursor:        cursorName = IDC_SIZENS; break;
 
-        if (dragHandCursor == 0)
+        case TopLeftCornerResizeCursor:
+        case BottomRightCornerResizeCursor: cursorName = IDC_SIZENWSE; break;
+
+        case TopRightCornerResizeCursor:
+        case BottomLeftCornerResizeCursor:  cursorName = IDC_SIZENESW; break;
+
+        case UpDownLeftRightResizeCursor:   cursorName = IDC_SIZEALL; break;
+
+        case DraggingHandCursor:
         {
-            static const unsigned char dragHandData[] =
-                { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
-                  16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39, 132,117,151,116,132,146,248,60,209,138,
-                  98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
+            static void* dragHandCursor = 0;
 
-            const ScopedPointer <Image> image (ImageFileFormat::loadFrom ((const char*) dragHandData, sizeof (dragHandData)));
-            dragHandCursor = juce_createMouseCursorFromImage (*image, 8, 7);
+            if (dragHandCursor == 0)
+            {
+                static const unsigned char dragHandData[] =
+                    { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
+                      16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39, 132,117,151,116,132,146,248,60,209,138,
+                      98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
+
+                const ScopedPointer <Image> image (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)));
+                dragHandCursor = createMouseCursorFromImage (*image, 8, 7);
+            }
+
+            return dragHandCursor;
         }
 
-        return dragHandCursor;
-    }
-
-    case MouseCursor::WaitCursor:
-        cursorName = IDC_WAIT;
-        break;
-
-    case MouseCursor::IBeamCursor:
-        cursorName = IDC_IBEAM;
-        break;
-
-    case MouseCursor::PointingHandCursor:
-        cursorName = MAKEINTRESOURCE(32649);
-        break;
-
-    case MouseCursor::LeftRightResizeCursor:
-    case MouseCursor::LeftEdgeResizeCursor:
-    case MouseCursor::RightEdgeResizeCursor:
-        cursorName = IDC_SIZEWE;
-        break;
-
-    case MouseCursor::UpDownResizeCursor:
-    case MouseCursor::TopEdgeResizeCursor:
-    case MouseCursor::BottomEdgeResizeCursor:
-        cursorName = IDC_SIZENS;
-        break;
-
-    case MouseCursor::TopLeftCornerResizeCursor:
-    case MouseCursor::BottomRightCornerResizeCursor:
-        cursorName = IDC_SIZENWSE;
-        break;
-
-    case MouseCursor::TopRightCornerResizeCursor:
-    case MouseCursor::BottomLeftCornerResizeCursor:
-        cursorName = IDC_SIZENESW;
-        break;
-
-    case MouseCursor::UpDownLeftRightResizeCursor:
-        cursorName = IDC_SIZEALL;
-        break;
-
-    case MouseCursor::CrosshairCursor:
-        cursorName = IDC_CROSS;
-        break;
-
-    case MouseCursor::CopyingCursor:
-        // can't seem to find one of these in the win32 list..
-        break;
+        default:
+            jassertfalse; break;
     }
 
     HCURSOR cursorH = LoadCursor (0, cursorName);

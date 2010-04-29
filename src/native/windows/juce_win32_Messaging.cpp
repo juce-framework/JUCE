@@ -238,7 +238,7 @@ void MessageManager::broadcastMessage (const String& value) throw()
         GetWindowText (hwnd, windowName, 64);
         windowName [63] = 0;
 
-        if (String (windowName) == String (messageWindowName))
+        if (String (windowName) == messageWindowName)
         {
             DWORD_PTR result;
             SendMessageTimeout (hwnd, WM_COPYDATA,

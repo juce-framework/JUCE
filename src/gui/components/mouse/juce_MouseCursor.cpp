@@ -33,17 +33,13 @@ BEGIN_JUCE_NAMESPACE
 #include "../mouse/juce_MouseInputSource.h"
 #include "../../../threads/juce_ScopedLock.h"
 
-void* juce_createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
-void* juce_createStandardMouseCursor (MouseCursor::StandardCursorType type);
-void juce_deleteMouseCursor (void* const cursorHandle, const bool isStandard);
-
 
 //==============================================================================
 class MouseCursor::SharedCursorHandle
 {
 public:
     explicit SharedCursorHandle (const MouseCursor::StandardCursorType type)
-        : handle (juce_createStandardMouseCursor (type)),
+        : handle (createStandardMouseCursor (type)),
           refCount (1),
           standardType (type),
           isStandard (true)
@@ -51,7 +47,7 @@ public:
     }
 
     SharedCursorHandle (const Image& image, const int hotSpotX, const int hotSpotY)
-        : handle (juce_createMouseCursorFromImage (image, hotSpotX, hotSpotY)),
+        : handle (createMouseCursorFromImage (image, hotSpotX, hotSpotY)),
           refCount (1),
           standardType (MouseCursor::NormalCursor),
           isStandard (false)
@@ -121,7 +117,7 @@ private:
 
     ~SharedCursorHandle()
     {
-        juce_deleteMouseCursor (handle, isStandard);
+        deleteMouseCursor (handle, isStandard);
     }
 
     SharedCursorHandle& operator= (const SharedCursorHandle&);

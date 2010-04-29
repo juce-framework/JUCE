@@ -78,6 +78,8 @@ const String indentCode (const String& code, const int numSpaces);
 
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 
+void autoScrollForMouseEvent (const MouseEvent& e);
+
 //==============================================================================
 class FileModificationDetector
 {

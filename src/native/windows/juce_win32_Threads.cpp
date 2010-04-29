@@ -128,11 +128,7 @@ void juce_CloseThreadHandle (void* handle)
 void* juce_createThread (void* userData)
 {
     unsigned int threadId;
-
-    return (void*) _beginthreadex (0, 0,
-                                   &threadEntryProc,
-                                   userData,
-                                   0, &threadId);
+    return (void*) _beginthreadex (0, 0, &threadEntryProc, userData, 0, &threadId);
 }
 
 void juce_killThread (void* handle)

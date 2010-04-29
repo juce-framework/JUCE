@@ -51,6 +51,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../io/files/juce_DirectoryIterator.h"
 #include "../io/network/juce_URL.h"
 #include "../io/streams/juce_MemoryInputStream.h"
+#include "../io/streams/juce_BufferedInputStream.h"
 #include "../core/juce_PlatformUtilities.h"
 #include "../text/juce_LocalisedStrings.h"
 #include "../utilities/juce_DeletedAtShutdown.h"

@@ -72,7 +72,7 @@ public:
         if (component != 0)
         {
             updateDragZone (e.getPosition());
-            canvas.beginDrag (e, dragZone);
+            canvas.beginDrag (e.getEventRelativeTo (getParentComponent()), dragZone);
             canvas.showSizeGuides();
         }
     }
@@ -80,7 +80,10 @@ public:
     void mouseDrag (const MouseEvent& e)
     {
         if (component != 0)
-            canvas.continueDrag (e);
+        {
+            canvas.continueDrag (e.getEventRelativeTo (getParentComponent()));
+            autoScrollForMouseEvent (e);
+        }
     }
 
     void mouseUp (const MouseEvent& e)
@@ -88,7 +91,7 @@ public:
         canvas.hideSizeGuides();
 
         if (component != 0)
-            canvas.endDrag (e);
+            canvas.endDrag (e.getEventRelativeTo (getParentComponent()));
 
         updateDragZone (e.getPosition());
     }
@@ -297,6 +300,7 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
+        mouseDownPos = e.getEventRelativeTo (getParentComponent()).getMouseDownPosition();
         toFront (false);
         updateLabel();
 
@@ -320,6 +324,9 @@ public:
     {
         if (isDragging)
         {
+            autoScrollForMouseEvent (e);
+            const MouseEvent e2 (e.getEventRelativeTo (getParentComponent()));
+
             ComponentDocument& doc = getDocument();
             doc.getUndoManager()->undoCurrentTransactionOnly();
 
@@ -332,8 +339,10 @@ public:
             if (axis.expanded (30, 30).contains (e.x, e.y))
             {
                 Coordinate coord (getMarkerList().getCoordinate (marker));
-                coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e.getDistanceFromDragStartX()
-                                                                               : e.getDistanceFromDragStartY()))),
+
+                // (can't use getDistanceFromDragStart() because it doesn't take into account auto-scrolling)
+                coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e2.x - mouseDownPos.getX()
+                                                                               : e2.y - mouseDownPos.getY()))),
                                       getMarkerList());
                 getMarkerList().setCoordinate (marker, coord);
             }
@@ -378,6 +387,7 @@ private:
     bool isDragging;
     FloatingLabelComponent label;
     String labelText;
+    Point<int> mouseDownPos;
 };
 
 
@@ -486,13 +496,7 @@ public:
             showSizeGuides();
         }
 
-        Viewport* viewport = Component::findParentComponentOfClass ((Viewport*) 0);
-
-        if (viewport != 0)
-        {
-            MouseEvent e2 (e.getEventRelativeTo (viewport));
-            viewport->autoScroll (e2.x, e2.y, 8, 16);
-        }
+        autoScrollForMouseEvent (e);
     }
 
     void mouseUp (const MouseEvent& e)

@@ -151,6 +151,10 @@ private:
     void showInWindow (ComponentPeer* window) const;
     void showInAllWindows() const;
     void* getHandle() const throw();
+
+    static void* createMouseCursorFromImage (const Image& image, int hotspotX, int hotspotY);
+    static void* createStandardMouseCursor (MouseCursor::StandardCursorType type);
+    static void deleteMouseCursor (void* cursorHandle, bool isStandard);
 };
 
 #endif   // __JUCE_MOUSECURSOR_JUCEHEADER__

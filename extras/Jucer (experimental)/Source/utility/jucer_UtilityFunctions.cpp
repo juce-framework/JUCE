@@ -373,6 +373,17 @@ const String makeValidCppIdentifier (String s,
     return n;
 }
 
+void autoScrollForMouseEvent (const MouseEvent& e)
+{
+    Viewport* const viewport = e.eventComponent->findParentComponentOfClass ((Viewport*) 0);
+
+    if (viewport != 0)
+    {
+        const MouseEvent e2 (e.getEventRelativeTo (viewport));
+        viewport->autoScroll (e2.x, e2.y, 8, 16);
+    }
+}
+
 //==============================================================================
 const String floatToCode (const float v)
 {

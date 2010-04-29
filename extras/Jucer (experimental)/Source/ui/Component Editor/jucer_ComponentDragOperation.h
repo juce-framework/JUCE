@@ -36,7 +36,8 @@ public:
                    const ResizableBorderComponent::Zone& zone_)
         : canvas (canvas_),
           snapGuideParentComp (snapGuideParentComp_),
-          zone (zone_)
+          zone (zone_),
+          mouseDownPos (e.getPosition())
     {
         int i;
         for (i = 0; i < items.size(); ++i)
@@ -168,12 +169,13 @@ public:
     {
         getDocument().getUndoManager()->undoCurrentTransactionOnly();
 
-        Point<int> distance (e.getOffsetFromDragStart());
+        // (can't use getOffsetFromDragStart() because of auto-scrolling)
+        Point<int> distance (e.getPosition() - mouseDownPos);
         if (! isDraggingLeftRight())
-            distance = Point<int> (0, distance.getY());
+            distance = distance.withX (0);
 
         if (! isDraggingUpDown())
-            distance = Point<int> (distance.getX(), 0);
+            distance = distance.withY (0);
 
         snapGuides.clear();
 
@@ -221,6 +223,7 @@ private:
     const ResizableBorderComponent::Zone zone;
     OwnedArray<Component> snapGuides;
     Component* snapGuideParentComp;
+    Point<int> mouseDownPos;
 
     ComponentDocument& getDocument() throw()         { return canvas.getDocument(); }
 
