@@ -126,7 +126,7 @@ namespace jpeglibNamespace
 
 BEGIN_JUCE_NAMESPACE
 
-#include "../juce_Image.h"
+#include "../juce_ImageFileFormat.h"
 #include "../../../../io/streams/juce_InputStream.h"
 #include "../../../../io/streams/juce_OutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
@@ -216,7 +216,40 @@ namespace JPEGHelpers
 }
 
 //==============================================================================
-Image* juce_loadJPEGImageFromStream (InputStream& in)
+JPEGImageFormat::JPEGImageFormat()
+    : quality (-1.0f)
+{
+}
+
+JPEGImageFormat::~JPEGImageFormat()     {}
+
+void JPEGImageFormat::setQuality (const float newQuality)
+{
+    quality = newQuality;
+}
+
+const String JPEGImageFormat::getFormatName()
+{
+    return "JPEG";
+}
+
+bool JPEGImageFormat::canUnderstand (InputStream& in)
+{
+    const int bytesNeeded = 10;
+    uint8 header [bytesNeeded];
+
+    if (in.read (header, bytesNeeded) == bytesNeeded)
+    {
+        return header[0] == 0xff
+            && header[1] == 0xd8
+            && header[2] == 0xff
+            && (header[3] == 0xe0 || header[3] == 0xe1);
+    }
+
+    return false;
+}
+
+Image* JPEGImageFormat::decodeImage (InputStream& in)
 {
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
@@ -313,10 +346,7 @@ Image* juce_loadJPEGImageFromStream (InputStream& in)
     return image;
 }
 
-//==============================================================================
-bool juce_writeJPEGImageToStream (const Image& image,
-                                  OutputStream& out,
-                                  float quality)
+bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
 {
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;

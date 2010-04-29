@@ -69,10 +69,10 @@ public:
         @param newShadowOffsetY allows the shadow to be shifted in relation to the
                                 component's contents
     */
-    void setShadowProperties (const float newRadius,
-                              const float newOpacity,
-                              const int newShadowOffsetX,
-                              const int newShadowOffsetY);
+    void setShadowProperties (float newRadius,
+                              float newOpacity,
+                              int newShadowOffsetX,
+                              int newShadowOffsetY);
 
 
     //==============================================================================

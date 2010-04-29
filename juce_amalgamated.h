@@ -9546,8 +9546,8 @@ public:
 
 	AffineTransform (const AffineTransform& other) throw();
 
-	AffineTransform (const float mat00, const float mat01, const float mat02,
-					 const float mat10, const float mat11, const float mat12) throw();
+	AffineTransform (float mat00, float mat01, float mat02,
+					 float mat10, float mat11, float mat12) throw();
 
 	AffineTransform& operator= (const AffineTransform& other) throw();
 
@@ -9563,32 +9563,32 @@ public:
 	void transformPoint (double& x,
 						 double& y) const throw();
 
-	const AffineTransform translated (const float deltaX,
-									  const float deltaY) const throw();
+	const AffineTransform translated (float deltaX,
+									  float deltaY) const throw();
 
-	static const AffineTransform translation (const float deltaX,
-											  const float deltaY) throw();
+	static const AffineTransform translation (float deltaX,
+											  float deltaY) throw();
 
-	const AffineTransform rotated (const float angleInRadians) const throw();
+	const AffineTransform rotated (float angleInRadians) const throw();
 
-	const AffineTransform rotated (const float angleInRadians,
-								   const float pivotX,
-								   const float pivotY) const throw();
+	const AffineTransform rotated (float angleInRadians,
+								   float pivotX,
+								   float pivotY) const throw();
 
-	static const AffineTransform rotation (const float angleInRadians) throw();
+	static const AffineTransform rotation (float angleInRadians) throw();
 
-	static const AffineTransform rotation (const float angleInRadians,
-										   const float pivotX,
-										   const float pivotY) throw();
+	static const AffineTransform rotation (float angleInRadians,
+										   float pivotX,
+										   float pivotY) throw();
 
-	const AffineTransform scaled (const float factorX,
-								  const float factorY) const throw();
+	const AffineTransform scaled (float factorX,
+								  float factorY) const throw();
 
-	static const AffineTransform scale (const float factorX,
-										const float factorY) throw();
+	static const AffineTransform scale (float factorX,
+										float factorY) throw();
 
-	const AffineTransform sheared (const float shearX,
-								   const float shearY) const throw();
+	const AffineTransform sheared (float shearX,
+								   float shearY) const throw();
 
 	const AffineTransform inverted() const throw();
 
@@ -9611,8 +9611,8 @@ public:
 
 private:
 
-	const AffineTransform followedBy (const float mat00, const float mat01, const float mat02,
-									  const float mat10, const float mat11, const float mat12) const throw();
+	const AffineTransform followedBy (float mat00, float mat01, float mat02,
+									  float mat10, float mat11, float mat12) const throw();
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__
@@ -11188,7 +11188,7 @@ public:
 
 	int getStyleFlags() const throw()			   { return font->styleFlags; }
 
-	void setStyleFlags (const int newFlags) throw();
+	void setStyleFlags (int newFlags) throw();
 
 	void setBold (bool shouldBeBold) throw();
 	bool isBold() const throw();
@@ -20098,10 +20098,10 @@ public:
 
 	~DropShadowEffect();
 
-	void setShadowProperties (const float newRadius,
-							  const float newOpacity,
-							  const int newShadowOffsetX,
-							  const int newShadowOffsetY);
+	void setShadowProperties (float newRadius,
+							  float newOpacity,
+							  int newShadowOffsetX,
+							  int newShadowOffsetY);
 
 	void applyEffect (Image& sourceImage, Graphics& destContext);
 
@@ -28217,7 +28217,7 @@ public:
 
 	~GlowEffect();
 
-	void setGlowProperties (const float newRadius,
+	void setGlowProperties (float newRadius,
 							const Colour& newColour);
 
 	void applyEffect (Image& sourceImage, Graphics& destContext);
@@ -28247,11 +28247,11 @@ class JUCE_API  ReduceOpacityEffect  : public ImageEffectFilter
 {
 public:
 
-	ReduceOpacityEffect (const float opacity = 1.0f);
+	ReduceOpacityEffect (float opacity = 1.0f);
 
 	~ReduceOpacityEffect();
 
-	void setOpacity (const float newOpacity);
+	void setOpacity (float newOpacity);
 
 	void applyEffect (Image& sourceImage, Graphics& destContext);
 

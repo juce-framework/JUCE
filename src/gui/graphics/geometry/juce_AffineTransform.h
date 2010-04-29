@@ -56,8 +56,8 @@ public:
             (mat10 mat11 mat12)
             (  0     0     1  )
     */
-    AffineTransform (const float mat00, const float mat01, const float mat02,
-                     const float mat10, const float mat11, const float mat12) throw();
+    AffineTransform (float mat00, float mat01, float mat02,
+                     float mat10, float mat11, float mat12) throw();
 
     /** Copies from another AffineTransform object */
     AffineTransform& operator= (const AffineTransform& other) throw();
@@ -90,54 +90,54 @@ public:
 
     //==============================================================================
     /** Returns a new transform which is the same as this one followed by a translation. */
-    const AffineTransform translated (const float deltaX,
-                                      const float deltaY) const throw();
+    const AffineTransform translated (float deltaX,
+                                      float deltaY) const throw();
 
     /** Returns a new transform which is a translation. */
-    static const AffineTransform translation (const float deltaX,
-                                              const float deltaY) throw();
+    static const AffineTransform translation (float deltaX,
+                                              float deltaY) throw();
 
     /** Returns a transform which is the same as this one followed by a rotation.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
         the origin (0, 0).
     */
-    const AffineTransform rotated (const float angleInRadians) const throw();
+    const AffineTransform rotated (float angleInRadians) const throw();
 
     /** Returns a transform which is the same as this one followed by a rotation about a given point.
 
         The rotation is specified by a number of radians to rotate clockwise, centred around
         the co-ordinates passed in.
     */
-    const AffineTransform rotated (const float angleInRadians,
-                                   const float pivotX,
-                                   const float pivotY) const throw();
+    const AffineTransform rotated (float angleInRadians,
+                                   float pivotX,
+                                   float pivotY) const throw();
 
     /** Returns a new transform which is a rotation about (0, 0). */
-    static const AffineTransform rotation (const float angleInRadians) throw();
+    static const AffineTransform rotation (float angleInRadians) throw();
 
     /** Returns a new transform which is a rotation about a given point. */
-    static const AffineTransform rotation (const float angleInRadians,
-                                           const float pivotX,
-                                           const float pivotY) throw();
+    static const AffineTransform rotation (float angleInRadians,
+                                           float pivotX,
+                                           float pivotY) throw();
 
     /** Returns a transform which is the same as this one followed by a re-scaling.
 
         The scaling is centred around the origin (0, 0).
     */
-    const AffineTransform scaled (const float factorX,
-                                  const float factorY) const throw();
+    const AffineTransform scaled (float factorX,
+                                  float factorY) const throw();
 
     /** Returns a new transform which is a re-scale about the origin. */
-    static const AffineTransform scale (const float factorX,
-                                        const float factorY) throw();
+    static const AffineTransform scale (float factorX,
+                                        float factorY) throw();
 
     /** Returns a transform which is the same as this one followed by a shear.
 
         The shear is centred around the origin (0, 0).
     */
-    const AffineTransform sheared (const float shearX,
-                                   const float shearY) const throw();
+    const AffineTransform sheared (float shearX,
+                                   float shearY) const throw();
 
     /** Returns a matrix which is the inverse operation of this one.
 
@@ -185,8 +185,8 @@ public:
 
 private:
     //==============================================================================
-    const AffineTransform followedBy (const float mat00, const float mat01, const float mat02,
-                                      const float mat10, const float mat11, const float mat12) const throw();
+    const AffineTransform followedBy (float mat00, float mat01, float mat02,
+                                      float mat10, float mat11, float mat12) const throw();
 };
 
 #endif   // __JUCE_AFFINETRANSFORM_JUCEHEADER__

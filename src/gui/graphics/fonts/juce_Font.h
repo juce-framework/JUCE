@@ -225,7 +225,7 @@ public:
                             enum, to set the font's properties
         @see FontStyleFlags
     */
-    void setStyleFlags (const int newFlags) throw();
+    void setStyleFlags (int newFlags) throw();
 
     //==============================================================================
     /** Makes the font bold or non-bold. */

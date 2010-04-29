@@ -57,7 +57,7 @@ public:
         used to render it (for a less intense glow, lower the colour's
         opacity).
     */
-    void setGlowProperties (const float newRadius,
+    void setGlowProperties (float newRadius,
                             const Colour& newColour);
 
 

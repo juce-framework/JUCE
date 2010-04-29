@@ -47,7 +47,7 @@ public:
         The opacity of the component to which the effect is applied will be
         scaled by the given factor (in the range 0 to 1.0f).
     */
-    ReduceOpacityEffect (const float opacity = 1.0f);
+    ReduceOpacityEffect (float opacity = 1.0f);
 
     /** Destructor. */
     ~ReduceOpacityEffect();
@@ -56,7 +56,7 @@ public:
 
         @param newOpacity   should be between 0 and 1.0f
     */
-    void setOpacity (const float newOpacity);
+    void setOpacity (float newOpacity);
 
 
     //==============================================================================

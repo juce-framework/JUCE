@@ -418,16 +418,10 @@ bool GIFLoader::readImage (const int width, const int height,
             {
                 switch (pass)
                 {
-                case 0:
-                case 1:
-                    ypos += 8;
-                    break;
-                case 2:
-                    ypos += 4;
-                    break;
-                case 3:
-                    ypos += 2;
-                    break;
+                    case 0:
+                    case 1:     ypos += 8; break;
+                    case 2:     ypos += 4; break;
+                    case 3:     ypos += 2; break;
                 }
 
                 while (ypos >= height)
@@ -436,17 +430,10 @@ bool GIFLoader::readImage (const int width, const int height,
 
                     switch (pass)
                     {
-                    case 1:
-                        ypos = 4;
-                        break;
-                    case 2:
-                        ypos = 2;
-                        break;
-                    case 3:
-                        ypos = 1;
-                        break;
-                    default:
-                        return true;
+                        case 1:     ypos = 4; break;
+                        case 2:     ypos = 2; break;
+                        case 3:     ypos = 1; break;
+                        default:    return true;
                     }
                 }
             }
