@@ -639,7 +639,7 @@ public:
         if (cfmfp == 0)
             return 0;
 
-        UInt32* const mfp = (UInt32*) juce_malloc (sizeof (UInt32) * 6);
+        UInt32* const mfp = new UInt32[6];
 
         mfp[0] = 0x3d800000 | ((UInt32) cfmfp >> 16);
         mfp[1] = 0x618c0000 | ((UInt32) cfmfp & 0xffff);
@@ -654,7 +654,7 @@ public:
 
     static void disposeMachOFromCFM (void* ptr)
     {
-        juce_free (ptr);
+        delete[] static_cast <UInt32*> (ptr);
     }
 
     void coerceAEffectFunctionCalls (AEffect* eff)

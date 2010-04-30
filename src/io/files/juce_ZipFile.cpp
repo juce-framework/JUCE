@@ -66,7 +66,7 @@ public:
         }
         else
         {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
             file_.numOpenStreams++;
 #endif
         }
@@ -85,7 +85,7 @@ public:
 
     ~ZipInputStream() throw()
     {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         if (inputStream != 0 && inputStream == file.inputStream)
             file.numOpenStreams--;
 #endif
@@ -161,7 +161,7 @@ private:
 ZipFile::ZipFile (InputStream* const source_,
                   const bool deleteStreamWhenDestroyed) throw()
    : inputStream (source_)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
      , numOpenStreams (0)
 #endif
 {
@@ -173,7 +173,7 @@ ZipFile::ZipFile (InputStream* const source_,
 
 ZipFile::ZipFile (const File& file)
     : inputStream (0)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
       , numOpenStreams (0)
 #endif
 {
@@ -184,7 +184,7 @@ ZipFile::ZipFile (const File& file)
 ZipFile::ZipFile (InputSource* const inputSource_)
     : inputStream (0),
       inputSource (inputSource_)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
       , numOpenStreams (0)
 #endif
 {
@@ -193,7 +193,7 @@ ZipFile::ZipFile (InputSource* const inputSource_)
 
 ZipFile::~ZipFile() throw()
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     entries.clear();
 
     // If you hit this assertion, it means you've created a stream to read

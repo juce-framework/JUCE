@@ -1072,6 +1072,11 @@ bool TextEditor::isReadOnly() const
     return readOnly || ! isEnabled();
 }
 
+bool TextEditor::isTextInputActive() const
+{
+    return ! isReadOnly();
+}
+
 void TextEditor::setReturnKeyStartsNewLine (const bool shouldStartNewLine)
 {
     returnKeyStartsNewLine = shouldStartNewLine;

@@ -197,7 +197,9 @@ public:
         bufferList->mNumberBuffers = 1;
         bufferList->mBuffers[0].mNumberChannels = inputStreamDesc.mChannelsPerFrame;
         bufferList->mBuffers[0].mDataByteSize = (UInt32) (samplesPerFrame * inputStreamDesc.mBytesPerFrame) + 16;
-        bufferList->mBuffers[0].mData = malloc (bufferList->mBuffers[0].mDataByteSize);
+
+        dataBuffer.malloc (bufferList->mBuffers[0].mDataByteSize);
+        bufferList->mBuffers[0].mData = dataBuffer;
 
         sampleRate = inputStreamDesc.mSampleRate;
         bitsPerSample = 16;
@@ -220,8 +222,6 @@ public:
 
         checkThreadIsAttached();
         DisposeMovie (movie);
-
-        juce_free (bufferList->mBuffers[0].mData);
 
 #if JUCE_MAC
         ExitMoviesOnThread ();
@@ -307,6 +307,7 @@ private:
     MovieAudioExtractionRef extractor;
     AudioStreamBasicDescription inputStreamDesc;
     HeapBlock <AudioBufferList> bufferList;
+    HeapBlock <char> dataBuffer;
     Handle dataHandle;
 
     //==============================================================================

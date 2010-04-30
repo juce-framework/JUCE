@@ -33,7 +33,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 ColourGradient::ColourGradient() throw()
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     x1 = 987654.0f;
 #endif
 }
@@ -138,7 +138,7 @@ const Colour ColourGradient::getColourAtPosition (const float position) const th
 //==============================================================================
 int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlock <PixelARGB>& lookupTable) const
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of
     // the comments for the constructors.
     jassert (x1 != 987654.0f);

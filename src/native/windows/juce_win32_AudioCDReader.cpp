@@ -516,8 +516,8 @@ public:
     int numFrames;
     int dataStartOffset;
     int dataLength;
-    BYTE* buffer;
     int bufferSize;
+    HeapBlock<BYTE> buffer;
     int index;
     bool wantsIndex;
 
@@ -527,19 +527,14 @@ public:
           numFrames (0),
           dataStartOffset (0),
           dataLength (0),
+          bufferSize (2352 * numberOfFrames),
+          buffer (bufferSize),
           index (0),
           wantsIndex (false)
     {
-        bufferSize = 2352 * numberOfFrames;
-        buffer = (BYTE*) juce_malloc (bufferSize);
     }
 
-    ~CDReadBuffer()
-    {
-        juce_free (buffer);
-    }
-
-    bool isZero() const
+    bool isZero() const throw()
     {
         BYTE* p = buffer + dataStartOffset;
 

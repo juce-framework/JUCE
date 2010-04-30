@@ -106,14 +106,20 @@
       <GROUP id="d2joUoRvF" name="Component Editor">
         <FILE id="m6WsEDek9" name="jucer_ComponentDragOperation.h" compile="0"
               resource="0" file="Source/ui/Component Editor/jucer_ComponentDragOperation.h"/>
-        <FILE id="3Rd2cdG1r" name="jucer_ComponentEditorCanvas.cpp" compile="1"
-              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorCanvas.cpp"/>
-        <FILE id="PYpzAE3jK" name="jucer_ComponentEditorCanvas.h" compile="0"
-              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorCanvas.h"/>
         <FILE id="Q48V5uBKu" name="jucer_ComponentEditor.cpp" compile="1" resource="0"
               file="Source/ui/Component Editor/jucer_ComponentEditor.cpp"/>
         <FILE id="B1zNCvltV" name="jucer_ComponentEditor.h" compile="0" resource="0"
               file="Source/ui/Component Editor/jucer_ComponentEditor.h"/>
+        <FILE id="3Rd2cdG1r" name="jucer_ComponentEditorCanvas.cpp" compile="1"
+              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorCanvas.cpp"/>
+        <FILE id="PYpzAE3jK" name="jucer_ComponentEditorCanvas.h" compile="0"
+              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorCanvas.h"/>
+        <FILE id="pqP7rsm8g" name="jucer_ComponentEditorCodeView.h" compile="0"
+              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorCodeView.h"/>
+        <FILE id="oUOqiYNk0" name="jucer_ComponentEditorToolbar.h" compile="0"
+              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorToolbar.h"/>
+        <FILE id="B9QzpSD6c" name="jucer_ComponentEditorTreeView.h" compile="0"
+              resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorTreeView.h"/>
       </GROUP>
       <GROUP id="VLkoRqu1c" name="Drawable Editor">
         <FILE id="0eWoa5Ttv" name="jucer_DrawableEditor.cpp" compile="1" resource="0"

@@ -812,7 +812,7 @@ void Component::setBounds (int x, int y, int w, int h)
     const bool wasResized  = (getWidth() != w || getHeight() != h);
     const bool wasMoved    = (getX() != x || getY() != y);
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     // It's a very bad idea to try to resize a window during its paint() method!
     jassert (! (flags.isInsidePaintCall && wasResized && isOnDesktop()));
 #endif
@@ -1673,7 +1673,7 @@ void Component::paintEntireComponent (Graphics& g)
 {
     jassert (! g.isClipEmpty());
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     flags.isInsidePaintCall = true;
 #endif
 
@@ -1694,7 +1694,7 @@ void Component::paintEntireComponent (Graphics& g)
         renderComponent (g);
     }
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     flags.isInsidePaintCall = false;
 #endif
 }

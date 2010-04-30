@@ -115,13 +115,13 @@ END_JUCE_NAMESPACE
         including juce.h
     */
     #ifdef JUCE_DLL
-      #ifdef JUCE_DEBUG
+      #if JUCE_DEBUG
         #define AUTOLINKEDLIB "JUCE_debug.lib"
       #else
         #define AUTOLINKEDLIB "JUCE.lib"
       #endif
     #else
-      #ifdef JUCE_DEBUG
+      #if JUCE_DEBUG
         #ifdef _WIN64
           #define AUTOLINKEDLIB "jucelib_static_x64_debug.lib"
         #else

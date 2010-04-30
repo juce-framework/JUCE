@@ -175,10 +175,13 @@
       <Filter Name="UI">
         <Filter Name="Component Editor">
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentDragOperation.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.cpp"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h"/>
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp"/>
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.cpp"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h"/>
         </Filter>
         <Filter Name="Drawable Editor">
           <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>

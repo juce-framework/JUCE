@@ -59,7 +59,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat,
 
     if (newFormat != 0)
     {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         for (int i = getNumKnownFormats(); --i >= 0;)
         {
             if (getKnownFormat (i)->getFormatName() == newFormat->getFormatName())

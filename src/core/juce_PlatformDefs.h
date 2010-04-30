@@ -52,13 +52,13 @@
 // (For info about JUCE_LOG_ASSERTIONS, have a look in juce_Config.h)
 #if JUCE_LOG_ASSERTIONS
   #define juce_LogCurrentAssertion    juce_LogAssertion (__FILE__, __LINE__);
-#elif defined (JUCE_DEBUG)
+#elif JUCE_DEBUG
   #define juce_LogCurrentAssertion    std::cerr << "JUCE Assertion failure in " << __FILE__ << ", line " << __LINE__ << std::endl;
 #else
   #define juce_LogCurrentAssertion
 #endif
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
   //==============================================================================
   // If debugging is enabled..
 

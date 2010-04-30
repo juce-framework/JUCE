@@ -78,7 +78,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
         const ScopedAutoReleasePool pool;
 #endif
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         {
             // Some simple test code to keep an eye on things and make sure these functions
             // work ok on all platforms. Let me know if any of these assertions fail!
@@ -205,7 +205,7 @@ void juce_Free (void* const block)
     free (block);
 }
 
-#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
 
 void* juce_DebugMalloc (const int size, const char* file, const int line)
 {

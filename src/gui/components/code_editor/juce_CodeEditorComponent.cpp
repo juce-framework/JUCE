@@ -348,6 +348,11 @@ void CodeEditorComponent::loadContent (const String& newContent)
     scrollToLine (0);
 }
 
+bool CodeEditorComponent::isTextInputActive() const
+{
+    return true;
+}
+
 //==============================================================================
 void CodeEditorComponent::codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
                                                const CodeDocument::Position& affectedTextEnd)

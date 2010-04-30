@@ -435,7 +435,7 @@ bool XmlElement::writeToFile (const File& file,
 //==============================================================================
 bool XmlElement::hasTagName (const String& tagNameWanted) const throw()
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     // if debugging, check that the case is actually the same, because
     // valid xml is case-sensitive, and although this lets it pass, it's
     // better not to..
@@ -639,7 +639,7 @@ bool XmlElement::compareAttribute (const String& attributeName,
 //==============================================================================
 void XmlElement::setAttribute (const String& attributeName, const String& value)
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     // check the identifier being passed in is legal..
     const juce_wchar* t = attributeName;
     while (*t != 0)

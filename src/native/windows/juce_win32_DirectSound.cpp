@@ -958,12 +958,10 @@ public:
           isStarted (false),
           outputDeviceIndex (outputDeviceIndex_),
           inputDeviceIndex (inputDeviceIndex_),
-          numInputBuffers (0),
-          numOutputBuffers (0),
           totalSamplesOut (0),
           sampleRate (0.0),
-          inputBuffers (0),
-          outputBuffers (0),
+          inputBuffers (1, 1),
+          outputBuffers (1, 1),
           callback (0),
           bufferSizeSamples (0)
     {
@@ -1161,12 +1159,13 @@ private:
     OwnedArray <DSoundInternalOutChannel> outChans;
     WaitableEvent startEvent;
 
-    int numInputBuffers, numOutputBuffers, bufferSizeSamples;
+    int bufferSizeSamples;
     int volatile totalSamplesOut;
     int64 volatile lastBlockTime;
     double sampleRate;
     BigInteger enabledInputs, enabledOutputs;
-    HeapBlock <float*> inputBuffers, outputBuffers;
+
+    AudioSampleBuffer inputBuffers, outputBuffers;
 
     AudioIODeviceCallback* callback;
     CriticalSection startStopLock;
@@ -1186,19 +1185,8 @@ private:
 
         inChans.clear();
         outChans.clear();
-
-        int i;
-        for (i = 0; i < numInputBuffers; ++i)
-            juce_free (inputBuffers[i]);
-
-        inputBuffers.free();
-        numInputBuffers = 0;
-
-        for (i = 0; i < numOutputBuffers; ++i)
-            juce_free (outputBuffers[i]);
-
-        outputBuffers.free();
-        numOutputBuffers = 0;
+        inputBuffers.setSize (1, 1);
+        outputBuffers.setSize (1, 1);
     }
 
     void resync()
@@ -1305,10 +1293,10 @@ public:
             {
                 JUCE_TRY
                 {
-                    callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getData()),
-                                                     numInputBuffers,
-                                                     outputBuffers,
-                                                     numOutputBuffers,
+                    callback->audioDeviceIOCallback (const_cast <const float**> (inputBuffers.getArrayOfChannels()),
+                                                     inputBuffers.getNumChannels(),
+                                                     outputBuffers.getArrayOfChannels(),
+                                                     outputBuffers.getNumChannels(),
                                                      bufferSizeSamples);
                 }
                 JUCE_CATCH_EXCEPTION
@@ -1317,10 +1305,7 @@ public:
             }
             else
             {
-                for (i = 0; i < numOutputBuffers; ++i)
-                    if (outputBuffers[i] != 0)
-                        zeromem (outputBuffers[i], bufferSizeSamples * sizeof (float));
-
+                outputBuffers.clear();
                 totalSamplesOut = 0;
                 sleep (1);
             }
@@ -1518,20 +1503,18 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                             enabledInputs.getHighestBit() + 1 - inChannels.size(),
                             false);
 
-    numInputBuffers = enabledInputs.countNumberOfSetBits();
-    inputBuffers.calloc (numInputBuffers + 2);
+    inputBuffers.setSize (enabledInputs.countNumberOfSetBits(), bufferSizeSamples);
     int i, numIns = 0;
 
     for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
     {
         float* left = 0;
-        float* right = 0;
-
         if (enabledInputs[i])
-            left = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            left = inputBuffers.getSampleData (numIns++);
 
+        float* right = 0;
         if (enabledInputs[i + 1])
-            right = inputBuffers[numIns++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            right = inputBuffers.getSampleData (numIns++);
 
         if (left != 0 || right != 0)
             inChans.add (new DSoundInternalInChannel (dlh.inputDeviceNames [inputDeviceIndex],
@@ -1545,20 +1528,18 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                              enabledOutputs.getHighestBit() + 1 - outChannels.size(),
                              false);
 
-    numOutputBuffers = enabledOutputs.countNumberOfSetBits();
-    outputBuffers.calloc (numOutputBuffers + 2);
+    outputBuffers.setSize (enabledOutputs.countNumberOfSetBits(), bufferSizeSamples);
     int numOuts = 0;
 
     for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
     {
         float* left = 0;
-        float* right = 0;
-
         if (enabledOutputs[i])
-            left = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            left = outputBuffers.getSampleData (numOuts++);
 
+        float* right = 0;
         if (enabledOutputs[i + 1])
-            right = outputBuffers[numOuts++] = (float*) juce_calloc ((bufferSizeSamples + 16) * sizeof (float));
+            right = outputBuffers.getSampleData (numOuts++);
 
         if (left != 0 || right != 0)
             outChans.add (new DSoundInternalOutChannel (dlh.outputDeviceNames[outputDeviceIndex],

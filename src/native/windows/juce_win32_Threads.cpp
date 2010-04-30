@@ -135,7 +135,7 @@ void juce_killThread (void* handle)
 {
     if (handle != 0)
     {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         OutputDebugString (_T("** Warning - Forced thread termination **\n"));
 #endif
         TerminateThread (handle, 0);
@@ -144,7 +144,7 @@ void juce_killThread (void* handle)
 
 void juce_setCurrentThreadName (const String& name)
 {
-#if defined (JUCE_DEBUG) && JUCE_MSVC
+#if JUCE_DEBUG && JUCE_MSVC
     struct
     {
         DWORD dwType;
@@ -208,7 +208,7 @@ static HANDLE sleepEvent = 0;
 void juce_initialiseThreadEvents()
 {
     if (sleepEvent == 0)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         sleepEvent = CreateEvent (0, 0, 0, _T("Juce Sleep Event"));
 #else
         sleepEvent = CreateEvent (0, 0, 0, 0);
@@ -294,7 +294,7 @@ void Process::lowerPrivilege()
 
 void Process::terminate()
 {
-#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtDumpMemoryLeaks();
 #endif
 

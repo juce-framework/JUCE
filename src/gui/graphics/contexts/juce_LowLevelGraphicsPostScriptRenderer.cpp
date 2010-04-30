@@ -40,7 +40,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if defined (JUCE_DEBUG) && WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS
+#if JUCE_DEBUG && WARN_ABOUT_NON_POSTSCRIPT_OPERATIONS
  #define notPossibleInPostscriptAssert jassertfalse
 #else
  #define notPossibleInPostscriptAssert

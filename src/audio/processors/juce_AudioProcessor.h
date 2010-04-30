@@ -578,7 +578,7 @@ private:
     bool suspended, nonRealtime;
     CriticalSection callbackLock, listenerLock;
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     BigInteger changingParams;
 #endif
 

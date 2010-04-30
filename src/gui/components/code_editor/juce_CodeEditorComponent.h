@@ -253,6 +253,8 @@ public:
     /** @internal */
     void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
                               const CodeDocument::Position& affectedTextEnd);
+    /** @internal */
+    bool isTextInputActive() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

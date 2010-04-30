@@ -159,7 +159,7 @@ private:
     ScopedPointer <InputStream> streamToDelete;
     ScopedPointer <InputSource> inputSource;
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     int numOpenStreams;
 #endif
 

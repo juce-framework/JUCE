@@ -28,14 +28,14 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG && ! defined (JUCE_DEBUG_XERRORS)
  #define JUCE_DEBUG_XERRORS 1
 #endif
 
 Display* display = 0;     // This is also referenced from WindowDriver.cpp
 Window juce_messageWindowHandle = None;
 
-XContext improbableNumber;   // This is referenced from Windowing.cpp
+XContext windowHandleXContext;   // This is referenced from Windowing.cpp
 
 extern void juce_windowMessageReceive (XEvent* event);  // Defined in Windowing.cpp
 extern void juce_handleSelectionRequest (XSelectionRequestEvent &evt);  // Defined in Clipboard.cpp
@@ -165,7 +165,7 @@ static int ioErrorHandler (Display* display)
 // A protocol error has occurred
 static int errorHandler (Display* display, XErrorEvent* event)
 {
-#ifdef JUCE_DEBUG_XERRORS
+#if JUCE_DEBUG_XERRORS
     char errorStr[64] = { 0 };
     char requestStr[64] = { 0 };
 
@@ -280,7 +280,7 @@ void MessageManager::doPlatformSpecificInitialisation()
 
     // Create a context to store user data associated with Windows we
     // create in WindowDriver
-    improbableNumber = XUniqueContext();
+    windowHandleXContext = XUniqueContext();
 
     // We're only interested in client messages for this window
     // which are always sent

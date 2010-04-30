@@ -2026,7 +2026,7 @@ private:
         bool currentlyModalFlag         : 1;
         bool isDisabledFlag             : 1;
         bool childCompFocusedFlag       : 1;
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         bool isInsidePaintCall          : 1;
 #endif
     };

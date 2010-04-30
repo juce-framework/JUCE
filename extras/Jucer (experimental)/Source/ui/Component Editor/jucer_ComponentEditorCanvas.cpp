@@ -675,15 +675,15 @@ private:
 };
 
 //==============================================================================
-class ComponentEditorCanvas::WholeComponentResizer    : public Component
+class ComponentEditorCanvas::DocumentResizerFrame    : public Component
 {
 public:
-    WholeComponentResizer (ComponentEditorCanvas& canvas_)
+    DocumentResizerFrame (ComponentEditorCanvas& canvas_)
         : canvas (canvas_), dragStartWidth (0), dragStartHeight (0), resizerThickness (4)
     {
     }
 
-    ~WholeComponentResizer()
+    ~DocumentResizerFrame()
     {
     }
 
@@ -770,7 +770,7 @@ ComponentEditorCanvas::ComponentEditorCanvas (ComponentEditor& editor_)
     setOpaque (true);
     addAndMakeVisible (componentHolder = new ComponentHolder());
     addAndMakeVisible (overlay = new OverlayComponent (*this));
-    overlay->addAndMakeVisible (resizeFrame = new WholeComponentResizer (*this));
+    overlay->addAndMakeVisible (resizeFrame = new DocumentResizerFrame (*this));
 
     setSize (500, 500);
 

@@ -28,7 +28,7 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
   #define JUCE_DEBUG_XERRORS 1
 #endif
 

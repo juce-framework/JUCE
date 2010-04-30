@@ -52,7 +52,7 @@ juce_ImplementSingleton_SingleThreaded (AudioPluginFormatManager);
 //==============================================================================
 void AudioPluginFormatManager::addDefaultFormats()
 {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     // you should only call this method once!
     for (int i = formats.size(); --i >= 0;)
     {

@@ -30,7 +30,7 @@
 //==============================================================================
 // These are defined in juce_linux_Messaging.cpp
 extern Display* display;
-extern XContext improbableNumber;
+extern XContext windowHandleXContext;
 
 //==============================================================================
 namespace Atoms
@@ -721,7 +721,7 @@ public:
         XPointer peer = 0;
 
         ScopedXLock xlock;
-        if (! XFindContext (display, (XID) windowHandle, improbableNumber, &peer))
+        if (! XFindContext (display, (XID) windowHandle, windowHandleXContext, &peer))
         {
             if (peer != 0 && ! ComponentPeer::isValidPeer ((LinuxComponentPeer*) peer))
                 peer = 0;
@@ -2245,7 +2245,7 @@ private:
                      GrabModeAsync, GrabModeAsync, None, None);
 
         // Set the window context to identify the window handle object
-        if (XSaveContext (display, (XID) wndH, improbableNumber, (XPointer) this))
+        if (XSaveContext (display, (XID) wndH, windowHandleXContext, (XPointer) this))
         {
             // Failed
             jassertfalse
@@ -2338,8 +2338,8 @@ private:
         ScopedXLock xlock;
 
         XPointer handlePointer;
-        if (! XFindContext (display, (XID) windowH, improbableNumber, &handlePointer))
-            XDeleteContext (display, (XID) windowH, improbableNumber);
+        if (! XFindContext (display, (XID) windowH, windowHandleXContext, &handlePointer))
+            XDeleteContext (display, (XID) windowH, windowHandleXContext);
 
         XDestroyWindow (display, windowH);
 
@@ -3250,7 +3250,7 @@ public:
                                         CWBorderPixel | CWColormap | CWEventMask,
                                         &swa);
 
-        XSaveContext (display, (XID) embeddedWindow, improbableNumber, (XPointer) peer);
+        XSaveContext (display, (XID) embeddedWindow, windowHandleXContext, (XPointer) peer);
 
         XMapWindow (display, embeddedWindow);
         XFreeColormap (display, colourMap);

@@ -150,6 +150,15 @@ public:
                            : static_cast <ObjectClass*> (0);
     }
 
+    /** Returns a pointer to the actual array data.
+        This pointer will only be valid until the next time a non-const method
+        is called on the array.
+    */
+    inline ObjectClass** getRawDataPointer() throw()
+    {
+        return data.elements;
+    }
+
     //==============================================================================
     /** Finds the index of an object which might be in the array.
 

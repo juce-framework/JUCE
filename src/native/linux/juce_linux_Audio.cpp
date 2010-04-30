@@ -214,7 +214,7 @@ public:
         }
 
         /*
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         // enable this to dump the config of the devices that get opened
         snd_output_t* out;
         snd_output_stdio_attach (&out, stderr, 0);
@@ -229,8 +229,11 @@ public:
     }
 
     //==============================================================================
-    bool write (float** const data, const int numSamples)
+    bool write (AudioSampleBuffer& outputChannelBuffer, const int numSamples)
     {
+        jassert (numChannelsRunning <= outputChannelBuffer.getNumChannels());
+        float** const data = outputChannelBuffer.getArrayOfChannels();
+
         if (isInterleaved)
         {
             scratch.ensureSize (sizeof (float) * numSamples * numChannelsRunning, false);
@@ -267,8 +270,11 @@ public:
         return true;
     }
 
-    bool read (float** const data, const int numSamples)
+    bool read (AudioSampleBuffer& inputChannelBuffer, const int numSamples)
     {
+        jassert (numChannelsRunning <= inputChannelBuffer.getNumChannels());
+        float** const data = inputChannelBuffer.getArrayOfChannels();
+
         if (isInterleaved)
         {
             scratch.ensureSize (sizeof (float) * numSamples * numChannelsRunning, false);
@@ -346,14 +352,9 @@ public:
           outputDevice (0),
           inputDevice (0),
           numCallbacks (0),
-          totalNumInputChannels (0),
-          totalNumOutputChannels (0)
+          inputChannelBuffer (1, 1),
+          outputChannelBuffer (1, 1)
     {
-        zeromem (outputChannelData, sizeof (outputChannelData));
-        zeromem (outputChannelDataForCallback, sizeof (outputChannelDataForCallback));
-        zeromem (inputChannelData, sizeof (inputChannelData));
-        zeromem (inputChannelDataForCallback, sizeof (inputChannelDataForCallback));
-
         initialiseRatesAndChannels();
     }
 
@@ -372,38 +373,42 @@ public:
         error = String::empty;
         sampleRate = sampleRate_;
         bufferSize = bufferSize_;
+
+        inputChannelBuffer.setSize (jmax ((int) minChansIn, inputChannels.getHighestBit()) + 1, bufferSize);
+        inputChannelBuffer.clear();
+        inputChannelDataForCallback.clear();
         currentInputChans.clear();
-        currentOutputChans.clear();
 
         if (inputChannels.getHighestBit() >= 0)
         {
             for (int i = 0; i <= jmax (inputChannels.getHighestBit(), (int) minChansIn); ++i)
             {
-                inputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
-
                 if (inputChannels[i])
                 {
-                    inputChannelDataForCallback [totalNumInputChannels++] = inputChannelData [i];
+                    inputChannelDataForCallback.add (inputChannelBuffer.getSampleData (i));
                     currentInputChans.setBit (i);
                 }
             }
         }
 
+        outputChannelBuffer.setSize (jmax ((int) minChansOut, outputChannels.getHighestBit()) + 1, bufferSize);
+        outputChannelBuffer.clear();
+        outputChannelDataForCallback.clear();
+        currentOutputChans.clear();
+
         if (outputChannels.getHighestBit() >= 0)
         {
             for (int i = 0; i <= jmax (outputChannels.getHighestBit(), (int) minChansOut); ++i)
             {
-                outputChannelData [i] = (float*) juce_calloc (sizeof (float) * bufferSize);
-
                 if (outputChannels[i])
                 {
-                    outputChannelDataForCallback [totalNumOutputChannels++] = outputChannelData [i];
+                    outputChannelDataForCallback.add (outputChannelBuffer.getSampleData (i));
                     currentOutputChans.setBit (i);
                 }
             }
         }
 
-        if (totalNumOutputChannels > 0 && outputId.isNotEmpty())
+        if (outputChannelDataForCallback.size() > 0 && outputId.isNotEmpty())
         {
             outputDevice = new ALSADevice (outputId, false);
 
@@ -426,7 +431,7 @@ public:
             }
         }
 
-        if (totalNumInputChannels > 0 && inputId.isNotEmpty())
+        if (inputChannelDataForCallback.size() > 0 && inputId.isNotEmpty())
         {
             inputDevice = new ALSADevice (inputId, true);
 
@@ -489,18 +494,8 @@ public:
         deleteAndZero (inputDevice);
         deleteAndZero (outputDevice);
 
-        for (int i = 0; i < maxNumChans; ++i)
-        {
-            juce_free (inputChannelData [i]);
-            juce_free (outputChannelData [i]);
-        }
-
-        zeromem (outputChannelData, sizeof (outputChannelData));
-        zeromem (outputChannelDataForCallback, sizeof (outputChannelDataForCallback));
-        zeromem (inputChannelData, sizeof (inputChannelData));
-        zeromem (inputChannelDataForCallback, sizeof (inputChannelDataForCallback));
-        totalNumOutputChannels = 0;
-        totalNumInputChannels = 0;
+        inputChannelBuffer.setSize (1, 1);
+        outputChannelBuffer.setSize (1, 1);
 
         numCallbacks = 0;
     }
@@ -517,7 +512,7 @@ public:
         {
             if (inputDevice != 0)
             {
-                if (! inputDevice->read (inputChannelData, bufferSize))
+                if (! inputDevice->read (inputChannelBuffer, bufferSize))
                 {
                     DBG ("ALSA: read failure");
                     break;
@@ -533,15 +528,15 @@ public:
 
                 if (callback != 0)
                 {
-                    callback->audioDeviceIOCallback ((const float**) inputChannelDataForCallback,
-                                                     totalNumInputChannels,
-                                                     outputChannelDataForCallback,
-                                                     totalNumOutputChannels,
+                    callback->audioDeviceIOCallback ((const float**) inputChannelDataForCallback.getRawDataPointer(),
+                                                     inputChannelDataForCallback.size(),
+                                                     outputChannelDataForCallback.getRawDataPointer(),
+                                                     outputChannelDataForCallback.size(),
                                                      bufferSize);
                 }
                 else
                 {
-                    for (int i = 0; i < totalNumOutputChannels; ++i)
+                    for (int i = 0; i < outputChannelDataForCallback.size(); ++i)
                         zeromem (outputChannelDataForCallback[i], sizeof (float) * bufferSize);
                 }
             }
@@ -555,7 +550,7 @@ public:
 
                 failed (snd_pcm_avail_update (outputDevice->handle));
 
-                if (! outputDevice->write (outputChannelData, bufferSize))
+                if (! outputDevice->write (outputChannelBuffer, bufferSize))
                 {
                     DBG ("ALSA: write failure");
                     break;
@@ -596,12 +591,8 @@ private:
 
     CriticalSection callbackLock;
 
-    float* outputChannelData [maxNumChans];
-    float* outputChannelDataForCallback [maxNumChans];
-    int totalNumInputChannels;
-    float* inputChannelData [maxNumChans];
-    float* inputChannelDataForCallback [maxNumChans];
-    int totalNumOutputChannels;
+    AudioSampleBuffer inputChannelBuffer, outputChannelBuffer;
+    Array<float*> inputChannelDataForCallback, outputChannelDataForCallback;
 
     unsigned int minChansOut, maxChansOut;
     unsigned int minChansIn, maxChansIn;

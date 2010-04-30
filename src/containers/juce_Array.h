@@ -277,6 +277,15 @@ public:
                              : ElementType();
     }
 
+    /** Returns a pointer to the actual array data.
+        This pointer will only be valid until the next time a non-const method
+        is called on the array.
+    */
+    inline ElementType* getRawDataPointer() throw()
+    {
+        return data.elements;
+    }
+
     //==============================================================================
     /** Finds the index of the first element which matches the value passed in.
 

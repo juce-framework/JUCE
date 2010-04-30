@@ -329,7 +329,7 @@ void Toolbar::addItemInternal (ToolbarItemFactory& factory,
 
     if (tc != 0)
     {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
         Array <int> allowedIds;
         factory.getAllToolbarItemIds (allowedIds);
 

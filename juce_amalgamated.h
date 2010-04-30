@@ -195,11 +195,11 @@
 #endif
 
 #ifndef JUCE_ASIO
-  #define JUCE_ASIO 0
+  #define JUCE_ASIO 1
 #endif
 
 #ifndef JUCE_WASAPI
-  #define JUCE_WASAPI 0
+  #define JUCE_WASAPI 1
 #endif
 
 #ifndef JUCE_DIRECTSOUND
@@ -211,11 +211,11 @@
 #endif
 
 #ifndef JUCE_JACK
-  #define JUCE_JACK 0
+  #define JUCE_JACK 1
 #endif
 
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
-  #define JUCE_QUICKTIME 0
+  #define JUCE_QUICKTIME 1
 #endif
 
 #if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
@@ -235,15 +235,15 @@
 #endif
 
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
-  #define JUCE_USE_CDBURNER 0
+  #define JUCE_USE_CDBURNER 1
 #endif
 
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 0
+  #define JUCE_USE_CDREADER 1
 #endif
 
 #if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
-  #define JUCE_USE_CAMERA 0
+  #define JUCE_USE_CAMERA 1
 #endif
 
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
@@ -367,13 +367,13 @@
 // (For info about JUCE_LOG_ASSERTIONS, have a look in juce_Config.h)
 #if JUCE_LOG_ASSERTIONS
   #define juce_LogCurrentAssertion	juce_LogAssertion (__FILE__, __LINE__);
-#elif defined (JUCE_DEBUG)
+#elif JUCE_DEBUG
   #define juce_LogCurrentAssertion    std::cerr << "JUCE Assertion failure in " << __FILE__ << ", line " << __LINE__ << std::endl;
 #else
   #define juce_LogCurrentAssertion
 #endif
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 
   // If debugging is enabled..
 
@@ -586,7 +586,7 @@ extern bool JUCE_PUBLIC_FUNCTION juce_isRunningUnderDebugger();
 #ifndef __JUCE_MEMORY_JUCEHEADER__
 #define __JUCE_MEMORY_JUCEHEADER__
 
-#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
   #ifndef JUCE_DLL
 
 	// Win32 debug non-DLL versions..
@@ -2085,6 +2085,11 @@ public:
 		const ScopedLockType lock (getLock());
 		return (numUsed > 0) ? data.elements [numUsed - 1]
 							 : ElementType();
+	}
+
+	inline ElementType* getRawDataPointer() throw()
+	{
+		return data.elements;
 	}
 
 	int indexOf (ParameterType elementToLookFor) const
@@ -8119,7 +8124,7 @@ private:
 	ScopedPointer <InputStream> streamToDelete;
 	ScopedPointer <InputSource> inputSource;
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 	int numOpenStreams;
 #endif
 
@@ -13026,7 +13031,7 @@ private:
 		bool currentlyModalFlag	 : 1;
 		bool isDisabledFlag		 : 1;
 		bool childCompFocusedFlag	   : 1;
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 		bool isInsidePaintCall	  : 1;
 #endif
 	};
@@ -18124,7 +18129,7 @@ private:
 	bool suspended, nonRealtime;
 	CriticalSection callbackLock, listenerLock;
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 	BigInteger changingParams;
 #endif
 
@@ -23313,7 +23318,7 @@ protected:
 
 	virtual const BorderSize getContentComponentBorder();
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 	void addChildComponent (Component* child, int zOrder = -1);
 	void addAndMakeVisible (Component* child, int zOrder = -1);
 
@@ -23329,7 +23334,7 @@ private:
 	Rectangle<int> lastNonFullScreenPos;
 	ComponentBoundsConstrainer defaultConstrainer;
 	ComponentBoundsConstrainer* constrainer;
-	#ifdef JUCE_DEBUG
+	#if JUCE_DEBUG
 	bool hasBeenResized;
 	#endif
 
@@ -28939,13 +28944,13 @@ END_JUCE_NAMESPACE
   #ifndef DONT_AUTOLINK_TO_JUCE_LIBRARY
 
 	#ifdef JUCE_DLL
-	  #ifdef JUCE_DEBUG
+	  #if JUCE_DEBUG
 		#define AUTOLINKEDLIB "JUCE_debug.lib"
 	  #else
 		#define AUTOLINKEDLIB "JUCE.lib"
 	  #endif
 	#else
-	  #ifdef JUCE_DEBUG
+	  #if JUCE_DEBUG
 		#ifdef _WIN64
 		  #define AUTOLINKEDLIB "jucelib_static_x64_debug.lib"
 		#else

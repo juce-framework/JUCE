@@ -535,6 +535,8 @@ public:
     void enablementChanged();
     /** @internal */
     void colourChanged();
+    /** @internal */
+    bool isTextInputActive() const;
 
     juce_UseDebuggingNewOperator
 

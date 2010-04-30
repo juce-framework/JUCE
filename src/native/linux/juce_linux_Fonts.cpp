@@ -473,7 +473,7 @@ public:
 
         if (face == 0)
         {
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
             String msg ("Failed to create typeface: ");
             msg << font.getTypefaceName() << " " << (font.isBold() ? 'B' : ' ') << (font.isItalic() ? 'I' : ' ');
             DBG (msg);

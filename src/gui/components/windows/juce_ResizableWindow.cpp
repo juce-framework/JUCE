@@ -43,7 +43,7 @@ ResizableWindow::ResizableWindow (const String& name,
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
       constrainer (0)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
       , hasBeenResized (false)
 #endif
 {
@@ -63,7 +63,7 @@ ResizableWindow::ResizableWindow (const String& name,
       fullscreen (false),
       lastNonFullScreenPos (50, 50, 256, 256),
       constrainer (0)
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
       , hasBeenResized (false)
 #endif
 {
@@ -177,7 +177,7 @@ void ResizableWindow::resized()
 
     updateLastPos();
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     hasBeenResized = true;
 #endif
 }
@@ -309,7 +309,7 @@ void ResizableWindow::paint (Graphics& g)
                                                     getBorderThickness(), *this);
     }
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     /* If this fails, then you've probably written a subclass with a resized()
        callback but forgotten to make it call its parent class's resized() method.
 
@@ -520,7 +520,7 @@ void ResizableWindow::mouseDrag (const MouseEvent& e)
 }
 
 //==============================================================================
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
 void ResizableWindow::addChildComponent (Component* const child, int zOrder)
 {
     /* Agh! You shouldn't add components directly to a ResizableWindow - this class

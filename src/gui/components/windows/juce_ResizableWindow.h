@@ -320,7 +320,7 @@ protected:
     */
     virtual const BorderSize getContentComponentBorder();
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     /** Overridden to warn people about adding components directly to this component
         instead of using setContentComponent().
 
@@ -348,7 +348,7 @@ private:
     Rectangle<int> lastNonFullScreenPos;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer;
-    #ifdef JUCE_DEBUG
+    #if JUCE_DEBUG
     bool hasBeenResized;
     #endif
 

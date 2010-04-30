@@ -163,14 +163,14 @@ void SystemStats::initialiseStats() throw()
 
     String s (SystemStats::getJUCEVersion());
 
-#ifdef JUCE_DEBUG
+#if JUCE_DEBUG
     const MMRESULT res = timeBeginPeriod (1);
     jassert (res == TIMERR_NOERROR);
 #else
     timeBeginPeriod (1);
 #endif
 
-#if defined (JUCE_DEBUG) && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
+#if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 }

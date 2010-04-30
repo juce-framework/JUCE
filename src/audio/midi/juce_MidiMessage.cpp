@@ -85,7 +85,7 @@ MidiMessage::MidiMessage (const void* const d, const int dataSize, const double 
     if (dataSize <= 4)
         data = static_cast<uint8*> (preallocatedData.asBytes);
     else
-        data = static_cast<uint8*> (juce_malloc (dataSize));
+        data = new uint8 [dataSize];
 
     memcpy (data, d, dataSize);
 
@@ -135,7 +135,7 @@ MidiMessage::MidiMessage (const MidiMessage& other)
 {
     if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
     {
-        data = static_cast<uint8*> (juce_malloc (size));
+        data = new uint8 [size];
         memcpy (data, other.data, size);
     }
     else
@@ -151,7 +151,7 @@ MidiMessage::MidiMessage (const MidiMessage& other, const double newTimeStamp)
 {
     if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
     {
-        data = static_cast<uint8*> (juce_malloc (size));
+        data = new uint8 [size];
         memcpy (data, other.data, size);
     }
     else
@@ -201,7 +201,7 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
 
             size = 1 + (int) (d - src);
 
-            data = static_cast<uint8*> (juce_malloc (size));
+            data = new uint8 [size];
             *data = (uint8) byte;
             memcpy (data + 1, src, size - 1);
         }
@@ -211,7 +211,7 @@ MidiMessage::MidiMessage (const void* src_, int sz, int& numBytesUsed, const uin
             const int bytesLeft = readVariableLengthVal (src + 1, n);
             size = jmin (sz + 1, n + 2 + bytesLeft);
 
-            data = static_cast<uint8*> (juce_malloc (size));
+            data = new uint8 [size];
             *data = (uint8) byte;
             memcpy (data + 1, src, size - 1);
         }
@@ -247,11 +247,11 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
         size = other.size;
 
         if (data != static_cast <const uint8*> (preallocatedData.asBytes))
-            juce_free (data);
+            delete[] data;
 
         if (other.data != static_cast <const uint8*> (other.preallocatedData.asBytes))
         {
-            data = static_cast<uint8*> (juce_malloc (size));
+            data = new uint8 [size];
             memcpy (data, other.data, size);
         }
         else
@@ -267,7 +267,7 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
 MidiMessage::~MidiMessage()
 {
     if (data != static_cast <const uint8*> (preallocatedData.asBytes))
-        juce_free (data);
+        delete[] data;
 }
 
 int MidiMessage::getChannel() const throw()

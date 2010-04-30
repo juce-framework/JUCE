@@ -121,13 +121,13 @@ private:
     friend class OverlayItemComponent;
     class ComponentResizeFrame;
     class MarkerComponent;
-    class WholeComponentResizer;
+    class DocumentResizerFrame;
     class OverlayComponent;
 
     //==============================================================================
     ComponentHolder* componentHolder;
     OverlayComponent* overlay;
-    WholeComponentResizer* resizeFrame;
+    DocumentResizerFrame* resizeFrame;
     SelectedItems selection;
 
     const Array<Component*> getSelectedComps() const;

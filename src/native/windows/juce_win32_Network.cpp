@@ -257,10 +257,8 @@ int juce_seekInInternetFile (void* handle, int newPosition)
         const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
         return InternetSetFilePointer (crs->request, newPosition, 0, FILE_BEGIN, 0);
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 int64 juce_getInternetFileContentLength (void* handle)
@@ -335,12 +333,6 @@ static int getMACAddressViaGetAdaptersInfo (int64* addresses, int maxNum, const 
     return numFound;
 }
 
-struct ASTAT
-{
-    ADAPTER_STATUS adapt;
-    NAME_BUFFER    NameBuff [30];
-};
-
 static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool littleEndian) throw()
 {
     int numFound = 0;
@@ -352,6 +344,12 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool l
     {
         NCB ncb;
         zerostruct (ncb);
+
+        struct ASTAT
+        {
+            ADAPTER_STATUS adapt;
+            NAME_BUFFER    NameBuff [30];
+        };
 
         ASTAT astat;
         zerostruct (astat);
@@ -410,14 +408,14 @@ int SystemStats::getMACAddresses (int64* addresses, int maxNum, const bool littl
 }
 
 //==============================================================================
-typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG);
-
 bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAddress,
                                                     const String& emailSubject,
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
     HMODULE h = LoadLibraryA ("MAPI32.dll");
+
+    typedef ULONG (WINAPI *MAPISendMailType) (LHANDLE, ULONG, lpMapiMessage, ::FLAGS, ULONG);
 
     MAPISendMailType mapiSendMail = (MAPISendMailType) GetProcAddress (h, "MAPISendMail");
     bool ok = false;

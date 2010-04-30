@@ -47,6 +47,11 @@ public:
     /** Destructor. */
     virtual ~TextInputTarget() {}
 
+    /** Returns true if this input target is currently accepting input.
+        For example, a text editor might return false if it's in read-only mode.
+    */
+    virtual bool isTextInputActive() const = 0;
+
     /** Returns the extents of the selected text region, or an empty range if
         nothing is selected,
     */
