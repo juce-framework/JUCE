@@ -34,7 +34,11 @@
 class ToggleButtonHandler  : public ComponentTypeHelper<ToggleButton>
 {
 public:
-    ToggleButtonHandler() : ComponentTypeHelper<ToggleButton> ("ToggleButton", "TOGGLEBUTTON", "toggleButton")  {}
+    ToggleButtonHandler() : ComponentTypeHelper<ToggleButton> ("ToggleButton", "TOGGLEBUTTON", "toggleButton")
+    {
+        addEditableColour (ToggleButton::textColourId, "Text Colour", "textColour");
+    }
+
     ~ToggleButtonHandler()  {}
 
     Component* createComponent()                { return new ToggleButton (String::empty); }
@@ -52,8 +56,13 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
+
+        addEditableColourProperties (document, state, props);
     }
 };
 

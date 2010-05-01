@@ -43,7 +43,7 @@
 
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	0
+#define JUCE_BUILDNUMBER	1
 
 #define JUCE_VERSION		((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
@@ -195,11 +195,11 @@
 #endif
 
 #ifndef JUCE_ASIO
-  #define JUCE_ASIO 1
+  #define JUCE_ASIO 0
 #endif
 
 #ifndef JUCE_WASAPI
-  #define JUCE_WASAPI 1
+  #define JUCE_WASAPI 0
 #endif
 
 #ifndef JUCE_DIRECTSOUND
@@ -211,11 +211,11 @@
 #endif
 
 #ifndef JUCE_JACK
-  #define JUCE_JACK 1
+  #define JUCE_JACK 0
 #endif
 
 #if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
-  #define JUCE_QUICKTIME 1
+  #define JUCE_QUICKTIME 0
 #endif
 
 #if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
@@ -235,15 +235,15 @@
 #endif
 
 #if (! defined (JUCE_USE_CDBURNER)) && ! (JUCE_WINDOWS && ! JUCE_MSVC)
-  #define JUCE_USE_CDBURNER 1
+  #define JUCE_USE_CDBURNER 0
 #endif
 
 #ifndef JUCE_USE_CDREADER
-  #define JUCE_USE_CDREADER 1
+  #define JUCE_USE_CDREADER 0
 #endif
 
 #if (JUCE_QUICKTIME || JUCE_WINDOWS) && ! defined (JUCE_USE_CAMERA)
-  #define JUCE_USE_CAMERA 1
+  #define JUCE_USE_CAMERA 0
 #endif
 
 #ifndef JUCE_ENABLE_REPAINT_DEBUGGING
@@ -3592,6 +3592,11 @@ public:
 		const ScopedLockType lock (getLock());
 		return numUsed > 0 ? data.elements [numUsed - 1]
 						   : static_cast <ObjectClass*> (0);
+	}
+
+	inline ObjectClass** getRawDataPointer() throw()
+	{
+		return data.elements;
 	}
 
 	int indexOf (const ObjectClass* const objectToLookFor) const throw()
@@ -12411,7 +12416,7 @@ public:
 
 	int getNumRectangles() const throw()			{ return rects.size(); }
 
-	const Rectangle<int> getRectangle (const int index) const throw();
+	const Rectangle<int> getRectangle (int index) const throw();
 
 	void clear();
 
@@ -16719,6 +16724,8 @@ public:
 
 	virtual ~TextInputTarget() {}
 
+	virtual bool isTextInputActive() const = 0;
+
 	virtual const Range<int> getHighlightedRegion() const = 0;
 
 	virtual void setHighlightedRegion (const Range<int>& newRange) = 0;
@@ -16907,6 +16914,7 @@ public:
 	void resized();
 	void enablementChanged();
 	void colourChanged();
+	bool isTextInputActive() const;
 
 	juce_UseDebuggingNewOperator
 
@@ -21226,6 +21234,7 @@ public:
 	void handleAsyncUpdate();
 	void codeDocumentChanged (const CodeDocument::Position& affectedTextStart,
 							  const CodeDocument::Position& affectedTextEnd);
+	bool isTextInputActive() const;
 
 	juce_UseDebuggingNewOperator
 

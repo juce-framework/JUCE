@@ -34,7 +34,19 @@
 class SliderHandler  : public ComponentTypeHelper<Slider>
 {
 public:
-    SliderHandler() : ComponentTypeHelper<Slider> ("Slider", "SLIDER", "slider")  {}
+    SliderHandler() : ComponentTypeHelper<Slider> ("Slider", "SLIDER", "slider")
+    {
+        addEditableColour (Slider::backgroundColourId, "Background", "backgroundColour");
+        addEditableColour (Slider::thumbColourId, "Thumb", "thumbColour");
+        addEditableColour (Slider::trackColourId, "Track", "trackColour");
+        addEditableColour (Slider::rotarySliderFillColourId, "Rotary Fill", "rotaryFillColour");
+        addEditableColour (Slider::rotarySliderOutlineColourId, "Rotary Outline", "rotaryOutlineColour");
+        addEditableColour (Slider::textBoxTextColourId, "Text", "textColour");
+        addEditableColour (Slider::textBoxBackgroundColourId, "Text Background", "textBackgroundColour");
+        addEditableColour (Slider::textBoxHighlightColourId, "Text Highlight", "textHighlightColour");
+        addEditableColour (Slider::textBoxOutlineColourId, "Textbox Outline", "textboxOutlineColour");
+    }
+
     ~SliderHandler()  {}
 
     Component* createComponent()                { return new Slider (String::empty); }
@@ -50,6 +62,9 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+        addEditableColourProperties (document, state, props);
     }
 };
 

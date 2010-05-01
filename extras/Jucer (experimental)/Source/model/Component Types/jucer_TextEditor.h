@@ -34,7 +34,18 @@
 class TextEditorHandler  : public ComponentTypeHelper<TextEditor>
 {
 public:
-    TextEditorHandler() : ComponentTypeHelper<TextEditor> ("TextEditor", "TEXTEDITOR", "textEditor")  {}
+    TextEditorHandler() : ComponentTypeHelper<TextEditor> ("TextEditor", "TEXTEDITOR", "textEditor")
+    {
+        addEditableColour (TextEditor::backgroundColourId, "Background", "backgroundColour");
+        addEditableColour (TextEditor::textColourId, "Text", "textColour");
+        addEditableColour (TextEditor::highlightColourId, "Highlight", "highlightColour");
+        addEditableColour (TextEditor::highlightedTextColourId, "Highlighted Text", "highlightedTextColour");
+        addEditableColour (TextEditor::caretColourId, "Caret", "caretColour");
+        addEditableColour (TextEditor::outlineColourId, "Outline", "outlineColour");
+        addEditableColour (TextEditor::focusedOutlineColourId, "Outline (focused)", "focusedOutlineColour");
+        addEditableColour (TextEditor::shadowColourId, "Shadow", "shadowColour");
+    }
+
     ~TextEditorHandler()  {}
 
     Component* createComponent()                { return new TextEditor(); }
@@ -52,8 +63,13 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Text", 16384, true));
         props.getLast()->setTooltip ("The editor's initial content.");
+
+        addEditableColourProperties (document, state, props);
     }
 };
 

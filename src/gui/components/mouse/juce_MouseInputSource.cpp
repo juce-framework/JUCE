@@ -42,7 +42,8 @@ public:
     //==============================================================================
     MouseInputSourceInternal (MouseInputSource& source_, const int index_, const bool isMouseDevice_)
         : index (index_), isMouseDevice (isMouseDevice_), source (source_), lastPeer (0), lastTime (0),
-          isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (0)
+          isUnboundedMouseModeOn (false), isCursorVisibleUntilOffscreen (false), currentCursorHandle (0),
+          mouseEventCounter (0)
     {
         zerostruct (mouseDowns);
     }
@@ -141,42 +142,47 @@ public:
     }
 
     //==============================================================================
-    void setButtons (const Point<int>& screenPos, const int64 time, const ModifierKeys& newButtonState)
+    // (returns true if the button change caused a modal event loop)
+    bool setButtons (const Point<int>& screenPos, const int64 time, const ModifierKeys& newButtonState)
     {
-        if (buttonState != newButtonState)
+        if (buttonState == newButtonState)
+            return false;
+
+        // (ignore secondary clicks when there's already a button down)
+        if (buttonState.isAnyMouseButtonDown() == newButtonState.isAnyMouseButtonDown())
         {
-            // (ignore secondary clicks when there's already a button down)
-            if (buttonState.isAnyMouseButtonDown() == newButtonState.isAnyMouseButtonDown())
-            {
-                buttonState = newButtonState;
-                return;
-            }
-
-            if (buttonState.isAnyMouseButtonDown())
-            {
-                Component* const current = getComponentUnderMouse();
-
-                if (current != 0)
-                    sendMouseUp (current, screenPos + unboundedMouseOffset, time);
-
-                enableUnboundedMouseMovement (false, false);
-            }
-
             buttonState = newButtonState;
+            return false;
+        }
 
-            if (buttonState.isAnyMouseButtonDown())
+        const int lastCounter = mouseEventCounter;
+
+        if (buttonState.isAnyMouseButtonDown())
+        {
+            Component* const current = getComponentUnderMouse();
+
+            if (current != 0)
+                sendMouseUp (current, screenPos + unboundedMouseOffset, time);
+
+            enableUnboundedMouseMovement (false, false);
+        }
+
+        buttonState = newButtonState;
+
+        if (buttonState.isAnyMouseButtonDown())
+        {
+            Desktop::getInstance().incrementMouseClickCounter();
+
+            Component* const current = getComponentUnderMouse();
+
+            if (current != 0)
             {
-                Desktop::getInstance().incrementMouseClickCounter();
-
-                Component* const current = getComponentUnderMouse();
-
-                if (current != 0)
-                {
-                    registerMouseDown (screenPos, time, current);
-                    sendMouseDown (current, screenPos, time);
-                }
+                registerMouseDown (screenPos, time, current);
+                sendMouseDown (current, screenPos, time);
             }
         }
+
+        return lastCounter != mouseEventCounter;
     }
 
     void setComponentUnderMouse (Component* const newComponent, const Point<int>& screenPos, const int64 time)
@@ -255,6 +261,7 @@ public:
     {
         jassert (newPeer != 0);
         lastTime = time;
+        ++mouseEventCounter;
         const Point<int> screenPos (newPeer->relativePositionToGlobal (positionWithinPeer));
 
         if (isDragging() && newMods.isAnyMouseButtonDown())
@@ -268,11 +275,12 @@ public:
             ComponentPeer* peer = getPeer();
             if (peer != 0)
             {
-                setButtons (screenPos, time, newMods);
+                if (setButtons (screenPos, time, newMods))
+                    return; // some modal events have been dispatched, so the current event is now out-of-date
 
                 peer = getPeer();
                 if (peer != 0)
-                    setScreenPos (peer->relativePositionToGlobal (positionWithinPeer), time, false);
+                    setScreenPos (screenPos, time, false);
             }
         }
     }
@@ -281,6 +289,7 @@ public:
     {
         jassert (peer != 0);
         lastTime = time;
+        ++mouseEventCounter;
         const Point<int> screenPos (peer->relativePositionToGlobal (positionWithinPeer));
 
         setPeer (peer, screenPos, time);
@@ -441,6 +450,7 @@ private:
     Point<int> unboundedMouseOffset;
     bool isUnboundedMouseModeOn, isCursorVisibleUntilOffscreen;
     void* currentCursorHandle;
+    int mouseEventCounter;
 
     struct RecentMouseDown
     {

@@ -34,7 +34,15 @@
 class ComboBoxHandler  : public ComponentTypeHelper<ComboBox>
 {
 public:
-    ComboBoxHandler() : ComponentTypeHelper<ComboBox> ("ComboBox", "COMBOBOX", "comboBox")  {}
+    ComboBoxHandler() : ComponentTypeHelper<ComboBox> ("ComboBox", "COMBOBOX", "comboBox")
+    {
+        addEditableColour (ComboBox::backgroundColourId, "Background", "backgroundColour");
+        addEditableColour (ComboBox::textColourId, "Text", "textColour");
+        addEditableColour (ComboBox::outlineColourId, "Outline", "outlineColour");
+        addEditableColour (ComboBox::buttonColourId, "Button", "buttonColour");
+        addEditableColour (ComboBox::arrowColourId, "Arrow", "arrowColour");
+    }
+
     ~ComboBoxHandler()  {}
 
     Component* createComponent()                { return new ComboBox (String::empty); }
@@ -50,6 +58,9 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+        addEditableColourProperties (document, state, props);
     }
 };
 

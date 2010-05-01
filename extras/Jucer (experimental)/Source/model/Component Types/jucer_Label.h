@@ -34,7 +34,13 @@
 class LabelHandler  : public ComponentTypeHelper<Label>
 {
 public:
-    LabelHandler() : ComponentTypeHelper<Label> ("Label", "LABEL", "label")  {}
+    LabelHandler() : ComponentTypeHelper<Label> ("Label", "LABEL", "label")
+    {
+        addEditableColour (Label::backgroundColourId, "Background", "backgroundColour");
+        addEditableColour (Label::textColourId, "Text Colour", "textColour");
+        addEditableColour (Label::outlineColourId, "Outline Colour", "outlineColour");
+    }
+
     ~LabelHandler()  {}
 
     Component* createComponent()                { return new Label (String::empty, String::empty); }
@@ -52,8 +58,13 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Text", 16384, true));
         props.getLast()->setTooltip ("The label's text.");
+
+        addEditableColourProperties (document, state, props);
     }
 };
 

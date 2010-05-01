@@ -292,6 +292,7 @@ public:
 private:
     ComponentDocument document;
     ComponentEditorCanvas::SelectedItems selected;
+    TooltipWindow tooltipWindow;
 };
 
 void ComponentEditor::test()

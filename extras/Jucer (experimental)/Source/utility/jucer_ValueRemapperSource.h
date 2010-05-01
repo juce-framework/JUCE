@@ -108,5 +108,48 @@ protected:
     const ValueRemapperSource& operator= (const ValueRemapperSource&);
 };
 
+//==============================================================================
+/**
+*/
+class IntegerValueSource   : public Value::ValueSource,
+                             public Value::Listener
+{
+public:
+    IntegerValueSource (const Value& sourceValue_)
+       : sourceValue (sourceValue_)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~IntegerValueSource() {}
+
+    const var getValue() const
+    {
+        return (int) sourceValue.getValue();
+    }
+
+    void setValue (const var& newValue)
+    {
+        const var newVal ((int) newValue);
+
+        if (newVal != sourceValue)
+            sourceValue = newVal;
+    }
+
+    void valueChanged (Value&)
+    {
+        sendChangeMessage (true);
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+protected:
+    Value sourceValue;
+
+    IntegerValueSource (const IntegerValueSource&);
+    const IntegerValueSource& operator= (const IntegerValueSource&);
+};
+
 
 #endif   // __JUCER_VALUEREMAPPERSOURCE_JUCEHEADER__

@@ -175,6 +175,12 @@ void ComponentTypeHandler::updateComponent (ComponentDocument& document, Compone
     comp->setBounds (pos.resolve (document));
 
     comp->setName (state [ComponentDocument::compNameProperty]);
+
+    comp->setExplicitFocusOrder (state [ComponentDocument::compFocusOrderProperty]);
+
+    SettableTooltipClient* tooltipClient = dynamic_cast <SettableTooltipClient*> (comp);
+    if (tooltipClient != 0)
+        tooltipClient->setTooltip (state [ComponentDocument::compTooltipProperty]);
 }
 
 void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, ValueTree& state)

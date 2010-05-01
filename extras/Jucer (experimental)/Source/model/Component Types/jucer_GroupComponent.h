@@ -34,7 +34,12 @@
 class GroupComponentHandler  : public ComponentTypeHelper<GroupComponent>
 {
 public:
-    GroupComponentHandler() : ComponentTypeHelper<GroupComponent> ("GroupComponent", "GROUPCOMPONENT", "group")  {}
+    GroupComponentHandler() : ComponentTypeHelper<GroupComponent> ("GroupComponent", "GROUPCOMPONENT", "group")
+    {
+        addEditableColour (GroupComponent::outlineColourId, "Outline", "outlineColour");
+        addEditableColour (GroupComponent::textColourId, "Text Colour", "textColour");
+    }
+
     ~GroupComponentHandler()  {}
 
     Component* createComponent()                { return new GroupComponent (String::empty, String::empty); }
@@ -50,6 +55,7 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addEditableColourProperties (document, state, props);
     }
 };
 

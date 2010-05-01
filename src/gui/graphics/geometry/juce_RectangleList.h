@@ -71,7 +71,7 @@ public:
         @returns    the rectangle at the index, or an empty rectangle if the
                     index is out-of-range.
     */
-    const Rectangle<int> getRectangle (const int index) const throw();
+    const Rectangle<int> getRectangle (int index) const throw();
 
 
     //==============================================================================

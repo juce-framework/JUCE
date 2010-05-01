@@ -78,6 +78,26 @@ void StoredSettings::flush()
     // recent files...
     recentFiles.restoreFromString (props->getValue ("recentFiles"));
     recentFiles.removeNonExistentFiles();
+
+    // swatch colours...
+    swatchColours.clear();
+
+    #define COL(col)  Colours::col,
+
+    const Colour colours[] =
+    {
+        #include "jucer_Colours.h"
+        Colours::transparentBlack
+    };
+
+    #undef COL
+
+    for (int i = 0; i < numSwatchColours; ++i)
+    {
+        Colour defaultCol (colours [2 + i]);
+        swatchColours.add (Colour (props->getValue ("swatchColour" + String (i),
+                                                    hexString8Digits (defaultCol.getARGB())).getHexValue32()));
+    }
 }
 
 const File StoredSettings::getLastProject() const

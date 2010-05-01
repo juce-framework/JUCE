@@ -34,7 +34,12 @@
 class TextButtonHandler  : public ComponentTypeHelper<TextButton>
 {
 public:
-    TextButtonHandler() : ComponentTypeHelper<TextButton> ("TextButton", "TEXTBUTTON", "textButton")  {}
+    TextButtonHandler() : ComponentTypeHelper<TextButton> ("TextButton", "TEXTBUTTON", "textButton")
+    {
+        addEditableColour (TextButton::buttonColourId, "Background", "backgroundColour");
+        addEditableColour (TextButton::textColourOffId, "Text Colour", "textColour");
+    }
+
     ~TextButtonHandler()  {}
 
     Component* createComponent()                { return new TextButton (String::empty); }
@@ -52,9 +57,15 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
+
+        addEditableColourProperties (document, state, props);
     }
 };
+
 
 #endif

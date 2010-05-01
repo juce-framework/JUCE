@@ -53,6 +53,8 @@ public:
     const File getLastKnownJuceFolder() const;
     void setLastKnownJuceFolder (const File& file);
 
+    Array <Colour> swatchColours;
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 

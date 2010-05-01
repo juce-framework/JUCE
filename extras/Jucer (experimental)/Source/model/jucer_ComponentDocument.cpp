@@ -42,6 +42,8 @@ const char* const ComponentDocument::idProperty             = "id";
 const char* const ComponentDocument::compBoundsProperty     = "position";
 const char* const ComponentDocument::memberNameProperty     = "memberName";
 const char* const ComponentDocument::compNameProperty       = "name";
+const char* const ComponentDocument::compTooltipProperty    = "tooltip";
+const char* const ComponentDocument::compFocusOrderProperty = "focusOrder";
 const char* const ComponentDocument::markerNameProperty     = "name";
 const char* const ComponentDocument::markerPosProperty      = "position";
 
@@ -178,8 +180,7 @@ void ComponentDocument::writeMetadata (OutputStream& out)
     if (xml != 0)
         xml->writeToStream (out, String::empty, false, false);
 
-    out << newLine
-        << metadataTagEnd << newLine;
+    out << newLine << metadataTagEnd;
 }
 
 bool ComponentDocument::save()

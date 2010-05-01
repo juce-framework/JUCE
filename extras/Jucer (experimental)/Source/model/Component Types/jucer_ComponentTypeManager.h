@@ -28,6 +28,7 @@
 
 #include "../../jucer_Headers.h"
 #include "../jucer_ComponentDocument.h"
+#include "../../utility/jucer_ColourEditorComponent.h"
 
 
 //==============================================================================
@@ -92,6 +93,7 @@ template <class ComponentClass>
 class ComponentTypeHelper   : public ComponentTypeHandler
 {
 public:
+    //==============================================================================
     ComponentTypeHelper (const String& name_, const String& xmlTag_, const String& memberNameRoot_)
         : ComponentTypeHandler (name_, xmlTag_, memberNameRoot_)
     {
@@ -105,6 +107,7 @@ public:
 
         ComponentClass* const c = dynamic_cast <ComponentClass*> (comp);
         jassert (c != 0);
+        updateComponentColours (state, c);
         update (document, c, state);
     }
 
@@ -123,9 +126,67 @@ public:
         ComponentTypeHandler::createPropertyEditors (document, state, props);
         createProperties (document, state, props);
     }
+
+protected:
+    //==============================================================================
+    void addTooltipProperty (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    {
+        props.add (new TextPropertyComponent (getValue (ComponentDocument::compTooltipProperty, state, document),
+                                              "Tooltip", 4096, false));
+    }
+
+    void addFocusOrderProperty (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    {
+        props.add (new TextPropertyComponent (Value (new IntegerValueSource (getValue (ComponentDocument::compFocusOrderProperty,
+                                                                                       state, document))),
+                                              "Focus Order", 10, false));
+    }
+
+    //==============================================================================
+    struct EditableColour
+    {
+        int colourId;
+        String name, propertyName;
+
+        PropertyComponent* createProperty (ComponentTypeHelper& type, ComponentDocument& document, ValueTree& state)
+        {
+            return new ColourPropertyComponent (document, name, type.getValue (propertyName, state, document),
+                                                LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true);
+        }
+
+        void updateComponent (const ValueTree& state, Component* component)
+        {
+            const String colour (state [propertyName].toString());
+            if (colour.isNotEmpty())
+                component->setColour (colourId, Colour::fromString (colour));
+            else
+                component->removeColour (colourId);
+        }
+    };
+
+    Array <EditableColour> editableColours;
+
+    void addEditableColour (int colourId, const String& displayName, const String& propertyName)
+    {
+        EditableColour ec;
+        ec.colourId = colourId;
+        ec.name = displayName;
+        ec.propertyName = propertyName;
+        editableColours.add (ec);
+    }
+
+    void addEditableColourProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    {
+        for (int i = 0; i < editableColours.size(); ++i)
+            props.add (editableColours.getReference(i).createProperty (*this, document, state));
+    }
+
+    void updateComponentColours (const ValueTree& state, Component* component)
+    {
+        for (int i = 0; i < editableColours.size(); ++i)
+            editableColours.getReference(i).updateComponent (state, component);
+    }
 };
-
-
 
 
 #endif  // __JUCER_COMPONENTTYPEMANAGER_H_734EBF1__

@@ -34,7 +34,12 @@
 class TabbedComponentHandler  : public ComponentTypeHelper<TabbedComponent>
 {
 public:
-    TabbedComponentHandler() : ComponentTypeHelper<TabbedComponent> ("TabbedComponent", "TABBEDCOMPONENT", "tabbedComponent")  {}
+    TabbedComponentHandler() : ComponentTypeHelper<TabbedComponent> ("TabbedComponent", "TABBEDCOMPONENT", "tabbedComponent")
+    {
+        addEditableColour (TabbedComponent::backgroundColourId, "Background", "backgroundColour");
+        addEditableColour (TabbedComponent::outlineColourId, "Outline", "outlineColour");
+    }
+
     ~TabbedComponentHandler()  {}
 
     Component* createComponent()                { return new TabbedComponent (TabbedButtonBar::TabsAtTop); }
@@ -50,6 +55,7 @@ public:
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addEditableColourProperties (document, state, props);
     }
 };
 

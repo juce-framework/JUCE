@@ -160,6 +160,8 @@ public:
     static const char* const compBoundsProperty;
     static const char* const memberNameProperty;
     static const char* const compNameProperty;
+    static const char* const compTooltipProperty;
+    static const char* const compFocusOrderProperty;
     static const char* const markerNameProperty;
     static const char* const markerPosProperty;
 
