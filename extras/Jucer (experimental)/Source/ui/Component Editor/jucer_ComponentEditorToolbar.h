@@ -27,6 +27,7 @@
 #define __JUCER_COMPONENTEDITORTOOLBAR_H_6B5CA931__
 
 
+//==============================================================================
 class ComponentEditorToolbarFactory  : public ToolbarItemFactory
 {
 public:

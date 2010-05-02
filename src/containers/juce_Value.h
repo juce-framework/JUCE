@@ -65,7 +65,7 @@ public:
     Value (const Value& other);
 
     /** Creates a Value that is set to the specified value. */
-    Value (const var& initialValue);
+    explicit Value (const var& initialValue);
 
     /** Destructor. */
     ~Value();

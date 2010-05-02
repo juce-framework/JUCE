@@ -24,9 +24,9 @@
 */
 
 #include "jucer_OpenDocumentManager.h"
-#include "jucer_SourceCodeEditor.h"
+#include "Code Editor/jucer_SourceCodeEditor.h"
 #include "Drawable Editor/jucer_DrawableEditor.h"
-#include "jucer_ItemPreviewComponent.h"
+#include "Project Editor/jucer_ItemPreviewComponent.h"
 #include "Component Editor/jucer_ComponentEditor.h"
 
 

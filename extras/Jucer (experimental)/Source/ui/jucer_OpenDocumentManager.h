@@ -26,8 +26,8 @@
 #ifndef __JUCER_OPENDOCUMENTMANAGER_JUCEHEADER__
 #define __JUCER_OPENDOCUMENTMANAGER_JUCEHEADER__
 
-#include "../model/jucer_Project.h"
-#include "../model/jucer_DrawableDocument.h"
+#include "../model/Project/jucer_Project.h"
+#include "../model/Drawable/jucer_DrawableDocument.h"
 class DocumentEditorComponent;
 
 

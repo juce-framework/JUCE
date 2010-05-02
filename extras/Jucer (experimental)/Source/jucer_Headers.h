@@ -56,5 +56,9 @@ const char* const headerFileExtensions  = "h;hpp";
 const int numSwatchColours = 24;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
+const float snapDistance = 8.0f;
+static const Colour alignmentMarkerColour (0x77ff0000);
+static const Colour resizableBorderColour (0x7066aaff);
+
 
 #endif   // __JUCER_HEADERS_JUCEHEADER__

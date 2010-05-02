@@ -6378,7 +6378,7 @@ public:
 
 	Value (const Value& other);
 
-	Value (const var& initialValue);
+	explicit Value (const var& initialValue);
 
 	~Value();
 
@@ -23179,6 +23179,9 @@ public:
 
 		const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
 												const Point<int>& distance) const throw();
+
+		const Rectangle<float> resizeRectangleBy (Rectangle<float> original,
+												  const Point<float>& distance) const throw();
 
 		int getZoneFlags() const throw()		{ return zone; }
 

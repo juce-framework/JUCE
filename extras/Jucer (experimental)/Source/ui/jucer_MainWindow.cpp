@@ -26,8 +26,8 @@
 #include "../jucer_Headers.h"
 #include "jucer_MainWindow.h"
 #include "jucer_OpenDocumentManager.h"
-#include "jucer_SourceCodeEditor.h"
-#include "../model/jucer_ProjectWizard.h"
+#include "Code Editor/jucer_SourceCodeEditor.h"
+#include "../model/Project/jucer_ProjectWizard.h"
 
 
 //==============================================================================

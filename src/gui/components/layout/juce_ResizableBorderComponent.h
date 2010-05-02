@@ -141,6 +141,12 @@ public:
         const Rectangle<int> resizeRectangleBy (Rectangle<int> original,
                                                 const Point<int>& distance) const throw();
 
+        /** Resizes this rectangle by the given amount, moving just the edges that this zone
+            applies to.
+        */
+        const Rectangle<float> resizeRectangleBy (Rectangle<float> original,
+                                                  const Point<float>& distance) const throw();
+
         /** Returns the raw flags for this zone. */
         int getZoneFlags() const throw()                { return zone; }
 

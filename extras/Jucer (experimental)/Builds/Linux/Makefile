@@ -43,30 +43,30 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/jucer_ComponentTypeManager.o \
-  $(OBJDIR)/jucer_ComponentDocument.o \
   $(OBJDIR)/jucer_CodeGenerator.o \
-  $(OBJDIR)/jucer_Coordinate.o \
+  $(OBJDIR)/jucer_ComponentDocument.o \
+  $(OBJDIR)/jucer_ComponentTypeManager.o \
   $(OBJDIR)/jucer_DrawableDocument.o \
   $(OBJDIR)/jucer_NewFileWizard.o \
   $(OBJDIR)/jucer_Project.o \
   $(OBJDIR)/jucer_ProjectExporter.o \
   $(OBJDIR)/jucer_ProjectWizard.o \
   $(OBJDIR)/jucer_ResourceFile.o \
+  $(OBJDIR)/jucer_SourceCodeEditor.o \
   $(OBJDIR)/jucer_ComponentEditor.o \
-  $(OBJDIR)/jucer_ComponentEditorCanvas.o \
   $(OBJDIR)/jucer_DrawableEditor.o \
+  $(OBJDIR)/jucer_EditorCanvas.o \
   $(OBJDIR)/jucer_DocumentEditorComponent.o \
-  $(OBJDIR)/jucer_GroupInformationComponent.o \
-  $(OBJDIR)/jucer_ItemPreviewComponent.o \
   $(OBJDIR)/jucer_JucerTreeViewBase.o \
   $(OBJDIR)/jucer_MainWindow.o \
   $(OBJDIR)/jucer_OpenDocumentManager.o \
+  $(OBJDIR)/jucer_GroupInformationComponent.o \
+  $(OBJDIR)/jucer_ItemPreviewComponent.o \
   $(OBJDIR)/jucer_ProjectContentComponent.o \
   $(OBJDIR)/jucer_ProjectInformationComponent.o \
   $(OBJDIR)/jucer_ProjectTreeViewBase.o \
-  $(OBJDIR)/jucer_SourceCodeEditor.o \
   $(OBJDIR)/jucer_TreeViewTypes.o \
+  $(OBJDIR)/jucer_Coordinate.o \
   $(OBJDIR)/jucer_StoredSettings.o \
   $(OBJDIR)/jucer_UtilityFunctions.o \
   $(OBJDIR)/jucer_Main.o \
@@ -91,52 +91,52 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
-$(OBJDIR)/jucer_ComponentTypeManager.o: ../../Source/model/Component\ Types/jucer_ComponentTypeManager.cpp
+$(OBJDIR)/jucer_CodeGenerator.o: ../../Source/model/Component/jucer_CodeGenerator.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ComponentDocument.o: ../../Source/model/jucer_ComponentDocument.cpp
+$(OBJDIR)/jucer_ComponentDocument.o: ../../Source/model/Component/jucer_ComponentDocument.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_CodeGenerator.o: ../../Source/model/jucer_CodeGenerator.cpp
+$(OBJDIR)/jucer_ComponentTypeManager.o: ../../Source/model/Component/Types/jucer_ComponentTypeManager.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_Coordinate.o: ../../Source/model/jucer_Coordinate.cpp
+$(OBJDIR)/jucer_DrawableDocument.o: ../../Source/model/Drawable/jucer_DrawableDocument.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_DrawableDocument.o: ../../Source/model/jucer_DrawableDocument.cpp
+$(OBJDIR)/jucer_NewFileWizard.o: ../../Source/model/Project/jucer_NewFileWizard.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_NewFileWizard.o: ../../Source/model/jucer_NewFileWizard.cpp
+$(OBJDIR)/jucer_Project.o: ../../Source/model/Project/jucer_Project.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_Project.o: ../../Source/model/jucer_Project.cpp
+$(OBJDIR)/jucer_ProjectExporter.o: ../../Source/model/Project/jucer_ProjectExporter.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectExporter.o: ../../Source/model/jucer_ProjectExporter.cpp
+$(OBJDIR)/jucer_ProjectWizard.o: ../../Source/model/Project/jucer_ProjectWizard.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectWizard.o: ../../Source/model/jucer_ProjectWizard.cpp
+$(OBJDIR)/jucer_ResourceFile.o: ../../Source/model/Project/jucer_ResourceFile.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ResourceFile.o: ../../Source/model/jucer_ResourceFile.cpp
+$(OBJDIR)/jucer_SourceCodeEditor.o: ../../Source/ui/Code\ Editor/jucer_SourceCodeEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -146,27 +146,17 @@ $(OBJDIR)/jucer_ComponentEditor.o: ../../Source/ui/Component\ Editor/jucer_Compo
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ComponentEditorCanvas.o: ../../Source/ui/Component\ Editor/jucer_ComponentEditorCanvas.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_DrawableEditor.o: ../../Source/ui/Drawable\ Editor/jucer_DrawableEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/jucer_EditorCanvas.o: ../../Source/ui/Editor\ Base/jucer_EditorCanvas.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/jucer_DocumentEditorComponent.o: ../../Source/ui/jucer_DocumentEditorComponent.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_GroupInformationComponent.o: ../../Source/ui/jucer_GroupInformationComponent.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ItemPreviewComponent.o: ../../Source/ui/jucer_ItemPreviewComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -186,27 +176,37 @@ $(OBJDIR)/jucer_OpenDocumentManager.o: ../../Source/ui/jucer_OpenDocumentManager
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectContentComponent.o: ../../Source/ui/jucer_ProjectContentComponent.cpp
+$(OBJDIR)/jucer_GroupInformationComponent.o: ../../Source/ui/Project\ Editor/jucer_GroupInformationComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectInformationComponent.o: ../../Source/ui/jucer_ProjectInformationComponent.cpp
+$(OBJDIR)/jucer_ItemPreviewComponent.o: ../../Source/ui/Project\ Editor/jucer_ItemPreviewComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_ProjectTreeViewBase.o: ../../Source/ui/jucer_ProjectTreeViewBase.cpp
+$(OBJDIR)/jucer_ProjectContentComponent.o: ../../Source/ui/Project\ Editor/jucer_ProjectContentComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_SourceCodeEditor.o: ../../Source/ui/jucer_SourceCodeEditor.cpp
+$(OBJDIR)/jucer_ProjectInformationComponent.o: ../../Source/ui/Project\ Editor/jucer_ProjectInformationComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_TreeViewTypes.o: ../../Source/ui/jucer_TreeViewTypes.cpp
+$(OBJDIR)/jucer_ProjectTreeViewBase.o: ../../Source/ui/Project\ Editor/jucer_ProjectTreeViewBase.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_TreeViewTypes.o: ../../Source/ui/Project\ Editor/jucer_TreeViewTypes.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_Coordinate.o: ../../Source/utility/jucer_Coordinate.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

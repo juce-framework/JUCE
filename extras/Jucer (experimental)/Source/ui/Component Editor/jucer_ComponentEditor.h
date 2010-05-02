@@ -26,7 +26,9 @@
 #ifndef __JUCE_COMPONENTEDITOR_H_6CAE6B7E__
 #define __JUCE_COMPONENTEDITOR_H_6CAE6B7E__
 
-#include "jucer_ComponentEditorCanvas.h"
+#include "../jucer_DocumentEditorComponent.h"
+#include "../../model/Component/jucer_ComponentDocument.h"
+#include "../Editor Base/jucer_EditorCanvas.h"
 
 
 //==============================================================================
@@ -50,12 +52,20 @@ public:
     void paint (Graphics& g);
     void resized();
 
+    //==============================================================================
     ComponentDocument& getDocument() const      { return *componentDocument; }
 
-    Viewport* getViewport() const;
-    ComponentEditorCanvas* getCanvas() const;
+    const StringArray getSelectedIds() const;
+    void getSelectedItemProperties (Array <PropertyComponent*>& props);
+    void deleteSelection();
+    void deselectNonComponents();
+    void selectionToFront();
+    void selectionToBack();
 
+    //==============================================================================
     void test();
+
+    EditorCanvasBase::SelectedItems& getSelection()         { return selection; }
 
 private:
     class ClassInfoHolder;
@@ -65,6 +75,7 @@ private:
 
     Project* project;
     ComponentDocument* componentDocument;
+    EditorCanvasBase::SelectedItems selection;
 
     TabbedComponent* tabs;
     ClassInfoHolder* classInfoHolder;

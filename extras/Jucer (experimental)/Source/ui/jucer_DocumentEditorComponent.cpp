@@ -24,7 +24,7 @@
 */
 
 #include "jucer_DocumentEditorComponent.h"
-#include "jucer_ProjectContentComponent.h"
+#include "Project Editor/jucer_ProjectContentComponent.h"
 
 
 //==============================================================================

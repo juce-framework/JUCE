@@ -26,7 +26,7 @@
 #ifndef __JUCER_MAINWINDOW_JUCEHEADER__
 #define __JUCER_MAINWINDOW_JUCEHEADER__
 
-#include "jucer_ProjectContentComponent.h"
+#include "Project Editor/jucer_ProjectContentComponent.h"
 #include "Component Editor/jucer_ComponentEditor.h"
 
 //==============================================================================

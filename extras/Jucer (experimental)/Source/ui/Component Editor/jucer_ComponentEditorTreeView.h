@@ -26,8 +26,6 @@
 #ifndef __JUCE_COMPONENTEDITORTREEVIEW_H_F3B95A41__
 #define __JUCE_COMPONENTEDITORTREEVIEW_H_F3B95A41__
 
-#include "../jucer_JucerTreeViewBase.h"
-
 
 //==============================================================================
 namespace ComponentEditorTreeView
@@ -41,12 +39,12 @@ namespace ComponentEditorTreeView
         Base (ComponentEditor& editor_)
             : editor (editor_)
         {
-            editor.getCanvas()->getSelection().addChangeListener (this);
+            editor.getSelection().addChangeListener (this);
         }
 
         ~Base()
         {
-            editor.getCanvas()->getSelection().removeChangeListener (this);
+            editor.getSelection().removeChangeListener (this);
         }
 
         //==============================================================================
@@ -78,16 +76,16 @@ namespace ComponentEditorTreeView
         void itemSelectionChanged (bool isNowSelected)
         {
             if (isNowSelected)
-                editor.getCanvas()->getSelection().addToSelection (getItemId());
+                editor.getSelection().addToSelection (getItemId());
             else
-                editor.getCanvas()->getSelection().deselect (getItemId());
+                editor.getSelection().deselect (getItemId());
         }
 
         void changeListenerCallback (void*)             { updateSelectionState(); }
 
         void updateSelectionState()
         {
-            setSelected (editor.getCanvas()->getSelection().isSelected (getItemId()), false);
+            setSelected (editor.getSelection().isSelected (getItemId()), false);
         }
 
         bool isMissing()                            { return false; }
@@ -204,13 +202,13 @@ namespace ComponentEditorTreeView
         }
 
         //==============================================================================
-        const String getItemId() const              { return markerState [ComponentDocument::idProperty]; }
+        const String getItemId() const              { return MarkerListBase::getId (markerState); }
 
         bool mightContainSubItems()                 { return false; }
         void refreshSubItems()                      {}
 
         const String getDisplayName() const         { return getRenamingName(); }
-        const String getRenamingName() const        { return markerState [ComponentDocument::markerNameProperty]; }
+        const String getRenamingName() const        { return markerState [MarkerListBase::getMarkerNameProperty()]; }
 
         Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
 
@@ -218,7 +216,7 @@ namespace ComponentEditorTreeView
 
         void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
         {
-            if (property == ComponentDocument::markerNameProperty)
+            if (property == MarkerListBase::getMarkerNameProperty())
                 repaintItem();
         }
 
