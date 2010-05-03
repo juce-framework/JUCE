@@ -46,10 +46,10 @@ static bool canFileBeReincluded (const File& f)
     {
         content = content.trimStart();
 
-        if (content.startsWith (T("//")))
-            content = content.fromFirstOccurrenceOf (T("\n"), false, false);
-        else if (content.startsWith (T("/*")))
-            content = content.fromFirstOccurrenceOf (T("*/"), false, false);
+        if (content.startsWith ("//"))
+            content = content.fromFirstOccurrenceOf ("\n", false, false);
+        else if (content.startsWith ("/*"))
+            content = content.fromFirstOccurrenceOf ("*/", false, false);
         else
             break;
     }
@@ -59,10 +59,10 @@ static bool canFileBeReincluded (const File& f)
     lines.trim();
     lines.removeEmptyStrings();
 
-    const String l1 (lines[0].removeCharacters (T(" \t")).trim());
-    const String l2 (lines[1].removeCharacters (T(" \t")).trim());
+    const String l1 (lines[0].removeCharacters (" \t").trim());
+    const String l2 (lines[1].removeCharacters (" \t").trim());
 
-    if (l1.replace (T("#ifndef"), T("#define")) == l2)
+    if (l1.replace ("#ifndef", "#define") == l2)
         return false;
 
     return true;
@@ -105,7 +105,8 @@ static bool parseFile (const File& rootFolder,
                        StringArray& alreadyIncludedFiles,
                        const StringArray& includesToIgnore,
                        const StringArray& wildcards,
-                       const bool isOuterFile)
+                       bool isOuterFile,
+                       bool stripCommentBlocks)
 {
     if (! file.exists())
     {
@@ -129,26 +130,26 @@ static bool parseFile (const File& rootFolder,
         String line (lines[i]);
         String trimmed (line.trimStart());
 
-        if ((! isOuterFile) && trimmed.startsWith (T("//================================================================")))
+        if ((! isOuterFile) && trimmed.startsWith ("//================================================================"))
             line = String::empty;
 
-        if (trimmed.startsWithChar (T('#'))
-             && trimmed.removeCharacters (T(" \t")).startsWithIgnoreCase (T("#include\"")))
+        if (trimmed.startsWithChar ('#')
+             && trimmed.removeCharacters (" \t").startsWithIgnoreCase ("#include\""))
         {
-            const int endOfInclude = line.indexOfChar (line.indexOfChar (T('\"')) + 1, T('\"')) + 1;
+            const int endOfInclude = line.indexOfChar (line.indexOfChar ('\"') + 1, '\"') + 1;
             const String lineUpToEndOfInclude (line.substring (0, endOfInclude));
             const String lineAfterInclude (line.substring (endOfInclude));
 
-            const String filename (line.fromFirstOccurrenceOf (T("\""), false, false)
-                                       .upToLastOccurrenceOf (T("\""), false, false));
+            const String filename (line.fromFirstOccurrenceOf ("\"", false, false)
+                                       .upToLastOccurrenceOf ("\"", false, false));
             const File targetFile (file.getSiblingFile (filename));
 
             if (targetFile.exists() && targetFile.isAChildOf (rootFolder))
             {
-                if (matchesWildcard (filename.replaceCharacter (T('\\'), T('/')), wildcards)
+                if (matchesWildcard (filename.replaceCharacter ('\\', '/'), wildcards)
                      && ! includesToIgnore.contains (targetFile.getFileName()))
                 {
-                    if (line.containsIgnoreCase (T("FORCE_AMALGAMATOR_INCLUDE"))
+                    if (line.containsIgnoreCase ("FORCE_AMALGAMATOR_INCLUDE")
                         || ! alreadyIncludedFiles.contains (targetFile.getFullPathName()))
                     {
                         if (! canFileBeReincluded (targetFile))
@@ -158,7 +159,7 @@ static bool parseFile (const File& rootFolder,
 
                         if (! parseFile (rootFolder, newTargetFile,
                                          dest, targetFile, alreadyIncludedFiles, includesToIgnore,
-                                         wildcards, false))
+                                         wildcards, false, stripCommentBlocks))
                         {
                             return false;
                         }
@@ -174,23 +175,23 @@ static bool parseFile (const File& rootFolder,
                 }
                 else
                 {
-                    line = lineUpToEndOfInclude.upToFirstOccurrenceOf (T("\""), true, false)
+                    line = lineUpToEndOfInclude.upToFirstOccurrenceOf ("\"", true, false)
                             + targetFile.getRelativePathFrom (newTargetFile.getParentDirectory())
-                                        .replaceCharacter (T('\\'), T('/'))
-                            + T("\"")
+                                        .replaceCharacter ('\\', '/')
+                            + "\""
                             + lineAfterInclude;
                 }
             }
         }
 
-        if (trimmed.startsWith (T("/*")) && (i > 10 || ! isOuterFile))
+        if ((stripCommentBlocks || i == 0) && trimmed.startsWith ("/*") && (i > 10 || ! isOuterFile))
         {
             int originalI = i;
             String originalLine = line;
 
             for (;;)
             {
-                int end = line.indexOf (T("*/"));
+                int end = line.indexOf ("*/");
 
                 if (end >= 0)
                 {
@@ -198,8 +199,8 @@ static bool parseFile (const File& rootFolder,
 
                     // If our comment appeared just before an assertion, leave it in, as it
                     // might be useful..
-                    if (lines [i + 1].contains (T("assert"))
-                         || lines [i + 2].contains (T("assert")))
+                    if (lines [i + 1].contains ("assert")
+                         || lines [i + 2].contains ("assert"))
                     {
                         i = originalI;
                         line = originalLine;
@@ -232,15 +233,15 @@ static bool parseFile (const File& rootFolder,
             {
                 int tabSize = 4;
                 int numTabs = numIntialSpaces / tabSize;
-                line = String::repeatedString (T("\t"), numTabs) + line.substring (numTabs * tabSize);
+                line = String::repeatedString ("\t", numTabs) + line.substring (numTabs * tabSize);
             }
 
-            if (! line.containsChar (T('"')))
+            if (! line.containsChar ('"'))
             {
                 // turn large areas of spaces into tabs - this will mess up alignment a bit, but
                 // it's only the amalgamated file, so doesn't matter...
-                line = line.replace (T("        "), T("\t"), false);
-                line = line.replace (T("    "), T("\t"), false);
+                line = line.replace ("        ", "\t", false);
+                line = line.replace ("    ", "\t", false);
             }
         }
 
@@ -264,7 +265,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
     }
 
     StringArray wildcards;
-    wildcards.addTokens (wildcard, T(";,"), T("'\""));
+    wildcards.addTokens (wildcard, ";,", "'\"");
     wildcards.trim();
     wildcards.removeEmptyStrings();
 
@@ -286,7 +287,7 @@ static bool munge (const File& templateFile, const File& targetFile, const Strin
                      alreadyIncludedFiles,
                      includesToIgnore,
                      wildcards,
-                     true))
+                     true, false))
     {
         return false;
     }
@@ -318,17 +319,17 @@ static void findAllFilesIncludedIn (const File& hppTemplate, StringArray& alread
     {
         String line (lines[i]);
 
-        if (line.removeCharacters (T(" \t")).startsWithIgnoreCase (T("#include\"")))
+        if (line.removeCharacters (" \t").startsWithIgnoreCase ("#include\""))
         {
-            const String filename (line.fromFirstOccurrenceOf (T("\""), false, false)
-                                       .upToLastOccurrenceOf (T("\""), false, false));
+            const String filename (line.fromFirstOccurrenceOf ("\"", false, false)
+                                       .upToLastOccurrenceOf ("\"", false, false));
             const File targetFile (hppTemplate.getSiblingFile (filename));
 
             if (! alreadyIncludedFiles.contains (targetFile.getFullPathName()))
             {
                 alreadyIncludedFiles.add (targetFile.getFullPathName());
 
-                if (targetFile.getFileName().containsIgnoreCase (T("juce_")) && targetFile.exists())
+                if (targetFile.getFileName().containsIgnoreCase ("juce_") && targetFile.exists())
                     findAllFilesIncludedIn (targetFile, alreadyIncludedFiles);
             }
         }
@@ -344,11 +345,11 @@ static void mungeJuce (const File& juceFolder)
         return;
     }
 
-    const File hppTemplate (juceFolder.getChildFile (T("amalgamation/juce_amalgamated_template.h")));
-    const File cppTemplate (juceFolder.getChildFile (T("amalgamation/juce_amalgamated_template.cpp")));
+    const File hppTemplate (juceFolder.getChildFile ("amalgamation/juce_amalgamated_template.h"));
+    const File cppTemplate (juceFolder.getChildFile ("amalgamation/juce_amalgamated_template.cpp"));
 
-    const File hppTarget (juceFolder.getChildFile (T("juce_amalgamated.h")));
-    const File cppTarget (juceFolder.getChildFile (T("juce_amalgamated.cpp")));
+    const File hppTarget (juceFolder.getChildFile ("juce_amalgamated.h"));
+    const File cppTarget (juceFolder.getChildFile ("juce_amalgamated.cpp"));
 
     StringArray alreadyIncludedFiles, includesToIgnore;
 
