@@ -137,7 +137,12 @@ bool FileChooser::showDialog (const bool selectsDirectories,
             flags |= FileBrowserComponent::canSelectFiles;
 
         if (selectsDirectories)
+        {
             flags |= FileBrowserComponent::canSelectDirectories;
+
+            if (! isSave)
+                flags |= FileBrowserComponent::filenameBoxIsReadOnly;
+        }
 
         if (selectMultipleFiles)
             flags |= FileBrowserComponent::canSelectMultipleItems;

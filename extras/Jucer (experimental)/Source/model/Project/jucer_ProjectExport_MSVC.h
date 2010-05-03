@@ -526,9 +526,7 @@ private:
                 linker->setAttribute ("EnableCOMDATFolding", "2");
             }
 
-            linker->setAttribute ("RandomizedBaseAddress", "1");
-            linker->setAttribute ("DataExecutionPrevention", "0");
-            linker->setAttribute ("TargetMachine", "1");
+            linker->setAttribute ("TargetMachine", "1"); // (64-bit build = 5)
 
             String extraLinkerOptions (getExtraLinkerFlags().toString());
 

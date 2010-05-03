@@ -115,6 +115,28 @@ const File ProjectExporter::getTargetFolder() const
     return project.resolveFilename (getTargetLocation().toString());
 }
 
+const String ProjectExporter::getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const
+{
+    String juceFolderPath (getJuceFolder().toString());
+
+    if (juceFolderPath.startsWithChar ('<'))
+    {
+        juceFolderPath = unixStylePath (File::addTrailingSeparator (juceFolderPath.substring (1).dropLastCharacters(1)));
+        if (juceFolderPath == "/")
+            juceFolderPath = String::empty;
+
+        return "<" + juceFolderPath + pathFromJuceFolder + ">";
+    }
+    else
+    {
+        const RelativePath juceFromProject (juceFolderPath, RelativePath::projectFolder);
+        const RelativePath fileFromProject (juceFromProject.getChildFile (pathFromJuceFolder));
+        const RelativePath fileFromHere (fileFromProject.rebased (project.getFile().getParentDirectory(),
+                                                                  targetIncludeFile.getParentDirectory(), RelativePath::unknown));
+        return fileFromHere.toUnixStyle().quoted();
+    }
+}
+
 const RelativePath ProjectExporter::getJucePathFromTargetFolder() const
 {
     RelativePath juceFolder (getJuceFolder().toString(), RelativePath::projectFolder);

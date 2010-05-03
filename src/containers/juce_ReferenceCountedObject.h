@@ -68,9 +68,7 @@ public:
     */
     inline void incReferenceCount() throw()
     {
-        Atomic::increment (refCounts);
-
-        jassert (refCounts > 0);
+        ++refCount;
     }
 
     /** Decreases the object's reference count.
@@ -79,16 +77,16 @@ public:
     */
     inline void decReferenceCount() throw()
     {
-        jassert (refCounts > 0);
+        jassert (getReferenceCount() > 0);
 
-        if (Atomic::decrementAndReturn (refCounts) == 0)
+        if (--refCount == 0)
             delete this;
     }
 
     /** Returns the object's current reference count. */
     inline int getReferenceCount() const throw()
     {
-        return refCounts;
+        return refCount.get();
     }
 
 
@@ -96,7 +94,6 @@ protected:
     //==============================================================================
     /** Creates the reference-counted object (with an initial ref count of zero). */
     ReferenceCountedObject()
-        : refCounts (0)
     {
     }
 
@@ -104,12 +101,12 @@ protected:
     virtual ~ReferenceCountedObject()
     {
         // it's dangerous to delete an object that's still referenced by something else!
-        jassert (refCounts == 0);
+        jassert (getReferenceCount() == 0);
     }
 
 private:
     //==============================================================================
-    int32 refCounts;
+    Atomic <int> refCount;
 };
 
 

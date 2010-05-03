@@ -73,13 +73,13 @@ public:
 
     SharedCursorHandle* retain() throw()
     {
-        Atomic::increment (refCount);
+        ++refCount;
         return this;
     }
 
     void release()
     {
-        if (Atomic::decrementAndReturn (refCount) == 0)
+        if (--refCount == 0)
         {
             if (isStandard)
             {
@@ -99,7 +99,7 @@ public:
 
 private:
     void* const handle;
-    int32 refCount;
+    Atomic <int> refCount;
     const MouseCursor::StandardCursorType standardType;
     const bool isStandard;
 

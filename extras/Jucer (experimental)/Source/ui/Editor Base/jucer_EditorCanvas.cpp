@@ -386,6 +386,7 @@ public:
         markerRootY.removeListener (this);
 
         getSelection().removeChangeListener (this);
+        resizers.clear();
         deleteAllChildren();
     }
 
@@ -497,6 +498,7 @@ public:
     void resized()
     {
         updateMarkers();
+        updateResizeFrames();
     }
 
     void changeListenerCallback (void*)
@@ -543,16 +545,19 @@ public:
         for (i = 0; i < num; ++i)
             requiredIds.add (selection.getSelectedItem(i));
 
-        for (i = getNumChildComponents(); --i >= 0;)
+        for (i = resizers.size(); --i >= 0;)
         {
-            ResizeFrame* resizer = dynamic_cast <ResizeFrame*> (getChildComponent(i));
+            ResizeFrame* resizer = resizers.getUnchecked(i);
+            const int index = requiredIds.indexOf (resizer->getTargetObjectID());
 
-            if (resizer != 0)
+            if (index >= 0)
             {
-                if (selection.isSelected (resizer->getTargetObjectID()))
-                    requiredIds.removeString (resizer->getTargetObjectID());
-                else
-                    delete resizer;
+                resizer->updatePosition();
+                requiredIds.remove (index);
+            }
+            else
+            {
+                resizers.remove (i);
             }
         }
 
@@ -563,6 +568,7 @@ public:
             if (state.isValid()) // (the id may be a marker)
             {
                 ResizeFrame* frame = new ResizeFrame (canvas, requiredIds[i], state);
+                resizers.add (frame);
                 addAndMakeVisible (frame);
                 frame->updatePosition();
             }
@@ -576,6 +582,7 @@ private:
     ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
     bool mouseDownResult, isDraggingClickedComp;
     SelectedItems::ItemType mouseDownCompUID;
+    OwnedArray <ResizeFrame> resizers;
 
     void updateMarkers (bool isX)
     {

@@ -78,6 +78,9 @@ public:
     Value getExtraCompilerFlags() const     { return getSetting ("extraCompilerFlags"); }
     Value getExtraLinkerFlags() const       { return getSetting ("extraLinkerFlags"); }
 
+    // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
+    const String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
+
     Array<RelativePath> juceWrapperFiles;
 
 protected:
@@ -87,6 +90,7 @@ protected:
     String name;
 
     const RelativePath getJucePathFromTargetFolder() const;
+
     const String getDefaultBuildsRootFolder() const         { return "Builds/"; }
 
     const Array<RelativePath> getVSTFilesRequired() const;

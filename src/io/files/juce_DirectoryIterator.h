@@ -128,10 +128,11 @@ private:
                    bool* isDirectory, bool* isHidden, int64* fileSize,
                    Time* modTime, Time* creationTime, bool* isReadOnly);
 
+        class Pimpl;
+
         juce_UseDebuggingNewOperator
 
     private:
-        class Pimpl;
         friend class DirectoryIterator;
         friend class ScopedPointer<Pimpl>;
         ScopedPointer<Pimpl> pimpl;

@@ -63,7 +63,7 @@ public:
     static juce_wchar* createUninitialised (const size_t numChars)
     {
         StringHolder* const s = reinterpret_cast <StringHolder*> (new char [sizeof (StringHolder) + numChars * sizeof (juce_wchar)]);
-        s->refCount = 0;
+        s->refCount.value = 0;
         s->allocatedNumChars = numChars;
         return &(s->text[0]);
     }
@@ -91,12 +91,12 @@ public:
     //==============================================================================
     static void retain (juce_wchar* const text) throw()
     {
-        Atomic::increment (bufferFromText (text)->refCount);
+        ++(bufferFromText (text)->refCount);
     }
 
     static inline void release (StringHolder* const b) throw()
     {
-        if (Atomic::decrementAndReturn (b->refCount) == -1 && b != &empty)
+        if (--(b->refCount) == -1 && b != &empty)
             delete[] reinterpret_cast <char*> (b);
     }
 
@@ -110,7 +110,7 @@ public:
     {
         StringHolder* const b = bufferFromText (text);
 
-        if (b->refCount <= 0)
+        if (b->refCount.get() <= 0)
             return text;
 
         juce_wchar* const newText = createCopy (text, b->allocatedNumChars);
@@ -123,7 +123,7 @@ public:
     {
         StringHolder* const b = bufferFromText (text);
 
-        if (b->refCount <= 0 && b->allocatedNumChars >= numChars)
+        if (b->refCount.get() <= 0 && b->allocatedNumChars >= numChars)
             return text;
 
         juce_wchar* const newText = createUninitialised (jmax (b->allocatedNumChars, numChars));
@@ -145,7 +145,7 @@ public:
     }
 
     //==============================================================================
-    int refCount;
+    Atomic<int> refCount;
     size_t allocatedNumChars;
     juce_wchar text[1];
 
@@ -214,7 +214,7 @@ String& String::operator= (const String& other) throw()
 {
     juce_wchar* const newText = other.text;
     StringHolder::retain (newText);
-    StringHolder::release (static_cast <juce_wchar*> (Atomic::swapPointers ((void* volatile*) &text, newText)));
+    StringHolder::release (reinterpret_cast <Atomic<juce_wchar*>*> (&text)->exchange (newText));
     return *this;
 }
 

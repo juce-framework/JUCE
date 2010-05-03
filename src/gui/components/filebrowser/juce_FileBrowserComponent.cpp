@@ -176,10 +176,13 @@ int FileBrowserComponent::getNumSelectedFiles() const throw()
 
 const File FileBrowserComponent::getSelectedFile (int index) const throw()
 {
+    if ((flags & canSelectDirectories) != 0 && filenameBox->getText().isEmpty())
+        return currentRoot;
+
     if (! filenameBox->isReadOnly())
         return currentRoot.getChildFile (filenameBox->getText());
-    else
-        return chosenFiles[index];
+
+    return chosenFiles[index];
 }
 
 bool FileBrowserComponent::currentFileIsValid() const
@@ -354,6 +357,9 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
     if (f.isDirectory())
     {
         setRoot (f);
+
+        if ((flags & canSelectDirectories) != 0)
+            filenameBox->setText (String::empty);
     }
     else
     {

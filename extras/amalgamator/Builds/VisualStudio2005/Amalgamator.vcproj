@@ -54,8 +54,6 @@
             GenerateDebugInformation="true"
             ProgramDatabaseFile=".\Debug\amalgamator.pdb"
             SubSystem="1"
-            RandomizedBaseAddress="1"
-            DataExecutionPrevention="0"
             TargetMachine="1"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -115,8 +113,6 @@
             GenerateManifest="false"
             OptimizeReferences="2"
             EnableCOMDATFolding="2"
-            RandomizedBaseAddress="1"
-            DataExecutionPrevention="0"
             TargetMachine="1"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>

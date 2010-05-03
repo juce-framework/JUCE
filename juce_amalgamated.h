@@ -3120,108 +3120,231 @@ private:
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
 #define __JUCE_ATOMIC_JUCEHEADER__
 
-class JUCE_API  Atomic
+template <typename Type>
+class Atomic
 {
 public:
-	static void increment (int32& variable);
+	inline Atomic() throw()
+		: value (0)
+	{
+	}
 
-	static int32 incrementAndReturn (int32& variable);
+	inline Atomic (const Type initialValue) throw()
+		: value (initialValue)
+	{
+	}
 
-	static void decrement (int32& variable);
+	inline Atomic (const Atomic& other) throw()
+		: value (other.get())
+	{
+	}
 
-	static int32 decrementAndReturn (int32& variable);
+	inline Atomic& operator= (const Atomic& other) throw()
+	{
+		set (other.get());
+	}
 
-	static int32 compareAndExchange (int32& destination, int32 newValue, int32 requiredCurrentValue);
+	inline ~Atomic() throw()
+	{
+		// This class can only be used for types which are 32 or 64 bits in size.
+		static_jassert (sizeof (Type) == 4 || sizeof (Type) == 8);
+	}
 
-	static void* swapPointers (void* volatile* value1, void* value2);
+	Type get() const throw();
 
-private:
-	Atomic();
-	Atomic (const Atomic&);
-	Atomic& operator= (const Atomic&);
+	void set (Type newValue) throw();
+
+	Type exchange (Type value) throw();
+
+	Type operator+= (Type amountToAdd) throw();
+
+	Type operator-= (Type amountToSubtract) throw();
+
+	Type operator++() throw();
+
+	Type operator--() throw();
+
+	bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+
+	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+
+	static void memoryBarrier() throw();
+
+	#if JUCE_MSVC
+	  __declspec (align (8))
+	#else
+	  __attribute__ ((aligned (8)))
+	#endif
+
+	Type value;
 };
 
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
-	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))  //  Older OSX builds using gcc4.1 or earlier...
+	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+  #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
 
-	inline void  Atomic::increment (int32& variable)		{ OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
-	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return OSAtomicIncrement32 (static_cast <int32_t*> (&variable)); }
-	inline void  Atomic::decrement (int32& variable)		{ OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
-	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return OSAtomicDecrement32 (static_cast <int32_t*> (&variable)); }
+#elif JUCE_GCC
+  #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
 
-	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-	{
-		for (;;) // Annoying workaround for OSX only having a bool CAS operation..
-		{
-			if (OSAtomicCompareAndSwap32Barrier (oldValue, newValue, static_cast <int32_t*> (&destination)))
-				return oldValue;
+#else
+  #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
 
-			const uint32 result = destination;
-			if (result != oldValue)
-				return result;
-		}
-	}
+  #if JUCE_USE_INTRINSICS
+	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
+					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
+	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
+	#define juce_InterlockedIncrement(a)		_InterlockedIncrement(a)
+	#define juce_InterlockedDecrement(a)		_InterlockedDecrement(a)
+	#define juce_InterlockedExchangeAdd(a, b)	   _InterlockedExchangeAdd(a, b)
+	#define juce_InterlockedCompareExchange(a, b, c)	_InterlockedCompareExchange(a, b, c)
+	#define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
+	#define juce_MemoryBarrier MemoryBarrier
+  #else
+	// (these are defined in juce_win32_Threads.cpp)
+	long juce_InterlockedExchange (volatile long* a, long b) throw();
+	long juce_InterlockedIncrement (volatile long* a) throw();
+	long juce_InterlockedDecrement (volatile long* a) throw();
+	long juce_InterlockedExchangeAdd (volatile long* a, long b) throw();
+	long juce_InterlockedCompareExchange (volatile long* a, long b, long c) throw();
+	__int64 juce_InterlockedCompareExchange64 (volatile __int64* a, __int64 b, __int64 c) throw();
+	static void juce_MemoryBarrier() throw()   { long x = 0; juce_InterlockedIncrement (&x); }
+  #endif
 
-	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-	{
-		void* currentVal = *value1;
-	  #if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5 && ! JUCE_64BIT
-		while (! OSAtomicCompareAndSwap32 (reinterpret_cast <int32_t> (currentVal), reinterpret_cast <int32_t> (value2),
-										   const_cast <int32_t*> (reinterpret_cast <volatile int32_t*> (value1)))) { currentVal = *value1; }
-	  #else
-		while (! OSAtomicCompareAndSwapPtr (currentVal, value2, value1)) { currentVal = *value1; }
-	  #endif
-		return currentVal;
-	}
-
-#elif JUCE_LINUX && __INTEL_COMPILER  // Linux with Intel compiler...
-
-	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (&variable); }
-	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (&variable); }
-	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (&variable); }
-	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (&variable); }
-	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																	{ return _InterlockedCompareExchange (&destination, newValue, oldValue); }
-
-	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-	{
-	  #if __ia64__
-		return reinterpret_cast<void*> (_InterlockedExchange64 (const_cast<void**> (value1), reinterpret_cast<__int64> (value2)));
-	  #else
-		return reinterpret_cast<void*> (_InterlockedExchange (const_cast<void**> (value1), reinterpret_cast<long> (value2)));
-	  #endif
-	}
-
-#elif JUCE_GCC	   // On GCC, use intrinsics...
-
-	inline void  Atomic::increment (int32& variable)		{ __sync_add_and_fetch (&variable, 1); }
-	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, 1); }
-	inline void  Atomic::decrement (int32& variable)		{ __sync_add_and_fetch (&variable, -1); }
-	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return __sync_add_and_fetch (&variable, -1); }
-	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																	{ return __sync_val_compare_and_swap (&destination, oldValue, newValue); }
-
-	inline void* Atomic::swapPointers (void* volatile* value1, void* value2)
-	{
-		void* currentVal = *value1;
-		while (! __sync_bool_compare_and_swap (value1, currentVal, value2)) { currentVal = *value1; }
-		return currentVal;
-	}
-
-#elif JUCE_USE_INTRINSICS		   // Windows...
-
-	// (If JUCE_USE_INTRINSICS isn't enabled, a fallback version of these methods is declared in juce_win32_Threads.cpp)
-	#pragma intrinsic (_InterlockedIncrement)
-	#pragma intrinsic (_InterlockedDecrement)
-	#pragma intrinsic (_InterlockedCompareExchange)
-
-	inline void  Atomic::increment (int32& variable)		{ _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-	inline int32 Atomic::incrementAndReturn (int32& variable)	   { return _InterlockedIncrement (reinterpret_cast <volatile long*> (&variable)); }
-	inline void  Atomic::decrement (int32& variable)		{ _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-	inline int32 Atomic::decrementAndReturn (int32& variable)	   { return _InterlockedDecrement (reinterpret_cast <volatile long*> (&variable)); }
-	inline int32 Atomic::compareAndExchange (int32& destination, int32 newValue, int32 oldValue)
-																	{ return _InterlockedCompareExchange (reinterpret_cast <volatile long*> (&destination), newValue, oldValue); }
+  #if JUCE_64BIT
+	#pragma intrinsic (_InterlockedExchangeAdd64, _InterlockedExchange64, _InterlockedIncrement64, _InterlockedDecrement64)
+	#define juce_InterlockedExchangeAdd64(a, b)	 _InterlockedExchangeAdd64(a, b)
+	#define juce_InterlockedExchange64(a, b)	_InterlockedExchange64(a, b)
+	#define juce_InterlockedIncrement64(a)	  _InterlockedIncrement64(a)
+	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
+  #else
+	// None of these atomics are available in a 32-bit Windows build!!
+	static __int64 juce_InterlockedExchangeAdd64 (volatile __int64* a, __int64 b) throw()   { jassertfalse; __int64 old = *a; *a += b; return old; }
+	static __int64 juce_InterlockedExchange64 (volatile __int64* a, __int64 b) throw()	  { jassertfalse; __int64 old = *a; *a = b; return old; }
+	static __int64 juce_InterlockedIncrement64 (volatile __int64* a) throw()		{ jassertfalse; return ++*a; }
+	static __int64 juce_InterlockedDecrement64 (volatile __int64* a) throw()		{ jassertfalse; return --*a; }
+  #endif
 #endif
+
+template <typename Type>
+inline Type Atomic<Type>::get() const throw()
+{
+	return const_cast <Atomic<Type>*> (this)->operator+= (0);
+}
+
+template <typename Type>
+inline void Atomic<Type>::set (const Type newValue) throw()
+{
+	exchange (newValue);
+}
+
+template <typename Type>
+Type Atomic<Type>::exchange (const Type newValue) throw()
+{
+  #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
+	Type currentVal = value;
+	while (! compareAndSetBool (newValue, currentVal)) { currentVal = value; }
+	return currentVal;
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedExchange ((volatile long*) &value, (long) newValue)
+							  : (Type) juce_InterlockedExchange64 ((volatile __int64*) &value, (__int64) newValue);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32 ((int32_t) amountToAdd, (int32_t*) &value)
+							  : (Type) OSAtomicAdd64 ((int64_t) amountToAdd, (int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
+							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, amountToAdd);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
+{
+	return operator+= (sizeof (Type) == 4 ? (Type) (-(int32) amountToSubtract)
+										  : (Type) (-(int64) amountToSubtract));
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator++() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32 ((int32_t*) &value)
+							  : (Type) OSAtomicIncrement64 ((int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, 1);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::operator--() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32 ((int32_t*) &value)
+							  : (Type) OSAtomicDecrement64 ((int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
+							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
+  #elif JUCE_ATOMICS_GCC
+	return (Type) __sync_add_and_fetch (&value, -1);
+  #endif
+}
+
+template <typename Type>
+inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	return sizeof (Type) == 4 ? (Type) OSAtomicCompareAndSwap32Barrier ((int32_t) valueToCompare, (int32_t) newValue, (int32_t*) &value)
+							  : (Type) OSAtomicCompareAndSwap64Barrier ((int64_t) valueToCompare, (int64_t) newValue, (int64_t*) &value);
+  #elif JUCE_ATOMICS_WINDOWS
+	return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
+  #elif JUCE_ATOMICS_GCC
+	return __sync_bool_compare_and_swap (&value, valueToCompare, newValue);
+  #endif
+}
+
+template <typename Type>
+inline Type Atomic<Type>::compareAndSetValue (const Type newValue, const Type valueToCompare) throw()
+{
+  #if JUCE_ATOMICS_MAC
+	for (;;) // Annoying workaround for OSX only having a bool CAS operation..
+	{
+		if (compareAndSetBool (newValue, valueToCompare))
+			return valueToCompare;
+
+		const Type result = value;
+		if (result != valueToCompare)
+			return result;
+	}
+
+  #elif JUCE_ATOMICS_WINDOWS
+	return sizeof (Type) == 4 ? (Type) juce_InterlockedCompareExchange ((volatile long*) &value, (long) newValue, (long) valueToCompare)
+							  : (Type) juce_InterlockedCompareExchange64 ((volatile __int64*) &value, (__int64) newValue, (__int64) valueToCompare);
+  #elif JUCE_ATOMICS_GCC
+	return __sync_val_compare_and_swap (&value, valueToCompare, newValue);
+  #endif
+}
+
+template <typename Type>
+inline void Atomic<Type>::memoryBarrier() throw()
+{
+  #if JUCE_ATOMICS_MAC
+	OSMemoryBarrier();
+  #elif JUCE_ATOMICS_GCC
+	__sync_synchronize();
+  #elif JUCE_ATOMICS_WINDOWS
+	juce_MemoryBarrier();
+  #endif
+}
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
 /*** End of inlined file: juce_Atomic.h ***/
@@ -3232,40 +3355,37 @@ public:
 
 	inline void incReferenceCount() throw()
 	{
-		Atomic::increment (refCounts);
-
-		jassert (refCounts > 0);
+		++refCount;
 	}
 
 	inline void decReferenceCount() throw()
 	{
-		jassert (refCounts > 0);
+		jassert (getReferenceCount() > 0);
 
-		if (Atomic::decrementAndReturn (refCounts) == 0)
+		if (--refCount == 0)
 			delete this;
 	}
 
 	inline int getReferenceCount() const throw()
 	{
-		return refCounts;
+		return refCount.get();
 	}
 
 protected:
 
 	ReferenceCountedObject()
-		: refCounts (0)
 	{
 	}
 
 	virtual ~ReferenceCountedObject()
 	{
 		// it's dangerous to delete an object that's still referenced by something else!
-		jassert (refCounts == 0);
+		jassert (getReferenceCount() == 0);
 	}
 
 private:
 
-	int32 refCounts;
+	Atomic <int> refCount;
 };
 
 template <class ReferenceCountedObjectClass>
@@ -7768,10 +7888,11 @@ private:
 				   bool* isDirectory, bool* isHidden, int64* fileSize,
 				   Time* modTime, Time* creationTime, bool* isReadOnly);
 
+		class Pimpl;
+
 		juce_UseDebuggingNewOperator
 
 	private:
-		class Pimpl;
 		friend class DirectoryIterator;
 		friend class ScopedPointer<Pimpl>;
 		ScopedPointer<Pimpl> pimpl;
@@ -9386,6 +9507,7 @@ public:
 
 private:
 	class SharedCursorHandle;
+	friend class SharedCursorHandle;
 	SharedCursorHandle* cursorHandle;
 
 	friend class MouseInputSourceInternal;

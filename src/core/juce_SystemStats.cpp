@@ -70,6 +70,54 @@ const StringArray SystemStats::getMACAddressStrings()
 //==============================================================================
 static bool juceInitialisedNonGUI = false;
 
+#if JUCE_DEBUG
+template <typename Type>
+static void juce_testAtomicType (Type)
+{
+    Atomic<Type> a;
+    a.set ((Type) 10);
+    a += (Type) 15;
+    a.memoryBarrier();
+    a -= (Type) 5;
+    ++a;
+    ++a;
+    --a;
+    a.memoryBarrier();
+
+    /*  These are some simple test cases to check the atomics - let me know
+        if any of these assertions fail on your system!
+    */
+    jassert (a.get() == (Type) 21);
+    jassert (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
+    jassert (a.get() == (Type) 21);
+    jassert (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
+    jassert (a.get() == (Type) 101);
+    jassert (! a.compareAndSetBool ((Type) 300, (Type) 200));
+    jassert (a.get() == (Type) 101);
+    jassert (a.compareAndSetBool ((Type) 200, a.get()));
+    jassert (a.get() == (Type) 200);
+
+    jassert (a.exchange ((Type) 300) == (Type) 200);
+    jassert (a.get() == (Type) 300);
+}
+
+static void juce_testAtomics()
+{
+    juce_testAtomicType ((int) 0);
+    juce_testAtomicType ((unsigned int) 0);
+    juce_testAtomicType ((int32) 0);
+    juce_testAtomicType ((uint32) 0);
+    juce_testAtomicType ((long) 0);
+    juce_testAtomicType ((void*) 0);
+    juce_testAtomicType ((int*) 0);
+  #if ! (JUCE_WINDOWS && JUCE_32BIT) // some 64-bit intrinsics aren't available on win32
+    juce_testAtomicType ((int64) 0);
+    juce_testAtomicType ((uint64) 0);
+  #endif
+
+}
+#endif
+
 void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
@@ -99,11 +147,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
             int a2[3];
             jassert (numElementsInArray(a2) == 3);
 
-            int n = 1;
-            Atomic::increment (n);
-            jassert (Atomic::incrementAndReturn (n) == 3);
-            Atomic::decrement (n);
-            jassert (Atomic::decrementAndReturn (n) == 1);
+            juce_testAtomics();
 
             jassert (ByteOrder::swap ((uint16) 0x1122) == 0x2211);
             jassert (ByteOrder::swap ((uint32) 0x11223344) == 0x44332211);

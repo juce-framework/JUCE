@@ -80,7 +80,7 @@ public:
         if (isDraggingLeftRight())
         {
             verticalSnapTargets.add (SnapLine (0, -100.0f, 10000.0f));
-            verticalSnapTargets.add (SnapLine (getCanvasWidth(), -100.0f, 10000.0f));
+            verticalSnapTargets.add (SnapLine ((float) getCanvasWidth(), -100.0f, 10000.0f));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
                 verticalSnapTargets.add (SnapLine ((float) getCanvasWidth() / 2.0f, 0, 10000.0f));
@@ -89,7 +89,7 @@ public:
         if (isDraggingUpDown())
         {
             horizontalSnapTargets.add (SnapLine (0, -100.0f, 10000.0f));
-            horizontalSnapTargets.add (SnapLine (getCanvasHeight(), -100.0f, 10000.0f));
+            horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight(), -100.0f, 10000.0f));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
                 horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight() / 2.0f, 0, 10000.0f));

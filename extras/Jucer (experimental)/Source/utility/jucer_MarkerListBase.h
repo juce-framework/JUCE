@@ -40,10 +40,12 @@ public:
     ValueTree getMarker (int index) const                                       { return group.getChild (index); }
     ValueTree getMarkerNamed (const String& name) const                         { return group.getChildWithProperty (getMarkerNameProperty(), name); }
     bool contains (const ValueTree& markerState) const                          { return markerState.isAChildOf (group); }
-    const Coordinate getCoordinate (const ValueTree& markerState) const         { return Coordinate (markerState [getMarkerNameProperty()].toString(), isX); }
+
     const String getName (const ValueTree& markerState) const                   { return markerState [getMarkerNameProperty()].toString(); }
     Value getNameAsValue (const ValueTree& markerState) const                   { return markerState.getPropertyAsValue (getMarkerNameProperty(), getUndoManager()); }
-    void setCoordinate (ValueTree& markerState, const Coordinate& newCoord)     { markerState.setProperty (getMarkerNameProperty(), newCoord.toString(), getUndoManager()); }
+
+    const Coordinate getCoordinate (const ValueTree& markerState) const         { return Coordinate (markerState [getMarkerPosProperty()].toString(), isX); }
+    void setCoordinate (ValueTree& markerState, const Coordinate& newCoord)     { markerState.setProperty (getMarkerPosProperty(), newCoord.toString(), getUndoManager()); }
 
     void createMarker (const String& name, int position)
     {

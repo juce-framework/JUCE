@@ -251,12 +251,7 @@ private:
 
             if (exporter != 0)
             {
-                const RelativePath juceFromProject (exporter->getJuceFolder().toString(), RelativePath::projectFolder);
-                const RelativePath fileFromProject (juceFromProject.getChildFile (pathFromJuceFolder));
-                const RelativePath fileFromHere (fileFromProject.rebased (project.getFile().getParentDirectory(),
-                                                                          juceHeaderFile.getParentDirectory(), RelativePath::unknown));
-
-                paths.add (fileFromHere.toUnixStyle());
+                paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromJuceFolder, juceHeaderFile));
                 guards.add (exporter->getOSTestMacro());
             }
         }
@@ -266,7 +261,7 @@ private:
 
         if (uniquePaths.size() == 1)
         {
-            out << "#include " << paths[0].quoted() << newLine;
+            out << "#include " << paths[0] << newLine;
         }
         else
         {
@@ -286,7 +281,7 @@ private:
             for (i = 0; i < paths.size(); ++i)
             {
                 out << (i == 0 ? "#if " : "#elif ") << guards[i] << newLine
-                    << " #include " << paths[i].quoted() << newLine;
+                    << " #include " << paths[i] << newLine;
             }
 
             out << "#endif" << newLine;

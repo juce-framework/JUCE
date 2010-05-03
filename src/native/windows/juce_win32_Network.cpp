@@ -352,7 +352,7 @@ static int getMACAddressesViaNetBios (int64* addresses, int maxNum, const bool l
         };
 
         ASTAT astat;
-        zerostruct (astat);
+        zeromem (&astat, sizeof (astat));  // (can't use zerostruct here in VC6)
 
         LANA_ENUM enums;
         zerostruct (enums);

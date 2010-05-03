@@ -206,12 +206,12 @@ private:
                 return StoredSettings::getInstance()->swatchColours.size();
             }
 
-            const Colour getSwatchColour (const int index) const
+            const Colour getSwatchColour (int index) const
             {
                 return StoredSettings::getInstance()->swatchColours [index];
             }
 
-            void setSwatchColour (const int index, const Colour& newColour) const
+            void setSwatchColour (int index, const Colour& newColour) const
             {
                 StoredSettings::getInstance()->swatchColours.set (index, newColour);
             }

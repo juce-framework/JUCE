@@ -145,6 +145,7 @@ public:
 
 private:
     class SharedCursorHandle;
+    friend class SharedCursorHandle;
     SharedCursorHandle* cursorHandle;
 
     friend class MouseInputSourceInternal;

@@ -48,7 +48,7 @@ public:
     InternalTimerThread()
         : Thread ("Juce Timer"),
           firstTimer (0),
-          callbackNeeded (false)
+          callbackNeeded (0)
     {
         triggerAsyncUpdate();
     }
@@ -96,7 +96,7 @@ public:
                    but if it fails it means the message-thread changed the value from under us so at least
                    some processing is happenening and we can just loop around and try again
                 */
-                if (callbackNeeded.set (true))
+                if (callbackNeeded.compareAndSetBool (1, 0))
                 {
                     postMessage (new Message());
 
@@ -106,7 +106,7 @@ public:
                     */
                     const uint32 messageDeliveryTimeout = now + 2000;
 
-                    while (callbackNeeded.get())
+                    while (callbackNeeded.get() != 0)
                     {
                         wait (4);
 
@@ -154,7 +154,7 @@ public:
            get a message then the value is true and the other thread can only  set  it to true again and
            we will get another callback to set it to false.
         */
-        callbackNeeded.set (false);
+        callbackNeeded.set (0);
     }
 
     void handleMessage (const Message&)
@@ -222,25 +222,7 @@ private:
     static InternalTimerThread* instance;
     static CriticalSection lock;
     Timer* volatile firstTimer;
-
-    //==============================================================================
-    class AtomicBool
-    {
-    public:
-        AtomicBool (const bool value) throw() : value (static_cast<int32> (value)) {}
-        ~AtomicBool() throw() {}
-
-        bool get() const throw()        { return value != 0; }
-        bool set (const bool newValue)  { return Atomic::compareAndExchange (value, newValue ? 1 : 0, value) != 0; }
-
-    private:
-        int32 value;
-
-        AtomicBool (const AtomicBool&);
-        AtomicBool& operator= (const AtomicBool&);
-    };
-
-    AtomicBool callbackNeeded;
+    Atomic <int> callbackNeeded;
 
     //==============================================================================
     void addTimer (Timer* const t) throw()
