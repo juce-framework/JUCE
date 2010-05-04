@@ -297,9 +297,9 @@ private:
     AlertTextComp& operator= (const AlertTextComp&);
 };
 
-void AlertWindow::addTextBlock (const String& text)
+void AlertWindow::addTextBlock (const String& textBlock)
 {
-    AlertTextComp* const c = new AlertTextComp (text, font);
+    AlertTextComp* const c = new AlertTextComp (textBlock, font);
 
     textBlocks.add (c);
     allComps.add (c);
@@ -519,7 +519,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     for (i = 0; i < allComps.size(); ++i)
     {
         Component* const c = (Component*) allComps[i];
-        int h = 22;
+        h = 22;
 
         const int comboIndex = comboBoxes.indexOf (c);
         if (comboIndex >= 0 && comboBoxNames [comboIndex].isNotEmpty())
@@ -601,10 +601,10 @@ bool AlertWindow::keyPressed (const KeyPress& key)
 
 void AlertWindow::lookAndFeelChanged()
 {
-    const int flags = getLookAndFeel().getAlertBoxWindowFlags();
+    const int newFlags = getLookAndFeel().getAlertBoxWindowFlags();
 
-    setUsingNativeTitleBar ((flags & ComponentPeer::windowHasTitleBar) != 0);
-    setDropShadowEnabled (isOpaque() && (flags & ComponentPeer::windowHasDropShadow) != 0);
+    setUsingNativeTitleBar ((newFlags & ComponentPeer::windowHasTitleBar) != 0);
+    setDropShadowEnabled (isOpaque() && (newFlags & ComponentPeer::windowHasDropShadow) != 0);
 }
 
 int AlertWindow::getDesktopWindowStyleFlags() const

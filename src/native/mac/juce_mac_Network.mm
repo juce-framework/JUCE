@@ -236,8 +236,9 @@ public:
         runLoopThread->signalThreadShouldExit();
 }
 
-- (void) connection: (NSURLConnection*) connection didReceiveResponse: (NSURLResponse*) response
+- (void) connection: (NSURLConnection*) conn didReceiveResponse: (NSURLResponse*) response
 {
+    (void) conn;
     [dataLock lock];
     [data setLength: 0];
     [dataLock unlock];
@@ -245,8 +246,9 @@ public:
     contentLength = [response expectedContentLength];
 }
 
-- (void) connection: (NSURLConnection*) connection didFailWithError: (NSError*) error
+- (void) connection: (NSURLConnection*) conn didFailWithError: (NSError*) error
 {
+    (void) conn;
     DBG (nsStringToJuce ([error description]));
     hasFailed = true;
     initialised = true;
@@ -255,16 +257,18 @@ public:
         runLoopThread->signalThreadShouldExit();
 }
 
-- (void) connection: (NSURLConnection*) connection didReceiveData: (NSData*) newData
+- (void) connection: (NSURLConnection*) conn didReceiveData: (NSData*) newData
 {
+    (void) conn;
     [dataLock lock];
     [data appendData: newData];
     [dataLock unlock];
     initialised = true;
 }
 
-- (void) connectionDidFinishLoading: (NSURLConnection*) connection
+- (void) connectionDidFinishLoading: (NSURLConnection*) conn
 {
+    (void) conn;
     hasFinished = true;
     initialised = true;
 
@@ -412,7 +416,7 @@ int64 juce_getInternetFileContentLength (void* handle)
     return -1;
 }
 
-int juce_seekInInternetFile (void* handle, int newPosition)
+int juce_seekInInternetFile (void* handle, int /*newPosition*/)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
 

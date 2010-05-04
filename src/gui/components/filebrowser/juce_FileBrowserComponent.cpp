@@ -370,6 +370,8 @@ void FileBrowserComponent::fileDoubleClicked (const File& f)
 
 bool FileBrowserComponent::keyPressed (const KeyPress& key)
 {
+    (void) key;
+
 #if JUCE_LINUX || JUCE_WINDOWS
     if (key.getModifiers().isCommandDown()
          && (key.getKeyCode() == 'H' || key.getKeyCode() == 'h'))

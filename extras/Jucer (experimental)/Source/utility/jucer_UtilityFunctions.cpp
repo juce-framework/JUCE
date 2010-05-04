@@ -307,6 +307,9 @@ const String makeValidCppIdentifier (String s,
                                      const bool removeColons,
                                      const bool allowTemplates)
 {
+    if (s.isEmpty())
+        return "unknown";
+
     if (removeColons)
         s = s.replaceCharacters (".,;:/@", "______");
     else

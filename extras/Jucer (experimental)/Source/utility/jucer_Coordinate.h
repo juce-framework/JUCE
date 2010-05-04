@@ -97,6 +97,9 @@ public:
     const String getAnchor2() const                     { return checkName (anchor2); }
     void changeAnchor2 (const String& newMarkerName, const MarkerResolver& markerResolver);
 
+    // Tells the coord that an anchor is changing its name.
+    void renameAnchorIfUsed (const String& oldName, const String& newName);
+
     //==============================================================================
     /*
         Position string formats:
@@ -153,6 +156,9 @@ public:
     const Rectangle<int> resolve (const Coordinate::MarkerResolver& markerResolver) const;
     void moveToAbsolute (const Rectangle<float>& newPos, const Coordinate::MarkerResolver& markerResolver);
     const String toString() const;
+
+    // Tells the coord that an anchor is changing its name.
+    void renameAnchorIfUsed (const String& oldName, const String& newName);
 
     Coordinate left, right, top, bottom;
 };

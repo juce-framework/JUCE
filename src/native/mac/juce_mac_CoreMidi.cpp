@@ -315,12 +315,12 @@ void MidiOutput::reset()
 {
 }
 
-bool MidiOutput::getVolume (float& leftVol, float& rightVol)
+bool MidiOutput::getVolume (float& /*leftVol*/, float& /*rightVol*/)
 {
     return false;
 }
 
-void MidiOutput::setVolume (float leftVol, float rightVol)
+void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)
 {
 }
 
@@ -476,7 +476,7 @@ namespace CoreMidiCallbacks
 
 static void midiInputProc (const MIDIPacketList* pktlist,
                            void* readProcRefCon,
-                           void* srcConnRefCon)
+                           void* /*srcConnRefCon*/)
 {
     double time = Time::getMillisecondCounterHiRes() * 0.001;
     const double originalTime = time;
@@ -658,12 +658,12 @@ void MidiOutput::reset()
 {
 }
 
-bool MidiOutput::getVolume (float& leftVol, float& rightVol)
+bool MidiOutput::getVolume (float& /*leftVol*/, float& /*rightVol*/)
 {
     return false;
 }
 
-void MidiOutput::setVolume (float leftVol, float rightVol)
+void MidiOutput::setVolume (float /*leftVol*/, float /*rightVol*/)
 {
 }
 

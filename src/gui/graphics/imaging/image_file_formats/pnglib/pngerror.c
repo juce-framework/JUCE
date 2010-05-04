@@ -208,7 +208,7 @@ png_chunk_warning(png_structp png_ptr, png_const_charp warning_message)
  * error function pointer in png_set_error_fn().
  */
 static void /* PRIVATE */
-png_default_error(png_structp png_ptr, png_const_charp error_message)
+png_default_error(png_structp, png_const_charp error_message)
 {
 #ifndef PNG_NO_CONSOLE_IO
 #ifdef PNG_ERROR_NUMBERS_SUPPORTED

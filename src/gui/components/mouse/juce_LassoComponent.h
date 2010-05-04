@@ -228,7 +228,7 @@ public:
     }
 
     /** @internal */
-    bool hitTest (int x, int y)         { return false; }
+    bool hitTest (int, int)             { return false; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator

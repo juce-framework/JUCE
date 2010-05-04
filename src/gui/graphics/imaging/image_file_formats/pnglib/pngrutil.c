@@ -2723,7 +2723,7 @@ png_do_read_interlace(png_structp png_ptr)
 #endif /* PNG_READ_INTERLACING_SUPPORTED */
 
 void /* PRIVATE */
-png_read_filter_row(png_structp png_ptr, png_row_infop row_info, png_bytep row,
+png_read_filter_row(png_structp, png_row_infop row_info, png_bytep row,
    png_bytep prev_row, int filter)
 {
    png_debug(1, "in png_read_filter_row\n");

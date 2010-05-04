@@ -36,8 +36,8 @@ class TabCompButtonBar  : public TabbedButtonBar
 {
 public:
     TabCompButtonBar (TabbedComponent* const owner_,
-                      const TabbedButtonBar::Orientation orientation)
-        : TabbedButtonBar (orientation),
+                      const TabbedButtonBar::Orientation orientation_)
+        : TabbedButtonBar (orientation_),
           owner (owner_)
     {
     }

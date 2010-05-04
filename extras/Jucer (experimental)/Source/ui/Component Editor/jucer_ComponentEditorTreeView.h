@@ -164,7 +164,7 @@ namespace ComponentEditorTreeView
 
         void refreshSubItems()
         {
-            ScopedPointer <XmlElement> openness (getOpennessState());
+            ScopedPointer <XmlElement> oldOpenness (getOpennessState());
             clearSubItems();
 
             ComponentDocument& doc = editor.getDocument();
@@ -173,8 +173,8 @@ namespace ComponentEditorTreeView
             for (int i = 0; i < num; ++i)
                 addSubItem (new ComponentItem (editor, doc.getComponent (i)));
 
-            if (openness != 0)
-                restoreOpennessState (*openness);
+            if (oldOpenness != 0)
+                restoreOpennessState (*oldOpenness);
         }
 
         const String getDisplayName() const         { return getRenamingName(); }
@@ -193,7 +193,7 @@ namespace ComponentEditorTreeView
             if (editor.getSelection().getNumSelected() > 0)
             {
                 TreeView* tree = getOwnerView();
-                const ScopedPointer <XmlElement> openness (tree->getOpennessState (false));
+                const ScopedPointer <XmlElement> oldOpenness (tree->getOpennessState (false));
 
                 Array <ValueTree> selectedComps;
                 // scan the source tree rather than look at the selection manager, because it might
@@ -201,8 +201,8 @@ namespace ComponentEditorTreeView
                 getAllSelectedNodesInTree (sourceComponent, selectedComps);
                 insertItems (selectedComps, insertIndex);
 
-                if (openness != 0)
-                    tree->restoreOpennessState (*openness);
+                if (oldOpenness != 0)
+                    tree->restoreOpennessState (*oldOpenness);
             }
         }
 
@@ -332,14 +332,14 @@ namespace ComponentEditorTreeView
         const String getItemId() const              { return isX ? "markersX" : "markersY"; }
         bool mightContainSubItems()                 { return true; }
 
-        void valueTreeChildrenChanged (ValueTree& tree)
+        void valueTreeChildrenChanged (ValueTree&)
         {
             refreshSubItems();
         }
 
         void refreshSubItems()
         {
-            ScopedPointer <XmlElement> openness (getOpennessState());
+            ScopedPointer <XmlElement> oldOpenness (getOpennessState());
             clearSubItems();
 
             ComponentDocument::MarkerList& markers = editor.getDocument().getMarkerList (isX);
@@ -348,8 +348,8 @@ namespace ComponentEditorTreeView
             for (int i = 0; i < num; ++i)
                 addSubItem (new MarkerItem (editor, markers.getMarker (i)));
 
-            if (openness != 0)
-                restoreOpennessState (*openness);
+            if (oldOpenness != 0)
+                restoreOpennessState (*oldOpenness);
         }
 
         const String getDisplayName() const         { return getRenamingName(); }
@@ -375,15 +375,15 @@ namespace ComponentEditorTreeView
 
         void refreshSubItems()
         {
-            ScopedPointer <XmlElement> openness (getOpennessState());
+            ScopedPointer <XmlElement> oldOpenness (getOpennessState());
             clearSubItems();
 
             addSubItem (new ComponentList (editor));
             addSubItem (new MarkerList (editor, true));
             addSubItem (new MarkerList (editor, false));
 
-            if (openness != 0)
-                restoreOpennessState (*openness);
+            if (oldOpenness != 0)
+                restoreOpennessState (*oldOpenness);
         }
 
         const String getDisplayName() const         { return getRenamingName(); }

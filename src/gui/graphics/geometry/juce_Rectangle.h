@@ -482,12 +482,12 @@ public:
         transform.transformPoint (x3, y3);
         transform.transformPoint (x4, y4);
 
-        const float x = jmin (x1, x2, x3, x4);
-        const float y = jmin (y1, y2, y3, y4);
+        const float rx = jmin (x1, x2, x3, x4);
+        const float ry = jmin (y1, y2, y3, y4);
 
-        return Rectangle (x, y,
-                          jmax (x1, x2, x3, x4) - x,
-                          jmax (y1, y2, y3, y4) - y);
+        return Rectangle (rx, ry,
+                          jmax (x1, x2, x3, x4) - rx,
+                          jmax (y1, y2, y3, y4) - ry);
     }
 
     /** Returns the smallest integer-aligned rectangle that completely contains this one.

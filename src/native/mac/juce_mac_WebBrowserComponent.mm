@@ -63,6 +63,10 @@ END_JUCE_NAMESPACE
                                                               frame: (WebFrame*) frame
                                                    decisionListener: (id <WebPolicyDecisionListener>) listener
 {
+    (void) sender;
+    (void) request;
+    (void) frame;
+
     NSURL* url = [actionInformation valueForKey: @"WebActionOriginalURLKey"];
 
     if (ownerComponent->pageAboutToLoad (nsStringToJuce ([url absoluteString])))
@@ -214,7 +218,7 @@ void WebBrowserComponent::refresh()
 }
 
 //==============================================================================
-void WebBrowserComponent::paint (Graphics& g)
+void WebBrowserComponent::paint (Graphics&)
 {
 }
 
@@ -263,7 +267,7 @@ void WebBrowserComponent::visibilityChanged()
     checkWindowAssociation();
 }
 
-bool WebBrowserComponent::pageAboutToLoad (const String& url)
+bool WebBrowserComponent::pageAboutToLoad (const String&)
 {
     return true;
 }

@@ -120,9 +120,9 @@ private:
 
 
 //==============================================================================
-ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document,
+ComponentEditor::ComponentEditor (OpenDocumentManager::Document* document_,
                                   Project* project_, ComponentDocument* componentDocument_)
-    : DocumentEditorComponent (document),
+    : DocumentEditorComponent (document_),
       project (project_),
       componentDocument (componentDocument_),
       classInfoHolder (0),

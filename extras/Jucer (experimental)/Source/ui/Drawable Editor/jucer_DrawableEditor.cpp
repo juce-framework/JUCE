@@ -72,10 +72,10 @@ private:
 };
 
 //==============================================================================
-DrawableEditor::DrawableEditor (OpenDocumentManager::Document* document,
+DrawableEditor::DrawableEditor (OpenDocumentManager::Document* document_,
                                 Project* project_,
                                 DrawableDocument* drawableDocument_)
-    : DocumentEditorComponent (document),
+    : DocumentEditorComponent (document_),
       project (project_),
       drawableDocument (drawableDocument_)
 {

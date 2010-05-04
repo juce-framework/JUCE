@@ -145,7 +145,7 @@ void* NSViewComponent::getView() const
     return info == 0 ? 0 : info->view;
 }
 
-void NSViewComponent::paint (Graphics& g)
+void NSViewComponent::paint (Graphics&)
 {
 }
 

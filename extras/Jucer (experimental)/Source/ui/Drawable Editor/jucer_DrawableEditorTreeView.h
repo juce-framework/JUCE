@@ -114,7 +114,7 @@ public:
 
     void refreshSubItems()
     {
-        ScopedPointer <XmlElement> openness (getOpennessState());
+        ScopedPointer <XmlElement> oldOpenness (getOpennessState());
 
         clearSubItems();
 
@@ -127,8 +127,8 @@ public:
                 addSubItem (item);
         }
 
-        if (openness != 0)
-            restoreOpennessState (*openness);
+        if (oldOpenness != 0)
+            restoreOpennessState (*oldOpenness);
 
         editor.getSelection().changed();
     }
@@ -215,10 +215,10 @@ public:
     }
 
     // Text editor listener for renaming..
-    void textEditorTextChanged (TextEditor& editor)         {}
-    void textEditorReturnKeyPressed (TextEditor& editor)    { editor.exitModalState (1); }
-    void textEditorEscapeKeyPressed (TextEditor& editor)    { editor.exitModalState (0); }
-    void textEditorFocusLost (TextEditor& editor)           { editor.exitModalState (0); }
+    void textEditorTextChanged (TextEditor& textEditor)         {}
+    void textEditorReturnKeyPressed (TextEditor& textEditor)    { textEditor.exitModalState (1); }
+    void textEditorEscapeKeyPressed (TextEditor& textEditor)    { textEditor.exitModalState (0); }
+    void textEditorFocusLost (TextEditor& textEditor)           { textEditor.exitModalState (0); }
 
     //==============================================================================
     DrawableEditor& editor;

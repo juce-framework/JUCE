@@ -412,6 +412,33 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
     return true;
 }
 
+const String ComponentDocument::getNonexistentMemberName (String name)
+{
+    String n (makeValidCppIdentifier (name, false, true, false));
+    int suffix = 2;
+
+    while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid()
+            || getComponentWithMemberName (n).isValid())
+        n = n.trimCharactersAtEnd ("0123456789") + String (suffix++);
+
+    return n;
+}
+
+void ComponentDocument::renameAnchor (const String& oldName, const String& newName)
+{
+    int i;
+    for (i = getNumComponents(); --i >= 0;)
+    {
+        ValueTree v (getComponent(i));
+        RectangleCoordinates coords (getCoordsFor (v));
+        coords.renameAnchorIfUsed (oldName, newName);
+        setCoordsFor (v, coords);
+    }
+
+    markersX->renameAnchorInMarkers (oldName, newName);
+    markersY->renameAnchorInMarkers (oldName, newName);
+}
+
 void ComponentDocument::addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
                                            bool isAnchor1, const String& fullCoordName)
 {
@@ -555,24 +582,6 @@ void ComponentDocument::removeComponent (const ValueTree& state)
     getComponentGroup().removeChild (state, getUndoManager());
 }
 
-const String ComponentDocument::getNonExistentMemberName (String suggestedName)
-{
-    suggestedName = makeValidCppIdentifier (suggestedName, false, true, false);
-    const String original (suggestedName);
-    int num = 1;
-
-    while (getComponentWithMemberName (suggestedName).isValid())
-    {
-        suggestedName = original;
-        while (String ("0123456789").containsChar (suggestedName.getLastCharacter()))
-            suggestedName = suggestedName.dropLastCharacters (1);
-
-        suggestedName << num++;
-    }
-
-    return suggestedName;
-}
-
 //==============================================================================
 ComponentDocument::MarkerList::MarkerList (ComponentDocument& document_, const bool isX_)
     : MarkerListBase (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag), isX_),
@@ -589,19 +598,24 @@ UndoManager* ComponentDocument::MarkerList::getUndoManager() const
 
 const String ComponentDocument::MarkerList::getNonexistentMarkerName (const String& name)
 {
-    return document.getNonexistentMarkerName (name);
+    return document.getNonexistentMemberName (name);
 }
 
-const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, bool isHorizontal) const
+void ComponentDocument::MarkerList::renameAnchor (const String& oldName, const String& newName)
 {
-    if (isHorizontal == isX)
-    {
-        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isHorizontal);
-        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isHorizontal);
+    document.renameAnchor (oldName, newName);
+}
 
-        const ValueTree marker (document.getMarkerList (isHorizontal).getMarkerNamed (name));
+const Coordinate ComponentDocument::MarkerList::findMarker (const String& name, bool isHorizontal_) const
+{
+    if (isHorizontal_ == isX)
+    {
+        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isX);
+        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isX);
+
+        const ValueTree marker (document.getMarkerList (isX).getMarkerNamed (name));
         if (marker.isValid())
-            return document.getMarkerList (isHorizontal).getCoordinate (marker);
+            return document.getMarkerList (isX).getCoordinate (marker);
     }
 
     return Coordinate (isX);
@@ -643,67 +657,23 @@ const String ComponentDocument::MarkerList::getChosenMarkerMenuItem (const Coord
     return String::empty;
 }
 
+
 //==============================================================================
-class MarkerPositionComponent  : public CoordinatePropertyComponent
-{
-public:
-    //==============================================================================
-    MarkerPositionComponent (ComponentDocument& document_, const String& name, const ValueTree& markerState_,
-                             const Value& coordValue_, bool isHorizontal_)
-        : CoordinatePropertyComponent (document_, name, coordValue_, isHorizontal_),
-          markerState (markerState_)
-    {
-    }
-
-    ~MarkerPositionComponent()
-    {
-    }
-
-    const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1)
-    {
-        Coordinate coord (getCoordinate());
-
-        PopupMenu m;
-        document.getMarkerList (coord.isHorizontal())
-                .addMarkerMenuItems (markerState, coord, m, isAnchor1);
-
-        const int r = m.showAt (button);
-
-        if (r > 0)
-            return document.getMarkerList (coord.isHorizontal()).getChosenMarkerMenuItem (coord, r);
-
-        return String::empty;
-    }
-
-private:
-    ValueTree markerState;
-};
-
 bool ComponentDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)
 {
     ValueTree marker (group.getChildWithProperty (idProperty, itemId));
 
     if (marker.isValid())
     {
-        props.add (new TextPropertyComponent (getNameAsValue (marker), "Marker Name", 256, false));
-        props.add (new MarkerPositionComponent (document, "Position", marker,
-                                                marker.getPropertyAsValue (getMarkerPosProperty(), document.getUndoManager()),
-                                                contains (marker)));
+        props.add (new TextPropertyComponent (Value (new MarkerListBase::MarkerNameValueSource (this, getNameAsValue (marker))),
+                                              "Marker Name", 256, false));
+
+        props.add (new MarkerListBase::PositionPropertyComponent (document, *this, "Position", marker,
+                                                                  marker.getPropertyAsValue (getMarkerPosProperty(), document.getUndoManager())));
         return true;
     }
 
     return false;
-}
-
-const String ComponentDocument::getNonexistentMarkerName (const String& name)
-{
-    String n (makeValidCppIdentifier (name, false, true, false));
-    int suffix = 2;
-
-    while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid())
-        n = n.trimCharactersAtEnd ("0123456789") + String (suffix++);
-
-    return n;
 }
 
 //==============================================================================

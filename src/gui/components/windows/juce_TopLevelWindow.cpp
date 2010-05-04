@@ -202,15 +202,15 @@ void TopLevelWindow::visibilityChanged()
 
 int TopLevelWindow::getDesktopWindowStyleFlags() const
 {
-    int flags = ComponentPeer::windowAppearsOnTaskbar;
+    int styleFlags = ComponentPeer::windowAppearsOnTaskbar;
 
     if (useDropShadow)
-        flags |= ComponentPeer::windowHasDropShadow;
+        styleFlags |= ComponentPeer::windowHasDropShadow;
 
     if (useNativeTitleBar)
-        flags |= ComponentPeer::windowHasTitleBar;
+        styleFlags |= ComponentPeer::windowHasTitleBar;
 
-    return flags;
+    return styleFlags;
 }
 
 void TopLevelWindow::setDropShadowEnabled (const bool useShadow)

@@ -1329,9 +1329,9 @@ void Path::loadPathFromStream (InputStream& source)
     }
 }
 
-void Path::loadPathFromData (const void* const data, const int numberOfBytes)
+void Path::loadPathFromData (const void* const pathData, const int numberOfBytes)
 {
-    MemoryInputStream in (data, numberOfBytes, false);
+    MemoryInputStream in (pathData, numberOfBytes, false);
     loadPathFromStream (in);
 }
 

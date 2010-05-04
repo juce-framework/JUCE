@@ -28,10 +28,10 @@
 
 
 //==============================================================================
-SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document,
+SourceCodeEditor::SourceCodeEditor (OpenDocumentManager::Document* document_,
                                     CodeDocument& codeDocument,
                                     CodeTokeniser* const codeTokeniser)
-    : DocumentEditorComponent (document)
+    : DocumentEditorComponent (document_)
 {
     addAndMakeVisible (editor = new CodeEditorComponent (codeDocument, codeTokeniser));
 

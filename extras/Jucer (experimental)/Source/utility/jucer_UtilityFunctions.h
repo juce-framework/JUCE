@@ -208,7 +208,7 @@ private:
     int findLevelIndexForValue (const double value) const
     {
         int i;
-        for (i = 0; i < sizeof (tickSizes) / sizeof (*tickSizes); ++i)
+        for (i = 0; i < (int) (sizeof (tickSizes) / sizeof (*tickSizes)); ++i)
             if (tickSizes [i] >= value)
                 break;
 

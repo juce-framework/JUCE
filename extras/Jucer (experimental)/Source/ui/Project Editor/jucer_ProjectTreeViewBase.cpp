@@ -242,9 +242,9 @@ void ProjectTreeViewBase::deleteAllSelectedItems()
 
         for (i = itemsToRemove.size(); --i >= 0;)
         {
-            ProjectTreeViewBase* item = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
-            if (item != 0)
-                item->deleteItem();
+            ProjectTreeViewBase* itemToRemove = treeRootItem->findTreeViewItem (*itemsToRemove.getUnchecked(i));
+            if (itemToRemove != 0)
+                itemToRemove->deleteItem();
         }
     }
 }
@@ -353,12 +353,12 @@ void ProjectTreeViewBase::itemDropped (const String& sourceDescription, Componen
     if (selectedNodes.size() > 0)
     {
         TreeView* tree = getOwnerView();
-        ScopedPointer <XmlElement> openness (tree->getOpennessState (false));
+        ScopedPointer <XmlElement> oldOpenness (tree->getOpennessState (false));
 
         moveSelectedItemsTo (selectedNodes, insertIndex);
 
-        if (openness != 0)
-            tree->restoreOpennessState (*openness);
+        if (oldOpenness != 0)
+            tree->restoreOpennessState (*oldOpenness);
     }
 }
 
@@ -414,13 +414,13 @@ void ProjectTreeViewBase::addSubItems()
 
 void ProjectTreeViewBase::refreshSubItems()
 {
-    ScopedPointer <XmlElement> openness (getOpennessState());
+    ScopedPointer <XmlElement> oldOpenness (getOpennessState());
 
     clearSubItems();
     addSubItems();
 
-    if (openness != 0)
-        restoreOpennessState (*openness);
+    if (oldOpenness != 0)
+        restoreOpennessState (*oldOpenness);
 }
 
 void ProjectTreeViewBase::showMultiSelectionPopupMenu()

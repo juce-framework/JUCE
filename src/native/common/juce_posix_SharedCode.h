@@ -292,7 +292,7 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
     }
 }
 
-bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 creationTime) const
+bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 /*creationTime*/) const
 {
     struct utimbuf times;
     times.actime = (time_t) (accessTime / 1000);

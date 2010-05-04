@@ -191,10 +191,10 @@ public:
     #define juce_InterlockedDecrement64(a)          _InterlockedDecrement64(a)
   #else
     // None of these atomics are available in a 32-bit Windows build!!
-    static __int64 juce_InterlockedExchangeAdd64 (volatile __int64* a, __int64 b) throw()   { jassertfalse; __int64 old = *a; *a += b; return old; }
-    static __int64 juce_InterlockedExchange64 (volatile __int64* a, __int64 b) throw()      { jassertfalse; __int64 old = *a; *a = b; return old; }
-    static __int64 juce_InterlockedIncrement64 (volatile __int64* a) throw()                { jassertfalse; return ++*a; }
-    static __int64 juce_InterlockedDecrement64 (volatile __int64* a) throw()                { jassertfalse; return --*a; }
+    template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
+    template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()      { jassertfalse; Type old = *a; *a = b; return old; }
+    template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()             { jassertfalse; return ++*a; }
+    template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()             { jassertfalse; return --*a; }
   #endif
 #endif
 

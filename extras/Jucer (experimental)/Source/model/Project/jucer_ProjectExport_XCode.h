@@ -368,57 +368,57 @@ private:
 
     const StringArray getProjectSettings (const Project::BuildConfiguration& config)
     {
-        StringArray settings;
-        settings.add ("ALWAYS_SEARCH_USER_PATHS = NO");
-        settings.add ("GCC_C_LANGUAGE_STANDARD = c99");
-        settings.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
-        settings.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
-        settings.add ("GCC_WARN_UNUSED_VARIABLE = YES");
-        settings.add ("GCC_WARN_MISSING_PARENTHESES = YES");
-        settings.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
-        settings.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
-        settings.add ("GCC_MODEL_TUNING = G5");
-        settings.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
-        settings.add ("ZERO_LINK = NO");
-        settings.add ("DEBUG_INFORMATION_FORMAT = \"dwarf-with-dsym\"");
-        settings.add ("PRODUCT_NAME = \"" + config.getTargetBinaryName().toString() + "\"");
-        return settings;
+        StringArray s;
+        s.add ("ALWAYS_SEARCH_USER_PATHS = NO");
+        s.add ("GCC_C_LANGUAGE_STANDARD = c99");
+        s.add ("GCC_WARN_ABOUT_RETURN_TYPE = YES");
+        s.add ("GCC_WARN_CHECK_SWITCH_STATEMENTS = YES");
+        s.add ("GCC_WARN_UNUSED_VARIABLE = YES");
+        s.add ("GCC_WARN_MISSING_PARENTHESES = YES");
+        s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
+        s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
+        s.add ("GCC_MODEL_TUNING = G5");
+        s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
+        s.add ("ZERO_LINK = NO");
+        s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf-with-dsym\"");
+        s.add ("PRODUCT_NAME = \"" + config.getTargetBinaryName().toString() + "\"");
+        return s;
     }
 
     const StringArray getTargetSettings (const Project::BuildConfiguration& config)
     {
-        StringArray settings;
-        settings.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
-        settings.add ("PREBINDING = NO");
-        settings.add ("HEADER_SEARCH_PATHS = \"" + getHeaderSearchPaths (config).joinIntoString (" ") + " $(inherited)\"");
-        settings.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
-        settings.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
+        StringArray s;
+        s.add ("ARCHS = \"$(ARCHS_STANDARD_32_BIT)\"");
+        s.add ("PREBINDING = NO");
+        s.add ("HEADER_SEARCH_PATHS = \"" + getHeaderSearchPaths (config).joinIntoString (" ") + " $(inherited)\"");
+        s.add ("GCC_OPTIMIZATION_LEVEL = " + config.getGCCOptimisationFlag());
+        s.add ("INFOPLIST_FILE = " + infoPlistFile.getFileName());
 
         if (getExtraCompilerFlags().toString().isNotEmpty())
-            settings.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
+            s.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
 
         switch ((int) project.getProjectType().getValue())
         {
         case Project::application:
-            settings.add ("INSTALL_PATH = \"$(HOME)/Applications\"");
+            s.add ("INSTALL_PATH = \"$(HOME)/Applications\"");
             break;
 
         case Project::commandLineApp:
             break;
 
         case Project::audioPlugin:
-            settings.add ("LIBRARY_STYLE = Bundle");
-            settings.add ("INSTALL_PATH = \"$(HOME)/Library/Audio/Plug-Ins/Components/\"");
-            settings.add ("WRAPPER_EXTENSION = " + getAudioPluginBundleExtension());
-            settings.add ("GENERATE_PKGINFO_FILE = YES");
-            settings.add ("OTHER_REZFLAGS = \"-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
-                          " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-                          " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"\"");
+            s.add ("LIBRARY_STYLE = Bundle");
+            s.add ("INSTALL_PATH = \"$(HOME)/Library/Audio/Plug-Ins/Components/\"");
+            s.add ("WRAPPER_EXTENSION = " + getAudioPluginBundleExtension());
+            s.add ("GENERATE_PKGINFO_FILE = YES");
+            s.add ("OTHER_REZFLAGS = \"-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
+                   " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
+                   " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"\"");
             break;
 
         case Project::browserPlugin:
-            settings.add ("LIBRARY_STYLE = Bundle");
-            settings.add ("INSTALL_PATH = \"/Library/Internet Plug-Ins/\"");
+            s.add ("LIBRARY_STYLE = Bundle");
+            s.add ("INSTALL_PATH = \"/Library/Internet Plug-Ins/\"");
             break;
 
         case Project::library:
@@ -427,12 +427,12 @@ private:
                 RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
                 binaryPath = binaryPath.rebased (project.getFile().getParentDirectory(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                settings.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
-                settings.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+                s.add ("DSTROOT = " + sanitisePath (binaryPath.toUnixStyle()));
+                s.add ("SYMROOT = " + sanitisePath (binaryPath.toUnixStyle()));
             }
 
-            settings.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
-            settings.add ("DEPLOYMENT_LOCATION = YES");
+            s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
+            s.add ("DEPLOYMENT_LOCATION = YES");
             break;
 
         default:
@@ -441,27 +441,27 @@ private:
 
         if (iPhone)
         {
-            settings.add ("SDKROOT = iphonesimulator3.0");
+            s.add ("SDKROOT = iphonesimulator3.0");
         }
         else
         {
             switch ((int) config.getMacSDKVersion().getValue())
             {
-                case 2:  settings.add ("SDKROOT = macosx10.4"); settings.add ("GCC_VERSION = 4.0"); break;
-                case 3:  settings.add ("SDKROOT = macosx10.5"); break;
-                case 4:  settings.add ("SDKROOT = macosx10.6"); break;
+                case 2:  s.add ("SDKROOT = macosx10.4"); s.add ("GCC_VERSION = 4.0"); break;
+                case 3:  s.add ("SDKROOT = macosx10.5"); break;
+                case 4:  s.add ("SDKROOT = macosx10.6"); break;
                 default: break;
             }
 
             switch ((int) config.getMacCompatibilityVersion().getValue())
             {
-                case 2:  settings.add ("MACOSX_DEPLOYMENT_TARGET = 10.4"); break;
-                case 3:  settings.add ("MACOSX_DEPLOYMENT_TARGET = 10.5"); break;
-                case 4:  settings.add ("MACOSX_DEPLOYMENT_TARGET = 10.6"); break;
+                case 2:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4"); break;
+                case 3:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5"); break;
+                case 4:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6"); break;
                 default: break;
             }
 
-            settings.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
+            s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
         }
 
         {
@@ -469,7 +469,7 @@ private:
             getLinkerFlags (config, linkerFlags, librarySearchPaths);
 
             if (linkerFlags.size() > 0)
-                settings.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
+                s.add ("OTHER_LDFLAGS = \"" + linkerFlags.joinIntoString (" ") + "\"");
 
             if (librarySearchPaths.size() > 0)
             {
@@ -478,7 +478,7 @@ private:
                 for (int i = 0; i < librarySearchPaths.size(); ++i)
                     libPaths += ", \"\\\"" + librarySearchPaths[i] + "\\\"\"";
 
-                settings.add (libPaths + ")");
+                s.add (libPaths + ")");
             }
         }
 
@@ -488,17 +488,17 @@ private:
         {
             defines.add ("_DEBUG=1");
             defines.add ("DEBUG=1 ");
-            settings.add ("ONLY_ACTIVE_ARCH = YES");
-            settings.add ("COPY_PHASE_STRIP = NO");
-            settings.add ("GCC_DYNAMIC_NO_PIC = NO");
-            settings.add ("GCC_ENABLE_FIX_AND_CONTINUE = YES");
+            s.add ("ONLY_ACTIVE_ARCH = YES");
+            s.add ("COPY_PHASE_STRIP = NO");
+            s.add ("GCC_DYNAMIC_NO_PIC = NO");
+            s.add ("GCC_ENABLE_FIX_AND_CONTINUE = YES");
         }
         else
         {
             defines.add ("_NDEBUG=1");
             defines.add ("NDEBUG=1 ");
-            settings.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
-            settings.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
+            s.add ("GCC_GENERATE_DEBUGGING_SYMBOLS = NO");
+            s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = YES");
         }
 
         {
@@ -513,10 +513,10 @@ private:
             for (int i = defines.size(); --i >= 0;)
                 defines.set (i, defines[i].quoted());
 
-            settings.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defines, ",") + ")");
+            s.add ("GCC_PREPROCESSOR_DEFINITIONS = (" + indentList (defines, ",") + ")");
         }
 
-        return settings;
+        return s;
     }
 
     void addFrameworks()
@@ -565,15 +565,15 @@ private:
 
             for (int j = 0; j < o.getNumProperties(); ++j)
             {
-                const var::identifier name (o.getPropertyName(j));
-                String val (o.getProperty (name).toString());
+                const var::identifier propertyName (o.getPropertyName(j));
+                String val (o.getProperty (propertyName).toString());
 
                 if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,-\r\n")
                                         && ! (val.trimStart().startsWithChar ('(')
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = val.quoted();
 
-                output << name.name << " = " << val << "; ";
+                output << propertyName.name << " = " << val << "; ";
             }
 
             output << "};\n";
@@ -699,12 +699,12 @@ private:
         frameworkFileIDs.add (fileRefID);
     }
 
-    void addGroup (const String& groupID, const String& name, const StringArray& childIDs)
+    void addGroup (const String& groupID, const String& groupName, const StringArray& childIDs)
     {
         ValueTree* v = new ValueTree (groupID);
         v->setProperty ("isa", "PBXGroup", 0);
         v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", 0);
-        v->setProperty ("name", name, 0);
+        v->setProperty ("name", groupName, 0);
         v->setProperty ("sourceTree", "<group>", 0);
         groups.add (v);
     }
@@ -782,21 +782,21 @@ private:
         pbxFileReferences.add (v);
     }
 
-    void addTargetConfig (const String& name, const StringArray& settings)
+    void addTargetConfig (const String& configName, const StringArray& buildSettings)
     {
-        ValueTree* v = new ValueTree (createID ("targetconfigid_" + name));
+        ValueTree* v = new ValueTree (createID ("targetconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (settings, ";") + " }", 0);
-        v->setProperty ("name", name, 0);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
+        v->setProperty ("name", configName, 0);
         targetConfigs.add (v);
     }
 
-    void addProjectConfig (const String& name, const StringArray& settings)
+    void addProjectConfig (const String& configName, const StringArray& buildSettings)
     {
-        ValueTree* v = new ValueTree (createID ("projectconfigid_" + name));
+        ValueTree* v = new ValueTree (createID ("projectconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", 0);
-        v->setProperty ("buildSettings", "{" + indentList (settings, ";") + " }", 0);
-        v->setProperty ("name", name, 0);
+        v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
+        v->setProperty ("name", configName, 0);
         projectConfigs.add (v);
     }
 
@@ -910,11 +910,11 @@ private:
         return createID (path.toUnixStyle());
     }
 
-    const String createID (const String& name) const
+    const String createID (const String& rootString) const
     {
         static const char digits[] = "0123456789ABCDEF";
         char n[24];
-        Random ran (projectIDSalt + hashCode64 (name));
+        Random ran (projectIDSalt + hashCode64 (rootString));
 
         for (int i = 0; i < numElementsInArray (n); ++i)
             n[i] = digits [ran.nextInt (16)];

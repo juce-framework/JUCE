@@ -275,7 +275,7 @@ start_pass_coef2 (j_compress_ptr cinfo, J_BUF_MODE pass_mode)
  */
 
 METHODDEF(boolean)
-compress_output2 (j_compress_ptr cinfo, JSAMPIMAGE input_buf)
+compress_output2 (j_compress_ptr cinfo, JSAMPIMAGE)
 {
   my_coef_ptr2 coef = (my_coef_ptr2) cinfo->coef;
   JDIMENSION MCU_col_num;	/* index of current MCU within row */

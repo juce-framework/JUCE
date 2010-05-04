@@ -86,6 +86,9 @@ public:
 
 private:
     DrawableEditor& editor;
+
+    DrawableEditorToolbarFactory (const DrawableEditorToolbarFactory&);
+    DrawableEditorToolbarFactory& operator= (const DrawableEditorToolbarFactory&);
 };
 
 

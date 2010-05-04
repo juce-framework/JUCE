@@ -62,7 +62,7 @@ public:
 
     void createClassProperties (Array <PropertyComponent*>& props);
 
-    const String getNonExistentMemberName (String suggestedName);
+    const String getNonexistentMemberName (String suggestedName);
 
     //==============================================================================
     int getNumComponents() const;
@@ -77,6 +77,7 @@ public:
     void removeComponent (const ValueTree& state);
     const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
     bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
+    void renameAnchor (const String& oldName, const String& newName);
 
     // for Coordinate::MarkerResolver:
     const Coordinate findMarker (const String& name, bool isHorizontal) const;
@@ -99,7 +100,10 @@ public:
         void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
         const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
         UndoManager* getUndoManager() const;
+        void renameAnchor (const String& oldName, const String& newName);
         const String getNonexistentMarkerName (const String& name);
+
+        ComponentDocument& getDocument() throw()    { return document; }
 
     private:
         ComponentDocument& document;
@@ -111,8 +115,6 @@ public:
     MarkerList& getMarkerListX() const            { return *markersX; }
     MarkerList& getMarkerListY() const            { return *markersY; }
     MarkerList& getMarkerList (bool isX) const    { return isX ? *markersX : *markersY; }
-
-    const String getNonexistentMarkerName (const String& name);
 
     //==============================================================================
     void createItemProperties (Array <PropertyComponent*>& props, const StringArray& selectedItemIds);

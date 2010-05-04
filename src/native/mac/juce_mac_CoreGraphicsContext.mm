@@ -225,7 +225,7 @@ public:
             AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
             applyTransform (t);
 
-            CGRect r = CGRectMake (0, 0, sourceImage.getWidth(), sourceImage.getHeight());
+            CGRect r = CGRectMake (srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
             CGContextClipToMask (context, r, image);
 
             applyTransform (t.inverted());

@@ -89,6 +89,9 @@ public:
 
 private:
     ComponentEditor& editor;
+
+    ComponentEditorToolbarFactory (const ComponentEditorToolbarFactory&);
+    ComponentEditorToolbarFactory& operator= (const ComponentEditorToolbarFactory&);
 };
 
 

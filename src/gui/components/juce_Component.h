@@ -2084,12 +2084,7 @@ private:
     // hierarchies. You might need to give your subclasses a private dummy constructor like
     // this one to avoid compiler warnings.
     Component (const Component&);
-
     Component& operator= (const Component&);
-
-    // (dummy method to cause a deliberate compile error - if you hit this, you need to update your
-    // subclass to use the new parameters to keyStateChanged)
-    virtual void keyStateChanged() {};
 
 protected:
     /** @internal */

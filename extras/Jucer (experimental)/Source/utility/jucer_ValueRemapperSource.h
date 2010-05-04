@@ -40,10 +40,10 @@ public:
         sourceValue.addListener (this);
     }
 
-    ValueRemapperSource (const Value& sourceValue_, const char** mappings)
+    ValueRemapperSource (const Value& sourceValue_, const char** mappings_)
        : sourceValue (sourceValue_)
     {
-        addMappings (mappings);
+        addMappings (mappings_);
         sourceValue.addListener (this);
     }
 
@@ -58,9 +58,9 @@ public:
         }
     }
 
-    void addMapping (const var& sourceValue, const var& remappedValue)
+    void addMapping (const var& sourceValue_, const var& remappedValue)
     {
-        mappings.add (sourceValue);
+        mappings.add (sourceValue_);
         mappings.add (remappedValue);
     }
 

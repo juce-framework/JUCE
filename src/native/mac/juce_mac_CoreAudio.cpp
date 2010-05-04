@@ -338,7 +338,7 @@ public:
     {
         StringArray s;
         HeapBlock <OSType> types;
-        const int num = getAllDataSourcesForDevice (deviceID, input, types);
+        const int num = getAllDataSourcesForDevice (deviceID, types);
 
         for (int i = 0; i < num; ++i)
         {
@@ -383,7 +383,7 @@ public:
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, 0, &size, &currentSourceID)))
             {
                 HeapBlock <OSType> types;
-                const int num = getAllDataSourcesForDevice (deviceID, input, types);
+                const int num = getAllDataSourcesForDevice (deviceID, types);
 
                 for (int i = 0; i < num; ++i)
                 {
@@ -404,7 +404,7 @@ public:
         if (deviceID != 0)
         {
             HeapBlock <OSType> types;
-            const int num = getAllDataSourcesForDevice (deviceID, input, types);
+            const int num = getAllDataSourcesForDevice (deviceID, types);
 
             if (((unsigned int) index) < (unsigned int) num)
             {
@@ -798,12 +798,12 @@ private:
     CoreAudioInternal& operator= (const CoreAudioInternal&);
 
     //==============================================================================
-    static OSStatus audioIOProc (AudioDeviceID inDevice,
-                                 const AudioTimeStamp* inNow,
+    static OSStatus audioIOProc (AudioDeviceID /*inDevice*/,
+                                 const AudioTimeStamp* /*inNow*/,
                                  const AudioBufferList* inInputData,
-                                 const AudioTimeStamp* inInputTime,
+                                 const AudioTimeStamp* /*inInputTime*/,
                                  AudioBufferList* outOutputData,
-                                 const AudioTimeStamp* inOutputTime,
+                                 const AudioTimeStamp* /*inOutputTime*/,
                                  void* device)
     {
         static_cast <CoreAudioInternal*> (device)->audioCallback (inInputData, outOutputData);
@@ -837,7 +837,7 @@ private:
     }
 
     //==============================================================================
-    static int getAllDataSourcesForDevice (AudioDeviceID deviceID, const bool input, HeapBlock <OSType>& types)
+    static int getAllDataSourcesForDevice (AudioDeviceID deviceID, HeapBlock <OSType>& types)
     {
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioDevicePropertyDataSources;

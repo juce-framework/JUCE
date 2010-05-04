@@ -88,7 +88,7 @@ void Thread::yield()
     sched_yield();
 }
 
-void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
+void Thread::setCurrentThreadAffinityMask (const uint32 /*affinityMask*/)
 {
     // xxx
     jassertfalse
@@ -119,7 +119,7 @@ void Process::terminate()
     exit (0);
 }
 
-void Process::setPriority (ProcessPriority p)
+void Process::setPriority (ProcessPriority)
 {
     // xxx
 }

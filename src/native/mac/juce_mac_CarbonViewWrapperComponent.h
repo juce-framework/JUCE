@@ -54,7 +54,7 @@ public:
 
     virtual HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) = 0;
     virtual void removeView (HIViewRef embeddedView) = 0;
-    virtual void mouseDown (int x, int y) {}
+    virtual void mouseDown (int, int) {}
     virtual void paint() {}
 
     virtual bool getEmbeddedViewSize (int& w, int& h)
@@ -224,7 +224,7 @@ public:
             recursiveHIViewRepaint (HIViewGetRoot (wrapperWindow));
     }
 
-    OSStatus carbonEventHandler (EventHandlerCallRef nextHandlerRef,
+    OSStatus carbonEventHandler (EventHandlerCallRef /*nextHandlerRef*/,
                                  EventRef event)
     {
         switch (GetEventKind (event))

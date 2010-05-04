@@ -412,6 +412,8 @@ END_JUCE_NAMESPACE
 
 - (void) menuNeedsUpdate: (NSMenu*) menu;
 {
+    (void) menu;
+
     if (JuceMainMenuHandler::instance != 0)
         JuceMainMenuHandler::instance->updateMenus();
 }

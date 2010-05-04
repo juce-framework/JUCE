@@ -222,22 +222,6 @@ static const String getIncludeFileCode (StringArray files)
 }
 
 //==============================================================================
-static bool getUserSection (const StringArray& lines, const String& tag, StringArray& resultLines)
-{
-    const int start = indexOfLineStartingWith (lines, "//[" + tag + "]", 0);
-
-    if (start < 0)
-        return false;
-
-    const int end = indexOfLineStartingWith (lines, "//[/" + tag + "]", start + 1);
-
-    for (int i = start + 1; i < end; ++i)
-        resultLines.add (lines [i]);
-
-    return true;
-}
-
-//==============================================================================
 static void replaceTemplate (String& text, const String& itemName, const String& value)
 {
     for (;;)

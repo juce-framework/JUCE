@@ -62,7 +62,7 @@ public:
     const File getTargetFolder() const;
 
     const ValueTree& getSettings() const                    { return settings; }
-    Value getSetting (const var::identifier& name) const    { return settings.getPropertyAsValue (name, project.getUndoManagerFor (settings)); }
+    Value getSetting (const var::identifier& name_) const   { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
     Value getJuceFolder() const             { return getSetting ("juceFolder"); }
     Value getTargetLocation() const         { return getSetting ("targetFolder"); }
@@ -95,7 +95,7 @@ protected:
 
     const Array<RelativePath> getVSTFilesRequired() const;
 
-    const String getLibbedFilename (String name) const
+    static const String getLibbedFilename (String name)
     {
         if (! name.startsWith ("lib"))
             name = "lib" + name;

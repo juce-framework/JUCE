@@ -44,6 +44,8 @@ namespace FontValues
     }
 
     static const float defaultFontHeight = 14.0f;
+
+    static String fallbackFont;
 }
 
 //==============================================================================
@@ -166,16 +168,14 @@ void Font::setTypefaceName (const String& faceName) throw()
 }
 
 //==============================================================================
-static String fallbackFont;
-
 const String Font::getFallbackFontName() throw()
 {
-    return fallbackFont;
+    return FontValues::fallbackFont;
 }
 
 void Font::setFallbackFontName (const String& name) throw()
 {
-    fallbackFont = name;
+    FontValues::fallbackFont = name;
 }
 
 //==============================================================================

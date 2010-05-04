@@ -236,31 +236,37 @@ using namespace JUCE_NAMESPACE;
 
 - (NSApplicationTerminateReply) applicationShouldTerminate: (NSApplication*) app
 {
+    (void) app;
     return redirector->shouldTerminate();
 }
 
 - (BOOL) application: (NSApplication*) app openFile: (NSString*) filename
 {
+    (void) app;
     return redirector->openFile (filename);
 }
 
 - (void) application: (NSApplication*) sender openFiles: (NSArray*) filenames
 {
+    (void) sender;
     return redirector->openFiles (filenames);
 }
 
-- (void) applicationDidBecomeActive: (NSNotification*) aNotification
+- (void) applicationDidBecomeActive: (NSNotification*) notification
 {
+    (void) notification;
     redirector->focusChanged();
 }
 
-- (void) applicationDidResignActive: (NSNotification*) aNotification
+- (void) applicationDidResignActive: (NSNotification*) notification
 {
+    (void) notification;
     redirector->focusChanged();
 }
 
-- (void) applicationWillUnhide: (NSNotification*) aNotification
+- (void) applicationWillUnhide: (NSNotification*) notification
 {
+    (void) notification;
     redirector->focusChanged();
 }
 

@@ -97,6 +97,9 @@ public:
 
         private:
             CodeDocument* const doc;
+
+            CodeDocumentRef (const CodeDocumentRef&);
+            CodeDocumentRef& operator= (const CodeDocumentRef&);
         };
 
         //==============================================================================
@@ -124,6 +127,9 @@ public:
             CustomCodeList& customCode;
             StringArray lines;
             int i;
+
+            Iterator (const Iterator&);
+            Iterator& operator= (const Iterator&);
         };
 
     private:

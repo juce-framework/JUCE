@@ -43,6 +43,7 @@ public:
         : CoordinatePropertyComponent (document_, name,
                                        Value (new CoordExtractor (coordValue_, type_)),
                                        type_ == left || type_ == right),
+          document (document_),
           type (type_),
           compState (compState_)
     {
@@ -133,6 +134,7 @@ public:
     }
 
 private:
+    ComponentDocument& document;
     Type type;
     ValueTree compState;
 
@@ -164,9 +166,9 @@ ComponentTypeHandler::~ComponentTypeHandler()
 {
 }
 
-Value ComponentTypeHandler::getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const
+Value ComponentTypeHandler::getValue (const var::identifier& name_, ValueTree& state, ComponentDocument& document) const
 {
-    return state.getPropertyAsValue (name, document.getUndoManager());
+    return state.getPropertyAsValue (name_, document.getUndoManager());
 }
 
 void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
@@ -186,7 +188,7 @@ void ComponentTypeHandler::updateComponent (ComponentDocument& document, Compone
 void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, ValueTree& state)
 {
     state.setProperty (ComponentDocument::compNameProperty, String::empty, 0);
-    state.setProperty (ComponentDocument::memberNameProperty, document.getNonExistentMemberName (getMemberNameRoot()), 0);
+    state.setProperty (ComponentDocument::memberNameProperty, document.getNonexistentMemberName (getMemberNameRoot()), 0);
 
     const Rectangle<int> bounds (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
                                                                             Random::getSystemRandom().nextInt (100) + 100)));
@@ -202,10 +204,9 @@ class CompMemberNameValueSource   : public Value::ValueSource,
                                     public Value::Listener
 {
 public:
-    CompMemberNameValueSource (ComponentDocument& document_, const ValueTree& state_)
-       : sourceValue (state_.getPropertyAsValue (ComponentDocument::memberNameProperty, document_.getUndoManager())),
-         document (document_),
-         state (state_)
+    CompMemberNameValueSource (ComponentDocument& document_, const ValueTree& state)
+       : sourceValue (state.getPropertyAsValue (ComponentDocument::memberNameProperty, document_.getUndoManager())),
+         document (document_)
     {
         sourceValue.addListener (this);
     }
@@ -217,21 +218,21 @@ public:
 
     void setValue (const var& newValue)
     {
-        String newVal (newValue.toString());
+        if (newValue == sourceValue)
+            return;
 
-        //xxx check for uniqueness + rename any coords that use the name..
+        const String name (document.getNonexistentMemberName (newValue));
 
-
-        newVal = makeValidCppIdentifier (newVal, false, true, false);
-
-        if (sourceValue != newVal)
-            sourceValue = newVal;
+        if (sourceValue != name)
+        {
+            document.renameAnchor (sourceValue.toString(), name);
+            sourceValue = name;
+        }
     }
 
 private:
     Value sourceValue;
     ComponentDocument& document;
-    ValueTree state;
 
     CompMemberNameValueSource (const CompMemberNameValueSource&);
     const CompMemberNameValueSource& operator= (const CompMemberNameValueSource&);

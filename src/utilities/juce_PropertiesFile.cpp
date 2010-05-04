@@ -171,10 +171,10 @@ bool PropertiesFile::needsToBeSaved() const
     return needsWriting;
 }
 
-void PropertiesFile::setNeedsToBeSaved (const bool needsToBeSaved)
+void PropertiesFile::setNeedsToBeSaved (const bool needsToBeSaved_)
 {
     const ScopedLock sl (getLock());
-    needsWriting = needsToBeSaved;
+    needsWriting = needsToBeSaved_;
 }
 
 bool PropertiesFile::save()

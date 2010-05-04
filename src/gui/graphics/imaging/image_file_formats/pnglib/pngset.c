@@ -1204,7 +1204,7 @@ png_set_invalid(png_structp png_ptr, png_infop info_ptr, int mask)
 #ifdef PNG_ASSEMBLER_CODE_SUPPORTED
 /* function was added to libpng 1.2.0 and should always exist by default */
 void PNGAPI
-png_set_asm_flags (png_structp png_ptr, png_uint_32 asm_flags)
+png_set_asm_flags (png_structp png_ptr, png_uint_32)
 {
 /* Obsolete as of libpng-1.2.20 and will be removed from libpng-1.4.0 */
     if (png_ptr != NULL)
@@ -1214,8 +1214,8 @@ png_set_asm_flags (png_structp png_ptr, png_uint_32 asm_flags)
 /* this function was added to libpng 1.2.0 */
 void PNGAPI
 png_set_mmx_thresholds (png_structp png_ptr,
-                        png_byte mmx_bitdepth_threshold,
-                        png_uint_32 mmx_rowbytes_threshold)
+                        png_byte,
+                        png_uint_32)
 {
 /* Obsolete as of libpng-1.2.20 and will be removed from libpng-1.4.0 */
     if (png_ptr == NULL)

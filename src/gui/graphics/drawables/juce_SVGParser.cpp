@@ -734,8 +734,8 @@ private:
 
                 gradient.isRadial = fillXml->hasTagName ("radialGradient");
 
-                float width = viewBoxW;
-                float height = viewBoxH;
+                float gradientWidth = viewBoxW;
+                float gradientHeight = viewBoxH;
                 float dx = 0.0f;
                 float dy = 0.0f;
 
@@ -746,16 +746,16 @@ private:
                     const Rectangle<float> bounds (path.getBounds());
                     dx = bounds.getX();
                     dy = bounds.getY();
-                    width = bounds.getWidth();
-                    height = bounds.getHeight();
+                    gradientWidth = bounds.getWidth();
+                    gradientHeight = bounds.getHeight();
                 }
 
                 if (gradient.isRadial)
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), width);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), height);
+                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth);
+                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), gradientHeight);
 
-                    const float radius = getCoordLength (fillXml->getStringAttribute ("r", "50%"), width);
+                    const float radius = getCoordLength (fillXml->getStringAttribute ("r", "50%"), gradientWidth);
 
                     gradient.x2 = gradient.x1 + radius;
                     gradient.y2 = gradient.y1;
@@ -764,11 +764,11 @@ private:
                 }
                 else
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), width);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), height);
+                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), gradientWidth);
+                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), gradientHeight);
 
-                    gradient.x2 = dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), width);
-                    gradient.y2 = dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), height);
+                    gradient.x2 = dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), gradientWidth);
+                    gradient.y2 = dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), gradientHeight);
 
                     if (gradient.x1 == gradient.x2 && gradient.y1 == gradient.y2)
                         return Colour (gradient.getColour (gradient.getNumColours() - 1));
@@ -791,7 +791,7 @@ private:
 
     const PathStrokeType getStrokeFor (const XmlElement* const xml) const
     {
-        const String width (getStyleAttribute (xml, "stroke-width"));
+        const String strokeWidth (getStyleAttribute (xml, "stroke-width"));
         const String cap (getStyleAttribute (xml, "stroke-linecap"));
         const String join (getStyleAttribute (xml, "stroke-linejoin"));
 
@@ -814,10 +814,10 @@ private:
 
         float ox = 0.0f, oy = 0.0f;
         transform.transformPoint (ox, oy);
-        float x = getCoordLength (width, viewBoxW), y = 0.0f;
+        float x = getCoordLength (strokeWidth, viewBoxW), y = 0.0f;
         transform.transformPoint (x, y);
 
-        return PathStrokeType (width.isNotEmpty() ? juce_hypotf (x - ox, y - oy) : 1.0f,
+        return PathStrokeType (strokeWidth.isNotEmpty() ? juce_hypotf (x - ox, y - oy) : 1.0f,
                                joinStyle, capStyle);
     }
 

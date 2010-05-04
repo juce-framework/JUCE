@@ -45,13 +45,29 @@ public:
         {
         }
 
+        void setDetails (const String& memberName, const String& className)
+        {
+            const String name (memberName + " (" + className + ")");
+
+            if (name != getName())
+            {
+                setName (name);
+                repaint();
+            }
+        }
+
         void paint (Graphics& g)
         {
+            g.fillAll (Colours::white.withAlpha (0.2f));
             g.setColour (Colours::grey);
             g.drawRect (getLocalBounds());
 
             g.drawLine (0.5f, 0.5f, getWidth() - 0.5f, getHeight() - 0.5f);
             g.drawLine (0.5f, getHeight() - 0.5f, getWidth() - 0.5f, 0.5f);
+
+            g.setColour (Colours::black);
+            g.setFont (11.0f);
+            g.drawFittedText (getName(), 2, 2, getWidth() - 4, getHeight() - 4, Justification::centredTop, 2);
         }
     };
 
@@ -61,14 +77,21 @@ public:
 
     void update (ComponentDocument& document, Component* comp, const ValueTree& state)
     {
+        static_cast<PlaceholderComp*> (comp)->setDetails (state [ComponentDocument::memberNameProperty],
+                                                          state ["class"]);
     }
 
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
+        state.setProperty ("class", "Component", 0);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addFocusOrderProperty (document, state, props);
+
+        props.add (new TextPropertyComponent (getValue ("class", state, document), "Class", 256, false));
+        props.getLast()->setTooltip ("The class that this component is an instance of.");
     }
 };
 

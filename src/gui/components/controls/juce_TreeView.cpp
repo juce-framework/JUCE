@@ -205,37 +205,40 @@ public:
         const int visibleBottom = visibleTop + getParentHeight();
 
         BigInteger itemsToKeep;
-        TreeViewItem* item = owner.rootItem;
-        int y = (item != 0 && ! owner.rootItemVisible) ? -item->itemHeight : 0;
 
-        while (item != 0 && y < visibleBottom)
         {
-            y += item->itemHeight;
+            TreeViewItem* item = owner.rootItem;
+            int y = (item != 0 && ! owner.rootItemVisible) ? -item->itemHeight : 0;
 
-            if (y >= visibleTop)
+            while (item != 0 && y < visibleBottom)
             {
-                const int index = rowComponentIds.indexOf (item->uid);
+                y += item->itemHeight;
 
-                if (index < 0)
+                if (y >= visibleTop)
                 {
-                    Component* const comp = item->createItemComponent();
+                    const int index = rowComponentIds.indexOf (item->uid);
 
-                    if (comp != 0)
+                    if (index < 0)
                     {
-                        addAndMakeVisible (comp);
-                        itemsToKeep.setBit (rowComponentItems.size());
-                        rowComponentItems.add (item);
-                        rowComponentIds.add (item->uid);
-                        rowComponents.add (comp);
+                        Component* const comp = item->createItemComponent();
+
+                        if (comp != 0)
+                        {
+                            addAndMakeVisible (comp);
+                            itemsToKeep.setBit (rowComponentItems.size());
+                            rowComponentItems.add (item);
+                            rowComponentIds.add (item->uid);
+                            rowComponents.add (comp);
+                        }
+                    }
+                    else
+                    {
+                        itemsToKeep.setBit (index);
                     }
                 }
-                else
-                {
-                    itemsToKeep.setBit (index);
-                }
-            }
 
-            item = item->getNextVisibleItem (true);
+                item = item->getNextVisibleItem (true);
+            }
         }
 
         for (int i = rowComponentItems.size(); --i >= 0;)
@@ -1716,14 +1719,14 @@ const String TreeViewItem::getItemIdentifierString() const
 
 TreeViewItem* TreeViewItem::findItemFromIdentifierString (const String& identifierString)
 {
-    const String uid (getUniqueName());
+    const String thisId (getUniqueName());
 
-    if (uid == identifierString)
+    if (thisId == identifierString)
         return this;
 
-    if (identifierString.startsWith (uid + "/"))
+    if (identifierString.startsWith (thisId + "/"))
     {
-        const String remainingPath (identifierString.substring (uid.length() + 1));
+        const String remainingPath (identifierString.substring (thisId.length() + 1));
 
         bool wasOpen = isOpen();
         setOpen (true);

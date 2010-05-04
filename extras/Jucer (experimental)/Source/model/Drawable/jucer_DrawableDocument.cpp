@@ -307,16 +307,16 @@ DrawableDocument::MarkerList::MarkerList (DrawableDocument& document_, bool isX_
 {
 }
 
-const Coordinate DrawableDocument::MarkerList::findMarker (const String& name, bool isHorizontal) const
+const Coordinate DrawableDocument::MarkerList::findMarker (const String& name, bool isHorizontal_) const
 {
-    if (isHorizontal == isX)
+    if (isHorizontal_ == isX)
     {
-        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isHorizontal);
-        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isHorizontal);
+        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isX);
+        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isX);
 
-        const ValueTree marker (document.getMarkerList (isHorizontal).getMarkerNamed (name));
+        const ValueTree marker (document.getMarkerList (isX).getMarkerNamed (name));
         if (marker.isValid())
-            return document.getMarkerList (isHorizontal).getCoordinate (marker);
+            return document.getMarkerList (isX).getCoordinate (marker);
     }
 
     return Coordinate (isX);
@@ -403,4 +403,13 @@ const String DrawableDocument::getNonexistentMarkerName (const String& name)
         n = n.trimCharactersAtEnd ("0123456789") + String (suffix++);
 
     return n;
+}
+
+void DrawableDocument::MarkerList::renameAnchor (const String& oldName, const String& newName)
+{
+    document.renameAnchor (oldName, newName);
+}
+
+void DrawableDocument::renameAnchor (const String& oldName, const String& newName)
+{
 }

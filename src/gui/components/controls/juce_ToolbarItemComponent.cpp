@@ -190,11 +190,11 @@ void ToolbarItemComponent::setStyle (const Toolbar::ToolbarItemStyle& newStyle)
     }
 }
 
-void ToolbarItemComponent::paintButton (Graphics& g, bool isMouseOver, bool isMouseDown)
+void ToolbarItemComponent::paintButton (Graphics& g, const bool over, const bool down)
 {
     if (isBeingUsedAsAButton)
         getLookAndFeel().paintToolbarButtonBackground (g, getWidth(), getHeight(),
-                                                       isMouseOver, isMouseDown, *this);
+                                                       over, down, *this);
 
     if (toolbarStyle != Toolbar::iconsOnly)
     {
@@ -218,7 +218,7 @@ void ToolbarItemComponent::paintButton (Graphics& g, bool isMouseOver, bool isMo
         g.setOrigin (contentArea.getX(), contentArea.getY());
         g.reduceClipRegion (0, 0, contentArea.getWidth(), contentArea.getHeight());
 
-        paintButtonArea (g, contentArea.getWidth(), contentArea.getHeight(), isMouseOver, isMouseDown);
+        paintButtonArea (g, contentArea.getWidth(), contentArea.getHeight(), over, down);
 
         g.restoreState();
     }

@@ -5740,10 +5740,10 @@ public:
 	#define juce_InterlockedDecrement64(a)	  _InterlockedDecrement64(a)
   #else
 	// None of these atomics are available in a 32-bit Windows build!!
-	static __int64 juce_InterlockedExchangeAdd64 (volatile __int64* a, __int64 b) throw()   { jassertfalse; __int64 old = *a; *a += b; return old; }
-	static __int64 juce_InterlockedExchange64 (volatile __int64* a, __int64 b) throw()	  { jassertfalse; __int64 old = *a; *a = b; return old; }
-	static __int64 juce_InterlockedIncrement64 (volatile __int64* a) throw()		{ jassertfalse; return ++*a; }
-	static __int64 juce_InterlockedDecrement64 (volatile __int64* a) throw()		{ jassertfalse; return --*a; }
+	template <typename Type> static Type juce_InterlockedExchangeAdd64 (volatile Type* a, Type b) throw()   { jassertfalse; Type old = *a; *a += b; return old; }
+	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
+	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
+	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
   #endif
 #endif
 
@@ -20390,12 +20390,12 @@ public:
 		transform.transformPoint (x3, y3);
 		transform.transformPoint (x4, y4);
 
-		const float x = jmin (x1, x2, x3, x4);
-		const float y = jmin (y1, y2, y3, y4);
+		const float rx = jmin (x1, x2, x3, x4);
+		const float ry = jmin (y1, y2, y3, y4);
 
-		return Rectangle (x, y,
-						  jmax (x1, x2, x3, x4) - x,
-						  jmax (y1, y2, y3, y4) - y);
+		return Rectangle (rx, ry,
+						  jmax (x1, x2, x3, x4) - rx,
+						  jmax (y1, y2, y3, y4) - ry);
 	}
 
 	/** Returns the smallest integer-aligned rectangle that completely contains this one.
@@ -26352,12 +26352,7 @@ private:
 	// hierarchies. You might need to give your subclasses a private dummy constructor like
 	// this one to avoid compiler warnings.
 	Component (const Component&);
-
 	Component& operator= (const Component&);
-
-	// (dummy method to cause a deliberate compile error - if you hit this, you need to update your
-	// subclass to use the new parameters to keyStateChanged)
-	virtual void keyStateChanged() {};
 
 protected:
 	/** @internal */
@@ -44798,14 +44793,6 @@ public:
 	*/
 	virtual void valueChanged();
 
-	/** Callback to indicate that the user has just moved the slider.
-		Note - the valueChanged() method has changed its format and now no longer has
-		any parameters. Update your code to use the new version.
-		This version has been left here with an int as its return value to cause
-		a syntax error if you've got existing code that uses the old version.
-	*/
-	virtual int valueChanged (double) { jassertfalse; return 0; }
-
 	/** Subclasses can override this to convert a text string to a value.
 
 		When the user enters something into the text-entry box, this method is
@@ -53360,14 +53347,14 @@ public:
 		For example, if the item is an object, you might want to call it and tell
 		it that it's being selected.
 	*/
-	virtual void itemSelected (SelectableItemType item)			 {}
+	virtual void itemSelected (SelectableItemType item)			 { (void) item; }
 
 	/** Can be overridden to do special handling when an item is deselected.
 
 		For example, if the item is an object, you might want to call it and tell
 		it that it's being deselected.
 	*/
-	virtual void itemDeselected (SelectableItemType item)		   {}
+	virtual void itemDeselected (SelectableItemType item)		   { (void) item; }
 
 	/** Used internally, but can be called to force a change message to be sent to the ChangeListeners.
 	*/
@@ -53580,7 +53567,7 @@ public:
 	}
 
 	/** @internal */
-	bool hitTest (int x, int y)	 { return false; }
+	bool hitTest (int, int)		 { return false; }
 
 	juce_UseDebuggingNewOperator
 

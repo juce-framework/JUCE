@@ -338,6 +338,15 @@ void Coordinate::changeAnchor2 (const String& newMarkerName, const MarkerResolve
     moveToAbsolute (oldValue, markerResolver);
 }
 
+void Coordinate::renameAnchorIfUsed (const String& oldName, const String& newName)
+{
+    if (anchor1.upToFirstOccurrenceOf (".", false, false) == oldName)
+        anchor1 = newName + anchor1.fromFirstOccurrenceOf (".", true, false);
+
+    if (anchor2.upToFirstOccurrenceOf (".", false, false) == oldName)
+        anchor2 = newName + anchor2.fromFirstOccurrenceOf (".", true, false);
+}
+
 //==============================================================================
 RectangleCoordinates::RectangleCoordinates()
     : left (true), right (true), top (false), bottom (false)
@@ -385,4 +394,12 @@ void RectangleCoordinates::moveToAbsolute (const Rectangle<float>& newPos, const
 const String RectangleCoordinates::toString() const
 {
     return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
+}
+
+void RectangleCoordinates::renameAnchorIfUsed (const String& oldName, const String& newName)
+{
+    left.renameAnchorIfUsed (oldName, newName);
+    right.renameAnchorIfUsed (oldName, newName);
+    top.renameAnchorIfUsed (oldName, newName);
+    bottom.renameAnchorIfUsed (oldName, newName);
 }

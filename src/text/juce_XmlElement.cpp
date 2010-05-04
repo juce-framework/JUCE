@@ -824,9 +824,9 @@ void XmlElement::insertChildElement (XmlElement* const newNode,
     }
 }
 
-XmlElement* XmlElement::createNewChildElement (const String& tagName)
+XmlElement* XmlElement::createNewChildElement (const String& childTagName)
 {
-    XmlElement* const newElement = new XmlElement (tagName);
+    XmlElement* const newElement = new XmlElement (childTagName);
     addChildElement (newElement);
     return newElement;
 }

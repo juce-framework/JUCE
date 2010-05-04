@@ -729,7 +729,7 @@ trim_bottom_edge (j_compress_ptr dstinfo)
  */
 
 GLOBAL(jvirt_barray_ptr *)
-jtransform_adjust_parameters (j_decompress_ptr srcinfo,
+jtransform_adjust_parameters (j_decompress_ptr,
 			      j_compress_ptr dstinfo,
 			      jvirt_barray_ptr *src_coef_arrays,
 			      jpeg_transform_info *info)
@@ -884,7 +884,7 @@ jcopy_markers_setup (j_decompress_ptr srcinfo, JCOPY_OPTION option)
 
 GLOBAL(void)
 jcopy_markers_execute (j_decompress_ptr srcinfo, j_compress_ptr dstinfo,
-		       JCOPY_OPTION option)
+		       JCOPY_OPTION)
 {
   jpeg_saved_marker_ptr marker;
 

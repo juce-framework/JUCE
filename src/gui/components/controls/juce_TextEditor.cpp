@@ -1631,10 +1631,10 @@ void TextEditor::copy()
 {
     if (passwordCharacter == 0)
     {
-        const String selection (getHighlightedText());
+        const String selectedText (getHighlightedText());
 
-        if (selection.isNotEmpty())
-            SystemClipboard::copyTextToClipboard (selection);
+        if (selectedText.isNotEmpty())
+            SystemClipboard::copyTextToClipboard (selectedText);
     }
 }
 

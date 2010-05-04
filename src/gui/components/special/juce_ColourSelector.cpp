@@ -124,12 +124,12 @@ public:
 
             for (int y = 0; y < height; ++y)
             {
-                const float v = 1.0f - y / (float) height;
+                const float val = 1.0f - y / (float) height;
 
                 for (int x = 0; x < width; ++x)
                 {
-                    const float s = x / (float) width;
-                    const Colour col (h, s, v, 1.0f);
+                    const float sat = x / (float) width;
+                    const Colour col (h, sat, val, 1.0f);
 
                     PixelRGB* const pix = (PixelRGB*) pixels.getPixelPointer (x, y);
                     pix->set (col.getPixelARGB());
@@ -149,10 +149,10 @@ public:
 
     void mouseDrag (const MouseEvent& e)
     {
-        const float s = (e.x - edge) / (float) (getWidth() - edge * 2);
-        const float v = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
+        const float sat = (e.x - edge) / (float) (getWidth() - edge * 2);
+        const float val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
 
-        owner->setSV (s, v);
+        owner->setSV (sat, val);
     }
 
     void updateIfNeeded()
@@ -486,16 +486,16 @@ void ColourSelector::paint (Graphics& g)
 
     if ((flags & showColourAtTop) != 0)
     {
-        const Colour colour (getCurrentColour());
+        const Colour currentColour (getCurrentColour());
 
         g.fillCheckerBoard (edgeGap, edgeGap, getWidth() - edgeGap - edgeGap, topSpace - edgeGap - edgeGap,
                             10, 10,
-                            Colour (0xffdddddd).overlaidWith (colour),
-                            Colour (0xffffffff).overlaidWith (colour));
+                            Colour (0xffdddddd).overlaidWith (currentColour),
+                            Colour (0xffffffff).overlaidWith (currentColour));
 
-        g.setColour (Colours::white.overlaidWith (colour).contrasting());
+        g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
         g.setFont (14.0f, true);
-        g.drawText (colour.toDisplayString ((flags & showAlphaChannel) != 0),
+        g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
                     0, edgeGap, getWidth(), topSpace - edgeGap * 2,
                     Justification::centred, false);
     }

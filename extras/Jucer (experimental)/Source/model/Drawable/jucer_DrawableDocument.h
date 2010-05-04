@@ -75,6 +75,7 @@ public:
         const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
         UndoManager* getUndoManager() const;
         const String getNonexistentMarkerName (const String& name);
+        void renameAnchor (const String& oldName, const String& newName);
 
     private:
         DrawableDocument& document;
@@ -88,6 +89,7 @@ public:
     MarkerList& getMarkerList (bool isX) const    { return isX ? *markersX : *markersY; }
 
     const String getNonexistentMarkerName (const String& name);
+    void renameAnchor (const String& oldName, const String& newName);
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const var::identifier& name);

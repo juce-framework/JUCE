@@ -50,14 +50,14 @@ public:
     {
     }
 
-    void paintButton (Graphics& g, bool isMouseOver, bool isMouseDown)
+    void paintButton (Graphics& g, bool over, bool down)
     {
         getLookAndFeel()
             .drawScrollbarButton (g, owner,
                                   getWidth(), getHeight(),
                                   direction,
                                   owner.isVertical(),
-                                  isMouseOver, isMouseDown);
+                                  over, down);
     }
 
     void clicked()

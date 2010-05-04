@@ -106,7 +106,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
     return c;
 }
 
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)
+void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool /*isStandard*/)
 {
     [((NSCursor*) cursorHandle) release];
 }

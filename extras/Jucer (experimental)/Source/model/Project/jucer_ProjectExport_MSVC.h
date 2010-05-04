@@ -237,10 +237,10 @@ private:
         }
     }
 
-    XmlElement* createGroup (const String& name, XmlElement& parent)
+    XmlElement* createGroup (const String& groupName, XmlElement& parent)
     {
         XmlElement* filter = parent.createNewChildElement ("Filter");
-        filter->setAttribute ("Name", name);
+        filter->setAttribute ("Name", groupName);
         return filter;
     }
 
@@ -409,10 +409,10 @@ private:
         return searchPaths;
     }
 
-    XmlElement* createToolElement (XmlElement& parent, const String& name) const
+    XmlElement* createToolElement (XmlElement& parent, const String& toolName) const
     {
         XmlElement* const e = parent.createNewChildElement ("Tool");
-        e->setAttribute ("Name", name);
+        e->setAttribute ("Name", toolName);
         return e;
     }
 

@@ -152,7 +152,7 @@ emit_dht (j_compress_ptr cinfo, int index, boolean is_ac)
 
 
 LOCAL(void)
-emit_dac (j_compress_ptr cinfo)
+emit_dac (j_compress_ptr)
 /* Emit a DAC marker */
 /* Since the useful info is so small, we want to emit all the tables in */
 /* one DAC marker.  Therefore this routine does its own scan of the table. */

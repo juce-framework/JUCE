@@ -34,9 +34,9 @@ class CoordinatePropertyComponent  : public PropertyComponent,
 {
 public:
     //==============================================================================
-    CoordinatePropertyComponent (ComponentDocument& document_, const String& name,
+    CoordinatePropertyComponent (Coordinate::MarkerResolver& resolver_, const String& name,
                                  const Value& coordValue_, bool isHorizontal_)
-        : PropertyComponent (name, 40), document (document_),
+        : PropertyComponent (name, 40), resolver (resolver_),
           coordValue (coordValue_),
           textValue (Value (new CoordEditableValueSource (coordValue_, isHorizontal_))),
          isHorizontal (isHorizontal_)
@@ -98,7 +98,7 @@ public:
 
         if (button == proportionButton)
         {
-            coord.toggleProportionality (document);
+            coord.toggleProportionality (resolver);
             coordValue = coord.toString();
         }
         else if (button == anchorButton1)
@@ -107,7 +107,7 @@ public:
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor1 (marker, document);
+                coord.changeAnchor1 (marker, resolver);
                 coordValue = coord.toString();
             }
         }
@@ -117,7 +117,7 @@ public:
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor2 (marker, document);
+                coord.changeAnchor2 (marker, resolver);
                 coordValue = coord.toString();
             }
         }
@@ -142,7 +142,7 @@ public:
     virtual const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1) = 0;
 
 protected:
-    ComponentDocument& document;
+    Coordinate::MarkerResolver& resolver;
     Value coordValue, textValue;
     Label* label;
     TextButton* proportionButton;

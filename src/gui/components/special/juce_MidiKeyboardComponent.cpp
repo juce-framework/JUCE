@@ -204,7 +204,7 @@ void MidiKeyboardComponent::setVelocity (const float velocity_, const bool useMo
 }
 
 //==============================================================================
-void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyWidth, int& x, int& w) const
+void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyWidth_, int& x, int& w) const
 {
     jassert (midiNoteNumber >= 0 && midiNoteNumber < 128);
 
@@ -227,8 +227,8 @@ void MidiKeyboardComponent::getKeyPosition (int midiNoteNumber, const float keyW
     const int octave = midiNoteNumber / 12;
     const int note = midiNoteNumber % 12;
 
-    x = roundToInt (octave * 7.0f * keyWidth + notePos [note] * keyWidth);
-    w = roundToInt (widths [note] * keyWidth);
+    x = roundToInt (octave * 7.0f * keyWidth_ + notePos [note] * keyWidth_);
+    w = roundToInt (widths [note] * keyWidth_);
 }
 
 void MidiKeyboardComponent::getKeyPos (int midiNoteNumber, int& x, int& w) const
@@ -551,7 +551,7 @@ const String MidiKeyboardComponent::getWhiteNoteText (const int midiNoteNumber)
 }
 
 void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
-                                              const bool isMouseOver,
+                                              const bool isMouseOver_,
                                               const bool isButtonDown,
                                               const bool movesOctavesUp)
 {
@@ -574,7 +574,7 @@ void MidiKeyboardComponent::drawUpDownButton (Graphics& g, int w, int h,
     path.applyTransform (AffineTransform::rotation (float_Pi * 2.0f * angle, 0.5f, 0.5f));
 
     g.setColour (findColour (upDownButtonArrowColourId)
-                  .withAlpha (isButtonDown ? 1.0f : (isMouseOver ? 0.6f : 0.4f)));
+                  .withAlpha (isButtonDown ? 1.0f : (isMouseOver_ ? 0.6f : 0.4f)));
 
     g.fillPath (path, path.getTransformToScaleToFit (1.0f, 1.0f,
                                                      w - 2.0f,

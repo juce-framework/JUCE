@@ -85,7 +85,7 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool /*canMoveFiles*/)
 {
     if (files.size() == 0)
         return false;
@@ -140,7 +140,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     return true;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
 {
     jassertfalse    // not implemented!
     return false;

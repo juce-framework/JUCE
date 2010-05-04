@@ -494,12 +494,12 @@ private:
 
                 if (numJuceSourceFiles > 0)
                 {
-                    for (int i = 0; i <= project.getNumSeparateAmalgamatedFiles(); ++i)
+                    for (int j = 0; j <= project.getNumSeparateAmalgamatedFiles(); ++j)
                     {
-                        const File sourceWrapperCpp (getSourceWrapperCpp (i));
+                        const File sourceWrapperCpp (getSourceWrapperCpp (j));
                         const File sourceWrapperMM (sourceWrapperCpp.withFileExtension (".mm"));
 
-                        if ((i == 0 && numJuceSourceFiles == 1) || (i != 0 && numJuceSourceFiles > 1))
+                        if ((j == 0 && numJuceSourceFiles == 1) || (j != 0 && numJuceSourceFiles > 1))
                         {
                             if (exporter->usesMMFiles())
                                 exporter->juceWrapperFiles.add (RelativePath (sourceWrapperMM, targetFolder, RelativePath::buildTargetFolder));
