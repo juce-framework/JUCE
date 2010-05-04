@@ -238,7 +238,7 @@ static void* NewCFMFromMachO (void* const machofp) throw()
 #if JUCE_LINUX
 
 extern Display* display;
-extern XContext improbableNumber;
+extern XContext windowHandleXContext;
 
 typedef void (*EventProcPtr) (XEvent* ev);
 

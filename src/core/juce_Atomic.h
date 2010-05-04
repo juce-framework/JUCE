@@ -95,7 +95,7 @@ public:
 
         This operation is the atomic equivalent of doing this:
         @code
-        bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+        bool compareAndSetBool (Type newValue, Type valueToCompare)
         {
             if (get() == valueToCompare)
             {
@@ -118,7 +118,7 @@ public:
 
         This operation is the atomic equivalent of doing this:
         @code
-        Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+        Type compareAndSetValue (Type newValue, Type valueToCompare)
         {
             Type oldValue = get();
             if (oldValue == valueToCompare)
@@ -133,15 +133,11 @@ public:
     */
     Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
 
-    /** Performs a memory write barrier. */
+    /** Implements a memory read/write barrier. */
     static void memoryBarrier() throw();
 
     //==============================================================================
-    #if JUCE_MSVC
-      __declspec (align (8))
-    #else
-      __attribute__ ((aligned (8)))
-    #endif
+    JUCE_ALIGN(8)
 
     /** The raw value that this class operates on.
         This is exposed publically in case you need to manipulate it directly
@@ -215,7 +211,7 @@ inline void Atomic<Type>::set (const Type newValue) throw()
 }
 
 template <typename Type>
-Type Atomic<Type>::exchange (const Type newValue) throw()
+inline Type Atomic<Type>::exchange (const Type newValue) throw()
 {
   #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
     Type currentVal = value;

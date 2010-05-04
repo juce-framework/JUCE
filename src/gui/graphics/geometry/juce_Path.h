@@ -150,6 +150,7 @@ public:
         line would need to be cut into multiple pieces to correctly clip against
         a re-entrant shape.
 
+        @param line                     the line to clip
         @param keepSectionOutsidePath   if true, it's the section outside the path
                                         that will be kept; if false its the section inside
                                         the path

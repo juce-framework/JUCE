@@ -200,6 +200,8 @@
     #define forcedinline  inline
   #endif
 
+  #define JUCE_ALIGN(bytes) __declspec (align (bytes))
+
 #else
   /** A platform-independent way of forcing an inline function.
 
@@ -212,6 +214,8 @@
   #else
     #define forcedinline  inline
   #endif
+
+  #define JUCE_ALIGN(bytes) __attribute__ ((aligned (bytes)))
 
 #endif
 

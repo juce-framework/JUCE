@@ -119,6 +119,14 @@ bool juce_setThreadPriority (void* handle, int priority)
     return false;
 }
 
+/* Remove this macro if you're having problems compiling the cpu affinity
+   calls (the API for these has changed about quite a bit in various Linux
+   versions, and a lot of distros seem to ship with obsolete versions)
+*/
+#if defined (CPU_ISSET) && ! defined (SUPPORT_AFFINITIES)
+  #define SUPPORT_AFFINITIES 1
+#endif
+
 void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
 {
 #if SUPPORT_AFFINITIES
@@ -134,15 +142,14 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
        version of glibc installed.
 
        If you don't want to update your copy of glibc and don't care about cpu affinities,
-       then you can just disable all this stuff by removing the SUPPORT_AFFINITIES macro
-       from the linuxincludes.h file.
+       then you can just disable all this stuff by setting the SUPPORT_AFFINITIES macro to 0.
     */
     sched_setaffinity (getpid(), sizeof (cpu_set_t), &affinity);
     sched_yield();
 
 #else
     /* affinities aren't supported because either the appropriate header files weren't found,
-       or the SUPPORT_AFFINITIES macro was turned off in linuxheaders.h
+       or the SUPPORT_AFFINITIES macro was turned off
     */
     jassertfalse
 #endif

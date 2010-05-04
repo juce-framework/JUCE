@@ -660,6 +660,8 @@
 	#define forcedinline  inline
   #endif
 
+  #define JUCE_ALIGN(bytes) __declspec (align (bytes))
+
 #else
   /** A platform-independent way of forcing an inline function.
 
@@ -672,6 +674,8 @@
   #else
 	#define forcedinline  inline
   #endif
+
+  #define JUCE_ALIGN(bytes) __attribute__ ((aligned (bytes)))
 
 #endif
 
@@ -5643,7 +5647,7 @@ public:
 
 		This operation is the atomic equivalent of doing this:
 		@code
-		bool compareAndSetBool (Type newValue, Type valueToCompare) throw();
+		bool compareAndSetBool (Type newValue, Type valueToCompare)
 		{
 			if (get() == valueToCompare)
 			{
@@ -5666,7 +5670,7 @@ public:
 
 		This operation is the atomic equivalent of doing this:
 		@code
-		Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
+		Type compareAndSetValue (Type newValue, Type valueToCompare)
 		{
 			Type oldValue = get();
 			if (oldValue == valueToCompare)
@@ -5681,14 +5685,10 @@ public:
 	*/
 	Type compareAndSetValue (Type newValue, Type valueToCompare) throw();
 
-	/** Performs a memory write barrier. */
+	/** Implements a memory read/write barrier. */
 	static void memoryBarrier() throw();
 
-	#if JUCE_MSVC
-	  __declspec (align (8))
-	#else
-	  __attribute__ ((aligned (8)))
-	#endif
+	JUCE_ALIGN(8)
 
 	/** The raw value that this class operates on.
 		This is exposed publically in case you need to manipulate it directly
@@ -5759,7 +5759,7 @@ inline void Atomic<Type>::set (const Type newValue) throw()
 }
 
 template <typename Type>
-Type Atomic<Type>::exchange (const Type newValue) throw()
+inline Type Atomic<Type>::exchange (const Type newValue) throw()
 {
   #if JUCE_ATOMICS_MAC || JUCE_ATOMICS_GCC
 	Type currentVal = value;
@@ -19819,8 +19819,6 @@ public:
 	/** Finds the point on this line which is nearest to a given point, and
 		returns its position as a proportional position along the line.
 
-		@param x	x position of the point to test
-		@param y	y position of the point to test
 		@returns	a value 0 to 1.0 which is the distance along this line from the
 					line's start to the point which is nearest to the point passed-in. To
 					turn this number into a position, use getPointAlongLineProportionally().
@@ -20933,6 +20931,7 @@ public:
 		line would need to be cut into multiple pieces to correctly clip against
 		a re-entrant shape.
 
+		@param line			 the line to clip
 		@param keepSectionOutsidePath   if true, it's the section outside the path
 										that will be kept; if false its the section inside
 										the path
