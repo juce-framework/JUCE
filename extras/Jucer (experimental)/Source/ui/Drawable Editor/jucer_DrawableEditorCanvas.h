@@ -47,10 +47,15 @@ public:
         shutdown();
     }
 
+    Component* createComponentHolder()
+    {
+        return new DrawableComponent (this);
+    }
+
     void updateComponents()
     {
-
-
+        drawable = Drawable::createFromValueTree (getEditor().getDocument().getRootDrawableNode());
+        getComponentHolder()->repaint();
         startTimer (500);
     }
 
@@ -180,6 +185,7 @@ public:
         return *getDocument().getUndoManager();
     }
 
+    DrawableEditor& getEditor() throw()                         { return editor; }
     DrawableDocument& getDocument() throw()                     { return editor.getDocument(); }
 
     void timerCallback()
@@ -189,6 +195,38 @@ public:
         if (! Component::isMouseButtonDownAnywhere())
             getUndoManager().beginNewTransaction();
     }
+
+    //==============================================================================
+    class DrawableComponent   : public Component
+    {
+    public:
+        DrawableComponent (DrawableEditorCanvas* canvas_)
+            : canvas (canvas_)
+        {
+            setOpaque (true);
+        }
+
+        ~DrawableComponent()
+        {
+        }
+
+        void updateDrawable()
+        {
+            repaint();
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::white);
+            canvas->drawable->draw (g, 1.0f);
+        }
+
+    private:
+        DrawableEditorCanvas* canvas;
+        DrawableEditor& getEditor() const   { return canvas->getEditor(); }
+    };
+
+    ScopedPointer<Drawable> drawable;
 
 private:
     //==============================================================================

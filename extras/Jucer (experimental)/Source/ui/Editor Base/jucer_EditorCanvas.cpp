@@ -735,7 +735,7 @@ EditorCanvasBase::~EditorCanvasBase()
 
 void EditorCanvasBase::initialise()
 {
-    addAndMakeVisible (componentHolder = new Component());
+    addAndMakeVisible (componentHolder = createComponentHolder());
     addAndMakeVisible (overlay = new OverlayComponent (this));
     overlay->addAndMakeVisible (resizeFrame = new DocumentResizeFrame (this));
 

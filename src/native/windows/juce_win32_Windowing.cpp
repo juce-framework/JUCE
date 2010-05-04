@@ -2465,9 +2465,6 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
         hotspotY = (hotspotY * maxH) / image.getHeight();
     }
 
-    void* cursorH = 0;
-    const SystemStats::OperatingSystemType os = SystemStats::getOperatingSystemType();
-
     return createHICONFromImage (*im, FALSE, hotspotX, hotspotY);
 }
 

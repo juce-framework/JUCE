@@ -52,6 +52,8 @@ public:
     const File getCppFile() const           { return cppFile; }
 
     //==============================================================================
+    const String getUniqueId() const        { return root [idProperty]; }
+
     Value getClassName() const              { return getRootValueNonUndoable ("className"); }
     Value getClassDescription() const       { return getRootValueNonUndoable ("classDesc"); }
 

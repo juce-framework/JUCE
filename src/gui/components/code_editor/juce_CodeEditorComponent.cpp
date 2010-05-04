@@ -1100,12 +1100,12 @@ void CodeEditorComponent::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, doub
 }
 
 //==============================================================================
-void CodeEditorComponent::focusGained (FocusChangeType cause)
+void CodeEditorComponent::focusGained (FocusChangeType)
 {
     caret->updatePosition();
 }
 
-void CodeEditorComponent::focusLost (FocusChangeType cause)
+void CodeEditorComponent::focusLost (FocusChangeType)
 {
     caret->updatePosition();
 }

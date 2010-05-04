@@ -267,6 +267,9 @@ void ComponentDocument::checkRootObject()
 {
     jassert (root.hasType (componentDocumentTag));
 
+    if (root [idProperty].toString().isEmpty())
+        root.setProperty (idProperty, createAlphaNumericUID(), 0);
+
     createSubTreeIfNotThere (componentGroupTag);
     createSubTreeIfNotThere (markersGroupXTag);
     createSubTreeIfNotThere (markersGroupYTag);

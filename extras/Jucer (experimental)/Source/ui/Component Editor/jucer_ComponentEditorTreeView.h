@@ -69,7 +69,6 @@ namespace ComponentEditorTreeView
         virtual const String getItemId() const = 0;
 
         void setName (const String& newName)            {}
-
         void itemClicked (const MouseEvent& e)          {}
         void itemDoubleClicked (const MouseEvent& e)    {}
 
@@ -95,6 +94,10 @@ namespace ComponentEditorTreeView
         ComponentEditor& editor;
     };
 
+    static const String getDragIdFor (ComponentEditor& editor)
+    {
+        return componentItemDragType + editor.getDocument().getUniqueId();
+    }
 
     //==============================================================================
     class ComponentItem  : public Base
@@ -123,7 +126,7 @@ namespace ComponentEditorTreeView
 
         Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
 
-        const String getDragSourceDescription()     { return componentItemDragType; }
+        const String getDragSourceDescription()     { return getDragIdFor (editor); }
 
         void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
         {
@@ -131,7 +134,6 @@ namespace ComponentEditorTreeView
                 repaintItem();
         }
 
-    private:
         ValueTree componentState;
     };
 
@@ -180,6 +182,93 @@ namespace ComponentEditorTreeView
         Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
         const String getDragSourceDescription()     { return String::empty; }
 
+        bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
+        {
+            return sourceDescription == getDragIdFor (editor)
+                    && editor.getSelection().getNumSelected() > 0;
+        }
+
+        void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex)
+        {
+            if (editor.getSelection().getNumSelected() > 0)
+            {
+                TreeView* tree = getOwnerView();
+                const ScopedPointer <XmlElement> openness (tree->getOpennessState (false));
+
+                Array <ValueTree> selectedComps;
+                // scan the source tree rather than look at the selection manager, because it might
+                // be from a different editor, and the order needs to be correct.
+                getAllSelectedNodesInTree (sourceComponent, selectedComps);
+                insertItems (selectedComps, insertIndex);
+
+                if (openness != 0)
+                    tree->restoreOpennessState (*openness);
+            }
+        }
+
+        static void getAllSelectedNodesInTree (Component* componentInTree, Array<ValueTree>& selectedComps)
+        {
+            TreeView* tree = dynamic_cast <TreeView*> (componentInTree);
+
+            if (tree == 0)
+                tree = componentInTree->findParentComponentOfClass ((TreeView*) 0);
+
+            if (tree != 0)
+            {
+                const int numSelected = tree->getNumSelectedItems();
+
+                for (int i = 0; i < numSelected; ++i)
+                {
+                    const ComponentItem* const item = dynamic_cast <ComponentItem*> (tree->getSelectedItem (i));
+
+                    if (item != 0)
+                        selectedComps.add (item->componentState);
+                }
+            }
+        }
+
+        void insertItems (Array <ValueTree>& comps, int insertIndex)
+        {
+            int i;
+            for (i = comps.size(); --i >= 0;)
+                if (componentTree == comps.getReference(i) || componentTree.isAChildOf (comps.getReference(i))) // Check for recursion.
+                    return;
+
+            // Don't include any nodes that are children of other selected nodes..
+            for (i = comps.size(); --i >= 0;)
+            {
+                const ValueTree& n = comps.getReference(i);
+
+                for (int j = comps.size(); --j >= 0;)
+                {
+                    if (j != i && n.isAChildOf (comps.getReference(j)))
+                    {
+                        comps.remove (i);
+                        break;
+                    }
+                }
+            }
+
+            // Remove and re-insert them one at a time..
+            for (i = 0; i < comps.size(); ++i)
+            {
+                ValueTree& n = comps.getReference(i);
+
+                if (n.getParent() == componentTree && componentTree.indexOf (n) < insertIndex)
+                    --insertIndex;
+
+                if (n.getParent() == componentTree)
+                {
+                    n.getParent().moveChild (componentTree.indexOf (n), insertIndex++, editor.getDocument().getUndoManager());
+                }
+                else
+                {
+                    n.getParent().removeChild (n, editor.getDocument().getUndoManager());
+                    componentTree.addChild (n, insertIndex++, editor.getDocument().getUndoManager());
+                }
+            }
+        }
+
     private:
         ValueTree componentTree;
     };
@@ -212,7 +301,7 @@ namespace ComponentEditorTreeView
 
         Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
 
-        const String getDragSourceDescription()     { return componentItemDragType; }
+        const String getDragSourceDescription()     { return String::empty; }
 
         void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
         {

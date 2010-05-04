@@ -80,6 +80,7 @@ public:
     virtual UndoManager& getUndoManager() = 0;
     virtual void deselectNonDraggableObjects() = 0;
     virtual void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area) = 0;
+    virtual Component* createComponentHolder() = 0;
 
     class DragOperation
     {

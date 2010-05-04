@@ -57,6 +57,11 @@ public:
             getDocument().beginNewTransaction();
     }
 
+    Component* createComponentHolder()
+    {
+        return new Component();
+    }
+
     static Component* findComponentForState (Component* compHolder, ComponentDocument& doc, const ValueTree& state)
     {
         for (int i = compHolder->getNumChildComponents(); --i >= 0;)

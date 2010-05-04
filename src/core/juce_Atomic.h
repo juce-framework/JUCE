@@ -171,7 +171,7 @@ public:
     #define juce_InterlockedExchangeAdd(a, b)           _InterlockedExchangeAdd(a, b)
     #define juce_InterlockedCompareExchange(a, b, c)    _InterlockedCompareExchange(a, b, c)
     #define juce_InterlockedCompareExchange64(a, b, c)  _InterlockedCompareExchange64(a, b, c)
-    #define juce_MemoryBarrier MemoryBarrier
+    #define juce_MemoryBarrier _ReadWriteBarrier
   #else
     // (these are defined in juce_win32_Threads.cpp)
     long juce_InterlockedExchange (volatile long* a, long b) throw();

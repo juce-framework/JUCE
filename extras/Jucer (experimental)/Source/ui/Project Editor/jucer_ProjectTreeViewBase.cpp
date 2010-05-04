@@ -336,7 +336,7 @@ static void getAllSelectedNodesInTree (Component* componentInTree, OwnedArray <P
 
 bool ProjectTreeViewBase::isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
 {
-    if (sourceDescription != String (projectItemDragType))
+    if (sourceDescription != projectItemDragType)
         return false;
 
     OwnedArray <Project::Item> selectedNodes;
