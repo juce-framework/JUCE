@@ -155,6 +155,16 @@ public:
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
       || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1        // Older OSX builds using gcc4.1 or earlier
+
+  #if JUCE_PPC
+    // None of these atomics are available in a PPC build!!
+    template <typename Type> static Type OSAtomicAdd64 (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
+    template <typename Type> static Type OSAtomicIncrement64 (volatile Type* a) throw()     { jassertfalse; return ++*a; }
+    template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()     { jassertfalse; return --*a; }
+    template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
+        { jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
+  #endif
+
 //==============================================================================
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
@@ -277,8 +287,8 @@ template <typename Type>
 inline bool Atomic<Type>::compareAndSetBool (const Type newValue, const Type valueToCompare) throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicCompareAndSwap32Barrier ((int32_t) valueToCompare, (int32_t) newValue, (int32_t*) &value)
-                              : (Type) OSAtomicCompareAndSwap64Barrier ((int64_t) valueToCompare, (int64_t) newValue, (int64_t*) &value);
+    return sizeof (Type) == 4 ? OSAtomicCompareAndSwap32Barrier ((int32_t) valueToCompare, (int32_t) newValue, (int32_t*) &value)
+                              : OSAtomicCompareAndSwap64Barrier ((int64_t) valueToCompare, (int64_t) newValue, (int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return compareAndSetValue (newValue, valueToCompare) == valueToCompare;
   #elif JUCE_ATOMICS_GCC
