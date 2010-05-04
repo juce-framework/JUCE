@@ -5612,6 +5612,7 @@ public:
 	inline Atomic& operator= (const Atomic& other) throw()
 	{
 		set (other.get());
+		return *this;
 	}
 
 	/** Destructor. */

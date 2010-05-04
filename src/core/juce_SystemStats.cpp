@@ -74,7 +74,7 @@ static bool juceInitialisedNonGUI = false;
 template <typename Type>
 static void juce_testAtomicType (Type)
 {
-    Atomic<Type> a;
+    Atomic<Type> a, b;
     a.set ((Type) 10);
     a += (Type) 15;
     a.memoryBarrier();
@@ -99,6 +99,9 @@ static void juce_testAtomicType (Type)
 
     jassert (a.exchange ((Type) 300) == (Type) 200);
     jassert (a.get() == (Type) 300);
+
+    b = a;
+    jassert (b.get() == a.get());
 }
 
 static void juce_testAtomics()
