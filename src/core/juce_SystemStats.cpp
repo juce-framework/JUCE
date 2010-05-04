@@ -113,7 +113,7 @@ static void juce_testAtomics()
     juce_testAtomicType ((long) 0);
     juce_testAtomicType ((void*) 0);
     juce_testAtomicType ((int*) 0);
-  #if ! (JUCE_WINDOWS && JUCE_32BIT) // some 64-bit intrinsics aren't available on win32
+  #if ! ((JUCE_WINDOWS && JUCE_32BIT) || JUCE_PPC) // 64-bit intrinsics aren't available on some old platforms
     juce_testAtomicType ((int64) 0);
     juce_testAtomicType ((uint64) 0);
   #endif
