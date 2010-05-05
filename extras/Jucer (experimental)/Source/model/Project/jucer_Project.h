@@ -157,6 +157,7 @@ public:
         ~Item();
 
         //==============================================================================
+        bool isValid() const                            { return node.isValid(); }
         const ValueTree& getNode() const throw()        { return node; }
         ValueTree& getNode() throw()                    { return node; }
         Project& getProject() const throw()             { return project; }
@@ -176,6 +177,7 @@ public:
         const File getFile() const;
         void setFile (const File& file);
         const File determineGroupFolder() const;
+        bool renameFile (const File& newFile);
 
         bool shouldBeAddedToTargetProject() const;
         bool shouldBeCompiled() const;
@@ -191,6 +193,7 @@ public:
         bool addFile (const File& file, int insertIndex);
         void removeItemFromProject();
         void sortAlphabetically();
+        Item findItemForFile (const File& file) const;
 
         Item getParent() const;
 

@@ -28,6 +28,82 @@
 
 
 //==============================================================================
+class JucerToolbarButton   : public ToolbarItemComponent
+{
+public:
+    //==============================================================================
+    JucerToolbarButton (ComponentEditor& editor_, int itemId_, const String& labelText)
+        : ToolbarItemComponent (itemId_, labelText, true),
+          editor (editor_)
+    {
+        setClickingTogglesState (false);
+    }
+
+    ~JucerToolbarButton()
+    {
+    }
+
+    //==============================================================================
+    bool getToolbarItemSizes (int toolbarDepth, bool isToolbarVertical, int& preferredSize, int& minSize, int& maxSize)
+    {
+        preferredSize = minSize = maxSize = 50;
+        return true;
+    }
+
+    void paintButton (Graphics& g, const bool over, const bool down)
+    {
+        Path p;
+        p.addRoundedRectangle (1.5f, 2.5f, getWidth() - 3.0f, getHeight() - 5.0f, 3.0f);
+
+        if (getToggleState())
+        {
+            g.setColour (Colours::grey.withAlpha (0.5f));
+            g.fillPath (p);
+        }
+
+        g.setColour (Colours::darkgrey.withAlpha (0.3f));
+        g.strokePath (p, PathStrokeType (1.0f));
+
+        g.setFont (11.0f);
+        g.setColour (Colours::black.withAlpha ((over || down) ? 1.0f : 0.7f));
+        g.drawFittedText (getButtonText(), 2, 2, getWidth() - 4, getHeight() - 4, Justification::centred, 2);
+    }
+
+    void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown)
+    {
+    }
+
+    void contentAreaChanged (const Rectangle<int>& newBounds)
+    {
+    }
+
+    juce_UseDebuggingNewOperator
+
+protected:
+    ComponentEditor& editor;
+
+private:
+    JucerToolbarButton (const JucerToolbarButton&);
+    JucerToolbarButton& operator= (const JucerToolbarButton&);
+};
+
+//==============================================================================
+class NewComponentToolbarButton   : public JucerToolbarButton
+{
+public:
+    NewComponentToolbarButton (ComponentEditor& editor_, int itemId_)
+        : JucerToolbarButton (editor_, itemId_, "create...")
+    {
+        setTriggeredOnMouseDown (true);
+    }
+
+    void clicked()
+    {
+        editor.showNewComponentMenu (this);
+    }
+};
+
+//==============================================================================
 class ComponentEditorToolbarFactory  : public ToolbarItemFactory
 {
 public:
@@ -46,6 +122,8 @@ public:
         createComponent     = 1,
         showInfo            = 2,
         showComponentTree   = 3,
+        showOrHideMarkers   = 4,
+        toggleSnapping      = 5
     };
 
     void getAllToolbarItemIds (Array <int>& ids)
@@ -53,6 +131,8 @@ public:
         ids.add (createComponent);
         ids.add (showInfo);
         ids.add (showComponentTree);
+        ids.add (showOrHideMarkers);
+        ids.add (toggleSnapping);
 
         ids.add (separatorBarId);
         ids.add (spacerId);
@@ -63,6 +143,9 @@ public:
     {
         ids.add (spacerId);
         ids.add (createComponent);
+        ids.add (flexibleSpacerId);
+        ids.add (showOrHideMarkers);
+        ids.add (toggleSnapping);
         ids.add (flexibleSpacerId);
         ids.add (showComponentTree);
         ids.add (showInfo);
@@ -76,13 +159,15 @@ public:
 
         switch (itemId)
         {
-            case createComponent:   name = "new"; break;
+            case createComponent:   name = "new"; return new NewComponentToolbarButton (editor, createComponent);
             case showInfo:          name = "info"; commandId = CommandIDs::showOrHideProperties; break;
             case showComponentTree: name = "tree"; commandId = CommandIDs::showOrHideTree; break;
+            case showOrHideMarkers: name = "markers"; commandId = CommandIDs::showOrHideMarkers; break;
+            case toggleSnapping:    name = "snap"; commandId = CommandIDs::toggleSnapping; break;
             default:                jassertfalse; return 0;
         }
 
-        ToolbarButton* b = new ToolbarButton (itemId, name, new DrawablePath(), 0);
+        JucerToolbarButton* b = new JucerToolbarButton (editor, itemId, name);
         b->setCommandToTrigger (commandManager, commandId, true);
         return b;
     }

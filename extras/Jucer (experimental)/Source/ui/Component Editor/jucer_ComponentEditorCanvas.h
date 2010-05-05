@@ -146,10 +146,9 @@ public:
 
     void showPopupMenu (const Point<int>& position)
     {
-        PopupMenu m;
-
         if (findObjectIdAt (position).isNotEmpty())
         {
+            PopupMenu m;
             m.addCommandItem (commandManager, CommandIDs::toFront);
             m.addCommandItem (commandManager, CommandIDs::toBack);
             m.addSeparator();
@@ -159,9 +158,7 @@ public:
         }
         else
         {
-            getDocument().addNewComponentMenuItems (m);
-            const int r = m.show();
-            getDocument().performNewComponentMenuItem (r);
+            editor.showNewComponentMenu (0);
         }
     }
 

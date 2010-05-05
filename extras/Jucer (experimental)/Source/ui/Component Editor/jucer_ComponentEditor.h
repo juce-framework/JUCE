@@ -61,6 +61,7 @@ public:
     void deselectNonComponents();
     void selectionToFront();
     void selectionToBack();
+    void showNewComponentMenu (Component* componentToAttachTo);
 
     //==============================================================================
     void test();

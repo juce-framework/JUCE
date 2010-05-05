@@ -28,7 +28,7 @@
 
 #include "../../utility/jucer_Coordinate.h"
 #include "../../utility/jucer_MarkerListBase.h"
-
+class EditorPanelBase;
 
 //==============================================================================
 class EditorCanvasBase   : public Component,
@@ -101,7 +101,8 @@ public:
     void endDrag (const MouseEvent& e);
 
     //==============================================================================
-    Component* getComponentHolder() const     { return componentHolder; }
+    Component* getComponentHolder() const       { return componentHolder; }
+    EditorPanelBase* getPanel() const;
 
     //==============================================================================
     class OverlayItemComponent  : public Component

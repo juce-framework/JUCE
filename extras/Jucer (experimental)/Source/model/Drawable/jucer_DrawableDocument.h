@@ -38,15 +38,15 @@ class DrawableDocument  :  public ValueTree::Listener,
 {
 public:
     //==============================================================================
-    DrawableDocument (Project* project, const File& drawableFile);
+    DrawableDocument (Project* project);
     ~DrawableDocument();
 
     //==============================================================================
     void setName (const String& name);
     const String getName() const;
 
-    bool reload();
-    bool save();
+    bool reload (const File& drawableFile);
+    bool save (const File& drawableFile);
     bool hasChangedSinceLastSave() const;
     void changed();
 
@@ -101,7 +101,6 @@ public:
 
 private:
     Project* project;
-    File drawableFile;
     ValueTree root;
     ScopedPointer<MarkerList> markersX, markersY;
     mutable UndoManager undoManager;

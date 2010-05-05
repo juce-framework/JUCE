@@ -25,6 +25,7 @@
 
 #include "../../jucer_Headers.h"
 #include "jucer_EditorCanvas.h"
+#include "jucer_EditorPanel.h"
 
 
 //==============================================================================
@@ -747,6 +748,11 @@ void EditorCanvasBase::shutdown()
     dragger = 0;
     deleteAndZero (overlay);
     deleteAllChildren();
+}
+
+EditorPanelBase* EditorCanvasBase::getPanel() const
+{
+    return findParentComponentOfClass ((EditorPanelBase*) 0);
 }
 
 //==============================================================================

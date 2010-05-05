@@ -26,8 +26,8 @@
 #include "../../jucer_Headers.h"
 #include "../../model/Component/jucer_ComponentDocument.h"
 #include "../jucer_JucerTreeViewBase.h"
-#include "../Editor Base/jucer_EditorDragOperation.h"
 #include "../Editor Base/jucer_EditorPanel.h"
+#include "../Editor Base/jucer_EditorDragOperation.h"
 #include "jucer_ComponentEditor.h"
 #include "jucer_ComponentEditorCanvas.h"
 #include "jucer_ComponentEditorTreeView.h"
@@ -256,6 +256,19 @@ void ComponentEditor::selectionToBack()
     getDocument().beginNewTransaction();
 }
 
+//==============================================================================
+void ComponentEditor::showNewComponentMenu (Component* componentToAttachTo)
+{
+    PopupMenu m;
+    getDocument().addNewComponentMenuItems (m);
+
+    const int r = m.showAt (componentToAttachTo);
+
+    const ValueTree newComp (getDocument().performNewComponentMenuItem (r));
+
+    if (newComp.isValid())
+        getSelection().selectOnly (newComp [ComponentDocument::idProperty]);
+}
 
 //==============================================================================
 class TestComponent     : public Component
@@ -307,6 +320,8 @@ void ComponentEditor::getAllCommands (Array <CommandID>& commands)
                               CommandIDs::test,
                               CommandIDs::showOrHideProperties,
                               CommandIDs::showOrHideTree,
+                              CommandIDs::showOrHideMarkers,
+                              CommandIDs::toggleSnapping,
                               StandardApplicationCommandIDs::del };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -344,10 +359,22 @@ void ComponentEditor::getCommandInfo (CommandID commandID, ApplicationCommandInf
 
     case CommandIDs::showOrHideProperties:
         result.setInfo ("Show/Hide Tree", "Shows or hides the component tree view", CommandCategories::editing, 0);
+        result.setTicked (layoutEditorHolder != 0 && layoutEditorHolder->arePropertiesVisible());
         break;
 
     case CommandIDs::showOrHideTree:
         result.setInfo ("Show/Hide Properties", "Shows or hides the component properties panel", CommandCategories::editing, 0);
+        result.setTicked (layoutEditorHolder != 0 && layoutEditorHolder->isTreeVisible());
+        break;
+
+    case CommandIDs::showOrHideMarkers:
+        result.setInfo ("Show/Hide Markers", "Shows or hides the markers", CommandCategories::editing, 0);
+        result.setTicked (layoutEditorHolder != 0 && layoutEditorHolder->areMarkersVisible());
+        break;
+
+    case CommandIDs::toggleSnapping:
+        result.setInfo ("Toggle snapping", "Turns object snapping on or off", CommandCategories::editing, 0);
+        result.setTicked (layoutEditorHolder != 0 && layoutEditorHolder->isSnappingEnabled());
         break;
 
     case StandardApplicationCommandIDs::del:
@@ -392,6 +419,14 @@ bool ComponentEditor::perform (const InvocationInfo& info)
 
     case CommandIDs::showOrHideTree:
         layoutEditorHolder->showOrHideTree();
+        return true;
+
+    case CommandIDs::showOrHideMarkers:
+        layoutEditorHolder->showOrHideMarkers();
+        return true;
+
+    case CommandIDs::toggleSnapping:
+        layoutEditorHolder->toggleSnapping();
         return true;
 
     case StandardApplicationCommandIDs::del:

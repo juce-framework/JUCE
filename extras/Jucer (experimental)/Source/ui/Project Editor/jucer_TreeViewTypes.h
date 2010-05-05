@@ -41,6 +41,8 @@ public:
     ProjectTreeViewBase* createSubItem (const Project::Item& child);
     void showDocument();
     void showPopupMenu();
+    const String getDisplayName() const;
+    void setName (const String& newName);
 };
 
 //==============================================================================

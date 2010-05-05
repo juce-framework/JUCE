@@ -61,6 +61,7 @@ public:
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
         virtual Component* createEditor() = 0;
+        virtual void fileHasBeenRenamed (const File& newFile) = 0;
     };
 
     Document* getDocumentForFile (Project* project, const File& file);
@@ -79,6 +80,7 @@ public:
     bool saveAll();
     FileBasedDocument::SaveResult saveIfNeededAndUserAgrees (Document* doc);
     void reloadModifiedFiles();
+    void fileHasBeenRenamed (const File& oldFile, const File& newFile);
 
     //==============================================================================
     void registerEditor (DocumentEditorComponent* editor);

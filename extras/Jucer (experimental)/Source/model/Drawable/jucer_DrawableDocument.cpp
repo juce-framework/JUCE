@@ -33,9 +33,8 @@ static const char* const markersGroupYTag   = "MARKERS_Y";
 
 
 //==============================================================================
-DrawableDocument::DrawableDocument (Project* project_, const File& drawableFile_)
+DrawableDocument::DrawableDocument (Project* project_)
     : project (project_),
-      drawableFile (drawableFile_),
       root (drawableTag),
       saveAsXml (true),
       needsSaving (false)
@@ -51,9 +50,6 @@ DrawableDocument::DrawableDocument (Project* project_, const File& drawableFile_
 
 DrawableDocument::~DrawableDocument()
 {
-    if (needsSaving)
-        save();
-
     root.removeListener (this);
 }
 
@@ -107,7 +103,7 @@ bool DrawableDocument::hasChangedSinceLastSave() const
     return needsSaving;
 }
 
-bool DrawableDocument::reload()
+bool DrawableDocument::reload (const File& drawableFile)
 {
     ScopedPointer <InputStream> stream (drawableFile.createInputStream());
 
@@ -122,7 +118,7 @@ bool DrawableDocument::reload()
     return false;
 }
 
-bool DrawableDocument::save()
+bool DrawableDocument::save (const File& drawableFile)
 {
     TemporaryFile tempFile (drawableFile);
     ScopedPointer <OutputStream> out (tempFile.getFile().createOutputStream());

@@ -32,7 +32,7 @@ class EditorPanelBase  : public Component
 {
 public:
     EditorPanelBase()
-        : infoPanel (0), tree (0)
+        : infoPanel (0), tree (0), markersVisible (true), snappingEnabled (true)
     {
         addAndMakeVisible (toolbar = new Toolbar());
         toolbar->setStyle (Toolbar::textOnly);
@@ -68,11 +68,14 @@ public:
         deleteAndZero (infoPanel);
     }
 
+    //==============================================================================
     void showOrHideProperties()
     {
         infoPanel->setVisible (! infoPanel->isVisible());
         resized();
     }
+
+    bool arePropertiesVisible() const        { return infoPanel->isVisible(); }
 
     void showOrHideTree()
     {
@@ -80,6 +83,25 @@ public:
         resized();
     }
 
+    bool isTreeVisible() const              { return tree->isVisible(); }
+
+    void showOrHideMarkers()
+    {
+        markersVisible = ! markersVisible;
+        commandManager->commandStatusChanged();
+    }
+
+    bool areMarkersVisible() const          { return markersVisible; }
+
+    void toggleSnapping()
+    {
+        snappingEnabled = ! snappingEnabled;
+        commandManager->commandStatusChanged();
+    }
+
+    bool isSnappingEnabled() const          { return snappingEnabled; }
+
+    //==============================================================================
     virtual SelectedItemSet<String>& getSelection() = 0;
     virtual void getSelectedItemProperties (Array<PropertyComponent*>& newComps) = 0;
 
@@ -89,21 +111,21 @@ public:
 
         toolbar->setBounds (0, 0, getWidth(), toolbarHeight);
 
-        int infoPanelWidth = 200;
+        int contentL = 0, contentR = getWidth();
+
         if (infoPanel != 0 && infoPanel->isVisible())
-            infoPanel->setBounds (getWidth() - infoPanelWidth, toolbar->getBottom(), infoPanelWidth, getHeight() - toolbar->getBottom());
-        else
-            infoPanelWidth = 0;
+        {
+            contentR -= 200;
+            infoPanel->setBounds (contentR, toolbar->getBottom(), getWidth() - contentR, getHeight() - toolbar->getBottom());
+        }
 
         if (tree->isVisible())
         {
-            tree->setBounds (0, toolbar->getBottom(), infoPanelWidth, getHeight() - toolbar->getBottom());
-            viewport->setBounds (infoPanelWidth, toolbar->getBottom(), getWidth() - infoPanelWidth * 2, getHeight() - toolbar->getBottom());
+            contentL = 200;
+            tree->setBounds (0, toolbar->getBottom(), contentL, getHeight() - toolbar->getBottom());
         }
-        else
-        {
-            viewport->setBounds (0, toolbar->getBottom(), getWidth() - infoPanelWidth, getHeight() - toolbar->getBottom());
-        }
+
+        viewport->setBounds (contentL, toolbar->getBottom(), contentR - contentL, getHeight() - toolbar->getBottom());
     }
 
 private:
@@ -157,6 +179,7 @@ private:
     Viewport* viewport;
     InfoPanel* infoPanel;
     TreeView* tree;
+    bool markersVisible, snappingEnabled;
 };
 
 

@@ -165,6 +165,68 @@ SourceFileTreeViewItem::~SourceFileTreeViewItem()
 {
 }
 
+const String SourceFileTreeViewItem::getDisplayName() const
+{
+    return getFile().getFileName();
+}
+
+static const File findCorrespondingHeaderOrCpp (const File& f)
+{
+    if (f.hasFileExtension (".cpp"))
+        return f.withFileExtension (".h");
+    else if (f.hasFileExtension (".h"))
+        return f.withFileExtension (".cpp");
+
+    return File::nonexistent;
+}
+
+void SourceFileTreeViewItem::setName (const String& newName)
+{
+    if (newName != File::createLegalFileName (newName))
+    {
+        AlertWindow::showMessageBox (AlertWindow::WarningIcon, "File Rename",
+                                     "That filename contained some illegal characters!");
+        triggerAsyncRename (item);
+        return;
+    }
+
+    File oldFile (getFile());
+    File newFile (oldFile.getSiblingFile (newName));
+    File correspondingFile (findCorrespondingHeaderOrCpp (oldFile));
+
+    if (correspondingFile.exists() && newFile.hasFileExtension (oldFile.getFileExtension()))
+    {
+        Project::Item correspondingItem (item.getProject().getMainGroup().findItemForFile (correspondingFile));
+
+        if (correspondingItem.isValid())
+        {
+            if (AlertWindow::showOkCancelBox (AlertWindow::NoIcon, "File Rename",
+                                              "Do you also want to rename the corresponding file \"" + correspondingFile.getFileName()
+                                                + "\" to match?"))
+            {
+                if (! item.renameFile (newFile))
+                {
+                    AlertWindow::showMessageBox (AlertWindow::WarningIcon, "File Rename",
+                                                 "Failed to rename \"" + oldFile.getFullPathName() + "\"!\n\nCheck your file permissions!");
+                    return;
+                }
+
+                if (! correspondingItem.renameFile (newFile.withFileExtension (correspondingFile.getFileExtension())))
+                {
+                    AlertWindow::showMessageBox (AlertWindow::WarningIcon, "File Rename",
+                                                 "Failed to rename \"" + correspondingFile.getFullPathName() + "\"!\n\nCheck your file permissions!");
+                }
+            }
+        }
+    }
+
+    if (! item.renameFile (newFile))
+    {
+        AlertWindow::showMessageBox (AlertWindow::WarningIcon, "File Rename",
+                                     "Failed to rename the file!\n\nCheck your file permissions!");
+    }
+}
+
 ProjectTreeViewBase* SourceFileTreeViewItem::createSubItem (const Project::Item& child)
 {
     jassertfalse
@@ -193,13 +255,15 @@ void SourceFileTreeViewItem::showPopupMenu()
     }
 
     m.addItem (1, "Open in external editor");
+    m.addItem (2,
 #if JUCE_MAC
-    m.addItem (2, "Reveal in Finder");
+                  "Reveal in Finder");
 #else
-    m.addItem (2, "Reveal in Explorer");
+                  "Reveal in Explorer");
 #endif
 
-    //m.addItem (4, "Rename...");
+    m.addItem (4, "Rename File...");
+    m.addSeparator();
     m.addItem (3, "Delete");
 
     const int res = m.show();
@@ -208,7 +272,7 @@ void SourceFileTreeViewItem::showPopupMenu()
         case 1:     getFile().startAsProcess(); break;
         case 2:     revealInFinder(); break;
         case 3:     deleteAllSelectedItems(); break;
-        //case 4:     triggerAsyncRename(); break;
+        case 4:     triggerAsyncRename (item); break;
 
         default:
             if (parentGroup != 0)

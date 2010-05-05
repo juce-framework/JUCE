@@ -197,6 +197,7 @@ bool ComponentDocument::save()
 bool ComponentDocument::reload()
 {
     String xmlString;
+    bool hadMetaDataTags = false;
 
     {
         InputStream* in = cppFile.createInputStream();
@@ -217,7 +218,10 @@ bool ComponentDocument::reload()
                 {
                     line = buf.readNextLine();
                     if (line.contains (metadataTagEnd))
+                    {
+                        hadMetaDataTags = true;
                         break;
+                    }
 
                     xml.append (line);
                     xml.append (newLine);
@@ -230,6 +234,9 @@ bool ComponentDocument::reload()
 
     XmlDocument doc (xmlString);
     ScopedPointer<XmlElement> xml (doc.getDocumentElement());
+
+    if (xml == 0 && hadMetaDataTags)
+        xml = new XmlElement (componentDocumentTag);
 
     if (xml != 0 && xml->hasTagName (componentDocumentTag))
     {
@@ -301,7 +308,7 @@ void ComponentDocument::addNewComponentMenuItems (PopupMenu& menu) const
         menu.addItem (i + menuItemOffset, "New " + typeNames[i]);
 }
 
-void ComponentDocument::performNewComponentMenuItem (int menuResultCode)
+const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCode)
 {
     const StringArray typeNames (ComponentTypeManager::getInstance()->getTypeNames());
 
@@ -317,8 +324,12 @@ void ComponentDocument::performNewComponentMenuItem (int menuResultCode)
             handler->initialiseNewItem (*this, state);
 
             getComponentGroup().addChild (state, -1, getUndoManager());
+
+            return state;
         }
     }
+
+    return ValueTree::invalid;
 }
 
 //==============================================================================

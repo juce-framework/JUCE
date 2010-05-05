@@ -141,9 +141,9 @@ public:
 
         if (newFile != File::nonexistent)
         {
-            DrawableDocument newDrawable (&(parent.getProject()), newFile);
+            DrawableDocument newDrawable (&(parent.getProject()));
 
-            if (newDrawable.save())
+            if (newDrawable.save (newFile))
                 parent.addFile (newFile, 0);
             else
                 showFailedToWriteMessage (newFile);

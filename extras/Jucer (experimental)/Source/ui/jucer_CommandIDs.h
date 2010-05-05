@@ -51,6 +51,8 @@ namespace CommandIDs
     static const int toBack                 = 0x2030a1;
     static const int showOrHideProperties   = 0x2030b0;
     static const int showOrHideTree         = 0x2030b1;
+    static const int showOrHideMarkers      = 0x2030b2;
+    static const int toggleSnapping         = 0x2030b3;
 
     static const int group                  = 0x202170;
     static const int ungroup                = 0x202180;

@@ -53,6 +53,7 @@ public:
     const String getType() const                        { return modDetector.getFile().getFileExtension() + " file"; }
     bool needsSaving() const                            { return codeDoc != 0 && codeDoc->hasChangedSinceSavePoint(); }
     bool hasFileBeenModifiedExternally()                { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile)       { modDetector.fileHasBeenRenamed (newFile); }
 
     void reloadFromFile()
     {
@@ -119,6 +120,14 @@ public:
     bool needsSaving() const                        { return componentDoc != 0 && componentDoc->hasChangedSinceLastSave(); }
     bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
 
+    void fileHasBeenRenamed (const File& newFile)
+    {
+        if (componentDoc != 0)
+            componentDoc->cppFileHasMoved (newFile);
+
+        modDetector.fileHasBeenRenamed (newFile);
+    }
+
     void reloadFromFile()
     {
         modDetector.updateHash();
@@ -178,21 +187,22 @@ public:
     const String getName() const                    { return modDetector.getFile().getFileName(); }
     bool needsSaving() const                        { return drawableDoc != 0 && drawableDoc->hasChangedSinceLastSave(); }
     bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
+    void fileHasBeenRenamed (const File& newFile)   { modDetector.fileHasBeenRenamed (newFile); }
 
     void reloadFromFile()
     {
         modDetector.updateHash();
 
         if (drawableDoc == 0)
-            drawableDoc = new DrawableDocument (project, modDetector.getFile());
+            drawableDoc = new DrawableDocument (project);
 
-        if (! drawableDoc->reload())
+        if (! drawableDoc->reload (modDetector.getFile()))
             drawableDoc = 0;
     }
 
     bool save()
     {
-        return drawableDoc->save();
+        return drawableDoc->save (modDetector.getFile());
     }
 
     Component* createEditor()
@@ -233,6 +243,7 @@ public:
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     const String getName() const                    { return file.getFileName(); }
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
+    void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
 
     const String getType() const
     {
@@ -245,7 +256,7 @@ public:
 
 private:
     Project* const project;
-    const File file;
+    File file;
     Time fileModificationTime;
 
     UnknownDocument (const UnknownDocument&);
@@ -446,5 +457,16 @@ void OpenDocumentManager::reloadModifiedFiles()
 
         if (d->hasFileBeenModifiedExternally())
             d->reloadFromFile();
+    }
+}
+
+void OpenDocumentManager::fileHasBeenRenamed (const File& oldFile, const File& newFile)
+{
+    for (int i = documents.size(); --i >= 0;)
+    {
+        Document* d = documents.getUnchecked (i);
+
+        if (d->isForFile (oldFile))
+            d->fileHasBeenRenamed (newFile);
     }
 }

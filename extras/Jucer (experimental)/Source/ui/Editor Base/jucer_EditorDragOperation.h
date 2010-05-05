@@ -183,8 +183,11 @@ public:
 
         snapGuides.clear();
 
-        performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
-        performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
+        if (canvas->getPanel()->isSnappingEnabled() != e.mods.isCommandDown())
+        {
+            performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
+            performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
+        }
 
         for (int n = 50;;)
         {
@@ -279,11 +282,13 @@ private:
                 if (absDiff <= absBest)
                 {
                     if (absDiff < absBest)
+                    {
+                        absBest = absDiff;
+                        best = diff;
                         lines.clearQuick();
+                    }
 
                     lines.add (SnapLine (target.position, jmin (target.start, source.start), jmax (target.end, source.end)));
-                    best = diff;
-                    absBest = absDiff;
                 }
             }
         }

@@ -49,7 +49,9 @@ public:
     bool reload();
     bool hasChangedSinceLastSave();
     void changed();
-    const File getCppFile() const           { return cppFile; }
+
+    const File getCppFile() const                   { return cppFile; }
+    void cppFileHasMoved (const File& newFile)      { cppFile = newFile; }
 
     //==============================================================================
     const String getUniqueId() const        { return root [idProperty]; }
@@ -87,7 +89,7 @@ public:
     const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
-    void performNewComponentMenuItem (int menuResultCode);
+    const ValueTree performNewComponentMenuItem (int menuResultCode);
 
     //==============================================================================
     class MarkerList    : public MarkerListBase

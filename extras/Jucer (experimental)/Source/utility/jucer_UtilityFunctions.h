@@ -89,7 +89,8 @@ public:
     {
     }
 
-    const File& getFile() const         { return file; }
+    const File& getFile() const                     { return file; }
+    void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
 
     bool hasBeenModified() const
     {

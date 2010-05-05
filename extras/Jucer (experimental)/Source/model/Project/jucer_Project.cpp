@@ -494,6 +494,39 @@ void Project::Item::setFile (const File& file)
     jassert (getFile() == file);
 }
 
+bool Project::Item::renameFile (const File& newFile)
+{
+    const File oldFile (getFile());
+
+    if (oldFile.moveFileTo (newFile))
+    {
+        setFile (newFile);
+        OpenDocumentManager::getInstance()->fileHasBeenRenamed (oldFile, newFile);
+        return true;
+    }
+
+    return false;
+}
+
+Project::Item Project::Item::findItemForFile (const File& file) const
+{
+    if (getFile() == file)
+        return *this;
+
+    if (isGroup())
+    {
+        for (int i = getNumChildren(); --i >= 0;)
+        {
+            Item found (getChild(i).findItemForFile (file));
+
+            if (found.isValid())
+                return found;
+        }
+    }
+
+    return Item (project, ValueTree::invalid);
+}
+
 const File Project::Item::determineGroupFolder() const
 {
     jassert (isGroup());
