@@ -36,7 +36,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const wavFormatName = "WAV file";
-static const juce_wchar* const wavExtensions[] =    { T(".wav"), T(".bwf"), 0 };
+static const char* const wavExtensions[] = { ".wav", ".bwf", 0 };
 
 
 //==============================================================================
@@ -820,7 +820,7 @@ public:
 
 //==============================================================================
 WavAudioFormat::WavAudioFormat()
-    : AudioFormat (TRANS (wavFormatName), (const juce_wchar**) wavExtensions)
+    : AudioFormat (TRANS (wavFormatName), StringArray (wavExtensions))
 {
 }
 

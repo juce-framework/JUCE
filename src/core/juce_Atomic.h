@@ -251,8 +251,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 template <typename Type>
 inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
 {
-    return operator+= (sizeof (Type) == 4 ? (Type) (-(int32) amountToSubtract)
-                                          : (Type) (-(int64) amountToSubtract));
+    return operator+= (juce_negate (amountToSubtract));
 }
 
 template <typename Type>

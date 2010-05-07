@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const aiffFormatName = "AIFF file";
-static const juce_wchar* const aiffExtensions[] =    { T(".aiff"), T(".aif"), 0 };
+static const char* const aiffExtensions[] = { ".aiff", ".aif", 0 };
 
 
 //==============================================================================
@@ -743,7 +743,7 @@ public:
 
 //==============================================================================
 AiffAudioFormat::AiffAudioFormat()
-    : AudioFormat (TRANS (aiffFormatName), (const juce_wchar**) aiffExtensions)
+    : AudioFormat (TRANS (aiffFormatName), StringArray (aiffExtensions))
 {
 }
 

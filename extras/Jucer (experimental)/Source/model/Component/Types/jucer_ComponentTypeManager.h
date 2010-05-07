@@ -52,8 +52,8 @@ public:
 
     Value getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const;
 
-    //==============================================================================
 protected:
+    //==============================================================================
     const String name, xmlTag, memberNameRoot;
 
 private:
@@ -80,7 +80,6 @@ public:
 
     ComponentTypeHandler* getHandlerFor (const String& type);
     const StringArray getTypeNames() const;
-
 
 private:
     //==============================================================================

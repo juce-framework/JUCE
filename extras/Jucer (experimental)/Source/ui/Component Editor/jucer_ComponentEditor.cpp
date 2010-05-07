@@ -394,10 +394,12 @@ bool ComponentEditor::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::undo:
+        getDocument().getUndoManager()->beginNewTransaction();
         getDocument().getUndoManager()->undo();
         return true;
 
     case CommandIDs::redo:
+        getDocument().getUndoManager()->beginNewTransaction();
         getDocument().getUndoManager()->redo();
         return true;
 

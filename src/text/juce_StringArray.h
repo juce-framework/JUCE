@@ -54,27 +54,27 @@ public:
                                 treated as empty strings
         @param numberOfStrings  how many items there are in the array
     */
-    StringArray (const juce_wchar** strings, int numberOfStrings);
+    StringArray (const juce_wchar* const* strings, int numberOfStrings);
 
     /** Creates a copy of an array of string literals.
         @param strings          an array of strings to add. Null pointers in the array will be
                                 treated as empty strings
         @param numberOfStrings  how many items there are in the array
     */
-    StringArray (const char** strings, int numberOfStrings);
+    StringArray (const char* const* strings, int numberOfStrings);
 
     /** Creates a copy of a null-terminated array of string literals.
         Each item from the array passed-in is added, until it encounters a null pointer,
         at which point it stops.
     */
-    explicit StringArray (const juce_wchar** strings);
+    explicit StringArray (const juce_wchar* const* strings);
 
     /** Creates a copy of a null-terminated array of string literals.
 
         Each item from the array passed-in is added, until it encounters a null pointer,
         at which point it stops.
     */
-    explicit StringArray (const char** strings);
+    explicit StringArray (const char* const* strings);
 
     /** Destructor. */
     ~StringArray();

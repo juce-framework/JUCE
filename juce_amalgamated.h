@@ -1120,7 +1120,7 @@ inline double juce_hypot (double a, double b)
 
 /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
 	versions of these functions of various platforms and compilers. */
-inline float juce_hypotf (float a, float b)
+inline float juce_hypotf (float a, float b) throw()
 {
   #if JUCE_WINDOWS
 	return (float) _hypot (a, b);
@@ -1130,9 +1130,23 @@ inline float juce_hypotf (float a, float b)
 }
 
 /** 64-bit abs function. */
-inline int64 abs64 (const int64 n)
+inline int64 abs64 (const int64 n) throw()
 {
 	return (n >= 0) ? n : -n;
+}
+
+/** This templated negate function will negate pointers as well as integers */
+template <typename Type>
+inline Type juce_negate (Type n) throw()
+{
+	return -n;
+}
+
+/** This templated negate function will negate pointers as well as integers */
+template <typename Type>
+inline Type* juce_negate (Type* n) throw()
+{
+	return (Type*) -(pointer_sized_int) n;
 }
 
 /** A predefined value for Pi, at double-precision.
@@ -5798,8 +5812,7 @@ inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 template <typename Type>
 inline Type Atomic<Type>::operator-= (const Type amountToSubtract) throw()
 {
-	return operator+= (sizeof (Type) == 4 ? (Type) (-(int32) amountToSubtract)
-										  : (Type) (-(int64) amountToSubtract));
+	return operator+= (juce_negate (amountToSubtract));
 }
 
 template <typename Type>
@@ -7092,27 +7105,27 @@ public:
 								treated as empty strings
 		@param numberOfStrings  how many items there are in the array
 	*/
-	StringArray (const juce_wchar** strings, int numberOfStrings);
+	StringArray (const juce_wchar* const* strings, int numberOfStrings);
 
 	/** Creates a copy of an array of string literals.
 		@param strings	  an array of strings to add. Null pointers in the array will be
 								treated as empty strings
 		@param numberOfStrings  how many items there are in the array
 	*/
-	StringArray (const char** strings, int numberOfStrings);
+	StringArray (const char* const* strings, int numberOfStrings);
 
 	/** Creates a copy of a null-terminated array of string literals.
 		Each item from the array passed-in is added, until it encounters a null pointer,
 		at which point it stops.
 	*/
-	explicit StringArray (const juce_wchar** strings);
+	explicit StringArray (const juce_wchar* const* strings);
 
 	/** Creates a copy of a null-terminated array of string literals.
 
 		Each item from the array passed-in is added, until it encounters a null pointer,
 		at which point it stops.
 	*/
-	explicit StringArray (const char** strings);
+	explicit StringArray (const char* const* strings);
 
 	/** Destructor. */
 	~StringArray();
@@ -11999,10 +12012,9 @@ private:
 	object - this means that multiple Value objects can all refer to the same piece of
 	data, allowing all of them to be notified when any of them changes it.
 
-	The base class of Value contains a simple var object, but subclasses can be
-	created that map a Value onto any kind of underlying data, e.g.
-	ValueTree::getPropertyAsValue() returns a Value object that is a wrapper
-	for one of its properties.
+	When you create a Value with its default constructor, it acts as a wrapper around a
+	simple var object, but by creating a Value that refers to a custom subclass of ValueSource,
+	you can map the Value onto any kind of underlying data.
 */
 class JUCE_API  Value
 {
@@ -12110,10 +12122,10 @@ public:
 
 		@see removeListener
 	*/
-	void addListener (Listener* const listener);
+	void addListener (Listener* listener);
 
 	/** Removes a listener that was previously added with addListener(). */
-	void removeListener (Listener* const listener);
+	void removeListener (Listener* listener);
 
 	/**
 		Used internally by the Value class as the base class for its shared value objects.
@@ -12131,6 +12143,7 @@ public:
 
 		/** Returns the current value of this object. */
 		virtual const var getValue() const = 0;
+
 		/** Changes the current value.
 			This must also trigger a change message if the value actually changes.
 		*/
@@ -12142,7 +12155,7 @@ public:
 			If dispatchSynchronously is true, the method will call all the listeners
 			before returning; otherwise it'll dispatch a message and make the call later.
 		*/
-		void sendChangeMessage (const bool dispatchSynchronously);
+		void sendChangeMessage (bool dispatchSynchronously);
 
 		juce_UseDebuggingNewOperator
 
@@ -12156,10 +12169,11 @@ public:
 		ValueSource& operator= (const ValueSource&);
 	};
 
-	/** @internal */
-	explicit Value (ValueSource* const valueSource);
-	/** @internal */
-	ValueSource& getValueSource()	   { return *value; }
+	/** Creates a Value object that uses this valueSource object as its underlying data. */
+	explicit Value (ValueSource* valueSource);
+
+	/** Returns the ValueSource that this value is referring to. */
+	ValueSource& getValueSource() throw()	   { return *value; }
 
 	juce_UseDebuggingNewOperator
 
@@ -29187,7 +29201,7 @@ protected:
 								be returned by getFileExtension()
 	*/
 	AudioFormat (const String& formatName,
-				 const juce_wchar** const fileExtensions);
+				 const StringArray& fileExtensions);
 
 private:
 
@@ -52028,6 +52042,9 @@ public:
 
 	/** Returns the number of buttons that the window currently has. */
 	int getNumButtons() const;
+
+	/** Invokes a click of one of the buttons. */
+	void triggerButtonClick (const String& buttonName);
 
 	/** Adds a textbox to the window for entering strings.
 

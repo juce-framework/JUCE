@@ -32,7 +32,6 @@ ProjectTreeViewBase::ProjectTreeViewBase (const Project::Item& item_)
     : item (item_), isFileMissing (false)
 {
     item.getNode().addListener (this);
-    item.createUIDIfMissing();
 }
 
 ProjectTreeViewBase::~ProjectTreeViewBase()

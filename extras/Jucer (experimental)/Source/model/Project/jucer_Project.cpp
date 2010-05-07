@@ -93,9 +93,10 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
     {
         Item mainGroup (*this, ValueTree (Tags::projectMainGroup));
-        mainGroup.createUIDIfMissing();
         projectRoot.addChild (mainGroup.getNode(), 0, 0);
     }
+
+    getMainGroup().initialiseNodeValues();
 
     if (getDocumentTitle().isEmpty())
         setTitle ("Juce Project");
@@ -407,7 +408,7 @@ Project::Item Project::getMainGroup()
 Project::Item Project::createNewGroup()
 {
     Item item (*this, ValueTree (Tags::group));
-    item.createUIDIfMissing();
+    item.initialiseNodeValues();
     item.getName() = "New Group";
     return item;
 }
@@ -415,7 +416,7 @@ Project::Item Project::createNewGroup()
 Project::Item Project::createNewItem (const File& file)
 {
     Item item (*this, ValueTree (Tags::file));
-    item.createUIDIfMissing();
+    item.initialiseNodeValues();
     item.getName() = file.getFileName();
     item.getShouldCompileValue() = file.hasFileExtension ("cpp;mm;c;m");
     item.getShouldAddToResourceValue() = shouldBeAddedToBinaryResourcesByDefault (file);
@@ -490,7 +491,10 @@ const File Project::Item::getFile() const
 
 void Project::Item::setFile (const File& file)
 {
+    jassert (isFile());
     node.setProperty ("file", project.getRelativePathForFile (file), getUndoManager());
+    node.setProperty ("name", file.getFileName(), getUndoManager());
+
     jassert (getFile() == file);
 }
 
@@ -559,10 +563,20 @@ const File Project::Item::determineGroupFolder() const
     return f;
 }
 
-void Project::Item::createUIDIfMissing()
+void Project::Item::initialiseNodeValues()
 {
     if (! node.hasProperty ("id"))
-        node.setProperty ("id", createAlphaNumericUID(), getUndoManager());
+        node.setProperty ("id", createAlphaNumericUID(), 0);
+
+    if (isFile())
+    {
+        node.setProperty ("name", getFile().getFileName(), 0);
+    }
+    else if (isGroup())
+    {
+        for (int i = getNumChildren(); --i >= 0;)
+            getChild(i).initialiseNodeValues();
+    }
 }
 
 Value Project::Item::getName() const

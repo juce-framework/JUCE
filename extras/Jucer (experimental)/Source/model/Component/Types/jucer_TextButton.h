@@ -48,11 +48,25 @@ public:
     void update (ComponentDocument& document, TextButton* comp, const ValueTree& state)
     {
         comp->setButtonText (state ["text"].toString());
+        comp->setRadioGroupId (state ["radioGroup"]);
+
+        int connected = 0;
+        if (state ["connectedLeft"]) connected |= TextButton::ConnectedOnLeft;
+        if (state ["connectedRight"]) connected |= TextButton::ConnectedOnRight;
+        if (state ["connectedTop"]) connected |= TextButton::ConnectedOnTop;
+        if (state ["connectedBottom"]) connected |= TextButton::ConnectedOnBottom;
+
+        comp->setConnectedEdges (connected);
     }
 
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
         state.setProperty ("text", "New Button", 0);
+        state.setProperty ("radioGroup", 0, 0);
+        state.setProperty ("connectedLeft", false, 0);
+        state.setProperty ("connectedRight", false, 0);
+        state.setProperty ("connectedTop", false, 0);
+        state.setProperty ("connectedBottom", false, 0);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
@@ -62,6 +76,14 @@ public:
 
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
+
+        props.add (new TextPropertyComponent (Value (new IntegerValueSource (getValue ("radioGroup", state, document))), "Radio Group", 8, false));
+        props.getLast()->setTooltip ("The radio group that this button is a member of.");
+
+        props.add (new BooleanPropertyComponent (getValue ("connectedLeft", state, document), "Connected left", "Connected"));
+        props.add (new BooleanPropertyComponent (getValue ("connectedRight", state, document), "Connected right", "Connected"));
+        props.add (new BooleanPropertyComponent (getValue ("connectedTop", state, document), "Connected top", "Connected"));
+        props.add (new BooleanPropertyComponent (getValue ("connectedBottom", state, document), "Connected bottom", "Connected"));
 
         addEditableColourProperties (document, state, props);
     }

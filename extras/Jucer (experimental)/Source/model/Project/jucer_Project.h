@@ -156,6 +156,8 @@ public:
         Item (const Item& other);
         ~Item();
 
+        void initialiseNodeValues();
+
         //==============================================================================
         bool isValid() const                            { return node.isValid(); }
         const ValueTree& getNode() const throw()        { return node; }
@@ -170,7 +172,6 @@ public:
         bool isMainGroup() const;
 
         const String getID() const;
-        void createUIDIfMissing();
 
         //==============================================================================
         Value getName() const;
@@ -188,7 +189,7 @@ public:
         //==============================================================================
         bool canContain (const Item& child) const;
         int getNumChildren() const                      { return node.getNumChildren(); }
-        const Item getChild (int index) const           { return Item (project, node.getChild (index)); }
+        Item getChild (int index) const                 { return Item (project, node.getChild (index)); }
         void addChild (const Item& newChild, int insertIndex);
         bool addFile (const File& file, int insertIndex);
         void removeItemFromProject();

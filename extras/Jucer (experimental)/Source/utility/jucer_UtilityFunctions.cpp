@@ -641,3 +641,102 @@ void FloatingLabelComponent::paint (Graphics& g)
     g.setColour (colour);
     glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));
 }
+
+//==============================================================================
+class FontNameValueSource   : public Value::ValueSource,
+                              public Value::Listener
+{
+public:
+    FontNameValueSource (const Value& source)
+       : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~FontNameValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+    const var getValue() const
+    {
+        const String fontName (sourceValue.toString());
+        const int index = StoredSettings::getInstance()->getFontNames().indexOf (fontName);
+
+        if (index >= 0)                                         return 5 + index;
+        else if (fontName == getDefaultFontName())              return 1;
+        else if (fontName == getDefaultSansFontName())          return 2;
+        else if (fontName == getDefaultSerifFontName())         return 3;
+        else if (fontName == getDefaultMonospacedFontName())    return 4;
+
+        return 1;
+    }
+
+    void setValue (const var& newValue)
+    {
+        const int index = newValue;
+        if (index <= 1)         sourceValue = getDefaultFontName();
+        else if (index == 2)    sourceValue = getDefaultSansFontName();
+        else if (index == 3)    sourceValue = getDefaultSerifFontName();
+        else if (index == 4)    sourceValue = getDefaultMonospacedFontName();
+        else                    sourceValue = StoredSettings::getInstance()->getFontNames() [index - 5];
+    }
+
+    static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
+    {
+        StringArray fontNames;
+        fontNames.add (getDefaultFontName());
+        fontNames.add (getDefaultSansFontName());
+        fontNames.add (getDefaultSerifFontName());
+        fontNames.add (getDefaultMonospacedFontName());
+        fontNames.add (String::empty);
+        fontNames.addArray (StoredSettings::getInstance()->getFontNames());
+
+        return new ChoicePropertyComponent (Value (new FontNameValueSource (value)), title, fontNames);
+    }
+
+    static void applyToFont (Font& font, const String& fontName)
+    {
+        if (fontName.isEmpty() || fontName == getDefaultFontName() || fontName == getDefaultSansFontName())
+            return;
+
+        font.setTypefaceName (fontName == getDefaultSerifFontName() ? Font::getDefaultSerifFontName()
+                              : (fontName == getDefaultMonospacedFontName() ? Font::getDefaultMonospacedFontName()
+                              : fontName));
+    }
+
+    static const char* getDefaultFontName() throw()             { return "Default Font"; }
+    static const char* getDefaultSansFontName() throw()         { return "Default Sans-Serif Font"; }
+    static const char* getDefaultSerifFontName() throw()        { return "Default Serif Font"; }
+    static const char* getDefaultMonospacedFontName() throw()   { return "Default Monospaced Font"; }
+
+private:
+    Value sourceValue;
+
+    FontNameValueSource (const FontNameValueSource&);
+    const FontNameValueSource& operator= (const FontNameValueSource&);
+};
+
+static const char* const fontStyles[] = { "Normal", "Bold", "Italic", "Bold + Italic", 0 };
+
+const Font getFontFromState (const ValueTree& state, const var::identifier& fontName, const var::identifier& fontSize, const var::identifier& fontStyle)
+{
+    const String styleString (state.getProperty (fontStyle).toString());
+    const int fontFlags = styleString == fontStyles[1] ? Font::bold
+                            : (styleString == fontStyles[2] ? Font::italic
+                            : (styleString == fontStyles[3] ? (Font::italic | Font::bold)
+                            : 0));
+
+    Font f (state.getProperty (fontSize, 14), fontFlags);
+    FontNameValueSource::applyToFont (f, state.getProperty (fontName));
+    return f;
+}
+
+void createFontProperties (Array <PropertyComponent*>& props, const ValueTree& state,
+                           const var::identifier& fontName, const var::identifier& fontSize, const var::identifier& fontStyle,
+                           UndoManager* undoManager)
+{
+    props.add (FontNameValueSource::createProperty ("Font", state.getPropertyAsValue (fontName, undoManager)));
+    props.add (new SliderPropertyComponent (state.getPropertyAsValue (fontSize, undoManager), "Font Size", 1.0, 150.0, 0.1, 0.5));
+
+    props.add (StringListValueSource::create ("Font Style", state.getPropertyAsValue (fontStyle, undoManager), StringArray (fontStyles)));
+}

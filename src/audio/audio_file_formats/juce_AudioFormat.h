@@ -161,7 +161,7 @@ protected:
                                 be returned by getFileExtension()
     */
     AudioFormat (const String& formatName,
-                 const juce_wchar** const fileExtensions);
+                 const StringArray& fileExtensions);
 
 private:
     //==============================================================================

@@ -191,7 +191,7 @@ inline double juce_hypot (double a, double b)
 
 /** Using juce_hypot and juce_hypotf is easier than dealing with all the different
     versions of these functions of various platforms and compilers. */
-inline float juce_hypotf (float a, float b)
+inline float juce_hypotf (float a, float b) throw()
 {
   #if JUCE_WINDOWS
     return (float) _hypot (a, b);
@@ -201,9 +201,23 @@ inline float juce_hypotf (float a, float b)
 }
 
 /** 64-bit abs function. */
-inline int64 abs64 (const int64 n)
+inline int64 abs64 (const int64 n) throw()
 {
     return (n >= 0) ? n : -n;
+}
+
+/** This templated negate function will negate pointers as well as integers */
+template <typename Type>
+inline Type juce_negate (Type n) throw()
+{
+    return -n;
+}
+
+/** This templated negate function will negate pointers as well as integers */
+template <typename Type>
+inline Type* juce_negate (Type* n) throw()
+{
+    return (Type*) -(pointer_sized_int) n;
 }
 
 

@@ -85,7 +85,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const oggFormatName = "Ogg-Vorbis file";
-static const juce_wchar* const oggExtensions[] = { T(".ogg"), 0 };
+static const char* const oggExtensions[] = { ".ogg", 0 };
 
 //==============================================================================
 class OggReader : public AudioFormatReader
@@ -395,7 +395,7 @@ public:
 
 //==============================================================================
 OggVorbisAudioFormat::OggVorbisAudioFormat()
-    : AudioFormat (TRANS (oggFormatName), (const juce_wchar**) oggExtensions)
+    : AudioFormat (TRANS (oggFormatName), StringArray (oggExtensions))
 {
 }
 

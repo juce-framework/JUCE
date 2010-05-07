@@ -192,6 +192,20 @@ int AlertWindow::getNumButtons() const
     return buttons.size();
 }
 
+void AlertWindow::triggerButtonClick (const String& buttonName)
+{
+    for (int i = buttons.size(); --i >= 0;)
+    {
+        TextButton* const b = (TextButton*) buttons[i];
+
+        if (buttonName == b->getName())
+        {
+            b->triggerClick();
+            break;
+        }
+    }
+}
+
 //==============================================================================
 void AlertWindow::addTextEditor (const String& name,
                                  const String& initialContents,

@@ -81,6 +81,18 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 void autoScrollForMouseEvent (const MouseEvent& e);
 
 //==============================================================================
+const Font getFontFromState (const ValueTree& state,
+                             const var::identifier& fontName,
+                             const var::identifier& fontSize,
+                             const var::identifier& fontStyle);
+
+void createFontProperties (Array <PropertyComponent*>& props, const ValueTree& state,
+                           const var::identifier& fontName,
+                           const var::identifier& fontSize,
+                           const var::identifier& fontStyle,
+                           UndoManager* undoManager);
+
+//==============================================================================
 class FileModificationDetector
 {
 public:

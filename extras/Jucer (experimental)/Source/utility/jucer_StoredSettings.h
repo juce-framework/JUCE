@@ -55,11 +55,14 @@ public:
 
     Array <Colour> swatchColours;
 
+    const StringArray& getFontNames();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     ScopedPointer<PropertiesFile> props;
+    StringArray fontNames;
 };
 
 

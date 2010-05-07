@@ -86,7 +86,7 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 static const char* const flacFormatName = "FLAC file";
-static const juce_wchar* const flacExtensions[] = { T(".flac"), 0 };
+static const char* const flacExtensions[] = { ".flac", 0 };
 
 
 //==============================================================================
@@ -496,7 +496,7 @@ private:
 
 //==============================================================================
 FlacAudioFormat::FlacAudioFormat()
-    : AudioFormat (TRANS (flacFormatName), (const juce_wchar**) flacExtensions)
+    : AudioFormat (TRANS (flacFormatName), StringArray (flacExtensions))
 {
 }
 

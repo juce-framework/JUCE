@@ -63,10 +63,12 @@ void ChoicePropertyComponent::createComboBox (const Array <int>* choiceIDs)
 
     addAndMakeVisible (comboBox = new ComboBox (String::empty));
 
+    int itemId = 0;
+
     for (int i = 0; i < choices.size(); ++i)
     {
         if (choices[i].isNotEmpty())
-            comboBox->addItem (choices[i], choiceIDs == 0 ? (i + 1)
+            comboBox->addItem (choices[i], choiceIDs == 0 ? ++itemId
                                                           : ((*choiceIDs)[i]));
         else
             comboBox->addSeparator();

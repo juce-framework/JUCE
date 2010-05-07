@@ -81,12 +81,11 @@ void BooleanPropertyComponent::paint (Graphics& g)
 {
     PropertyComponent::paint (g);
 
-    const Rectangle<int> r (button->getBounds());
     g.setColour (Colours::white);
-    g.fillRect (r);
+    g.fillRect (button->getBounds());
 
     g.setColour (findColour (ComboBox::outlineColourId));
-    g.drawRect (r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    g.drawRect (button->getBounds());
 }
 
 void BooleanPropertyComponent::refresh()

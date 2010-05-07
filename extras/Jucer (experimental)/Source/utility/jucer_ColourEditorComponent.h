@@ -197,24 +197,11 @@ private:
         class ColourSelectorWithSwatches    : public ColourSelector
         {
         public:
-            ColourSelectorWithSwatches()
-            {
-            }
+            ColourSelectorWithSwatches() {}
 
-            int getNumSwatches() const
-            {
-                return StoredSettings::getInstance()->swatchColours.size();
-            }
-
-            const Colour getSwatchColour (int index) const
-            {
-                return StoredSettings::getInstance()->swatchColours [index];
-            }
-
-            void setSwatchColour (int index, const Colour& newColour) const
-            {
-                StoredSettings::getInstance()->swatchColours.set (index, newColour);
-            }
+            int getNumSwatches() const                      { return StoredSettings::getInstance()->swatchColours.size(); }
+            const Colour getSwatchColour (int index) const  { return StoredSettings::getInstance()->swatchColours [index]; }
+            void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
         };
 
         ColourEditorComponent* owner;

@@ -57,7 +57,7 @@ void File::findFileSystemRoots (Array<File>& destArray)
 
 
 //==============================================================================
-static bool isFileOnDriveType (const File& f, const char** types)
+static bool isFileOnDriveType (const File& f, const char* const* types)
 {
     struct statfs buf;
 
@@ -75,16 +75,16 @@ static bool isFileOnDriveType (const File& f, const char** types)
 
 bool File::isOnCDRomDrive() const
 {
-    static const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", 0 };
+    const char* const cdTypes[] = { "cd9660", "cdfs", "cddafs", "udf", 0 };
 
-    return isFileOnDriveType (*this, (const char**) cdTypes);
+    return isFileOnDriveType (*this, cdTypes);
 }
 
 bool File::isOnHardDisk() const
 {
-    static const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", 0 };
+    const char* const nonHDTypes[] = { "nfs", "smbfs", "ramfs", 0 };
 
-    return ! (isOnCDRomDrive() || isFileOnDriveType (*this, (const char**) nonHDTypes));
+    return ! (isOnCDRomDrive() || isFileOnDriveType (*this, nonHDTypes));
 }
 
 bool File::isOnRemovableDrive() const

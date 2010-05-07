@@ -126,3 +126,11 @@ void StoredSettings::setLastKnownJuceFolder (const File& file)
     jassert (isJuceFolder (file));
     props->setValue ("lastJuceFolder", file.getFullPathName());
 }
+
+const StringArray& StoredSettings::getFontNames()
+{
+    if (fontNames.size() == 0)
+        fontNames = Font::findAllTypefaceNames();
+
+    return fontNames;
+}

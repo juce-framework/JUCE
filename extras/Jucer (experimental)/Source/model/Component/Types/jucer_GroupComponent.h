@@ -47,14 +47,22 @@ public:
 
     void update (ComponentDocument& document, GroupComponent* comp, const ValueTree& state)
     {
+        comp->setText (state ["text"].toString());
     }
 
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
+        state.setProperty ("text", "Group", 0);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        addTooltipProperty (document, state, props);
+        addFocusOrderProperty (document, state, props);
+
+        props.add (new TextPropertyComponent (getValue ("text", state, document), "Label", 512, false));
+        props.getLast()->setTooltip ("The group's display name.");
+
         addEditableColourProperties (document, state, props);
     }
 };

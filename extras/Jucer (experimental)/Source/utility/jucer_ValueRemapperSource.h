@@ -49,7 +49,7 @@ public:
 
     ~ValueRemapperSource() {}
 
-    void addMappings (const char** values)
+    void addMappings (const char* const* values)
     {
         while (values[0] != 0 && values[1] != 0)
         {
@@ -109,6 +109,48 @@ protected:
 };
 
 //==============================================================================
+/** A ValueSource that converts strings into an ID suitable for a combo box.
+*/
+class StringListValueSource   : public Value::ValueSource,
+                                public Value::Listener
+{
+public:
+    StringListValueSource (const Value& sourceValue_, const StringArray& strings_)
+       : sourceValue (sourceValue_), strings (strings_)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~StringListValueSource() {}
+
+    const var getValue() const              { return jmax (0, strings.indexOf (sourceValue.toString())) + 1; }
+    void setValue (const var& newValue)
+    {
+        const String newVal (strings [((int) newValue) - 1]);
+
+        if (newVal != getValue().toString())  // this test is important, because if a property is missing, it won't
+            sourceValue = newVal;             // create it (causing an unwanted undo action) when a control sets it to empty
+    }
+
+    void valueChanged (Value&)              { sendChangeMessage (true); }
+
+    static ChoicePropertyComponent* create (const String& title, const Value& value, const StringArray& strings)
+    {
+        return new ChoicePropertyComponent (Value (new StringListValueSource (value, strings)), title, strings);
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+protected:
+    Value sourceValue;
+    StringArray strings;
+
+    StringListValueSource (const StringListValueSource&);
+    const StringListValueSource& operator= (const StringListValueSource&);
+};
+
+//==============================================================================
 /**
 */
 class IntegerValueSource   : public Value::ValueSource,
@@ -130,10 +172,10 @@ public:
 
     void setValue (const var& newValue)
     {
-        const var newVal ((int) newValue);
+        const int newVal = (int) newValue;
 
-        if (newVal != sourceValue)
-            sourceValue = newVal;
+        if (newVal != (int) getValue())  // this test is important, because if a property is missing, it won't
+            sourceValue = newVal;        // create it (causing an unwanted undo action) when a control sets it to 0
     }
 
     void valueChanged (Value&)

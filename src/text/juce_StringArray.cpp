@@ -46,21 +46,21 @@ StringArray::StringArray (const String& firstValue)
     strings.add (firstValue);
 }
 
-StringArray::StringArray (const juce_wchar** const initialStrings,
+StringArray::StringArray (const juce_wchar* const* const initialStrings,
                           const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
         strings.add (initialStrings [i]);
 }
 
-StringArray::StringArray (const char** const initialStrings,
+StringArray::StringArray (const char* const* const initialStrings,
                           const int numberOfStrings)
 {
     for (int i = 0; i < numberOfStrings; ++i)
         strings.add (initialStrings [i]);
 }
 
-StringArray::StringArray (const juce_wchar** const initialStrings)
+StringArray::StringArray (const juce_wchar* const* const initialStrings)
 {
     int i = 0;
 
@@ -68,7 +68,7 @@ StringArray::StringArray (const juce_wchar** const initialStrings)
         strings.add (initialStrings [i++]);
 }
 
-StringArray::StringArray (const char** const initialStrings)
+StringArray::StringArray (const char* const* const initialStrings)
 {
     int i = 0;
 

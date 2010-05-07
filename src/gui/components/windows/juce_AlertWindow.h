@@ -111,6 +111,9 @@ public:
     /** Returns the number of buttons that the window currently has. */
     int getNumButtons() const;
 
+    /** Invokes a click of one of the buttons. */
+    void triggerButtonClick (const String& buttonName);
+
     //==============================================================================
     /** Adds a textbox to the window for entering strings.
 
