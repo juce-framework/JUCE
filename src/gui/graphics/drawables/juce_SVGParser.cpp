@@ -1180,13 +1180,13 @@ private:
             }
             else if (t.startsWithIgnoreCase ("skewX"))
             {
-                trans = AffineTransform (1.0f, tanf (numbers[0] * (float_Pi / 180.0f)), 0.0f,
+                trans = AffineTransform (1.0f, std::tan (numbers[0] * (float_Pi / 180.0f)), 0.0f,
                                          0.0f, 1.0f, 0.0f);
             }
             else if (t.startsWithIgnoreCase ("skewY"))
             {
                 trans = AffineTransform (1.0f, 0.0f, 0.0f,
-                                         tanf (numbers[0] * (float_Pi / 180.0f)), 1.0f, 0.0f);
+                                         std::tan (numbers[0] * (float_Pi / 180.0f)), 1.0f, 0.0f);
             }
 
             result = trans.followedBy (result);
@@ -1222,15 +1222,15 @@ private:
 
         if (s <= 1.0)
         {
-            c = sqrt (jmax (0.0, ((rx2 * ry2) - (rx2 * yp2) - (ry2 * xp2))
-                                   / (( rx2 * yp2) + (ry2 * xp2))));
+            c = std::sqrt (jmax (0.0, ((rx2 * ry2) - (rx2 * yp2) - (ry2 * xp2))
+                                         / (( rx2 * yp2) + (ry2 * xp2))));
 
             if (largeArc == sweep)
                 c = -c;
         }
         else
         {
-            const double s2 = sqrt (s);
+            const double s2 = std::sqrt (s);
             rx *= s2;
             ry *= s2;
             rx2 = rx * rx;

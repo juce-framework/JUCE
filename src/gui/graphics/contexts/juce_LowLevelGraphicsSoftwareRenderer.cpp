@@ -193,8 +193,8 @@ public:
             p2 = l2.getPointAlongLineProportionally (l2.findNearestPointTo (p1));
         }
 
-        vertical = fabs (p1.getX() - p2.getX()) < 0.001f;
-        horizontal = fabs (p1.getY() - p2.getY()) < 0.001f;
+        vertical = std::abs (p1.getX() - p2.getX()) < 0.001f;
+        horizontal = std::abs (p1.getY() - p2.getY()) < 0.001f;
 
         if (vertical)
         {
@@ -257,8 +257,8 @@ public:
         const float gdx = gradient.x1 - gradient.x2;
         const float gdy = gradient.y1 - gradient.y2;
         maxDist = gdx * gdx + gdy * gdy;
-        invScale = numEntries / sqrt (maxDist);
-        jassert (roundToInt (sqrt (maxDist) * invScale) <= numEntries);
+        invScale = numEntries / std::sqrt (maxDist);
+        jassert (roundToInt (std::sqrt (maxDist) * invScale) <= numEntries);
     }
 
     forcedinline void setY (const int y) throw()
@@ -273,7 +273,7 @@ public:
         x *= x;
         x += dy;
 
-        return lookupTable [x >= maxDist ? numEntries : roundToInt (sqrt (x) * invScale)];
+        return lookupTable [x >= maxDist ? numEntries : roundToInt (std::sqrt (x) * invScale)];
     }
 
 protected:
@@ -316,7 +316,7 @@ public:
         if (x >= maxDist)
             return lookupTable [numEntries];
         else
-            return lookupTable [jmin (numEntries, roundToInt (sqrt (x) * invScale))];
+            return lookupTable [jmin (numEntries, roundToInt (std::sqrt (x) * invScale))];
     }
 
 private:
@@ -887,6 +887,7 @@ private:
     TransformedImageFillEdgeTableRenderer (const TransformedImageFillEdgeTableRenderer&);
     TransformedImageFillEdgeTableRenderer& operator= (const TransformedImageFillEdgeTableRenderer&);
 };
+
 
 //==============================================================================
 class LLGCSavedState
@@ -1475,7 +1476,10 @@ void LowLevelGraphicsSoftwareRenderer::drawVerticalLine (const int x, double top
 {
     if (bottom > top)
     {
-        EdgeTable et ((float) (x + currentState->xOffset), (float) (top + currentState->yOffset), 1.0f, (float) (bottom - top));
+        EdgeTable et (Rectangle<float> ((float) (x + currentState->xOffset),
+                                        (float) (top + currentState->yOffset),
+                                        1.0f, (float) (bottom - top)));
+
         currentState->fillEdgeTable (image, et);
     }
 }
@@ -1484,8 +1488,10 @@ void LowLevelGraphicsSoftwareRenderer::drawHorizontalLine (const int y, double l
 {
     if (right > left)
     {
-        EdgeTable et ((float) (left + currentState->xOffset), (float) (y + currentState->yOffset),
-                      (float) (right - left), 1.0f);
+        EdgeTable et (Rectangle<float> ((float) (left + currentState->xOffset),
+                                        (float) (y + currentState->yOffset),
+                                        (float) (right - left), 1.0f));
+
         currentState->fillEdgeTable (image, et);
     }
 }

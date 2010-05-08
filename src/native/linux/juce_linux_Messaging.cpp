@@ -32,9 +32,8 @@
  #define JUCE_DEBUG_XERRORS 1
 #endif
 
-Display* display = 0;     // This is also referenced from WindowDriver.cpp
+Display* display = 0;
 Window juce_messageWindowHandle = None;
-
 XContext windowHandleXContext;   // This is referenced from Windowing.cpp
 
 extern void juce_windowMessageReceive (XEvent* event);  // Defined in Windowing.cpp
@@ -246,15 +245,15 @@ void MessageManager::doPlatformSpecificInitialisation()
     saction.sa_handler = signalHandler;
     saction.sa_mask = maskSet;
     saction.sa_flags = 0;
-    sigaction (SIGINT, &saction, NULL);
+    sigaction (SIGINT, &saction, 0);
 
 #ifndef _DEBUG
     // Setup signal handlers for various fatal errors
-    sigaction (SIGILL, &saction, NULL);
-    sigaction (SIGBUS, &saction, NULL);
-    sigaction (SIGFPE, &saction, NULL);
-    sigaction (SIGSEGV, &saction, NULL);
-    sigaction (SIGSYS, &saction, NULL);
+    sigaction (SIGILL, &saction, 0);
+    sigaction (SIGBUS, &saction, 0);
+    sigaction (SIGFPE, &saction, 0);
+    sigaction (SIGSEGV, &saction, 0);
+    sigaction (SIGSYS, &saction, 0);
 #endif
 
     // Create the internal message queue

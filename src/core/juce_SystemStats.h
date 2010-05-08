@@ -43,7 +43,7 @@ public:
 
         See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
     */
-    static const String getJUCEVersion() throw();
+    static const String getJUCEVersion();
 
     //==============================================================================
     /** The set of possible results of the getOperatingSystemType() method.
@@ -75,18 +75,18 @@ public:
         @returns one of the values from the OperatingSystemType enum.
         @see getOperatingSystemName
     */
-    static OperatingSystemType getOperatingSystemType() throw();
+    static OperatingSystemType getOperatingSystemType();
 
     /** Returns the name of the type of operating system we're running on.
 
         @returns a string describing the OS type.
         @see getOperatingSystemType
     */
-    static const String getOperatingSystemName() throw();
+    static const String getOperatingSystemName();
 
     /** Returns true if the OS is 64-bit, or false for a 32-bit OS.
     */
-    static bool isOperatingSystem64Bit() throw();
+    static bool isOperatingSystem64Bit();
 
     //==============================================================================
     /** Returns the current user's name, if available.
@@ -108,39 +108,29 @@ public:
         @returns    the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
                     what year you're reading this...)
     */
-    static int getCpuSpeedInMegaherz() throw();
+    static int getCpuSpeedInMegaherz();
 
     /** Returns a string to indicate the CPU vendor.
 
         Might not be known on some systems.
     */
-    static const String getCpuVendor() throw();
+    static const String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX() throw();
+    static bool hasMMX();
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE() throw();
+    static bool hasSSE();
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2() throw();
+    static bool hasSSE2();
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow() throw();
+    static bool has3DNow();
 
     /** Returns the number of CPUs.
     */
-    static int getNumCpus() throw();
-
-    /** Returns a clock-cycle tick counter, if available.
-
-        If the machine can do it, this will return a tick-count
-        where each tick is one cpu clock cycle - used for profiling
-        code.
-
-        @returns    the tick count, or zero if not available.
-    */
-    static int64 getClockCycleCounter() throw();
+    static int getNumCpus();
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -148,13 +138,13 @@ public:
         @returns    the approximate number of megabytes of memory, or zero if
                     something goes wrong when finding out.
     */
-    static int getMemorySizeInMegabytes() throw();
+    static int getMemorySizeInMegabytes();
 
     /** Returns the system page-size.
 
         This is only used by programmers with beards.
     */
-    static int getPageSize() throw();
+    static int getPageSize();
 
     //==============================================================================
     /** Returns a list of MAC addresses found on this machine.
@@ -188,7 +178,7 @@ public:
 
     //==============================================================================
     // not-for-public-use platform-specific method gets called at startup to initialise things.
-    static void initialiseStats() throw();
+    static void initialiseStats();
 
 private:
     SystemStats();

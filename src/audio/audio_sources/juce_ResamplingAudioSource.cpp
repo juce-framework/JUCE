@@ -205,14 +205,14 @@ void ResamplingAudioSource::createLowPass (const double frequencyRatio)
 
     const double n = 1.0 / tan (double_Pi * jmax (0.001, proportionalRate));
     const double nSquared = n * n;
-    const double c1 = 1.0 / (1.0 + sqrt (2.0) * n + nSquared);
+    const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
     setFilterCoefficients (c1,
                            c1 * 2.0f,
                            c1,
                            1.0,
                            c1 * 2.0 * (1.0 - nSquared),
-                           c1 * (1.0 - sqrt (2.0) * n + nSquared));
+                           c1 * (1.0 - std::sqrt (2.0) * n + nSquared));
 }
 
 void ResamplingAudioSource::setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6)

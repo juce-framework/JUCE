@@ -281,7 +281,7 @@ public:
         @returns    true if this succeeds, although depending on the system, the
                     application might not have sufficient privileges to do this.
     */
-    bool setSystemTimeToThisTime() const throw();
+    bool setSystemTimeToThisTime() const;
 
     //==============================================================================
     /** Returns the name of a day of the week.

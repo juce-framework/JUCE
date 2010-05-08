@@ -35,114 +35,105 @@
 extern Display* display;
 extern Window juce_messageWindowHandle;
 
-static String localClipboardContent;
-static Atom   atom_UTF8_STRING;
-static Atom   atom_CLIPBOARD;
-static Atom   atom_TARGETS;
-
-//==============================================================================
-static void initSelectionAtoms()
+namespace ClipboardHelpers
 {
-    static bool isInitialised = false;
-    if (! isInitialised)
+    static String localClipboardContent;
+    static Atom   atom_UTF8_STRING;
+    static Atom   atom_CLIPBOARD;
+    static Atom   atom_TARGETS;
+
+    //==============================================================================
+    static void initSelectionAtoms()
     {
-        atom_UTF8_STRING = XInternAtom (display, "UTF8_STRING", False);
-        atom_CLIPBOARD   = XInternAtom (display, "CLIPBOARD", False);
-        atom_TARGETS     = XInternAtom (display, "TARGETS", False);
-    }
-}
-
-//==============================================================================
-// Read the content of a window property as either a locale-dependent string or an utf8 string
-// works only for strings shorter than 1000000 bytes
-static String juce_readWindowProperty (Window window, Atom prop,
-                                       Atom fmt, // XA_STRING or UTF8_STRING
-                                       bool deleteAfterReading)
-{
-    String returnData;
-    char* clipData;
-    Atom actualType;
-    int  actualFormat;
-    unsigned long numItems, bytesLeft;
-
-    if (XGetWindowProperty (display, window, prop,
-                            0L /* offset */, 1000000 /* length (max) */, False,
-                            AnyPropertyType /* format */,
-                            &actualType, &actualFormat, &numItems, &bytesLeft,
-                            (unsigned char**) &clipData) == Success)
-    {
-        if (actualType == atom_UTF8_STRING && actualFormat == 8)
+        static bool isInitialised = false;
+        if (! isInitialised)
         {
-            returnData = String::fromUTF8 (clipData, numItems);
+            atom_UTF8_STRING = XInternAtom (display, "UTF8_STRING", False);
+            atom_CLIPBOARD   = XInternAtom (display, "CLIPBOARD", False);
+            atom_TARGETS     = XInternAtom (display, "TARGETS", False);
         }
-        else if (actualType == XA_STRING && actualFormat == 8)
-        {
-            returnData = String (clipData, numItems);
-        }
-
-        if (clipData != 0)
-            XFree (clipData);
-
-        jassert (bytesLeft == 0 || numItems == 1000000);
     }
 
-    if (deleteAfterReading)
+    //==============================================================================
+    // Read the content of a window property as either a locale-dependent string or an utf8 string
+    // works only for strings shorter than 1000000 bytes
+    static String readWindowProperty (Window window, Atom prop, Atom fmt)
+    {
+        String returnData;
+        char* clipData;
+        Atom actualType;
+        int  actualFormat;
+        unsigned long numItems, bytesLeft;
+
+        if (XGetWindowProperty (display, window, prop,
+                                0L /* offset */, 1000000 /* length (max) */, False,
+                                AnyPropertyType /* format */,
+                                &actualType, &actualFormat, &numItems, &bytesLeft,
+                                (unsigned char**) &clipData) == Success)
+        {
+            if (actualType == atom_UTF8_STRING && actualFormat == 8)
+                returnData = String::fromUTF8 (clipData, numItems);
+            else if (actualType == XA_STRING && actualFormat == 8)
+                returnData = String (clipData, numItems);
+
+            if (clipData != 0)
+                XFree (clipData);
+
+            jassert (bytesLeft == 0 || numItems == 1000000);
+        }
+
         XDeleteProperty (display, window, prop);
+        return returnData;
+    }
 
-    return returnData;
-}
-
-//==============================================================================
-// Send a SelectionRequest to the window owning the selection and waits for its answer (with a timeout) */
-static bool juce_requestSelectionContent (String &selection_content, Atom selection, Atom requested_format)
-{
-    Atom property_name = XInternAtom (display, "JUCE_SEL", false);
-
-    // The selection owner will be asked to set the JUCE_SEL property on the
-    // juce_messageWindowHandle with the selection content
-    XConvertSelection (display, selection, requested_format, property_name,
-                       juce_messageWindowHandle, CurrentTime);
-
-    int timeoutMs = 200; // will wait at most for 200 ms
-
-    do
+    //==============================================================================
+    // Send a SelectionRequest to the window owning the selection and waits for its answer (with a timeout) */
+    static bool requestSelectionContent (String& selectionContent, Atom selection, Atom requestedFormat)
     {
-        XEvent event;
+        Atom property_name = XInternAtom (display, "JUCE_SEL", false);
 
-        if (XCheckTypedWindowEvent (display, juce_messageWindowHandle, SelectionNotify, &event))
+        // The selection owner will be asked to set the JUCE_SEL property on the
+        // juce_messageWindowHandle with the selection content
+        XConvertSelection (display, selection, requestedFormat, property_name,
+                           juce_messageWindowHandle, CurrentTime);
+
+        int count = 50; // will wait at most for 200 ms
+
+        while (--count >= 0)
         {
-            if (event.xselection.property == property_name)
+            XEvent event;
+            if (XCheckTypedWindowEvent (display, juce_messageWindowHandle, SelectionNotify, &event))
             {
-                jassert (event.xselection.requestor == juce_messageWindowHandle);
+                if (event.xselection.property == property_name)
+                {
+                    jassert (event.xselection.requestor == juce_messageWindowHandle);
 
-                selection_content = juce_readWindowProperty (event.xselection.requestor,
-                                                             event.xselection.property,
-                                                             requested_format, true);
-                return true;
+                    selectionContent = readWindowProperty (event.xselection.requestor,
+                                                           event.xselection.property,
+                                                           requestedFormat);
+                    return true;
+                }
+                else
+                {
+                    return false; // the format we asked for was denied.. (event.xselection.property == None)
+                }
             }
-            else
-            {
-                return false; // the format we asked for was denied.. (event.xselection.property == None)
-            }
+
+            // not very elegant.. we could do a select() or something like that...
+            // however clipboard content requesting is inherently slow on x11, it
+            // often takes 50ms or more so...
+            Thread::sleep (4);
         }
 
-        // not very elegant.. we could do a select() or something like that...
-        // however clipboard content requesting is inherently slow on x11, it
-        // often takes 50ms or more so...
-        Thread::sleep (4);
-        timeoutMs -= 4;
+        return false;
     }
-    while (timeoutMs > 0);
-
-    DBG("timeout for juce_requestSelectionContent");
-    return false;
 }
 
 //==============================================================================
 // Called from the event loop in juce_linux_Messaging in response to SelectionRequest events
 void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
 {
-    initSelectionAtoms();
+    ClipboardHelpers::initSelectionAtoms();
 
     // the selection content is sent to the target window as a window property
     XSelectionEvent reply;
@@ -157,32 +148,32 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
     HeapBlock <char> data;
     int propertyFormat = 0, numDataItems = 0;
 
-    if (evt.selection == XA_PRIMARY || evt.selection == atom_CLIPBOARD)
+    if (evt.selection == XA_PRIMARY || evt.selection == ClipboardHelpers::atom_CLIPBOARD)
     {
         if (evt.target == XA_STRING)
         {
             // format data according to system locale
-            numDataItems = localClipboardContent.getNumBytesAsCString() + 1;
+            numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsCString() + 1;
             data.calloc (numDataItems + 1);
-            localClipboardContent.copyToCString (data, numDataItems);
+            ClipboardHelpers::localClipboardContent.copyToCString (data, numDataItems);
             propertyFormat = 8; // bits/item
         }
-        else if (evt.target == atom_UTF8_STRING)
+        else if (evt.target == ClipboardHelpers::atom_UTF8_STRING)
         {
             // translate to utf8
-            numDataItems = localClipboardContent.getNumBytesAsUTF8() + 1;
+            numDataItems = ClipboardHelpers::localClipboardContent.getNumBytesAsUTF8() + 1;
             data.calloc (numDataItems + 1);
-            localClipboardContent.copyToUTF8 (data, numDataItems);
+            ClipboardHelpers::localClipboardContent.copyToUTF8 (data, numDataItems);
             propertyFormat = 8; // bits/item
         }
-        else if (evt.target == atom_TARGETS)
+        else if (evt.target == ClipboardHelpers::atom_TARGETS)
         {
             // another application wants to know what we are able to send
             numDataItems = 2;
             propertyFormat = 32; // atoms are 32-bit
             data.calloc (numDataItems * 4);
             Atom* atoms = reinterpret_cast<Atom*> (data.getData());
-            atoms[0] = atom_UTF8_STRING;
+            atoms[0] = ClipboardHelpers::atom_UTF8_STRING;
             atoms[1] = XA_STRING;
         }
     }
@@ -212,16 +203,16 @@ void juce_handleSelectionRequest (XSelectionRequestEvent &evt)
 //==============================================================================
 void SystemClipboard::copyTextToClipboard (const String& clipText)
 {
-    initSelectionAtoms();
-    localClipboardContent = clipText;
+    ClipboardHelpers::initSelectionAtoms();
+    ClipboardHelpers::localClipboardContent = clipText;
 
     XSetSelectionOwner (display, XA_PRIMARY, juce_messageWindowHandle, CurrentTime);
-    XSetSelectionOwner (display, atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
+    XSetSelectionOwner (display, ClipboardHelpers::atom_CLIPBOARD, juce_messageWindowHandle, CurrentTime);
 }
 
 const String SystemClipboard::getTextFromClipboard()
 {
-    initSelectionAtoms();
+    ClipboardHelpers::initSelectionAtoms();
 
     /* 1) try to read from the "CLIPBOARD" selection first (the "high
        level" clipboard that is supposed to be filled by ctrl-C
@@ -238,7 +229,7 @@ const String SystemClipboard::getTextFromClipboard()
 
     if ((selectionOwner = XGetSelectionOwner (display, selection)) == None)
     {
-        selection = atom_CLIPBOARD;
+        selection = ClipboardHelpers::atom_CLIPBOARD;
         selectionOwner = XGetSelectionOwner (display, selection);
     }
 
@@ -246,17 +237,17 @@ const String SystemClipboard::getTextFromClipboard()
     {
         if (selectionOwner == juce_messageWindowHandle)
         {
-            content = localClipboardContent;
+            content = ClipboardHelpers::localClipboardContent;
         }
         else
         {
             // first try: we want an utf8 string
-            bool ok = juce_requestSelectionContent (content, selection, atom_UTF8_STRING);
+            bool ok = ClipboardHelpers::requestSelectionContent (content, selection, ClipboardHelpers::atom_UTF8_STRING);
 
             if (! ok)
             {
                 // second chance, ask for a good old locale-dependent string ..
-                ok = juce_requestSelectionContent (content, selection, XA_STRING);
+                ok = ClipboardHelpers::requestSelectionContent (content, selection, XA_STRING);
             }
         }
     }

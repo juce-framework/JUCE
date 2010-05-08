@@ -29,22 +29,23 @@
 
 
 //==============================================================================
-void Logger::outputDebugString (const String& text) throw()
+void Logger::outputDebugString (const String& text)
 {
     std::cerr << text << std::endl;
 }
 
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
+//==============================================================================
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
     return Linux;
 }
 
-const String SystemStats::getOperatingSystemName() throw()
+const String SystemStats::getOperatingSystemName()
 {
     return "Linux";
 }
 
-bool SystemStats::isOperatingSystem64Bit() throw()
+bool SystemStats::isOperatingSystem64Bit()
 {
 #if JUCE_64BIT
     return true;
@@ -54,75 +55,35 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #endif
 }
 
-static const String getCpuInfo (const char* key, bool lastOne = false) throw()
+//==============================================================================
+static const String juce_getCpuInfo (const char* const key)
 {
-    String info;
-    char buf [256];
+    StringArray lines;
+    lines.addLines (File ("/proc/cpuinfo").loadFileAsString());
 
-    FILE* f = fopen ("/proc/cpuinfo", "r");
+    for (int i = lines.size(); --i >= 0;) // (NB - it's important that this runs in reverse order)
+        if (lines[i].startsWithIgnoreCase (key))
+            return lines[i].fromFirstOccurrenceOf (":", false, false).trim();
 
-    while (f != 0 && fgets (buf, sizeof(buf), f))
-    {
-        if (strncmp (buf, key, strlen (key)) == 0)
-        {
-            char* p = buf;
-
-            while (*p && *p != '\n')
-                ++p;
-
-            if (*p != 0)
-                *p = 0;
-
-            p = buf;
-
-            while (*p != 0 && *p != ':')
-                ++p;
-
-            if (*p != 0 && *(p + 1) != 0)
-                info = p + 2;
-
-            if (! lastOne)
-                break;
-        }
-    }
-
-    fclose (f);
-    return info;
+    return String::empty;
 }
 
-bool SystemStats::hasMMX() throw()
+bool SystemStats::hasMMX()      { return juce_getCpuInfo ("flags").contains ("mmx"); }
+bool SystemStats::hasSSE()      { return juce_getCpuInfo ("flags").contains ("sse"); }
+bool SystemStats::hasSSE2()     { return juce_getCpuInfo ("flags").contains ("sse2"); }
+bool SystemStats::has3DNow()    { return juce_getCpuInfo ("flags").contains ("3dnow"); }
+
+const String SystemStats::getCpuVendor()
 {
-    return getCpuInfo ("flags").contains ("mmx");
+    return juce_getCpuInfo ("vendor_id");
 }
 
-bool SystemStats::hasSSE() throw()
+int SystemStats::getCpuSpeedInMegaherz()
 {
-    return getCpuInfo ("flags").contains ("sse");
+    return roundToInt (juce_getCpuInfo ("cpu MHz").getFloatValue());
 }
 
-bool SystemStats::hasSSE2() throw()
-{
-    return getCpuInfo ("flags").contains ("sse2");
-}
-
-bool SystemStats::has3DNow() throw()
-{
-    return getCpuInfo ("flags").contains ("3dnow");
-}
-
-const String SystemStats::getCpuVendor() throw()
-{
-    return getCpuInfo ("vendor_id");
-}
-
-int SystemStats::getCpuSpeedInMegaherz() throw()
-{
-    const String speed (getCpuInfo ("cpu MHz"));
-
-    return (int) (speed.getFloatValue() + 0.5f);
-}
-
-int SystemStats::getMemorySizeInMegabytes() throw()
+int SystemStats::getMemorySizeInMegabytes()
 {
     struct sysinfo sysi;
 
@@ -132,6 +93,46 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     return 0;
 }
 
+int SystemStats::getPageSize()
+{
+    return sysconf (_SC_PAGESIZE);
+}
+
+int SystemStats::getNumCpus()
+{
+    return juce_getCpuInfo ("processor").getIntValue() + 1;
+}
+
+//==============================================================================
+const String SystemStats::getLogonName()
+{
+    const char* user = getenv ("USER");
+
+    if (user == 0)
+    {
+        struct passwd* const pw = getpwuid (getuid());
+        if (pw != 0)
+            user = pw->pw_name;
+    }
+
+    return String::fromUTF8 (user);
+}
+
+const String SystemStats::getFullUserName()
+{
+    return getLogonName();
+}
+
+//==============================================================================
+void SystemStats::initialiseStats()
+{
+}
+
+void PlatformUtilities::fpuReset()
+{
+}
+
+//==============================================================================
 uint32 juce_millisecondsSinceStartup() throw()
 {
     static unsigned int calibrate = 0;
@@ -174,67 +175,17 @@ int64 Time::getHighResolutionTicks() throw()
 
 int64 Time::getHighResolutionTicksPerSecond() throw()
 {
-    // Microseconds
-    return 1000000;
+    return 1000000;  // (microseconds)
 }
 
-bool Time::setSystemTimeToThisTime() const throw()
+bool Time::setSystemTimeToThisTime() const
 {
     timeval t;
     t.tv_sec = millisSinceEpoch % 1000000;
     t.tv_usec = millisSinceEpoch - t.tv_sec;
 
-    return settimeofday (&t, NULL) ? false : true;
+    return settimeofday (&t, 0) ? false : true;
 }
 
-int SystemStats::getPageSize() throw()
-{
-    static int systemPageSize = 0;
-
-    if (systemPageSize == 0)
-        systemPageSize = sysconf (_SC_PAGESIZE);
-
-    return systemPageSize;
-}
-
-int SystemStats::getNumCpus() throw()
-{
-    const int lastCpu = getCpuInfo ("processor", true).getIntValue();
-
-    return lastCpu + 1;
-}
-
-//==============================================================================
-const String SystemStats::getLogonName()
-{
-    const char* user = getenv ("USER");
-
-    if (user == 0)
-    {
-        struct passwd* const pw = getpwuid (getuid());
-        if (pw != 0)
-            user = pw->pw_name;
-    }
-
-    return String::fromUTF8 (user);
-}
-
-const String SystemStats::getFullUserName()
-{
-    return getLogonName();
-}
-
-//==============================================================================
-void SystemStats::initialiseStats() throw()
-{
-    // Process starts off as root when running suid
-    Process::lowerPrivilege();
-
-    String s (SystemStats::getJUCEVersion());
-}
-
-void PlatformUtilities::fpuReset()
-{
-}
 
 #endif

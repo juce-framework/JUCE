@@ -57,7 +57,7 @@ public:
     {
         const float newLevel = (float) manager->getCurrentInputLevel();
 
-        if (fabsf (level - newLevel) > 0.005f)
+        if (std::abs (level - newLevel) > 0.005f)
         {
             level = newLevel;
             repaint();

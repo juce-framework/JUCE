@@ -804,7 +804,7 @@ void ValueTree::writeToStream (OutputStream& output)
 
 ValueTree ValueTree::readFromStream (InputStream& input)
 {
-    String type (input.readString());
+    const String type (input.readString());
 
     if (type.isEmpty())
         return ValueTree::invalid;

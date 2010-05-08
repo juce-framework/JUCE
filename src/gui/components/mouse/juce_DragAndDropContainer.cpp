@@ -368,7 +368,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                 for (int x = dragImage->getWidth(); --x >= 0;)
                 {
                     const int dx = x - clipped.getX();
-                    const int distance = roundToInt (sqrt (dx * dx + dy));
+                    const int distance = roundToInt (std::sqrt (dx * dx + dy));
 
                     if (distance > lo)
                     {

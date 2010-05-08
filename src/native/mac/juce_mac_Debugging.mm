@@ -28,7 +28,7 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-void Logger::outputDebugString (const String& text) throw()
+void Logger::outputDebugString (const String& text)
 {
     std::cerr << text << std::endl;
 }

@@ -240,13 +240,13 @@ namespace PathFunctions
                 else
                 {
                     // curved joints
-                    float angle1 = atan2f (x2 - midX, y2 - midY);
-                    float angle2 = atan2f (x3 - midX, y3 - midY);
+                    float angle1 = std::atan2 (x2 - midX, y2 - midY);
+                    float angle2 = std::atan2 (x3 - midX, y3 - midY);
                     const float angleIncrement = 0.1f;
 
                     destPath.lineTo (x2, y2);
 
-                    if (fabs (angle1 - angle2) > angleIncrement)
+                    if (std::abs (angle1 - angle2) > angleIncrement)
                     {
                         if (angle2 > angle1 + float_Pi
                              || (angle2 < angle1 && angle2 >= angle1 - float_Pi))
@@ -259,8 +259,8 @@ namespace PathFunctions
                             angle1 -= angleIncrement;
                             while (angle1 > angle2)
                             {
-                                destPath.lineTo (midX + width * sinf (angle1),
-                                                 midY + width * cosf (angle1));
+                                destPath.lineTo (midX + width * std::sin (angle1),
+                                                 midY + width * std::cos (angle1));
 
                                 angle1 -= angleIncrement;
                             }
@@ -275,8 +275,8 @@ namespace PathFunctions
                             angle1 += angleIncrement;
                             while (angle1 < angle2)
                             {
-                                destPath.lineTo (midX + width * sinf (angle1),
-                                                 midY + width * cosf (angle1));
+                                destPath.lineTo (midX + width * std::sin (angle1),
+                                                 midY + width * std::cos (angle1));
 
                                 angle1 += angleIncrement;
                             }
@@ -532,7 +532,7 @@ void PathStrokeType::createStrokedPath (Path& destPath,
 
         if (it.closesSubPath || hypotSquared > minSegmentLength || it.isLastInSubpath())
         {
-            const float len = sqrtf (hypotSquared);
+            const float len = std::sqrt (hypotSquared);
 
             if (len == 0)
             {

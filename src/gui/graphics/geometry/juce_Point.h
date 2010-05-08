@@ -121,7 +121,7 @@ public:
         The return value is the number of radians clockwise from the 3 o'clock direction,
         where this point is the centre and the other point is on the radius.
     */
-    ValueType getAngleToPoint (const Point& other) const throw()        { return (ValueType) atan2 (other.x - x, other.y - y); }
+    ValueType getAngleToPoint (const Point& other) const throw()        { return (ValueType) std::atan2 (other.x - x, other.y - y); }
 
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!

@@ -367,7 +367,7 @@ namespace NumberToStringConverters
         {
             juce_wchar* const end = buffer + numChars;
             juce_wchar* t = end;
-            int64 v = (int64) (pow (10.0, numDecPlaces) * fabs (n) + 0.5);
+            int64 v = (int64) (pow (10.0, numDecPlaces) * std::abs (n) + 0.5);
             *--t = (juce_wchar) 0;
 
             while (numDecPlaces >= 0 || v > 0)

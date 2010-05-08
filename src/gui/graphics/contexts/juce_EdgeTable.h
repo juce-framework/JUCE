@@ -28,9 +28,9 @@
 
 #include "../geometry/juce_AffineTransform.h"
 #include "../geometry/juce_Rectangle.h"
+#include "../geometry/juce_RectangleList.h"
 #include "../../../containers/juce_MemoryBlock.h"
 class Path;
-class RectangleList;
 class Image;
 
 
@@ -67,7 +67,7 @@ public:
 
     /** Creates an edge table containing a rectangle.
     */
-    EdgeTable (float x, float y, float w, float h);
+    EdgeTable (const Rectangle<float>& rectangleToAdd);
 
     /** Creates a copy of another edge table. */
     EdgeTable (const EdgeTable& other);

@@ -489,8 +489,8 @@ void Path::addCentredArc (const float centreX, const float centreY,
 
         if (startAsNewSubPath)
         {
-            float x = centreX + radiusX * sinf (angle);
-            float y = centreY - radiusY * cosf (angle);
+            float x = centreX + radiusX * std::sin (angle);
+            float y = centreY - radiusY * std::cos (angle);
 
             if (rotationOfEllipse != 0)
                 rotation.transformPoint (x, y);
@@ -505,8 +505,8 @@ void Path::addCentredArc (const float centreX, const float centreY,
 
             while (angle < toRadians)
             {
-                float x = centreX + radiusX * sinf (angle);
-                float y = centreY - radiusY * cosf (angle);
+                float x = centreX + radiusX * std::sin (angle);
+                float y = centreY - radiusY * std::cos (angle);
 
                 if (rotationOfEllipse != 0)
                     rotation.transformPoint (x, y);
@@ -523,8 +523,8 @@ void Path::addCentredArc (const float centreX, const float centreY,
 
             while (angle > toRadians)
             {
-                float x = centreX + radiusX * sinf (angle);
-                float y = centreY - radiusY * cosf (angle);
+                float x = centreX + radiusX * std::sin (angle);
+                float y = centreY - radiusY * std::cos (angle);
 
                 if (rotationOfEllipse != 0)
                     rotation.transformPoint (x, y);
@@ -535,8 +535,8 @@ void Path::addCentredArc (const float centreX, const float centreY,
             }
         }
 
-        float x = centreX + radiusX * sinf (toRadians);
-        float y = centreY - radiusY * cosf (toRadians);
+        float x = centreX + radiusX * std::sin (toRadians);
+        float y = centreY - radiusY * std::cos (toRadians);
 
         if (rotationOfEllipse != 0)
             rotation.transformPoint (x, y);
@@ -556,12 +556,12 @@ void Path::addPieSegment (const float x, const float y,
     const float centreX = x + hw;
     const float centreY = y + hh;
 
-    startNewSubPath (centreX + hw * sinf (fromRadians),
-                     centreY - hh * cosf (fromRadians));
+    startNewSubPath (centreX + hw * std::sin (fromRadians),
+                     centreY - hh * std::cos (fromRadians));
 
     addArc (x, y, width, height, fromRadians, toRadians);
 
-    if (fabs (fromRadians - toRadians) > float_Pi * 1.999f)
+    if (std::abs (fromRadians - toRadians) > float_Pi * 1.999f)
     {
         closeSubPath();
 
@@ -570,8 +570,8 @@ void Path::addPieSegment (const float x, const float y,
             hw *= innerCircleProportionalSize;
             hh *= innerCircleProportionalSize;
 
-            startNewSubPath (centreX + hw * sinf (toRadians),
-                             centreY - hh * cosf (toRadians));
+            startNewSubPath (centreX + hw * std::sin (toRadians),
+                             centreY - hh * std::cos (toRadians));
 
             addArc (centreX - hw, centreY - hh, hw * 2.0f, hh * 2.0f,
                     toRadians, fromRadians);
@@ -685,8 +685,8 @@ void Path::addStar (const float centreX,
         {
             float angle = startAngle + i * angleBetweenPoints;
 
-            const float x = centreX + outerRadius * sinf (angle);
-            const float y = centreY - outerRadius * cosf (angle);
+            const float x = centreX + outerRadius * std::sin (angle);
+            const float y = centreY - outerRadius * std::cos (angle);
 
             if (i == 0)
                 startNewSubPath (x, y);
@@ -695,8 +695,8 @@ void Path::addStar (const float centreX,
 
             angle += angleBetweenPoints * 0.5f;
 
-            lineTo (centreX + innerRadius * sinf (angle),
-                    centreY - innerRadius * cosf (angle));
+            lineTo (centreX + innerRadius * std::sin (angle),
+                    centreY - innerRadius * std::cos (angle));
         }
 
         closeSubPath();

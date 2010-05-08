@@ -566,7 +566,7 @@ float AudioSampleBuffer::getRMSLevel (const int channel,
         sum += sample * sample;
     }
 
-    return (float) sqrt (sum / numSamples);
+    return (float) std::sqrt (sum / numSamples);
 }
 
 void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,

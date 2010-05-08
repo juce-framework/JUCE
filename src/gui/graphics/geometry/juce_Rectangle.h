@@ -496,10 +496,10 @@ public:
     */
     const Rectangle<int> getSmallestIntegerContainer() const throw()
     {
-        const int x1 = (int) floorf ((float) x);
-        const int y1 = (int) floorf ((float) y);
-        const int x2 = (int) floorf ((float) (x + w + 0.9999f));
-        const int y2 = (int) floorf ((float) (y + h + 0.9999f));
+        const int x1 = (int) std::floor (static_cast<float> (x));
+        const int y1 = (int) std::floor (static_cast<float> (y));
+        const int x2 = (int) std::floor (static_cast<float> (x + w + 0.9999f));
+        const int y2 = (int) std::floor (static_cast<float> (y + h + 0.9999f));
 
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }

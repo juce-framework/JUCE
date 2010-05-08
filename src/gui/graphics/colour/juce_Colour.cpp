@@ -55,8 +55,8 @@ namespace ColourHelpers
         {
             s = jmin (1.0f, s);
             h = jlimit (0.0f, 1.0f, h);
-            h = (h - floorf (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
-            const float f = h - floorf (h);
+            h = (h - std::floor (h)) * 6.0f + 0.00001f; // need a small adjustment to compensate for rounding errors
+            const float f = h - std::floor (h);
 
             const uint8 x = (uint8) roundToInt (v * (1.0f - s));
             const float y = v * (1.0f - s * f);
@@ -405,7 +405,7 @@ const Colour Colour::withRotatedHue (const float amountToRotate) const throw()
     getHSB (h, s, b);
 
     h += amountToRotate;
-    h -= floorf (h);
+    h -= std::floor (h);
 
     return Colour (h, s, b, getAlpha());
 }
@@ -511,8 +511,8 @@ const Colour Colour::contrasting (const Colour& colour1,
 
     for (float i = 0.0f; i < 1.0f; i += 0.02f)
     {
-        const float d1 = fabsf (i - b1);
-        const float d2 = fabsf (i - b2);
+        const float d1 = std::abs (i - b1);
+        const float d2 = std::abs (i - b2);
         const float dist = jmin (d1, d2, 1.0f - d1, 1.0f - d2);
 
         if (dist > bestDist)

@@ -117,8 +117,8 @@ public:
 
         [nsFont retain];
 
-        ascent = fabsf ((float) [nsFont ascender]);
-        float totalSize = ascent + fabsf ((float) [nsFont descender]);
+        ascent = std::abs ((float) [nsFont ascender]);
+        float totalSize = ascent + std::abs ((float) [nsFont descender]);
         ascent /= totalSize;
 
         pathTransform = AffineTransform::identity.scale (1.0f / totalSize, 1.0f / totalSize);
@@ -137,7 +137,7 @@ public:
 
         fontRef = CGFontCreateWithPlatformFont (&atsFont);
 
-        const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
+        const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
         unitsToHeightScaleFactor = 1.0f / totalHeight;
         fontHeightToCGSizeFactor = 1024.0f / totalHeight;
 #else
@@ -151,7 +151,7 @@ public:
 
             fontRef = CGFontCreateWithPlatformFont (&atsFont);
 
-            const float totalHeight = fabsf ([nsFont ascender]) + fabsf([nsFont descender]);
+            const float totalHeight = std::abs ([nsFont ascender]) + std::abs ([nsFont descender]);
             unitsToHeightScaleFactor = 1.0f / totalHeight;
             fontHeightToCGSizeFactor = 1024.0f / totalHeight;
         }

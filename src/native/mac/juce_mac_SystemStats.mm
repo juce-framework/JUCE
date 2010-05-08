@@ -79,7 +79,7 @@ namespace SystemStatsHelpers
 }
 
 //==============================================================================
-void SystemStats::initialiseStats() throw()
+void SystemStats::initialiseStats()
 {
     using namespace SystemStatsHelpers;
     static bool initialised = false;
@@ -123,17 +123,17 @@ void SystemStats::initialiseStats() throw()
 }
 
 //==============================================================================
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
     return MacOSX;
 }
 
-const String SystemStats::getOperatingSystemName() throw()
+const String SystemStats::getOperatingSystemName()
 {
     return "Mac OS X";
 }
 
-bool SystemStats::isOperatingSystem64Bit() throw()
+bool SystemStats::isOperatingSystem64Bit()
 {
 #if JUCE_64BIT
     return true;
@@ -143,7 +143,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 #endif
 }
 
-int SystemStats::getMemorySizeInMegabytes() throw()
+int SystemStats::getMemorySizeInMegabytes()
 {
     uint64 mem = 0;
     size_t memSize = sizeof (mem);
@@ -152,7 +152,7 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     return (int) (mem / (1024 * 1024));
 }
 
-bool SystemStats::hasMMX() throw()
+bool SystemStats::hasMMX()
 {
 #if JUCE_INTEL
     return SystemStatsHelpers::cpuFlags.hasMMX;
@@ -161,7 +161,7 @@ bool SystemStats::hasMMX() throw()
 #endif
 }
 
-bool SystemStats::hasSSE() throw()
+bool SystemStats::hasSSE()
 {
 #if JUCE_INTEL
     return SystemStatsHelpers::cpuFlags.hasSSE;
@@ -170,7 +170,7 @@ bool SystemStats::hasSSE() throw()
 #endif
 }
 
-bool SystemStats::hasSSE2() throw()
+bool SystemStats::hasSSE2()
 {
 #if JUCE_INTEL
     return SystemStatsHelpers::cpuFlags.hasSSE2;
@@ -179,7 +179,7 @@ bool SystemStats::hasSSE2() throw()
 #endif
 }
 
-bool SystemStats::has3DNow() throw()
+bool SystemStats::has3DNow()
 {
 #if JUCE_INTEL
     return SystemStatsHelpers::cpuFlags.has3DNow;
@@ -188,7 +188,7 @@ bool SystemStats::has3DNow() throw()
 #endif
 }
 
-const String SystemStats::getCpuVendor() throw()
+const String SystemStats::getCpuVendor()
 {
 #if JUCE_INTEL
     char v [16];
@@ -199,7 +199,7 @@ const String SystemStats::getCpuVendor() throw()
 #endif
 }
 
-int SystemStats::getCpuSpeedInMegaherz() throw()
+int SystemStats::getCpuSpeedInMegaherz()
 {
     uint64 speedHz = 0;
     size_t speedSize = sizeof (speedHz);
@@ -213,7 +213,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
     return (int) (speedHz / 1000000);
 }
 
-int SystemStats::getNumCpus() throw()
+int SystemStats::getNumCpus()
 {
 #if JUCE_IPHONE || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
     return (int) [[NSProcessInfo processInfo] activeProcessorCount];
@@ -254,19 +254,14 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
     return SystemStatsHelpers::highResTimerFrequency;
 }
 
-int64 SystemStats::getClockCycleCounter() throw()
-{
-    return (int64) mach_absolute_time();
-}
-
-bool Time::setSystemTimeToThisTime() const throw()
+bool Time::setSystemTimeToThisTime() const
 {
     jassertfalse
     return false;
 }
 
 //==============================================================================
-int SystemStats::getPageSize() throw()
+int SystemStats::getPageSize()
 {
     return (int) NSPageSize();
 }

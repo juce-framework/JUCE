@@ -297,7 +297,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
 
             if (usesFloatingPointData)
             {
-                const float sample1 = fabsf (((float*) tempBuffer[0]) [index]);
+                const float sample1 = std::abs (((float*) tempBuffer[0]) [index]);
 
                 if (sample1 >= magnitudeRangeMinimum
                      && sample1 <= magnitudeRangeMaximum)
@@ -306,7 +306,7 @@ int64 AudioFormatReader::searchForLevel (int64 startSample,
                 }
                 else if (numChannels > 1)
                 {
-                    const float sample2 = fabsf (((float*) tempBuffer[1]) [index]);
+                    const float sample2 = std::abs (((float*) tempBuffer[1]) [index]);
 
                     matches = (sample2 >= magnitudeRangeMinimum
                                  && sample2 <= magnitudeRangeMaximum);

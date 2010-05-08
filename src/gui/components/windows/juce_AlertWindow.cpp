@@ -283,7 +283,7 @@ public:
         setFont (font);
         setText (message, false);
 
-        bestWidth = 2 * (int) sqrt (font.getHeight() * font.getStringWidth (message));
+        bestWidth = 2 * (int) std::sqrt (font.getHeight() * font.getStringWidth (message));
 
         setColour (TextEditor::backgroundColourId, Colours::transparentBlack);
         setColour (TextEditor::outlineColourId, Colours::transparentBlack);
@@ -421,7 +421,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     const int wid = jmax (font.getStringWidth (text),
                           font.getStringWidth (getName()));
 
-    const int sw = (int) sqrt (font.getHeight() * wid);
+    const int sw = (int) std::sqrt (font.getHeight() * wid);
     int w = jmin (300 + sw * 2, (int) (getParentWidth() * 0.7f));
     const int edgeGap = 10;
     const int labelHeight = 18;

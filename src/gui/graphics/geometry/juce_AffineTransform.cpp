@@ -150,8 +150,8 @@ const AffineTransform AffineTransform::translation (const float dx,
 
 const AffineTransform AffineTransform::rotated (const float rad) const throw()
 {
-    const float cosRad = cosf (rad);
-    const float sinRad = sinf (rad);
+    const float cosRad = std::cos (rad);
+    const float sinRad = std::sin (rad);
 
     return followedBy (cosRad, -sinRad, 0,
                        sinRad, cosRad, 0);
@@ -159,8 +159,8 @@ const AffineTransform AffineTransform::rotated (const float rad) const throw()
 
 const AffineTransform AffineTransform::rotation (const float rad) throw()
 {
-    const float cosRad = cosf (rad);
-    const float sinRad = sinf (rad);
+    const float cosRad = std::cos (rad);
+    const float sinRad = std::sin (rad);
 
     return AffineTransform (cosRad, -sinRad, 0,
                             sinRad, cosRad, 0);

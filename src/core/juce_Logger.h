@@ -76,7 +76,7 @@ public:
         This can be called directly, or by using the DBG() macro in
         juce_PlatformDefs.h (which will avoid calling the method in non-debug builds).
     */
-    static void JUCE_CALLTYPE outputDebugString (const String& text) throw();
+    static void JUCE_CALLTYPE outputDebugString (const String& text);
 
 
 protected:

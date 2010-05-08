@@ -31,7 +31,7 @@ extern void juce_initialiseThreadEvents();
 
 
 //==============================================================================
-void Logger::outputDebugString (const String& text) throw()
+void Logger::outputDebugString (const String& text)
 {
     OutputDebugString (text + "\n");
 }
@@ -49,7 +49,7 @@ static double hiResTicksScaleFactor;
 #pragma intrinsic (__cpuid)
 #pragma intrinsic (__rdtsc)
 
-const String SystemStats::getCpuVendor() throw()
+const String SystemStats::getCpuVendor()
 {
     int info [4];
     __cpuid (info, 0);
@@ -103,7 +103,7 @@ static void juce_getCpuVendor (char* const v)
     memcpy (v, vendor, 16);
 }
 
-const String SystemStats::getCpuVendor() throw()
+const String SystemStats::getCpuVendor()
 {
     char v [16];
     juce_getCpuVendor (v);
@@ -123,27 +123,27 @@ struct CPUFlags
 
 static CPUFlags cpuFlags;
 
-bool SystemStats::hasMMX() throw()
+bool SystemStats::hasMMX()
 {
     return cpuFlags.hasMMX;
 }
 
-bool SystemStats::hasSSE() throw()
+bool SystemStats::hasSSE()
 {
     return cpuFlags.hasSSE;
 }
 
-bool SystemStats::hasSSE2() throw()
+bool SystemStats::hasSSE2()
 {
     return cpuFlags.hasSSE2;
 }
 
-bool SystemStats::has3DNow() throw()
+bool SystemStats::has3DNow()
 {
     return cpuFlags.has3DNow;
 }
 
-void SystemStats::initialiseStats() throw()
+void SystemStats::initialiseStats()
 {
     juce_initialiseThreadEvents();
 
@@ -176,7 +176,7 @@ void SystemStats::initialiseStats() throw()
 }
 
 //==============================================================================
-SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
+SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
 {
     OSVERSIONINFO info;
     info.dwOSVersionInfoSize = sizeof (info);
@@ -200,7 +200,7 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType() throw()
     return UnknownOS;
 }
 
-const String SystemStats::getOperatingSystemName() throw()
+const String SystemStats::getOperatingSystemName()
 {
     const char* name = "Unknown OS";
 
@@ -217,7 +217,7 @@ const String SystemStats::getOperatingSystemName() throw()
     return name;
 }
 
-bool SystemStats::isOperatingSystem64Bit() throw()
+bool SystemStats::isOperatingSystem64Bit()
 {
 #ifdef _WIN64
     return true;
@@ -236,7 +236,7 @@ bool SystemStats::isOperatingSystem64Bit() throw()
 
 
 //==============================================================================
-int SystemStats::getMemorySizeInMegabytes() throw()
+int SystemStats::getMemorySizeInMegabytes()
 {
     MEMORYSTATUSEX mem;
     mem.dwLength = sizeof (mem);
@@ -244,7 +244,7 @@ int SystemStats::getMemorySizeInMegabytes() throw()
     return (int) (mem.ullTotalPhys / (1024 * 1024)) + 1;
 }
 
-int SystemStats::getNumCpus() throw()
+int SystemStats::getNumCpus()
 {
     SYSTEM_INFO systemInfo;
     GetSystemInfo (&systemInfo);
@@ -287,7 +287,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
     return hiResTicksPerSecond;
 }
 
-int64 SystemStats::getClockCycleCounter() throw()
+static int64 juce_getClockCycleCounter() throw()
 {
 #if JUCE_USE_INTRINSICS
     // MS intrinsics version...
@@ -326,9 +326,9 @@ int64 SystemStats::getClockCycleCounter() throw()
 #endif
 }
 
-int SystemStats::getCpuSpeedInMegaherz() throw()
+int SystemStats::getCpuSpeedInMegaherz()
 {
-    const int64 cycles = SystemStats::getClockCycleCounter();
+    const int64 cycles = juce_getClockCycleCounter();
     const uint32 millis = Time::getMillisecondCounter();
     int lastResult = 0;
 
@@ -338,7 +338,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
         while (--n > 0) {}
 
         const uint32 millisElapsed = Time::getMillisecondCounter() - millis;
-        const int64 cyclesNow = SystemStats::getClockCycleCounter();
+        const int64 cyclesNow = juce_getClockCycleCounter();
 
         if (millisElapsed > 80)
         {
@@ -354,7 +354,7 @@ int SystemStats::getCpuSpeedInMegaherz() throw()
 
 
 //==============================================================================
-bool Time::setSystemTimeToThisTime() const throw()
+bool Time::setSystemTimeToThisTime() const
 {
     SYSTEMTIME st;
 
@@ -373,7 +373,7 @@ bool Time::setSystemTimeToThisTime() const throw()
             && SetLocalTime (&st) != 0;
 }
 
-int SystemStats::getPageSize() throw()
+int SystemStats::getPageSize()
 {
     SYSTEM_INFO systemInfo;
     GetSystemInfo (&systemInfo);

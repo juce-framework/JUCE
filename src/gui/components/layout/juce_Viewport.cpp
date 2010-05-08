@@ -253,9 +253,15 @@ void Viewport::setSingleStepSizes (const int stepX, const int stepY)
 void Viewport::setScrollBarsShown (const bool showVerticalScrollbarIfNeeded,
                                    const bool showHorizontalScrollbarIfNeeded)
 {
-    showVScrollbar = showVerticalScrollbarIfNeeded;
-    showHScrollbar = showHorizontalScrollbarIfNeeded;
-    updateVisibleRegion();
+    if (showVScrollbar != showVerticalScrollbarIfNeeded
+         || showHScrollbar != showHorizontalScrollbarIfNeeded)
+    {
+        showVScrollbar = showVerticalScrollbarIfNeeded;
+        showHScrollbar = showHorizontalScrollbarIfNeeded;
+        horizontalScrollBar->setVisible (true);
+        verticalScrollBar->setVisible (true);
+        updateVisibleRegion();
+    }
 }
 
 void Viewport::setScrollBarThickness (const int thickness)

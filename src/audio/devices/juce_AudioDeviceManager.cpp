@@ -645,7 +645,7 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
             float s = 0;
 
             for (int i = 0; i < numInputChannels; ++i)
-                s += fabsf (inputChannelData[i][j]);
+                s += std::abs (inputChannelData[i][j]);
 
             s /= numInputChannels;
 
@@ -946,7 +946,7 @@ void AudioDeviceManager::playTestSound()
         const double phasePerSample = double_Pi * 2.0 / (sampleRate / frequency);
 
         for (int i = 0; i < soundLength; ++i)
-            samples[i] = amplitude * (float) sin (i * phasePerSample);
+            samples[i] = amplitude * (float) std::sin (i * phasePerSample);
 
         newSound->applyGainRamp (0, 0, soundLength / 10, 0.0f, 1.0f);
         newSound->applyGainRamp (0, soundLength - soundLength / 4, soundLength / 4, 1.0f, 0.0f);

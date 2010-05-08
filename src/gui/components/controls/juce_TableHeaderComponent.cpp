@@ -357,7 +357,7 @@ void TableHeaderComponent::resizeColumnsToFit (int firstColumnIndex, int targetT
         if (ci->isVisible())
         {
             const int newWidth = jlimit (ci->minimumWidth, ci->maximumWidth,
-                                         (int) floor (sor.getItemSize (visIndex++)));
+                                         (int) std::floor (sor.getItemSize (visIndex++)));
 
             if (newWidth != ci->width)
             {

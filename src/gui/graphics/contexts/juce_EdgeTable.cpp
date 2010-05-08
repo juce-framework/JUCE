@@ -87,7 +87,7 @@ EdgeTable::EdgeTable (const Rectangle<int>& bounds_,
             {
                 const double startX = 256.0f * iter.x1;
                 const double multiplier = (iter.x2 - iter.x1) / (iter.y2 - iter.y1);
-                const int stepSize = jlimit (1, 256, 256 / (1 + (int) fabs (multiplier)));
+                const int stepSize = jlimit (1, 256, 256 / (1 + (int) std::abs (multiplier)));
 
                 do
                 {
@@ -168,22 +168,25 @@ EdgeTable::EdgeTable (const RectangleList& rectanglesToAdd)
     sanitiseLevels (true);
 }
 
-EdgeTable::EdgeTable (const float x, const float y, const float w, const float h)
-   : bounds (Rectangle<int> ((int) floorf (x), roundToInt (y * 256.0f) >> 8, 2 + (int) w, 2 + (int) h)),
+EdgeTable::EdgeTable (const Rectangle<float>& rectangleToAdd)
+   : bounds (Rectangle<int> ((int) std::floor (rectangleToAdd.getX()),
+                             roundToInt (rectangleToAdd.getY() * 256.0f) >> 8,
+                             2 + (int) rectangleToAdd.getWidth(),
+                             2 + (int) rectangleToAdd.getHeight())),
      maxEdgesPerLine (juce_edgeTableDefaultEdgesPerLine),
      lineStrideElements ((juce_edgeTableDefaultEdgesPerLine << 1) + 1),
      needToCheckEmptinesss (true)
 {
-    jassert (w > 0 && h > 0);
+    jassert (! rectangleToAdd.isEmpty());
     table.malloc (jmax (1, bounds.getHeight()) * lineStrideElements);
     table[0] = 0;
 
-    const int x1 = roundToInt (x * 256.0f);
-    const int x2 = roundToInt ((x + w) * 256.0f);
+    const int x1 = roundToInt (rectangleToAdd.getX() * 256.0f);
+    const int x2 = roundToInt (rectangleToAdd.getRight() * 256.0f);
 
-    int y1 = roundToInt (y * 256.0f) - (bounds.getY() << 8);
+    int y1 = roundToInt (rectangleToAdd.getY() * 256.0f) - (bounds.getY() << 8);
     jassert (y1 < 256);
-    int y2 = roundToInt ((y + h) * 256.0f) - (bounds.getY() << 8);
+    int y2 = roundToInt (rectangleToAdd.getBottom() * 256.0f) - (bounds.getY() << 8);
 
     if (x2 <= x1 || y2 <= y1)
     {
@@ -244,7 +247,6 @@ EdgeTable::EdgeTable (const float x, const float y, const float w, const float h
 }
 
 EdgeTable::EdgeTable (const EdgeTable& other)
-   : table (0)
 {
     operator= (other);
 }
@@ -398,9 +400,9 @@ void EdgeTable::addEdgePoint (const int x, const int y, const int winding) throw
     line[0]++;
 }
 
-void EdgeTable::translate (float dx, int dy) throw()
+void EdgeTable::translate (float dx, const int dy) throw()
 {
-    bounds.setPosition (bounds.getX() + (int) floorf (dx), bounds.getY() + dy);
+    bounds.translate ((int) std::floor (dx), dy);
 
     int* lineStart = table;
     const int intDx = (int) (dx * 256.0f);

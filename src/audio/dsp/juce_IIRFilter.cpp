@@ -122,14 +122,14 @@ void IIRFilter::makeLowPass (const double sampleRate,
 
     const double n = 1.0 / tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
-    const double c1 = 1.0 / (1.0 + sqrt (2.0) * n + nSquared);
+    const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
     setCoefficients (c1,
                      c1 * 2.0f,
                      c1,
                      1.0,
                      c1 * 2.0 * (1.0 - nSquared),
-                     c1 * (1.0 - sqrt (2.0) * n + nSquared));
+                     c1 * (1.0 - std::sqrt (2.0) * n + nSquared));
 }
 
 void IIRFilter::makeHighPass (const double sampleRate,
@@ -137,14 +137,14 @@ void IIRFilter::makeHighPass (const double sampleRate,
 {
     const double n = tan (double_Pi * frequency / sampleRate);
     const double nSquared = n * n;
-    const double c1 = 1.0 / (1.0 + sqrt (2.0) * n + nSquared);
+    const double c1 = 1.0 / (1.0 + std::sqrt (2.0) * n + nSquared);
 
     setCoefficients (c1,
                      c1 * -2.0f,
                      c1,
                      1.0,
                      c1 * 2.0 * (nSquared - 1.0),
-                     c1 * (1.0 - sqrt (2.0) * n + nSquared));
+                     c1 * (1.0 - std::sqrt (2.0) * n + nSquared));
 }
 
 void IIRFilter::makeLowShelf (const double sampleRate,
@@ -159,8 +159,8 @@ void IIRFilter::makeLowShelf (const double sampleRate,
     const double aminus1 = A - 1.0;
     const double aplus1 = A + 1.0;
     const double omega = (double_Pi * 2.0 * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    const double coso = cos (omega);
-    const double beta = sin (omega) * sqrt (A) / Q;
+    const double coso = std::cos (omega);
+    const double beta = std::sin (omega) * std::sqrt (A) / Q;
     const double aminus1TimesCoso = aminus1 * coso;
 
     setCoefficients (A * (aplus1 - aminus1TimesCoso + beta),
@@ -183,8 +183,8 @@ void IIRFilter::makeHighShelf (const double sampleRate,
     const double aminus1 = A - 1.0;
     const double aplus1 = A + 1.0;
     const double omega = (double_Pi * 2.0 * jmax (cutOffFrequency, 2.0)) / sampleRate;
-    const double coso = cos (omega);
-    const double beta = sin (omega) * sqrt (A) / Q;
+    const double coso = std::cos (omega);
+    const double beta = std::sin (omega) * std::sqrt (A) / Q;
     const double aminus1TimesCoso = aminus1 * coso;
 
     setCoefficients (A * (aplus1 + aminus1TimesCoso + beta),
@@ -205,8 +205,8 @@ void IIRFilter::makeBandPass (const double sampleRate,
 
     const double A = jmax (0.0f, gainFactor);
     const double omega = (double_Pi * 2.0 * jmax (centreFrequency, 2.0)) / sampleRate;
-    const double alpha = 0.5 * sin (omega) / Q;
-    const double c2 = -2.0 * cos (omega);
+    const double alpha = 0.5 * std::sin (omega) / Q;
+    const double c2 = -2.0 * std::cos (omega);
     const double alphaTimesA = alpha * A;
     const double alphaOverA = alpha / A;
 
