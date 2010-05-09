@@ -62,7 +62,7 @@ public:
                 verticalSnapPositions.add (SnapLine (floatPos.getX(), floatPos.getY(), floatPos.getBottom()));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapPositions.add (SnapLine (floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+                verticalSnapPositions.add (SnapLine ((int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
 
             if (zone.isDraggingWholeObject() || zone.isDraggingRightEdge())
                 verticalSnapPositions.add (SnapLine (floatPos.getRight(), floatPos.getY(), floatPos.getBottom()));
@@ -71,7 +71,7 @@ public:
                 horizontalSnapPositions.add (SnapLine (floatPos.getY(), floatPos.getX(), floatPos.getRight()));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapPositions.add (SnapLine (floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+                horizontalSnapPositions.add (SnapLine ((int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
 
             if (zone.isDraggingWholeObject() || zone.isDraggingBottomEdge())
                 horizontalSnapPositions.add (SnapLine (floatPos.getBottom(), floatPos.getX(), floatPos.getRight()));
@@ -79,20 +79,30 @@ public:
 
         if (isDraggingLeftRight())
         {
-            verticalSnapTargets.add (SnapLine (0, -100.0f, 10000.0f));
-            verticalSnapTargets.add (SnapLine ((float) getCanvasWidth(), -100.0f, 10000.0f));
+            const float y1 = -100.0f, y2 = 10000.0f;
+            verticalSnapTargets.add (SnapLine (0, y1, y2));
+            verticalSnapTargets.add (SnapLine ((float) getCanvasWidth(), y1, y2));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapTargets.add (SnapLine ((float) getCanvasWidth() / 2.0f, 0, 10000.0f));
+                verticalSnapTargets.add (SnapLine ((float) getCanvasWidth() / 2.0f, y1, y2));
+
+            MarkerListBase& markers = canvas->getMarkerList (true);
+            for (int i = markers.size(); --i >= 0;)
+                verticalSnapTargets.add (SnapLine (getMarkerPosition (markers.getMarker(i), true), y1, y2));
         }
 
         if (isDraggingUpDown())
         {
-            horizontalSnapTargets.add (SnapLine (0, -100.0f, 10000.0f));
-            horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight(), -100.0f, 10000.0f));
+            const float x1 = -100.0f, x2 = 10000.0f;
+            horizontalSnapTargets.add (SnapLine (0, x1, x2));
+            horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight(), x1, x2));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight() / 2.0f, 0, 10000.0f));
+                horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight() / 2.0f, x1, x2));
+
+            MarkerListBase& markers = canvas->getMarkerList (false);
+            for (int i = markers.size(); --i >= 0;)
+                horizontalSnapTargets.add (SnapLine (getMarkerPosition (markers.getMarker(i), false), x1, x2));
         }
 
         for (i = 0; i < objectsToSnapTo.size(); ++i)
@@ -106,7 +116,7 @@ public:
             }
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapTargets.add (SnapLine (floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+                verticalSnapTargets.add (SnapLine ((int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
 
             if (isDraggingUpDown())
             {
@@ -115,7 +125,7 @@ public:
             }
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapTargets.add (SnapLine (floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+                horizontalSnapTargets.add (SnapLine ((int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
         }
 
         mergeSnapLines (verticalSnapTargets);
@@ -221,6 +231,7 @@ protected:
     //==============================================================================
     virtual int getCanvasWidth() = 0;
     virtual int getCanvasHeight() = 0;
+    virtual float getMarkerPosition (const ValueTree& marker, bool isX) = 0;
 
     virtual const Rectangle<float> getObjectPosition (const ValueTree& state) = 0;
     virtual bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds) = 0;

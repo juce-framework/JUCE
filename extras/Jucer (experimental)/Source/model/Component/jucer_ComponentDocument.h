@@ -50,6 +50,7 @@ public:
     bool hasChangedSinceLastSave();
     void changed();
 
+    Project* getProject() const                     { return project; }
     const File getCppFile() const                   { return cppFile; }
     void cppFileHasMoved (const File& newFile)      { cppFile = newFile; }
 
@@ -59,8 +60,9 @@ public:
     Value getClassName() const              { return getRootValueNonUndoable ("className"); }
     Value getClassDescription() const       { return getRootValueNonUndoable ("classDesc"); }
 
-    Value getCanvasWidth() const            { return getRootValueNonUndoable ("width"); }
-    Value getCanvasHeight() const           { return getRootValueNonUndoable ("height"); }
+    void setUsingTemporaryCanvasSize (bool b);
+    Value getCanvasWidth() const;
+    Value getCanvasHeight() const;
 
     void createClassProperties (Array <PropertyComponent*>& props);
 
@@ -90,6 +92,8 @@ public:
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     const ValueTree performNewComponentMenuItem (int menuResultCode);
+
+    void updateComponentsIn (Component* compHolder);
 
     //==============================================================================
     class MarkerList    : public MarkerListBase
@@ -157,14 +161,34 @@ public:
     static const char* const jucerIDProperty;
     static const String getJucerIDFor (Component* c);
 
+    //==============================================================================
+    class TestComponent     : public Component
+    {
+    public:
+        TestComponent (ComponentDocument& document_);
+        TestComponent (Project* project, const File& cppFile);
+        ~TestComponent();
+
+        void resized();
+        void paint (Graphics& g);
+
+    private:
+        ScopedPointer<ComponentDocument> document;
+        void setupDocument();
+    };
+
+    juce_UseDebuggingNewOperator
+
 private:
+    //==============================================================================
     Project* project;
     File cppFile;
     ValueTree root;
     ScopedPointer<MarkerList> markersX, markersY;
     CodeGenerator::CustomCodeList customCode;
     mutable UndoManager undoManager;
-    bool changedSinceSaved;
+    bool changedSinceSaved, usingTemporaryCanvasSize;
+    Value tempCanvasWidth, tempCanvasHeight;
 
     void checkRootObject();
     void createSubTreeIfNotThere (const String& name);
@@ -178,6 +202,8 @@ private:
     void writeMetadata (OutputStream& out);
 
     bool createItemProperties (Array <PropertyComponent*>& props, const String& itemId);
+
+    Component* findComponentForState (Component* compHolder, const ValueTree& state);
 };
 
 

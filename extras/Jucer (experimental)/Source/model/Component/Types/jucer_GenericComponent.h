@@ -58,16 +58,7 @@ public:
 
         void paint (Graphics& g)
         {
-            g.fillAll (Colours::white.withAlpha (0.2f));
-            g.setColour (Colours::grey);
-            g.drawRect (getLocalBounds());
-
-            g.drawLine (0.5f, 0.5f, getWidth() - 0.5f, getHeight() - 0.5f);
-            g.drawLine (0.5f, getHeight() - 0.5f, getWidth() - 0.5f, 0.5f);
-
-            g.setColour (Colours::black);
-            g.setFont (11.0f);
-            g.drawFittedText (getName(), 2, 2, getWidth() - 4, getHeight() - 4, Justification::centredTop, 2);
+            drawComponentPlaceholder (g, getWidth(), getHeight(), getName());
         }
     };
 

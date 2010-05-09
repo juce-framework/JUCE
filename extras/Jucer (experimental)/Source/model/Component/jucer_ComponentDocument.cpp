@@ -50,9 +50,9 @@ ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
    : project (project_),
      cppFile (cppFile_),
      root (componentDocumentTag),
-     changedSinceSaved (false)
+     changedSinceSaved (false),
+     usingTemporaryCanvasSize (false)
 {
-    reload();
     checkRootObject();
 
     root.addListener (this);
@@ -61,7 +61,7 @@ ComponentDocument::ComponentDocument (Project* project_, const File& cppFile_)
 ComponentDocument::ComponentDocument (const ComponentDocument& other)
    : project (other.project),
      cppFile (other.cppFile),
-     root (other.root.createCopy()),
+     root (other.root),
      changedSinceSaved (false)
 {
     checkRootObject();
@@ -248,10 +248,13 @@ bool ComponentDocument::reload()
             markersX = 0;
             markersY = 0;
             checkRootObject();
+            customCode.reloadFrom (cppFile.loadFileAsString());
+
+            root.addChild (ValueTree ("dummy"), 0, 0);
+            root.removeChild (root.getChildWithName("dummy"), 0);
+
             undoManager.clearUndoHistory();
             changedSinceSaved = false;
-
-            customCode.reloadFrom (cppFile.loadFileAsString());
             return true;
         }
     }
@@ -297,6 +300,23 @@ void ComponentDocument::checkRootObject()
         getCanvasHeight() = 480;
 }
 
+void ComponentDocument::setUsingTemporaryCanvasSize (bool b)
+{
+    tempCanvasWidth = root.getProperty ("width");
+    tempCanvasHeight = root.getProperty ("height");
+    usingTemporaryCanvasSize = b;
+}
+
+Value ComponentDocument::getCanvasWidth() const
+{
+    return usingTemporaryCanvasSize ? tempCanvasWidth : getRootValueNonUndoable ("width");
+}
+
+Value ComponentDocument::getCanvasHeight() const
+{
+    return usingTemporaryCanvasSize ? tempCanvasHeight : getRootValueNonUndoable ("height");
+}
+
 //==============================================================================
 const int menuItemOffset = 0x63451fa4;
 
@@ -330,6 +350,102 @@ const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCo
     }
 
     return ValueTree::invalid;
+}
+
+Component* ComponentDocument::findComponentForState (Component* compHolder, const ValueTree& state)
+{
+    for (int i = compHolder->getNumChildComponents(); --i >= 0;)
+    {
+        Component* const c = compHolder->getChildComponent (i);
+        if (isStateForComponent (state, c))
+            return c;
+    }
+
+    return 0;
+}
+
+void ComponentDocument::updateComponentsIn (Component* compHolder)
+{
+    int i;
+    for (i = compHolder->getNumChildComponents(); --i >= 0;)
+    {
+        Component* c = compHolder->getChildComponent (i);
+
+        if (! containsComponent (c))
+            delete c;
+    }
+
+    Array <Component*> componentsInOrder;
+
+    const int num = getNumComponents();
+    for (i = 0; i < num; ++i)
+    {
+        const ValueTree v (getComponent (i));
+        Component* c = findComponentForState (compHolder, v);
+
+        if (c == 0)
+        {
+            c = createComponent (i);
+            compHolder->addAndMakeVisible (c);
+        }
+
+        updateComponent (c);
+        componentsInOrder.add (c);
+    }
+
+    // Make sure the z-order is correct..
+    if (num > 0)
+    {
+        componentsInOrder.getLast()->toFront (false);
+
+        for (i = num - 1; --i >= 0;)
+            componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
+    }
+}
+
+//==============================================================================
+ComponentDocument::TestComponent::TestComponent (ComponentDocument& document_)
+    : document (new ComponentDocument (document_))
+{
+    setupDocument();
+}
+
+ComponentDocument::TestComponent::TestComponent (Project* project, const File& cppFile)
+    : document (new ComponentDocument (project, cppFile))
+{
+    if (document->reload())
+        setupDocument();
+    else
+        document = 0;
+}
+
+ComponentDocument::TestComponent::~TestComponent()
+{
+    deleteAllChildren();
+}
+
+void ComponentDocument::TestComponent::setupDocument()
+{
+    document->setUsingTemporaryCanvasSize (true);
+
+    setSize (document->getCanvasWidth().getValue(),
+             document->getCanvasHeight().getValue());
+}
+
+void ComponentDocument::TestComponent::resized()
+{
+    if (document != 0)
+    {
+        document->getCanvasWidth() = getWidth();
+        document->getCanvasHeight() = getHeight();
+        document->updateComponentsIn (this);
+    }
+}
+
+void ComponentDocument::TestComponent::paint (Graphics& g)
+{
+    if (document == 0)
+        drawComponentPlaceholder (g, getWidth(), getHeight(), "(Not a valid Jucer component)");
 }
 
 //==============================================================================

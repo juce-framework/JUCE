@@ -75,7 +75,7 @@ public:
         resized();
     }
 
-    bool arePropertiesVisible() const        { return infoPanel->isVisible(); }
+    bool arePropertiesVisible() const       { return infoPanel->isVisible(); }
 
     void showOrHideTree()
     {

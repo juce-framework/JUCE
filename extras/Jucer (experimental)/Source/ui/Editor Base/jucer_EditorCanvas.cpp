@@ -53,9 +53,13 @@ public:
         g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
     }
 
-    void valueTreePropertyChanged (ValueTree&, const var::identifier&)    { updatePosition(); }
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { updatePosition(); }
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
+    void valueTreePropertyChanged (ValueTree&, const var::identifier&)  { updatePosition(); }
+    void valueTreeChildrenChanged (ValueTree&)                          { updatePosition(); }
+    void valueTreeParentChanged (ValueTree&)
+    {
+        if (! objectState.getParent().isValid())
+            canvas->getSelection().deselect (objectState ["id"]);
+    }
 
     void mouseEnter (const MouseEvent& e)                       { updateDragZone (e.getPosition()); }
     void mouseExit (const MouseEvent& e)                        { updateDragZone (e.getPosition()); }

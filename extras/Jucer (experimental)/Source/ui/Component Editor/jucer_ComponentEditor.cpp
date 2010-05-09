@@ -271,38 +271,10 @@ void ComponentEditor::showNewComponentMenu (Component* componentToAttachTo)
 }
 
 //==============================================================================
-class TestComponent     : public Component
-{
-public:
-    TestComponent (ComponentDocument& document_)
-        : document (document_)
-    {
-        setSize (document.getCanvasWidth().getValue(),
-                 document.getCanvasHeight().getValue());
-    }
-
-    ~TestComponent()
-    {
-        deleteAllChildren();
-    }
-
-    void resized()
-    {
-        document.getCanvasWidth() = getWidth();
-        document.getCanvasHeight() = getHeight();
-
-        ComponentEditorCanvas::updateComponentsIn (this, document, selected);
-    }
-
-private:
-    ComponentDocument document;
-    ComponentEditorCanvas::SelectedItems selected;
-    TooltipWindow tooltipWindow;
-};
-
 void ComponentEditor::test()
 {
-    TestComponent testComp (getDocument());
+    ComponentDocument::TestComponent testComp (getDocument());
+    TooltipWindow tooltipWindow;
 
     DialogWindow::showModalDialog ("Testing: " + getDocument().getClassName().toString(),
                                    &testComp, this, Colours::lightgrey, true, true);

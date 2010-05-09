@@ -48,11 +48,13 @@ public:
     void update (ComponentDocument& document, GroupComponent* comp, const ValueTree& state)
     {
         comp->setText (state ["text"].toString());
+        comp->setTextLabelPosition ((int) state ["justification"]);
     }
 
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
         state.setProperty ("text", "Group", 0);
+        state.setProperty ("justification", (int) Justification::left, 0);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
@@ -63,6 +65,7 @@ public:
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Label", 512, false));
         props.getLast()->setTooltip ("The group's display name.");
 
+        props.add (createJustificationProperty ("Text Position", state.getPropertyAsValue ("justification", document.getUndoManager()), true));
         addEditableColourProperties (document, state, props);
     }
 };

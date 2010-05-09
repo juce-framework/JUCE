@@ -48,18 +48,57 @@ public:
     Component* createComponent()                { return new ComboBox (String::empty); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void update (ComponentDocument& document, ComboBox* comp, const ValueTree& state)
-    {
-    }
-
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
+        state.setProperty ("items", "Item 1\nItem 2", 0);
+        state.setProperty ("editable", false, 0);
+        state.setProperty ("textJustification", (int) Justification::centredLeft, 0);
+        state.setProperty ("unselectedText", "", 0);
+        state.setProperty ("noItemsText", "(No Choices)", 0);
+    }
+
+    void updateItems (ComboBox* comp, const String& itemString)
+    {
+        StringArray items;
+        items.addLines (itemString);
+        items.removeEmptyStrings (true);
+
+        StringArray existingItems;
+
+        for (int i = 0; i < comp->getNumItems(); ++i)
+            existingItems.add (comp->getItemText (i));
+
+        if (existingItems != items)
+        {
+            comp->clear();
+
+            for (int i = 0; i < items.size(); ++i)
+                comp->addItem (items[i], i + 1);
+        }
+    }
+
+    void update (ComponentDocument& document, ComboBox* comp, const ValueTree& state)
+    {
+        updateItems (comp, state ["items"]);
+        comp->setEditableText (state ["editable"]);
+        comp->setJustificationType ((int) state ["textJustification"]);
+        comp->setTextWhenNothingSelected (state ["unselectedText"].toString());
+        comp->setTextWhenNoChoicesAvailable (state ["noItemsText"].toString());
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
         addTooltipProperty (document, state, props);
         addFocusOrderProperty (document, state, props);
+
+        props.add (new TextPropertyComponent (getValue ("items", state, document), "Items", 16384, true));
+        props.getLast()->setTooltip ("A list of items to use to initialise the ComboBox");
+
+        props.add (new BooleanPropertyComponent (getValue ("editable", state, document), "Editable", "Text is editable"));
+        props.add (createJustificationProperty ("Text Position", getValue ("textJustification", state, document), false));
+        props.add (new TextPropertyComponent (getValue ("unselectedText", state, document), "Text when none selected", 512, false));
+        props.add (new TextPropertyComponent (getValue ("noItemsText", state, document), "Text when no items", 512, false));
+
         addEditableColourProperties (document, state, props);
     }
 };

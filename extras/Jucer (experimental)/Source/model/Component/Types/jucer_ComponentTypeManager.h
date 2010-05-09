@@ -136,8 +136,8 @@ protected:
 
     void addFocusOrderProperty (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
-        props.add (new TextPropertyComponent (Value (new IntegerValueSource (getValue (ComponentDocument::compFocusOrderProperty,
-                                                                                       state, document))),
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue (ComponentDocument::compFocusOrderProperty,
+                                                                                            state, document))),
                                               "Focus Order", 10, false));
     }
 

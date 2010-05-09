@@ -158,6 +158,11 @@ public:
         {
             return false;
         }
+
+        float getMarkerPosition (const ValueTree& marker, bool isX)
+        {
+            return 0;
+        }
     };
 
     DragOperation* createDragOperation (const MouseEvent& e, Component* snapGuideParentComponent,

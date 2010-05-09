@@ -62,63 +62,9 @@ public:
         return new Component();
     }
 
-    static Component* findComponentForState (Component* compHolder, ComponentDocument& doc, const ValueTree& state)
-    {
-        for (int i = compHolder->getNumChildComponents(); --i >= 0;)
-        {
-            Component* const c = compHolder->getChildComponent (i);
-            if (doc.isStateForComponent (state, c))
-                return c;
-        }
-
-        return 0;
-    }
-
-    static void updateComponentsIn (Component* compHolder, ComponentDocument& doc, SelectedItems& selection)
-    {
-        int i;
-        for (i = compHolder->getNumChildComponents(); --i >= 0;)
-        {
-            Component* c = compHolder->getChildComponent (i);
-
-            if (! doc.containsComponent (c))
-            {
-                selection.deselect (ComponentDocument::getJucerIDFor (c));
-                delete c;
-            }
-        }
-
-        Array <Component*> componentsInOrder;
-
-        const int num = doc.getNumComponents();
-        for (i = 0; i < num; ++i)
-        {
-            const ValueTree v (doc.getComponent (i));
-            Component* c = findComponentForState (compHolder, doc, v);
-
-            if (c == 0)
-            {
-                c = doc.createComponent (i);
-                compHolder->addAndMakeVisible (c);
-            }
-
-            doc.updateComponent (c);
-            componentsInOrder.add (c);
-        }
-
-        // Make sure the z-order is correct..
-        if (num > 0)
-        {
-            componentsInOrder.getLast()->toFront (false);
-
-            for (i = num - 1; --i >= 0;)
-                componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
-        }
-    }
-
     void updateComponents()
     {
-        updateComponentsIn (getComponentHolder(), getDocument(), editor.getSelection());
+        getDocument().updateComponentsIn (getComponentHolder());
         startTimer (500);
     }
 
@@ -238,6 +184,12 @@ public:
             pr.moveToAbsolute (newBounds, doc);
 
             return doc.setCoordsFor (state, pr);
+        }
+
+        float getMarkerPosition (const ValueTree& marker, bool isX)
+        {
+            ComponentDocument& doc = getDocument();
+            return doc.getMarkerList (isX).getCoordinate (marker).resolve (doc);
         }
     };
 
