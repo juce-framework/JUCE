@@ -266,7 +266,7 @@ void MagnifierComponent::paint (Graphics& g)
     }
 
     Image temp (Image::ARGB, jmax (w, srcX + srcW), jmax (h, srcY + srcH), false);
-    temp.clear (srcX, srcY, srcW, srcH);
+    temp.clear (Rectangle<int> (srcX, srcY, srcW, srcH));
 
     {
         Graphics g2 (temp);

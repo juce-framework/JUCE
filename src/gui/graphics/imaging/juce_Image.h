@@ -132,8 +132,7 @@ public:
         This won't do any alpha-blending - it just sets all pixels in the image to
         the given colour (which may be non-opaque if the image has an alpha channel).
     */
-    virtual void clear (int x, int y, int w, int h,
-                        const Colour& colourToClearTo = Colour (0x00000000));
+    virtual void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
 
     /** Returns a new image that's a copy of this one.
 
@@ -240,6 +239,7 @@ public:
         inline uint8* getPixelPointer (int x, int y) const              { return data + y * lineStride + x * pixelStride; }
 
         uint8* data;
+        const PixelFormat pixelFormat;
         int lineStride, pixelStride, width, height;
 
     private:

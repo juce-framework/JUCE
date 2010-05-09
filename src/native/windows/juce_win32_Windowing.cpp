@@ -1122,6 +1122,7 @@ private:
             WindowsBitmapImage* const offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
 
             RectangleList contextClip;
+            const Rectangle<int> clipBounds (0, 0, w, h);
 
             bool needToPaintAll = true;
 
@@ -1149,15 +1150,12 @@ private:
 
                         while (--num >= 0)
                         {
-                            // (need to move this one pixel to the left because of a win32 bug)
-                            const int cx = jmax (x, (int) rects->left - 1);
-                            const int cy = rects->top;
-                            const int cw = rects->right - cx;
-                            const int ch = rects->bottom - rects->top;
-
-                            if (cx + cw - x <= w && cy + ch - y <= h)
+                            if (rects->right <= x + w && rects->bottom <= y + h)
                             {
-                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, cy - y, cw, ch));
+                                // (need to move this one pixel to the left because of a win32 bug)
+                                const int cx = jmax (x, (int) rects->left - 1);
+                                contextClip.addWithoutMerging (Rectangle<int> (cx - x, rects->top - y, rects->right - cx, rects->bottom - rects->top)
+                                                                   .getIntersection (clipBounds));
                             }
                             else
                             {
@@ -1182,10 +1180,7 @@ private:
                 RectangleList::Iterator i (contextClip);
 
                 while (i.next())
-                {
-                    const Rectangle<int>& r = *i.getRectangle();
-                    offscreenImage->clear (r.getX(), r.getY(), r.getWidth(), r.getHeight());
-                }
+                    offscreenImage->clear (*i.getRectangle());
             }
 
             // if the component's not opaque, this won't draw properly unless the platform can support this
@@ -1193,10 +1188,7 @@ private:
 
             updateCurrentModifiers();
 
-            LowLevelGraphicsSoftwareRenderer context (*offscreenImage);
-            context.clipToRectangleList (contextClip);
-            context.setOrigin (-x, -y);
-
+            LowLevelGraphicsSoftwareRenderer context (*offscreenImage, -x, -y, contextClip);
             handlePaint (context);
 
             if (! dontRepaint)

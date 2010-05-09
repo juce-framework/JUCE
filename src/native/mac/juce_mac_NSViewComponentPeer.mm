@@ -1505,25 +1505,28 @@ void NSViewComponentPeer::drawRect (NSRect r)
                     (int) (r.size.height + 0.5f),
                     ! getComponent()->isOpaque());
 
-        LowLevelGraphicsSoftwareRenderer context (temp);
-        context.setOrigin (-roundToInt (r.origin.x),
-                           -roundToInt ([view frame].size.height - (r.origin.y + r.size.height)));
+        const int xOffset = -roundToInt (r.origin.x);
+        const int yOffset = -roundToInt ([view frame].size.height - (r.origin.y + r.size.height));
 
         const NSRect* rects = 0;
         NSInteger numRects = 0;
         [view getRectsBeingDrawn: &rects count: &numRects];
 
+        const Rectangle<int> clipBounds (temp.getBounds());
+
         RectangleList clip;
         for (int i = 0; i < numRects; ++i)
         {
-            clip.addWithoutMerging (Rectangle<int> (roundToInt (rects[i].origin.x),
-                                                    roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)),
-                                                    roundToInt (rects[i].size.width),
-                                                    roundToInt (rects[i].size.height)));
+            clip.addWithoutMerging (clipBounds.getIntersection (Rectangle<int> (roundToInt (rects[i].origin.x) + xOffset,
+                                                                                roundToInt ([view frame].size.height - (rects[i].origin.y + rects[i].size.height)) + yOffset,
+                                                                                roundToInt (rects[i].size.width),
+                                                                                roundToInt (rects[i].size.height))));
         }
 
-        if (context.clipToRectangleList (clip))
+        if (! clip.isEmpty())
         {
+            LowLevelGraphicsSoftwareRenderer context (temp, xOffset, yOffset, clip);
+
             insideDrawRect = true;
             handlePaint (context);
             insideDrawRect = false;

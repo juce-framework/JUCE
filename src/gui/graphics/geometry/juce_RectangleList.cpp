@@ -157,7 +157,8 @@ void RectangleList::add (const Rectangle<int>& rect)
 
 void RectangleList::addWithoutMerging (const Rectangle<int>& rect)
 {
-    rects.add (rect);
+    if (! rect.isEmpty())
+        rects.add (rect);
 }
 
 void RectangleList::add (const int x, const int y, const int w, const int h)

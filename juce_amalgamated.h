@@ -1139,7 +1139,10 @@ inline int64 abs64 (const int64 n) throw()
 template <typename Type>
 inline Type juce_negate (Type n) throw()
 {
-	return -n;
+	return sizeof (Type) == 1 ? (Type) -(char) n
+		: (sizeof (Type) == 2 ? (Type) -(short) n
+		: (sizeof (Type) == 4 ? (Type) -(int) n
+		: ((Type) -(int64) n)));
 }
 
 /** This templated negate function will negate pointers as well as integers */
@@ -2682,7 +2685,7 @@ public:
 		This can be called directly, or by using the DBG() macro in
 		juce_PlatformDefs.h (which will avoid calling the method in non-debug builds).
 	*/
-	static void JUCE_CALLTYPE outputDebugString (const String& text) throw();
+	static void JUCE_CALLTYPE outputDebugString (const String& text);
 
 protected:
 
@@ -7931,7 +7934,7 @@ public:
 		@returns	true if this succeeds, although depending on the system, the
 					application might not have sufficient privileges to do this.
 	*/
-	bool setSystemTimeToThisTime() const throw();
+	bool setSystemTimeToThisTime() const;
 
 	/** Returns the name of a day of the week.
 
@@ -14258,7 +14261,7 @@ public:
 
 		See also the JUCE_VERSION, JUCE_MAJOR_VERSION and JUCE_MINOR_VERSION macros.
 	*/
-	static const String getJUCEVersion() throw();
+	static const String getJUCEVersion();
 
 	/** The set of possible results of the getOperatingSystemType() method.
 	*/
@@ -14289,18 +14292,18 @@ public:
 		@returns one of the values from the OperatingSystemType enum.
 		@see getOperatingSystemName
 	*/
-	static OperatingSystemType getOperatingSystemType() throw();
+	static OperatingSystemType getOperatingSystemType();
 
 	/** Returns the name of the type of operating system we're running on.
 
 		@returns a string describing the OS type.
 		@see getOperatingSystemType
 	*/
-	static const String getOperatingSystemName() throw();
+	static const String getOperatingSystemName();
 
 	/** Returns true if the OS is 64-bit, or false for a 32-bit OS.
 	*/
-	static bool isOperatingSystem64Bit() throw();
+	static bool isOperatingSystem64Bit();
 
 	/** Returns the current user's name, if available.
 		@see getFullUserName()
@@ -14320,52 +14323,42 @@ public:
 		@returns	the speed in megahertz, e.g. 1500, 2500, 32000 (depending on
 					what year you're reading this...)
 	*/
-	static int getCpuSpeedInMegaherz() throw();
+	static int getCpuSpeedInMegaherz();
 
 	/** Returns a string to indicate the CPU vendor.
 
 		Might not be known on some systems.
 	*/
-	static const String getCpuVendor() throw();
+	static const String getCpuVendor();
 
 	/** Checks whether Intel MMX instructions are available. */
-	static bool hasMMX() throw();
+	static bool hasMMX();
 
 	/** Checks whether Intel SSE instructions are available. */
-	static bool hasSSE() throw();
+	static bool hasSSE();
 
 	/** Checks whether Intel SSE2 instructions are available. */
-	static bool hasSSE2() throw();
+	static bool hasSSE2();
 
 	/** Checks whether AMD 3DNOW instructions are available. */
-	static bool has3DNow() throw();
+	static bool has3DNow();
 
 	/** Returns the number of CPUs.
 	*/
-	static int getNumCpus() throw();
-
-	/** Returns a clock-cycle tick counter, if available.
-
-		If the machine can do it, this will return a tick-count
-		where each tick is one cpu clock cycle - used for profiling
-		code.
-
-		@returns	the tick count, or zero if not available.
-	*/
-	static int64 getClockCycleCounter() throw();
+	static int getNumCpus();
 
 	/** Finds out how much RAM is in the machine.
 
 		@returns	the approximate number of megabytes of memory, or zero if
 					something goes wrong when finding out.
 	*/
-	static int getMemorySizeInMegabytes() throw();
+	static int getMemorySizeInMegabytes();
 
 	/** Returns the system page-size.
 
 		This is only used by programmers with beards.
 	*/
-	static int getPageSize() throw();
+	static int getPageSize();
 
 	/** Returns a list of MAC addresses found on this machine.
 
@@ -14396,7 +14389,7 @@ public:
 	static const StringArray getMACAddressStrings();
 
 	// not-for-public-use platform-specific method gets called at startup to initialise things.
-	static void initialiseStats() throw();
+	static void initialiseStats();
 
 private:
 	SystemStats();
@@ -18873,7 +18866,7 @@ public:
 		The return value is the number of radians clockwise from the 3 o'clock direction,
 		where this point is the centre and the other point is on the radius.
 	*/
-	ValueType getAngleToPoint (const Point& other) const throw()	{ return (ValueType) atan2 (other.x - x, other.y - y); }
+	ValueType getAngleToPoint (const Point& other) const throw()	{ return (ValueType) std::atan2 (other.x - x, other.y - y); }
 
 	/** Uses a transform to change the point's co-ordinates.
 		This will only compile if ValueType = float!
@@ -20427,10 +20420,10 @@ public:
 	*/
 	const Rectangle<int> getSmallestIntegerContainer() const throw()
 	{
-		const int x1 = (int) floorf ((float) x);
-		const int y1 = (int) floorf ((float) y);
-		const int x2 = (int) floorf ((float) (x + w + 0.9999f));
-		const int y2 = (int) floorf ((float) (y + h + 0.9999f));
+		const int x1 = (int) std::floor (static_cast<float> (x));
+		const int y1 = (int) std::floor (static_cast<float> (y));
+		const int x2 = (int) std::floor (static_cast<float> (x + w + 0.9999f));
+		const int y2 = (int) std::floor (static_cast<float> (y + h + 0.9999f));
 
 		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
 	}
@@ -20660,186 +20653,6 @@ private:
 
 #endif   // __JUCE_JUSTIFICATION_JUCEHEADER__
 /*** End of inlined file: juce_Justification.h ***/
-
-
-/*** Start of inlined file: juce_EdgeTable.h ***/
-#ifndef __JUCE_EDGETABLE_JUCEHEADER__
-#define __JUCE_EDGETABLE_JUCEHEADER__
-
-class Path;
-class RectangleList;
-class Image;
-
-/**
-	A table of horizontal scan-line segments - used for rasterising Paths.
-
-	@see Path, Graphics
-*/
-class JUCE_API  EdgeTable
-{
-public:
-
-	/** Creates an edge table containing a path.
-
-		A table is created with a fixed vertical range, and only sections of the path
-		which lie within this range will be added to the table.
-
-		@param clipLimits		   only the region of the path that lies within this area will be added
-		@param pathToAdd		the path to add to the table
-		@param transform		a transform to apply to the path being added
-	*/
-	EdgeTable (const Rectangle<int>& clipLimits,
-			   const Path& pathToAdd,
-			   const AffineTransform& transform);
-
-	/** Creates an edge table containing a rectangle.
-	*/
-	EdgeTable (const Rectangle<int>& rectangleToAdd);
-
-	/** Creates an edge table containing a rectangle list.
-	*/
-	EdgeTable (const RectangleList& rectanglesToAdd);
-
-	/** Creates an edge table containing a rectangle.
-	*/
-	EdgeTable (float x, float y, float w, float h);
-
-	/** Creates a copy of another edge table. */
-	EdgeTable (const EdgeTable& other);
-
-	/** Copies from another edge table. */
-	EdgeTable& operator= (const EdgeTable& other);
-
-	/** Destructor. */
-	~EdgeTable();
-
-	void clipToRectangle (const Rectangle<int>& r) throw();
-	void excludeRectangle (const Rectangle<int>& r) throw();
-	void clipToEdgeTable (const EdgeTable& other);
-	void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
-	bool isEmpty() throw();
-	const Rectangle<int>& getMaximumBounds() const throw()	   { return bounds; }
-	void translate (float dx, int dy) throw();
-
-	/** Reduces the amount of space the table has allocated.
-
-		This will shrink the table down to use as little memory as possible - useful for
-		read-only tables that get stored and re-used for rendering.
-	*/
-	void optimiseTable() throw();
-
-	/** Iterates the lines in the table, for rendering.
-
-		This function will iterate each line in the table, and call a user-defined class
-		to render each pixel or continuous line of pixels that the table contains.
-
-		@param iterationCallback	this templated class must contain the following methods:
-										@code
-										inline void setEdgeTableYPos (int y);
-										inline void handleEdgeTablePixel (int x, int alphaLevel) const;
-										inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
-										@endcode
-										(these don't necessarily have to be 'const', but it might help it go faster)
-	*/
-	template <class EdgeTableIterationCallback>
-	void iterate (EdgeTableIterationCallback& iterationCallback) const throw()
-	{
-		const int* lineStart = table;
-
-		for (int y = 0; y < bounds.getHeight(); ++y)
-		{
-			const int* line = lineStart;
-			lineStart += lineStrideElements;
-			int numPoints = line[0];
-
-			if (--numPoints > 0)
-			{
-				int x = *++line;
-				jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
-				int levelAccumulator = 0;
-
-				iterationCallback.setEdgeTableYPos (bounds.getY() + y);
-
-				while (--numPoints >= 0)
-				{
-					const int level = *++line;
-					jassert (((unsigned int) level) < (unsigned int) 256);
-					const int endX = *++line;
-					jassert (endX >= x);
-					const int endOfRun = (endX >> 8);
-
-					if (endOfRun == (x >> 8))
-					{
-						// small segment within the same pixel, so just save it for the next
-						// time round..
-						levelAccumulator += (endX - x) * level;
-					}
-					else
-					{
-						// plot the fist pixel of this segment, including any accumulated
-						// levels from smaller segments that haven't been drawn yet
-						levelAccumulator += (0xff - (x & 0xff)) * level;
-						levelAccumulator >>= 8;
-						x >>= 8;
-
-						if (levelAccumulator > 0)
-						{
-							if (levelAccumulator >> 8)
-								levelAccumulator = 0xff;
-
-							iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-						}
-
-						// if there's a run of similar pixels, do it all in one go..
-						if (level > 0)
-						{
-							jassert (endOfRun <= bounds.getRight());
-							const int numPix = endOfRun - ++x;
-
-							if (numPix > 0)
-								iterationCallback.handleEdgeTableLine (x, numPix, level);
-						}
-
-						// save the bit at the end to be drawn next time round the loop.
-						levelAccumulator = (endX & 0xff) * level;
-					}
-
-					x = endX;
-				}
-
-				if (levelAccumulator > 0)
-				{
-					levelAccumulator >>= 8;
-					if (levelAccumulator >> 8)
-						levelAccumulator = 0xff;
-
-					x >>= 8;
-					jassert (x >= bounds.getX() && x < bounds.getRight());
-					iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
-				}
-			}
-		}
-	}
-
-	juce_UseDebuggingNewOperator
-
-private:
-	// table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
-	HeapBlock<int> table;
-	Rectangle<int> bounds;
-	int maxEdgesPerLine, lineStrideElements;
-	bool needToCheckEmptinesss;
-
-	void addEdgePoint (int x, int y, int winding) throw();
-	void remapTableForNumEdges (int newNumEdgesPerLine) throw();
-	void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
-	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
-	void sanitiseLevels (bool useNonZeroWinding) throw();
-	static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
-};
-
-#endif   // __JUCE_EDGETABLE_JUCEHEADER__
-/*** End of inlined file: juce_EdgeTable.h ***/
 
 class Image;
 
@@ -44113,6 +43926,9 @@ public:
 	const StringArray getTokenTypes();
 	const Colour getDefaultColour (int tokenType);
 
+	/** This is a handy method for checking whether a string is a c++ reserved keyword. */
+	static bool isReservedKeyword (const String& token) throw();
+
 	juce_UseDebuggingNewOperator
 };
 
@@ -46857,8 +46673,7 @@ public:
 		This won't do any alpha-blending - it just sets all pixels in the image to
 		the given colour (which may be non-opaque if the image has an alpha channel).
 	*/
-	virtual void clear (int x, int y, int w, int h,
-						const Colour& colourToClearTo = Colour (0x00000000));
+	virtual void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
 
 	/** Returns a new image that's a copy of this one.
 
@@ -46963,6 +46778,7 @@ public:
 		inline uint8* getPixelPointer (int x, int y) const		  { return data + y * lineStride + x * pixelStride; }
 
 		uint8* data;
+		const PixelFormat pixelFormat;
 		int lineStride, pixelStride, width, height;
 
 	private:
@@ -56975,6 +56791,185 @@ private:
 #endif
 #ifndef __JUCE_EDGETABLE_JUCEHEADER__
 
+/*** Start of inlined file: juce_EdgeTable.h ***/
+#ifndef __JUCE_EDGETABLE_JUCEHEADER__
+#define __JUCE_EDGETABLE_JUCEHEADER__
+
+class Path;
+class Image;
+
+/**
+	A table of horizontal scan-line segments - used for rasterising Paths.
+
+	@see Path, Graphics
+*/
+class JUCE_API  EdgeTable
+{
+public:
+
+	/** Creates an edge table containing a path.
+
+		A table is created with a fixed vertical range, and only sections of the path
+		which lie within this range will be added to the table.
+
+		@param clipLimits		   only the region of the path that lies within this area will be added
+		@param pathToAdd		the path to add to the table
+		@param transform		a transform to apply to the path being added
+	*/
+	EdgeTable (const Rectangle<int>& clipLimits,
+			   const Path& pathToAdd,
+			   const AffineTransform& transform);
+
+	/** Creates an edge table containing a rectangle.
+	*/
+	EdgeTable (const Rectangle<int>& rectangleToAdd);
+
+	/** Creates an edge table containing a rectangle list.
+	*/
+	EdgeTable (const RectangleList& rectanglesToAdd);
+
+	/** Creates an edge table containing a rectangle.
+	*/
+	EdgeTable (const Rectangle<float>& rectangleToAdd);
+
+	/** Creates a copy of another edge table. */
+	EdgeTable (const EdgeTable& other);
+
+	/** Copies from another edge table. */
+	EdgeTable& operator= (const EdgeTable& other);
+
+	/** Destructor. */
+	~EdgeTable();
+
+	void clipToRectangle (const Rectangle<int>& r) throw();
+	void excludeRectangle (const Rectangle<int>& r) throw();
+	void clipToEdgeTable (const EdgeTable& other);
+	void clipLineToMask (int x, int y, const uint8* mask, int maskStride, int numPixels) throw();
+	bool isEmpty() throw();
+	const Rectangle<int>& getMaximumBounds() const throw()	   { return bounds; }
+	void translate (float dx, int dy) throw();
+
+	/** Reduces the amount of space the table has allocated.
+
+		This will shrink the table down to use as little memory as possible - useful for
+		read-only tables that get stored and re-used for rendering.
+	*/
+	void optimiseTable() throw();
+
+	/** Iterates the lines in the table, for rendering.
+
+		This function will iterate each line in the table, and call a user-defined class
+		to render each pixel or continuous line of pixels that the table contains.
+
+		@param iterationCallback	this templated class must contain the following methods:
+										@code
+										inline void setEdgeTableYPos (int y);
+										inline void handleEdgeTablePixel (int x, int alphaLevel) const;
+										inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
+										@endcode
+										(these don't necessarily have to be 'const', but it might help it go faster)
+	*/
+	template <class EdgeTableIterationCallback>
+	void iterate (EdgeTableIterationCallback& iterationCallback) const throw()
+	{
+		const int* lineStart = table;
+
+		for (int y = 0; y < bounds.getHeight(); ++y)
+		{
+			const int* line = lineStart;
+			lineStart += lineStrideElements;
+			int numPoints = line[0];
+
+			if (--numPoints > 0)
+			{
+				int x = *++line;
+				jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
+				int levelAccumulator = 0;
+
+				iterationCallback.setEdgeTableYPos (bounds.getY() + y);
+
+				while (--numPoints >= 0)
+				{
+					const int level = *++line;
+					jassert (((unsigned int) level) < (unsigned int) 256);
+					const int endX = *++line;
+					jassert (endX >= x);
+					const int endOfRun = (endX >> 8);
+
+					if (endOfRun == (x >> 8))
+					{
+						// small segment within the same pixel, so just save it for the next
+						// time round..
+						levelAccumulator += (endX - x) * level;
+					}
+					else
+					{
+						// plot the fist pixel of this segment, including any accumulated
+						// levels from smaller segments that haven't been drawn yet
+						levelAccumulator += (0xff - (x & 0xff)) * level;
+						levelAccumulator >>= 8;
+						x >>= 8;
+
+						if (levelAccumulator > 0)
+						{
+							if (levelAccumulator >> 8)
+								levelAccumulator = 0xff;
+
+							iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+						}
+
+						// if there's a run of similar pixels, do it all in one go..
+						if (level > 0)
+						{
+							jassert (endOfRun <= bounds.getRight());
+							const int numPix = endOfRun - ++x;
+
+							if (numPix > 0)
+								iterationCallback.handleEdgeTableLine (x, numPix, level);
+						}
+
+						// save the bit at the end to be drawn next time round the loop.
+						levelAccumulator = (endX & 0xff) * level;
+					}
+
+					x = endX;
+				}
+
+				if (levelAccumulator > 0)
+				{
+					levelAccumulator >>= 8;
+					if (levelAccumulator >> 8)
+						levelAccumulator = 0xff;
+
+					x >>= 8;
+					jassert (x >= bounds.getX() && x < bounds.getRight());
+					iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+				}
+			}
+		}
+	}
+
+	juce_UseDebuggingNewOperator
+
+private:
+	// table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
+	HeapBlock<int> table;
+	Rectangle<int> bounds;
+	int maxEdgesPerLine, lineStrideElements;
+	bool needToCheckEmptinesss;
+
+	void addEdgePoint (int x, int y, int winding) throw();
+	void remapTableForNumEdges (int newNumEdgesPerLine) throw();
+	void intersectWithEdgeTableLine (int y, const int* otherLine) throw();
+	void clipEdgeTableLineToRange (int* line, int x1, int x2) throw();
+	void sanitiseLevels (bool useNonZeroWinding) throw();
+	static void copyEdgeTableData (int* dest, int destLineStride, const int* src, int srcLineStride, int numLines) throw();
+};
+
+#endif   // __JUCE_EDGETABLE_JUCEHEADER__
+/*** End of inlined file: juce_EdgeTable.h ***/
+
+
 #endif
 #ifndef __JUCE_FILLTYPE_JUCEHEADER__
 
@@ -57178,6 +57173,7 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer	: public LowLevelGraphicsContex
 public:
 
 	LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn);
+	LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
 	~LowLevelGraphicsSoftwareRenderer();
 
 	bool isVectorDevice() const;

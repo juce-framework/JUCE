@@ -1888,25 +1888,19 @@ private:
 
                 startTimer (repaintTimerPeriod);
 
-                LowLevelGraphicsSoftwareRenderer context (*image);
+                RectangleList adjustedList (originalRepaintRegion);
+                adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
+                LowLevelGraphicsSoftwareRenderer context (*image, -totalArea.getX(), -totalArea.getY(), adjustedList);
 
-                context.setOrigin (-totalArea.getX(), -totalArea.getY());
-
-                if (context.clipToRectangleList (originalRepaintRegion))
+                if (peer->depth == 32)
                 {
-                    if (peer->depth == 32)
-                    {
-                        RectangleList::Iterator i (originalRepaintRegion);
+                    RectangleList::Iterator i (originalRepaintRegion);
 
-                        while (i.next())
-                        {
-                            const Rectangle<int>& r = *i.getRectangle();
-                            image->clear (r.getX() - totalArea.getX(), r.getY() - totalArea.getY(), r.getWidth(), r.getHeight());
-                        }
-                    }
-
-                    peer->handlePaint (context);
+                    while (i.next())
+                        image->clear (*i.getRectangle() - totalArea.getPosition());
                 }
+
+                peer->handlePaint (context);
 
                 if (! peer->maskedRegion.isEmpty())
                     originalRepaintRegion.subtract (peer->maskedRegion);

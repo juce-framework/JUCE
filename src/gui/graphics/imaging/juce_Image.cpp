@@ -96,8 +96,9 @@ LowLevelGraphicsContext* Image::createLowLevelContext()
 }
 
 //==============================================================================
-Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const bool /*makeWritable*/)
+Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int w, const int h, const bool /*makeWritable*/)
     : data (image.imageData + image.lineStride * y + image.pixelStride * x),
+      pixelFormat (image.getFormat()),
       lineStride (image.lineStride),
       pixelStride (image.pixelStride),
       width (w),
@@ -106,8 +107,9 @@ Image::BitmapData::BitmapData (Image& image, int x, int y, int w, int h, const b
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
 }
 
-Image::BitmapData::BitmapData (const Image& image, int x, int y, int w, int h)
+Image::BitmapData::BitmapData (const Image& image, const int x, const int y, const int w, const int h)
     : data (image.imageData + image.lineStride * y + image.pixelStride * x),
+      pixelFormat (image.getFormat()),
       lineStride (image.lineStride),
       pixelStride (image.pixelStride),
       width (w),
@@ -121,7 +123,7 @@ Image::BitmapData::~BitmapData()
 }
 
 void Image::setPixelData (int x, int y, int w, int h,
-                          const uint8* sourcePixelData, int sourceLineStride)
+                          const uint8* const sourcePixelData, const int sourceLineStride)
 {
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= imageWidth && y + h <= imageHeight);
 
@@ -139,14 +141,17 @@ void Image::setPixelData (int x, int y, int w, int h,
 }
 
 //==============================================================================
-void Image::clear (int dx, int dy, int dw, int dh, const Colour& colourToClearTo)
+void Image::clear (const Rectangle<int>& area, const Colour& colourToClearTo)
 {
-    if (Rectangle<int>::intersectRectangles (dx, dy, dw, dh, 0, 0, imageWidth, imageHeight))
+    const Rectangle<int> clipped (area.getIntersection (getBounds()));
+
+    if (! clipped.isEmpty())
     {
         const PixelARGB col (colourToClearTo.getPixelARGB());
 
-        const BitmapData destData (*this, dx, dy, dw, dh, true);
+        const BitmapData destData (*this, clipped.getX(), clipped.getY(), clipped.getWidth(), clipped.getHeight(), true);
         uint8* dest = destData.data;
+        int dh = clipped.getHeight();
 
         while (--dh >= 0)
         {
@@ -155,7 +160,7 @@ void Image::clear (int dx, int dy, int dw, int dh, const Colour& colourToClearTo
 
             if (isARGB())
             {
-                for (int x = dw; --x >= 0;)
+                for (int x = clipped.getWidth(); --x >= 0;)
                 {
                     ((PixelARGB*) line)->set (col);
                     line += destData.pixelStride;
@@ -163,7 +168,7 @@ void Image::clear (int dx, int dy, int dw, int dh, const Colour& colourToClearTo
             }
             else if (isRGB())
             {
-                for (int x = dw; --x >= 0;)
+                for (int x = clipped.getWidth(); --x >= 0;)
                 {
                     ((PixelRGB*) line)->set (col);
                     line += destData.pixelStride;
@@ -171,7 +176,7 @@ void Image::clear (int dx, int dy, int dw, int dh, const Colour& colourToClearTo
             }
             else
             {
-                for (int x = dw; --x >= 0;)
+                for (int x = clipped.getWidth(); --x >= 0;)
                 {
                     *line = col.getAlpha();
                     line += destData.pixelStride;
@@ -211,7 +216,7 @@ Image* Image::createCopyOfAlphaChannel() const
 
     if (! hasAlphaChannel())
     {
-        newImage->clear (0, 0, imageWidth, imageHeight, Colours::black);
+        newImage->clear (getBounds(), Colours::black);
     }
     else
     {
