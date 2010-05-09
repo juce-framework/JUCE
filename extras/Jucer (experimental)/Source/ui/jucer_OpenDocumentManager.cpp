@@ -74,7 +74,11 @@ public:
             return false;
 
         out = 0;
-        return temp.overwriteTargetFileWithTemporary();
+        if (! temp.overwriteTargetFileWithTemporary())
+            return false;
+
+        modDetector.updateHash();
+        return true;
     }
 
     Component* createEditor()
@@ -141,7 +145,13 @@ public:
 
     bool save()
     {
-        return componentDoc->save();
+        if (componentDoc->save())
+        {
+            modDetector.updateHash();
+            return true;
+        }
+
+        return false;
     }
 
     Component* createEditor()
@@ -202,7 +212,13 @@ public:
 
     bool save()
     {
-        return drawableDoc->save (modDetector.getFile());
+        if (drawableDoc->save (modDetector.getFile()))
+        {
+            modDetector.updateHash();
+            return true;
+        }
+
+        return false;
     }
 
     Component* createEditor()

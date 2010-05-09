@@ -37,19 +37,47 @@ public:
     ViewportHandler() : ComponentTypeHelper<Viewport> ("Viewport", "VIEWPORT", "viewport")  {}
     ~ViewportHandler()  {}
 
-    Component* createComponent()                { return new Viewport(); }
-    const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 300, 200); }
-
-    void update (ComponentDocument& document, Viewport* comp, const ValueTree& state)
+    class DemoContentComponent  : public Component
     {
+    public:
+        DemoContentComponent() { setSize (1000, 1000); }
+        ~DemoContentComponent() {}
+
+        void paint (Graphics& g)
+        {
+            g.fillCheckerBoard (0, 0, getWidth(), getHeight(), 40, 40,
+                                Colours::grey.withAlpha (0.7f),
+                                Colours::white.withAlpha (0.7f));
+        }
+    };
+
+    Component* createComponent()
+    {
+        Viewport* v = new Viewport();
+        v->setViewedComponent (new DemoContentComponent());
+        return v;
     }
+
+    const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 300, 200); }
 
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
+        state.setProperty ("scrollBarV", true, 0);
+        state.setProperty ("scrollBarH", true, 0);
+        state.setProperty ("scrollbarWidth", 18, 0);
+    }
+
+    void update (ComponentDocument& document, Viewport* comp, const ValueTree& state)
+    {
+        comp->setScrollBarsShown (state ["scrollBarV"], state ["scrollBarH"]);
+        comp->setScrollBarThickness (state ["scrollbarWidth"]);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
     {
+        props.add (new BooleanPropertyComponent (getValue ("scrollBarV", state, document), "Scrollbar V", "Vertical scrollbar shown"));
+        props.add (new BooleanPropertyComponent (getValue ("scrollBarH", state, document), "Scrollbar H", "Horizontal scrollbar shown"));
+        props.add (new SliderPropertyComponent (getValue ("scrollbarWidth", state, document), "Scrollbar Thickness", 3, 40, 1));
     }
 };
 

@@ -80,6 +80,8 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 
 void autoScrollForMouseEvent (const MouseEvent& e);
 
+void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
+
 //==============================================================================
 const Font getFontFromState (const ValueTree& state,
                              const var::identifier& fontName,
@@ -91,6 +93,8 @@ void createFontProperties (Array <PropertyComponent*>& props, const ValueTree& s
                            const var::identifier& fontSize,
                            const var::identifier& fontStyle,
                            UndoManager* undoManager);
+
+PropertyComponent* createJustificationProperty (const String& name, const Value& value, bool onlyHorizontal);
 
 //==============================================================================
 class FileModificationDetector

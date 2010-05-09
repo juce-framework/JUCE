@@ -71,17 +71,7 @@ public:
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Text", 16384, true));
         props.getLast()->setTooltip ("The label's text.");
 
-        const char* const layouts[] = { "Centred", "Centred-left", "Centred-right", "Centred-top", "Centred-bottom", "Top-left",
-                                        "Top-right", "Bottom-left", "Bottom-right", 0 };
-        const int justifications[] = { Justification::centred, Justification::centredLeft, Justification::centredRight,
-                                       Justification::centredTop, Justification::centredBottom, Justification::topLeft,
-                                       Justification::topRight, Justification::bottomLeft, Justification::bottomRight, 0 };
-
-        ValueRemapperSource* remapper = new ValueRemapperSource (state.getPropertyAsValue ("justification", document.getUndoManager()));
-        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
-            remapper->addMapping (justifications[i], i + 1);
-
-        props.add (new ChoicePropertyComponent (Value (remapper), "Layout", StringArray (layouts)));
+        props.add (createJustificationProperty ("Layout", state.getPropertyAsValue ("justification", document.getUndoManager()), false));
 
         const char* const editModes[] = { "Read-only", "Edit on Single-Click", "Edit on Double-Click", 0 };
         props.add (new ChoicePropertyComponent (state.getPropertyAsValue ("editMode", document.getUndoManager()),

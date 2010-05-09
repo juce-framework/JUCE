@@ -153,34 +153,28 @@ protected:
 //==============================================================================
 /**
 */
-class IntegerValueSource   : public Value::ValueSource,
+template <typename Type>
+class NumericValueSource   : public Value::ValueSource,
                              public Value::Listener
 {
 public:
-    IntegerValueSource (const Value& sourceValue_)
+    NumericValueSource (const Value& sourceValue_)
        : sourceValue (sourceValue_)
     {
         sourceValue.addListener (this);
     }
 
-    ~IntegerValueSource() {}
+    ~NumericValueSource() {}
 
-    const var getValue() const
-    {
-        return (int) sourceValue.getValue();
-    }
+    void valueChanged (Value&)   { sendChangeMessage (true); }
+    const var getValue() const   { return (Type) sourceValue.getValue(); }
 
     void setValue (const var& newValue)
     {
-        const int newVal = (int) newValue;
+        const Type newVal = (Type) newValue;
 
-        if (newVal != (int) getValue())  // this test is important, because if a property is missing, it won't
+        if (newVal != (Type) getValue())  // this test is important, because if a property is missing, it won't
             sourceValue = newVal;        // create it (causing an unwanted undo action) when a control sets it to 0
-    }
-
-    void valueChanged (Value&)
-    {
-        sendChangeMessage (true);
     }
 
     //==============================================================================
@@ -189,8 +183,8 @@ public:
 protected:
     Value sourceValue;
 
-    IntegerValueSource (const IntegerValueSource&);
-    const IntegerValueSource& operator= (const IntegerValueSource&);
+    NumericValueSource (const NumericValueSource&);
+    const NumericValueSource& operator= (const NumericValueSource&);
 };
 
 

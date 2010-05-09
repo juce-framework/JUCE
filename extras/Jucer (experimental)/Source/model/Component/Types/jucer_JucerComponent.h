@@ -35,16 +35,22 @@ class JucerComponent : public Component
 public:
     JucerComponent()
     {
+        addAndMakeVisible (comp = new ComponentDocument::TestComponent (0, File::nonexistent));
     }
 
-    void paint (Graphics& g)
+    void resized()
     {
-        g.setColour (Colours::grey);
-        g.drawRect (getLocalBounds());
-
-        g.drawLine (0.5f, 0.5f, getWidth() - 0.5f, getHeight() - 0.5f);
-        g.drawLine (0.5f, getHeight() - 0.5f, getWidth() - 0.5f, 0.5f);
+        comp->setBounds (getLocalBounds());
     }
+
+    void setJucerComp (ComponentDocument& document, const File& cppFile)
+    {
+        addAndMakeVisible (comp = new ComponentDocument::TestComponent (document.getProject(), cppFile));
+        resized();
+    }
+
+private:
+    ScopedPointer<ComponentDocument::TestComponent> comp;
 };
 
 //==============================================================================

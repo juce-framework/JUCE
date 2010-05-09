@@ -51,14 +51,26 @@ public:
     Component* createComponent()                { return new TextEditor(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void update (ComponentDocument& document, TextEditor* comp, const ValueTree& state)
-    {
-        comp->setText (state ["text"].toString());
-    }
-
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
         state.setProperty ("text", "Text Editor Content", 0);
+        state.setProperty ("readOnly", false, 0);
+        state.setProperty ("scrollbarsShown", true, 0);
+        state.setProperty ("caretVisible", true, 0);
+        state.setProperty ("popupMenuEnabled", true, 0);
+        state.setProperty ("mode", 1, 0);
+    }
+
+    void update (ComponentDocument& document, TextEditor* comp, const ValueTree& state)
+    {
+        comp->setReadOnly (state["readOnly"]);
+        comp->setScrollbarsShown (state ["scrollbarsShown"]);
+        comp->setCaretVisible (state ["caretVisible"]);
+        comp->setPopupMenuEnabled (state ["popupMenuEnabled"]);
+        int mode = state ["mode"];
+        comp->setMultiLine (mode > 1, true);
+        comp->setReturnKeyStartsNewLine (mode != 3);
+        comp->setText (state ["text"].toString());
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
@@ -68,6 +80,14 @@ public:
 
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Text", 16384, true));
         props.getLast()->setTooltip ("The editor's initial content.");
+
+        const char* const modes[] = { "Single-Line", "Multi-Line (Return key starts new line)", "Multi-Line (Return key disabled)", 0 };
+        props.add (new ChoicePropertyComponent (getValue ("mode", state, document), "Mode", StringArray (modes)));
+
+        props.add (new BooleanPropertyComponent (getValue ("readOnly", state, document), "Read-Only", "Read-Only"));
+        props.add (new BooleanPropertyComponent (getValue ("scrollbarsShown", state, document), "Scrollbars", "Scrollbars Shown"));
+        props.add (new BooleanPropertyComponent (getValue ("caretVisible", state, document), "Caret", "Caret Visible"));
+        props.add (new BooleanPropertyComponent (getValue ("popupMenuEnabled", state, document), "Popup Menu", "Popup Menu Enabled"));
 
         addEditableColourProperties (document, state, props);
     }

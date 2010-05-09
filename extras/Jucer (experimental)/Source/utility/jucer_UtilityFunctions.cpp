@@ -351,27 +351,8 @@ const String makeValidCppIdentifier (String s,
     if (CharacterFunctions::isDigit (n[0]))
         n = "_" + n;
 
-    // make sure it's not a reserved c++ keyword..
-    static const char* const reservedWords[] =
-    {
-        "auto", "const", "double", "float", "int", "short", "struct",
-        "return", "static", "union", "while", "asm", "dynamic_cast",
-        "unsigned", "break", "continue", "else", "for", "long", "signed",
-        "switch", "void", "case", "default", "enum", "goto", "register",
-        "sizeof", "typedef", "volatile", "char", "do", "extern", "if",
-        "namespace", "reinterpret_cast", "try", "bool", "explicit", "new",
-        "static_cast", "typeid", "catch", "false", "operator", "template",
-        "typename", "class", "friend", "private", "this", "using", "const_cast",
-        "inline", "public", "throw", "virtual", "delete", "mutable", "protected",
-        "true", "wchar_t", "and", "bitand", "compl", "not_eq", "or_eq",
-        "xor_eq", "and_eq", "bitor", "not", "or", "xor", "cin", "endl",
-        "INT_MIN", "iomanip", "main", "npos", "std", "cout", "include",
-        "INT_MAX", "iostream", "MAX_RAND", "NULL", "string", "id", "std"
-    };
-
-    for (i = 0; i < numElementsInArray (reservedWords); ++i)
-        if (n == reservedWords[i])
-            n << '_';
+    if (CPlusPlusCodeTokeniser::isReservedKeyword (n))
+        n << '_';
 
     return n;
 }
@@ -385,6 +366,20 @@ void autoScrollForMouseEvent (const MouseEvent& e)
         const MouseEvent e2 (e.getEventRelativeTo (viewport));
         viewport->autoScroll (e2.x, e2.y, 8, 16);
     }
+}
+
+void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text)
+{
+    g.fillAll (Colours::white.withAlpha (0.4f));
+    g.setColour (Colours::grey);
+    g.drawRect (0, 0, w, h);
+
+    g.drawLine (0.5f, 0.5f, w - 0.5f, h - 0.5f);
+    g.drawLine (0.5f, h - 0.5f, w - 0.5f, 0.5f);
+
+    g.setColour (Colours::black);
+    g.setFont (11.0f);
+    g.drawFittedText (text, 2, 2, w - 4, h - 4, Justification::centredTop, 2);
 }
 
 //==============================================================================
@@ -739,4 +734,36 @@ void createFontProperties (Array <PropertyComponent*>& props, const ValueTree& s
     props.add (new SliderPropertyComponent (state.getPropertyAsValue (fontSize, undoManager), "Font Size", 1.0, 150.0, 0.1, 0.5));
 
     props.add (StringListValueSource::create ("Font Style", state.getPropertyAsValue (fontStyle, undoManager), StringArray (fontStyles)));
+}
+
+PropertyComponent* createJustificationProperty (const String& name, const Value& value, bool onlyHorizontal)
+{
+    ValueRemapperSource* remapper = new ValueRemapperSource (value);
+    StringArray strings;
+
+    if (onlyHorizontal)
+    {
+        const char* const layouts[] = { "Left", "Centred", "Right", 0 };
+        const int justifications[] = { Justification::left, Justification::centred, Justification::right, 0 };
+
+        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
+            remapper->addMapping (justifications[i], i + 1);
+
+        strings = StringArray (layouts);
+    }
+    else
+    {
+        const char* const layouts[] = { "Centred", "Centred-left", "Centred-right", "Centred-top", "Centred-bottom", "Top-left",
+                                        "Top-right", "Bottom-left", "Bottom-right", 0 };
+        const int justifications[] = { Justification::centred, Justification::centredLeft, Justification::centredRight,
+                                       Justification::centredTop, Justification::centredBottom, Justification::topLeft,
+                                       Justification::topRight, Justification::bottomLeft, Justification::bottomRight, 0 };
+
+        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
+            remapper->addMapping (justifications[i], i + 1);
+
+        strings = StringArray (layouts);
+    }
+
+    return new ChoicePropertyComponent (Value (remapper), name, strings);
 }

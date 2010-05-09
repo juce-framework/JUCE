@@ -44,14 +44,16 @@ public:
     Component* createComponent()                { return new ToggleButton (String::empty); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void update (ComponentDocument& document, ToggleButton* comp, const ValueTree& state)
-    {
-        comp->setButtonText (state ["text"].toString());
-    }
-
     void initialiseNew (ComponentDocument& document, ValueTree& state)
     {
         state.setProperty ("text", "New Toggle Button", 0);
+        state.setProperty ("initialState", false, 0);
+    }
+
+    void update (ComponentDocument& document, ToggleButton* comp, const ValueTree& state)
+    {
+        comp->setButtonText (state ["text"].toString());
+        comp->setToggleState (state ["initialState"], false);
     }
 
     void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
@@ -61,6 +63,8 @@ public:
 
         props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
+
+        props.add (new BooleanPropertyComponent (getValue ("initialState", state, document), "Initial State", "Enabled initially"));
 
         addEditableColourProperties (document, state, props);
     }
