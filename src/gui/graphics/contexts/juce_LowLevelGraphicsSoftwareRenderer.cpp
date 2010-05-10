@@ -87,7 +87,15 @@ public:
             linePixels[x].blend (sourceColour, alphaLevel);
     }
 
-    forcedinline void handleEdgeTableLine (const int x, int width, const int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    {
+        if (replaceExisting)
+            linePixels[x].set (sourceColour);
+        else
+            linePixels[x].blend (sourceColour);
+    }
+
+    forcedinline void handleEdgeTableLine (const int x, const int width, const int alphaLevel) const throw()
     {
         PixelARGB p (sourceColour);
         p.multiplyAlpha (alphaLevel);
@@ -98,6 +106,16 @@ public:
             replaceLine (dest, p, width);
         else
             blendLine (dest, p, width);
+    }
+
+    forcedinline void handleEdgeTableLineFull (const int x, const int width) const throw()
+    {
+        PixelType* dest = linePixels + x;
+
+        if (replaceExisting || sourceColour.getAlpha() >= 0xff)
+            replaceLine (dest, sourceColour, width);
+        else
+            blendLine (dest, sourceColour, width);
     }
 
 private:
@@ -153,7 +171,7 @@ private:
         }
     }
 
-    forcedinline void replaceLine (PixelAlpha* dest, const PixelARGB& colour, int width) const throw()
+    forcedinline void replaceLine (PixelAlpha* const dest, const PixelARGB& colour, int const width) const throw()
     {
         memset (dest, colour.getAlpha(), width);
     }
@@ -353,7 +371,12 @@ public:
         linePixels[x].blend (GradientType::getPixel (x), alphaLevel);
     }
 
-    forcedinline void handleEdgeTableLine (int x, int width, const int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    {
+        linePixels[x].blend (GradientType::getPixel (x));
+    }
+
+    void handleEdgeTableLine (int x, int width, const int alphaLevel) const throw()
     {
         PixelType* dest = linePixels + x;
 
@@ -371,6 +394,16 @@ public:
                 (dest++)->blend (GradientType::getPixel (x++));
             } while (--width > 0);
         }
+    }
+
+    void handleEdgeTableLineFull (int x, int width) const throw()
+    {
+        PixelType* dest = linePixels + x;
+
+        do
+        {
+            (dest++)->blend (GradientType::getPixel (x++));
+        } while (--width > 0);
     }
 
 private:
@@ -420,14 +453,19 @@ public:
         sourceLineStart = (SrcPixelType*) srcData.getLinePointer (y);
     }
 
-    forcedinline void handleEdgeTablePixel (int x, int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixel (const int x, int alphaLevel) const throw()
     {
         alphaLevel = (alphaLevel * extraAlpha) >> 8;
 
         linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], alphaLevel);
     }
 
-    forcedinline void handleEdgeTableLine (int x, int width, int alphaLevel) const throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) const throw()
+    {
+        linePixels[x].blend (sourceLineStart [repeatPattern ? ((x - xOffset) % srcData.width) : (x - xOffset)], extraAlpha);
+    }
+
+    void handleEdgeTableLine (int x, int width, int alphaLevel) const throw()
     {
         DestPixelType* dest = linePixels + x;
         alphaLevel = (alphaLevel * extraAlpha) >> 8;
@@ -440,6 +478,36 @@ public:
             do
             {
                 dest++ ->blend (sourceLineStart [repeatPattern ? (x++ % srcData.width) : x++], alphaLevel);
+            } while (--width > 0);
+        }
+        else
+        {
+            if (repeatPattern)
+            {
+                do
+                {
+                    dest++ ->blend (sourceLineStart [x++ % srcData.width]);
+                } while (--width > 0);
+            }
+            else
+            {
+                copyRow (dest, sourceLineStart + x, width);
+            }
+        }
+    }
+
+    void handleEdgeTableLineFull (int x, int width) const throw()
+    {
+        DestPixelType* dest = linePixels + x;
+        x -= xOffset;
+
+        jassert (repeatPattern || (x >= 0 && x + width <= srcData.width));
+
+        if (extraAlpha < 0xfe)
+        {
+            do
+            {
+                dest++ ->blend (sourceLineStart [repeatPattern ? (x++ % srcData.width) : x++], extraAlpha);
             } while (--width > 0);
         }
         else
@@ -540,7 +608,15 @@ public:
         linePixels[x].blend (p, alphaLevel);
     }
 
-    forcedinline void handleEdgeTableLine (const int x, int width, int alphaLevel) throw()
+    forcedinline void handleEdgeTablePixelFull (const int x) throw()
+    {
+        SrcPixelType p;
+        generate (&p, x, 1);
+
+        linePixels[x].blend (p, extraAlpha);
+    }
+
+    void handleEdgeTableLine (const int x, int width, int alphaLevel) throw()
     {
         if (width > scratchSize)
         {
@@ -569,6 +645,11 @@ public:
                 dest++ ->blend (*span++);
             } while (--width > 0);
         }
+    }
+
+    forcedinline void handleEdgeTableLineFull (const int x, int width) throw()
+    {
+        handleEdgeTableLine (x, width, 255);
     }
 
     void clipEdgeTableLine (EdgeTable& et, int x, int y_, int width)
@@ -901,8 +982,8 @@ public:
     typedef ReferenceCountedObjectPtr<ClipRegionBase> Ptr;
 
     virtual const Ptr clone() const = 0;
-
     virtual const Ptr applyClipTo (const Ptr& target) const = 0;
+
     virtual const Ptr clipToRectangle (const Rectangle<int>& r) = 0;
     virtual const Ptr clipToRectangleList (const RectangleList& r) = 0;
     virtual const Ptr excludeClipRectangle (const Rectangle<int>& r) = 0;
@@ -1118,8 +1199,7 @@ public:
 
     const Ptr clipToRectangleList (const RectangleList& r)
     {
-        EdgeTable et (r);
-        edgeTable.clipToEdgeTable (et);
+        edgeTable.clipToEdgeTable (EdgeTable (r));
         return edgeTable.isEmpty() ? 0 : this;
     }
 
@@ -1426,7 +1506,7 @@ public:
             for (int y = rect.getY(); y < bottom; ++y)
             {
                 r.setEdgeTableYPos (y);
-                r.handleEdgeTableLine (x, w, 255);
+                r.handleEdgeTableLineFull (x, w);
             }
         }
     }
@@ -1459,7 +1539,7 @@ private:
                     for (int y = rect.getY(); y < bottom; ++y)
                     {
                         r.setEdgeTableYPos (y);
-                        r.handleEdgeTableLine (x, w, 255);
+                        r.handleEdgeTableLineFull (x, w);
                     }
                 }
             }
@@ -1568,7 +1648,7 @@ private:
                         for (int y = jmax (clipTop, top); y < endY; ++y)
                         {
                             r.setEdgeTableYPos (y);
-                            r.handleEdgeTablePixel (left, 255);
+                            r.handleEdgeTablePixelFull (left);
                         }
 
                         if (bottomAlpha != 0 && bottom < clipBottom)
@@ -1607,7 +1687,7 @@ private:
                                 r.handleEdgeTablePixel (totalLeft, leftAlpha);
 
                             if (clippedWidth > 0)
-                                r.handleEdgeTableLine (clippedLeft, clippedWidth, 255);
+                                r.handleEdgeTableLineFull (clippedLeft, clippedWidth);
 
                             if (doRightAlpha)
                                 r.handleEdgeTablePixel (right, rightAlpha);
