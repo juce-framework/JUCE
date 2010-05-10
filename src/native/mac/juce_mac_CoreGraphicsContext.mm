@@ -449,7 +449,7 @@ public:
     }
 
     //==============================================================================
-    void drawLine (double x1, double y1, double x2, double y2)
+    void drawLine (const Line<float>& line)
     {
         CGContextSetLineCap (context, kCGLineCapSquare);
         CGContextSetLineWidth (context, 1.0f);
@@ -457,31 +457,31 @@ public:
                                     state->fillType.colour.getFloatRed(), state->fillType.colour.getFloatGreen(),
                                     state->fillType.colour.getFloatBlue(), state->fillType.colour.getFloatAlpha());
 
-        CGPoint line[] = { { (CGFloat) x1, flipHeight - (CGFloat) y1 },
-                           { (CGFloat) x2, flipHeight - (CGFloat) y2 } };
+        CGPoint cgLine[] = { { (CGFloat) line.getStartX(), flipHeight - (CGFloat) line.getStartY() },
+                             { (CGFloat) line.getEndX(),   flipHeight - (CGFloat) line.getEndY()   } };
 
-        CGContextStrokeLineSegments (context, line, 1);
+        CGContextStrokeLineSegments (context, cgLine, 1);
     }
 
-    void drawVerticalLine (const int x, double top, double bottom)
+    void drawVerticalLine (const int x, float top, float bottom)
     {
 #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake (x, flipHeight - (float) bottom, 1.0f, (float) (bottom - top)));
+        CGContextFillRect (context, CGRectMake (x, flipHeight - bottom, 1.0f, bottom - top));
 #else
         // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
         // the x co-ord slightly to trick it..
-        CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - (float) bottom, 1.0f + 1.0f / 256.0f, (float) (bottom - top)));
+        CGContextFillRect (context, CGRectMake (x + 1.0f / 256.0f, flipHeight - bottom, 1.0f + 1.0f / 256.0f, bottom - top));
 #endif
     }
 
-    void drawHorizontalLine (const int y, double left, double right)
+    void drawHorizontalLine (const int y, float left, float right)
     {
 #if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_5
-        CGContextFillRect (context, CGRectMake ((float) left, flipHeight - (y + 1.0f), (float) (right - left), 1.0f));
+        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + 1.0f), right - left, 1.0f));
 #else
         // On Leopard, unless both co-ordinates are non-integer, it disables anti-aliasing, so nudge
         // the x co-ord slightly to trick it..
-        CGContextFillRect (context, CGRectMake ((float) left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), (float) (right - left), 1.0f + 1.0f / 256.0f));
+        CGContextFillRect (context, CGRectMake (left, flipHeight - (y + (1.0f + 1.0f / 256.0f)), right - left, 1.0f + 1.0f / 256.0f));
 #endif
     }
 
@@ -646,23 +646,12 @@ private:
         {
             switch (i.elementType)
             {
-            case Path::Iterator::startNewSubPath:
-                CGContextMoveToPoint (context, i.x1, i.y1);
-                break;
-            case Path::Iterator::lineTo:
-                CGContextAddLineToPoint (context, i.x1, i.y1);
-                break;
-            case Path::Iterator::quadraticTo:
-                CGContextAddQuadCurveToPoint (context, i.x1, i.y1, i.x2, i.y2);
-                break;
-            case Path::Iterator::cubicTo:
-                CGContextAddCurveToPoint (context, i.x1, i.y1, i.x2, i.y2, i.x3, i.y3);
-                break;
-            case Path::Iterator::closePath:
-                CGContextClosePath (context); break;
-            default:
-                jassertfalse
-                break;
+                case Path::Iterator::startNewSubPath:  CGContextMoveToPoint (context, i.x1, i.y1); break;
+                case Path::Iterator::lineTo:           CGContextAddLineToPoint (context, i.x1, i.y1); break;
+                case Path::Iterator::quadraticTo:      CGContextAddQuadCurveToPoint (context, i.x1, i.y1, i.x2, i.y2); break;
+                case Path::Iterator::cubicTo:          CGContextAddCurveToPoint (context, i.x1, i.y1, i.x2, i.y2, i.x3, i.y3); break;
+                case Path::Iterator::closePath:        CGContextClosePath (context); break;
+                default:                               jassertfalse; break;
             }
         }
     }

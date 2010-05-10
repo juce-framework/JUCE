@@ -75,10 +75,10 @@ public:
     void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                     const AffineTransform& transform, bool fillEntireClipAsTiles);
 
-    void drawLine (double x1, double y1, double x2, double y2);
+    void drawLine (const Line <float>& line);
 
-    void drawVerticalLine (int x, double top, double bottom);
-    void drawHorizontalLine (int x, double top, double bottom);
+    void drawVerticalLine (int x, float top, float bottom);
+    void drawHorizontalLine (int x, float top, float bottom);
 
     //==============================================================================
     const Font getFont();

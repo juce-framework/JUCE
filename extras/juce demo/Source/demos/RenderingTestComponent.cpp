@@ -166,8 +166,8 @@ private:
         return AffineTransform::rotation ((float) owner.angleSlider->getValue() / (180.0f / float_Pi))
                                 .scaled ((float) owner.sizeSlider->getValue(),
                                          (float) owner.sizeSlider->getValue())
-                                .translated (getWidth() * 0.5f + (float) owner.xSlider->getValue(),
-                                             getHeight() * 0.5f + (float) owner.ySlider->getValue());
+                                .translated (getWidth() / 2 + (float) owner.xSlider->getValue(),
+                                             getHeight() / 2 + (float) owner.ySlider->getValue());
     }
 
     void clipToRectangle (Graphics& g)

@@ -31,10 +31,9 @@ BEGIN_JUCE_NAMESPACE
 #include "../imaging/juce_Image.h"
 #include "../colour/juce_PixelFormats.h"
 
-#if JUCE_MSVC
-  #pragma optimize ("t", on)  // try to avoid slowing everything down in debug builds
+#if JUCE_MSVC && JUCE_DEBUG
+  #pragma optimize ("t", on)
 #endif
-
 
 //==============================================================================
 DropShadowEffect::DropShadowEffect()
@@ -108,5 +107,9 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
     g.setOpacity (1.0f);
     g.drawImageAt (&image, 0, 0);
 }
+
+#if JUCE_MSVC && JUCE_DEBUG
+  #pragma optimize ("", on)  // resets optimisations to the project defaults
+#endif
 
 END_JUCE_NAMESPACE

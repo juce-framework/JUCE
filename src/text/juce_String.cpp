@@ -23,17 +23,14 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (push)
-  #pragma warning (disable: 4514)
-#endif
-#include <locale>
-
 #include "../core/juce_StandardHeader.h"
 
 #if JUCE_MSVC
-  #include <float.h>
+  #pragma warning (push)
+  #pragma warning (disable: 4514)
 #endif
+
+#include <locale>
 
 BEGIN_JUCE_NAMESPACE
 
@@ -41,7 +38,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Atomic.h"
 #include "../io/streams/juce_OutputStream.h"
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 
@@ -1689,12 +1686,12 @@ const String String::formatted (const juce_wchar* const pf, ... )
         const int num = (int) vswprintf (result.text, bufferSize - 1, pf, tempArgs);
         va_end (tempArgs);
 #elif JUCE_WINDOWS
-        #ifdef _MSC_VER
+        #if JUCE_MSVC
           #pragma warning (push)
           #pragma warning (disable: 4996)
         #endif
         const int num = (int) _vsnwprintf (result.text, bufferSize - 1, pf, args);
-        #ifdef _MSC_VER
+        #if JUCE_MSVC
           #pragma warning (pop)
         #endif
 #else
@@ -2133,9 +2130,9 @@ const char* String::toCString() const
     }
 }
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514 4996)
+#if JUCE_MSVC
   #pragma warning (push)
+  #pragma warning (disable: 4514 4996)
 #endif
 
 int String::getNumBytesAsCString() const throw()
@@ -2153,7 +2150,7 @@ int String::copyToCString (char* destBuffer, const int maxBufferSizeBytes) const
     return numBytes;
 }
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 

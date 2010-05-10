@@ -499,22 +499,21 @@ void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, co
 
 
 //==============================================================================
-void LowLevelGraphicsPostScriptRenderer::drawLine (double x1, double y1, double x2, double y2)
+void LowLevelGraphicsPostScriptRenderer::drawLine (const Line <float>& line)
 {
     Path p;
-    p.addLineSegment ((float) x1, (float) y1, (float) x2, (float) y2, 1.0f);
+    p.addLineSegment (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), 1.0f);
     fillPath (p, AffineTransform::identity);
 }
 
-void LowLevelGraphicsPostScriptRenderer::drawVerticalLine (const int x, double top, double bottom)
+void LowLevelGraphicsPostScriptRenderer::drawVerticalLine (const int x, float top, float bottom)
 {
-    drawLine (x, top, x, bottom);
+    drawLine (Line<float> ((float) x, top, (float) x, bottom));
 }
 
-
-void LowLevelGraphicsPostScriptRenderer::drawHorizontalLine (const int y, double left, double right)
+void LowLevelGraphicsPostScriptRenderer::drawHorizontalLine (const int y, float left, float right)
 {
-    drawLine (left, y, right, y);
+    drawLine (Line<float> (left, (float) y, right, (float) y));
 }
 
 //==============================================================================

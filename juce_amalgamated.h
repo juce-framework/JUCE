@@ -5716,7 +5716,7 @@ public:
 };
 
 /*
-	The following code allows the atomics to be performed as inline functions where possible...
+	The following code is in the header so that the atomics can be inlined where possible...
 */
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
 	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
@@ -5771,6 +5771,11 @@ public:
 	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
 	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
   #endif
+#endif
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4311)  // (truncation warning)
 #endif
 
 template <typename Type>
@@ -5892,6 +5897,10 @@ inline void Atomic<Type>::memoryBarrier() throw()
 	juce_MemoryBarrier();
   #endif
 }
+
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__
 /*** End of inlined file: juce_Atomic.h ***/
@@ -18756,8 +18765,6 @@ public:
 	*/
 	float getTranslationY() const throw()		   { return mat12; }
 
-	juce_UseDebuggingNewOperator
-
 	/* The transform matrix is:
 
 		(mat00 mat01 mat02)
@@ -18766,6 +18773,8 @@ public:
 	*/
 	float mat00, mat01, mat02;
 	float mat10, mat11, mat12;
+
+	juce_UseDebuggingNewOperator
 
 private:
 
@@ -57041,9 +57050,9 @@ public:
 	virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 							const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
 
-	virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
-	virtual void drawVerticalLine (int x, double top, double bottom) = 0;
-	virtual void drawHorizontalLine (int y, double left, double right) = 0;
+	virtual void drawLine (const Line <float>& line) = 0;
+	virtual void drawVerticalLine (int x, float top, float bottom) = 0;
+	virtual void drawHorizontalLine (int y, float left, float right) = 0;
 
 	virtual void setFont (const Font& newFont) = 0;
 	virtual const Font getFont() = 0;
@@ -57103,10 +57112,10 @@ public:
 	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 					const AffineTransform& transform, bool fillEntireClipAsTiles);
 
-	void drawLine (double x1, double y1, double x2, double y2);
+	void drawLine (const Line <float>& line);
 
-	void drawVerticalLine (int x, double top, double bottom);
-	void drawHorizontalLine (int x, double top, double bottom);
+	void drawVerticalLine (int x, float top, float bottom);
+	void drawHorizontalLine (int x, float top, float bottom);
 
 	const Font getFont();
 	void setFont (const Font& newFont);
@@ -57159,8 +57168,6 @@ protected:
 #ifndef __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
-class LLGCSavedState;
-
 /**
 	A lowest-common-denominator implementation of LowLevelGraphicsContext that does all
 	its rendering in memory.
@@ -57203,10 +57210,10 @@ public:
 	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
 					const AffineTransform& transform, bool fillEntireClipAsTiles);
 
-	void drawLine (double x1, double y1, double x2, double y2);
+	void drawLine (const Line <float>& line);
 
-	void drawVerticalLine (int x, double top, double bottom);
-	void drawHorizontalLine (int x, double top, double bottom);
+	void drawVerticalLine (int x, float top, float bottom);
+	void drawHorizontalLine (int x, float top, float bottom);
 
 	void setFont (const Font& newFont);
 	const Font getFont();
@@ -57219,8 +57226,14 @@ protected:
 
 	Image& image;
 
-	ScopedPointer <LLGCSavedState> currentState;
-	OwnedArray <LLGCSavedState> stateStack;
+	class GlyphCache;
+	class CachedGlyph;
+	class SavedState;
+	friend class ScopedPointer <SavedState>;
+	friend class OwnedArray <SavedState>;
+	friend class OwnedArray <CachedGlyph>;
+	ScopedPointer <SavedState> currentState;
+	OwnedArray <SavedState> stateStack;
 
 	LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
 	LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);
@@ -57815,14 +57828,10 @@ public:
 	*/
 	bool next();
 
-	/** The x position of the start of the current line segment. */
-	float x1;
-	/** The y position of the start of the current line segment. */
-	float y1;
-	/** The x position of the end of the current line segment. */
-	float x2;
-	/** The y position of the end of the current line segment. */
-	float y2;
+	float x1;  /**< The x position of the start of the current line segment. */
+	float y1;  /**< The y position of the start of the current line segment. */
+	float x2;  /**< The x position of the end of the current line segment. */
+	float y2;  /**< The y position of the end of the current line segment. */
 
 	/** Indicates whether the current line segment is closing a sub-path.
 
@@ -57839,9 +57848,8 @@ public:
 	int subPathIndex;
 
 	/** Returns true if the current segment is the last in the current sub-path. */
-	bool isLastInSubpath() const		{ return stackPos == stackBase.getData()
-													  && (index >= path.numElements
-														   || points [index] == Path::moveMarker); }
+	bool isLastInSubpath() const throw()	{ return stackPos == stackBase.getData()
+														   && (index >= path.numElements || points [index] == Path::moveMarker); }
 
 	juce_UseDebuggingNewOperator
 

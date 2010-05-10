@@ -38,7 +38,7 @@
 #undef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN 1
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable : 4100 4201 4514 4312 4995)
 #endif
@@ -179,7 +179,7 @@
 #endif
 
 //==============================================================================
-#ifdef _MSC_VER
+#if JUCE_MSVC
  #pragma warning (pop)
 #endif
 

@@ -940,7 +940,6 @@ private:
         if (hasTitleBar())
         {
             type |= WS_OVERLAPPED;
-            exstyle |= WS_EX_APPWINDOW;
 
             if ((styleFlags & windowHasCloseButton) != 0)
             {
@@ -958,12 +957,12 @@ private:
         else
         {
             type |= WS_POPUP | WS_SYSMENU;
-
-            if ((styleFlags & windowAppearsOnTaskbar) == 0)
-                exstyle |= WS_EX_TOOLWINDOW;
-            else
-                exstyle |= WS_EX_APPWINDOW;
         }
+
+        if ((styleFlags & windowAppearsOnTaskbar) == 0)
+            exstyle |= WS_EX_TOOLWINDOW;
+        else
+            exstyle |= WS_EX_APPWINDOW;
 
         if ((styleFlags & windowHasMinimiseButton) != 0)
             type |= WS_MINIMIZEBOX;

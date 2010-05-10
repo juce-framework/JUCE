@@ -23,19 +23,16 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514 4996)
+#include "../core/juce_StandardHeader.h"
+
+#if JUCE_MSVC
   #pragma warning (push)
+  #pragma warning (disable: 4514 4996)
 #endif
 
-#include "../core/juce_StandardHeader.h"
 #include <cwctype>
 #include <cctype>
 #include <ctime>
-
-#ifdef _MSC_VER
-  #pragma warning (pop)
-#endif
 
 BEGIN_JUCE_NAMESPACE
 
@@ -794,5 +791,8 @@ int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
     return -1;
 }
 
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 END_JUCE_NAMESPACE

@@ -27,7 +27,7 @@
 #define __JUCE_LOWLEVELGRAPHICSSOFTWARERENDERER_JUCEHEADER__
 
 #include "juce_LowLevelGraphicsContext.h"
-class LLGCSavedState;
+
 
 //==============================================================================
 /**
@@ -75,10 +75,10 @@ public:
     void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                     const AffineTransform& transform, bool fillEntireClipAsTiles);
 
-    void drawLine (double x1, double y1, double x2, double y2);
+    void drawLine (const Line <float>& line);
 
-    void drawVerticalLine (int x, double top, double bottom);
-    void drawHorizontalLine (int x, double top, double bottom);
+    void drawVerticalLine (int x, float top, float bottom);
+    void drawHorizontalLine (int x, float top, float bottom);
 
     //==============================================================================
     void setFont (const Font& newFont);
@@ -93,8 +93,14 @@ protected:
     //==============================================================================
     Image& image;
 
-    ScopedPointer <LLGCSavedState> currentState;
-    OwnedArray <LLGCSavedState> stateStack;
+    class GlyphCache;
+    class CachedGlyph;
+    class SavedState;
+    friend class ScopedPointer <SavedState>;
+    friend class OwnedArray <SavedState>;
+    friend class OwnedArray <CachedGlyph>;
+    ScopedPointer <SavedState> currentState;
+    OwnedArray <SavedState> stateStack;
 
     LowLevelGraphicsSoftwareRenderer (const LowLevelGraphicsSoftwareRenderer& other);
     LowLevelGraphicsSoftwareRenderer& operator= (const LowLevelGraphicsSoftwareRenderer&);

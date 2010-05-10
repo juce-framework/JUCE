@@ -150,7 +150,7 @@ public:
 
 //==============================================================================
 /*
-    The following code allows the atomics to be performed as inline functions where possible...
+    The following code is in the header so that the atomics can be inlined where possible...
 */
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
       || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
@@ -206,6 +206,11 @@ public:
     template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()             { jassertfalse; return ++*a; }
     template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()             { jassertfalse; return --*a; }
   #endif
+#endif
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4311)  // (truncation warning)
 #endif
 
 //==============================================================================
@@ -329,5 +334,8 @@ inline void Atomic<Type>::memoryBarrier() throw()
   #endif
 }
 
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 #endif   // __JUCE_ATOMIC_JUCEHEADER__

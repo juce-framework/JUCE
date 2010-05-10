@@ -25,7 +25,7 @@
 
 #include "../../../../core/juce_StandardHeader.h"
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable: 4390 4611)
 #endif
@@ -93,7 +93,7 @@ namespace pnglibNamespace
 #undef max
 #undef min
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 

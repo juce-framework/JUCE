@@ -84,7 +84,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../audio/devices/juce_MidiOutput.h"
 #include "../audio/devices/juce_MidiInput.h"
 
-
 //==============================================================================
 #define JUCE_INCLUDED_FILE 1
 

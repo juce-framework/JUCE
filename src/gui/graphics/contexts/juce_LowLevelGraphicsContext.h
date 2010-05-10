@@ -91,9 +91,9 @@ public:
     virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
                             const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
 
-    virtual void drawLine (double x1, double y1, double x2, double y2) = 0;
-    virtual void drawVerticalLine (int x, double top, double bottom) = 0;
-    virtual void drawHorizontalLine (int y, double left, double right) = 0;
+    virtual void drawLine (const Line <float>& line) = 0;
+    virtual void drawVerticalLine (int x, float top, float bottom) = 0;
+    virtual void drawHorizontalLine (int y, float left, float right) = 0;
 
     virtual void setFont (const Font& newFont) = 0;
     virtual const Font getFont() = 0;

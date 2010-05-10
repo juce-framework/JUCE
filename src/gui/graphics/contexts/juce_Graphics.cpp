@@ -532,7 +532,7 @@ void Graphics::drawHorizontalLine (const int y, float left, float right) const
 
 void Graphics::drawLine (float x1, float y1, float x2, float y2) const
 {
-    context->drawLine (x1, y1, x2, y2);
+    context->drawLine (Line<float> (x1, y1, x2, y2));
 }
 
 void Graphics::drawLine (const float startX, const float startY,

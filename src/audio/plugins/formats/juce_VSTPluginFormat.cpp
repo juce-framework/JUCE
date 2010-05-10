@@ -84,7 +84,7 @@ BEGIN_JUCE_NAMESPACE
 #undef PRAGMA_ALIGN_SUPPORTED
 #define VST_FORCE_DEPRECATED 0
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (push)
   #pragma warning (disable: 4996)
 #endif
@@ -97,7 +97,7 @@ BEGIN_JUCE_NAMESPACE
 */
 #include "pluginterfaces/vst2.x/aeffectx.h"
 
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (pop)
 #endif
 
@@ -2311,14 +2311,14 @@ VstIntPtr VSTPluginInstance::handleCallback (VstInt32 opcode, VstInt32 index, Vs
         break;
 
     case audioMasterGetTime:
-        #ifdef _MSC_VER
+        #if JUCE_MSVC
          #pragma warning (push)
          #pragma warning (disable: 4311)
         #endif
 
         return (VstIntPtr) &vstHostTime;
 
-        #ifdef _MSC_VER
+        #if JUCE_MSVC
          #pragma warning (pop)
         #endif
         break;

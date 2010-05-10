@@ -71,14 +71,10 @@ public:
     */
     bool next();
 
-    /** The x position of the start of the current line segment. */
-    float x1;
-    /** The y position of the start of the current line segment. */
-    float y1;
-    /** The x position of the end of the current line segment. */
-    float x2;
-    /** The y position of the end of the current line segment. */
-    float y2;
+    float x1;  /**< The x position of the start of the current line segment. */
+    float y1;  /**< The y position of the start of the current line segment. */
+    float x2;  /**< The x position of the end of the current line segment. */
+    float y2;  /**< The y position of the end of the current line segment. */
 
     /** Indicates whether the current line segment is closing a sub-path.
 
@@ -95,10 +91,8 @@ public:
     int subPathIndex;
 
     /** Returns true if the current segment is the last in the current sub-path. */
-    bool isLastInSubpath() const            { return stackPos == stackBase.getData()
-                                                      && (index >= path.numElements
-                                                           || points [index] == Path::moveMarker); }
-
+    bool isLastInSubpath() const throw()        { return stackPos == stackBase.getData()
+                                                           && (index >= path.numElements || points [index] == Path::moveMarker); }
 
     //==============================================================================
     juce_UseDebuggingNewOperator

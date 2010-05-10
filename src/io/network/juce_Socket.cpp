@@ -28,7 +28,8 @@
 #if JUCE_WINDOWS
   #include <winsock2.h>
 
-  #ifdef _MSC_VER
+  #if JUCE_MSVC
+    #pragma warning (push)
     #pragma warning (disable : 4127 4389 4018)
   #endif
 
@@ -631,5 +632,8 @@ bool DatagramSocket::isLocal() const throw()
     return hostName == "127.0.0.1";
 }
 
+#if JUCE_MSVC
+  #pragma warning (pop)
+#endif
 
 END_JUCE_NAMESPACE

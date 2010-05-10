@@ -23,12 +23,12 @@
   ==============================================================================
 */
 
-#ifdef _MSC_VER
-  #pragma warning (disable: 4514)
-  #pragma warning (push)
-#endif
-
 #include "juce_StandardHeader.h"
+
+#if JUCE_MSVC
+  #pragma warning (push)
+  #pragma warning (disable: 4514)
+#endif
 
 #ifndef JUCE_WINDOWS
   #include <sys/time.h>
@@ -38,21 +38,20 @@
 
 #include <sys/timeb.h>
 
-BEGIN_JUCE_NAMESPACE
-
-
-#include "juce_Time.h"
-#include "../threads/juce_Thread.h"
-#include "../containers/juce_MemoryBlock.h"
-#include "../text/juce_LocalisedStrings.h"
-
-#ifdef _MSC_VER
+#if JUCE_MSVC
   #pragma warning (pop)
 
   #ifdef _INC_TIME_INL
     #define USE_NEW_SECURE_TIME_FNS
   #endif
 #endif
+
+BEGIN_JUCE_NAMESPACE
+
+#include "juce_Time.h"
+#include "../threads/juce_Thread.h"
+#include "../containers/juce_MemoryBlock.h"
+#include "../text/juce_LocalisedStrings.h"
 
 //==============================================================================
 namespace TimeHelpers
