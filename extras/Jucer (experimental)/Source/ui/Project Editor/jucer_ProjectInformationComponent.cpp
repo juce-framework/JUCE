@@ -3,7 +3,7 @@
 
   This is an automatically generated file created by the Jucer!
 
-  Creation date:  14 Feb 2010 3:06:06 pm
+  Creation date:  10 May 2010 7:13:27pm
 
   Be careful when adding custom code to these files, as only the code within
   the "//[xyz]" and "//[/xyz]" sections will be retained when the file is loaded
@@ -117,15 +117,15 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
     configTabBox->setCurrentTabIndex (-1);
 
     addAndMakeVisible (editConfigsButton = new TextButton (String::empty));
-    editConfigsButton->setButtonText ("Add/Remove Configurations...");
+    editConfigsButton->setButtonText (T("Add/Remove Configurations..."));
     editConfigsButton->addButtonListener (this);
 
     addAndMakeVisible (openProjectButton = new TextButton (String::empty));
-    openProjectButton->setButtonText ("Open Project in ");
+    openProjectButton->setButtonText (T("Open Project in "));
     openProjectButton->addButtonListener (this);
 
     addAndMakeVisible (editExportersButton = new TextButton (String::empty));
-    editExportersButton->setButtonText ("Add/Remove Exporters...");
+    editExportersButton->setButtonText (T("Add/Remove Exporters..."));
     editExportersButton->addButtonListener (this);
 
 
@@ -141,11 +141,12 @@ ProjectInformationComponent::ProjectInformationComponent (Project& project_)
 
     //[/UserPreSize]
 
+    setOpaque (true);
     setSize (600, 400);
 
     //[Constructor] You can add your own custom stuff here..
     configTabBox->setOutline (1);
-    configTabBox->setColour (TabbedComponent::outlineColourId, Colours::black);
+    configTabBox->setColour (TabbedComponent::outlineColourId, Colours::black.withAlpha (0.3f));
 
     editConfigsButton->setTriggeredOnMouseDown (true);
 
@@ -172,6 +173,11 @@ ProjectInformationComponent::~ProjectInformationComponent()
 void ProjectInformationComponent::paint (Graphics& g)
 {
     //[UserPrePaint] Add your own custom painting code here..
+    Image* im = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
+    g.setTiledImageFill (*im, 0, 0, 1.0f);
+    g.fillAll();
+    ImageCache::release (im);
+    drawRecessedShadows (g, getWidth(), getHeight(), 14);
     //[/UserPrePaint]
 
     //[UserPaint] Add your own custom painting code here..
@@ -181,9 +187,9 @@ void ProjectInformationComponent::paint (Graphics& g)
 void ProjectInformationComponent::resized()
 {
     configTabBox->setBounds (8, 0, getWidth() - 16, getHeight() - 36);
-    editConfigsButton->setBounds (8, getHeight() - 26, 192, 22);
-    openProjectButton->setBounds (384, getHeight() - 26, 208, 22);
-    editExportersButton->setBounds (208, getHeight() - 26, 160, 22);
+    editConfigsButton->setBounds (8, getHeight() - 30, 192, 22);
+    openProjectButton->setBounds (384, getHeight() - 30, 208, 22);
+    editExportersButton->setBounds (208, getHeight() - 30, 160, 22);
     //[UserResized] Add your own custom resize handling here..
     //[/UserResized]
 }
@@ -359,13 +365,13 @@ BEGIN_JUCER_METADATA
                    explicitFocusOrder="0" pos="8 0 16M 36M" orientation="top" tabBarDepth="30"
                    initialTab="-1"/>
   <TEXTBUTTON name="" id="b6625dfcdb1f4755" memberName="editConfigsButton"
-              virtualName="" explicitFocusOrder="0" pos="8 26R 192 22" buttonText="Add/Remove Configurations..."
+              virtualName="" explicitFocusOrder="0" pos="8 30R 192 22" buttonText="Add/Remove Configurations..."
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
   <TEXTBUTTON name="" id="a550a652e2666ee7" memberName="openProjectButton"
-              virtualName="" explicitFocusOrder="0" pos="384 26R 208 22" buttonText="Open Project in "
+              virtualName="" explicitFocusOrder="0" pos="384 30R 208 22" buttonText="Open Project in "
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
   <TEXTBUTTON name="" id="c1f6e5f9811b307e" memberName="editExportersButton"
-              virtualName="" explicitFocusOrder="0" pos="208 26R 160 22" buttonText="Add/Remove Exporters..."
+              virtualName="" explicitFocusOrder="0" pos="208 30R 160 22" buttonText="Add/Remove Exporters..."
               connectedEdges="0" needsCallback="1" radioGroupId="0"/>
 </JUCER_COMPONENT>
 

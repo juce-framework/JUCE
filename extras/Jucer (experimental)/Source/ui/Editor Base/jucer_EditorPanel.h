@@ -37,7 +37,7 @@ public:
         addAndMakeVisible (toolbar = new Toolbar());
         toolbar->setStyle (Toolbar::textOnly);
 
-        addAndMakeVisible (viewport = new Viewport());
+        addAndMakeVisible (viewport = new CanvasViewport());
 
         addChildComponent (tree = new TreeView());
         tree->setRootItemVisible (true);
@@ -173,6 +173,33 @@ private:
     private:
         EditorPanelBase* owner;
         PropertyPanel* props;
+    };
+
+
+    class CanvasViewport  : public Viewport
+    {
+    public:
+        CanvasViewport()
+        {
+            setOpaque (true);
+        }
+
+        ~CanvasViewport()
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            Image* im = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
+            g.setTiledImageFill (*im, 0, 0, 1.0f);
+            g.fillAll();
+            ImageCache::release (im);
+        }
+
+        void paintOverChildren (Graphics& g)
+        {
+            drawRecessedShadows (g, getWidth(), getHeight(), 14);
+        }
     };
 
     Toolbar* toolbar;

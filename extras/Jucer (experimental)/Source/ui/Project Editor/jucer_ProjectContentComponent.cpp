@@ -54,7 +54,7 @@ ProjectContentComponent::~ProjectContentComponent()
 
 void ProjectContentComponent::paint (Graphics& g)
 {
-    g.fillAll (Colour::greyLevel (0.4f));
+    g.fillAll (Colour::greyLevel (0.8f));
 }
 
 void ProjectContentComponent::hasBeenMoved()

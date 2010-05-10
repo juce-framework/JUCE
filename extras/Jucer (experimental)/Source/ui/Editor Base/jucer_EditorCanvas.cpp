@@ -217,7 +217,7 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (Colours::darkgreen.withAlpha (isMouseOverOrDragging() ? 0.8f : 0.4f));
+        g.setColour (Colours::lightgreen.withAlpha (isMouseOverOrDragging() ? 0.8f : 0.4f));
         g.fillPath (path);
     }
 
@@ -655,13 +655,13 @@ public:
     {
         const Rectangle<int> content (getContentArea());
 
-        g.setColour (Colour::greyLevel (0.7f).withAlpha (0.4f));
-        g.drawRect (content.expanded (resizerThickness, resizerThickness), resizerThickness);
+//        g.setColour (Colour::greyLevel (0.7f).withAlpha (0.4f));
+  //      g.drawRect (content.expanded (resizerThickness, resizerThickness), resizerThickness);
 
         const int bottomGap = getHeight() - content.getBottom();
         g.setFont (bottomGap - 5.0f);
 
-        g.setColour (Colours::grey);
+        g.setColour (Colour::greyLevel (0.9f));
         g.drawText (String (content.getWidth()) + " x " + String (content.getHeight()),
                     0, 0, jmax (content.getRight(), jmin (60, getWidth())), getHeight(), Justification::bottomRight, false);
     }
@@ -730,7 +730,7 @@ private:
 EditorCanvasBase::EditorCanvasBase()
     : border (14)
 {
-    setOpaque (true);
+    //setOpaque (true);
 }
 
 EditorCanvasBase::~EditorCanvasBase()
@@ -762,13 +762,12 @@ EditorPanelBase* EditorCanvasBase::getPanel() const
 //==============================================================================
 void EditorCanvasBase::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);
-
     g.setFont (border.getTop() - 5.0f);
-    g.setColour (Colours::darkgrey);
+    g.setColour (Colour::greyLevel (0.9f));
 
-    g.drawHorizontalLine (border.getTop() - 1, 2.0f, (float) getWidth() - border.getRight());
-    g.drawVerticalLine (border.getLeft() - 1, 2.0f, (float) getHeight() - border.getBottom());
+    //g.drawHorizontalLine (border.getTop() - 1, 2.0f, (float) getWidth() - border.getRight());
+    //g.drawVerticalLine (border.getLeft() - 1, 2.0f, (float) getHeight() - border.getBottom());
+
     drawXAxis (g, Rectangle<int> (border.getLeft(), 0, componentHolder->getWidth(), border.getTop()));
     drawYAxis (g, Rectangle<int> (0, border.getTop(), border.getLeft(), componentHolder->getHeight()));
 }

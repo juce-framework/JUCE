@@ -35,13 +35,11 @@ class ValueTree::SetPropertyAction  : public UndoableAction
 {
 public:
     SetPropertyAction (const SharedObjectPtr& target_, const var::identifier& name_,
-                       const var& newValue_, const bool isAddingNewProperty_, const bool isDeletingProperty_)
-        : target (target_), name (name_), newValue (newValue_),
-          isAddingNewProperty (isAddingNewProperty_),
-          isDeletingProperty (isDeletingProperty_)
+                       const var& newValue_, const var& oldValue_,
+                       const bool isAddingNewProperty_, const bool isDeletingProperty_)
+        : target (target_), name (name_), newValue (newValue_), oldValue (oldValue_),
+          isAddingNewProperty (isAddingNewProperty_), isDeletingProperty (isDeletingProperty_)
     {
-        if (! isAddingNewProperty)
-            oldValue = target_->getProperty (name_);
     }
 
     ~SetPropertyAction() {}
@@ -73,12 +71,28 @@ public:
         return (int) sizeof (*this); //xxx should be more accurate
     }
 
+    UndoableAction* createCoalescedAction (UndoableAction* nextAction)
+    {
+        if (! (isAddingNewProperty || isDeletingProperty))
+        {
+            SetPropertyAction* next = dynamic_cast <SetPropertyAction*> (nextAction);
+
+            if (next != 0 && next->target == target && next->name == name
+                 && ! (next->isAddingNewProperty || next->isDeletingProperty))
+            {
+                return new SetPropertyAction (target, name, next->newValue, oldValue, false, false);
+            }
+        }
+
+        return 0;
+    }
+
 private:
     const SharedObjectPtr target;
     const var::identifier name;
     const var newValue;
     var oldValue;
-    const bool isAddingNewProperty, isDeletingProperty;
+    const bool isAddingNewProperty : 1, isDeletingProperty : 1;
 
     SetPropertyAction (const SetPropertyAction&);
     SetPropertyAction& operator= (const SetPropertyAction&);
@@ -170,6 +184,16 @@ public:
     int getSizeInUnits()
     {
         return (int) sizeof (*this); //xxx should be more accurate
+    }
+
+    UndoableAction* createCoalescedAction (UndoableAction* nextAction)
+    {
+        MoveChildAction* next = dynamic_cast <MoveChildAction*> (nextAction);
+
+        if (next != 0 && next->target == target && next->child == child)
+            return new MoveChildAction (target, startIndex, next->endIndex);
+
+        return 0;
     }
 
 private:
@@ -301,11 +325,11 @@ void ValueTree::SharedObject::setProperty (const var::identifier& name, const va
         if (existingValue != 0)
         {
             if (*existingValue != newValue)
-                undoManager->perform (new SetPropertyAction (this, name, newValue, false, false));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, properties [name], false, false));
         }
         else
         {
-            undoManager->perform (new SetPropertyAction (this, name, newValue, true, false));
+            undoManager->perform (new SetPropertyAction (this, name, newValue, var::null, true, false));
         }
     }
 }
@@ -325,7 +349,7 @@ void ValueTree::SharedObject::removeProperty (const var::identifier& name, UndoM
     else
     {
         if (properties.contains (name))
-            undoManager->perform (new SetPropertyAction (this, name, var::null, false, true));
+            undoManager->perform (new SetPropertyAction (this, name, var::null, properties [name], false, true));
     }
 }
 
@@ -343,7 +367,7 @@ void ValueTree::SharedObject::removeAllProperties (UndoManager* const undoManage
     else
     {
         for (int i = properties.size(); --i >= 0;)
-            undoManager->perform (new SetPropertyAction (this, properties.getName(i), var::null, false, true));
+            undoManager->perform (new SetPropertyAction (this, properties.getName(i), var::null, properties.getValueAt(i), false, true));
     }
 }
 

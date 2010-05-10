@@ -104,6 +104,8 @@ public:
 
     void mouseDown (const MouseEvent& e)
     {
+        document.getUndoManager()->beginNewTransaction();
+
         SafePointer<Component> deletionChecker (this);
 
         {
@@ -116,10 +118,6 @@ public:
             if (deletionChecker == 0)
                 return;
         }
-
-        const Colour newColour (getColour());
-        document.getUndoManager()->undoCurrentTransactionOnly();
-        setColour (newColour);
     }
 
     void valueChanged (Value&)
@@ -132,10 +130,7 @@ public:
         ColourSelector* cs = static_cast <ColourSelector*> (source);
 
         if (cs->getCurrentColour() != getColour())
-        {
-            document.getUndoManager()->undoCurrentTransactionOnly();
             setColour (cs->getCurrentColour());
-        }
     }
 
     juce_UseDebuggingNewOperator

@@ -72,10 +72,12 @@ void UndoManager::setMaxNumberOfStoredUnits (const int maxNumberOfUnitsToKeep,
 }
 
 //==============================================================================
-bool UndoManager::perform (UndoableAction* const command, const String& actionName)
+bool UndoManager::perform (UndoableAction* const command_, const String& actionName)
 {
-    if (command != 0)
+    if (command_ != 0)
     {
+        ScopedPointer<UndoableAction> command (command_);
+
         if (actionName.isNotEmpty())
             currentTransactionName = actionName;
 
@@ -86,41 +88,37 @@ bool UndoManager::perform (UndoableAction* const command, const String& actionNa
 
             return false;
         }
-        else
+        else if (command->perform())
         {
-            bool success = false;
+            OwnedArray<UndoableAction>* commandSet = transactions [nextIndex - 1];
 
-            JUCE_TRY
+            if (commandSet != 0 && ! newTransaction)
             {
-                success = command->perform();
-            }
-            JUCE_CATCH_EXCEPTION
+                UndoableAction* lastAction = commandSet->getLast();
 
-            jassert (success);
-            if (success)
+                if (lastAction != 0)
+                {
+                    UndoableAction* coalescedAction = lastAction->createCoalescedAction (command);
+
+                    if (coalescedAction != 0)
+                    {
+                        command = coalescedAction;
+                        totalUnitsStored -= lastAction->getSizeInUnits();
+                        commandSet->removeLast();
+                    }
+                }
+            }
+            else
             {
-                if (nextIndex > 0 && ! newTransaction)
-                {
-                    OwnedArray<UndoableAction>* commandSet = transactions [nextIndex - 1];
-
-                    jassert (commandSet != 0);
-                    if (commandSet == 0)
-                        return false;
-
-                    commandSet->add (command);
-                }
-                else
-                {
-                    OwnedArray<UndoableAction>* commandSet = new OwnedArray<UndoableAction>();
-                    commandSet->add (command);
-                    transactions.insert (nextIndex, commandSet);
-                    transactionNames.insert (nextIndex, currentTransactionName);
-                    ++nextIndex;
-                }
-
-                totalUnitsStored += command->getSizeInUnits();
-                newTransaction = false;
+                commandSet = new OwnedArray<UndoableAction>();
+                transactions.insert (nextIndex, commandSet);
+                transactionNames.insert (nextIndex, currentTransactionName);
+                ++nextIndex;
             }
+
+            totalUnitsStored += command->getSizeInUnits();
+            commandSet->add (command.release());
+            newTransaction = false;
 
             while (nextIndex < transactions.size())
             {
@@ -151,7 +149,7 @@ bool UndoManager::perform (UndoableAction* const command, const String& actionNa
 
             sendChangeMessage (this);
 
-            return success;
+            return true;
         }
     }
 
@@ -213,13 +211,9 @@ bool UndoManager::undo()
     reentrancyCheck = false;
 
     if (failed)
-    {
         clearUndoHistory();
-    }
     else
-    {
         --nextIndex;
-    }
 
     beginNewTransaction();
 
@@ -250,13 +244,9 @@ bool UndoManager::redo()
     reentrancyCheck = false;
 
     if (failed)
-    {
         clearUndoHistory();
-    }
     else
-    {
         ++nextIndex;
-    }
 
     beginNewTransaction();
 
@@ -266,8 +256,7 @@ bool UndoManager::redo()
 
 bool UndoManager::undoCurrentTransactionOnly()
 {
-    return newTransaction ? false
-                          : undo();
+    return newTransaction ? false : undo();
 }
 
 void UndoManager::getActionsInCurrentTransaction (Array <const UndoableAction*>& actionsFound) const

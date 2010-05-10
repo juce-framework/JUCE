@@ -129,6 +129,9 @@ public:
     */
     void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
 
+    /** Returns the currently selected font. */
+    const Font getCurrentFont() const;
+
     /** Draws a one-line text string.
 
         This will use the current colour (or brush) to fill the text. The font is the last

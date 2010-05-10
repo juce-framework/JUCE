@@ -136,10 +136,16 @@ bool NamedValueSet::remove (const var::identifier& name)
     return false;
 }
 
-const var::identifier NamedValueSet::getName (int index) const
+const var::identifier NamedValueSet::getName (const int index) const
 {
     jassert (((unsigned int) index) < (unsigned int) values.size());
     return values [index].name;
+}
+
+const var NamedValueSet::getValueAt (const int index) const
+{
+    jassert (((unsigned int) index) < (unsigned int) values.size());
+    return values [index].value;
 }
 
 void NamedValueSet::clear()

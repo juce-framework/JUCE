@@ -225,6 +225,8 @@
             file="Source/jucer_Main.cpp"/>
     </GROUP>
     <GROUP id="ywDE042sn" name="Resources">
+      <FILE id="u9Hl9Qyct" name="brushed_aluminium.png" compile="0" resource="1"
+            file="Source/templates/brushed_aluminium.png"/>
       <FILE id="RgsvQa9jP" name="AudioPluginXCodeScript.txt" compile="0"
             resource="1" file="Source/templates/AudioPluginXCodeScript.txt"/>
       <FILE id="1Z03IyRzy" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"

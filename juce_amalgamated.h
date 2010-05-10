@@ -5566,6 +5566,12 @@ public:
 	*/
 	const var::identifier getName (int index) const;
 
+	/** Returns the value of the item at a given index.
+		The index must be between 0 and size() - 1. Out-of-range indexes will
+		return an empty identifier.
+	*/
+	const var getValueAt (int index) const;
+
 	/** Removes all values. */
 	void clear();
 
@@ -12604,6 +12610,15 @@ public:
 			 UndoManager::setMaxNumberOfStoredUnits
 	*/
 	virtual int getSizeInUnits()	{ return 10; }
+
+	/** Allows multiple actions to be coalesced into a single action object, to reduce storage space.
+
+		If possible, this method should create and return a single action that does the same job as
+		this one followed by the supplied action.
+
+		If it's not possible to merge the two actions, the method should return zero.
+	*/
+	virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { return 0; }
 };
 
 #endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
@@ -23338,6 +23353,9 @@ public:
 		@see Font
 	*/
 	void setFont (float newFontHeight, int fontStyleFlags = Font::plain);
+
+	/** Returns the currently selected font. */
+	const Font getCurrentFont() const;
 
 	/** Draws a one-line text string.
 
@@ -56874,7 +56892,9 @@ public:
 										@code
 										inline void setEdgeTableYPos (int y);
 										inline void handleEdgeTablePixel (int x, int alphaLevel) const;
+										inline void handleEdgeTablePixelFull (int x) const;
 										inline void handleEdgeTableLine (int x, int width, int alphaLevel) const;
+										inline void handleEdgeTableLineFull (int x, int width) const;
 										@endcode
 										(these don't necessarily have to be 'const', but it might help it go faster)
 	*/
@@ -56922,9 +56942,9 @@ public:
 						if (levelAccumulator > 0)
 						{
 							if (levelAccumulator >> 8)
-								levelAccumulator = 0xff;
-
-							iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+								iterationCallback.handleEdgeTablePixelFull (x);
+							else
+								iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
 						}
 
 						// if there's a run of similar pixels, do it all in one go..
@@ -56946,13 +56966,14 @@ public:
 
 				if (levelAccumulator > 0)
 				{
-					levelAccumulator >>= 8;
-					if (levelAccumulator >> 8)
-						levelAccumulator = 0xff;
-
 					x >>= 8;
 					jassert (x >= bounds.getX() && x < bounds.getRight());
-					iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
+
+					levelAccumulator >>= 8;
+					if (levelAccumulator >> 8)
+						iterationCallback.handleEdgeTablePixelFull (x);
+					else
+						iterationCallback.handleEdgeTablePixel (x, levelAccumulator);
 				}
 			}
 		}

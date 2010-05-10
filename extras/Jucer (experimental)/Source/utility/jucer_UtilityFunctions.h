@@ -81,6 +81,7 @@ int indexOfLineStartingWith (const StringArray& lines, const String& text, int s
 void autoScrollForMouseEvent (const MouseEvent& e);
 
 void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
+void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
 
 //==============================================================================
 const Font getFontFromState (const ValueTree& state,

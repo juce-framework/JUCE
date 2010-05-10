@@ -59,7 +59,7 @@ public:
 
     Component* createComponentHolder()
     {
-        return new Component();
+        return new ComponentHolder();
     }
 
     void updateComponents()
@@ -221,6 +221,25 @@ public:
 private:
     //==============================================================================
     ComponentEditor& editor;
+
+    class ComponentHolder   : public Component
+    {
+    public:
+        ComponentHolder()
+        {
+            setOpaque (true);
+        }
+
+        ~ComponentHolder()
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::white);
+        }
+    };
+
 };
 
 

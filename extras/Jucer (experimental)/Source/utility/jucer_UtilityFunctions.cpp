@@ -382,6 +382,33 @@ void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text)
     g.drawFittedText (text, 2, 2, w - 4, h - 4, Justification::centredTop, 2);
 }
 
+void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize)
+{
+    ColourGradient cg (Colours::black.withAlpha (0.15f), 0, 0,
+                       Colours::transparentBlack, 0, (float) shadowSize, false);
+    cg.addColour (0.4, Colours::black.withAlpha (0.07f));
+    cg.addColour (0.6, Colours::black.withAlpha (0.02f));
+
+    g.setGradientFill (cg);
+    g.fillRect (0, 0, w, shadowSize);
+
+    cg.y1 = (float) h;
+    cg.y2 = cg.y1 - shadowSize;
+    g.setGradientFill (cg);
+    g.fillRect (0, h - shadowSize, w, shadowSize);
+
+    cg.x1 = cg.y1 = cg.y2 = 0;
+    cg.x2 = (float) shadowSize;
+    g.setGradientFill (cg);
+    g.fillRect (0, 0, shadowSize, h);
+
+    cg.y1 = cg.y2 = 0;
+    cg.x1 = (float) w;
+    cg.x2 = cg.x1 - shadowSize;
+    g.setGradientFill (cg);
+    g.fillRect (w - shadowSize, 0, shadowSize, h);
+}
+
 //==============================================================================
 const String floatToCode (const float v)
 {
@@ -627,7 +654,7 @@ void FloatingLabelComponent::update (Component* parent, const String& text, cons
 void FloatingLabelComponent::paint (Graphics& g)
 {
     g.setFont (font);
-    g.setColour (Colours::white);
+    g.setColour (Colours::white.withAlpha (0.5f));
 
     for (int y = -1; y <= 1; ++y)
         for (int x = -1; x <= 1; ++x)

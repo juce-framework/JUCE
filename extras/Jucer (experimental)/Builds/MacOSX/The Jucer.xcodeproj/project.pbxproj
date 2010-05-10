@@ -148,6 +148,7 @@
 		B8469A2CDD0FBEA6BE01B1D5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ValueRemapperSource.h; path = ../../Source/utility/jucer_ValueRemapperSource.h; sourceTree = SOURCE_ROOT; };
 		0CA0CCCEBFA0AC8C577FC915 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Headers.h; path = ../../Source/jucer_Headers.h; sourceTree = SOURCE_ROOT; };
 		0DC331A7B856F30AD266A3E6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Main.cpp; path = ../../Source/jucer_Main.cpp; sourceTree = SOURCE_ROOT; };
+		E50666EA86CAD5FB338A8756 = { isa = PBXFileReference; lastKnownFileType = image.png; name = brushed_aluminium.png; path = ../../Source/templates/brushed_aluminium.png; sourceTree = SOURCE_ROOT; };
 		1366A411A69F2020EE651CDB = { isa = PBXFileReference; lastKnownFileType = text.txt; name = AudioPluginXCodeScript.txt; path = ../../Source/templates/AudioPluginXCodeScript.txt; sourceTree = SOURCE_ROOT; };
 		607EB083892A70C2A770A1B6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_AudioPluginEditorTemplate.cpp; path = ../../Source/templates/jucer_AudioPluginEditorTemplate.cpp; sourceTree = SOURCE_ROOT; };
 		1C52B91B15DF56E0A37F3EEE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioPluginEditorTemplate.h; path = ../../Source/templates/jucer_AudioPluginEditorTemplate.h; sourceTree = SOURCE_ROOT; };
@@ -279,6 +280,7 @@
 				0CA0CCCEBFA0AC8C577FC915,
 				0DC331A7B856F30AD266A3E6 ); name = Main; sourceTree = "<group>"; };
 		A3AA50DFBB048C92A2213BC1 = { isa = PBXGroup; children = (
+				E50666EA86CAD5FB338A8756,
 				1366A411A69F2020EE651CDB,
 				607EB083892A70C2A770A1B6,
 				1C52B91B15DF56E0A37F3EEE,

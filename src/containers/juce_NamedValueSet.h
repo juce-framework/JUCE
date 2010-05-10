@@ -91,6 +91,12 @@ public:
     */
     const var::identifier getName (int index) const;
 
+    /** Returns the value of the item at a given index.
+        The index must be between 0 and size() - 1. Out-of-range indexes will
+        return an empty identifier.
+    */
+    const var getValueAt (int index) const;
+
     /** Removes all values. */
     void clear();
 
