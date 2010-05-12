@@ -48,7 +48,7 @@ public:
                             initially set to this string, but these can be changed later
                             using the setName() and setButtonText() methods)
     */
-    ToggleButton (const String& buttonText);
+    explicit ToggleButton (const String& buttonText = String::empty);
 
     /** Destructor. */
     ~ToggleButton();

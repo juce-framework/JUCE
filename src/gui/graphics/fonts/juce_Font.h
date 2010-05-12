@@ -344,6 +344,18 @@ public:
     */
     static void setFallbackFontName (const String& name) throw();
 
+    //==============================================================================
+    /** Creates a string to describe this font.
+        The string will contain information to describe the font's typeface, size, and
+        style. To recreate the font from this string, use fromString().
+    */
+    const String toString() const;
+
+    /** Recreates a font from its stringified encoding.
+        This method takes a string that was created by toString(), and recreates the
+        original font.
+    */
+    static const Font fromString (const String& fontDescription);
 
     //==============================================================================
     juce_UseDebuggingNewOperator

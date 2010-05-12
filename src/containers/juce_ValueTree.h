@@ -310,9 +310,11 @@ public:
     */
     void writeToStream (OutputStream& output);
 
-    /** Reloads a tree from a stream that was written with writeToStream().
-    */
+    /** Reloads a tree from a stream that was written with writeToStream(). */
     static ValueTree readFromStream (InputStream& input);
+
+    /** Reloads a tree from a data block that was written with writeToStream(). */
+    static ValueTree readFromData (const void* data, size_t numBytes);
 
     //==============================================================================
     /** Listener class for events that happen to a ValueTree.

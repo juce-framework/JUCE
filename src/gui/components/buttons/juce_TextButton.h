@@ -49,7 +49,7 @@ public:
 
         @see Button
     */
-    TextButton (const String& buttonName,
+    TextButton (const String& buttonName = String::empty,
                 const String& toolTip = String::empty);
 
     /** Destructor. */

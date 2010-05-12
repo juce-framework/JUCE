@@ -338,6 +338,53 @@ void Font::findFonts (Array<Font>& destArray) throw()
         destArray.add (Font (names[i], FontValues::defaultFontHeight, Font::plain));
 }
 
+//==============================================================================
+const String Font::toString() const
+{
+    String s (getTypefaceName());
+
+    if (s == getDefaultSansSerifFontName())
+        s = String::empty;
+    else
+        s += "; ";
+
+    s += String (getHeight(), 1);
+
+    if (isBold())
+        s += " bold";
+
+    if (isItalic())
+        s += " italic";
+
+    return s;
+}
+
+const Font Font::fromString (const String& fontDescription)
+{
+    String name;
+
+    const int separator = fontDescription.indexOfChar (';');
+
+    if (separator > 0)
+        name = fontDescription.substring (0, separator).trim();
+
+    if (name.isEmpty())
+        name = getDefaultSansSerifFontName();
+
+    String sizeAndStyle (fontDescription.substring (separator + 1));
+
+    float height = sizeAndStyle.getFloatValue();
+    if (height <= 0)
+        height = 10.0f;
+
+    int flags = Font::plain;
+    if (sizeAndStyle.containsIgnoreCase ("bold"))
+        flags |= Font::bold;
+    if (sizeAndStyle.containsIgnoreCase ("italic"))
+        flags |= Font::italic;
+
+    return Font (name, height, flags);
+}
 
 //==============================================================================
 class TypefaceCache  : public DeletedAtShutdown

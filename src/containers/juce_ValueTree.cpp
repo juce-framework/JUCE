@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_ValueTree.h"
+#include "../io/streams/juce_MemoryInputStream.h"
 
 
 //==============================================================================
@@ -858,6 +859,12 @@ ValueTree ValueTree::readFromStream (InputStream& input)
         v.addChild (readFromStream (input), -1, 0);
 
     return v;
+}
+
+ValueTree ValueTree::readFromData (const void* const data, const size_t numBytes)
+{
+    MemoryInputStream in (data, numBytes, false);
+    return readFromStream (in);
 }
 
 END_JUCE_NAMESPACE

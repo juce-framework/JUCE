@@ -84,7 +84,7 @@ public:
 
         @param componentName    the name to set for the component (see Component::setName())
     */
-    explicit ComboBox (const String& componentName);
+    explicit ComboBox (const String& componentName = String::empty);
 
     /** Destructor. */
     ~ComboBox();

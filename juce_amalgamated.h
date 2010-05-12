@@ -13086,9 +13086,11 @@ public:
 	*/
 	void writeToStream (OutputStream& output);
 
-	/** Reloads a tree from a stream that was written with writeToStream().
-	*/
+	/** Reloads a tree from a stream that was written with writeToStream(). */
 	static ValueTree readFromStream (InputStream& input);
+
+	/** Reloads a tree from a data block that was written with writeToStream(). */
+	static ValueTree readFromData (const void* data, size_t numBytes);
 
 	/** Listener class for events that happen to a ValueTree.
 
@@ -21781,6 +21783,18 @@ public:
 		available in whatever font you're trying to use.
 	*/
 	static void setFallbackFontName (const String& name) throw();
+
+	/** Creates a string to describe this font.
+		The string will contain information to describe the font's typeface, size, and
+		style. To recreate the font from this string, use fromString().
+	*/
+	const String toString() const;
+
+	/** Recreates a font from its stringified encoding.
+		This method takes a string that was created by toString(), and recreates the
+		original font.
+	*/
+	static const Font fromString (const String& fontDescription);
 
 	juce_UseDebuggingNewOperator
 
@@ -35113,8 +35127,8 @@ public:
 		@param componentName	the name to give the component
 		@param labelText	the text to show in the label
 	*/
-	Label (const String& componentName,
-		   const String& labelText);
+	Label (const String& componentName = String::empty,
+		   const String& labelText = String::empty);
 
 	/** Destructor. */
 	~Label();
@@ -35430,7 +35444,7 @@ public:
 
 		@param componentName	the name to set for the component (see Component::setName())
 	*/
-	explicit ComboBox (const String& componentName);
+	explicit ComboBox (const String& componentName = String::empty);
 
 	/** Destructor. */
 	~ComboBox();
@@ -39198,7 +39212,7 @@ public:
 
 		@see Button
 	*/
-	TextButton (const String& buttonName,
+	TextButton (const String& buttonName = String::empty,
 				const String& toolTip = String::empty);
 
 	/** Destructor. */
@@ -42267,7 +42281,7 @@ public:
 							initially set to this string, but these can be changed later
 							using the setName() and setButtonText() methods)
 	*/
-	ToggleButton (const String& buttonText);
+	explicit ToggleButton (const String& buttonText = String::empty);
 
 	/** Destructor. */
 	~ToggleButton();
@@ -44162,7 +44176,7 @@ public:
 		When created, you'll need to set up the slider's style and range with setSliderStyle(),
 		setRange(), etc.
 	*/
-	explicit Slider (const String& componentName);
+	explicit Slider (const String& componentName = String::empty);
 
 	/** Destructor. */
 	~Slider();
@@ -50002,8 +50016,8 @@ public:
 		@param componentName	the name to give the component
 		@param labelText	the text to show at the top of the outline
 	*/
-	GroupComponent (const String& componentName,
-					const String& labelText);
+	GroupComponent (const String& componentName = String::empty,
+					const String& labelText = String::empty);
 
 	/** Destructor. */
 	~GroupComponent();
