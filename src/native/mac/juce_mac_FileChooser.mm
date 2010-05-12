@@ -170,7 +170,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 {
     const ScopedAutoReleasePool pool;
 
-    jassertfalse //xxx to do
+    jassertfalse; //xxx to do
 }
 
 #endif

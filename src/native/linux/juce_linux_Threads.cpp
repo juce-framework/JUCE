@@ -144,7 +144,7 @@ void Thread::setCurrentThreadAffinityMask (const uint32 affinityMask)
     /* affinities aren't supported because either the appropriate header files weren't found,
        or the SUPPORT_AFFINITIES macro was turned off
     */
-    jassertfalse
+    jassertfalse;
 #endif
 }
 

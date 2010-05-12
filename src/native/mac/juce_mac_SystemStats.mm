@@ -256,7 +256,7 @@ int64 Time::getHighResolutionTicksPerSecond() throw()
 
 bool Time::setSystemTimeToThisTime() const
 {
-    jassertfalse
+    jassertfalse;
     return false;
 }
 

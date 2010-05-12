@@ -655,8 +655,8 @@ public:
     {
         const Rectangle<int> content (getContentArea());
 
-//        g.setColour (Colour::greyLevel (0.7f).withAlpha (0.4f));
-  //      g.drawRect (content.expanded (resizerThickness, resizerThickness), resizerThickness);
+        g.setColour (Colour::greyLevel (0.1f).withAlpha (0.3f));
+        g.drawRect (content.expanded (1, 1), 1);
 
         const int bottomGap = getHeight() - content.getBottom();
         g.setFont (bottomGap - 5.0f);

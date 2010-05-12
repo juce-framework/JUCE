@@ -29,6 +29,70 @@
 #include "../../../jucer_Headers.h"
 #include "../jucer_ComponentDocument.h"
 #include "../../../utility/jucer_ColourEditorComponent.h"
+class ComponentTypeHandler;
+
+class JucerState
+{
+public:
+    JucerState (const ValueTree& state_)
+        : state (state_)
+    {
+    }
+
+    ~JucerState()
+    {
+    }
+
+private:
+    ValueTree state;
+};
+
+//==============================================================================
+/** Temporary wrapper around a document and a component's ValueTree, providing lots of useful
+    functions that can be performed on the component.
+*/
+class ComponentTypeInstance
+{
+public:
+    ComponentTypeInstance (ComponentDocument& document_, const ValueTree& state_);
+
+    //==============================================================================
+    ComponentDocument& getDocument() throw()            { return document; }
+    ValueTree& getState() throw()                       { return state; }
+
+    Value getValue (const var::identifier& name) const;
+    void set (const var::identifier& name, const var& value);
+    const var operator[] (const var::identifier& name) const    { return state [name] ;}
+
+    const String getMemberName() const                  { return state [ComponentDocument::memberNameProperty]; }
+    const String getComponentName() const               { return state [ComponentDocument::compNameProperty]; }
+
+    //==============================================================================
+    void initialiseNewItemBasics();
+    void updateComponentBasics (Component* comp);
+
+    void addMemberNameProperty (Array <PropertyComponent*>& props);
+    void addBoundsProperties (Array <PropertyComponent*>& props);
+    void addTooltipProperty (Array <PropertyComponent*>& props);
+    void addFocusOrderProperty (Array <PropertyComponent*>& props);
+    void addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const String& propertyName);
+    void addFontProperties (Array <PropertyComponent*>& props, const var::identifier& name);
+    void addJustificationProperty (Array <PropertyComponent*>& props, const String& name, const Value& value, bool onlyHorizontal);
+
+    //==============================================================================
+    const String createConstructorStatement (const String& params);
+
+    //==============================================================================
+    ComponentTypeHandler* getHandler() const;
+    void updateComponent (Component* comp);
+    void createProperties (Array <PropertyComponent*>& props);
+    void createCode (CodeGenerator& code);
+
+private:
+    //==============================================================================
+    ComponentDocument& document;
+    ValueTree state;
+};
 
 
 //==============================================================================
@@ -36,25 +100,25 @@ class ComponentTypeHandler
 {
 public:
     //==============================================================================
-    ComponentTypeHandler (const String& name_, const String& xmlTag_, const String& memberNameRoot_);
+    ComponentTypeHandler (const String& displayName_, const String& className_, const String& xmlTag_, const String& memberNameRoot_);
     virtual ~ComponentTypeHandler();
 
-    const String& getName() const               { return name; }
+    const String& getDisplayName() const        { return displayName; }
     const String& getXmlTag() const             { return xmlTag; }
     const String& getMemberNameRoot() const     { return memberNameRoot; }
 
     virtual Component* createComponent() = 0;
     virtual const Rectangle<int> getDefaultSize() = 0;
 
-    virtual void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state);
-    virtual void initialiseNewItem (ComponentDocument& document, ValueTree& state);
-    virtual void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props);
-
-    Value getValue (const var::identifier& name, ValueTree& state, ComponentDocument& document) const;
+    virtual void initialiseNewItem (ComponentTypeInstance& item) = 0;
+    virtual void updateComponent (ComponentTypeInstance& item, Component* comp) = 0;
+    virtual void createPropertyEditors (ComponentTypeInstance& item, Array <PropertyComponent*>& props) = 0;
+    virtual void createCode (ComponentTypeInstance& item, CodeGenerator& code) = 0;
+    virtual const String getClassName (ComponentTypeInstance& item) const     { return className; }
 
 protected:
     //==============================================================================
-    const String name, xmlTag, memberNameRoot;
+    const String displayName, className, xmlTag, memberNameRoot;
 
 private:
     ComponentTypeHandler (const ComponentTypeHandler&);
@@ -79,7 +143,7 @@ public:
     ComponentTypeHandler* getHandler (const int index) const        { return handlers[index]; }
 
     ComponentTypeHandler* getHandlerFor (const String& type);
-    const StringArray getTypeNames() const;
+    const StringArray getDisplayNames() const;
 
 private:
     //==============================================================================
@@ -93,74 +157,46 @@ class ComponentTypeHelper   : public ComponentTypeHandler
 {
 public:
     //==============================================================================
-    ComponentTypeHelper (const String& name_, const String& xmlTag_, const String& memberNameRoot_)
-        : ComponentTypeHandler (name_, xmlTag_, memberNameRoot_)
+    ComponentTypeHelper (const String& displayName_, const String& className_, const String& xmlTag_, const String& memberNameRoot_)
+        : ComponentTypeHandler (displayName_, className_, xmlTag_, memberNameRoot_)
     {
     }
 
-    virtual void update (ComponentDocument& document, ComponentClass* comp, const ValueTree& state) = 0;
+    virtual void initialiseNew (ComponentTypeInstance& item) = 0;
+    virtual void update (ComponentTypeInstance& item, ComponentClass* comp) = 0;
+    virtual void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props) = 0;
 
-    void updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
+    void initialiseNewItem (ComponentTypeInstance& item)
     {
-        ComponentTypeHandler::updateComponent (document, comp, state);
+        item.initialiseNewItemBasics();
+        initialiseNew (item);
+    }
+
+    void updateComponent (ComponentTypeInstance& item, Component* comp)
+    {
+        item.updateComponentBasics (comp);
 
         ComponentClass* const c = dynamic_cast <ComponentClass*> (comp);
         jassert (c != 0);
-        updateComponentColours (state, c);
-        update (document, c, state);
+        updateComponentColours (item, c);
+
+        update (item, c);
     }
 
-    virtual void initialiseNew (ComponentDocument& document, ValueTree& state) = 0;
-
-    void initialiseNewItem (ComponentDocument& document, ValueTree& state)
+    void createPropertyEditors (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        ComponentTypeHandler::initialiseNewItem (document, state);
-        initialiseNew (document, state);
-    }
+        item.addMemberNameProperty (props);
+        item.addBoundsProperties (props);
 
-    virtual void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props) = 0;
-
-    void createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
-    {
-        ComponentTypeHandler::createPropertyEditors (document, state, props);
-        createProperties (document, state, props);
+        createProperties (item, props);
     }
 
 protected:
-    //==============================================================================
-    void addTooltipProperty (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
-    {
-        props.add (new TextPropertyComponent (getValue (ComponentDocument::compTooltipProperty, state, document),
-                                              "Tooltip", 4096, false));
-    }
-
-    void addFocusOrderProperty (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
-    {
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue (ComponentDocument::compFocusOrderProperty,
-                                                                                            state, document))),
-                                              "Focus Order", 10, false));
-    }
-
     //==============================================================================
     struct EditableColour
     {
         int colourId;
         String name, propertyName;
-
-        PropertyComponent* createProperty (ComponentTypeHelper& type, ComponentDocument& document, ValueTree& state)
-        {
-            return new ColourPropertyComponent (document, name, type.getValue (propertyName, state, document),
-                                                LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true);
-        }
-
-        void updateComponent (const ValueTree& state, Component* component)
-        {
-            const String colour (state [propertyName].toString());
-            if (colour.isNotEmpty())
-                component->setColour (colourId, Colour::fromString (colour));
-            else
-                component->removeColour (colourId);
-        }
     };
 
     Array <EditableColour> editableColours;
@@ -174,16 +210,28 @@ protected:
         editableColours.add (ec);
     }
 
-    void addEditableColourProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void addEditableColourProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
         for (int i = 0; i < editableColours.size(); ++i)
-            props.add (editableColours.getReference(i).createProperty (*this, document, state));
+        {
+            const EditableColour& ec = editableColours.getReference(i);
+            item.addColourProperty (props, ec.colourId, ec.name, ec.propertyName);
+        }
     }
 
-    void updateComponentColours (const ValueTree& state, Component* component)
+    void updateComponentColours (ComponentTypeInstance& item, Component* component)
     {
         for (int i = 0; i < editableColours.size(); ++i)
-            editableColours.getReference(i).updateComponent (state, component);
+        {
+            const EditableColour& ec = editableColours.getReference(i);
+
+            const String colour (item.getState() [ec.propertyName].toString());
+
+            if (colour.isNotEmpty())
+                component->setColour (ec.colourId, Colour::fromString (colour));
+            else
+                component->removeColour (ec.colourId);
+        }
     }
 };
 

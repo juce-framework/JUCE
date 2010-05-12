@@ -67,7 +67,7 @@ const String getAudioErrorDesc (HRESULT hr)
     return e;
 }
 
-#define logFailure(hr) { if (FAILED (hr)) { DBG ("WASAPI FAIL! " + getAudioErrorDesc (hr)); jassertfalse } }
+#define logFailure(hr) { if (FAILED (hr)) { DBG ("WASAPI FAIL! " + getAudioErrorDesc (hr)); jassertfalse; } }
 #define OK(a) wasapi_checkResult(a)
 
 static bool wasapi_checkResult (HRESULT hr)

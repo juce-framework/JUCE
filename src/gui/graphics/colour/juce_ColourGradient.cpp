@@ -34,7 +34,7 @@ BEGIN_JUCE_NAMESPACE
 ColourGradient::ColourGradient() throw()
 {
 #if JUCE_DEBUG
-    x1 = 987654.0f;
+    point1.setX (987654.0f);
 #endif
 }
 
@@ -45,17 +45,12 @@ ColourGradient::ColourGradient (const Colour& colour1,
                                 const float x2_,
                                 const float y2_,
                                 const bool isRadial_)
-    : x1 (x1_),
-      y1 (y1_),
-      x2 (x2_),
-      y2 (y2_),
+    : point1 (x1_, y1_),
+      point2 (x2_, y2_),
       isRadial (isRadial_)
 {
-    colours.add (0);
-    colours.add (colour1.getARGB());
-
-    colours.add (1 << 16);
-    colours.add (colour2.getARGB());
+    colours.add (ColourPoint (0, colour1));
+    colours.add (ColourPoint (1 << 16, colour2));
 }
 
 ColourGradient::~ColourGradient()
@@ -77,62 +72,64 @@ void ColourGradient::addColour (const double proportionAlongGradient,
     const uint32 pos = jlimit (0, 65535, roundToInt (proportionAlongGradient * 65536.0));
 
     int i;
-    for (i = 0; i < colours.size(); i += 2)
-        if (colours.getUnchecked(i) > pos)
+    for (i = 0; i < colours.size(); ++i)
+        if (colours.getReference(i).position > pos)
             break;
 
-    colours.insert (i, pos);
-    colours.insert (i + 1, colour.getARGB());
+    colours.insert (i, ColourPoint (pos, colour));
 }
 
 void ColourGradient::multiplyOpacity (const float multiplier) throw()
 {
-    for (int i = 1; i < colours.size(); i += 2)
+    for (int i = 0; i < colours.size(); ++i)
     {
-        const Colour c (colours.getUnchecked(i));
-        colours.set (i, c.withMultipliedAlpha (multiplier).getARGB());
+        Colour& c = colours.getReference(i).colour;
+        c = c.withMultipliedAlpha (multiplier);
     }
 }
 
 //==============================================================================
 int ColourGradient::getNumColours() const throw()
 {
-    return colours.size() >> 1;
+    return colours.size();
 }
 
 double ColourGradient::getColourPosition (const int index) const throw()
 {
-    return jlimit (0.0, 1.0, colours [index << 1] / 65535.0);
+    if (((unsigned int) index) < (unsigned int) colours.size())
+        return jlimit (0.0, 1.0, colours.getReference (index).position / 65535.0);
+
+    return 0;
  }
 
 const Colour ColourGradient::getColour (const int index) const throw()
 {
-    return Colour (colours [(index << 1) + 1]);
+    if (((unsigned int) index) < (unsigned int) colours.size())
+        return colours.getReference (index).colour;
+
+    return Colour();
 }
 
 const Colour ColourGradient::getColourAtPosition (const float position) const throw()
 {
-    jassert (colours.getUnchecked (0) == 0); // the first colour specified has to go at position 0
+    jassert (colours.getReference(0).position == 0); // the first colour specified has to go at position 0
 
     const int integerPos = jlimit (0, 65535, roundToInt (position * 65536.0f));
 
-    if (integerPos <= 0 || colours.size() <= 2)
+    if (integerPos <= 0 || colours.size() <= 1)
         return getColour (0);
 
-    int i = colours.size() - 2;
-    while (integerPos < (int) colours.getUnchecked(i))
-        i -= 2;
+    int i = colours.size() - 1;
+    while (integerPos < (int) colours.getReference(i).position)
+        --i;
 
-    if (i >= colours.size() - 2)
-        return Colour (colours.getUnchecked(i));
+    if (i >= colours.size() - 1)
+        return colours.getReference(i).colour;
 
-    const int pos1 = colours.getUnchecked (i);
-    const Colour col1 (colours.getUnchecked (i + 1));
+    const ColourPoint& p1 = colours.getReference (i);
+    const ColourPoint& p2 = colours.getReference (i + 1);
 
-    const int pos2 = colours.getUnchecked (i + 2);
-    const Colour col2 (colours.getUnchecked (i + 3));
-
-    return col1.interpolatedWith (col2, (integerPos - pos1) / (float) (pos2 - pos1));
+    return p1.colour.interpolatedWith (p2.colour, (integerPos - p1.position) / (float) (p2.position - p1.position));
 }
 
 //==============================================================================
@@ -141,32 +138,26 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
 #if JUCE_DEBUG
     // trying to use the object without setting its co-ordinates? Have a careful read of
     // the comments for the constructors.
-    jassert (x1 != 987654.0f);
+    jassert (point1.getX() != 987654.0f);
 #endif
 
-    const int numColours = colours.size() >> 1;
-
-    float tx1 = x1, ty1 = y1, tx2 = x2, ty2 = y2;
-    transform.transformPoint (tx1, ty1);
-    transform.transformPoint (tx2, ty2);
-    const double distance = juce_hypot (tx1 - tx2, ty1 - ty2);
-
-    const int numEntries = jlimit (1, (numColours - 1) << 8, 3 * (int) distance);
+    const int numEntries = jlimit (1, (colours.size() - 1) << 8,
+                                   3 * (int) point1.transformedBy (transform)
+                                                .getDistanceFrom (point2.transformedBy (transform)));
     lookupTable.malloc (numEntries);
 
-    if (numColours >= 2)
+    if (colours.size() >= 2)
     {
-        jassert (colours.getUnchecked (0) == 0); // the first colour specified has to go at position 0
+        jassert (colours.getReference(0).position == 0); // the first colour specified has to go at position 0
 
-        PixelARGB pix1 (colours.getUnchecked (1));
-        pix1.premultiply();
+        PixelARGB pix1 (colours.getReference (0).colour.getPixelARGB());
         int index = 0;
 
-        for (int j = 2; j < colours.size(); j += 2)
+        for (int j = 1; j < colours.size(); ++j)
         {
-            const int numToDo = ((colours.getUnchecked (j) * (numEntries - 1)) >> 16) - index;
-            PixelARGB pix2 (colours.getUnchecked (j + 1));
-            pix2.premultiply();
+            const ColourPoint& p = colours.getReference (j);
+            const int numToDo = ((p.position * (numEntries - 1)) >> 16) - index;
+            const PixelARGB pix2 (p.colour.getPixelARGB());
 
             for (int i = 0; i < numToDo; ++i)
             {
@@ -185,7 +176,7 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
     }
     else
     {
-        jassertfalse // no colours specified!
+        jassertfalse; // no colours specified!
     }
 
     return numEntries;
@@ -193,8 +184,8 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
 
 bool ColourGradient::isOpaque() const throw()
 {
-    for (int i = 1; i < colours.size(); i += 2)
-        if (PixelARGB (colours.getUnchecked(i)).getAlpha() < 0xff)
+    for (int i = 0; i < colours.size(); ++i)
+        if (! colours.getReference(i).colour.isOpaque())
             return false;
 
     return true;
@@ -202,8 +193,8 @@ bool ColourGradient::isOpaque() const throw()
 
 bool ColourGradient::isInvisible() const throw()
 {
-    for (int i = 1; i < colours.size(); i += 2)
-        if (PixelARGB (colours.getUnchecked(i)).getAlpha() > 0)
+    for (int i = 0; i < colours.size(); ++i)
+        if (! colours.getReference(i).colour.isTransparent())
             return false;
 
     return true;

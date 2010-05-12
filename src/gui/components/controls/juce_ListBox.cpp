@@ -945,7 +945,7 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
     {
         // to be able to do a drag-and-drop operation, the listbox needs to
         // be inside a component which is also a DragAndDropContainer.
-        jassertfalse
+        jassertfalse;
     }
 }
 

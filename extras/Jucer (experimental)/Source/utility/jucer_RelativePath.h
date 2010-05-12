@@ -59,8 +59,8 @@ public:
 
     RootFolder getRoot() const                              { return root; }
 
-    const String toUnixStyle() const                        { return unixStylePath (path); }
-    const String toWindowsStyle() const                     { return windowsStylePath (path); }
+    const String toUnixStyle() const                        { return FileUtils::unixStylePath (path); }
+    const String toWindowsStyle() const                     { return FileUtils::windowsStylePath (path); }
 
     const String getFileName() const                        { return getFakeFile().getFileName(); }
     const String getFileNameWithoutExtension() const        { return getFakeFile().getFileNameWithoutExtension(); }

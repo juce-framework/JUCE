@@ -446,7 +446,7 @@ void ValueTree::SharedObject::addChild (SharedObject* child, int index, UndoMana
         {
             // You're attempting to create a recursive loop! A node
             // can't be a child of one of its own children!
-            jassertfalse
+            jassertfalse;
         }
     }
 }
@@ -840,7 +840,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
 
     if (numProps < 0)
     {
-        jassertfalse  // trying to read corrupted data!
+        jassertfalse;  // trying to read corrupted data!
         return v;
     }
 

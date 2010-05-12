@@ -39,7 +39,7 @@ static bool logAnyErrorsMidi (const OSStatus err, const int lineNum)
         return true;
 
     log ("CoreMidi error: " + String (lineNum) + " - " + String::toHexString ((int) err));
-    jassertfalse
+    jassertfalse;
     return false;
 }
 
@@ -508,7 +508,7 @@ static void midiInputProc (const MIDIPacketList* pktlist,
 
                     if (used <= 0)
                     {
-                        jassertfalse // malformed midi message
+                        jassertfalse; // malformed midi message
                         break;
                     }
                     else

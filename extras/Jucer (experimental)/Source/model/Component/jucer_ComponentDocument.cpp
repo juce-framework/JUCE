@@ -143,6 +143,17 @@ void ComponentDocument::writeCode (OutputStream& cpp, OutputStream& header)
     codeGen.parentClasses = "public Component";
 
     {
+        MemoryOutputStream stateStream (1024, 1024, &codeGen.componentStateData);
+        root.writeToStream (stateStream);
+    }
+
+    for (int i = 0; i < getNumComponents(); ++i)
+    {
+        ComponentTypeInstance item (*this, getComponent (i));
+        item.createCode (codeGen);
+    }
+
+    {
         MemoryOutputStream metaData;
         writeMetadata (metaData);
         codeGen.jucerMetadata = metaData.toUTF8();
@@ -185,8 +196,8 @@ bool ComponentDocument::save()
     MemoryOutputStream cpp, header;
     writeCode (cpp, header);
 
-    bool savedOk = overwriteFileWithNewDataIfDifferent (cppFile, cpp)
-                    && overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
+    bool savedOk = FileUtils::overwriteFileWithNewDataIfDifferent (cppFile, cpp)
+                    && FileUtils::overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
 
     if (savedOk)
         changedSinceSaved = false;
@@ -298,6 +309,9 @@ void ComponentDocument::checkRootObject()
 
     if ((int) getCanvasHeight().getValue() <= 0)
         getCanvasHeight() = 480;
+
+    if (! root.hasProperty ("background"))
+        getBackgroundColour() = Colours::white.toString();
 }
 
 void ComponentDocument::setUsingTemporaryCanvasSize (bool b)
@@ -317,22 +331,27 @@ Value ComponentDocument::getCanvasHeight() const
     return usingTemporaryCanvasSize ? tempCanvasHeight : getRootValueNonUndoable ("height");
 }
 
+Value ComponentDocument::getBackgroundColour() const
+{
+    return getRootValueUndoable ("background");
+}
+
 //==============================================================================
 const int menuItemOffset = 0x63451fa4;
 
 void ComponentDocument::addNewComponentMenuItems (PopupMenu& menu) const
 {
-    const StringArray typeNames (ComponentTypeManager::getInstance()->getTypeNames());
+    const StringArray displayNames (ComponentTypeManager::getInstance()->getDisplayNames());
 
-    for (int i = 0; i < typeNames.size(); ++i)
-        menu.addItem (i + menuItemOffset, "New " + typeNames[i]);
+    for (int i = 0; i < displayNames.size(); ++i)
+        menu.addItem (i + menuItemOffset, "New " + displayNames[i]);
 }
 
 const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCode)
 {
-    const StringArray typeNames (ComponentTypeManager::getInstance()->getTypeNames());
+    const StringArray displayNames (ComponentTypeManager::getInstance()->getDisplayNames());
 
-    if (menuResultCode >= menuItemOffset && menuResultCode < menuItemOffset + typeNames.size())
+    if (menuResultCode >= menuItemOffset && menuResultCode < menuItemOffset + displayNames.size())
     {
         ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandler (menuResultCode - menuItemOffset);
         jassert (handler != 0);
@@ -341,7 +360,9 @@ const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCo
         {
             ValueTree state (handler->getXmlTag());
             state.setProperty (idProperty, createAlphaNumericUID(), 0);
-            handler->initialiseNewItem (*this, state);
+
+            ComponentTypeInstance comp (*this, state);
+            handler->initialiseNewItem (comp);
 
             getComponentGroup().addChild (state, -1, getUndoManager());
 
@@ -541,7 +562,7 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
 
 const String ComponentDocument::getNonexistentMemberName (String name)
 {
-    String n (makeValidCppIdentifier (name, false, true, false));
+    String n (CodeFormatting::makeValidIdentifier (name, false, true, false));
     int suffix = 2;
 
     while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid()
@@ -558,7 +579,7 @@ void ComponentDocument::renameAnchor (const String& oldName, const String& newNa
     {
         ValueTree v (getComponent(i));
         RectangleCoordinates coords (getCoordsFor (v));
-        coords.renameAnchorIfUsed (oldName, newName);
+        coords.renameAnchorIfUsed (oldName, newName, *this);
         setCoordsFor (v, coords);
     }
 
@@ -664,11 +685,8 @@ void ComponentDocument::updateComponent (Component* comp)
 
     if (v.isValid())
     {
-        ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandlerFor (v.getType());
-        jassert (handler != 0);
-
-        if (handler != 0)
-            handler->updateComponent (*this, comp, v);
+        ComponentTypeInstance item (*this, v);
+        item.updateComponent (comp);
     }
 }
 
@@ -706,6 +724,7 @@ bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Compo
 void ComponentDocument::removeComponent (const ValueTree& state)
 {
     jassert (state.isAChildOf (getComponentGroup()));
+    renameAnchor (state [memberNameProperty], String::empty);
     getComponentGroup().removeChild (state, getUndoManager());
 }
 
@@ -810,12 +829,8 @@ bool ComponentDocument::createItemProperties (Array <PropertyComponent*>& props,
 
     if (comp.isValid())
     {
-        ComponentTypeHandler* handler = ComponentTypeManager::getInstance()->getHandlerFor (comp.getType());
-        jassert (handler != 0);
-
-        if (handler != 0)
-            handler->createPropertyEditors (*this, comp, props);
-
+        ComponentTypeInstance item (*this, comp);
+        item.createProperties (props);
         return true;
     }
 

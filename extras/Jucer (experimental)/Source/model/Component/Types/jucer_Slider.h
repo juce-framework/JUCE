@@ -34,7 +34,7 @@
 class SliderHandler  : public ComponentTypeHelper<Slider>
 {
 public:
-    SliderHandler() : ComponentTypeHelper<Slider> ("Slider", "SLIDER", "slider")
+    SliderHandler() : ComponentTypeHelper<Slider> ("Slider", "Slider", "SLIDER", "slider")
     {
         addEditableColour (Slider::backgroundColourId, "Background", "backgroundColour");
         addEditableColour (Slider::thumbColourId, "Thumb", "thumbColour");
@@ -49,54 +49,59 @@ public:
 
     ~SliderHandler()  {}
 
-    Component* createComponent()                { return new Slider (String::empty); }
+    Component* createComponent()                { return new Slider(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 200, 24); }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        state.setProperty ("min", 0, 0);
-        state.setProperty ("max", 100, 0);
-        state.setProperty ("interval", 1, 0);
-        state.setProperty ("type", 1 + Slider::LinearHorizontal, 0);
-        state.setProperty ("textBoxPos", 2, 0);
-        state.setProperty ("editable", true, 0);
-        state.setProperty ("textBoxWidth", 80, 0);
-        state.setProperty ("textBoxHeight", 20, 0);
-        state.setProperty ("skew", 1, 0);
+        item.set ("min", 0);
+        item.set ("max", 100);
+        item.set ("interval", 1);
+        item.set ("type", 1 + Slider::LinearHorizontal);
+        item.set ("textBoxPos", 2);
+        item.set ("editable", true);
+        item.set ("textBoxWidth", 80);
+        item.set ("textBoxHeight", 20);
+        item.set ("skew", 1);
     }
 
-    void update (ComponentDocument& document, Slider* comp, const ValueTree& state)
+    void update (ComponentTypeInstance& item, Slider* comp)
     {
-        comp->setRange ((double) state ["min"], (double) state ["max"], (double) state ["interval"]);
-        comp->setSliderStyle ((Slider::SliderStyle) ((int) state ["type"] - 1));
-        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) ((int) state ["textBoxPos"] - 1),
-                               ! (bool) state ["editable"],
-                               (int) state ["textBoxWidth"], (int) state ["textBoxHeight"]);
-        comp->setSkewFactor ((double) state ["skew"]);
+        comp->setRange ((double) item ["min"], (double) item ["max"], (double) item ["interval"]);
+        comp->setSliderStyle ((Slider::SliderStyle) ((int) item ["type"] - 1));
+        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) ((int) item ["textBoxPos"] - 1),
+                               ! (bool) item ["editable"],
+                               (int) item ["textBoxWidth"], (int) item ["textBoxHeight"]);
+        comp->setSkewFactor ((double) item ["skew"]);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (getValue ("min", state, document))), "Minimum", 16, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (getValue ("max", state, document))), "Maximum", 16, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (getValue ("interval", state, document))), "Interval", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("min"))), "Minimum", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("max"))), "Maximum", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("interval"))), "Interval", 16, false));
 
         const char* const types[] = { "LinearHorizontal", "LinearVertical", "LinearBar", "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
                                       "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical", "ThreeValueHorizontal", "ThreeValueVertical", 0 };
-        props.add (new ChoicePropertyComponent (state.getPropertyAsValue ("type", document.getUndoManager()), "Type", StringArray (types)));
+        props.add (new ChoicePropertyComponent (item.getValue ("type"), "Type", StringArray (types)));
 
         const char* const textBoxPositions[] = { "NoTextBox", "TextBoxLeft", "TextBoxRight", "TextBoxAbove", "TextBoxBelow", 0 };
-        props.add (new ChoicePropertyComponent (state.getPropertyAsValue ("textBoxPos", document.getUndoManager()), "Text Box", StringArray (textBoxPositions)));
+        props.add (new ChoicePropertyComponent (item.getValue ("textBoxPos"), "Text Box", StringArray (textBoxPositions)));
 
-        props.add (new BooleanPropertyComponent (getValue ("editable", state, document), "Editable", "Value can be edited"));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue ("textBoxWidth", state, document))), "Text Box Width", 8, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue ("textBoxHeight", state, document))), "Text Box Height", 8, false));
+        props.add (new BooleanPropertyComponent (item.getValue ("editable"), "Editable", "Value can be edited"));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxWidth"))), "Text Box Width", 8, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxHeight"))), "Text Box Height", 8, false));
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (getValue ("skew", state, document))), "Skew Factor", 16, false));
-        addEditableColourProperties (document, state, props);
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("skew"))), "Skew Factor", 16, false));
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (CodeFormatting::stringLiteral (item.getComponentName()));
     }
 };
 

@@ -57,6 +57,8 @@ private:
     %%privateMemberDeclarations%%
 
     //==============================================================================
+    ValueTree componentState;
+    
     // (prevent copy constructor and operator= being generated..)
     %%className%% (const %%className%%&);
     %%className%%& operator= (const %%className%%&);

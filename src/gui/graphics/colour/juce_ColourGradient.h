@@ -27,7 +27,7 @@
 #define __JUCE_COLOURGRADIENT_JUCEHEADER__
 
 #include "juce_Colour.h"
-#include "../geometry/juce_AffineTransform.h"
+#include "../geometry/juce_Point.h"
 #include "../../../containers/juce_Array.h"
 #include "../../../containers/juce_HeapBlock.h"
 
@@ -132,14 +132,10 @@ public:
     bool isInvisible() const throw();
 
     //==============================================================================
-    float x1;
-    float y1;
-
-    float x2;
-    float y2;
+    Point<float> point1, point2;
 
     /** If true, the gradient should be filled circularly, centred around
-        (x1, y1), with (x2, y2) defining a point on the circumference.
+        point1, with point2 defining a point on the circumference.
 
         If false, the gradient is linear between the two points.
     */
@@ -149,7 +145,19 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Array <uint32> colours;
+    struct ColourPoint
+    {
+        ColourPoint() throw() {}
+
+        ColourPoint (uint32 position_, const Colour& colour_) throw()
+            : position (position_), colour (colour_)
+        {}
+
+        uint32 position;
+        Colour colour;
+    };
+
+    Array <ColourPoint> colours;
 };
 
 

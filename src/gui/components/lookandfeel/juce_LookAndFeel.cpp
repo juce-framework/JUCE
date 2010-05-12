@@ -247,7 +247,7 @@ const Colour LookAndFeel::findColour (const int colourId) const throw()
     if (index >= 0)
         return colours [index];
 
-    jassertfalse
+    jassertfalse;
     return Colours::black;
 }
 
@@ -1923,7 +1923,7 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
         return new GlassWindowButton ("maximise", Colour (0xff119911), shape, fullscreenShape);
     }
 
-    jassertfalse
+    jassertfalse;
     return 0;
 }
 
@@ -3050,8 +3050,8 @@ void LookAndFeel::drawGlassLozenge (Graphics& g,
 
     if (! (flatOnRight || flatOnTop || flatOnBottom))
     {
-        cg.x1 = x + width - edgeBlurRadius;
-        cg.x2 = x + width;
+        cg.point1.setX (x + width - edgeBlurRadius);
+        cg.point2.setX (x + width);
 
         g.saveState();
         g.setGradientFill (cg);

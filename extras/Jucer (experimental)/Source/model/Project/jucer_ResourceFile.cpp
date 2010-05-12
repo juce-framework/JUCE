@@ -100,83 +100,6 @@ int64 ResourceFile::getTotalDataSize() const
     return total;
 }
 
-static void writeCppData (InputStream& in, OutputStream& out)
-{
-    const int maxCharsOnLine = 250;
-
-    MemoryBlock mb;
-    in.readIntoMemoryBlock (mb);
-    const unsigned char* data = (const unsigned char*) mb.getData();
-    int charsOnLine = 0;
-
-    bool canUseStringLiteral = mb.getSize() < 65535; // MS compilers can't handle strings bigger than 65536 chars..
-
-    if (canUseStringLiteral)
-    {
-        for (size_t i = 0; i < mb.getSize(); ++i)
-        {
-            const unsigned int num = (unsigned int) data[i];
-            if (! ((num >= 32 && num < 127) || num == '\t' || num == '\r' || num == '\n'))
-            {
-                canUseStringLiteral = false;
-                break;
-            }
-        }
-    }
-
-    if (! canUseStringLiteral)
-    {
-        out << "{ ";
-
-        for (size_t i = 0; i < mb.getSize(); ++i)
-        {
-            const int num = (int) (unsigned int) data[i];
-            out << num << ',';
-
-            charsOnLine += 2;
-            if (num >= 10)
-                ++charsOnLine;
-            if (num >= 100)
-                ++charsOnLine;
-
-            if (charsOnLine >= maxCharsOnLine)
-            {
-                charsOnLine = 0;
-                out << newLine;
-            }
-        }
-
-        out << "0,0 };";
-    }
-    else
-    {
-        out << "\"";
-
-        for (size_t i = 0; i < mb.getSize(); ++i)
-        {
-            const unsigned int num = (unsigned int) data[i];
-
-            switch (num)
-            {
-                case '\t':      out << "\\t"; break;
-                case '\r':      out << "\\r"; break;
-                case '\n':      out << "\\n"; charsOnLine = maxCharsOnLine; break;
-                case '"':       out << "\\\""; break;
-                case '\\':      out << "\\\\"; break;
-                default:        out << (char) num; break;
-            }
-
-            if (++charsOnLine >= maxCharsOnLine && i < mb.getSize() - 1)
-            {
-                charsOnLine = 0;
-                out << "\"" << newLine << "\"";
-            }
-        }
-
-        out << "\";";
-    }
-}
-
 static int calcResourceHashCode (const String& s)
 {
     const char* t = s.toUTF8();
@@ -202,7 +125,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         << comment;
 
     if (juceHeader.exists())
-        header << createIncludeStatement (juceHeader, cppFile) << newLine;
+        header << CodeFormatting::createIncludeStatement (juceHeader, cppFile) << newLine;
 
     const String namespaceName (className);
     StringArray variableNames;
@@ -210,10 +133,10 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
     int i;
     for (i = 0; i < files.size(); ++i)
     {
-        String variableNameRoot (makeValidCppIdentifier (files.getUnchecked(i)->getFileName()
-                                                          .replaceCharacters (" .", "__")
-                                                          .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
-                                                         false, true, false));
+        String variableNameRoot (CodeFormatting::makeValidIdentifier (files.getUnchecked(i)->getFileName()
+                                                                       .replaceCharacters (" .", "__")
+                                                                       .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
+                                                                      false, true, false));
         String variableName (variableNameRoot);
 
         int suffix = 2;
@@ -223,7 +146,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         variableNames.add (variableName);
     }
 
-    cpp << createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
+    cpp << CodeFormatting::createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
         << newLine
         << newLine
         << "const char* " << namespaceName << "::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
@@ -273,7 +196,11 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
                 << "static const unsigned char " << tempVariable
                 << "[] =" << newLine;
 
-            writeCppData (*fileStream, cpp);
+            {
+                MemoryBlock data;
+                fileStream->readIntoMemoryBlock (data);
+                CodeFormatting::writeDataAsCppLiteral (data, cpp);
+            }
 
             cpp << newLine << newLine
                 << "const char* " << namespaceName << "::" << variableName << " = (const char*) "
@@ -304,8 +231,8 @@ bool ResourceFile::write (const File& cppFile)
             cppOut = 0;
             hppOut = 0;
 
-            return (areFilesIdentical (tempCpp.getFile(), tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
-                && (areFilesIdentical (tempH.getFile(), tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());
+            return (FileUtils::areFilesIdentical (tempCpp.getFile(), tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
+                && (FileUtils::areFilesIdentical (tempH.getFile(), tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());
         }
     }
 

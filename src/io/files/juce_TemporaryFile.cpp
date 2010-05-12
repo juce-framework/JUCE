@@ -100,7 +100,7 @@ bool TemporaryFile::overwriteTargetFileWithTemporary() const
     {
         // There's no temporary file to use. If your write failed, you should
         // probably check, and not bother calling this method.
-        jassertfalse
+        jassertfalse;
     }
 
     return false;

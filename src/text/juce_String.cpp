@@ -1161,7 +1161,7 @@ const String String::replaceSection (int index, int numCharsToReplace, const Str
     if (index < 0)
     {
         // a negative index to replace from?
-        jassertfalse
+        jassertfalse;
         index = 0;
     }
 
@@ -1180,7 +1180,7 @@ const String String::replaceSection (int index, int numCharsToReplace, const Str
         {
             // replacing beyond the end of the string?
             index = len;
-            jassertfalse
+            jassertfalse;
         }
 
         numCharsToReplace = len - index;

@@ -477,7 +477,7 @@ public:
                 break;
 
             logError (hr);
-            jassertfalse
+            jassertfalse;
             return true;
         }
 
@@ -640,7 +640,7 @@ public:
                 }
                 else
                 {
-                    jassertfalse
+                    jassertfalse;
                 }
 
                 writeOffset = (writeOffset + dwSize1 + dwSize2) % totalBytesPerBuffer;
@@ -649,7 +649,7 @@ public:
             }
             else
             {
-                jassertfalse
+                jassertfalse;
                 logError (hr);
             }
 
@@ -920,7 +920,7 @@ public:
                 }
                 else
                 {
-                    jassertfalse
+                    jassertfalse;
                 }
 
                 readOffset = (readOffset + dwsize1 + dwsize2) % totalBytesPerBuffer;
@@ -930,7 +930,7 @@ public:
             else
             {
                 logError (hr);
-                jassertfalse
+                jassertfalse;
             }
 
             bytesFilled -= bytesPerBuffer;

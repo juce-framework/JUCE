@@ -442,7 +442,7 @@ const File JUCE_CALLTYPE File::getSpecialLocation (const SpecialLocationType typ
         break;
 
         default:
-            jassertfalse // unknown type?
+            jassertfalse; // unknown type?
             return File::nonexistent;
     }
 

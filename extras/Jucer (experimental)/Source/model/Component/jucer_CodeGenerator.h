@@ -51,6 +51,7 @@ public:
     String destructorCode;
     String staticMemberDefinitions;
     String jucerMetadata;
+    MemoryBlock componentStateData;
 
     struct CallbackMethod
     {
@@ -59,6 +60,8 @@ public:
     };
 
     OwnedArray<CallbackMethod> callbacks;
+
+    void addPrivateMember (const String& type, const String& name);
 
     String& getCallbackCode (const String& requiredParentClass,
                              const String& returnType,
@@ -90,13 +93,13 @@ public:
         class CodeDocumentRef   : public ReferenceCountedObject
         {
         public:
-            CodeDocumentRef (CodeDocument* doc_) : doc (doc_)   {}
-            CodeDocument& getDocument() const throw()           { return *doc; }
+            CodeDocumentRef() {}
+            CodeDocument& getDocument() throw()           { return doc; }
 
             typedef ReferenceCountedObjectPtr<CodeDocumentRef> Ptr;
 
         private:
-            CodeDocument* const doc;
+            CodeDocument doc;
 
             CodeDocumentRef (const CodeDocumentRef&);
             CodeDocumentRef& operator= (const CodeDocumentRef&);

@@ -587,7 +587,7 @@
 
 	  @see jassertfalse
   */
-  #define jassert(expression)	   { if (! (expression)) jassertfalse }
+  #define jassert(expression)	   { if (! (expression)) jassertfalse; }
 
 #else
 
@@ -598,7 +598,7 @@
   #define jassertfalse		  { juce_LogCurrentAssertion }
 
   #if JUCE_LOG_ASSERTIONS
-	#define jassert(expression)	 { if (! (expression)) jassertfalse }
+	#define jassert(expression)	 { if (! (expression)) jassertfalse; }
   #else
 	#define jassert(a)		  { }
   #endif
@@ -634,7 +634,7 @@
 	}
 
   #define JUCE_CATCH_ALL		catch (...) {}
-  #define JUCE_CATCH_ALL_ASSERT	 catch (...) { jassertfalse }
+  #define JUCE_CATCH_ALL_ASSERT	 catch (...) { jassertfalse; }
 
 #else
 
@@ -3957,7 +3957,7 @@ public:
 
 		if (startIndex < 0)
 		{
-			jassertfalse
+			jassertfalse;
 			startIndex = 0;
 		}
 
@@ -6713,7 +6713,7 @@ public:
 
 		if (startIndex < 0)
 		{
-			jassertfalse
+			jassertfalse;
 			startIndex = 0;
 		}
 
@@ -9050,10 +9050,10 @@ public:
 	explicit XmlElement (const String& tagName) throw();
 
 	/** Creates a (deep) copy of another element. */
-	XmlElement (const XmlElement& other) throw();
+	XmlElement (const XmlElement& other);
 
 	/** Creates a (deep) copy of another element. */
-	XmlElement& operator= (const XmlElement& other) throw();
+	XmlElement& operator= (const XmlElement& other);
 
 	/** Deleting an XmlElement will also delete all its child elements. */
 	~XmlElement() throw();
@@ -9148,7 +9148,7 @@ public:
 
 		@see hasTagName
 	*/
-	inline const String& getTagName() const throw()  { return tagName; }
+	inline const String& getTagName() const throw()		 { return tagName; }
 
 	/** Tests whether this element has a particular tag name.
 
@@ -9489,7 +9489,7 @@ public:
 	*/
 	template <class ElementComparator>
 	void sortChildElements (ElementComparator& comparator,
-							const bool retainOrderOfEquivalentItems = false) throw()
+							bool retainOrderOfEquivalentItems = false)
 	{
 		const int num = getNumChildElements();
 
@@ -9524,14 +9524,14 @@ public:
 
 		@see isTextElement, getAllSubText, getChildElementAllSubText
 	*/
-	const String getText() const throw();
+	const String& getText() const throw();
 
 	/** Sets the text in a text element.
 
 		Note that this is only a valid call if this element is a text element. If it's
 		not, then no action will be performed.
 	*/
-	void setText (const String& newText) throw();
+	void setText (const String& newText);
 
 	/** Returns all the text from this element's child nodes.
 
@@ -9543,7 +9543,7 @@ public:
 
 		@see isTextElement, getChildElementAllSubText, getText, addTextElement
 	*/
-	const String getAllSubText() const throw();
+	const String getAllSubText() const;
 
 	/** Returns all the sub-text of a named child element.
 
@@ -9554,13 +9554,13 @@ public:
 		@see getAllSubText
 	*/
 	const String getChildElementAllSubText (const String& childTagName,
-											const String& defaultReturnValue) const throw();
+											const String& defaultReturnValue) const;
 
 	/** Appends a section of text to this element.
 
 		@see isTextElement, getText, getAllSubText
 	*/
-	void addTextElement (const String& text) throw();
+	void addTextElement (const String& text);
 
 	/** Removes all the text elements from this element.
 
@@ -9570,7 +9570,7 @@ public:
 
 	/** Creates a text element that can be added to a parent element.
 	*/
-	static XmlElement* createTextElement (const String& text) throw();
+	static XmlElement* createTextElement (const String& text);
 
 	juce_UseDebuggingNewOperator
 
@@ -9596,7 +9596,7 @@ private:
 	XmlAttributeNode* attributes;
 
 	XmlElement (int) throw();
-	void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
+	void copyChildrenAndAttributesFrom (const XmlElement& other);
 	void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
 	void getChildElementsAsArray (XmlElement**) const throw();
 	void reorderChildElements (XmlElement** const, const int) throw();
@@ -10363,7 +10363,7 @@ public:
 
 		if (startIndex < 0)
 		{
-			jassertfalse
+			jassertfalse;
 			startIndex = 0;
 		}
 
@@ -11071,7 +11071,7 @@ public:
 		{
 			if (startIndex < 0)
 			{
-				jassertfalse
+				jassertfalse;
 				startIndex = 0;
 			}
 
@@ -13719,7 +13719,7 @@ public:
 
 		This is needed to avoid unicode problems with the argc type params.
 	*/
-	static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
+	static const String JUCE_CALLTYPE getCurrentCommandLineParams();
 #endif
 
 	/** Clears the floating point unit's flags.
@@ -16549,14 +16549,14 @@ public:
 	SubregionStream (InputStream* sourceStream,
 					 int64 startPositionInSourceStream,
 					 int64 lengthOfSourceStream,
-					 bool deleteSourceWhenDestroyed) throw();
+					 bool deleteSourceWhenDestroyed);
 
 	/** Destructor.
 
 		This may also delete the source stream, if that option was chosen when the
 		buffered stream was created.
 	*/
-	~SubregionStream() throw();
+	~SubregionStream();
 
 	int64 getTotalLength();
 	int64 getPosition();
@@ -18830,17 +18830,20 @@ public:
 	/** Copies this point from another one. */
 	Point& operator= (const Point& other) throw()			   { x = other.x; y = other.y; return *this; }
 
+	/** Returns true if the point is (0, 0). */
+	bool isOrigin() const throw()					   { return x == ValueType() && y == ValueType(); }
+
 	/** Returns the point's x co-ordinate. */
 	inline ValueType getX() const throw()				   { return x; }
 
 	/** Returns the point's y co-ordinate. */
 	inline ValueType getY() const throw()				   { return y; }
 
-	inline bool operator== (const Point& other) const throw()	   { return x == other.x && y == other.y; }
-	inline bool operator!= (const Point& other) const throw()	   { return x != other.x || y != other.y; }
+	/** Sets the point's x co-ordinate. */
+	inline void setX (const ValueType newX) throw()			 { x = newX; }
 
-	/** Returns true if the point is (0, 0). */
-	bool isOrigin() const throw()					   { return x == ValueType() && y == ValueType(); }
+	/** Sets the point's y co-ordinate. */
+	inline void setY (const ValueType newY) throw()			 { y = newY; }
 
 	/** Returns a point which has the same Y position as this one, but a new X. */
 	const Point withX (const ValueType newX) const throw()		  { return Point (newX, y); }
@@ -18853,6 +18856,9 @@ public:
 
 	/** Adds a pair of co-ordinates to this value. */
 	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
+
+	inline bool operator== (const Point& other) const throw()	   { return x == other.x && y == other.y; }
+	inline bool operator!= (const Point& other) const throw()	   { return x != other.x || y != other.y; }
 
 	/** Adds two points together. */
 	const Point operator+ (const Point& other) const throw()		{ return Point (x + other.x, y + other.y); }
@@ -18899,6 +18905,9 @@ public:
 		@see AffineTransform::transformPoint
 	*/
 	void applyTransform (const AffineTransform& transform) throw()	  { transform.transformPoint (x, y); }
+
+	/** Returns the position of this point, if it is transformed by a given AffineTransform. */
+	const Point transformedBy (const AffineTransform& transform) const throw()	{ ValueType x2 (x), y2 (y); transform.transformPoint (x2, y2); return Point (x2, y2); }
 
 	/** Returns the point as a string in the form "x, y". */
 	const String toString() const                                       { return String (x) + ", " + String (y); }
@@ -23022,14 +23031,10 @@ public:
 	/** Returns true if all colours are completely transparent. */
 	bool isInvisible() const throw();
 
-	float x1;
-	float y1;
-
-	float x2;
-	float y2;
+	Point<float> point1, point2;
 
 	/** If true, the gradient should be filled circularly, centred around
-		(x1, y1), with (x2, y2) defining a point on the circumference.
+		point1, with point2 defining a point on the circumference.
 
 		If false, the gradient is linear between the two points.
 	*/
@@ -23038,7 +23043,19 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Array <uint32> colours;
+	struct ColourPoint
+	{
+		ColourPoint() throw() {}
+
+		ColourPoint (uint32 position_, const Colour& colour_) throw()
+			: position (position_), colour (colour_)
+		{}
+
+		uint32 position;
+		Colour colour;
+	};
+
+	Array <ColourPoint> colours;
 };
 
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
@@ -27252,7 +27269,7 @@ public:
 
 		@see isScreenSaverEnabled
 	*/
-	static void setScreenSaverEnabled (bool isEnabled) throw();
+	static void setScreenSaverEnabled (bool isEnabled);
 
 	/** Returns true if the screensaver has not been turned off.
 
@@ -27262,7 +27279,7 @@ public:
 
 		@see setScreenSaverEnabled
 	*/
-	static bool isScreenSaverEnabled() throw();
+	static bool isScreenSaverEnabled();
 
 	/** Registers a MouseListener that will receive all mouse events that occur on
 		any component.

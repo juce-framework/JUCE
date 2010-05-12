@@ -275,7 +275,7 @@ public:
         }
         else
         {
-            jassertfalse // trying to pop with an empty stack!
+            jassertfalse; // trying to pop with an empty stack!
         }
     }
 
@@ -605,18 +605,18 @@ private:
 
         CGShadingRef result = 0;
         CGFunctionRef function = CGFunctionCreate (this, 1, 0, 4, 0, &gradientCallbacks);
-        CGPoint p1 (CGPointMake (gradient.x1, gradient.y1));
+        CGPoint p1 (CGPointMake (gradient.point1.getX(), gradient.point1.getY()));
 
         if (gradient.isRadial)
         {
             result = CGShadingCreateRadial (rgbColourSpace, p1, 0,
-                                            p1, hypotf (gradient.x1 - gradient.x2, gradient.y1 - gradient.y2),
+                                            p1, gradient.point1.getDistanceFrom (gradient.point2),
                                             function, true, true);
         }
         else
         {
             result = CGShadingCreateAxial (rgbColourSpace, p1,
-                                           CGPointMake (gradient.x2, gradient.y2),
+                                           CGPointMake (gradient.point2.getX(), gradient.point2.getY()),
                                            function, true, true);
         }
 
@@ -687,7 +687,7 @@ private:
             case Path::Iterator::closePath:
                 CGContextClosePath (context); break;
             default:
-                jassertfalse
+                jassertfalse;
                 break;
             }
         }

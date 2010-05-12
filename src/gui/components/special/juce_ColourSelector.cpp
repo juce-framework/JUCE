@@ -616,13 +616,13 @@ int ColourSelector::getNumSwatches() const
 
 const Colour ColourSelector::getSwatchColour (const int) const
 {
-    jassertfalse // if you've overridden getNumSwatches(), you also need to implement this method
+    jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
     return Colours::black;
 }
 
 void ColourSelector::setSwatchColour (const int, const Colour&) const
 {
-    jassertfalse // if you've overridden getNumSwatches(), you also need to implement this method
+    jassertfalse; // if you've overridden getNumSwatches(), you also need to implement this method
 }
 
 

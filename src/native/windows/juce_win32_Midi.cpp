@@ -99,7 +99,7 @@ public:
             }
             else
             {
-                jassertfalse // midi buffer overflow! You might need to increase the size..
+                jassertfalse; // midi buffer overflow! You might need to increase the size..
             }
         }
 
@@ -127,7 +127,7 @@ public:
                 }
                 else
                 {
-                    jassertfalse // midi buffer overflow! You might need to increase the size..
+                    jassertfalse; // midi buffer overflow! You might need to increase the size..
                 }
             }
 

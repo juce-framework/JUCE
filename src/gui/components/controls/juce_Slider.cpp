@@ -812,7 +812,7 @@ float Slider::getPositionOfValue (const double value)
     }
     else
     {
-        jassertfalse // not a valid call on a slider that doesn't work linearly!
+        jassertfalse; // not a valid call on a slider that doesn't work linearly!
         return 0.0f;
     }
 }

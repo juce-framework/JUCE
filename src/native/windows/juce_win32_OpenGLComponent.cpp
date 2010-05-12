@@ -69,7 +69,7 @@ static void getWglExtensions (HDC dc, StringArray& result) throw()
     if (WGL_EXT_FUNCTION_INIT (PFNWGLGETEXTENSIONSSTRINGARBPROC, wglGetExtensionsStringARB))
         result.addTokens (String (wglGetExtensionsStringARB (dc)), false);
     else
-        jassertfalse // If this fails, it may be because you didn't activate the openGL context
+        jassertfalse; // If this fails, it may be because you didn't activate the openGL context
 }
 
 
@@ -343,7 +343,7 @@ public:
             int attributes = WGL_NUMBER_PIXEL_FORMATS_ARB;
 
             if (! wglGetPixelFormatAttribivARB (dc, 1, 0, 1, &attributes, &numTypes))
-                jassertfalse
+                jassertfalse;
         }
         else
         {
@@ -461,7 +461,7 @@ private:
             }
             else
             {
-                jassertfalse
+                jassertfalse;
             }
         }
         else
@@ -486,7 +486,7 @@ private:
             }
             else
             {
-                jassertfalse
+                jassertfalse;
             }
         }
 

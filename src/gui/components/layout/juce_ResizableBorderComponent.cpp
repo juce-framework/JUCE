@@ -164,7 +164,7 @@ void ResizableBorderComponent::mouseDown (const MouseEvent& e)
 {
     if (component == 0)
     {
-        jassertfalse // You've deleted the component that this resizer was supposed to be using!
+        jassertfalse; // You've deleted the component that this resizer was supposed to be using!
         return;
     }
 
@@ -180,7 +180,7 @@ void ResizableBorderComponent::mouseDrag (const MouseEvent& e)
 {
     if (component == 0)
     {
-        jassertfalse // You've deleted the component that this resizer was supposed to be using!
+        jassertfalse; // You've deleted the component that this resizer was supposed to be using!
         return;
     }
 

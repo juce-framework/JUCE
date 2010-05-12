@@ -198,7 +198,7 @@ int64 GZIPCompressorOutputStream::getPosition()
 
 bool GZIPCompressorOutputStream::setPosition (int64 /*newPosition*/)
 {
-    jassertfalse // can't do it!
+    jassertfalse; // can't do it!
     return false;
 }
 

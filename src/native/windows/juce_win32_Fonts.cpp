@@ -205,12 +205,12 @@ public:
                 }
                 else
                 {
-                    jassertfalse
+                    jassertfalse;
                 }
             }
             else
             {
-                jassertfalse
+                jassertfalse;
             }
         }
 

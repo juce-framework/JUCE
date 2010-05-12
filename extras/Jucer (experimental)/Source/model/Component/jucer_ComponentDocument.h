@@ -63,6 +63,7 @@ public:
     void setUsingTemporaryCanvasSize (bool b);
     Value getCanvasWidth() const;
     Value getCanvasHeight() const;
+    Value getBackgroundColour() const;
 
     void createClassProperties (Array <PropertyComponent*>& props);
 

@@ -109,7 +109,7 @@ void ReadWriteLock::exitRead() const throw()
         }
     }
 
-    jassertfalse // unlocking a lock that wasn't locked..
+    jassertfalse; // unlocking a lock that wasn't locked..
 }
 
 //==============================================================================

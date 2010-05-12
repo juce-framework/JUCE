@@ -61,7 +61,7 @@ void DrawableComposite::insertDrawable (Drawable* drawable,
         }
         else
         {
-            jassertfalse // trying to add a drawable that's already in here!
+            jassertfalse; // trying to add a drawable that's already in here!
         }
     }
 }

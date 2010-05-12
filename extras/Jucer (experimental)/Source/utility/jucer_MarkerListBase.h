@@ -56,7 +56,7 @@ public:
         {
             ValueTree v (getMarker (i));
             Coordinate coord (getCoordinate (v));
-            coord.renameAnchorIfUsed (oldName, newName);
+            coord.renameAnchorIfUsed (oldName, newName, *this);
             setCoordinate (v, coord);
         }
     }
@@ -70,7 +70,11 @@ public:
         group.addChild (marker, -1, getUndoManager());
     }
 
-    void deleteMarker (ValueTree& markerState)                                  { group.removeChild (markerState, getUndoManager()); }
+    void deleteMarker (ValueTree& markerState)
+    {
+        renameAnchor (getName (markerState), String::empty);
+        group.removeChild (markerState, getUndoManager());
+    }
 
     //==============================================================================
     virtual UndoManager* getUndoManager() const = 0;

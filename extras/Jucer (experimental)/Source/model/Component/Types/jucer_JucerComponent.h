@@ -57,23 +57,33 @@ private:
 class JucerComponentHandler  : public ComponentTypeHelper<JucerComponent>
 {
 public:
-    JucerComponentHandler() : ComponentTypeHelper<JucerComponent> ("Jucer Component", "JUCERCOMPONENT", "jucerComp")  {}
+    JucerComponentHandler() : ComponentTypeHelper<JucerComponent> ("Jucer Component", "Component", "JUCERCOMPONENT", "jucerComp")  {}
     ~JucerComponentHandler()  {}
 
     //==============================================================================
     Component* createComponent()                { return new JucerComponent(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 150, 150); }
 
-    void update (ComponentDocument& document, JucerComponent* comp, const ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
     }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void update (ComponentTypeInstance& item, JucerComponent* comp)
     {
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
+    }
+
+    const String getClassName (ComponentTypeInstance& item) const
+    {
+        return "xxx";
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (String::empty);
     }
 };
 

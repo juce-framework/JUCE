@@ -73,7 +73,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
-    jassertfalse    // xxx todo
+    jassertfalse;    // xxx todo
 
     return false;
 }
@@ -452,7 +452,7 @@ int64 juce_getInternetFileContentLength (void* handle)
     if (s != 0)
     {
         //xxx todo
-        jassertfalse
+        jassertfalse;
     }
 
     return -1;

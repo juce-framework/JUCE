@@ -143,7 +143,7 @@ void LowLevelGraphicsPostScriptRenderer::clipToPath (const Path& path, const Aff
 void LowLevelGraphicsPostScriptRenderer::clipToImageAlpha (const Image& /*sourceImage*/, const Rectangle<int>& /*srcClip*/, const AffineTransform& /*transform*/)
 {
     needToClip = true;
-    jassertfalse // xxx
+    jassertfalse; // xxx
 }
 
 bool LowLevelGraphicsPostScriptRenderer::clipRegionIntersects (const Rectangle<int>& r)
@@ -299,7 +299,7 @@ void LowLevelGraphicsPostScriptRenderer::writePath (const Path& path) const
             break;
 
         default:
-            jassertfalse
+            jassertfalse;
             break;
         }
     }

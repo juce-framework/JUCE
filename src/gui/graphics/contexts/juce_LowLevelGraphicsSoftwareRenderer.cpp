@@ -198,8 +198,8 @@ public:
         : lookupTable (lookupTable_), numEntries (numEntries_)
     {
         jassert (numEntries_ >= 0);
-        Point<float> p1 (gradient.x1, gradient.y1);
-        Point<float> p2 (gradient.x2, gradient.y2);
+        Point<float> p1 (gradient.point1);
+        Point<float> p2 (gradient.point2);
 
         if (! transform.isIdentity())
         {
@@ -271,13 +271,12 @@ public:
                                   const PixelARGB* const lookupTable_, const int numEntries_)
         : lookupTable (lookupTable_),
           numEntries (numEntries_),
-          gx1 (gradient.x1),
-          gy1 (gradient.y1)
+          gx1 (gradient.point1.getX()),
+          gy1 (gradient.point1.getY())
     {
         jassert (numEntries_ >= 0);
-        const float gdx = gradient.x1 - gradient.x2;
-        const float gdy = gradient.y1 - gradient.y2;
-        maxDist = gdx * gdx + gdy * gdy;
+        const Point<float> diff (gradient.point1 - gradient.point2);
+        maxDist = diff.getX() * diff.getX() + diff.getY() * diff.getY();
         invScale = numEntries / std::sqrt (maxDist);
         jassert (roundToInt (std::sqrt (maxDist) * invScale) <= numEntries);
     }
@@ -1908,16 +1907,16 @@ public:
 
             ColourGradient g2 (*(fillType.gradient));
             g2.multiplyOpacity (fillType.getOpacity());
-            g2.x1 -= 0.5f; g2.y1 -= 0.5f;
-            g2.x2 -= 0.5f; g2.y2 -= 0.5f;
+            g2.point1.addXY (-0.5f, -0.5f);
+            g2.point2.addXY (-0.5f, -0.5f);
             AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
             const bool isIdentity = transform.isOnlyTranslation();
 
             if (isIdentity)
             {
                 // If our translation doesn't involve any distortion, we can speed it up..
-                transform.transformPoint (g2.x1, g2.y1);
-                transform.transformPoint (g2.x2, g2.y2);
+                g2.point1.applyTransform (transform);
+                g2.point2.applyTransform (transform);
                 transform = AffineTransform::identity;
             }
 
@@ -2096,7 +2095,7 @@ void LowLevelGraphicsSoftwareRenderer::restoreState()
     }
     else
     {
-        jassertfalse // trying to pop with an empty stack!
+        jassertfalse; // trying to pop with an empty stack!
     }
 }
 

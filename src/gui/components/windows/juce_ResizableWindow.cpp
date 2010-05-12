@@ -392,7 +392,7 @@ void ResizableWindow::setFullScreen (const bool shouldBeFullScreen)
             }
             else
             {
-                jassertfalse
+                jassertfalse;
             }
         }
         else
@@ -427,7 +427,7 @@ void ResizableWindow::setMinimised (const bool shouldMinimise)
         }
         else
         {
-            jassertfalse
+            jassertfalse;
         }
     }
 }
@@ -533,7 +533,7 @@ void ResizableWindow::addChildComponent (Component* const child, int zOrder)
        If you really know what you're doing and want to avoid this assertion, just call
        Component::addChildComponent directly.
    */
-    jassertfalse
+    jassertfalse;
 
     Component::addChildComponent (child, zOrder);
 }
@@ -550,7 +550,7 @@ void ResizableWindow::addAndMakeVisible (Component* const child, int zOrder)
        If you really know what you're doing and want to avoid this assertion, just call
        Component::addAndMakeVisible directly.
    */
-    jassertfalse
+    jassertfalse;
 
     Component::addAndMakeVisible (child, zOrder);
 }

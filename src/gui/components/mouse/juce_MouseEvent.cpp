@@ -64,7 +64,7 @@ const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent
 {
     if (otherComponent == 0)
     {
-        jassertfalse
+        jassertfalse;
         return *this;
     }
 

@@ -557,7 +557,7 @@ class AiffAudioFormatWriter  : public AudioFormatWriter
 
             if (sampleRate >= mask)
             {
-                jassertfalse
+                jassertfalse;
                 sampleRateBytes[1] = 0x1d;
             }
             else

@@ -392,7 +392,7 @@ const String DrawableDocument::MarkerList::getNonexistentMarkerName (const Strin
 
 const String DrawableDocument::getNonexistentMarkerName (const String& name)
 {
-    String n (makeValidCppIdentifier (name, false, true, false));
+    String n (CodeFormatting::makeValidIdentifier (name, false, true, false));
     int suffix = 2;
 
     while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid())

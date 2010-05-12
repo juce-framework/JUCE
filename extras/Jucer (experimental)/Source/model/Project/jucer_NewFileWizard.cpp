@@ -35,9 +35,9 @@ static bool fillInNewCppFileTemplate (const File& file, const Project::Item& ite
                   .replace ("FILENAME", file.getFileName(), false)
                   .replace ("DATE", Time::getCurrentTime().toString (true, true, true), false)
                   .replace ("AUTHOR", SystemStats::getFullUserName(), false)
-                  .replace ("HEADERGUARD", makeHeaderGuardName (file), false);
+                  .replace ("HEADERGUARD", CodeFormatting::makeHeaderGuardName (file), false);
 
-    return overwriteFileWithNewDataIfDifferent (file, s);
+    return FileUtils::overwriteFileWithNewDataIfDifferent (file, s);
 }
 
 //==============================================================================

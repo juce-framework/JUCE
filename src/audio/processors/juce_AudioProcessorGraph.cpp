@@ -118,7 +118,7 @@ AudioProcessorGraph::Node* AudioProcessorGraph::addNode (AudioProcessor* const n
 {
     if (newProcessor == 0)
     {
-        jassertfalse
+        jassertfalse;
         return 0;
     }
 

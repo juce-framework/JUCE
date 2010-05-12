@@ -148,10 +148,10 @@ public:
     explicit XmlElement (const String& tagName) throw();
 
     /** Creates a (deep) copy of another element. */
-    XmlElement (const XmlElement& other) throw();
+    XmlElement (const XmlElement& other);
 
     /** Creates a (deep) copy of another element. */
-    XmlElement& operator= (const XmlElement& other) throw();
+    XmlElement& operator= (const XmlElement& other);
 
     /** Deleting an XmlElement will also delete all its child elements. */
     ~XmlElement() throw();
@@ -249,7 +249,7 @@ public:
 
         @see hasTagName
     */
-    inline const String& getTagName() const throw()  { return tagName; }
+    inline const String& getTagName() const throw()             { return tagName; }
 
     /** Tests whether this element has a particular tag name.
 
@@ -451,7 +451,7 @@ public:
 
         @see getNextElement, isTextElement, forEachXmlChildElement
     */
-    inline XmlElement* getNextElement() const throw()       { return nextElement; }
+    inline XmlElement* getNextElement() const throw()           { return nextElement; }
 
     /** Returns the next of this element's siblings which has the specified tag
         name.
@@ -595,7 +595,7 @@ public:
     */
     template <class ElementComparator>
     void sortChildElements (ElementComparator& comparator,
-                            const bool retainOrderOfEquivalentItems = false) throw()
+                            bool retainOrderOfEquivalentItems = false)
     {
         const int num = getNumChildElements();
 
@@ -631,14 +631,14 @@ public:
 
         @see isTextElement, getAllSubText, getChildElementAllSubText
     */
-    const String getText() const throw();
+    const String& getText() const throw();
 
     /** Sets the text in a text element.
 
         Note that this is only a valid call if this element is a text element. If it's
         not, then no action will be performed.
     */
-    void setText (const String& newText) throw();
+    void setText (const String& newText);
 
     /** Returns all the text from this element's child nodes.
 
@@ -650,7 +650,7 @@ public:
 
         @see isTextElement, getChildElementAllSubText, getText, addTextElement
     */
-    const String getAllSubText() const throw();
+    const String getAllSubText() const;
 
     /** Returns all the sub-text of a named child element.
 
@@ -661,13 +661,13 @@ public:
         @see getAllSubText
     */
     const String getChildElementAllSubText (const String& childTagName,
-                                            const String& defaultReturnValue) const throw();
+                                            const String& defaultReturnValue) const;
 
     /** Appends a section of text to this element.
 
         @see isTextElement, getText, getAllSubText
     */
-    void addTextElement (const String& text) throw();
+    void addTextElement (const String& text);
 
     /** Removes all the text elements from this element.
 
@@ -677,7 +677,7 @@ public:
 
     /** Creates a text element that can be added to a parent element.
     */
-    static XmlElement* createTextElement (const String& text) throw();
+    static XmlElement* createTextElement (const String& text);
 
 
     //==============================================================================
@@ -705,7 +705,7 @@ private:
     XmlAttributeNode* attributes;
 
     XmlElement (int) throw();
-    void copyChildrenAndAttributesFrom (const XmlElement& other) throw();
+    void copyChildrenAndAttributesFrom (const XmlElement& other);
     void writeElementAsText (OutputStream& out, int indentationLevel, int lineWrapLength) const;
     void getChildElementsAsArray (XmlElement**) const throw();
     void reorderChildElements (XmlElement** const, const int) throw();

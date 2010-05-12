@@ -34,7 +34,7 @@
 class LabelHandler  : public ComponentTypeHelper<Label>
 {
 public:
-    LabelHandler() : ComponentTypeHelper<Label> ("Label", "LABEL", "label")
+    LabelHandler() : ComponentTypeHelper<Label> ("Label", "Label", "LABEL", "label")
     {
         addEditableColour (Label::backgroundColourId, "Background", "backgroundColour");
         addEditableColour (Label::textColourId, "Text Colour", "textColour");
@@ -43,43 +43,47 @@ public:
 
     ~LabelHandler()  {}
 
-    Component* createComponent()                { return new Label (String::empty, String::empty); }
+    Component* createComponent()                { return new Label(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void update (ComponentDocument& document, Label* comp, const ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        comp->setText (state ["text"].toString(), false);
-        comp->setFont (getFontFromState (state, "fontName", "fontSize", "fontStyle"));
-        int editMode = (int) state ["editMode"];
+        item.set ("text", "New Label");
+        item.set ("font", Font (14.0f).toString());
+        item.set ("editMode", 1);
+        item.set ("justification", (int) Justification::centredLeft);
+    }
+
+    void update (ComponentTypeInstance& item, Label* comp)
+    {
+        comp->setText (item ["text"].toString(), false);
+        comp->setFont (Font::fromString (item ["font"]));
+        int editMode = (int) item ["editMode"];
         comp->setEditable (editMode == 2, editMode == 3, false);
-        comp->setJustificationType ((int) state ["justification"]);
+        comp->setJustificationType ((int) item ["justification"]);
     }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        state.setProperty ("text", "New Label", 0);
-        state.setProperty ("fontSize", 14, 0);
-        state.setProperty ("editMode", 1, 0);
-        state.setProperty ("justification", (int) Justification::centredLeft, 0);
-    }
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
-    {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
-
-        props.add (new TextPropertyComponent (getValue ("text", state, document), "Text", 16384, true));
+        props.add (new TextPropertyComponent (item.getValue ("text"), "Text", 16384, true));
         props.getLast()->setTooltip ("The label's text.");
 
-        props.add (createJustificationProperty ("Layout", state.getPropertyAsValue ("justification", document.getUndoManager()), false));
+        item.addJustificationProperty (props, "Layout", item.getValue ("justification"), false);
 
         const char* const editModes[] = { "Read-only", "Edit on Single-Click", "Edit on Double-Click", 0 };
-        props.add (new ChoicePropertyComponent (state.getPropertyAsValue ("editMode", document.getUndoManager()),
-                                                "Edit Mode", StringArray (editModes)));
+        props.add (new ChoicePropertyComponent (item.getValue ("editMode"), "Edit Mode", StringArray (editModes)));
 
-        createFontProperties (props, state, "fontName", "fontSize", "fontStyle", document.getUndoManager());
+        item.addFontProperties (props, "font");
 
-        addEditableColourProperties (document, state, props);
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (String::empty);
     }
 };
 

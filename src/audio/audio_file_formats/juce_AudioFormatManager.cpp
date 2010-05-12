@@ -64,7 +64,7 @@ void AudioFormatManager::registerFormat (AudioFormat* newFormat,
         {
             if (getKnownFormat (i)->getFormatName() == newFormat->getFormatName())
             {
-                jassertfalse // trying to add the same format twice!
+                jassertfalse; // trying to add the same format twice!
             }
         }
 #endif

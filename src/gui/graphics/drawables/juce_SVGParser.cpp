@@ -752,25 +752,23 @@ private:
 
                 if (gradient.isRadial)
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), gradientHeight);
+                    gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("cx", "50%"), gradientWidth),
+                                           dy + getCoordLength (fillXml->getStringAttribute ("cy", "50%"), gradientHeight));
 
                     const float radius = getCoordLength (fillXml->getStringAttribute ("r", "50%"), gradientWidth);
-
-                    gradient.x2 = gradient.x1 + radius;
-                    gradient.y2 = gradient.y1;
+                    gradient.point2 = gradient.point1 + Point<float> (radius, 0.0f);
 
                     //xxx (the fx, fy focal point isn't handled properly here..)
                 }
                 else
                 {
-                    gradient.x1 = dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), gradientWidth);
-                    gradient.y1 = dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), gradientHeight);
+                    gradient.point1.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x1", "0%"), gradientWidth),
+                                           dy + getCoordLength (fillXml->getStringAttribute ("y1", "0%"), gradientHeight));
 
-                    gradient.x2 = dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), gradientWidth);
-                    gradient.y2 = dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), gradientHeight);
+                    gradient.point2.setXY (dx + getCoordLength (fillXml->getStringAttribute ("x2", "100%"), gradientWidth),
+                                           dy + getCoordLength (fillXml->getStringAttribute ("y2", "0%"), gradientHeight));
 
-                    if (gradient.x1 == gradient.x2 && gradient.y1 == gradient.y2)
+                    if (gradient.point1 == gradient.point2)
                         return Colour (gradient.getColour (gradient.getNumColours() - 1));
                 }
 

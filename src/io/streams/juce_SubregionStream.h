@@ -60,14 +60,14 @@ public:
     SubregionStream (InputStream* sourceStream,
                      int64 startPositionInSourceStream,
                      int64 lengthOfSourceStream,
-                     bool deleteSourceWhenDestroyed) throw();
+                     bool deleteSourceWhenDestroyed);
 
     /** Destructor.
 
         This may also delete the source stream, if that option was chosen when the
         buffered stream was created.
     */
-    ~SubregionStream() throw();
+    ~SubregionStream();
 
 
     //==============================================================================

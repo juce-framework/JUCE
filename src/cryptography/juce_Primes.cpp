@@ -218,7 +218,7 @@ const BigInteger Primes::createProbablePrime (const int bitLength,
             return candidate;
     }
 
-    jassertfalse
+    jassertfalse;
     return BigInteger();
 }
 

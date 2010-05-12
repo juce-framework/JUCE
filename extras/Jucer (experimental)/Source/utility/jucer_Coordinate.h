@@ -97,8 +97,10 @@ public:
     const String getAnchor2() const                     { return checkName (anchor2); }
     void changeAnchor2 (const String& newMarkerName, const MarkerResolver& markerResolver);
 
-    // Tells the coord that an anchor is changing its name.
-    void renameAnchorIfUsed (const String& oldName, const String& newName);
+    /** Tells the coord that an anchor is changing its name.
+        If the new name is empty, it removes the anchor.
+    */
+    void renameAnchorIfUsed (const String& oldName, const String& newName, const MarkerResolver& markerResolver);
 
     //==============================================================================
     /*
@@ -158,7 +160,8 @@ public:
     const String toString() const;
 
     // Tells the coord that an anchor is changing its name.
-    void renameAnchorIfUsed (const String& oldName, const String& newName);
+    void renameAnchorIfUsed (const String& oldName, const String& newName,
+                             const Coordinate::MarkerResolver& markerResolver);
 
     Coordinate left, right, top, bottom;
 };

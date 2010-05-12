@@ -201,7 +201,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
     }
 
     default:
-        jassertfalse // unknown type?
+        jassertfalse; // unknown type?
         break;
     }
 

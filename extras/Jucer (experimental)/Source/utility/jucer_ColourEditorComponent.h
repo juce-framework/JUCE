@@ -28,12 +28,120 @@
 
 
 //==============================================================================
+class PopupColourSelector   : public Component,
+                              public ChangeListener,
+                              public Value::Listener,
+                              public ButtonListener
+{
+public:
+    PopupColourSelector (const Value& colourValue_,
+                         const Colour& defaultColour_,
+                         const bool canResetToDefault)
+        : defaultButton ("Reset to Default"),
+          colourValue (colourValue_),
+          defaultColour (defaultColour_)
+    {
+        addAndMakeVisible (&selector);
+        selector.setName ("Colour");
+        selector.setCurrentColour (getColour());
+        selector.addChangeListener (this);
+
+        if (canResetToDefault)
+        {
+            addAndMakeVisible (&defaultButton);
+            defaultButton.addButtonListener (this);
+        }
+
+        colourValue.addListener (this);
+    }
+
+    ~PopupColourSelector()
+    {
+    }
+
+    static void showAt (Component* comp, const Value& colourValue,
+                        const Colour& defaultColour, const bool canResetToDefault)
+    {
+        PopupColourSelector colourSelector (colourValue, defaultColour, canResetToDefault);
+
+        PopupMenu m;
+        m.addCustomItem (1234, &colourSelector, 300, 400, false);
+        m.showAt (comp);
+    }
+
+    void resized()
+    {
+        if (defaultButton.isVisible())
+        {
+            selector.setBounds (0, 0, getWidth(), getHeight() - 30);
+            defaultButton.changeWidthToFitText (22);
+            defaultButton.setTopLeftPosition (10, getHeight() - 26);
+        }
+        else
+        {
+            selector.setBounds (0, 0, getWidth(), getHeight());
+        }
+    }
+
+    const Colour getColour() const
+    {
+        if (colourValue.toString().isEmpty())
+            return defaultColour;
+
+        return Colour::fromString (colourValue.toString());
+    }
+
+    void setColour (const Colour& newColour)
+    {
+        if (getColour() != newColour)
+        {
+            if (newColour == defaultColour && defaultButton.isVisible())
+                colourValue = var::null;
+            else
+                colourValue = newColour.toDisplayString (true);
+        }
+    }
+
+    void buttonClicked (Button*)
+    {
+        setColour (defaultColour);
+        selector.setCurrentColour (defaultColour);
+    }
+
+    void changeListenerCallback (void* source)
+    {
+        if (selector.getCurrentColour() != getColour())
+            setColour (selector.getCurrentColour());
+    }
+
+    void valueChanged (Value&)
+    {
+        selector.setCurrentColour (getColour());
+    }
+
+private:
+    class ColourSelectorWithSwatches    : public ColourSelector
+    {
+    public:
+        ColourSelectorWithSwatches() {}
+
+        int getNumSwatches() const                      { return StoredSettings::getInstance()->swatchColours.size(); }
+        const Colour getSwatchColour (int index) const  { return StoredSettings::getInstance()->swatchColours [index]; }
+        void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
+    };
+
+    ColourSelectorWithSwatches selector;
+    TextButton defaultButton;
+    Value colourValue;
+    Colour defaultColour;
+};
+
+//==============================================================================
 /**
     A component that shows a colour swatch with hex ARGB value, and which pops up
     a colour selector when you click it.
 */
 class ColourEditorComponent    : public Component,
-                                 public ChangeListener,
                                  public Value::Listener
 {
 public:
@@ -47,7 +155,6 @@ public:
 
     ~ColourEditorComponent()
     {
-        colourValue.removeListener (this);
     }
 
     void paint (Graphics& g)
@@ -80,7 +187,7 @@ public:
         if (getColour() != newColour)
         {
             if (newColour == defaultColour && canResetToDefault)
-                colourValue = var();
+                colourValue = var::null;
             else
                 colourValue = newColour.toDisplayString (true);
         }
@@ -105,32 +212,12 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         document.getUndoManager()->beginNewTransaction();
-
-        SafePointer<Component> deletionChecker (this);
-
-        {
-            ColourSelectorComp colourSelector (this, canResetToDefault);
-
-            PopupMenu m;
-            m.addCustomItem (1234, &colourSelector, 300, 400, false);
-            m.showAt (this);
-
-            if (deletionChecker == 0)
-                return;
-        }
+        PopupColourSelector::showAt (this, colourValue, defaultColour, canResetToDefault);
     }
 
     void valueChanged (Value&)
     {
         refresh();
-    }
-
-    void changeListenerCallback (void* source)
-    {
-        ColourSelector* cs = static_cast <ColourSelector*> (source);
-
-        if (cs->getCurrentColour() != getColour())
-            setColour (cs->getCurrentColour());
     }
 
     juce_UseDebuggingNewOperator
@@ -141,68 +228,6 @@ private:
     Colour lastColour;
     const Colour defaultColour;
     const bool canResetToDefault;
-
-    class ColourSelectorComp   : public Component,
-                                 public ButtonListener
-    {
-    public:
-        ColourSelectorComp (ColourEditorComponent* owner_,
-                            const bool canResetToDefault)
-            : owner (owner_),
-              defaultButton ("Reset to Default")
-        {
-            addAndMakeVisible (&selector);
-            selector.setName ("Colour");
-            selector.setCurrentColour (owner->getColour());
-            selector.addChangeListener (owner);
-
-            if (canResetToDefault)
-            {
-                addAndMakeVisible (&defaultButton);
-                defaultButton.addButtonListener (this);
-            }
-        }
-
-        ~ColourSelectorComp()
-        {
-        }
-
-        void resized()
-        {
-            if (defaultButton.isVisible())
-            {
-                selector.setBounds (0, 0, getWidth(), getHeight() - 30);
-                defaultButton.changeWidthToFitText (22);
-                defaultButton.setTopLeftPosition (10, getHeight() - 26);
-            }
-            else
-            {
-                selector.setBounds (0, 0, getWidth(), getHeight());
-            }
-        }
-
-        void buttonClicked (Button*)
-        {
-            owner->resetToDefault();
-            owner->refresh();
-            selector.setCurrentColour (owner->getColour());
-        }
-
-    private:
-        class ColourSelectorWithSwatches    : public ColourSelector
-        {
-        public:
-            ColourSelectorWithSwatches() {}
-
-            int getNumSwatches() const                      { return StoredSettings::getInstance()->swatchColours.size(); }
-            const Colour getSwatchColour (int index) const  { return StoredSettings::getInstance()->swatchColours [index]; }
-            void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
-        };
-
-        ColourEditorComponent* owner;
-        ColourSelectorWithSwatches selector;
-        TextButton defaultButton;
-    };
 };
 
 //==============================================================================

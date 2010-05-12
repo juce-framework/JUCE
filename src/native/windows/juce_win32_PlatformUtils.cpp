@@ -191,7 +191,7 @@ bool juce_IsRunningInWine()
 }
 
 //==============================================================================
-const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams() throw()
+const String JUCE_CALLTYPE PlatformUtilities::getCurrentCommandLineParams()
 {
     String s (::GetCommandLineW());
 

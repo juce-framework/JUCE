@@ -293,12 +293,12 @@ bool JUCE_CALLTYPE Process::isRunningUnderDebugger()
 //==============================================================================
 void Process::raisePrivilege()
 {
-    jassertfalse // xxx not implemented
+    jassertfalse; // xxx not implemented
 }
 
 void Process::lowerPrivilege()
 {
-    jassertfalse // xxx not implemented
+    jassertfalse; // xxx not implemented
 }
 
 void Process::terminate()

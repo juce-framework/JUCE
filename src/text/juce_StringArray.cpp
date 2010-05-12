@@ -142,7 +142,7 @@ void StringArray::addArray (const StringArray& otherArray, int startIndex, int n
 {
     if (startIndex < 0)
     {
-        jassertfalse
+        jassertfalse;
         startIndex = 0;
     }
 

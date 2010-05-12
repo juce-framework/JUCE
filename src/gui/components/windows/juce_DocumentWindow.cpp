@@ -176,7 +176,7 @@ void DocumentWindow::closeButtonPressed()
         still get cleaned-up if the app is quit by some other means (e.g. a cmd-Q on the mac
         or closing it via the taskbar icon on Windows).
     */
-    jassertfalse
+    jassertfalse;
 }
 
 void DocumentWindow::minimiseButtonPressed()

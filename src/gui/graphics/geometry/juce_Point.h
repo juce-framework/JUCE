@@ -59,17 +59,20 @@ public:
     /** Copies this point from another one. */
     Point& operator= (const Point& other) throw()                       { x = other.x; y = other.y; return *this; }
 
+    /** Returns true if the point is (0, 0). */
+    bool isOrigin() const throw()                                       { return x == ValueType() && y == ValueType(); }
+
     /** Returns the point's x co-ordinate. */
     inline ValueType getX() const throw()                               { return x; }
 
     /** Returns the point's y co-ordinate. */
     inline ValueType getY() const throw()                               { return y; }
 
-    inline bool operator== (const Point& other) const throw()           { return x == other.x && y == other.y; }
-    inline bool operator!= (const Point& other) const throw()           { return x != other.x || y != other.y; }
+    /** Sets the point's x co-ordinate. */
+    inline void setX (const ValueType newX) throw()                     { x = newX; }
 
-    /** Returns true if the point is (0, 0). */
-    bool isOrigin() const throw()                                       { return x == ValueType() && y == ValueType(); }
+    /** Sets the point's y co-ordinate. */
+    inline void setY (const ValueType newY) throw()                     { y = newY; }
 
     /** Returns a point which has the same Y position as this one, but a new X. */
     const Point withX (const ValueType newX) const throw()              { return Point (newX, y); }
@@ -82,6 +85,9 @@ public:
 
     /** Adds a pair of co-ordinates to this value. */
     void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
+
+    inline bool operator== (const Point& other) const throw()           { return x == other.x && y == other.y; }
+    inline bool operator!= (const Point& other) const throw()           { return x != other.x || y != other.y; }
 
     /** Adds two points together. */
     const Point operator+ (const Point& other) const throw()            { return Point (x + other.x, y + other.y); }
@@ -128,6 +134,9 @@ public:
         @see AffineTransform::transformPoint
     */
     void applyTransform (const AffineTransform& transform) throw()      { transform.transformPoint (x, y); }
+
+    /** Returns the position of this point, if it is transformed by a given AffineTransform. */
+    const Point transformedBy (const AffineTransform& transform) const throw()    { ValueType x2 (x), y2 (y); transform.transformPoint (x2, y2); return Point (x2, y2); }
 
     /** Returns the point as a string in the form "x, y". */
     const String toString() const                                       { return String (x) + ", " + String (y); }

@@ -149,7 +149,7 @@ public:
                     {
                         // to be able to do a drag-and-drop operation, the treeview needs to
                         // be inside a component which is also a DragAndDropContainer.
-                        jassertfalse
+                        jassertfalse;
                     }
                 }
             }
@@ -1801,7 +1801,7 @@ XmlElement* TreeViewItem::getOpennessState() const throw()
     {
         // trying to save the openness for an element that has no name - this won't
         // work because it needs the names to identify what to open.
-        jassertfalse
+        jassertfalse;
     }
 
     return 0;

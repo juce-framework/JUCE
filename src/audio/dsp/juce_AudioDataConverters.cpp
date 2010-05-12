@@ -444,7 +444,7 @@ void AudioDataConverters::convertFloatToFormat (const DataFormat destFormat,
         break;
 
     default:
-        jassertfalse
+        jassertfalse;
         break;
     }
 }
@@ -489,7 +489,7 @@ void AudioDataConverters::convertFormatToFloat (const DataFormat sourceFormat,
         break;
 
     default:
-        jassertfalse
+        jassertfalse;
         break;
     }
 }

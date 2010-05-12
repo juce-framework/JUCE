@@ -142,10 +142,8 @@ static const FillType readFillTypeFromTree (const ValueTree& v)
     else if (type.equalsIgnoreCase ("gradient"))
     {
         ColourGradient g;
-        g.x1 = v["x1"];
-        g.y1 = v["y1"];
-        g.x2 = v["x2"];
-        g.y2 = v["y2"];
+        g.point1.setXY (v["x1"], v["y1"]);
+        g.point2.setXY (v["x2"], v["y2"]);
         g.isRadial = v["radial"];
 
         StringArray colours;
@@ -158,7 +156,7 @@ static const FillType readFillTypeFromTree (const ValueTree& v)
         return g;
     }
 
-    jassertfalse
+    jassertfalse;
     return FillType();
 }
 
@@ -174,10 +172,10 @@ static ValueTree createTreeForFillType (const String& tagName, const FillType& f
     else if (fillType.isGradient())
     {
         v.setProperty ("type", "gradient", 0);
-        v.setProperty ("x1", fillType.gradient->x1, 0);
-        v.setProperty ("y1", fillType.gradient->y1, 0);
-        v.setProperty ("x2", fillType.gradient->x2, 0);
-        v.setProperty ("y2", fillType.gradient->y2, 0);
+        v.setProperty ("x1", fillType.gradient->point1.getX(), 0);
+        v.setProperty ("y1", fillType.gradient->point1.getY(), 0);
+        v.setProperty ("x2", fillType.gradient->point2.getX(), 0);
+        v.setProperty ("y2", fillType.gradient->point2.getY(), 0);
         v.setProperty ("radial", fillType.gradient->isRadial, 0);
 
         String s;
@@ -189,7 +187,7 @@ static ValueTree createTreeForFillType (const String& tagName, const FillType& f
     }
     else
     {
-        jassertfalse //xxx
+        jassertfalse; //xxx
     }
 
     return v;

@@ -34,39 +34,44 @@
 class ToggleButtonHandler  : public ComponentTypeHelper<ToggleButton>
 {
 public:
-    ToggleButtonHandler() : ComponentTypeHelper<ToggleButton> ("ToggleButton", "TOGGLEBUTTON", "toggleButton")
+    ToggleButtonHandler() : ComponentTypeHelper<ToggleButton> ("ToggleButton", "ToggleButton", "TOGGLEBUTTON", "toggleButton")
     {
         addEditableColour (ToggleButton::textColourId, "Text Colour", "textColour");
     }
 
     ~ToggleButtonHandler()  {}
 
-    Component* createComponent()                { return new ToggleButton (String::empty); }
+    Component* createComponent()                { return new ToggleButton(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        state.setProperty ("text", "New Toggle Button", 0);
-        state.setProperty ("initialState", false, 0);
+        item.set ("text", "New Toggle Button");
+        item.set ("initialState", false);
     }
 
-    void update (ComponentDocument& document, ToggleButton* comp, const ValueTree& state)
+    void update (ComponentTypeInstance& item, ToggleButton* comp)
     {
-        comp->setButtonText (state ["text"].toString());
-        comp->setToggleState (state ["initialState"], false);
+        comp->setButtonText (item ["text"].toString());
+        comp->setToggleState (item ["initialState"], false);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
+        props.add (new TextPropertyComponent (item.getValue ("text"), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
 
-        props.add (new BooleanPropertyComponent (getValue ("initialState", state, document), "Initial State", "Enabled initially"));
+        props.add (new BooleanPropertyComponent (item.getValue ("initialState"), "Initial State", "Enabled initially"));
 
-        addEditableColourProperties (document, state, props);
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode += item.createConstructorStatement (String::empty);
     }
 };
 

@@ -158,7 +158,7 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
     {
         // You're trying to open a movie when the control hasn't yet been created, probably because
         // you've not yet added this component to a Window and made the whole component hierarchy visible.
-        jassertfalse
+        jassertfalse;
     }
 
     return movieLoaded;

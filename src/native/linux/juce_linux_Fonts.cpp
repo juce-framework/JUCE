@@ -40,12 +40,6 @@ public:
         Italic = 2
     };
 
-    struct FontNameIndex
-    {
-        String fileName;
-        int faceIndex;
-    };
-
     //==============================================================================
     FreeTypeFontFace (const String& familyName)
       : hasSerif (false),
@@ -80,6 +74,13 @@ public:
 private:
     //==============================================================================
     String family;
+
+    struct FontNameIndex
+    {
+        String fileName;
+        int faceIndex;
+    };
+
     FontNameIndex names[4];
     bool hasSerif, monospaced;
 };

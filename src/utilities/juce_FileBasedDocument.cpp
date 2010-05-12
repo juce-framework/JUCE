@@ -158,7 +158,7 @@ FileBasedDocument::SaveResult FileBasedDocument::saveAs (const File& newFile,
         else
         {
             // can't save to an unspecified file
-            jassertfalse
+            jassertfalse;
             return failedToWriteToFile;
         }
     }

@@ -573,7 +573,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
         return b;
     }
 
-    jassertfalse
+    jassertfalse;
     return 0;
 }
 

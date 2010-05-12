@@ -138,7 +138,7 @@ public:
 
         @see isScreenSaverEnabled
     */
-    static void setScreenSaverEnabled (bool isEnabled) throw();
+    static void setScreenSaverEnabled (bool isEnabled);
 
     /** Returns true if the screensaver has not been turned off.
 
@@ -148,7 +148,7 @@ public:
 
         @see setScreenSaverEnabled
     */
-    static bool isScreenSaverEnabled() throw();
+    static bool isScreenSaverEnabled();
 
     //==============================================================================
     /** Registers a MouseListener that will receive all mouse events that occur on

@@ -322,7 +322,7 @@ bool MultiDocumentPanel::closeDocument (Component* component,
     }
     else
     {
-        jassertfalse
+        jassertfalse;
     }
 
     return true;

@@ -569,7 +569,7 @@ public:
 
         if (startIndex < 0)
         {
-            jassertfalse
+            jassertfalse;
             startIndex = 0;
         }
 

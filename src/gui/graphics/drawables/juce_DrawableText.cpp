@@ -92,7 +92,7 @@ ValueTree DrawableText::createValueTree() const
     if (getName().isNotEmpty())
         v.setProperty ("id", getName(), 0);
 
-    jassertfalse // xxx not finished!
+    jassertfalse; // xxx not finished!
     return v;
 }
 
@@ -105,7 +105,7 @@ DrawableText* DrawableText::createFromValueTree (const ValueTree& tree)
 
     dt->setName (tree ["id"]);
 
-    jassertfalse // xxx not finished!
+    jassertfalse; // xxx not finished!
 
     return dt;
 }

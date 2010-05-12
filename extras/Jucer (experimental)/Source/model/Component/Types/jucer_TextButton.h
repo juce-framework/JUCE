@@ -34,7 +34,7 @@
 class TextButtonHandler  : public ComponentTypeHelper<TextButton>
 {
 public:
-    TextButtonHandler() : ComponentTypeHelper<TextButton> ("TextButton", "TEXTBUTTON", "textButton")
+    TextButtonHandler() : ComponentTypeHelper<TextButton> ("TextButton", "TextButton", "TEXTBUTTON", "textButton")
     {
         addEditableColour (TextButton::buttonColourId, "Background", "backgroundColour");
         addEditableColour (TextButton::textColourOffId, "Text Colour", "textColour");
@@ -42,50 +42,55 @@ public:
 
     ~TextButtonHandler()  {}
 
-    Component* createComponent()                { return new TextButton (String::empty); }
+    Component* createComponent()                { return new TextButton(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 150, 24); }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        state.setProperty ("text", "New Button", 0);
-        state.setProperty ("radioGroup", 0, 0);
-        state.setProperty ("connectedLeft", false, 0);
-        state.setProperty ("connectedRight", false, 0);
-        state.setProperty ("connectedTop", false, 0);
-        state.setProperty ("connectedBottom", false, 0);
+        item.set ("text", "New Button");
+        item.set ("radioGroup", 0);
+        item.set ("connectedLeft", false);
+        item.set ("connectedRight", false);
+        item.set ("connectedTop", false);
+        item.set ("connectedBottom", false);
     }
 
-    void update (ComponentDocument& document, TextButton* comp, const ValueTree& state)
+    void update (ComponentTypeInstance& item, TextButton* comp)
     {
-        comp->setButtonText (state ["text"].toString());
-        comp->setRadioGroupId (state ["radioGroup"]);
+        comp->setButtonText (item ["text"].toString());
+        comp->setRadioGroupId (item ["radioGroup"]);
 
         int connected = 0;
-        if (state ["connectedLeft"])    connected |= TextButton::ConnectedOnLeft;
-        if (state ["connectedRight"])   connected |= TextButton::ConnectedOnRight;
-        if (state ["connectedTop"])     connected |= TextButton::ConnectedOnTop;
-        if (state ["connectedBottom"])  connected |= TextButton::ConnectedOnBottom;
+        if (item ["connectedLeft"])    connected |= TextButton::ConnectedOnLeft;
+        if (item ["connectedRight"])   connected |= TextButton::ConnectedOnRight;
+        if (item ["connectedTop"])     connected |= TextButton::ConnectedOnTop;
+        if (item ["connectedBottom"])  connected |= TextButton::ConnectedOnBottom;
 
         comp->setConnectedEdges (connected);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (getValue ("text", state, document), "Button Text", 1024, false));
+        props.add (new TextPropertyComponent (item.getValue ("text"), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue ("radioGroup", state, document))), "Radio Group", 8, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("radioGroup"))), "Radio Group", 8, false));
         props.getLast()->setTooltip ("The radio group that this button is a member of.");
 
-        props.add (new BooleanPropertyComponent (getValue ("connectedLeft", state, document), "Connected left", "Connected"));
-        props.add (new BooleanPropertyComponent (getValue ("connectedRight", state, document), "Connected right", "Connected"));
-        props.add (new BooleanPropertyComponent (getValue ("connectedTop", state, document), "Connected top", "Connected"));
-        props.add (new BooleanPropertyComponent (getValue ("connectedBottom", state, document), "Connected bottom", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue ("connectedLeft"), "Connected left", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue ("connectedRight"), "Connected right", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue ("connectedTop"), "Connected top", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue ("connectedBottom"), "Connected bottom", "Connected"));
 
-        addEditableColourProperties (document, state, props);
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode += item.createConstructorStatement (String::empty);
     }
 };
 

@@ -2676,7 +2676,7 @@ void VSTPluginInstance::changeProgramName (int index, const String& newName)
     }
     else
     {
-        jassertfalse // xxx not implemented!
+        jassertfalse; // xxx not implemented!
     }
 }
 

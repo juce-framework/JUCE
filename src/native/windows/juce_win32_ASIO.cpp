@@ -420,7 +420,7 @@ public:
             }
             else
             {
-                jassertfalse
+                jassertfalse;
             }
 
             log ("disposing buffers");
@@ -1075,7 +1075,7 @@ private:
                         }
                         else
                         {
-                            jassertfalse
+                            jassertfalse;
                         }
 
                         log ("creating buffers (dummy): " + String (numChans) + ", " + String ((int) preferredSize));
@@ -1275,7 +1275,7 @@ private:
                             break;
 
                         case 64:
-                            jassertfalse
+                            jassertfalse;
                             break;
                         }
                     }
@@ -1321,7 +1321,7 @@ private:
                             break;
 
                         case 64:
-                            jassertfalse
+                            jassertfalse;
                             break;
                         }
                     }

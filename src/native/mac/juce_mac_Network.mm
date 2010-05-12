@@ -78,7 +78,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
 {
 #if JUCE_IPHONE
     //xxx probably need to use MFMailComposeViewController
-    jassertfalse
+    jassertfalse;
     return false;
 #else
     const ScopedAutoReleasePool pool;

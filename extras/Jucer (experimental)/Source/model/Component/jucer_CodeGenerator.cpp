@@ -41,6 +41,12 @@ int CodeGenerator::getUniqueSuffix()
 }
 
 //==============================================================================
+void CodeGenerator::addPrivateMember (const String& type, const String& name)
+{
+    privateMemberDeclarations << type << " " << name << ";" << newLine;
+}
+
+//==============================================================================
 String& CodeGenerator::getCallbackCode (const String& requiredParentClass,
                                         const String& returnType,
                                         const String& prototype,
@@ -121,8 +127,8 @@ const String CodeGenerator::getCallbackDefinitions() const
     {
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
-        const String userCodeBlockName ("User" + makeValidCppIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
-                                                                         true, true, false).trim());
+        const String userCodeBlockName ("User" + CodeFormatting::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
+                                                                                      true, true, false).trim());
 
         if (userCodeBlockName.isNotEmpty() && cm->hasPrePostUserSections)
         {
@@ -132,7 +138,7 @@ const String CodeGenerator::getCallbackDefinitions() const
               << "    //[" << userCodeBlockName << "_Pre]" << newLine
               << "    //[/" << userCodeBlockName
               << "_Pre]" << newLine << newLine 
-              << "    " << indentCode (cm->content.trim(), 4) << newLine 
+              << "    " << CodeFormatting::indent (cm->content.trim(), 4, false) << newLine 
               << newLine 
               << "    //[" << userCodeBlockName << "_Post]" << newLine
               << "    //[/" << userCodeBlockName << "_Post]" << newLine
@@ -143,7 +149,7 @@ const String CodeGenerator::getCallbackDefinitions() const
         {
             s << cm->returnType << " " << className << "::" << cm->prototype << newLine
               << "{" << newLine
-              << "    "  << indentCode (cm->content.trim(), 4) << newLine
+              << "    "  << CodeFormatting::indent (cm->content.trim(), 4, false) << newLine
               << "}" << newLine
               << newLine;
         }
@@ -222,7 +228,7 @@ static const String getIncludeFileCode (StringArray files)
 }
 
 //==============================================================================
-static void replaceTemplate (String& text, const String& itemName, const String& value)
+static void replaceTemplate (String& text, const String& itemName, const String& value, bool indent = true)
 {
     for (;;)
     {
@@ -233,16 +239,18 @@ static void replaceTemplate (String& text, const String& itemName, const String&
 
         int indentLevel = 0;
 
-        for (int i = index; --i >= 0;)
+        if (indent)
         {
-            if (text[i] == '\n')
-                break;
+            for (int i = index; --i >= 0;)
+            {
+                if (text[i] == '\n')
+                    break;
 
-            ++indentLevel;
+                ++indentLevel;
+            }
         }
 
-        text = text.replaceSection (index, itemName.length() + 4,
-                                    indentCode (value, indentLevel));
+        text = text.replaceSection (index, itemName.length() + 4, CodeFormatting::indent (value, indentLevel, false));
     }
 }
 
@@ -251,7 +259,7 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
                                  bool isForPreview, Project* project) const
 {
     replaceTemplate (code, "juceVersion", SystemStats::getJUCEVersion());
-    replaceTemplate (code, "headerGuard", makeHeaderGuardName (targetFile));
+    replaceTemplate (code, "headerGuard", CodeFormatting::makeHeaderGuardName (targetFile));
 
     replaceTemplate (code, "className", className);
     replaceTemplate (code, "constructorParams", constructorParams);
@@ -264,7 +272,7 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
     replaceTemplate (code, "methodDefinitions", getCallbackDefinitions());
 
     if (project != 0)
-        replaceTemplate (code, "defaultJuceInclude", createIncludeStatement (project->getAppIncludeFile(), targetFile));
+        replaceTemplate (code, "defaultJuceInclude", CodeFormatting::createIncludeStatement (project->getAppIncludeFile(), targetFile));
     else
         replaceTemplate (code, "defaultJuceInclude", "#include \"juce_amalgamated.h\"");
 
@@ -283,6 +291,14 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
     {
         replaceTemplate (code, "metadata", "  << Metadata isn't shown in the code preview >>" + String (newLine));
         replaceTemplate (code, "staticMemberDefinitions", "// Static member declarations and resources would go here... (these aren't shown in the code preview)");
+    }
+    
+    {
+        MemoryOutputStream compDataCpp;
+        CodeFormatting::writeDataAsCppLiteral (componentStateData, compDataCpp);
+
+        replaceTemplate (code, "statedata", compDataCpp.toUTF8(), false);
+        replaceTemplate (code, "statedatasize", String ((int) componentStateData.getSize()));
     }
 }
 
@@ -389,11 +405,10 @@ void CodeGenerator::CustomCodeList::reloadFrom (const String& fileContent)
                     CodeDocumentRef::Ptr doc (getDocumentFor (tag, false));
                     if (doc == 0)
                     {
-                        CodeDocument* const codeDoc = new CodeDocument();
-                        doc = new CodeDocumentRef (codeDoc);
-                        codeDoc->replaceAllContent (content);
-                        codeDoc->clearUndoHistory();
-                        codeDoc->setSavePoint();
+                        doc = new CodeDocumentRef();
+                        doc->getDocument().replaceAllContent (content);
+                        doc->getDocument().clearUndoHistory();
+                        doc->getDocument().setSavePoint();
                     }
 
                     newContent.add (doc);
@@ -493,7 +508,7 @@ const CodeGenerator::CustomCodeList::CodeDocumentRef::Ptr CodeGenerator::CustomC
     {
         sectionNames.add (sectionName);
 
-        const CodeDocumentRef::Ptr doc (new CodeDocumentRef (new CodeDocument()));
+        const CodeDocumentRef::Ptr doc (new CodeDocumentRef());
         sectionContent.add (doc);
         return doc;
     }

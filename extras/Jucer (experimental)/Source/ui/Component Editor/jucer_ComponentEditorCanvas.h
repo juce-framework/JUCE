@@ -59,7 +59,7 @@ public:
 
     Component* createComponentHolder()
     {
-        return new ComponentHolder();
+        return new ComponentHolder (getDocument().getBackgroundColour());
     }
 
     void updateComponents()
@@ -222,24 +222,55 @@ private:
     //==============================================================================
     ComponentEditor& editor;
 
-    class ComponentHolder   : public Component
+    class ComponentHolder   : public Component,
+                              public Value::Listener
     {
     public:
-        ComponentHolder()
+        ComponentHolder (const Value& backgroundColour_)
+            : backgroundColour (backgroundColour_)
         {
             setOpaque (true);
+            updateColour();
+            backgroundColour.addListener (this);
         }
 
         ~ComponentHolder()
         {
         }
 
+        void updateColour()
+        {
+            Colour newColour (Colours::white);
+
+            if (backgroundColour.toString().isNotEmpty())
+                newColour = Colour::fromString (backgroundColour.toString());
+
+            if (newColour != colour)
+            {
+                colour = newColour;
+                repaint();
+            }
+        }
+
         void paint (Graphics& g)
         {
-            g.fillAll (Colours::white);
+            if (colour.isOpaque())
+                g.fillAll (colour);
+            else
+                g.fillCheckerBoard (0, 0, getWidth(), getHeight(), 24, 24,
+                                    Colour (0xffeeeeee).overlaidWith (colour),
+                                    Colour (0xffffffff).overlaidWith (colour));
         }
-    };
 
+        void valueChanged (Value&)
+        {
+            updateColour();
+        }
+
+    private:
+        Value backgroundColour;
+        Colour colour;
+    };
 };
 
 

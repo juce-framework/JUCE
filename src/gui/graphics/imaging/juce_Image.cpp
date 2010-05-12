@@ -333,7 +333,7 @@ void Image::multiplyAllAlphas (const float amountToMultiplyBy)
     }
     else
     {
-        jassertfalse // can't do this without an alpha-channel!
+        jassertfalse; // can't do this without an alpha-channel!
     }
 }
 

@@ -603,7 +603,7 @@ void UIViewComponentPeer::toBehind (ComponentPeer* other)
         }
         else
         {
-            jassertfalse // don't know how to do this
+            jassertfalse; // don't know how to do this
         }
     }
 }

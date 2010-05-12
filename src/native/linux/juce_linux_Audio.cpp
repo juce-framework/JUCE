@@ -154,7 +154,7 @@ public:
             isInterleaved = true;
         else
         {
-            jassertfalse
+            jassertfalse;
             return false;
         }
 
@@ -597,7 +597,7 @@ private:
     unsigned int minChansOut, maxChansOut;
     unsigned int minChansIn, maxChansIn;
 
-    bool failed (const int errorNum) throw()
+    bool failed (const int errorNum)
     {
         if (errorNum >= 0)
             return false;
@@ -607,7 +607,7 @@ private:
         return true;
     }
 
-    void initialiseRatesAndChannels() throw()
+    void initialiseRatesAndChannels()
     {
         sampleRates.clear();
         channelNamesOut.clear();

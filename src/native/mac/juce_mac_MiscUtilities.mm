@@ -94,7 +94,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     if (draggingSource == 0)
     {
-        jassertfalse  // This method must be called in response to a component's mouseDown or mouseDrag event!
+        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
         return false;
     }
 
@@ -102,7 +102,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
     if (sourceComp == 0)
     {
-        jassertfalse  // This method must be called in response to a component's mouseDown or mouseDrag event!
+        jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
         return false;
     }
 
@@ -142,7 +142,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& /*text*/)
 {
-    jassertfalse    // not implemented!
+    jassertfalse;    // not implemented!
     return false;
 }
 
@@ -191,19 +191,15 @@ public:
 
 static ScreenSaverDefeater* screenSaverDefeater = 0;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
-    {
         deleteAndZero (screenSaverDefeater);
-    }
     else if (screenSaverDefeater == 0)
-    {
         screenSaverDefeater = new ScreenSaverDefeater();
-    }
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverDefeater == 0;
 }
@@ -212,7 +208,7 @@ bool Desktop::isScreenSaverEnabled() throw()
 //==============================================================================
 static IOPMAssertionID screenSaverDisablerID = 0;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
     {
@@ -237,7 +233,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
     }
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverDisablerID == 0;
 }

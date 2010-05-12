@@ -26,6 +26,8 @@
 #ifndef __JUCER_COMPONENTEDITORTOOLBAR_H_6B5CA931__
 #define __JUCER_COMPONENTEDITORTOOLBAR_H_6B5CA931__
 
+#include "../../utility/jucer_ColourEditorComponent.h"
+
 
 //==============================================================================
 class JucerToolbarButton   : public ToolbarItemComponent
@@ -103,6 +105,25 @@ public:
     }
 };
 
+
+//==============================================================================
+class BackgroundColourToolbarButton   : public JucerToolbarButton
+{
+public:
+    BackgroundColourToolbarButton (ComponentEditor& editor_, int itemId_)
+        : JucerToolbarButton (editor_, itemId_, "background")
+    {
+        setTriggeredOnMouseDown (true);
+    }
+
+    void clicked()
+    {
+        editor.getDocument().getUndoManager()->beginNewTransaction();
+        PopupColourSelector::showAt (this, editor.getDocument().getBackgroundColour(), Colours::white, true);
+    }
+};
+
+
 //==============================================================================
 class ComponentEditorToolbarFactory  : public ToolbarItemFactory
 {
@@ -120,15 +141,17 @@ public:
     enum DemoToolbarItemIds
     {
         createComponent     = 1,
-        showInfo            = 2,
-        showComponentTree   = 3,
-        showOrHideMarkers   = 4,
-        toggleSnapping      = 5
+        changeBackground,
+        showInfo,
+        showComponentTree,
+        showOrHideMarkers,
+        toggleSnapping
     };
 
     void getAllToolbarItemIds (Array <int>& ids)
     {
         ids.add (createComponent);
+        ids.add (changeBackground);
         ids.add (showInfo);
         ids.add (showComponentTree);
         ids.add (showOrHideMarkers);
@@ -143,6 +166,7 @@ public:
     {
         ids.add (spacerId);
         ids.add (createComponent);
+        ids.add (changeBackground);
         ids.add (flexibleSpacerId);
         ids.add (showOrHideMarkers);
         ids.add (toggleSnapping);
@@ -159,7 +183,8 @@ public:
 
         switch (itemId)
         {
-            case createComponent:   name = "new"; return new NewComponentToolbarButton (editor, createComponent);
+            case createComponent:   return new NewComponentToolbarButton (editor, itemId);
+            case changeBackground:  return new BackgroundColourToolbarButton (editor, itemId);
             case showInfo:          name = "info"; commandId = CommandIDs::showOrHideProperties; break;
             case showComponentTree: name = "tree"; commandId = CommandIDs::showOrHideTree; break;
             case showOrHideMarkers: name = "markers"; commandId = CommandIDs::showOrHideMarkers; break;

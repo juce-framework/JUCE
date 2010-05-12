@@ -34,7 +34,7 @@
 class GenericComponentHandler  : public ComponentTypeHelper<Component>
 {
 public:
-    GenericComponentHandler() : ComponentTypeHelper<Component> ("Generic Component", "COMPONENT", "component")  {}
+    GenericComponentHandler() : ComponentTypeHelper<Component> ("Generic Component", "Component", "COMPONENT", "component")  {}
     ~GenericComponentHandler()  {}
 
     //==============================================================================
@@ -66,23 +66,33 @@ public:
     Component* createComponent()                { return new PlaceholderComp(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void update (ComponentDocument& document, Component* comp, const ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        static_cast<PlaceholderComp*> (comp)->setDetails (state [ComponentDocument::memberNameProperty],
-                                                          state ["class"]);
+        item.set ("class", "Component");
     }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void update (ComponentTypeInstance& item, Component* comp)
     {
-        state.setProperty ("class", "Component", 0);
+        static_cast<PlaceholderComp*> (comp)->setDetails (item [ComponentDocument::memberNameProperty],
+                                                          item ["class"]);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addFocusOrderProperty (document, state, props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (getValue ("class", state, document), "Class", 256, false));
+        props.add (new TextPropertyComponent (item.getValue ("class"), "Class", 256, false));
         props.getLast()->setTooltip ("The class that this component is an instance of.");
+    }
+
+    const String getClassName (ComponentTypeInstance& item) const
+    {
+        return item ["class"];
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (String::empty);
     }
 };
 

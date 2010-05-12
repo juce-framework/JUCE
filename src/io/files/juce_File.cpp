@@ -98,7 +98,7 @@ const String File::parseAbsolutePath (const String& p)
                 "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
                 path if that's what was supplied, or would evaluate a partial path relative to the CWD.
             */
-            jassertfalse
+            jassertfalse;
 
             path = File::getCurrentWorkingDirectory().getFullPathName().substring (0, 2) + path;
         }
@@ -112,7 +112,7 @@ const String File::parseAbsolutePath (const String& p)
             "File::getCurrentWorkingDirectory().getChildFile (myUnknownPath)" would return an absolute
             path if that's what was supplied, or would evaluate a partial path relative to the CWD.
         */
-        jassertfalse
+        jassertfalse;
 
         return File::getCurrentWorkingDirectory().getChildFile (path).getFullPathName();
     }
@@ -601,7 +601,7 @@ int File::getNumberOfChildFiles (const int whatToLookFor,
     else
     {
         // trying to search for files inside a non-directory?
-        jassertfalse
+        jassertfalse;
     }
 
     return count;

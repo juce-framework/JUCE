@@ -49,7 +49,7 @@
           return true;
 
       Logger::writeToLog ("CoreAudio error: " + String (lineNum) + " - " + String::toHexString ((int) err));
-      jassertfalse
+      jassertfalse;
       return false;
   }
 

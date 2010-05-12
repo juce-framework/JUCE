@@ -34,7 +34,7 @@
 class GroupComponentHandler  : public ComponentTypeHelper<GroupComponent>
 {
 public:
-    GroupComponentHandler() : ComponentTypeHelper<GroupComponent> ("GroupComponent", "GROUPCOMPONENT", "group")
+    GroupComponentHandler() : ComponentTypeHelper<GroupComponent> ("GroupComponent", "GroupComponent", "GROUPCOMPONENT", "group")
     {
         addEditableColour (GroupComponent::outlineColourId, "Outline", "outlineColour");
         addEditableColour (GroupComponent::textColourId, "Text Colour", "textColour");
@@ -42,31 +42,36 @@ public:
 
     ~GroupComponentHandler()  {}
 
-    Component* createComponent()                { return new GroupComponent (String::empty, String::empty); }
+    Component* createComponent()                { return new GroupComponent(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 200, 200); }
 
-    void update (ComponentDocument& document, GroupComponent* comp, const ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        comp->setText (state ["text"].toString());
-        comp->setTextLabelPosition ((int) state ["justification"]);
+        item.set ("text", "Group");
+        item.set ("justification", (int) Justification::left);
     }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void update (ComponentTypeInstance& item, GroupComponent* comp)
     {
-        state.setProperty ("text", "Group", 0);
-        state.setProperty ("justification", (int) Justification::left, 0);
+        comp->setText (item ["text"].toString());
+        comp->setTextLabelPosition ((int) item ["justification"]);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (getValue ("text", state, document), "Label", 512, false));
+        props.add (new TextPropertyComponent (item.getValue ("text"), "Label", 512, false));
         props.getLast()->setTooltip ("The group's display name.");
 
-        props.add (createJustificationProperty ("Text Position", state.getPropertyAsValue ("justification", document.getUndoManager()), true));
-        addEditableColourProperties (document, state, props);
+        item.addJustificationProperty (props, "Text Position", item.getValue ("justification"), true);
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (String::empty);
     }
 };
 

@@ -1308,7 +1308,7 @@ const String AudioUnitPluginInstance::getProgramName (int index)
 
 void AudioUnitPluginInstance::changeProgramName (int index, const String& newName)
 {
-    jassertfalse // xxx not implemented!
+    jassertfalse; // xxx not implemented!
 }
 
 //==============================================================================

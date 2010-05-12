@@ -122,7 +122,7 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
 
-    const String sanitisedProjectName (makeValidCppIdentifier (getProjectName().toString(), false, true, false));
+    const String sanitisedProjectName (CodeFormatting::makeValidIdentifier (getProjectName().toString(), false, true, false));
 
     if (! projectRoot.hasProperty ("buildVST"))
     {
@@ -184,7 +184,7 @@ const String Project::saveDocument (const File& file)
         getJuceConfigFlags (flags);
     }
 
-    if (isJuceFolder (getLocalJuceFolder()))
+    if (FileUtils::isJuceFolder (getLocalJuceFolder()))
         StoredSettings::getInstance()->setLastKnownJuceFolder (getLocalJuceFolder().getFullPathName());
 
     StoredSettings::getInstance()->recentFiles.addFile (file);
@@ -310,7 +310,7 @@ const File Project::getLocalJuceFolder()
     {
         File f (resolveFilename (exp->getJuceFolder().toString()));
 
-        if (isJuceFolder (f))
+        if (FileUtils::isJuceFolder (f))
             return f;
     }
 

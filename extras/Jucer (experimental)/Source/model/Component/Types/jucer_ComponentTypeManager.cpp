@@ -153,101 +153,6 @@ private:
     }
 };
 
-
-//==============================================================================
-ComponentTypeHandler::ComponentTypeHandler (const String& name_, const String& xmlTag_,
-                                            const String& memberNameRoot_)
-    : name (name_), xmlTag (xmlTag_),
-      memberNameRoot (memberNameRoot_)
-{
-}
-
-ComponentTypeHandler::~ComponentTypeHandler()
-{
-}
-
-Value ComponentTypeHandler::getValue (const var::identifier& name_, ValueTree& state, ComponentDocument& document) const
-{
-    return state.getPropertyAsValue (name_, document.getUndoManager());
-}
-
-void ComponentTypeHandler::updateComponent (ComponentDocument& document, Component* comp, const ValueTree& state)
-{
-    RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
-    comp->setBounds (pos.resolve (document));
-
-    comp->setName (state [ComponentDocument::compNameProperty]);
-
-    comp->setExplicitFocusOrder (state [ComponentDocument::compFocusOrderProperty]);
-
-    SettableTooltipClient* tooltipClient = dynamic_cast <SettableTooltipClient*> (comp);
-    if (tooltipClient != 0)
-        tooltipClient->setTooltip (state [ComponentDocument::compTooltipProperty]);
-}
-
-void ComponentTypeHandler::initialiseNewItem (ComponentDocument& document, ValueTree& state)
-{
-    state.setProperty (ComponentDocument::compNameProperty, String::empty, 0);
-    state.setProperty (ComponentDocument::memberNameProperty, document.getNonexistentMemberName (getMemberNameRoot()), 0);
-
-    const Rectangle<int> bounds (getDefaultSize().withPosition (Point<int> (Random::getSystemRandom().nextInt (100) + 100,
-                                                                            Random::getSystemRandom().nextInt (100) + 100)));
-
-    state.setProperty (ComponentDocument::compBoundsProperty,
-                       RectangleCoordinates (bounds.toFloat(),
-                                             state [ComponentDocument::memberNameProperty]).toString(), 0);
-}
-
-
-//==============================================================================
-class CompMemberNameValueSource   : public Value::ValueSource,
-                                    public Value::Listener
-{
-public:
-    CompMemberNameValueSource (ComponentDocument& document_, const ValueTree& state)
-       : sourceValue (state.getPropertyAsValue (ComponentDocument::memberNameProperty, document_.getUndoManager())),
-         document (document_)
-    {
-        sourceValue.addListener (this);
-    }
-
-    ~CompMemberNameValueSource() {}
-
-    void valueChanged (Value&)      { sendChangeMessage (true); }
-    const var getValue() const      { return sourceValue.toString(); }
-
-    void setValue (const var& newValue)
-    {
-        if (newValue == sourceValue)
-            return;
-
-        const String name (document.getNonexistentMemberName (newValue));
-
-        if (sourceValue != name)
-        {
-            document.renameAnchor (sourceValue.toString(), name);
-            sourceValue = name;
-        }
-    }
-
-private:
-    Value sourceValue;
-    ComponentDocument& document;
-
-    CompMemberNameValueSource (const CompMemberNameValueSource&);
-    const CompMemberNameValueSource& operator= (const CompMemberNameValueSource&);
-};
-
-void ComponentTypeHandler::createPropertyEditors (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
-{
-    props.add (new TextPropertyComponent (Value (new CompMemberNameValueSource (document, state)), "Member Name", 256, false));
-
-    props.add (new ComponentBoundsEditor (document, "Left",   ComponentBoundsEditor::left,   state, getValue (ComponentDocument::compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor (document, "Right",  ComponentBoundsEditor::right,  state, getValue (ComponentDocument::compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor (document, "Top",    ComponentBoundsEditor::top,    state, getValue (ComponentDocument::compBoundsProperty, state, document)));
-    props.add (new ComponentBoundsEditor (document, "Bottom", ComponentBoundsEditor::bottom, state, getValue (ComponentDocument::compBoundsProperty, state, document)));
-}
-
 //==============================================================================
 ComponentTypeManager::ComponentTypeManager()
 {
@@ -268,7 +173,10 @@ Component* ComponentTypeManager::createFromStoredType (ComponentDocument& docume
 
     Component* c = handler->createComponent();
     if (c != 0)
-        handler->updateComponent (document, c, value);
+    {
+        ComponentTypeInstance item (document, value);
+        handler->updateComponent (item, c);
+    }
 
     return c;
 }
@@ -282,13 +190,372 @@ ComponentTypeHandler* ComponentTypeManager::getHandlerFor (const String& type)
     return 0;
 }
 
-const StringArray ComponentTypeManager::getTypeNames() const
+const StringArray ComponentTypeManager::getDisplayNames() const
 {
     StringArray s;
     for (int i = 0; i < handlers.size(); ++i)
-        s.add (handlers.getUnchecked(i)->getName());
+        s.add (handlers.getUnchecked(i)->getDisplayName());
 
     return s;
 }
 
 juce_ImplementSingleton_SingleThreaded (ComponentTypeManager);
+
+
+
+//==============================================================================
+ComponentTypeHandler::ComponentTypeHandler (const String& displayName_, const String& className_,
+                                            const String& xmlTag_, const String& memberNameRoot_)
+    : displayName (displayName_), className (className_), xmlTag (xmlTag_),
+      memberNameRoot (memberNameRoot_)
+{
+}
+
+ComponentTypeHandler::~ComponentTypeHandler()
+{
+}
+
+//==============================================================================
+class CompMemberNameValueSource   : public Value::ValueSource,
+                                    public Value::Listener
+{
+public:
+    CompMemberNameValueSource (ComponentTypeInstance& item_)
+       : sourceValue (item_.getValue (ComponentDocument::memberNameProperty)),
+         item (item_)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~CompMemberNameValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+    const var getValue() const      { return sourceValue.toString(); }
+
+    void setValue (const var& newValue)
+    {
+        if (newValue == sourceValue)
+            return;
+
+        const String name (item.getDocument().getNonexistentMemberName (newValue));
+
+        if (sourceValue != name)
+        {
+            item.getDocument().renameAnchor (sourceValue.toString(), name);
+            sourceValue = name;
+        }
+    }
+
+private:
+    Value sourceValue;
+    ComponentTypeInstance& item;
+
+    CompMemberNameValueSource (const CompMemberNameValueSource&);
+    const CompMemberNameValueSource& operator= (const CompMemberNameValueSource&);
+};
+
+
+//==============================================================================
+ComponentTypeInstance::ComponentTypeInstance (ComponentDocument& document_, const ValueTree& state_)
+    : document (document_), state (state_)
+{
+}
+
+Value ComponentTypeInstance::getValue (const var::identifier& name) const
+{
+    return state.getPropertyAsValue (name, document.getUndoManager());
+}
+
+void ComponentTypeInstance::set (const var::identifier& name, const var& value)
+{
+    state.setProperty (name, value, 0);
+}
+
+ComponentTypeHandler* ComponentTypeInstance::getHandler() const
+{
+    ComponentTypeHandler* const handler = ComponentTypeManager::getInstance()->getHandlerFor (state.getType());
+    jassert (handler != 0);
+    return handler;
+}
+
+void ComponentTypeInstance::updateComponent (Component* comp)
+{
+    getHandler()->updateComponent (*this, comp);
+}
+
+void ComponentTypeInstance::createProperties (Array <PropertyComponent*>& props)
+{
+    getHandler()->createPropertyEditors (*this, props);
+}
+
+void ComponentTypeInstance::createCode (CodeGenerator& code)
+{
+    code.addPrivateMember (getHandler()->getClassName (*this) + "*", getMemberName());
+    getHandler()->createCode (*this, code);
+}
+
+//==============================================================================
+void ComponentTypeInstance::initialiseNewItemBasics()
+{
+    ComponentTypeHandler* handler = getHandler();
+
+    set (ComponentDocument::compNameProperty, String::empty);
+    set (ComponentDocument::memberNameProperty, document.getNonexistentMemberName (handler->getMemberNameRoot()));
+
+    Rectangle<int> bounds (handler->getDefaultSize());
+    int cw = document.getCanvasWidth().getValue();
+    int ch = document.getCanvasHeight().getValue();
+    bounds.setPosition (Random::getSystemRandom().nextInt (cw / 3) + cw / 4,
+                        Random::getSystemRandom().nextInt (ch / 3) + ch / 4);
+
+    set (ComponentDocument::compBoundsProperty, RectangleCoordinates (bounds.toFloat(), getMemberName()).toString());
+}
+
+void ComponentTypeInstance::updateComponentBasics (Component* comp)
+{
+    RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
+    comp->setBounds (pos.resolve (document));
+
+    comp->setName (state [ComponentDocument::compNameProperty]);
+
+    comp->setExplicitFocusOrder (state [ComponentDocument::compFocusOrderProperty]);
+
+    SettableTooltipClient* tooltipClient = dynamic_cast <SettableTooltipClient*> (comp);
+    if (tooltipClient != 0)
+        tooltipClient->setTooltip (state [ComponentDocument::compTooltipProperty]);
+}
+
+void ComponentTypeInstance::addMemberNameProperty (Array <PropertyComponent*>& props)
+{
+    props.add (new TextPropertyComponent (Value (new CompMemberNameValueSource (*this)),
+                                          "Member Name", 256, false));
+}
+
+void ComponentTypeInstance::addBoundsProperties (Array <PropertyComponent*>& props)
+{
+    const Value bounds (getValue (ComponentDocument::compBoundsProperty));
+    props.add (new ComponentBoundsEditor (document, "Left",   ComponentBoundsEditor::left,   state, bounds));
+    props.add (new ComponentBoundsEditor (document, "Right",  ComponentBoundsEditor::right,  state, bounds));
+    props.add (new ComponentBoundsEditor (document, "Top",    ComponentBoundsEditor::top,    state, bounds));
+    props.add (new ComponentBoundsEditor (document, "Bottom", ComponentBoundsEditor::bottom, state, bounds));
+}
+
+void ComponentTypeInstance::addTooltipProperty (Array <PropertyComponent*>& props)
+{
+    props.add (new TextPropertyComponent (getValue (ComponentDocument::compTooltipProperty),
+                                          "Tooltip", 4096, false));
+}
+
+void ComponentTypeInstance::addFocusOrderProperty (Array <PropertyComponent*>& props)
+{
+    props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (getValue (ComponentDocument::compFocusOrderProperty))),
+                                          "Focus Order", 10, false));
+}
+
+void ComponentTypeInstance::addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const String& propertyName)
+{
+    props.add (new ColourPropertyComponent (document, name, getValue (propertyName),
+                                            LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true));
+}
+
+//==============================================================================
+class FontNameValueSource   : public Value::ValueSource,
+                              public Value::Listener
+{
+public:
+    FontNameValueSource (const Value& source)
+       : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~FontNameValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+    const var getValue() const
+    {
+        const String fontName (Font::fromString (sourceValue.toString()).getTypefaceName());
+        const int index = StoredSettings::getInstance()->getFontNames().indexOf (fontName);
+
+        if (index >= 0)                                             return 4 + index;
+        else if (fontName == Font::getDefaultSansSerifFontName())   return 1;
+        else if (fontName == Font::getDefaultSerifFontName())       return 2;
+        else if (fontName == Font::getDefaultMonospacedFontName())  return 3;
+
+        return 1;
+    }
+
+    void setValue (const var& newValue)
+    {
+        Font font (Font::fromString (sourceValue.toString()));
+
+        const int index = newValue;
+        if (index <= 1)         font.setTypefaceName (Font::getDefaultSansSerifFontName());
+        else if (index == 2)    font.setTypefaceName (Font::getDefaultSerifFontName());
+        else if (index == 3)    font.setTypefaceName (Font::getDefaultMonospacedFontName());
+        else                    font.setTypefaceName (StoredSettings::getInstance()->getFontNames() [index - 4]);
+
+        sourceValue = font.toString();
+    }
+
+    static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
+    {
+        StringArray fontNames;
+        fontNames.add (Font::getDefaultSansSerifFontName());
+        fontNames.add (Font::getDefaultSerifFontName());
+        fontNames.add (Font::getDefaultMonospacedFontName());
+        fontNames.add (String::empty);
+        fontNames.addArray (StoredSettings::getInstance()->getFontNames());
+
+        return new ChoicePropertyComponent (Value (new FontNameValueSource (value)), title, fontNames);
+    }
+
+private:
+    Value sourceValue;
+};
+
+class FontSizeValueSource   : public Value::ValueSource,
+                              public Value::Listener
+{
+public:
+    FontSizeValueSource (const Value& source)
+       : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~FontSizeValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+    const var getValue() const
+    {
+        return Font::fromString (sourceValue.toString()).getHeight();
+    }
+
+    void setValue (const var& newValue)
+    {
+        Font font (Font::fromString (sourceValue.toString()));
+        font.setHeight (newValue);
+        sourceValue = font.toString();
+    }
+
+    static PropertyComponent* createProperty (const String& title, const Value& value)
+    {
+        return new SliderPropertyComponent (Value (new FontSizeValueSource (value)), title, 1.0, 150.0, 0.1, 0.5);
+    }
+
+private:
+    Value sourceValue;
+};
+
+class FontStyleValueSource   : public Value::ValueSource,
+                               public Value::Listener
+{
+public:
+    FontStyleValueSource (const Value& source)
+       : sourceValue (source)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~FontStyleValueSource() {}
+
+    void valueChanged (Value&)      { sendChangeMessage (true); }
+
+    const var getValue() const
+    {
+        const Font f (Font::fromString (sourceValue.toString()));
+
+        if (f.isBold() && f.isItalic()) return getStyles() [3];
+        if (f.isBold())                 return getStyles() [1];
+        if (f.isItalic())               return getStyles() [2];
+
+        return getStyles() [0];
+    }
+
+    void setValue (const var& newValue)
+    {
+        Font font (Font::fromString (sourceValue.toString()));
+        font.setBold (newValue.toString().containsIgnoreCase ("Bold"));
+        font.setItalic (newValue.toString().containsIgnoreCase ("Italic"));
+        sourceValue = font.toString();
+    }
+
+    static PropertyComponent* createProperty (const String& title, const Value& value)
+    {
+        return StringListValueSource::create (title, Value (new FontStyleValueSource (value)), StringArray (getStyles()));
+    }
+
+    static const char* const* getStyles()
+    {
+        static const char* const fontStyles[] = { "Normal", "Bold", "Italic", "Bold + Italic", 0 };
+        return fontStyles;
+    }
+
+private:
+    Value sourceValue;
+};
+
+void ComponentTypeInstance::addFontProperties (Array <PropertyComponent*>& props, const var::identifier& name)
+{
+    Value v (getValue (name));
+    props.add (FontNameValueSource::createProperty ("Font", v));
+    props.add (FontSizeValueSource::createProperty ("Font Size", v));
+    props.add (FontStyleValueSource::createProperty ("Font Style", v));
+}
+
+//==============================================================================
+void ComponentTypeInstance::addJustificationProperty (Array <PropertyComponent*>& props, const String& name, const Value& value, bool onlyHorizontal)
+{
+    ValueRemapperSource* remapper = new ValueRemapperSource (value);
+    StringArray strings;
+
+    if (onlyHorizontal)
+    {
+        const char* const layouts[] = { "Left", "Centred", "Right", 0 };
+        const int justifications[] = { Justification::left, Justification::centred, Justification::right, 0 };
+
+        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
+            remapper->addMapping (justifications[i], i + 1);
+
+        strings = StringArray (layouts);
+    }
+    else
+    {
+        const char* const layouts[] = { "Centred", "Centred-left", "Centred-right", "Centred-top", "Centred-bottom", "Top-left",
+                                        "Top-right", "Bottom-left", "Bottom-right", 0 };
+        const int justifications[] = { Justification::centred, Justification::centredLeft, Justification::centredRight,
+                                       Justification::centredTop, Justification::centredBottom, Justification::topLeft,
+                                       Justification::topRight, Justification::bottomLeft, Justification::bottomRight, 0 };
+
+        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
+            remapper->addMapping (justifications[i], i + 1);
+
+        strings = StringArray (layouts);
+    }
+
+    props.add (new ChoicePropertyComponent (Value (remapper), name, strings));
+}
+
+//==============================================================================
+const String ComponentTypeInstance::createConstructorStatement (const String& params)
+{
+    String s;
+    s << "addAndMakeVisible (" << getMemberName()
+      << " = new " << getHandler()->getClassName (*this);
+
+    if (params.isEmpty())
+        s << "());" << newLine;
+    else
+    {
+        s << " (";
+        s << CodeFormatting::indent (params.trim(), s.length(), false) << "));" << newLine;
+    }
+
+//    s << getMemberName() << "->updateStateFrom (componentStateList.getChild ("
+  //    << document.getComponentGroup().indexOf (state) << ");" << newLine;
+
+    return s;
+}

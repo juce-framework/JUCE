@@ -91,7 +91,7 @@ void Thread::yield()
 void Thread::setCurrentThreadAffinityMask (const uint32 /*affinityMask*/)
 {
     // xxx
-    jassertfalse
+    jassertfalse;
 }
 
 //==============================================================================
@@ -106,12 +106,12 @@ bool Process::isForegroundProcess()
 
 void Process::raisePrivilege()
 {
-    jassertfalse
+    jassertfalse;
 }
 
 void Process::lowerPrivilege()
 {
-    jassertfalse
+    jassertfalse;
 }
 
 void Process::terminate()

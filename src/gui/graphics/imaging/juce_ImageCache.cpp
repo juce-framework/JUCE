@@ -161,7 +161,7 @@ void ImageCache::incReferenceCount (Image* const image)
         }
     }
 
-    jassertfalse  // (trying to inc the ref count of an image that's not in the cache)
+    jassertfalse;  // (trying to inc the ref count of an image that's not in the cache)
 }
 
 void ImageCache::timerCallback()

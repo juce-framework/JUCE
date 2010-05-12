@@ -25,15 +25,28 @@
 
 
 //==============================================================================
-int64 calculateStreamHashCode (InputStream& stream);
-int64 calculateFileHashCode (const File& file);
-bool areFilesIdentical (const File& file1, const File& file2);
+namespace FileUtils
+{
+    int64 calculateStreamHashCode (InputStream& stream);
+    int64 calculateFileHashCode (const File& file);
+    bool areFilesIdentical (const File& file1, const File& file2);
 
-bool overwriteFileWithNewDataIfDifferent (const File& file, const char* data, int numBytes);
-bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
-bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData);
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const char* data, int numBytes);
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData);
 
-bool containsAnyNonHiddenFiles (const File& folder);
+    bool containsAnyNonHiddenFiles (const File& folder);
+
+    const String unixStylePath (const String& path);
+    const String windowsStylePath (const String& path);
+
+    bool shouldPathsBeRelative (String path1, String path2);
+
+    //==============================================================================
+    bool isJuceFolder (const File& folder);
+    const File findParentJuceFolder (const File& file);
+    const File findDefaultJuceFolder();
+}
 
 //==============================================================================
 // String::hashCode64 actually hit some dupes, so this is a more powerful version.
@@ -44,58 +57,13 @@ const String hexString8Digits (int value);
 const String createAlphaNumericUID();
 const String createGUID (const String& seed); // Turns a seed into a windows GUID
 
-const String unixStylePath (const String& path);
-const String windowsStylePath (const String& path);
-
-bool shouldPathsBeRelative (String path1, String path2);
-
 //==============================================================================
-bool isJuceFolder (const File& folder);
-const File findParentJuceFolder (const File& file);
-const File findDefaultJuceFolder();
-
-//==============================================================================
-const String createIncludeStatement (const File& includeFile, const File& targetFile);
-const String makeHeaderGuardName (const File& file);
-
-const String replaceCEscapeChars (const String& s);
-
-const String makeValidCppIdentifier (String s,
-                                     const bool capitalise,
-                                     const bool removeColons,
-                                     const bool allowTemplates);
-
-//==============================================================================
-const String boolToCode (const bool b);
-const String floatToCode (const float v);
-const String doubleToCode (const double v);
-const String colourToCode (const Colour& col);
-const String justificationToCode (const Justification& justification);
-const String castToFloat (const String& expression);
-
-//==============================================================================
-const String indentCode (const String& code, const int numSpaces);
-
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 
 void autoScrollForMouseEvent (const MouseEvent& e);
 
 void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
 void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);
-
-//==============================================================================
-const Font getFontFromState (const ValueTree& state,
-                             const var::identifier& fontName,
-                             const var::identifier& fontSize,
-                             const var::identifier& fontStyle);
-
-void createFontProperties (Array <PropertyComponent*>& props, const ValueTree& state,
-                           const var::identifier& fontName,
-                           const var::identifier& fontSize,
-                           const var::identifier& fontStyle,
-                           UndoManager* undoManager);
-
-PropertyComponent* createJustificationProperty (const String& name, const Value& value, bool onlyHorizontal);
 
 //==============================================================================
 class FileModificationDetector
@@ -113,14 +81,14 @@ public:
     {
         return fileModificationTime != file.getLastModificationTime()
                  && (fileSize != file.getSize()
-                      || calculateFileHashCode (file) != fileHashCode);
+                      || FileUtils::calculateFileHashCode (file) != fileHashCode);
     }
 
     void updateHash()
     {
         fileModificationTime = file.getLastModificationTime();
         fileSize = file.getSize();
-        fileHashCode = calculateFileHashCode (file);
+        fileHashCode = FileUtils::calculateFileHashCode (file);
     }
 
 private:
@@ -128,6 +96,27 @@ private:
     Time fileModificationTime;
     int64 fileHashCode, fileSize;
 };
+
+//==============================================================================
+namespace CodeFormatting
+{
+    const String indent (const String& code, const int numSpaces, bool indentFirstLine);
+    const String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates);
+    const String addEscapeChars (const String& text);
+    const String createIncludeStatement (const File& includeFile, const File& targetFile);
+    const String makeHeaderGuardName (const File& file);
+
+    const String stringLiteral (const String& text);
+    const String boolLiteral (bool b);
+    const String floatLiteral (float v);
+    const String doubleLiteral (double v);
+
+    const String colourToCode (const Colour& col);
+    const String justificationToCode (const Justification& justification);
+    const String castToFloat (const String& expression);
+
+    void writeDataAsCppLiteral (const MemoryBlock& data, OutputStream& out);
+}
 
 //==============================================================================
 class PropertyPanelWithTooltips  : public Component,

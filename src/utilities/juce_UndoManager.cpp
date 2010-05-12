@@ -83,8 +83,8 @@ bool UndoManager::perform (UndoableAction* const command_, const String& actionN
 
         if (reentrancyCheck)
         {
-            jassertfalse    // don't call perform() recursively from the UndoableAction::perform() or
-                            // undo() methods, or else these actions won't actually get done.
+            jassertfalse;    // don't call perform() recursively from the UndoableAction::perform() or
+                             // undo() methods, or else these actions won't actually get done.
 
             return false;
         }
@@ -202,7 +202,7 @@ bool UndoManager::undo()
     {
         if (! commandSet->getUnchecked(i)->undo())
         {
-            jassertfalse
+            jassertfalse;
             failed = true;
             break;
         }
@@ -235,7 +235,7 @@ bool UndoManager::redo()
     {
         if (! commandSet->getUnchecked(i)->perform())
         {
-            jassertfalse
+            jassertfalse;
             failed = true;
             break;
         }

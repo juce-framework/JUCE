@@ -338,13 +338,29 @@ void Coordinate::changeAnchor2 (const String& newMarkerName, const MarkerResolve
     moveToAbsolute (oldValue, markerResolver);
 }
 
-void Coordinate::renameAnchorIfUsed (const String& oldName, const String& newName)
+void Coordinate::renameAnchorIfUsed (const String& oldName, const String& newName, const MarkerResolver& markerResolver)
 {
-    if (anchor1.upToFirstOccurrenceOf (".", false, false) == oldName)
-        anchor1 = newName + anchor1.fromFirstOccurrenceOf (".", true, false);
+    jassert (oldName.isNotEmpty());
 
-    if (anchor2.upToFirstOccurrenceOf (".", false, false) == oldName)
-        anchor2 = newName + anchor2.fromFirstOccurrenceOf (".", true, false);
+    if (newName.isEmpty())
+    {
+        if (anchor1.upToFirstOccurrenceOf (".", false, false) == oldName
+            || anchor2.upToFirstOccurrenceOf (".", false, false) == oldName)
+        {
+            value = resolve (markerResolver);
+            isProportion = false;
+            anchor1 = String::empty;
+            anchor2 = String::empty;
+        }
+    }
+    else
+    {
+        if (anchor1.upToFirstOccurrenceOf (".", false, false) == oldName)
+            anchor1 = newName + anchor1.fromFirstOccurrenceOf (".", true, false);
+
+        if (anchor2.upToFirstOccurrenceOf (".", false, false) == oldName)
+            anchor2 = newName + anchor2.fromFirstOccurrenceOf (".", true, false);
+    }
 }
 
 //==============================================================================
@@ -396,10 +412,11 @@ const String RectangleCoordinates::toString() const
     return left.toString() + ", " + top.toString() + ", " + right.toString() + ", " + bottom.toString();
 }
 
-void RectangleCoordinates::renameAnchorIfUsed (const String& oldName, const String& newName)
+void RectangleCoordinates::renameAnchorIfUsed (const String& oldName, const String& newName,
+                                               const Coordinate::MarkerResolver& markerResolver)
 {
-    left.renameAnchorIfUsed (oldName, newName);
-    right.renameAnchorIfUsed (oldName, newName);
-    top.renameAnchorIfUsed (oldName, newName);
-    bottom.renameAnchorIfUsed (oldName, newName);
+    left.renameAnchorIfUsed (oldName, newName, markerResolver);
+    right.renameAnchorIfUsed (oldName, newName, markerResolver);
+    top.renameAnchorIfUsed (oldName, newName, markerResolver);
+    bottom.renameAnchorIfUsed (oldName, newName, markerResolver);
 }

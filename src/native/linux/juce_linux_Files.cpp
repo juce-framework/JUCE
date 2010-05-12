@@ -97,7 +97,7 @@ bool File::isOnHardDisk() const
 
 bool File::isOnRemovableDrive() const
 {
-    jassertfalse // xxx not implemented for linux!
+    jassertfalse; // xxx not implemented for linux!
     return false;
 }
 
@@ -167,7 +167,7 @@ const File File::getSpecialLocation (const SpecialLocationType type)
         return juce_getExecutableFile();
 
     default:
-        jassertfalse // unknown type?
+        jassertfalse; // unknown type?
         break;
     }
 

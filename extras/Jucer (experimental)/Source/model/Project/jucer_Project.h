@@ -85,7 +85,7 @@ public:
 
     Value getVersion() const                            { return getProjectValue ("version"); }
     Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
-    void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + makeValidCppIdentifier (getProjectName().toString(), false, true, false); }
+    void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeFormatting::makeValidIdentifier (getProjectName().toString(), false, true, false); }
 
     //==============================================================================
     enum JuceLinkage

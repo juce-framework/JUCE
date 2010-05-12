@@ -122,7 +122,7 @@ public:
             MemoryOutputStream mo;
             writeProjectFile (mo);
 
-            if (! overwriteFileWithNewDataIfDifferent (projectFile, mo))
+            if (! FileUtils::overwriteFileWithNewDataIfDifferent (projectFile, mo))
                 return "Can't write to file: " + projectFile.getFullPathName();
         }
 
@@ -266,7 +266,7 @@ private:
         MemoryOutputStream mo;
         plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
 
-        return overwriteFileWithNewDataIfDifferent (infoPlistFile, mo);
+        return FileUtils::overwriteFileWithNewDataIfDifferent (infoPlistFile, mo);
     }
 
     const StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config)

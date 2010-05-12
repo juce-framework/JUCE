@@ -282,7 +282,7 @@ using namespace JUCE_NAMESPACE;
     }
     else
     {
-        jassertfalse // should never get here!
+        jassertfalse; // should never get here!
     }
 }
 

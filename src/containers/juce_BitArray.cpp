@@ -160,7 +160,7 @@ int BigInteger::getBitRangeAsInt (const int startBit, int numBits) const throw()
 {
     if (numBits > 32)
     {
-        jassertfalse  // use getBitRange() if you need more than 32 bits..
+        jassertfalse;  // use getBitRange() if you need more than 32 bits..
         numBits = 32;
     }
 
@@ -185,7 +185,7 @@ void BigInteger::setBitRangeAsInt (const int startBit, int numBits, unsigned int
 {
     if (numBits > 32)
     {
-        jassertfalse
+        jassertfalse;
         numBits = 32;
     }
 
@@ -908,7 +908,7 @@ const String BigInteger::toString (const int base, const int minimumNumCharacter
     }
     else
     {
-        jassertfalse // can't do the specified base!
+        jassertfalse; // can't do the specified base!
         return String::empty;
     }
 

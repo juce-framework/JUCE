@@ -384,7 +384,7 @@ AudioFormatWriter* QuickTimeAudioFormat::createWriterFor (OutputStream* /*stream
                                                           const StringPairArray& /*metadataValues*/,
                                                           int /*qualityOptionIndex*/)
 {
-    jassertfalse // not yet implemented!
+    jassertfalse; // not yet implemented!
     return 0;
 }
 

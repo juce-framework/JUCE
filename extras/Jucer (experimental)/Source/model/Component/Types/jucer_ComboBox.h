@@ -34,7 +34,7 @@
 class ComboBoxHandler  : public ComponentTypeHelper<ComboBox>
 {
 public:
-    ComboBoxHandler() : ComponentTypeHelper<ComboBox> ("ComboBox", "COMBOBOX", "comboBox")
+    ComboBoxHandler() : ComponentTypeHelper<ComboBox> ("ComboBox", "ComboBox", "COMBOBOX", "comboBox")
     {
         addEditableColour (ComboBox::backgroundColourId, "Background", "backgroundColour");
         addEditableColour (ComboBox::textColourId, "Text", "textColour");
@@ -45,16 +45,16 @@ public:
 
     ~ComboBoxHandler()  {}
 
-    Component* createComponent()                { return new ComboBox (String::empty); }
+    Component* createComponent()                { return new ComboBox(); }
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 180, 24); }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        state.setProperty ("items", "Item 1\nItem 2", 0);
-        state.setProperty ("editable", false, 0);
-        state.setProperty ("textJustification", (int) Justification::centredLeft, 0);
-        state.setProperty ("unselectedText", "", 0);
-        state.setProperty ("noItemsText", "(No Choices)", 0);
+        item.set ("items", "Item 1\nItem 2");
+        item.set ("editable", false);
+        item.set ("textJustification", (int) Justification::centredLeft);
+        item.set ("unselectedText", "");
+        item.set ("noItemsText", "(No Choices)");
     }
 
     void updateItems (ComboBox* comp, const String& itemString)
@@ -77,29 +77,34 @@ public:
         }
     }
 
-    void update (ComponentDocument& document, ComboBox* comp, const ValueTree& state)
+    void update (ComponentTypeInstance& item, ComboBox* comp)
     {
-        updateItems (comp, state ["items"]);
-        comp->setEditableText (state ["editable"]);
-        comp->setJustificationType ((int) state ["textJustification"]);
-        comp->setTextWhenNothingSelected (state ["unselectedText"].toString());
-        comp->setTextWhenNoChoicesAvailable (state ["noItemsText"].toString());
+        updateItems (comp, item ["items"]);
+        comp->setEditableText (item ["editable"]);
+        comp->setJustificationType ((int) item ["textJustification"]);
+        comp->setTextWhenNothingSelected (item ["unselectedText"].toString());
+        comp->setTextWhenNoChoicesAvailable (item ["noItemsText"].toString());
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        addTooltipProperty (document, state, props);
-        addFocusOrderProperty (document, state, props);
+        item.addTooltipProperty (props);
+        item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (getValue ("items", state, document), "Items", 16384, true));
+        props.add (new TextPropertyComponent (item.getValue ("items"), "Items", 16384, true));
         props.getLast()->setTooltip ("A list of items to use to initialise the ComboBox");
 
-        props.add (new BooleanPropertyComponent (getValue ("editable", state, document), "Editable", "Text is editable"));
-        props.add (createJustificationProperty ("Text Position", getValue ("textJustification", state, document), false));
-        props.add (new TextPropertyComponent (getValue ("unselectedText", state, document), "Text when none selected", 512, false));
-        props.add (new TextPropertyComponent (getValue ("noItemsText", state, document), "Text when no items", 512, false));
+        props.add (new BooleanPropertyComponent (item.getValue ("editable"), "Editable", "Text is editable"));
+        item.addJustificationProperty (props, "Text Position", item.getValue ("textJustification"), false);
+        props.add (new TextPropertyComponent (item.getValue ("unselectedText"), "Text when none selected", 512, false));
+        props.add (new TextPropertyComponent (item.getValue ("noItemsText"), "Text when no items", 512, false));
 
-        addEditableColourProperties (document, state, props);
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (String::empty);
     }
 };
 

@@ -156,7 +156,7 @@ public:
 
         This is needed to avoid unicode problems with the argc type params.
     */
-    static const String JUCE_CALLTYPE getCurrentCommandLineParams() throw();
+    static const String JUCE_CALLTYPE getCurrentCommandLineParams();
 #endif
 
     /** Clears the floating point unit's flags.

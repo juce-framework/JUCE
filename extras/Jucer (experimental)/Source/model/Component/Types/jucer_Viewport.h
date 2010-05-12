@@ -34,7 +34,7 @@
 class ViewportHandler  : public ComponentTypeHelper<Viewport>
 {
 public:
-    ViewportHandler() : ComponentTypeHelper<Viewport> ("Viewport", "VIEWPORT", "viewport")  {}
+    ViewportHandler() : ComponentTypeHelper<Viewport> ("Viewport", "Viewport", "VIEWPORT", "viewport")  {}
     ~ViewportHandler()  {}
 
     class DemoContentComponent  : public Component
@@ -60,24 +60,30 @@ public:
 
     const Rectangle<int> getDefaultSize()       { return Rectangle<int> (0, 0, 300, 200); }
 
-    void initialiseNew (ComponentDocument& document, ValueTree& state)
+    void initialiseNew (ComponentTypeInstance& item)
     {
-        state.setProperty ("scrollBarV", true, 0);
-        state.setProperty ("scrollBarH", true, 0);
-        state.setProperty ("scrollbarWidth", 18, 0);
+        item.set ("scrollBarV", true);
+        item.set ("scrollBarH", true);
+        item.set ("scrollbarWidth", 18);
     }
 
-    void update (ComponentDocument& document, Viewport* comp, const ValueTree& state)
+    void update (ComponentTypeInstance& item, Viewport* comp)
     {
-        comp->setScrollBarsShown (state ["scrollBarV"], state ["scrollBarH"]);
-        comp->setScrollBarThickness (state ["scrollbarWidth"]);
+        comp->setScrollBarsShown (item ["scrollBarV"], item ["scrollBarH"]);
+        comp->setScrollBarThickness (item ["scrollbarWidth"]);
     }
 
-    void createProperties (ComponentDocument& document, ValueTree& state, Array <PropertyComponent*>& props)
+    void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        props.add (new BooleanPropertyComponent (getValue ("scrollBarV", state, document), "Scrollbar V", "Vertical scrollbar shown"));
-        props.add (new BooleanPropertyComponent (getValue ("scrollBarH", state, document), "Scrollbar H", "Horizontal scrollbar shown"));
-        props.add (new SliderPropertyComponent (getValue ("scrollbarWidth", state, document), "Scrollbar Thickness", 3, 40, 1));
+        props.add (new BooleanPropertyComponent (item.getValue ("scrollBarV"), "Scrollbar V", "Vertical scrollbar shown"));
+        props.add (new BooleanPropertyComponent (item.getValue ("scrollBarH"), "Scrollbar H", "Horizontal scrollbar shown"));
+        props.add (new SliderPropertyComponent (item.getValue ("scrollbarWidth"), "Scrollbar Thickness", 3, 40, 1));
+        addEditableColourProperties (item, props);
+    }
+
+    void createCode (ComponentTypeInstance& item, CodeGenerator& code)
+    {
+        code.constructorCode << item.createConstructorStatement (CodeFormatting::stringLiteral (item.getComponentName()));
     }
 };
 

@@ -95,7 +95,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
     }
 
     //xxx ain't got one!
-    jassertfalse
+    jassertfalse;
 }
 
 #endif

@@ -48,8 +48,8 @@ bool AudioIODevice::hasControlPanel() const
 
 bool AudioIODevice::showControlPanel()
 {
-    jassertfalse    // this should only be called for devices which return true from
-                    // their hasControlPanel() method.
+    jassertfalse;    // this should only be called for devices which return true from
+                     // their hasControlPanel() method.
     return false;
 }
 

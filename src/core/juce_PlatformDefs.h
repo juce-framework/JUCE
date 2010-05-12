@@ -123,7 +123,7 @@
 
       @see jassertfalse
   */
-  #define jassert(expression)           { if (! (expression)) jassertfalse }
+  #define jassert(expression)           { if (! (expression)) jassertfalse; }
 
 #else
   //==============================================================================
@@ -134,7 +134,7 @@
   #define jassertfalse                  { juce_LogCurrentAssertion }
 
   #if JUCE_LOG_ASSERTIONS
-    #define jassert(expression)         { if (! (expression)) jassertfalse }
+    #define jassert(expression)         { if (! (expression)) jassertfalse; }
   #else
     #define jassert(a)                  { }
   #endif
@@ -173,7 +173,7 @@
     }
 
   #define JUCE_CATCH_ALL            catch (...) {}
-  #define JUCE_CATCH_ALL_ASSERT     catch (...) { jassertfalse }
+  #define JUCE_CATCH_ALL_ASSERT     catch (...) { jassertfalse; }
 
 #else
 

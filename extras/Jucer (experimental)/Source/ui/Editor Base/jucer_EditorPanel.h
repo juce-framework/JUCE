@@ -43,7 +43,7 @@ public:
         tree->setRootItemVisible (true);
         tree->setMultiSelectEnabled (true);
         tree->setDefaultOpenness (true);
-        tree->setColour (TreeView::backgroundColourId, Colours::white);
+        tree->setColour (TreeView::backgroundColourId, Colour::greyLevel (0.92f));
         tree->setIndentSize (15);
     }
 
@@ -175,7 +175,7 @@ private:
         PropertyPanel* props;
     };
 
-
+    //==============================================================================
     class CanvasViewport  : public Viewport
     {
     public:
@@ -202,6 +202,7 @@ private:
         }
     };
 
+    //==============================================================================
     Toolbar* toolbar;
     Viewport* viewport;
     InfoPanel* infoPanel;

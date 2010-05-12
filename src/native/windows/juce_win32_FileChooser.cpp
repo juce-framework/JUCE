@@ -189,7 +189,7 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
         if (currentExtraFileWin->isValidComponent())
         {
-            jassertfalse
+            jassertfalse;
             return;
         }
 

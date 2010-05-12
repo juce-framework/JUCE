@@ -64,7 +64,7 @@ bool RSAKey::applyToValue (BigInteger& value) const
 {
     if (part1.isZero() || part2.isZero() || value <= 0)
     {
-        jassertfalse   // using an uninitialised key
+        jassertfalse;   // using an uninitialised key
         value.clear();
         return false;
     }

@@ -998,7 +998,7 @@ private:
         }
         else
         {
-            jassertfalse
+            jassertfalse;
         }
     }
 
@@ -2210,7 +2210,7 @@ class ScreenSaverDefeater   : public Timer,
                               public DeletedAtShutdown
 {
 public:
-    ScreenSaverDefeater() throw()
+    ScreenSaverDefeater()
     {
         startTimer (10000);
         timerCallback();
@@ -2241,19 +2241,15 @@ public:
 
 static ScreenSaverDefeater* screenSaverDefeater = 0;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (isEnabled)
-    {
         deleteAndZero (screenSaverDefeater);
-    }
     else if (screenSaverDefeater == 0)
-    {
         screenSaverDefeater = new ScreenSaverDefeater();
-    }
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverDefeater == 0;
 }

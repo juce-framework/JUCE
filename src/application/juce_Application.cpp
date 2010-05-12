@@ -113,7 +113,7 @@ void JUCEApplication::unhandledException (const std::exception*,
                                           const String&,
                                           const int)
 {
-    jassertfalse
+    jassertfalse;
 }
 
 void JUCEApplication::sendUnhandledException (const std::exception* const e,
@@ -342,7 +342,7 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
             // Ended up here? If so, TURN ON RTTI in your compiler settings!! And if you
             // got as far as this catch statement, then why haven't you got exception catching
             // turned on in the debugger???
-            jassertfalse
+            jassertfalse;
         }
 #endif
     }

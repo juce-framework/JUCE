@@ -24,9 +24,15 @@
 //[MiscUserDefs] You can add your own user definitions and misc code here...
 //[/MiscUserDefs]
 
+extern const unsigned char %%className%%_ComponentStateData[];
+
 //==============================================================================
 %%className%%::%%className%% (%%constructorParams%%)
 %%initialisers%%{
+    componentState = ValueTree::readFromData (%%className%%_ComponentStateData, %%statedatasize%%);
+    jassert (componentState.isValid());
+    const ValueTree componentStateList (componentState.getChildByName ("COMPONENTS"));
+
     %%constructor%%
 
     //[Constructor] You can add your own custom stuff here..
@@ -51,6 +57,10 @@
 //[/MiscUserCode]
 
 %%staticMemberDefinitions%%
+
+//==============================================================================
+/* This data contains the ValueTree that holds all the Jucer-generated settings for the components */
+const unsigned char %%className%%_ComponentStateData[] = %%statedata%%;
 
 //==============================================================================
 //=======================  Jucer Information Section  ==========================

@@ -472,7 +472,7 @@ void Component::userTriedToCloseWindow()
        If you want to ignore the event and don't want to trigger this assertion, just override
        this method and do nothing.
     */
-    jassertfalse
+    jassertfalse;
 }
 
 void Component::minimisationStateChanged (bool)
@@ -625,7 +625,7 @@ void Component::toBack()
 
     if (isOnDesktop())
     {
-        jassertfalse //xxx need to add this to native window
+        jassertfalse; //xxx need to add this to native window
     }
     else if (parentComponent_ != 0 && childList.getFirst() != this)
     {

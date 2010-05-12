@@ -50,7 +50,7 @@ FileOutputStream::FileOutputStream (const File& f,
 
         if (currentPosition < 0)
         {
-            jassertfalse
+            jassertfalse;
             juce_fileClose (fileHandle);
             fileHandle = 0;
         }

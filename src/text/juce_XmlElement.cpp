@@ -71,7 +71,7 @@ XmlElement::XmlElement (int /*dummy*/) throw()
 {
 }
 
-XmlElement::XmlElement (const XmlElement& other) throw()
+XmlElement::XmlElement (const XmlElement& other)
     : tagName (other.tagName),
       firstChildElement (0),
       nextElement (0),
@@ -80,7 +80,7 @@ XmlElement::XmlElement (const XmlElement& other) throw()
     copyChildrenAndAttributesFrom (other);
 }
 
-XmlElement& XmlElement::operator= (const XmlElement& other) throw()
+XmlElement& XmlElement::operator= (const XmlElement& other)
 {
     if (this != &other)
     {
@@ -95,7 +95,7 @@ XmlElement& XmlElement::operator= (const XmlElement& other) throw()
     return *this;
 }
 
-void XmlElement::copyChildrenAndAttributesFrom (const XmlElement& other) throw()
+void XmlElement::copyChildrenAndAttributesFrom (const XmlElement& other)
 {
     XmlElement* child = other.firstChildElement;
     XmlElement* lastChild = 0;
@@ -1080,7 +1080,7 @@ bool XmlElement::isTextElement() const throw()
 
 static const juce_wchar* const juce_xmltextContentAttributeName = L"text";
 
-const String XmlElement::getText() const throw()
+const String& XmlElement::getText() const throw()
 {
     jassert (isTextElement());  // you're trying to get the text from an element that
                                 // isn't actually a text element.. If this contains text sub-nodes, you
@@ -1089,19 +1089,15 @@ const String XmlElement::getText() const throw()
     return getStringAttribute (juce_xmltextContentAttributeName);
 }
 
-void XmlElement::setText (const String& newText) throw()
+void XmlElement::setText (const String& newText)
 {
     if (isTextElement())
-    {
         setAttribute (juce_xmltextContentAttributeName, newText);
-    }
     else
-    {
-        jassertfalse // you can only change the text in a text element, not a normal one.
-    }
+        jassertfalse; // you can only change the text in a text element, not a normal one.
 }
 
-const String XmlElement::getAllSubText() const throw()
+const String XmlElement::getAllSubText() const
 {
     String result;
     String::Concatenator concatenator (result);
@@ -1119,7 +1115,7 @@ const String XmlElement::getAllSubText() const throw()
 }
 
 const String XmlElement::getChildElementAllSubText (const String& childTagName,
-                                                    const String& defaultReturnValue) const throw()
+                                                    const String& defaultReturnValue) const
 {
     const XmlElement* const child = getChildByName (childTagName);
 
@@ -1129,14 +1125,14 @@ const String XmlElement::getChildElementAllSubText (const String& childTagName,
     return defaultReturnValue;
 }
 
-XmlElement* XmlElement::createTextElement (const String& text) throw()
+XmlElement* XmlElement::createTextElement (const String& text)
 {
     XmlElement* const e = new XmlElement ((int) 0);
     e->setAttribute (juce_xmltextContentAttributeName, text);
     return e;
 }
 
-void XmlElement::addTextElement (const String& text) throw()
+void XmlElement::addTextElement (const String& text)
 {
     addChildElement (createTextElement (text));
 }

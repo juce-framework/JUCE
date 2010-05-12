@@ -491,13 +491,9 @@ public:
                             imageData = (uint8*) segmentInfo.shmaddr;
 
                             if (XShmAttach (display, &segmentInfo) != 0)
-                            {
                                 usingXShm = true;
-                            }
                             else
-                            {
-                                jassertfalse
-                            }
+                                jassertfalse;
                         }
                         else
                         {
@@ -552,9 +548,7 @@ public:
             }
 
             if (! XInitImage (xImage))
-            {
-                jassertfalse
-            }
+                jassertfalse;
         }
     }
 
@@ -664,7 +658,7 @@ private:
             if (((mask >> i) & 1) != 0)
                 return i - 7;
 
-        jassertfalse
+        jassertfalse;
         return 0;
     }
 };
@@ -2242,7 +2236,7 @@ private:
         if (XSaveContext (display, (XID) wndH, windowHandleXContext, (XPointer) this))
         {
             // Failed
-            jassertfalse
+            jassertfalse;
             Logger::outputDebugString ("Failed to create context information for window.\n");
             XDestroyWindow (display, wndH);
             wndH = 0;
@@ -2925,7 +2919,7 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
 //==============================================================================
 static bool screenSaverAllowed = true;
 
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     if (screenSaverAllowed != isEnabled)
     {
@@ -2948,7 +2942,7 @@ void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
     }
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled()
 {
     return screenSaverAllowed;
 }
@@ -3364,13 +3358,13 @@ void OpenGLPixelFormat::getAvailablePixelFormats (Component* component,
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {
-    jassertfalse    // not implemented!
+    jassertfalse;    // not implemented!
     return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 {
-    jassertfalse    // not implemented!
+    jassertfalse;    // not implemented!
     return false;
 }
 

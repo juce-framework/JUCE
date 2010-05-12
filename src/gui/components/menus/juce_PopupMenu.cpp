@@ -1734,14 +1734,14 @@ void PopupMenuCustomComponent::triggerMenuItem()
         else
         {
             // something must have gone wrong with the component hierarchy if this happens..
-            jassertfalse
+            jassertfalse;
         }
     }
     else
     {
         // why isn't this component inside a menu? Not much point triggering the item if
         // there's no menu.
-        jassertfalse
+        jassertfalse;
     }
 }
 

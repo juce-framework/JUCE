@@ -2190,7 +2190,7 @@ void TextEditor::handleCommandMessage (const int commandId)
         break;
 
     default:
-        jassertfalse
+        jassertfalse;
         break;
     }
 }

@@ -827,7 +827,7 @@ void Path::addPath (const Path& other)
         else
         {
             // something's gone wrong with the element list!
-            jassertfalse
+            jassertfalse;
         }
     }
 }
@@ -881,7 +881,7 @@ void Path::addPath (const Path& other,
             else
             {
                 // something's gone wrong with the element list!
-                jassertfalse
+                jassertfalse;
             }
         }
     }
@@ -1323,7 +1323,7 @@ void Path::loadPathFromStream (InputStream& source)
             return; // end of path marker
 
         default:
-            jassertfalse // illegal char in the stream
+            jassertfalse; // illegal char in the stream
             break;
         }
     }
@@ -1529,7 +1529,7 @@ void Path::restoreFromString (const String& stringVersion)
             break;
 
         default:
-            jassertfalse // illegal string format?
+            jassertfalse; // illegal string format?
             break;
         }
     }

@@ -354,7 +354,7 @@ bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     if (image.hasAlphaChannel())
     {
         // this method could fill the background in white and still save the image..
-        jassertfalse
+        jassertfalse;
         return true;
     }
 

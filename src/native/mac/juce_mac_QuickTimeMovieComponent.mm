@@ -149,7 +149,7 @@ bool QuickTimeMovieComponent::loadMovie (InputStream* movieStream,
     {
         // To open a movie, this component must be visible inside a functioning window, so that
         // the QT control can be assigned to the window.
-        jassertfalse
+        jassertfalse;
         return false;
     }
 
@@ -176,7 +176,7 @@ bool QuickTimeMovieComponent::loadMovie (const URL& movieURL,
     {
         // To open a movie, this component must be visible inside a functioning window, so that
         // the QT control can be assigned to the window.
-        jassertfalse
+        jassertfalse;
         return false;
     }
 

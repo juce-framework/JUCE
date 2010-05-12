@@ -158,23 +158,23 @@ bool AlertWindow::showNativeDialogBox (const String& title,
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
 {
-    jassertfalse    // no such thing on the iphone!
+    jassertfalse;    // no such thing on the iphone!
     return false;
 }
 
 bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
 {
-    jassertfalse    // no such thing on the iphone!
+    jassertfalse;    // no such thing on the iphone!
     return false;
 }
 
 //==============================================================================
-void Desktop::setScreenSaverEnabled (const bool isEnabled) throw()
+void Desktop::setScreenSaverEnabled (const bool isEnabled)
 {
     [[UIApplication sharedApplication] setIdleTimerDisabled: ! isEnabled];
 }
 
-bool Desktop::isScreenSaverEnabled() throw()
+bool Desktop::isScreenSaverEnabled()
 {
     return ! [[UIApplication sharedApplication] isIdleTimerDisabled];
 }

@@ -323,7 +323,7 @@ public:
                 path.closeSubPath();
                 break;
             default:
-                jassertfalse
+                jassertfalse;
                 break;
             }
         }
