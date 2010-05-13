@@ -93,7 +93,7 @@ public:
         props.getLast()->setTooltip ("Because objective-C linkage is done by string-matching, you can get horrible linkage mix-ups when different modules containing the "
                                      "same class-names are loaded simultaneously. This setting lets you provide a unique string that will be used in naming the obj-C classes in your executable to avoid this.");
 
-        if (! iPhone)
+        if (project.isGUIApplication() && ! iPhone)
         {
             props.add (new TextPropertyComponent (getSetting ("documentExtensions"), "Document file extensions", 128, false));
             props.getLast()->setTooltip ("A comma-separated list of file extensions for documents that your app can open.");
@@ -509,6 +509,7 @@ private:
 
         {
             defines.addArray (config.parsePreprocessorDefs());
+            defines.addArray (parsePreprocessorDefs());
 
             for (int i = defines.size(); --i >= 0;)
                 defines.set (i, defines[i].quoted());

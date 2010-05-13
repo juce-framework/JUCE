@@ -139,6 +139,7 @@ private:
         }
 
         defines.addArray (config.parsePreprocessorDefs());
+        defines.addArray (parsePreprocessorDefs());
 
         for (int i = 0; i < defines.size(); ++i)
             out << " -D " << defines[i].quoted();

@@ -171,6 +171,8 @@ void ProjectExporter::createPropertyEditors (Array <PropertyComponent*>& props)
         }
     }
 
+    props.add (new TextPropertyComponent (getExtraPreprocessorDefs(), "Extra Preprocessor Definitions", 32768, false));
+    props.getLast()->setTooltip ("Extra preprocessor definitions. Use whitespace or commas as a delimiter.");
     props.add (new TextPropertyComponent (getExtraCompilerFlags(), "Extra compiler flags", 2048, false));
     props.getLast()->setTooltip ("Extra command-line flags to be passed to the compiler");
     props.add (new TextPropertyComponent (getExtraLinkerFlags(), "Extra linker flags", 2048, false));
@@ -190,4 +192,12 @@ const Array<RelativePath> ProjectExporter::getVSTFilesRequired() const
     }
 
     return s;
+}
+
+const StringArray ProjectExporter::parsePreprocessorDefs() const
+{
+    StringArray defines;
+    defines.addTokens (getExtraPreprocessorDefs().toString(), " ,;", String::empty);
+    defines.removeEmptyStrings (true);
+    return defines;
 }

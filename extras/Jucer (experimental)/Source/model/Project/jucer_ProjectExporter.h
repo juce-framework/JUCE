@@ -78,6 +78,9 @@ public:
     Value getExtraCompilerFlags() const     { return getSetting ("extraCompilerFlags"); }
     Value getExtraLinkerFlags() const       { return getSetting ("extraLinkerFlags"); }
 
+    Value getExtraPreprocessorDefs() const  { return getSetting ("extraDefs"); }
+    const StringArray parsePreprocessorDefs() const;
+
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     const String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
 

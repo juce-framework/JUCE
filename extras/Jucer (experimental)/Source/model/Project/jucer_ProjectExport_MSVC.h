@@ -93,6 +93,9 @@ public:
 
         if (getRTASFolder().toString().isEmpty())
             getRTASFolder() = "c:\\SDKs\\PT_80_SDK";
+
+        if ((int) getLibraryType().getValue() <= 0)
+            getLibraryType() = 1;
     }
 
     ~MSVCProjectExporter()  {}
@@ -119,6 +122,18 @@ public:
     void createPropertyEditors (Array <PropertyComponent*>& props)
     {
         ProjectExporter::createPropertyEditors (props);
+
+        if (project.isLibrary())
+        {
+            static const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
+            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type", StringArray (libTypes)));
+
+            props.add (new TextPropertyComponent (getSetting ("libraryName_Debug"), "Library Name (Debug)", 128, false));
+            props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a debug build. You must include the .lib or .dll suffix on this filename.");
+
+            props.add (new TextPropertyComponent (getSetting ("libraryName_Release"), "Library Name (Release)", 128, false));
+            props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a release build. You must include the .lib or .dll suffix on this filename.");
+        }
     }
 
     //==============================================================================
@@ -179,6 +194,9 @@ private:
     const File getSLNFile() const       { return getProjectFile (".sln"); }
     const File getDSPFile() const       { return getProjectFile (".dsp"); }
     const File getDSWFile() const       { return getProjectFile (".dsw"); }
+
+    Value getLibraryType() const        { return getSetting ("libraryType"); }
+    bool isLibraryDLL() const           { return project.isLibrary() && getLibraryType() == 2; }
 
     //==============================================================================
     void fillInMasterXml (XmlElement& masterXml)
@@ -357,6 +375,7 @@ private:
         }
 
         defines.addArray (config.parsePreprocessorDefs());
+        defines.addArray (parsePreprocessorDefs());
         return defines.joinIntoString (joinString);
     }
 
@@ -416,6 +435,15 @@ private:
         return e;
     }
 
+    const String getBinaryFileForConfig (const Project::BuildConfiguration& config) const
+    {
+        const String targetBinary (getSetting (config.isDebug().getValue() ? "libraryName_Debug" : "libraryName_Release").toString().trim());
+        if (targetBinary.isNotEmpty())
+            return targetBinary;
+
+        return config.getTargetBinaryName().toString() + getTargetBinarySuffix();
+    }
+
     void createConfig (XmlElement& xml, const Project::BuildConfiguration& config) const
     {
         String binariesPath (getConfigTargetPath (config));
@@ -426,7 +454,7 @@ private:
         xml.setAttribute ("Name", createConfigName (config));
         xml.setAttribute ("OutputDirectory", FileUtils::windowsStylePath (binariesPath));
         xml.setAttribute ("IntermediateDirectory", FileUtils::windowsStylePath (intermediatesPath));
-        xml.setAttribute ("ConfigurationType", (project.isAudioPlugin() || project.isBrowserPlugin())
+        xml.setAttribute ("ConfigurationType", (project.isAudioPlugin() || project.isBrowserPlugin() || isLibraryDLL())
                                                     ? "2" : (project.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
         xml.setAttribute ("ATLMinimizesCRunTimeLibraryUsage", "false");
@@ -504,11 +532,13 @@ private:
 
         createToolElement (xml, "VCPreLinkEventTool");
 
+        const String outputFileName (getBinaryFileForConfig (config));
+
         if (! project.isLibrary())
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            linker->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
+            linker->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             if (project.getJuceLinkageMode() == Project::useLinkedJuce)
@@ -544,10 +574,24 @@ private:
         }
         else
         {
-            XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
+            if (isLibraryDLL())
+            {
+                XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            librarian->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
-            librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
+                String extraLinkerOptions (getExtraLinkerFlags().toString());
+                extraLinkerOptions << " /IMPLIB:" << FileUtils::windowsStylePath (binariesPath + "/" + outputFileName.upToLastOccurrenceOf (".", false, false) + ".lib");
+                linker->setAttribute ("AdditionalOptions", extraLinkerOptions.trim());
+
+                linker->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
+                linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
+            }
+            else
+            {
+                XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
+
+                librarian->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
+                librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
+            }
         }
 
         createToolElement (xml, "VCALinkTool");
@@ -683,7 +727,7 @@ private:
             targetList << "# Name \"" << configName << '"' << newLine;
 
             const String binariesPath (getConfigTargetPath (config));
-            const String targetBinary (FileUtils::windowsStylePath (binariesPath + "/" + config.getTargetBinaryName().toString() + getTargetBinarySuffix()));
+            const String targetBinary (FileUtils::windowsStylePath (binariesPath + "/" + getBinaryFileForConfig (config)));
             const String optimisationFlag (((int) config.getOptimisationLevel().getValue() <= 1) ? "Od" : (config.getOptimisationLevel() == 2 ? "O2" : "O3"));
             const String defines (getPreprocessorDefs (config, " /D "));
             const bool isDebug = (bool) config.isDebug().getValue();
