@@ -5728,8 +5728,8 @@ public:
 	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
 
-  #if JUCE_PPC
-	// None of these atomics are available in a PPC build!!
+  #if JUCE_PPC || JUCE_IPHONE
+	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
 	template <typename Type> static Type OSAtomicAdd64 (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
 	template <typename Type> static Type OSAtomicIncrement64 (volatile Type* a) throw()	 { jassertfalse; return ++*a; }
 	template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()	 { jassertfalse; return --*a; }
@@ -9996,6 +9996,12 @@ public:
 	ValueType clipValue (const ValueType value) const throw()
 	{
 		return jlimit (start, end, value);
+	}
+
+	/** Returns true if the given range lies entirely inside this range. */
+	bool contains (const Range& other) const throw()
+	{
+		return start <= other.start && end >= other.end;
 	}
 
 	/** Returns true if the given range intersects this one. */

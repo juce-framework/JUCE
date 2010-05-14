@@ -213,6 +213,12 @@ public:
         return jlimit (start, end, value);
     }
 
+    /** Returns true if the given range lies entirely inside this range. */
+    bool contains (const Range& other) const throw()
+    {
+        return start <= other.start && end >= other.end;
+    }
+
     /** Returns true if the given range intersects this one. */
     bool intersects (const Range& other) const throw()
     {
