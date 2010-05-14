@@ -41,7 +41,7 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static VoidArray heavyweightPeers;
+static Array <ComponentPeer*> heavyweightPeers;
 
 
 //==============================================================================
@@ -72,14 +72,14 @@ int ComponentPeer::getNumPeers() throw()
 
 ComponentPeer* ComponentPeer::getPeer (const int index) throw()
 {
-    return (ComponentPeer*) heavyweightPeers [index];
+    return heavyweightPeers [index];
 }
 
 ComponentPeer* ComponentPeer::getPeerFor (const Component* const component) throw()
 {
     for (int i = heavyweightPeers.size(); --i >= 0;)
     {
-        ComponentPeer* const peer = (ComponentPeer*) heavyweightPeers.getUnchecked(i);
+        ComponentPeer* const peer = heavyweightPeers.getUnchecked(i);
 
         if (peer->getComponent() == component)
             return peer;
@@ -176,7 +176,7 @@ bool ComponentPeer::handleKeyPress (const int keyCode,
         {
             for (int i = target->keyListeners_->size(); --i >= 0;)
             {
-                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyPressed (keyInfo, target);
+                keyWasUsed = target->keyListeners_->getUnchecked(i)->keyPressed (keyInfo, target);
 
                 if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;
@@ -235,7 +235,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
         {
             for (int i = target->keyListeners_->size(); --i >= 0;)
             {
-                keyWasUsed = ((KeyListener*) target->keyListeners_->getUnchecked(i))->keyStateChanged (isKeyDown, target);
+                keyWasUsed = target->keyListeners_->getUnchecked(i)->keyStateChanged (isKeyDown, target);
 
                 if (keyWasUsed || deletionChecker == 0)
                     return keyWasUsed;

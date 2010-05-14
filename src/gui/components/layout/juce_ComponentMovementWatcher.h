@@ -78,7 +78,7 @@ private:
     //==============================================================================
     Component::SafePointer<Component> component;
     ComponentPeer* lastPeer;
-    VoidArray registeredParentComps;
+    Array <Component*> registeredParentComps;
     bool reentrant;
     Rectangle<int> lastBounds;
 

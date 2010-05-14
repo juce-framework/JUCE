@@ -213,14 +213,14 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
 static BOOL CALLBACK BroadcastEnumWindowProc (HWND hwnd, LPARAM lParam)
 {
     if (hwnd != juce_messageWindowHandle)
-        reinterpret_cast <VoidArray*> (lParam)->add ((void*) hwnd);
+        reinterpret_cast <Array<void*>*> (lParam)->add ((void*) hwnd);
 
     return TRUE;
 }
 
 void MessageManager::broadcastMessage (const String& value) throw()
 {
-    VoidArray windows;
+    Array<void*> windows;
     EnumWindows (&BroadcastEnumWindowProc, (LPARAM) &windows);
 
     const String localCopy (value);

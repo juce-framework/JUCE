@@ -498,7 +498,7 @@ private:
             if (isDebug)
             {
                 compiler->setAttribute ("BufferSecurityCheck", "");
-                compiler->setAttribute ("DebugInformationFormat", "4");
+                compiler->setAttribute ("DebugInformationFormat", project.isLibrary() ? "3" : "4");
             }
             else
             {
@@ -516,7 +516,7 @@ private:
             compiler->setAttribute ("AssemblerListingLocation", FileUtils::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ObjectFile", FileUtils::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ProgramDataBaseFileName", FileUtils::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("WarningLevel", "3");
+            compiler->setAttribute ("WarningLevel", project.isLibrary() ? "4" : "3");
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
             if (getExtraCompilerFlags().toString().isNotEmpty())

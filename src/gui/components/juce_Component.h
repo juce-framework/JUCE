@@ -38,12 +38,13 @@
 #include "../../events/juce_MessageListener.h"
 #include "../../events/juce_ListenerList.h"
 #include "../../text/juce_StringArray.h"
-#include "../../containers/juce_VoidArray.h"
+#include "../../containers/juce_Array.h"
 #include "../../containers/juce_NamedValueSet.h"
 class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
 class ComponentPeer;
+
 
 //==============================================================================
 /**
@@ -51,7 +52,7 @@ class ComponentPeer;
 
 */
 class JUCE_API  Component  : public MouseListener,
-                             protected MessageListener
+                             public MessageListener
 {
 public:
     //==============================================================================
@@ -2002,7 +2003,7 @@ private:
     ImageEffectFilter* effect_;
     Image* bufferedImage_;
     Array <MouseListener*>* mouseListeners_;
-    VoidArray* keyListeners_;
+    Array <KeyListener*>* keyListeners_;
     ListenerList <ComponentListener> componentListeners;
     NamedValueSet properties;
 

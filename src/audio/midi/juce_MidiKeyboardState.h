@@ -28,7 +28,7 @@
 
 #include "juce_MidiBuffer.h"
 #include "../../threads/juce_ScopedLock.h"
-#include "../../containers/juce_VoidArray.h"
+#include "../../containers/juce_Array.h"
 class MidiKeyboardState;
 
 

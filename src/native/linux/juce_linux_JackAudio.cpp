@@ -445,7 +445,7 @@ private:
     HeapBlock <float*> inChans, outChans;
     int totalNumberOfInputChannels;
     int totalNumberOfOutputChannels;
-    VoidArray inputPorts, outputPorts;
+    Array<void*> inputPorts, outputPorts;
 };
 
 

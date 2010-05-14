@@ -309,7 +309,7 @@ const File PropertiesFile::getDefaultAppSettingsFile (const String& applicationN
                                                    : ("." + applicationName)));
 #endif
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     File dir (File::getSpecialLocation (commonToAllUsers ? File::commonApplicationDataDirectory
                                                          : File::userApplicationDataDirectory));
 

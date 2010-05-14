@@ -351,7 +351,7 @@ public:
     juce_UseDebuggingNewOperator
 };
 
-static VoidArray activePlugins;
+static Array<void*> activePlugins;
 
 
 //==============================================================================
@@ -672,7 +672,7 @@ public:
                 int i;
                 for (i = 0; i < numOut; ++i)
                 {
-                    float* chan = (float*) tempChannels.getUnchecked(i);
+                    float* chan = tempChannels.getUnchecked(i);
 
                     if (chan == 0)
                     {
@@ -1417,7 +1417,7 @@ private:
     VstSpeakerArrangementType speakerIn, speakerOut;
     int numInChans, numOutChans;
     HeapBlock <float*> channels;
-    VoidArray tempChannels; // see note in processReplacing()
+    Array<float*> tempChannels; // see note in processReplacing()
     bool hasCreatedTempChannels;
     bool shouldDeleteEditor;
 

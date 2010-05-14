@@ -28,8 +28,8 @@
 
 #include "juce_AudioSource.h"
 #include "../../threads/juce_CriticalSection.h"
-#include "../../containers/juce_VoidArray.h"
-#include "../../containers/juce_BitArray.h"
+#include "../../containers/juce_Array.h"
+#include "../../containers/juce_BigInteger.h"
 
 
 //==============================================================================
@@ -111,7 +111,7 @@ public:
 
 private:
     //==============================================================================
-    VoidArray inputs;
+    Array <AudioSource*> inputs;
     BigInteger inputsToDelete;
     CriticalSection lock;
     AudioSampleBuffer tempBuffer;

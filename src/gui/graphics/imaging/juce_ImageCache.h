@@ -30,7 +30,7 @@
 #include "../../../io/files/juce_File.h"
 #include "../../../events/juce_Timer.h"
 #include "../../../utilities/juce_DeletedAtShutdown.h"
-#include "../../../containers/juce_VoidArray.h"
+#include "../../../containers/juce_OwnedArray.h"
 
 
 //==============================================================================

@@ -846,8 +846,6 @@ OSStatus AudioUnitPluginInstance::getTransportState (Boolean* outIsPlaying,
 
 
 //==============================================================================
-static VoidArray activeWindows;
-
 class AudioUnitPluginWindowCocoa    : public AudioProcessorEditor
 {
 public:
@@ -857,8 +855,6 @@ public:
           wrapper (0)
     {
         addAndMakeVisible (wrapper = new NSViewComponent());
-
-        activeWindows.add (this);
 
         setOpaque (true);
         setVisible (true);
@@ -872,7 +868,6 @@ public:
         const bool wasValid = isValid();
 
         wrapper->setView (0);
-        activeWindows.removeValue (this);
 
         if (wasValid)
             plugin.editorBeingDeleted (this);
@@ -964,8 +959,6 @@ public:
     {
         addAndMakeVisible (innerWrapper = new InnerWrapperComponent (this));
 
-        activeWindows.add (this);
-
         setOpaque (true);
         setVisible (true);
         setSize (400, 300);
@@ -981,7 +974,6 @@ public:
     ~AudioUnitPluginWindowCarbon()
     {
         innerWrapper = 0;
-        activeWindows.removeValue (this);
 
         if (isValid())
             plugin.editorBeingDeleted (this);
@@ -1009,13 +1001,6 @@ public:
     bool keyPressed (const KeyPress&)
     {
         return false;
-    }
-
-    //==============================================================================
-    void broughtToFront()
-    {
-        activeWindows.removeValue (this);
-        activeWindows.add (this);
     }
 
     //==============================================================================

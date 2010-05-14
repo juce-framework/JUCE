@@ -85,7 +85,7 @@ public:
 
             for (int i = windows.size(); --i >= 0;)
             {
-                TopLevelWindow* const tlw = (TopLevelWindow*) windows.getUnchecked (i);
+                TopLevelWindow* const tlw = windows.getUnchecked (i);
                 tlw->setWindowActive (isWindowActive (tlw));
 
                 i = jmin (i, windows.size() - 1);
@@ -116,7 +116,7 @@ public:
             deleteInstance();
     }
 
-    VoidArray windows;
+    Array <TopLevelWindow*> windows;
 
 private:
     TopLevelWindow* currentActive;

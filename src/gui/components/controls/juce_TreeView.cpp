@@ -29,7 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_TreeView.h"
 #include "../lookandfeel/juce_LookAndFeel.h"
-#include "../../../containers/juce_BitArray.h"
+#include "../../../containers/juce_BigInteger.h"
 #include "../mouse/juce_DragAndDropContainer.h"
 #include "../mouse/juce_MouseInputSource.h"
 #include "../../graphics/imaging/juce_Image.h"

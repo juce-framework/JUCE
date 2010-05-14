@@ -471,7 +471,7 @@ struct MidiPortAndCallback
 namespace CoreMidiCallbacks
 {
     static CriticalSection callbackLock;
-    static VoidArray activeCallbacks;
+    static Array<void*> activeCallbacks;
 }
 
 static void midiInputProc (const MIDIPacketList* pktlist,

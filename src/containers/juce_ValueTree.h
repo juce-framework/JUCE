@@ -496,9 +496,10 @@ private:
     SharedObjectPtr object;
     ListenerList <Listener> listeners;
 
-public:
-    /** @internal */
-    explicit ValueTree (SharedObject*);  // (can be made private when VC6 support is finally dropped)
+#if JUCE_MSVC && ! DOXYGEN
+ public:  // (workaround for VC6)
+#endif
+    explicit ValueTree (SharedObject*);
 };
 
 

@@ -35,7 +35,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../core/juce_Time.h"
 #include "../threads/juce_Thread.h"
 #include "../threads/juce_ScopedLock.h"
-#include "../containers/juce_VoidArray.h"
 
 
 //==============================================================================

@@ -190,7 +190,7 @@ public:
 
         for (int i = listeners.size(); --i >= 0;)
         {
-            CameraImageListener* l = (CameraImageListener*) listeners[i];
+            CameraImageListener* const l = listeners[i];
 
             if (l != 0)
                 l->imageReceived (image);
@@ -207,7 +207,7 @@ public:
     QTCaptureCallbackDelegate* callbackDelegate;
     String openingError;
 
-    VoidArray listeners;
+    Array<CameraImageListener*> listeners;
     CriticalSection listenerLock;
 };
 

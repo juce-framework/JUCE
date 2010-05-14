@@ -118,7 +118,7 @@ void AudioProcessor::sendParamChangeMessageToListeners (const int parameterIndex
 
         {
             const ScopedLock sl (listenerLock);
-            l = (AudioProcessorListener*) listeners [i];
+            l = listeners [i];
         }
 
         if (l != 0)
@@ -143,7 +143,7 @@ void AudioProcessor::beginParameterChangeGesture (int parameterIndex)
 
         {
             const ScopedLock sl (listenerLock);
-            l = (AudioProcessorListener*) listeners [i];
+            l = listeners [i];
         }
 
         if (l != 0)
@@ -169,7 +169,7 @@ void AudioProcessor::endParameterChangeGesture (int parameterIndex)
 
         {
             const ScopedLock sl (listenerLock);
-            l = (AudioProcessorListener*) listeners [i];
+            l = listeners [i];
         }
 
         if (l != 0)
@@ -185,7 +185,7 @@ void AudioProcessor::updateHostDisplay()
 
         {
             const ScopedLock sl (listenerLock);
-            l = (AudioProcessorListener*) listeners [i];
+            l = listeners [i];
         }
 
         if (l != 0)

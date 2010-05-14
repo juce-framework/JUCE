@@ -23,23 +23,12 @@
   ==============================================================================
 */
 
-#include "../../core/juce_StandardHeader.h"
-
-BEGIN_JUCE_NAMESPACE
-
-#if JUCE_MAC && JUCE_USE_CDREADER
+// (This file gets included by juce_mac_NativeCode.mm, rather than being
+// compiled on its own).
+#if JUCE_INCLUDED_FILE && JUCE_USE_CDREADER
 
 //==============================================================================
-// Mac version doesn't need any native code because it's all done with files..
-// Windows + Linux versions are in the platform-dependent code sections.
-
-#include "juce_AudioCDReader.h"
-#include "juce_AiffAudioFormat.h"
-#include "../../io/files/juce_FileInputStream.h"
-#include "../../io/streams/juce_BufferedInputStream.h"
-
-
-static void findCDs (Array<File>& cds)
+static void juce_findCDs (Array<File>& cds)
 {
     File volumes ("/Volumes");
     volumes.findChildFiles (cds, File::findDirectories, false);
@@ -52,7 +41,7 @@ static void findCDs (Array<File>& cds)
 const StringArray AudioCDReader::getAvailableCDNames()
 {
     Array<File> cds;
-    findCDs (cds);
+    juce_findCDs (cds);
 
     StringArray names;
 
@@ -65,12 +54,12 @@ const StringArray AudioCDReader::getAvailableCDNames()
 AudioCDReader* AudioCDReader::createReaderForCD (const int index)
 {
     Array<File> cds;
-    findCDs (cds);
+    juce_findCDs (cds);
 
-    if (cds[index] != File::nonexistent)
+    if (cds[index].exists())
         return new AudioCDReader (cds[index]);
-    else
-        return 0;
+
+    return 0;
 }
 
 AudioCDReader::AudioCDReader (const File& volume)
@@ -91,7 +80,7 @@ AudioCDReader::~AudioCDReader()
 {
 }
 
-static int getTrackNumber (const File& file)
+static int juce_getCDTrackNumber (const File& file)
 {
     return file.getFileName()
                .initialSectionContainingOnly ("0123456789")
@@ -100,8 +89,8 @@ static int getTrackNumber (const File& file)
 
 int AudioCDReader::compareElements (const File& first, const File& second)
 {
-    const int firstTrack  = getTrackNumber (first);
-    const int secondTrack = getTrackNumber (second);
+    const int firstTrack  = juce_getCDTrackNumber (first);
+    const int secondTrack = juce_getCDTrackNumber (second);
 
     jassert (firstTrack > 0 && secondTrack > 0);
 
@@ -233,5 +222,3 @@ int AudioCDReader::getCDDBId()
 }
 
 #endif
-
-END_JUCE_NAMESPACE

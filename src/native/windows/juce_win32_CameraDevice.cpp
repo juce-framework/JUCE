@@ -152,7 +152,7 @@ public:
         removeGraphFromRot();
 
         for (int i = viewerComps.size(); --i >= 0;)
-            ((DShowCaptureViewerComp*) viewerComps.getUnchecked(i))->ownerDeleted();
+            viewerComps.getUnchecked(i)->ownerDeleted();
 
         callback = 0;
         graphBuilder = 0;
@@ -368,7 +368,7 @@ public:
 
         for (int i = listeners.size(); --i >= 0;)
         {
-            CameraImageListener* l = (CameraImageListener*) listeners[i];
+            CameraImageListener* const l = listeners[i];
 
             if (l != 0)
                 l->imageReceived (image);
@@ -431,7 +431,7 @@ public:
     int width, height;
     Time firstRecordedTime;
 
-    VoidArray viewerComps;
+    Array <DShowCaptureViewerComp*> viewerComps;
 
 private:
     CameraDevice* const owner;
@@ -652,7 +652,7 @@ private:
     };
 
     ComSmartPtr <GrabberCallback> callback;
-    VoidArray listeners;
+    Array <CameraImageListener*> listeners;
     CriticalSection listenerLock;
 
     //==============================================================================

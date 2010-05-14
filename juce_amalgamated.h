@@ -3374,7 +3374,7 @@ public:
 
 private:
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
   #if JUCE_64BIT
 	// To avoid including windows.h in the public Juce includes, we'll just allocate a
 	// block of memory here that's big enough to be used internally as a windows critical
@@ -4372,11 +4372,11 @@ private:
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
 
 #endif
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
+#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
 
-/*** Start of inlined file: juce_BitArray.h ***/
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
-#define __JUCE_BITARRAY_JUCEHEADER__
+/*** Start of inlined file: juce_BigInteger.h ***/
+#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
+#define __JUCE_BIGINTEGER_JUCEHEADER__
 
 class MemoryBlock;
 
@@ -4662,8 +4662,8 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
 */
 typedef BigInteger BitArray;
 
-#endif   // __JUCE_BITARRAY_JUCEHEADER__
-/*** End of inlined file: juce_BitArray.h ***/
+#endif   // __JUCE_BIGINTEGER_JUCEHEADER__
+/*** End of inlined file: juce_BigInteger.h ***/
 
 
 #endif
@@ -12624,7 +12624,7 @@ public:
 
 		If it's not possible to merge the two actions, the method should return zero.
 	*/
-	virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { return 0; }
+	virtual UndoableAction* createCoalescedAction (UndoableAction* nextAction)  { (void) nextAction; return 0; }
 };
 
 #endif   // __JUCE_UNDOABLEACTION_JUCEHEADER__
@@ -13275,9 +13275,10 @@ private:
 	SharedObjectPtr object;
 	ListenerList <Listener> listeners;
 
-public:
-	/** @internal */
-	explicit ValueTree (SharedObject*);  // (can be made private when VC6 support is finally dropped)
+#if JUCE_MSVC && ! DOXYGEN
+ public:  // (workaround for VC6)
+#endif
+	explicit ValueTree (SharedObject*);
 };
 
 #endif   // __JUCE_VALUETREE_JUCEHEADER__
@@ -13286,25 +13287,6 @@ public:
 
 #endif
 #ifndef __JUCE_VARIANT_JUCEHEADER__
-
-#endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
-
-/*** Start of inlined file: juce_VoidArray.h ***/
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
-#define __JUCE_VOIDARRAY_JUCEHEADER__
-
-/**
-	A typedef for an Array of void*'s.
-
-	VoidArrays are used in various places throughout the library instead of
-	more strongly-typed arrays, to keep code-size low.
-*/
-typedef Array <void*> VoidArray;
-
-#endif   // __JUCE_VOIDARRAY_JUCEHEADER__
-/*** End of inlined file: juce_VoidArray.h ***/
-
 
 #endif
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
@@ -24266,7 +24248,7 @@ class ComponentPeer;
 
 */
 class JUCE_API  Component  : public MouseListener,
-							 protected MessageListener
+							 public MessageListener
 {
 public:
 
@@ -26172,7 +26154,7 @@ private:
 	ImageEffectFilter* effect_;
 	Image* bufferedImage_;
 	Array <MouseListener*>* mouseListeners_;
-	VoidArray* keyListeners_;
+	Array <KeyListener*>* keyListeners_;
 	ListenerList <ComponentListener> componentListeners;
 	NamedValueSet properties;
 
@@ -31324,7 +31306,7 @@ public:
 
 private:
 
-	VoidArray inputs;
+	Array <AudioSource*> inputs;
 	BigInteger inputsToDelete;
 	CriticalSection lock;
 	AudioSampleBuffer tempBuffer;
@@ -37770,7 +37752,7 @@ protected:
 	void sendParamChangeMessageToListeners (const int parameterIndex, const float newValue);
 
 private:
-	VoidArray listeners;
+	Array <AudioProcessorListener*> listeners;
 	AudioProcessorEditor* activeEditor;
 	double sampleRate;
 	int blockSize, numInputChannels, numOutputChannels, latencySamples;
@@ -38056,7 +38038,7 @@ private:
 #ifndef __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 #define __JUCE_DIRECTXPLUGINFORMAT_JUCEHEADER__
 
-#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+#if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
 
 //   Sorry, this file is just a placeholder at the moment!...
 
@@ -39734,7 +39716,7 @@ private:
 	OwnedArray <MidiBuffer> midiBuffers;
 
 	CriticalSection renderLock;
-	VoidArray renderingOps;
+	Array<void*> renderingOps;
 
 	friend class AudioGraphIOProcessor;
 	AudioSampleBuffer* currentAudioInputBuffer;
@@ -41279,7 +41261,6 @@ private:
 	bool quitMessagePosted, quitMessageReceived;
 	Thread::ThreadID messageThreadId;
 
-	VoidArray modalComponents;
 	static void* exitModalLoopCallback (void*);
 
 	void postMessageToQueue (Message* message);
@@ -50003,7 +49984,7 @@ private:
 
 	Component::SafePointer<Component> component;
 	ComponentPeer* lastPeer;
-	VoidArray registeredParentComps;
+	Array <Component*> registeredParentComps;
 	bool reentrant;
 	Rectangle<int> lastBounds;
 
@@ -52163,8 +52144,8 @@ private:
 	ComponentBoundsConstrainer constrainer;
 	ComponentDragger dragger;
 	Rectangle<int> textArea;
-	VoidArray buttons, textBoxes, comboBoxes;
-	VoidArray progressBars, customComps, textBlocks, allComps;
+	Array<void*> buttons, textBoxes, comboBoxes;
+	Array<void*> progressBars, customComps, textBlocks, allComps;
 	StringArray textboxNames, comboBoxNames;
 	Font font;
 	Component* associatedComponent;

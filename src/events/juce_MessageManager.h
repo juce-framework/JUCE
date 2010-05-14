@@ -28,7 +28,6 @@
 
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../containers/juce_SortedSet.h"
-#include "../containers/juce_VoidArray.h"
 #include "../containers/juce_ScopedPointer.h"
 #include "../threads/juce_Thread.h"
 #include "../threads/juce_ThreadPool.h"
@@ -182,7 +181,6 @@ private:
     bool quitMessagePosted, quitMessageReceived;
     Thread::ThreadID messageThreadId;
 
-    VoidArray modalComponents;
     static void* exitModalLoopCallback (void*);
 
     void postMessageToQueue (Message* message);

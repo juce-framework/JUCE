@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
-#define __JUCE_BITARRAY_JUCEHEADER__
+#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
+#define __JUCE_BIGINTEGER_JUCEHEADER__
 
 #include "../text/juce_String.h"
 #include "juce_HeapBlock.h"
@@ -325,4 +325,4 @@ OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const BigInteger& 
 typedef BigInteger BitArray;
 
 
-#endif   // __JUCE_BITARRAY_JUCEHEADER__
+#endif   // __JUCE_BIGINTEGER_JUCEHEADER__

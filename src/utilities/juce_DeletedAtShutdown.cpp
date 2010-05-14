@@ -28,13 +28,13 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DeletedAtShutdown.h"
-#include "../containers/juce_VoidArray.h"
+#include "../containers/juce_Array.h"
 #include "../threads/juce_ScopedLock.h"
 #include "../application/juce_Application.h"
 
 
 //==============================================================================
-static VoidArray objectsToDelete;
+static Array <DeletedAtShutdown*> objectsToDelete;
 static CriticalSection lock;
 
 //==============================================================================
@@ -54,7 +54,7 @@ void DeletedAtShutdown::deleteAll()
 {
     // make a local copy of the array, so it can't get into a loop if something
     // creates another DeletedAtShutdown object during its destructor.
-    VoidArray localCopy;
+    Array <DeletedAtShutdown*> localCopy;
 
     {
         const ScopedLock sl (lock);
@@ -65,7 +65,7 @@ void DeletedAtShutdown::deleteAll()
     {
         JUCE_TRY
         {
-            DeletedAtShutdown* deletee = static_cast <DeletedAtShutdown*> (localCopy.getUnchecked(i));
+            DeletedAtShutdown* deletee = localCopy.getUnchecked(i);
 
             // double-check that it's not already been deleted during another object's destructor.
             {

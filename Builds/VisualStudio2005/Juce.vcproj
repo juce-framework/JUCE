@@ -24,7 +24,7 @@
       <Tool Name="VCCLCompilerTool"
             Optimization="0"
             BufferSecurityCheck=""
-            DebugInformationFormat="4"
+            DebugInformationFormat="3"
             AdditionalIncludeDirectories=""
             PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;_LIB"
             RuntimeLibrary="1"
@@ -34,14 +34,14 @@
             AssemblerListingLocation=".\Debug\"
             ObjectFile=".\Debug\"
             ProgramDataBaseFileName=".\Debug\"
-            WarningLevel="3"
+            WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
       <Tool Name="VCResourceCompilerTool"
             PreprocessorDefinitions="_DEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\..\..\bin\jucedebug.lib"
+            OutputFile=".\..\..\bin\jucelib_static_Win32_debug.lib"
             IgnoreDefaultLibraryNames="libcmt.lib, msvcrt.lib"/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -77,14 +77,14 @@
             AssemblerListingLocation=".\Release\"
             ObjectFile=".\Release\"
             ProgramDataBaseFileName=".\Release\"
-            WarningLevel="3"
+            WarningLevel="4"
             SuppressStartupBanner="true"/>
       <Tool Name="VCManagedResourceCompilerTool"/>
       <Tool Name="VCResourceCompilerTool"
             PreprocessorDefinitions="NDEBUG"/>
       <Tool Name="VCPreLinkEventTool"/>
       <Tool Name="VCLibrarianTool"
-            OutputFile=".\..\..\bin\juce.lib"
+            OutputFile=".\..\..\bin\jucelib_static_Win32.lib"
             IgnoreDefaultLibraryNames=""/>
       <Tool Name="VCALinkTool"/>
       <Tool Name="VCManifestTool"/>
@@ -118,7 +118,6 @@
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AiffAudioFormat.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDBurner.h"/>
-            <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDReader.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioCDReader.h"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormat.cpp"/>
             <File RelativePath="..\..\src\audio\audio_file_formats\juce_AudioFormat.h"/>
@@ -246,8 +245,8 @@
         <Filter Name="containers">
           <File RelativePath="..\..\src\containers\juce_Array.h"/>
           <File RelativePath="..\..\src\containers\juce_ArrayAllocationBase.h"/>
-          <File RelativePath="..\..\src\containers\juce_BitArray.cpp"/>
-          <File RelativePath="..\..\src\containers\juce_BitArray.h"/>
+          <File RelativePath="..\..\src\containers\juce_BigInteger.cpp"/>
+          <File RelativePath="..\..\src\containers\juce_BigInteger.h"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.cpp"/>
           <File RelativePath="..\..\src\containers\juce_DynamicObject.h"/>
           <File RelativePath="..\..\src\containers\juce_ElementComparator.h"/>
@@ -271,7 +270,6 @@
           <File RelativePath="..\..\src\containers\juce_ValueTree.h"/>
           <File RelativePath="..\..\src\containers\juce_Variant.cpp"/>
           <File RelativePath="..\..\src\containers\juce_Variant.h"/>
-          <File RelativePath="..\..\src\containers\juce_VoidArray.h"/>
         </Filter>
         <Filter Name="core">
           <File RelativePath="..\..\src\core\juce_Atomic.h"/>
@@ -641,7 +639,6 @@
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_AffineTransform.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_BorderSize.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_BorderSize.h"/>
-              <File RelativePath="..\..\src\gui\graphics\geometry\juce_Line.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Line.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Path.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Path.h"/>
@@ -754,6 +751,7 @@
             <File RelativePath="..\..\src\native\mac\juce_iphone_UIViewComponentPeer.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_AppleRemote.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_AudioCDBurner.mm"/>
+            <File RelativePath="..\..\src\native\mac\juce_mac_AudioCDReader.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_CameraDevice.mm"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_CarbonViewWrapperComponent.h"/>
             <File RelativePath="..\..\src\native\mac\juce_mac_CoreAudio.cpp"/>

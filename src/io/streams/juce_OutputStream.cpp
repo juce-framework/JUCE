@@ -30,7 +30,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_OutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
-#include "../../containers/juce_VoidArray.h"
+#include "../../containers/juce_Array.h"
 #include "../../containers/juce_ScopedPointer.h"
 #include "../files/juce_FileInputStream.h"
 
@@ -38,7 +38,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 #if JUCE_DEBUG
 static CriticalSection activeStreamLock;
-static VoidArray activeStreams;
+static Array<void*> activeStreams;
 
 void juce_CheckForDanglingStreams()
 {

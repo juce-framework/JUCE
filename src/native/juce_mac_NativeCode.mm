@@ -130,6 +130,7 @@ BEGIN_JUCE_NAMESPACE
   #include "mac/juce_mac_FileChooser.mm"
   #include "mac/juce_mac_QuickTimeMovieComponent.mm"
   #include "mac/juce_mac_AudioCDBurner.mm"
+  #include "mac/juce_mac_AudioCDReader.mm"
   #include "mac/juce_mac_MessageManager.mm"
   #include "mac/juce_mac_WebBrowserComponent.mm"
   #include "mac/juce_mac_CoreAudio.cpp"

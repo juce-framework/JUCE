@@ -549,8 +549,8 @@ class RenderingOpSequenceCalculator
 public:
     //==============================================================================
     RenderingOpSequenceCalculator (AudioProcessorGraph& graph_,
-                                   const VoidArray& orderedNodes_,
-                                   VoidArray& renderingOps)
+                                   const Array<void*>& orderedNodes_,
+                                   Array<void*>& renderingOps)
         : graph (graph_),
           orderedNodes (orderedNodes_)
     {
@@ -578,12 +578,12 @@ public:
 
 private:
     AudioProcessorGraph& graph;
-    const VoidArray& orderedNodes;
+    const Array<void*>& orderedNodes;
     Array <int> nodeIds, channels, midiNodeIds;
 
     //==============================================================================
     void createRenderingOpsForNode (AudioProcessorGraph::Node* const node,
-                                    VoidArray& renderingOps,
+                                    Array<void*>& renderingOps,
                                     const int ourRenderingIndex)
     {
         const int numIns = node->processor->getNumInputChannels();
@@ -999,14 +999,14 @@ bool AudioProcessorGraph::isAnInputTo (const uint32 possibleInputId,
 
 void AudioProcessorGraph::buildRenderingSequence()
 {
-    VoidArray newRenderingOps;
+    Array<void*> newRenderingOps;
     int numRenderingBuffersNeeded = 2;
     int numMidiBuffersNeeded = 1;
 
     {
         MessageManagerLock mml;
 
-        VoidArray orderedNodes;
+        Array<void*> orderedNodes;
 
         int i;
         for (i = 0; i < nodes.size(); ++i)
@@ -1031,7 +1031,7 @@ void AudioProcessorGraph::buildRenderingSequence()
         numMidiBuffersNeeded = calculator.getNumMidiBuffersNeeded();
     }
 
-    VoidArray oldRenderingOps (renderingOps);
+    Array<void*> oldRenderingOps (renderingOps);
 
     {
         // swap over to the new rendering sequence..

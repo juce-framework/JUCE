@@ -413,7 +413,7 @@ private:
     OwnedArray <MidiBuffer> midiBuffers;
 
     CriticalSection renderLock;
-    VoidArray renderingOps;
+    Array<void*> renderingOps;
 
     friend class AudioGraphIOProcessor;
     AudioSampleBuffer* currentAudioInputBuffer;

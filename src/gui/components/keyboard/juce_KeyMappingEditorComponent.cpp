@@ -29,7 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 // N.B. these two includes are put here deliberately to avoid problems with
 // old GCCs failing on long include paths
-#include "../../../containers/juce_VoidArray.h"
+#include "../../../containers/juce_Array.h"
 #include "../../../containers/juce_OwnedArray.h"
 
 #include "juce_KeyMappingEditorComponent.h"

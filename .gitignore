@@ -18,11 +18,32 @@
 .DS_Store
 .svn
 profile
-extras/juce demo/build/macosx/build
-extras/juce demo/build/iphone/build
-extras/juce demo/build/linux/build
-extras/juce demo/build/win32_vc8/Debug
-extras/juce demo/build/win32_vc8/Release
+extras/juce demo/Builds/MacOSX/build
+extras/juce demo/Builds/Linux/build
+extras/juce demo/Builds/VisualStudio2005/Debug
+extras/juce demo/Builds/VisualStudio2005/Release
+extras/juce demo/Builds/VisualStudio2008/Debug
+extras/juce demo/Builds/VisualStudio2008/Release
+extras/juce demo/Builds/iPhone/build
+extras/audio plugins/demo/Builds/MacOSX/build
+extras/audio plugins/demo/Builds/Linux/build
+extras/audio plugins/demo/Builds/VisualStudio2005/Debug
+extras/audio plugins/demo/Builds/VisualStudio2005/Release
+extras/audio plugins/demo/Builds/VisualStudio2008/Debug
+extras/audio plugins/demo/Builds/VisualStudio2008/Release
+extras/audio plugin host/Builds/MacOSX/build
+extras/audio plugin host/Builds/Linux/build
+extras/audio plugin host/Builds/VisualStudio2005/Debug
+extras/audio plugin host/Builds/VisualStudio2005/Release
+extras/audio plugin host/Builds/VisualStudio2008/Debug
+extras/audio plugin host/Builds/VisualStudio2008/Release
+extras/Jucer (experimental)/Builds/MacOSX/build
+extras/Jucer (experimental)/Builds/Linux/build
+extras/Jucer (experimental)/Builds/VisualStudio2005/Debug
+extras/Jucer (experimental)/Builds/VisualStudio2005/Release
+extras/Jucer (experimental)/Builds/VisualStudio2008/Debug
+extras/Jucer (experimental)/Builds/VisualStudio2008/Release
+extras/Jucer (experimental)/Builds/iPhone/build
 extras/the jucer/build/mac/build
 extras/audio plugin host/build/mac/build
 extras/binarybuilder/mac/build
@@ -33,3 +54,5 @@ bin/intermediate*
 bin/lib*
 bin/jucelib*
 bin/JUCE*
+Builds/VisualStudio2008_DLL/Debug
+Builds/VisualStudio2008_DLL/Release

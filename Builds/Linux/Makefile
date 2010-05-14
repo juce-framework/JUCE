@@ -45,7 +45,6 @@ OBJECTS := \
   $(OBJDIR)/juce_ApplicationCommandTarget.o \
   $(OBJDIR)/juce_ApplicationProperties.o \
   $(OBJDIR)/juce_AiffAudioFormat.o \
-  $(OBJDIR)/juce_AudioCDReader.o \
   $(OBJDIR)/juce_AudioFormat.o \
   $(OBJDIR)/juce_AudioFormatManager.o \
   $(OBJDIR)/juce_AudioSubsectionReader.o \
@@ -92,7 +91,7 @@ OBJECTS := \
   $(OBJDIR)/juce_GenericAudioProcessorEditor.o \
   $(OBJDIR)/juce_Sampler.o \
   $(OBJDIR)/juce_Synthesiser.o \
-  $(OBJDIR)/juce_BitArray.o \
+  $(OBJDIR)/juce_BigInteger.o \
   $(OBJDIR)/juce_DynamicObject.o \
   $(OBJDIR)/juce_MemoryBlock.o \
   $(OBJDIR)/juce_NamedValueSet.o \
@@ -246,7 +245,6 @@ OBJECTS := \
   $(OBJDIR)/juce_Typeface.o \
   $(OBJDIR)/juce_AffineTransform.o \
   $(OBJDIR)/juce_BorderSize.o \
-  $(OBJDIR)/juce_Line.o \
   $(OBJDIR)/juce_Path.o \
   $(OBJDIR)/juce_PathIterator.o \
   $(OBJDIR)/juce_PathStrokeType.o \
@@ -377,11 +375,6 @@ $(OBJDIR)/juce_ApplicationProperties.o: ../../src/application/juce_ApplicationPr
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AiffAudioFormat.o: ../../src/audio/audio_file_formats/juce_AiffAudioFormat.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_AudioCDReader.o: ../../src/audio/audio_file_formats/juce_AudioCDReader.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -616,7 +609,7 @@ $(OBJDIR)/juce_Synthesiser.o: ../../src/audio/synthesisers/juce_Synthesiser.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/juce_BitArray.o: ../../src/containers/juce_BitArray.cpp
+$(OBJDIR)/juce_BigInteger.o: ../../src/containers/juce_BigInteger.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1382,11 +1375,6 @@ $(OBJDIR)/juce_AffineTransform.o: ../../src/gui/graphics/geometry/juce_AffineTra
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BorderSize.o: ../../src/gui/graphics/geometry/juce_BorderSize.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/juce_Line.o: ../../src/gui/graphics/geometry/juce_Line.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

@@ -28,7 +28,7 @@
 
 #include "juce_Font.h"
 #include "../contexts/juce_Justification.h"
-#include "../../../containers/juce_VoidArray.h"
+#include "../../../containers/juce_OwnedArray.h"
 class Graphics;
 
 

@@ -105,7 +105,7 @@ bool OpenGLPixelFormat::operator== (const OpenGLPixelFormat& other) const
 }
 
 //==============================================================================
-static VoidArray knownContexts;
+static Array<OpenGLContext*> knownContexts;
 
 OpenGLContext::OpenGLContext() throw()
 {
@@ -121,7 +121,7 @@ OpenGLContext* OpenGLContext::getCurrentContext()
 {
     for (int i = knownContexts.size(); --i >= 0;)
     {
-        OpenGLContext* const oglc = (OpenGLContext*) knownContexts.getUnchecked(i);
+        OpenGLContext* const oglc = knownContexts.getUnchecked(i);
 
         if (oglc->isActive())
             return oglc;

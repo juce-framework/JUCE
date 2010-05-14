@@ -32,8 +32,8 @@
 #ifndef __JUCE_ARRAYALLOCATIONBASE_JUCEHEADER__
  #include "containers/juce_ArrayAllocationBase.h"
 #endif
-#ifndef __JUCE_BITARRAY_JUCEHEADER__
- #include "containers/juce_BitArray.h"
+#ifndef __JUCE_BIGINTEGER_JUCEHEADER__
+ #include "containers/juce_BigInteger.h"
 #endif
 #ifndef __JUCE_DYNAMICOBJECT_JUCEHEADER__
  #include "containers/juce_DynamicObject.h"
@@ -82,9 +82,6 @@
 #endif
 #ifndef __JUCE_VARIANT_JUCEHEADER__
  #include "containers/juce_Variant.h"
-#endif
-#ifndef __JUCE_VOIDARRAY_JUCEHEADER__
- #include "containers/juce_VoidArray.h"
 #endif
 #ifndef __JUCE_ATOMIC_JUCEHEADER__
  #include "core/juce_Atomic.h"

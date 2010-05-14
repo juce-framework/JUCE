@@ -3151,7 +3151,7 @@ const Rectangle<int> Component::getParentMonitorArea() const
 void Component::addKeyListener (KeyListener* const newListener)
 {
     if (keyListeners_ == 0)
-        keyListeners_ = new VoidArray();
+        keyListeners_ = new Array <KeyListener*>();
 
     keyListeners_->addIfNotAlreadyThere (newListener);
 }

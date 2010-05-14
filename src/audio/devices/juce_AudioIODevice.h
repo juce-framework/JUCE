@@ -27,7 +27,7 @@
 #define __JUCE_AUDIOIODEVICE_JUCEHEADER__
 
 #include "../../text/juce_StringArray.h"
-#include "../../containers/juce_BitArray.h"
+#include "../../containers/juce_BigInteger.h"
 #include "../../containers/juce_OwnedArray.h"
 class AudioIODevice;
 

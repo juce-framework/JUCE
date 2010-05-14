@@ -28,7 +28,7 @@
 
 #include "../juce_AudioPluginFormat.h"
 
-#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+#if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
 
 
 //   Sorry, this file is just a placeholder at the moment!...

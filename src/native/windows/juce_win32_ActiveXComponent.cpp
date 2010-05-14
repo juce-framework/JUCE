@@ -162,7 +162,7 @@ namespace ActiveXHelpers
     };
 
     //==============================================================================
-    static VoidArray activeXComps;
+    static Array<ActiveXControlComponent*> activeXComps;
 
     static HWND getHWND (const ActiveXControlComponent* const component)
     {
@@ -282,8 +282,7 @@ public:
     {
         for (int i = ActiveXHelpers::activeXComps.size(); --i >= 0;)
         {
-            const ActiveXControlComponent* const ax
-                    = static_cast <const ActiveXControlComponent*> (ActiveXHelpers::activeXComps.getUnchecked(i));
+            const ActiveXControlComponent* const ax = ActiveXHelpers::activeXComps.getUnchecked(i);
 
             if (ax->control != 0 && ax->control->controlHWND == hwnd)
             {

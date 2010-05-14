@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_NamedPipe.h"
 
 
@@ -65,7 +64,5 @@ const String NamedPipe::getName() const
 }
 
 // other methods for this class are implemented in the platform-specific files
-
-
 
 END_JUCE_NAMESPACE

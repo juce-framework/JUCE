@@ -27,7 +27,7 @@
 
 BEGIN_JUCE_NAMESPACE
 
-#include "juce_BitArray.h"
+#include "juce_BigInteger.h"
 #include "juce_MemoryBlock.h"
 #include "../core/juce_Random.h"
 

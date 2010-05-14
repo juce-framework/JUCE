@@ -30,7 +30,7 @@
 #include "../dsp/juce_AudioSampleBuffer.h"
 #include "../midi/juce_MidiBuffer.h"
 #include "../../text/juce_XmlElement.h"
-#include "../../containers/juce_BitArray.h"
+#include "../../containers/juce_BigInteger.h"
 #include "juce_AudioProcessorListener.h"
 #include "juce_AudioPlayHead.h"
 
@@ -571,7 +571,7 @@ protected:
     void sendParamChangeMessageToListeners (const int parameterIndex, const float newValue);
 
 private:
-    VoidArray listeners;
+    Array <AudioProcessorListener*> listeners;
     AudioProcessorEditor* activeEditor;
     double sampleRate;
     int blockSize, numInputChannels, numOutputChannels, latencySamples;

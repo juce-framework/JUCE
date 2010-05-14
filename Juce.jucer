@@ -65,8 +65,6 @@
                 file="src/audio/audio_file_formats/juce_AiffAudioFormat.h"/>
           <FILE id="iaSLTdAgX" name="juce_AudioCDBurner.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioCDBurner.h"/>
-          <FILE id="lgwbgj4vF" name="juce_AudioCDReader.cpp" compile="1" resource="0"
-                file="src/audio/audio_file_formats/juce_AudioCDReader.cpp"/>
           <FILE id="RV1XmJohc" name="juce_AudioCDReader.h" compile="0" resource="0"
                 file="src/audio/audio_file_formats/juce_AudioCDReader.h"/>
           <FILE id="7bdvMw9hr" name="juce_AudioFormat.cpp" compile="1" resource="0"
@@ -301,10 +299,10 @@
         <FILE id="MMVvnl2oo" name="juce_Array.h" compile="0" resource="0" file="src/containers/juce_Array.h"/>
         <FILE id="I2LILZNlU" name="juce_ArrayAllocationBase.h" compile="0"
               resource="0" file="src/containers/juce_ArrayAllocationBase.h"/>
-        <FILE id="T2Ys7NAuy" name="juce_BitArray.cpp" compile="1" resource="0"
-              file="src/containers/juce_BitArray.cpp"/>
-        <FILE id="yo9C7IDcf" name="juce_BitArray.h" compile="0" resource="0"
-              file="src/containers/juce_BitArray.h"/>
+        <FILE id="T2Ys7NAuy" name="juce_BigInteger.cpp" compile="1" resource="0"
+              file="src/containers/juce_BigInteger.cpp"/>
+        <FILE id="yo9C7IDcf" name="juce_BigInteger.h" compile="0" resource="0"
+              file="src/containers/juce_BigInteger.h"/>
         <FILE id="1cwWOJ3Mv" name="juce_DynamicObject.cpp" compile="1" resource="0"
               file="src/containers/juce_DynamicObject.cpp"/>
         <FILE id="e3gh56Kq6" name="juce_DynamicObject.h" compile="0" resource="0"
@@ -349,8 +347,6 @@
               file="src/containers/juce_Variant.cpp"/>
         <FILE id="8q9BHXyE6" name="juce_Variant.h" compile="0" resource="0"
               file="src/containers/juce_Variant.h"/>
-        <FILE id="zxopOwMZz" name="juce_VoidArray.h" compile="0" resource="0"
-              file="src/containers/juce_VoidArray.h"/>
       </GROUP>
       <GROUP id="LTuqRhF2Y" name="core">
         <FILE id="9zAJsfSFe" name="juce_Atomic.h" compile="0" resource="0"
@@ -1035,8 +1031,6 @@
                   file="src/gui/graphics/geometry/juce_BorderSize.cpp"/>
             <FILE id="Yrgxtk9Y" name="juce_BorderSize.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_BorderSize.h"/>
-            <FILE id="QviRuOhCo" name="juce_Line.cpp" compile="1" resource="0"
-                  file="src/gui/graphics/geometry/juce_Line.cpp"/>
             <FILE id="kctD1TPMS" name="juce_Line.h" compile="0" resource="0" file="src/gui/graphics/geometry/juce_Line.h"/>
             <FILE id="BumvtZ3k6" name="juce_Path.cpp" compile="1" resource="0"
                   file="src/gui/graphics/geometry/juce_Path.cpp"/>
@@ -1233,6 +1227,8 @@
                 file="src/native/mac/juce_mac_AppleRemote.mm"/>
           <FILE id="8rKYGEkhh" name="juce_mac_AudioCDBurner.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_AudioCDBurner.mm"/>
+          <FILE id="av8QbC0JI" name="juce_mac_AudioCDReader.mm" compile="1" resource="0"
+                file="src/native/mac/juce_mac_AudioCDReader.mm"/>
           <FILE id="8QiF5ZqPk" name="juce_mac_CameraDevice.mm" compile="1" resource="0"
                 file="src/native/mac/juce_mac_CameraDevice.mm"/>
           <FILE id="JCvDhO9Ty" name="juce_mac_CarbonViewWrapperComponent.h" compile="0"

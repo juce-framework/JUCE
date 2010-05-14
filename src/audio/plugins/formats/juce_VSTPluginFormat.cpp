@@ -26,7 +26,7 @@
 #include "../../../core/juce_TargetPlatform.h"
 #include "../../../../juce_Config.h"
 
-#if JUCE_PLUGINHOST_VST
+#if JUCE_PLUGINHOST_VST && (JUCE_MAC_VST_INCLUDED || ! JUCE_MAC)
 
 #if JUCE_WINDOWS
  #undef _WIN32_WINNT
@@ -47,11 +47,6 @@
  #undef Drawable
  #undef Time
 #else
- #ifndef JUCE_MAC_VST_INCLUDED
-  // On the mac, this file needs to be compiled indirectly, by using
-  // juce_VSTPluginFormat.mm instead - that wraps it as an objective-C file for cocoa
-  #error
- #endif
  #include <Cocoa/Cocoa.h>
  #include <Carbon/Carbon.h>
 #endif
@@ -112,7 +107,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../juce_PluginDescription.h"
 #include "juce_VSTMidiEventList.h"
 
-#if ! JUCE_WIN32
+#if ! JUCE_WINDOWS
  static void _fpreset() {}
  static void _clearfp() {}
 #endif
@@ -344,9 +339,6 @@ static void translateJuceToXMouseWheelModifiers (const MouseEvent& e, const floa
 #endif
 
 //==============================================================================
-static VoidArray activeModules;
-
-//==============================================================================
 class ModuleHandle    : public ReferenceCountedObject
 {
 public:
@@ -355,12 +347,18 @@ public:
     MainCall moduleMain;
     String pluginName;
 
+    static Array <ModuleHandle*>& getActiveModules()
+    {
+        static Array <ModuleHandle*> activeModules;
+        return activeModules;
+    }
+
     //==============================================================================
     static ModuleHandle* findOrCreateModule (const File& file)
     {
-        for (int i = activeModules.size(); --i >= 0;)
+        for (int i = getActiveModules().size(); --i >= 0;)
         {
-            ModuleHandle* const module = (ModuleHandle*) activeModules.getUnchecked(i);
+            ModuleHandle* const module = getActiveModules().getUnchecked(i);
 
             if (module->file == file)
                 return module;
@@ -387,7 +385,7 @@ public:
     ModuleHandle (const File& file_)
         : file (file_),
           moduleMain (0),
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
           hModule (0)
 #elif JUCE_MAC
           fragId (0),
@@ -396,9 +394,9 @@ public:
           resFileId (0)
 #endif
     {
-        activeModules.add (this);
+        getActiveModules().add (this);
 
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
         fullParentDirectoryPathName = file_.getParentDirectory().getFullPathName();
 #elif JUCE_MAC
         FSRef ref;
@@ -409,7 +407,7 @@ public:
 
     ~ModuleHandle()
     {
-        activeModules.removeValue (this);
+        getActiveModules().removeValue (this);
 
         close();
     }
@@ -418,13 +416,13 @@ public:
     juce_UseDebuggingNewOperator
 
     //==============================================================================
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
     void* hModule;
     String fullParentDirectoryPathName;
 
     bool open()
     {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         static bool timePeriodSet = false;
 
         if (! timePeriodSet)
@@ -614,7 +612,7 @@ public:
 #if JUCE_PPC
         if (fragId != 0)
         {
-            VoidArray thingsToDelete;
+            Array<void*> thingsToDelete;
             thingsToDelete.add ((void*) eff->dispatcher);
             thingsToDelete.add ((void*) eff->process);
             thingsToDelete.add ((void*) eff->setParameter);
@@ -672,7 +670,6 @@ public:
 
 #endif
 };
-
 
 //==============================================================================
 /**
@@ -1052,7 +1049,7 @@ void VSTPluginInstance::processBlock (AudioSampleBuffer& buffer,
                 vstHostTime.flags &= ~kVstTransportPlaying;
         }
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         vstHostTime.nanoSeconds = timeGetTime() * 1000000.0;
 #elif JUCE_LINUX
         timeval micro;
@@ -1180,7 +1177,7 @@ public:
           alreadyInside (false),
           recursiveResize (false)
     {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         sizeCheckCount = 0;
         pluginHWND = 0;
 #elif JUCE_LINUX
@@ -1223,7 +1220,7 @@ public:
 
             recursiveResize = true;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             if (pluginHWND != 0)
                 MoveWindow (pluginHWND, pos.getX(), pos.getY(), getWidth(), getHeight(), TRUE);
 #elif JUCE_LINUX
@@ -1322,7 +1319,7 @@ public:
     //==============================================================================
     void timerCallback()
     {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         if (--sizeCheckCount <= 0)
         {
             sizeCheckCount = 10;
@@ -1371,7 +1368,7 @@ public:
 
         sendEventToChild (&ev);
 
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
         (void) e;
 
         toFront (true);
@@ -1396,7 +1393,7 @@ private:
     bool isOpen, wasShowing, recursiveResize;
     bool pluginWantsKeys, pluginRefusesToResize, alreadyInside;
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     HWND pluginHWND;
     void* originalWndProc;
     int sizeCheckCount;
@@ -1469,7 +1466,7 @@ private:
         // Install keyboard hooks
         pluginWantsKeys = (dispatch (effKeysRequired, 0, 0, 0, 0) == 0);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         originalWndProc = 0;
         pluginHWND = GetWindow ((HWND) getWindowHandle(), GW_CHILD);
 
@@ -1555,7 +1552,7 @@ private:
 
         setSize (w, h);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         checkPluginWindowSize();
 #endif
 
@@ -1575,7 +1572,7 @@ private:
 
             dispatch (effEditClose, 0, 0, 0, 0);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             #pragma warning (push)
             #pragma warning (disable: 4244)
 
@@ -1606,7 +1603,7 @@ private:
     }
 
     //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
     void checkPluginWindowSize() throw()
     {
         RECT r;
@@ -2959,7 +2956,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
 #endif
 
     return false;
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
     return f.existsAsFile()
             && f.hasFileExtension (".dll");
 #elif JUCE_LINUX
@@ -3014,7 +3011,7 @@ const FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
 #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-#elif JUCE_WIN32
+#elif JUCE_WINDOWS
     const String programFiles (File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName());
 
     return FileSearchPath (programFiles + "\\Steinberg\\VstPlugins");

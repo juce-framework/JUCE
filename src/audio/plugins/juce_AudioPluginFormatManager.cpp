@@ -64,7 +64,7 @@ void AudioPluginFormatManager::addDefaultFormats()
         jassert (dynamic_cast <AudioUnitPluginFormat*> (formats[i]) == 0);
   #endif
 
-  #if JUCE_PLUGINHOST_DX && JUCE_WIN32
+  #if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
         jassert (dynamic_cast <DirectXPluginFormat*> (formats[i]) == 0);
   #endif
 
@@ -82,7 +82,7 @@ void AudioPluginFormatManager::addDefaultFormats()
     formats.add (new VSTPluginFormat());
 #endif
 
-#if JUCE_PLUGINHOST_DX && JUCE_WIN32
+#if JUCE_PLUGINHOST_DX && JUCE_WINDOWS
     formats.add (new DirectXPluginFormat());
 #endif
 

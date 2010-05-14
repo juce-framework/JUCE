@@ -52,7 +52,7 @@
 
 //==============================================================================
 #define juceFilterObjectPropertyID 0x1a45ffe9
-static VoidArray activePlugins, activeUIs;
+static Array<void*> activePlugins, activeUIs;
 
 static const short channelConfigs[][2] = { JucePlugin_PreferredChannelConfigurations };
 static const int numChannelConfigs = sizeof (channelConfigs) / sizeof (*channelConfigs);
