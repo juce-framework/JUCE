@@ -266,10 +266,12 @@ void RectangleList::subtract (const Rectangle<int>& rect)
     }
 }
 
-void RectangleList::subtract (const RectangleList& otherList)
+bool RectangleList::subtract (const RectangleList& otherList)
 {
-    for (int i = otherList.rects.size(); --i >= 0;)
+    for (int i = otherList.rects.size(); --i >= 0 && rects.size() > 0;)
         subtract (otherList.rects.getReference (i));
+
+    return rects.size() > 0;
 }
 
 bool RectangleList::clipTo (const Rectangle<int>& rect)

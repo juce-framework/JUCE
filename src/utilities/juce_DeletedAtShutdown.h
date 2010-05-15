@@ -65,6 +65,9 @@ public:
 private:
     DeletedAtShutdown (const DeletedAtShutdown&);
     DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+
+    static CriticalSection& getLock();
+    static Array <DeletedAtShutdown*>& getObjects();
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__

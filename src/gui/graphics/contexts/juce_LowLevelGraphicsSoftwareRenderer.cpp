@@ -1198,7 +1198,12 @@ public:
 
     const Ptr clipToRectangleList (const RectangleList& r)
     {
-        edgeTable.clipToEdgeTable (EdgeTable (r));
+        RectangleList inverse (edgeTable.getMaximumBounds());
+
+        if (inverse.subtract (r))
+            for (RectangleList::Iterator iter (inverse); iter.next();)
+                edgeTable.excludeRectangle (*iter.getRectangle());
+
         return edgeTable.isEmpty() ? 0 : this;
     }
 

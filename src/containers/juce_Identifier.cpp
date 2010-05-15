@@ -37,8 +37,8 @@ BEGIN_JUCE_NAMESPACE
 class Identifier::Pool   : public DeletedAtShutdown
 {
 public:
-    Pool()   {}
-    ~Pool()  {}
+    Pool()    {}
+    ~Pool()   { clearSingletonInstance(); }
 
     StringPool pool;
 

@@ -383,6 +383,8 @@ public:
 
         return true;
     }
+
+    juce_UseDebuggingNewOperator
 };
 
 const Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)

@@ -236,6 +236,7 @@ private:
 
         ~ComponentHolder()
         {
+            deleteAllChildren();
         }
 
         void updateColour()

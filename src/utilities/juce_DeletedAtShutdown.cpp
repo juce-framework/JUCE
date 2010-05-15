@@ -34,20 +34,16 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-static Array <DeletedAtShutdown*> objectsToDelete;
-static CriticalSection lock;
-
-//==============================================================================
 DeletedAtShutdown::DeletedAtShutdown()
 {
-    const ScopedLock sl (lock);
-    objectsToDelete.add (this);
+    const ScopedLock sl (getLock());
+    getObjects().add (this);
 }
 
 DeletedAtShutdown::~DeletedAtShutdown()
 {
-    const ScopedLock sl (lock);
-    objectsToDelete.removeValue (this);
+    const ScopedLock sl (getLock());
+    getObjects().removeValue (this);
 }
 
 void DeletedAtShutdown::deleteAll()
@@ -57,8 +53,8 @@ void DeletedAtShutdown::deleteAll()
     Array <DeletedAtShutdown*> localCopy;
 
     {
-        const ScopedLock sl (lock);
-        localCopy = objectsToDelete;
+        const ScopedLock sl (getLock());
+        localCopy = getObjects();
     }
 
     for (int i = localCopy.size(); --i >= 0;)
@@ -69,8 +65,8 @@ void DeletedAtShutdown::deleteAll()
 
             // double-check that it's not already been deleted during another object's destructor.
             {
-                const ScopedLock sl (lock);
-                if (! objectsToDelete.contains (deletee))
+                const ScopedLock sl (getLock());
+                if (! getObjects().contains (deletee))
                     deletee = 0;
             }
 
@@ -81,9 +77,21 @@ void DeletedAtShutdown::deleteAll()
 
     // if no objects got re-created during shutdown, this should have been emptied by their
     // destructors
-    jassert (objectsToDelete.size() == 0);
+    jassert (getObjects().size() == 0);
 
-    objectsToDelete.clear(); // just to make sure the array doesn't have any memory still allocated
+    getObjects().clear(); // just to make sure the array doesn't have any memory still allocated
+}
+
+CriticalSection& DeletedAtShutdown::getLock()
+{
+    static CriticalSection lock;
+    return lock;
+}
+
+Array <DeletedAtShutdown*>& DeletedAtShutdown::getObjects()
+{
+    static Array <DeletedAtShutdown*> objects;
+    return objects;
 }
 
 END_JUCE_NAMESPACE

@@ -118,8 +118,10 @@ public:
 
         Any rectangles in the list which overlap this will be clipped and subdivided
         if necessary.
+
+        @returns true if the resulting list is non-empty.
     */
-    void subtract (const RectangleList& otherList);
+    bool subtract (const RectangleList& otherList);
 
     /** Removes any areas of the region that lie outside a given rectangle.
 

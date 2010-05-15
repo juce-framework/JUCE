@@ -24114,8 +24114,10 @@ public:
 
 		Any rectangles in the list which overlap this will be clipped and subdivided
 		if necessary.
+
+		@returns true if the resulting list is non-empty.
 	*/
-	void subtract (const RectangleList& otherList);
+	bool subtract (const RectangleList& otherList);
 
 	/** Removes any areas of the region that lie outside a given rectangle.
 
@@ -27147,6 +27149,9 @@ public:
 private:
 	DeletedAtShutdown (const DeletedAtShutdown&);
 	DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+
+	static CriticalSection& getLock();
+	static Array <DeletedAtShutdown*>& getObjects();
 };
 
 #endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
