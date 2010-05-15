@@ -54,19 +54,19 @@ public:
     /** Returns true if the object has a property with this name.
         Note that if the property is actually a method, this will return false.
     */
-    virtual bool hasProperty (const var::identifier& propertyName) const;
+    virtual bool hasProperty (const Identifier& propertyName) const;
 
     /** Returns a named property.
 
         This returns a void if no such property exists.
     */
-    virtual const var getProperty (const var::identifier& propertyName) const;
+    virtual const var getProperty (const Identifier& propertyName) const;
 
     /** Sets a named property. */
-    virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+    virtual void setProperty (const Identifier& propertyName, const var& newValue);
 
     /** Removes a named property. */
-    virtual void removeProperty (const var::identifier& propertyName);
+    virtual void removeProperty (const Identifier& propertyName);
 
     //==============================================================================
     /** Checks whether this object has the specified method.
@@ -75,7 +75,7 @@ public:
         with this name that's actually a method, but this can be overridden for
         building objects with dynamic invocation.
     */
-    virtual bool hasMethod (const var::identifier& methodName) const;
+    virtual bool hasMethod (const Identifier& methodName) const;
 
     /** Invokes a named method on this object.
 
@@ -85,7 +85,7 @@ public:
         This method is virtual to allow more dynamic invocation to used for objects
         where the methods may not already be set as properies.
     */
-    virtual const var invokeMethod (const var::identifier& methodName,
+    virtual const var invokeMethod (const Identifier& methodName,
                                     const var* parameters,
                                     int numParameters);
 
@@ -100,7 +100,7 @@ public:
         setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
         @endcode
     */
-    void setMethod (const var::identifier& methodName,
+    void setMethod (const Identifier& methodName,
                     var::MethodFunction methodFunction);
 
     //==============================================================================

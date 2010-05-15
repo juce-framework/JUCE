@@ -100,7 +100,7 @@ public:
         {
             jassert (row >= 0);
 
-            const var::identifier tagPropertyName ("_tableLastUseNum");
+            const Identifier tagPropertyName ("_tableLastUseNum");
             const int newTag = Random::getSystemRandom().nextInt();
 
             const TableHeaderComponent* const header = owner.getHeader();

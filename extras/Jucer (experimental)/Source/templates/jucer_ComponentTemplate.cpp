@@ -59,10 +59,6 @@ extern const unsigned char %%className%%_ComponentStateData[];
 %%staticMemberDefinitions%%
 
 //==============================================================================
-/* This data contains the ValueTree that holds all the Jucer-generated settings for the components */
-const unsigned char %%className%%_ComponentStateData[] = %%statedata%%;
-
-//==============================================================================
 //=======================  Jucer Information Section  ==========================
 //==============================================================================
 #if 0

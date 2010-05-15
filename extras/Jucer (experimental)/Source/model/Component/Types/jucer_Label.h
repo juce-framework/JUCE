@@ -48,19 +48,19 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("text", "New Label");
-        item.set ("font", Font (14.0f).toString());
-        item.set ("editMode", 1);
-        item.set ("justification", (int) Justification::centredLeft);
+        item.set (Ids::text, "New Label");
+        item.set (Ids::font, Font (14.0f).toString());
+        item.set (Ids::editMode, 1);
+        item.set (Ids::justification, (int) Justification::centredLeft);
     }
 
     void update (ComponentTypeInstance& item, Label* comp)
     {
-        comp->setText (item ["text"].toString(), false);
-        comp->setFont (Font::fromString (item ["font"]));
-        int editMode = (int) item ["editMode"];
+        comp->setText (item [Ids::text].toString(), false);
+        comp->setFont (Font::fromString (item [Ids::font]));
+        int editMode = (int) item [Ids::editMode];
         comp->setEditable (editMode == 2, editMode == 3, false);
-        comp->setJustificationType ((int) item ["justification"]);
+        comp->setJustificationType ((int) item [Ids::justification]);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -68,22 +68,34 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("text"), "Text", 16384, true));
+        props.add (new TextPropertyComponent (item.getValue (Ids::text), "Text", 16384, true));
         props.getLast()->setTooltip ("The label's text.");
 
         item.addJustificationProperty (props, "Layout", item.getValue ("justification"), false);
 
         const char* const editModes[] = { "Read-only", "Edit on Single-Click", "Edit on Double-Click", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue ("editMode"), "Edit Mode", StringArray (editModes)));
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::editMode), "Edit Mode", StringArray (editModes)));
 
-        item.addFontProperties (props, "font");
+        item.addFontProperties (props, Ids::font);
 
         addEditableColourProperties (item, props);
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode << item.createConstructorStatement (String::empty);
+        int editMode = (int) item [Ids::editMode];
+
+        code.constructorCode
+            << item.createConstructorStatement (String::empty)
+            << item.getMemberName() << "->setText (" << CodeHelpers::stringLiteral (item [Ids::text]) << ");" << newLine
+            << item.getMemberName() << "->setFont (" << CodeHelpers::fontToCode (Font::fromString (item [Ids::font])) << ");" << newLine
+            << item.getMemberName() << "->setEditable (" << CodeHelpers::boolLiteral (editMode == 2)
+                                    << ", " << CodeHelpers::boolLiteral (editMode == 3) << ", false);" << newLine;
+
+        Justification justification ((int) item ["textJustification"]);
+        if (justification.getFlags() != 0)
+            code.constructorCode << item.getMemberName() << "->setJustificationType ("
+                                 << CodeHelpers::justificationToCode (justification) << ");" << newLine;
     }
 };
 

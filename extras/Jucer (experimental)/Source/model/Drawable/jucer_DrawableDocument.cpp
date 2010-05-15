@@ -248,7 +248,7 @@ void DrawableDocument::addImage (const File& imageFile)
 }
 
 //==============================================================================
-void DrawableDocument::valueTreePropertyChanged (ValueTree& tree, const var::identifier& name)
+void DrawableDocument::valueTreePropertyChanged (ValueTree& tree, const Identifier& name)
 {
     changed();
 }
@@ -392,7 +392,7 @@ const String DrawableDocument::MarkerList::getNonexistentMarkerName (const Strin
 
 const String DrawableDocument::getNonexistentMarkerName (const String& name)
 {
-    String n (CodeFormatting::makeValidIdentifier (name, false, true, false));
+    String n (CodeHelpers::makeValidIdentifier (name, false, true, false));
     int suffix = 2;
 
     while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid())

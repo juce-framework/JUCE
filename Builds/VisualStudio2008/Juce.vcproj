@@ -251,6 +251,8 @@
           <File RelativePath="..\..\src\containers\juce_DynamicObject.h"/>
           <File RelativePath="..\..\src\containers\juce_ElementComparator.h"/>
           <File RelativePath="..\..\src\containers\juce_HeapBlock.h"/>
+          <File RelativePath="..\..\src\containers\juce_Identifier.cpp"/>
+          <File RelativePath="..\..\src\containers\juce_Identifier.h"/>
           <File RelativePath="..\..\src\containers\juce_MemoryBlock.cpp"/>
           <File RelativePath="..\..\src\containers\juce_MemoryBlock.h"/>
           <File RelativePath="..\..\src\containers\juce_NamedValueSet.cpp"/>
@@ -815,6 +817,8 @@
           <File RelativePath="..\..\src\text\juce_StringArray.h"/>
           <File RelativePath="..\..\src\text\juce_StringPairArray.cpp"/>
           <File RelativePath="..\..\src\text\juce_StringPairArray.h"/>
+          <File RelativePath="..\..\src\text\juce_StringPool.cpp"/>
+          <File RelativePath="..\..\src\text\juce_StringPool.h"/>
           <File RelativePath="..\..\src\text\juce_XmlDocument.cpp"/>
           <File RelativePath="..\..\src\text\juce_XmlDocument.h"/>
           <File RelativePath="..\..\src\text\juce_XmlElement.cpp"/>

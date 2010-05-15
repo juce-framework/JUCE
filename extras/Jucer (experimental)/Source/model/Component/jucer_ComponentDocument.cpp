@@ -29,20 +29,21 @@
 
 
 //==============================================================================
-static const char* const componentDocumentTag   = "COMPONENT";
-static const char* const componentGroupTag      = "COMPONENTS";
-static const char* const markersGroupXTag       = "MARKERS_X";
-static const char* const markersGroupYTag       = "MARKERS_Y";
+static const Identifier componentDocumentTag ("COMPONENT");
+static const Identifier componentGroupTag ("COMPONENTS");
+static const Identifier markersGroupXTag ("MARKERS_X");
+static const Identifier markersGroupYTag ("MARKERS_Y");
 
-static const char* const metadataTagStart       = "JUCER_" "COMPONENT_METADATA_START"; // written like this to avoid thinking this file is a component!
-static const char* const metadataTagEnd         = "JUCER_" "COMPONENT_METADATA_END";
+static const char* const metadataTagStart = "JUCER_" "COMPONENT_METADATA_START"; // written like this to avoid thinking this file is a component!
+static const char* const metadataTagEnd = "JUCER_" "COMPONENT_METADATA_END";
 
-const char* const ComponentDocument::idProperty             = "id";
-const char* const ComponentDocument::compBoundsProperty     = "position";
-const char* const ComponentDocument::memberNameProperty     = "memberName";
-const char* const ComponentDocument::compNameProperty       = "name";
-const char* const ComponentDocument::compTooltipProperty    = "tooltip";
-const char* const ComponentDocument::compFocusOrderProperty = "focusOrder";
+const Identifier ComponentDocument::idProperty ("id");
+const Identifier ComponentDocument::compBoundsProperty ("position");
+const Identifier ComponentDocument::memberNameProperty ("memberName");
+const Identifier ComponentDocument::compNameProperty ("name");
+const Identifier ComponentDocument::compTooltipProperty ("tooltip");
+const Identifier ComponentDocument::compFocusOrderProperty ("focusOrder");
+const Identifier ComponentDocument::jucerIDProperty ("jucerID");
 
 
 //==============================================================================
@@ -84,7 +85,7 @@ void ComponentDocument::changed()
     changedSinceSaved = true;
 }
 
-void ComponentDocument::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
+void ComponentDocument::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)
 {
     changed();
 }
@@ -196,8 +197,8 @@ bool ComponentDocument::save()
     MemoryOutputStream cpp, header;
     writeCode (cpp, header);
 
-    bool savedOk = FileUtils::overwriteFileWithNewDataIfDifferent (cppFile, cpp)
-                    && FileUtils::overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
+    bool savedOk = FileHelpers::overwriteFileWithNewDataIfDifferent (cppFile, cpp)
+                    && FileHelpers::overwriteFileWithNewDataIfDifferent (cppFile.withFileExtension (".h"), header);
 
     if (savedOk)
         changedSinceSaved = false;
@@ -247,9 +248,9 @@ bool ComponentDocument::reload()
     ScopedPointer<XmlElement> xml (doc.getDocumentElement());
 
     if (xml == 0 && hadMetaDataTags)
-        xml = new XmlElement (componentDocumentTag);
+        xml = new XmlElement (componentDocumentTag.toString());
 
-    if (xml != 0 && xml->hasTagName (componentDocumentTag))
+    if (xml != 0 && xml->hasTagName (componentDocumentTag.toString()))
     {
         ValueTree newTree (ValueTree::fromXml (*xml));
 
@@ -278,7 +279,7 @@ bool ComponentDocument::hasChangedSinceLastSave()
     return changedSinceSaved || customCode.needsSaving();
 }
 
-void ComponentDocument::createSubTreeIfNotThere (const String& name)
+void ComponentDocument::createSubTreeIfNotThere (const Identifier& name)
 {
     if (! root.getChildWithName (name).isValid())
         root.addChild (ValueTree (name), -1, 0);
@@ -562,7 +563,7 @@ bool ComponentDocument::setCoordsFor (ValueTree& state, const RectangleCoordinat
 
 const String ComponentDocument::getNonexistentMemberName (String name)
 {
-    String n (CodeFormatting::makeValidIdentifier (name, false, true, false));
+    String n (CodeHelpers::makeValidIdentifier (name, false, true, false));
     int suffix = 2;
 
     while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid()
@@ -857,8 +858,6 @@ UndoManager* ComponentDocument::getUndoManager() const
 }
 
 //==============================================================================
-const char* const ComponentDocument::jucerIDProperty = "jucerID";
-
 const String ComponentDocument::getJucerIDFor (Component* c)
 {
     if (c == 0)

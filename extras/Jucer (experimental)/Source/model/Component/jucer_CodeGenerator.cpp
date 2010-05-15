@@ -127,7 +127,7 @@ const String CodeGenerator::getCallbackDefinitions() const
     {
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
-        const String userCodeBlockName ("User" + CodeFormatting::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
+        const String userCodeBlockName ("User" + CodeHelpers::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
                                                                                       true, true, false).trim());
 
         if (userCodeBlockName.isNotEmpty() && cm->hasPrePostUserSections)
@@ -138,7 +138,7 @@ const String CodeGenerator::getCallbackDefinitions() const
               << "    //[" << userCodeBlockName << "_Pre]" << newLine
               << "    //[/" << userCodeBlockName
               << "_Pre]" << newLine << newLine 
-              << "    " << CodeFormatting::indent (cm->content.trim(), 4, false) << newLine 
+              << "    " << CodeHelpers::indent (cm->content.trim(), 4, false) << newLine 
               << newLine 
               << "    //[" << userCodeBlockName << "_Post]" << newLine
               << "    //[/" << userCodeBlockName << "_Post]" << newLine
@@ -149,7 +149,7 @@ const String CodeGenerator::getCallbackDefinitions() const
         {
             s << cm->returnType << " " << className << "::" << cm->prototype << newLine
               << "{" << newLine
-              << "    "  << CodeFormatting::indent (cm->content.trim(), 4, false) << newLine
+              << "    "  << CodeHelpers::indent (cm->content.trim(), 4, false) << newLine
               << "}" << newLine
               << newLine;
         }
@@ -250,7 +250,7 @@ static void replaceTemplate (String& text, const String& itemName, const String&
             }
         }
 
-        text = text.replaceSection (index, itemName.length() + 4, CodeFormatting::indent (value, indentLevel, false));
+        text = text.replaceSection (index, itemName.length() + 4, CodeHelpers::indent (value, indentLevel, false));
     }
 }
 
@@ -259,7 +259,7 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
                                  bool isForPreview, Project* project) const
 {
     replaceTemplate (code, "juceVersion", SystemStats::getJUCEVersion());
-    replaceTemplate (code, "headerGuard", CodeFormatting::makeHeaderGuardName (targetFile));
+    replaceTemplate (code, "headerGuard", CodeHelpers::makeHeaderGuardName (targetFile));
 
     replaceTemplate (code, "className", className);
     replaceTemplate (code, "constructorParams", constructorParams);
@@ -272,7 +272,7 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
     replaceTemplate (code, "methodDefinitions", getCallbackDefinitions());
 
     if (project != 0)
-        replaceTemplate (code, "defaultJuceInclude", CodeFormatting::createIncludeStatement (project->getAppIncludeFile(), targetFile));
+        replaceTemplate (code, "defaultJuceInclude", CodeHelpers::createIncludeStatement (project->getAppIncludeFile(), targetFile));
     else
         replaceTemplate (code, "defaultJuceInclude", "#include \"juce_amalgamated.h\"");
 
@@ -293,13 +293,13 @@ void CodeGenerator::applyToCode (String& code, const File& targetFile,
         replaceTemplate (code, "staticMemberDefinitions", "// Static member declarations and resources would go here... (these aren't shown in the code preview)");
     }
     
-    {
+    /*{
         MemoryOutputStream compDataCpp;
-        CodeFormatting::writeDataAsCppLiteral (componentStateData, compDataCpp);
+        CodeHelpers::writeDataAsCppLiteral (componentStateData, compDataCpp);
 
         replaceTemplate (code, "statedata", compDataCpp.toUTF8(), false);
         replaceTemplate (code, "statedatasize", String ((int) componentStateData.getSize()));
-    }
+    }*/
 }
 
 

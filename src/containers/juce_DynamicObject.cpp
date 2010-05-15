@@ -39,40 +39,40 @@ DynamicObject::~DynamicObject()
 {
 }
 
-bool DynamicObject::hasProperty (const var::identifier& propertyName) const
+bool DynamicObject::hasProperty (const Identifier& propertyName) const
 {
     var* const v = properties.getItem (propertyName);
     return v != 0 && ! v->isMethod();
 }
 
-const var DynamicObject::getProperty (const var::identifier& propertyName) const
+const var DynamicObject::getProperty (const Identifier& propertyName) const
 {
     return properties [propertyName];
 }
 
-void DynamicObject::setProperty (const var::identifier& propertyName, const var& newValue)
+void DynamicObject::setProperty (const Identifier& propertyName, const var& newValue)
 {
     properties.set (propertyName, newValue);
 }
 
-void DynamicObject::removeProperty (const var::identifier& propertyName)
+void DynamicObject::removeProperty (const Identifier& propertyName)
 {
     properties.remove (propertyName);
 }
 
-bool DynamicObject::hasMethod (const var::identifier& methodName) const
+bool DynamicObject::hasMethod (const Identifier& methodName) const
 {
     return getProperty (methodName).isMethod();
 }
 
-const var DynamicObject::invokeMethod (const var::identifier& methodName,
+const var DynamicObject::invokeMethod (const Identifier& methodName,
                                        const var* parameters,
                                        int numParameters)
 {
     return properties [methodName].invoke (var (this), parameters, numParameters);
 }
 
-void DynamicObject::setMethod (const var::identifier& name,
+void DynamicObject::setMethod (const Identifier& name,
                                var::MethodFunction methodFunction)
 {
     properties.set (name, var (methodFunction));

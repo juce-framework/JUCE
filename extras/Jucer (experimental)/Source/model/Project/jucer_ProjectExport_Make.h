@@ -101,7 +101,7 @@ public:
         writeMakefile (mo, files);
 
         const File makefile (getTargetFolder().getChildFile ("Makefile"));
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (makefile, mo))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (makefile, mo))
             return "Can't write to the Makefile: " + makefile.getFullPathName();
 
         return String::empty;
@@ -152,7 +152,7 @@ private:
         headerPaths.insert (0, "/usr/include");
 
         for (int i = 0; i < headerPaths.size(); ++i)
-            out << " -I " << FileUtils::unixStylePath (headerPaths[i]).quoted();
+            out << " -I " << FileHelpers::unixStylePath (headerPaths[i]).quoted();
     }
 
     void writeCppFlags (OutputStream& out, const Project::BuildConfiguration& config)

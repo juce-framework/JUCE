@@ -48,7 +48,7 @@ namespace ComponentEditorTreeView
         }
 
         //==============================================================================
-        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)  {}
+        void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)  {}
         void valueTreeParentChanged (ValueTree& tree)       {}
         void valueTreeChildrenChanged (ValueTree& tree)     {}
 
@@ -128,7 +128,7 @@ namespace ComponentEditorTreeView
 
         const String getDragSourceDescription()     { return getDragIdFor (editor); }
 
-        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+        void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
         {
             if (property == ComponentDocument::memberNameProperty)
                 repaintItem();
@@ -303,7 +303,7 @@ namespace ComponentEditorTreeView
 
         const String getDragSourceDescription()     { return String::empty; }
 
-        void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+        void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
         {
             if (property == MarkerListBase::getMarkerNameProperty())
                 repaintItem();

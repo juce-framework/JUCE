@@ -30,6 +30,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_Variant.h"
 #include "juce_DynamicObject.h"
 
+
 //==============================================================================
 var::var() throw()
    : type (voidType)
@@ -283,7 +284,7 @@ const var var::readFromStream (InputStream& input)
     return var::null;
 }
 
-const var var::operator[] (const var::identifier& propertyName) const
+const var var::operator[] (const Identifier& propertyName) const
 {
     if (type == objectType && value.objectValue != 0)
         return value.objectValue->getProperty (propertyName);
@@ -291,7 +292,7 @@ const var var::operator[] (const var::identifier& propertyName) const
     return var::null;
 }
 
-const var var::invoke (const var::identifier& method, const var* arguments, int numArguments) const
+const var var::invoke (const Identifier& method, const var* arguments, int numArguments) const
 {
     if (type == objectType && value.objectValue != 0)
         return value.objectValue->invokeMethod (method, arguments, numArguments);
@@ -312,67 +313,38 @@ const var var::invoke (const var& targetObject, const var* arguments, int numArg
     return var::null;
 }
 
-const var var::call (const var::identifier& method) const
+const var var::call (const Identifier& method) const
 {
     return invoke (method, 0, 0);
 }
 
-const var var::call (const var::identifier& method, const var& arg1) const
+const var var::call (const Identifier& method, const var& arg1) const
 {
     return invoke (method, &arg1, 1);
 }
 
-const var var::call (const var::identifier& method, const var& arg1, const var& arg2) const
+const var var::call (const Identifier& method, const var& arg1, const var& arg2) const
 {
     var args[] = { arg1, arg2 };
     return invoke (method, args, 2);
 }
 
-const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3)
+const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3)
 {
     var args[] = { arg1, arg2, arg3 };
     return invoke (method, args, 3);
 }
 
-const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
+const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const
 {
     var args[] = { arg1, arg2, arg3, arg4 };
     return invoke (method, args, 4);
 }
 
-const var var::call (const var::identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
+const var var::call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const
 {
     var args[] = { arg1, arg2, arg3, arg4, arg5 };
     return invoke (method, args, 5);
-}
-
-
-//==============================================================================
-var::identifier::identifier() throw()
-    : hashCode (0)
-{
-}
-
-var::identifier::identifier (const String& name_)
-    : name (name_),
-      hashCode (name_.hashCode())
-{
-    /* An identifier string must be suitable for use as a script variable or XML
-       attribute, so it can only contain this limited set of characters.. */
-    jassert (name.containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") && name.isNotEmpty());
-}
-
-var::identifier::identifier (const char* const name_)
-    : name (name_),
-      hashCode (name.hashCode())
-{
-    /* An identifier string must be suitable for use as a script variable or XML
-       attribute, so it can only contain this limited set of characters.. */
-    jassert (name.containsOnly ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_") && name.isNotEmpty());
-}
-
-var::identifier::~identifier()
-{
 }
 
 

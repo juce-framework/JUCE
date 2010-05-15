@@ -79,30 +79,30 @@ public:
         for (int i = project.getNumConfigurations(); --i >= 0;)
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
 
-        String appHeaders (CodeFormatting::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
         String initCode, shutdownCode, anotherInstanceStartedCode, privateMembers, memberInitialisers;
 
         if (createWindow)
         {
-            appHeaders << newLine << CodeFormatting::createIncludeStatement (mainWindowH, mainCppFile);
+            appHeaders << newLine << CodeHelpers::createIncludeStatement (mainWindowH, mainCppFile);
             memberInitialisers = "   : mainWindow (0)";
             initCode = "mainWindow = new " + windowClassName + "();";
             shutdownCode = "deleteAndZero (mainWindow);";
             privateMembers = windowClassName + "* mainWindow;";
 
             String windowH = project.getFileTemplate ("jucer_WindowTemplate_h")
-                                .replace ("INCLUDES", CodeFormatting::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
+                                .replace ("INCLUDES", CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainWindowH), false)
                                 .replace ("WINDOWCLASS", windowClassName, false)
-                                .replace ("HEADERGUARD", CodeFormatting::makeHeaderGuardName (mainWindowH), false);
+                                .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (mainWindowH), false);
 
             String windowCpp = project.getFileTemplate ("jucer_WindowTemplate_cpp")
-                                .replace ("INCLUDES", CodeFormatting::createIncludeStatement (mainWindowH, mainWindowCpp), false)
+                                .replace ("INCLUDES", CodeHelpers::createIncludeStatement (mainWindowH, mainWindowCpp), false)
                                 .replace ("WINDOWCLASS", windowClassName, false);
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (mainWindowH, windowH))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowH, windowH))
                 failedFiles.add (mainWindowH.getFullPathName());
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainWindowCpp, windowCpp))
                 failedFiles.add (mainWindowCpp.getFullPathName());
 
             group.addFile (mainWindowCpp, -1);
@@ -113,17 +113,17 @@ public:
         {
             String mainCpp = project.getFileTemplate ("jucer_MainTemplate_cpp")
                                 .replace ("APPHEADERS", appHeaders, false)
-                                .replace ("APPCLASSNAME", CodeFormatting::makeValidIdentifier (appTitle + "Application", false, true, false), false)
+                                .replace ("APPCLASSNAME", CodeHelpers::makeValidIdentifier (appTitle + "Application", false, true, false), false)
                                 .replace ("MEMBERINITIALISERS", memberInitialisers, false)
                                 .replace ("APPINITCODE", initCode, false)
                                 .replace ("APPSHUTDOWNCODE", shutdownCode, false)
-                                .replace ("APPNAME", CodeFormatting::addEscapeChars (appTitle), false)
+                                .replace ("APPNAME", CodeHelpers::addEscapeChars (appTitle), false)
                                 .replace ("APPVERSION", "1.0", false)
                                 .replace ("ALLOWMORETHANONEINSTANCE", "true", false)
                                 .replace ("ANOTHERINSTANCECODE", anotherInstanceStartedCode, false)
                                 .replace ("PRIVATEMEMBERS", privateMembers, false);
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
             group.addFile (mainCppFile, -1);
@@ -186,12 +186,12 @@ public:
 
         if (createMainCpp)
         {
-            String appHeaders (CodeFormatting::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
+            String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), mainCppFile));
 
             String mainCpp = project.getFileTemplate ("jucer_MainConsoleAppTemplate_cpp")
                                 .replace ("APPHEADERS", appHeaders, false);
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (mainCppFile, mainCpp))
                 failedFiles.add (mainCppFile.getFullPathName());
 
             group.addFile (mainCppFile, -1);
@@ -228,7 +228,7 @@ public:
         if (! getSourceFilesFolder().createDirectory())
             failedFiles.add (getSourceFilesFolder().getFullPathName());
 
-        String filterClassName = CodeFormatting::makeValidIdentifier (appTitle, true, true, false) + "AudioProcessor";
+        String filterClassName = CodeHelpers::makeValidIdentifier (appTitle, true, true, false) + "AudioProcessor";
         filterClassName = filterClassName.substring (0, 1).toUpperCase() + filterClassName.substring (1);
         String editorClassName = filterClassName + "Editor";
 
@@ -247,42 +247,42 @@ public:
         for (int i = project.getNumConfigurations(); --i >= 0;)
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);
 
-        String appHeaders (CodeFormatting::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
-        appHeaders << newLine << CodeFormatting::createIncludeStatement (project.getPluginCharacteristicsFile(), filterCppFile);
+        String appHeaders (CodeHelpers::createIncludeStatement (project.getAppIncludeFile(), filterCppFile));
+        appHeaders << newLine << CodeHelpers::createIncludeStatement (project.getPluginCharacteristicsFile(), filterCppFile);
 
         String filterCpp = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_cpp")
-                            .replace ("FILTERHEADERS", CodeFormatting::createIncludeStatement (filterHFile, filterCppFile)
-                                                            + newLine + CodeFormatting::createIncludeStatement (editorHFile, filterCppFile), false)
+                            .replace ("FILTERHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
+                                                            + newLine + CodeHelpers::createIncludeStatement (editorHFile, filterCppFile), false)
                             .replace ("FILTERCLASSNAME", filterClassName, false)
                             .replace ("EDITORCLASSNAME", editorClassName, false);
 
         String filterH = project.getFileTemplate ("jucer_AudioPluginFilterTemplate_h")
                             .replace ("APPHEADERS", appHeaders, false)
                             .replace ("FILTERCLASSNAME", filterClassName, false)
-                            .replace ("HEADERGUARD", CodeFormatting::makeHeaderGuardName (filterHFile), false);
+                            .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (filterHFile), false);
 
         String editorCpp = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_cpp")
-                            .replace ("EDITORCPPHEADERS", CodeFormatting::createIncludeStatement (filterHFile, filterCppFile)
-                                                               + newLine + CodeFormatting::createIncludeStatement (editorHFile, filterCppFile), false)
+                            .replace ("EDITORCPPHEADERS", CodeHelpers::createIncludeStatement (filterHFile, filterCppFile)
+                                                               + newLine + CodeHelpers::createIncludeStatement (editorHFile, filterCppFile), false)
                             .replace ("FILTERCLASSNAME", filterClassName, false)
                             .replace ("EDITORCLASSNAME", editorClassName, false);
 
         String editorH = project.getFileTemplate ("jucer_AudioPluginEditorTemplate_h")
-                            .replace ("EDITORHEADERS", appHeaders + newLine + CodeFormatting::createIncludeStatement (filterHFile, filterCppFile), false)
+                            .replace ("EDITORHEADERS", appHeaders + newLine + CodeHelpers::createIncludeStatement (filterHFile, filterCppFile), false)
                             .replace ("FILTERCLASSNAME", filterClassName, false)
                             .replace ("EDITORCLASSNAME", editorClassName, false)
-                            .replace ("HEADERGUARD", CodeFormatting::makeHeaderGuardName (editorHFile), false);
+                            .replace ("HEADERGUARD", CodeHelpers::makeHeaderGuardName (editorHFile), false);
 
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (filterCppFile, filterCpp))
             failedFiles.add (filterCppFile.getFullPathName());
 
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (filterHFile, filterH))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (filterHFile, filterH))
             failedFiles.add (filterHFile.getFullPathName());
 
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (editorCppFile, editorCpp))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorCppFile, editorCpp))
             failedFiles.add (editorCppFile.getFullPathName());
 
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (editorHFile, editorH))
             failedFiles.add (editorHFile.getFullPathName());
 
         group.addFile (filterCppFile, -1);
@@ -381,7 +381,7 @@ Project* ProjectWizard::runWizard (Component* ownerWindow_)
                 failedFiles.add (newProjectFolder.getFullPathName());
         }
 
-        if (FileUtils::containsAnyNonHiddenFiles (newProjectFolder))
+        if (FileHelpers::containsAnyNonHiddenFiles (newProjectFolder))
         {
             if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon, "New Juce Project",
                                                 "The folder you chose isn't empty - are you sure you want to create the project there?\n\nAny existing files with the same names may be overwritten by the new files."))
@@ -480,7 +480,7 @@ Project* ProjectWizard::runNewProjectWizard (Component* ownerWindow)
             if (aw.runModalLoop() == 0)
                 return 0;
 
-            if (FileUtils::isJuceFolder (juceFolderSelector.getCurrentFile()))
+            if (FileHelpers::isJuceFolder (juceFolderSelector.getCurrentFile()))
             {
                 wizard = createWizard (aw.getComboBoxComponent ("type")->getSelectedItemIndex());
                 break;

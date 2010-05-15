@@ -47,14 +47,14 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("text", "Group");
-        item.set ("justification", (int) Justification::left);
+        item.set (Ids::text, "Group");
+        item.set (Ids::justification, (int) Justification::left);
     }
 
     void update (ComponentTypeInstance& item, GroupComponent* comp)
     {
-        comp->setText (item ["text"].toString());
-        comp->setTextLabelPosition ((int) item ["justification"]);
+        comp->setText (item [Ids::text].toString());
+        comp->setTextLabelPosition ((int) item [Ids::justification]);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -62,10 +62,10 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("text"), "Label", 512, false));
+        props.add (new TextPropertyComponent (item.getValue (Ids::text), "Label", 512, false));
         props.getLast()->setTooltip ("The group's display name.");
 
-        item.addJustificationProperty (props, "Text Position", item.getValue ("justification"), true);
+        item.addJustificationProperty (props, "Text Position", item.getValue (Ids::justification), true);
         addEditableColourProperties (item, props);
     }
 

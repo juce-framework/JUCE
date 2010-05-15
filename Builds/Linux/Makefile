@@ -93,6 +93,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Synthesiser.o \
   $(OBJDIR)/juce_BigInteger.o \
   $(OBJDIR)/juce_DynamicObject.o \
+  $(OBJDIR)/juce_Identifier.o \
   $(OBJDIR)/juce_MemoryBlock.o \
   $(OBJDIR)/juce_NamedValueSet.o \
   $(OBJDIR)/juce_PropertySet.o \
@@ -322,6 +323,7 @@ OBJECTS := \
   $(OBJDIR)/juce_String.o \
   $(OBJDIR)/juce_StringArray.o \
   $(OBJDIR)/juce_StringPairArray.o \
+  $(OBJDIR)/juce_StringPool.o \
   $(OBJDIR)/juce_XmlDocument.o \
   $(OBJDIR)/juce_XmlElement.o \
   $(OBJDIR)/juce_ReadWriteLock.o \
@@ -615,6 +617,11 @@ $(OBJDIR)/juce_BigInteger.o: ../../src/containers/juce_BigInteger.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DynamicObject.o: ../../src/containers/juce_DynamicObject.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_Identifier.o: ../../src/containers/juce_Identifier.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -1760,6 +1767,11 @@ $(OBJDIR)/juce_StringArray.o: ../../src/text/juce_StringArray.cpp
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StringPairArray.o: ../../src/text/juce_StringPairArray.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_StringPool.o: ../../src/text/juce_StringPool.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

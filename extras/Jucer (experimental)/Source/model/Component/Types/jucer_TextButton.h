@@ -47,26 +47,29 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("text", "New Button");
-        item.set ("radioGroup", 0);
-        item.set ("connectedLeft", false);
-        item.set ("connectedRight", false);
-        item.set ("connectedTop", false);
-        item.set ("connectedBottom", false);
+        item.set (Ids::text, "New Button");
+        item.set (Ids::radioGroup, 0);
+        item.set (Ids::connectedLeft, false);
+        item.set (Ids::connectedRight, false);
+        item.set (Ids::connectedTop, false);
+        item.set (Ids::connectedBottom, false);
+    }
+
+    static int getConnectedFlags (ComponentTypeInstance& item)
+    {
+        int connected = 0;
+        if (item [Ids::connectedLeft])    connected |= TextButton::ConnectedOnLeft;
+        if (item [Ids::connectedRight])   connected |= TextButton::ConnectedOnRight;
+        if (item [Ids::connectedTop])     connected |= TextButton::ConnectedOnTop;
+        if (item [Ids::connectedBottom])  connected |= TextButton::ConnectedOnBottom;
+        return connected;
     }
 
     void update (ComponentTypeInstance& item, TextButton* comp)
     {
-        comp->setButtonText (item ["text"].toString());
-        comp->setRadioGroupId (item ["radioGroup"]);
-
-        int connected = 0;
-        if (item ["connectedLeft"])    connected |= TextButton::ConnectedOnLeft;
-        if (item ["connectedRight"])   connected |= TextButton::ConnectedOnRight;
-        if (item ["connectedTop"])     connected |= TextButton::ConnectedOnTop;
-        if (item ["connectedBottom"])  connected |= TextButton::ConnectedOnBottom;
-
-        comp->setConnectedEdges (connected);
+        comp->setButtonText (item [Ids::text].toString());
+        comp->setRadioGroupId (item [Ids::radioGroup]);
+        comp->setConnectedEdges (getConnectedFlags (item));
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -74,23 +77,31 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("text"), "Button Text", 1024, false));
+        props.add (new TextPropertyComponent (item.getValue (Ids::text), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("radioGroup"))), "Radio Group", 8, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue (Ids::radioGroup))), "Radio Group", 8, false));
         props.getLast()->setTooltip ("The radio group that this button is a member of.");
 
-        props.add (new BooleanPropertyComponent (item.getValue ("connectedLeft"), "Connected left", "Connected"));
-        props.add (new BooleanPropertyComponent (item.getValue ("connectedRight"), "Connected right", "Connected"));
-        props.add (new BooleanPropertyComponent (item.getValue ("connectedTop"), "Connected top", "Connected"));
-        props.add (new BooleanPropertyComponent (item.getValue ("connectedBottom"), "Connected bottom", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::connectedLeft), "Connected left", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::connectedRight), "Connected right", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::connectedTop), "Connected top", "Connected"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::connectedBottom), "Connected bottom", "Connected"));
 
         addEditableColourProperties (item, props);
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode += item.createConstructorStatement (String::empty);
+        code.constructorCode
+            << item.createConstructorStatement (String::empty)
+            << item.getMemberName() << "->setButtonText (" << CodeHelpers::stringLiteral (item [Ids::text]) << ");" << newLine;
+
+        if ((int) item [Ids::radioGroup] != 0)
+            code.constructorCode << item.getMemberName() << "->setRadioGroupId (" << String ((int) item [Ids::radioGroup]) << ");" << newLine;
+
+        if (getConnectedFlags (item) != 0)
+            code.constructorCode << item.getMemberName() << "->setConnectedEdges (" << String (getConnectedFlags (item)) << ");" << newLine;
     }
 };
 

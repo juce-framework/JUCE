@@ -59,37 +59,37 @@ public:
         If the name isn't found, this will return a void variant.
         @see getProperty
     */
-    const var& operator[] (const var::identifier& name) const;
+    const var& operator[] (const Identifier& name) const;
 
     /** Tries to return the named value, but if no such value is found, this will
         instead return the supplied default value.
     */
-    const var getWithDefault (const var::identifier& name, const var& defaultReturnValue) const;
+    const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
     /** Returns a pointer to the object holding a named value, or
         null if there is no value with this name. */
-    var* getItem (const var::identifier& name) const;
+    var* getItem (const Identifier& name) const;
 
     /** Changes or adds a named value.
         @returns true if a value was changed or added; false if the
                  value was already set the the value passed-in.
     */
-    bool set (const var::identifier& name, const var& newValue);
+    bool set (const Identifier& name, const var& newValue);
 
     /** Returns true if the set contains an item with the specified name. */
-    bool contains (const var::identifier& name) const;
+    bool contains (const Identifier& name) const;
 
     /** Removes a value from the set.
         @returns    true if a value was removed; false if there was no value
                     with the name that was given.
     */
-    bool remove (const var::identifier& name);
+    bool remove (const Identifier& name);
 
     /** Returns the name of the value at a given index.
         The index must be between 0 and size() - 1. Out-of-range indexes will
         return an empty identifier.
     */
-    const var::identifier getName (int index) const;
+    const Identifier getName (int index) const;
 
     /** Returns the value of the item at a given index.
         The index must be between 0 and size() - 1. Out-of-range indexes will
@@ -107,9 +107,9 @@ private:
     struct NamedValue
     {
         NamedValue() throw();
-        NamedValue (const var::identifier& name, const var& value);
+        NamedValue (const Identifier& name, const var& value);
 
-        var::identifier name;
+        Identifier name;
         var value;
     };
 

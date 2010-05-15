@@ -62,29 +62,30 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("scrollBarV", true);
-        item.set ("scrollBarH", true);
-        item.set ("scrollbarWidth", 18);
+        item.set (Ids::scrollBarV, true);
+        item.set (Ids::scrollBarH, true);
+        item.set (Ids::scrollbarWidth, 18);
     }
 
     void update (ComponentTypeInstance& item, Viewport* comp)
     {
-        comp->setScrollBarsShown (item ["scrollBarV"], item ["scrollBarH"]);
-        comp->setScrollBarThickness (item ["scrollbarWidth"]);
+        comp->setScrollBarsShown (item [Ids::scrollBarV], item [Ids::scrollBarH]);
+        comp->setScrollBarThickness (item [Ids::scrollbarWidth]);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
-        props.add (new BooleanPropertyComponent (item.getValue ("scrollBarV"), "Scrollbar V", "Vertical scrollbar shown"));
-        props.add (new BooleanPropertyComponent (item.getValue ("scrollBarH"), "Scrollbar H", "Horizontal scrollbar shown"));
-        props.add (new SliderPropertyComponent (item.getValue ("scrollbarWidth"), "Scrollbar Thickness", 3, 40, 1));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::scrollBarV), "Scrollbar V", "Vertical scrollbar shown"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::scrollBarH), "Scrollbar H", "Horizontal scrollbar shown"));
+        props.add (new SliderPropertyComponent (item.getValue (Ids::scrollbarWidth), "Scrollbar Thickness", 3, 40, 1));
         addEditableColourProperties (item, props);
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode << item.createConstructorStatement (CodeFormatting::stringLiteral (item.getComponentName()));
+        code.constructorCode << item.createConstructorStatement (CodeHelpers::stringLiteral (item.getComponentName()));
     }
 };
+
 
 #endif

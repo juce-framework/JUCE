@@ -166,5 +166,20 @@ public:
     Coordinate left, right, top, bottom;
 };
 
+//==============================================================================
+class ComponentAutoLayoutManager    : public ComponentListener
+{
+public:
+    ComponentAutoLayoutManager (Component* parentComponent);
+    ~ComponentAutoLayoutManager();
+
+    void addMarker (bool isX, const String& name, const String& position);
+    void moveMarker (const String& name, int newPosition);
+
+private:
+    Array <Component*> components;
+
+};
+
 
 #endif  // __JUCER_COORDINATE_H_EF56ACFA__

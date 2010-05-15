@@ -311,6 +311,10 @@
               file="src/containers/juce_ElementComparator.h"/>
         <FILE id="ssHjnrvya" name="juce_HeapBlock.h" compile="0" resource="0"
               file="src/containers/juce_HeapBlock.h"/>
+        <FILE id="3Wo76GZwg" name="juce_Identifier.cpp" compile="1" resource="0"
+              file="src/containers/juce_Identifier.cpp"/>
+        <FILE id="8q7r0YE6b" name="juce_Identifier.h" compile="0" resource="0"
+              file="src/containers/juce_Identifier.h"/>
         <FILE id="GJt7L3I14" name="juce_MemoryBlock.cpp" compile="1" resource="0"
               file="src/containers/juce_MemoryBlock.cpp"/>
         <FILE id="09FY4g3q" name="juce_MemoryBlock.h" compile="0" resource="0"
@@ -1350,6 +1354,10 @@
               file="src/text/juce_StringPairArray.cpp"/>
         <FILE id="U9Fa8IfUG" name="juce_StringPairArray.h" compile="0" resource="0"
               file="src/text/juce_StringPairArray.h"/>
+        <FILE id="YCDGjklky" name="juce_StringPool.cpp" compile="1" resource="0"
+              file="src/text/juce_StringPool.cpp"/>
+        <FILE id="XPIlVuv7o" name="juce_StringPool.h" compile="0" resource="0"
+              file="src/text/juce_StringPool.h"/>
         <FILE id="iPfP4KM3" name="juce_XmlDocument.cpp" compile="1" resource="0"
               file="src/text/juce_XmlDocument.cpp"/>
         <FILE id="oqocsaa6g" name="juce_XmlDocument.h" compile="0" resource="0"

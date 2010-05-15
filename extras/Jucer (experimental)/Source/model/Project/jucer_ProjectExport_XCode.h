@@ -122,7 +122,7 @@ public:
             MemoryOutputStream mo;
             writeProjectFile (mo);
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (projectFile, mo))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (projectFile, mo))
                 return "Can't write to file: " + projectFile.getFullPathName();
         }
 
@@ -266,7 +266,7 @@ private:
         MemoryOutputStream mo;
         plist.writeToStream (mo, "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">");
 
-        return FileUtils::overwriteFileWithNewDataIfDifferent (infoPlistFile, mo);
+        return FileHelpers::overwriteFileWithNewDataIfDifferent (infoPlistFile, mo);
     }
 
     const StringArray getHeaderSearchPaths (const Project::BuildConfiguration& config)
@@ -566,7 +566,7 @@ private:
 
             for (int j = 0; j < o.getNumProperties(); ++j)
             {
-                const var::identifier propertyName (o.getPropertyName(j));
+                const Identifier propertyName (o.getPropertyName(j));
                 String val (o.getProperty (propertyName).toString());
 
                 if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,-\r\n")
@@ -574,7 +574,7 @@ private:
                                                 || val.trimStart().startsWithChar ('{'))))
                     val = val.quoted();
 
-                output << propertyName.name << " = " << val << "; ";
+                output << propertyName.toString() << " = " << val << "; ";
             }
 
             output << "};\n";

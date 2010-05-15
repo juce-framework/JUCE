@@ -123,7 +123,7 @@ private:
             MemoryOutputStream mo;
             xml->writeToStream (mo, String::empty);
 
-            if (! FileUtils::overwriteFileWithNewDataIfDifferent (projectFile, mo))
+            if (! FileHelpers::overwriteFileWithNewDataIfDifferent (projectFile, mo))
                 errors.add ("Couldn't write to the target file!");
         }
     }
@@ -192,7 +192,7 @@ private:
             << newLine
             << "*/"
             << newLine << newLine
-            << CodeFormatting::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
+            << CodeHelpers::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
 
         if (fileNumber == 0)
             writeInclude (out, project.isUsingFullyAmalgamatedFile() ? "juce_amalgamated.cpp"
@@ -216,7 +216,7 @@ private:
             << "#define " << headerGuard << newLine << newLine;
 
         if (hasAppConfigFile)
-            out << CodeFormatting::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
+            out << CodeHelpers::createIncludeStatement (appConfigFile, appConfigFile) << newLine;
 
         if (project.getJuceLinkageMode() != Project::notLinkedToJuce)
         {
@@ -228,13 +228,13 @@ private:
         }
 
         if (binaryDataCpp.exists())
-            out << CodeFormatting::createIncludeStatement (binaryDataCpp.withFileExtension (".h"), appConfigFile) << newLine;
+            out << CodeHelpers::createIncludeStatement (binaryDataCpp.withFileExtension (".h"), appConfigFile) << newLine;
 
         out << newLine
             << "namespace ProjectInfo" << newLine
             << "{" << newLine
-            << "    const char* const  projectName    = " << CodeFormatting::addEscapeChars (project.getProjectName().toString()).quoted() << ";" << newLine
-            << "    const char* const  versionString  = " << CodeFormatting::addEscapeChars (project.getVersion().toString()).quoted() << ";" << newLine
+            << "    const char* const  projectName    = " << CodeHelpers::addEscapeChars (project.getProjectName().toString()).quoted() << ";" << newLine
+            << "    const char* const  versionString  = " << CodeHelpers::addEscapeChars (project.getVersion().toString()).quoted() << ";" << newLine
             << "    const int          versionNumber  = " << createVersionCode (project.getVersion().toString()) << ";" << newLine
             << "}" << newLine
             << newLine
@@ -370,7 +370,7 @@ private:
 
     bool replaceFileIfDifferent (const File& f, const MemoryOutputStream& newData)
     {
-        if (! FileUtils::overwriteFileWithNewDataIfDifferent (f, newData))
+        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (f, newData))
         {
             errors.add ("Can't write to file: " + f.getFullPathName());
             return false;

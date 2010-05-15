@@ -50,11 +50,11 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("items", "Item 1\nItem 2");
-        item.set ("editable", false);
-        item.set ("textJustification", (int) Justification::centredLeft);
-        item.set ("unselectedText", "");
-        item.set ("noItemsText", "(No Choices)");
+        item.set (Ids::items, "Item 1\nItem 2");
+        item.set (Ids::editable, false);
+        item.set (Ids::textJustification, (int) Justification::centredLeft);
+        item.set (Ids::unselectedText, "");
+        item.set (Ids::noItemsText, "(No Choices)");
     }
 
     void updateItems (ComboBox* comp, const String& itemString)
@@ -79,11 +79,11 @@ public:
 
     void update (ComponentTypeInstance& item, ComboBox* comp)
     {
-        updateItems (comp, item ["items"]);
-        comp->setEditableText (item ["editable"]);
-        comp->setJustificationType ((int) item ["textJustification"]);
-        comp->setTextWhenNothingSelected (item ["unselectedText"].toString());
-        comp->setTextWhenNoChoicesAvailable (item ["noItemsText"].toString());
+        updateItems (comp, item [Ids::items]);
+        comp->setEditableText (item [Ids::editable]);
+        comp->setJustificationType ((int) item [Ids::textJustification]);
+        comp->setTextWhenNothingSelected (item [Ids::unselectedText].toString());
+        comp->setTextWhenNoChoicesAvailable (item [Ids::noItemsText].toString());
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -91,20 +91,43 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("items"), "Items", 16384, true));
+        props.add (new TextPropertyComponent (item.getValue (Ids::items), "Items", 16384, true));
         props.getLast()->setTooltip ("A list of items to use to initialise the ComboBox");
 
-        props.add (new BooleanPropertyComponent (item.getValue ("editable"), "Editable", "Text is editable"));
-        item.addJustificationProperty (props, "Text Position", item.getValue ("textJustification"), false);
-        props.add (new TextPropertyComponent (item.getValue ("unselectedText"), "Text when none selected", 512, false));
-        props.add (new TextPropertyComponent (item.getValue ("noItemsText"), "Text when no items", 512, false));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::editable), "Editable", "Text is editable"));
+        item.addJustificationProperty (props, "Text Position", item.getValue (Ids::textJustification), false);
+        props.add (new TextPropertyComponent (item.getValue (Ids::unselectedText), "Text when none selected", 512, false));
+        props.add (new TextPropertyComponent (item.getValue (Ids::noItemsText), "Text when no items", 512, false));
 
         addEditableColourProperties (item, props);
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode << item.createConstructorStatement (String::empty);
+        ComboBox defaultBox;
+
+        code.constructorCode
+            << item.createConstructorStatement (String::empty)
+            << item.getMemberName() << "->setEditableText (" << CodeHelpers::boolLiteral (item [Ids::editable]) << ");" << newLine;
+
+        Justification justification ((int) item [Ids::textJustification]);
+        if (justification.getFlags() != 0 && justification.getFlags() != defaultBox.getJustificationType().getFlags())
+            code.constructorCode << item.getMemberName() << "->setJustificationType (" << CodeHelpers::justificationToCode (justification) << ");" << newLine;
+
+        if (item [Ids::unselectedText].toString() != defaultBox.getTextWhenNothingSelected())
+            code.constructorCode << item.getMemberName() << "->setTextWhenNothingSelected ("
+                                 << CodeHelpers::stringLiteral (item [Ids::unselectedText]) << ");" << newLine;
+
+        if (item [Ids::noItemsText].toString() != defaultBox.getTextWhenNoChoicesAvailable())
+            code.constructorCode << item.getMemberName() << "->setTextWhenNoChoicesAvailable ("
+                                 << CodeHelpers::stringLiteral (item [Ids::noItemsText]) << ");" << newLine;
+
+        StringArray items;
+        items.addLines (item [Ids::items]);
+        items.removeEmptyStrings (true);
+
+        for (int i = 0; i < items.size(); ++i)
+            code.constructorCode << item.getMemberName() << "->addItem (" << CodeHelpers::stringLiteral (items[i]) << ");" << newLine;
     }
 };
 

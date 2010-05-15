@@ -79,7 +79,7 @@ public:
     }
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
     {
     }
 

@@ -62,7 +62,7 @@ public:
                 verticalSnapPositions.add (SnapLine (floatPos.getX(), floatPos.getY(), floatPos.getBottom()));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapPositions.add (SnapLine ((int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+                verticalSnapPositions.add (SnapLine ((float) (int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
 
             if (zone.isDraggingWholeObject() || zone.isDraggingRightEdge())
                 verticalSnapPositions.add (SnapLine (floatPos.getRight(), floatPos.getY(), floatPos.getBottom()));
@@ -71,7 +71,7 @@ public:
                 horizontalSnapPositions.add (SnapLine (floatPos.getY(), floatPos.getX(), floatPos.getRight()));
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapPositions.add (SnapLine ((int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+                horizontalSnapPositions.add (SnapLine ((float) (int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
 
             if (zone.isDraggingWholeObject() || zone.isDraggingBottomEdge())
                 horizontalSnapPositions.add (SnapLine (floatPos.getBottom(), floatPos.getX(), floatPos.getRight()));
@@ -116,7 +116,7 @@ public:
             }
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapTargets.add (SnapLine ((int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
+                verticalSnapTargets.add (SnapLine ((float) (int) floatPos.getCentreX(), floatPos.getY(), floatPos.getBottom()));
 
             if (isDraggingUpDown())
             {
@@ -125,7 +125,7 @@ public:
             }
 
             if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapTargets.add (SnapLine ((int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
+                horizontalSnapTargets.add (SnapLine ((float) (int) floatPos.getCentreY(), floatPos.getX(), floatPos.getRight()));
         }
 
         mergeSnapLines (verticalSnapTargets);

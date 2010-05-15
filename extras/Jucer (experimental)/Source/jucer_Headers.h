@@ -34,7 +34,9 @@
 //==============================================================================
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "utility/jucer_StoredSettings.h"
-#include "utility/jucer_UtilityFunctions.h"
+#include "utility/jucer_MiscUtilities.h"
+#include "utility/jucer_CodeHelpers.h"
+#include "utility/jucer_FileHelpers.h"
 #include "utility/jucer_RelativePath.h"
 #include "utility/jucer_ValueRemapperSource.h"
 #include "ui/jucer_CommandIDs.h"

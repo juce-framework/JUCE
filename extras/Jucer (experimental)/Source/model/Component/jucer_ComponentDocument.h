@@ -148,18 +148,18 @@ public:
     UndoManager* getUndoManager() const;
     void beginNewTransaction();
 
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property);
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 
-    static const char* const idProperty;
-    static const char* const compBoundsProperty;
-    static const char* const memberNameProperty;
-    static const char* const compNameProperty;
-    static const char* const compTooltipProperty;
-    static const char* const compFocusOrderProperty;
+    static const Identifier idProperty;
+    static const Identifier compBoundsProperty;
+    static const Identifier memberNameProperty;
+    static const Identifier compNameProperty;
+    static const Identifier compTooltipProperty;
+    static const Identifier compFocusOrderProperty;
 
-    static const char* const jucerIDProperty;
+    static const Identifier jucerIDProperty;
     static const String getJucerIDFor (Component* c);
 
     //==============================================================================
@@ -192,12 +192,12 @@ private:
     Value tempCanvasWidth, tempCanvasHeight;
 
     void checkRootObject();
-    void createSubTreeIfNotThere (const String& name);
+    void createSubTreeIfNotThere (const Identifier& name);
     void addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
                             bool isAnchor1, const String& fullCoordName);
 
-    Value getRootValueUndoable (const var::identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
-    Value getRootValueNonUndoable (const var::identifier& name) const     { return root.getPropertyAsValue (name, 0); }
+    Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
+    Value getRootValueNonUndoable (const Identifier& name) const     { return root.getPropertyAsValue (name, 0); }
 
     void writeCode (OutputStream& cpp, OutputStream& header);
     void writeMetadata (OutputStream& out);

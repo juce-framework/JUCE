@@ -92,7 +92,7 @@ public:
     void renameAnchor (const String& oldName, const String& newName);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const var::identifier& name);
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& name);
     void valueTreeChildrenChanged (ValueTree& tree);
     void valueTreeParentChanged (ValueTree& tree);
 
@@ -108,8 +108,8 @@ private:
 
     void checkRootObject();
 
-    Value getRootValueUndoable (const var::identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
-    Value getRootValueNonUndoable (const var::identifier& name) const     { return root.getPropertyAsValue (name, 0); }
+    Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
+    Value getRootValueNonUndoable (const Identifier& name) const     { return root.getPropertyAsValue (name, 0); }
 
     void save (OutputStream& output);
     bool load (InputStream& input);

@@ -223,17 +223,22 @@
         </Filter>
       </Filter>
       <Filter Name="Utility">
+        <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.cpp"/>
+        <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.h"/>
         <File RelativePath="..\..\Source\utility\jucer_ColourEditorComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_Colours.h"/>
         <File RelativePath="..\..\Source\utility\jucer_Coordinate.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_Coordinate.h"/>
         <File RelativePath="..\..\Source\utility\jucer_CoordinatePropertyComponent.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_FileHelpers.cpp"/>
+        <File RelativePath="..\..\Source\utility\jucer_FileHelpers.h"/>
         <File RelativePath="..\..\Source\utility\jucer_MarkerListBase.h"/>
         <File RelativePath="..\..\Source\utility\jucer_RelativePath.h"/>
         <File RelativePath="..\..\Source\utility\jucer_StoredSettings.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_StoredSettings.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_UtilityFunctions.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_UtilityFunctions.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_TickIterator.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
+        <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.h"/>
         <File RelativePath="..\..\Source\utility\jucer_ValueRemapperSource.h"/>
       </Filter>
       <Filter Name="Main">

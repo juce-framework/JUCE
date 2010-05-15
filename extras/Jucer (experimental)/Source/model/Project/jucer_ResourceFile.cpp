@@ -100,16 +100,6 @@ int64 ResourceFile::getTotalDataSize() const
     return total;
 }
 
-static int calcResourceHashCode (const String& s)
-{
-    const char* t = s.toUTF8();
-    int hash = 0;
-    while (*t != 0)
-        hash = 31 * hash + *t++;
-
-    return hash;
-}
-
 bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& header)
 {
     String comment;
@@ -125,15 +115,15 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
         << comment;
 
     if (juceHeader.exists())
-        header << CodeFormatting::createIncludeStatement (juceHeader, cppFile) << newLine;
+        header << CodeHelpers::createIncludeStatement (juceHeader, cppFile) << newLine;
 
     const String namespaceName (className);
-    StringArray variableNames;
+    StringArray variableNames, returnCodes;
 
     int i;
     for (i = 0; i < files.size(); ++i)
     {
-        String variableNameRoot (CodeFormatting::makeValidIdentifier (files.getUnchecked(i)->getFileName()
+        String variableNameRoot (CodeHelpers::makeValidIdentifier (files.getUnchecked(i)->getFileName()
                                                                        .replaceCharacters (" .", "__")
                                                                        .retainCharacters ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789"),
                                                                       false, true, false));
@@ -144,32 +134,19 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             variableName = variableNameRoot + String (suffix++);
 
         variableNames.add (variableName);
+        returnCodes.add ("numBytes = " + namespaceName + "::" + variableName + "Size; return "
+                            + namespaceName + "::" + variableName + ";");
     }
 
-    cpp << CodeFormatting::createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
+    cpp << CodeHelpers::createIncludeStatement (cppFile.withFileExtension (".h"), cppFile) << newLine
         << newLine
         << newLine
         << "const char* " << namespaceName << "::getNamedResource (const char* resourceNameUTF8, int& numBytes) throw()" << newLine
-        << "{" << newLine
-        << "    int hash = 0;" << newLine
-        << "    if (resourceNameUTF8 != 0)" << newLine
-        << "        while (*resourceNameUTF8 != 0)" << newLine
-        << "            hash = 31 * hash + *resourceNameUTF8++;" << newLine
-        << newLine
-        << "    switch (hash)" << newLine
-        << "    {" << newLine;
+        << "{" << newLine;
 
-    for (i = 0; i < files.size(); ++i)
-    {
-        cpp << "        case 0x" << hexString8Digits (calcResourceHashCode (variableNames[i]))
-            << ":  numBytes = " << namespaceName << "::" << variableNames[i] << "Size; return "
-            << namespaceName << "::" << variableNames[i] << ";" << newLine;
-    }
+    CodeHelpers::createStringMatcher (cpp, "resourceNameUTF8", variableNames, returnCodes, 4);
 
-    cpp << "        default: break;" << newLine
-        << "    }" << newLine
-        << newLine
-        << "    numBytes = 0;" << newLine
+    cpp << "    numBytes = 0;" << newLine
         << "    return 0;" << newLine
         << "}" << newLine
         << newLine;
@@ -199,7 +176,7 @@ bool ResourceFile::write (const File& cppFile, OutputStream& cpp, OutputStream& 
             {
                 MemoryBlock data;
                 fileStream->readIntoMemoryBlock (data);
-                CodeFormatting::writeDataAsCppLiteral (data, cpp);
+                CodeHelpers::writeDataAsCppLiteral (data, cpp);
             }
 
             cpp << newLine << newLine
@@ -231,8 +208,8 @@ bool ResourceFile::write (const File& cppFile)
             cppOut = 0;
             hppOut = 0;
 
-            return (FileUtils::areFilesIdentical (tempCpp.getFile(), tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
-                && (FileUtils::areFilesIdentical (tempH.getFile(), tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());
+            return (tempCpp.getFile().hasIdenticalContentTo (tempCpp.getTargetFile()) || tempCpp.overwriteTargetFileWithTemporary())
+                && (tempH.getFile().hasIdenticalContentTo (tempH.getTargetFile()) || tempH.overwriteTargetFileWithTemporary());
         }
     }
 

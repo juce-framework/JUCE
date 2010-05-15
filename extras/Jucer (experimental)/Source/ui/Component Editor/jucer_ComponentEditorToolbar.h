@@ -52,7 +52,7 @@ public:
         return true;
     }
 
-    void paintButton (Graphics& g, const bool over, const bool down)
+    void paintButton (Graphics& g, bool over, bool down)
     {
         Path p;
         p.addRoundedRectangle (1.5f, 2.5f, getWidth() - 3.0f, getHeight() - 5.0f, 3.0f);

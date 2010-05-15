@@ -46,14 +46,14 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("text", "New Toggle Button");
-        item.set ("initialState", false);
+        item.set (Ids::text, "New Toggle Button");
+        item.set (Ids::initialState, false);
     }
 
     void update (ComponentTypeInstance& item, ToggleButton* comp)
     {
-        comp->setButtonText (item ["text"].toString());
-        comp->setToggleState (item ["initialState"], false);
+        comp->setButtonText (item [Ids::text].toString());
+        comp->setToggleState (item [Ids::initialState], false);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -61,10 +61,10 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("text"), "Button Text", 1024, false));
+        props.add (new TextPropertyComponent (item.getValue (Ids::text), "Button Text", 1024, false));
         props.getLast()->setTooltip ("The button's text.");
 
-        props.add (new BooleanPropertyComponent (item.getValue ("initialState"), "Initial State", "Enabled initially"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::initialState), "Initial State", "Enabled initially"));
 
         addEditableColourProperties (item, props);
     }

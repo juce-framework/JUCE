@@ -29,6 +29,7 @@
 #include "../../../jucer_Headers.h"
 #include "../jucer_ComponentDocument.h"
 #include "../../../utility/jucer_ColourEditorComponent.h"
+
 class ComponentTypeHandler;
 
 class JucerState
@@ -60,9 +61,9 @@ public:
     ComponentDocument& getDocument() throw()            { return document; }
     ValueTree& getState() throw()                       { return state; }
 
-    Value getValue (const var::identifier& name) const;
-    void set (const var::identifier& name, const var& value);
-    const var operator[] (const var::identifier& name) const    { return state [name] ;}
+    Value getValue (const Identifier& name) const;
+    void set (const Identifier& name, const var& value);
+    const var operator[] (const Identifier& name) const    { return state [name] ;}
 
     const String getMemberName() const                  { return state [ComponentDocument::memberNameProperty]; }
     const String getComponentName() const               { return state [ComponentDocument::compNameProperty]; }
@@ -75,8 +76,8 @@ public:
     void addBoundsProperties (Array <PropertyComponent*>& props);
     void addTooltipProperty (Array <PropertyComponent*>& props);
     void addFocusOrderProperty (Array <PropertyComponent*>& props);
-    void addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const String& propertyName);
-    void addFontProperties (Array <PropertyComponent*>& props, const var::identifier& name);
+    void addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const Identifier& propertyName);
+    void addFontProperties (Array <PropertyComponent*>& props, const Identifier& name);
     void addJustificationProperty (Array <PropertyComponent*>& props, const String& name, const Value& value, bool onlyHorizontal);
 
     //==============================================================================
@@ -104,7 +105,7 @@ public:
     virtual ~ComponentTypeHandler();
 
     const String& getDisplayName() const        { return displayName; }
-    const String& getXmlTag() const             { return xmlTag; }
+    const Identifier& getXmlTag() const    { return xmlTag; }
     const String& getMemberNameRoot() const     { return memberNameRoot; }
 
     virtual Component* createComponent() = 0;
@@ -118,7 +119,8 @@ public:
 
 protected:
     //==============================================================================
-    const String displayName, className, xmlTag, memberNameRoot;
+    const String displayName, className, memberNameRoot;
+    const Identifier xmlTag;
 
 private:
     ComponentTypeHandler (const ComponentTypeHandler&);
@@ -196,12 +198,13 @@ protected:
     struct EditableColour
     {
         int colourId;
-        String name, propertyName;
+        String name;
+        Identifier propertyName;
     };
 
     Array <EditableColour> editableColours;
 
-    void addEditableColour (int colourId, const String& displayName, const String& propertyName)
+    void addEditableColour (int colourId, const String& displayName, const Identifier& propertyName)
     {
         EditableColour ec;
         ec.colourId = colourId;

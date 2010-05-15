@@ -68,26 +68,26 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("class", "Component");
+        item.set (Ids::class_, "Component");
     }
 
     void update (ComponentTypeInstance& item, Component* comp)
     {
         static_cast<PlaceholderComp*> (comp)->setDetails (item [ComponentDocument::memberNameProperty],
-                                                          item ["class"]);
+                                                          item [Ids::class_]);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("class"), "Class", 256, false));
+        props.add (new TextPropertyComponent (item.getValue (Ids::class_), "Class", 256, false));
         props.getLast()->setTooltip ("The class that this component is an instance of.");
     }
 
     const String getClassName (ComponentTypeInstance& item) const
     {
-        return item ["class"];
+        return item [Ids::class_];
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)

@@ -362,7 +362,7 @@ void ProjectTreeViewBase::itemDropped (const String& sourceDescription, Componen
 }
 
 //==============================================================================
-void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+void ProjectTreeViewBase::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (tree == item.getNode())
         repaintItem();

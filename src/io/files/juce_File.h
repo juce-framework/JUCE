@@ -669,6 +669,11 @@ public:
                           bool asUnicode = false,
                           bool writeUnicodeHeaderBytes = false) const;
 
+    /** Attempts to scan the contents of this file and compare it to another file, returning
+        true if this is possible and they match byte-for-byte.
+    */
+    bool hasIdenticalContentTo (const File& other) const;
+
     //==============================================================================
     /** Creates a set of files to represent each file root.
 

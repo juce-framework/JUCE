@@ -57,7 +57,7 @@ void GroupInformationComponent::paintListBoxItem (int rowNumber, Graphics& g, in
 }
 
 //==============================================================================
-void GroupInformationComponent::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property)
+void GroupInformationComponent::valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)
 {
     list->updateContent();
 }

@@ -54,7 +54,7 @@ public:
     void drawYAxis (Graphics& g, const Rectangle<int>& r);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const var::identifier&)    { update(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { update(); }
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { update(); }
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
 

@@ -44,6 +44,9 @@
 #ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
  #include "containers/juce_HeapBlock.h"
 #endif
+#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
+ #include "containers/juce_Identifier.h"
+#endif
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
  #include "containers/juce_MemoryBlock.h"
 #endif
@@ -223,6 +226,9 @@
 #endif
 #ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
  #include "text/juce_StringPairArray.h"
+#endif
+#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
+ #include "text/juce_StringPool.h"
 #endif
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
  #include "text/juce_XmlDocument.h"

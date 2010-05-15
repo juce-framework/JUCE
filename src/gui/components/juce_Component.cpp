@@ -1783,7 +1783,7 @@ void Component::sendLookAndFeelChange()
     }
 }
 
-static const var::identifier getColourPropertyId (const int colourId)
+static const Identifier getColourPropertyId (const int colourId)
 {
     String s;
     s.preallocateStorage (18);
@@ -1827,9 +1827,9 @@ void Component::copyAllExplicitColoursTo (Component& target) const
 
     for (int i = properties.size(); --i >= 0;)
     {
-        const var::identifier name (properties.getName(i));
+        const Identifier name (properties.getName(i));
 
-        if (name.name.startsWith ("jcclr_"))
+        if (name.toString().startsWith ("jcclr_"))
             if (target.properties.set (name, properties [name]))
                 changed = true;
     }

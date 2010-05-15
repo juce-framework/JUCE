@@ -14,9 +14,9 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../.." documentExtensions=".jucer"/>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.."/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../.." libraryType="1"/>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../.."/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>
@@ -193,6 +193,10 @@
       </GROUP>
     </GROUP>
     <GROUP id="wje6dWhDW" name="Utility">
+      <FILE id="V7oDXc3FF" name="jucer_CodeHelpers.cpp" compile="1" resource="0"
+            file="Source/utility/jucer_CodeHelpers.cpp"/>
+      <FILE id="L5cAZdBjr" name="jucer_CodeHelpers.h" compile="0" resource="0"
+            file="Source/utility/jucer_CodeHelpers.h"/>
       <FILE id="hmWl0ODQe" name="jucer_ColourEditorComponent.h" compile="0"
             resource="0" file="Source/utility/jucer_ColourEditorComponent.h"/>
       <FILE id="bjibbvm3S" name="jucer_Colours.h" compile="0" resource="0"
@@ -203,6 +207,10 @@
             file="Source/utility/jucer_Coordinate.h"/>
       <FILE id="DDCunFHcy" name="jucer_CoordinatePropertyComponent.h" compile="0"
             resource="0" file="Source/utility/jucer_CoordinatePropertyComponent.h"/>
+      <FILE id="WlEYep7NN" name="jucer_FileHelpers.cpp" compile="1" resource="0"
+            file="Source/utility/jucer_FileHelpers.cpp"/>
+      <FILE id="4paLQmzFf" name="jucer_FileHelpers.h" compile="0" resource="0"
+            file="Source/utility/jucer_FileHelpers.h"/>
       <FILE id="ZYrHhSqnP" name="jucer_MarkerListBase.h" compile="0" resource="0"
             file="Source/utility/jucer_MarkerListBase.h"/>
       <FILE id="nMKxowe0" name="jucer_RelativePath.h" compile="0" resource="0"
@@ -211,10 +219,12 @@
             file="Source/utility/jucer_StoredSettings.cpp"/>
       <FILE id="v3HgXpLOM" name="jucer_StoredSettings.h" compile="0" resource="0"
             file="Source/utility/jucer_StoredSettings.h"/>
-      <FILE id="4RGcC516Z" name="jucer_UtilityFunctions.cpp" compile="1"
-            resource="0" file="Source/utility/jucer_UtilityFunctions.cpp"/>
-      <FILE id="kNy0Xya3H" name="jucer_UtilityFunctions.h" compile="0" resource="0"
-            file="Source/utility/jucer_UtilityFunctions.h"/>
+      <FILE id="Ihan8wumM" name="jucer_TickIterator.h" compile="0" resource="0"
+            file="Source/utility/jucer_TickIterator.h"/>
+      <FILE id="4RGcC516Z" name="jucer_MiscUtilities.cpp" compile="1" resource="0"
+            file="Source/utility/jucer_MiscUtilities.cpp"/>
+      <FILE id="kNy0Xya3H" name="jucer_MiscUtilities.h" compile="0" resource="0"
+            file="Source/utility/jucer_MiscUtilities.h"/>
       <FILE id="0uDzmAAml" name="jucer_ValueRemapperSource.h" compile="0"
             resource="0" file="Source/utility/jucer_ValueRemapperSource.h"/>
     </GROUP>

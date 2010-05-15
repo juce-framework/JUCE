@@ -826,6 +826,39 @@ bool File::replaceWithText (const String& textToWrite,
     return tempFile.overwriteTargetFileWithTemporary();
 }
 
+bool File::hasIdenticalContentTo (const File& other) const
+{
+    if (other == *this)
+        return true;
+
+    if (getSize() == other.getSize() && existsAsFile() && other.existsAsFile())
+    {
+        FileInputStream in1 (*this), in2 (other);
+
+        const int bufferSize = 4096;
+        HeapBlock <char> buffer1, buffer2;
+        buffer1.malloc (bufferSize);
+        buffer2.malloc (bufferSize);
+
+        for (;;)
+        {
+            const int num1 = in1.read (buffer1, bufferSize);
+            const int num2 = in2.read (buffer2, bufferSize);
+
+            if (num1 != num2)
+                break;
+
+            if (num1 <= 0)
+                return true;
+
+            if (memcmp (buffer1, buffer2, num1) != 0)
+                break;
+        }
+    }
+
+    return false;
+}
+
 //==============================================================================
 const String File::createLegalPathName (const String& original)
 {

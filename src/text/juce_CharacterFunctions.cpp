@@ -781,12 +781,17 @@ bool CharacterFunctions::isLetterOrDigit (const juce_wchar character) throw()
 
 int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
 {
-    if (digit >= '0' && digit <= '9')
-        return digit - '0';
-    else if (digit >= 'a' && digit <= 'f')
-        return digit - ('a' - 10);
-    else if (digit >= 'A' && digit <= 'F')
-        return digit - ('A' - 10);
+    unsigned int d = digit - '0';
+    if (d < (unsigned int) 10)
+        return (int) d;
+
+    d += '0' - 'a';
+    if (d < (unsigned int) 6)
+        return (int) d + 10;
+
+    d += 'a' - 'A';
+    if (d < (unsigned int) 6)
+        return (int) d + 10;
 
     return -1;
 }

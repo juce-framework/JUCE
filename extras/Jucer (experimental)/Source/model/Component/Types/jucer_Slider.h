@@ -54,25 +54,25 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("min", 0);
-        item.set ("max", 100);
-        item.set ("interval", 1);
-        item.set ("type", 1 + Slider::LinearHorizontal);
-        item.set ("textBoxPos", 2);
-        item.set ("editable", true);
-        item.set ("textBoxWidth", 80);
-        item.set ("textBoxHeight", 20);
-        item.set ("skew", 1);
+        item.set (Ids::min, 0);
+        item.set (Ids::max, 100);
+        item.set (Ids::interval, 1);
+        item.set (Ids::type, 1 + Slider::LinearHorizontal);
+        item.set (Ids::textBoxPos, 2);
+        item.set (Ids::editable, true);
+        item.set (Ids::textBoxWidth, 80);
+        item.set (Ids::textBoxHeight, 20);
+        item.set (Ids::skew, 1);
     }
 
     void update (ComponentTypeInstance& item, Slider* comp)
     {
-        comp->setRange ((double) item ["min"], (double) item ["max"], (double) item ["interval"]);
-        comp->setSliderStyle ((Slider::SliderStyle) ((int) item ["type"] - 1));
-        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) ((int) item ["textBoxPos"] - 1),
-                               ! (bool) item ["editable"],
-                               (int) item ["textBoxWidth"], (int) item ["textBoxHeight"]);
-        comp->setSkewFactor ((double) item ["skew"]);
+        comp->setRange ((double) item [Ids::min], (double) item [Ids::max], (double) item [Ids::interval]);
+        comp->setSliderStyle ((Slider::SliderStyle) ((int) item [Ids::type] - 1));
+        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) ((int) item [Ids::textBoxPos] - 1),
+                               ! (bool) item [Ids::editable],
+                               (int) item [Ids::textBoxWidth], (int) item [Ids::textBoxHeight]);
+        comp->setSkewFactor ((double) item [Ids::skew]);
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -80,28 +80,79 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("min"))), "Minimum", 16, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("max"))), "Maximum", 16, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("interval"))), "Interval", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue (Ids::min))), "Minimum", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue (Ids::max))), "Maximum", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue (Ids::interval))), "Interval", 16, false));
 
         const char* const types[] = { "LinearHorizontal", "LinearVertical", "LinearBar", "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
                                       "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical", "ThreeValueHorizontal", "ThreeValueVertical", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue ("type"), "Type", StringArray (types)));
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::type), "Type", StringArray (types)));
 
         const char* const textBoxPositions[] = { "NoTextBox", "TextBoxLeft", "TextBoxRight", "TextBoxAbove", "TextBoxBelow", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue ("textBoxPos"), "Text Box", StringArray (textBoxPositions)));
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::textBoxPos), "Text Box", StringArray (textBoxPositions)));
 
-        props.add (new BooleanPropertyComponent (item.getValue ("editable"), "Editable", "Value can be edited"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::editable), "Editable", "Value can be edited"));
         props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxWidth"))), "Text Box Width", 8, false));
         props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxHeight"))), "Text Box Height", 8, false));
 
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue ("skew"))), "Skew Factor", 16, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue (Ids::skew))), "Skew Factor", 16, false));
         addEditableColourProperties (item, props);
+    }
+
+    static const char* sliderTypeString (int type) throw()
+    {
+        switch (type)
+        {
+            case Slider::LinearHorizontal:      return "LinearHorizontal";
+            case Slider::LinearVertical:        return "LinearVertical";
+            case Slider::LinearBar:             return "LinearBar";
+            case Slider::Rotary:                return "Rotary";
+            case Slider::RotaryHorizontalDrag:  return "RotaryHorizontalDrag";
+            case Slider::RotaryVerticalDrag:    return "RotaryVerticalDrag";
+            case Slider::IncDecButtons:         return "IncDecButtons";
+            case Slider::TwoValueHorizontal:    return "TwoValueHorizontal";
+            case Slider::TwoValueVertical:      return "TwoValueVertical";
+            case Slider::ThreeValueHorizontal:  return "ThreeValueHorizontal";
+            case Slider::ThreeValueVertical:    return "ThreeValueVertical";
+            default:                            jassertfalse; break;
+        }
+
+        return "";
+    }
+
+    static const char* sliderTextBoxString (int type) throw()
+    {
+        switch (type)
+        {
+            case Slider::NoTextBox:     return "NoTextBox";
+            case Slider::TextBoxLeft:   return "TextBoxLeft";
+            case Slider::TextBoxRight:  return "TextBoxRight";
+            case Slider::TextBoxAbove:  return "TextBoxAbove";
+            case Slider::TextBoxBelow:  return "TextBoxBelow";
+            default:                    jassertfalse; break;
+        }
+
+        return "";
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode << item.createConstructorStatement (CodeFormatting::stringLiteral (item.getComponentName()));
+        code.constructorCode
+            << item.createConstructorStatement (CodeHelpers::stringLiteral (item.getComponentName()))
+            << item.getMemberName() << "->setRange (" << CodeHelpers::doubleLiteral (item [Ids::min])
+                                    << ", " << CodeHelpers::doubleLiteral (item [Ids::max])
+                                    << ", " << CodeHelpers::doubleLiteral (item [Ids::interval])
+                                    << ");" << newLine
+            << item.getMemberName() << "->setSliderStyle (Slider::" << sliderTypeString ((int) item [Ids::type] - 1) << ");" << newLine
+            << item.getMemberName() << "->setTextBoxStyle (Slider::" << sliderTextBoxString ((int) item [Ids::type] - 1)
+                                    << ", " << CodeHelpers::boolLiteral (! (bool) item [Ids::editable])
+                                    << ", " << String ((int) item [Ids::textBoxWidth])
+                                    << ", " << String ((int) item [Ids::textBoxHeight])
+                                    << ");" << newLine;
+
+        double skew = (double) item [Ids::skew];
+        if (skew != 1.0 && skew != 0)
+            code.constructorCode << item.getMemberName() << "->setSkewFactor (" << CodeHelpers::doubleLiteral (skew) << ");" << newLine;
     }
 };
 

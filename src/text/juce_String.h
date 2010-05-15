@@ -81,7 +81,7 @@ public:
     /** Destructor. */
     ~String() throw();
 
-    //========================juce_wchar======================================================
+    //==============================================================================
     /** This is an empty string that can be used whenever one is needed.
 
         It's better to use this than String() because it explains what's going on

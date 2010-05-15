@@ -75,7 +75,7 @@ ProjectExporter* ProjectExporter::createNewExporter (Project& project, const int
     File juceFolder (StoredSettings::getInstance()->getLastKnownJuceFolder());
     File target (exp->getTargetFolder());
 
-    if (FileUtils::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
+    if (FileHelpers::shouldPathsBeRelative (juceFolder.getFullPathName(), project.getFile().getFullPathName()))
         exp->getJuceFolder() = juceFolder.getRelativePathFrom (project.getFile().getParentDirectory());
     else
         exp->getJuceFolder() = juceFolder.getFullPathName();
@@ -121,7 +121,7 @@ const String ProjectExporter::getIncludePathForFileInJuceFolder (const String& p
 
     if (juceFolderPath.startsWithChar ('<'))
     {
-        juceFolderPath = FileUtils::unixStylePath (File::addTrailingSeparator (juceFolderPath.substring (1).dropLastCharacters(1)));
+        juceFolderPath = FileHelpers::unixStylePath (File::addTrailingSeparator (juceFolderPath.substring (1).dropLastCharacters(1)));
         if (juceFolderPath == "/")
             juceFolderPath = String::empty;
 

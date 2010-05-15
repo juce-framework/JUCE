@@ -189,7 +189,7 @@ public:
         float getMarkerPosition (const ValueTree& marker, bool isX)
         {
             ComponentDocument& doc = getDocument();
-            return doc.getMarkerList (isX).getCoordinate (marker).resolve (doc);
+            return (float) doc.getMarkerList (isX).getCoordinate (marker).resolve (doc);
         }
     };
 

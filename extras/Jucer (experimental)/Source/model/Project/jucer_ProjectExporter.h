@@ -62,7 +62,7 @@ public:
     const File getTargetFolder() const;
 
     const ValueTree& getSettings() const                    { return settings; }
-    Value getSetting (const var::identifier& name_) const   { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
+    Value getSetting (const Identifier& name_) const   { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
     Value getJuceFolder() const             { return getSetting ("juceFolder"); }
     Value getTargetLocation() const         { return getSetting ("targetFolder"); }

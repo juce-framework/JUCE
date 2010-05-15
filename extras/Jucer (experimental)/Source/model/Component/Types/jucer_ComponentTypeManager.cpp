@@ -24,6 +24,46 @@
 */
 
 #include "jucer_ComponentTypeManager.h"
+
+// Handy list of static ids for use by component types..
+namespace Ids
+{
+    #define DECLARE_ID(name)      const Identifier name (#name)
+
+    DECLARE_ID (text);
+    DECLARE_ID (font);
+    DECLARE_ID (mode);
+    DECLARE_ID (type);
+    DECLARE_ID (readOnly);
+    DECLARE_ID (editMode);
+    DECLARE_ID (justification);
+    DECLARE_ID (items);
+    DECLARE_ID (editable);
+    DECLARE_ID (textJustification);
+    DECLARE_ID (unselectedText);
+    DECLARE_ID (noItemsText);
+    DECLARE_ID (min);
+    DECLARE_ID (max);
+    DECLARE_ID (interval);
+    DECLARE_ID (textBoxPos);
+    DECLARE_ID (textBoxWidth);
+    DECLARE_ID (textBoxHeight);
+    DECLARE_ID (skew);
+    DECLARE_ID (scrollBarV);
+    DECLARE_ID (scrollBarH);
+    DECLARE_ID (scrollbarWidth);
+    DECLARE_ID (initialState);
+    DECLARE_ID (scrollbarsShown);
+    DECLARE_ID (caretVisible);
+    DECLARE_ID (popupMenuEnabled);
+    DECLARE_ID (radioGroup);
+    DECLARE_ID (connectedLeft);
+    DECLARE_ID (connectedRight);
+    DECLARE_ID (connectedTop);
+    DECLARE_ID (connectedBottom);
+    const Identifier class_ ("class");
+}
+
 #include "jucer_ComponentTypes.h"
 #include "../../../utility/jucer_CoordinatePropertyComponent.h"
 
@@ -261,12 +301,12 @@ ComponentTypeInstance::ComponentTypeInstance (ComponentDocument& document_, cons
 {
 }
 
-Value ComponentTypeInstance::getValue (const var::identifier& name) const
+Value ComponentTypeInstance::getValue (const Identifier& name) const
 {
     return state.getPropertyAsValue (name, document.getUndoManager());
 }
 
-void ComponentTypeInstance::set (const var::identifier& name, const var& value)
+void ComponentTypeInstance::set (const Identifier& name, const var& value)
 {
     state.setProperty (name, value, 0);
 }
@@ -352,7 +392,7 @@ void ComponentTypeInstance::addFocusOrderProperty (Array <PropertyComponent*>& p
                                           "Focus Order", 10, false));
 }
 
-void ComponentTypeInstance::addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const String& propertyName)
+void ComponentTypeInstance::addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const Identifier& propertyName)
 {
     props.add (new ColourPropertyComponent (document, name, getValue (propertyName),
                                             LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true));
@@ -498,7 +538,7 @@ private:
     Value sourceValue;
 };
 
-void ComponentTypeInstance::addFontProperties (Array <PropertyComponent*>& props, const var::identifier& name)
+void ComponentTypeInstance::addFontProperties (Array <PropertyComponent*>& props, const Identifier& name)
 {
     Value v (getValue (name));
     props.add (FontNameValueSource::createProperty ("Font", v));
@@ -551,7 +591,7 @@ const String ComponentTypeInstance::createConstructorStatement (const String& pa
     else
     {
         s << " (";
-        s << CodeFormatting::indent (params.trim(), s.length(), false) << "));" << newLine;
+        s << CodeHelpers::indent (params.trim(), s.length(), false) << "));" << newLine;
     }
 
 //    s << getMemberName() << "->updateStateFrom (componentStateList.getChild ("

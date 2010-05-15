@@ -71,7 +71,7 @@ public:
     virtual ProjectTreeViewBase* findTreeViewItem (const Project::Item& itemToFind);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property);
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
     void valueTreeChildrenChanged (ValueTree& tree);
     void valueTreeParentChanged (ValueTree& tree);
 

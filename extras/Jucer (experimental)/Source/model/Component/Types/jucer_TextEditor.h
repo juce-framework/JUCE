@@ -53,24 +53,32 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
-        item.set ("text", "Text Editor Content");
-        item.set ("readOnly", false);
-        item.set ("scrollbarsShown", true);
-        item.set ("caretVisible", true);
-        item.set ("popupMenuEnabled", true);
-        item.set ("mode", 1);
+        TextEditor defaultComp;
+
+        item.set (Ids::text, "Text Editor Content");
+        item.set (Ids::readOnly, false);
+        item.set (Ids::scrollbarsShown, true);
+        item.set (Ids::caretVisible, true);
+        item.set (Ids::popupMenuEnabled, true);
+        item.set (Ids::mode, 1);
+        item.set (Ids::font, defaultComp.getFont().toString());
     }
 
     void update (ComponentTypeInstance& item, TextEditor* comp)
     {
-        comp->setReadOnly (item ["readOnly"]);
-        comp->setScrollbarsShown (item ["scrollbarsShown"]);
-        comp->setCaretVisible (item ["caretVisible"]);
-        comp->setPopupMenuEnabled (item ["popupMenuEnabled"]);
-        int mode = item ["mode"];
+        comp->setReadOnly (item [Ids::readOnly]);
+        comp->setScrollbarsShown (item [Ids::scrollbarsShown]);
+        comp->setCaretVisible (item [Ids::caretVisible]);
+        comp->setPopupMenuEnabled (item [Ids::popupMenuEnabled]);
+        int mode = item [Ids::mode];
         comp->setMultiLine (mode > 1, true);
         comp->setReturnKeyStartsNewLine (mode != 3);
-        comp->setText (item ["text"].toString());
+
+        const Font font (Font::fromString (item [Ids::font]));
+        if (comp->getFont() != font)
+            comp->applyFontToAllText (font);
+
+        comp->setText (item [Ids::text].toString());
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
@@ -78,23 +86,53 @@ public:
         item.addTooltipProperty (props);
         item.addFocusOrderProperty (props);
 
-        props.add (new TextPropertyComponent (item.getValue ("text"), "Text", 16384, true));
+        props.add (new TextPropertyComponent (item.getValue (Ids::text), "Text", 16384, true));
         props.getLast()->setTooltip ("The editor's initial content.");
 
         const char* const modes[] = { "Single-Line", "Multi-Line (Return key starts new line)", "Multi-Line (Return key disabled)", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue ("mode"), "Mode", StringArray (modes)));
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::mode), "Mode", StringArray (modes)));
 
-        props.add (new BooleanPropertyComponent (item.getValue ("readOnly"), "Read-Only", "Read-Only"));
-        props.add (new BooleanPropertyComponent (item.getValue ("scrollbarsShown"), "Scrollbars", "Scrollbars Shown"));
-        props.add (new BooleanPropertyComponent (item.getValue ("caretVisible"), "Caret", "Caret Visible"));
-        props.add (new BooleanPropertyComponent (item.getValue ("popupMenuEnabled"), "Popup Menu", "Popup Menu Enabled"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::readOnly), "Read-Only", "Read-Only"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::scrollbarsShown), "Scrollbars", "Scrollbars Shown"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::caretVisible), "Caret", "Caret Visible"));
+        props.add (new BooleanPropertyComponent (item.getValue (Ids::popupMenuEnabled), "Popup Menu", "Popup Menu Enabled"));
+
+        item.addFontProperties (props, Ids::font);
 
         addEditableColourProperties (item, props);
     }
 
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
-        code.constructorCode += item.createConstructorStatement (String::empty);
+        TextEditor defaultComp;
+
+        code.constructorCode
+            << item.createConstructorStatement (String::empty);
+
+        if (defaultComp.isReadOnly() != (bool) item [Ids::readOnly])
+            code.constructorCode << item.getMemberName() << "->setReadOnly (" << CodeHelpers::boolLiteral (item [Ids::readOnly]) << ");" << newLine;
+
+        if (defaultComp.areScrollbarsShown() != (bool) item [Ids::scrollbarsShown])
+            code.constructorCode << item.getMemberName() << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (item [Ids::scrollbarsShown]) << ");" << newLine;
+
+        if (defaultComp.isCaretVisible() != (bool) item [Ids::caretVisible])
+            code.constructorCode << item.getMemberName() << "->setCaretVisible (" << CodeHelpers::boolLiteral (item [Ids::caretVisible]) << ");" << newLine;
+
+        if (defaultComp.isPopupMenuEnabled() != (bool) item [Ids::popupMenuEnabled])
+            code.constructorCode << item.getMemberName() << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (item [Ids::popupMenuEnabled]) << ");" << newLine;
+
+        int mode = item [Ids::mode];
+        if (defaultComp.isMultiLine() != (mode > 1))
+            code.constructorCode << item.getMemberName() << "->setMultiLine (" << CodeHelpers::boolLiteral (mode > 1) << ", true);" << newLine;
+
+        if (defaultComp.getReturnKeyStartsNewLine() != (mode != 3))
+            code.constructorCode << item.getMemberName() << "->setReturnKeyStartsNewLine (" << CodeHelpers::boolLiteral (mode != 3) << ");" << newLine;
+
+        const Font font (Font::fromString (item [Ids::font]));
+        if (font != defaultComp.getFont())
+            code.constructorCode << item.getMemberName() << "->setFont (" << CodeHelpers::fontToCode (font) << ");" << newLine;
+
+        code.constructorCode << item.getMemberName() << "->setText (" << CodeHelpers::stringLiteral (item [Ids::text]) << ");" << newLine;
     }
 };
 

@@ -24,6 +24,7 @@
 */
 
 #include "../../jucer_Headers.h"
+#include "../../utility/jucer_TickIterator.h"
 #include "jucer_EditorCanvas.h"
 #include "jucer_EditorPanel.h"
 
@@ -53,7 +54,7 @@ public:
         g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
     }
 
-    void valueTreePropertyChanged (ValueTree&, const var::identifier&)  { updatePosition(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)  { updatePosition(); }
     void valueTreeChildrenChanged (ValueTree&)                          { updatePosition(); }
     void valueTreeParentChanged (ValueTree&)
     {
@@ -346,7 +347,7 @@ public:
 
     MarkerListBase& getMarkerList()      { return canvas->getMarkerList (isX); }
 
-    void valueTreePropertyChanged (ValueTree&, const var::identifier&)    { updatePosition(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { updatePosition(); }
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   {}
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
 
@@ -536,7 +537,7 @@ public:
         }
     }
 
-    void valueTreePropertyChanged (ValueTree&, const var::identifier&)    { updateMarkers(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { updateMarkers(); }
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { updateMarkers(); }
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
 

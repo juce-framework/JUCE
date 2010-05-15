@@ -66,9 +66,11 @@ OBJECTS := \
   $(OBJDIR)/jucer_ProjectInformationComponent.o \
   $(OBJDIR)/jucer_ProjectTreeViewBase.o \
   $(OBJDIR)/jucer_TreeViewTypes.o \
+  $(OBJDIR)/jucer_CodeHelpers.o \
   $(OBJDIR)/jucer_Coordinate.o \
+  $(OBJDIR)/jucer_FileHelpers.o \
   $(OBJDIR)/jucer_StoredSettings.o \
-  $(OBJDIR)/jucer_UtilityFunctions.o \
+  $(OBJDIR)/jucer_MiscUtilities.o \
   $(OBJDIR)/jucer_Main.o \
   $(OBJDIR)/BinaryData.o \
   $(OBJDIR)/JuceLibraryCode1.o \
@@ -206,7 +208,17 @@ $(OBJDIR)/jucer_TreeViewTypes.o: ../../Source/ui/Project\ Editor/jucer_TreeViewT
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
+$(OBJDIR)/jucer_CodeHelpers.o: ../../Source/utility/jucer_CodeHelpers.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
 $(OBJDIR)/jucer_Coordinate.o: ../../Source/utility/jucer_Coordinate.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_FileHelpers.o: ../../Source/utility/jucer_FileHelpers.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
@@ -216,7 +228,7 @@ $(OBJDIR)/jucer_StoredSettings.o: ../../Source/utility/jucer_StoredSettings.cpp
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_UtilityFunctions.o: ../../Source/utility/jucer_UtilityFunctions.cpp
+$(OBJDIR)/jucer_MiscUtilities.o: ../../Source/utility/jucer_MiscUtilities.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

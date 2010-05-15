@@ -48,7 +48,7 @@ public:
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component* existingComponentToUpdate);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const var::identifier& property);
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property);
     void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged);
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged);
 

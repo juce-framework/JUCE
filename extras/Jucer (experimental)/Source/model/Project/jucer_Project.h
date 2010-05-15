@@ -85,7 +85,7 @@ public:
 
     Value getVersion() const                            { return getProjectValue ("version"); }
     Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
-    void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeFormatting::makeValidIdentifier (getProjectName().toString(), false, true, false); }
+    void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
 
     //==============================================================================
     enum JuceLinkage
@@ -107,7 +107,7 @@ public:
     bool isUsingMultipleTemplateFiles() const           { return getJuceLinkageMode() == useAmalgamatedJuceViaMultipleTemplates; }
 
     //==============================================================================
-    Value getProjectValue (const var::identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
+    Value getProjectValue (const Identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
 
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
@@ -281,7 +281,7 @@ public:
     const String getFileTemplate (const String& templateName);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const var::identifier& property);
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& property);
     void valueTreeChildrenChanged (ValueTree& tree);
     void valueTreeParentChanged (ValueTree& tree);
 

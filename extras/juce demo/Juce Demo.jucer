@@ -14,9 +14,9 @@
     <XCODE_IPHONE targetFolder="Builds/iPhone" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                   juceFolder="../../../juce"/>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"/>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../juce" libraryType="1"/>
     <LINUX_MAKE targetFolder="Builds/Linux" vstFolder="~/SDKs/vstsdk2.4" juceFolder="../../../juce"/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>

@@ -1620,7 +1620,6 @@ public:
 	/** Destructor. */
 	~String() throw();
 
-	//========================juce_wchar======================================================
 	/** This is an empty string that can be used whenever one is needed.
 
 		It's better to use this than String() because it explains what's going on
@@ -4684,6 +4683,65 @@ typedef BigInteger BitArray;
 #define __JUCE_VARIANT_JUCEHEADER__
 
 
+/*** Start of inlined file: juce_Identifier.h ***/
+#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
+#define __JUCE_IDENTIFIER_JUCEHEADER__
+
+/**
+	Represents a string identifier, designed for accessing properties by name.
+
+	Identifier objects are very light and fast to copy, but slower to initialise
+	from a string, so it's much faster to keep a static identifier object to refer
+	to frequently-used names, rather than constructing them each time you need it.
+
+	@see NamedPropertySet, ValueTree
+*/
+class JUCE_API  Identifier
+{
+public:
+	/** Creates a null identifier. */
+	Identifier() throw();
+
+	/** Creates an identifier with a specified name.
+		Because this name may need to be used in contexts such as script variables or XML
+		tags, it must only contain ascii letters and digits, or the underscore character.
+	*/
+	Identifier (const char* name);
+
+	/** Creates an identifier with a specified name.
+		Because this name may need to be used in contexts such as script variables or XML
+		tags, it must only contain ascii letters and digits, or the underscore character.
+	*/
+	Identifier (const String& name);
+
+	/** Creates a copy of another identifier. */
+	Identifier (const Identifier& other) throw();
+
+	/** Creates a copy of another identifier. */
+	Identifier& operator= (const Identifier& other) throw();
+
+	/** Destructor */
+	~Identifier();
+
+	/** Compares two identifiers. This is a very fast operation. */
+	inline bool operator== (const Identifier& other) const throw()	  { return name == other.name; }
+
+	/** Compares two identifiers. This is a very fast operation. */
+	inline bool operator!= (const Identifier& other) const throw()	  { return name != other.name; }
+
+	const String toString() const					   { return name; }
+
+private:
+
+	const juce_wchar* name;
+
+	class Pool;
+};
+
+#endif   // __JUCE_IDENTIFIER_JUCEHEADER__
+/*** End of inlined file: juce_Identifier.h ***/
+
+
 /*** Start of inlined file: juce_OutputStream.h ***/
 #ifndef __JUCE_OUTPUTSTREAM_JUCEHEADER__
 #define __JUCE_OUTPUTSTREAM_JUCEHEADER__
@@ -5356,6 +5414,7 @@ class JUCE_API  var
 public:
 
 	typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
+	typedef Identifier identifier;
 
 	/** Creates a void variant. */
 	var() throw();
@@ -5415,55 +5474,24 @@ public:
 	*/
 	static const var readFromStream (InputStream& input);
 
-	class JUCE_API  identifier
-	{
-	public:
-		/** Creates a null identifier. */
-		identifier() throw();
-
-		/** Creates an identifier with a specified name.
-			Because this name may need to be used in contexts such as script variables or XML
-			tags, it must only contain ascii letters and digits, or the underscore character.
-		*/
-		identifier (const char* name);
-
-		/** Creates an identifier with a specified name.
-			Because this name may need to be used in contexts such as script variables or XML
-			tags, it must only contain ascii letters and digits, or the underscore character.
-		*/
-		identifier (const String& name);
-
-		/** Destructor */
-		~identifier();
-
-		bool operator== (const identifier& other) const throw()
-		{
-			jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
-			return hashCode == other.hashCode;
-		}
-
-		String name;
-		int hashCode;
-	};
-
 	/** If this variant is an object, this returns one of its properties. */
-	const var operator[] (const identifier& propertyName) const;
+	const var operator[] (const Identifier& propertyName) const;
 
 	/** If this variant is an object, this invokes one of its methods with no arguments. */
-	const var call (const identifier& method) const;
+	const var call (const Identifier& method) const;
 	/** If this variant is an object, this invokes one of its methods with one argument. */
-	const var call (const identifier& method, const var& arg1) const;
+	const var call (const Identifier& method, const var& arg1) const;
 	/** If this variant is an object, this invokes one of its methods with 2 arguments. */
-	const var call (const identifier& method, const var& arg1, const var& arg2) const;
+	const var call (const Identifier& method, const var& arg1, const var& arg2) const;
 	/** If this variant is an object, this invokes one of its methods with 3 arguments. */
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
+	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
 	/** If this variant is an object, this invokes one of its methods with 4 arguments. */
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
 	/** If this variant is an object, this invokes one of its methods with 5 arguments. */
-	const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
+	const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
 
 	/** If this variant is an object, this invokes one of its methods with a list of arguments. */
-	const var invoke (const identifier& method, const var* arguments, int numArguments) const;
+	const var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
 	/** If this variant is a method pointer, this invokes it on a target object. */
 	const var invoke (const var& targetObject, const var* arguments, int numArguments) const;
@@ -5534,37 +5562,37 @@ public:
 		If the name isn't found, this will return a void variant.
 		@see getProperty
 	*/
-	const var& operator[] (const var::identifier& name) const;
+	const var& operator[] (const Identifier& name) const;
 
 	/** Tries to return the named value, but if no such value is found, this will
 		instead return the supplied default value.
 	*/
-	const var getWithDefault (const var::identifier& name, const var& defaultReturnValue) const;
+	const var getWithDefault (const Identifier& name, const var& defaultReturnValue) const;
 
 	/** Returns a pointer to the object holding a named value, or
 		null if there is no value with this name. */
-	var* getItem (const var::identifier& name) const;
+	var* getItem (const Identifier& name) const;
 
 	/** Changes or adds a named value.
 		@returns true if a value was changed or added; false if the
 				 value was already set the the value passed-in.
 	*/
-	bool set (const var::identifier& name, const var& newValue);
+	bool set (const Identifier& name, const var& newValue);
 
 	/** Returns true if the set contains an item with the specified name. */
-	bool contains (const var::identifier& name) const;
+	bool contains (const Identifier& name) const;
 
 	/** Removes a value from the set.
 		@returns	true if a value was removed; false if there was no value
 					with the name that was given.
 	*/
-	bool remove (const var::identifier& name);
+	bool remove (const Identifier& name);
 
 	/** Returns the name of the value at a given index.
 		The index must be between 0 and size() - 1. Out-of-range indexes will
 		return an empty identifier.
 	*/
-	const var::identifier getName (int index) const;
+	const Identifier getName (int index) const;
 
 	/** Returns the value of the item at a given index.
 		The index must be between 0 and size() - 1. Out-of-range indexes will
@@ -5581,9 +5609,9 @@ private:
 	struct NamedValue
 	{
 		NamedValue() throw();
-		NamedValue (const var::identifier& name, const var& value);
+		NamedValue (const Identifier& name, const var& value);
 
-		var::identifier name;
+		Identifier name;
 		var value;
 	};
 
@@ -6153,19 +6181,19 @@ public:
 	/** Returns true if the object has a property with this name.
 		Note that if the property is actually a method, this will return false.
 	*/
-	virtual bool hasProperty (const var::identifier& propertyName) const;
+	virtual bool hasProperty (const Identifier& propertyName) const;
 
 	/** Returns a named property.
 
 		This returns a void if no such property exists.
 	*/
-	virtual const var getProperty (const var::identifier& propertyName) const;
+	virtual const var getProperty (const Identifier& propertyName) const;
 
 	/** Sets a named property. */
-	virtual void setProperty (const var::identifier& propertyName, const var& newValue);
+	virtual void setProperty (const Identifier& propertyName, const var& newValue);
 
 	/** Removes a named property. */
-	virtual void removeProperty (const var::identifier& propertyName);
+	virtual void removeProperty (const Identifier& propertyName);
 
 	/** Checks whether this object has the specified method.
 
@@ -6173,7 +6201,7 @@ public:
 		with this name that's actually a method, but this can be overridden for
 		building objects with dynamic invocation.
 	*/
-	virtual bool hasMethod (const var::identifier& methodName) const;
+	virtual bool hasMethod (const Identifier& methodName) const;
 
 	/** Invokes a named method on this object.
 
@@ -6183,7 +6211,7 @@ public:
 		This method is virtual to allow more dynamic invocation to used for objects
 		where the methods may not already be set as properies.
 	*/
-	virtual const var invokeMethod (const var::identifier& methodName,
+	virtual const var invokeMethod (const Identifier& methodName,
 									const var* parameters,
 									int numParameters);
 
@@ -6198,7 +6226,7 @@ public:
 		setMethod ("doSomething", (var::MethodFunction) &MyClass::doSomething);
 		@endcode
 	*/
-	void setMethod (const var::identifier& methodName,
+	void setMethod (const Identifier& methodName,
 					var::MethodFunction methodFunction);
 
 	/** Removes all properties and methods from the object. */
@@ -6219,6 +6247,9 @@ private:
 
 #endif
 #ifndef __JUCE_HEAPBLOCK_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_MEMORYBLOCK_JUCEHEADER__
@@ -8675,6 +8706,11 @@ public:
 	bool replaceWithText (const String& textToWrite,
 						  bool asUnicode = false,
 						  bool writeUnicodeHeaderBytes = false) const;
+
+	/** Attempts to scan the contents of this file and compare it to another file, returning
+		true if this is possible and they match byte-for-byte.
+	*/
+	bool hasIdenticalContentTo (const File& other) const;
 
 	/** Creates a set of files to represent each file root.
 
@@ -12875,7 +12911,7 @@ public:
 		Like an XmlElement, each ValueTree node has a type, which you can access with
 		getType() and hasType().
 	*/
-	explicit ValueTree (const String& type);
+	explicit ValueTree (const Identifier& type);
 
 	/** Creates a reference to another ValueTree. */
 	ValueTree (const ValueTree& other);
@@ -12916,44 +12952,44 @@ public:
 	/** Returns true if the node has this type.
 		The comparison is case-sensitive.
 	*/
-	bool hasType (const String& typeName) const;
+	bool hasType (const Identifier& typeName) const;
 
 	/** Returns the value of a named property.
 		If no such property has been set, this will return a void variant.
 		You can also use operator[] to get a property.
 		@see var, setProperty, hasProperty
 	*/
-	const var& getProperty (const var::identifier& name) const;
+	const var& getProperty (const Identifier& name) const;
 
 	/** Returns the value of a named property, or a user-specified default if the property doesn't exist.
 		If no such property has been set, this will return the value of defaultReturnValue.
 		You can also use operator[] and getProperty to get a property.
 		@see var, getProperty, setProperty, hasProperty
 	*/
-	const var getProperty (const var::identifier& name, const var& defaultReturnValue) const;
+	const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
 
 	/** Returns the value of a named property.
 		If no such property has been set, this will return a void variant. This is the same as
 		calling getProperty().
 		@see getProperty
 	*/
-	const var& operator[] (const var::identifier& name) const;
+	const var& operator[] (const Identifier& name) const;
 
 	/** Changes a named property of the node.
 		If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
 		so that this change can be undone.
 		@see var, getProperty, removeProperty
 	*/
-	void setProperty (const var::identifier& name, const var& newValue, UndoManager* undoManager);
+	void setProperty (const Identifier& name, const var& newValue, UndoManager* undoManager);
 
 	/** Returns true if the node contains a named property. */
-	bool hasProperty (const var::identifier& name) const;
+	bool hasProperty (const Identifier& name) const;
 
 	/** Removes a property from the node.
 		If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
 		so that this change can be undone.
 	*/
-	void removeProperty (const var::identifier& name, UndoManager* undoManager);
+	void removeProperty (const Identifier& name, UndoManager* undoManager);
 
 	/** Removes all properties from the node.
 		If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -12969,7 +13005,7 @@ public:
 	/** Returns the identifier of the property with a given index.
 		@see getNumProperties
 	*/
-	const var::identifier getPropertyName (int index) const;
+	const Identifier getPropertyName (int index) const;
 
 	/** Returns a Value object that can be used to control and respond to one of the tree's properties.
 
@@ -12977,7 +13013,7 @@ public:
 		it needs to change the value. Attaching a Value::Listener to the value object will provide
 		callbacks whenever the property changes.
 	*/
-	Value getPropertyAsValue (const var::identifier& name, UndoManager* undoManager) const;
+	Value getPropertyAsValue (const Identifier& name, UndoManager* undoManager) const;
 
 	/** Returns the number of child nodes belonging to this one.
 		@see getChild
@@ -12994,7 +13030,7 @@ public:
 		If no such node is found, it'll return an invalid node. (See isValid() to find out
 		whether a node is valid).
 	*/
-	ValueTree getChildWithName (const String& type) const;
+	ValueTree getChildWithName (const Identifier& type) const;
 
 	/** Looks for the first child node that has the speficied property value.
 
@@ -13004,7 +13040,7 @@ public:
 		If no such node is found, it'll return an invalid node. (See isValid() to find out
 		whether a node is valid).
 	*/
-	ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
+	ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
 
 	/** Adds a child to this node.
 
@@ -13121,7 +13157,7 @@ public:
 			simply check the tree parameter in this callback to make sure it's the tree you're interested in.
 		*/
 		virtual void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
-											   const var::identifier& property) = 0;
+											   const Identifier& property) = 0;
 
 		/** This method is called when a child sub-tree is added or removed.
 
@@ -13214,31 +13250,31 @@ private:
 	class JUCE_API  SharedObject	: public ReferenceCountedObject
 	{
 	public:
-		explicit SharedObject (const String& type);
+		explicit SharedObject (const Identifier& type);
 		SharedObject (const SharedObject& other);
 		~SharedObject();
 
-		const String type;
+		const Identifier type;
 		NamedValueSet properties;
 		ReferenceCountedArray <SharedObject> children;
 		SortedSet <ValueTree*> valueTreesWithListeners;
 		SharedObject* parent;
 
-		void sendPropertyChangeMessage (const var::identifier& property);
-		void sendPropertyChangeMessage (ValueTree& tree, const var::identifier& property);
+		void sendPropertyChangeMessage (const Identifier& property);
+		void sendPropertyChangeMessage (ValueTree& tree, const Identifier& property);
 		void sendChildChangeMessage();
 		void sendChildChangeMessage (ValueTree& tree);
 		void sendParentChangeMessage();
-		const var& getProperty (const var::identifier& name) const;
-		const var getProperty (const var::identifier& name, const var& defaultReturnValue) const;
-		void setProperty (const var::identifier& name, const var& newValue, UndoManager*);
-		bool hasProperty (const var::identifier& name) const;
-		void removeProperty (const var::identifier& name, UndoManager*);
+		const var& getProperty (const Identifier& name) const;
+		const var getProperty (const Identifier& name, const var& defaultReturnValue) const;
+		void setProperty (const Identifier& name, const var& newValue, UndoManager*);
+		bool hasProperty (const Identifier& name) const;
+		void removeProperty (const Identifier& name, UndoManager*);
 		void removeAllProperties (UndoManager*);
 		bool isAChildOf (const SharedObject* possibleParent) const;
 		int indexOf (const ValueTree& child) const;
-		ValueTree getChildWithName (const String& type) const;
-		ValueTree getChildWithProperty (const var::identifier& propertyName, const var& propertyValue) const;
+		ValueTree getChildWithName (const Identifier& type) const;
+		ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
 		void addChild (SharedObject* child, int index, UndoManager*);
 		void removeChild (int childIndex, UndoManager*);
 		void removeAllChildren (UndoManager*);
@@ -16742,6 +16778,64 @@ private:
 
 #endif
 #ifndef __JUCE_STRINGPAIRARRAY_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
+
+/*** Start of inlined file: juce_StringPool.h ***/
+#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
+#define __JUCE_STRINGPOOL_JUCEHEADER__
+
+/**
+	A StringPool holds a set of shared strings, which reduces storage overheads and improves
+	comparison speed when dealing with many duplicate strings.
+
+	When you add a string to a pool using getPooledString, it'll return a character
+	array containing the same string. This array is owned by the pool, and the same array
+	is returned every time a matching string is asked for. This means that it's trivial to
+	compare two pooled strings for equality, as you can simply compare their pointers. It
+	also cuts down on storage if you're using many copies of the same string.
+*/
+class JUCE_API  StringPool
+{
+public:
+	/** Creates an empty pool. */
+	StringPool() throw();
+
+	/** Destructor */
+	~StringPool();
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const String& original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const char* original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const juce_wchar* original);
+
+private:
+	Array <String> strings;
+};
+
+#endif   // __JUCE_STRINGPOOL_JUCEHEADER__
+/*** End of inlined file: juce_StringPool.h ***/
+
 
 #endif
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__

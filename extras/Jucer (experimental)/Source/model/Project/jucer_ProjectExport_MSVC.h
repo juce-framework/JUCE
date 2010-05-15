@@ -145,7 +145,7 @@ public:
                 MemoryOutputStream mo;
                 writeVC6Project (mo);
 
-                if (! FileUtils::overwriteFileWithNewDataIfDifferent (getDSPFile(), mo))
+                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (getDSPFile(), mo))
                     return "Can't write to the VC project file: " + getDSPFile().getFullPathName();
             }
 
@@ -153,7 +153,7 @@ public:
                 MemoryOutputStream mo;
                 writeDSWFile (mo);
 
-                if (! FileUtils::overwriteFileWithNewDataIfDifferent (getDSWFile(), mo))
+                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (getDSWFile(), mo))
                     return "Can't write to the VC solution file: " + getDSWFile().getFullPathName();
             }
         }
@@ -168,7 +168,7 @@ public:
                 MemoryOutputStream mo;
                 masterXml.writeToStream (mo, String::empty, false, true, "UTF-8", 10);
 
-                if (! FileUtils::overwriteFileWithNewDataIfDifferent (getVCProjFile(), mo))
+                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (getVCProjFile(), mo))
                     return "Can't write to the VC project file: " + getVCProjFile().getFullPathName();
             }
 
@@ -176,7 +176,7 @@ public:
                 MemoryOutputStream mo;
                 writeSolutionFile (mo);
 
-                if (! FileUtils::overwriteFileWithNewDataIfDifferent (getSLNFile(), mo))
+                if (! FileHelpers::overwriteFileWithNewDataIfDifferent (getSLNFile(), mo))
                     return "Can't write to the VC solution file: " + getSLNFile().getFullPathName();
             }
         }
@@ -370,7 +370,7 @@ private:
         {
             RelativePath rtasFolder (getRTASFolder().toString(), RelativePath::unknown);
             defines.add ("JucePlugin_WinBag_path="
-                            + CodeFormatting::addEscapeChars (rtasFolder.getChildFile ("WinBag")
+                            + CodeHelpers::addEscapeChars (rtasFolder.getChildFile ("WinBag")
                                                                 .toWindowsStyle().quoted()));
         }
 
@@ -452,8 +452,8 @@ private:
         const String binaryName (File::createLegalFileName (config.getTargetBinaryName().toString()));
 
         xml.setAttribute ("Name", createConfigName (config));
-        xml.setAttribute ("OutputDirectory", FileUtils::windowsStylePath (binariesPath));
-        xml.setAttribute ("IntermediateDirectory", FileUtils::windowsStylePath (intermediatesPath));
+        xml.setAttribute ("OutputDirectory", FileHelpers::windowsStylePath (binariesPath));
+        xml.setAttribute ("IntermediateDirectory", FileHelpers::windowsStylePath (intermediatesPath));
         xml.setAttribute ("ConfigurationType", (project.isAudioPlugin() || project.isBrowserPlugin() || isLibraryDLL())
                                                     ? "2" : (project.isLibrary() ? "4" : "1"));
         xml.setAttribute ("UseOfMFC", "0");
@@ -485,7 +485,7 @@ private:
             midl->setAttribute ("MkTypLibCompatible", "true");
             midl->setAttribute ("SuppressStartupBanner", "true");
             midl->setAttribute ("TargetEnvironment", "1");
-            midl->setAttribute ("TypeLibraryName", FileUtils::windowsStylePath (intermediatesPath + "/" + binaryName + ".tlb"));
+            midl->setAttribute ("TypeLibraryName", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".tlb"));
             midl->setAttribute ("HeaderFileName", "");
         }
 
@@ -512,10 +512,10 @@ private:
                                                                : (isDebug ? 1 : 0)); // MT static
             compiler->setAttribute ("RuntimeTypeInfo", "true");
             compiler->setAttribute ("UsePrecompiledHeader", "0");
-            compiler->setAttribute ("PrecompiledHeaderFile", FileUtils::windowsStylePath (intermediatesPath + "/" + binaryName + ".pch"));
-            compiler->setAttribute ("AssemblerListingLocation", FileUtils::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ObjectFile", FileUtils::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("ProgramDataBaseFileName", FileUtils::windowsStylePath (intermediatesPath + "/"));
+            compiler->setAttribute ("PrecompiledHeaderFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pch"));
+            compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
+            compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
+            compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("WarningLevel", project.isLibrary() ? "4" : "3");
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
@@ -538,7 +538,7 @@ private:
         {
             XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
-            linker->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
+            linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
             linker->setAttribute ("SuppressStartupBanner", "true");
 
             if (project.getJuceLinkageMode() == Project::useLinkedJuce)
@@ -546,7 +546,7 @@ private:
 
             linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             linker->setAttribute ("GenerateDebugInformation", isDebug ? "true" : "false");
-            linker->setAttribute ("ProgramDatabaseFile", FileUtils::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
+            linker->setAttribute ("ProgramDatabaseFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
             linker->setAttribute ("SubSystem", project.isCommandLineApp() ? "1" : "2");
 
             if (! isDebug)
@@ -579,17 +579,17 @@ private:
                 XmlElement* linker = createToolElement (xml, "VCLinkerTool");
 
                 String extraLinkerOptions (getExtraLinkerFlags().toString());
-                extraLinkerOptions << " /IMPLIB:" << FileUtils::windowsStylePath (binariesPath + "/" + outputFileName.upToLastOccurrenceOf (".", false, false) + ".lib");
+                extraLinkerOptions << " /IMPLIB:" << FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName.upToLastOccurrenceOf (".", false, false) + ".lib");
                 linker->setAttribute ("AdditionalOptions", extraLinkerOptions.trim());
 
-                linker->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
+                linker->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
                 linker->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
             else
             {
                 XmlElement* librarian = createToolElement (xml, "VCLibrarianTool");
 
-                librarian->setAttribute ("OutputFile", FileUtils::windowsStylePath (binariesPath + "/" + outputFileName));
+                librarian->setAttribute ("OutputFile", FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
                 librarian->setAttribute ("IgnoreDefaultLibraryNames", isDebug ? "libcmt.lib, msvcrt.lib" : "");
             }
         }
@@ -601,7 +601,7 @@ private:
         {
             XmlElement* bscMake = createToolElement (xml, "VCBscMakeTool");
             bscMake->setAttribute ("SuppressStartupBanner", "true");
-            bscMake->setAttribute ("OutputFile", FileUtils::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
+            bscMake->setAttribute ("OutputFile", FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
         }
 
         createToolElement (xml, "VCFxCopTool");
@@ -727,7 +727,7 @@ private:
             targetList << "# Name \"" << configName << '"' << newLine;
 
             const String binariesPath (getConfigTargetPath (config));
-            const String targetBinary (FileUtils::windowsStylePath (binariesPath + "/" + getBinaryFileForConfig (config)));
+            const String targetBinary (FileHelpers::windowsStylePath (binariesPath + "/" + getBinaryFileForConfig (config)));
             const String optimisationFlag (((int) config.getOptimisationLevel().getValue() <= 1) ? "Od" : (config.getOptimisationLevel() == 2 ? "O2" : "O3"));
             const String defines (getPreprocessorDefs (config, " /D "));
             const bool isDebug = (bool) config.isDebug().getValue();

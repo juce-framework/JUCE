@@ -33,13 +33,13 @@
 //==============================================================================
 namespace Tags
 {
-    const char* const projectRoot       = "JUCERPROJECT";
-    const char* const projectMainGroup  = "MAINGROUP";
-    const char* const group             = "GROUP";
-    const char* const file              = "FILE";
-    const char* const configurations    = "CONFIGURATIONS";
-    const char* const configuration     = "CONFIGURATION";
-    const char* const exporters         = "EXPORTFORMATS";
+    const Identifier projectRoot       ("JUCERPROJECT");
+    const Identifier projectMainGroup  ("MAINGROUP");
+    const Identifier group             ("GROUP");
+    const Identifier file              ("FILE");
+    const Identifier configurations    ("CONFIGURATIONS");
+    const Identifier configuration     ("CONFIGURATION");
+    const Identifier exporters         ("EXPORTFORMATS");
 }
 
 const char* Project::projectFileExtension = ".jucer";
@@ -122,7 +122,7 @@ void Project::setMissingDefaultValues()
     if (! projectRoot.getChildWithName (Tags::exporters).isValid())
         createDefaultExporters();
 
-    const String sanitisedProjectName (CodeFormatting::makeValidIdentifier (getProjectName().toString(), false, true, false));
+    const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false));
 
     if (! projectRoot.hasProperty ("buildVST"))
     {
@@ -157,7 +157,7 @@ const String Project::loadDocument (const File& file)
     XmlDocument doc (file);
     ScopedPointer <XmlElement> xml (doc.getDocumentElement());
 
-    if (xml == 0 || ! xml->hasTagName (Tags::projectRoot))
+    if (xml == 0 || ! xml->hasTagName (Tags::projectRoot.toString()))
         return "Not a valid Jucer project!";
 
     ValueTree newTree (ValueTree::fromXml (*xml));
@@ -184,7 +184,7 @@ const String Project::saveDocument (const File& file)
         getJuceConfigFlags (flags);
     }
 
-    if (FileUtils::isJuceFolder (getLocalJuceFolder()))
+    if (FileHelpers::isJuceFolder (getLocalJuceFolder()))
         StoredSettings::getInstance()->setLastKnownJuceFolder (getLocalJuceFolder().getFullPathName());
 
     StoredSettings::getInstance()->recentFiles.addFile (file);
@@ -207,7 +207,7 @@ void Project::setLastDocumentOpened (const File& file)
 }
 
 //==============================================================================
-void Project::valueTreePropertyChanged (ValueTree& tree, const var::identifier& property)
+void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (isLibrary())
         getJuceLinkageModeValue() = (int) notLinkedToJuce;
@@ -310,7 +310,7 @@ const File Project::getLocalJuceFolder()
     {
         File f (resolveFilename (exp->getJuceFolder().toString()));
 
-        if (FileUtils::isJuceFolder (f))
+        if (FileHelpers::isJuceFolder (f))
             return f;
     }
 

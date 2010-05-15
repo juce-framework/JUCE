@@ -26,6 +26,7 @@
 #ifndef __JUCE_VARIANT_JUCEHEADER__
 #define __JUCE_VARIANT_JUCEHEADER__
 
+#include "juce_Identifier.h"
 #include "../io/streams/juce_OutputStream.h"
 #include "../io/streams/juce_InputStream.h"
 
@@ -47,6 +48,7 @@ class JUCE_API  var
 public:
     //==============================================================================
     typedef const var (DynamicObject::*MethodFunction) (const var* arguments, int numArguments);
+    typedef Identifier identifier;
 
     //==============================================================================
     /** Creates a void variant. */
@@ -109,56 +111,25 @@ public:
     static const var readFromStream (InputStream& input);
 
     //==============================================================================
-    class JUCE_API  identifier
-    {
-    public:
-        /** Creates a null identifier. */
-        identifier() throw();
-
-        /** Creates an identifier with a specified name.
-            Because this name may need to be used in contexts such as script variables or XML
-            tags, it must only contain ascii letters and digits, or the underscore character.
-        */
-        identifier (const char* name);
-
-        /** Creates an identifier with a specified name.
-            Because this name may need to be used in contexts such as script variables or XML
-            tags, it must only contain ascii letters and digits, or the underscore character.
-        */
-        identifier (const String& name);
-
-        /** Destructor */
-        ~identifier();
-
-        bool operator== (const identifier& other) const throw()
-        {
-            jassert (hashCode != other.hashCode || name == other.name); // check for name hash collisions
-            return hashCode == other.hashCode;
-        }
-
-        String name;
-        int hashCode;
-    };
-
     /** If this variant is an object, this returns one of its properties. */
-    const var operator[] (const identifier& propertyName) const;
+    const var operator[] (const Identifier& propertyName) const;
 
     //==============================================================================
     /** If this variant is an object, this invokes one of its methods with no arguments. */
-    const var call (const identifier& method) const;
+    const var call (const Identifier& method) const;
     /** If this variant is an object, this invokes one of its methods with one argument. */
-    const var call (const identifier& method, const var& arg1) const;
+    const var call (const Identifier& method, const var& arg1) const;
     /** If this variant is an object, this invokes one of its methods with 2 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2) const;
+    const var call (const Identifier& method, const var& arg1, const var& arg2) const;
     /** If this variant is an object, this invokes one of its methods with 3 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3);
+    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3);
     /** If this variant is an object, this invokes one of its methods with 4 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
+    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4) const;
     /** If this variant is an object, this invokes one of its methods with 5 arguments. */
-    const var call (const identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
+    const var call (const Identifier& method, const var& arg1, const var& arg2, const var& arg3, const var& arg4, const var& arg5) const;
 
     /** If this variant is an object, this invokes one of its methods with a list of arguments. */
-    const var invoke (const identifier& method, const var* arguments, int numArguments) const;
+    const var invoke (const Identifier& method, const var* arguments, int numArguments) const;
 
     //==============================================================================
     /** If this variant is a method pointer, this invokes it on a target object. */
