@@ -94,12 +94,12 @@ void Viewport::setViewedComponent (Component* const newViewedComponent)
 
 int Viewport::getMaximumVisibleWidth() const
 {
-    return jmax (0, getWidth() - (verticalScrollBar->isVisible() ? getScrollBarThickness() : 0));
+    return contentHolder->getWidth();
 }
 
 int Viewport::getMaximumVisibleHeight() const
 {
-    return jmax (0, getHeight() - (horizontalScrollBar->isVisible() ? getScrollBarThickness() : 0));
+    return contentHolder->getHeight();
 }
 
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
@@ -181,27 +181,12 @@ void Viewport::updateVisibleArea()
     bool hBarVisible = canShowHBar && ! horizontalScrollBar->autoHides();
     bool vBarVisible = canShowVBar && ! horizontalScrollBar->autoHides();
 
-    if (contentComp != 0)
+    Rectangle<int> contentArea (getLocalBounds());
+
+    if (contentComp != 0 && ! contentArea.contains (contentComp->getBounds()))
     {
-        Rectangle<int> contentArea (getLocalBounds());
-
-        if (! contentArea.contains (contentComp->getBounds()))
-        {
-            hBarVisible = canShowHBar && (hBarVisible || contentComp->getX() < 0 || contentComp->getRight() > contentArea.getWidth());
-            vBarVisible = canShowVBar && (vBarVisible || contentComp->getY() < 0 || contentComp->getBottom() > contentArea.getHeight());
-
-            if (vBarVisible)
-                contentArea.setWidth (getWidth() - scrollbarWidth);
-
-            if (hBarVisible)
-                contentArea.setHeight (getHeight() - scrollbarWidth);
-
-            if (! contentArea.contains (contentComp->getBounds()))
-            {
-                hBarVisible = canShowHBar && (hBarVisible || contentComp->getRight() > contentArea.getWidth());
-                vBarVisible = canShowVBar && (vBarVisible || contentComp->getBottom() > contentArea.getHeight());
-            }
-        }
+        hBarVisible = canShowHBar && (hBarVisible || contentComp->getX() < 0 || contentComp->getRight() > contentArea.getWidth());
+        vBarVisible = canShowVBar && (vBarVisible || contentComp->getY() < 0 || contentComp->getBottom() > contentArea.getHeight());
 
         if (vBarVisible)
             contentArea.setWidth (getWidth() - scrollbarWidth);
@@ -209,48 +194,59 @@ void Viewport::updateVisibleArea()
         if (hBarVisible)
             contentArea.setHeight (getHeight() - scrollbarWidth);
 
-        const Point<int> visibleOrigin (-contentComp->getPosition());
-
-        if (hBarVisible)
+        if (! contentArea.contains (contentComp->getBounds()))
         {
-            horizontalScrollBar->setBounds (0, contentArea.getHeight(), contentArea.getWidth(), scrollbarWidth);
-            horizontalScrollBar->setRangeLimits (0.0, contentComp->getWidth());
-            horizontalScrollBar->setCurrentRange (visibleOrigin.getX(), contentArea.getWidth());
-            horizontalScrollBar->setSingleStepSize (singleStepX);
+            hBarVisible = canShowHBar && (hBarVisible || contentComp->getRight() > contentArea.getWidth());
+            vBarVisible = canShowVBar && (vBarVisible || contentComp->getBottom() > contentArea.getHeight());
         }
-
-        if (vBarVisible)
-        {
-            verticalScrollBar->setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
-            verticalScrollBar->setRangeLimits (0.0, contentComp->getHeight());
-            verticalScrollBar->setCurrentRange (visibleOrigin.getY(), contentArea.getHeight());
-            verticalScrollBar->setSingleStepSize (singleStepY);
-        }
-
-        // Force the visibility *after* setting the ranges to avoid flicker caused by edge conditions in the numbers.
-        horizontalScrollBar->setVisible (hBarVisible);
-        verticalScrollBar->setVisible (vBarVisible);
-
-        contentHolder->setBounds (contentArea);
-
-        const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
-                                          jmin (contentComp->getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
-                                          jmin (contentComp->getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
-
-        if (lastVisibleArea != visibleArea)
-        {
-            lastVisibleArea = visibleArea;
-            visibleAreaChanged (visibleArea.getX(), visibleArea.getY(), visibleArea.getWidth(), visibleArea.getHeight());
-        }
-
-        horizontalScrollBar->handleUpdateNowIfNeeded();
-        verticalScrollBar->handleUpdateNowIfNeeded();
     }
-    else
+
+    if (vBarVisible)
+        contentArea.setWidth (getWidth() - scrollbarWidth);
+
+    if (hBarVisible)
+        contentArea.setHeight (getHeight() - scrollbarWidth);
+
+    contentHolder->setBounds (contentArea);
+
+    Rectangle<int> contentBounds;
+    if (contentComp != 0)
+        contentBounds = contentComp->getBounds();
+
+    const Point<int> visibleOrigin (-contentBounds.getPosition());
+
+    if (hBarVisible)
     {
-        horizontalScrollBar->setVisible (hBarVisible);
-        verticalScrollBar->setVisible (vBarVisible);
+        horizontalScrollBar->setBounds (0, contentArea.getHeight(), contentArea.getWidth(), scrollbarWidth);
+        horizontalScrollBar->setRangeLimits (0.0, contentBounds.getWidth());
+        horizontalScrollBar->setCurrentRange (visibleOrigin.getX(), contentArea.getWidth());
+        horizontalScrollBar->setSingleStepSize (singleStepX);
     }
+
+    if (vBarVisible)
+    {
+        verticalScrollBar->setBounds (contentArea.getWidth(), 0, scrollbarWidth, contentArea.getHeight());
+        verticalScrollBar->setRangeLimits (0.0, contentBounds.getHeight());
+        verticalScrollBar->setCurrentRange (visibleOrigin.getY(), contentArea.getHeight());
+        verticalScrollBar->setSingleStepSize (singleStepY);
+    }
+
+    // Force the visibility *after* setting the ranges to avoid flicker caused by edge conditions in the numbers.
+    horizontalScrollBar->setVisible (hBarVisible);
+    verticalScrollBar->setVisible (vBarVisible);
+
+    const Rectangle<int> visibleArea (visibleOrigin.getX(), visibleOrigin.getY(),
+                                      jmin (contentBounds.getWidth() - visibleOrigin.getX(),  contentArea.getWidth()),
+                                      jmin (contentBounds.getHeight() - visibleOrigin.getY(), contentArea.getHeight()));
+
+    if (lastVisibleArea != visibleArea)
+    {
+        lastVisibleArea = visibleArea;
+        visibleAreaChanged (visibleArea.getX(), visibleArea.getY(), visibleArea.getWidth(), visibleArea.getHeight());
+    }
+
+    horizontalScrollBar->handleUpdateNowIfNeeded();
+    verticalScrollBar->handleUpdateNowIfNeeded();
 }
 
 //==============================================================================

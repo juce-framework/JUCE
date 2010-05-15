@@ -260,9 +260,6 @@ void RectangleList::subtract (const Rectangle<int>& rect)
                 }
             }
         }
-
-        if (rects.size() > originalNumRects + 10)
-            consolidate();
     }
 }
 
