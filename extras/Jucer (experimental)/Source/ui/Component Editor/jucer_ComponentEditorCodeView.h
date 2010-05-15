@@ -54,20 +54,39 @@ public:
         viewport.setBounds (getLocalBounds());
 
         int visWidth = viewport.getMaximumVisibleWidth();
-        dynamic_cast <ContentHolder*> (viewport.getViewedComponent())->updateSize (visWidth);
 
-        if (viewport.getMaximumVisibleWidth() != visWidth)
-            dynamic_cast <ContentHolder*> (viewport.getViewedComponent())->updateSize (viewport.getMaximumVisibleWidth());
+        ContentHolder* ch = dynamic_cast <ContentHolder*> (viewport.getViewedComponent());
+
+        if (ch != 0)
+        {
+            ch->updateSize (visWidth);
+
+            if (viewport.getMaximumVisibleWidth() != visWidth)
+                ch->updateSize (viewport.getMaximumVisibleWidth());
+        }
 
         switchFileButton.setBounds (getWidth() - 150, 4, 120, 20);
+    }
+
+    void refreshContent()
+    {
+        viewport.setViewedComponent (new ContentHolder (editor.getDocument(), showingHeader));
+        resized();
+        switchFileButton.setButtonText (showingHeader ? "Show CPP file" : "Show header file");
     }
 
     void buttonClicked (Button*)
     {
         showingHeader = ! showingHeader;
-        viewport.setViewedComponent (new ContentHolder (editor.getDocument(), showingHeader));
-        resized();
-        switchFileButton.setButtonText (showingHeader ? "Show CPP file" : "Show header file");
+        refreshContent();
+    }
+
+    void parentHierarchyChanged()
+    {
+        if (getParentComponent() != 0)
+            refreshContent();
+        else
+            viewport.setViewedComponent (0);
     }
 
 private:

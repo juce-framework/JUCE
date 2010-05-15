@@ -121,45 +121,45 @@ public:
 
     /** Returns the position within the child component of the top-left of its visible area.
     */
-    const Point<int> getViewPosition() const throw()        { return lastViewPos.getPosition(); }
+    const Point<int> getViewPosition() const throw()        { return lastVisibleArea.getPosition(); }
 
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewWidth, setViewPosition
     */
-    int getViewPositionX() const throw()                    { return lastViewPos.getX(); }
+    int getViewPositionX() const throw()                    { return lastVisibleArea.getX(); }
 
     /** Returns the position within the child component of the top-left of its visible area.
         @see getViewHeight, setViewPosition
     */
-    int getViewPositionY() const throw()                    { return lastViewPos.getY(); }
+    int getViewPositionY() const throw()                    { return lastVisibleArea.getY(); }
 
     /** Returns the width of the visible area of the child component.
 
         This may be less than the width of this Viewport if there's a vertical scrollbar
         or if the child component is itself smaller.
     */
-    int getViewWidth() const throw()                        { return lastViewPos.getWidth(); }
+    int getViewWidth() const throw()                        { return lastVisibleArea.getWidth(); }
 
     /** Returns the height of the visible area of the child component.
 
         This may be less than the height of this Viewport if there's a horizontal scrollbar
         or if the child component is itself smaller.
     */
-    int getViewHeight() const throw()                       { return lastViewPos.getHeight(); }
+    int getViewHeight() const throw()                       { return lastVisibleArea.getHeight(); }
 
     /** Returns the width available within this component for the contents.
 
         This will be the width of the viewport component minus the width of a
         vertical scrollbar (if visible).
     */
-    int getMaximumVisibleWidth() const throw();
+    int getMaximumVisibleWidth() const;
 
     /** Returns the height available within this component for the contents.
 
         This will be the height of the viewport component minus the space taken up
         by a horizontal scrollbar (if visible).
     */
-    int getMaximumVisibleHeight() const throw();
+    int getMaximumVisibleHeight() const;
 
     //==============================================================================
     /** Callback method that is called when the visible area changes.
@@ -201,7 +201,7 @@ public:
 
         @see setScrollBarThickness
     */
-    int getScrollBarThickness() const throw();
+    int getScrollBarThickness() const;
 
     /** Changes the distance that a single-step click on a scrollbar button
         will move the viewport.
@@ -245,7 +245,7 @@ public:
 
 private:
     Component::SafePointer<Component> contentComp;
-    Rectangle<int> lastViewPos;
+    Rectangle<int> lastVisibleArea;
     int scrollBarThickness;
     int singleStepX, singleStepY;
     bool showHScrollbar, showVScrollbar;
@@ -253,7 +253,7 @@ private:
     ScrollBar* verticalScrollBar;
     ScrollBar* horizontalScrollBar;
 
-    void updateVisibleRegion();
+    void updateVisibleArea();
 
     Viewport (const Viewport&);
     Viewport& operator= (const Viewport&);

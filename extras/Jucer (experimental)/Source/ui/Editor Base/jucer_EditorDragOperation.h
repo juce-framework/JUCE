@@ -193,7 +193,7 @@ public:
 
         snapGuides.clear();
 
-        if (canvas->getPanel()->isSnappingEnabled() != e.mods.isCommandDown())
+        if (canvas->getPanel()->isSnappingEnabled() != (e.mods.isCommandDown() || e.mods.isCtrlDown()))
         {
             performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
             performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);

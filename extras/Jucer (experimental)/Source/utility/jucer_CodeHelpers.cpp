@@ -344,7 +344,7 @@ namespace CodeHelpers
 
         if (canUseStringLiteral)
         {
-            int numEscaped = 0;
+            unsigned int numEscaped = 0;
 
             for (size_t i = 0; i < mb.getSize(); ++i)
             {

@@ -46,14 +46,12 @@ public:
     {
     }
 
-    void currentTabChanged (int newCurrentTabIndex,
-                            const String& newTabName)
+    void currentTabChanged (int newCurrentTabIndex, const String& newTabName)
     {
         owner->changeCallback (newCurrentTabIndex, newTabName);
     }
 
-    void popupMenuClickOnTab (int tabIndex,
-                              const String& tabName)
+    void popupMenuClickOnTab (int tabIndex, const String& tabName)
     {
         owner->popupMenuClickOnTab (tabIndex, tabName);
     }
@@ -159,8 +157,7 @@ void TabbedComponent::addTab (const String& tabName,
     tabs->addTab (tabName, tabBackgroundColour, insertIndex);
 }
 
-void TabbedComponent::setTabName (const int tabIndex,
-                                  const String& newName)
+void TabbedComponent::setTabName (const int tabIndex, const String& newName)
 {
     tabs->setTabName (tabIndex, newName);
 }
