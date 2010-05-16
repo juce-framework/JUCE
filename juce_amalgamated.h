@@ -20656,6 +20656,9 @@ public:
 	/** Copies another Justification object. */
 	Justification& operator= (const Justification& other) throw();
 
+	bool operator== (const Justification& other) const throw()	  { return flags == other.flags; }
+	bool operator!= (const Justification& other) const throw()	  { return flags != other.flags; }
+
 	/** Returns the raw flags that are set for this Justification object. */
 	inline int getFlags() const throw()				 { return flags; }
 

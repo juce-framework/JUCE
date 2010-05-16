@@ -181,6 +181,9 @@ public:
     //==============================================================================
     void drag (const MouseEvent& e)
     {
+//        if (draggedObjects.size() > 5)
+  //          canvas->repaint(); // more efficient than having to repaint a highly fragmented region
+
         getUndoManager().undoCurrentTransactionOnly();
 
         // (can't use getOffsetFromDragStart() because of auto-scrolling)

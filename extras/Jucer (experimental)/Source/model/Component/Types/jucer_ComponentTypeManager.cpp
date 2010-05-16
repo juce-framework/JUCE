@@ -356,7 +356,7 @@ void ComponentTypeInstance::updateComponentBasics (Component* comp)
     RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
     comp->setBounds (pos.resolve (document));
 
-    comp->setName (state [ComponentDocument::compNameProperty]);
+    //comp->setName (state [ComponentDocument::compNameProperty]);
 
     comp->setExplicitFocusOrder (state [ComponentDocument::compFocusOrderProperty]);
 

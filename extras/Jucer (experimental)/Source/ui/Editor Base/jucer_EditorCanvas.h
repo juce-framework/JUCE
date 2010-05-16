@@ -32,7 +32,8 @@ class EditorPanelBase;
 
 //==============================================================================
 class EditorCanvasBase   : public Component,
-                           public ValueTree::Listener
+                           public ValueTree::Listener,
+                           public AsyncUpdater
 {
 public:
     //==============================================================================
@@ -54,8 +55,8 @@ public:
     void drawYAxis (Graphics& g, const Rectangle<int>& r);
 
     //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { update(); }
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { update(); }
+    void valueTreePropertyChanged (ValueTree&, const Identifier&)         { triggerAsyncUpdate(); }
+    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { triggerAsyncUpdate(); }
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
 
     //==============================================================================
@@ -133,7 +134,7 @@ private:
     DocumentResizeFrame* resizeFrame;
     ScopedPointer<DragOperation> dragger;
 
-    void update();
+    void handleAsyncUpdate();
 };
 
 

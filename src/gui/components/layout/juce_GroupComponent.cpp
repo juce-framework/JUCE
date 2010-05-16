@@ -63,7 +63,7 @@ const String GroupComponent::getText() const
 //==============================================================================
 void GroupComponent::setTextLabelPosition (const Justification& newJustification)
 {
-    if (justification.getFlags() != newJustification.getFlags())
+    if (justification != newJustification)
     {
         justification = newJustification;
         repaint();

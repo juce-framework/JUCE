@@ -518,6 +518,8 @@ public:
         {
             if (transform.isOnlyTranslation())
             {
+                CGContextSetTextMatrix (context, state->fontTransform); // have to set this each time, as it's not saved as part of the state
+
                 CGGlyph g = glyphNumber;
                 CGContextShowGlyphsAtPoint (context, transform.getTranslationX(),
                                             flipHeight - roundToInt (transform.getTranslationY()), &g, 1);
@@ -535,7 +537,6 @@ public:
                 CGGlyph g = glyphNumber;
                 CGContextShowGlyphsAtPoint (context, 0, 0, &g, 1);
 
-                CGContextSetTextMatrix (context, state->fontTransform);
                 CGContextRestoreGState (context);
             }
         }

@@ -111,7 +111,7 @@ public:
             << item.getMemberName() << "->setEditableText (" << CodeHelpers::boolLiteral (item [Ids::editable]) << ");" << newLine;
 
         Justification justification ((int) item [Ids::textJustification]);
-        if (justification.getFlags() != 0 && justification.getFlags() != defaultBox.getJustificationType().getFlags())
+        if (justification.getFlags() != 0 && justification != defaultBox.getJustificationType())
             code.constructorCode << item.getMemberName() << "->setJustificationType (" << CodeHelpers::justificationToCode (justification) << ");" << newLine;
 
         if (item [Ids::unselectedText].toString() != defaultBox.getTextWhenNothingSelected())

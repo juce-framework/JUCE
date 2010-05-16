@@ -103,8 +103,11 @@ void Label::valueChanged (Value&)
 //==============================================================================
 void Label::setFont (const Font& newFont) throw()
 {
-    font = newFont;
-    repaint();
+    if (font != newFont)
+    {
+        font = newFont;
+        repaint();
+    }
 }
 
 const Font& Label::getFont() const throw()
@@ -124,17 +127,23 @@ void Label::setEditable (const bool editOnSingleClick,
     setFocusContainer (editOnSingleClick || editOnDoubleClick);
 }
 
-void Label::setJustificationType (const Justification& justification_) throw()
+void Label::setJustificationType (const Justification& newJustification) throw()
 {
-    justification = justification_;
-    repaint();
+    if (justification != newJustification)
+    {
+        justification = newJustification;
+        repaint();
+    }
 }
 
 void Label::setBorderSize (int h, int v)
 {
-    horizontalBorderSize = h;
-    verticalBorderSize = v;
-    repaint();
+    if (horizontalBorderSize != h || verticalBorderSize != v)
+    {
+        horizontalBorderSize = h;
+        verticalBorderSize = v;
+        repaint();
+    }
 }
 
 //==============================================================================
@@ -162,9 +171,7 @@ void Label::attachToComponent (Component* owner,
     }
 }
 
-void Label::componentMovedOrResized (Component& component,
-                                     bool /*wasMoved*/,
-                                     bool /*wasResized*/)
+void Label::componentMovedOrResized (Component& component, bool /*wasMoved*/, bool /*wasResized*/)
 {
     if (leftOfOwnerComp)
     {

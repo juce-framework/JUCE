@@ -30,8 +30,7 @@
 
 
 //==============================================================================
-class EditorCanvasBase::ResizeFrame    : public EditorCanvasBase::OverlayItemComponent,
-                                         public ValueTree::Listener
+class EditorCanvasBase::ResizeFrame    : public EditorCanvasBase::OverlayItemComponent
 {
 public:
     ResizeFrame (EditorCanvasBase* canvas_, const String& objectId_, const ValueTree& objectState_)
@@ -41,7 +40,6 @@ public:
           borderThickness (4)
     {
         jassert (objectState.isValid());
-        objectState.addListener (this);
     }
 
     ~ResizeFrame()
@@ -52,14 +50,6 @@ public:
     {
         g.setColour (resizableBorderColour);
         g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
-    }
-
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)  { updatePosition(); }
-    void valueTreeChildrenChanged (ValueTree&)                          { updatePosition(); }
-    void valueTreeParentChanged (ValueTree&)
-    {
-        if (! objectState.getParent().isValid())
-            canvas->getSelection().deselect (objectState ["id"]);
     }
 
     void mouseEnter (const MouseEvent& e)                       { updateDragZone (e.getPosition()); }
@@ -200,20 +190,17 @@ private:
 };
 
 //==============================================================================
-class EditorCanvasBase::MarkerComponent   : public EditorCanvasBase::OverlayItemComponent,
-                                                 public ValueTree::Listener
+class EditorCanvasBase::MarkerComponent   : public EditorCanvasBase::OverlayItemComponent
 {
 public:
     MarkerComponent (EditorCanvasBase* canvas_, const ValueTree& marker_, bool isX_, int headSize_)
         : OverlayItemComponent (canvas_), marker (marker_), isX (isX_), headSize (headSize_ - 2),
           dragStartPos (0), isDragging (false)
     {
-        marker.addListener (this);
     }
 
     ~MarkerComponent()
     {
-        marker.removeListener (this);
     }
 
     void paint (Graphics& g)
@@ -347,10 +334,6 @@ public:
 
     MarkerListBase& getMarkerList()      { return canvas->getMarkerList (isX); }
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { updatePosition(); }
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   {}
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
-
     ValueTree marker;
     const bool isX;
 
@@ -368,30 +351,20 @@ private:
 //==============================================================================
 class EditorCanvasBase::OverlayComponent  : public Component,
                                             public LassoSource <SelectedItems::ItemType>,
-                                            public ChangeListener,
-                                            public ValueTree::Listener
+                                            public ChangeListener
 {
 public:
     OverlayComponent (EditorCanvasBase* canvas_)
         : canvas (canvas_)
     {
         setWantsKeyboardFocus (true);
-
         getSelection().addChangeListener (this);
-
-        markerRootX = canvas->getMarkerList (true).getGroup();
-        markerRootY = canvas->getMarkerList (false).getGroup();
-        markerRootX.addListener (this);
-        markerRootY.addListener (this);
     }
 
     ~OverlayComponent()
     {
-        lasso = 0;
-        markerRootX.removeListener (this);
-        markerRootY.removeListener (this);
-
         getSelection().removeChangeListener (this);
+        lasso = 0;
         resizers.clear();
         deleteAllChildren();
     }
@@ -537,10 +510,6 @@ public:
         }
     }
 
-    void valueTreePropertyChanged (ValueTree&, const Identifier&)    { updateMarkers(); }
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)   { updateMarkers(); }
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)    {}
-
     void updateResizeFrames()
     {
         SelectedItems& selection = getSelection();
@@ -581,10 +550,15 @@ public:
         }
     }
 
+    void update()
+    {
+        updateResizeFrames();
+        updateMarkers();
+    }
+
 private:
     //==============================================================================
     EditorCanvasBase* canvas;
-    ValueTree markerRootX, markerRootY;
     ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
     bool mouseDownResult, isDraggingClickedComp;
     SelectedItems::ItemType mouseDownCompUID;
@@ -745,7 +719,7 @@ void EditorCanvasBase::initialise()
     addAndMakeVisible (overlay = new OverlayComponent (this));
     overlay->addAndMakeVisible (resizeFrame = new DocumentResizeFrame (this));
 
-    update();
+    handleAsyncUpdate();
 }
 
 void EditorCanvasBase::shutdown()
@@ -812,12 +786,13 @@ const Rectangle<int> EditorCanvasBase::getContentArea() const
 }
 
 //==============================================================================
-void EditorCanvasBase::update()
+void EditorCanvasBase::handleAsyncUpdate()
 {
     setSize ((int) getCanvasWidth() + border.getLeftAndRight(),
              (int) getCanvasHeight() + border.getTopAndBottom());
 
     updateComponents();
+    overlay->update();
 }
 
 void EditorCanvasBase::resized()
@@ -826,6 +801,7 @@ void EditorCanvasBase::resized()
     overlay->setBounds (getLocalBounds());
     resizeFrame->setBounds (getLocalBounds());
     updateComponents();
+    overlay->update();
 }
 
 //==============================================================================

@@ -268,13 +268,19 @@ void Slider::setTextBoxStyle (const TextEntryBoxPosition newPosition,
                               const int textEntryBoxWidth,
                               const int textEntryBoxHeight)
 {
-    textBoxPos = newPosition;
-    editableText = ! isReadOnly;
-    textBoxWidth = textEntryBoxWidth;
-    textBoxHeight = textEntryBoxHeight;
+    if (textBoxPos != newPosition
+         || editableText != (! isReadOnly)
+         || textBoxWidth != textEntryBoxWidth
+         || textBoxHeight != textEntryBoxHeight)
+    {
+        textBoxPos = newPosition;
+        editableText = ! isReadOnly;
+        textBoxWidth = textEntryBoxWidth;
+        textBoxHeight = textEntryBoxHeight;
 
-    repaint();
-    lookAndFeelChanged();
+        repaint();
+        lookAndFeelChanged();
+    }
 }
 
 void Slider::setTextBoxIsEditable (const bool shouldBeEditable)

@@ -1036,15 +1036,17 @@ void TextEditor::doUndoRedo (const bool isRedo)
 void TextEditor::setMultiLine (const bool shouldBeMultiLine,
                                const bool shouldWordWrap)
 {
-    multiline = shouldBeMultiLine;
-    wordWrap = shouldWordWrap && shouldBeMultiLine;
+    if (multiline != shouldBeMultiLine
+         || wordWrap != (shouldWordWrap && shouldBeMultiLine))
+    {
+        multiline = shouldBeMultiLine;
+        wordWrap = shouldWordWrap && shouldBeMultiLine;
 
-    setScrollbarsShown (scrollbarVisible);
-
-    viewport->setViewPosition (0, 0);
-
-    resized();
-    scrollToMakeSureCursorIsVisible();
+        setScrollbarsShown (scrollbarVisible);
+        viewport->setViewPosition (0, 0);
+        resized();
+        scrollToMakeSureCursorIsVisible();
+    }
 }
 
 bool TextEditor::isMultiLine() const
@@ -1052,19 +1054,23 @@ bool TextEditor::isMultiLine() const
     return multiline;
 }
 
-void TextEditor::setScrollbarsShown (bool enabled)
+void TextEditor::setScrollbarsShown (bool shown)
 {
-    scrollbarVisible = enabled;
-
-    enabled = enabled && isMultiLine();
-
-    viewport->setScrollBarsShown (enabled, enabled);
+    if (scrollbarVisible != shown)
+    {
+        scrollbarVisible = shown;
+        shown = shown && isMultiLine();
+        viewport->setScrollBarsShown (shown, shown);
+    }
 }
 
 void TextEditor::setReadOnly (const bool shouldBeReadOnly)
 {
-    readOnly = shouldBeReadOnly;
-    enablementChanged();
+    if (readOnly != shouldBeReadOnly)
+    {
+        readOnly = shouldBeReadOnly;
+        enablementChanged();
+    }
 }
 
 bool TextEditor::isReadOnly() const
@@ -1211,12 +1217,12 @@ void TextEditor::setText (const String& newText,
         if (sendTextChangeMessage)
             textChanged();
 
+        updateTextHolderSize();
+        scrollToMakeSureCursorIsVisible();
+        undoManager.clearUndoHistory();
+
         repaint();
     }
-
-    updateTextHolderSize();
-    scrollToMakeSureCursorIsVisible();
-    undoManager.clearUndoHistory();
 }
 
 //==============================================================================

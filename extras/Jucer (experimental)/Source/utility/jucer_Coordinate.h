@@ -166,20 +166,46 @@ public:
     Coordinate left, right, top, bottom;
 };
 
+
 //==============================================================================
-class ComponentAutoLayoutManager    : public ComponentListener
+class ComponentAutoLayoutManager    : public ComponentListener,
+                                      public Coordinate::MarkerResolver
 {
 public:
+    //==============================================================================
     ComponentAutoLayoutManager (Component* parentComponent);
     ~ComponentAutoLayoutManager();
 
-    void addMarker (bool isX, const String& name, const String& position);
-    void moveMarker (const String& name, int newPosition);
+    //==============================================================================
+    void setMarker (const String& name, const Coordinate& coord);
+
+    void setComponentLayout (Component* comp, const RectangleCoordinates& coords);
+
+    void applyLayout();
+
+    const Coordinate findMarker (const String& name, bool isHorizontal) const;
+
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    void componentBeingDeleted (Component& component);
 
 private:
-    Array <Component*> components;
+    //==============================================================================
+    class ComponentPosition
+    {
+    public:
+        Component* component;
+        RectangleCoordinates coords;
+    };
 
+    class MarkerPosition
+    {
+    public:
+        const String markerName;
+        Coordinate position;
+    };
+
+    OwnedArray <ComponentPosition> components;
+    OwnedArray <MarkerPosition> markers;
 };
-
 
 #endif  // __JUCER_COORDINATE_H_EF56ACFA__
