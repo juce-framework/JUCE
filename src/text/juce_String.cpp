@@ -1758,7 +1758,7 @@ double String::getDoubleValue() const throw()
     return CharacterFunctions::getDoubleValue (text);
 }
 
-static const juce_wchar* const hexDigits = T("0123456789abcdef");
+static const juce_wchar* const hexDigits = JUCE_T("0123456789abcdef");
 
 const String String::toHexString (const int number)
 {

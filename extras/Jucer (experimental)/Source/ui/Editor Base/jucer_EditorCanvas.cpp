@@ -81,8 +81,11 @@ public:
         return ! getCentreArea().contains (x, y);
     }
 
-    void updatePosition()
+    bool updatePosition()
     {
+        if (! objectState.getParent().isValid())
+            return false;
+
         const Rectangle<int> bounds (canvas->getObjectPosition (objectState));
         setBoundsInTargetSpace (bounds.expanded (borderThickness, borderThickness));
 
@@ -91,6 +94,8 @@ public:
             sizeGuides.getUnchecked(i)->setVisible (isVisible());
             sizeGuides.getUnchecked(i)->updatePosition (bounds);
         }
+
+        return true;
     }
 
     const String& getTargetObjectID() const     { return objectId; }
@@ -527,8 +532,15 @@ public:
 
             if (index >= 0)
             {
-                resizer->updatePosition();
-                requiredIds.remove (index);
+                if (resizer->updatePosition())
+                {
+                    requiredIds.remove (index);
+                }
+                else
+                {
+                    resizers.remove (i);
+                    canvas->getSelection().deselect (requiredIds[i]);
+                }
             }
             else
             {

@@ -420,3 +420,148 @@ void RectangleCoordinates::renameAnchorIfUsed (const String& oldName, const Stri
     top.renameAnchorIfUsed (oldName, newName, markerResolver);
     bottom.renameAnchorIfUsed (oldName, newName, markerResolver);
 }
+
+
+
+//==============================================================================
+ComponentAutoLayoutManager::ComponentAutoLayoutManager (Component* parentComponent)
+    : parent (parentComponent)
+{
+    parent->addComponentListener (this);
+}
+
+ComponentAutoLayoutManager::~ComponentAutoLayoutManager()
+{
+    parent->removeComponentListener (this);
+
+    for (int i = components.size(); --i >= 0;)
+        components.getUnchecked(i)->component->removeComponentListener (this);
+}
+
+void ComponentAutoLayoutManager::setMarker (const String& name, const Coordinate& coord)
+{
+    for (int i = markers.size(); --i >= 0;)
+    {
+        MarkerPosition* m = markers.getUnchecked(i);
+        if (m->markerName == name)
+        {
+            m->position = coord;
+            applyLayout();
+            return;
+        }
+    }
+
+    markers.add (new MarkerPosition (name, coord));
+    applyLayout();
+}
+
+void ComponentAutoLayoutManager::setComponentLayout (Component* comp, const String& name, const RectangleCoordinates& coords)
+{
+    jassert (comp != 0);
+
+    // All the components that this layout manages must be inside the parent component..
+    jassert (parent->isParentOf (comp));
+
+    for (int i = components.size(); --i >= 0;)
+    {
+        ComponentPosition* c = components.getUnchecked(i);
+        if (c->component == comp)
+        {
+            c->name = name;
+            c->coords = coords;
+            triggerAsyncUpdate();
+            return;
+        }
+    }
+
+    components.add (new ComponentPosition (comp, name, coords));
+    comp->addComponentListener (this);
+    triggerAsyncUpdate();
+}
+
+void ComponentAutoLayoutManager::applyLayout()
+{
+    for (int i = components.size(); --i >= 0;)
+    {
+        ComponentPosition* c = components.getUnchecked(i);
+
+        // All the components that this layout manages must be inside the parent component..
+        jassert (parent->isParentOf (c->component));
+
+        c->component->setBounds (c->coords.resolve (*this));
+    }
+}
+
+const Coordinate ComponentAutoLayoutManager::findMarker (const String& name, bool isHorizontal) const
+{
+    if (name == Coordinate::parentRightMarkerName)     return Coordinate ((double) parent->getWidth(), isHorizontal);
+    if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) parent->getHeight(), isHorizontal);
+
+    if (name.containsChar ('.'))
+    {
+        const String compName (name.upToFirstOccurrenceOf (".", false, false).trim());
+        const String edge (name.fromFirstOccurrenceOf (".", false, false).trim());
+
+        if (compName.isNotEmpty() && edge.isNotEmpty())
+        {
+            for (int i = components.size(); --i >= 0;)
+            {
+                ComponentPosition* c = components.getUnchecked(i);
+
+                if (c->name == compName)
+                {
+                    if (edge == "left")   return c->coords.left;
+                    if (edge == "right")  return c->coords.right;
+                    if (edge == "top")    return c->coords.top;
+                    if (edge == "bottom") return c->coords.bottom;
+                }
+            }
+        }
+    }
+
+    for (int i = markers.size(); --i >= 0;)
+    {
+        MarkerPosition* m = markers.getUnchecked(i);
+
+        if (m->markerName == name)
+            return m->position;
+    }
+
+    return Coordinate (isHorizontal);
+}
+
+void ComponentAutoLayoutManager::componentMovedOrResized (Component& component, bool wasMoved, bool wasResized)
+{
+    triggerAsyncUpdate();
+
+    if (parent == &component)
+        handleUpdateNowIfNeeded();
+}
+
+void ComponentAutoLayoutManager::componentBeingDeleted (Component& component)
+{
+    for (int i = components.size(); --i >= 0;)
+    {
+        ComponentPosition* c = components.getUnchecked(i);
+        if (c->component == &component)
+        {
+            components.remove (i);
+            break;
+        }
+    }
+}
+
+void ComponentAutoLayoutManager::handleAsyncUpdate()
+{
+    applyLayout();
+}
+
+ComponentAutoLayoutManager::MarkerPosition::MarkerPosition (const String& name, const Coordinate& coord)
+    : markerName (name), position (coord)
+{
+}
+
+ComponentAutoLayoutManager::ComponentPosition::ComponentPosition (Component* component_, const String& name_, const RectangleCoordinates& coords_)
+    : component (component_), name (name_), coords (coords_)
+{
+}

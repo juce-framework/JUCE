@@ -24,46 +24,6 @@
 */
 
 #include "jucer_ComponentTypeManager.h"
-
-// Handy list of static ids for use by component types..
-namespace Ids
-{
-    #define DECLARE_ID(name)      const Identifier name (#name)
-
-    DECLARE_ID (text);
-    DECLARE_ID (font);
-    DECLARE_ID (mode);
-    DECLARE_ID (type);
-    DECLARE_ID (readOnly);
-    DECLARE_ID (editMode);
-    DECLARE_ID (justification);
-    DECLARE_ID (items);
-    DECLARE_ID (editable);
-    DECLARE_ID (textJustification);
-    DECLARE_ID (unselectedText);
-    DECLARE_ID (noItemsText);
-    DECLARE_ID (min);
-    DECLARE_ID (max);
-    DECLARE_ID (interval);
-    DECLARE_ID (textBoxPos);
-    DECLARE_ID (textBoxWidth);
-    DECLARE_ID (textBoxHeight);
-    DECLARE_ID (skew);
-    DECLARE_ID (scrollBarV);
-    DECLARE_ID (scrollBarH);
-    DECLARE_ID (scrollbarWidth);
-    DECLARE_ID (initialState);
-    DECLARE_ID (scrollbarsShown);
-    DECLARE_ID (caretVisible);
-    DECLARE_ID (popupMenuEnabled);
-    DECLARE_ID (radioGroup);
-    DECLARE_ID (connectedLeft);
-    DECLARE_ID (connectedRight);
-    DECLARE_ID (connectedTop);
-    DECLARE_ID (connectedBottom);
-    const Identifier class_ ("class");
-}
-
 #include "jucer_ComponentTypes.h"
 #include "../../../utility/jucer_CoordinatePropertyComponent.h"
 
@@ -331,6 +291,7 @@ void ComponentTypeInstance::createProperties (Array <PropertyComponent*>& props)
 void ComponentTypeInstance::createCode (CodeGenerator& code)
 {
     code.addPrivateMember (getHandler()->getClassName (*this) + "*", getMemberName());
+    code.memberInitialisers.add (getMemberName() + " (0)");
     getHandler()->createCode (*this, code);
 }
 
@@ -415,27 +376,13 @@ public:
 
     const var getValue() const
     {
-        const String fontName (Font::fromString (sourceValue.toString()).getTypefaceName());
-        const int index = StoredSettings::getInstance()->getFontNames().indexOf (fontName);
-
-        if (index >= 0)                                             return 4 + index;
-        else if (fontName == Font::getDefaultSansSerifFontName())   return 1;
-        else if (fontName == Font::getDefaultSerifFontName())       return 2;
-        else if (fontName == Font::getDefaultMonospacedFontName())  return 3;
-
-        return 1;
+        return Font::fromString (sourceValue.toString()).getTypefaceName();
     }
 
     void setValue (const var& newValue)
     {
         Font font (Font::fromString (sourceValue.toString()));
-
-        const int index = newValue;
-        if (index <= 1)         font.setTypefaceName (Font::getDefaultSansSerifFontName());
-        else if (index == 2)    font.setTypefaceName (Font::getDefaultSerifFontName());
-        else if (index == 3)    font.setTypefaceName (Font::getDefaultMonospacedFontName());
-        else                    font.setTypefaceName (StoredSettings::getInstance()->getFontNames() [index - 4]);
-
+        font.setTypefaceName (newValue.toString());
         sourceValue = font.toString();
     }
 
@@ -448,7 +395,11 @@ public:
         fontNames.add (String::empty);
         fontNames.addArray (StoredSettings::getInstance()->getFontNames());
 
-        return new ChoicePropertyComponent (Value (new FontNameValueSource (value)), title, fontNames);
+        Array<var> values;
+        for (int i = 0; i < fontNames.size(); ++i)
+            values.add (fontNames[i]);
+
+        return new ChoicePropertyComponent (Value (new FontNameValueSource (value)), title, fontNames, values);
     }
 
 private:
@@ -525,7 +476,7 @@ public:
 
     static PropertyComponent* createProperty (const String& title, const Value& value)
     {
-        return StringListValueSource::create (title, Value (new FontStyleValueSource (value)), StringArray (getStyles()));
+        return new ChoicePropertyComponent (Value (new FontStyleValueSource (value)), title, StringArray (getStyles()), Array<var> (getStyles()));
     }
 
     static const char* const* getStyles()
@@ -549,34 +500,25 @@ void ComponentTypeInstance::addFontProperties (Array <PropertyComponent*>& props
 //==============================================================================
 void ComponentTypeInstance::addJustificationProperty (Array <PropertyComponent*>& props, const String& name, const Value& value, bool onlyHorizontal)
 {
-    ValueRemapperSource* remapper = new ValueRemapperSource (value);
     StringArray strings;
 
     if (onlyHorizontal)
     {
         const char* const layouts[] = { "Left", "Centred", "Right", 0 };
-        const int justifications[] = { Justification::left, Justification::centred, Justification::right, 0 };
+        const var justifications[] = { (int) Justification::left, (int) Justification::centred, (int) Justification::right, 0 };
 
-        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
-            remapper->addMapping (justifications[i], i + 1);
-
-        strings = StringArray (layouts);
+        props.add (new ChoicePropertyComponent (value, name, StringArray (layouts), Array<var> (justifications)));
     }
     else
     {
         const char* const layouts[] = { "Centred", "Centred-left", "Centred-right", "Centred-top", "Centred-bottom", "Top-left",
                                         "Top-right", "Bottom-left", "Bottom-right", 0 };
-        const int justifications[] = { Justification::centred, Justification::centredLeft, Justification::centredRight,
-                                       Justification::centredTop, Justification::centredBottom, Justification::topLeft,
-                                       Justification::topRight, Justification::bottomLeft, Justification::bottomRight, 0 };
+        const var justifications[] = { (int) Justification::centred, (int) Justification::centredLeft, (int) Justification::centredRight,
+                                       (int) Justification::centredTop, (int) Justification::centredBottom, (int) Justification::topLeft,
+                                       (int) Justification::topRight, (int) Justification::bottomLeft, (int) Justification::bottomRight, var() };
 
-        for (int i = 0; i < numElementsInArray (justifications) - 1; ++i)
-            remapper->addMapping (justifications[i], i + 1);
-
-        strings = StringArray (layouts);
+        props.add (new ChoicePropertyComponent (value, name, StringArray (layouts), Array<var> (justifications)));
     }
-
-    props.add (new ChoicePropertyComponent (Value (remapper), name, strings));
 }
 
 //==============================================================================

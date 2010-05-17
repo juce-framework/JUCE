@@ -90,7 +90,8 @@ public:
         props.getLast()->setTooltip ("The editor's initial content.");
 
         const char* const modes[] = { "Single-Line", "Multi-Line (Return key starts new line)", "Multi-Line (Return key disabled)", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue (Ids::mode), "Mode", StringArray (modes)));
+        const int values[] = { 1, 2, 3, 0 };
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::mode), "Mode", StringArray (modes), Array<var> (values)));
 
         props.add (new BooleanPropertyComponent (item.getValue (Ids::readOnly), "Read-Only", "Read-Only"));
         props.add (new BooleanPropertyComponent (item.getValue (Ids::scrollbarsShown), "Scrollbars", "Scrollbars Shown"));

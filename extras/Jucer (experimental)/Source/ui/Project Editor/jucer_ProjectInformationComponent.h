@@ -64,7 +64,7 @@ private:
     //[UserVariables]   -- You can add your own custom variables in this section.
     Project& project;
 
-    Project::ProjectType lastProjectType;
+    var lastProjectType;
     void updateConfigTabs();
     void showConfigMenu();
     void showExporterMenu();

@@ -31,23 +31,73 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+class ChoicePropertyComponent::RemapperValueSource    : public Value::ValueSource,
+                                                        public Value::Listener
+{
+public:
+    RemapperValueSource (const Value& sourceValue_, const Array<var>& mappings_)
+       : sourceValue (sourceValue_),
+         mappings (mappings_)
+    {
+        sourceValue.addListener (this);
+    }
+
+    ~RemapperValueSource() {}
+
+    const var getValue() const
+    {
+        return mappings.indexOf (sourceValue.getValue()) + 1;
+    }
+
+    void setValue (const var& newValue)
+    {
+        const var remappedVal (mappings [(int) newValue - 1]);
+
+        if (remappedVal != sourceValue)
+            sourceValue = remappedVal;
+    }
+
+    void valueChanged (Value&)
+    {
+        sendChangeMessage (true);
+    }
+
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+protected:
+    Value sourceValue;
+    Array<var> mappings;
+
+    RemapperValueSource (const RemapperValueSource&);
+    const RemapperValueSource& operator= (const RemapperValueSource&);
+};
+
+
+//==============================================================================
 ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
     : PropertyComponent (name),
-      comboBox (0)
+      comboBox (0),
+      isCustomClass (true)
 {
 }
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                   const String& name,
                                                   const StringArray& choices_,
-                                                  const Array <int>* choiceIDs)
+                                                  const Array <var>& correspondingValues)
     : PropertyComponent (name),
       choices (choices_),
-      comboBox (0)
+      comboBox (0),
+      isCustomClass (false)
 {
-    createComboBox (choiceIDs);
+    // The array of corresponding values must contain one value for each of the items in
+    // the choices array!
+    jassert (correspondingValues.size() == choices.size());
 
-    comboBox->getSelectedIdAsValue().referTo (valueToControl);
+    createComboBox();
+
+    comboBox->getSelectedIdAsValue().referTo (Value (new RemapperValueSource (valueToControl, correspondingValues)));
 }
 
 ChoicePropertyComponent::~ChoicePropertyComponent()
@@ -56,20 +106,14 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 }
 
 //==============================================================================
-void ChoicePropertyComponent::createComboBox (const Array <int>* choiceIDs)
+void ChoicePropertyComponent::createComboBox()
 {
-    // The array of IDs must contain the same number of values as the choices list!
-    jassert (choiceIDs == 0 || choiceIDs->size() == choices.size());
-
-    addAndMakeVisible (comboBox = new ComboBox (String::empty));
-
-    int itemId = 0;
+    addAndMakeVisible (comboBox = new ComboBox());
 
     for (int i = 0; i < choices.size(); ++i)
     {
         if (choices[i].isNotEmpty())
-            comboBox->addItem (choices[i], choiceIDs == 0 ? ++itemId
-                                                          : ((*choiceIDs)[i]));
+            comboBox->addItem (choices[i], i + 1);
         else
             comboBox->addSeparator();
     }
@@ -79,12 +123,13 @@ void ChoicePropertyComponent::createComboBox (const Array <int>* choiceIDs)
 
 void ChoicePropertyComponent::setIndex (const int newIndex)
 {
-    comboBox->setSelectedId (comboBox->getItemId (newIndex));
+    jassertfalse; // you need to override this method in your subclass!
 }
 
 int ChoicePropertyComponent::getIndex() const
 {
-    return comboBox->getSelectedItemIndex();
+    jassertfalse; // you need to override this method in your subclass!
+    return -1;
 }
 
 const StringArray& ChoicePropertyComponent::getChoices() const
@@ -95,21 +140,27 @@ const StringArray& ChoicePropertyComponent::getChoices() const
 //==============================================================================
 void ChoicePropertyComponent::refresh()
 {
-    if (comboBox == 0)
+    if (isCustomClass)
     {
-        createComboBox (0);
-        comboBox->addListener (this);
-    }
+        if (comboBox == 0)
+        {
+            createComboBox();
+            comboBox->addListener (this);
+        }
 
-    comboBox->setSelectedId (getIndex() + 1, true);
+        comboBox->setSelectedId (getIndex() + 1, true);
+    }
 }
 
 void ChoicePropertyComponent::comboBoxChanged (ComboBox*)
 {
-    const int newIndex = comboBox->getSelectedId() - 1;
+    if (isCustomClass)
+    {
+        const int newIndex = comboBox->getSelectedId() - 1;
 
-    if (newIndex != getIndex())
-        setIndex (newIndex);
+        if (newIndex != getIndex())
+            setIndex (newIndex);
+    }
 }
 
 

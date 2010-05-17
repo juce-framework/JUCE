@@ -225,8 +225,8 @@
             file="Source/utility/jucer_MiscUtilities.cpp"/>
       <FILE id="kNy0Xya3H" name="jucer_MiscUtilities.h" compile="0" resource="0"
             file="Source/utility/jucer_MiscUtilities.h"/>
-      <FILE id="0uDzmAAml" name="jucer_ValueRemapperSource.h" compile="0"
-            resource="0" file="Source/utility/jucer_ValueRemapperSource.h"/>
+      <FILE id="0uDzmAAml" name="jucer_ValueSourceHelpers.h" compile="0"
+            resource="0" file="Source/utility/jucer_ValueSourceHelpers.h"/>
     </GROUP>
     <GROUP id="A1dyCqqMO" name="Main">
       <FILE id="bUx7JL9VV" name="jucer_Headers.h" compile="0" resource="0"

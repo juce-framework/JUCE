@@ -183,12 +183,12 @@ int XmlDocument::findNextTokenLength() throw()
 
 void XmlDocument::skipHeader()
 {
-    const juce_wchar* const found = CharacterFunctions::find (input, T("<?xml"));
+    const juce_wchar* const found = CharacterFunctions::find (input, JUCE_T("<?xml"));
 
     if (found != 0)
     {
         input = found;
-        input = CharacterFunctions::find (input, T("?>"));
+        input = CharacterFunctions::find (input, JUCE_T("?>"));
 
         if (input == 0)
             return;
@@ -197,7 +197,7 @@ void XmlDocument::skipHeader()
     }
 
     skipNextWhiteSpace();
-    const juce_wchar* docType = CharacterFunctions::find (input, T("<!DOCTYPE"));
+    const juce_wchar* docType = CharacterFunctions::find (input, JUCE_T("<!DOCTYPE"));
 
     if (docType == 0)
         return;
@@ -243,7 +243,7 @@ void XmlDocument::skipNextWhiteSpace()
                  && input[2] == '-'
                  && input[3] == '-')
             {
-                const juce_wchar* const closeComment = CharacterFunctions::find (input, T("-->"));
+                const juce_wchar* const closeComment = CharacterFunctions::find (input, JUCE_T("-->"));
 
                 if (closeComment == 0)
                 {
@@ -256,7 +256,7 @@ void XmlDocument::skipNextWhiteSpace()
             }
             else if (input[1] == '?')
             {
-                const juce_wchar* const closeBracket = CharacterFunctions::find (input, T("?>"));
+                const juce_wchar* const closeBracket = CharacterFunctions::find (input, JUCE_T("?>"));
 
                 if (closeBracket == 0)
                 {
@@ -331,7 +331,7 @@ XmlElement* XmlDocument::readNextElement (const bool alsoParseSubElements)
     if (outOfData)
         return 0;
 
-    input = CharacterFunctions::find (input, T("<"));
+    input = CharacterFunctions::find (input, JUCE_T("<"));
 
     if (input != 0)
     {
@@ -451,7 +451,7 @@ void XmlDocument::readChildElements (XmlElement* parent)
             if (input[1] == '/')
             {
                 // our close tag..
-                input = CharacterFunctions::find (input, T(">"));
+                input = CharacterFunctions::find (input, JUCE_T(">"));
                 ++input;
                 break;
             }
@@ -623,27 +623,27 @@ void XmlDocument::readEntity (String& result)
     // skip over the ampersand
     ++input;
 
-    if (CharacterFunctions::compareIgnoreCase (input, T("amp;"), 4) == 0)
+    if (CharacterFunctions::compareIgnoreCase (input, JUCE_T("amp;"), 4) == 0)
     {
         input += 4;
         result += '&';
     }
-    else if (CharacterFunctions::compareIgnoreCase (input, T("quot;"), 5) == 0)
+    else if (CharacterFunctions::compareIgnoreCase (input, JUCE_T("quot;"), 5) == 0)
     {
         input += 5;
         result += '"';
     }
-    else if (CharacterFunctions::compareIgnoreCase (input, T("apos;"), 5) == 0)
+    else if (CharacterFunctions::compareIgnoreCase (input, JUCE_T("apos;"), 5) == 0)
     {
         input += 5;
         result += '\'';
     }
-    else if (CharacterFunctions::compareIgnoreCase (input, T("lt;"), 3) == 0)
+    else if (CharacterFunctions::compareIgnoreCase (input, JUCE_T("lt;"), 3) == 0)
     {
         input += 3;
         result += '<';
     }
-    else if (CharacterFunctions::compareIgnoreCase (input, T("gt;"), 3) == 0)
+    else if (CharacterFunctions::compareIgnoreCase (input, JUCE_T("gt;"), 3) == 0)
     {
         input += 3;
         result += '>';
@@ -704,7 +704,7 @@ void XmlDocument::readEntity (String& result)
     else
     {
         const juce_wchar* const entityNameStart = input;
-        const juce_wchar* const closingSemiColon = CharacterFunctions::find (input, T(";"));
+        const juce_wchar* const closingSemiColon = CharacterFunctions::find (input, JUCE_T(";"));
 
         if (closingSemiColon == 0)
         {

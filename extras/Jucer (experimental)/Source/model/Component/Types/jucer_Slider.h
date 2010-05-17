@@ -54,10 +54,10 @@ public:
 
     void initialiseNew (ComponentTypeInstance& item)
     {
+        item.set (Ids::type, Slider::LinearHorizontal);
         item.set (Ids::min, 0);
         item.set (Ids::max, 100);
         item.set (Ids::interval, 1);
-        item.set (Ids::type, 1 + Slider::LinearHorizontal);
         item.set (Ids::textBoxPos, 2);
         item.set (Ids::editable, true);
         item.set (Ids::textBoxWidth, 80);
@@ -68,8 +68,8 @@ public:
     void update (ComponentTypeInstance& item, Slider* comp)
     {
         comp->setRange ((double) item [Ids::min], (double) item [Ids::max], (double) item [Ids::interval]);
-        comp->setSliderStyle ((Slider::SliderStyle) ((int) item [Ids::type] - 1));
-        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) ((int) item [Ids::textBoxPos] - 1),
+        comp->setSliderStyle ((Slider::SliderStyle) (int) item [Ids::type]);
+        comp->setTextBoxStyle ((Slider::TextEntryBoxPosition) (int) item [Ids::textBoxPos],
                                ! (bool) item [Ids::editable],
                                (int) item [Ids::textBoxWidth], (int) item [Ids::textBoxHeight]);
         comp->setSkewFactor ((double) item [Ids::skew]);
@@ -86,10 +86,14 @@ public:
 
         const char* const types[] = { "LinearHorizontal", "LinearVertical", "LinearBar", "Rotary", "RotaryHorizontalDrag", "RotaryVerticalDrag",
                                       "IncDecButtons", "TwoValueHorizontal", "TwoValueVertical", "ThreeValueHorizontal", "ThreeValueVertical", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue (Ids::type), "Type", StringArray (types)));
+        const int typeValues[] = { (int) Slider::LinearHorizontal, (int) Slider::LinearVertical, (int) Slider::LinearBar, (int) Slider::Rotary,
+                                   (int) Slider::RotaryHorizontalDrag, (int) Slider::RotaryVerticalDrag, (int) Slider::IncDecButtons, (int) Slider::TwoValueHorizontal,
+                                   (int) Slider::TwoValueVertical, (int) Slider::ThreeValueHorizontal, (int) Slider::ThreeValueVertical };
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::type), "Type", StringArray (types), Array<var> (typeValues, numElementsInArray (typeValues))));
 
         const char* const textBoxPositions[] = { "NoTextBox", "TextBoxLeft", "TextBoxRight", "TextBoxAbove", "TextBoxBelow", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue (Ids::textBoxPos), "Text Box", StringArray (textBoxPositions)));
+        const int positionValues[] = { (int) Slider::NoTextBox, (int) Slider::TextBoxLeft, (int) Slider::TextBoxRight, (int) Slider::TextBoxAbove, (int) Slider::TextBoxBelow };
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::textBoxPos), "Text Box", StringArray (textBoxPositions), Array<var> (positionValues, numElementsInArray (positionValues))));
 
         props.add (new BooleanPropertyComponent (item.getValue (Ids::editable), "Editable", "Value can be edited"));
         props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxWidth"))), "Text Box Width", 8, false));
@@ -143,8 +147,8 @@ public:
                                     << ", " << CodeHelpers::doubleLiteral (item [Ids::max])
                                     << ", " << CodeHelpers::doubleLiteral (item [Ids::interval])
                                     << ");" << newLine
-            << item.getMemberName() << "->setSliderStyle (Slider::" << sliderTypeString ((int) item [Ids::type] - 1) << ");" << newLine
-            << item.getMemberName() << "->setTextBoxStyle (Slider::" << sliderTextBoxString ((int) item [Ids::type] - 1)
+            << item.getMemberName() << "->setSliderStyle (Slider::" << sliderTypeString ((int) item [Ids::type]) << ");" << newLine
+            << item.getMemberName() << "->setTextBoxStyle (Slider::" << sliderTextBoxString ((int) item [Ids::type])
                                     << ", " << CodeHelpers::boolLiteral (! (bool) item [Ids::editable])
                                     << ", " << String ((int) item [Ids::textBoxWidth])
                                     << ", " << String ((int) item [Ids::textBoxHeight])

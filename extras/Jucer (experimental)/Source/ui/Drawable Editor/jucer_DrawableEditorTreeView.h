@@ -102,8 +102,8 @@ public:
 
     const String getUniqueName() const
     {
-        jassert (node ["id"].toString().isNotEmpty());
-        return node ["id"];
+        jassert (node [Ids::id_].toString().isNotEmpty());
+        return node [Ids::id_];
     }
 
     void itemOpennessChanged (bool isNowOpen)

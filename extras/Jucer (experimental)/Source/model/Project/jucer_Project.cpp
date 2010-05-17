@@ -69,7 +69,7 @@ Project::~Project()
 //==============================================================================
 void Project::setTitle (const String& newTitle)
 {
-    projectRoot.setProperty ("name", newTitle, getUndoManagerFor (projectRoot));
+    projectRoot.setProperty (Ids::name, newTitle, getUndoManagerFor (projectRoot));
     getMainGroup().getName() = newTitle;
 }
 
@@ -81,13 +81,13 @@ const String Project::getDocumentTitle()
 void Project::updateProjectSettings()
 {
     projectRoot.setProperty ("jucerVersion", ProjectInfo::versionString, 0);
-    projectRoot.setProperty ("name", getDocumentTitle(), 0);
+    projectRoot.setProperty (Ids::name, getDocumentTitle(), 0);
 }
 
 void Project::setMissingDefaultValues()
 {
-    if (! projectRoot.hasProperty ("id"))
-        projectRoot.setProperty ("id", createAlphaNumericUID(), 0);
+    if (! projectRoot.hasProperty (Ids::id_))
+        projectRoot.setProperty (Ids::id_, createAlphaNumericUID(), 0);
 
     // Create main file group if missing
     if (! projectRoot.getChildWithName (Tags::projectMainGroup).isValid())
@@ -108,7 +108,7 @@ void Project::setMissingDefaultValues()
         getVersion() = "1.0.0";
 
     if (! projectRoot.hasProperty ("juceLinkage"))
-        getJuceLinkageModeValue() = (int) useAmalgamatedJuceViaMultipleTemplates;
+        getJuceLinkageModeValue() = useAmalgamatedJuceViaMultipleTemplates;
 
     const String juceFolderPath (getRelativePathForFile (StoredSettings::getInstance()->getLastKnownJuceFolder()));
 
@@ -210,7 +210,7 @@ void Project::setLastDocumentOpened (const File& file)
 void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
 {
     if (isLibrary())
-        getJuceLinkageModeValue() = (int) notLinkedToJuce;
+        getJuceLinkageModeValue() = notLinkedToJuce;
 
     changed();
 }
@@ -266,41 +266,24 @@ bool Project::shouldBeAddedToBinaryResourcesByDefault (const File& file)
     return ! file.hasFileExtension (sourceFileExtensions);
 }
 
-Value Project::getProjectType() const
-{
-    static const char* mappings[] = { "guiapp", "1", "consoleapp", "2", "audioplug", "3", "library", "4", "browserplug", "5", 0 };
-    return Value (new ValueRemapperSource (projectRoot.getPropertyAsValue ("projectType", getUndoManagerFor (projectRoot)), mappings));
-}
+//==============================================================================
+const char* const Project::application      = "guiapp";
+const char* const Project::commandLineApp   = "consoleapp";
+const char* const Project::audioPlugin      = "audioplug";
+const char* const Project::library          = "library";
+const char* const Project::browserPlugin    = "browserplug";
 
-const StringArray Project::getProjectTypes() const
-{
-    const char* types[] = { "Application (GUI)",
-                            "Application (Non-GUI)",
-                            "Audio Plug-in",
-                            //"Browser Plug-in",
-                            "Static Library",
-                            0 };
+bool Project::isLibrary() const                 { return getProjectType().toString() == library; }
+bool Project::isGUIApplication() const          { return getProjectType().toString() == application; }
+bool Project::isCommandLineApp() const          { return getProjectType().toString() == commandLineApp; }
+bool Project::isAudioPlugin() const             { return getProjectType().toString() == audioPlugin; }
+bool Project::isBrowserPlugin() const           { return getProjectType().toString() == browserPlugin; }
 
-    return StringArray (types);
-}
-
-Value Project::getJuceLinkageModeValue() const
-{
-    static const char* mappings[] = { "none", "1", "static", "2", "amalg_big", "3", "amalg_template", "4", "amalg_multi", "5", 0 };
-    return Value (new ValueRemapperSource (projectRoot.getPropertyAsValue ("juceLinkage", getUndoManagerFor (projectRoot)), mappings));
-}
-
-const StringArray Project::getJuceLinkageModes() const
-{
-    const char* types[] = { "Not linked to Juce",
-                            "Linked to Juce Static Library",
-                            "Include Juce Amalgamated Files",
-                            "Include Juce Source Code Directly (In a single file)",
-                            "Include Juce Source Code Directly (Split across several files)",
-                            0 };
-
-    return StringArray (types);
-}
+const char* const Project::notLinkedToJuce                          = "none";
+const char* const Project::useLinkedJuce                            = "static";
+const char* const Project::useAmalgamatedJuce                       = "amalg_big";
+const char* const Project::useAmalgamatedJuceViaSingleTemplate      = "amalg_template";
+const char* const Project::useAmalgamatedJuceViaMultipleTemplates   = "amalg_multi";
 
 const File Project::getLocalJuceFolder()
 {
@@ -326,9 +309,13 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getVersion(), "Project Version", 16, false));
     props.getLast()->setTooltip ("The project's version number, This should be in the format major.minor.point");
 
-    props.add (new ChoicePropertyComponent (getProjectType(), "Project Type", getProjectTypes()));
+    const char* projectTypes[] = { "Application (GUI)", "Application (Non-GUI)", "Audio Plug-in", "Static Library", 0 };
+    const char* projectTypeValues[] = { application, commandLineApp, audioPlugin, library, 0 };
+    props.add (new ChoicePropertyComponent (getProjectType(), "Project Type", StringArray (projectTypes), Array<var> (projectTypeValues)));
 
-    props.add (new ChoicePropertyComponent (getJuceLinkageModeValue(), "Juce Linkage Method", getJuceLinkageModes()));
+    const char* linkageTypes[] = { "Not linked to Juce", "Linked to Juce Static Library", "Include Juce Amalgamated Files", "Include Juce Source Code Directly (In a single file)", "Include Juce Source Code Directly (Split across several files)", 0 };
+    const char* linkageTypeValues[] = { notLinkedToJuce, useLinkedJuce, useAmalgamatedJuce, useAmalgamatedJuceViaSingleTemplate, useAmalgamatedJuceViaMultipleTemplates, 0 };
+    props.add (new ChoicePropertyComponent (getJuceLinkageModeValue(), "Juce Linkage Method", StringArray (linkageTypes), Array<var> (linkageTypeValues)));
     props.getLast()->setTooltip ("The method by which your project will be linked to Juce.");
 
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false));
@@ -438,11 +425,29 @@ Project::Item::~Item()
 {
 }
 
-const String Project::Item::getID() const  { return node ["id"]; }
+const String Project::Item::getID() const  { return node [Ids::id_]; }
 
 bool Project::Item::isFile() const         { return node.hasType (Tags::file); }
 bool Project::Item::isGroup() const        { return node.hasType (Tags::group) || isMainGroup(); }
 bool Project::Item::isMainGroup() const    { return node.hasType (Tags::projectMainGroup); }
+
+Project::Item Project::Item::findItemWithID (const String& targetId) const
+{
+    if (node [Ids::id_] == targetId)
+        return *this;
+
+    if (isGroup())
+    {
+        for (int i = getNumChildren(); --i >= 0;)
+        {
+            Item found (getChild(i).findItemWithID (targetId));
+            if (found.isValid())
+                return found;
+        }
+    }
+
+    return Item (project, ValueTree::invalid);
+}
 
 bool Project::Item::canContain (const Item& child) const
 {
@@ -484,7 +489,7 @@ Value Project::Item::getShouldAddToResourceValue() const
 const File Project::Item::getFile() const
 {
     if (isFile())
-        return project.resolveFilename (node ["file"].toString());
+        return project.resolveFilename (node [Ids::file].toString());
     else
         return File::nonexistent;
 }
@@ -492,8 +497,8 @@ const File Project::Item::getFile() const
 void Project::Item::setFile (const File& file)
 {
     jassert (isFile());
-    node.setProperty ("file", project.getRelativePathForFile (file), getUndoManager());
-    node.setProperty ("name", file.getFileName(), getUndoManager());
+    node.setProperty (Ids::file, project.getRelativePathForFile (file), getUndoManager());
+    node.setProperty (Ids::name, file.getFileName(), getUndoManager());
 
     jassert (getFile() == file);
 }
@@ -565,12 +570,12 @@ const File Project::Item::determineGroupFolder() const
 
 void Project::Item::initialiseNodeValues()
 {
-    if (! node.hasProperty ("id"))
-        node.setProperty ("id", createAlphaNumericUID(), 0);
+    if (! node.hasProperty (Ids::id_))
+        node.setProperty (Ids::id_, createAlphaNumericUID(), 0);
 
     if (isFile())
     {
-        node.setProperty ("name", getFile().getFileName(), 0);
+        node.setProperty (Ids::name, getFile().getFileName(), 0);
     }
     else if (isGroup())
     {
@@ -581,7 +586,7 @@ void Project::Item::initialiseNodeValues()
 
 Value Project::Item::getName() const
 {
-    return node.getPropertyAsValue ("name", getUndoManager());
+    return node.getPropertyAsValue (Ids::name, getUndoManager());
 }
 
 void Project::Item::addChild (const Item& newChild, int insertIndex)
@@ -606,7 +611,7 @@ struct ItemSorter
 {
     static int compareElements (const ValueTree& first, const ValueTree& second)
     {
-        return first["name"].toString().compareIgnoreCase (second["name"].toString());
+        return first [Ids::name].toString().compareIgnoreCase (second [Ids::name].toString());
     }
 };
 
@@ -716,16 +721,17 @@ void Project::getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags)
     }
 }
 
+const char* const Project::configFlagDefault = "default";
+const char* const Project::configFlagEnabled = "enabled";
+const char* const Project::configFlagDisabled = "disabled";
+
 Value Project::getJuceConfigFlag (const String& name)
 {
-    static const char* valueRemappings[] = { "enabled", "1", "disabled", "2", "default", "3", 0 };
+    const ValueTree configNode (getJuceConfigNode());
+    Value v (configNode.getPropertyAsValue (name, getUndoManagerFor (configNode)));
 
-    ValueTree configNode (getJuceConfigNode());
-    Value v (new ValueRemapperSource (configNode.getPropertyAsValue (name, getUndoManagerFor (configNode)),
-                                      valueRemappings));
-
-    if ((int) v.getValue() == 0)
-        v = 3;
+    if (v.getValue().toString().isEmpty())
+        v = configFlagDefault;
 
     return v;
 }
@@ -751,7 +757,7 @@ bool Project::hasConfigurationNamed (const String& name) const
 {
     const ValueTree configs (getConfigurations());
     for (int i = configs.getNumChildren(); --i >= 0;)
-        if (configs.getChild(i) ["name"].toString() == name)
+        if (configs.getChild(i) [Ids::name].toString() == name)
             return true;
 
     return false;
@@ -774,7 +780,7 @@ const String Project::getUniqueConfigName (String name) const
 
 void Project::addNewConfiguration (BuildConfiguration* configToCopy)
 {
-    const String configName (getUniqueConfigName (configToCopy != 0 ? configToCopy->config ["name"].toString()
+    const String configName (getUniqueConfigName (configToCopy != 0 ? configToCopy->config [Ids::name].toString()
                                                                     : "New Build Configuration"));
 
     ValueTree configs (getConfigurations());
@@ -789,7 +795,7 @@ void Project::addNewConfiguration (BuildConfiguration* configToCopy)
     if (configToCopy != 0)
         newConfig = configToCopy->config.createCopy();
 
-    newConfig.setProperty ("name", configName, 0);
+    newConfig.setProperty (Ids::name, configName, 0);
 
     configs.addChild (newConfig, -1, getUndoManagerFor (configs));
 }
@@ -846,8 +852,10 @@ const String Project::BuildConfiguration::getGCCOptimisationFlag() const
     return String (level <= 1 ? "0" : (level == 2 ? "s" : "3"));
 }
 
-static const char* osxSDKs[]        = { "Use default", "10.4 SDK", "10.5 SDK", "10.6 SDK", 0 };
-static const char* osxSDKMappings[] = { "default", "1", "10.4 SDK", "2", "10.5 SDK", "3", "10.6 SDK", "4", "10.7 SDK", "5", 0 };
+const char* const Project::BuildConfiguration::osxVersionDefault = "default";
+const char* const Project::BuildConfiguration::osxVersion10_4    = "10.4 SDK";
+const char* const Project::BuildConfiguration::osxVersion10_5    = "10.5 SDK";
+const char* const Project::BuildConfiguration::osxVersion10_6    = "10.6 SDK";
 
 void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponent*>& props)
 {
@@ -858,7 +866,8 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
     props.getLast()->setTooltip ("If enabled, this means that the configuration should be built with debug synbols.");
 
     const char* optimisationLevels[] = { "No optimisation", "Optimise for size and speed", "Optimise for maximum speed", 0 };
-    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels)));
+    const int optimisationLevelValues[] = { 1, 2, 3, 0 };
+    props.add (new ChoicePropertyComponent (getOptimisationLevel(), "Optimisation", StringArray (optimisationLevels), Array<var> (optimisationLevelValues)));
     props.getLast()->setTooltip ("The optimisation level for this configuration");
 
     props.add (new TextPropertyComponent (getTargetBinaryName(), "Binary name", 256, false));
@@ -873,16 +882,19 @@ void Project::BuildConfiguration::createPropertyEditors (Array <PropertyComponen
     props.add (new TextPropertyComponent (getPreprocessorDefs(), "Preprocessor definitions", 32768, false));
     props.getLast()->setTooltip ("Extra preprocessor definitions. Use whitespace or commas as a delimiter.");
 
-    if ((int) getMacSDKVersion().getValue() == 0)
-        getMacSDKVersion() = 1;
+    if (getMacSDKVersion().toString().isEmpty())
+        getMacSDKVersion() = osxVersionDefault;
 
-    props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxSDKs)));
+    const char* osxVersions[] = { "Use Default", osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
+    const char* osxVersionValues[] = { osxVersionDefault, osxVersion10_4, osxVersion10_5, osxVersion10_6, 0 };
+
+    props.add (new ChoicePropertyComponent (getMacSDKVersion(), "OSX Base SDK Version", StringArray (osxVersions), Array<var> (osxVersionValues)));
     props.getLast()->setTooltip ("The version of OSX to link against in the XCode build.");
 
-    if ((int) getMacCompatibilityVersion().getValue() == 0)
-        getMacCompatibilityVersion() = 1;
+    if (getMacCompatibilityVersion().toString().isEmpty())
+        getMacCompatibilityVersion() = osxVersionDefault;
 
-    props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxSDKs)));
+    props.add (new ChoicePropertyComponent (getMacCompatibilityVersion(), "OSX Compatibility Version", StringArray (osxVersions), Array<var> (osxVersionValues)));
     props.getLast()->setTooltip ("The minimum version of OSX that the target binary will be compatible with.");
 
     for (int i = props.size(); --i >= 0;)
@@ -902,16 +914,6 @@ const StringArray Project::BuildConfiguration::getHeaderSearchPaths() const
     StringArray s;
     s.addTokens (getHeaderSearchPath().toString(), ";", String::empty);
     return s;
-}
-
-Value Project::BuildConfiguration::getMacSDKVersion() const
-{
-    return Value (new ValueRemapperSource (config.getPropertyAsValue ("osxSDK", getUndoManager()), osxSDKMappings));
-}
-
-Value Project::BuildConfiguration::getMacCompatibilityVersion() const
-{
-    return Value (new ValueRemapperSource (config.getPropertyAsValue ("osxCompatibility", getUndoManager()), osxSDKMappings));
 }
 
 //==============================================================================

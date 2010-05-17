@@ -41,36 +41,36 @@ public:
         const File oldFile (project.getFile());
         project.setFile (projectFile);
 
-        switch (project.getJuceLinkageMode())
+        const String linkageMode (project.getJuceLinkageMode());
+
+        if (linkageMode == Project::notLinkedToJuce)
         {
-        case Project::notLinkedToJuce:
             hasAppHeaderFile = ! project.isLibrary();
             hasAppConfigFile = false;
             numJuceSourceFiles = 0;
-            break;
-
-        case Project::useAmalgamatedJuce:
-        case Project::useAmalgamatedJuceViaSingleTemplate:
+        }
+        else if (linkageMode == Project::useAmalgamatedJuce
+                 || linkageMode == Project::useAmalgamatedJuceViaSingleTemplate)
+        {
             hasAppHeaderFile = true;
             hasAppConfigFile = true;
             numJuceSourceFiles = 1;
-            break;
-
-        case Project::useAmalgamatedJuceViaMultipleTemplates:
+        }
+        else if (linkageMode == Project::useAmalgamatedJuceViaMultipleTemplates)
+        {
             hasAppHeaderFile = true;
             hasAppConfigFile = true;
             numJuceSourceFiles = project.getNumSeparateAmalgamatedFiles();
-            break;
-
-        case Project::useLinkedJuce:
+        }
+        else if (linkageMode == Project::useLinkedJuce)
+        {
             hasAppHeaderFile = true;
             hasAppConfigFile = true;
             numJuceSourceFiles = 0;
-            break;
-
-        default:
+        }
+        else
+        {
             jassertfalse;
-            break;
         }
 
         hasResources = (resourceFile.getNumFiles() > 0);
@@ -160,18 +160,18 @@ private:
         for (int i = 0; i < flags.size(); ++i)
         {
             const Project::JuceConfigFlag* const f = flags[i];
-            int value = (int) f->value.getValue();
+            const String value (f->value.toString());
 
-            if (value < 1 || value > 2)
+            if (value != Project::configFlagEnabled && value != Project::configFlagDisabled)
                 out << "//#define  ";
             else
                 out << "#define    ";
 
             out << f->symbol;
 
-            if (value == 1)
+            if (value == Project::configFlagEnabled)
                 out << " 1";
-            else if (value == 2)
+            else if (value == Project::configFlagDisabled)
                 out << " 0";
 
             out << newLine;

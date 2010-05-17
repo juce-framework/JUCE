@@ -239,7 +239,7 @@
         <File RelativePath="..\..\Source\utility\jucer_TickIterator.h"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_ValueRemapperSource.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_ValueSourceHelpers.h"/>
       </Filter>
       <Filter Name="Main">
         <File RelativePath="..\..\Source\jucer_Headers.h"/>

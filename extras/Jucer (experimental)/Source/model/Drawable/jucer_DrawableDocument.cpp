@@ -75,24 +75,24 @@ void DrawableDocument::checkRootObject()
 
 const String DrawableDocument::getIdFor (const ValueTree& object)
 {
-    return object ["id"];
+    return object [Ids::id_];
 }
 
 //==============================================================================
 void DrawableDocument::setName (const String& name)
 {
-    root.setProperty ("name", name, getUndoManager());
+    root.setProperty (Ids::name, name, getUndoManager());
 }
 
 const String DrawableDocument::getName() const
 {
-    return root ["name"];
+    return root [Ids::name];
 }
 
 void DrawableDocument::addMissingIds (ValueTree tree) const
 {
-    if (! tree.hasProperty ("id"))
-        tree.setProperty ("id", createAlphaNumericUID(), 0);
+    if (! tree.hasProperty (Ids::id_))
+        tree.setProperty (Ids::id_, createAlphaNumericUID(), 0);
 
     for (int i = tree.getNumChildren(); --i >= 0;)
         addMissingIds (tree.getChild(i));

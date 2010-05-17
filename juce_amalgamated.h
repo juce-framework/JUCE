@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	2
+#define JUCE_BUILDNUMBER	3
 
 /** Current Juce version number.
 
@@ -3483,10 +3483,11 @@ public:
 
 		@param values   the array to copy from
 	*/
-	explicit Array (const ElementType* values)
+	template <typename TypeToCreateFrom>
+	explicit Array (const TypeToCreateFrom* values)
 	   : numUsed (0)
 	{
-		while (*values != 0)
+		while (*values != TypeToCreateFrom())
 			add (*values++);
 	}
 
@@ -3495,7 +3496,8 @@ public:
 		@param values	   the array to copy from
 		@param numValues	the number of values in the array
 	*/
-	Array (const ElementType* values, int numValues)
+	template <typename TypeToCreateFrom>
+	Array (const TypeToCreateFrom* values, int numValues)
 	   : numUsed (numValues)
 	{
 		data.setAllocatedSize (numValues);
@@ -54014,20 +54016,18 @@ protected:
 public:
 	/** Creates the component.
 
-		@param valueToControl   the value that the combo box will read and control
+		@param valueToControl	   the value that the combo box will read and control
 		@param propertyName	 the name of the property
-		@param choices	  the list of possible values that the user can choose between
-		@param choiceIDs	if this is 0, then the value corresponding to each item in the
-								'choices' StringArray is simply its index + 1. But if the
-								choiceIDs parameter is specified, it lets you provide a set
-								of IDs for each item in the choices list. If you use this
-								parameter, it must contain the same number of elements as
-								the choices list.
+		@param choices		  the list of possible values that the drop-down list will contain
+		@param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
+									These are the values that will be read and written to the
+									valueToControl value. This array must contain the same number of items
+									as the choices array
 	*/
 	ChoicePropertyComponent (const Value& valueToControl,
 							 const String& propertyName,
 							 const StringArray& choices,
-							 const Array <int>* choiceIDs = 0);
+							 const Array <var>& correspondingValues);
 
 	/** Destructor. */
 	~ChoicePropertyComponent();
@@ -54068,8 +54068,10 @@ protected:
 
 private:
 	ComboBox* comboBox;
+	bool isCustomClass;
 
-	void createComboBox (const Array <int>* choiceIDs);
+	class RemapperValueSource;
+	void createComboBox();
 
 	ChoicePropertyComponent (const ChoicePropertyComponent&);
 	ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);

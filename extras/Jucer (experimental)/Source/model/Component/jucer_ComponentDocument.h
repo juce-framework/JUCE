@@ -166,16 +166,14 @@ public:
     class TestComponent     : public Component
     {
     public:
-        TestComponent (ComponentDocument& document_);
-        TestComponent (Project* project, const File& cppFile);
+        TestComponent (ComponentDocument& document);
         ~TestComponent();
 
-        void resized();
         void paint (Graphics& g);
 
     private:
-        ScopedPointer<ComponentDocument> document;
-        void setupDocument();
+        ScopedPointer<ComponentAutoLayoutManager> layoutManager;
+        Colour background;
     };
 
     juce_UseDebuggingNewOperator

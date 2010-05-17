@@ -70,7 +70,7 @@ public:
         File mainWindowH = mainWindowCpp.withFileExtension (".h");
         String windowClassName = "MainAppWindow";
 
-        project.getProjectType() = (int) Project::application;
+        project.getProjectType() = Project::application;
 
         Project::Item group (project.createNewGroup());
         project.getMainGroup().addChild (group, 0);
@@ -175,7 +175,7 @@ public:
 
         File mainCppFile = getSourceFilesFolder().getChildFile ("Main.cpp");
 
-        project.getProjectType() = (int) Project::commandLineApp;
+        project.getProjectType() = Project::commandLineApp;
 
         Project::Item group (project.createNewGroup());
         project.getMainGroup().addChild (group, 0);
@@ -237,12 +237,12 @@ public:
         File editorCppFile = getSourceFilesFolder().getChildFile ("PluginEditor.cpp");
         File editorHFile   = editorCppFile.withFileExtension (".h");
 
-        project.getProjectType() = (int) Project::audioPlugin;
+        project.getProjectType() = Project::audioPlugin;
 
         Project::Item group (project.createNewGroup());
         project.getMainGroup().addChild (group, 0);
         group.getName() = "Source";
-        project.getJuceConfigFlag ("JUCE_QUICKTIME") = 2; // disabled because it interferes with RTAS build on PC
+        project.getJuceConfigFlag ("JUCE_QUICKTIME") = Project::configFlagDisabled; // disabled because it interferes with RTAS build on PC
 
         for (int i = project.getNumConfigurations(); --i >= 0;)
             project.getConfiguration(i).getTargetBinaryName() = File::createLegalFileName (appTitle);

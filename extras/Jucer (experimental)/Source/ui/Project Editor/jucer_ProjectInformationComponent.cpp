@@ -56,16 +56,18 @@ public:
             project.getJuceConfigFlags (flags);
 
             StringArray possibleValues;
+            possibleValues.add ("(Use default from juce_Config.h)");
             possibleValues.add ("Enabled");
             possibleValues.add ("Disabled");
-            possibleValues.add ("(Use default from juce_Config.h)");
+
+            Array<var> mappings;
+            mappings.add (Project::configFlagDefault);
+            mappings.add (Project::configFlagEnabled);
+            mappings.add (Project::configFlagDisabled);
 
             for (int i = 0; i < flags.size(); ++i)
             {
-                if ((int) flags[i]->value.getValue() == 0)
-                    flags[i]->value = 3;
-
-                ChoicePropertyComponent* c = new ChoicePropertyComponent (flags[i]->value, flags[i]->symbol, possibleValues);
+                ChoicePropertyComponent* c = new ChoicePropertyComponent (flags[i]->value, flags[i]->symbol, possibleValues, mappings);
                 c->setTooltip (flags[i]->description);
                 c->setPreferredHeight (22);
                 props.add (c);
@@ -254,13 +256,13 @@ void ProjectInformationComponent::rebuildConfigTabs()
         }
     }
 
-    lastProjectType = (Project::ProjectType) (int) project.getProjectType().getValue();
+    lastProjectType = project.getProjectType().getValue();
 }
 
 void ProjectInformationComponent::updateConfigTabs()
 {
     if (configTabBox->getNumTabs() != project.getNumConfigurations() + project.getNumExporters() + 2
-         || lastProjectType != (Project::ProjectType) (int) project.getProjectType().getValue())
+         || lastProjectType != project.getProjectType().getValue())
     {
         rebuildConfigTabs();
     }

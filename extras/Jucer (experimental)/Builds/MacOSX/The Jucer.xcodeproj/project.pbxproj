@@ -152,7 +152,7 @@
 		7530E3F9877E4F322CD81801 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TickIterator.h; path = ../../Source/utility/jucer_TickIterator.h; sourceTree = SOURCE_ROOT; };
 		49A1C43070A68985C25F34C7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MiscUtilities.cpp; path = ../../Source/utility/jucer_MiscUtilities.cpp; sourceTree = SOURCE_ROOT; };
 		2B2A6FCA85F56682698864EC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_MiscUtilities.h; path = ../../Source/utility/jucer_MiscUtilities.h; sourceTree = SOURCE_ROOT; };
-		B8469A2CDD0FBEA6BE01B1D5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ValueRemapperSource.h; path = ../../Source/utility/jucer_ValueRemapperSource.h; sourceTree = SOURCE_ROOT; };
+		C693F6EF4381328D5F5891CF = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ValueSourceHelpers.h; path = ../../Source/utility/jucer_ValueSourceHelpers.h; sourceTree = SOURCE_ROOT; };
 		0CA0CCCEBFA0AC8C577FC915 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Headers.h; path = ../../Source/jucer_Headers.h; sourceTree = SOURCE_ROOT; };
 		0DC331A7B856F30AD266A3E6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Main.cpp; path = ../../Source/jucer_Main.cpp; sourceTree = SOURCE_ROOT; };
 		E50666EA86CAD5FB338A8756 = { isa = PBXFileReference; lastKnownFileType = image.png; name = brushed_aluminium.png; path = ../../Source/templates/brushed_aluminium.png; sourceTree = SOURCE_ROOT; };
@@ -287,7 +287,7 @@
 				7530E3F9877E4F322CD81801,
 				49A1C43070A68985C25F34C7,
 				2B2A6FCA85F56682698864EC,
-				B8469A2CDD0FBEA6BE01B1D5 ); name = Utility; sourceTree = "<group>"; };
+				C693F6EF4381328D5F5891CF ); name = Utility; sourceTree = "<group>"; };
 		FAFBE12D4C5798FC1BB3A4BA = { isa = PBXGroup; children = (
 				0CA0CCCEBFA0AC8C577FC915,
 				0DC331A7B856F30AD266A3E6 ); name = Main; sourceTree = "<group>"; };

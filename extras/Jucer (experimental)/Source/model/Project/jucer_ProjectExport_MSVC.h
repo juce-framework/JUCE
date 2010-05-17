@@ -125,8 +125,9 @@ public:
 
         if (project.isLibrary())
         {
-            static const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
-            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type", StringArray (libTypes)));
+            const char* const libTypes[] = { "Static Library (.lib)", "Dynamic Library (.dll)", 0 };
+            const int libTypeValues[] = { 1, 2, 0 };
+            props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type", StringArray (libTypes), Array<var> (libTypeValues)));
 
             props.add (new TextPropertyComponent (getSetting ("libraryName_Debug"), "Library Name (Debug)", 128, false));
             props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a debug build. You must include the .lib or .dll suffix on this filename.");

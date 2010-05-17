@@ -35,22 +35,70 @@ class JucerComponent : public Component
 public:
     JucerComponent()
     {
-        addAndMakeVisible (comp = new ComponentDocument::TestComponent (0, File::nonexistent));
+    }
+
+    void paint (Graphics& g)
+    {
+        if (comp == 0)
+            drawComponentPlaceholder (g, getWidth(), getHeight(), "(Not a valid Jucer component)");
     }
 
     void resized()
     {
-        comp->setBounds (getLocalBounds());
+        if (comp != 0)
+            comp->setBounds (getLocalBounds());
     }
 
-    void setJucerComp (ComponentDocument& document, const File& cppFile)
+    void setJucerComp (ComponentTypeInstance& item, const String& newProjectId)
     {
-        addAndMakeVisible (comp = new ComponentDocument::TestComponent (document.getProject(), cppFile));
-        resized();
+        if (projectId != newProjectId)
+        {
+            projectId = newProjectId;
+            comp = 0;
+            document = 0;
+
+            if (newProjectId.isNotEmpty())
+            {
+                const File file (getDocumentFile (item, projectId));
+
+                if (file.exists())
+                {
+                    ComponentDocument doc (item.getDocument().getProject(), file);
+
+                    if (doc.reload())
+                    {
+                        addAndMakeVisible (comp = new ComponentDocument::TestComponent (doc));
+                        resized();
+                    }
+                }
+            }
+        }
     }
 
 private:
+    String projectId;
+    ScopedPointer<ComponentDocument> document;
     ScopedPointer<ComponentDocument::TestComponent> comp;
+
+    const File getDocumentFile (ComponentTypeInstance& item, const String projectItemId)
+    {
+        const String projectId (projectItemId);
+
+        if (projectId.isNotEmpty())
+        {
+            Project* project = item.getDocument().getProject();
+
+            if (project != 0)
+            {
+                Project::Item item (project->getMainGroup().findItemWithID (projectId));
+
+                if (item.isValid())
+                    return item.getFile();
+            }
+        }
+
+        return File::nonexistent;
+    }
 };
 
 //==============================================================================
@@ -70,10 +118,35 @@ public:
 
     void update (ComponentTypeInstance& item, JucerComponent* comp)
     {
+        comp->setJucerComp (item, item [Ids::source].toString());
     }
 
     void createProperties (ComponentTypeInstance& item, Array <PropertyComponent*>& props)
     {
+        StringArray names;
+        Array<var> ids;
+
+        names.add ("<none>");
+        ids.add (var::null);
+        names.add (String::empty);
+        ids.add (var::null);
+
+        {
+            Array <Project::Item> comps;
+            findAllComponentDocumentsInProject (item, comps);
+
+            for (int i = 0; i < comps.size(); ++i)
+            {
+                if (comps.getReference(i).getFile() != item.getDocument().getCppFile())
+                {
+                    names.add (comps.getReference(i).getName().toString());
+                    ids.add (comps.getReference(i).getID());
+                }
+            }
+        }
+
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::source), "Source", names, ids));
+        item.addFocusOrderProperty (props);
     }
 
     const String getClassName (ComponentTypeInstance& item) const
@@ -84,6 +157,30 @@ public:
     void createCode (ComponentTypeInstance& item, CodeGenerator& code)
     {
         code.constructorCode << item.createConstructorStatement (String::empty);
+    }
+
+    //==============================================================================
+    static void findAllComponentDocumentsInProject (ComponentTypeInstance& item, Array <Project::Item>& comps)
+    {
+        Project* project = item.getDocument().getProject();
+
+        if (project != 0)
+            findAllComponentDocumentsInProjectItem (project->getMainGroup(), comps);
+    }
+
+    static void findAllComponentDocumentsInProjectItem (const Project::Item& item, Array <Project::Item>& comps)
+    {
+        if (item.isGroup())
+        {
+            const int num = item.getNumChildren();
+            for (int i = 0; i < num; ++i)
+                findAllComponentDocumentsInProjectItem (item.getChild (i), comps);
+        }
+        else if (item.isFile())
+        {
+            if (ComponentDocument::isComponentFile (item.getFile()))
+                comps.add (item);
+        }
     }
 };
 

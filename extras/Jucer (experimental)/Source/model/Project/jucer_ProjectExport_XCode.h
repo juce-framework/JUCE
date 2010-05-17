@@ -397,16 +397,12 @@ private:
         if (getExtraCompilerFlags().toString().isNotEmpty())
             s.add ("OTHER_CPLUSPLUSFLAGS = " + getExtraCompilerFlags().toString());
 
-        switch ((int) project.getProjectType().getValue())
+        if (project.isGUIApplication())
         {
-        case Project::application:
             s.add ("INSTALL_PATH = \"$(HOME)/Applications\"");
-            break;
-
-        case Project::commandLineApp:
-            break;
-
-        case Project::audioPlugin:
+        }
+        else if (project.isAudioPlugin())
+        {
             s.add ("LIBRARY_STYLE = Bundle");
             s.add ("INSTALL_PATH = \"$(HOME)/Library/Audio/Plug-Ins/Components/\"");
             s.add ("WRAPPER_EXTENSION = " + getAudioPluginBundleExtension());
@@ -414,14 +410,14 @@ private:
             s.add ("OTHER_REZFLAGS = \"-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
                    " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
                    " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\"\"");
-            break;
-
-        case Project::browserPlugin:
+        }
+        else if (project.isBrowserPlugin())
+        {
             s.add ("LIBRARY_STYLE = Bundle");
             s.add ("INSTALL_PATH = \"/Library/Internet Plug-Ins/\"");
-            break;
-
-        case Project::library:
+        }
+        else if (project.isLibrary())
+        {
             if (config.getTargetBinaryRelativePath().toString().isNotEmpty())
             {
                 RelativePath binaryPath (config.getTargetBinaryRelativePath().toString(), RelativePath::projectFolder);
@@ -433,10 +429,13 @@ private:
 
             s.add ("CONFIGURATION_BUILD_DIR = \"$(BUILD_DIR)\"");
             s.add ("DEPLOYMENT_LOCATION = YES");
-            break;
-
-        default:
-            jassertfalse; break;
+        }
+        else if (project.isCommandLineApp())
+        {
+        }
+        else
+        {
+            jassertfalse;
         }
 
         if (iPhone)
@@ -445,21 +444,29 @@ private:
         }
         else
         {
-            switch ((int) config.getMacSDKVersion().getValue())
+            const String sdk (config.getMacSDKVersion().toString());
+            const String sdkCompat (config.getMacCompatibilityVersion().toString());
+
+            if (sdk == Project::BuildConfiguration::osxVersion10_4)
             {
-                case 2:  s.add ("SDKROOT = macosx10.4"); s.add ("GCC_VERSION = 4.0"); break;
-                case 3:  s.add ("SDKROOT = macosx10.5"); break;
-                case 4:  s.add ("SDKROOT = macosx10.6"); break;
-                default: break;
+                s.add ("SDKROOT = macosx10.4");
+                s.add ("GCC_VERSION = 4.0");
+            }
+            else if (sdk == Project::BuildConfiguration::osxVersion10_5)
+            {
+                s.add ("SDKROOT = macosx10.5");
+            }
+            else if (sdk == Project::BuildConfiguration::osxVersion10_6)
+            {
+                s.add ("SDKROOT = macosx10.6");
             }
 
-            switch ((int) config.getMacCompatibilityVersion().getValue())
-            {
-                case 2:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4"); break;
-                case 3:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5"); break;
-                case 4:  s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6"); break;
-                default: break;
-            }
+            if (sdkCompat == Project::BuildConfiguration::osxVersion10_4)
+                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.4");
+            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_5)
+                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.5");
+            else if (sdkCompat == Project::BuildConfiguration::osxVersion10_6)
+                s.add ("MACOSX_DEPLOYMENT_TARGET = 10.6");
 
             s.add ("MACOSX_DEPLOYMENT_TARGET_ppc = 10.4");
         }
@@ -534,7 +541,7 @@ private:
 
             if (isAU())
                 s.addTokens ("AudioUnit CoreAudioKit AudioToolbox", false);
-            else if ((int) project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").getValue() == 1)
+            else if (project.getJuceConfigFlag ("JUCE_PLUGINHOST_AU").toString() == Project::configFlagEnabled)
                 s.addTokens ("AudioUnit CoreAudioKit", false);
         }
 
@@ -617,7 +624,7 @@ private:
         ValueTree* v = new ValueTree (fileRefID);
         v->setProperty ("isa", "PBXFileReference", 0);
         v->setProperty ("lastKnownFileType", lastKnownFileType, 0);
-        v->setProperty ("name", path.getFileName(), 0);
+        v->setProperty (Ids::name, path.getFileName(), 0);
         v->setProperty ("path", sanitisePath (path.toUnixStyle()), 0);
         v->setProperty ("sourceTree", sourceTree, 0);
         pbxFileReferences.add (v);
@@ -705,7 +712,7 @@ private:
         ValueTree* v = new ValueTree (groupID);
         v->setProperty ("isa", "PBXGroup", 0);
         v->setProperty ("children", "(" + indentList (childIDs, ",") + " )", 0);
-        v->setProperty ("name", groupName, 0);
+        v->setProperty (Ids::name, groupName, 0);
         v->setProperty ("sourceTree", "<group>", 0);
         groups.add (v);
     }
@@ -788,7 +795,7 @@ private:
         ValueTree* v = new ValueTree (createID ("targetconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", 0);
         v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty ("name", configName, 0);
+        v->setProperty (Ids::name, configName, 0);
         targetConfigs.add (v);
     }
 
@@ -797,7 +804,7 @@ private:
         ValueTree* v = new ValueTree (createID ("projectconfigid_" + configName));
         v->setProperty ("isa", "XCBuildConfiguration", 0);
         v->setProperty ("buildSettings", "{" + indentList (buildSettings, ";") + " }", 0);
-        v->setProperty ("name", configName, 0);
+        v->setProperty (Ids::name, configName, 0);
         projectConfigs.add (v);
     }
 
@@ -814,7 +821,7 @@ private:
         v->setProperty ("defaultConfigurationIsVisible", (int) 0, 0);
 
         if (configsToUse[0] != 0)
-            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty ("name"), 0);
+            v->setProperty ("defaultConfigurationName", configsToUse[0]->getProperty (Ids::name), 0);
 
         misc.add (v);
     }
@@ -841,7 +848,7 @@ private:
         v->setProperty ("buildPhases", "(" + indentList (buildPhaseIDs, ",") + " )", 0);
         v->setProperty ("buildRules", "( )", 0);
         v->setProperty ("dependencies", "( )", 0);
-        v->setProperty ("name", project.getDocumentTitle(), 0);
+        v->setProperty (Ids::name, project.getDocumentTitle(), 0);
         v->setProperty ("productName", project.getDocumentTitle(), 0);
         v->setProperty ("productReference", createID ("__productFileID"), 0);
 
@@ -887,7 +894,7 @@ private:
     void addPluginShellScriptPhase()
     {
         ValueTree* v = addBuildPhase ("PBXShellScriptBuildPhase", StringArray());
-        v->setProperty ("name", "Copy to the different plugin folders", 0);
+        v->setProperty (Ids::name, "Copy to the different plugin folders", 0);
         v->setProperty ("shellPath", "/bin/sh", 0);
         v->setProperty ("shellScript", String::fromUTF8 (BinaryData::AudioPluginXCodeScript_txt, BinaryData::AudioPluginXCodeScript_txtSize)
                                             .replace ("\\", "\\\\")

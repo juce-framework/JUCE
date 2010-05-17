@@ -84,10 +84,10 @@ public:
     virtual const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const = 0;
 
     //==============================================================================
-    static const char* getMarkerTag()           { return "MARKER"; }
-    static const char* getIdProperty()          { return "id"; }
-    static const char* getMarkerNameProperty()  { return "name"; }
-    static const char* getMarkerPosProperty()   { return "position"; }
+    static const Identifier getMarkerTag()           { static Identifier i ("MARKER"); return i; }
+    static const Identifier getIdProperty()          { return Ids::id_;  }
+    static const Identifier getMarkerNameProperty()  { return Ids::name;  }
+    static const Identifier getMarkerPosProperty()   { return Ids::position;  }
 
     //==============================================================================
     class MarkerNameValueSource   : public Value::ValueSource,

@@ -63,20 +63,18 @@ protected:
 public:
     /** Creates the component.
 
-        @param valueToControl   the value that the combo box will read and control
-        @param propertyName     the name of the property
-        @param choices          the list of possible values that the user can choose between
-        @param choiceIDs        if this is 0, then the value corresponding to each item in the
-                                'choices' StringArray is simply its index + 1. But if the
-                                choiceIDs parameter is specified, it lets you provide a set
-                                of IDs for each item in the choices list. If you use this
-                                parameter, it must contain the same number of elements as
-                                the choices list.
+        @param valueToControl       the value that the combo box will read and control
+        @param propertyName         the name of the property
+        @param choices              the list of possible values that the drop-down list will contain
+        @param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
+                                    These are the values that will be read and written to the
+                                    valueToControl value. This array must contain the same number of items
+                                    as the choices array
     */
     ChoicePropertyComponent (const Value& valueToControl,
                              const String& propertyName,
                              const StringArray& choices,
-                             const Array <int>* choiceIDs = 0);
+                             const Array <var>& correspondingValues);
 
     /** Destructor. */
     ~ChoicePropertyComponent();
@@ -120,8 +118,10 @@ protected:
 
 private:
     ComboBox* comboBox;
+    bool isCustomClass;
 
-    void createComboBox (const Array <int>* choiceIDs);
+    class RemapperValueSource;
+    void createComboBox();
 
     ChoicePropertyComponent (const ChoicePropertyComponent&);
     ChoicePropertyComponent& operator= (const ChoicePropertyComponent&);

@@ -169,7 +169,8 @@ public:
 
 //==============================================================================
 class ComponentAutoLayoutManager    : public ComponentListener,
-                                      public Coordinate::MarkerResolver
+                                      public Coordinate::MarkerResolver,
+                                      public AsyncUpdater
 {
 public:
     //==============================================================================
@@ -179,7 +180,7 @@ public:
     //==============================================================================
     void setMarker (const String& name, const Coordinate& coord);
 
-    void setComponentLayout (Component* comp, const RectangleCoordinates& coords);
+    void setComponentLayout (Component* comp, const String& name, const RectangleCoordinates& coords);
 
     void applyLayout();
 
@@ -188,22 +189,28 @@ public:
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
     void componentBeingDeleted (Component& component);
 
+    void handleAsyncUpdate();
+
 private:
     //==============================================================================
-    class ComponentPosition
+    struct ComponentPosition
     {
-    public:
+        ComponentPosition (Component* component, const String& name, const RectangleCoordinates& coords);
+
         Component* component;
+        String name;
         RectangleCoordinates coords;
     };
 
-    class MarkerPosition
+    struct MarkerPosition
     {
-    public:
-        const String markerName;
+        MarkerPosition (const String& name, const Coordinate& coord);
+
+        String markerName;
         Coordinate position;
     };
 
+    Component* parent;
     OwnedArray <ComponentPosition> components;
     OwnedArray <MarkerPosition> markers;
 };

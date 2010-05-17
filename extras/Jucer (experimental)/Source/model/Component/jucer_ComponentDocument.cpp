@@ -374,18 +374,6 @@ const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCo
     return ValueTree::invalid;
 }
 
-Component* ComponentDocument::findComponentForState (Component* compHolder, const ValueTree& state)
-{
-    for (int i = compHolder->getNumChildComponents(); --i >= 0;)
-    {
-        Component* const c = compHolder->getChildComponent (i);
-        if (isStateForComponent (state, c))
-            return c;
-    }
-
-    return 0;
-}
-
 void ComponentDocument::updateComponentsIn (Component* compHolder)
 {
     int i;
@@ -426,19 +414,38 @@ void ComponentDocument::updateComponentsIn (Component* compHolder)
 }
 
 //==============================================================================
-ComponentDocument::TestComponent::TestComponent (ComponentDocument& document_)
-    : document (new ComponentDocument (document_))
+ComponentDocument::TestComponent::TestComponent (ComponentDocument& document)
 {
-    setupDocument();
-}
+    background = Colour::fromString (document.getBackgroundColour().toString());
+    layoutManager = new ComponentAutoLayoutManager (this);
 
-ComponentDocument::TestComponent::TestComponent (Project* project, const File& cppFile)
-    : document (new ComponentDocument (project, cppFile))
-{
-    if (document->reload())
-        setupDocument();
-    else
-        document = 0;
+    setSize (document.getCanvasWidth().getValue(),
+             document.getCanvasHeight().getValue());
+
+    int i;
+    for (i = 0; i < document.getNumComponents(); ++i)
+    {
+        Component* c = document.createComponent (i);
+        addAndMakeVisible (c);
+
+        const ValueTree state (document.getComponent (i));
+        layoutManager->setComponentLayout (c, state [ComponentDocument::memberNameProperty],
+                                           document.getCoordsFor (state));
+    }
+
+    for (i = 0; i < document.getMarkerListX().size(); ++i)
+    {
+        const ValueTree marker (document.getMarkerListX().getMarker (i));
+        layoutManager->setMarker (document.getMarkerListX().getName (marker),
+                                  document.getMarkerListX().getCoordinate (marker));
+    }
+
+    for (i = 0; i < document.getMarkerListY().size(); ++i)
+    {
+        const ValueTree marker (document.getMarkerListY().getMarker (i));
+        layoutManager->setMarker (document.getMarkerListY().getName (marker),
+                                  document.getMarkerListY().getCoordinate (marker));
+    }
 }
 
 ComponentDocument::TestComponent::~TestComponent()
@@ -446,28 +453,9 @@ ComponentDocument::TestComponent::~TestComponent()
     deleteAllChildren();
 }
 
-void ComponentDocument::TestComponent::setupDocument()
-{
-    document->setUsingTemporaryCanvasSize (true);
-
-    setSize (document->getCanvasWidth().getValue(),
-             document->getCanvasHeight().getValue());
-}
-
-void ComponentDocument::TestComponent::resized()
-{
-    if (document != 0)
-    {
-        document->getCanvasWidth() = getWidth();
-        document->getCanvasHeight() = getHeight();
-        document->updateComponentsIn (this);
-    }
-}
-
 void ComponentDocument::TestComponent::paint (Graphics& g)
 {
-    if (document == 0)
-        drawComponentPlaceholder (g, getWidth(), getHeight(), "(Not a valid Jucer component)");
+    g.fillAll (background);
 }
 
 //==============================================================================
@@ -705,14 +693,21 @@ bool ComponentDocument::containsComponent (Component* comp) const
 const ValueTree ComponentDocument::getComponentState (Component* comp) const
 {
     jassert (comp != 0);
-    const ValueTree comps (getComponentGroup());
+    return getComponentGroup().getChildWithProperty (idProperty, getJucerIDFor (comp));
+}
 
-    for (int i = 0; i < comps.getNumChildren(); ++i)
-        if (isStateForComponent (comps.getChild(i), comp))
-            return comps.getChild(i);
+Component* ComponentDocument::findComponentForState (Component* compHolder, const ValueTree& state)
+{
+    const String compId (state [idProperty].toString());
 
-    jassertfalse;
-    return ValueTree::invalid;
+    for (int i = compHolder->getNumChildComponents(); --i >= 0;)
+    {
+        Component* const c = compHolder->getChildComponent (i);
+        if (getJucerIDFor (c) == compId)
+            return c;
+    }
+
+    return 0;
 }
 
 bool ComponentDocument::isStateForComponent (const ValueTree& storedState, Component* comp) const

@@ -52,7 +52,7 @@ public:
     ValueTree getProjectRoot() const                    { return projectRoot; }
     Value getProjectName()                              { return getMainGroup().getName(); }
     const String getProjectFilenameRoot()               { return File::createLegalFileName (getDocumentTitle()); }
-    const String getProjectUID() const                  { return projectRoot ["id"]; }
+    const String getProjectUID() const                  { return projectRoot [Ids::id_]; }
 
     //==============================================================================
     bool shouldBeAddedToBinaryResourcesByDefault (const File& file);
@@ -64,42 +64,35 @@ public:
     void createPropertyEditors (Array <PropertyComponent*>& properties);
 
     //==============================================================================
-    // project type info
-    enum ProjectType
-    {
-        application     = 1, // must all be sequntial, starting from 1, so that combo boxes can update correctly
-        commandLineApp  = 2,
-        audioPlugin     = 3,
-        library         = 4,
-        browserPlugin   = 5
-    };
+    // project types
+    static const char* const application;
+    static const char* const commandLineApp;
+    static const char* const audioPlugin;
+    static const char* const library;
+    static const char* const browserPlugin;
 
-    const StringArray getProjectTypes() const;
-    Value getProjectType() const;
+    Value getProjectType() const                        { return getProjectValue ("projectType"); }
 
-    bool isLibrary() const                              { return (int) getProjectType().getValue() == (int) library; }
-    bool isGUIApplication() const                       { return (int) getProjectType().getValue() == (int) application; }
-    bool isCommandLineApp() const                       { return (int) getProjectType().getValue() == (int) commandLineApp; }
-    bool isAudioPlugin() const                          { return (int) getProjectType().getValue() == (int) audioPlugin; }
-    bool isBrowserPlugin() const                        { return (int) getProjectType().getValue() == (int) browserPlugin; }
+    bool isLibrary() const;
+    bool isGUIApplication() const;
+    bool isCommandLineApp() const;
+    bool isAudioPlugin() const;
+    bool isBrowserPlugin() const;
 
     Value getVersion() const                            { return getProjectValue ("version"); }
     Value getBundleIdentifier() const                   { return getProjectValue ("bundleIdentifier"); }
     void setBundleIdentifierToDefault()                 { getBundleIdentifier() = "com.yourcompany." + CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false); }
 
     //==============================================================================
-    enum JuceLinkage
-    {
-        notLinkedToJuce = 1,   // must all be sequntial, starting from 1, so that combo boxes can update correctly
-        useLinkedJuce = 2,
-        useAmalgamatedJuce = 3,
-        useAmalgamatedJuceViaSingleTemplate = 4,
-        useAmalgamatedJuceViaMultipleTemplates = 5,
-    };
+    // linkage modes..
+    static const char* const notLinkedToJuce;
+    static const char* const useLinkedJuce;
+    static const char* const useAmalgamatedJuce;
+    static const char* const useAmalgamatedJuceViaSingleTemplate;
+    static const char* const useAmalgamatedJuceViaMultipleTemplates;
 
-    const StringArray getJuceLinkageModes() const;
-    Value getJuceLinkageModeValue() const;
-    JuceLinkage getJuceLinkageMode() const              { return (JuceLinkage) (int) getJuceLinkageModeValue().getValue(); }
+    Value getJuceLinkageModeValue() const               { return getProjectValue ("juceLinkage"); }
+    const String getJuceLinkageMode() const             { return getJuceLinkageModeValue().toString(); }
 
     bool isUsingWrapperFiles() const                    { return isUsingFullyAmalgamatedFile() || isUsingSingleTemplateFile() || isUsingMultipleTemplateFiles(); }
     bool isUsingFullyAmalgamatedFile() const            { return getJuceLinkageMode() == useAmalgamatedJuce; }
@@ -112,7 +105,7 @@ public:
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
     Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }
-    bool shouldAddVSTFolderToPath()                     { return (isAudioPlugin() && (bool) shouldBuildVST().getValue()) || (int) getJuceConfigFlag ("JUCE_PLUGINHOST_VST").getValue() == 1; }
+    bool shouldAddVSTFolderToPath()                     { return (isAudioPlugin() && (bool) shouldBuildVST().getValue()) || getJuceConfigFlag ("JUCE_PLUGINHOST_VST").toString() == configFlagEnabled; }
 
     Value getPluginName() const                         { return getProjectValue ("pluginName"); }
     Value getPluginDesc() const                         { return getProjectValue ("pluginDesc"); }
@@ -172,6 +165,7 @@ public:
         bool isMainGroup() const;
 
         const String getID() const;
+        Item findItemWithID (const String& targetId) const; // (recursive search)
 
         //==============================================================================
         Value getName() const;
@@ -227,19 +221,24 @@ public:
         void createPropertyEditors (Array <PropertyComponent*>& properties);
 
         //==============================================================================
-        Value getName() const                               { return config.getPropertyAsValue ("name", getUndoManager()); }
-        Value isDebug() const                               { return config.getPropertyAsValue ("isDebug", getUndoManager()); }
-        Value getTargetBinaryName() const                   { return config.getPropertyAsValue ("targetName", getUndoManager()); }
+        Value getName() const                               { return getValue ("name"); }
+        Value isDebug() const                               { return getValue ("isDebug"); }
+        Value getTargetBinaryName() const                   { return getValue ("targetName"); }
         // the path relative to the build folder in which the binary should go
-        Value getTargetBinaryRelativePath() const           { return config.getPropertyAsValue ("binaryPath", getUndoManager()); }
-        Value getOptimisationLevel() const                  { return config.getPropertyAsValue ("optimisation", getUndoManager()); }
+        Value getTargetBinaryRelativePath() const           { return getValue ("binaryPath"); }
+        Value getOptimisationLevel() const                  { return getValue ("optimisation"); }
         const String getGCCOptimisationFlag() const;
-        Value getPreprocessorDefs() const                   { return config.getPropertyAsValue ("defines", getUndoManager()); }
+        Value getPreprocessorDefs() const                   { return getValue ("defines"); }
         const StringArray parsePreprocessorDefs() const;
-        Value getHeaderSearchPath() const                   { return config.getPropertyAsValue ("headerPath", getUndoManager()); }
+        Value getHeaderSearchPath() const                   { return getValue ("headerPath"); }
         const StringArray getHeaderSearchPaths() const;
-        Value getMacSDKVersion() const;
-        Value getMacCompatibilityVersion() const;
+
+        static const char* const osxVersionDefault;
+        static const char* const osxVersion10_4;
+        static const char* const osxVersion10_5;
+        static const char* const osxVersion10_6;
+        Value getMacSDKVersion() const                      { return getValue ("osxSDK"); }
+        Value getMacCompatibilityVersion() const            { return getValue ("osxCompatibility"); }
 
         //==============================================================================
     private:
@@ -247,6 +246,7 @@ public:
         Project* project;
         ValueTree config;
 
+        Value getValue (const char* name) const             { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project->getUndoManagerFor (config); }
 
         BuildConfiguration (Project* project, const ValueTree& configNode);
@@ -275,6 +275,10 @@ public:
     };
 
     void getJuceConfigFlags (OwnedArray <JuceConfigFlag>& flags);
+
+    static const char* const configFlagDefault;
+    static const char* const configFlagEnabled;
+    static const char* const configFlagDisabled;
     Value getJuceConfigFlag (const String& name);
 
     //==============================================================================

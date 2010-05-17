@@ -74,7 +74,8 @@ public:
         item.addJustificationProperty (props, "Layout", item.getValue ("justification"), false);
 
         const char* const editModes[] = { "Read-only", "Edit on Single-Click", "Edit on Double-Click", 0 };
-        props.add (new ChoicePropertyComponent (item.getValue (Ids::editMode), "Edit Mode", StringArray (editModes)));
+        const int values[] = { 1, 2, 3, 0 };
+        props.add (new ChoicePropertyComponent (item.getValue (Ids::editMode), "Edit Mode", StringArray (editModes), Array<var> (values)));
 
         item.addFontProperties (props, Ids::font);
 
