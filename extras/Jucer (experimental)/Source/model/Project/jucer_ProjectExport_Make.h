@@ -75,7 +75,6 @@ public:
 
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
-    const String getOSTestMacro()               { return "(defined (LINUX) || defined (__linux__))"; }
 
     void launchProject()
     {
@@ -126,6 +125,7 @@ private:
     void writeDefineFlags (OutputStream& out, const Project::BuildConfiguration& config)
     {
         StringArray defines;
+        defines.add (getExporterIdentifierMacro() + "=1");
         defines.add ("LINUX=1");
 
         if (config.isDebug().getValue())

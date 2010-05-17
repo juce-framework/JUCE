@@ -82,7 +82,6 @@ public:
     }
 
     bool isPossibleForCurrentProject()      { return project.isGUIApplication() || ! iPhone; }
-    const String getOSTestMacro()           { return "(defined(__APPLE_CPP__) || defined(__APPLE_CC__))"; }
     bool usesMMFiles() const                { return true; }
 
     void createPropertyEditors (Array <PropertyComponent*>& props)
@@ -490,6 +489,8 @@ private:
         }
 
         StringArray defines;
+
+        defines.add (getExporterIdentifierMacro() + "=1");
 
         if (config.isDebug().getValue())
         {

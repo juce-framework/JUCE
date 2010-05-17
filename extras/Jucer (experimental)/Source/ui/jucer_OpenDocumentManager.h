@@ -28,7 +28,6 @@
 
 #include "../model/Project/jucer_Project.h"
 #include "../model/Drawable/jucer_DrawableDocument.h"
-class DocumentEditorComponent;
 
 
 //==============================================================================
@@ -61,6 +60,7 @@ public:
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
         virtual Component* createEditor() = 0;
+        virtual Component* createViewer() = 0;
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
     };
 
@@ -83,15 +83,24 @@ public:
     void fileHasBeenRenamed (const File& oldFile, const File& newFile);
 
     //==============================================================================
-    void registerEditor (DocumentEditorComponent* editor);
-    void deregisterEditor (DocumentEditorComponent* editor);
+    class DocumentCloseListener
+    {
+    public:
+        DocumentCloseListener() {}
+        virtual ~DocumentCloseListener() {}
+
+        virtual void documentAboutToClose (Document* document) = 0;
+    };
+
+    void addListener (DocumentCloseListener* listener);
+    void removeListener (DocumentCloseListener* listener);
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     OwnedArray <Document> documents;
-    SortedSet <DocumentEditorComponent*> editors;
+    Array <DocumentCloseListener*> listeners;
 };
 
 

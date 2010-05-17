@@ -28,6 +28,9 @@
 #else
 
 #include "../jucer_ComponentDocument.h"
+#include "../../../ui/jucer_OpenDocumentManager.h"
+#include "../../../ui/Project Editor/jucer_ProjectContentComponent.h"
+
 
 //==============================================================================
 class JucerComponent : public Component
@@ -55,7 +58,6 @@ public:
         {
             projectId = newProjectId;
             comp = 0;
-            document = 0;
 
             if (newProjectId.isNotEmpty())
             {
@@ -63,11 +65,11 @@ public:
 
                 if (file.exists())
                 {
-                    ComponentDocument doc (item.getDocument().getProject(), file);
+                    OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getDocumentForFile (item.getDocument().getProject(), file);
 
-                    if (doc.reload())
+                    if (doc != 0)
                     {
-                        addAndMakeVisible (comp = new ComponentDocument::TestComponent (doc));
+                        addAndMakeVisible (comp = doc->createViewer());
                         resized();
                     }
                 }
@@ -75,22 +77,15 @@ public:
         }
     }
 
-private:
-    String projectId;
-    ScopedPointer<ComponentDocument> document;
-    ScopedPointer<ComponentDocument::TestComponent> comp;
-
-    const File getDocumentFile (ComponentTypeInstance& item, const String projectItemId)
+    static const File getDocumentFile (ComponentTypeInstance& item, const String projectItemId)
     {
-        const String projectId (projectItemId);
-
-        if (projectId.isNotEmpty())
+        if (projectItemId.isNotEmpty())
         {
             Project* project = item.getDocument().getProject();
 
             if (project != 0)
             {
-                Project::Item item (project->getMainGroup().findItemWithID (projectId));
+                Project::Item item (project->getMainGroup().findItemWithID (projectItemId));
 
                 if (item.isValid())
                     return item.getFile();
@@ -99,6 +94,10 @@ private:
 
         return File::nonexistent;
     }
+
+private:
+    String projectId;
+    ScopedPointer<Component> comp;
 };
 
 //==============================================================================
@@ -147,6 +146,14 @@ public:
 
         props.add (new ChoicePropertyComponent (item.getValue (Ids::source), "Source", names, ids));
         item.addFocusOrderProperty (props);
+    }
+
+    void itemDoubleClicked (const MouseEvent& e, ComponentTypeInstance& item)
+    {
+        ProjectContentComponent* pcc = e.originalComponent->findParentComponentOfClass ((ProjectContentComponent*) 0);
+
+        if (pcc != 0)
+            pcc->showEditorForFile (JucerComponent::getDocumentFile (item, item [Ids::source].toString()));
     }
 
     const String getClassName (ComponentTypeInstance& item) const

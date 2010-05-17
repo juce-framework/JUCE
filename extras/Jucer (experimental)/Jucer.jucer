@@ -124,6 +124,10 @@
               resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorToolbar.h"/>
         <FILE id="B9QzpSD6c" name="jucer_ComponentEditorTreeView.h" compile="0"
               resource="0" file="Source/ui/Component Editor/jucer_ComponentEditorTreeView.h"/>
+        <FILE id="OUefpLz58" name="jucer_ComponentViewer.cpp" compile="1" resource="0"
+              file="Source/ui/Component Editor/jucer_ComponentViewer.cpp"/>
+        <FILE id="nTJT0X7O" name="jucer_ComponentViewer.h" compile="0" resource="0"
+              file="Source/ui/Component Editor/jucer_ComponentViewer.h"/>
       </GROUP>
       <GROUP id="VLkoRqu1c" name="Drawable Editor">
         <FILE id="0eWoa5Ttv" name="jucer_DrawableEditor.cpp" compile="1" resource="0"

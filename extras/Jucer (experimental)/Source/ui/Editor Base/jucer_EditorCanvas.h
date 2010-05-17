@@ -73,6 +73,7 @@ public:
 
     virtual const SelectedItems::ItemType findObjectIdAt (const Point<int>& position) = 0;
     virtual void showPopupMenu (const Point<int>& position) = 0;
+    virtual void objectDoubleClicked (const MouseEvent& e, const ValueTree& state) = 0;
 
     virtual const ValueTree getObjectState (const String& objectId) = 0;
     virtual const Rectangle<int> getObjectPosition (const ValueTree& state) = 0;

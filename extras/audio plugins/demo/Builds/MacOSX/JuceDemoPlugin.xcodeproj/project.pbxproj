@@ -249,6 +249,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_DEBUG=1",
 				"DEBUG=1 ",
 				"JUCE_ObjCExtraSuffix=JuceDemo"); }; name = Debug; };
@@ -268,6 +269,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_NDEBUG=1",
 				"NDEBUG=1 ",
 				"JUCE_ObjCExtraSuffix=JuceDemo"); }; name = Release; };

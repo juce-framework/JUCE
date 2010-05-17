@@ -28,6 +28,7 @@
 		7C9FFFC0B129F5C3FAEE13E9 = { isa = PBXBuildFile; fileRef = A6D148E4503AAD3DE6DDCD8B; };
 		33E1A095D656AF109DD54170 = { isa = PBXBuildFile; fileRef = 31F175F277299B3CEA857F96; };
 		D706C3B5016318D85FE452C2 = { isa = PBXBuildFile; fileRef = 3263F4099F45D6FACD28F08D; };
+		872B76525D184228B4F69372 = { isa = PBXBuildFile; fileRef = 06F5D2DB198F068520732796; };
 		E43D00B370F289420379B759 = { isa = PBXBuildFile; fileRef = 82F91CF84A296665177CB79A; };
 		EFFCA85EFB4F06F1BEB9AB97 = { isa = PBXBuildFile; fileRef = 03E9C079FBBF727D50A2B678; };
 		944CE0EADAD951F48EC77071 = { isa = PBXBuildFile; fileRef = 3B2C45064E85B3B631D4F921; };
@@ -106,6 +107,8 @@
 		7CB154C3682F8C786134A6F3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentEditorCodeView.h; path = "../../Source/ui/Component Editor/jucer_ComponentEditorCodeView.h"; sourceTree = SOURCE_ROOT; };
 		B5F5AD9FC53F60610C71367C = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentEditorToolbar.h; path = "../../Source/ui/Component Editor/jucer_ComponentEditorToolbar.h"; sourceTree = SOURCE_ROOT; };
 		8CB73D6F1D0FFC4B379D1240 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentEditorTreeView.h; path = "../../Source/ui/Component Editor/jucer_ComponentEditorTreeView.h"; sourceTree = SOURCE_ROOT; };
+		06F5D2DB198F068520732796 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ComponentViewer.cpp; path = "../../Source/ui/Component Editor/jucer_ComponentViewer.cpp"; sourceTree = SOURCE_ROOT; };
+		1309F36592198D9DC738FDE6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentViewer.h; path = "../../Source/ui/Component Editor/jucer_ComponentViewer.h"; sourceTree = SOURCE_ROOT; };
 		82F91CF84A296665177CB79A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_DrawableEditor.cpp; path = "../../Source/ui/Drawable Editor/jucer_DrawableEditor.cpp"; sourceTree = SOURCE_ROOT; };
 		D1776C5F3E6BB7E8C698BAD6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_DrawableEditor.h; path = "../../Source/ui/Drawable Editor/jucer_DrawableEditor.h"; sourceTree = SOURCE_ROOT; };
 		B19F19A0ED7386FAA7DD854E = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_DrawableEditorCanvas.h; path = "../../Source/ui/Drawable Editor/jucer_DrawableEditorCanvas.h"; sourceTree = SOURCE_ROOT; };
@@ -230,7 +233,9 @@
 				3B77C7A8D9A2386088D75CFE,
 				7CB154C3682F8C786134A6F3,
 				B5F5AD9FC53F60610C71367C,
-				8CB73D6F1D0FFC4B379D1240 ); name = "Component Editor"; sourceTree = "<group>"; };
+				8CB73D6F1D0FFC4B379D1240,
+				06F5D2DB198F068520732796,
+				1309F36592198D9DC738FDE6 ); name = "Component Editor"; sourceTree = "<group>"; };
 		E6053BD673F80E900DDA3593 = { isa = PBXGroup; children = (
 				82F91CF84A296665177CB79A,
 				D1776C5F3E6BB7E8C698BAD6,
@@ -355,6 +360,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_DEBUG=1",
 				"DEBUG=1 "); }; name = Debug; };
 		673FACB8969ADED17ACEFF7C = { isa = XCBuildConfiguration; buildSettings = {
@@ -368,6 +374,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_NDEBUG=1",
 				"NDEBUG=1 "); }; name = Release; };
 		69D26A715A354ED1735D8438 = { isa = XCBuildConfiguration; buildSettings = {
@@ -417,6 +424,7 @@
 				7C9FFFC0B129F5C3FAEE13E9,
 				33E1A095D656AF109DD54170,
 				D706C3B5016318D85FE452C2,
+				872B76525D184228B4F69372,
 				E43D00B370F289420379B759,
 				EFFCA85EFB4F06F1BEB9AB97,
 				944CE0EADAD951F48EC77071,

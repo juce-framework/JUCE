@@ -95,6 +95,10 @@ public:
         }
     }
 
+    void objectDoubleClicked (const MouseEvent& e, const ValueTree& state)
+    {
+    }
+
     const ValueTree getObjectState (const String& objectId)
     {
         return ValueTree();

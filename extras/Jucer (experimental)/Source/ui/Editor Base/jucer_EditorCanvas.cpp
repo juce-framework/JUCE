@@ -469,6 +469,17 @@ public:
         {
             canvas->getMarkerList (false).createMarker ("Marker", e.y - yAxis.getY());
         }
+        else
+        {
+            const MouseEvent e2 (e.getEventRelativeTo (canvas->getComponentHolder()));
+            const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (e2.getPosition()));
+
+            if (underMouse.isNotEmpty())
+            {
+                const ValueTree state (canvas->getObjectState (underMouse));
+                canvas->objectDoubleClicked (e2, state);
+            }
+        }
     }
 
     void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area)

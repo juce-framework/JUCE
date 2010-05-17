@@ -112,6 +112,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_DEBUG=1",
 				"DEBUG=1 "); }; name = Debug; };
 		90901561E3F7FD713257B23D = { isa = XCBuildConfiguration; buildSettings = {
@@ -125,6 +126,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+				"JUCER_XCODE_MAC_F6D2F4CF=1",
 				"_NDEBUG=1",
 				"NDEBUG=1 "); }; name = Release; };
 		8133D32BA8816D704BF648FA = { isa = XCBuildConfiguration; buildSettings = {

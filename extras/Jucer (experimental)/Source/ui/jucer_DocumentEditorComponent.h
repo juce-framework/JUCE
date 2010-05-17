@@ -33,7 +33,8 @@
 /**
 */
 class DocumentEditorComponent  : public Component,
-                                 public ApplicationCommandTarget
+                                 public ApplicationCommandTarget,
+                                 public OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================
@@ -41,7 +42,7 @@ public:
     ~DocumentEditorComponent();
 
     OpenDocumentManager::Document* getDocument() const              { return document; }
-    virtual void deleteSelf();
+    void documentAboutToClose (OpenDocumentManager::Document* document);
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();

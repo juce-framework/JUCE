@@ -31,27 +31,29 @@
 DocumentEditorComponent::DocumentEditorComponent (OpenDocumentManager::Document* document_)
     : document (document_)
 {
-    OpenDocumentManager::getInstance()->registerEditor (this);
+    OpenDocumentManager::getInstance()->addListener (this);
 }
 
 DocumentEditorComponent::~DocumentEditorComponent()
 {
-    OpenDocumentManager::getInstance()->deregisterEditor (this);
+    OpenDocumentManager::getInstance()->removeListener (this);
 }
 
-void DocumentEditorComponent::deleteSelf()
+void DocumentEditorComponent::documentAboutToClose (OpenDocumentManager::Document* closingDoc)
 {
-    jassert (document != 0);
-
-    ProjectContentComponent* pcc = findParentComponentOfClass ((ProjectContentComponent*) 0);
-
-    if (pcc != 0)
+    if (document == closingDoc)
     {
-        pcc->hideDocument (document);
-        return;
-    }
+        jassert (document != 0);
+        ProjectContentComponent* pcc = findParentComponentOfClass ((ProjectContentComponent*) 0);
 
-    jassertfalse
+        if (pcc != 0)
+        {
+            pcc->hideDocument (document);
+            return;
+        }
+
+        jassertfalse
+    }
 }
 
 ApplicationCommandTarget* DocumentEditorComponent::getNextCommandTarget()

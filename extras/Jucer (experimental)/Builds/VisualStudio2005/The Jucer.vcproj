@@ -33,7 +33,7 @@
             BufferSecurityCheck=""
             DebugInformationFormat="4"
             AdditionalIncludeDirectories=""
-            PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG"
+            PreprocessorDefinitions="JUCER_VS2005_78A5003;WIN32;_WINDOWS;_DEBUG"
             RuntimeLibrary="1"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -89,7 +89,7 @@
             InlineFunctionExpansion="1"
             StringPooling="true"
             AdditionalIncludeDirectories=""
-            PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG"
+            PreprocessorDefinitions="JUCER_VS2005_78A5003;WIN32;_WINDOWS;NDEBUG"
             RuntimeLibrary="0"
             RuntimeTypeInfo="true"
             UsePrecompiledHeader="0"
@@ -184,6 +184,8 @@
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h"/>
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h"/>
           <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentViewer.cpp"/>
+          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentViewer.h"/>
         </Filter>
         <Filter Name="Drawable Editor">
           <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>

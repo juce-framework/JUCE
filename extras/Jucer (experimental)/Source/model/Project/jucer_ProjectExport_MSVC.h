@@ -112,7 +112,6 @@ public:
 
     bool isPossibleForCurrentProject()          { return true; }
     bool usesMMFiles() const                    { return false; }
-    const String getOSTestMacro()               { return "(defined (_WIN32) || defined (_WIN64))"; }
 
     void launchProject()
     {
@@ -358,6 +357,7 @@ private:
     const String getPreprocessorDefs (const Project::BuildConfiguration& config, const String& joinString) const
     {
         StringArray defines;
+        defines.add (getExporterIdentifierMacro());
         defines.add ("WIN32");
         defines.add ("_WINDOWS");
         defines.add (config.isDebug().getValue() ? "_DEBUG" : "NDEBUG");

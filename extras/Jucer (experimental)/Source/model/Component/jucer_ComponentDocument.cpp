@@ -374,6 +374,12 @@ const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCo
     return ValueTree::invalid;
 }
 
+void ComponentDocument::componentDoubleClicked (const MouseEvent& e, const ValueTree& state)
+{
+    ComponentTypeInstance item (*this, state);
+    item.getHandler()->itemDoubleClicked (e, item);
+}
+
 void ComponentDocument::updateComponentsIn (Component* compHolder)
 {
     int i;
@@ -394,12 +400,10 @@ void ComponentDocument::updateComponentsIn (Component* compHolder)
         Component* c = findComponentForState (compHolder, v);
 
         if (c == 0)
-        {
-            c = createComponent (i);
-            compHolder->addAndMakeVisible (c);
-        }
+            compHolder->addAndMakeVisible (c = createComponent (i));
+        else
+            updateComponent (c);
 
-        updateComponent (c);
         componentsInOrder.add (c);
     }
 
@@ -411,51 +415,6 @@ void ComponentDocument::updateComponentsIn (Component* compHolder)
         for (i = num - 1; --i >= 0;)
             componentsInOrder.getUnchecked(i)->toBehind (componentsInOrder.getUnchecked (i + 1));
     }
-}
-
-//==============================================================================
-ComponentDocument::TestComponent::TestComponent (ComponentDocument& document)
-{
-    background = Colour::fromString (document.getBackgroundColour().toString());
-    layoutManager = new ComponentAutoLayoutManager (this);
-
-    setSize (document.getCanvasWidth().getValue(),
-             document.getCanvasHeight().getValue());
-
-    int i;
-    for (i = 0; i < document.getNumComponents(); ++i)
-    {
-        Component* c = document.createComponent (i);
-        addAndMakeVisible (c);
-
-        const ValueTree state (document.getComponent (i));
-        layoutManager->setComponentLayout (c, state [ComponentDocument::memberNameProperty],
-                                           document.getCoordsFor (state));
-    }
-
-    for (i = 0; i < document.getMarkerListX().size(); ++i)
-    {
-        const ValueTree marker (document.getMarkerListX().getMarker (i));
-        layoutManager->setMarker (document.getMarkerListX().getName (marker),
-                                  document.getMarkerListX().getCoordinate (marker));
-    }
-
-    for (i = 0; i < document.getMarkerListY().size(); ++i)
-    {
-        const ValueTree marker (document.getMarkerListY().getMarker (i));
-        layoutManager->setMarker (document.getMarkerListY().getName (marker),
-                                  document.getMarkerListY().getCoordinate (marker));
-    }
-}
-
-ComponentDocument::TestComponent::~TestComponent()
-{
-    deleteAllChildren();
-}
-
-void ComponentDocument::TestComponent::paint (Graphics& g)
-{
-    g.fillAll (background);
 }
 
 //==============================================================================

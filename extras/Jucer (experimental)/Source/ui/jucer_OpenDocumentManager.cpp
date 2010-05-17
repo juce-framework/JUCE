@@ -28,6 +28,7 @@
 #include "Drawable Editor/jucer_DrawableEditor.h"
 #include "Project Editor/jucer_ItemPreviewComponent.h"
 #include "Component Editor/jucer_ComponentEditor.h"
+#include "Component Editor/jucer_ComponentViewer.h"
 
 
 //==============================================================================
@@ -90,6 +91,8 @@ public:
 
         return new SourceCodeEditor (this, *codeDoc, tokeniser);
     }
+
+    Component* createViewer()       { return createEditor(); }
 
 private:
     FileModificationDetector modDetector;
@@ -165,6 +168,17 @@ public:
         return new ComponentEditor (this, project, componentDoc);
     }
 
+    Component* createViewer()
+    {
+        if (componentDoc == 0)
+        {
+            jassertfalse;
+            return 0;
+        }
+
+        return new ComponentViewer (this, project, componentDoc);
+    }
+
 private:
     Project* project;
     FileModificationDetector modDetector;
@@ -231,6 +245,11 @@ public:
         return new DrawableEditor (this, project, drawableDoc);
     }
 
+    Component* createViewer()
+    {
+        return createEditor(); //xxx
+    }
+
 private:
     Project* project;
     FileModificationDetector modDetector;
@@ -259,6 +278,7 @@ public:
     void reloadFromFile()                           { fileModificationTime = file.getLastModificationTime(); }
     const String getName() const                    { return file.getFileName(); }
     Component* createEditor()                       { return new ItemPreviewComponent (file); }
+    Component* createViewer()                       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile)   { file = newFile; }
 
     const String getType() const
@@ -293,14 +313,14 @@ OpenDocumentManager::~OpenDocumentManager()
 juce_ImplementSingleton_SingleThreaded (OpenDocumentManager);
 
 //==============================================================================
-void OpenDocumentManager::registerEditor (DocumentEditorComponent* editor)
+void OpenDocumentManager::addListener (DocumentCloseListener* listener)
 {
-    editors.add (editor);
+    listeners.addIfNotAlreadyThere (listener);
 }
 
-void OpenDocumentManager::deregisterEditor (DocumentEditorComponent* editor)
+void OpenDocumentManager::removeListener (DocumentCloseListener* listener)
 {
-    editors.removeValue (editor);
+    listeners.removeValue (listener);
 }
 
 //==============================================================================
@@ -396,9 +416,8 @@ bool OpenDocumentManager::closeDocument (int index, bool saveIfNeeded)
                 return false;
         }
 
-        for (int i = editors.size(); --i >= 0;)
-            if (editors.getUnchecked(i)->getDocument() == doc)
-                editors.getUnchecked(i)->deleteSelf();
+        for (int i = listeners.size(); --i >= 0;)
+            listeners.getUnchecked(i)->documentAboutToClose (doc);
 
         documents.remove (index);
         commandManager->commandStatusChanged();

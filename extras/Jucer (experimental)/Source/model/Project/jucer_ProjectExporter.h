@@ -54,14 +54,13 @@ public:
     virtual void createPropertyEditors (Array <PropertyComponent*>& props);
     virtual void launchProject() = 0;
     virtual const String create() = 0;
-    virtual const String getOSTestMacro() = 0;
     virtual bool shouldFileBeCompiledByDefault (const RelativePath& path) const;
 
     //==============================================================================
     const String getName() const            { return name; }
     const File getTargetFolder() const;
 
-    const ValueTree& getSettings() const                    { return settings; }
+    const ValueTree& getSettings() const                { return settings; }
     Value getSetting (const Identifier& name_) const   { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
     Value getJuceFolder() const             { return getSetting ("juceFolder"); }
@@ -83,6 +82,12 @@ public:
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
     const String getIncludePathForFileInJuceFolder (const String& pathFromJuceFolder, const File& targetIncludeFile) const;
+
+    const String getExporterIdentifierMacro() const
+    {
+        return "JUCER_" + settings.getType() + "_"
+                + String::toHexString (settings ["targetFolder"].toString().hashCode()).toUpperCase();
+    }
 
     Array<RelativePath> juceWrapperFiles;
 

@@ -252,7 +252,7 @@ private:
             if (exporter != 0)
             {
                 paths.add (exporter->getIncludePathForFileInJuceFolder (pathFromJuceFolder, juceHeaderFile));
-                guards.add (exporter->getOSTestMacro());
+                guards.add ("defined (" + exporter->getExporterIdentifierMacro() + ")");
             }
         }
 

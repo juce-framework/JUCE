@@ -273,11 +273,11 @@ void ComponentEditor::showNewComponentMenu (Component* componentToAttachTo)
 //==============================================================================
 void ComponentEditor::test()
 {
-    ComponentDocument::TestComponent testComp (getDocument());
+    ScopedPointer<Component> testComp (document->createViewer());
     TooltipWindow tooltipWindow;
 
     DialogWindow::showModalDialog ("Testing: " + getDocument().getClassName().toString(),
-                                   &testComp, this, Colours::lightgrey, true, true);
+                                   testComp, this, Colours::lightgrey, true, true);
 }
 
 //==============================================================================

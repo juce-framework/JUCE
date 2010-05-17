@@ -89,5 +89,4 @@ private:
 };
 
 
-
 #endif  // __JUCE_COMPONENTEDITOR_H_6CAE6B7E__

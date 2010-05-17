@@ -108,6 +108,11 @@ public:
         }
     }
 
+    void objectDoubleClicked (const MouseEvent& e, const ValueTree& state)
+    {
+        getDocument().componentDoubleClicked (e, state);
+    }
+
     const ValueTree getObjectState (const String& objectId)
     {
         return getDocument().getComponentWithID (objectId);

@@ -94,7 +94,10 @@ public:
     void addNewComponentMenuItems (PopupMenu& menu) const;
     const ValueTree performNewComponentMenuItem (int menuResultCode);
 
+    void componentDoubleClicked (const MouseEvent& e, const ValueTree& state);
+
     void updateComponentsIn (Component* compHolder);
+    Component* findComponentForState (Component* parentComp, const ValueTree& state);
 
     //==============================================================================
     class MarkerList    : public MarkerListBase
@@ -163,19 +166,6 @@ public:
     static const String getJucerIDFor (Component* c);
 
     //==============================================================================
-    class TestComponent     : public Component
-    {
-    public:
-        TestComponent (ComponentDocument& document);
-        ~TestComponent();
-
-        void paint (Graphics& g);
-
-    private:
-        ScopedPointer<ComponentAutoLayoutManager> layoutManager;
-        Colour background;
-    };
-
     juce_UseDebuggingNewOperator
 
 private:
@@ -201,8 +191,6 @@ private:
     void writeMetadata (OutputStream& out);
 
     bool createItemProperties (Array <PropertyComponent*>& props, const String& itemId);
-
-    Component* findComponentForState (Component* compHolder, const ValueTree& state);
 };
 
 

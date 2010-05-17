@@ -32,21 +32,6 @@
 
 class ComponentTypeHandler;
 
-class JucerState
-{
-public:
-    JucerState (const ValueTree& state_)
-        : state (state_)
-    {
-    }
-
-    ~JucerState()
-    {
-    }
-
-private:
-    ValueTree state;
-};
 
 //==============================================================================
 /** Temporary wrapper around a document and a component's ValueTree, providing lots of useful
@@ -114,6 +99,7 @@ public:
     virtual void initialiseNewItem (ComponentTypeInstance& item) = 0;
     virtual void updateComponent (ComponentTypeInstance& item, Component* comp) = 0;
     virtual void createPropertyEditors (ComponentTypeInstance& item, Array <PropertyComponent*>& props) = 0;
+    virtual void itemDoubleClicked (const MouseEvent& e, ComponentTypeInstance& item) = 0;
     virtual void createCode (ComponentTypeInstance& item, CodeGenerator& code) = 0;
     virtual const String getClassName (ComponentTypeInstance& item) const     { return className; }
 
@@ -191,6 +177,10 @@ public:
         item.addBoundsProperties (props);
 
         createProperties (item, props);
+    }
+
+    void itemDoubleClicked (const MouseEvent&, ComponentTypeInstance&)
+    {
     }
 
 protected:
