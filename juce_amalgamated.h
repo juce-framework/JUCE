@@ -4731,7 +4731,11 @@ public:
 	/** Compares two identifiers. This is a very fast operation. */
 	inline bool operator!= (const Identifier& other) const throw()	  { return name != other.name; }
 
+	/** Returns this identifier as a string. */
 	const String toString() const					   { return name; }
+
+	/** Returns this identifier's raw string pointer. */
+	operator const juce_wchar*() const throw()			  { return name; }
 
 private:
 
@@ -5765,6 +5769,7 @@ public:
 	template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()	 { jassertfalse; return --*a; }
 	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
 		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
 
 #elif JUCE_GCC
@@ -5773,7 +5778,7 @@ public:
 #else
   #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
 
-  #if JUCE_USE_INTRINSICS
+  #if JUCE_USE_INTRINSICS || JUCE_64BIT
 	#pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
 					   _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
 	#define juce_InterlockedExchange(a, b)		  _InterlockedExchange(a, b)
@@ -5806,6 +5811,7 @@ public:
 	template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()	  { jassertfalse; Type old = *a; *a = b; return old; }
 	template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()		 { jassertfalse; return ++*a; }
 	template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()		 { jassertfalse; return --*a; }
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
 #endif
 
@@ -16801,6 +16807,7 @@ private:
 class JUCE_API  StringPool
 {
 public:
+
 	/** Creates an empty pool. */
 	StringPool() throw();
 
@@ -16830,6 +16837,12 @@ public:
 		is deleted.
 	*/
 	const juce_wchar* getPooledString (const juce_wchar* original);
+
+	/** Returns the number of strings in the pool. */
+	int size() const throw();
+
+	/** Returns one of the strings in the pool, by index. */
+	const juce_wchar* operator[] (int index) const throw();
 
 private:
 	Array <String> strings;

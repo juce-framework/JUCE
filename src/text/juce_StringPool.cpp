@@ -102,4 +102,14 @@ const juce_wchar* StringPool::getPooledString (const juce_wchar* const s)
     return getPooledStringFromArray (strings, s);
 }
 
+int StringPool::size() const throw()
+{
+    return strings.size();
+}
+
+const juce_wchar* StringPool::operator[] (const int index) const throw()
+{
+    return strings [index];
+}
+
 END_JUCE_NAMESPACE

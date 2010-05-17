@@ -163,6 +163,7 @@ public:
     template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()     { jassertfalse; return --*a; }
     template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
         { jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
+    #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
 
 //==============================================================================
@@ -172,7 +173,7 @@ public:
 #else
   #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics
 
-  #if JUCE_USE_INTRINSICS
+  #if JUCE_USE_INTRINSICS || JUCE_64BIT
     #pragma intrinsic (_InterlockedExchange, _InterlockedIncrement, _InterlockedDecrement, _InterlockedCompareExchange, \
                        _InterlockedCompareExchange64, _InterlockedExchangeAdd, _ReadWriteBarrier)
     #define juce_InterlockedExchange(a, b)              _InterlockedExchange(a, b)
@@ -205,6 +206,7 @@ public:
     template <typename Type> static Type juce_InterlockedExchange64 (volatile Type* a, Type b) throw()      { jassertfalse; Type old = *a; *a = b; return old; }
     template <typename Type> static Type juce_InterlockedIncrement64 (volatile Type* a) throw()             { jassertfalse; return ++*a; }
     template <typename Type> static Type juce_InterlockedDecrement64 (volatile Type* a) throw()             { jassertfalse; return --*a; }
+    #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
   #endif
 #endif
 

@@ -70,33 +70,19 @@ public:
     IDispatchHelper() {}
     ~IDispatchHelper() {}
 
-    var::identifier getId (const int hash) const
+    const String getStringFromDISPID (const DISPID hash) const
     {
-        for (int i = knownIdentifiers.size(); --i >= 0;)
-            if (knownIdentifiers.getUnchecked(i)->hashCode == hash)
-                return *knownIdentifiers.getUnchecked(i);
+        for (int i = identifierPool.size(); --i >= 0;)
+            if (getHashFromString (identifierPool[i]) == hash)
+                return identifierPool[i];
 
-        return var::identifier (String::empty);
-    }
-
-    var::identifier getId (const String& name)
-    {
-        for (int i = knownIdentifiers.size(); --i >= 0;)
-            if (knownIdentifiers.getUnchecked(i)->name == name)
-                return *knownIdentifiers.getUnchecked(i);
-
-        const var::identifier v (name);
-        knownIdentifiers.add (new var::identifier (v));
-        return v;
+        return String::empty;
     }
 
     HRESULT doGetIDsOfNames (LPOLESTR* rgszNames, UINT cNames, DISPID* rgDispId)
     {
         for (unsigned int i = 0; i < cNames; ++i)
-        {
-            var::identifier id (getId (rgszNames[i]));
-            rgDispId[i] = (DISPID) id.hashCode;
-        }
+            rgDispId[i] = getHashFromString (identifierPool.getPooledString (String (rgszNames[i])));
 
         return S_OK;
     }
@@ -105,9 +91,9 @@ public:
                       DISPID dispIdMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS* pDispParams,
                       VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr)
     {
-        const var::identifier memberId (getId ((int) dispIdMember));
+        const Identifier memberId (getStringFromDISPID (dispIdMember));
 
-        if (memberId.name.isEmpty() || v.getObject() == 0)
+        if (memberId.toString().isEmpty() || v.getObject() == 0)
             return DISP_E_MEMBERNOTFOUND;
 
         if ((wFlags & DISPATCH_METHOD) != 0)
@@ -124,16 +110,11 @@ public:
             }
             else
             {
-                HeapBlock <var> args;
-                args.calloc (numArgs);
+                Array<var> args;
+                for (int j = numArgs; --j >= 0;)
+                    args.add (variantTojuceVar (pDispParams->rgvarg[j]));
 
-                for (int j = 0; j < numArgs; ++j)
-                    args[(numArgs - 1) - j] = variantTojuceVar (pDispParams->rgvarg[j]);
-
-                result = v.invoke (memberId, args, numArgs);
-
-                for (int j = 0; j < numArgs; ++j)
-                    args[j] = var();
+                result = v.invoke (memberId, args.getRawDataPointer(), numArgs);
             }
 
             if (pVarResult != 0)
@@ -165,7 +146,12 @@ public:
     }
 
 private:
-    OwnedArray <var::identifier> knownIdentifiers;
+    StringPool identifierPool;
+
+    static DISPID getHashFromString (const juce_wchar* s) throw()
+    {
+        return (DISPID) (pointer_sized_int) s;
+    }
 
     IDispatchHelper (const IDispatchHelper&);
     IDispatchHelper& operator= (const IDispatchHelper&);
@@ -245,11 +231,12 @@ public:
         log ("num IDispatch wrapper objs: " + String (--numDOWID));
     }
 
-    const var getProperty (const var::identifier& propertyName) const
+    const var getProperty (const Identifier& propertyName) const
     {
-        LPCOLESTR name = (LPCOLESTR) propertyName.name;
+        const String nameCopy (propertyName.toString());
+        LPCOLESTR name = (LPCOLESTR) nameCopy;
         DISPID id = 0;
-        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK)
+        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
             EXCEPINFO excepInfo;
             DISPPARAMS params;
@@ -267,21 +254,23 @@ public:
             }
         }
 
-        return var();
+        return var::null;
     }
 
-    bool hasProperty (const var::identifier& propertyName) const
+    bool hasProperty (const Identifier& propertyName) const
     {
-        LPCOLESTR name = (LPCOLESTR) propertyName.name;
+        const String nameCopy (propertyName.toString());
+        LPCOLESTR name = (LPCOLESTR) nameCopy;
         DISPID id = 0;
-        return source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK;
+        return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
 
-    void setProperty (const var::identifier& propertyName, const var& newValue)
+    void setProperty (const Identifier& propertyName, const var& newValue)
     {
-        LPCOLESTR name = (LPCOLESTR) propertyName.name;
+        const String nameCopy (propertyName.toString());
+        LPCOLESTR name = (LPCOLESTR) nameCopy;
         DISPID id = 0;
-        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK)
+        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
             VARIANT param;
             zerostruct (param);
@@ -308,26 +297,26 @@ public:
         }
     }
 
-    void removeProperty (const var::identifier& propertyName)
+    void removeProperty (const Identifier& propertyName)
     {
-        setProperty (propertyName, var());
+        setProperty (propertyName, var::null);
     }
 
-    bool hasMethod (const var::identifier& methodName) const
+    bool hasMethod (const Identifier& methodName) const
     {
-        LPCOLESTR name = (LPCOLESTR) methodName.name;
+        const String nameCopy (methodName.toString());
+        LPCOLESTR name = (LPCOLESTR) nameCopy;
         DISPID id = 0;
-        return source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK;
+        return source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK;
     }
 
-    const var invokeMethod (const var::identifier& methodName,
-                            const var* parameters,
-                            int numParameters)
+    const var invokeMethod (const Identifier& methodName, const var* parameters, int numParameters)
     {
         var returnValue;
-        LPCOLESTR name = (LPCOLESTR) methodName.name;
+        const String nameCopy (methodName.toString());
+        LPCOLESTR name = (LPCOLESTR) nameCopy;
         DISPID id = 0;
-        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*)&name, 1, 0, &id) == S_OK)
+        if (source->GetIDsOfNames (IID_NULL, (LPOLESTR*) &name, 1, 0, &id) == S_OK)
         {
             HeapBlock <VARIANT> params;
             params.calloc (numParameters + 1);
@@ -409,7 +398,7 @@ const var variantTojuceVar (const VARIANT& v)
         switch (v.vt & ~VT_BYREF)
         {
         case VT_VOID:
-        case VT_EMPTY:      return var();
+        case VT_EMPTY:      return var::null;
         case VT_I1:         return var ((int) v.cVal);
         case VT_I2:         return var ((int) v.iVal);
         case VT_I4:         return var ((int) v.lVal);
@@ -430,7 +419,7 @@ const var variantTojuceVar (const VARIANT& v)
         }
     }
 
-    return var();
+    return var::null;
 }
 
 //==============================================================================

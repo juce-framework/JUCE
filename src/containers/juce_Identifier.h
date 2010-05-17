@@ -72,7 +72,11 @@ public:
     /** Compares two identifiers. This is a very fast operation. */
     inline bool operator!= (const Identifier& other) const throw()      { return name != other.name; }
 
+    /** Returns this identifier as a string. */
     const String toString() const                                       { return name; }
+
+    /** Returns this identifier's raw string pointer. */
+    operator const juce_wchar*() const throw()                          { return name; }
 
 private:
     //==============================================================================

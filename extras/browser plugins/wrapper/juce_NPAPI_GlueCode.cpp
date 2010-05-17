@@ -542,7 +542,7 @@ public:
 //==============================================================================
 static NPIdentifier getIdentifierFromString (const var::identifier& s) throw()
 {
-    return browser.getstringidentifier (s.name.toUTF8());
+    return browser.getstringidentifier (s.toString().toUTF8());
 }
 
 static const var createValueFromNPVariant (NPP npp, const NPVariant& v);

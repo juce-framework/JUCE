@@ -44,12 +44,14 @@
 class JUCE_API  StringPool
 {
 public:
+    //==============================================================================
     /** Creates an empty pool. */
     StringPool() throw();
 
     /** Destructor */
     ~StringPool();
 
+    //==============================================================================
     /** Returns a pointer to a copy of the string that is passed in.
 
         The pool will always return the same pointer when asked for a string that matches it.
@@ -73,6 +75,13 @@ public:
         is deleted.
     */
     const juce_wchar* getPooledString (const juce_wchar* original);
+
+    //==============================================================================
+    /** Returns the number of strings in the pool. */
+    int size() const throw();
+
+    /** Returns one of the strings in the pool, by index. */
+    const juce_wchar* operator[] (int index) const throw();
 
 private:
     Array <String> strings;
