@@ -55,16 +55,12 @@ public:
         @param drawable         the object to add - this will be deleted automatically
                                 when no longer needed, so the caller mustn't keep any
                                 pointers to it.
-        @param transform        the transform to apply to this drawable when it's being
-                                drawn
         @param index            where to insert it in the list of drawables. 0 is the back,
                                 -1 is the front, or any value from 0 and getNumDrawables()
                                 can be used
         @see removeDrawable
     */
-    void insertDrawable (Drawable* drawable,
-                         const AffineTransform& transform = AffineTransform::identity,
-                         int index = -1);
+    void insertDrawable (Drawable* drawable, int index = -1);
 
     /** Adds a new sub-drawable to this one.
 
@@ -73,16 +69,12 @@ public:
         pointer instead.
 
         @param drawable         the object to add - an internal copy will be made of this object
-        @param transform        the transform to apply to this drawable when it's being
-                                drawn
         @param index            where to insert it in the list of drawables. 0 is the back,
                                 -1 is the front, or any value from 0 and getNumDrawables()
                                 can be used
         @see removeDrawable
     */
-    void insertDrawable (const Drawable& drawable,
-                         const AffineTransform& transform = AffineTransform::identity,
-                         int index = -1);
+    void insertDrawable (const Drawable& drawable, int index = -1);
 
     /** Deletes one of the Drawable objects.
 
@@ -112,15 +104,6 @@ public:
     */
     Drawable* getDrawable (int index) const throw()                             { return drawables [index]; }
 
-    /** Returns the transform that applies to one of the drawables that are contained in this one.
-
-        The pointer returned is managed by this object and will be deleted when no longer
-        needed, so be careful what you do with it.
-
-        @see getNumDrawables
-    */
-    const AffineTransform* getDrawableTransform (int index) const throw()       { return transforms [index]; }
-
     /** Brings one of the Drawables to the front.
 
         @param index    the index of the drawable to move, between 0
@@ -129,6 +112,37 @@ public:
     */
     void bringToFront (int index);
 
+    /** Sets the transform to be applied to this drawable, by defining the positions
+        where three anchor points should end up in the target rendering space.
+
+        @param targetPositionForOrigin  the position that the local coordinate (0, 0) should be
+                                        mapped onto when rendering this object.
+        @param targetPositionForX1Y0    the position that the local coordinate (1, 0) should be
+                                        mapped onto when rendering this object.
+        @param targetPositionForX0Y1    the position that the local coordinate (0, 1) should be
+                                        mapped onto when rendering this object.
+    */
+    void setTransform (const Point<float>& targetPositionForOrigin,
+                       const Point<float>& targetPositionForX1Y0,
+                       const Point<float>& targetPositionForX0Y1);
+
+    /** Returns the position to which the local coordinate (0, 0) should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForOrigin() const throw()          { return controlPoints[0]; }
+
+    /** Returns the position to which the local coordinate (1, 0) should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForX1Y0() const throw()            { return controlPoints[1]; }
+
+    /** Returns the position to which the local coordinate (0, 1) should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForX0Y1() const throw()            { return controlPoints[2]; }
 
     //==============================================================================
     /** @internal */
@@ -138,18 +152,29 @@ public:
     /** @internal */
     bool hitTest (float x, float y) const;
     /** @internal */
+    int getNumControlPoints() const;
+    /** @internal */
+    const Point<float> getControlPoint (int index) const;
+    /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    ValueTree createValueTree() const;
+    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
-    static DrawableComposite* createFromValueTree (const ValueTree& tree);
+    const ValueTree createValueTree (ImageProvider* imageProvider) const;
+    /** @internal */
+    static const Identifier valueTreeType;
+    /** @internal */
+    const Identifier getValueTreeType() const    { return valueTreeType; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     OwnedArray <Drawable> drawables;
-    OwnedArray <AffineTransform> transforms;
+    Point<float> controlPoints[3];
+
+    const Rectangle<float> getUntransformedBounds() const;
+    const AffineTransform getTransform() const;
 
     DrawableComposite (const DrawableComposite&);
     DrawableComposite& operator= (const DrawableComposite&);

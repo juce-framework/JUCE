@@ -130,7 +130,7 @@ public:
     int getNumHandlers() const                                      { return handlers.size(); }
     ComponentTypeHandler* getHandler (const int index) const        { return handlers[index]; }
 
-    ComponentTypeHandler* getHandlerFor (const String& type);
+    ComponentTypeHandler* getHandlerFor (const Identifier& type);
     const StringArray getDisplayNames() const;
 
 private:

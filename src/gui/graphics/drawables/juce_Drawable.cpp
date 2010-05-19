@@ -36,6 +36,8 @@ BEGIN_JUCE_NAMESPACE
 #include "../../../text/juce_XmlDocument.h"
 #include "../../../io/files/juce_FileInputStream.h"
 
+const Identifier Drawable::idProperty ("id");
+
 //==============================================================================
 Drawable::RenderingContext::RenderingContext (Graphics& g_,
                                               const AffineTransform& transform_,
@@ -133,22 +135,22 @@ Drawable* Drawable::createFromImageFile (const File& file)
 }
 
 //==============================================================================
-Drawable* Drawable::createFromValueTree (const ValueTree& tree)
+Drawable* Drawable::createFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    Drawable* d = DrawablePath::createFromValueTree (tree);
+    const Identifier type (tree.getType());
 
-    if (d == 0)
-    {
-        d = DrawableComposite::createFromValueTree (tree);
+    Drawable* d = 0;
+    if (type == DrawablePath::valueTreeType)
+        d = new DrawablePath();
+    else if (type == DrawableComposite::valueTreeType)
+        d = new DrawableComposite();
+    else if (type == DrawableImage::valueTreeType)
+        d = new DrawableImage();
+    else if (type == DrawableText::valueTreeType)
+        d = new DrawableText();
 
-        if (d == 0)
-        {
-            d = DrawableImage::createFromValueTree (tree);
-
-            if (d == 0)
-                d = DrawableText::createFromValueTree (tree);
-        }
-    }
+    if (d != 0)
+        d->refreshFromValueTree (tree, imageProvider);
 
     return d;
 }

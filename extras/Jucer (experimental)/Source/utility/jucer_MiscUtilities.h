@@ -80,3 +80,59 @@ private:
     Colour colour;
     GlyphArrangement glyphs;
 };
+
+//==============================================================================
+class JucerToolbarButton   : public ToolbarItemComponent
+{
+public:
+    //==============================================================================
+    JucerToolbarButton (int itemId_, const String& labelText)
+        : ToolbarItemComponent (itemId_, labelText, true)
+    {
+        setClickingTogglesState (false);
+    }
+
+    ~JucerToolbarButton()
+    {
+    }
+
+    //==============================================================================
+    bool getToolbarItemSizes (int toolbarDepth, bool isToolbarVertical, int& preferredSize, int& minSize, int& maxSize)
+    {
+        preferredSize = minSize = maxSize = 50;
+        return true;
+    }
+
+    void paintButton (Graphics& g, bool over, bool down)
+    {
+        Path p;
+        p.addRoundedRectangle (1.5f, 2.5f, getWidth() - 3.0f, getHeight() - 5.0f, 3.0f);
+
+        if (getToggleState())
+        {
+            g.setColour (Colours::grey.withAlpha (0.5f));
+            g.fillPath (p);
+        }
+
+        g.setColour (Colours::darkgrey.withAlpha (0.3f));
+        g.strokePath (p, PathStrokeType (1.0f));
+
+        g.setFont (11.0f);
+        g.setColour (Colours::black.withAlpha ((over || down) ? 1.0f : 0.7f));
+        g.drawFittedText (getButtonText(), 2, 2, getWidth() - 4, getHeight() - 4, Justification::centred, 2);
+    }
+
+    void paintButtonArea (Graphics& g, int width, int height, bool isMouseOver, bool isMouseDown)
+    {
+    }
+
+    void contentAreaChanged (const Rectangle<int>& newBounds)
+    {
+    }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    JucerToolbarButton (const JucerToolbarButton&);
+    JucerToolbarButton& operator= (const JucerToolbarButton&);
+};

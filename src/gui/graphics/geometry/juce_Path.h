@@ -84,6 +84,9 @@ public:
     /** Copies this path from another one. */
     Path& operator= (const Path& other);
 
+    bool operator== (const Path& other) const throw();
+    bool operator!= (const Path& other) const throw();
+
     //==============================================================================
     /** Returns true if the path doesn't contain any lines or curves. */
     bool isEmpty() const throw();
@@ -472,7 +475,7 @@ public:
         The internal data of the two paths is swapped over, so this is much faster than
         copying it to a temp variable and back.
     */
-    void swapWithPath (Path& other);
+    void swapWithPath (Path& other) throw();
 
     //==============================================================================
     /** Applies a 2D transform to all the vertices in the path.

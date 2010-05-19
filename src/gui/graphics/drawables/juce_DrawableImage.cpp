@@ -30,8 +30,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawableImage.h"
 #include "../imaging/juce_ImageCache.h"
-#include "../imaging/juce_ImageFileFormat.h"
-#include "../../../io/streams/juce_MemoryOutputStream.h"
+
 
 //==============================================================================
 DrawableImage::DrawableImage()
@@ -40,6 +39,8 @@ DrawableImage::DrawableImage()
       opacity (1.0f),
       overlayColour (0x00000000)
 {
+    controlPoints[1].setXY (1.0f, 0.0f);
+    controlPoints[2].setXY (0.0f, 1.0f);
 }
 
 DrawableImage::~DrawableImage()
@@ -61,6 +62,10 @@ void DrawableImage::setImage (const Image& imageToCopy)
     clearImage();
     image = new Image (imageToCopy);
     canDeleteImage = true;
+
+    controlPoints[0].setXY (0.0f, 0.0f);
+    controlPoints[1].setXY ((float) image->getWidth(), 0.0f);
+    controlPoints[2].setXY (0.0f, (float) image->getHeight());
 }
 
 void DrawableImage::setImage (Image* imageToUse,
@@ -69,6 +74,13 @@ void DrawableImage::setImage (Image* imageToUse,
     clearImage();
     image = imageToUse;
     canDeleteImage = releaseWhenNotNeeded;
+
+    if (image != 0)
+    {
+        controlPoints[0].setXY (0.0f, 0.0f);
+        controlPoints[1].setXY ((float) image->getWidth(), 0.0f);
+        controlPoints[2].setXY (0.0f, (float) image->getHeight());
+    }
 }
 
 void DrawableImage::setOpacity (const float newOpacity)
@@ -81,23 +93,45 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
     overlayColour = newOverlayColour;
 }
 
+void DrawableImage::setTransform (const Point<float>& imageTopLeftPosition,
+                                  const Point<float>& imageTopRightPosition,
+                                  const Point<float>& imageBottomLeftPosition)
+{
+    controlPoints[0] = imageTopLeftPosition;
+    controlPoints[1] = imageTopRightPosition;
+    controlPoints[2] = imageBottomLeftPosition;
+}
+
 //==============================================================================
+const AffineTransform DrawableImage::getTransform() const
+{
+    if (image == 0)
+        return AffineTransform::identity;
+
+    const Point<float> tr (controlPoints[0] + (controlPoints[1] - controlPoints[0]) / image->getWidth());
+    const Point<float> bl (controlPoints[0] + (controlPoints[2] - controlPoints[0]) / image->getHeight());
+
+    return AffineTransform::fromTargetPoints (controlPoints[0].getX(), controlPoints[0].getY(),
+                                              tr.getX(), tr.getY(),
+                                              bl.getX(), bl.getY());
+}
+
 void DrawableImage::render (const Drawable::RenderingContext& context) const
 {
     if (image != 0)
     {
+        const AffineTransform t (getTransform().followedBy (context.transform));
+
         if (opacity > 0.0f && ! overlayColour.isOpaque())
         {
             context.g.setOpacity (context.opacity * opacity);
-            context.g.drawImageTransformed (image, image->getBounds(),
-                                            context.transform, false);
+            context.g.drawImageTransformed (image, image->getBounds(), t, false);
         }
 
         if (! overlayColour.isTransparent())
         {
             context.g.setColour (overlayColour.withMultipliedAlpha (context.opacity));
-            context.g.drawImageTransformed (image, image->getBounds(),
-                                            context.transform, true);
+            context.g.drawImageTransformed (image, image->getBounds(), t, true);
         }
     }
 }
@@ -107,17 +141,38 @@ const Rectangle<float> DrawableImage::getBounds() const
     if (image == 0)
         return Rectangle<float>();
 
-    return Rectangle<float> (0, 0, (float) image->getWidth(), (float) image->getHeight());
+    const Point<float> bottomRight (controlPoints[1] + (controlPoints[2] - controlPoints[0]));
+    float minX = bottomRight.getX();
+    float maxX = minX;
+    float minY = bottomRight.getY();
+    float maxY = minY;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        minX = jmin (minX, controlPoints[i].getX());
+        maxX = jmax (maxX, controlPoints[i].getX());
+        minY = jmin (minY, controlPoints[i].getY());
+        maxY = jmax (maxY, controlPoints[i].getY());
+    }
+
+    return Rectangle<float> (minX, minY, maxX - minX, maxY - minY);
 }
 
 bool DrawableImage::hitTest (float x, float y) const
 {
-    return image != 0
-            && x >= 0.0f
-            && y >= 0.0f
-            && x < image->getWidth()
-            && y < image->getHeight()
-            && image->getPixelAt (roundToInt (x), roundToInt (y)).getAlpha() >= 127;
+    if (image == 0)
+        return false;
+
+    getTransform().inverted().transformPoint (x, y);
+
+    const int ix = roundToInt (x);
+    const int iy = roundToInt (y);
+
+    return ix >= 0
+            && iy >= 0
+            && ix < image->getWidth()
+            && iy < image->getHeight()
+            && image->getPixelAt (ix, iy).getAlpha() >= 127;
 }
 
 Drawable* DrawableImage::createCopy() const
@@ -126,6 +181,9 @@ Drawable* DrawableImage::createCopy() const
 
     di->opacity = opacity;
     di->overlayColour = overlayColour;
+
+    for (int i = 0; i < 4; ++i)
+        di->controlPoints[i] = controlPoints[i];
 
     if (image != 0)
     {
@@ -144,59 +202,110 @@ Drawable* DrawableImage::createCopy() const
 }
 
 //==============================================================================
-ValueTree DrawableImage::createValueTree() const
+const Identifier DrawableImage::valueTreeType ("Image");
+
+namespace DrawableImageHelpers
 {
-    ValueTree v ("Image");
+    static const Identifier opacity ("opacity");
+    static const Identifier overlay ("overlay");
+    static const Identifier image ("image");
+    static const Identifier topLeft ("topLeft");
+    static const Identifier topRight ("topRight");
+    static const Identifier bottomLeft ("bottomLeft");
 
-    if (getName().isNotEmpty())
-        v.setProperty ("id", getName(), 0);
-
-    if (opacity < 1.0f)
-        v.setProperty ("opacity", (double) opacity, 0);
-
-    if (! overlayColour.isTransparent())
-        v.setProperty ("overlay", String::toHexString ((int) overlayColour.getARGB()), 0);
-
-    if (image != 0)
+    static void stringToPoint (const String& coords, Point<float>& point)
     {
-        MemoryOutputStream imageData;
-        PNGImageFormat pngFormat;
-        if (pngFormat.writeImageToStream (*image, imageData))
+        if (coords.isNotEmpty())
         {
-            String base64 (MemoryBlock (imageData.getData(), imageData.getDataSize()).toBase64Encoding());
-
-            for (int i = (base64.length() & ~127); i >= 0; i -= 128)
-                base64 = base64.substring (0, i) + "\n" + base64.substring (i);
-
-            v.setProperty ("data", base64, 0);
+            const int comma = coords.indexOfChar (',');
+            point.setXY (coords.substring (0, comma).getFloatValue(),
+                         coords.substring (comma).getFloatValue());
         }
     }
 
-    return v;
+    static const var pointToString (const Point<float>& point)
+    {
+        return String (point.getX()) + ", " + String (point.getY());
+    }
 }
 
-DrawableImage* DrawableImage::createFromValueTree (const ValueTree& tree)
+const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    if (! tree.hasType ("Image"))
-        return 0;
+    jassert (tree.hasType (valueTreeType));
 
-    DrawableImage* di = new DrawableImage();
+    setName (tree [idProperty]);
 
-    di->setName (tree ["id"]);
-    di->opacity = tree.hasProperty ("opacity") ? (float) tree ["opacity"] : 1.0f;
-    di->overlayColour = Colour (tree ["overlay"].toString().getHexValue32());
+    const float newOpacity = tree.getProperty (DrawableImageHelpers::opacity, 1.0);
+    const Colour newOverlayColour (tree [DrawableImageHelpers::overlay].toString().getHexValue32());
 
-    MemoryBlock imageData;
-    if (imageData.fromBase64Encoding (tree ["data"]))
+    Image* newImage = 0;
+    const String imageIdentifier (tree [DrawableImageHelpers::image].toString());
+    if (imageIdentifier.isNotEmpty())
     {
-        Image* const im = ImageFileFormat::loadFrom (imageData.getData(), (int) imageData.getSize());
-        if (im == 0)
-            return false;
+        jassert (imageProvider != 0); // if you're using images, you need to provide something that can load and save them!
 
-        di->setImage (im, true);
+        if (imageProvider != 0)
+            newImage = imageProvider->getImageForIdentifier (imageIdentifier);
     }
 
-    return di;
+    Point<float> newControlPoint[3];
+    DrawableImageHelpers::stringToPoint (tree [DrawableImageHelpers::topLeft].toString(), newControlPoint[0]);
+    DrawableImageHelpers::stringToPoint (tree [DrawableImageHelpers::topRight].toString(), newControlPoint[1]);
+    DrawableImageHelpers::stringToPoint (tree [DrawableImageHelpers::bottomLeft].toString(), newControlPoint[2]);
+
+    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage
+         || controlPoints[0] != newControlPoint[0]
+         || controlPoints[1] != newControlPoint[1]
+         || controlPoints[2] != newControlPoint[2])
+    {
+        opacity = newOpacity;
+        overlayColour = newOverlayColour;
+        controlPoints[0] = newControlPoint[0];
+        controlPoints[1] = newControlPoint[1];
+        controlPoints[2] = newControlPoint[2];
+
+        if (image != newImage)
+        {
+            ImageCache::release (image);
+            image = newImage;
+        }
+
+        return getBounds();
+    }
+
+    ImageCache::release (newImage);
+    return Rectangle<float>();
+}
+
+const ValueTree DrawableImage::createValueTree (ImageProvider* imageProvider) const
+{
+    ValueTree v (valueTreeType);
+
+    if (getName().isNotEmpty())
+        v.setProperty (idProperty, getName(), 0);
+
+    if (opacity < 1.0f)
+        v.setProperty (DrawableImageHelpers::opacity, (double) opacity, 0);
+
+    if (! overlayColour.isTransparent())
+        v.setProperty (DrawableImageHelpers::overlay, String::toHexString ((int) overlayColour.getARGB()), 0);
+
+    if (! getTransform().isIdentity())
+    {
+        v.setProperty (DrawableImageHelpers::topLeft, DrawableImageHelpers::pointToString (controlPoints[0]), 0);
+        v.setProperty (DrawableImageHelpers::topRight, DrawableImageHelpers::pointToString (controlPoints[1]), 0);
+        v.setProperty (DrawableImageHelpers::bottomLeft, DrawableImageHelpers::pointToString (controlPoints[2]), 0);
+    }
+
+    if (image != 0)
+    {
+        jassert (imageProvider != 0); // if you're using images, you need to provide something that can load and save them!
+
+        if (imageProvider != 0)
+            v.setProperty (DrawableImageHelpers::image, imageProvider->getIdentifierForImage (image), 0);
+    }
+
+    return v;
 }
 
 

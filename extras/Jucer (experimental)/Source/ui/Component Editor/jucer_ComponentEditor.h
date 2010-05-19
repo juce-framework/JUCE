@@ -56,7 +56,6 @@ public:
     ComponentDocument& getDocument() const      { return *componentDocument; }
 
     const StringArray getSelectedIds() const;
-    void getSelectedItemProperties (Array <PropertyComponent*>& props);
     void deleteSelection();
     void deselectNonComponents();
     void selectionToFront();

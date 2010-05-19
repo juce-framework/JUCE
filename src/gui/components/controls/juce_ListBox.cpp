@@ -895,11 +895,7 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
         {
             const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
             const Rectangle<int> rowRect (pos.getX(), pos.getY(), rowComp->getWidth(), rowComp->getHeight());
-
-            if (imageArea.isEmpty())
-                imageArea = rowRect;
-            else
-                imageArea = imageArea.getUnion (rowRect);
+            imageArea = imageArea.getUnion (rowRect);
         }
     }
 

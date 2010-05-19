@@ -138,6 +138,9 @@ public:
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
     const Point transformedBy (const AffineTransform& transform) const throw()    { ValueType x2 (x), y2 (y); transform.transformPoint (x2, y2); return Point (x2, y2); }
 
+    /** Casts this point to a Point<float> object. */
+    const Point<float> toFloat() const throw()                          { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
+
     /** Returns the point as a string in the form "x, y". */
     const String toString() const                                       { return String (x) + ", " + String (y); }
 

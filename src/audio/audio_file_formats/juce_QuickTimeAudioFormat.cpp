@@ -88,7 +88,7 @@ public:
     {
         bufferList.calloc (256, 1);
 
-#ifdef WIN32
+#if JUCE_WINDOWS
         if (InitializeQTML (0) != noErr)
             return;
 #endif

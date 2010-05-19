@@ -78,9 +78,13 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    ValueTree createValueTree() const;
+    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
-    static DrawableText* createFromValueTree (const ValueTree& tree);
+    const ValueTree createValueTree (ImageProvider* imageProvider) const;
+    /** @internal */
+    static const Identifier valueTreeType;
+    /** @internal */
+    const Identifier getValueTreeType() const    { return valueTreeType; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator

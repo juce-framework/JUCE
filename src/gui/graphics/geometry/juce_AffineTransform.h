@@ -146,6 +146,16 @@ public:
     */
     const AffineTransform inverted() const throw();
 
+    /** Returns the transform that will map three known points onto three coordinates
+        that are supplied.
+
+        This returns the transform that will transform (0, 0) into (x00, y00),
+        (1, 0) to (x10, y10), and (0, 1) to (x01, y01).
+    */
+    static const AffineTransform fromTargetPoints (float x00, float y00,
+                                                   float x10, float y10,
+                                                   float x01, float y01) throw();
+
     //==============================================================================
     /** Returns the result of concatenating another transformation after this one. */
     const AffineTransform followedBy (const AffineTransform& other) const throw();

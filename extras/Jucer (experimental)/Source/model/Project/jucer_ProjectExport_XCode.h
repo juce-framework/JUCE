@@ -570,7 +570,7 @@ private:
         for (int i = 0; i < objects.size(); ++i)
         {
             ValueTree& o = *objects.getUnchecked(i);
-            output << "\t\t" << o.getType() << " = { ";
+            output << "\t\t" << static_cast <const juce_wchar*> (o.getType()) << " = { ";
 
             for (int j = 0; j < o.getNumProperties(); ++j)
             {
@@ -814,7 +814,7 @@ private:
         StringArray configIDs;
 
         for (int i = 0; i < configsToUse.size(); ++i)
-            configIDs.add (configsToUse[i]->getType());
+            configIDs.add (configsToUse[i]->getType().toString());
 
         ValueTree* v = new ValueTree (listID);
         v->setProperty ("isa", "XCConfigurationList", 0);

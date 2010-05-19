@@ -27,15 +27,17 @@
 
 
 //==============================================================================
-static const char* const drawableTag        = "DRAWABLE";
-static const char* const markersGroupXTag   = "MARKERS_X";
-static const char* const markersGroupYTag   = "MARKERS_Y";
-
+namespace Tags
+{
+    const Identifier drawableTag ("DRAWABLE");
+    const Identifier markersGroupXTag ("MARKERS_X");
+    const Identifier markersGroupYTag ("MARKERS_Y");
+}
 
 //==============================================================================
 DrawableDocument::DrawableDocument (Project* project_)
     : project (project_),
-      root (drawableTag),
+      root (Tags::drawableTag),
       saveAsXml (true),
       needsSaving (false)
 {
@@ -166,7 +168,7 @@ bool DrawableDocument::load (InputStream& input)
         loadedTree = ValueTree::readFromStream (input);
     }
 
-    if (loadedTree.hasType (drawableTag))
+    if (loadedTree.hasType (Tags::drawableTag))
     {
         addMissingIds (loadedTree);
 
@@ -264,58 +266,63 @@ void DrawableDocument::valueTreeParentChanged (ValueTree& tree)
 }
 
 //==============================================================================
-const Coordinate DrawableDocument::findMarker (const String& name, bool isHorizontal) const
+const Coordinate DrawableDocument::findNamedCoordinate (const String& objectName, const String& edge) const
 {
-    if (name == Coordinate::parentRightMarkerName)     return Coordinate ((double) getCanvasWidth().getValue(), isHorizontal);
-    if (name == Coordinate::parentBottomMarkerName)    return Coordinate ((double) getCanvasHeight().getValue(), isHorizontal);
-
-    if (name.containsChar ('.'))
+    if (objectName == "parent")
     {
-        const String compName (name.upToFirstOccurrenceOf (".", false, false).trim());
-        const String edge (name.fromFirstOccurrenceOf (".", false, false).trim());
-
-        if (compName.isNotEmpty() && edge.isNotEmpty())
-        {
-/*            const ValueTree comp (getComponentWithMemberName (compName));
-
-            if (comp.isValid())
-            {
-                const RectangleCoordinates coords (getCoordsFor (comp));
-
-                if (edge == "left")   return coords.left;
-                if (edge == "right")  return coords.right;
-                if (edge == "top")    return coords.top;
-                if (edge == "bottom") return coords.bottom;
-            }*/
-        }
+        if (edge == "right")     return Coordinate ((double) getCanvasWidth().getValue(), true);
+        if (edge == "bottom")    return Coordinate ((double) getCanvasHeight().getValue(), false);
     }
 
-    const ValueTree marker (getMarkerList (isHorizontal).getMarkerNamed (name));
-    if (marker.isValid())
-        return getMarkerList (isHorizontal).getCoordinate (marker);
+    if (objectName.isNotEmpty() && edge.isNotEmpty())
+    {
+/*            const ValueTree comp (getComponentWithMemberName (compName));
 
-    return Coordinate (isHorizontal);
+        if (comp.isValid())
+        {
+            const RectangleCoordinates coords (getCoordsFor (comp));
+
+            if (edge == Coordinate::leftName)   return coords.left;
+            if (edge == "right")  return coords.right;
+            if (edge == "top")    return coords.top;
+            if (edge == "bottom") return coords.bottom;
+        }*/
+    }
+
+    {
+        const ValueTree marker (getMarkerListX().getMarkerNamed (objectName));
+        if (marker.isValid())
+            return getMarkerListX().getCoordinate (marker);
+    }
+
+    {
+        const ValueTree marker (getMarkerListY().getMarkerNamed (objectName));
+        if (marker.isValid())
+            return getMarkerListY().getCoordinate (marker);
+    }
+
+    return Coordinate();
 }
 
 DrawableDocument::MarkerList::MarkerList (DrawableDocument& document_, bool isX_)
-    : MarkerListBase (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag), isX_),
+    : MarkerListBase (document_.getRoot().getChildWithName (isX_ ? Tags::markersGroupXTag : Tags::markersGroupYTag), isX_),
       document (document_)
 {
 }
 
-const Coordinate DrawableDocument::MarkerList::findMarker (const String& name, bool isHorizontal_) const
+const Coordinate DrawableDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
 {
-    if (isHorizontal_ == isX)
+    if (objectName == "parent")
     {
-        if (name == Coordinate::parentRightMarkerName)   return Coordinate ((double) document.getCanvasWidth().getValue(), isX);
-        if (name == Coordinate::parentBottomMarkerName)  return Coordinate ((double) document.getCanvasHeight().getValue(), isX);
-
-        const ValueTree marker (document.getMarkerList (isX).getMarkerNamed (name));
-        if (marker.isValid())
-            return document.getMarkerList (isX).getCoordinate (marker);
+        if (edge == "right")     return Coordinate ((double) document.getCanvasWidth().getValue(), true);
+        if (edge == "bottom")    return Coordinate ((double) document.getCanvasHeight().getValue(), false);
     }
 
-    return Coordinate (isX);
+    const ValueTree marker (getMarkerNamed (objectName));
+    if (marker.isValid())
+        return getCoordinate (marker);
+
+    return Coordinate();
 }
 
 bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)
@@ -334,10 +341,10 @@ bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>&
     return false;
 }
 
-void DrawableDocument::addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
+void DrawableDocument::addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge, PopupMenu& menu,
                                           bool isAnchor1, const String& fullCoordName)
 {
-    Coordinate requestedCoord (findMarker (name, coord.isHorizontal()));
+//    Coordinate requestedCoord (findNamedCoordinate (objectName, edge, coord.isHorizontal()));
 
 //    menu.addItem (i, name,
   //                ! (name == fullCoordName || requestedCoord.referencesIndirectly (fullCoordName, *this)),
@@ -346,37 +353,38 @@ void DrawableDocument::addMarkerMenuItem (int i, const Coordinate& coord, const 
 
 void DrawableDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1)
 {
-    const String fullCoordName (getName (markerState));
+/*    const String fullCoordName (getName (markerState));
 
     if (coord.isHorizontal())
     {
-        document.addMarkerMenuItem (1, coord, Coordinate::parentLeftMarkerName, menu, isAnchor1, fullCoordName);
-        document.addMarkerMenuItem (2, coord, Coordinate::parentRightMarkerName, menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (1, coord, "parent", "left", menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (2, coord, "parent", "right", menu, isAnchor1, fullCoordName);
     }
     else
     {
-        document.addMarkerMenuItem (1, coord, Coordinate::parentTopMarkerName, menu, isAnchor1, fullCoordName);
-        document.addMarkerMenuItem (2, coord, Coordinate::parentBottomMarkerName, menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (1, coord, "parent", "top", menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (2, coord, "parent", "bottom", menu, isAnchor1, fullCoordName);
     }
 
     menu.addSeparator();
     const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
 
     for (int i = 0; i < markerList.size(); ++i)
-        document.addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)), menu, isAnchor1, fullCoordName);
+        document.addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)),
+                                    String::empty, menu, isAnchor1, fullCoordName);*/
 }
 
 const String DrawableDocument::MarkerList::getChosenMarkerMenuItem (const Coordinate& coord, int i) const
 {
-    if (i == 1)  return coord.isHorizontal() ? Coordinate::parentLeftMarkerName : Coordinate::parentTopMarkerName;
-    if (i == 2)  return coord.isHorizontal() ? Coordinate::parentRightMarkerName : Coordinate::parentBottomMarkerName;
+/*    if (i == 1)  return coord.isHorizontal() ? "parent.left" : "parent.top";
+    if (i == 2)  return coord.isHorizontal() ? "parent.right" : "parent.bottom";
 
     const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
 
     if (i >= 100 && i < 10000)
         return markerList.getName (markerList.getMarker (i - 100));
 
-    jassertfalse;
+    jassertfalse;*/
     return String::empty;
 }
 

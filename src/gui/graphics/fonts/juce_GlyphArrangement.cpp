@@ -615,24 +615,13 @@ const Rectangle<float> GlyphArrangement::getBoundingBox (int startIndex, int num
         num = glyphs.size() - startIndex;
 
     Rectangle<float> result;
-    bool isFirst = true;
 
     while (--num >= 0)
     {
         const PositionedGlyph* const pg = glyphs.getUnchecked (startIndex++);
 
         if (includeWhitespace || ! pg->isWhitespace())
-        {
-            if (isFirst)
-            {
-                isFirst = false;
-                result = pg->getBounds();
-            }
-            else
-            {
-                result = result.getUnion (pg->getBounds());
-            }
-        }
+            result = result.getUnion (pg->getBounds());
     }
 
     return result;

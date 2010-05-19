@@ -128,10 +128,10 @@ public:
             const int libTypeValues[] = { 1, 2, 0 };
             props.add (new ChoicePropertyComponent (getLibraryType(), "Library Type", StringArray (libTypes), Array<var> (libTypeValues)));
 
-            props.add (new TextPropertyComponent (getSetting ("libraryName_Debug"), "Library Name (Debug)", 128, false));
+            props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Debug), "Library Name (Debug)", 128, false));
             props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a debug build. You must include the .lib or .dll suffix on this filename.");
 
-            props.add (new TextPropertyComponent (getSetting ("libraryName_Release"), "Library Name (Release)", 128, false));
+            props.add (new TextPropertyComponent (getSetting (Ids::libraryName_Release), "Library Name (Release)", 128, false));
             props.getLast()->setTooltip ("If set, this name will override the binary name specified in the configuration settings, for a release build. You must include the .lib or .dll suffix on this filename.");
         }
     }
@@ -195,7 +195,7 @@ private:
     const File getDSPFile() const       { return getProjectFile (".dsp"); }
     const File getDSWFile() const       { return getProjectFile (".dsw"); }
 
-    Value getLibraryType() const        { return getSetting ("libraryType"); }
+    Value getLibraryType() const        { return getSetting (Ids::libraryType); }
     bool isLibraryDLL() const           { return project.isLibrary() && getLibraryType() == 2; }
 
     //==============================================================================
@@ -438,7 +438,7 @@ private:
 
     const String getBinaryFileForConfig (const Project::BuildConfiguration& config) const
     {
-        const String targetBinary (getSetting (config.isDebug().getValue() ? "libraryName_Debug" : "libraryName_Release").toString().trim());
+        const String targetBinary (getSetting (config.isDebug().getValue() ? Ids::libraryName_Debug : Ids::libraryName_Release).toString().trim());
         if (targetBinary.isNotEmpty())
             return targetBinary;
 

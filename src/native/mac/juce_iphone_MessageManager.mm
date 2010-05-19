@@ -36,81 +36,24 @@ struct CallbackMessagePayload
 };
 
 END_JUCE_NAMESPACE
-using namespace JUCE_NAMESPACE;
 
-@interface JuceAppDelegate   : NSObject <UIApplicationDelegate>
+//==============================================================================
+@interface JuceCustomMessageHandler   : NSObject
 {
 }
 
-- (JuceAppDelegate*) init;
-- (void) dealloc;
-- (BOOL) application: (UIApplication*) application handleOpenURL: (NSURL*) url;
-- (void) applicationDidBecomeActive: (NSNotification*) aNotification;
-- (void) applicationDidResignActive: (NSNotification*) aNotification;
-- (void) applicationWillUnhide: (NSNotification*) aNotification;
-- (void) customEvent: (id) data;
 - (void) performCallback: (id) info;
+
 @end
 
-@implementation JuceAppDelegate
-
-- (JuceAppDelegate*) init
-{
-    [super init];
-
-    [[UIApplication sharedApplication] setDelegate: self];
-
-    return self;
-}
-
-- (void) dealloc
-{
-    [[UIApplication sharedApplication] setDelegate: nil];
-    [super dealloc];
-}
-
-- (BOOL) application: (UIApplication*) application handleOpenURL: (NSURL*) url
-{
-    if (JUCEApplication::getInstance() != 0)
-    {
-        JUCEApplication::getInstance()->anotherInstanceStarted (nsStringToJuce ([url absoluteString]));
-        return YES;
-    }
-
-    return NO;
-}
-
-- (void) applicationDidBecomeActive: (NSNotification*) aNotification
-{
-    juce_HandleProcessFocusChange();
-}
-
-- (void) applicationDidResignActive: (NSNotification*) aNotification
-{
-    juce_HandleProcessFocusChange();
-}
-
-- (void) applicationWillUnhide: (NSNotification*) aNotification
-{
-    juce_HandleProcessFocusChange();
-}
-
-- (void) customEvent: (id) n
-{
-    NSData* data = (NSData*) n;
-    void* message = 0;
-    [data getBytes: &message length: sizeof (message)];
-    [data release];
-
-    if (message != 0)
-        MessageManager::getInstance()->deliverMessage (message);
-}
+//==============================================================================
+@implementation JuceCustomMessageHandler
 
 - (void) performCallback: (id) info
 {
     if ([info isKindOfClass: [NSData class]])
     {
-        CallbackMessagePayload* pl = (CallbackMessagePayload*) [((NSData*) info) bytes];
+        JUCE_NAMESPACE::CallbackMessagePayload* pl = (JUCE_NAMESPACE::CallbackMessagePayload*) [((NSData*) info) bytes];
 
         if (pl != 0)
         {
@@ -128,8 +71,7 @@ using namespace JUCE_NAMESPACE;
 
 BEGIN_JUCE_NAMESPACE
 
-static JuceAppDelegate* juceAppDelegate = 0;
-
+//==============================================================================
 void MessageManager::runDispatchLoop()
 {
     jassert (isThisTheMessageThread()); // must only be called by the message thread
@@ -167,6 +109,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 static CFRunLoopRef runLoop = 0;
 static CFRunLoopSourceRef runLoopSource = 0;
 static Array <void*, CriticalSection>* pendingMessages = 0;
+static JuceCustomMessageHandler* juceCustomMessageHandler = 0;
 
 static void runLoopSourceCallback (void*)
 {
@@ -202,8 +145,8 @@ void MessageManager::doPlatformSpecificInitialisation()
     runLoopSource = CFRunLoopSourceCreate (kCFAllocatorDefault, 1, &sourceContext);
     CFRunLoopAddSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
 
-    if (juceAppDelegate == 0)
-        juceAppDelegate = [[JuceAppDelegate alloc] init];
+    if (juceCustomMessageHandler == 0)
+        juceCustomMessageHandler = [[JuceCustomMessageHandler alloc] init];
 }
 
 void MessageManager::doPlatformSpecificShutdown()
@@ -220,11 +163,11 @@ void MessageManager::doPlatformSpecificShutdown()
         deleteAndZero (pendingMessages);
     }
 
-    if (juceAppDelegate != 0)
+    if (juceCustomMessageHandler != 0)
     {
-        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceAppDelegate];
-        [juceAppDelegate release];
-        juceAppDelegate = 0;
+        [[NSRunLoop currentRunLoop] cancelPerformSelectorsWithTarget: juceCustomMessageHandler];
+        [juceCustomMessageHandler release];
+        juceCustomMessageHandler = 0;
     }
 }
 
@@ -266,11 +209,11 @@ void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* call
         cmp.result = 0;
         cmp.hasBeenExecuted = false;
 
-        [juceAppDelegate performSelectorOnMainThread: @selector (performCallback:)
-                                          withObject: [NSData dataWithBytesNoCopy: &cmp
-                                                                           length: sizeof (cmp)
-                                                                     freeWhenDone: NO]
-                                       waitUntilDone: YES];
+        [juceCustomMessageHandler performSelectorOnMainThread: @selector (performCallback:)
+                                                   withObject: [NSData dataWithBytesNoCopy: &cmp
+                                                                                    length: sizeof (cmp)
+                                                                              freeWhenDone: NO]
+                                                waitUntilDone: YES];
 
         return cmp.result;
     }

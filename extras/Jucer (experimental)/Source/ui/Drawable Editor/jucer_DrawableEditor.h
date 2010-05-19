@@ -42,9 +42,21 @@ public:
                     Project* project, DrawableDocument* drawableDocument);
     ~DrawableEditor();
 
+    //==============================================================================
+    void getAllCommands (Array <CommandID>& commands);
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result);
+    bool perform (const InvocationInfo& info);
+
     void paint (Graphics& g);
     void resized();
 
+    //==============================================================================
+    void deleteSelection();
+    void selectionToFront();
+    void selectionToBack();
+    void showNewShapeMenu (Component* componentToAttachTo);
+
+    //==============================================================================
     DrawableDocument& getDocument() const   { return *drawableDocument; }
 
     EditorCanvasBase::SelectedItems& getSelection()         { return selection; }

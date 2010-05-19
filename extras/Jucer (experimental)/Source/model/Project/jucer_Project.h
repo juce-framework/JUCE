@@ -221,24 +221,24 @@ public:
         void createPropertyEditors (Array <PropertyComponent*>& properties);
 
         //==============================================================================
-        Value getName() const                               { return getValue ("name"); }
-        Value isDebug() const                               { return getValue ("isDebug"); }
-        Value getTargetBinaryName() const                   { return getValue ("targetName"); }
+        Value getName() const                               { return getValue (Ids::name); }
+        Value isDebug() const                               { return getValue (Ids::isDebug); }
+        Value getTargetBinaryName() const                   { return getValue (Ids::targetName); }
         // the path relative to the build folder in which the binary should go
-        Value getTargetBinaryRelativePath() const           { return getValue ("binaryPath"); }
-        Value getOptimisationLevel() const                  { return getValue ("optimisation"); }
+        Value getTargetBinaryRelativePath() const           { return getValue (Ids::binaryPath); }
+        Value getOptimisationLevel() const                  { return getValue (Ids::optimisation); }
         const String getGCCOptimisationFlag() const;
-        Value getPreprocessorDefs() const                   { return getValue ("defines"); }
+        Value getPreprocessorDefs() const                   { return getValue (Ids::defines); }
         const StringArray parsePreprocessorDefs() const;
-        Value getHeaderSearchPath() const                   { return getValue ("headerPath"); }
+        Value getHeaderSearchPath() const                   { return getValue (Ids::headerPath); }
         const StringArray getHeaderSearchPaths() const;
 
         static const char* const osxVersionDefault;
         static const char* const osxVersion10_4;
         static const char* const osxVersion10_5;
         static const char* const osxVersion10_6;
-        Value getMacSDKVersion() const                      { return getValue ("osxSDK"); }
-        Value getMacCompatibilityVersion() const            { return getValue ("osxCompatibility"); }
+        Value getMacSDKVersion() const                      { return getValue (Ids::osxSDK); }
+        Value getMacCompatibilityVersion() const            { return getValue (Ids::osxCompatibility); }
 
         //==============================================================================
     private:
@@ -246,7 +246,7 @@ public:
         Project* project;
         ValueTree config;
 
-        Value getValue (const char* name) const             { return config.getPropertyAsValue (name, getUndoManager()); }
+        Value getValue (const Identifier& name) const       { return config.getPropertyAsValue (name, getUndoManager()); }
         UndoManager* getUndoManager() const                 { return project->getUndoManagerFor (config); }
 
         BuildConfiguration (Project* project, const ValueTree& configNode);

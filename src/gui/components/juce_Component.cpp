@@ -2929,14 +2929,16 @@ bool Component::isFocusContainer() const throw()
     return flags.isFocusContainerFlag;
 }
 
+static const Identifier juce_explicitFocusOrderId ("_jexfo");
+
 int Component::getExplicitFocusOrder() const
 {
-    return properties ["_jexfo"];
+    return properties [juce_explicitFocusOrderId];
 }
 
 void Component::setExplicitFocusOrder (const int newFocusOrderIndex)
 {
-    properties.set ("_jexfo", newFocusOrderIndex);
+    properties.set (juce_explicitFocusOrderId, newFocusOrderIndex);
 }
 
 KeyboardFocusTraverser* Component::createFocusTraverser()

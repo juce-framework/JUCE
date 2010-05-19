@@ -233,6 +233,14 @@ bool AffineTransform::isSingularity() const throw()
     return (mat00 * mat11 - mat10 * mat01) == 0.0;
 }
 
+const AffineTransform AffineTransform::fromTargetPoints (const float x00, const float y00,
+                                                         const float x10, const float y10,
+                                                         const float x01, const float y01) throw()
+{
+    return AffineTransform (x10 - x00, x01 - x00, x00,
+                            y10 - y00, y01 - y00, y00);
+}
+
 bool AffineTransform::isOnlyTranslation() const throw()
 {
     return (mat01 == 0)

@@ -55,9 +55,6 @@ public:
 
     /** Sets the image that this drawable will render.
 
-        An internal copy of this will not be made, so the caller mustn't delete
-        the image while it's still being used by this object.
-
         A good way to use this is with the ImageCache - if you create an image
         with ImageCache and pass it in here with releaseWhenNotNeeded = true, then
         it'll be released neatly with its reference count being decreased.
@@ -68,8 +65,7 @@ public:
                                         needs it - unless the image was created by the ImageCache,
                                         in which case it will be released with ImageCache::release().
     */
-    void setImage (Image* imageToUse,
-                   bool releaseWhenNotNeeded);
+    void setImage (Image* imageToUse, bool releaseWhenNotNeeded);
 
     /** Returns the current image. */
     Image* getImage() const throw()                             { return image; }
@@ -97,6 +93,37 @@ public:
     /** Returns the overlay colour. */
     const Colour& getOverlayColour() const throw()              { return overlayColour; }
 
+    /** Sets the transform to be applied to this image, by defining the positions
+        where three anchor points should end up in the target rendering space.
+
+        @param imageTopLeftPosition     the position that the image's top-left corner should be mapped to
+                                        in the target coordinate space.
+        @param imageTopRightPosition    the position that the image's top-right corner should be mapped to
+                                        in the target coordinate space.
+        @param imageBottomLeftPosition  the position that the image's bottom-left corner should be mapped to
+                                        in the target coordinate space.
+    */
+    void setTransform (const Point<float>& imageTopLeftPosition,
+                       const Point<float>& imageTopRightPosition,
+                       const Point<float>& imageBottomLeftPosition);
+
+    /** Returns the position to which the image's top-left corner should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForTopLeft() const throw()         { return controlPoints[0]; }
+
+    /** Returns the position to which the image's top-right corner should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForTopRight() const throw()        { return controlPoints[1]; }
+
+    /** Returns the position to which the image's bottom-left corner should be remapped in the target
+        coordinate space when rendering this object.
+        @see setTransform
+    */
+    const Point<float>& getTargetPositionForBottomLeft() const throw()      { return controlPoints[2]; }
 
     //==============================================================================
     /** @internal */
@@ -108,9 +135,13 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
-    ValueTree createValueTree() const;
+    const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
-    static DrawableImage* createFromValueTree (const ValueTree& tree);
+    const ValueTree createValueTree (ImageProvider* imageProvider) const;
+    /** @internal */
+    static const Identifier valueTreeType;
+    /** @internal */
+    const Identifier getValueTreeType() const    { return valueTreeType; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -120,6 +151,9 @@ private:
     bool canDeleteImage;
     float opacity;
     Colour overlayColour;
+    Point<float> controlPoints[3];
+
+    const AffineTransform getTransform() const;
 
     DrawableImage (const DrawableImage&);
     DrawableImage& operator= (const DrawableImage&);

@@ -37,6 +37,8 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 DrawableComposite::DrawableComposite()
 {
+    controlPoints[1].setXY (1.0f, 0.0f);
+    controlPoints[2].setXY (0.0f, 1.0f);
 }
 
 DrawableComposite::~DrawableComposite()
@@ -44,51 +46,48 @@ DrawableComposite::~DrawableComposite()
 }
 
 //==============================================================================
-void DrawableComposite::insertDrawable (Drawable* drawable,
-                                        const AffineTransform& transform,
-                                        const int index)
+void DrawableComposite::insertDrawable (Drawable* drawable, const int index)
 {
     if (drawable != 0)
     {
-        if (! drawables.contains (drawable))
-        {
-            drawables.insert (index, drawable);
-
-            if (transform.isIdentity())
-                transforms.insert (index, 0);
-            else
-                transforms.insert (index, new AffineTransform (transform));
-        }
-        else
-        {
-            jassertfalse; // trying to add a drawable that's already in here!
-        }
+        jassert (! drawables.contains (drawable)); // trying to add a drawable that's already in here!
+        drawables.insert (index, drawable);
     }
 }
 
-void DrawableComposite::insertDrawable (const Drawable& drawable,
-                                        const AffineTransform& transform,
-                                        const int index)
+void DrawableComposite::insertDrawable (const Drawable& drawable, const int index)
 {
-    insertDrawable (drawable.createCopy(), transform, index);
+    insertDrawable (drawable.createCopy(), index);
 }
 
 void DrawableComposite::removeDrawable (const int index, const bool deleteDrawable)
 {
     drawables.remove (index, deleteDrawable);
-    transforms.remove (index);
 }
 
 void DrawableComposite::bringToFront (const int index)
 {
     if (index >= 0 && index < drawables.size() - 1)
-    {
         drawables.move (index, -1);
-        transforms.move (index, -1);
-    }
+}
+
+void DrawableComposite::setTransform (const Point<float>& targetPositionForOrigin,
+                                      const Point<float>& targetPositionForX1Y0,
+                                      const Point<float>& targetPositionForX0Y1)
+{
+    controlPoints[0] = targetPositionForOrigin;
+    controlPoints[1] = targetPositionForX1Y0;
+    controlPoints[2] = targetPositionForX0Y1;
 }
 
 //==============================================================================
+const AffineTransform DrawableComposite::getTransform() const
+{
+    return AffineTransform::fromTargetPoints (controlPoints[0].getX(), controlPoints[0].getY(),
+                                              controlPoints[1].getX(), controlPoints[1].getY(),
+                                              controlPoints[2].getX(), controlPoints[2].getY());
+}
+
 void DrawableComposite::render (const Drawable::RenderingContext& context) const
 {
     if (drawables.size() > 0 && context.opacity > 0)
@@ -96,15 +95,10 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
         if (context.opacity >= 1.0f || drawables.size() == 1)
         {
             Drawable::RenderingContext contextCopy (context);
+            contextCopy.transform = getTransform().followedBy (context.transform);
 
             for (int i = 0; i < drawables.size(); ++i)
-            {
-                const AffineTransform* const t = transforms.getUnchecked(i);
-                contextCopy.transform = (t == 0) ? context.transform
-                                                 : t->followedBy (context.transform);
-
                 drawables.getUnchecked(i)->render (contextCopy);
-            }
         }
         else
         {
@@ -127,42 +121,28 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
     }
 }
 
-const Rectangle<float> DrawableComposite::getBounds() const
+const Rectangle<float> DrawableComposite::getUntransformedBounds() const
 {
     Rectangle<float> bounds;
 
     for (int i = 0; i < drawables.size(); ++i)
-    {
-        const Drawable* const d = drawables.getUnchecked(i);
-        const AffineTransform* const t = transforms.getUnchecked(i);
-
-        const Rectangle<float> childBounds (t == 0 ? d->getBounds()
-                                                   : d->getBounds().transformed (*t));
-
-        if (bounds.isEmpty())
-            bounds = childBounds;
-        else if (! childBounds.isEmpty())
-            bounds = bounds.getUnion (childBounds);
-    }
+        bounds = bounds.getUnion (drawables.getUnchecked(i)->getBounds());
 
     return bounds;
 }
 
+const Rectangle<float> DrawableComposite::getBounds() const
+{
+    return getUntransformedBounds().transformed (getTransform());
+}
+
 bool DrawableComposite::hitTest (float x, float y) const
 {
+    getTransform().inverted().transformPoint (x, y);
+
     for (int i = 0; i < drawables.size(); ++i)
-    {
-        float tx = x;
-        float ty = y;
-
-        const AffineTransform* const t = transforms.getUnchecked(i);
-
-        if (t != 0)
-            t->inverted().transformPoint (tx, ty);
-
-        if (drawables.getUnchecked(i)->hitTest (tx, ty))
+        if (drawables.getUnchecked(i)->hitTest (x, y))
             return true;
-    }
 
     return false;
 }
@@ -171,87 +151,123 @@ Drawable* DrawableComposite::createCopy() const
 {
     DrawableComposite* const dc = new DrawableComposite();
 
-    for (int i = 0; i < drawables.size(); ++i)
-    {
-        dc->drawables.add (drawables.getUnchecked(i)->createCopy());
+    for (int i = 0; i < 3; ++i)
+        dc->controlPoints[i] = controlPoints[i];
 
-        const AffineTransform* const t = transforms.getUnchecked(i);
-        dc->transforms.add (t != 0 ? new AffineTransform (*t) : 0);
-    }
+    for (int i = 0; i < drawables.size(); ++i)
+        dc->drawables.add (drawables.getUnchecked(i)->createCopy());
 
     return dc;
 }
 
 //==============================================================================
-ValueTree DrawableComposite::createValueTree() const
+const Identifier DrawableComposite::valueTreeType ("Group");
+
+namespace DrawableCompositeHelpers
 {
-    ValueTree v ("Group");
+    static const Identifier topLeft ("topLeft");
+    static const Identifier topRight ("topRight");
+    static const Identifier bottomLeft ("bottomLeft");
 
-    if (getName().isNotEmpty())
-        v.setProperty ("id", getName(), 0);
-
-    for (int i = 0; i < drawables.size(); ++i)
+    static void stringToPoint (const String& coords, Point<float>& point)
     {
-        Drawable* const d = drawables.getUnchecked(i);
-
-        ValueTree child (d->createValueTree());
-
-        AffineTransform* transform = transforms.getUnchecked(i);
-
-        if (transform != 0)
+        if (coords.isNotEmpty())
         {
-            String t;
-            t <<  transform->mat00 << " " << transform->mat01 << " " << transform->mat02 << " "
-              << transform->mat10 << " " << transform->mat11 << " " << transform->mat12;
-
-            child.setProperty ("transform", t, 0);
+            const int comma = coords.indexOfChar (',');
+            point.setXY (coords.substring (0, comma).getFloatValue(),
+                         coords.substring (comma).getFloatValue());
         }
-
-        v.addChild (child, -1, 0);
     }
 
-    return v;
+    static const var pointToString (const Point<float>& point)
+    {
+        return String (point.getX()) + ", " + String (point.getY());
+    }
 }
 
-DrawableComposite* DrawableComposite::createFromValueTree (const ValueTree& tree)
+const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    if (! tree.hasType ("Group"))
-        return 0;
+    jassert (tree.hasType (valueTreeType));
 
-    DrawableComposite* dc = new DrawableComposite();
-    dc->setName (tree ["id"]);
+    Rectangle<float> damageRect;
+
+    setName (tree [idProperty]);
+
+    Point<float> newControlPoint[3];
+    DrawableCompositeHelpers::stringToPoint (tree [DrawableCompositeHelpers::topLeft].toString(), newControlPoint[0]);
+    DrawableCompositeHelpers::stringToPoint (tree [DrawableCompositeHelpers::topRight].toString(), newControlPoint[1]);
+    DrawableCompositeHelpers::stringToPoint (tree [DrawableCompositeHelpers::bottomLeft].toString(), newControlPoint[2]);
+    bool controlPointsChanged = false;
+
+    if (controlPoints[0] != newControlPoint[0]
+         || controlPoints[1] != newControlPoint[1]
+         || controlPoints[2] != newControlPoint[2])
+    {
+        controlPointsChanged = true;
+        damageRect = getUntransformedBounds();
+        controlPoints[0] = newControlPoint[0];
+        controlPoints[1] = newControlPoint[1];
+        controlPoints[2] = newControlPoint[2];
+    }
+
+    int i;
+    for (i = drawables.size(); --i >= tree.getNumChildren();)
+    {
+        damageRect = damageRect.getUnion (drawables.getUnchecked(i)->getBounds());
+        drawables.remove (i);
+    }
 
     for (int i = 0; i < tree.getNumChildren(); ++i)
     {
-        ValueTree childTree (tree.getChild (i));
-        Drawable* d = Drawable::createFromValueTree (childTree);
+        const ValueTree childTree (tree.getChild (i));
+        Drawable* d = drawables[i];
 
         if (d != 0)
         {
-            AffineTransform transform;
-            const String transformAtt (childTree ["transform"].toString());
-
-            if (transformAtt.isNotEmpty())
+            if (childTree.hasType (d->getValueTreeType()))
             {
-                StringArray tokens;
-                tokens.addTokens (transformAtt.trim(), false);
-                tokens.removeEmptyStrings (true);
-
-                if (tokens.size() == 6)
-                {
-                    float f[6];
-                    for (int j = 0; j < 6; ++j)
-                        f[j] = (float) tokens[j].getDoubleValue();
-
-                    transform = AffineTransform (f[0], f[1], f[2], f[3], f[4], f[5]);
-                }
+                damageRect = damageRect.getUnion (d->refreshFromValueTree (childTree, imageProvider));
             }
-
-            dc->insertDrawable (d, transform);
+            else
+            {
+                damageRect = damageRect.getUnion (d->getBounds());
+                d = createFromValueTree (childTree, imageProvider);
+                drawables.set (i, d);
+                damageRect = damageRect.getUnion (d->getBounds());
+            }
+        }
+        else
+        {
+            d = createFromValueTree (childTree, imageProvider);
+            drawables.set (i, d);
+            damageRect = damageRect.getUnion (d->getBounds());
         }
     }
 
-    return dc;
+    if (controlPointsChanged)
+        damageRect = damageRect.getUnion (getUntransformedBounds());
+
+    return damageRect.transformed (getTransform());
+}
+
+const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider) const
+{
+    ValueTree v (valueTreeType);
+
+    if (getName().isNotEmpty())
+        v.setProperty (idProperty, getName(), 0);
+
+    if (! getTransform().isIdentity())
+    {
+        v.setProperty (DrawableCompositeHelpers::topLeft, DrawableCompositeHelpers::pointToString (controlPoints[0]), 0);
+        v.setProperty (DrawableCompositeHelpers::topRight, DrawableCompositeHelpers::pointToString (controlPoints[1]), 0);
+        v.setProperty (DrawableCompositeHelpers::bottomLeft, DrawableCompositeHelpers::pointToString (controlPoints[2]), 0);
+    }
+
+    for (int i = 0; i < drawables.size(); ++i)
+        v.addChild (drawables.getUnchecked(i)->createValueTree (imageProvider), -1, 0);
+
+    return v;
 }
 
 

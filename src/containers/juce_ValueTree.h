@@ -125,7 +125,7 @@ public:
         The type is specified when the ValueTree is created.
         @see hasType
     */
-    const String getType() const;
+    const Identifier getType() const;
 
     /** Returns true if the node has this type.
         The comparison is case-sensitive.

@@ -107,7 +107,8 @@ void ComponentViewer::handleAsyncUpdate()
 
                 componentsInOrder.add (c);
 
-                layoutManager->setComponentLayout (c, v [ComponentDocument::memberNameProperty], componentDocument->getCoordsFor (v));
+                layoutManager->setComponentBounds (c, v [ComponentDocument::memberNameProperty],
+                                                   componentDocument->getCoordsFor (v));
             }
 
             // Make sure the z-order is correct..

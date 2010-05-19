@@ -128,18 +128,6 @@ private:
 };
 
 //==============================================================================
-struct MessageThreadFuncCall
-{
-    enum { uniqueID = 0x73774623 };
-
-    MessageCallbackFunction* func;
-    void* parameter;
-    void* result;
-    CriticalSection lock;
-    WaitableEvent event;
-};
-
-//==============================================================================
 static InternalMessageQueue* juce_internalMessageQueue = 0;
 
 // error handling in X11
@@ -326,6 +314,17 @@ void MessageManager::broadcastMessage (const String& value) throw()
 {
     /* TODO */
 }
+
+struct MessageThreadFuncCall
+{
+    enum { uniqueID = 0x73774623 };
+
+    MessageCallbackFunction* func;
+    void* parameter;
+    void* result;
+    CriticalSection lock;
+    WaitableEvent event;
+};
 
 void* MessageManager::callFunctionOnMessageThread (MessageCallbackFunction* func,
                                                    void* parameter)

@@ -232,6 +232,7 @@ private:
     Component* panelComponent;
     int tabDepth;
     int outlineThickness, edgeIndent;
+    static const Identifier deleteComponentId;
 
     friend class TabCompButtonBar;
     void changeCallback (int newCurrentTabIndex, const String& newTabName);

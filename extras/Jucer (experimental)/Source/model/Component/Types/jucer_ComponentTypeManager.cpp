@@ -76,7 +76,7 @@ public:
         {
             RectangleCoordinates r (sourceValue.toString());
             Coordinate& coord = getCoord (r);
-            coord = Coordinate (newValue.toString(), coord.isHorizontal());
+            coord = Coordinate (newValue.toString(), type == left || type == right);
 
             const String newVal (r.toString());
             if (sourceValue != newVal)
@@ -123,12 +123,12 @@ public:
         Coordinate coord (getCoordinate());
 
         PopupMenu m;
-        document.addComponentMarkerMenuItems (compState, getTypeName(), coord, m, isAnchor1);
+        document.addComponentMarkerMenuItems (compState, getTypeName(), coord, m, isAnchor1, type == left || type == right);
 
         const int r = m.showAt (button);
 
         if (r > 0)
-            return document.getChosenMarkerMenuItem (compState, coord, r);
+            return document.getChosenMarkerMenuItem (compState, coord, r, type == left || type == right);
 
         return String::empty;
     }
@@ -142,10 +142,10 @@ private:
     {
         switch (type)
         {
-            case left:      return "left";
-            case right:     return "right";
-            case top:       return "top";
-            case bottom:    return "bottom";
+            case left:      return Coordinate::Strings::left;
+            case right:     return Coordinate::Strings::right;
+            case top:       return Coordinate::Strings::top;
+            case bottom:    return Coordinate::Strings::bottom;
             default:        jassertfalse; break;
         }
 
@@ -181,7 +181,7 @@ Component* ComponentTypeManager::createFromStoredType (ComponentDocument& docume
     return c;
 }
 
-ComponentTypeHandler* ComponentTypeManager::getHandlerFor (const String& type)
+ComponentTypeHandler* ComponentTypeManager::getHandlerFor (const Identifier& type)
 {
     for (int i = handlers.size(); --i >= 0;)
         if (handlers.getUnchecked(i)->getXmlTag() == type)
@@ -248,7 +248,7 @@ public:
 
 private:
     Value sourceValue;
-    ComponentTypeInstance& item;
+    ComponentTypeInstance item;
 
     CompMemberNameValueSource (const CompMemberNameValueSource&);
     const CompMemberNameValueSource& operator= (const CompMemberNameValueSource&);

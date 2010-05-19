@@ -566,9 +566,9 @@ bool ValueTree::hasType (const Identifier& typeName) const
     return object != 0 && object->type == typeName;
 }
 
-const String ValueTree::getType() const
+const Identifier ValueTree::getType() const
 {
-    return object != 0 ? object->type.toString() : String::empty;
+    return object != 0 ? object->type : Identifier();
 }
 
 ValueTree ValueTree::getParent() const
@@ -807,7 +807,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 //==============================================================================
 void ValueTree::writeToStream (OutputStream& output)
 {
-    output.writeString (getType());
+    output.writeString (getType().toString());
 
     const int numProps = getNumProperties();
     output.writeCompressedInt (numProps);

@@ -34,42 +34,12 @@ class DrawableTreeViewItem  : public JucerTreeViewBase,
                               public ValueTree::Listener,
                               public ChangeListener
 {
-    DrawableTreeViewItem (DrawableEditor& editor_, const ValueTree& drawableRoot, const String& typeName_)
-        : editor (editor_), node (drawableRoot), typeName (typeName_)
+public:
+    DrawableTreeViewItem (DrawableEditor& editor_, const ValueTree& drawableRoot)
+        : editor (editor_), node (drawableRoot), typeName (drawableRoot.getType().toString())
     {
         node.addListener (this);
         editor.getSelection().addChangeListener (this);
-    }
-
-public:
-    static DrawableTreeViewItem* createItemForNode (DrawableEditor& editor, const ValueTree& drawableRoot)
-    {
-        const char* typeName = 0;
-
-        {
-            ScopedPointer <Drawable> d (Drawable::createFromValueTree (drawableRoot));
-
-            if (d != 0)
-            {
-                if (dynamic_cast <DrawablePath*> ((Drawable*) d) != 0)
-                    typeName = "Path";
-                else if (dynamic_cast <DrawableImage*> ((Drawable*) d) != 0)
-                    typeName = "Image";
-                else if (dynamic_cast <DrawableComposite*> ((Drawable*) d) != 0)
-                    typeName = "Group";
-                else if (dynamic_cast <DrawableText*> ((Drawable*) d) != 0)
-                    typeName = "Text";
-                else
-                {
-                    jassertfalse
-                }
-            }
-        }
-
-        if (typeName != 0)
-            return new DrawableTreeViewItem (editor, drawableRoot, typeName);
-
-        return 0;
     }
 
     ~DrawableTreeViewItem()
@@ -97,7 +67,8 @@ public:
     // TreeViewItem stuff..
     bool mightContainSubItems()
     {
-        return node.getNumChildren() > 0;
+        return node.getType() == DrawableComposite::valueTreeType
+                && node.getNumChildren() > 0;
     }
 
     const String getUniqueName() const
@@ -114,23 +85,24 @@ public:
 
     void refreshSubItems()
     {
-        ScopedPointer <XmlElement> oldOpenness (getOpennessState());
-
-        clearSubItems();
-
-        for (int i = 0; i < node.getNumChildren(); ++i)
+        if (node.getType() == DrawableComposite::valueTreeType)
         {
-            ValueTree subNode (node.getChild (i));
-            DrawableTreeViewItem* const item = createItemForNode (editor, subNode);
+            ScopedPointer <XmlElement> oldOpenness (getOpennessState());
 
-            if (item != 0)
+            clearSubItems();
+
+            for (int i = 0; i < node.getNumChildren(); ++i)
+            {
+                ValueTree subNode (node.getChild (i));
+                DrawableTreeViewItem* const item = new DrawableTreeViewItem (editor, subNode);
                 addSubItem (item);
+            }
+
+            if (oldOpenness != 0)
+                restoreOpennessState (*oldOpenness);
+
+            editor.getSelection().changed();
         }
-
-        if (oldOpenness != 0)
-            restoreOpennessState (*oldOpenness);
-
-        editor.getSelection().changed();
     }
 
     const String getDisplayName() const

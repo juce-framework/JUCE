@@ -85,29 +85,27 @@ Drawable* DrawableText::createCopy() const
 }
 
 //==============================================================================
-ValueTree DrawableText::createValueTree() const
+const Identifier DrawableText::valueTreeType ("Text");
+
+const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    ValueTree v ("Text");
+    jassert (tree.hasType (valueTreeType));
+    setName (tree [idProperty]);
+
+    jassertfalse; // xxx not finished!
+
+    return Rectangle<float>();
+}
+
+const ValueTree DrawableText::createValueTree (ImageProvider* imageProvider) const
+{
+    ValueTree v (valueTreeType);
 
     if (getName().isNotEmpty())
-        v.setProperty ("id", getName(), 0);
+        v.setProperty (idProperty, getName(), 0);
 
     jassertfalse; // xxx not finished!
     return v;
-}
-
-DrawableText* DrawableText::createFromValueTree (const ValueTree& tree)
-{
-    if (! tree.hasType ("Text"))
-        return 0;
-
-    DrawableText* dt = new DrawableText();
-
-    dt->setName (tree ["id"]);
-
-    jassertfalse; // xxx not finished!
-
-    return dt;
 }
 
 

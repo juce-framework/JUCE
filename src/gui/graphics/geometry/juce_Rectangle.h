@@ -395,11 +395,16 @@ public:
         return false;
     }
 
-    /** Returns the smallest rectangle that contains both this one and the one
-        passed-in.
+    /** Returns the smallest rectangle that contains both this one and the one passed-in.
+
+        If either this or the other rectangle are empty, they will not be counted as
+        part of the resulting region.
     */
     const Rectangle getUnion (const Rectangle& other) const throw()
     {
+        if (other.isEmpty())  return *this;
+        if (isEmpty())        return other;
+
         const ValueType newX = jmin (x, other.x);
         const ValueType newY = jmin (y, other.y);
 

@@ -96,8 +96,8 @@ public:
         props.add (new ChoicePropertyComponent (item.getValue (Ids::textBoxPos), "Text Box", StringArray (textBoxPositions), Array<var> (positionValues, numElementsInArray (positionValues))));
 
         props.add (new BooleanPropertyComponent (item.getValue (Ids::editable), "Editable", "Value can be edited"));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxWidth"))), "Text Box Width", 8, false));
-        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue ("textBoxHeight"))), "Text Box Height", 8, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue (Ids::textBoxWidth))), "Text Box Width", 8, false));
+        props.add (new TextPropertyComponent (Value (new NumericValueSource<int> (item.getValue (Ids::textBoxHeight))), "Text Box Height", 8, false));
 
         props.add (new TextPropertyComponent (Value (new NumericValueSource<double> (item.getValue (Ids::skew))), "Skew Factor", 16, false));
         addEditableColourProperties (item, props);

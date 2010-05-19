@@ -141,6 +141,23 @@ Path& Path::operator= (const Path& other)
     return *this;
 }
 
+bool Path::operator== (const Path& other) const throw()
+{
+    return ! operator!= (other);
+}
+
+bool Path::operator!= (const Path& other) const throw()
+{
+    if (numElements != other.numElements || useNonZeroWinding != other.useNonZeroWinding)
+        return true;
+
+    for (int i = 0; i < numElements; ++i)
+        if (data.elements[i] != other.data.elements[i])
+            return true;
+
+    return false;
+}
+
 void Path::clear() throw()
 {
     numElements = 0;
@@ -150,7 +167,7 @@ void Path::clear() throw()
     pathXMax = 0;
 }
 
-void Path::swapWithPath (Path& other)
+void Path::swapWithPath (Path& other) throw()
 {
     data.swapWith (other.data);
     swapVariables <size_t> (numElements, other.numElements);
@@ -203,7 +220,6 @@ const Rectangle<float> Path::getBounds() const throw()
                              pathXMax - pathXMin,
                              pathYMax - pathYMin);
 }
-
 
 const Rectangle<float> Path::getBoundsTransformed (const AffineTransform& transform) const throw()
 {

@@ -40,6 +40,7 @@ namespace Tags
     const Identifier configurations    ("CONFIGURATIONS");
     const Identifier configuration     ("CONFIGURATION");
     const Identifier exporters         ("EXPORTFORMATS");
+    const Identifier configGroup       ("JUCEOPTIONS");
 }
 
 const char* Project::projectFileExtension = ".jucer";
@@ -80,7 +81,7 @@ const String Project::getDocumentTitle()
 
 void Project::updateProjectSettings()
 {
-    projectRoot.setProperty ("jucerVersion", ProjectInfo::versionString, 0);
+    projectRoot.setProperty (Ids::jucerVersion, ProjectInfo::versionString, 0);
     projectRoot.setProperty (Ids::name, getDocumentTitle(), 0);
 }
 
@@ -101,13 +102,13 @@ void Project::setMissingDefaultValues()
     if (getDocumentTitle().isEmpty())
         setTitle ("Juce Project");
 
-    if (! projectRoot.hasProperty ("projectType"))
+    if (! projectRoot.hasProperty (Ids::projectType))
         getProjectType() = (int) application;
 
-    if (! projectRoot.hasProperty ("version"))
+    if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";
 
-    if (! projectRoot.hasProperty ("juceLinkage"))
+    if (! projectRoot.hasProperty (Ids::juceLinkage))
         getJuceLinkageModeValue() = useAmalgamatedJuceViaMultipleTemplates;
 
     const String juceFolderPath (getRelativePathForFile (StoredSettings::getInstance()->getLastKnownJuceFolder()));
@@ -124,7 +125,7 @@ void Project::setMissingDefaultValues()
 
     const String sanitisedProjectName (CodeHelpers::makeValidIdentifier (getProjectName().toString(), false, true, false));
 
-    if (! projectRoot.hasProperty ("buildVST"))
+    if (! projectRoot.hasProperty (Ids::buildVST))
     {
         shouldBuildVST() = true;
         shouldBuildRTAS() = false;
@@ -147,7 +148,7 @@ void Project::setMissingDefaultValues()
         getPluginRTASCategory() = String::empty;
     }
 
-    if (! projectRoot.hasProperty ("bundleIdentifier"))
+    if (! projectRoot.hasProperty (Ids::bundleIdentifier))
         setBundleIdentifierToDefault();
 }
 
@@ -473,7 +474,7 @@ bool Project::Item::shouldBeCompiled() const
 
 Value Project::Item::getShouldCompileValue() const
 {
-    return node.getPropertyAsValue ("compile", getUndoManager());
+    return node.getPropertyAsValue (Ids::compile, getUndoManager());
 }
 
 bool Project::Item::shouldBeAddedToBinaryResources() const
@@ -483,7 +484,7 @@ bool Project::Item::shouldBeAddedToBinaryResources() const
 
 Value Project::Item::getShouldAddToResourceValue() const
 {
-    return node.getPropertyAsValue ("resource", getUndoManager());
+    return node.getPropertyAsValue (Ids::resource, getUndoManager());
 }
 
 const File Project::Item::getFile() const
@@ -673,11 +674,11 @@ Image* Project::Item::getIcon() const
 //==============================================================================
 ValueTree Project::getJuceConfigNode()
 {
-    ValueTree configNode = projectRoot.getChildWithName ("JUCEOPTIONS");
+    ValueTree configNode = projectRoot.getChildWithName (Tags::configGroup);
 
     if (! configNode.isValid())
     {
-        configNode = ValueTree ("JUCEOPTIONS");
+        configNode = ValueTree (Tags::configGroup);
         projectRoot.addChild (configNode, -1, 0);
     }
 

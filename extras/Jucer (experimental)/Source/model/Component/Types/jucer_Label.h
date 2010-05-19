@@ -71,7 +71,7 @@ public:
         props.add (new TextPropertyComponent (item.getValue (Ids::text), "Text", 16384, true));
         props.getLast()->setTooltip ("The label's text.");
 
-        item.addJustificationProperty (props, "Layout", item.getValue ("justification"), false);
+        item.addJustificationProperty (props, "Layout", item.getValue (Ids::justification), false);
 
         const char* const editModes[] = { "Read-only", "Edit on Single-Click", "Edit on Double-Click", 0 };
         const int values[] = { 1, 2, 3, 0 };
@@ -93,7 +93,7 @@ public:
             << item.getMemberName() << "->setEditable (" << CodeHelpers::boolLiteral (editMode == 2)
                                     << ", " << CodeHelpers::boolLiteral (editMode == 3) << ", false);" << newLine;
 
-        Justification justification ((int) item ["textJustification"]);
+        Justification justification ((int) item [Ids::justification]);
         if (justification.getFlags() != 0)
             code.constructorCode << item.getMemberName() << "->setJustificationType ("
                                  << CodeHelpers::justificationToCode (justification) << ");" << newLine;

@@ -30,7 +30,7 @@
 
 
 //==============================================================================
-class MarkerListBase    : public Coordinate::MarkerResolver
+class MarkerListBase    : public Coordinate::NamedCoordinateFinder
 {
 public:
     MarkerListBase (const ValueTree& group_, bool isX_)   : group (group_), isX (isX_) {}
@@ -133,10 +133,10 @@ public:
     {
     public:
         //==============================================================================
-        PositionPropertyComponent (MarkerResolver& resolver_, MarkerListBase& markerList_,
+        PositionPropertyComponent (NamedCoordinateFinder& nameSource_, MarkerListBase& markerList_,
                                    const String& name, const ValueTree& markerState_,
                                    const Value& coordValue_)
-            : CoordinatePropertyComponent (resolver_, name, coordValue_, markerList_.isHorizontal()),
+            : CoordinatePropertyComponent (nameSource_, name, coordValue_, markerList_.isHorizontal()),
               markerList (markerList_),
               markerState (markerState_)
         {

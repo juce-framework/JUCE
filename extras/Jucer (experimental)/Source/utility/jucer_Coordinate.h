@@ -31,15 +31,15 @@
 
 //==============================================================================
 /**
-    Holds a co-ordinate along the x or y axis, expressed either as an absolute
-    position, or relative to other named marker positions.
+    Describes a coordinate's, either as an absolute position, or relative to
+    other named positions.
 */
 class Coordinate
 {
 public:
     //==============================================================================
     /** Creates a zero coordinate. */
-    explicit Coordinate (bool isHorizontal);
+    Coordinate();
 
     /** Recreates a coordinate from its stringified version. */
     Coordinate (const String& stringVersion, bool isHorizontal);
@@ -47,99 +47,143 @@ public:
     /** Creates an absolute position from the parent origin. */
     Coordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
 
-    /** Creates an absolute position relative to a named marker. */
-    Coordinate (double absolutePosition, const String& relativeToMarker, bool isHorizontal);
+    /** Creates an absolute position relative to a named anchor. */
+    Coordinate (double absoluteDistanceFromAnchor, const String& anchorPoint);
 
-    /** Creates a relative position between two named markers. */
-    Coordinate (double relativePosition, const String& marker1, const String& marker2, bool isHorizontal);
+    /** Creates a relative position between two named points. */
+    Coordinate (double relativeProportionBetweenAnchors, const String& anchorPoint1, const String& anchorPoint2);
 
     /** Destructor. */
     ~Coordinate();
 
     //==============================================================================
     /**
-        Provides an interface for looking up the position of a named marker.
+        Provides an interface for looking up the position of a named anchor.
     */
-    class MarkerResolver
+    class NamedCoordinateFinder
     {
     public:
-        virtual ~MarkerResolver() {}
-        virtual const Coordinate findMarker (const String& name, bool isHorizontal) const = 0;
+        virtual ~NamedCoordinateFinder() {}
+        virtual const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const = 0;
     };
 
+    //==============================================================================
     /** Calculates the absolute position of this co-ordinate. */
-    double resolve (const MarkerResolver& markerResolver) const;
+    double resolve (const NamedCoordinateFinder& nameSource) const;
 
-    /** Returns true if this co-ordinate is expressed directly in terms of the specified marker. */
-    bool referencesDirectly (const String& markerName) const;
-
-    /** Returns true if this co-ordinate is expressed in terms of the specified marker at any
+    /** Returns true if this co-ordinate is expressed in terms of the specified coord at any
         level in its evaluation. */
-    bool referencesIndirectly (const String& markerName, const MarkerResolver& markerResolver) const;
+    bool references (const String& coordName, const NamedCoordinateFinder& nameSource) const;
 
-    /** Changes the value of this marker to make it resolve to the specified position. */
-    void moveToAbsolute (double newPos, const MarkerResolver& markerResolver);
+    //==============================================================================
+    /** Changes the value of this coord to make it resolve to the specified position. */
+    void moveToAbsolute (double newPos, const NamedCoordinateFinder& nameSource);
 
-    const Coordinate getAnchorPoint1() const;
-    const Coordinate getAnchorPoint2() const;
+    /** */
+    bool isProportional() const throw()                     { return anchor2.isNotEmpty(); }
 
-    const double getEditableValue() const;
-    void setEditableValue (const double newValue);
+    /** */
+    void toggleProportionality (const NamedCoordinateFinder& nameSource, bool isHorizontal);
 
-    bool isHorizontal() const throw()                   { return horizontal; }
+    /** */
+    const double getEditableNumber() const;
 
-    bool isProportional() const throw()                 { return isProportion; }
-    void toggleProportionality (const MarkerResolver& markerResolver);
+    /** */
+    void setEditableNumber (const double newValue);
 
-    const String getAnchor1() const                     { return checkName (anchor1); }
-    void changeAnchor1 (const String& newMarkerName, const MarkerResolver& markerResolver);
+    //==============================================================================
+    /** */
+    const String getAnchorName1() const                     { return anchor1; }
 
-    const String getAnchor2() const                     { return checkName (anchor2); }
-    void changeAnchor2 (const String& newMarkerName, const MarkerResolver& markerResolver);
+    /** */
+    const String getAnchorName2() const                     { return anchor2; }
+
+    /** */
+    const Coordinate getAnchorCoordinate1() const;
+
+    /** */
+    const Coordinate getAnchorCoordinate2() const;
+
+    /** */
+    void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder& nameSource);
+
+    /** */
+    void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder& nameSource);
 
     /** Tells the coord that an anchor is changing its name.
         If the new name is empty, it removes the anchor.
     */
-    void renameAnchorIfUsed (const String& oldName, const String& newName, const MarkerResolver& markerResolver);
+    void renameAnchorIfUsed (const String& oldName, const String& newName, const NamedCoordinateFinder& nameSource);
 
     //==============================================================================
     /*
         Position string formats:
             123                         = absolute pixels from parent origin
-            marker
-            marker + 123
-            marker - 123
+            anchor
+            anchor + 123
+            anchor - 123
             50%                         = percentage between parent origin and parent extent
-            50% * marker                = percentage between parent origin and marker
-            50% * marker1 -> marker2    = percentage between two markers
+            50% * anchor                = percentage between parent origin and anchor
+            50% * anchor1 -> anchor2    = percentage between two named points
 
-        standard marker names:
+        where an anchor name can be:
             "parent.top", "parent.left", "parent.bottom", "parent.right"
-            "componentName.top", "componentName.left", "componentName.bottom", "componentName.right"
+            "objectName.top", "objectName.left", "objectName.bottom", "objectName.right"
+            "markerName"
     */
     const String toString() const;
 
     //==============================================================================
-    static const char* parentLeftMarkerName;
-    static const char* parentRightMarkerName;
-    static const char* parentTopMarkerName;
-    static const char* parentBottomMarkerName;
+    struct Strings
+    {
+        static const String parent;
+        static const String left;
+        static const String right;
+        static const String top;
+        static const String bottom;
+        static const String originX;
+        static const String originY;
+        static const String extentX;
+        static const String extentY;
+    };
+
+    //==============================================================================
+    struct RecursiveCoordinateException  : public std::runtime_error
+    {
+        RecursiveCoordinateException();
+    };
 
 private:
     //==============================================================================
     String anchor1, anchor2;
     double value;
-    bool isProportion, horizontal;
 
-    double resolve (const MarkerResolver& markerResolver, int recursionCounter) const;
-    double getPosition (const String& name, const MarkerResolver& markerResolver, int recursionCounter) const;
-    const String checkName (const String& name) const;
-    const String getOriginMarkerName() const;
-    const String getExtentMarkerName() const;
+    double resolve (const NamedCoordinateFinder& nameSource, int recursionCounter) const;
+    double resolveAnchor (const String& name, const NamedCoordinateFinder& nameSource, int recursionCounter) const;
+    const String getOriginAnchorName (bool isHorizontal) const throw();
+    const String getExtentAnchorName (bool isHorizontal) const throw();
+    const Coordinate lookUpName (const String& name, const NamedCoordinateFinder& nameSource) const;
     static bool isOrigin (const String& name);
-    static void skipWhitespace (const String& s, int& i);
-    static const String readMarkerName (const String& s, int& i);
-    static double readNumber (const String& s, int& i);
+    static const String getObjectName (const String& fullName);
+    static const String getEdgeName (const String& fullName);
+};
+
+//==============================================================================
+class CoordinatePair
+{
+public:
+    CoordinatePair();
+    CoordinatePair (const Point<float>& absolutePoint);
+    CoordinatePair (const String& stringVersion);
+
+    const Point<float> resolve (const Coordinate::NamedCoordinateFinder& nameSource) const;
+    void moveToAbsolute (const Point<float>& newPos, const Coordinate::NamedCoordinateFinder& nameSource);
+    const String toString() const;
+
+    // Tells the coord that an anchor is changing its name.
+    void renameAnchorIfUsed (const String& oldName, const String& newName, const Coordinate::NamedCoordinateFinder& nameSource);
+
+    Coordinate x, y;
 };
 
 //==============================================================================
@@ -155,41 +199,57 @@ public:
     explicit RectangleCoordinates (const String& stringVersion);
 
     //==============================================================================
-    const Rectangle<int> resolve (const Coordinate::MarkerResolver& markerResolver) const;
-    void moveToAbsolute (const Rectangle<float>& newPos, const Coordinate::MarkerResolver& markerResolver);
+    const Rectangle<int> resolve (const Coordinate::NamedCoordinateFinder& nameSource) const;
+    void moveToAbsolute (const Rectangle<float>& newPos, const Coordinate::NamedCoordinateFinder& nameSource);
     const String toString() const;
 
     // Tells the coord that an anchor is changing its name.
-    void renameAnchorIfUsed (const String& oldName, const String& newName,
-                             const Coordinate::MarkerResolver& markerResolver);
+    void renameAnchorIfUsed (const String& oldName, const String& newName, const Coordinate::NamedCoordinateFinder& nameSource);
 
     Coordinate left, right, top, bottom;
 };
 
 
 //==============================================================================
+/**
+*/
 class ComponentAutoLayoutManager    : public ComponentListener,
-                                      public Coordinate::MarkerResolver,
+                                      public Coordinate::NamedCoordinateFinder,
                                       public AsyncUpdater
 {
 public:
     //==============================================================================
+    /**
+    */
     ComponentAutoLayoutManager (Component* parentComponent);
+
+    /** Destructor. */
     ~ComponentAutoLayoutManager();
 
     //==============================================================================
+    /**
+    */
     void setMarker (const String& name, const Coordinate& coord);
 
-    void setComponentLayout (Component* comp, const String& name, const RectangleCoordinates& coords);
+    /**
+    */
+    void setComponentBounds (Component* component, const String& componentName, const RectangleCoordinates& bounds);
 
+    /**
+    */
     void applyLayout();
 
-    const Coordinate findMarker (const String& name, bool isHorizontal) const;
-
+    //==============================================================================
+    /** @internal */
+    const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    /** @internal */
     void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    /** @internal */
     void componentBeingDeleted (Component& component);
-
+    /** @internal */
     void handleAsyncUpdate();
+
+    juce_UseDebuggingNewOperator
 
 private:
     //==============================================================================
@@ -213,6 +273,10 @@ private:
     Component* parent;
     OwnedArray <ComponentPosition> components;
     OwnedArray <MarkerPosition> markers;
+
+    ComponentAutoLayoutManager (const ComponentAutoLayoutManager&);
+    ComponentAutoLayoutManager& operator= (const ComponentAutoLayoutManager&);
 };
+
 
 #endif  // __JUCER_COORDINATE_H_EF56ACFA__

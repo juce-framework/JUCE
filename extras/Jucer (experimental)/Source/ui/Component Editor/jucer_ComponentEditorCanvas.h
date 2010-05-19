@@ -90,9 +90,9 @@ public:
         return String::empty;
     }
 
-    void showPopupMenu (const Point<int>& position)
+    void showPopupMenu (bool isClickOnSelectedObject)
     {
-        if (findObjectIdAt (position).isNotEmpty())
+        if (isClickOnSelectedObject)
         {
             PopupMenu m;
             m.addCommandItem (commandManager, CommandIDs::toFront);

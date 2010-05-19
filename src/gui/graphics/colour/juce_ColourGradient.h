@@ -141,6 +141,9 @@ public:
     */
     bool isRadial;
 
+    bool operator== (const ColourGradient& other) const throw();
+    bool operator!= (const ColourGradient& other) const throw();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
@@ -152,6 +155,9 @@ private:
         ColourPoint (uint32 position_, const Colour& colour_) throw()
             : position (position_), colour (colour_)
         {}
+
+        bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
+        bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
 
         uint32 position;
         Colour colour;

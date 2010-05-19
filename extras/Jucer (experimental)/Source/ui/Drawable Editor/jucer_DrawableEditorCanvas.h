@@ -74,11 +74,11 @@ public:
         return String::empty;
     }
 
-    void showPopupMenu (const Point<int>& position)
+    void showPopupMenu (bool isClickOnSelectedObject)
     {
         PopupMenu m;
 
-        if (findObjectIdAt (position).isNotEmpty())
+        if (isClickOnSelectedObject)
         {
             m.addCommandItem (commandManager, CommandIDs::toFront);
             m.addCommandItem (commandManager, CommandIDs::toBack);

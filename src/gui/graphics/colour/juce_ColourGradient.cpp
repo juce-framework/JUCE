@@ -57,6 +57,18 @@ ColourGradient::~ColourGradient()
 {
 }
 
+bool ColourGradient::operator== (const ColourGradient& other) const throw()
+{
+    return point1 == other.point1 && point2 == other.point2
+            && isRadial == other.isRadial
+            && colours == other.colours;
+}
+
+bool ColourGradient::operator!= (const ColourGradient& other) const throw()
+{
+    return ! operator== (other);
+}
+
 //==============================================================================
 void ColourGradient::clearColours()
 {

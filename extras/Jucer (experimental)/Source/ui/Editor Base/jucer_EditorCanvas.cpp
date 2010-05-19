@@ -37,7 +37,8 @@ public:
         : OverlayItemComponent (canvas_),
           objectState (objectState_),
           objectId (objectId_),
-          borderThickness (4)
+          borderThickness (4),
+          isDragging (false)
     {
         jassert (objectState.isValid());
     }
@@ -59,26 +60,50 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         updateDragZone (e.getPosition());
-        canvas->beginDrag (e.getEventRelativeTo (getParentComponent()), dragZone);
-        canvas->showSizeGuides();
+
+        if (e.mods.isPopupMenu())
+        {
+            isDragging = false;
+            canvas->showPopupMenu (true);
+        }
+        else
+        {
+            isDragging = true;
+            canvas->beginDrag (e.getEventRelativeTo (getParentComponent()), dragZone);
+            canvas->showSizeGuides();
+        }
     }
 
     void mouseDrag (const MouseEvent& e)
     {
-        canvas->continueDrag (e.getEventRelativeTo (getParentComponent()));
-        autoScrollForMouseEvent (e);
+        if (isDragging)
+        {
+            canvas->continueDrag (e.getEventRelativeTo (getParentComponent()));
+            autoScrollForMouseEvent (e);
+        }
     }
 
     void mouseUp (const MouseEvent& e)
     {
-        canvas->hideSizeGuides();
-        canvas->endDrag (e.getEventRelativeTo (getParentComponent()));
-        updateDragZone (e.getPosition());
+        if (isDragging)
+        {
+            canvas->hideSizeGuides();
+            canvas->endDrag (e.getEventRelativeTo (getParentComponent()));
+            updateDragZone (e.getPosition());
+        }
+    }
+
+    void mouseDoubleClick (const MouseEvent& e)
+    {
+        canvas->objectDoubleClicked (e, objectState);
     }
 
     bool hitTest (int x, int y)
     {
-        return ! getCentreArea().contains (x, y);
+        if (ModifierKeys::getCurrentModifiers().isAnyModifierKeyDown())
+            return ! getCentreArea().contains (x, y);
+
+        return true;
     }
 
     bool updatePosition()
@@ -130,7 +155,7 @@ public:
         void updatePosition (const Rectangle<int>& bounds)
         {
             RectangleCoordinates coords (canvas->getObjectCoords (state));
-            Coordinate coord (false);
+            Coordinate coord;
             Rectangle<int> r;
 
             switch (type)
@@ -174,6 +199,7 @@ private:
     ResizableBorderComponent::Zone dragZone;
     const int borderThickness;
     OwnedArray <SizeGuideComponent> sizeGuides;
+    bool isDragging;
 
     const Rectangle<int> getCentreArea() const
     {
@@ -389,7 +415,7 @@ public:
             if (underMouse.isNotEmpty() && ! getSelection().isSelected (underMouse))
                 getSelection().selectOnly (underMouse);
 
-            canvas->showPopupMenu (e2.getPosition());
+            canvas->showPopupMenu (underMouse.isNotEmpty());
         }
         else
         {

@@ -118,6 +118,8 @@ TabBarButton* TabbedComponent::createTabButton (const String& tabName, const int
 }
 
 //==============================================================================
+const Identifier TabbedComponent::deleteComponentId ("deleteByTabComp_");
+
 void TabbedComponent::clearTabs()
 {
     if (panelComponent != 0)
@@ -136,7 +138,7 @@ void TabbedComponent::clearTabs()
         // be careful not to delete these components until they've been removed from the tab component
         jassert (c == 0 || c->isValidComponent());
 
-        if (c != 0 && (bool) c->getProperties() ["deleteByTabComp_"])
+        if (c != 0 && (bool) c->getProperties() [deleteComponentId])
             delete c;
     }
 
@@ -152,7 +154,7 @@ void TabbedComponent::addTab (const String& tabName,
     contentComponents.insert (insertIndex, contentComponent);
 
     if (contentComponent != 0)
-        contentComponent->getProperties().set ("deleteByTabComp_", deleteComponentWhenNotNeeded);
+        contentComponent->getProperties().set (deleteComponentId, deleteComponentWhenNotNeeded);
 
     tabs->addTab (tabName, tabBackgroundColour, insertIndex);
 }
@@ -166,7 +168,7 @@ void TabbedComponent::removeTab (const int tabIndex)
 {
     Component* const c = contentComponents [tabIndex];
 
-    if (c != 0 && (bool) c->getProperties() ["deleteByTabComp_"])
+    if (c != 0 && (bool) c->getProperties() [deleteComponentId])
     {
         if (c == panelComponent)
             panelComponent = 0;

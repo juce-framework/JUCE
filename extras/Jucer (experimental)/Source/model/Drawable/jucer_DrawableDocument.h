@@ -57,8 +57,8 @@ public:
     void addCircle();
     void addImage (const File& imageFile);
 
-    Value getCanvasWidth() const            { return getRootValueNonUndoable ("width"); }
-    Value getCanvasHeight() const           { return getRootValueNonUndoable ("height"); }
+    Value getCanvasWidth() const            { return getRootValueNonUndoable (Ids::width); }
+    Value getCanvasHeight() const           { return getRootValueNonUndoable (Ids::height); }
 
     static const String getIdFor (const ValueTree& object);
 
@@ -69,7 +69,7 @@ public:
         MarkerList (DrawableDocument& document, bool isX);
         ~MarkerList() {}
 
-        const Coordinate findMarker (const String& name, bool isHorizontal) const;
+        const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
         bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
         void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
         const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
@@ -117,9 +117,9 @@ private:
     void addMissingIds (ValueTree tree) const;
     void addDrawable (Drawable& d);
 
-    const Coordinate findMarker (const String& name, bool isHorizontal) const;
-    void addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
-                            bool isAnchor1, const String& fullCoordName);
+    const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    void addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge,
+                            PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 };
 
 

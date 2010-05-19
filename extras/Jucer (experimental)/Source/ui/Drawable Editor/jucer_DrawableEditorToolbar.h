@@ -41,17 +41,22 @@ public:
     }
 
     //==============================================================================
-    enum DemoToolbarItemIds
+    enum ToolbarItemIds
     {
-        createComponent     = 1,
-        showInfo            = 2,
-        showComponentTree   = 3,
+        createShape     = 1,
+        showInfo,
+        showTree,
+        showOrHideMarkers,
+        toggleSnapping
     };
 
     void getAllToolbarItemIds (Array <int>& ids)
     {
+        ids.add (createShape);
         ids.add (showInfo);
-        ids.add (showComponentTree);
+        ids.add (showTree);
+        ids.add (showOrHideMarkers);
+        ids.add (toggleSnapping);
 
         ids.add (separatorBarId);
         ids.add (spacerId);
@@ -61,8 +66,12 @@ public:
     void getDefaultItemSet (Array <int>& ids)
     {
         ids.add (spacerId);
+        ids.add (createShape);
         ids.add (flexibleSpacerId);
-        ids.add (showComponentTree);
+        ids.add (showOrHideMarkers);
+        ids.add (toggleSnapping);
+        ids.add (flexibleSpacerId);
+        ids.add (showTree);
         ids.add (showInfo);
         ids.add (spacerId);
     }
@@ -74,15 +83,37 @@ public:
 
         switch (itemId)
         {
+            case createShape:       return new NewShapeToolbarButton (editor, itemId);
             case showInfo:          name = "info"; commandId = CommandIDs::showOrHideProperties; break;
-            case showComponentTree: name = "tree"; commandId = CommandIDs::showOrHideTree; break;
+            case showTree:          name = "tree"; commandId = CommandIDs::showOrHideTree; break;
+            case showOrHideMarkers: name = "markers"; commandId = CommandIDs::showOrHideMarkers; break;
+            case toggleSnapping:    name = "snap"; commandId = CommandIDs::toggleSnapping; break;
             default:                jassertfalse; return 0;
         }
 
-        ToolbarButton* b = new ToolbarButton (itemId, name, new DrawablePath(), 0);
+        JucerToolbarButton* b = new JucerToolbarButton (itemId, name);
         b->setCommandToTrigger (commandManager, commandId, true);
         return b;
     }
+
+    //==============================================================================
+    class NewShapeToolbarButton   : public JucerToolbarButton
+    {
+    public:
+        NewShapeToolbarButton (DrawableEditor& editor_, int itemId_)
+            : JucerToolbarButton (itemId_, "create..."), editor (editor_)
+        {
+            setTriggeredOnMouseDown (true);
+        }
+
+        void clicked()
+        {
+            editor.showNewShapeMenu (this);
+        }
+
+    private:
+        DrawableEditor& editor;
+    };
 
 private:
     DrawableEditor& editor;

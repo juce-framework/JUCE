@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	3
+#define JUCE_BUILDNUMBER	4
 
 /** Current Juce version number.
 
@@ -5759,7 +5759,7 @@ public:
 	The following code is in the header so that the atomics can be inlined where possible...
 */
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
-	  || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+	  || (JUCE_MAC &&  (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
 
   #if JUCE_PPC || JUCE_IPHONE
@@ -12955,7 +12955,7 @@ public:
 		The type is specified when the ValueTree is created.
 		@see hasType
 	*/
-	const String getType() const;
+	const Identifier getType() const;
 
 	/** Returns true if the node has this type.
 		The comparison is case-sensitive.
@@ -18856,6 +18856,16 @@ public:
 	*/
 	const AffineTransform inverted() const throw();
 
+	/** Returns the transform that will map three known points onto three coordinates
+		that are supplied.
+
+		This returns the transform that will transform (0, 0) into (x00, y00),
+		(1, 0) to (x10, y10), and (0, 1) to (x01, y01).
+	*/
+	static const AffineTransform fromTargetPoints (float x00, float y00,
+												   float x10, float y10,
+												   float x01, float y01) throw();
+
 	/** Returns the result of concatenating another transformation after this one. */
 	const AffineTransform followedBy (const AffineTransform& other) const throw();
 
@@ -19005,6 +19015,9 @@ public:
 
 	/** Returns the position of this point, if it is transformed by a given AffineTransform. */
 	const Point transformedBy (const AffineTransform& transform) const throw()	{ ValueType x2 (x), y2 (y); transform.transformPoint (x2, y2); return Point (x2, y2); }
+
+	/** Casts this point to a Point<float> object. */
+	const Point<float> toFloat() const throw()			  { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
 	/** Returns the point as a string in the form "x, y". */
 	const String toString() const                                       { return String (x) + ", " + String (y); }
@@ -20451,11 +20464,16 @@ public:
 		return false;
 	}
 
-	/** Returns the smallest rectangle that contains both this one and the one
-		passed-in.
+	/** Returns the smallest rectangle that contains both this one and the one passed-in.
+
+		If either this or the other rectangle are empty, they will not be counted as
+		part of the resulting region.
 	*/
 	const Rectangle getUnion (const Rectangle& other) const throw()
 	{
+		if (other.isEmpty())  return *this;
+		if (isEmpty())	return other;
+
 		const ValueType newX = jmin (x, other.x);
 		const ValueType newY = jmin (y, other.y);
 
@@ -20838,6 +20856,9 @@ public:
 
 	/** Copies this path from another one. */
 	Path& operator= (const Path& other);
+
+	bool operator== (const Path& other) const throw();
+	bool operator!= (const Path& other) const throw();
 
 	/** Returns true if the path doesn't contain any lines or curves. */
 	bool isEmpty() const throw();
@@ -21224,7 +21245,7 @@ public:
 		The internal data of the two paths is swapped over, so this is much faster than
 		copying it to a temp variable and back.
 	*/
-	void swapWithPath (Path& other);
+	void swapWithPath (Path& other) throw();
 
 	/** Applies a 2D transform to all the vertices in the path.
 
@@ -23140,6 +23161,9 @@ public:
 	*/
 	bool isRadial;
 
+	bool operator== (const ColourGradient& other) const throw();
+	bool operator!= (const ColourGradient& other) const throw();
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -23150,6 +23174,9 @@ private:
 		ColourPoint (uint32 position_, const Colour& colour_) throw()
 			: position (position_), colour (colour_)
 		{}
+
+		bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
+		bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
 
 		uint32 position;
 		Colour colour;
@@ -41889,24 +41916,65 @@ public:
 	*/
 	static Drawable* createFromSVG (const XmlElement& svgDocument);
 
+	/** This class is used when loading Drawables that contain images, and retrieves
+		the image for a stored identifier.
+		@see Drawable::createFromValueTree
+	*/
+	class JUCE_API  ImageProvider
+	{
+	public:
+		ImageProvider() {}
+		virtual ~ImageProvider() {}
+
+		/** Retrieves the image associated with this identifier, which could be any
+			kind of string, number, filename, etc.
+
+			The image that is returned will be owned by the caller, but it may come
+			from the ImageCache.
+		*/
+		virtual Image* getImageForIdentifier (const var& imageIdentifier) = 0;
+
+		/** Returns an identifier to be used to refer to a given image.
+			This is used when converting a drawable into a ValueTree, so if you're
+			only loading drawables, you can just return a var::null here.
+		*/
+		virtual const var getIdentifierForImage (Image* image) = 0;
+	};
+
 	/** Tries to create a Drawable from a previously-saved ValueTree.
 		The ValueTree must have been created by the createValueTree() method.
+		If there are any images used within the drawable, you'll need to provide a valid
+		ImageProvider object that can be used to retrieve these images from whatever type
+		of identifier is used to represent them.
 	*/
-	static Drawable* createFromValueTree (const ValueTree& tree);
+	static Drawable* createFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+
+	/** Tries to refresh a Drawable from the same ValueTree that was used to create it.
+		@returns the damage rectangle that will need repainting due to any changes that were made.
+	*/
+	virtual const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider) = 0;
 
 	/** Creates a ValueTree to represent this Drawable.
 		The VarTree that is returned can be turned back into a Drawable with
 		createFromValueTree().
+		If there are any images used in this drawable, you'll need to provide a valid
+		ImageProvider object that can be used to create storable representations of them.
 	*/
-	virtual ValueTree createValueTree() const = 0;
+	virtual const ValueTree createValueTree (ImageProvider* imageProvider) const = 0;
+
+	/** Returns the tag ID that is used for a ValueTree that stores this type of drawable.  */
+	virtual const Identifier getValueTreeType() const = 0;
 
 	juce_UseDebuggingNewOperator
 
+protected:
+	static const Identifier idProperty;
+
 private:
+	String name;
+
 	Drawable (const Drawable&);
 	Drawable& operator= (const Drawable&);
-
-	String name;
 };
 
 #endif   // __JUCE_DRAWABLE_JUCEHEADER__
@@ -50657,6 +50725,7 @@ private:
 	Component* panelComponent;
 	int tabDepth;
 	int outlineThickness, edgeIndent;
+	static const Identifier deleteComponentId;
 
 	friend class TabCompButtonBar;
 	void changeCallback (int newCurrentTabIndex, const String& newTabName);
@@ -57436,16 +57505,12 @@ public:
 		@param drawable	 the object to add - this will be deleted automatically
 								when no longer needed, so the caller mustn't keep any
 								pointers to it.
-		@param transform	the transform to apply to this drawable when it's being
-								drawn
 		@param index		where to insert it in the list of drawables. 0 is the back,
 								-1 is the front, or any value from 0 and getNumDrawables()
 								can be used
 		@see removeDrawable
 	*/
-	void insertDrawable (Drawable* drawable,
-						 const AffineTransform& transform = AffineTransform::identity,
-						 int index = -1);
+	void insertDrawable (Drawable* drawable, int index = -1);
 
 	/** Adds a new sub-drawable to this one.
 
@@ -57454,16 +57519,12 @@ public:
 		pointer instead.
 
 		@param drawable	 the object to add - an internal copy will be made of this object
-		@param transform	the transform to apply to this drawable when it's being
-								drawn
 		@param index		where to insert it in the list of drawables. 0 is the back,
 								-1 is the front, or any value from 0 and getNumDrawables()
 								can be used
 		@see removeDrawable
 	*/
-	void insertDrawable (const Drawable& drawable,
-						 const AffineTransform& transform = AffineTransform::identity,
-						 int index = -1);
+	void insertDrawable (const Drawable& drawable, int index = -1);
 
 	/** Deletes one of the Drawable objects.
 
@@ -57493,15 +57554,6 @@ public:
 	*/
 	Drawable* getDrawable (int index) const throw()				 { return drawables [index]; }
 
-	/** Returns the transform that applies to one of the drawables that are contained in this one.
-
-		The pointer returned is managed by this object and will be deleted when no longer
-		needed, so be careful what you do with it.
-
-		@see getNumDrawables
-	*/
-	const AffineTransform* getDrawableTransform (int index) const throw()	   { return transforms [index]; }
-
 	/** Brings one of the Drawables to the front.
 
 		@param index	the index of the drawable to move, between 0
@@ -57510,6 +57562,38 @@ public:
 	*/
 	void bringToFront (int index);
 
+	/** Sets the transform to be applied to this drawable, by defining the positions
+		where three anchor points should end up in the target rendering space.
+
+		@param targetPositionForOrigin  the position that the local coordinate (0, 0) should be
+										mapped onto when rendering this object.
+		@param targetPositionForX1Y0	the position that the local coordinate (1, 0) should be
+										mapped onto when rendering this object.
+		@param targetPositionForX0Y1	the position that the local coordinate (0, 1) should be
+										mapped onto when rendering this object.
+	*/
+	void setTransform (const Point<float>& targetPositionForOrigin,
+					   const Point<float>& targetPositionForX1Y0,
+					   const Point<float>& targetPositionForX0Y1);
+
+	/** Returns the position to which the local coordinate (0, 0) should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForOrigin() const throw()	  { return controlPoints[0]; }
+
+	/** Returns the position to which the local coordinate (1, 0) should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForX1Y0() const throw()		{ return controlPoints[1]; }
+
+	/** Returns the position to which the local coordinate (0, 1) should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForX0Y1() const throw()		{ return controlPoints[2]; }
+
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
 	/** @internal */
@@ -57517,17 +57601,28 @@ public:
 	/** @internal */
 	bool hitTest (float x, float y) const;
 	/** @internal */
+	int getNumControlPoints() const;
+	/** @internal */
+	const Point<float> getControlPoint (int index) const;
+	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	ValueTree createValueTree() const;
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
-	static DrawableComposite* createFromValueTree (const ValueTree& tree);
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	juce_UseDebuggingNewOperator
 
 private:
 	OwnedArray <Drawable> drawables;
-	OwnedArray <AffineTransform> transforms;
+	Point<float> controlPoints[3];
+
+	const Rectangle<float> getUntransformedBounds() const;
+	const AffineTransform getTransform() const;
 
 	DrawableComposite (const DrawableComposite&);
 	DrawableComposite& operator= (const DrawableComposite&);
@@ -57568,9 +57663,6 @@ public:
 
 	/** Sets the image that this drawable will render.
 
-		An internal copy of this will not be made, so the caller mustn't delete
-		the image while it's still being used by this object.
-
 		A good way to use this is with the ImageCache - if you create an image
 		with ImageCache and pass it in here with releaseWhenNotNeeded = true, then
 		it'll be released neatly with its reference count being decreased.
@@ -57581,8 +57673,7 @@ public:
 										needs it - unless the image was created by the ImageCache,
 										in which case it will be released with ImageCache::release().
 	*/
-	void setImage (Image* imageToUse,
-				   bool releaseWhenNotNeeded);
+	void setImage (Image* imageToUse, bool releaseWhenNotNeeded);
 
 	/** Returns the current image. */
 	Image* getImage() const throw()				 { return image; }
@@ -57610,6 +57701,38 @@ public:
 	/** Returns the overlay colour. */
 	const Colour& getOverlayColour() const throw()		  { return overlayColour; }
 
+	/** Sets the transform to be applied to this image, by defining the positions
+		where three anchor points should end up in the target rendering space.
+
+		@param imageTopLeftPosition	 the position that the image's top-left corner should be mapped to
+										in the target coordinate space.
+		@param imageTopRightPosition	the position that the image's top-right corner should be mapped to
+										in the target coordinate space.
+		@param imageBottomLeftPosition  the position that the image's bottom-left corner should be mapped to
+										in the target coordinate space.
+	*/
+	void setTransform (const Point<float>& imageTopLeftPosition,
+					   const Point<float>& imageTopRightPosition,
+					   const Point<float>& imageBottomLeftPosition);
+
+	/** Returns the position to which the image's top-left corner should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForTopLeft() const throw()	 { return controlPoints[0]; }
+
+	/** Returns the position to which the image's top-right corner should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForTopRight() const throw()	{ return controlPoints[1]; }
+
+	/** Returns the position to which the image's bottom-left corner should be remapped in the target
+		coordinate space when rendering this object.
+		@see setTransform
+	*/
+	const Point<float>& getTargetPositionForBottomLeft() const throw()	  { return controlPoints[2]; }
+
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
 	/** @internal */
@@ -57619,9 +57742,13 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	ValueTree createValueTree() const;
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
-	static DrawableImage* createFromValueTree (const ValueTree& tree);
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	juce_UseDebuggingNewOperator
 
@@ -57630,6 +57757,9 @@ private:
 	bool canDeleteImage;
 	float opacity;
 	Colour overlayColour;
+	Point<float> controlPoints[3];
+
+	const AffineTransform getTransform() const;
 
 	DrawableImage (const DrawableImage&);
 	DrawableImage& operator= (const DrawableImage&);
@@ -57719,9 +57849,13 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	ValueTree createValueTree() const;
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
-	static DrawablePath* createFromValueTree (const ValueTree& tree);
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	juce_UseDebuggingNewOperator
 
@@ -57791,9 +57925,13 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
-	ValueTree createValueTree() const;
+	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
-	static DrawableText* createFromValueTree (const ValueTree& tree);
+	const ValueTree createValueTree (ImageProvider* imageProvider) const;
+	/** @internal */
+	static const Identifier valueTreeType;
+	/** @internal */
+	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
 	juce_UseDebuggingNewOperator
 

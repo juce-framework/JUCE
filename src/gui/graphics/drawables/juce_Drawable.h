@@ -180,25 +180,66 @@ public:
     static Drawable* createFromSVG (const XmlElement& svgDocument);
 
     //==============================================================================
+    /** This class is used when loading Drawables that contain images, and retrieves
+        the image for a stored identifier.
+        @see Drawable::createFromValueTree
+    */
+    class JUCE_API  ImageProvider
+    {
+    public:
+        ImageProvider() {}
+        virtual ~ImageProvider() {}
+
+        /** Retrieves the image associated with this identifier, which could be any
+            kind of string, number, filename, etc.
+
+            The image that is returned will be owned by the caller, but it may come
+            from the ImageCache.
+        */
+        virtual Image* getImageForIdentifier (const var& imageIdentifier) = 0;
+
+        /** Returns an identifier to be used to refer to a given image.
+            This is used when converting a drawable into a ValueTree, so if you're
+            only loading drawables, you can just return a var::null here.
+        */
+        virtual const var getIdentifierForImage (Image* image) = 0;
+    };
+
     /** Tries to create a Drawable from a previously-saved ValueTree.
         The ValueTree must have been created by the createValueTree() method.
+        If there are any images used within the drawable, you'll need to provide a valid
+        ImageProvider object that can be used to retrieve these images from whatever type
+        of identifier is used to represent them.
     */
-    static Drawable* createFromValueTree (const ValueTree& tree);
+    static Drawable* createFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
+
+    /** Tries to refresh a Drawable from the same ValueTree that was used to create it.
+        @returns the damage rectangle that will need repainting due to any changes that were made.
+    */
+    virtual const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider) = 0;
 
     /** Creates a ValueTree to represent this Drawable.
         The VarTree that is returned can be turned back into a Drawable with
         createFromValueTree().
+        If there are any images used in this drawable, you'll need to provide a valid
+        ImageProvider object that can be used to create storable representations of them.
     */
-    virtual ValueTree createValueTree() const = 0;
+    virtual const ValueTree createValueTree (ImageProvider* imageProvider) const = 0;
+
+    /** Returns the tag ID that is used for a ValueTree that stores this type of drawable.  */
+    virtual const Identifier getValueTreeType() const = 0;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
+protected:
+    static const Identifier idProperty;
+
 private:
+    String name;
+
     Drawable (const Drawable&);
     Drawable& operator= (const Drawable&);
-
-    String name;
 };
 
 

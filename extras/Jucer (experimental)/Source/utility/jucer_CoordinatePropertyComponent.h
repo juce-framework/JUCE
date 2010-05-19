@@ -34,9 +34,9 @@ class CoordinatePropertyComponent  : public PropertyComponent,
 {
 public:
     //==============================================================================
-    CoordinatePropertyComponent (Coordinate::MarkerResolver& resolver_, const String& name,
+    CoordinatePropertyComponent (Coordinate::NamedCoordinateFinder& nameSource_, const String& name,
                                  const Value& coordValue_, bool isHorizontal_)
-        : PropertyComponent (name, 40), resolver (resolver_),
+        : PropertyComponent (name, 40), nameSource (nameSource_),
           coordValue (coordValue_),
           textValue (Value (new CoordEditableValueSource (coordValue_, isHorizontal_))),
          isHorizontal (isHorizontal_)
@@ -98,26 +98,26 @@ public:
 
         if (button == proportionButton)
         {
-            coord.toggleProportionality (resolver);
+            coord.toggleProportionality (nameSource, isHorizontal);
             coordValue = coord.toString();
         }
         else if (button == anchorButton1)
         {
-            const String marker (pickMarker (anchorButton1, coord.getAnchor1(), true));
+            const String marker (pickMarker (anchorButton1, coord.getAnchorName1(), true));
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor1 (marker, resolver);
+                coord.changeAnchor1 (marker, nameSource);
                 coordValue = coord.toString();
             }
         }
         else if (button == anchorButton2)
         {
-            const String marker (pickMarker (anchorButton2, coord.getAnchor2(), false));
+            const String marker (pickMarker (anchorButton2, coord.getAnchorName2(), false));
 
             if (marker.isNotEmpty())
             {
-                coord.changeAnchor2 (marker, resolver);
+                coord.changeAnchor2 (marker, nameSource);
                 coordValue = coord.toString();
             }
         }
@@ -127,10 +127,10 @@ public:
     {
         Coordinate coord (getCoordinate());
 
-        anchorButton1->setButtonText (coord.getAnchor1());
+        anchorButton1->setButtonText (coord.getAnchorName1());
 
         anchorButton2->setVisible (coord.isProportional());
-        anchorButton2->setButtonText (coord.getAnchor2());
+        anchorButton2->setButtonText (coord.getAnchorName2());
         resized();
     }
 
@@ -142,7 +142,7 @@ public:
     virtual const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1) = 0;
 
 protected:
-    Coordinate::MarkerResolver& resolver;
+    Coordinate::NamedCoordinateFinder& nameSource;
     Value coordValue, textValue;
     Label* label;
     TextButton* proportionButton;
@@ -168,15 +168,15 @@ protected:
             Coordinate coord (sourceValue.toString(), isHorizontal);
 
             if (coord.isProportional())
-                return String (coord.getEditableValue()) + "%";
+                return String (coord.getEditableNumber()) + "%";
 
-            return coord.getEditableValue();
+            return coord.getEditableNumber();
         }
 
         void setValue (const var& newValue)
         {
             Coordinate coord (sourceValue.toString(), isHorizontal);
-            coord.setEditableValue ((double) newValue);
+            coord.setEditableNumber ((double) newValue);
 
             const String newVal (coord.toString());
             if (sourceValue != newVal)

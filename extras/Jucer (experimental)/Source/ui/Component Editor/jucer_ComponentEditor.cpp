@@ -91,9 +91,9 @@ public:
         return editor.getSelection();
     }
 
-    void getSelectedItemProperties (Array<PropertyComponent*>& newComps)
+    void getSelectedItemProperties (Array<PropertyComponent*>& props)
     {
-        editor.getSelectedItemProperties (newComps);
+        editor.getDocument().createItemProperties (props, editor.getSelectedIds());
     }
 
 private:
@@ -176,11 +176,6 @@ const StringArray ComponentEditor::getSelectedIds() const
         ids.add (selection.getSelectedItem(i));
 
     return ids;
-}
-
-void ComponentEditor::getSelectedItemProperties (Array <PropertyComponent*>& props)
-{
-    getDocument().createItemProperties (props, getSelectedIds());
 }
 
 void ComponentEditor::deleteSelection()

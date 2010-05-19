@@ -61,23 +61,23 @@ public:
     const File getTargetFolder() const;
 
     const ValueTree& getSettings() const                { return settings; }
-    Value getSetting (const Identifier& name_) const   { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
+    Value getSetting (const Identifier& name_) const    { return settings.getPropertyAsValue (name_, project.getUndoManagerFor (settings)); }
 
-    Value getJuceFolder() const             { return getSetting ("juceFolder"); }
-    Value getTargetLocation() const         { return getSetting ("targetFolder"); }
+    Value getJuceFolder() const             { return getSetting (Ids::juceFolder); }
+    Value getTargetLocation() const         { return getSetting (Ids::targetFolder); }
 
-    Value getVSTFolder() const              { return getSetting ("vstFolder"); }
-    Value getRTASFolder() const             { return getSetting ("rtasFolder"); }
-    Value getAUFolder() const               { return getSetting ("auFolder"); }
+    Value getVSTFolder() const              { return getSetting (Ids::vstFolder); }
+    Value getRTASFolder() const             { return getSetting (Ids::rtasFolder); }
+    Value getAUFolder() const               { return getSetting (Ids::auFolder); }
 
     bool isVST() const                      { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildVST().getValue(); }
     bool isRTAS() const                     { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildRTAS().getValue(); }
     bool isAU() const                       { return (bool) project.isAudioPlugin() && (bool) project.shouldBuildAU().getValue(); }
 
-    Value getExtraCompilerFlags() const     { return getSetting ("extraCompilerFlags"); }
-    Value getExtraLinkerFlags() const       { return getSetting ("extraLinkerFlags"); }
+    Value getExtraCompilerFlags() const     { return getSetting (Ids::extraCompilerFlags); }
+    Value getExtraLinkerFlags() const       { return getSetting (Ids::extraLinkerFlags); }
 
-    Value getExtraPreprocessorDefs() const  { return getSetting ("extraDefs"); }
+    Value getExtraPreprocessorDefs() const  { return getSetting (Ids::extraDefs); }
     const StringArray parsePreprocessorDefs() const;
 
     // This adds the quotes, and may return angle-brackets, eg: <foo/bar.h> or normal quotes.
@@ -86,7 +86,7 @@ public:
     const String getExporterIdentifierMacro() const
     {
         return "JUCER_" + settings.getType() + "_"
-                + String::toHexString (settings ["targetFolder"].toString().hashCode()).toUpperCase();
+                + String::toHexString (settings [Ids::targetFolder].toString().hashCode()).toUpperCase();
     }
 
     Array<RelativePath> juceWrapperFiles;

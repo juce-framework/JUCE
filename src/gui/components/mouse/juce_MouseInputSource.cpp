@@ -328,8 +328,7 @@ public:
             {
                 if (mouseDowns[0].time - mouseDowns[i].time < (int) (MouseEvent::getDoubleClickTimeout() * (1.0 + 0.25 * (i - 1)))
                     && abs (mouseDowns[0].position.getX() - mouseDowns[i].position.getX()) < 8
-                    && abs (mouseDowns[0].position.getY() - mouseDowns[i].position.getY()) < 8
-                    && mouseDowns[0].component == mouseDowns[i].component)
+                    && abs (mouseDowns[0].position.getY() - mouseDowns[i].position.getY()) < 8)
                 {
                     ++numClicks;
                 }

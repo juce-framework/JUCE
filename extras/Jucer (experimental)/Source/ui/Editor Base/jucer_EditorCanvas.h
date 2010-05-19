@@ -72,7 +72,7 @@ public:
     virtual MarkerListBase& getMarkerList (bool isX) = 0;
 
     virtual const SelectedItems::ItemType findObjectIdAt (const Point<int>& position) = 0;
-    virtual void showPopupMenu (const Point<int>& position) = 0;
+    virtual void showPopupMenu (bool isClickOnSelectedObject) = 0;
     virtual void objectDoubleClicked (const MouseEvent& e, const ValueTree& state) = 0;
 
     virtual const ValueTree getObjectState (const String& objectId) = 0;

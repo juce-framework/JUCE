@@ -153,7 +153,7 @@ public:
     The following code is in the header so that the atomics can be inlined where possible...
 */
 #if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
-      || (JUCE_MAC && (__GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
+      || (JUCE_MAC &&  (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1        // Older OSX builds using gcc4.1 or earlier
 
   #if JUCE_PPC || JUCE_IPHONE

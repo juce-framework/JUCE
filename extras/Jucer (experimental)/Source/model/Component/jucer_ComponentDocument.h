@@ -35,7 +35,7 @@
 
 //==============================================================================
 class ComponentDocument   : public ValueTree::Listener,
-                            public Coordinate::MarkerResolver
+                            public Coordinate::NamedCoordinateFinder
 {
 public:
     //==============================================================================
@@ -57,8 +57,8 @@ public:
     //==============================================================================
     const String getUniqueId() const        { return root [idProperty]; }
 
-    Value getClassName() const              { return getRootValueNonUndoable ("className"); }
-    Value getClassDescription() const       { return getRootValueNonUndoable ("classDesc"); }
+    Value getClassName() const              { return getRootValueNonUndoable (Ids::className); }
+    Value getClassDescription() const       { return getRootValueNonUndoable (Ids::classDesc); }
 
     void setUsingTemporaryCanvasSize (bool b);
     Value getCanvasWidth() const;
@@ -84,12 +84,12 @@ public:
     bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
     void renameAnchor (const String& oldName, const String& newName);
 
-    // for Coordinate::MarkerResolver:
-    const Coordinate findMarker (const String& name, bool isHorizontal) const;
+    // for Coordinate::Resolver:
+    const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
 
     void addComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
-                                      Coordinate& coord, PopupMenu& menu, bool isAnchor1);
-    const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId) const;
+                                      Coordinate& coord, PopupMenu& menu, bool isAnchor1, bool isHorizontal);
+    const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId, bool isHorizontal) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     const ValueTree performNewComponentMenuItem (int menuResultCode);
@@ -105,7 +105,7 @@ public:
     public:
         MarkerList (ComponentDocument& document, bool isX);
 
-        const Coordinate findMarker (const String& name, bool isHorizontal) const;
+        const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
         bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
         void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
         const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
@@ -181,8 +181,8 @@ private:
 
     void checkRootObject();
     void createSubTreeIfNotThere (const Identifier& name);
-    void addMarkerMenuItem (int i, const Coordinate& coord, const String& name, PopupMenu& menu,
-                            bool isAnchor1, const String& fullCoordName);
+    void addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge,
+                            PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 
     Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
     Value getRootValueNonUndoable (const Identifier& name) const     { return root.getPropertyAsValue (name, 0); }
