@@ -154,8 +154,8 @@ public:
         //==============================================================================
         void updatePosition (const Rectangle<int>& bounds)
         {
-            RectangleCoordinates coords (canvas->getObjectCoords (state));
-            Coordinate coord;
+            RelativeRectangle coords (canvas->getObjectCoords (state));
+            RelativeCoordinate coord;
             Rectangle<int> r;
 
             switch (type)
@@ -242,7 +242,7 @@ public:
 
     void updatePosition()
     {
-        Coordinate coord (getMarkerList().getCoordinate (marker));
+        RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
         const int pos = roundToInt (coord.resolve (getMarkerList()));
         const int width = 8;
 
@@ -308,7 +308,7 @@ public:
             isDragging = true;
             canvas->getUndoManager().beginNewTransaction();
 
-            Coordinate coord (getMarkerList().getCoordinate (marker));
+            RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
             dragStartPos = coord.resolve (getMarkerList());
         }
     }
@@ -330,7 +330,7 @@ public:
 
             if (axis.expanded (30, 30).contains (e.x, e.y))
             {
-                Coordinate coord (getMarkerList().getCoordinate (marker));
+                RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
 
                 // (can't use getDistanceFromDragStart() because it doesn't take into account auto-scrolling)
                 coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e2.x - mouseDownPos.getX()

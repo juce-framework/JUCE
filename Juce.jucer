@@ -1058,6 +1058,10 @@
                   file="src/gui/graphics/geometry/juce_RectangleList.cpp"/>
             <FILE id="OEwUQsN86" name="juce_RectangleList.h" compile="0" resource="0"
                   file="src/gui/graphics/geometry/juce_RectangleList.h"/>
+            <FILE id="qXlVCF8ol" name="juce_RelativeCoordinate.cpp" compile="1"
+                  resource="0" file="src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"/>
+            <FILE id="OKz41frTz" name="juce_RelativeCoordinate.h" compile="0" resource="0"
+                  file="src/gui/graphics/geometry/juce_RelativeCoordinate.h"/>
           </GROUP>
           <GROUP id="UvRZ4CgGl" name="imaging">
             <GROUP id="UpDEgf4Fr" name="image_file_formats">

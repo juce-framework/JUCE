@@ -30,7 +30,7 @@
 
 
 //==============================================================================
-class MarkerListBase    : public Coordinate::NamedCoordinateFinder
+class MarkerListBase    : public RelativeCoordinate::NamedCoordinateFinder
 {
 public:
     MarkerListBase (const ValueTree& group_, bool isX_)   : group (group_), isX (isX_) {}
@@ -47,15 +47,15 @@ public:
     const String getName (const ValueTree& markerState) const                   { return markerState [getMarkerNameProperty()].toString(); }
     Value getNameAsValue (const ValueTree& markerState) const                   { return markerState.getPropertyAsValue (getMarkerNameProperty(), getUndoManager()); }
 
-    const Coordinate getCoordinate (const ValueTree& markerState) const         { return Coordinate (markerState [getMarkerPosProperty()].toString(), isX); }
-    void setCoordinate (ValueTree& markerState, const Coordinate& newCoord)     { markerState.setProperty (getMarkerPosProperty(), newCoord.toString(), getUndoManager()); }
+    const RelativeCoordinate getCoordinate (const ValueTree& markerState) const         { return RelativeCoordinate (markerState [getMarkerPosProperty()].toString(), isX); }
+    void setCoordinate (ValueTree& markerState, const RelativeCoordinate& newCoord)     { markerState.setProperty (getMarkerPosProperty(), newCoord.toString(), getUndoManager()); }
 
     void renameAnchorInMarkers (const String& oldName, const String& newName)
     {
         for (int i = size(); --i >= 0;)
         {
             ValueTree v (getMarker (i));
-            Coordinate coord (getCoordinate (v));
+            RelativeCoordinate coord (getCoordinate (v));
             coord.renameAnchorIfUsed (oldName, newName, *this);
             setCoordinate (v, coord);
         }
@@ -65,7 +65,7 @@ public:
     {
         ValueTree marker (getMarkerTag());
         marker.setProperty (getMarkerNameProperty(), getNonexistentMarkerName (name), 0);
-        marker.setProperty (getMarkerPosProperty(), Coordinate (position, isX).toString(), 0);
+        marker.setProperty (getMarkerPosProperty(), RelativeCoordinate (position, isX).toString(), 0);
         marker.setProperty (getIdProperty(), createAlphaNumericUID(), 0);
         group.addChild (marker, -1, getUndoManager());
     }
@@ -80,8 +80,8 @@ public:
     virtual UndoManager* getUndoManager() const = 0;
     virtual const String getNonexistentMarkerName (const String& name) = 0;
     virtual void renameAnchor (const String& oldName, const String& newName) = 0;
-    virtual void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1) = 0;
-    virtual const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const = 0;
+    virtual void addMarkerMenuItems (const ValueTree& markerState, const RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1) = 0;
+    virtual const String getChosenMarkerMenuItem (const RelativeCoordinate& coord, int itemId) const = 0;
 
     //==============================================================================
     static const Identifier getMarkerTag()           { static Identifier i ("MARKER"); return i; }
@@ -148,7 +148,7 @@ public:
 
         const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1)
         {
-            Coordinate coord (getCoordinate());
+            RelativeCoordinate coord (getCoordinate());
 
             PopupMenu m;
             markerList.addMarkerMenuItems (markerState, coord, m, isAnchor1);

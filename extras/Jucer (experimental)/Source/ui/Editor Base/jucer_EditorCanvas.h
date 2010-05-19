@@ -77,7 +77,7 @@ public:
 
     virtual const ValueTree getObjectState (const String& objectId) = 0;
     virtual const Rectangle<int> getObjectPosition (const ValueTree& state) = 0;
-    virtual RectangleCoordinates getObjectCoords (const ValueTree& state) = 0;
+    virtual RelativeRectangle getObjectCoords (const ValueTree& state) = 0;
     virtual SelectedItems& getSelection() = 0;
     virtual UndoManager& getUndoManager() = 0;
     virtual void deselectNonDraggableObjects() = 0;

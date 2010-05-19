@@ -120,10 +120,10 @@ public:
 
     const Rectangle<int> getObjectPosition (const ValueTree& state)
     {
-        return getDocument().getCoordsFor (state).resolve (getDocument());
+        return getDocument().getCoordsFor (state).resolve (getDocument()).getSmallestIntegerContainer();
     }
 
-    RectangleCoordinates getObjectCoords (const ValueTree& state)
+    RelativeRectangle getObjectCoords (const ValueTree& state)
     {
         return getDocument().getCoordsFor (state);
     }
@@ -176,16 +176,13 @@ public:
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
             ComponentDocument& doc = getDocument();
-            RectangleCoordinates relativePos (doc.getCoordsFor (state));
-            const Rectangle<int> intPos (relativePos.resolve (doc));
-
-            return intPos.toFloat();
+            return doc.getCoordsFor (state).resolve (doc);
         }
 
         bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
             ComponentDocument& doc = getDocument();
-            RectangleCoordinates pr (doc.getCoordsFor (state));
+            RelativeRectangle pr (doc.getCoordsFor (state));
             pr.moveToAbsolute (newBounds, doc);
 
             return doc.setCoordsFor (state, pr);

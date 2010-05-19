@@ -251,6 +251,7 @@ OBJECTS := \
   $(OBJDIR)/juce_PathStrokeType.o \
   $(OBJDIR)/juce_PositionedRectangle.o \
   $(OBJDIR)/juce_RectangleList.o \
+  $(OBJDIR)/juce_RelativeCoordinate.o \
   $(OBJDIR)/juce_GIFLoader.o \
   $(OBJDIR)/juce_JPEGLoader.o \
   $(OBJDIR)/juce_PNGLoader.o \
@@ -1407,6 +1408,11 @@ $(OBJDIR)/juce_PositionedRectangle.o: ../../src/gui/graphics/geometry/juce_Posit
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RectangleList.o: ../../src/gui/graphics/geometry/juce_RectangleList.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo $(notdir $<)
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_RelativeCoordinate.o: ../../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo $(notdir $<)
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

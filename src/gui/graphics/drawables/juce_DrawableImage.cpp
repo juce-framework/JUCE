@@ -108,8 +108,8 @@ const AffineTransform DrawableImage::getTransform() const
     if (image == 0)
         return AffineTransform::identity;
 
-    const Point<float> tr (controlPoints[0] + (controlPoints[1] - controlPoints[0]) / image->getWidth());
-    const Point<float> bl (controlPoints[0] + (controlPoints[2] - controlPoints[0]) / image->getHeight());
+    const Point<float> tr (controlPoints[0] + (controlPoints[1] - controlPoints[0]) / (float) image->getWidth());
+    const Point<float> bl (controlPoints[0] + (controlPoints[2] - controlPoints[0]) / (float) image->getHeight());
 
     return AffineTransform::fromTargetPoints (controlPoints[0].getX(), controlPoints[0].getY(),
                                               tr.getX(), tr.getY(),
@@ -219,7 +219,7 @@ namespace DrawableImageHelpers
         {
             const int comma = coords.indexOfChar (',');
             point.setXY (coords.substring (0, comma).getFloatValue(),
-                         coords.substring (comma).getFloatValue());
+                         coords.substring (comma + 1).getFloatValue());
         }
     }
 

@@ -42,7 +42,7 @@ DrawableDocument::DrawableDocument (Project* project_)
       needsSaving (false)
 {
     DrawableComposite dc;
-    root.addChild (dc.createValueTree(), -1, 0);
+    root.addChild (dc.createValueTree (0), -1, 0);
 
     setName ("Drawable");
     checkRootObject();
@@ -204,7 +204,7 @@ void DrawableDocument::addDrawable (Drawable& d)
     DrawableComposite dc;
     dc.insertDrawable (d.createCopy());
 
-    ValueTree dcNode (dc.createValueTree());
+    ValueTree dcNode (dc.createValueTree (0));
     ValueTree subNode (dcNode.getChild(0));
     dcNode.removeChild (subNode, 0);
     addMissingIds (subNode);
@@ -266,12 +266,12 @@ void DrawableDocument::valueTreeParentChanged (ValueTree& tree)
 }
 
 //==============================================================================
-const Coordinate DrawableDocument::findNamedCoordinate (const String& objectName, const String& edge) const
+const RelativeCoordinate DrawableDocument::findNamedCoordinate (const String& objectName, const String& edge) const
 {
     if (objectName == "parent")
     {
-        if (edge == "right")     return Coordinate ((double) getCanvasWidth().getValue(), true);
-        if (edge == "bottom")    return Coordinate ((double) getCanvasHeight().getValue(), false);
+        if (edge == "right")     return RelativeCoordinate ((double) getCanvasWidth().getValue(), true);
+        if (edge == "bottom")    return RelativeCoordinate ((double) getCanvasHeight().getValue(), false);
     }
 
     if (objectName.isNotEmpty() && edge.isNotEmpty())
@@ -280,9 +280,9 @@ const Coordinate DrawableDocument::findNamedCoordinate (const String& objectName
 
         if (comp.isValid())
         {
-            const RectangleCoordinates coords (getCoordsFor (comp));
+            const RelativeRectangle coords (getCoordsFor (comp));
 
-            if (edge == Coordinate::leftName)   return coords.left;
+            if (edge == RelativeCoordinate::leftName)   return coords.left;
             if (edge == "right")  return coords.right;
             if (edge == "top")    return coords.top;
             if (edge == "bottom") return coords.bottom;
@@ -301,7 +301,7 @@ const Coordinate DrawableDocument::findNamedCoordinate (const String& objectName
             return getMarkerListY().getCoordinate (marker);
     }
 
-    return Coordinate();
+    return RelativeCoordinate();
 }
 
 DrawableDocument::MarkerList::MarkerList (DrawableDocument& document_, bool isX_)
@@ -310,19 +310,19 @@ DrawableDocument::MarkerList::MarkerList (DrawableDocument& document_, bool isX_
 {
 }
 
-const Coordinate DrawableDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
+const RelativeCoordinate DrawableDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
 {
     if (objectName == "parent")
     {
-        if (edge == "right")     return Coordinate ((double) document.getCanvasWidth().getValue(), true);
-        if (edge == "bottom")    return Coordinate ((double) document.getCanvasHeight().getValue(), false);
+        if (edge == "right")     return RelativeCoordinate ((double) document.getCanvasWidth().getValue(), true);
+        if (edge == "bottom")    return RelativeCoordinate ((double) document.getCanvasHeight().getValue(), false);
     }
 
     const ValueTree marker (getMarkerNamed (objectName));
     if (marker.isValid())
         return getCoordinate (marker);
 
-    return Coordinate();
+    return RelativeCoordinate();
 }
 
 bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)
@@ -341,17 +341,17 @@ bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>&
     return false;
 }
 
-void DrawableDocument::addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge, PopupMenu& menu,
+void DrawableDocument::addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge, PopupMenu& menu,
                                           bool isAnchor1, const String& fullCoordName)
 {
-//    Coordinate requestedCoord (findNamedCoordinate (objectName, edge, coord.isHorizontal()));
+//    RelativeCoordinate requestedCoord (findNamedCoordinate (objectName, edge, coord.isHorizontal()));
 
 //    menu.addItem (i, name,
   //                ! (name == fullCoordName || requestedCoord.referencesIndirectly (fullCoordName, *this)),
     //              name == (isAnchor1 ? coord.getAnchor1() : coord.getAnchor2()));
 }
 
-void DrawableDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1)
+void DrawableDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerState, const RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1)
 {
 /*    const String fullCoordName (getName (markerState));
 
@@ -374,7 +374,7 @@ void DrawableDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerSt
                                     String::empty, menu, isAnchor1, fullCoordName);*/
 }
 
-const String DrawableDocument::MarkerList::getChosenMarkerMenuItem (const Coordinate& coord, int i) const
+const String DrawableDocument::MarkerList::getChosenMarkerMenuItem (const RelativeCoordinate& coord, int i) const
 {
 /*    if (i == 1)  return coord.isHorizontal() ? "parent.left" : "parent.top";
     if (i == 2)  return coord.isHorizontal() ? "parent.right" : "parent.bottom";

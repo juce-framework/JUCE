@@ -350,6 +350,7 @@
  #include "../src/gui/graphics/geometry/juce_PathStrokeType.cpp"
  #include "../src/gui/graphics/geometry/juce_PositionedRectangle.cpp"
  #include "../src/gui/graphics/geometry/juce_RectangleList.cpp"
+ #include "../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"
  #include "../src/gui/graphics/imaging/juce_Image.cpp"
  #include "../src/gui/graphics/imaging/juce_ImageCache.cpp"
  #include "../src/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp"

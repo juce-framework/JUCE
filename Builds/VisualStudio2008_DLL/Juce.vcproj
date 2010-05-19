@@ -656,6 +656,8 @@
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_Rectangle.h"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.cpp"/>
               <File RelativePath="..\..\src\gui\graphics\geometry\juce_RectangleList.h"/>
+              <File RelativePath="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.cpp"/>
+              <File RelativePath="..\..\src\gui\graphics\geometry\juce_RelativeCoordinate.h"/>
             </Filter>
             <Filter Name="imaging">
               <Filter Name="image_file_formats">

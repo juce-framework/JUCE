@@ -35,7 +35,7 @@
 
 //==============================================================================
 class ComponentDocument   : public ValueTree::Listener,
-                            public Coordinate::NamedCoordinateFinder
+                            public RelativeCoordinate::NamedCoordinateFinder
 {
 public:
     //==============================================================================
@@ -80,16 +80,16 @@ public:
     const ValueTree getComponentState (Component* comp) const;
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
     void removeComponent (const ValueTree& state);
-    const RectangleCoordinates getCoordsFor (const ValueTree& componentState) const;
-    bool setCoordsFor (ValueTree& componentState, const RectangleCoordinates& newSize);
+    const RelativeRectangle getCoordsFor (const ValueTree& componentState) const;
+    bool setCoordsFor (ValueTree& componentState, const RelativeRectangle& newSize);
     void renameAnchor (const String& oldName, const String& newName);
 
-    // for Coordinate::Resolver:
-    const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    // for RelativeCoordinate::Resolver:
+    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
 
     void addComponentMarkerMenuItems (const ValueTree& componentState, const String& coordName,
-                                      Coordinate& coord, PopupMenu& menu, bool isAnchor1, bool isHorizontal);
-    const String getChosenMarkerMenuItem (const ValueTree& componentState, Coordinate& coord, int itemId, bool isHorizontal) const;
+                                      RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1, bool isHorizontal);
+    const String getChosenMarkerMenuItem (const ValueTree& componentState, RelativeCoordinate& coord, int itemId, bool isHorizontal) const;
 
     void addNewComponentMenuItems (PopupMenu& menu) const;
     const ValueTree performNewComponentMenuItem (int menuResultCode);
@@ -105,10 +105,10 @@ public:
     public:
         MarkerList (ComponentDocument& document, bool isX);
 
-        const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+        const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
         bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
-        void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
-        const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
+        void addMarkerMenuItems (const ValueTree& markerState, const RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1);
+        const String getChosenMarkerMenuItem (const RelativeCoordinate& coord, int itemId) const;
         UndoManager* getUndoManager() const;
         void renameAnchor (const String& oldName, const String& newName);
         const String getNonexistentMarkerName (const String& name);
@@ -181,7 +181,7 @@ private:
 
     void checkRootObject();
     void createSubTreeIfNotThere (const Identifier& name);
-    void addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge,
+    void addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge,
                             PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 
     Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }

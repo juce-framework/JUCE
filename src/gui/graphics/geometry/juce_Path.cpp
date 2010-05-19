@@ -151,7 +151,7 @@ bool Path::operator!= (const Path& other) const throw()
     if (numElements != other.numElements || useNonZeroWinding != other.useNonZeroWinding)
         return true;
 
-    for (int i = 0; i < numElements; ++i)
+    for (size_t i = 0; i < numElements; ++i)
         if (data.elements[i] != other.data.elements[i])
             return true;
 

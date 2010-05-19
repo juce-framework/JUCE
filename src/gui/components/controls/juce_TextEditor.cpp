@@ -1042,7 +1042,8 @@ void TextEditor::setMultiLine (const bool shouldBeMultiLine,
         multiline = shouldBeMultiLine;
         wordWrap = shouldWordWrap && shouldBeMultiLine;
 
-        setScrollbarsShown (scrollbarVisible);
+        viewport->setScrollBarsShown (scrollbarVisible && multiline,
+                                      scrollbarVisible && multiline);
         viewport->setViewPosition (0, 0);
         resized();
         scrollToMakeSureCursorIsVisible();

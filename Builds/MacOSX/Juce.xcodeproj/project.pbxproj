@@ -220,6 +220,7 @@
 		E7C9FAA5F8A4AEDAD8A8CC1D = { isa = PBXBuildFile; fileRef = 9D3F1BAB1D48DDECB9F35916; };
 		DC4BB8AFC054ECD4141B47CC = { isa = PBXBuildFile; fileRef = 11D8021D49B895410A836486; };
 		084C9F2D4F78134CB1EFE676 = { isa = PBXBuildFile; fileRef = 1B170F70AF8AA0A39074F671; };
+		1110DD0779F44F625316D083 = { isa = PBXBuildFile; fileRef = 2AA4DDD1F26188A570F4DBE2; };
 		4DAD08CD3A688747C9CA237B = { isa = PBXBuildFile; fileRef = 0F1C5770B363EF7DF64A876A; };
 		60FE8BFA252E3EF2D60B77AD = { isa = PBXBuildFile; fileRef = 6619D27E74F623B1E8CE8F71; };
 		C592CC923C5495467EF05D48 = { isa = PBXBuildFile; fileRef = EAF0F2EAB230F7539B91A7FB; };
@@ -816,6 +817,8 @@
 		F8C44FF03700F6140950F373 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_Rectangle.h; path = ../../src/gui/graphics/geometry/juce_Rectangle.h; sourceTree = SOURCE_ROOT; };
 		1B170F70AF8AA0A39074F671 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RectangleList.cpp; path = ../../src/gui/graphics/geometry/juce_RectangleList.cpp; sourceTree = SOURCE_ROOT; };
 		8B7D7435287A20CB2D8E3704 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_RectangleList.h; path = ../../src/gui/graphics/geometry/juce_RectangleList.h; sourceTree = SOURCE_ROOT; };
+		2AA4DDD1F26188A570F4DBE2 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_RelativeCoordinate.cpp; path = ../../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp; sourceTree = SOURCE_ROOT; };
+		54D9BBB69BDA3837240F7749 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_RelativeCoordinate.h; path = ../../src/gui/graphics/geometry/juce_RelativeCoordinate.h; sourceTree = SOURCE_ROOT; };
 		0F1C5770B363EF7DF64A876A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_GIFLoader.cpp; path = ../../src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp; sourceTree = SOURCE_ROOT; };
 		EFBDB957445BD56D0458535D = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_GIFLoader.h; path = ../../src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.h; sourceTree = SOURCE_ROOT; };
 		6619D27E74F623B1E8CE8F71 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_JPEGLoader.cpp; path = ../../src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp; sourceTree = SOURCE_ROOT; };
@@ -1529,7 +1532,9 @@
 				469347B6414F2CE9DCEEA386,
 				F8C44FF03700F6140950F373,
 				1B170F70AF8AA0A39074F671,
-				8B7D7435287A20CB2D8E3704 ); name = geometry; sourceTree = "<group>"; };
+				8B7D7435287A20CB2D8E3704,
+				2AA4DDD1F26188A570F4DBE2,
+				54D9BBB69BDA3837240F7749 ); name = geometry; sourceTree = "<group>"; };
 		D71FD838B3FD1536FCA839A4 = { isa = PBXGroup; children = (
 				0F1C5770B363EF7DF64A876A,
 				EFBDB957445BD56D0458535D,
@@ -2044,6 +2049,7 @@
 				E7C9FAA5F8A4AEDAD8A8CC1D,
 				DC4BB8AFC054ECD4141B47CC,
 				084C9F2D4F78134CB1EFE676,
+				1110DD0779F44F625316D083,
 				4DAD08CD3A688747C9CA237B,
 				60FE8BFA252E3EF2D60B77AD,
 				C592CC923C5495467EF05D48,

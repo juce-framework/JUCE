@@ -69,10 +69,10 @@ public:
         MarkerList (DrawableDocument& document, bool isX);
         ~MarkerList() {}
 
-        const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+        const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
         bool createProperties (Array <PropertyComponent*>& props, const String& itemId);
-        void addMarkerMenuItems (const ValueTree& markerState, const Coordinate& coord, PopupMenu& menu, bool isAnchor1);
-        const String getChosenMarkerMenuItem (const Coordinate& coord, int itemId) const;
+        void addMarkerMenuItems (const ValueTree& markerState, const RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1);
+        const String getChosenMarkerMenuItem (const RelativeCoordinate& coord, int itemId) const;
         UndoManager* getUndoManager() const;
         const String getNonexistentMarkerName (const String& name);
         void renameAnchor (const String& oldName, const String& newName);
@@ -117,8 +117,8 @@ private:
     void addMissingIds (ValueTree tree) const;
     void addDrawable (Drawable& d);
 
-    const Coordinate findNamedCoordinate (const String& objectName, const String& edge) const;
-    void addMarkerMenuItem (int i, const Coordinate& coord, const String& objectName, const String& edge,
+    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    void addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge,
                             PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 };
 

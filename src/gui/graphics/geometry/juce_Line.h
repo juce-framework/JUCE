@@ -316,7 +316,7 @@ private:
         }
 
         const Point<ValueType> d1 (p2 - p1);
-        const Point<ValueType> d2 (p4 - p2);
+        const Point<ValueType> d2 (p4 - p3);
         const ValueType divisor = d1.getX() * d2.getY() - d2.getX() * d1.getY();
 
         if (divisor == 0)

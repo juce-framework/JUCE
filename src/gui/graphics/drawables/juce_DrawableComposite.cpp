@@ -175,7 +175,7 @@ namespace DrawableCompositeHelpers
         {
             const int comma = coords.indexOfChar (',');
             point.setXY (coords.substring (0, comma).getFloatValue(),
-                         coords.substring (comma).getFloatValue());
+                         coords.substring (comma + 1).getFloatValue());
         }
     }
 

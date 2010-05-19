@@ -68,15 +68,15 @@ public:
 
         const var getValue() const
         {
-            RectangleCoordinates r (sourceValue.toString());
+            RelativeRectangle r (sourceValue.toString());
             return getCoord (r).toString();
         }
 
         void setValue (const var& newValue)
         {
-            RectangleCoordinates r (sourceValue.toString());
-            Coordinate& coord = getCoord (r);
-            coord = Coordinate (newValue.toString(), type == left || type == right);
+            RelativeRectangle r (sourceValue.toString());
+            RelativeCoordinate& coord = getCoord (r);
+            coord = RelativeCoordinate (newValue.toString(), type == left || type == right);
 
             const String newVal (r.toString());
             if (sourceValue != newVal)
@@ -95,7 +95,7 @@ public:
         Value sourceValue;
         Type type;
 
-        static Coordinate& getCoordForType (const Type type, RectangleCoordinates& r)
+        static RelativeCoordinate& getCoordForType (const Type type, RelativeRectangle& r)
         {
             switch (type)
             {
@@ -109,7 +109,7 @@ public:
             return r.left;
         }
 
-        Coordinate& getCoord (RectangleCoordinates& r) const
+        RelativeCoordinate& getCoord (RelativeRectangle& r) const
         {
             return getCoordForType (type, r);
         }
@@ -120,7 +120,7 @@ public:
 
     const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1)
     {
-        Coordinate coord (getCoordinate());
+        RelativeCoordinate coord (getCoordinate());
 
         PopupMenu m;
         document.addComponentMarkerMenuItems (compState, getTypeName(), coord, m, isAnchor1, type == left || type == right);
@@ -142,10 +142,10 @@ private:
     {
         switch (type)
         {
-            case left:      return Coordinate::Strings::left;
-            case right:     return Coordinate::Strings::right;
-            case top:       return Coordinate::Strings::top;
-            case bottom:    return Coordinate::Strings::bottom;
+            case left:      return RelativeCoordinate::Strings::left;
+            case right:     return RelativeCoordinate::Strings::right;
+            case top:       return RelativeCoordinate::Strings::top;
+            case bottom:    return RelativeCoordinate::Strings::bottom;
             default:        jassertfalse; break;
         }
 
@@ -309,13 +309,13 @@ void ComponentTypeInstance::initialiseNewItemBasics()
     bounds.setPosition (Random::getSystemRandom().nextInt (cw / 3) + cw / 4,
                         Random::getSystemRandom().nextInt (ch / 3) + ch / 4);
 
-    set (ComponentDocument::compBoundsProperty, RectangleCoordinates (bounds.toFloat(), getMemberName()).toString());
+    set (ComponentDocument::compBoundsProperty, RelativeRectangle (bounds.toFloat(), getMemberName()).toString());
 }
 
 void ComponentTypeInstance::updateComponentBasics (Component* comp)
 {
-    RectangleCoordinates pos (state [ComponentDocument::compBoundsProperty].toString());
-    comp->setBounds (pos.resolve (document));
+    RelativeRectangle pos (state [ComponentDocument::compBoundsProperty].toString());
+    comp->setBounds (pos.resolve (document).getSmallestIntegerContainer());
 
     //comp->setName (state [ComponentDocument::compNameProperty]);
 

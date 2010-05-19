@@ -34,7 +34,7 @@ class CoordinatePropertyComponent  : public PropertyComponent,
 {
 public:
     //==============================================================================
-    CoordinatePropertyComponent (Coordinate::NamedCoordinateFinder& nameSource_, const String& name,
+    CoordinatePropertyComponent (RelativeCoordinate::NamedCoordinateFinder& nameSource_, const String& name,
                                  const Value& coordValue_, bool isHorizontal_)
         : PropertyComponent (name, 40), nameSource (nameSource_),
           coordValue (coordValue_),
@@ -94,7 +94,7 @@ public:
 
     void buttonClicked (Button* button)
     {
-        Coordinate coord (getCoordinate());
+        RelativeCoordinate coord (getCoordinate());
 
         if (button == proportionButton)
         {
@@ -125,7 +125,7 @@ public:
 
     void valueChanged (Value&)
     {
-        Coordinate coord (getCoordinate());
+        RelativeCoordinate coord (getCoordinate());
 
         anchorButton1->setButtonText (coord.getAnchorName1());
 
@@ -134,15 +134,15 @@ public:
         resized();
     }
 
-    const Coordinate getCoordinate() const
+    const RelativeCoordinate getCoordinate() const
     {
-        return Coordinate (coordValue.toString(), isHorizontal);
+        return RelativeCoordinate (coordValue.toString(), isHorizontal);
     }
 
     virtual const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1) = 0;
 
 protected:
-    Coordinate::NamedCoordinateFinder& nameSource;
+    RelativeCoordinate::NamedCoordinateFinder& nameSource;
     Value coordValue, textValue;
     Label* label;
     TextButton* proportionButton;
@@ -165,7 +165,7 @@ protected:
 
         const var getValue() const
         {
-            Coordinate coord (sourceValue.toString(), isHorizontal);
+            RelativeCoordinate coord (sourceValue.toString(), isHorizontal);
 
             if (coord.isProportional())
                 return String (coord.getEditableNumber()) + "%";
@@ -175,7 +175,7 @@ protected:
 
         void setValue (const var& newValue)
         {
-            Coordinate coord (sourceValue.toString(), isHorizontal);
+            RelativeCoordinate coord (sourceValue.toString(), isHorizontal);
             coord.setEditableNumber ((double) newValue);
 
             const String newVal (coord.toString());

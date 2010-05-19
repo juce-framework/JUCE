@@ -54,7 +54,7 @@ public:
 
     void updateComponents()
     {
-        drawable = Drawable::createFromValueTree (getEditor().getDocument().getRootDrawableNode());
+        drawable = Drawable::createFromValueTree (getEditor().getDocument().getRootDrawableNode(), 0);
         getComponentHolder()->repaint();
         startTimer (500);
     }
@@ -109,9 +109,9 @@ public:
         return Rectangle<int>();//getDocument().getCoordsFor (state).resolve (getDocument());
     }
 
-    RectangleCoordinates getObjectCoords (const ValueTree& state)
+    RelativeRectangle getObjectCoords (const ValueTree& state)
     {
-        return RectangleCoordinates();
+        return RelativeRectangle();
 //        return getDocument().getCoordsFor (state);
     }
 
