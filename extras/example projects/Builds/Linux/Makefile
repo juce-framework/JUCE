@@ -67,32 +67,32 @@ clean:
 
 $(OBJDIR)/Main.o: ../../Source/Main.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling Main.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MainComponent.o: ../../Source/MainComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling MainComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

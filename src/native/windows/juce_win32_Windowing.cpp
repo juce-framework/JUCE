@@ -705,9 +705,9 @@ public:
         SetCaretPos (0, 0);
     }
 
-    void repaint (int x, int y, int w, int h)
+    void repaint (const Rectangle<int>& area)
     {
-        const RECT r = { x, y, x + w, y + h };
+        const RECT r = { area.getX(), area.getY(), area.getRight(), area.getBottom() };
         InvalidateRect (hwnd, &r, FALSE);
     }
 

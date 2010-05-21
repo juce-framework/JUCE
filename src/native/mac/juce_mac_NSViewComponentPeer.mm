@@ -253,7 +253,7 @@ public:
     void textInputRequired (const Point<int>& position);
 
     //==============================================================================
-    void repaint (int x, int y, int w, int h);
+    void repaint (const Rectangle<int>& area);
     void performAnyPendingRepaintsNow();
 
     //==============================================================================
@@ -1631,20 +1631,20 @@ public:
     void messageCallback()
     {
         if (ComponentPeer::isValidPeer (peer))
-            peer->repaint (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+            peer->repaint (rect);
     }
 };
 
-void NSViewComponentPeer::repaint (int x, int y, int w, int h)
+void NSViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect)
     {
-        (new AsyncRepaintMessage (this, Rectangle<int> (x, y, w, h)))->post();
+        (new AsyncRepaintMessage (this, area))->post();
     }
     else
     {
-        [view setNeedsDisplayInRect: NSMakeRect ((float) x, (float) ([view frame].size.height - (y + h)),
-                                                 (float) w, (float) h)];
+        [view setNeedsDisplayInRect: NSMakeRect ((float) area.getX(), [view frame].size.height - (float) area.getBottom(),
+                                                 (float) area.getWidth(), (float) area.getHeight())];
     }
 }
 

@@ -38,14 +38,14 @@ public:
     DrawableTreeViewItem (DrawableEditor& editor_, const ValueTree& drawableRoot)
         : editor (editor_), node (drawableRoot), typeName (drawableRoot.getType().toString())
     {
-        node.addListener (this);
+        node.getState().addListener (this);
         editor.getSelection().addChangeListener (this);
     }
 
     ~DrawableTreeViewItem()
     {
         editor.getSelection().removeChangeListener (this);
-        node.removeListener (this);
+        node.getState().removeListener (this);
     }
 
     //==============================================================================
@@ -55,7 +55,7 @@ public:
 
     void valueTreeChildrenChanged (ValueTree& tree)
     {
-        if (tree == node)
+        if (tree == node.getState())
             refreshSubItems();
     }
 
@@ -67,14 +67,13 @@ public:
     // TreeViewItem stuff..
     bool mightContainSubItems()
     {
-        return node.getType() == DrawableComposite::valueTreeType
-                && node.getNumChildren() > 0;
+        return node.getState().getType() == DrawableComposite::valueTreeType;
     }
 
     const String getUniqueName() const
     {
-        jassert (node [Ids::id_].toString().isNotEmpty());
-        return node [Ids::id_];
+        jassert (node.getID().isNotEmpty());
+        return node.getID();
     }
 
     void itemOpennessChanged (bool isNowOpen)
@@ -85,15 +84,17 @@ public:
 
     void refreshSubItems()
     {
-        if (node.getType() == DrawableComposite::valueTreeType)
+        if (node.getState().getType() == DrawableComposite::valueTreeType)
         {
             ScopedPointer <XmlElement> oldOpenness (getOpennessState());
 
             clearSubItems();
 
-            for (int i = 0; i < node.getNumChildren(); ++i)
+            DrawableComposite::ValueTreeWrapper composite (node.getState());
+
+            for (int i = 0; i < composite.getNumDrawables(); ++i)
             {
-                ValueTree subNode (node.getChild (i));
+                ValueTree subNode (composite.getDrawableState (i));
                 DrawableTreeViewItem* const item = new DrawableTreeViewItem (editor, subNode);
                 addSubItem (item);
             }
@@ -114,7 +115,7 @@ public:
 
     const String getRenamingName() const
     {
-        return node ["name"];
+        return node.getID();
     }
 
     void setName (const String& newName)
@@ -138,7 +139,7 @@ public:
 
     void itemSelectionChanged (bool isNowSelected)
     {
-        const String objectId (DrawableDocument::getIdFor (node));
+        const String objectId (node.getID());
 
         if (isNowSelected)
             editor.getSelection().addToSelection (objectId);
@@ -148,7 +149,7 @@ public:
 
     void changeListenerCallback (void*)
     {
-        setSelected (editor.getSelection().isSelected (DrawableDocument::getIdFor (node)), false);
+        setSelected (editor.getSelection().isSelected (node.getID()), false);
     }
 
     const String getTooltip()
@@ -194,7 +195,7 @@ public:
 
     //==============================================================================
     DrawableEditor& editor;
-    ValueTree node;
+    Drawable::ValueTreeWrapperBase node;
 
 private:
     String typeName;

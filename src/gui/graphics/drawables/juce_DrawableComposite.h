@@ -35,13 +35,16 @@
 
     @see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable
+class JUCE_API  DrawableComposite  : public Drawable,
+                                     public RelativeCoordinate::NamedCoordinateFinder
 {
 public:
     //==============================================================================
-    /** Creates a composite Drawable.
-    */
+    /** Creates a composite Drawable. */
     DrawableComposite();
+
+    /** Creates a copy of a DrawableComposite. */
+    DrawableComposite (const DrawableComposite& other);
 
     /** Destructor. */
     virtual ~DrawableComposite();
@@ -122,27 +125,44 @@ public:
         @param targetPositionForX0Y1    the position that the local coordinate (0, 1) should be
                                         mapped onto when rendering this object.
     */
-    void setTransform (const Point<float>& targetPositionForOrigin,
-                       const Point<float>& targetPositionForX1Y0,
-                       const Point<float>& targetPositionForX0Y1);
+    void setTransform (const RelativePoint& targetPositionForOrigin,
+                       const RelativePoint& targetPositionForX1Y0,
+                       const RelativePoint& targetPositionForX0Y1);
 
     /** Returns the position to which the local coordinate (0, 0) should be remapped in the target
         coordinate space when rendering this object.
         @see setTransform
     */
-    const Point<float>& getTargetPositionForOrigin() const throw()          { return controlPoints[0]; }
+    const RelativePoint& getTargetPositionForOrigin() const throw()          { return controlPoints[0]; }
 
     /** Returns the position to which the local coordinate (1, 0) should be remapped in the target
         coordinate space when rendering this object.
         @see setTransform
     */
-    const Point<float>& getTargetPositionForX1Y0() const throw()            { return controlPoints[1]; }
+    const RelativePoint& getTargetPositionForX1Y0() const throw()            { return controlPoints[1]; }
 
     /** Returns the position to which the local coordinate (0, 1) should be remapped in the target
         coordinate space when rendering this object.
         @see setTransform
     */
-    const Point<float>& getTargetPositionForX0Y1() const throw()            { return controlPoints[2]; }
+    const RelativePoint& getTargetPositionForX0Y1() const throw()            { return controlPoints[2]; }
+
+    //==============================================================================
+    struct Marker
+    {
+        Marker (const Marker&);
+        Marker (const String& name, const RelativeCoordinate& position, bool isOnXAxis);
+        bool operator!= (const Marker&) const throw();
+
+        String name;
+        RelativeCoordinate position;
+        bool isOnXAxis;
+    };
+
+    int getNumMarkers (bool xAxis) const throw();
+    const Marker* getMarker (int index) const throw();
+    void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
+    void removeMarker (int index);
 
     //==============================================================================
     /** @internal */
@@ -152,11 +172,9 @@ public:
     /** @internal */
     bool hitTest (float x, float y) const;
     /** @internal */
-    int getNumControlPoints() const;
-    /** @internal */
-    const Point<float> getControlPoint (int index) const;
-    /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    void invalidatePoints();
     /** @internal */
     const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
@@ -165,18 +183,57 @@ public:
     static const Identifier valueTreeType;
     /** @internal */
     const Identifier getValueTreeType() const    { return valueTreeType; }
+    /** @internal */
+    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+
+    //==============================================================================
+    /** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
+    class ValueTreeWrapper   : public ValueTreeWrapperBase
+    {
+    public:
+        ValueTreeWrapper (const ValueTree& state);
+
+        int getNumDrawables() const;
+        const ValueTree getDrawableState (int index) const;
+        void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
+        void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
+        void removeDrawable (int index, UndoManager* undoManager);
+
+        const RelativePoint getTargetPositionForOrigin() const;
+        void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
+
+        const RelativePoint getTargetPositionForX1Y0() const;
+        void setTargetPositionForX1Y0 (const RelativePoint& newPoint, UndoManager* undoManager);
+
+        const RelativePoint getTargetPositionForX0Y1() const;
+        void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
+
+        int getNumMarkers() const;
+        const Marker getMarker (int index) const;
+        void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position, UndoManager* undoManager);
+        void removeMarker (int index, UndoManager* undoManager);
+
+    private:
+        static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTag,
+                                markerTag, nameProperty, xAxisProperty, posProperty;
+
+        ValueTree getChildList() const;
+        ValueTree getChildListCreating (UndoManager* undoManager);
+        ValueTree getMarkerList() const;
+        ValueTree getMarkerListCreating (UndoManager* undoManager);
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     OwnedArray <Drawable> drawables;
-    Point<float> controlPoints[3];
+    RelativePoint controlPoints[3];
+    OwnedArray <Marker> markers;
 
     const Rectangle<float> getUntransformedBounds() const;
-    const AffineTransform getTransform() const;
+    const AffineTransform calculateTransform() const;
 
-    DrawableComposite (const DrawableComposite&);
     DrawableComposite& operator= (const DrawableComposite&);
 };
 

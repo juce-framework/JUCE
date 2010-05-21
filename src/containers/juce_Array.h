@@ -150,7 +150,7 @@ public:
             return false;
 
         for (int i = numUsed; --i >= 0;)
-            if (data.elements [i] != other.data.elements [i])
+            if (! (data.elements [i] == other.data.elements [i]))
                 return false;
 
         return true;

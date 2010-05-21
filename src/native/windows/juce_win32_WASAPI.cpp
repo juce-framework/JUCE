@@ -685,7 +685,7 @@ public:
     int getInputLatencyInSamples()                      { return latencyIn; }
     const BigInteger getActiveOutputChannels() const    { return outputDevice != 0 ? outputDevice->channels : BigInteger(); }
     const BigInteger getActiveInputChannels() const     { return inputDevice != 0 ? inputDevice->channels : BigInteger(); }
-    const String getLastError() { return lastError; }
+    const String getLastError()                         { return lastError; }
 
 
     const String open (const BigInteger& inputChannels, const BigInteger& outputChannels,

@@ -72,6 +72,8 @@
               file="Source/model/Drawable/jucer_DrawableDocument.cpp"/>
         <FILE id="qMcrWuCal" name="jucer_DrawableDocument.h" compile="0" resource="0"
               file="Source/model/Drawable/jucer_DrawableDocument.h"/>
+        <FILE id="tGjXOXiR9" name="jucer_DrawableTypeHandler.h" compile="0"
+              resource="0" file="Source/model/Drawable/jucer_DrawableTypeHandler.h"/>
       </GROUP>
       <GROUP id="na25KSPIj" name="Project">
         <FILE id="jqL1mb9xp" name="jucer_NewFileWizard.cpp" compile="1" resource="0"
@@ -205,10 +207,6 @@
             resource="0" file="Source/utility/jucer_ColourEditorComponent.h"/>
       <FILE id="bjibbvm3S" name="jucer_Colours.h" compile="0" resource="0"
             file="Source/utility/jucer_Colours.h"/>
-      <FILE id="bDebnoSX" name="jucer_Coordinate.cpp" compile="1" resource="0"
-            file="Source/utility/jucer_Coordinate.cpp"/>
-      <FILE id="uqXX3Ga6S" name="jucer_Coordinate.h" compile="0" resource="0"
-            file="Source/utility/jucer_Coordinate.h"/>
       <FILE id="DDCunFHcy" name="jucer_CoordinatePropertyComponent.h" compile="0"
             resource="0" file="Source/utility/jucer_CoordinatePropertyComponent.h"/>
       <FILE id="WlEYep7NN" name="jucer_FileHelpers.cpp" compile="1" resource="0"

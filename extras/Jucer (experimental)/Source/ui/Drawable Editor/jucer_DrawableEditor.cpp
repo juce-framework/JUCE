@@ -53,7 +53,7 @@ public:
     void createCanvas()
     {
         initialise (new DrawableEditorCanvas (editor), toolbarFactory,
-                    new DrawableTreeViewItem (editor, editor.getDocument().getRootDrawableNode()));
+                    new DrawableTreeViewItem (editor, editor.getDocument().getRootDrawableNode().getState()));
     }
 
     SelectedItemSet<String>& getSelection()
@@ -117,17 +117,10 @@ void DrawableEditor::selectionToBack()
 
 void DrawableEditor::showNewShapeMenu (Component* componentToAttachTo)
 {
-    /*
     PopupMenu m;
-    getDocument().addNewComponentMenuItems (m);
-
+    getDocument().addNewItemMenuItems (m);
     const int r = m.showAt (componentToAttachTo);
-
-    const ValueTree newComp (getDocument().performNewComponentMenuItem (r));
-
-    if (newComp.isValid())
-        getSelection().selectOnly (newComp [ComponentDocument::idProperty]);
-*/
+    getDocument().performNewItemMenuItem (r);
 }
 
 //==============================================================================

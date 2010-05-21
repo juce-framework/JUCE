@@ -80,7 +80,7 @@ void ComponentViewer::handleAsyncUpdate()
         background = Colour::fromString (componentDocument->getBackgroundColour().toString());
 
         if (layoutManager == 0)
-            layoutManager = new ComponentAutoLayoutManager (this);
+            layoutManager = new RelativeRectangleLayoutManager (this);
 
         int i;
         for (i = getNumChildComponents(); --i >= 0;)

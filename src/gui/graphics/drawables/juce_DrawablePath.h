@@ -40,9 +40,9 @@ class JUCE_API  DrawablePath  : public Drawable
 {
 public:
     //==============================================================================
-    /** Creates a DrawablePath.
-    */
+    /** Creates a DrawablePath. */
     DrawablePath();
+    DrawablePath (const DrawablePath& other);
 
     /** Destructor. */
     virtual ~DrawablePath();
@@ -53,9 +53,6 @@ public:
         @see setFillColour, setStrokeType
     */
     void setPath (const Path& newPath);
-
-    /** Returns the current path. */
-    const Path& getPath() const throw()                         { return path; }
 
     /** Sets a fill type for the path.
 
@@ -98,6 +95,13 @@ public:
 
 
     //==============================================================================
+    /** Returns the current path. */
+    const Path& getPath() const;
+
+    /** Returns the current path for the outline. */
+    const Path& getStrokePath() const;
+
+    //==============================================================================
     /** @internal */
     void render (const Drawable::RenderingContext& context) const;
     /** @internal */
@@ -106,6 +110,8 @@ public:
     bool hitTest (float x, float y) const;
     /** @internal */
     Drawable* createCopy() const;
+    /** @internal */
+    void invalidatePoints();
     /** @internal */
     const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
@@ -116,16 +122,42 @@ public:
     const Identifier getValueTreeType() const    { return valueTreeType; }
 
     //==============================================================================
+    /** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
+    class ValueTreeWrapper   : public ValueTreeWrapperBase
+    {
+    public:
+        ValueTreeWrapper (const ValueTree& state);
+
+        const FillType getMainFill() const;
+        void setMainFill (const FillType& newFill, UndoManager* undoManager);
+
+        const FillType getStrokeFill() const;
+        void setStrokeFill (const FillType& newFill, UndoManager* undoManager);
+
+        const PathStrokeType getStrokeType() const;
+        void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
+
+        void getPath (RelativePointPath& path) const;
+        void setPath (const String& newPath, UndoManager* undoManager);
+
+    private:
+        static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    Path path, stroke;
     FillType mainFill, strokeFill;
     PathStrokeType strokeType;
+    ScopedPointer<RelativePointPath> relativePath;
+    mutable Path path, stroke;
+    mutable bool pathNeedsUpdating, strokeNeedsUpdating;
 
-    void updateOutline();
+    void updatePath() const;
+    void updateStroke() const;
+    bool isStrokeVisible() const throw();
 
-    DrawablePath (const DrawablePath&);
     DrawablePath& operator= (const DrawablePath&);
 };
 

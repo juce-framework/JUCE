@@ -36,6 +36,12 @@ DrawableText::DrawableText()
 {
 }
 
+DrawableText::DrawableText (const DrawableText& other)
+    : text (other.text),
+      colour (other.colour)
+{
+}
+
 DrawableText::~DrawableText()
 {
 }
@@ -76,21 +82,28 @@ bool DrawableText::hitTest (float x, float y) const
 
 Drawable* DrawableText::createCopy() const
 {
-    DrawableText* const dt = new DrawableText();
+    return new DrawableText (*this);
+}
 
-    dt->text = text;
-    dt->colour = colour;
-
-    return dt;
+void DrawableText::invalidatePoints()
+{
 }
 
 //==============================================================================
 const Identifier DrawableText::valueTreeType ("Text");
 
+const Identifier DrawableText::ValueTreeWrapper::text ("text");
+
+DrawableText::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
+    : ValueTreeWrapperBase (state_)
+{
+    jassert (state.hasType (valueTreeType));
+}
+
 const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    jassert (tree.hasType (valueTreeType));
-    setName (tree [idProperty]);
+    ValueTreeWrapper v (tree);
+    setName (v.getID());
 
     jassertfalse; // xxx not finished!
 
@@ -99,13 +112,14 @@ const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree
 
 const ValueTree DrawableText::createValueTree (ImageProvider* imageProvider) const
 {
-    ValueTree v (valueTreeType);
+    ValueTree tree (valueTreeType);
+    ValueTreeWrapper v (tree);
 
-    if (getName().isNotEmpty())
-        v.setProperty (idProperty, getName(), 0);
+    v.setID (getName(), 0);
 
     jassertfalse; // xxx not finished!
-    return v;
+
+    return tree;
 }
 
 

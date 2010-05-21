@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	5
+#define JUCE_BUILDNUMBER	6
 
 /** Current Juce version number.
 
@@ -3541,7 +3541,7 @@ public:
 			return false;
 
 		for (int i = numUsed; --i >= 0;)
-			if (data.elements [i] != other.data.elements [i])
+			if (! (data.elements [i] == other.data.elements [i]))
 				return false;
 
 		return true;
@@ -5561,6 +5561,9 @@ public:
 	/** Destructor. */
 	~NamedValueSet();
 
+	bool operator== (const NamedValueSet& other) const;
+	bool operator!= (const NamedValueSet& other) const;
+
 	/** Returns the total number of values that the set contains. */
 	int size() const throw();
 
@@ -5616,6 +5619,7 @@ private:
 	{
 		NamedValue() throw();
 		NamedValue (const Identifier& name, const var& value);
+		bool operator== (const NamedValue& other) const throw();
 
 		Identifier name;
 		var value;
@@ -12934,13 +12938,21 @@ public:
 		Note that this isn't a value comparison - two independently-created trees which
 		contain identical data are not considered equal.
 	*/
-	bool operator== (const ValueTree& other) const;
+	bool operator== (const ValueTree& other) const throw();
 
 	/** Returns true if this and the other node refer to different underlying structures.
 		Note that this isn't a value comparison - two independently-created trees which
 		contain identical data are not considered equal.
 	*/
-	bool operator!= (const ValueTree& other) const;
+	bool operator!= (const ValueTree& other) const throw();
+
+	/** Performs a deep comparison between the properties and children of two trees.
+		If all the properties and children of the two trees are the same (recursively), this
+		returns true.
+		The normal operator==() only checks whether two trees refer to the same shared data
+		structure, so use this method if you need to do a proper value comparison.
+	*/
+	bool isEquivalentTo (const ValueTree& other) const;
 
 	/** Returns true if this node refers to some valid data.
 		It's hard to create an invalid node, but you might get one returned, e.g. by an out-of-range
@@ -13061,7 +13073,7 @@ public:
 		If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
 		so that this change can be undone.
 	*/
-	void addChild (ValueTree child, int index, UndoManager* undoManager);
+	void addChild (const ValueTree& child, int index, UndoManager* undoManager);
 
 	/** Removes the specified child from this node's child-list.
 		If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -13287,6 +13299,7 @@ private:
 		void removeChild (int childIndex, UndoManager*);
 		void removeAllChildren (UndoManager*);
 		void moveChild (int currentIndex, int newIndex, UndoManager*);
+		bool isEquivalentTo (const SharedObject& other) const;
 		XmlElement* createXml() const;
 
 		juce_UseDebuggingNewOperator
@@ -23261,6 +23274,12 @@ public:
 	*/
 	float getOpacity() const throw()	{ return colour.getFloatAlpha(); }
 
+	/** Returns true if this fill type is completely transparent. */
+	bool isInvisible() const throw();
+
+	bool operator== (const FillType& other) const;
+	bool operator!= (const FillType& other) const;
+
 	/** The solid colour being used.
 
 		If the fill type is not a solid colour, the alpha channel of this colour indicates
@@ -25141,6 +25160,21 @@ public:
 		@see repaint()
 	*/
 	void repaint (int x, int y, int width, int height);
+
+	/** Marks a subsection of this component as needing to be redrawn.
+
+		Calling this will not do any repainting immediately, but will mark the given region
+		of the component as 'dirty'. At some point in the near future the operating system
+		will send a paint message, which will redraw all the dirty regions of all components.
+		There's no guarantee about how soon after calling repaint() the redraw will actually
+		happen, and other queued events may be delivered before a redraw is done.
+
+		The region that is passed in will be clipped to keep it within the bounds of this
+		component.
+
+		@see repaint()
+	*/
+	void repaint (const Rectangle<int>& area);
 
 	/** Makes the component use an internal buffer to optimise its redrawing.
 
@@ -41776,6 +41810,494 @@ private:
 #ifndef __JUCE_DRAWABLE_JUCEHEADER__
 #define __JUCE_DRAWABLE_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_RelativeCoordinate.h ***/
+#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
+#define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
+
+/**
+	Expresses a coordinate as an absolute or proportional distance from other
+	named coordinates.
+
+	A RelativeCoordinate represents a position as either:
+		- an absolute distance from the origin
+		- an absolute distance from another named RelativeCoordinate
+		- a proportion of the distance between two other named RelativeCoordinates
+
+	Of course, the coordinates that this one is relative to may themselves be relative
+	to other coordinates, so complex arrangements can be built up (as long as you're careful
+	not to create recursive loops!)
+
+	Rather than keeping pointers to the coordinates that this one is dependent on, it
+	stores their names, and when resolving this coordinate to an absolute value, a
+	NamedCoordinateFinder class is required to retrieve these coordinates by name.
+
+	@see RelativePoint, RelativeRectangle
+*/
+class JUCE_API  RelativeCoordinate
+{
+public:
+
+	/** Creates a zero coordinate. */
+	RelativeCoordinate();
+
+	/** Creates an absolute position from the parent origin on either the X or Y axis.
+
+		@param absoluteDistanceFromOrigin   the distance from the origin
+		@param isHorizontal		 this must be true if this is an X coordinate, or false if it's on the Y axis.
+	*/
+	RelativeCoordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
+
+	/** Creates an absolute position relative to a named coordinate.
+
+		@param absoluteDistanceFromAnchor   the distance to add to the named anchor point
+		@param anchorPoint	  the name of the coordinate from which this one will be relative. See the constructor
+								notes for a description of the syntax for coordinate names.
+	*/
+	RelativeCoordinate (double absoluteDistanceFromAnchor, const String& anchorPoint);
+
+	/** Creates a relative position between two named points.
+
+		@param relativeProportionBetweenAnchors	 a value between 0 and 1 indicating this coordinate's relative position
+								between anchorPoint1 and anchorPoint2.
+		@param anchorPoint1	 the name of the first coordinate from which this one will be relative. See the constructor
+								notes for a description of the syntax for coordinate names.
+		@param anchorPoint2	 the name of the first coordinate from which this one will be relative. See the constructor
+								notes for a description of the syntax for coordinate names.
+	*/
+	RelativeCoordinate (double relativeProportionBetweenAnchors, const String& anchorPoint1, const String& anchorPoint2);
+
+	/** Recreates a coordinate from a string description.
+
+		The string can be in one of the following formats:
+			- "123"                         = 123 pixels from parent origin (this is equivalent to "parent.left + 123"
+												or "parent.top + 123", depending on which axis the coordinate is using)
+			- "anchor"                      = the same position as the coordinate named "anchor"
+			- "anchor + 123"                = the coordinate named "anchor" + 123 pixels
+			- "anchor - 123"                = the coordinate named "anchor" - 123 pixels
+			- "50%"                         = 50% of the distance between the coordinate space's top-left origin and its extent
+												(this is equivalent to "50% * parent.left -> parent.right" or "50% * parent.top -> parent.bottom")
+			- "50% * anchor"                = 50% of the distance between the coordinate space's origin and the coordinate named "anchor"
+												(this is equivalent to "50% * parent.left -> anchor" or "50% * parent.top -> anchor")
+			- "50% * anchor1 -> anchor2"    = 50% of the distance between the coordinate "anchor1" and the coordinate "anchor2"
+
+		An anchor name can either be just a single identifier (letters, digits and underscores only - no spaces),
+		e.g. "marker1", or it can be a two-part name in the form "objectName.edge". For example "parent.left" is
+		the origin, or "myComponent.top" is the top edge of a component called "myComponent". The exact names that
+		will be recognised are dependent on the NamedCoordinateFinder that you provide for looking them up, but
+		"parent.left" and "parent.top" are always available, meaning the origin. "parent.right" and "parent.bottom"
+		may also be available if the coordinate space has a fixed size.
+
+		@param stringVersion	the string to parse
+		@param isHorizontal	 this must be true if this is an X coordinate, or false if it's on the Y axis.
+
+		@see toString
+	*/
+	RelativeCoordinate (const String& stringVersion, bool isHorizontal);
+
+	/** Destructor. */
+	~RelativeCoordinate();
+
+	bool operator== (const RelativeCoordinate& other) const throw();
+	bool operator!= (const RelativeCoordinate& other) const throw();
+
+	/**
+		Provides an interface for looking up the position of a named anchor when resolving a RelativeCoordinate.
+
+		When using RelativeCoordinates, to resolve their names you need to provide a subclass of this which
+		can retrieve a coordinate by name.
+	*/
+	class JUCE_API  NamedCoordinateFinder
+	{
+	public:
+		/** Destructor. */
+		virtual ~NamedCoordinateFinder() {}
+
+		/** Returns the coordinate for a given name.
+
+			The objectName parameter will be the first section of the name, and the edge the name of the second part.
+			E.g. for "parent.right", objectName would be "parent" and edge would be "right". If the name
+			has no dot, the edge parameter will be an empty string.
+
+			This method must be able to resolve "parent.left", "parent.top", "parent.right" and "parent.bottom", as
+			well as any other objects that your application uses.
+		*/
+		virtual const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const = 0;
+	};
+
+	/** Calculates the absolute position of this coordinate.
+
+		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	double resolve (const NamedCoordinateFinder* nameFinder) const;
+
+	/** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
+		This will recursively check any coordinates upon which this one depends.
+	*/
+	bool references (const String& coordName, const NamedCoordinateFinder* nameFinder) const;
+
+	/** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
+	bool isRecursive (const NamedCoordinateFinder* nameFinder) const;
+
+	/** Returns true if this coordinate depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
+	/** Changes the value of this coord to make it resolve to the specified position.
+
+		Calling this will leave the anchor points unchanged, but will set this coordinate's absolute
+		or relative position to whatever value is necessary to make its resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (double absoluteTargetPosition, const NamedCoordinateFinder* nameFinder);
+
+	/** Returns true if the coordinate is calculated as a proportion of the distance between two other points.
+		@see toggleProportionality
+	*/
+	bool isProportional() const throw()			 { return anchor2.isNotEmpty(); }
+
+	/** Toggles the coordinate between using a proportional or absolute position.
+		Note that calling this will reset the names of any anchor points, and just make the
+		coordinate relative to the parent origin and parent size.
+	*/
+	void toggleProportionality (const NamedCoordinateFinder* nameFinder, bool isHorizontal);
+
+	/** Returns a value that can be edited to set this coordinate's position.
+		The meaning of this number depends on the coordinate's mode. If the coordinate is
+		proportional, the number will be a percentage between 0 and 100. If the
+		coordinate is absolute, then it will be the number of pixels from its anchor point.
+		@see setEditableNumber
+	 */
+	const double getEditableNumber() const;
+
+	/** Sets the value that controls this coordinate's position.
+		The meaning of this number depends on the coordinate's mode. If the coordinate is
+		proportional, the number must be a percentage between 0 and 100. If the
+		coordinate is absolute, then it indicates the number of pixels from its anchor point.
+		@see setEditableNumber
+	*/
+	void setEditableNumber (const double newValue);
+
+	/** Returns the name of the first anchor point from which this coordinate is relative.
+	*/
+	const String getAnchorName1() const			 { return anchor1; }
+
+	/** Returns the name of the second anchor point from which this coordinate is relative.
+		The second anchor is only valid if the coordinate is in proportional mode.
+	*/
+	const String getAnchorName2() const			 { return anchor2; }
+
+	/** Returns the first anchor point as a coordinate. */
+	const RelativeCoordinate getAnchorCoordinate1() const;
+
+	/** Returns the first anchor point as a coordinate.
+		The second anchor is only valid if the coordinate is in proportional mode.
+	*/
+	const RelativeCoordinate getAnchorCoordinate2() const;
+
+	/** Changes the first anchor point, keeping the resultant position of this coordinate in
+		the same place it was previously.
+	*/
+	void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
+
+	/** Changes the second anchor point, keeping the resultant position of this coordinate in
+		the same place it was previously.
+	*/
+	void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
+
+	/** Tells the coordinate that an object is changing its name or being deleted.
+
+		If either of this coordinates anchor points match this name, they will be replaced.
+		If the newName string is empty, it indicates that the object is being removed, so if
+		this coordinate was using it, the coordinate is changed to be relative to the origin
+		instead.
+	*/
+	void renameAnchorIfUsed (const String& oldName, const String& newName,
+							 const NamedCoordinateFinder* nameFinder);
+
+	/** Returns a string which represents this coordinate.
+		For details of the string syntax, see the constructor notes.
+	*/
+	const String toString() const;
+
+	/** A set of static strings that are commonly used by the RelativeCoordinate class.
+
+		As well as avoiding using string literals in your code, using these preset values
+		has the advantage that all instances of the same string will share the same, reference-counted
+		String object, so if you have thousands of points which all refer to the same
+		anchor points, this can save a significant amount of memory allocation.
+	*/
+	struct Strings
+	{
+		static const String parent;         /**< "parent" */
+		static const String left;           /**< "left" */
+		static const String right;          /**< "right" */
+		static const String top;            /**< "top" */
+		static const String bottom;         /**< "bottom" */
+		static const String parentLeft;     /**< "parent.left" */
+		static const String parentTop;      /**< "parent.top" */
+		static const String parentRight;    /**< "parent.right" */
+		static const String parentBottom;   /**< "parent.bottom" */
+	};
+
+private:
+
+	String anchor1, anchor2;
+	double value;
+
+	double resolve (const NamedCoordinateFinder* nameFinder, int recursionCounter) const;
+	static double resolveAnchor (const String& anchorName, const NamedCoordinateFinder* nameFinder, int recursionCounter);
+};
+
+/**
+	An X-Y position stored as a pair of RelativeCoordinate values.
+
+	@see RelativeCoordinate, RelativeRectangle
+*/
+class JUCE_API  RelativePoint
+{
+public:
+	/** Creates a point at the origin. */
+	RelativePoint();
+
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (const Point<float>& absolutePoint);
+
+	/** Creates an absolute point from two coordinates. */
+	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
+
+	/** Creates a point from a stringified representation.
+		The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
+		strings is explained in the RelativeCoordinate class.
+		@see toString
+	*/
+	RelativePoint (const String& stringVersion);
+
+	bool operator== (const RelativePoint& other) const throw();
+	bool operator!= (const RelativePoint& other) const throw();
+
+	/** Calculates the absolute position of this point.
+
+		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	const Point<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+
+	/** Changes the values of this point's coordinates to make it resolve to the specified position.
+
+		Calling this will leave any anchor points unchanged, but will set any absolute
+		or relative positions to whatever values are necessary to make the resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+	/** Returns a string which represents this point.
+		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
+		coordinates, see the RelativeCoordinate constructor notes.
+		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
+	*/
+	const String toString() const;
+
+	/** Tells the point that an object is changing its name or being deleted.
+		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
+	*/
+	void renameAnchorIfUsed (const String& oldName, const String& newName,
+							 const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+	/** Returns true if this point depends on any other coordinates for its position. */
+	bool isDynamic() const;
+
+	// The actual X and Y coords...
+	RelativeCoordinate x, y;
+};
+
+/**
+	An rectangle stored as a set of RelativeCoordinate values.
+
+	The rectangle's top, left, bottom and right edge positions are each stored as a RelativeCoordinate.
+
+	@see RelativeCoordinate, RelativePoint
+*/
+class JUCE_API  RelativeRectangle
+{
+public:
+
+	/** Creates a zero-size rectangle at the origin. */
+	RelativeRectangle();
+
+	/** Creates an absolute rectangle, relative to the origin. */
+	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
+
+	/** Creates a rectangle from a stringified representation.
+		The string must contain a sequence of 4 coordinates, separated by commas, in the order
+		left, top, right, bottom. The syntax for the coordinate strings is explained in the
+		RelativeCoordinate class.
+		@see toString
+	*/
+	explicit RelativeRectangle (const String& stringVersion);
+
+	bool operator== (const RelativeRectangle& other) const throw();
+	bool operator!= (const RelativeRectangle& other) const throw();
+
+	/** Calculates the absolute position of this rectangle.
+
+		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
+		be needed to calculate the result.
+	*/
+	const Rectangle<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+
+	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
+
+		Calling this will leave any anchor points unchanged, but will set any absolute
+		or relative positions to whatever values are necessary to make the resultant position
+		match the position that is provided.
+	*/
+	void moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+	/** Returns a string which represents this point.
+		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
+		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
+		The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
+	*/
+	const String toString() const;
+
+	/** Tells the rectangle that an object is changing its name or being deleted.
+		This calls RelativeCoordinate::renameAnchorIfUsed() on the rectangle's coordinates.
+	*/
+	void renameAnchorIfUsed (const String& oldName, const String& newName,
+							 const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+	// The actual rectangle coords...
+	RelativeCoordinate left, right, top, bottom;
+};
+
+/**
+	A path object that consists of RelativePoint coordinates rather than the normal fixed ones.
+
+	One of these paths can be converted into a Path object for drawing and manipulation, but
+	unlike a Path, its points can be dynamic instead of just fixed.
+
+	@see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativePointPath
+{
+public:
+
+	RelativePointPath();
+	RelativePointPath (const RelativePointPath& other);
+	RelativePointPath (const String& stringVersion);
+	~RelativePointPath();
+
+	/** Resolves this points in this path and adds them to a normal Path object. */
+	void createPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+
+	/** Returns true if the path contains any non-fixed points. */
+	bool containsAnyDynamicPoints() const;
+
+	/** Returns a string version of the path.
+		This has the same format as Path::toString(), but since it can contain RelativeCoordinate
+		positions, it can't be parsed by the Path class if any of the points are dynamic.
+	*/
+	const String toString() const;
+
+	/** Quickly swaps the contents of this path with another. */
+	void swapWith (RelativePointPath& other) throw();
+
+	/** The types of element that may be contained in this path.
+		@see RelativePointPath::ElementBase
+	*/
+	enum ElementType
+	{
+		nullElement,
+		startSubPathElement,
+		closeSubPathElement,
+		lineToElement,
+		quadraticToElement,
+		cubicToElement
+	};
+
+	/** Base class for the elements that make up a RelativePointPath.
+	*/
+	class JUCE_API  ElementBase
+	{
+	public:
+		ElementBase (ElementType type);
+		virtual ~ElementBase() {}
+		virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
+		virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
+
+		const ElementType type;
+	};
+
+	class JUCE_API  StartSubPath  : public ElementBase
+	{
+	public:
+		StartSubPath (const RelativePoint& pos);
+		~StartSubPath() {}
+		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+		RelativePoint startPos;
+	};
+
+	class JUCE_API  CloseSubPath  : public ElementBase
+	{
+	public:
+		CloseSubPath();
+		~CloseSubPath() {}
+		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+	};
+
+	class JUCE_API  LineTo  : public ElementBase
+	{
+	public:
+		LineTo (const RelativePoint& endPoint);
+		~LineTo() {}
+		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+		RelativePoint endPoint;
+	};
+
+	class JUCE_API  QuadraticTo  : public ElementBase
+	{
+	public:
+		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
+		~QuadraticTo() {}
+		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+		RelativePoint controlPoint, endPoint;
+	};
+
+	class JUCE_API  CubicTo  : public ElementBase
+	{
+	public:
+		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
+		~CubicTo() {}
+		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+		RelativePoint controlPoint1, controlPoint2, endPoint;
+	};
+
+	OwnedArray <ElementBase> elements;
+	bool usesNonZeroWinding;
+
+private:
+	bool containsDynamicPoints;
+
+	void parseString (const String& s);
+
+	RelativePointPath& operator= (const RelativePointPath&);
+};
+
+#endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__
+/*** End of inlined file: juce_RelativeCoordinate.h ***/
+
+class DrawableComposite;
+
 /**
 	The base class for objects which can draw themselves, e.g. polygons, images, etc.
 
@@ -41965,10 +42487,32 @@ public:
 	/** Returns the tag ID that is used for a ValueTree that stores this type of drawable.  */
 	virtual const Identifier getValueTreeType() const = 0;
 
+	/** Internal class used to manage ValueTrees that represent Drawables. */
+	class ValueTreeWrapperBase
+	{
+	public:
+		ValueTreeWrapperBase (const ValueTree& state);
+		~ValueTreeWrapperBase();
+
+		ValueTree& getState() throw()	   { return state; }
+
+		const String getID() const;
+		void setID (const String& newID, UndoManager* undoManager);
+
+	protected:
+		ValueTree state;
+		static const Identifier idProperty, type, x1, x2, y1, y2, colour, radial, colours;
+
+		static const FillType readFillType (const ValueTree& v);
+		void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
+	};
+
 	juce_UseDebuggingNewOperator
 
 protected:
-	static const Identifier idProperty;
+	friend class DrawableComposite;
+	DrawableComposite* parent;
+	virtual void invalidatePoints() = 0;
 
 private:
 	String name;
@@ -56527,7 +57071,7 @@ public:
 	TextInputTarget* findCurrentTextInputTarget();
 
 	/** Invalidates a region of the window to be repainted asynchronously. */
-	virtual void repaint (int x, int y, int w, int h) = 0;
+	virtual void repaint (const Rectangle<int>& area) = 0;
 
 	/** This can be called (from the message thread) to cause the immediate redrawing
 		of any areas of this window that need repainting.
@@ -57168,12 +57712,13 @@ public:
 					x = endX;
 				}
 
+				levelAccumulator >>= 8;
+
 				if (levelAccumulator > 0)
 				{
 					x >>= 8;
 					jassert (x >= bounds.getX() && x < bounds.getRight());
 
-					levelAccumulator >>= 8;
 					if (levelAccumulator >> 8)
 						iterationCallback.handleEdgeTablePixelFull (x);
 					else
@@ -57486,13 +58031,16 @@ protected:
 
 	@see Drawable
 */
-class JUCE_API  DrawableComposite  : public Drawable
+class JUCE_API  DrawableComposite  : public Drawable,
+									 public RelativeCoordinate::NamedCoordinateFinder
 {
 public:
 
-	/** Creates a composite Drawable.
-	*/
+	/** Creates a composite Drawable. */
 	DrawableComposite();
+
+	/** Creates a copy of a DrawableComposite. */
+	DrawableComposite (const DrawableComposite& other);
 
 	/** Destructor. */
 	virtual ~DrawableComposite();
@@ -57572,27 +58120,43 @@ public:
 		@param targetPositionForX0Y1	the position that the local coordinate (0, 1) should be
 										mapped onto when rendering this object.
 	*/
-	void setTransform (const Point<float>& targetPositionForOrigin,
-					   const Point<float>& targetPositionForX1Y0,
-					   const Point<float>& targetPositionForX0Y1);
+	void setTransform (const RelativePoint& targetPositionForOrigin,
+					   const RelativePoint& targetPositionForX1Y0,
+					   const RelativePoint& targetPositionForX0Y1);
 
 	/** Returns the position to which the local coordinate (0, 0) should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForOrigin() const throw()	  { return controlPoints[0]; }
+	const RelativePoint& getTargetPositionForOrigin() const throw()	  { return controlPoints[0]; }
 
 	/** Returns the position to which the local coordinate (1, 0) should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForX1Y0() const throw()		{ return controlPoints[1]; }
+	const RelativePoint& getTargetPositionForX1Y0() const throw()		{ return controlPoints[1]; }
 
 	/** Returns the position to which the local coordinate (0, 1) should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForX0Y1() const throw()		{ return controlPoints[2]; }
+	const RelativePoint& getTargetPositionForX0Y1() const throw()		{ return controlPoints[2]; }
+
+	struct Marker
+	{
+		Marker (const Marker&);
+		Marker (const String& name, const RelativeCoordinate& position, bool isOnXAxis);
+		bool operator!= (const Marker&) const throw();
+
+		String name;
+		RelativeCoordinate position;
+		bool isOnXAxis;
+	};
+
+	int getNumMarkers (bool xAxis) const throw();
+	const Marker* getMarker (int index) const throw();
+	void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
+	void removeMarker (int index);
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -57601,11 +58165,9 @@ public:
 	/** @internal */
 	bool hitTest (float x, float y) const;
 	/** @internal */
-	int getNumControlPoints() const;
-	/** @internal */
-	const Point<float> getControlPoint (int index) const;
-	/** @internal */
 	Drawable* createCopy() const;
+	/** @internal */
+	void invalidatePoints();
 	/** @internal */
 	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
@@ -57614,17 +58176,55 @@ public:
 	static const Identifier valueTreeType;
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
+	/** @internal */
+	const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+
+	/** Internally-used class for wrapping a DrawableComposite's state into a ValueTree. */
+	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		int getNumDrawables() const;
+		const ValueTree getDrawableState (int index) const;
+		void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
+		void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
+		void removeDrawable (int index, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForOrigin() const;
+		void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForX1Y0() const;
+		void setTargetPositionForX1Y0 (const RelativePoint& newPoint, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForX0Y1() const;
+		void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
+
+		int getNumMarkers() const;
+		const Marker getMarker (int index) const;
+		void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position, UndoManager* undoManager);
+		void removeMarker (int index, UndoManager* undoManager);
+
+	private:
+		static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTag,
+								markerTag, nameProperty, xAxisProperty, posProperty;
+
+		ValueTree getChildList() const;
+		ValueTree getChildListCreating (UndoManager* undoManager);
+		ValueTree getMarkerList() const;
+		ValueTree getMarkerListCreating (UndoManager* undoManager);
+	};
 
 	juce_UseDebuggingNewOperator
 
 private:
 	OwnedArray <Drawable> drawables;
-	Point<float> controlPoints[3];
+	RelativePoint controlPoints[3];
+	OwnedArray <Marker> markers;
 
 	const Rectangle<float> getUntransformedBounds() const;
-	const AffineTransform getTransform() const;
+	const AffineTransform calculateTransform() const;
 
-	DrawableComposite (const DrawableComposite&);
 	DrawableComposite& operator= (const DrawableComposite&);
 };
 
@@ -57649,6 +58249,7 @@ class JUCE_API  DrawableImage  : public Drawable
 public:
 
 	DrawableImage();
+	DrawableImage (const DrawableImage& other);
 
 	/** Destructor. */
 	virtual ~DrawableImage();
@@ -57667,7 +58268,7 @@ public:
 		with ImageCache and pass it in here with releaseWhenNotNeeded = true, then
 		it'll be released neatly with its reference count being decreased.
 
-		@param imageToUse		   the image to render
+		@param imageToUse		   the image to render (may be a null pointer)
 		@param releaseWhenNotNeeded	 if false, a simple pointer is kept to the image; if true,
 										then the image will be deleted when this object no longer
 										needs it - unless the image was created by the ImageCache,
@@ -57677,9 +58278,6 @@ public:
 
 	/** Returns the current image. */
 	Image* getImage() const throw()				 { return image; }
-
-	/** Clears (and possibly deletes) the currently set image. */
-	void clearImage();
 
 	/** Sets the opacity to use when drawing the image. */
 	void setOpacity (float newOpacity);
@@ -57711,27 +58309,27 @@ public:
 		@param imageBottomLeftPosition  the position that the image's bottom-left corner should be mapped to
 										in the target coordinate space.
 	*/
-	void setTransform (const Point<float>& imageTopLeftPosition,
-					   const Point<float>& imageTopRightPosition,
-					   const Point<float>& imageBottomLeftPosition);
+	void setTransform (const RelativePoint& imageTopLeftPosition,
+					   const RelativePoint& imageTopRightPosition,
+					   const RelativePoint& imageBottomLeftPosition);
 
 	/** Returns the position to which the image's top-left corner should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForTopLeft() const throw()	 { return controlPoints[0]; }
+	const RelativePoint& getTargetPositionForTopLeft() const throw()	 { return controlPoints[0]; }
 
 	/** Returns the position to which the image's top-right corner should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForTopRight() const throw()	{ return controlPoints[1]; }
+	const RelativePoint& getTargetPositionForTopRight() const throw()	{ return controlPoints[1]; }
 
 	/** Returns the position to which the image's bottom-left corner should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const Point<float>& getTargetPositionForBottomLeft() const throw()	  { return controlPoints[2]; }
+	const RelativePoint& getTargetPositionForBottomLeft() const throw()	  { return controlPoints[2]; }
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -57742,6 +58340,8 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
+	void invalidatePoints();
+	/** @internal */
 	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
@@ -57750,6 +58350,34 @@ public:
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
+	/** Internally-used class for wrapping a DrawableImage's state into a ValueTree. */
+	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		const var getImageIdentifier() const;
+		void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
+
+		float getOpacity() const;
+		void setOpacity (float newOpacity, UndoManager* undoManager);
+
+		const Colour getOverlayColour() const;
+		void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForTopLeft() const;
+		void setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForTopRight() const;
+		void setTargetPositionForTopRight (const RelativePoint& newPoint, UndoManager* undoManager);
+
+		const RelativePoint getTargetPositionForBottomLeft() const;
+		void setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager);
+
+	private:
+		static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
+	};
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -57757,11 +58385,10 @@ private:
 	bool canDeleteImage;
 	float opacity;
 	Colour overlayColour;
-	Point<float> controlPoints[3];
+	RelativePoint controlPoints[3];
 
-	const AffineTransform getTransform() const;
+	const AffineTransform calculateTransform() const;
 
-	DrawableImage (const DrawableImage&);
 	DrawableImage& operator= (const DrawableImage&);
 };
 
@@ -57785,9 +58412,9 @@ class JUCE_API  DrawablePath  : public Drawable
 {
 public:
 
-	/** Creates a DrawablePath.
-	*/
+	/** Creates a DrawablePath. */
 	DrawablePath();
+	DrawablePath (const DrawablePath& other);
 
 	/** Destructor. */
 	virtual ~DrawablePath();
@@ -57797,9 +58424,6 @@ public:
 		@see setFillColour, setStrokeType
 	*/
 	void setPath (const Path& newPath);
-
-	/** Returns the current path. */
-	const Path& getPath() const throw()			 { return path; }
 
 	/** Sets a fill type for the path.
 
@@ -57840,6 +58464,12 @@ public:
 	/** Returns the current outline style. */
 	const PathStrokeType& getStrokeType() const throw()	 { return strokeType; }
 
+	/** Returns the current path. */
+	const Path& getPath() const;
+
+	/** Returns the current path for the outline. */
+	const Path& getStrokePath() const;
+
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
 	/** @internal */
@@ -57849,6 +58479,8 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
+	void invalidatePoints();
+	/** @internal */
 	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
@@ -57857,16 +58489,41 @@ public:
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
+	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
+	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		const FillType getMainFill() const;
+		void setMainFill (const FillType& newFill, UndoManager* undoManager);
+
+		const FillType getStrokeFill() const;
+		void setStrokeFill (const FillType& newFill, UndoManager* undoManager);
+
+		const PathStrokeType getStrokeType() const;
+		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
+
+		void getPath (RelativePointPath& path) const;
+		void setPath (const String& newPath, UndoManager* undoManager);
+
+	private:
+		static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
+	};
+
 	juce_UseDebuggingNewOperator
 
 private:
-	Path path, stroke;
 	FillType mainFill, strokeFill;
 	PathStrokeType strokeType;
+	ScopedPointer<RelativePointPath> relativePath;
+	mutable Path path, stroke;
+	mutable bool pathNeedsUpdating, strokeNeedsUpdating;
 
-	void updateOutline();
+	void updatePath() const;
+	void updateStroke() const;
+	bool isStrokeVisible() const throw();
 
-	DrawablePath (const DrawablePath&);
 	DrawablePath& operator= (const DrawablePath&);
 };
 
@@ -57892,6 +58549,7 @@ public:
 
 	/** Creates a DrawableText object. */
 	DrawableText();
+	DrawableText (const DrawableText& other);
 
 	/** Destructor. */
 	virtual ~DrawableText();
@@ -57925,6 +58583,8 @@ public:
 	/** @internal */
 	Drawable* createCopy() const;
 	/** @internal */
+	void invalidatePoints();
+	/** @internal */
 	const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
 	/** @internal */
 	const ValueTree createValueTree (ImageProvider* imageProvider) const;
@@ -57933,13 +58593,24 @@ public:
 	/** @internal */
 	const Identifier getValueTreeType() const	{ return valueTreeType; }
 
+	/** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
+	class ValueTreeWrapper   : public ValueTreeWrapperBase
+	{
+	public:
+		ValueTreeWrapper (const ValueTree& state);
+
+		//xxx todo
+
+	private:
+		static const Identifier text;
+	};
+
 	juce_UseDebuggingNewOperator
 
 private:
 	GlyphArrangement text;
 	Colour colour;
 
-	DrawableText (const DrawableText&);
 	DrawableText& operator= (const DrawableText&);
 };
 
@@ -58494,352 +59165,6 @@ private:
 
 #endif
 #ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
-
-/*** Start of inlined file: juce_RelativeCoordinate.h ***/
-#ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
-#define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
-
-/**
-	Expresses a coordinate as an absolute or proportional distance from other
-	named coordinates.
-
-	A RelativeCoordinate represents a position as either:
-		- an absolute distance from the origin
-		- an absolute distance from another named RelativeCoordinate
-		- a proportion of the distance between two other named RelativeCoordinates
-
-	Of course, the coordinates that this one is relative to may themselves be relative
-	to other coordinates, so complex arrangements can be built up (as long as you're careful
-	not to create recursive loops!)
-
-	Rather than keeping pointers to the coordinates that this one is dependent on, it
-	stores their names, and when resolving this coordinate to an absolute value, a
-	NamedCoordinateFinder class is required to retrieve these coordinates by name.
-
-	@see RelativePoint, RelativeRectangle
-*/
-class JUCE_API  RelativeCoordinate
-{
-public:
-
-	/** Creates a zero coordinate. */
-	RelativeCoordinate();
-
-	/** Creates an absolute position from the parent origin on either the X or Y axis.
-
-		@param absoluteDistanceFromOrigin   the distance from the origin
-		@param isHorizontal		 this must be true if this is an X coordinate, or false if it's on the Y axis.
-	*/
-	RelativeCoordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
-
-	/** Creates an absolute position relative to a named coordinate.
-
-		@param absoluteDistanceFromAnchor   the distance to add to the named anchor point
-		@param anchorPoint	  the name of the coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-	*/
-	RelativeCoordinate (double absoluteDistanceFromAnchor, const String& anchorPoint);
-
-	/** Creates a relative position between two named points.
-
-		@param relativeProportionBetweenAnchors	 a value between 0 and 1 indicating this coordinate's relative position
-								between anchorPoint1 and anchorPoint2.
-		@param anchorPoint1	 the name of the first coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-		@param anchorPoint2	 the name of the first coordinate from which this one will be relative. See the constructor
-								notes for a description of the syntax for coordinate names.
-	*/
-	RelativeCoordinate (double relativeProportionBetweenAnchors, const String& anchorPoint1, const String& anchorPoint2);
-
-	/** Recreates a coordinate from a string description.
-
-		The string can be in one of the following formats:
-			- "123"                         = 123 pixels from parent origin (this is equivalent to "parent.left + 123"
-												or "parent.top + 123", depending on which axis the coordinate is using)
-			- "anchor"                      = the same position as the coordinate named "anchor"
-			- "anchor + 123"                = the coordinate named "anchor" + 123 pixels
-			- "anchor - 123"                = the coordinate named "anchor" - 123 pixels
-			- "50%"                         = 50% of the distance between the coordinate space's top-left origin and its extent
-												(this is equivalent to "50% * parent.left -> parent.right" or "50% * parent.top -> parent.bottom")
-			- "50% * anchor"                = 50% of the distance between the coordinate space's origin and the coordinate named "anchor"
-												(this is equivalent to "50% * parent.left -> anchor" or "50% * parent.top -> anchor")
-			- "50% * anchor1 -> anchor2"    = 50% of the distance between the coordinate "anchor1" and the coordinate "anchor2"
-
-		An anchor name can either be just a single identifier (letters, digits and underscores only - no spaces),
-		e.g. "marker1", or it can be a two-part name in the form "objectName.edge". For example "parent.left" is
-		the origin, or "myComponent.top" is the top edge of a component called "myComponent". The exact names that
-		will be recognised are dependent on the NamedCoordinateFinder that you provide for looking them up, but
-		"parent.left", "parent.top", "parent.right" and "parent.bottom" are always available, representing the
-		extents of the target coordinate space.
-
-		@param stringVersion	the string to parse
-		@param isHorizontal	 this must be true if this is an X coordinate, or false if it's on the Y axis.
-
-		@see toString
-	*/
-	RelativeCoordinate (const String& stringVersion, bool isHorizontal);
-
-	/** Destructor. */
-	~RelativeCoordinate();
-
-	/**
-		Provides an interface for looking up the position of a named anchor when resolving a RelativeCoordinate.
-
-		When using RelativeCoordinates, to resolve their names you need to provide a subclass of this which
-		can retrieve a coordinate by name.
-	*/
-	class JUCE_API  NamedCoordinateFinder
-	{
-	public:
-		/** Destructor. */
-		virtual ~NamedCoordinateFinder() {}
-
-		/** Returns the coordinate for a given name.
-
-			The objectName parameter will be the first section of the name, and the edge the name of the second part.
-			E.g. for "parent.right", objectName would be "parent" and edge would be "right". If the name
-			has no dot, the edge parameter will be an empty string.
-
-			This method must be able to resolve "parent.left", "parent.top", "parent.right" and "parent.bottom", as
-			well as any other objects that your application uses.
-		*/
-		virtual const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const = 0;
-	};
-
-	/** Calculates the absolute position of this coordinate.
-
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	double resolve (const NamedCoordinateFinder& nameFinder) const;
-
-	/** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
-		This will recursively check any coordinates upon which this one depends.
-	*/
-	bool references (const String& coordName, const NamedCoordinateFinder& nameFinder) const;
-
-	/** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
-	bool isRecursive (const NamedCoordinateFinder& nameFinder) const;
-
-	/** Changes the value of this coord to make it resolve to the specified position.
-
-		Calling this will leave the anchor points unchanged, but will set this coordinate's absolute
-		or relative position to whatever value is necessary to make its resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (double absoluteTargetPosition, const NamedCoordinateFinder& nameFinder);
-
-	/** Returns true if the coordinate is calculated as a proportion of the distance between two other points.
-		@see toggleProportionality
-	*/
-	bool isProportional() const throw()			 { return anchor2.isNotEmpty(); }
-
-	/** Toggles the coordinate between using a proportional or absolute position.
-		Note that calling this will reset the names of any anchor points, and just make the
-		coordinate relative to the parent origin and parent size.
-	*/
-	void toggleProportionality (const NamedCoordinateFinder& nameFinder, bool isHorizontal);
-
-	/** Returns a value that can be edited to set this coordinate's position.
-		The meaning of this number depends on the coordinate's mode. If the coordinate is
-		proportional, the number will be a percentage between 0 and 100. If the
-		coordinate is absolute, then it will be the number of pixels from its anchor point.
-		@see setEditableNumber
-	 */
-	const double getEditableNumber() const;
-
-	/** Sets the value that controls this coordinate's position.
-		The meaning of this number depends on the coordinate's mode. If the coordinate is
-		proportional, the number must be a percentage between 0 and 100. If the
-		coordinate is absolute, then it indicates the number of pixels from its anchor point.
-		@see setEditableNumber
-	*/
-	void setEditableNumber (const double newValue);
-
-	/** Returns the name of the first anchor point from which this coordinate is relative.
-	*/
-	const String getAnchorName1() const			 { return anchor1; }
-
-	/** Returns the name of the second anchor point from which this coordinate is relative.
-		The second anchor is only valid if the coordinate is in proportional mode.
-	*/
-	const String getAnchorName2() const			 { return anchor2; }
-
-	/** Returns the first anchor point as a coordinate. */
-	const RelativeCoordinate getAnchorCoordinate1() const;
-
-	/** Returns the first anchor point as a coordinate.
-		The second anchor is only valid if the coordinate is in proportional mode.
-	*/
-	const RelativeCoordinate getAnchorCoordinate2() const;
-
-	/** Changes the first anchor point, keeping the resultant position of this coordinate in
-		the same place it was previously.
-	*/
-	void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder& nameFinder);
-
-	/** Changes the second anchor point, keeping the resultant position of this coordinate in
-		the same place it was previously.
-	*/
-	void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder& nameFinder);
-
-	/** Tells the coordinate that an object is changing its name or being deleted.
-
-		If either of this coordinates anchor points match this name, they will be replaced.
-		If the newName string is empty, it indicates that the object is being removed, so if
-		this coordinate was using it, the coordinate is changed to be relative to the origin
-		instead.
-	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const NamedCoordinateFinder& nameFinder);
-
-	/** Returns a string which represents this coordinate.
-		For details of the string syntax, see the constructor notes.
-	*/
-	const String toString() const;
-
-	/** A set of static strings that are commonly used by the RelativeCoordinate class.
-
-		As well as avoiding using string literals in your code, using these preset values
-		has the advantage that all instances of the same string will share the same, reference-counted
-		String object, so if you have thousands of points which all refer to the same
-		anchor points, this can save a significant amount of memory allocation.
-	*/
-	struct Strings
-	{
-		static const String parent;         /**< "parent" */
-		static const String left;           /**< "left" */
-		static const String right;          /**< "right" */
-		static const String top;            /**< "top" */
-		static const String bottom;         /**< "bottom" */
-		static const String parentLeft;     /**< "parent.left" */
-		static const String parentTop;      /**< "parent.top" */
-		static const String parentRight;    /**< "parent.right" */
-		static const String parentBottom;   /**< "parent.bottom" */
-	};
-
-private:
-
-	String anchor1, anchor2;
-	double value;
-
-	double resolve (const NamedCoordinateFinder& nameFinder, int recursionCounter) const;
-	static double resolveAnchor (const String& anchorName, const NamedCoordinateFinder& nameFinder, int recursionCounter);
-};
-
-/**
-	An X-Y position stored as a pair of RelativeCoordinate values.
-
-	@see RelativeCoordinate, RelativeRectangle
-*/
-class JUCE_API  RelativePoint
-{
-public:
-	/** Creates a point at the origin. */
-	RelativePoint();
-
-	/** Creates an absolute point, relative to the origin. */
-	RelativePoint (const Point<float>& absolutePoint);
-
-	/** Creates a point from a stringified representation.
-		The string must contain a pair of coordinates, separated by a comma. The syntax for the coordinate
-		strings is explained in the RelativeCoordinate class.
-		@see toString
-	*/
-	RelativePoint (const String& stringVersion);
-
-	/** Calculates the absolute position of this point.
-
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	const Point<float> resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const;
-
-	/** Changes the values of this point's coordinates to make it resolve to the specified position.
-
-		Calling this will leave any anchor points unchanged, but will set any absolute
-		or relative positions to whatever values are necessary to make the resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
-
-	/** Returns a string which represents this point.
-		This returns a comma-separated pair of coordinates. For details of the string syntax used by the
-		coordinates, see the RelativeCoordinate constructor notes.
-		The string that is returned can be passed to the RelativePoint constructor to recreate the point.
-	*/
-	const String toString() const;
-
-	/** Tells the point that an object is changing its name or being deleted.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
-	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
-
-	// The actual X and Y coords...
-	RelativeCoordinate x, y;
-};
-
-/**
-	An rectangle stored as a set of RelativeCoordinate values.
-
-	The rectangle's top, left, bottom and right edge positions are each stored as a RelativeCoordinate.
-
-	@see RelativeCoordinate, RelativePoint
-*/
-class JUCE_API  RelativeRectangle
-{
-public:
-
-	/** Creates a zero-size rectangle at the origin. */
-	RelativeRectangle();
-
-	/** Creates an absolute rectangle, relative to the origin. */
-	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
-
-	/** Creates a rectangle from a stringified representation.
-		The string must contain a sequence of 4 coordinates, separated by commas, in the order
-		left, top, right, bottom. The syntax for the coordinate strings is explained in the
-		RelativeCoordinate class.
-		@see toString
-	*/
-	explicit RelativeRectangle (const String& stringVersion);
-
-	/** Calculates the absolute position of this rectangle.
-
-		You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
-		be needed to calculate the result.
-	*/
-	const Rectangle<float> resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const;
-
-	/** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
-
-		Calling this will leave any anchor points unchanged, but will set any absolute
-		or relative positions to whatever values are necessary to make the resultant position
-		match the position that is provided.
-	*/
-	void moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
-
-	/** Returns a string which represents this point.
-		This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
-		the string syntax used by the coordinates, see the RelativeCoordinate constructor notes.
-		The string that is returned can be passed to the RelativeRectangle constructor to recreate the rectangle.
-	*/
-	const String toString() const;
-
-	/** Tells the rectangle that an object is changing its name or being deleted.
-		This calls RelativeCoordinate::renameAnchorIfUsed() on the rectangle's coordinates.
-	*/
-	void renameAnchorIfUsed (const String& oldName, const String& newName,
-							 const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
-
-	// The actual rectangle coords...
-	RelativeCoordinate left, right, top, bottom;
-};
-
-#endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__
-/*** End of inlined file: juce_RelativeCoordinate.h ***/
-
 
 #endif
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__

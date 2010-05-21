@@ -95,9 +95,7 @@ DocumentWindow::~DocumentWindow()
 //==============================================================================
 void DocumentWindow::repaintTitleBar()
 {
-    const Rectangle<int> titleBarArea (getTitleBarArea());
-    repaint (titleBarArea.getX(), titleBarArea.getY(),
-             titleBarArea.getWidth(), titleBarArea.getHeight());
+    repaint (getTitleBarArea());
 }
 
 void DocumentWindow::setName (const String& newName)

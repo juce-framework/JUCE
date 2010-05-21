@@ -1055,9 +1055,7 @@ static int indexOfMatch (const juce_wchar* const wildcard,
             else
             {
                 if (wc == '*' && (wildcard [i + 1] == 0
-                                   || indexOfMatch (wildcard + i + 1,
-                                                    test + start + i,
-                                                    ignoreCase) >= 0))
+                                   || indexOfMatch (wildcard + i + 1, test + start + i, ignoreCase) >= 0))
                 {
                     return start;
                 }
@@ -1093,9 +1091,7 @@ bool String::matchesWildcard (const String& wildcard, const bool ignoreCase) con
         else
         {
             return wc == '*' && (wildcard [i + 1] == 0
-                                  || indexOfMatch (wildcard.text + i + 1,
-                                                   text + i,
-                                                   ignoreCase) >= 0);
+                                  || indexOfMatch (wildcard.text + i + 1, text + i, ignoreCase) >= 0);
         }
     }
 }

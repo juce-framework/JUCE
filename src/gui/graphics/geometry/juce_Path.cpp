@@ -74,12 +74,7 @@ namespace PathHelpers
         while (*t != 0 && ! CharacterFunctions::isWhitespace (*t))
             ++t;
 
-        const int length = (int) (t - start);
-
-        while (CharacterFunctions::isWhitespace (*t))
-            ++t;
-
-        return String (start, length);
+        return String (start, (int) (t - start));
     }
 }
 
@@ -1479,11 +1474,14 @@ void Path::restoreFromString (const String& stringVersion)
     int numValues = 2;
     float values [6];
 
-    while (*t != 0)
+    for (;;)
     {
         const String token (PathHelpers::nextToken (t));
         const juce_wchar firstChar = token[0];
         int startNum = 0;
+
+        if (firstChar == 0)
+            break;
 
         if (firstChar == 'm' || firstChar == 'l')
         {

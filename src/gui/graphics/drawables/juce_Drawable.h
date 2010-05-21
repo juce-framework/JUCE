@@ -27,8 +27,10 @@
 #define __JUCE_DRAWABLE_JUCEHEADER__
 
 #include "../contexts/juce_Graphics.h"
+#include "../geometry/juce_RelativeCoordinate.h"
 #include "../../../text/juce_XmlElement.h"
 #include "../../../containers/juce_ValueTree.h"
+class DrawableComposite;
 
 
 //==============================================================================
@@ -230,10 +232,33 @@ public:
     virtual const Identifier getValueTreeType() const = 0;
 
     //==============================================================================
+    /** Internal class used to manage ValueTrees that represent Drawables. */
+    class ValueTreeWrapperBase
+    {
+    public:
+        ValueTreeWrapperBase (const ValueTree& state);
+        ~ValueTreeWrapperBase();
+
+        ValueTree& getState() throw()           { return state; }
+
+        const String getID() const;
+        void setID (const String& newID, UndoManager* undoManager);
+
+    protected:
+        ValueTree state;
+        static const Identifier idProperty, type, x1, x2, y1, y2, colour, radial, colours;
+
+        static const FillType readFillType (const ValueTree& v);
+        void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 protected:
-    static const Identifier idProperty;
+    friend class DrawableComposite;
+    DrawableComposite* parent;
+    virtual void invalidatePoints() = 0;
 
 private:
     String name;

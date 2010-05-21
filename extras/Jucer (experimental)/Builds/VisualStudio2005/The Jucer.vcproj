@@ -154,6 +154,7 @@
         <Filter Name="Drawable">
           <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp"/>
           <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.h"/>
+          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h"/>
         </Filter>
         <Filter Name="Project">
           <File RelativePath="..\..\Source\model\Project\jucer_NewFileWizard.cpp"/>
@@ -229,8 +230,6 @@
         <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.h"/>
         <File RelativePath="..\..\Source\utility\jucer_ColourEditorComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_Colours.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_Coordinate.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_Coordinate.h"/>
         <File RelativePath="..\..\Source\utility\jucer_CoordinatePropertyComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.h"/>

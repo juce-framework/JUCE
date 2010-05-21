@@ -288,8 +288,7 @@ public:
 
     void repaint()
     {
-        const Rectangle<int> bounds (nativeWindow->getBounds());
-        nativeWindow->repaint (0, 0, bounds.getWidth(), bounds.getHeight());
+        nativeWindow->repaint (nativeWindow->getBounds().withPosition (Point<int>()));
     }
 
     void swapBuffers()

@@ -177,12 +177,13 @@ public:
                     x = endX;
                 }
 
+                levelAccumulator >>= 8;
+
                 if (levelAccumulator > 0)
                 {
                     x >>= 8;
                     jassert (x >= bounds.getX() && x < bounds.getRight());
 
-                    levelAccumulator >>= 8;
                     if (levelAccumulator >> 8)
                         iterationCallback.handleEdgeTablePixelFull (x);
                     else

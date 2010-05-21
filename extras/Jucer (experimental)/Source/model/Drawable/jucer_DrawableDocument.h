@@ -28,13 +28,13 @@
 
 #include "../../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
-#include "../../utility/jucer_Coordinate.h"
 #include "../../utility/jucer_MarkerListBase.h"
 
 
 //==============================================================================
 class DrawableDocument  :  public ValueTree::Listener,
-                           public ChangeBroadcaster
+                           public ChangeBroadcaster,
+                           public Drawable::ImageProvider
 {
 public:
     //==============================================================================
@@ -51,16 +51,13 @@ public:
     void changed();
 
     ValueTree& getRoot()                    { return root; }
-    ValueTree getRootDrawableNode() const;
-
-    void addRectangle();
-    void addCircle();
-    void addImage (const File& imageFile);
+    DrawableComposite::ValueTreeWrapper getRootDrawableNode() const;
 
     Value getCanvasWidth() const            { return getRootValueNonUndoable (Ids::width); }
     Value getCanvasHeight() const           { return getRootValueNonUndoable (Ids::height); }
 
-    static const String getIdFor (const ValueTree& object);
+    void addNewItemMenuItems (PopupMenu& menu) const;
+    const ValueTree performNewItemMenuItem (int menuResultCode);
 
     //==============================================================================
     class MarkerList    : public MarkerListBase
@@ -90,6 +87,9 @@ public:
 
     const String getNonexistentMarkerName (const String& name);
     void renameAnchor (const String& oldName, const String& newName);
+
+    Image* getImageForIdentifier (const var& imageIdentifier);
+    const var getIdentifierForImage (Image* image);
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& name);

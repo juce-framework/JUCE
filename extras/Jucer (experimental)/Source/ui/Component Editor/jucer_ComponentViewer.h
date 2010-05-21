@@ -62,7 +62,7 @@ private:
     ComponentDocument* componentDocument;
     ValueTree documentRoot;
 
-    ScopedPointer<ComponentAutoLayoutManager> layoutManager;
+    ScopedPointer<RelativeRectangleLayoutManager> layoutManager;
     Colour background;
 
     ComponentViewer (const ComponentViewer&);

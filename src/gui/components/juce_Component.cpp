@@ -1555,6 +1555,11 @@ void Component::repaint (const int x, const int y,
         internalRepaint (x, y, w, h);
 }
 
+void Component::repaint (const Rectangle<int>& area)
+{
+    repaint (area.getX(), area.getY(), area.getWidth(), area.getHeight());
+}
+
 void Component::internalRepaint (int x, int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
@@ -1596,7 +1601,7 @@ void Component::internalRepaint (int x, int y, int w, int h)
                 ComponentPeer* const peer = getPeer();
 
                 if (peer != 0)
-                    peer->repaint (x, y, w, h);
+                    peer->repaint (Rectangle<int> (x, y, w, h));
             }
         }
     }

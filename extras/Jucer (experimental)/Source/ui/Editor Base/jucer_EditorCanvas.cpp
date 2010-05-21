@@ -243,7 +243,7 @@ public:
     void updatePosition()
     {
         RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
-        const int pos = roundToInt (coord.resolve (getMarkerList()));
+        const int pos = roundToInt (coord.resolve (&getMarkerList()));
         const int width = 8;
 
         if (isX)
@@ -309,7 +309,7 @@ public:
             canvas->getUndoManager().beginNewTransaction();
 
             RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
-            dragStartPos = coord.resolve (getMarkerList());
+            dragStartPos = coord.resolve (&getMarkerList());
         }
     }
 
@@ -335,7 +335,7 @@ public:
                 // (can't use getDistanceFromDragStart() because it doesn't take into account auto-scrolling)
                 coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e2.x - mouseDownPos.getX()
                                                                                : e2.y - mouseDownPos.getY()))),
-                                      getMarkerList());
+                                      &getMarkerList());
                 getMarkerList().setCoordinate (marker, coord);
             }
             else

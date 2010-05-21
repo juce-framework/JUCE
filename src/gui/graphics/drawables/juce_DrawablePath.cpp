@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_DrawablePath.h"
+#include "juce_DrawableComposite.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
@@ -35,8 +36,23 @@ BEGIN_JUCE_NAMESPACE
 DrawablePath::DrawablePath()
     : mainFill (Colours::black),
       strokeFill (Colours::transparentBlack),
-      strokeType (0.0f)
+      strokeType (0.0f),
+      pathNeedsUpdating (true),
+      strokeNeedsUpdating (true)
 {
+}
+
+DrawablePath::DrawablePath (const DrawablePath& other)
+    : mainFill (other.mainFill),
+      strokeFill (other.strokeFill),
+      strokeType (other.strokeType),
+      pathNeedsUpdating (true),
+      strokeNeedsUpdating (true)
+{
+    if (other.relativePath != 0)
+        relativePath = new RelativePointPath (*other.relativePath);
+    else
+        path = other.path;
 }
 
 DrawablePath::~DrawablePath()
@@ -47,7 +63,7 @@ DrawablePath::~DrawablePath()
 void DrawablePath::setPath (const Path& newPath)
 {
     path = newPath;
-    updateOutline();
+    strokeNeedsUpdating = true;
 }
 
 void DrawablePath::setFill (const FillType& newFill)
@@ -63,12 +79,61 @@ void DrawablePath::setStrokeFill (const FillType& newFill)
 void DrawablePath::setStrokeType (const PathStrokeType& newStrokeType)
 {
     strokeType = newStrokeType;
-    updateOutline();
+    strokeNeedsUpdating = true;
 }
 
 void DrawablePath::setStrokeThickness (const float newThickness)
 {
     setStrokeType (PathStrokeType (newThickness, strokeType.getJointStyle(), strokeType.getEndStyle()));
+}
+
+void DrawablePath::updatePath() const
+{
+    if (pathNeedsUpdating)
+    {
+        pathNeedsUpdating = false;
+
+        if (relativePath != 0)
+        {
+            path.clear();
+            relativePath->createPath (path, parent);
+            strokeNeedsUpdating = true;
+        }
+    }
+}
+
+void DrawablePath::updateStroke() const
+{
+    if (strokeNeedsUpdating)
+    {
+        strokeNeedsUpdating = false;
+        updatePath();
+        stroke.clear();
+        strokeType.createStrokedPath (stroke, path, AffineTransform::identity, 4.0f);
+    }
+}
+
+const Path& DrawablePath::getPath() const
+{
+    updatePath();
+    return path;
+}
+
+const Path& DrawablePath::getStrokePath() const
+{
+    updateStroke();
+    return stroke;
+}
+
+bool DrawablePath::isStrokeVisible() const throw()
+{
+    return strokeType.getStrokeThickness() > 0.0f && ! strokeFill.isInvisible();
+}
+
+void DrawablePath::invalidatePoints()
+{
+    pathNeedsUpdating = true;
+    strokeNeedsUpdating = true;
 }
 
 //==============================================================================
@@ -81,10 +146,10 @@ void DrawablePath::render (const Drawable::RenderingContext& context) const
 
         f.transform = f.transform.followedBy (context.transform);
         context.g.setFillType (f);
-        context.g.fillPath (path, context.transform);
+        context.g.fillPath (getPath(), context.transform);
     }
 
-    if (strokeType.getStrokeThickness() > 0.0f)
+    if (isStrokeVisible())
     {
         FillType f (strokeFill);
         if (f.isGradient())
@@ -92,162 +157,133 @@ void DrawablePath::render (const Drawable::RenderingContext& context) const
 
         f.transform = f.transform.followedBy (context.transform);
         context.g.setFillType (f);
-        context.g.fillPath (stroke, context.transform);
+        context.g.fillPath (getStrokePath(), context.transform);
     }
-}
-
-void DrawablePath::updateOutline()
-{
-    stroke.clear();
-    strokeType.createStrokedPath (stroke, path, AffineTransform::identity, 4.0f);
 }
 
 const Rectangle<float> DrawablePath::getBounds() const
 {
-    if (strokeType.getStrokeThickness() > 0.0f)
-        return stroke.getBounds();
+    if (isStrokeVisible())
+        return getStrokePath().getBounds();
     else
-        return path.getBounds();
+        return getPath().getBounds();
 }
 
 bool DrawablePath::hitTest (float x, float y) const
 {
-    return path.contains (x, y)
-            || stroke.contains (x, y);
+    return getPath().contains (x, y)
+            || (isStrokeVisible() && getStrokePath().contains (x, y));
 }
 
 Drawable* DrawablePath::createCopy() const
 {
-    DrawablePath* const dp = new DrawablePath();
-
-    dp->path = path;
-    dp->stroke = stroke;
-    dp->mainFill = mainFill;
-    dp->strokeFill = strokeFill;
-    dp->strokeType = strokeType;
-    return dp;
+    return new DrawablePath (*this);
 }
 
 //==============================================================================
 const Identifier DrawablePath::valueTreeType ("Path");
 
-namespace DrawablePathHelpers
+const Identifier DrawablePath::ValueTreeWrapper::fill ("fill");
+const Identifier DrawablePath::ValueTreeWrapper::stroke ("stroke");
+const Identifier DrawablePath::ValueTreeWrapper::jointStyle ("jointStyle");
+const Identifier DrawablePath::ValueTreeWrapper::capStyle ("capStyle");
+const Identifier DrawablePath::ValueTreeWrapper::strokeWidth ("strokeWidth");
+const Identifier DrawablePath::ValueTreeWrapper::path ("path");
+
+//==============================================================================
+DrawablePath::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
+    : ValueTreeWrapperBase (state_)
 {
-    static const Identifier type ("type");
-    static const Identifier solid ("solid");
-    static const Identifier colour ("colour");
-    static const Identifier gradient ("gradient");
-    static const Identifier x1 ("x1");
-    static const Identifier x2 ("x2");
-    static const Identifier y1 ("y1");
-    static const Identifier y2 ("y2");
-    static const Identifier radial ("radial");
-    static const Identifier colours ("colours");
-    static const Identifier fill ("fill");
-    static const Identifier stroke ("stroke");
-    static const Identifier jointStyle ("jointStyle");
-    static const Identifier capStyle ("capStyle");
-    static const Identifier strokeWidth ("strokeWidth");
-    static const Identifier path ("path");
+    jassert (state.hasType (valueTreeType));
+}
 
-    static bool updateFillType (const ValueTree& v, FillType& fillType)
-    {
-        const String type (v[type].toString());
+const FillType DrawablePath::ValueTreeWrapper::getMainFill() const
+{
+    return readFillType (state.getChildWithName (fill));
+}
 
-        if (type.equalsIgnoreCase (solid))
-        {
-            const String colourString (v [colour].toString());
-            const Colour newColour (colourString.isEmpty() ? (uint32) 0xff000000
-                                                           : (uint32) colourString.getHexValue32());
+void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, UndoManager* undoManager)
+{
+    replaceFillType (fill, newFill, undoManager);
+}
 
-            if (fillType.isColour() && fillType.colour == newColour)
-                return false;
+const FillType DrawablePath::ValueTreeWrapper::getStrokeFill() const
+{
+    return readFillType (state.getChildWithName (stroke));
+}
 
-            fillType.setColour (newColour);
-            return true;
-        }
-        else if (type.equalsIgnoreCase (gradient))
-        {
-            ColourGradient g;
-            g.point1.setXY (v[x1], v[y1]);
-            g.point2.setXY (v[x2], v[y2]);
-            g.isRadial = v[radial];
+void DrawablePath::ValueTreeWrapper::setStrokeFill (const FillType& newFill, UndoManager* undoManager)
+{
+    replaceFillType (stroke, newFill, undoManager);
+}
 
-            StringArray colourSteps;
-            colourSteps.addTokens (v[colours].toString(), false);
+const PathStrokeType DrawablePath::ValueTreeWrapper::getStrokeType() const
+{
+    const String jointStyleString (state [jointStyle].toString());
+    const String capStyleString (state [capStyle].toString());
 
-            for (int i = 0; i < colourSteps.size() / 2; ++i)
-                g.addColour (colourSteps[i * 2].getDoubleValue(),
-                             Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
+    return PathStrokeType (state [strokeWidth],
+                           jointStyleString == "curved" ? PathStrokeType::curved
+                                                        : (jointStyleString == "bevel" ? PathStrokeType::beveled
+                                                                                       : PathStrokeType::mitered),
+                           capStyleString == "square" ? PathStrokeType::square
+                                                      : (capStyleString == "round" ? PathStrokeType::rounded
+                                                                                   : PathStrokeType::butt));
+}
 
-            if (fillType.isGradient() && *fillType.gradient == g)
-                return false;
+void DrawablePath::ValueTreeWrapper::setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager)
+{
+    state.setProperty (strokeWidth, (double) newStrokeType.getStrokeThickness(), undoManager);
+    state.setProperty (jointStyle, newStrokeType.getJointStyle() == PathStrokeType::mitered
+                                     ? "miter" : (newStrokeType.getJointStyle() == PathStrokeType::curved ? "curved" : "bevel"), undoManager);
+    state.setProperty (capStyle, newStrokeType.getEndStyle() == PathStrokeType::butt
+                                   ? "butt" : (newStrokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), undoManager);
+}
 
-            fillType.setGradient (g);
-            return true;
-        }
+void DrawablePath::ValueTreeWrapper::getPath (RelativePointPath& p) const
+{
+    RelativePointPath newPath (state [path]);
+    p.swapWith (newPath);
+}
 
-        jassertfalse;
-        return false;
-    }
-
-    static ValueTree createFillType (const Identifier& tagName, const FillType& fillType)
-    {
-        ValueTree v (tagName);
-
-        if (fillType.isColour())
-        {
-            v.setProperty (type, "solid", 0);
-            v.setProperty (colour, String::toHexString ((int) fillType.colour.getARGB()), 0);
-        }
-        else if (fillType.isGradient())
-        {
-            v.setProperty (type, "gradient", 0);
-            v.setProperty (x1, fillType.gradient->point1.getX(), 0);
-            v.setProperty (y1, fillType.gradient->point1.getY(), 0);
-            v.setProperty (x2, fillType.gradient->point2.getX(), 0);
-            v.setProperty (y2, fillType.gradient->point2.getY(), 0);
-            v.setProperty (radial, fillType.gradient->isRadial, 0);
-
-            String s;
-            for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
-                s << " " << fillType.gradient->getColourPosition (i)
-                  << " " << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
-
-            v.setProperty (colours, s.trimStart(), 0);
-        }
-        else
-        {
-            jassertfalse; //xxx
-        }
-
-        return v;
-    }
+void DrawablePath::ValueTreeWrapper::setPath (const String& newPath, UndoManager* undoManager)
+{
+    state.setProperty (path, newPath, undoManager);
 }
 
 const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    jassert (tree.hasType (valueTreeType));
-
     Rectangle<float> damageRect;
-    setName (tree [idProperty]);
+    ValueTreeWrapper v (tree);
+    setName (v.getID());
 
-    bool needsRedraw = DrawablePathHelpers::updateFillType (tree.getChildWithName (DrawablePathHelpers::fill), mainFill);
-    needsRedraw = DrawablePathHelpers::updateFillType (tree.getChildWithName (DrawablePathHelpers::stroke), strokeFill) || needsRedraw;
+    bool needsRedraw = false;
+    const FillType newFill (v.getMainFill());
 
-    const String jointStyle (tree [DrawablePathHelpers::jointStyle].toString());
-    const String endStyle (tree [DrawablePathHelpers::capStyle].toString());
+    if (mainFill != newFill)
+    {
+        needsRedraw = true;
+        mainFill = newFill;
+    }
 
-    PathStrokeType newStroke (tree [DrawablePathHelpers::strokeWidth],
-                              jointStyle == "curved" ? PathStrokeType::curved
-                                                     : (jointStyle == "bevel" ? PathStrokeType::beveled
-                                                                              : PathStrokeType::mitered),
-                              endStyle == "square" ? PathStrokeType::square
-                                                   : (endStyle == "round" ? PathStrokeType::rounded
-                                                                          : PathStrokeType::butt));
+    const FillType newStrokeFill (v.getStrokeFill());
+
+    if (strokeFill != newStrokeFill)
+    {
+        needsRedraw = true;
+        strokeFill = newStrokeFill;
+    }
+
+    const PathStrokeType newStroke (v.getStrokeType());
+
+    ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath());
+    v.getPath (*newRelativePath);
 
     Path newPath;
-    newPath.restoreFromString (tree [DrawablePathHelpers::path]);
+    newRelativePath->createPath (newPath, parent);
+
+    if (! newRelativePath->containsAnyDynamicPoints())
+        newRelativePath = 0;
 
     if (strokeType != newStroke || path != newPath)
     {
@@ -257,6 +293,8 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
         needsRedraw = true;
     }
 
+    relativePath = newRelativePath.release();
+
     if (needsRedraw)
         damageRect = damageRect.getUnion (getBounds());
 
@@ -265,22 +303,20 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
 
 const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) const
 {
-    ValueTree v (valueTreeType);
+    ValueTree tree (valueTreeType);
+    ValueTreeWrapper v (tree);
 
-    v.addChild (DrawablePathHelpers::createFillType (DrawablePathHelpers::fill, mainFill), -1, 0);
-    v.addChild (DrawablePathHelpers::createFillType (DrawablePathHelpers::stroke, strokeFill), -1, 0);
+    v.setID (getName(), 0);
+    v.setMainFill (mainFill, 0);
+    v.setStrokeFill (strokeFill, 0);
+    v.setStrokeType (strokeType, 0);
 
-    if (getName().isNotEmpty())
-        v.setProperty (idProperty, getName(), 0);
+    if (relativePath != 0)
+        v.setPath (relativePath->toString(), 0);
+    else
+        v.setPath (path.toString(), 0);
 
-    v.setProperty (DrawablePathHelpers::strokeWidth, (double) strokeType.getStrokeThickness(), 0);
-    v.setProperty (DrawablePathHelpers::jointStyle, strokeType.getJointStyle() == PathStrokeType::mitered
-                                                    ? "miter" : (strokeType.getJointStyle() == PathStrokeType::curved ? "curved" : "bevel"), 0);
-    v.setProperty (DrawablePathHelpers::capStyle, strokeType.getEndStyle() == PathStrokeType::butt
-                                                    ? "butt" : (strokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), 0);
-    v.setProperty (DrawablePathHelpers::path, path.toString(), 0);
-
-    return v;
+    return tree;
 }
 
 

@@ -26,7 +26,9 @@
 #ifndef __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 #define __JUCE_RELATIVECOORDINATE_JUCEHEADER__
 
+#include "juce_Path.h"
 #include "juce_Rectangle.h"
+#include "../../../containers/juce_OwnedArray.h"
 
 
 //==============================================================================
@@ -101,8 +103,8 @@ public:
         e.g. "marker1", or it can be a two-part name in the form "objectName.edge". For example "parent.left" is
         the origin, or "myComponent.top" is the top edge of a component called "myComponent". The exact names that
         will be recognised are dependent on the NamedCoordinateFinder that you provide for looking them up, but
-        "parent.left", "parent.top", "parent.right" and "parent.bottom" are always available, representing the
-        extents of the target coordinate space.
+        "parent.left" and "parent.top" are always available, meaning the origin. "parent.right" and "parent.bottom"
+        may also be available if the coordinate space has a fixed size.
 
         @param stringVersion    the string to parse
         @param isHorizontal     this must be true if this is an X coordinate, or false if it's on the Y axis.
@@ -113,6 +115,9 @@ public:
 
     /** Destructor. */
     ~RelativeCoordinate();
+
+    bool operator== (const RelativeCoordinate& other) const throw();
+    bool operator!= (const RelativeCoordinate& other) const throw();
 
     //==============================================================================
     /**
@@ -145,15 +150,18 @@ public:
         You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
         be needed to calculate the result.
     */
-    double resolve (const NamedCoordinateFinder& nameFinder) const;
+    double resolve (const NamedCoordinateFinder* nameFinder) const;
 
     /** Returns true if this coordinate uses the specified coord name at any level in its evaluation.
         This will recursively check any coordinates upon which this one depends.
     */
-    bool references (const String& coordName, const NamedCoordinateFinder& nameFinder) const;
+    bool references (const String& coordName, const NamedCoordinateFinder* nameFinder) const;
 
     /** Returns true if there's a recursive loop when trying to resolve this coordinate's position. */
-    bool isRecursive (const NamedCoordinateFinder& nameFinder) const;
+    bool isRecursive (const NamedCoordinateFinder* nameFinder) const;
+
+    /** Returns true if this coordinate depends on any other coordinates for its position. */
+    bool isDynamic() const;
 
     //==============================================================================
     /** Changes the value of this coord to make it resolve to the specified position.
@@ -162,7 +170,7 @@ public:
         or relative position to whatever value is necessary to make its resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (double absoluteTargetPosition, const NamedCoordinateFinder& nameFinder);
+    void moveToAbsolute (double absoluteTargetPosition, const NamedCoordinateFinder* nameFinder);
 
     /** Returns true if the coordinate is calculated as a proportion of the distance between two other points.
         @see toggleProportionality
@@ -173,7 +181,7 @@ public:
         Note that calling this will reset the names of any anchor points, and just make the
         coordinate relative to the parent origin and parent size.
     */
-    void toggleProportionality (const NamedCoordinateFinder& nameFinder, bool isHorizontal);
+    void toggleProportionality (const NamedCoordinateFinder* nameFinder, bool isHorizontal);
 
     /** Returns a value that can be edited to set this coordinate's position.
         The meaning of this number depends on the coordinate's mode. If the coordinate is
@@ -212,12 +220,12 @@ public:
     /** Changes the first anchor point, keeping the resultant position of this coordinate in
         the same place it was previously.
     */
-    void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder& nameFinder);
+    void changeAnchor1 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
 
     /** Changes the second anchor point, keeping the resultant position of this coordinate in
         the same place it was previously.
     */
-    void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder& nameFinder);
+    void changeAnchor2 (const String& newAnchor, const NamedCoordinateFinder* nameFinder);
 
     /** Tells the coordinate that an object is changing its name or being deleted.
 
@@ -227,7 +235,7 @@ public:
         instead.
     */
     void renameAnchorIfUsed (const String& oldName, const String& newName,
-                             const NamedCoordinateFinder& nameFinder);
+                             const NamedCoordinateFinder* nameFinder);
 
     //==============================================================================
     /** Returns a string which represents this coordinate.
@@ -261,8 +269,8 @@ private:
     String anchor1, anchor2;
     double value;
 
-    double resolve (const NamedCoordinateFinder& nameFinder, int recursionCounter) const;
-    static double resolveAnchor (const String& anchorName, const NamedCoordinateFinder& nameFinder, int recursionCounter);
+    double resolve (const NamedCoordinateFinder* nameFinder, int recursionCounter) const;
+    static double resolveAnchor (const String& anchorName, const NamedCoordinateFinder* nameFinder, int recursionCounter);
 };
 
 
@@ -281,19 +289,25 @@ public:
     /** Creates an absolute point, relative to the origin. */
     RelativePoint (const Point<float>& absolutePoint);
 
+    /** Creates an absolute point from two coordinates. */
+    RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
+
     /** Creates a point from a stringified representation.
-        The string must contain a pair of coordinates, separated by a comma. The syntax for the coordinate
+        The string must contain a pair of coordinates, separated by space or a comma. The syntax for the coordinate
         strings is explained in the RelativeCoordinate class.
         @see toString
     */
     RelativePoint (const String& stringVersion);
+
+    bool operator== (const RelativePoint& other) const throw();
+    bool operator!= (const RelativePoint& other) const throw();
 
     /** Calculates the absolute position of this point.
 
         You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
         be needed to calculate the result.
     */
-    const Point<float> resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const;
+    const Point<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
 
     /** Changes the values of this point's coordinates to make it resolve to the specified position.
 
@@ -301,7 +315,7 @@ public:
         or relative positions to whatever values are necessary to make the resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
+    void moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
 
     /** Returns a string which represents this point.
         This returns a comma-separated pair of coordinates. For details of the string syntax used by the
@@ -314,7 +328,10 @@ public:
         This calls RelativeCoordinate::renameAnchorIfUsed() on its X and Y coordinates.
     */
     void renameAnchorIfUsed (const String& oldName, const String& newName,
-                             const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
+                             const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+    /** Returns true if this point depends on any other coordinates for its position. */
+    bool isDynamic() const;
 
     // The actual X and Y coords...
     RelativeCoordinate x, y;
@@ -347,13 +364,16 @@ public:
     */
     explicit RelativeRectangle (const String& stringVersion);
 
+    bool operator== (const RelativeRectangle& other) const throw();
+    bool operator!= (const RelativeRectangle& other) const throw();
+
     //==============================================================================
     /** Calculates the absolute position of this rectangle.
 
         You'll need to provide a suitable NamedCoordinateFinder for looking up any coordinates that may
         be needed to calculate the result.
     */
-    const Rectangle<float> resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const;
+    const Rectangle<float> resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
 
     /** Changes the values of this rectangle's coordinates to make it resolve to the specified position.
 
@@ -361,7 +381,7 @@ public:
         or relative positions to whatever values are necessary to make the resultant position
         match the position that is provided.
     */
-    void moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
+    void moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
 
     /** Returns a string which represents this point.
         This returns a comma-separated list of coordinates, in the order left, top, right, bottom. For details of
@@ -374,10 +394,138 @@ public:
         This calls RelativeCoordinate::renameAnchorIfUsed() on the rectangle's coordinates.
     */
     void renameAnchorIfUsed (const String& oldName, const String& newName,
-                             const RelativeCoordinate::NamedCoordinateFinder& nameFinder);
+                             const RelativeCoordinate::NamedCoordinateFinder* nameFinder);
 
     // The actual rectangle coords...
     RelativeCoordinate left, right, top, bottom;
+};
+
+
+//==============================================================================
+/**
+    A path object that consists of RelativePoint coordinates rather than the normal fixed ones.
+
+    One of these paths can be converted into a Path object for drawing and manipulation, but
+    unlike a Path, its points can be dynamic instead of just fixed.
+
+    @see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativePointPath
+{
+public:
+    //==============================================================================
+    RelativePointPath();
+    RelativePointPath (const RelativePointPath& other);
+    RelativePointPath (const String& stringVersion);
+    ~RelativePointPath();
+
+    //==============================================================================
+    /** Resolves this points in this path and adds them to a normal Path object. */
+    void createPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+
+    /** Returns true if the path contains any non-fixed points. */
+    bool containsAnyDynamicPoints() const;
+
+    /** Returns a string version of the path.
+        This has the same format as Path::toString(), but since it can contain RelativeCoordinate
+        positions, it can't be parsed by the Path class if any of the points are dynamic.
+    */
+    const String toString() const;
+
+    /** Quickly swaps the contents of this path with another. */
+    void swapWith (RelativePointPath& other) throw();
+
+    //==============================================================================
+    /** The types of element that may be contained in this path.
+        @see RelativePointPath::ElementBase
+    */
+    enum ElementType
+    {
+        nullElement,
+        startSubPathElement,
+        closeSubPathElement,
+        lineToElement,
+        quadraticToElement,
+        cubicToElement
+    };
+
+    //==============================================================================
+    /** Base class for the elements that make up a RelativePointPath.
+    */
+    class JUCE_API  ElementBase
+    {
+    public:
+        ElementBase (ElementType type);
+        virtual ~ElementBase() {}
+        virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
+        virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
+
+        const ElementType type;
+    };
+
+    class JUCE_API  StartSubPath  : public ElementBase
+    {
+    public:
+        StartSubPath (const RelativePoint& pos);
+        ~StartSubPath() {}
+        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+        RelativePoint startPos;
+    };
+
+    class JUCE_API  CloseSubPath  : public ElementBase
+    {
+    public:
+        CloseSubPath();
+        ~CloseSubPath() {}
+        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+    };
+
+    class JUCE_API  LineTo  : public ElementBase
+    {
+    public:
+        LineTo (const RelativePoint& endPoint);
+        ~LineTo() {}
+        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+        RelativePoint endPoint;
+    };
+
+    class JUCE_API  QuadraticTo  : public ElementBase
+    {
+    public:
+        QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
+        ~QuadraticTo() {}
+        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+        RelativePoint controlPoint, endPoint;
+    };
+
+    class JUCE_API  CubicTo  : public ElementBase
+    {
+    public:
+        CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
+        ~CubicTo() {}
+        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+
+        RelativePoint controlPoint1, controlPoint2, endPoint;
+    };
+
+    //==============================================================================
+    OwnedArray <ElementBase> elements;
+    bool usesNonZeroWinding;
+
+private:
+    bool containsDynamicPoints;
+
+    void parseString (const String& s);
+
+    RelativePointPath& operator= (const RelativePointPath&);
 };
 
 

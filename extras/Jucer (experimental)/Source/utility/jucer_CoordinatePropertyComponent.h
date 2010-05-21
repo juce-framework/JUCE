@@ -34,7 +34,7 @@ class CoordinatePropertyComponent  : public PropertyComponent,
 {
 public:
     //==============================================================================
-    CoordinatePropertyComponent (RelativeCoordinate::NamedCoordinateFinder& nameSource_, const String& name,
+    CoordinatePropertyComponent (RelativeCoordinate::NamedCoordinateFinder* nameSource_, const String& name,
                                  const Value& coordValue_, bool isHorizontal_)
         : PropertyComponent (name, 40), nameSource (nameSource_),
           coordValue (coordValue_),
@@ -142,7 +142,7 @@ public:
     virtual const String pickMarker (TextButton* button, const String& currentMarker, bool isAnchor1) = 0;
 
 protected:
-    RelativeCoordinate::NamedCoordinateFinder& nameSource;
+    RelativeCoordinate::NamedCoordinateFinder* nameSource;
     Value coordValue, textValue;
     Label* label;
     TextButton* proportionButton;

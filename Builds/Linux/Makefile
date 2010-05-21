@@ -354,1487 +354,1487 @@ clean:
 
 $(OBJDIR)/juce_Application.o: ../../src/application/juce_Application.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Application.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ApplicationCommandInfo.o: ../../src/application/juce_ApplicationCommandInfo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ApplicationCommandInfo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ApplicationCommandManager.o: ../../src/application/juce_ApplicationCommandManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ApplicationCommandManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ApplicationCommandTarget.o: ../../src/application/juce_ApplicationCommandTarget.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ApplicationCommandTarget.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ApplicationProperties.o: ../../src/application/juce_ApplicationProperties.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ApplicationProperties.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AiffAudioFormat.o: ../../src/audio/audio_file_formats/juce_AiffAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AiffAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioFormat.o: ../../src/audio/audio_file_formats/juce_AudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioFormatManager.o: ../../src/audio/audio_file_formats/juce_AudioFormatManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioFormatManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioSubsectionReader.o: ../../src/audio/audio_file_formats/juce_AudioSubsectionReader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioSubsectionReader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioThumbnail.o: ../../src/audio/audio_file_formats/juce_AudioThumbnail.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioThumbnail.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioThumbnailCache.o: ../../src/audio/audio_file_formats/juce_AudioThumbnailCache.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioThumbnailCache.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FlacAudioFormat.o: ../../src/audio/audio_file_formats/juce_FlacAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FlacAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_OggVorbisAudioFormat.o: ../../src/audio/audio_file_formats/juce_OggVorbisAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_OggVorbisAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_QuickTimeAudioFormat.o: ../../src/audio/audio_file_formats/juce_QuickTimeAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_QuickTimeAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_WavAudioFormat.o: ../../src/audio/audio_file_formats/juce_WavAudioFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_WavAudioFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioFormatReaderSource.o: ../../src/audio/audio_sources/juce_AudioFormatReaderSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioFormatReaderSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioSourcePlayer.o: ../../src/audio/audio_sources/juce_AudioSourcePlayer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioSourcePlayer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioTransportSource.o: ../../src/audio/audio_sources/juce_AudioTransportSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioTransportSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BufferingAudioSource.o: ../../src/audio/audio_sources/juce_BufferingAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BufferingAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ChannelRemappingAudioSource.o: ../../src/audio/audio_sources/juce_ChannelRemappingAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ChannelRemappingAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_IIRFilterAudioSource.o: ../../src/audio/audio_sources/juce_IIRFilterAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_IIRFilterAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MixerAudioSource.o: ../../src/audio/audio_sources/juce_MixerAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MixerAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ResamplingAudioSource.o: ../../src/audio/audio_sources/juce_ResamplingAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ResamplingAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToneGeneratorAudioSource.o: ../../src/audio/audio_sources/juce_ToneGeneratorAudioSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ToneGeneratorAudioSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioDeviceManager.o: ../../src/audio/devices/juce_AudioDeviceManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioDeviceManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioIODevice.o: ../../src/audio/devices/juce_AudioIODevice.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioIODevice.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioIODeviceType.o: ../../src/audio/devices/juce_AudioIODeviceType.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioIODeviceType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiOutput.o: ../../src/audio/devices/juce_MidiOutput.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiOutput.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioDataConverters.o: ../../src/audio/dsp/juce_AudioDataConverters.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioDataConverters.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioSampleBuffer.o: ../../src/audio/dsp/juce_AudioSampleBuffer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioSampleBuffer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_IIRFilter.o: ../../src/audio/dsp/juce_IIRFilter.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_IIRFilter.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiBuffer.o: ../../src/audio/midi/juce_MidiBuffer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiBuffer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiFile.o: ../../src/audio/midi/juce_MidiFile.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiFile.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiKeyboardState.o: ../../src/audio/midi/juce_MidiKeyboardState.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiKeyboardState.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiMessage.o: ../../src/audio/midi/juce_MidiMessage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiMessage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiMessageCollector.o: ../../src/audio/midi/juce_MidiMessageCollector.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiMessageCollector.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiMessageSequence.o: ../../src/audio/midi/juce_MidiMessageSequence.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiMessageSequence.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_VSTPluginFormat.o: ../../src/audio/plugins/formats/juce_VSTPluginFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_VSTPluginFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioPluginFormat.o: ../../src/audio/plugins/juce_AudioPluginFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioPluginFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioPluginFormatManager.o: ../../src/audio/plugins/juce_AudioPluginFormatManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioPluginFormatManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioPluginInstance.o: ../../src/audio/plugins/juce_AudioPluginInstance.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioPluginInstance.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KnownPluginList.o: ../../src/audio/plugins/juce_KnownPluginList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KnownPluginList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PluginDescription.o: ../../src/audio/plugins/juce_PluginDescription.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PluginDescription.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PluginDirectoryScanner.o: ../../src/audio/plugins/juce_PluginDirectoryScanner.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PluginDirectoryScanner.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PluginListComponent.o: ../../src/audio/plugins/juce_PluginListComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PluginListComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioProcessor.o: ../../src/audio/processors/juce_AudioProcessor.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioProcessor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioProcessorEditor.o: ../../src/audio/processors/juce_AudioProcessorEditor.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioProcessorEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioProcessorGraph.o: ../../src/audio/processors/juce_AudioProcessorGraph.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioProcessorGraph.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioProcessorPlayer.o: ../../src/audio/processors/juce_AudioProcessorPlayer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioProcessorPlayer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GenericAudioProcessorEditor.o: ../../src/audio/processors/juce_GenericAudioProcessorEditor.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GenericAudioProcessorEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Sampler.o: ../../src/audio/synthesisers/juce_Sampler.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Sampler.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Synthesiser.o: ../../src/audio/synthesisers/juce_Synthesiser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Synthesiser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BigInteger.o: ../../src/containers/juce_BigInteger.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BigInteger.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DynamicObject.o: ../../src/containers/juce_DynamicObject.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DynamicObject.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Identifier.o: ../../src/containers/juce_Identifier.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Identifier.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MemoryBlock.o: ../../src/containers/juce_MemoryBlock.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MemoryBlock.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_NamedValueSet.o: ../../src/containers/juce_NamedValueSet.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_NamedValueSet.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PropertySet.o: ../../src/containers/juce_PropertySet.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PropertySet.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Value.o: ../../src/containers/juce_Value.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Value.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ValueTree.o: ../../src/containers/juce_ValueTree.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ValueTree.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Variant.o: ../../src/containers/juce_Variant.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Variant.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileLogger.o: ../../src/core/juce_FileLogger.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileLogger.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Logger.o: ../../src/core/juce_Logger.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Logger.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PerformanceCounter.o: ../../src/core/juce_PerformanceCounter.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PerformanceCounter.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Random.o: ../../src/core/juce_Random.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Random.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RelativeTime.o: ../../src/core/juce_RelativeTime.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RelativeTime.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SystemStats.o: ../../src/core/juce_SystemStats.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SystemStats.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Time.o: ../../src/core/juce_Time.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Time.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Uuid.o: ../../src/core/juce_Uuid.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Uuid.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BlowFish.o: ../../src/cryptography/juce_BlowFish.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BlowFish.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MD5.o: ../../src/cryptography/juce_MD5.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MD5.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Primes.o: ../../src/cryptography/juce_Primes.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Primes.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RSAKey.o: ../../src/cryptography/juce_RSAKey.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RSAKey.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ActionBroadcaster.o: ../../src/events/juce_ActionBroadcaster.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ActionBroadcaster.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ActionListenerList.o: ../../src/events/juce_ActionListenerList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ActionListenerList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AsyncUpdater.o: ../../src/events/juce_AsyncUpdater.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AsyncUpdater.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ChangeBroadcaster.o: ../../src/events/juce_ChangeBroadcaster.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ChangeBroadcaster.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ChangeListenerList.o: ../../src/events/juce_ChangeListenerList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ChangeListenerList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_InterprocessConnection.o: ../../src/events/juce_InterprocessConnection.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_InterprocessConnection.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_InterprocessConnectionServer.o: ../../src/events/juce_InterprocessConnectionServer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_InterprocessConnectionServer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Message.o: ../../src/events/juce_Message.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Message.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MessageListener.o: ../../src/events/juce_MessageListener.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MessageListener.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MessageManager.o: ../../src/events/juce_MessageManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MessageManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MultiTimer.o: ../../src/events/juce_MultiTimer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MultiTimer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Timer.o: ../../src/events/juce_Timer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Timer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Component.o: ../../src/gui/components/juce_Component.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Component.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentListener.o: ../../src/gui/components/juce_ComponentListener.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentListener.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Desktop.o: ../../src/gui/components/juce_Desktop.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Desktop.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ArrowButton.o: ../../src/gui/components/buttons/juce_ArrowButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ArrowButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Button.o: ../../src/gui/components/buttons/juce_Button.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Button.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableButton.o: ../../src/gui/components/buttons/juce_DrawableButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DrawableButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_HyperlinkButton.o: ../../src/gui/components/buttons/juce_HyperlinkButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_HyperlinkButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ImageButton.o: ../../src/gui/components/buttons/juce_ImageButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ImageButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ShapeButton.o: ../../src/gui/components/buttons/juce_ShapeButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ShapeButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TextButton.o: ../../src/gui/components/buttons/juce_TextButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TextButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToggleButton.o: ../../src/gui/components/buttons/juce_ToggleButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ToggleButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToolbarButton.o: ../../src/gui/components/buttons/juce_ToolbarButton.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ToolbarButton.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_CodeDocument.o: ../../src/gui/components/code_editor/juce_CodeDocument.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_CodeDocument.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_CodeEditorComponent.o: ../../src/gui/components/code_editor/juce_CodeEditorComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_CodeEditorComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_CPlusPlusCodeTokeniser.o: ../../src/gui/components/code_editor/juce_CPlusPlusCodeTokeniser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_CPlusPlusCodeTokeniser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComboBox.o: ../../src/gui/components/controls/juce_ComboBox.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComboBox.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Label.o: ../../src/gui/components/controls/juce_Label.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Label.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ListBox.o: ../../src/gui/components/controls/juce_ListBox.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ListBox.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ProgressBar.o: ../../src/gui/components/controls/juce_ProgressBar.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ProgressBar.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Slider.o: ../../src/gui/components/controls/juce_Slider.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Slider.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TableHeaderComponent.o: ../../src/gui/components/controls/juce_TableHeaderComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TableHeaderComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TableListBox.o: ../../src/gui/components/controls/juce_TableListBox.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TableListBox.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TextEditor.o: ../../src/gui/components/controls/juce_TextEditor.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TextEditor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Toolbar.o: ../../src/gui/components/controls/juce_Toolbar.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Toolbar.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToolbarItemComponent.o: ../../src/gui/components/controls/juce_ToolbarItemComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ToolbarItemComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ToolbarItemPalette.o: ../../src/gui/components/controls/juce_ToolbarItemPalette.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ToolbarItemPalette.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TreeView.o: ../../src/gui/components/controls/juce_TreeView.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TreeView.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DirectoryContentsDisplayComponent.o: ../../src/gui/components/filebrowser/juce_DirectoryContentsDisplayComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DirectoryContentsDisplayComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DirectoryContentsList.o: ../../src/gui/components/filebrowser/juce_DirectoryContentsList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DirectoryContentsList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileBrowserComponent.o: ../../src/gui/components/filebrowser/juce_FileBrowserComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileBrowserComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileChooser.o: ../../src/gui/components/filebrowser/juce_FileChooser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileChooser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileChooserDialogBox.o: ../../src/gui/components/filebrowser/juce_FileChooserDialogBox.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileChooserDialogBox.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileFilter.o: ../../src/gui/components/filebrowser/juce_FileFilter.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileFilter.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileListComponent.o: ../../src/gui/components/filebrowser/juce_FileListComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileListComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FilenameComponent.o: ../../src/gui/components/filebrowser/juce_FilenameComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FilenameComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileSearchPathListComponent.o: ../../src/gui/components/filebrowser/juce_FileSearchPathListComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileSearchPathListComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileTreeComponent.o: ../../src/gui/components/filebrowser/juce_FileTreeComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileTreeComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ImagePreviewComponent.o: ../../src/gui/components/filebrowser/juce_ImagePreviewComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ImagePreviewComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_WildcardFileFilter.o: ../../src/gui/components/filebrowser/juce_WildcardFileFilter.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_WildcardFileFilter.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyboardFocusTraverser.o: ../../src/gui/components/keyboard/juce_KeyboardFocusTraverser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KeyboardFocusTraverser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyListener.o: ../../src/gui/components/keyboard/juce_KeyListener.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KeyListener.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyMappingEditorComponent.o: ../../src/gui/components/keyboard/juce_KeyMappingEditorComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KeyMappingEditorComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyPress.o: ../../src/gui/components/keyboard/juce_KeyPress.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KeyPress.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_KeyPressMappingSet.o: ../../src/gui/components/keyboard/juce_KeyPressMappingSet.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_KeyPressMappingSet.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ModifierKeys.o: ../../src/gui/components/keyboard/juce_ModifierKeys.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ModifierKeys.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentAnimator.o: ../../src/gui/components/layout/juce_ComponentAnimator.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentAnimator.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentBoundsConstrainer.o: ../../src/gui/components/layout/juce_ComponentBoundsConstrainer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentBoundsConstrainer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentMovementWatcher.o: ../../src/gui/components/layout/juce_ComponentMovementWatcher.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentMovementWatcher.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GroupComponent.o: ../../src/gui/components/layout/juce_GroupComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GroupComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MultiDocumentPanel.o: ../../src/gui/components/layout/juce_MultiDocumentPanel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MultiDocumentPanel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ResizableBorderComponent.o: ../../src/gui/components/layout/juce_ResizableBorderComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ResizableBorderComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ResizableCornerComponent.o: ../../src/gui/components/layout/juce_ResizableCornerComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ResizableCornerComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ScrollBar.o: ../../src/gui/components/layout/juce_ScrollBar.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ScrollBar.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StretchableLayoutManager.o: ../../src/gui/components/layout/juce_StretchableLayoutManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StretchableLayoutManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StretchableLayoutResizerBar.o: ../../src/gui/components/layout/juce_StretchableLayoutResizerBar.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StretchableLayoutResizerBar.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StretchableObjectResizer.o: ../../src/gui/components/layout/juce_StretchableObjectResizer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StretchableObjectResizer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TabbedButtonBar.o: ../../src/gui/components/layout/juce_TabbedButtonBar.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TabbedButtonBar.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TabbedComponent.o: ../../src/gui/components/layout/juce_TabbedComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TabbedComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Viewport.o: ../../src/gui/components/layout/juce_Viewport.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Viewport.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LookAndFeel.o: ../../src/gui/components/lookandfeel/juce_LookAndFeel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_LookAndFeel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_OldSchoolLookAndFeel.o: ../../src/gui/components/lookandfeel/juce_OldSchoolLookAndFeel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_OldSchoolLookAndFeel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MenuBarComponent.o: ../../src/gui/components/menus/juce_MenuBarComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MenuBarComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MenuBarModel.o: ../../src/gui/components/menus/juce_MenuBarModel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MenuBarModel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PopupMenu.o: ../../src/gui/components/menus/juce_PopupMenu.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PopupMenu.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentDragger.o: ../../src/gui/components/mouse/juce_ComponentDragger.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentDragger.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DragAndDropContainer.o: ../../src/gui/components/mouse/juce_DragAndDropContainer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DragAndDropContainer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseCursor.o: ../../src/gui/components/mouse/juce_MouseCursor.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MouseCursor.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseEvent.o: ../../src/gui/components/mouse/juce_MouseEvent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MouseEvent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseHoverDetector.o: ../../src/gui/components/mouse/juce_MouseHoverDetector.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MouseHoverDetector.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseInputSource.o: ../../src/gui/components/mouse/juce_MouseInputSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MouseInputSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MouseListener.o: ../../src/gui/components/mouse/juce_MouseListener.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MouseListener.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BooleanPropertyComponent.o: ../../src/gui/components/properties/juce_BooleanPropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BooleanPropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ButtonPropertyComponent.o: ../../src/gui/components/properties/juce_ButtonPropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ButtonPropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ChoicePropertyComponent.o: ../../src/gui/components/properties/juce_ChoicePropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ChoicePropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PropertyComponent.o: ../../src/gui/components/properties/juce_PropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PropertyPanel.o: ../../src/gui/components/properties/juce_PropertyPanel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PropertyPanel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SliderPropertyComponent.o: ../../src/gui/components/properties/juce_SliderPropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SliderPropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TextPropertyComponent.o: ../../src/gui/components/properties/juce_TextPropertyComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TextPropertyComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AudioDeviceSelectorComponent.o: ../../src/gui/components/special/juce_AudioDeviceSelectorComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AudioDeviceSelectorComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BubbleComponent.o: ../../src/gui/components/special/juce_BubbleComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BubbleComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BubbleMessageComponent.o: ../../src/gui/components/special/juce_BubbleMessageComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BubbleMessageComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ColourSelector.o: ../../src/gui/components/special/juce_ColourSelector.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ColourSelector.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DropShadower.o: ../../src/gui/components/special/juce_DropShadower.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DropShadower.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MagnifierComponent.o: ../../src/gui/components/special/juce_MagnifierComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MagnifierComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MidiKeyboardComponent.o: ../../src/gui/components/special/juce_MidiKeyboardComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MidiKeyboardComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_OpenGLComponent.o: ../../src/gui/components/special/juce_OpenGLComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_OpenGLComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PreferencesPanel.o: ../../src/gui/components/special/juce_PreferencesPanel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PreferencesPanel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SystemTrayIconComponent.o: ../../src/gui/components/special/juce_SystemTrayIconComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SystemTrayIconComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AlertWindow.o: ../../src/gui/components/windows/juce_AlertWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AlertWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentPeer.o: ../../src/gui/components/windows/juce_ComponentPeer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ComponentPeer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DialogWindow.o: ../../src/gui/components/windows/juce_DialogWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DialogWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DocumentWindow.o: ../../src/gui/components/windows/juce_DocumentWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DocumentWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ResizableWindow.o: ../../src/gui/components/windows/juce_ResizableWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ResizableWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SplashScreen.o: ../../src/gui/components/windows/juce_SplashScreen.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SplashScreen.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ThreadWithProgressWindow.o: ../../src/gui/components/windows/juce_ThreadWithProgressWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ThreadWithProgressWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TooltipWindow.o: ../../src/gui/components/windows/juce_TooltipWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TooltipWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TopLevelWindow.o: ../../src/gui/components/windows/juce_TopLevelWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TopLevelWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Colour.o: ../../src/gui/graphics/colour/juce_Colour.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Colour.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ColourGradient.o: ../../src/gui/graphics/colour/juce_ColourGradient.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ColourGradient.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Colours.o: ../../src/gui/graphics/colour/juce_Colours.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Colours.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_EdgeTable.o: ../../src/gui/graphics/contexts/juce_EdgeTable.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_EdgeTable.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FillType.o: ../../src/gui/graphics/contexts/juce_FillType.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FillType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Graphics.o: ../../src/gui/graphics/contexts/juce_Graphics.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Graphics.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Justification.o: ../../src/gui/graphics/contexts/juce_Justification.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Justification.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LowLevelGraphicsPostScriptRenderer.o: ../../src/gui/graphics/contexts/juce_LowLevelGraphicsPostScriptRenderer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_LowLevelGraphicsPostScriptRenderer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LowLevelGraphicsSoftwareRenderer.o: ../../src/gui/graphics/contexts/juce_LowLevelGraphicsSoftwareRenderer.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_LowLevelGraphicsSoftwareRenderer.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RectanglePlacement.o: ../../src/gui/graphics/contexts/juce_RectanglePlacement.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RectanglePlacement.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Drawable.o: ../../src/gui/graphics/drawables/juce_Drawable.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Drawable.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableComposite.o: ../../src/gui/graphics/drawables/juce_DrawableComposite.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DrawableComposite.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableImage.o: ../../src/gui/graphics/drawables/juce_DrawableImage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DrawableImage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawablePath.o: ../../src/gui/graphics/drawables/juce_DrawablePath.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DrawablePath.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DrawableText.o: ../../src/gui/graphics/drawables/juce_DrawableText.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DrawableText.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SVGParser.o: ../../src/gui/graphics/drawables/juce_SVGParser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SVGParser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DropShadowEffect.o: ../../src/gui/graphics/effects/juce_DropShadowEffect.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DropShadowEffect.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GlowEffect.o: ../../src/gui/graphics/effects/juce_GlowEffect.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GlowEffect.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ReduceOpacityEffect.o: ../../src/gui/graphics/effects/juce_ReduceOpacityEffect.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ReduceOpacityEffect.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Font.o: ../../src/gui/graphics/fonts/juce_Font.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Font.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GlyphArrangement.o: ../../src/gui/graphics/fonts/juce_GlyphArrangement.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GlyphArrangement.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TextLayout.o: ../../src/gui/graphics/fonts/juce_TextLayout.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TextLayout.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Typeface.o: ../../src/gui/graphics/fonts/juce_Typeface.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Typeface.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_AffineTransform.o: ../../src/gui/graphics/geometry/juce_AffineTransform.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_AffineTransform.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BorderSize.o: ../../src/gui/graphics/geometry/juce_BorderSize.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BorderSize.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Path.o: ../../src/gui/graphics/geometry/juce_Path.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Path.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PathIterator.o: ../../src/gui/graphics/geometry/juce_PathIterator.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PathIterator.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PathStrokeType.o: ../../src/gui/graphics/geometry/juce_PathStrokeType.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PathStrokeType.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PositionedRectangle.o: ../../src/gui/graphics/geometry/juce_PositionedRectangle.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PositionedRectangle.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RectangleList.o: ../../src/gui/graphics/geometry/juce_RectangleList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RectangleList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RelativeCoordinate.o: ../../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RelativeCoordinate.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GIFLoader.o: ../../src/gui/graphics/imaging/image_file_formats/juce_GIFLoader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GIFLoader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_JPEGLoader.o: ../../src/gui/graphics/imaging/image_file_formats/juce_JPEGLoader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_JPEGLoader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PNGLoader.o: ../../src/gui/graphics/imaging/image_file_formats/juce_PNGLoader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PNGLoader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Image.o: ../../src/gui/graphics/imaging/juce_Image.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Image.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ImageCache.o: ../../src/gui/graphics/imaging/juce_ImageCache.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ImageCache.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ImageConvolutionKernel.o: ../../src/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ImageConvolutionKernel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ImageFileFormat.o: ../../src/gui/graphics/imaging/juce_ImageFileFormat.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ImageFileFormat.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DirectoryIterator.o: ../../src/io/files/juce_DirectoryIterator.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DirectoryIterator.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_File.o: ../../src/io/files/juce_File.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_File.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileInputStream.o: ../../src/io/files/juce_FileInputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileInputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileOutputStream.o: ../../src/io/files/juce_FileOutputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileOutputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileSearchPath.o: ../../src/io/files/juce_FileSearchPath.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileSearchPath.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_NamedPipe.o: ../../src/io/files/juce_NamedPipe.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_NamedPipe.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TemporaryFile.o: ../../src/io/files/juce_TemporaryFile.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TemporaryFile.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ZipFile.o: ../../src/io/files/juce_ZipFile.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ZipFile.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Socket.o: ../../src/io/network/juce_Socket.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Socket.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_URL.o: ../../src/io/network/juce_URL.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_URL.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_BufferedInputStream.o: ../../src/io/streams/juce_BufferedInputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_BufferedInputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileInputSource.o: ../../src/io/streams/juce_FileInputSource.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileInputSource.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GZIPCompressorOutputStream.o: ../../src/io/streams/juce_GZIPCompressorOutputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GZIPCompressorOutputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_GZIPDecompressorInputStream.o: ../../src/io/streams/juce_GZIPDecompressorInputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_GZIPDecompressorInputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_InputStream.o: ../../src/io/streams/juce_InputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_InputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MemoryInputStream.o: ../../src/io/streams/juce_MemoryInputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MemoryInputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_MemoryOutputStream.o: ../../src/io/streams/juce_MemoryOutputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_MemoryOutputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_OutputStream.o: ../../src/io/streams/juce_OutputStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_OutputStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_SubregionStream.o: ../../src/io/streams/juce_SubregionStream.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_SubregionStream.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_NativeCode.o: ../../src/native/juce_linux_NativeCode.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_NativeCode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_NativeCode.o: ../../src/native/juce_win32_NativeCode.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_NativeCode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_posix_NamedPipe.o: ../../src/native/common/juce_posix_NamedPipe.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_posix_NamedPipe.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Audio.o: ../../src/native/linux/juce_linux_Audio.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Audio.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_AudioCDReader.o: ../../src/native/linux/juce_linux_AudioCDReader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_AudioCDReader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Clipboard.o: ../../src/native/linux/juce_linux_Clipboard.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Clipboard.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_FileChooser.o: ../../src/native/linux/juce_linux_FileChooser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_FileChooser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Files.o: ../../src/native/linux/juce_linux_Files.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Files.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Fonts.o: ../../src/native/linux/juce_linux_Fonts.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Fonts.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_JackAudio.o: ../../src/native/linux/juce_linux_JackAudio.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_JackAudio.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Messaging.o: ../../src/native/linux/juce_linux_Messaging.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Messaging.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Midi.o: ../../src/native/linux/juce_linux_Midi.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Midi.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Network.o: ../../src/native/linux/juce_linux_Network.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Network.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_SystemStats.o: ../../src/native/linux/juce_linux_SystemStats.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_SystemStats.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Threads.o: ../../src/native/linux/juce_linux_Threads.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Threads.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_WebBrowserComponent.o: ../../src/native/linux/juce_linux_WebBrowserComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_WebBrowserComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_linux_Windowing.o: ../../src/native/linux/juce_linux_Windowing.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_linux_Windowing.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_iphone_Audio.o: ../../src/native/mac/juce_iphone_Audio.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_iphone_Audio.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_mac_CoreAudio.o: ../../src/native/mac/juce_mac_CoreAudio.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_mac_CoreAudio.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_mac_CoreMidi.o: ../../src/native/mac/juce_mac_CoreMidi.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_mac_CoreMidi.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_ActiveXComponent.o: ../../src/native/windows/juce_win32_ActiveXComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_ActiveXComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_ASIO.o: ../../src/native/windows/juce_win32_ASIO.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_ASIO.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_AudioCDReader.o: ../../src/native/windows/juce_win32_AudioCDReader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_AudioCDReader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_CameraDevice.o: ../../src/native/windows/juce_win32_CameraDevice.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_CameraDevice.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_DirectSound.o: ../../src/native/windows/juce_win32_DirectSound.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_DirectSound.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_DynamicLibraryLoader.o: ../../src/native/windows/juce_win32_DynamicLibraryLoader.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_DynamicLibraryLoader.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_FileChooser.o: ../../src/native/windows/juce_win32_FileChooser.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_FileChooser.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Files.o: ../../src/native/windows/juce_win32_Files.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Files.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Fonts.o: ../../src/native/windows/juce_win32_Fonts.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Fonts.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Messaging.o: ../../src/native/windows/juce_win32_Messaging.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Messaging.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Midi.o: ../../src/native/windows/juce_win32_Midi.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Midi.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Misc.o: ../../src/native/windows/juce_win32_Misc.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Misc.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Network.o: ../../src/native/windows/juce_win32_Network.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Network.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_OpenGLComponent.o: ../../src/native/windows/juce_win32_OpenGLComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_OpenGLComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_PlatformUtils.o: ../../src/native/windows/juce_win32_PlatformUtils.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_PlatformUtils.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_QuickTimeMovieComponent.o: ../../src/native/windows/juce_win32_QuickTimeMovieComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_QuickTimeMovieComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_SystemStats.o: ../../src/native/windows/juce_win32_SystemStats.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_SystemStats.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Threads.o: ../../src/native/windows/juce_win32_Threads.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Threads.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_WASAPI.o: ../../src/native/windows/juce_win32_WASAPI.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_WASAPI.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_WebBrowserComponent.o: ../../src/native/windows/juce_win32_WebBrowserComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_WebBrowserComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_win32_Windowing.o: ../../src/native/windows/juce_win32_Windowing.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_win32_Windowing.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_CharacterFunctions.o: ../../src/text/juce_CharacterFunctions.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_CharacterFunctions.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_LocalisedStrings.o: ../../src/text/juce_LocalisedStrings.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_LocalisedStrings.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_String.o: ../../src/text/juce_String.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_String.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StringArray.o: ../../src/text/juce_StringArray.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StringArray.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StringPairArray.o: ../../src/text/juce_StringPairArray.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StringPairArray.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_StringPool.o: ../../src/text/juce_StringPool.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_StringPool.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_XmlDocument.o: ../../src/text/juce_XmlDocument.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_XmlDocument.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_XmlElement.o: ../../src/text/juce_XmlElement.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_XmlElement.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ReadWriteLock.o: ../../src/threads/juce_ReadWriteLock.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ReadWriteLock.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_Thread.o: ../../src/threads/juce_Thread.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_Thread.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ThreadPool.o: ../../src/threads/juce_ThreadPool.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_ThreadPool.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_TimeSliceThread.o: ../../src/threads/juce_TimeSliceThread.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_TimeSliceThread.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_DeletedAtShutdown.o: ../../src/utilities/juce_DeletedAtShutdown.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_DeletedAtShutdown.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_FileBasedDocument.o: ../../src/utilities/juce_FileBasedDocument.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_FileBasedDocument.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_PropertiesFile.o: ../../src/utilities/juce_PropertiesFile.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_PropertiesFile.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_RecentlyOpenedFilesList.o: ../../src/utilities/juce_RecentlyOpenedFilesList.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_RecentlyOpenedFilesList.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_UndoManager.o: ../../src/utilities/juce_UndoManager.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling juce_UndoManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

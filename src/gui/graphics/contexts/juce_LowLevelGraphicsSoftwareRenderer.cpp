@@ -1899,41 +1899,38 @@ public:
         shapeToFill = clip->applyClipTo (shapeToFill);
 
         if (shapeToFill != 0)
-            fillShapeWithoutClipping (image, shapeToFill, replaceContents);
-    }
-
-    void fillShapeWithoutClipping (Image& image, const SoftwareRendererClasses::ClipRegionBase::Ptr& shapeToFill, const bool replaceContents)
-    {
-        Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
-
-        if (fillType.isGradient())
         {
-            jassert (! replaceContents); // that option is just for solid colours
+            Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
 
-            ColourGradient g2 (*(fillType.gradient));
-            g2.multiplyOpacity (fillType.getOpacity());
-            g2.point1.addXY (-0.5f, -0.5f);
-            g2.point2.addXY (-0.5f, -0.5f);
-            AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
-            const bool isIdentity = transform.isOnlyTranslation();
-
-            if (isIdentity)
+            if (fillType.isGradient())
             {
-                // If our translation doesn't involve any distortion, we can speed it up..
-                g2.point1.applyTransform (transform);
-                g2.point2.applyTransform (transform);
-                transform = AffineTransform::identity;
-            }
+                jassert (! replaceContents); // that option is just for solid colours
 
-            shapeToFill->fillAllWithGradient (destData, g2, transform, isIdentity);
-        }
-        else if (fillType.isTiledImage())
-        {
-            renderImage (image, *(fillType.image), fillType.image->getBounds(), fillType.transform, shapeToFill);
-        }
-        else
-        {
-            shapeToFill->fillAllWithColour (destData, fillType.colour.getPixelARGB(), replaceContents);
+                ColourGradient g2 (*(fillType.gradient));
+                g2.multiplyOpacity (fillType.getOpacity());
+                g2.point1.addXY (-0.5f, -0.5f);
+                g2.point2.addXY (-0.5f, -0.5f);
+                AffineTransform transform (fillType.transform.translated ((float) xOffset, (float) yOffset));
+                const bool isIdentity = transform.isOnlyTranslation();
+
+                if (isIdentity)
+                {
+                    // If our translation doesn't involve any distortion, we can speed it up..
+                    g2.point1.applyTransform (transform);
+                    g2.point2.applyTransform (transform);
+                    transform = AffineTransform::identity;
+                }
+
+                shapeToFill->fillAllWithGradient (destData, g2, transform, isIdentity);
+            }
+            else if (fillType.isTiledImage())
+            {
+                renderImage (image, *(fillType.image), fillType.image->getBounds(), fillType.transform, shapeToFill);
+            }
+            else
+            {
+                shapeToFill->fillAllWithColour (destData, fillType.colour.getPixelARGB(), replaceContents);
+            }
         }
     }
 

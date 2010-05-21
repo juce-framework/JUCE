@@ -103,6 +103,12 @@ public:
     */
     float getOpacity() const throw()        { return colour.getFloatAlpha(); }
 
+    /** Returns true if this fill type is completely transparent. */
+    bool isInvisible() const throw();
+
+    bool operator== (const FillType& other) const;
+    bool operator!= (const FillType& other) const;
+
     /** The solid colour being used.
 
         If the fill type is not a solid colour, the alpha channel of this colour indicates

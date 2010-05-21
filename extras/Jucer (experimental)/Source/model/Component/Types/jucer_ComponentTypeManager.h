@@ -86,11 +86,12 @@ class ComponentTypeHandler
 {
 public:
     //==============================================================================
-    ComponentTypeHandler (const String& displayName_, const String& className_, const String& xmlTag_, const String& memberNameRoot_);
+    ComponentTypeHandler (const String& displayName_, const String& className_,
+                          const Identifier& valueTreeType_, const String& memberNameRoot_);
     virtual ~ComponentTypeHandler();
 
     const String& getDisplayName() const        { return displayName; }
-    const Identifier& getXmlTag() const    { return xmlTag; }
+    const Identifier& getValueTreeType() const  { return valueTreeType; }
     const String& getMemberNameRoot() const     { return memberNameRoot; }
 
     virtual Component* createComponent() = 0;
@@ -106,7 +107,7 @@ public:
 protected:
     //==============================================================================
     const String displayName, className, memberNameRoot;
-    const Identifier xmlTag;
+    const Identifier valueTreeType;
 
 private:
     ComponentTypeHandler (const ComponentTypeHandler&);

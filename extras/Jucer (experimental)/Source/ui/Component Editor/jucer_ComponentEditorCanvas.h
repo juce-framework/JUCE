@@ -120,7 +120,7 @@ public:
 
     const Rectangle<int> getObjectPosition (const ValueTree& state)
     {
-        return getDocument().getCoordsFor (state).resolve (getDocument()).getSmallestIntegerContainer();
+        return getDocument().getCoordsFor (state).resolve (&getDocument()).getSmallestIntegerContainer();
     }
 
     RelativeRectangle getObjectCoords (const ValueTree& state)
@@ -176,14 +176,14 @@ public:
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
             ComponentDocument& doc = getDocument();
-            return doc.getCoordsFor (state).resolve (doc);
+            return doc.getCoordsFor (state).resolve (&doc);
         }
 
         bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
             ComponentDocument& doc = getDocument();
             RelativeRectangle pr (doc.getCoordsFor (state));
-            pr.moveToAbsolute (newBounds, doc);
+            pr.moveToAbsolute (newBounds, &doc);
 
             return doc.setCoordsFor (state, pr);
         }
@@ -191,7 +191,7 @@ public:
         float getMarkerPosition (const ValueTree& marker, bool isX)
         {
             ComponentDocument& doc = getDocument();
-            return (float) doc.getMarkerList (isX).getCoordinate (marker).resolve (doc);
+            return (float) doc.getMarkerList (isX).getCoordinate (marker).resolve (&doc);
         }
     };
 

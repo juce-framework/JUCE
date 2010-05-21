@@ -359,7 +359,7 @@ const ValueTree ComponentDocument::performNewComponentMenuItem (int menuResultCo
 
         if (handler != 0)
         {
-            ValueTree state (handler->getXmlTag());
+            ValueTree state (handler->getValueTreeType());
             state.setProperty (idProperty, createAlphaNumericUID(), 0);
 
             ComponentTypeInstance comp (*this, state);
@@ -532,7 +532,7 @@ void ComponentDocument::renameAnchor (const String& oldName, const String& newNa
     {
         ValueTree v (getComponent(i));
         RelativeRectangle coords (getCoordsFor (v));
-        coords.renameAnchorIfUsed (oldName, newName, *this);
+        coords.renameAnchorIfUsed (oldName, newName, this);
         setCoordsFor (v, coords);
     }
 
@@ -551,7 +551,7 @@ void ComponentDocument::addMarkerMenuItem (int i, const RelativeCoordinate& coor
         name << '.' << edge;
 
     menu.addItem (i, name,
-                  ! (name == fullCoordName || requestedCoord.references (fullCoordName, *this)),
+                  ! (name == fullCoordName || requestedCoord.references (fullCoordName, this)),
                   name == (isAnchor1 ? coord.getAnchorName1() : coord.getAnchorName2()));
 }
 
@@ -780,7 +780,7 @@ bool ComponentDocument::MarkerList::createProperties (Array <PropertyComponent*>
         props.add (new TextPropertyComponent (Value (new MarkerListBase::MarkerNameValueSource (this, getNameAsValue (marker))),
                                               "Marker Name", 256, false));
 
-        props.add (new MarkerListBase::PositionPropertyComponent (document, *this, "Position", marker,
+        props.add (new MarkerListBase::PositionPropertyComponent (&document, *this, "Position", marker,
                                                                   marker.getPropertyAsValue (getMarkerPosProperty(), document.getUndoManager())));
         return true;
     }

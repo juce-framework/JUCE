@@ -597,7 +597,10 @@ public:
             Thread::sleep (20);
             isStarted = false;
             isOpen_ = false;
-            close();
+
+            const String errorCopy (error);
+            close(); // (this resets the error string)
+            error = errorCopy;
         }
 
         needToReset = false;

@@ -35,7 +35,7 @@ DirectoryIterator::DirectoryIterator (const File& directory,
                                       bool isRecursive_,
                                       const String& wildCard_,
                                       const int whatToLookFor_)
-  : fileFinder (directory, isRecursive ? "*" : wildCard_),
+  : fileFinder (directory, isRecursive_ ? "*" : wildCard_),
     wildCard (wildCard_),
     path (File::addTrailingSeparator (directory.getFullPathName())),
     index (-1),

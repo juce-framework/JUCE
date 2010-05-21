@@ -500,6 +500,22 @@ void ValueTree::SharedObject::moveChild (int currentIndex, int newIndex, UndoMan
     }
 }
 
+bool ValueTree::SharedObject::isEquivalentTo (const SharedObject& other) const
+{
+    if (type != other.type
+         || properties.size() != other.properties.size()
+         || children.size() != other.children.size()
+         || properties != other.properties)
+        return false;
+
+    for (int i = 0; i < children.size(); ++i)
+        if (! children.getUnchecked(i)->isEquivalentTo (*other.children.getUnchecked(i)))
+            return false;
+
+    return true;
+}
+
+
 //==============================================================================
 ValueTree::ValueTree() throw()
     : object (0)
@@ -546,14 +562,20 @@ ValueTree::~ValueTree()
         object->valueTreesWithListeners.removeValue (this);
 }
 
-bool ValueTree::operator== (const ValueTree& other) const
+bool ValueTree::operator== (const ValueTree& other) const throw()
 {
     return object == other.object;
 }
 
-bool ValueTree::operator!= (const ValueTree& other) const
+bool ValueTree::operator!= (const ValueTree& other) const throw()
 {
     return object != other.object;
+}
+
+bool ValueTree::isEquivalentTo (const ValueTree& other) const
+{
+    return object == other.object
+            || (object != 0 && other.object != 0 && object->isEquivalentTo (*other.object));
 }
 
 ValueTree ValueTree::createCopy() const
@@ -710,7 +732,7 @@ int ValueTree::indexOf (const ValueTree& child) const
     return object != 0 ? object->indexOf (child) : -1;
 }
 
-void ValueTree::addChild (ValueTree child, int index, UndoManager* const undoManager)
+void ValueTree::addChild (const ValueTree& child, int index, UndoManager* const undoManager)
 {
     if (object != 0)
         object->addChild (child.object, index, undoManager);

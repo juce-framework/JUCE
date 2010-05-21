@@ -76,6 +76,16 @@ FillType::~FillType() throw()
 {
 }
 
+bool FillType::operator== (const FillType& other) const
+{
+    return colour == other.colour && gradient == other.gradient && image == other.image;
+}
+
+bool FillType::operator!= (const FillType& other) const
+{
+    return ! operator== (other);
+}
+
 void FillType::setColour (const Colour& newColour) throw()
 {
     gradient = 0;
@@ -109,5 +119,11 @@ void FillType::setOpacity (const float newOpacity) throw()
 {
     colour = colour.withAlpha (newOpacity);
 }
+
+bool FillType::isInvisible() const throw()
+{
+    return colour.isTransparent() || (gradient != 0 && gradient->isInvisible());
+}
+
 
 END_JUCE_NAMESPACE

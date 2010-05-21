@@ -136,3 +136,72 @@ private:
     JucerToolbarButton (const JucerToolbarButton&);
     JucerToolbarButton& operator= (const JucerToolbarButton&);
 };
+
+
+//==============================================================================
+/**
+*/
+class RelativeRectangleLayoutManager    : public ComponentListener,
+                                          public RelativeCoordinate::NamedCoordinateFinder,
+                                          public AsyncUpdater
+{
+public:
+    //==============================================================================
+    /**
+    */
+    RelativeRectangleLayoutManager (Component* parentComponent);
+
+    /** Destructor. */
+    ~RelativeRectangleLayoutManager();
+
+    //==============================================================================
+    /**
+    */
+    void setMarker (const String& name, const RelativeCoordinate& coord);
+
+    /**
+    */
+    void setComponentBounds (Component* component, const String& componentName, const RelativeRectangle& bounds);
+
+    /**
+    */
+    void applyLayout();
+
+    //==============================================================================
+    /** @internal */
+    const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
+    /** @internal */
+    void componentMovedOrResized (Component& component, bool wasMoved, bool wasResized);
+    /** @internal */
+    void componentBeingDeleted (Component& component);
+    /** @internal */
+    void handleAsyncUpdate();
+
+    juce_UseDebuggingNewOperator
+
+private:
+    //==============================================================================
+    struct ComponentPosition
+    {
+        ComponentPosition (Component* component, const String& name, const RelativeRectangle& coords);
+
+        Component* component;
+        String name;
+        RelativeRectangle coords;
+    };
+
+    struct MarkerPosition
+    {
+        MarkerPosition (const String& name, const RelativeCoordinate& coord);
+
+        String markerName;
+        RelativeCoordinate position;
+    };
+
+    Component* parent;
+    OwnedArray <ComponentPosition> components;
+    OwnedArray <MarkerPosition> markers;
+
+    RelativeRectangleLayoutManager (const RelativeRectangleLayoutManager&);
+    RelativeRectangleLayoutManager& operator= (const RelativeRectangleLayoutManager&);
+};

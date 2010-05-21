@@ -131,6 +131,9 @@ void ImageCache::releaseOrDelete (Image* const imageToRelease)
 
 bool ImageCache::isImageInCache (Image* const imageToLookFor)
 {
+    if (imageToLookFor == 0)
+        return false;
+
     if (instance != 0)
     {
         const ScopedLock sl (instance->lock);

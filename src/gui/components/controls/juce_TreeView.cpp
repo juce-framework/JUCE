@@ -1338,8 +1338,9 @@ void TreeViewItem::repaintItem() const
 {
     if (ownerView != 0 && areAllParentsOpen())
     {
-        const Rectangle<int> r (getItemPosition (true));
-        ownerView->viewport->repaint (0, r.getY(), r.getRight(), r.getHeight());
+        Rectangle<int> r (getItemPosition (true));
+        r.setLeft (0);
+        ownerView->viewport->repaint (r);
     }
 }
 

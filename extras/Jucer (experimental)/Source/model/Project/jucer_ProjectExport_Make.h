@@ -298,7 +298,7 @@ private:
                 out << "$(OBJDIR)/" << escapeSpaces (getObjectFileFor (files.getReference(i)))
                     << ": " << escapeSpaces (files.getReference(i).toUnixStyle()) << newLine
                     << "\t-@mkdir -p $(OBJDIR)" << newLine
-                    << "\t@echo $(notdir $<)" << newLine
+                    << "\t@echo \"Compiling " << files.getReference(i).getFileName() << "\"" << newLine
                     << (files.getReference(i).hasFileExtension (".c") ? "\t@$(CC) $(CFLAGS) -o \"$@\" -c \"$<\""
                                                                       : "\t@$(CXX) $(CXXFLAGS) -o \"$@\" -c \"$<\"")
                     << newLine << newLine;

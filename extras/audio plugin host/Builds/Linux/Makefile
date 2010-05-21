@@ -70,47 +70,47 @@ clean:
 
 $(OBJDIR)/FilterGraph.o: ../../Source/FilterGraph.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling FilterGraph.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/GraphEditorPanel.o: ../../Source/GraphEditorPanel.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling GraphEditorPanel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/HostStartup.o: ../../Source/HostStartup.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling HostStartup.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/InternalFilters.o: ../../Source/InternalFilters.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling InternalFilters.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MainHostWindow.o: ../../Source/MainHostWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling MainHostWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

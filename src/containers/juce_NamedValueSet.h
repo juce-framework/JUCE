@@ -51,6 +51,9 @@ public:
     /** Destructor. */
     ~NamedValueSet();
 
+    bool operator== (const NamedValueSet& other) const;
+    bool operator!= (const NamedValueSet& other) const;
+
     //==============================================================================
     /** Returns the total number of values that the set contains. */
     int size() const throw();
@@ -108,6 +111,7 @@ private:
     {
         NamedValue() throw();
         NamedValue (const Identifier& name, const var& value);
+        bool operator== (const NamedValue& other) const throw();
 
         Identifier name;
         var value;

@@ -56,7 +56,7 @@ public:
         {
             ValueTree v (getMarker (i));
             RelativeCoordinate coord (getCoordinate (v));
-            coord.renameAnchorIfUsed (oldName, newName, *this);
+            coord.renameAnchorIfUsed (oldName, newName, this);
             setCoordinate (v, coord);
         }
     }
@@ -133,7 +133,7 @@ public:
     {
     public:
         //==============================================================================
-        PositionPropertyComponent (NamedCoordinateFinder& nameSource_, MarkerListBase& markerList_,
+        PositionPropertyComponent (NamedCoordinateFinder* nameSource_, MarkerListBase& markerList_,
                                    const String& name, const ValueTree& markerState_,
                                    const Value& coordValue_)
             : CoordinatePropertyComponent (nameSource_, name, coordValue_, markerList_.isHorizontal()),

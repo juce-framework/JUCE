@@ -24,6 +24,54 @@
 */
 
 #include "jucer_DrawableDocument.h"
+#include "jucer_DrawableTypeHandler.h"
+
+
+//==============================================================================
+class DrawableTypeManager   : public DeletedAtShutdown
+{
+public:
+    DrawableTypeManager()
+    {
+        handlers.add (new DrawablePathHandler());
+        handlers.add (new DrawableImageHandler());
+    }
+
+    ~DrawableTypeManager()
+    {
+    }
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (DrawableTypeManager);
+
+    //==============================================================================
+    int getNumHandlers() const                                      { return handlers.size(); }
+    DrawableTypeHandler* getHandler (const int index) const         { return handlers[index]; }
+
+    DrawableTypeHandler* getHandlerFor (const Identifier& type)
+    {
+        for (int i = handlers.size(); --i >= 0;)
+            if (handlers.getUnchecked(i)->getValueTreeType() == type)
+                return handlers.getUnchecked(i);
+
+        jassertfalse;
+        return 0;
+    }
+
+    const StringArray getDisplayNames()
+    {
+        StringArray s;
+
+        for (int i = 0; i < handlers.size(); ++i)
+            s.add (handlers.getUnchecked(i)->getDisplayName());
+
+        return s;
+    }
+
+private:
+    OwnedArray <DrawableTypeHandler> handlers;
+};
+
+juce_ImplementSingleton_SingleThreaded (DrawableTypeManager);
 
 
 //==============================================================================
@@ -55,9 +103,9 @@ DrawableDocument::~DrawableDocument()
     root.removeListener (this);
 }
 
-ValueTree DrawableDocument::getRootDrawableNode() const
+DrawableComposite::ValueTreeWrapper DrawableDocument::getRootDrawableNode() const
 {
-    return root.getChild (0);
+    return DrawableComposite::ValueTreeWrapper (root.getChild (0));
 }
 
 void DrawableDocument::checkRootObject()
@@ -73,11 +121,6 @@ void DrawableDocument::checkRootObject()
 
     if ((int) getCanvasHeight().getValue() <= 0)
         getCanvasHeight() = 500;
-}
-
-const String DrawableDocument::getIdFor (const ValueTree& object)
-{
-    return object [Ids::id_];
 }
 
 //==============================================================================
@@ -194,59 +237,49 @@ void DrawableDocument::changed()
 }
 
 //==============================================================================
-static const Colour getRandomColour()
+const int menuItemOffset = 0x63451fa4;
+
+void DrawableDocument::addNewItemMenuItems (PopupMenu& menu) const
 {
-    return Colours::red.withHue (Random::getSystemRandom().nextFloat());
+    const StringArray displayNames (DrawableTypeManager::getInstance()->getDisplayNames());
+
+    for (int i = 0; i < displayNames.size(); ++i)
+        menu.addItem (i + menuItemOffset, "New " + displayNames[i]);
 }
 
-void DrawableDocument::addDrawable (Drawable& d)
+const ValueTree DrawableDocument::performNewItemMenuItem (int menuResultCode)
 {
-    DrawableComposite dc;
-    dc.insertDrawable (d.createCopy());
+    const StringArray displayNames (DrawableTypeManager::getInstance()->getDisplayNames());
 
-    ValueTree dcNode (dc.createValueTree (0));
-    ValueTree subNode (dcNode.getChild(0));
-    dcNode.removeChild (subNode, 0);
-    addMissingIds (subNode);
+    if (menuResultCode >= menuItemOffset && menuResultCode < menuItemOffset + displayNames.size())
+    {
+        DrawableTypeHandler* handler = DrawableTypeManager::getInstance()->getHandler (menuResultCode - menuItemOffset);
+        jassert (handler != 0);
 
-    getRootDrawableNode().addChild (subNode, -1, getUndoManager());
+        if (handler != 0)
+        {
+            ValueTree state (handler->createNewInstance (*this,
+                                                         Point<float> (Random::getSystemRandom().nextFloat() * 100.0f + 100.0f,
+                                                                       Random::getSystemRandom().nextFloat() * 100.0f + 100.0f)));
+
+            getRootDrawableNode().addDrawable (state, -1, getUndoManager());
+
+            return state;
+        }
+    }
+
+    return ValueTree::invalid;
 }
 
-void DrawableDocument::addRectangle()
+//==============================================================================
+Image* DrawableDocument::getImageForIdentifier (const var& imageIdentifier)
 {
-    Path p;
-    p.addRectangle ((float) Random::getSystemRandom().nextInt (500),
-                    (float) Random::getSystemRandom().nextInt (500),
-                    100.0f, 100.0f);
-
-    DrawablePath d;
-    d.setPath (p);
-    d.setFill (FillType (getRandomColour()));
-
-    addDrawable (d);
+    return ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
 }
 
-void DrawableDocument::addCircle()
+const var DrawableDocument::getIdentifierForImage (Image* image)
 {
-    Path p;
-    p.addEllipse ((float) Random::getSystemRandom().nextInt (500),
-                  (float) Random::getSystemRandom().nextInt (500),
-                  100.0f, 100.0f);
-
-    DrawablePath d;
-    d.setPath (p);
-    d.setFill (FillType (getRandomColour()));
-
-    addDrawable (d);
-}
-
-void DrawableDocument::addImage (const File& imageFile)
-{
-    jassertfalse
-
-    DrawableImage d;
-
-    addDrawable (d);
+    return var::null; //xxx todo
 }
 
 //==============================================================================

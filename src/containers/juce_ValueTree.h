@@ -102,13 +102,21 @@ public:
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator== (const ValueTree& other) const;
+    bool operator== (const ValueTree& other) const throw();
 
     /** Returns true if this and the other node refer to different underlying structures.
         Note that this isn't a value comparison - two independently-created trees which
         contain identical data are not considered equal.
     */
-    bool operator!= (const ValueTree& other) const;
+    bool operator!= (const ValueTree& other) const throw();
+
+    /** Performs a deep comparison between the properties and children of two trees.
+        If all the properties and children of the two trees are the same (recursively), this
+        returns true.
+        The normal operator==() only checks whether two trees refer to the same shared data
+        structure, so use this method if you need to do a proper value comparison.
+    */
+    bool isEquivalentTo (const ValueTree& other) const;
 
     //==============================================================================
     /** Returns true if this node refers to some valid data.
@@ -233,7 +241,7 @@ public:
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
         so that this change can be undone.
     */
-    void addChild (ValueTree child, int index, UndoManager* undoManager);
+    void addChild (const ValueTree& child, int index, UndoManager* undoManager);
 
     /** Removes the specified child from this node's child-list.
         If the undoManager parameter is non-null, its UndoManager::perform() method will be used,
@@ -464,6 +472,7 @@ private:
         void removeChild (int childIndex, UndoManager*);
         void removeAllChildren (UndoManager*);
         void moveChild (int currentIndex, int newIndex, UndoManager*);
+        bool isEquivalentTo (const SharedObject& other) const;
         XmlElement* createXml() const;
 
         juce_UseDebuggingNewOperator

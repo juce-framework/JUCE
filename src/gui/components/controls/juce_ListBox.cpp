@@ -877,8 +877,7 @@ void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 
 void ListBox::repaintRow (const int rowNumber) throw()
 {
-    const Rectangle<int> r (getRowPosition (rowNumber, true));
-    repaint (r.getX(), r.getY(), r.getWidth(), r.getHeight());
+    repaint (getRowPosition (rowNumber, true));
 }
 
 Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)

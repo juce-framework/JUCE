@@ -40,7 +40,7 @@ public:
     //==============================================================================
     ComponentBoundsEditor (ComponentDocument& document_, const String& name, Type type_,
                            const ValueTree& compState_, const Value& coordValue_)
-        : CoordinatePropertyComponent (document_, name,
+        : CoordinatePropertyComponent (&document_, name,
                                        Value (new CoordExtractor (coordValue_, type_)),
                                        type_ == left || type_ == right),
           document (document_),
@@ -184,7 +184,7 @@ Component* ComponentTypeManager::createFromStoredType (ComponentDocument& docume
 ComponentTypeHandler* ComponentTypeManager::getHandlerFor (const Identifier& type)
 {
     for (int i = handlers.size(); --i >= 0;)
-        if (handlers.getUnchecked(i)->getXmlTag() == type)
+        if (handlers.getUnchecked(i)->getValueTreeType() == type)
             return handlers.getUnchecked(i);
 
     return 0;
@@ -205,8 +205,8 @@ juce_ImplementSingleton_SingleThreaded (ComponentTypeManager);
 
 //==============================================================================
 ComponentTypeHandler::ComponentTypeHandler (const String& displayName_, const String& className_,
-                                            const String& xmlTag_, const String& memberNameRoot_)
-    : displayName (displayName_), className (className_), xmlTag (xmlTag_),
+                                            const Identifier& valueTreeType_, const String& memberNameRoot_)
+    : displayName (displayName_), className (className_), valueTreeType (valueTreeType_),
       memberNameRoot (memberNameRoot_)
 {
 }
@@ -315,7 +315,7 @@ void ComponentTypeInstance::initialiseNewItemBasics()
 void ComponentTypeInstance::updateComponentBasics (Component* comp)
 {
     RelativeRectangle pos (state [ComponentDocument::compBoundsProperty].toString());
-    comp->setBounds (pos.resolve (document).getSmallestIntegerContainer());
+    comp->setBounds (pos.resolve (&document).getSmallestIntegerContainer());
 
     //comp->setName (state [ComponentDocument::compNameProperty]);
 

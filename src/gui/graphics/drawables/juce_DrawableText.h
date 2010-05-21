@@ -42,6 +42,7 @@ public:
     //==============================================================================
     /** Creates a DrawableText object. */
     DrawableText();
+    DrawableText (const DrawableText& other);
 
     /** Destructor. */
     virtual ~DrawableText();
@@ -78,6 +79,8 @@ public:
     /** @internal */
     Drawable* createCopy() const;
     /** @internal */
+    void invalidatePoints();
+    /** @internal */
     const Rectangle<float> refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider);
     /** @internal */
     const ValueTree createValueTree (ImageProvider* imageProvider) const;
@@ -87,13 +90,25 @@ public:
     const Identifier getValueTreeType() const    { return valueTreeType; }
 
     //==============================================================================
+    /** Internally-used class for wrapping a DrawableText's state into a ValueTree. */
+    class ValueTreeWrapper   : public ValueTreeWrapperBase
+    {
+    public:
+        ValueTreeWrapper (const ValueTree& state);
+
+        //xxx todo
+
+    private:
+        static const Identifier text;
+    };
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     GlyphArrangement text;
     Colour colour;
 
-    DrawableText (const DrawableText&);
     DrawableText& operator= (const DrawableText&);
 };
 

@@ -28,7 +28,6 @@
 
 #include "../../jucer_Headers.h"
 #include "../Project/jucer_Project.h"
-#include "../../utility/jucer_Coordinate.h"
 #include "../../utility/jucer_MarkerListBase.h"
 #include "jucer_CodeGenerator.h"
 

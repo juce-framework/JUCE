@@ -63,12 +63,12 @@ clean:
 
 $(OBJDIR)/Main.o: ../../Source/Main.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling Main.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode.o: ../../JuceLibraryCode/JuceLibraryCode.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

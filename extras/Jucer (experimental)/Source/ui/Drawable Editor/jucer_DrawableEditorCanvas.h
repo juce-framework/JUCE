@@ -54,8 +54,19 @@ public:
 
     void updateComponents()
     {
-        drawable = Drawable::createFromValueTree (getEditor().getDocument().getRootDrawableNode(), 0);
-        getComponentHolder()->repaint();
+        DrawableDocument& doc = getEditor().getDocument();
+
+        if (drawable == 0)
+        {
+            drawable = Drawable::createFromValueTree (doc.getRootDrawableNode().getState(), &doc);
+            getComponentHolder()->repaint();
+        }
+        else
+        {
+            const Rectangle<float> damage (drawable->refreshFromValueTree (doc.getRootDrawableNode().getState(), &doc));
+            getComponentHolder()->repaint (damage.getSmallestIntegerContainer());
+        }
+
         startTimer (500);
     }
 
@@ -89,9 +100,9 @@ public:
         }
         else
         {
-//            getDocument().addNewComponentMenuItems (m);
-  //          const int r = m.show();
-    //        getDocument().performNewComponentMenuItem (r);
+            getDocument().addNewItemMenuItems (m);
+            const int r = m.show();
+            getDocument().performNewItemMenuItem (r);
         }
     }
 

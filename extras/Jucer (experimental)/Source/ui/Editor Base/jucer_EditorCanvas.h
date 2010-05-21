@@ -26,9 +26,9 @@
 #ifndef __JUCER_EDITORCANVAS_H_EF886D17__
 #define __JUCER_EDITORCANVAS_H_EF886D17__
 
-#include "../../utility/jucer_Coordinate.h"
 #include "../../utility/jucer_MarkerListBase.h"
 class EditorPanelBase;
+
 
 //==============================================================================
 class EditorCanvasBase   : public Component,

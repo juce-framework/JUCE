@@ -1091,15 +1091,9 @@ public:
     {
     }
 
-    void repaint (int x, int y, int w, int h)
+    void repaint (const Rectangle<int>& area)
     {
-        if (Rectangle<int>::intersectRectangles (x, y, w, h,
-                                                 0, 0,
-                                                 getComponent()->getWidth(),
-                                                 getComponent()->getHeight()))
-        {
-            repainter->repaint (x, y, w, h);
-        }
+        repainter->repaint (area.getIntersection (getComponent()->getLocalBounds()));
     }
 
     void performAnyPendingRepaintsNow()
@@ -1526,8 +1520,8 @@ public:
                                            &child);
                 }
 
-                repaint (exposeEvent->x, exposeEvent->y,
-                         exposeEvent->width, exposeEvent->height);
+                repaint (Rectangle<int> (exposeEvent->x, exposeEvent->y,
+                                         exposeEvent->width, exposeEvent->height));
 
                 while (XEventsQueued (display, QueuedAfterFlush) > 0)
                 {
@@ -1537,8 +1531,8 @@ public:
 
                     XNextEvent (display, (XEvent*) &nextEvent);
                     XExposeEvent* nextExposeEvent = (XExposeEvent*) &nextEvent.xexpose;
-                    repaint (nextExposeEvent->x, nextExposeEvent->y,
-                             nextExposeEvent->width, nextExposeEvent->height);
+                    repaint (Rectangle<int> (nextExposeEvent->x, nextExposeEvent->y,
+                                             nextExposeEvent->width, nextExposeEvent->height));
                 }
 
                 break;
@@ -1838,12 +1832,12 @@ private:
             }
         }
 
-        void repaint (int x, int y, int w, int h)
+        void repaint (const Rectangle<int>& area)
         {
             if (! isTimerRunning())
                 startTimer (repaintTimerPeriod);
 
-            regionsNeedingRepaint.add (x, y, w, h);
+            regionsNeedingRepaint.add (area);
         }
 
         void performAnyPendingRepaintsNow()

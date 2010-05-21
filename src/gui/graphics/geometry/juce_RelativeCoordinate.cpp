@@ -28,6 +28,8 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_RelativeCoordinate.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
+
 
 //==============================================================================
 namespace RelativeCoordinateHelpers
@@ -61,9 +63,10 @@ namespace RelativeCoordinateHelpers
         return fullName.fromFirstOccurrenceOf (".", false, false);
     }
 
-    static const RelativeCoordinate findCoordinate (const String& name, const RelativeCoordinate::NamedCoordinateFinder& nameFinder)
+    static const RelativeCoordinate findCoordinate (const String& name, const RelativeCoordinate::NamedCoordinateFinder* nameFinder)
     {
-        return nameFinder.findNamedCoordinate (getObjectName (name), getEdgeName (name));
+        return nameFinder != 0 ? nameFinder->findNamedCoordinate (getObjectName (name), getEdgeName (name))
+                               : RelativeCoordinate();
     }
 
     //==============================================================================
@@ -78,6 +81,13 @@ namespace RelativeCoordinateHelpers
     static void skipWhitespace (const String& s, int& i)
     {
         while (CharacterFunctions::isWhitespace (s[i]))
+            ++i;
+    }
+
+    static void skipComma (const String& s, int& i)
+    {
+        skipWhitespace (s, i);
+        if (s[i] == ',')
             ++i;
     }
 
@@ -126,9 +136,88 @@ namespace RelativeCoordinateHelpers
         return value;
     }
 
+    static const RelativeCoordinate readNextCoordinate (const String& s, int& i, const bool isHorizontal)
+    {
+        String anchor1 (readAnchorName (s, i));
+        double value = 0;
+
+        if (anchor1.isNotEmpty())
+        {
+            skipWhitespace (s, i);
+
+            if (s[i] == '+')
+                value = readNumber (s, ++i);
+            else if (s[i] == '-')
+                value = -readNumber (s, ++i);
+
+            return RelativeCoordinate (value, anchor1);
+        }
+        else
+        {
+            value = readNumber (s, i);
+            skipWhitespace (s, i);
+
+            if (s[i] == '%')
+            {
+                value /= 100.0;
+                skipWhitespace (s, ++i);
+                String anchor2;
+
+                if (s[i] == '*')
+                {
+                    anchor1 = readAnchorName (s, ++i);
+
+                    if (anchor1.isEmpty())
+                        anchor1 = getOriginAnchorName (isHorizontal);
+
+                    skipWhitespace (s, i);
+
+                    if (s[i] == '-' && s[i + 1] == '>')
+                    {
+                        i += 2;
+                        anchor2 = readAnchorName (s, i);
+                    }
+                    else
+                    {
+                        anchor2 = anchor1;
+                        anchor1 = getOriginAnchorName (isHorizontal);
+                    }
+                }
+                else
+                {
+                    anchor1 = getOriginAnchorName (isHorizontal);
+                    anchor2 = getExtentAnchorName (isHorizontal);
+                }
+
+                return RelativeCoordinate (value, anchor1, anchor2);
+            }
+
+            return RelativeCoordinate (value, isHorizontal);
+        }
+    }
+
     static const String limitedAccuracyString (const double n)
     {
         return String (n, 3).trimCharactersAtEnd ("0").trimCharactersAtEnd (".");
+    }
+
+    static bool couldBeMistakenForPathCommand (const String& s)
+    {
+        switch (s[0])
+        {
+        case 'a':
+        case 'm':
+        case 'l':
+        case 'z':
+        case 'q':
+        case 'c':
+            return s[1] == 0 || CharacterFunctions::isWhitespace (s[1]);
+
+        default:
+            break;
+        }
+
+        return false;
     }
 }
 
@@ -171,8 +260,25 @@ RelativeCoordinate::RelativeCoordinate (const double relativeProportion, const S
     jassert (anchor2.isNotEmpty());
 }
 
+RelativeCoordinate::RelativeCoordinate (const String& s, const bool isHorizontal)
+    : value (0)
+{
+    int i = 0;
+    *this = RelativeCoordinateHelpers::readNextCoordinate (s, i, isHorizontal);
+}
+
 RelativeCoordinate::~RelativeCoordinate()
 {
+}
+
+bool RelativeCoordinate::operator== (const RelativeCoordinate& other) const throw()
+{
+    return value == other.value && anchor1 == other.anchor1 && anchor2 == other.anchor2;
+}
+
+bool RelativeCoordinate::operator!= (const RelativeCoordinate& other) const throw()
+{
+    return ! operator== (other);
 }
 
 //==============================================================================
@@ -186,7 +292,7 @@ const RelativeCoordinate RelativeCoordinate::getAnchorCoordinate2() const
     return RelativeCoordinate (0.0, anchor2);
 }
 
-double RelativeCoordinate::resolveAnchor (const String& anchorName, const NamedCoordinateFinder& nameFinder, int recursionCounter)
+double RelativeCoordinate::resolveAnchor (const String& anchorName, const NamedCoordinateFinder* nameFinder, int recursionCounter)
 {
     if (RelativeCoordinateHelpers::isOrigin (anchorName))
         return 0.0;
@@ -194,7 +300,7 @@ double RelativeCoordinate::resolveAnchor (const String& anchorName, const NamedC
     return RelativeCoordinateHelpers::findCoordinate (anchorName, nameFinder).resolve (nameFinder, recursionCounter + 1);
 }
 
-double RelativeCoordinate::resolve (const NamedCoordinateFinder& nameFinder, int recursionCounter) const
+double RelativeCoordinate::resolve (const NamedCoordinateFinder* nameFinder, int recursionCounter) const
 {
     if (recursionCounter > 150)
     {
@@ -208,7 +314,7 @@ double RelativeCoordinate::resolve (const NamedCoordinateFinder& nameFinder, int
                             : pos1 + value;
 }
 
-double RelativeCoordinate::resolve (const NamedCoordinateFinder& nameFinder) const
+double RelativeCoordinate::resolve (const NamedCoordinateFinder* nameFinder) const
 {
     try
     {
@@ -220,7 +326,7 @@ double RelativeCoordinate::resolve (const NamedCoordinateFinder& nameFinder) con
     return 0.0;
 }
 
-bool RelativeCoordinate::isRecursive (const NamedCoordinateFinder& nameFinder) const
+bool RelativeCoordinate::isRecursive (const NamedCoordinateFinder* nameFinder) const
 {
     try
     {
@@ -234,7 +340,7 @@ bool RelativeCoordinate::isRecursive (const NamedCoordinateFinder& nameFinder) c
     return false;
 }
 
-void RelativeCoordinate::moveToAbsolute (double newPos, const NamedCoordinateFinder& nameFinder)
+void RelativeCoordinate::moveToAbsolute (double newPos, const NamedCoordinateFinder* nameFinder)
 {
     try
     {
@@ -256,7 +362,7 @@ void RelativeCoordinate::moveToAbsolute (double newPos, const NamedCoordinateFin
     {}
 }
 
-void RelativeCoordinate::toggleProportionality (const NamedCoordinateFinder& nameFinder, bool isHorizontal)
+void RelativeCoordinate::toggleProportionality (const NamedCoordinateFinder* nameFinder, bool isHorizontal)
 {
     const double oldValue = resolve (nameFinder);
 
@@ -267,8 +373,7 @@ void RelativeCoordinate::toggleProportionality (const NamedCoordinateFinder& nam
     moveToAbsolute (oldValue, nameFinder);
 }
 
-//==============================================================================
-bool RelativeCoordinate::references (const String& coordName, const NamedCoordinateFinder& nameFinder) const
+bool RelativeCoordinate::references (const String& coordName, const NamedCoordinateFinder* nameFinder) const
 {
     using namespace RelativeCoordinateHelpers;
 
@@ -281,65 +386,12 @@ bool RelativeCoordinate::references (const String& coordName, const NamedCoordin
             || (isProportional() && findCoordinate (anchor2, nameFinder).references (coordName, nameFinder));
 }
 
-//==============================================================================
-RelativeCoordinate::RelativeCoordinate (const String& s, bool isHorizontal)
-    : value (0)
+bool RelativeCoordinate::isDynamic() const
 {
-    using namespace RelativeCoordinateHelpers;
-    int i = 0;
-
-    anchor1 = readAnchorName (s, i);
-
-    if (anchor1.isNotEmpty())
-    {
-        skipWhitespace (s, i);
-
-        if (s[i] == '+')
-            value = readNumber (s, ++i);
-        else if (s[i] == '-')
-            value = -readNumber (s, ++i);
-    }
-    else
-    {
-        anchor1 = getOriginAnchorName (isHorizontal);
-
-        value = readNumber (s, i);
-        skipWhitespace (s, i);
-
-        if (s[i] == '%')
-        {
-            value /= 100.0;
-            skipWhitespace (s, ++i);
-
-            if (s[i] == '*')
-            {
-                anchor1 = readAnchorName (s, ++i);
-
-                if (anchor1.isEmpty())
-                    anchor1 = getOriginAnchorName (isHorizontal);
-
-                skipWhitespace (s, i);
-
-                if (s[i] == '-' && s[i + 1] == '>')
-                {
-                    i += 2;
-                    anchor2 = readAnchorName (s, i);
-                }
-                else
-                {
-                    anchor2 = anchor1;
-                    anchor1 = getOriginAnchorName (isHorizontal);
-                }
-            }
-            else
-            {
-                anchor1 = getOriginAnchorName (isHorizontal);
-                anchor2 = getExtentAnchorName (isHorizontal);
-            }
-        }
-    }
+    return anchor2.isNotEmpty() || ! RelativeCoordinateHelpers::isOrigin (anchor1);
 }
 
+//==============================================================================
 const String RelativeCoordinate::toString() const
 {
     using namespace RelativeCoordinateHelpers;
@@ -383,7 +435,7 @@ void RelativeCoordinate::setEditableNumber (const double newValue)
 }
 
 //==============================================================================
-void RelativeCoordinate::changeAnchor1 (const String& newAnchorName, const NamedCoordinateFinder& nameFinder)
+void RelativeCoordinate::changeAnchor1 (const String& newAnchorName, const NamedCoordinateFinder* nameFinder)
 {
     jassert (newAnchorName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
 
@@ -392,7 +444,7 @@ void RelativeCoordinate::changeAnchor1 (const String& newAnchorName, const Named
     moveToAbsolute (oldValue, nameFinder);
 }
 
-void RelativeCoordinate::changeAnchor2 (const String& newAnchorName, const NamedCoordinateFinder& nameFinder)
+void RelativeCoordinate::changeAnchor2 (const String& newAnchorName, const NamedCoordinateFinder* nameFinder)
 {
     jassert (isProportional());
     jassert (newAnchorName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
@@ -402,7 +454,7 @@ void RelativeCoordinate::changeAnchor2 (const String& newAnchorName, const Named
     moveToAbsolute (oldValue, nameFinder);
 }
 
-void RelativeCoordinate::renameAnchorIfUsed (const String& oldName, const String& newName, const NamedCoordinateFinder& nameFinder)
+void RelativeCoordinate::renameAnchorIfUsed (const String& oldName, const String& newName, const NamedCoordinateFinder* nameFinder)
 {
     using namespace RelativeCoordinateHelpers;
     jassert (oldName.isNotEmpty());
@@ -439,21 +491,36 @@ RelativePoint::RelativePoint (const Point<float>& absolutePoint)
 {
 }
 
-RelativePoint::RelativePoint (const String& stringVersion)
+RelativePoint::RelativePoint (const RelativeCoordinate& x_, const RelativeCoordinate& y_)
+    : x (x_), y (y_)
 {
-    const int separator = stringVersion.indexOfChar (',');
-
-    x = RelativeCoordinate (stringVersion.substring (0, separator), true);
-    y = RelativeCoordinate (stringVersion.substring (separator + 1), false);
 }
 
-const Point<float> RelativePoint::resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const
+RelativePoint::RelativePoint (const String& s)
+{
+    int i = 0;
+    x = RelativeCoordinateHelpers::readNextCoordinate (s, i, true);
+    RelativeCoordinateHelpers::skipComma (s, i);
+    y = RelativeCoordinateHelpers::readNextCoordinate (s, i, false);
+}
+
+bool RelativePoint::operator== (const RelativePoint& other) const throw()
+{
+    return x == other.x && y == other.y;
+}
+
+bool RelativePoint::operator!= (const RelativePoint& other) const throw()
+{
+    return ! operator== (other);
+}
+
+const Point<float> RelativePoint::resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
 {
     return Point<float> ((float) x.resolve (nameFinder),
                          (float) y.resolve (nameFinder));
 }
 
-void RelativePoint::moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder)
+void RelativePoint::moveToAbsolute (const Point<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder)
 {
     x.moveToAbsolute (newPos.getX(), nameFinder);
     y.moveToAbsolute (newPos.getY(), nameFinder);
@@ -464,10 +531,15 @@ const String RelativePoint::toString() const
     return x.toString() + ", " + y.toString();
 }
 
-void RelativePoint::renameAnchorIfUsed (const String& oldName, const String& newName, const RelativeCoordinate::NamedCoordinateFinder& nameFinder)
+void RelativePoint::renameAnchorIfUsed (const String& oldName, const String& newName, const RelativeCoordinate::NamedCoordinateFinder* nameFinder)
 {
     x.renameAnchorIfUsed (oldName, newName, nameFinder);
     y.renameAnchorIfUsed (oldName, newName, nameFinder);
+}
+
+bool RelativePoint::isDynamic() const
+{
+    return x.isDynamic() || y.isDynamic();
 }
 
 
@@ -484,18 +556,29 @@ RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect, const String
 {
 }
 
-RelativeRectangle::RelativeRectangle (const String& stringVersion)
+RelativeRectangle::RelativeRectangle (const String& s)
 {
-    StringArray tokens;
-    tokens.addTokens (stringVersion, ",", String::empty);
-
-    left   = RelativeCoordinate (tokens [0], true);
-    top    = RelativeCoordinate (tokens [1], false);
-    right  = RelativeCoordinate (tokens [2], true);
-    bottom = RelativeCoordinate (tokens [3], false);
+    int i = 0;
+    left = RelativeCoordinateHelpers::readNextCoordinate (s, i, true);
+    RelativeCoordinateHelpers::skipComma (s, i);
+    top = RelativeCoordinateHelpers::readNextCoordinate (s, i, false);
+    RelativeCoordinateHelpers::skipComma (s, i);
+    right = RelativeCoordinateHelpers::readNextCoordinate (s, i, true);
+    RelativeCoordinateHelpers::skipComma (s, i);
+    bottom = RelativeCoordinateHelpers::readNextCoordinate (s, i, false);
 }
 
-const Rectangle<float> RelativeRectangle::resolve (const RelativeCoordinate::NamedCoordinateFinder& nameFinder) const
+bool RelativeRectangle::operator== (const RelativeRectangle& other) const throw()
+{
+    return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+}
+
+bool RelativeRectangle::operator!= (const RelativeRectangle& other) const throw()
+{
+    return ! operator== (other);
+}
+
+const Rectangle<float> RelativeRectangle::resolve (const RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
 {
     const double l = left.resolve (nameFinder);
     const double r = right.resolve (nameFinder);
@@ -505,7 +588,7 @@ const Rectangle<float> RelativeRectangle::resolve (const RelativeCoordinate::Nam
     return Rectangle<float> ((float) l, (float) t, (float) (r - l), (float) (b - t));
 }
 
-void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder& nameFinder)
+void RelativeRectangle::moveToAbsolute (const Rectangle<float>& newPos, const RelativeCoordinate::NamedCoordinateFinder* nameFinder)
 {
     left.moveToAbsolute (newPos.getX(), nameFinder);
     right.moveToAbsolute (newPos.getRight(), nameFinder);
@@ -519,12 +602,272 @@ const String RelativeRectangle::toString() const
 }
 
 void RelativeRectangle::renameAnchorIfUsed (const String& oldName, const String& newName,
-                                               const RelativeCoordinate::NamedCoordinateFinder& nameFinder)
+                                               const RelativeCoordinate::NamedCoordinateFinder* nameFinder)
 {
     left.renameAnchorIfUsed (oldName, newName, nameFinder);
     right.renameAnchorIfUsed (oldName, newName, nameFinder);
     top.renameAnchorIfUsed (oldName, newName, nameFinder);
     bottom.renameAnchorIfUsed (oldName, newName, nameFinder);
+}
+
+
+//==============================================================================
+RelativePointPath::RelativePointPath()
+    : usesNonZeroWinding (true),
+      containsDynamicPoints (false)
+{
+}
+
+RelativePointPath::RelativePointPath (const RelativePointPath& other)
+    : usesNonZeroWinding (true),
+      containsDynamicPoints (false)
+{
+    parseString (other.toString());
+}
+
+RelativePointPath::RelativePointPath (const String& s)
+    : usesNonZeroWinding (true),
+      containsDynamicPoints (false)
+{
+    parseString (s);
+}
+
+void RelativePointPath::parseString (const String& s)
+{
+    int i = 0;
+    juce_wchar marker = 'm';
+    int numValues = 2;
+    RelativePoint points [3];
+
+    for (;;)
+    {
+        RelativeCoordinateHelpers::skipWhitespace (s, i);
+        const juce_wchar firstChar = s[i];
+
+        if (firstChar == 0)
+            break;
+
+        const juce_wchar secondChar = s[i + 1];
+
+        if (secondChar == 0 || CharacterFunctions::isWhitespace (secondChar))
+        {
+            if (firstChar == 'm' || firstChar == 'l')
+            {
+                ++i;
+                marker = firstChar;
+                numValues = 1;
+            }
+            else if (firstChar == 'q')
+            {
+                ++i;
+                marker = firstChar;
+                numValues = 2;
+            }
+            else if (firstChar == 'c')
+            {
+                ++i;
+                marker = firstChar;
+                numValues = 3;
+            }
+            else if (firstChar == 'z')
+            {
+                ++i;
+                marker = 'm';
+                numValues = 2;
+                elements.add (new CloseSubPath());
+                continue;
+            }
+            else if (firstChar == 'a')
+            {
+                ++i;
+                usesNonZeroWinding = false;
+                continue;
+            }
+        }
+
+        if (firstChar == '#')
+            ++i;
+
+        for (int j = 0; j < numValues; ++j)
+        {
+            const RelativeCoordinate x (RelativeCoordinateHelpers::readNextCoordinate (s, i, true));
+            const RelativeCoordinate y (RelativeCoordinateHelpers::readNextCoordinate (s, i, false));
+            points[j] = RelativePoint (x, y);
+            containsDynamicPoints = containsDynamicPoints || points[j].isDynamic();
+        }
+
+        switch (marker)
+        {
+            case 'm':   elements.add (new StartSubPath (points[0])); break;
+            case 'l':   elements.add (new LineTo (points[0])); break;
+            case 'q':   elements.add (new QuadraticTo (points[0], points[1])); break;
+            case 'c':   elements.add (new CubicTo (points[0], points[1], points[2])); break;
+            default: jassertfalse; break;  // illegal string format?
+        }
+    }
+}
+
+RelativePointPath::~RelativePointPath()
+{
+}
+
+void RelativePointPath::swapWith (RelativePointPath& other) throw()
+{
+    elements.swapWithArray (other.elements);
+    swapVariables (usesNonZeroWinding, other.usesNonZeroWinding);
+}
+
+void RelativePointPath::createPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder)
+{
+    for (int i = 0; i < elements.size(); ++i)
+        elements.getUnchecked(i)->addToPath (path, coordFinder);
+}
+
+bool RelativePointPath::containsAnyDynamicPoints() const
+{
+    return containsDynamicPoints;
+}
+
+const String RelativePointPath::toString() const
+{
+    ElementType lastType = nullElement;
+    MemoryOutputStream out;
+
+    if (! usesNonZeroWinding)
+        out << 'a';
+
+    for (int i = 0; i < elements.size(); ++i)
+    {
+        if (out.getDataSize() > 0)
+            out << ' ';
+
+        const ElementBase* const e = elements.getUnchecked(i);
+        e->write (out, lastType);
+        lastType = e->type;
+    }
+
+    return out.toUTF8();
+}
+
+//==============================================================================
+RelativePointPath::ElementBase::ElementBase (const ElementType type_) : type (type_)
+{
+}
+
+//==============================================================================
+RelativePointPath::StartSubPath::StartSubPath (const RelativePoint& pos)
+    : ElementBase (startSubPathElement), startPos (pos)
+{
+}
+
+void RelativePointPath::StartSubPath::write (OutputStream& out, ElementType lastTypeWritten) const
+{
+    const String p (startPos.toString());
+
+    if (lastTypeWritten != startSubPathElement)
+        out << "m ";
+    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p))
+        out << '#';
+
+    out << p;
+}
+
+void RelativePointPath::StartSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
+{
+    const Point<float> p (startPos.resolve (coordFinder));
+    path.startNewSubPath (p.getX(), p.getY());
+}
+
+//==============================================================================
+RelativePointPath::CloseSubPath::CloseSubPath()
+    : ElementBase (closeSubPathElement)
+{
+}
+
+void RelativePointPath::CloseSubPath::write (OutputStream& out, ElementType lastTypeWritten) const
+{
+    if (lastTypeWritten != closeSubPathElement)
+        out << 'z';
+}
+
+void RelativePointPath::CloseSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder*) const
+{
+    path.closeSubPath();
+}
+
+//==============================================================================
+RelativePointPath::LineTo::LineTo (const RelativePoint& endPoint_)
+    : ElementBase (lineToElement), endPoint (endPoint_)
+{
+}
+
+void RelativePointPath::LineTo::write (OutputStream& out, ElementType lastTypeWritten) const
+{
+    const String p (endPoint.toString());
+
+    if (lastTypeWritten != lineToElement)
+        out << "l ";
+    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p))
+        out << '#';
+
+    out << p;
+}
+
+void RelativePointPath::LineTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
+{
+    const Point<float> p (endPoint.resolve (coordFinder));
+    path.lineTo (p.getX(), p.getY());
+}
+
+//==============================================================================
+RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint_, const RelativePoint& endPoint_)
+    : ElementBase (quadraticToElement), controlPoint (controlPoint_), endPoint (endPoint_)
+{
+}
+
+void RelativePointPath::QuadraticTo::write (OutputStream& out, ElementType lastTypeWritten) const
+{
+    const String p1 (controlPoint.toString());
+
+    if (lastTypeWritten != quadraticToElement)
+        out << "q ";
+    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
+        out << '#';
+
+    out << p1 << ' ' << endPoint.toString();
+}
+
+void RelativePointPath::QuadraticTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
+{
+    const Point<float> p1 (controlPoint.resolve (coordFinder));
+    const Point<float> p2 (endPoint.resolve (coordFinder));
+    path.quadraticTo (p1.getX(), p1.getY(), p2.getX(), p2.getY());
+}
+
+//==============================================================================
+RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1_, const RelativePoint& controlPoint2_, const RelativePoint& endPoint_)
+    : ElementBase (cubicToElement), controlPoint1 (controlPoint1_), controlPoint2 (controlPoint2_), endPoint (endPoint_)
+{
+}
+
+void RelativePointPath::CubicTo::write (OutputStream& out, ElementType lastTypeWritten) const
+{
+    const String p1 (controlPoint1.toString());
+
+    if (lastTypeWritten != cubicToElement)
+        out << "c ";
+    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
+        out << '#';
+
+    out << p1 << ' ' << controlPoint2.toString() << ' ' << endPoint.toString();
+}
+
+void RelativePointPath::CubicTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
+{
+    const Point<float> p1 (controlPoint1.resolve (coordFinder));
+    const Point<float> p2 (controlPoint2.resolve (coordFinder));
+    const Point<float> p3 (endPoint.resolve (coordFinder));
+    path.cubicTo (p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
 }
 
 

@@ -87,132 +87,132 @@ clean:
 
 $(OBJDIR)/ApplicationStartup.o: ../../Source/ApplicationStartup.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling ApplicationStartup.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/MainDemoWindow.o: ../../Source/MainDemoWindow.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling MainDemoWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoLatencyPage.o: ../../Source/demos/AudioDemoLatencyPage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoLatencyPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoPlaybackPage.o: ../../Source/demos/AudioDemoPlaybackPage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoPlaybackPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoRecordPage.o: ../../Source/demos/AudioDemoRecordPage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoRecordPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoSetupPage.o: ../../Source/demos/AudioDemoSetupPage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoSetupPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoSynthPage.o: ../../Source/demos/AudioDemoSynthPage.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoSynthPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/AudioDemoTabComponent.o: ../../Source/demos/AudioDemoTabComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling AudioDemoTabComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/CameraDemo.o: ../../Source/demos/CameraDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling CameraDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/CodeEditorDemo.o: ../../Source/demos/CodeEditorDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling CodeEditorDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/DragAndDropDemo.o: ../../Source/demos/DragAndDropDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling DragAndDropDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/FontsAndTextDemo.o: ../../Source/demos/FontsAndTextDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling FontsAndTextDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/InterprocessCommsDemo.o: ../../Source/demos/InterprocessCommsDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling InterprocessCommsDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/OpenGLDemo.o: ../../Source/demos/OpenGLDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling OpenGLDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/QuickTimeDemo.o: ../../Source/demos/QuickTimeDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling QuickTimeDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/RenderingTestComponent.o: ../../Source/demos/RenderingTestComponent.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling RenderingTestComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/TableDemo.o: ../../Source/demos/TableDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling TableDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/ThreadingDemo.o: ../../Source/demos/ThreadingDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling ThreadingDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/TreeViewDemo.o: ../../Source/demos/TreeViewDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling TreeViewDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/WebBrowserDemo.o: ../../Source/demos/WebBrowserDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling WebBrowserDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/WidgetsDemo.o: ../../Source/demos/WidgetsDemo.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling WidgetsDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/BinaryData.o: ../../JuceLibraryCode/BinaryData.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling BinaryData.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
-	@echo $(notdir $<)
+	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 -include $(OBJECTS:%.o=%.d)

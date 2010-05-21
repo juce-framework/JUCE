@@ -138,7 +138,7 @@ public:
     void handleTouches (UIEvent* e, bool isDown, bool isUp, bool isCancel);
 
     //==============================================================================
-    void repaint (int x, int y, int w, int h);
+    void repaint (const Rectangle<int>& area);
     void performAnyPendingRepaintsNow();
 
     //==============================================================================
@@ -849,19 +849,20 @@ public:
     void messageCallback()
     {
         if (ComponentPeer::isValidPeer (peer))
-            peer->repaint (rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+            peer->repaint (rect);
     }
 };
 
-void UIViewComponentPeer::repaint (int x, int y, int w, int h)
+void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
     {
-        (new AsyncRepaintMessage (this, Rectangle<int> (x, y, w, h)))->post();
+        (new AsyncRepaintMessage (this, area))->post();
     }
     else
     {
-        [view setNeedsDisplayInRect: CGRectMake ((float) x, (float) y, (float) w, (float) h)];
+        [view setNeedsDisplayInRect: CGRectMake ((float) area.getX(), (float) area.getY(),
+                                                 (float) area.getWidth(), (float) area.getHeight())];
     }
 }
 

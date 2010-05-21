@@ -281,7 +281,7 @@ public:
 
     //==============================================================================
     /** Invalidates a region of the window to be repainted asynchronously. */
-    virtual void repaint (int x, int y, int w, int h) = 0;
+    virtual void repaint (const Rectangle<int>& area) = 0;
 
     /** This can be called (from the message thread) to cause the immediate redrawing
         of any areas of this window that need repainting.
