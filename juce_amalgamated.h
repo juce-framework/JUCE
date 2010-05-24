@@ -42225,6 +42225,7 @@ public:
 		virtual ~ElementBase() {}
 		virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
 		virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
+		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
 		const ElementType type;
 	};
@@ -42236,6 +42237,7 @@ public:
 		~StartSubPath() {}
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint startPos;
 	};
@@ -42247,6 +42249,7 @@ public:
 		~CloseSubPath() {}
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
 	};
 
 	class JUCE_API  LineTo  : public ElementBase
@@ -42256,6 +42259,7 @@ public:
 		~LineTo() {}
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint endPoint;
 	};
@@ -42267,8 +42271,9 @@ public:
 		~QuadraticTo() {}
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
 
-		RelativePoint controlPoint, endPoint;
+		RelativePoint controlPoints[2];
 	};
 
 	class JUCE_API  CubicTo  : public ElementBase
@@ -42278,8 +42283,9 @@ public:
 		~CubicTo() {}
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+		RelativePoint* getControlPoints (int& numPoints);
 
-		RelativePoint controlPoint1, controlPoint2, endPoint;
+		RelativePoint controlPoints[3];
 	};
 
 	OwnedArray <ElementBase> elements;
@@ -42406,6 +42412,9 @@ public:
 	/** Assigns a name to this drawable. */
 	void setName (const String& newName) throw()	{ name = newName; }
 
+	/** Returns the DrawableComposite that contains this object, if there is one. */
+	DrawableComposite* getParent() const throw()	{ return parent; }
+
 	/** Tries to turn some kind of image file into a drawable.
 
 		The data could be an image that the ImageFileFormat class understands, or it
@@ -42498,10 +42507,11 @@ public:
 
 		const String getID() const;
 		void setID (const String& newID, UndoManager* undoManager);
+		static const Identifier idProperty;
 
 	protected:
 		ValueTree state;
-		static const Identifier idProperty, type, x1, x2, y1, y2, colour, radial, colours;
+		static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
 
 		static const FillType readFillType (const ValueTree& v);
 		void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
@@ -58102,6 +58112,9 @@ public:
 	*/
 	Drawable* getDrawable (int index) const throw()				 { return drawables [index]; }
 
+	/** Looks for a child drawable with the specified name. */
+	Drawable* getDrawableWithName (const String& name) const throw();
+
 	/** Brings one of the Drawables to the front.
 
 		@param index	the index of the drawable to move, between 0
@@ -58186,7 +58199,8 @@ public:
 		ValueTreeWrapper (const ValueTree& state);
 
 		int getNumDrawables() const;
-		const ValueTree getDrawableState (int index) const;
+		ValueTree getDrawableState (int index) const;
+		ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
 		void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
 		void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
 		void removeDrawable (int index, UndoManager* undoManager);

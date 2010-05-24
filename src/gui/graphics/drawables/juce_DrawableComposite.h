@@ -107,6 +107,9 @@ public:
     */
     Drawable* getDrawable (int index) const throw()                             { return drawables [index]; }
 
+    /** Looks for a child drawable with the specified name. */
+    Drawable* getDrawableWithName (const String& name) const throw();
+
     /** Brings one of the Drawables to the front.
 
         @param index    the index of the drawable to move, between 0
@@ -194,7 +197,8 @@ public:
         ValueTreeWrapper (const ValueTree& state);
 
         int getNumDrawables() const;
-        const ValueTree getDrawableState (int index) const;
+        ValueTree getDrawableState (int index) const;
+        ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
         void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
         void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
         void removeDrawable (int index, UndoManager* undoManager);

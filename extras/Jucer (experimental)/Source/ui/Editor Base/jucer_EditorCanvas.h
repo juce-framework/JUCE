@@ -64,11 +64,10 @@ public:
     void hideSizeGuides();
 
     //==============================================================================
-    virtual void updateComponents() = 0;
-    virtual int getCanvasWidth() = 0;
-    virtual int getCanvasHeight() = 0;
-    virtual void setCanvasWidth (int w) = 0;
-    virtual void setCanvasHeight (int h) = 0;
+    virtual void documentChanged() = 0;
+    virtual const Rectangle<int> getCanvasBounds() = 0;
+    virtual void setCanvasBounds (const Rectangle<int>& newBounds) = 0;
+    virtual bool canResizeCanvas() const = 0;
     virtual MarkerListBase& getMarkerList (bool isX) = 0;
 
     virtual const SelectedItems::ItemType findObjectIdAt (const Point<int>& position) = 0;
@@ -77,6 +76,8 @@ public:
 
     virtual const ValueTree getObjectState (const String& objectId) = 0;
     virtual const Rectangle<int> getObjectPosition (const ValueTree& state) = 0;
+
+    virtual bool hasSizeGuides() const = 0;
     virtual RelativeRectangle getObjectCoords (const ValueTree& state) = 0;
     virtual SelectedItems& getSelection() = 0;
     virtual UndoManager& getUndoManager() = 0;
@@ -106,6 +107,12 @@ public:
     Component* getComponentHolder() const       { return componentHolder; }
     EditorPanelBase* getPanel() const;
 
+    const Point<int>& getOrigin() const throw()                             { return origin; }
+    const Point<int> screenSpaceToObjectSpace (const Point<int>& p) const;
+    const Point<int> objectSpaceToScreenSpace (const Point<int>& p) const;
+    const Rectangle<int> screenSpaceToObjectSpace (const Rectangle<int>& r) const;
+    const Rectangle<int> objectSpaceToScreenSpace (const Rectangle<int>& r) const;
+
     //==============================================================================
     class OverlayItemComponent  : public Component
     {
@@ -119,9 +126,11 @@ public:
         EditorCanvasBase* canvas;
     };
 
-private:
+protected:
     //==============================================================================
     const BorderSize border;
+    Point<int> origin;
+    double scaleFactor;
 
     friend class OverlayItemComponent;
     class ResizeFrame;

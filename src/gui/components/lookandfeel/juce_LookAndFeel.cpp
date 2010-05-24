@@ -256,10 +256,14 @@ void LookAndFeel::setColour (const int colourId, const Colour& colour) throw()
     const int index = colourIds.indexOf (colourId);
 
     if (index >= 0)
+    {
         colours.set (index, colour);
-
-    colourIds.add (colourId);
-    colours.add (colour);
+    }
+    else
+    {
+        colourIds.add (colourId);
+        colours.add (colour);
+    }
 }
 
 bool LookAndFeel::isColourSpecified (const int colourId) const throw()

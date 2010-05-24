@@ -51,6 +51,7 @@ public:
     void resized();
 
     //==============================================================================
+    const StringArray getSelectedIds() const;
     void deleteSelection();
     void selectionToFront();
     void selectionToBack();

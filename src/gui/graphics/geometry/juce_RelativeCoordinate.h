@@ -459,6 +459,7 @@ public:
         virtual ~ElementBase() {}
         virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
         virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
+        virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
         const ElementType type;
     };
@@ -470,6 +471,7 @@ public:
         ~StartSubPath() {}
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+        RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint startPos;
     };
@@ -481,6 +483,7 @@ public:
         ~CloseSubPath() {}
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+        RelativePoint* getControlPoints (int& numPoints);
     };
 
     class JUCE_API  LineTo  : public ElementBase
@@ -490,6 +493,7 @@ public:
         ~LineTo() {}
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+        RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint endPoint;
     };
@@ -501,8 +505,9 @@ public:
         ~QuadraticTo() {}
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+        RelativePoint* getControlPoints (int& numPoints);
 
-        RelativePoint controlPoint, endPoint;
+        RelativePoint controlPoints[2];
     };
 
     class JUCE_API  CubicTo  : public ElementBase
@@ -512,8 +517,9 @@ public:
         ~CubicTo() {}
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+        RelativePoint* getControlPoints (int& numPoints);
 
-        RelativePoint controlPoint1, controlPoint2, endPoint;
+        RelativePoint controlPoints[3];
     };
 
     //==============================================================================

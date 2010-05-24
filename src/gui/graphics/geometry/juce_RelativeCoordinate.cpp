@@ -198,6 +198,9 @@ namespace RelativeCoordinateHelpers
 
     static const String limitedAccuracyString (const double n)
     {
+        if (! (n < -0.001 || n > 0.001)) // to detect NaN and inf as well as for rounding
+            return "0";
+
         return String (n, 3).trimCharactersAtEnd ("0").trimCharactersAtEnd (".");
     }
 
@@ -778,6 +781,12 @@ void RelativePointPath::StartSubPath::addToPath (Path& path, RelativeCoordinate:
     path.startNewSubPath (p.getX(), p.getY());
 }
 
+RelativePoint* RelativePointPath::StartSubPath::getControlPoints (int& numPoints)
+{
+    numPoints = 1;
+    return &startPos;
+}
+
 //==============================================================================
 RelativePointPath::CloseSubPath::CloseSubPath()
     : ElementBase (closeSubPathElement)
@@ -793,6 +802,12 @@ void RelativePointPath::CloseSubPath::write (OutputStream& out, ElementType last
 void RelativePointPath::CloseSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder*) const
 {
     path.closeSubPath();
+}
+
+RelativePoint* RelativePointPath::CloseSubPath::getControlPoints (int& numPoints)
+{
+    numPoints = 0;
+    return 0;
 }
 
 //==============================================================================
@@ -819,55 +834,78 @@ void RelativePointPath::LineTo::addToPath (Path& path, RelativeCoordinate::Named
     path.lineTo (p.getX(), p.getY());
 }
 
-//==============================================================================
-RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint_, const RelativePoint& endPoint_)
-    : ElementBase (quadraticToElement), controlPoint (controlPoint_), endPoint (endPoint_)
+RelativePoint* RelativePointPath::LineTo::getControlPoints (int& numPoints)
 {
+    numPoints = 1;
+    return &endPoint;
+}
+
+//==============================================================================
+RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint)
+    : ElementBase (quadraticToElement)
+{
+    controlPoints[0] = controlPoint;
+    controlPoints[1] = endPoint;
 }
 
 void RelativePointPath::QuadraticTo::write (OutputStream& out, ElementType lastTypeWritten) const
 {
-    const String p1 (controlPoint.toString());
+    const String p1 (controlPoints[0].toString());
 
     if (lastTypeWritten != quadraticToElement)
         out << "q ";
     else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
         out << '#';
 
-    out << p1 << ' ' << endPoint.toString();
+    out << p1 << ' ' << controlPoints[1].toString();
 }
 
 void RelativePointPath::QuadraticTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p1 (controlPoint.resolve (coordFinder));
-    const Point<float> p2 (endPoint.resolve (coordFinder));
+    const Point<float> p1 (controlPoints[0].resolve (coordFinder));
+    const Point<float> p2 (controlPoints[1].resolve (coordFinder));
     path.quadraticTo (p1.getX(), p1.getY(), p2.getX(), p2.getY());
 }
 
-//==============================================================================
-RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1_, const RelativePoint& controlPoint2_, const RelativePoint& endPoint_)
-    : ElementBase (cubicToElement), controlPoint1 (controlPoint1_), controlPoint2 (controlPoint2_), endPoint (endPoint_)
+RelativePoint* RelativePointPath::QuadraticTo::getControlPoints (int& numPoints)
 {
+    numPoints = 2;
+    return controlPoints;
+}
+
+//==============================================================================
+RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint)
+    : ElementBase (cubicToElement)
+{
+    controlPoints[0] = controlPoint1;
+    controlPoints[1] = controlPoint2;
+    controlPoints[2] = endPoint;
 }
 
 void RelativePointPath::CubicTo::write (OutputStream& out, ElementType lastTypeWritten) const
 {
-    const String p1 (controlPoint1.toString());
+    const String p1 (controlPoints[0].toString());
 
     if (lastTypeWritten != cubicToElement)
         out << "c ";
     else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
         out << '#';
 
-    out << p1 << ' ' << controlPoint2.toString() << ' ' << endPoint.toString();
+    out << p1 << ' ' << controlPoints[1].toString() << ' ' << controlPoints[2].toString();
 }
 
 void RelativePointPath::CubicTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p1 (controlPoint1.resolve (coordFinder));
-    const Point<float> p2 (controlPoint2.resolve (coordFinder));
-    const Point<float> p3 (endPoint.resolve (coordFinder));
+    const Point<float> p1 (controlPoints[0].resolve (coordFinder));
+    const Point<float> p2 (controlPoints[1].resolve (coordFinder));
+    const Point<float> p3 (controlPoints[2].resolve (coordFinder));
     path.cubicTo (p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
+}
+
+RelativePoint* RelativePointPath::CubicTo::getControlPoints (int& numPoints)
+{
+    numPoints = 3;
+    return controlPoints;
 }
 
 

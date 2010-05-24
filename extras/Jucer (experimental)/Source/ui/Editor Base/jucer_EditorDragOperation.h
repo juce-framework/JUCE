@@ -80,11 +80,14 @@ public:
         if (isDraggingLeftRight())
         {
             const float y1 = -100.0f, y2 = 10000.0f;
-            verticalSnapTargets.add (SnapLine (0, y1, y2));
-            verticalSnapTargets.add (SnapLine ((float) getCanvasWidth(), y1, y2));
 
-            if (zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()))
-                verticalSnapTargets.add (SnapLine ((float) getCanvasWidth() / 2.0f, y1, y2));
+            {
+                Array<float> points;
+                getSnapPointsX (points, zone.isDraggingWholeObject() || (zone.isDraggingLeftEdge() && zone.isDraggingRightEdge()));
+
+                for (int i = 0; i < points.size(); ++i)
+                    verticalSnapTargets.add (SnapLine (points[i], y1, y2));
+            }
 
             MarkerListBase& markers = canvas->getMarkerList (true);
             for (int i = markers.size(); --i >= 0;)
@@ -94,11 +97,14 @@ public:
         if (isDraggingUpDown())
         {
             const float x1 = -100.0f, x2 = 10000.0f;
-            horizontalSnapTargets.add (SnapLine (0, x1, x2));
-            horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight(), x1, x2));
 
-            if (zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()))
-                horizontalSnapTargets.add (SnapLine ((float) getCanvasHeight() / 2.0f, x1, x2));
+            {
+                Array<float> points;
+                getSnapPointsY (points, zone.isDraggingWholeObject() || (zone.isDraggingTopEdge() && zone.isDraggingBottomEdge()));
+
+                for (int i = 0; i < points.size(); ++i)
+                    horizontalSnapTargets.add (SnapLine (points[i], x1, x2));
+            }
 
             MarkerListBase& markers = canvas->getMarkerList (false);
             for (int i = markers.size(); --i >= 0;)
@@ -181,9 +187,6 @@ public:
     //==============================================================================
     void drag (const MouseEvent& e)
     {
-//        if (draggedObjects.size() > 5)
-  //          canvas->repaint(); // more efficient than having to repaint a highly fragmented region
-
         getUndoManager().undoCurrentTransactionOnly();
 
         // (can't use getOffsetFromDragStart() because of auto-scrolling)
@@ -232,8 +235,8 @@ public:
 
 protected:
     //==============================================================================
-    virtual int getCanvasWidth() = 0;
-    virtual int getCanvasHeight() = 0;
+    virtual void getSnapPointsX (Array<float>& points, bool includeCentre) = 0;
+    virtual void getSnapPointsY (Array<float>& points, bool includeCentre) = 0;
     virtual float getMarkerPosition (const ValueTree& marker, bool isX) = 0;
 
     virtual const Rectangle<float> getObjectPosition (const ValueTree& state) = 0;

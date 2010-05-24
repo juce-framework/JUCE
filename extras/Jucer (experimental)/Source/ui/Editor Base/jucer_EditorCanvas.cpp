@@ -179,7 +179,7 @@ public:
 
     void showSizeGuides()
     {
-        if (sizeGuides.size() == 0)
+        if (sizeGuides.size() == 0 && canvas->hasSizeGuides())
         {
             sizeGuides.add (new SizeGuideComponent (canvas, objectState, SizeGuideComponent::left));
             sizeGuides.add (new SizeGuideComponent (canvas, objectState, SizeGuideComponent::right));
@@ -408,7 +408,7 @@ public:
         isDraggingClickedComp = false;
 
         const MouseEvent e2 (e.getEventRelativeTo (canvas->getComponentHolder()));
-        const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (e2.getPosition()));
+        const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (canvas->screenSpaceToObjectSpace (e2.getPosition())));
 
         if (e.mods.isPopupMenu())
         {
@@ -498,7 +498,7 @@ public:
         else
         {
             const MouseEvent e2 (e.getEventRelativeTo (canvas->getComponentHolder()));
-            const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (e2.getPosition()));
+            const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (canvas->screenSpaceToObjectSpace (e2.getPosition())));
 
             if (underMouse.isNotEmpty())
             {
@@ -510,7 +510,8 @@ public:
 
     void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area)
     {
-        canvas->findLassoItemsInArea (itemsFound, area + relativePositionToOtherComponent (canvas->getComponentHolder(), Point<int>()));
+        const Rectangle<int> sourceArea (area + relativePositionToOtherComponent (canvas->getComponentHolder(), Point<int>()));
+        canvas->findLassoItemsInArea (itemsFound, canvas->screenSpaceToObjectSpace (sourceArea));
     }
 
     SelectedItems& getSelection()               { return canvas->getSelection(); }
@@ -534,21 +535,27 @@ public:
 
     void showSizeGuides()
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
+        if (canvas->hasSizeGuides())
         {
-            ResizeFrame* resizer = dynamic_cast <ResizeFrame*> (getChildComponent(i));
-            if (resizer != 0)
-                resizer->showSizeGuides();
+            for (int i = getNumChildComponents(); --i >= 0;)
+            {
+                ResizeFrame* resizer = dynamic_cast <ResizeFrame*> (getChildComponent(i));
+                if (resizer != 0)
+                    resizer->showSizeGuides();
+            }
         }
     }
 
     void hideSizeGuides()
     {
-        for (int i = getNumChildComponents(); --i >= 0;)
+        if (canvas->hasSizeGuides())
         {
-            ResizeFrame* resizer = dynamic_cast <ResizeFrame*> (getChildComponent(i));
-            if (resizer != 0)
-                resizer->hideSizeGuides();
+            for (int i = getNumChildComponents(); --i >= 0;)
+            {
+                ResizeFrame* resizer = dynamic_cast <ResizeFrame*> (getChildComponent(i));
+                if (resizer != 0)
+                    resizer->hideSizeGuides();
+            }
         }
     }
 
@@ -667,7 +674,7 @@ class EditorCanvasBase::DocumentResizeFrame    : public Component
 {
 public:
     DocumentResizeFrame (EditorCanvasBase* canvas_)
-        : canvas (canvas_), dragStartWidth (0), dragStartHeight (0), resizerThickness (4)
+        : canvas (canvas_), resizerThickness (4)
     {
     }
 
@@ -698,18 +705,21 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         updateDragZone (e.getPosition());
-        dragStartWidth = canvas->getCanvasWidth();
-        dragStartHeight = canvas->getCanvasHeight();
+        dragStartBounds = canvas->getCanvasBounds();
         canvas->showSizeGuides();
     }
 
     void mouseDrag (const MouseEvent& e)
     {
+        Rectangle<int> newBounds (dragStartBounds);
+
         if (dragZone.isDraggingRightEdge())
-            canvas->setCanvasWidth (jmax (1, dragStartWidth + e.getDistanceFromDragStartX()));
+            newBounds.setWidth (jmax (1, newBounds.getWidth() + e.getDistanceFromDragStartX()));
 
         if (dragZone.isDraggingBottomEdge())
-            canvas->setCanvasHeight (jmax (1, dragStartHeight + e.getDistanceFromDragStartY()));
+            newBounds.setHeight (jmax (1, newBounds.getHeight() + e.getDistanceFromDragStartY()));
+
+        canvas->setCanvasBounds (newBounds);
     }
 
     void mouseUp (const MouseEvent& e)
@@ -733,6 +743,9 @@ public:
 
     bool hitTest (int x, int y)
     {
+        if (! canvas->canResizeCanvas())
+            return false;
+
         const Rectangle<int> content (getContentArea());
 
         return (x >= content.getRight() || y >= content.getBottom())
@@ -743,7 +756,7 @@ public:
 private:
     EditorCanvasBase* canvas;
     ResizableBorderComponent::Zone dragZone;
-    int dragStartWidth, dragStartHeight;
+    Rectangle<int> dragStartBounds;
     const int resizerThickness;
 
     const Rectangle<int> getContentArea() const     { return canvas->getContentArea(); }
@@ -752,7 +765,8 @@ private:
 
 //==============================================================================
 EditorCanvasBase::EditorCanvasBase()
-    : border (14)
+    : border (14),
+      scaleFactor (1.0)
 {
     //setOpaque (true);
 }
@@ -783,6 +797,26 @@ EditorPanelBase* EditorCanvasBase::getPanel() const
     return findParentComponentOfClass ((EditorPanelBase*) 0);
 }
 
+const Point<int> EditorCanvasBase::screenSpaceToObjectSpace (const Point<int>& p) const
+{
+    return p - origin;
+}
+
+const Point<int> EditorCanvasBase::objectSpaceToScreenSpace (const Point<int>& p) const
+{
+    return p + origin;
+}
+
+const Rectangle<int> EditorCanvasBase::screenSpaceToObjectSpace (const Rectangle<int>& r) const
+{
+    return r - origin;
+}
+
+const Rectangle<int> EditorCanvasBase::objectSpaceToScreenSpace (const Rectangle<int>& r) const
+{
+    return r + origin;
+}
+
 //==============================================================================
 void EditorCanvasBase::paint (Graphics& g)
 {
@@ -798,7 +832,7 @@ void EditorCanvasBase::paint (Graphics& g)
 
 void EditorCanvasBase::drawXAxis (Graphics& g, const Rectangle<int>& r)
 {
-    TickIterator ticks (0, r.getWidth(), 1.0, 10, 50);
+    TickIterator ticks (-origin.getX(), r.getWidth(), 1.0, 10, 50);
     float pos, tickLength;
     String label;
 
@@ -814,7 +848,7 @@ void EditorCanvasBase::drawXAxis (Graphics& g, const Rectangle<int>& r)
 
 void EditorCanvasBase::drawYAxis (Graphics& g, const Rectangle<int>& r)
 {
-    TickIterator ticks (0, r.getHeight(), 1.0, 10, 80);
+    TickIterator ticks (-origin.getY(), r.getHeight(), 1.0, 10, 80);
     float pos, tickLength;
     String label;
 
@@ -837,10 +871,20 @@ const Rectangle<int> EditorCanvasBase::getContentArea() const
 //==============================================================================
 void EditorCanvasBase::handleAsyncUpdate()
 {
-    setSize ((int) getCanvasWidth() + border.getLeftAndRight(),
-             (int) getCanvasHeight() + border.getTopAndBottom());
+    documentChanged();
 
-    updateComponents();
+    const Rectangle<int> canvasBounds (getCanvasBounds());
+
+    const Point<int> newOrigin (jmax (0, -canvasBounds.getX()), jmax (0, -canvasBounds.getY()));
+    if (origin != newOrigin)
+    {
+        repaint();
+        origin = newOrigin;
+    }
+
+    setSize (jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
+             jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+
     overlay->update();
 }
 
@@ -849,7 +893,6 @@ void EditorCanvasBase::resized()
     componentHolder->setBounds (getContentArea());
     overlay->setBounds (getLocalBounds());
     resizeFrame->setBounds (getLocalBounds());
-    updateComponents();
     overlay->update();
 }
 
@@ -891,5 +934,6 @@ EditorCanvasBase::OverlayItemComponent::~OverlayItemComponent()
 
 void EditorCanvasBase::OverlayItemComponent::setBoundsInTargetSpace (const Rectangle<int>& r)
 {
-    setBounds (r + canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>()));
+    setBounds (canvas->objectSpaceToScreenSpace (r)
+                + canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>()));
 }

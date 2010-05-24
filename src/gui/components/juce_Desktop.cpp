@@ -77,8 +77,7 @@ void Desktop::refreshMonitorSizes()
     monitorCoordsUnclipped.clear();
     juce_updateMultiMonitorInfo (monitorCoordsClipped, true);
     juce_updateMultiMonitorInfo (monitorCoordsUnclipped, false);
-    jassert (monitorCoordsClipped.size() > 0
-              && monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
+    jassert (monitorCoordsClipped.size() == monitorCoordsUnclipped.size());
 
     if (oldClipped != monitorCoordsClipped
          || oldUnclipped != monitorCoordsUnclipped)

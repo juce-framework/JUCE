@@ -821,9 +821,7 @@ public:
             clientMsg.data.l[0] = IconicState;
 
             ScopedXLock xlock;
-            XSendEvent (display, root, false,
-                        SubstructureRedirectMask | SubstructureNotifyMask,
-                        (XEvent*) &clientMsg);
+            XSendEvent (display, root, false, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*) &clientMsg);
         }
         else
         {
@@ -984,26 +982,7 @@ public:
 
     bool setAlwaysOnTop (bool alwaysOnTop)
     {
-        if (windowH != 0)
-        {
-            const bool wasVisible = component->isVisible();
-
-            if (wasVisible)
-                setVisible (false);  // doesn't always seem to work if the window is visible when this is done..
-
-            {
-                ScopedXLock xlock;
-                XSetWindowAttributes swa;
-                swa.override_redirect = alwaysOnTop ? True : False;
-
-                XChangeWindowAttributes (display, windowH, CWOverrideRedirect, &swa);
-            }
-
-            if (wasVisible)
-                setVisible (true);
-        }
-
-        return true;
+        return false;
     }
 
     void toFront (bool makeActive)
@@ -1030,14 +1009,12 @@ public:
         {
             ScopedXLock xlock;
             XSendEvent (display, RootWindow (display, DefaultScreen (display)),
-                        False,
-                        SubstructureRedirectMask | SubstructureNotifyMask,
-                        &ev);
+                        False, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 
             XWindowAttributes attr;
             XGetWindowAttributes (display, windowH, &attr);
 
-            if (attr.override_redirect)
+            if (component->isAlwaysOnTop())
                 XRaiseWindow (display, windowH);
 
             XSync (display, False);
@@ -1064,7 +1041,7 @@ public:
 
     bool isFocused() const
     {
-        int revert;
+        int revert = 0;
         Window focusedWindow = 0;
         ScopedXLock xlock;
         XGetInputFocus (display, &focusedWindow, &revert);
@@ -2140,49 +2117,49 @@ private:
             int netHints [6];
             int num = 0;
 
-            netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_RESIZE", (styleFlags & windowIsResizable) ? True : False);
-            netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_FULLSCREEN", (styleFlags & windowHasMaximiseButton) ? True : False);
-            netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_MINIMIZE", (styleFlags & windowHasMinimiseButton) ? True : False);
-            netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_CLOSE", (styleFlags & windowHasCloseButton) ? True : False);
+            if ((styleFlags & windowIsResizable) != 0)
+                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_RESIZE", True);
 
-            XChangeProperty (display, wndH, hints, XA_ATOM, 32, PropModeReplace,
-                             (unsigned char*) &netHints, num);
+            if ((styleFlags & windowHasMaximiseButton) != 0)
+                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_FULLSCREEN", True);
+
+            if ((styleFlags & windowHasMinimiseButton) != 0)
+                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_MINIMIZE", True);
+
+            if ((styleFlags & windowHasCloseButton) != 0)
+                netHints [num++] = XInternAtom (display, "_NET_WM_ACTION_CLOSE", True);
+
+            XChangeProperty (display, wndH, hints, XA_ATOM, 32, PropModeReplace, (unsigned char*) &netHints, num);
         }
     }
 
-    void setWindowType (Window wndH)
+    void setWindowType()
     {
         int netHints [2];
         int numHints = 0;
 
         if ((styleFlags & windowIsTemporary) != 0
              || ((styleFlags & windowHasDropShadow) == 0 && Desktop::canUseSemiTransparentWindows()))
-        {
-            netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_COMBO", True);
-        }
+            netHints [numHints++] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_COMBO", True);
         else
-        {
-            netHints [numHints] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
-        }
+            netHints [numHints++] = XInternAtom (display, "_NET_WM_WINDOW_TYPE_NORMAL", True);
 
-        if (netHints [numHints] != 0)
-            ++numHints;
+        netHints[numHints++] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
 
-        netHints[numHints] = XInternAtom (display, "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE", True);
-
-        if (netHints [numHints] != 0)
-            ++numHints;
-
-        XChangeProperty (display, wndH, Atoms::WindowType, XA_ATOM, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::WindowType, XA_ATOM, 32, PropModeReplace,
                          (unsigned char*) &netHints, numHints);
 
-        if ((styleFlags & windowAppearsOnTaskbar) == 0)
-        {
-            Atom skipTaskbar = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", False);
+        numHints = 0;
 
-            XChangeProperty (display, wndH, Atoms::WindowState, XA_ATOM, 32, PropModeReplace,
-                             (unsigned char*) &skipTaskbar, 1);
-        }
+        if ((styleFlags & windowAppearsOnTaskbar) == 0)
+            netHints [numHints++] = XInternAtom (display, "_NET_WM_STATE_SKIP_TASKBAR", True);
+
+        if (component->isAlwaysOnTop())
+            netHints [numHints++] = XInternAtom (display, "_NET_WM_STATE_ABOVE", True);
+
+        if (numHints > 0)
+            XChangeProperty (display, windowH, Atoms::WindowState, XA_ATOM, 32, PropModeReplace,
+                             (unsigned char*) &netHints, numHints);
     }
 
     void createWindow()
@@ -2213,27 +2190,27 @@ private:
         swa.border_pixel = 0;
         swa.background_pixmap = None;
         swa.colormap = colormap;
-        swa.override_redirect = getComponent()->isAlwaysOnTop() ? True : False;
         swa.event_mask = getAllEventsMask();
 
-        Window wndH = XCreateWindow (display, root,
-                                     0, 0, 1, 1,
-                                     0, depth, InputOutput, visual,
-                                     CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
-                                     &swa);
+        windowH = XCreateWindow (display, root,
+                                 0, 0, 1, 1,
+                                 0, depth, InputOutput, visual,
+                                 CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask,
+                                 &swa);
 
-        XGrabButton (display, AnyButton, AnyModifier, wndH, False,
+        XGrabButton (display, AnyButton, AnyModifier, windowH, False,
                      ButtonPressMask | ButtonReleaseMask | EnterWindowMask | LeaveWindowMask | PointerMotionMask,
                      GrabModeAsync, GrabModeAsync, None, None);
 
         // Set the window context to identify the window handle object
-        if (XSaveContext (display, (XID) wndH, windowHandleXContext, (XPointer) this))
+        if (XSaveContext (display, (XID) windowH, windowHandleXContext, (XPointer) this))
         {
             // Failed
             jassertfalse;
             Logger::outputDebugString ("Failed to create context information for window.\n");
-            XDestroyWindow (display, wndH);
-            wndH = 0;
+            XDestroyWindow (display, windowH);
+            windowH = 0;
+            return;
         }
 
         // Set window manager hints
@@ -2241,42 +2218,42 @@ private:
         wmHints->flags = InputHint | StateHint;
         wmHints->input = True;      // Locally active input model
         wmHints->initial_state = NormalState;
-        XSetWMHints (display, wndH, wmHints);
+        XSetWMHints (display, windowH, wmHints);
         XFree (wmHints);
 
         // Set the window type
-        setWindowType (wndH);
+        setWindowType();
 
         // Define decoration
         if ((styleFlags & windowHasTitleBar) == 0)
-            removeWindowDecorations (wndH);
+            removeWindowDecorations (windowH);
         else
-            addWindowButtons (wndH);
+            addWindowButtons (windowH);
 
         // Set window name
-        setWindowTitle (wndH, getComponent()->getName());
+        setWindowTitle (windowH, getComponent()->getName());
 
         // Associate the PID, allowing to be shut down when something goes wrong
         unsigned long pid = getpid();
-        XChangeProperty (display, wndH, Atoms::Pid, XA_CARDINAL, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::Pid, XA_CARDINAL, 32, PropModeReplace,
                          (unsigned char*) &pid, 1);
 
         // Set window manager protocols
-        XChangeProperty (display, wndH, Atoms::Protocols, XA_ATOM, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::Protocols, XA_ATOM, 32, PropModeReplace,
                          (unsigned char*) Atoms::ProtocolList, 2);
 
         // Set drag and drop flags
-        XChangeProperty (display, wndH, Atoms::XdndTypeList, XA_ATOM, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::XdndTypeList, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) Atoms::allowedMimeTypes, numElementsInArray (Atoms::allowedMimeTypes));
 
-        XChangeProperty (display, wndH, Atoms::XdndActionList, XA_ATOM, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::XdndActionList, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) Atoms::allowedActions, numElementsInArray (Atoms::allowedActions));
 
-        XChangeProperty (display, wndH, Atoms::XdndActionDescription, XA_STRING, 8, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::XdndActionDescription, XA_STRING, 8, PropModeReplace,
                          (const unsigned char*) "", 0);
 
         unsigned long dndVersion = Atoms::DndVersion;
-        XChangeProperty (display, wndH, Atoms::XdndAware, XA_ATOM, 32, PropModeReplace,
+        XChangeProperty (display, windowH, Atoms::XdndAware, XA_ATOM, 32, PropModeReplace,
                          (const unsigned char*) &dndVersion, 1);
 
         // Initialise the pointer and keyboard mapping
@@ -2311,8 +2288,6 @@ private:
 
             updateModifierMappings();
         }
-
-        windowH = wndH;
     }
 
     void destroyWindow()

@@ -62,16 +62,27 @@ public:
         return new ComponentHolder (getDocument().getBackgroundColour());
     }
 
-    void updateComponents()
+    void documentChanged()
     {
         getDocument().updateComponentsIn (getComponentHolder());
         startTimer (500);
     }
 
-    int getCanvasWidth()             { return getDocument().getCanvasWidth().getValue(); }
-    int getCanvasHeight()            { return getDocument().getCanvasHeight().getValue(); }
-    void setCanvasWidth (int w)      { getDocument().getCanvasWidth() = w; }
-    void setCanvasHeight (int h)     { getDocument().getCanvasHeight() = h; }
+    const Rectangle<int> getCanvasBounds()
+    {
+        return Rectangle<int> (0, 0, getDocument().getCanvasWidth().getValue(),
+                               getDocument().getCanvasHeight().getValue());
+    }
+
+    void setCanvasBounds (const Rectangle<int>& newBounds)
+    {
+        jassert (newBounds.getPosition().isOrigin());
+
+        getDocument().getCanvasWidth() = newBounds.getWidth();
+        getDocument().getCanvasHeight() = newBounds.getHeight();
+    }
+
+    bool canResizeCanvas() const     { return true; }
 
     ComponentDocument::MarkerList& getMarkerList (bool isX)
     {
@@ -123,6 +134,8 @@ public:
         return getDocument().getCoordsFor (state).resolve (&getDocument()).getSmallestIntegerContainer();
     }
 
+    bool hasSizeGuides() const  { return true; }
+
     RelativeRectangle getObjectCoords (const ValueTree& state)
     {
         return getDocument().getCoordsFor (state);
@@ -167,6 +180,26 @@ public:
 
     protected:
         ComponentDocument& getDocument() throw()                { return static_cast <ComponentEditorCanvas*> (canvas)->getDocument(); }
+
+        void getSnapPointsX (Array<float>& points, bool includeCentre)
+        {
+            const float width = getDocument().getCanvasWidth().getValue();
+            points.add (0.0f);
+            points.add (width);
+
+            if (includeCentre)
+                points.add (width / 2.0f);
+        }
+
+        void getSnapPointsY (Array<float>& points, bool includeCentre)
+        {
+            const float height = getDocument().getCanvasHeight().getValue();
+            points.add (0.0f);
+            points.add (height);
+
+            if (includeCentre)
+                points.add (height / 2.0f);
+        }
 
         int getCanvasWidth()                                    { return getDocument().getCanvasWidth().getValue(); }
         int getCanvasHeight()                                   { return getDocument().getCanvasHeight().getValue(); }

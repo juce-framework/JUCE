@@ -53,8 +53,13 @@ public:
     ValueTree& getRoot()                    { return root; }
     DrawableComposite::ValueTreeWrapper getRootDrawableNode() const;
 
-    Value getCanvasWidth() const            { return getRootValueNonUndoable (Ids::width); }
-    Value getCanvasHeight() const           { return getRootValueNonUndoable (Ids::height); }
+//    Value getCanvasWidth() const            { return getRootValueNonUndoable (Ids::width); }
+  //  Value getCanvasHeight() const           { return getRootValueNonUndoable (Ids::height); }
+
+    ValueTree findDrawableState (const String& objectId, bool recursive) const;
+    const String createUniqueID (const String& suggestion) const;
+
+    void createItemProperties (Array <PropertyComponent*>& props, const StringArray& selectedItemIds);
 
     void addNewItemMenuItems (PopupMenu& menu) const;
     const ValueTree performNewItemMenuItem (int menuResultCode);
@@ -107,6 +112,7 @@ private:
     bool saveAsXml, needsSaving;
 
     void checkRootObject();
+    void recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d);
 
     Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
     Value getRootValueNonUndoable (const Identifier& name) const     { return root.getPropertyAsValue (name, 0); }
@@ -114,8 +120,7 @@ private:
     void save (OutputStream& output);
     bool load (InputStream& input);
 
-    void addMissingIds (ValueTree tree) const;
-    void addDrawable (Drawable& d);
+    bool createItemProperties (Array <PropertyComponent*>& props, const String& itemId);
 
     const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
     void addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge,

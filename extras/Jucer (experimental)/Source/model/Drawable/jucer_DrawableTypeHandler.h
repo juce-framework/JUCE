@@ -27,23 +27,90 @@
 #define __JUCER_DRAWABLETYPEHANDLER_H_7FB02E2F__
 
 #include "jucer_DrawableDocument.h"
+class DrawableTypeHandler;
 
+
+//==============================================================================
+class DrawableTypeInstance
+{
+public:
+    DrawableTypeInstance (DrawableDocument& document_, const ValueTree& state_);
+
+    //==============================================================================
+    DrawableDocument& getDocument() throw()             { return document; }
+    ValueTree& getState() throw()                       { return state; }
+
+    Value getValue (const Identifier& name) const;
+    void createProperties (Array <PropertyComponent*>& props);
+    bool setBounds (Drawable* drawable, const Rectangle<float>& newBounds);
+
+    //==============================================================================
+    DrawableTypeHandler* getHandler() const;
+
+private:
+    //==============================================================================
+    DrawableDocument& document;
+    ValueTree state;
+};
 
 //==============================================================================
 class DrawableTypeHandler
 {
 public:
-    DrawableTypeHandler (const String& displayName_, const Identifier& valueTreeType_)
-        : displayName (displayName_), valueTreeType (valueTreeType_)
+    DrawableTypeHandler (const String& displayName_, const Identifier& valueTreeType_, bool canBeCreated_)
+        : displayName (displayName_), valueTreeType (valueTreeType_), canBeCreated (canBeCreated_)
     {
     }
 
     virtual ~DrawableTypeHandler() {}
 
     virtual const ValueTree createNewInstance (DrawableDocument& document, const Point<float>& approxPosition) = 0;
+    virtual void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props) = 0;
+    virtual void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item) = 0;
+    virtual bool setBounds (DrawableTypeInstance& item, Drawable* drawable, const Rectangle<float>& newBounds) = 0;
 
     const String& getDisplayName() const        { return displayName; }
     const Identifier& getValueTreeType() const  { return valueTreeType; }
+
+    const bool canBeCreated;
+
+protected:
+    static bool rescalePoints (RelativePoint* const points, const int numPoints,
+                               const Rectangle<float>& oldBounds, Rectangle<float> newBounds,
+                               RelativeCoordinate::NamedCoordinateFinder* nameFinder)
+    {
+        if (oldBounds.isEmpty())
+            return false;
+
+        newBounds.setSize (jmax (1.0f, newBounds.getWidth()),
+                           jmax (1.0f, newBounds.getHeight()));
+
+        const double tolerance = 0.1;
+
+        double xScale = newBounds.getWidth() / (double) oldBounds.getWidth();
+        double yScale = newBounds.getHeight() / (double) oldBounds.getHeight();
+
+        if (std::abs (xScale - 1.0) < tolerance)  xScale = 1.0;
+        if (std::abs (yScale - 1.0) < tolerance)  yScale = 1.0;
+
+        if (xScale == 1.0 && yScale == 1.0
+             && std::abs (newBounds.getX() - oldBounds.getX()) < tolerance
+             && std::abs (newBounds.getY() - oldBounds.getY()) < tolerance)
+            return false;
+
+        const double xOffset = newBounds.getX() - xScale * oldBounds.getX();
+        const double yOffset = newBounds.getY() - yScale * oldBounds.getY();
+
+        for (int i = 0; i < numPoints; ++i)
+        {
+            const Point<float> p (points[i].resolve (nameFinder));
+
+            points[i].moveToAbsolute (Point<float> ((float) (xOffset + xScale * p.getX()),
+                                                    (float) (yOffset + yScale * p.getY())), nameFinder);
+        }
+
+        return true;
+    }
 
 private:
     const String displayName;
@@ -54,7 +121,7 @@ private:
 class DrawablePathHandler : public DrawableTypeHandler
 {
 public:
-    DrawablePathHandler()  : DrawableTypeHandler ("Polygon", DrawablePath::valueTreeType) {}
+    DrawablePathHandler()  : DrawableTypeHandler ("Polygon", DrawablePath::valueTreeType, true) {}
     ~DrawablePathHandler() {}
 
     const ValueTree createNewInstance (DrawableDocument& document, const Point<float>& approxPosition)
@@ -69,13 +136,57 @@ public:
         dp.setFill (Colours::lightblue.withHue (Random::getSystemRandom().nextFloat()));
         return dp.createValueTree (0);
     }
+
+    void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
+    {
+    }
+
+    void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
+    {
+    }
+
+    bool setBounds (DrawableTypeInstance& item, Drawable* drawable, const Rectangle<float>& newBounds)
+    {
+        DrawablePath::ValueTreeWrapper wrapper (item.getState());
+
+        RelativePointPath path;
+        wrapper.getPath (path);
+
+        Array <RelativePoint> points;
+        int i;
+        for (i = 0; i < path.elements.size(); ++i)
+        {
+            int numPoints;
+            RelativePoint* elementPoints = path.elements.getUnchecked(i)->getControlPoints (numPoints);
+
+            for (int j = 0; j < numPoints; ++j)
+                points.add (elementPoints[j]);
+        }
+
+        if (! rescalePoints (points.getRawDataPointer(), points.size(),
+                             drawable->getBounds(), newBounds, drawable->getParent()))
+            return false;
+
+        int n = 0;
+        for (i = 0; i < path.elements.size(); ++i)
+        {
+            int numPoints;
+            RelativePoint* elementPoints = path.elements.getUnchecked(i)->getControlPoints (numPoints);
+
+            for (int j = 0; j < numPoints; ++j)
+                elementPoints[j] = points [n++];
+        }
+
+        wrapper.setPath (path.toString(), item.getDocument().getUndoManager());
+        return true;
+    }
 };
 
 //==============================================================================
 class DrawableImageHandler : public DrawableTypeHandler
 {
 public:
-    DrawableImageHandler()  : DrawableTypeHandler ("Image", DrawableImage::valueTreeType) {}
+    DrawableImageHandler()  : DrawableTypeHandler ("Image", DrawableImage::valueTreeType, true) {}
     ~DrawableImageHandler() {}
 
     const ValueTree createNewInstance (DrawableDocument& document, const Point<float>& approxPosition)
@@ -96,8 +207,71 @@ public:
                          RelativePoint (approxPosition + Point<float> (0.0f, 100.0f)));
         return di.createValueTree (&document);
     }
+
+    void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
+    {
+    }
+
+    void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
+    {
+    }
+
+    bool setBounds (DrawableTypeInstance& item, Drawable* drawable, const Rectangle<float>& newBounds)
+    {
+        DrawableImage::ValueTreeWrapper wrapper (item.getState());
+
+        RelativePoint points[3] = { wrapper.getTargetPositionForTopLeft(),
+                                    wrapper.getTargetPositionForTopRight(),
+                                    wrapper.getTargetPositionForBottomLeft() };
+
+        if (! rescalePoints (points, 3, drawable->getBounds(), newBounds, drawable->getParent()))
+            return false;
+
+        UndoManager* undoManager = item.getDocument().getUndoManager();
+        wrapper.setTargetPositionForTopLeft (points[0], undoManager);
+        wrapper.setTargetPositionForTopRight (points[1], undoManager);
+        wrapper.setTargetPositionForBottomLeft (points[2], undoManager);
+        return true;
+    }
 };
 
+//==============================================================================
+class DrawableCompositeHandler : public DrawableTypeHandler
+{
+public:
+    DrawableCompositeHandler()  : DrawableTypeHandler ("Group", DrawableComposite::valueTreeType, false) {}
+    ~DrawableCompositeHandler() {}
 
+    const ValueTree createNewInstance (DrawableDocument& document, const Point<float>& approxPosition)
+    {
+        return ValueTree::invalid;
+    }
+
+    void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
+    {
+    }
+
+    void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
+    {
+    }
+
+    bool setBounds (DrawableTypeInstance& item, Drawable* drawable, const Rectangle<float>& newBounds)
+    {
+        DrawableComposite::ValueTreeWrapper wrapper (item.getState());
+
+        RelativePoint points[3] = { wrapper.getTargetPositionForOrigin(),
+                                    wrapper.getTargetPositionForX1Y0(),
+                                    wrapper.getTargetPositionForX0Y1() };
+
+        if (! rescalePoints (points, 3, drawable->getBounds(), newBounds, drawable->getParent()))
+            return false;
+
+        UndoManager* undoManager = item.getDocument().getUndoManager();
+        wrapper.setTargetPositionForOrigin (points[0], undoManager);
+        wrapper.setTargetPositionForX1Y0 (points[1], undoManager);
+        wrapper.setTargetPositionForX0Y1 (points[2], undoManager);
+        return true;
+    }
+};
 
 #endif  // __JUCER_DRAWABLETYPEHANDLER_H_7FB02E2F__

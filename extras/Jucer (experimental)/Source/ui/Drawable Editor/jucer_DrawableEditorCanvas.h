@@ -27,6 +27,7 @@
 #define __JUCER_DRAWABLEOBJECTCOMPONENT_JUCEHEADER__
 
 #include "jucer_DrawableEditor.h"
+#include "../../model/Drawable/jucer_DrawableTypeHandler.h"
 
 
 //==============================================================================
@@ -38,12 +39,12 @@ public:
         : editor (editor_)
     {
         initialise();
-        editor.getDocument().getRoot().addListener (this);
+        getDocument().getRoot().addListener (this);
     }
 
     ~DrawableEditorCanvas()
     {
-        editor.getDocument().getRoot().removeListener (this);
+        getDocument().getRoot().removeListener (this);
         shutdown();
     }
 
@@ -52,13 +53,15 @@ public:
         return new DrawableComponent (this);
     }
 
-    void updateComponents()
+    void documentChanged()
     {
-        DrawableDocument& doc = getEditor().getDocument();
+        DrawableDocument& doc = getDocument();
 
         if (drawable == 0)
         {
-            drawable = Drawable::createFromValueTree (doc.getRootDrawableNode().getState(), &doc);
+            Drawable* newDrawable = Drawable::createFromValueTree (doc.getRootDrawableNode().getState(), &doc);
+            drawable = dynamic_cast <DrawableComposite*> (newDrawable);
+            jassert (drawable != 0);
             getComponentHolder()->repaint();
         }
         else
@@ -70,10 +73,13 @@ public:
         startTimer (500);
     }
 
-    int getCanvasWidth()             { return getDocument().getCanvasWidth().getValue(); }
-    int getCanvasHeight()            { return getDocument().getCanvasHeight().getValue(); }
-    void setCanvasWidth (int w)      { getDocument().getCanvasWidth() = w; }
-    void setCanvasHeight (int h)     { getDocument().getCanvasHeight() = h; }
+    const Rectangle<int> getCanvasBounds()
+    {
+        return drawable->getBounds().getSmallestIntegerContainer();
+    }
+
+    void setCanvasBounds (const Rectangle<int>& newBounds)  {}
+    bool canResizeCanvas() const                            { return false; }
 
     MarkerListBase& getMarkerList (bool isX)
     {
@@ -82,6 +88,17 @@ public:
 
     const SelectedItems::ItemType findObjectIdAt (const Point<int>& position)
     {
+        if (drawable != 0)
+        {
+            for (int i = drawable->getNumDrawables(); --i >= 0;)
+            {
+                Drawable* d = drawable->getDrawable (i);
+
+                if (d->hitTest ((float) position.getX(), (float) position.getY()))
+                    return d->getName();
+            }
+        }
+
         return String::empty;
     }
 
@@ -110,20 +127,51 @@ public:
     {
     }
 
+    bool hasSizeGuides() const  { return false; }
+
     const ValueTree getObjectState (const String& objectId)
     {
-        return ValueTree();
+        return getDocument().findDrawableState (objectId, false);
+    }
+
+    const Rectangle<float> getObjectPositionFloat (const ValueTree& state)
+    {
+        if (drawable != 0)
+        {
+            Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (state).getID());
+
+            if (d != 0)
+                return d->getBounds();
+        }
+
+        return Rectangle<float>();
+    }
+
+    bool setObjectPositionFloat (const ValueTree& state, const Rectangle<float>& newPos)
+    {
+        if (drawable != 0)
+        {
+            Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (state).getID());
+
+            if (d != 0)
+            {
+                d->refreshFromValueTree (state, &getDocument());
+                DrawableTypeInstance di (getDocument(), state);
+                return di.setBounds (d, newPos);
+            }
+        }
+
+        return false;
     }
 
     const Rectangle<int> getObjectPosition (const ValueTree& state)
     {
-        return Rectangle<int>();//getDocument().getCoordsFor (state).resolve (getDocument());
+        return getObjectPositionFloat (state).getSmallestIntegerContainer();
     }
 
     RelativeRectangle getObjectCoords (const ValueTree& state)
     {
         return RelativeRectangle();
-//        return getDocument().getCoordsFor (state);
     }
 
     SelectedItems& getSelection()
@@ -137,6 +185,18 @@ public:
 
     void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area)
     {
+        const Rectangle<float> floatArea (area.toFloat());
+
+        if (drawable != 0)
+        {
+            for (int i = drawable->getNumDrawables(); --i >= 0;)
+            {
+                Drawable* d = drawable->getDrawable (i);
+
+                if (d->getBounds().intersects (floatArea))
+                    itemsFound.add (d->getName());
+            }
+        }
     }
 
     //==============================================================================
@@ -159,19 +219,19 @@ public:
     protected:
         DrawableDocument& getDocument() throw()                 { return static_cast <DrawableEditorCanvas*> (canvas)->getDocument(); }
 
-        int getCanvasWidth()                                    { return getDocument().getCanvasWidth().getValue(); }
-        int getCanvasHeight()                                   { return getDocument().getCanvasHeight().getValue(); }
+        void getSnapPointsX (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
+        void getSnapPointsY (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
 
         UndoManager& getUndoManager()                           { return *getDocument().getUndoManager(); }
 
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
-            return Rectangle<float> ();
+            return static_cast <DrawableEditorCanvas*> (canvas)->getObjectPositionFloat (state);
         }
 
         bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
-            return false;
+            return static_cast <DrawableEditorCanvas*> (canvas)->setObjectPositionFloat (state, newBounds);
         }
 
         float getMarkerPosition (const ValueTree& marker, bool isX)
@@ -187,14 +247,17 @@ public:
 
         Array<ValueTree> selected, unselected;
 
-        /*for (int i = getDocument().getNumComponents(); --i >= 0;)
+        DrawableComposite::ValueTreeWrapper mainGroup (getDocument().getRootDrawableNode());
+
+        for (int i = mainGroup.getNumDrawables(); --i >= 0;)
         {
-            const ValueTree v (getDocument().getComponent (i));
-            if (editor.getSelection().isSelected (v [ComponentDocument::idProperty]))
+            const ValueTree v (mainGroup.getDrawableState (i));
+
+            if (editor.getSelection().isSelected (v[Drawable::ValueTreeWrapperBase::idProperty]))
                 selected.add (v);
             else
                 unselected.add (v);
-        }*/
+        }
 
         d->initialise (selected, unselected);
         return d;
@@ -238,6 +301,22 @@ public:
         void paint (Graphics& g)
         {
             g.fillAll (Colours::white);
+
+            const Point<int> origin (canvas->getOrigin());
+            g.setOrigin (origin.getX(), origin.getY());
+
+            if (origin.getX() > 0)
+            {
+                g.setColour (Colour::greyLevel (0.8f));
+                g.drawVerticalLine (0, 0, 10000.0f);
+            }
+
+            if (origin.getY() > 0)
+            {
+                g.setColour (Colour::greyLevel (0.8f));
+                g.drawHorizontalLine (0, 0, 10000.0f);
+            }
+
             canvas->drawable->draw (g, 1.0f);
         }
 
@@ -246,7 +325,7 @@ public:
         DrawableEditor& getEditor() const   { return canvas->getEditor(); }
     };
 
-    ScopedPointer<Drawable> drawable;
+    ScopedPointer<DrawableComposite> drawable;
 
 private:
     //==============================================================================

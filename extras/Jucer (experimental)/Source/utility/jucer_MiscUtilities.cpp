@@ -38,10 +38,10 @@ const String createAlphaNumericUID()
     static const char chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     Random r (Random::getSystemRandom().nextInt64());
 
-    for (int i = 9; --i >= 0;)
+    for (int i = 7; --i >= 0;)
     {
         r.setSeedRandomly();
-        uid << (juce_wchar) chars [r.nextInt (sizeof (chars))];
+        uid << chars [r.nextInt (numElementsInArray (chars))];
     }
 
     return uid;

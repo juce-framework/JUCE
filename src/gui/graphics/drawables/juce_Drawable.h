@@ -148,6 +148,9 @@ public:
     /** Assigns a name to this drawable. */
     void setName (const String& newName) throw()        { name = newName; }
 
+    /** Returns the DrawableComposite that contains this object, if there is one. */
+    DrawableComposite* getParent() const throw()        { return parent; }
+
     //==============================================================================
     /** Tries to turn some kind of image file into a drawable.
 
@@ -243,10 +246,11 @@ public:
 
         const String getID() const;
         void setID (const String& newID, UndoManager* undoManager);
+        static const Identifier idProperty;
 
     protected:
         ValueTree state;
-        static const Identifier idProperty, type, x1, x2, y1, y2, colour, radial, colours;
+        static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
 
         static const FillType readFillType (const ValueTree& v);
         void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);

@@ -80,6 +80,15 @@ void DrawableComposite::removeDrawable (const int index, const bool deleteDrawab
     drawables.remove (index, deleteDrawable);
 }
 
+Drawable* DrawableComposite::getDrawableWithName (const String& name) const throw()
+{
+    for (int i = drawables.size(); --i >= 0;)
+        if (drawables.getUnchecked(i)->getName() == name)
+            return drawables.getUnchecked(i);
+
+    return 0;
+}
+
 void DrawableComposite::bringToFront (const int index)
 {
     if (index >= 0 && index < drawables.size() - 1)
@@ -314,9 +323,42 @@ int DrawableComposite::ValueTreeWrapper::getNumDrawables() const
     return getChildList().getNumChildren();
 }
 
-const ValueTree DrawableComposite::ValueTreeWrapper::getDrawableState (int index) const
+ValueTree DrawableComposite::ValueTreeWrapper::getDrawableState (int index) const
 {
     return getChildList().getChild (index);
+}
+
+ValueTree DrawableComposite::ValueTreeWrapper::getDrawableWithId (const String& objectId, bool recursive) const
+{
+    if (getID() == objectId)
+        return state;
+
+    if (! recursive)
+    {
+        return getChildList().getChildWithProperty (idProperty, objectId);
+    }
+    else
+    {
+        const ValueTree childList (getChildList());
+
+        for (int i = getNumDrawables(); --i >= 0;)
+        {
+            const ValueTree& child = childList.getChild (i);
+
+            if (child [Drawable::ValueTreeWrapperBase::idProperty] == objectId)
+                return child;
+
+            if (child.hasType (DrawableComposite::valueTreeType))
+            {
+                ValueTree v (DrawableComposite::ValueTreeWrapper (child).getDrawableWithId (objectId, true));
+
+                if (v.isValid())
+                    return v;
+            }
+        }
+
+        return ValueTree::invalid;
+    }
 }
 
 void DrawableComposite::ValueTreeWrapper::addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager)

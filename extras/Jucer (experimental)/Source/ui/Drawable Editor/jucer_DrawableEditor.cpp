@@ -61,9 +61,9 @@ public:
         return editor.getSelection();
     }
 
-    void getSelectedItemProperties (Array<PropertyComponent*>& newComps)
+    void getSelectedItemProperties (Array<PropertyComponent*>& props)
     {
-        //editor.getSelectedItemProperties (newComps);
+        editor.getDocument().createItemProperties (props, editor.getSelectedIds());
     }
 
 private:
@@ -103,6 +103,16 @@ void DrawableEditor::resized()
 }
 
 //==============================================================================
+const StringArray DrawableEditor::getSelectedIds() const
+{
+    StringArray ids;
+    const int num = selection.getNumSelected();
+    for (int i = 0; i < num; ++i)
+        ids.add (selection.getSelectedItem(i));
+
+    return ids;
+}
+
 void DrawableEditor::deleteSelection()
 {
 }
