@@ -121,7 +121,7 @@ void ChoicePropertyComponent::createComboBox()
     comboBox->setEditableText (false);
 }
 
-void ChoicePropertyComponent::setIndex (const int newIndex)
+void ChoicePropertyComponent::setIndex (const int /*newIndex*/)
 {
     jassertfalse; // you need to override this method in your subclass!
 }

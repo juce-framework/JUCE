@@ -236,7 +236,7 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (Colours::lightgreen.withAlpha (isMouseOverOrDragging() ? 0.8f : 0.4f));
+        g.setColour (Colours::lightblue.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
         g.fillPath (path);
     }
 
@@ -247,9 +247,11 @@ public:
         const int width = 8;
 
         if (isX)
-            setBoundsInTargetSpace (Rectangle<int> (pos - width, -headSize, width * 2, getParentHeight()));
+            setBoundsInTargetSpace (Rectangle<int> (pos - width, -canvas->getOrigin().getY() - headSize,
+                                                    width * 2, getParentHeight()));
         else
-            setBoundsInTargetSpace (Rectangle<int> (-headSize, pos - width, getParentWidth(), width * 2));
+            setBoundsInTargetSpace (Rectangle<int> (-canvas->getOrigin().getX() - headSize, pos - width,
+                                                    getParentWidth(), width * 2));
 
         labelText = "name: " + getMarkerList().getName (marker) + "\nposition: " + coord.toString();
         updateLabel();
@@ -297,7 +299,7 @@ public:
         toFront (false);
         updateLabel();
 
-        canvas->getSelection().selectOnly (MarkerListBase::getId (marker));
+        canvas->getSelection().selectOnly (getMarkerList().getId (marker));
 
         if (e.mods.isPopupMenu())
         {
@@ -328,13 +330,13 @@ public:
             else
                 axis.setBounds (0, 0, headSize, getParentHeight());
 
-            if (axis.expanded (30, 30).contains (e.x, e.y))
+            if (axis.expanded (isX ? 500 : 30, isX ? 30 : 500).contains (e.x, e.y))
             {
                 RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
 
                 // (can't use getDistanceFromDragStart() because it doesn't take into account auto-scrolling)
-                coord.moveToAbsolute (jmax (0, roundToInt (dragStartPos + (isX ? e2.x - mouseDownPos.getX()
-                                                                               : e2.y - mouseDownPos.getY()))),
+                coord.moveToAbsolute (canvas->limitMarkerPosition (dragStartPos + (isX ? e2.x - mouseDownPos.getX()
+                                                                                       : e2.y - mouseDownPos.getY())),
                                       &getMarkerList());
                 getMarkerList().setCoordinate (marker, coord);
             }
@@ -489,11 +491,13 @@ public:
 
         if (xAxis.contains (e.x, e.y))
         {
-            canvas->getMarkerList (true).createMarker ("Marker", e.x - xAxis.getX());
+            canvas->getMarkerList (true).createMarker (canvas->getMarkerList (true).getNonexistentMarkerName ("Marker"),
+                                                       e.x - xAxis.getX());
         }
         else if (yAxis.contains (e.x, e.y))
         {
-            canvas->getMarkerList (false).createMarker ("Marker", e.y - yAxis.getY());
+            canvas->getMarkerList (false).createMarker (canvas->getMarkerList (false).getNonexistentMarkerName ("Marker"),
+                                                        e.y - yAxis.getY());
         }
         else
         {
@@ -879,11 +883,20 @@ void EditorCanvasBase::handleAsyncUpdate()
     if (origin != newOrigin)
     {
         repaint();
-        origin = newOrigin;
-    }
 
-    setSize (jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
-             jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+        const Point<int> oldOrigin (origin);
+        origin = newOrigin;
+
+        setBounds (jmin (0, getX() + oldOrigin.getX() - origin.getX()),
+                   jmin (0, getY() + oldOrigin.getY() - origin.getY()),
+                   jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
+                   jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+    }
+    else
+    {
+        setSize (jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
+                 jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+    }
 
     overlay->update();
 }
@@ -910,14 +923,14 @@ void EditorCanvasBase::beginDrag (const MouseEvent& e, const ResizableBorderComp
 void EditorCanvasBase::continueDrag (const MouseEvent& e)
 {
     if (dragger != 0)
-        dragger->drag (e);
+        dragger->drag (e, e.getPosition() - origin);
 }
 
 void EditorCanvasBase::endDrag (const MouseEvent& e)
 {
     if (dragger != 0)
     {
-        dragger->drag (e);
+        dragger->drag (e, e.getPosition() - origin);
         dragger = 0;
     }
 }

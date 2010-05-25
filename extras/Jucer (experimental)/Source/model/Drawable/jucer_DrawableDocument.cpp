@@ -90,9 +90,14 @@ DrawableTypeHandler* DrawableTypeInstance::getHandler() const
     return h;
 }
 
-bool DrawableTypeInstance::setBounds (Drawable* drawable, const Rectangle<float>& newBounds)
+void DrawableTypeInstance::setBounds (Drawable* drawable, const Rectangle<float>& newBounds)
 {
     return getHandler()->setBounds (*this, drawable, newBounds);
+}
+
+void DrawableTypeInstance::getAllControlPoints (Array <RelativePoint>& points)
+{
+    return getHandler()->getAllControlPoints (*this, points);
 }
 
 
@@ -227,7 +232,7 @@ void DrawableDocument::save (OutputStream& output)
 bool DrawableDocument::load (InputStream& input)
 {
     int64 originalPos = input.getPosition();
-    ValueTree loadedTree ("dummy");
+    ValueTree loadedTree;
 
     XmlDocument xmlDoc (input.readEntireStreamAsString());
     ScopedPointer <XmlElement> xml (xmlDoc.getDocumentElement());
@@ -247,6 +252,8 @@ bool DrawableDocument::load (InputStream& input)
         root.removeListener (this);
         root = loadedTree;
         root.addListener (this);
+        markersX = 0;
+        markersY = 0;
 
         valueTreeParentChanged (loadedTree);
 
@@ -262,7 +269,6 @@ bool DrawableDocument::load (InputStream& input)
 void DrawableDocument::changed()
 {
     needsSaving = true;
-    sendChangeMessage (this);
 }
 
 DrawableComposite::ValueTreeWrapper DrawableDocument::getRootDrawableNode() const
@@ -421,9 +427,46 @@ const RelativeCoordinate DrawableDocument::findNamedCoordinate (const String& ob
 
 //==============================================================================
 DrawableDocument::MarkerList::MarkerList (DrawableDocument& document_, bool isX_)
-    : MarkerListBase (document_.getRoot().getChildWithName (isX_ ? Tags::markersGroupXTag : Tags::markersGroupYTag), isX_),
-      document (document_)
+    : MarkerListBase (isX_),
+      document (document_),
+      object (document_.getRootDrawableNode())
 {
+}
+
+const String DrawableDocument::MarkerList::getId (const ValueTree& markerState)
+{
+    return markerState [DrawableComposite::ValueTreeWrapper::nameProperty];
+}
+
+int DrawableDocument::MarkerList::size() const
+{
+    return object.getNumMarkers (isX);
+}
+
+ValueTree DrawableDocument::MarkerList::getMarker (int index) const
+{
+    return object.getMarkerState (isX, index);
+}
+
+ValueTree DrawableDocument::MarkerList::getMarkerNamed (const String& name) const
+{
+    return object.getMarkerState (isX, name);
+}
+
+bool DrawableDocument::MarkerList::contains (const ValueTree& markerState) const
+{
+    return object.containsMarker (isX, markerState);
+}
+
+void DrawableDocument::MarkerList::createMarker (const String& name, int position)
+{
+    object.setMarker (isX, DrawableComposite::Marker (name, RelativeCoordinate ((double) position, isX)),
+                      getUndoManager());
+}
+
+void DrawableDocument::MarkerList::deleteMarker (ValueTree& markerState)
+{
+    object.removeMarker (isX, markerState, getUndoManager());
 }
 
 const RelativeCoordinate DrawableDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
@@ -443,14 +486,15 @@ const RelativeCoordinate DrawableDocument::MarkerList::findNamedCoordinate (cons
 
 bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>& props, const String& itemId)
 {
-    ValueTree marker (group.getChildWithProperty (getIdProperty(), itemId));
+    ValueTree marker (getMarkerNamed (itemId));
 
     if (marker.isValid())
     {
-        props.add (new TextPropertyComponent (getNameAsValue (marker), "Marker Name", 256, false));
-//        props.add (new MarkerPositionComponent (document, "Position", marker,
-  //                                              marker.getPropertyAsValue (markerPosProperty, document.getUndoManager()),
-    //                                            contains (marker)));
+        props.add (new TextPropertyComponent (marker.getPropertyAsValue (DrawableComposite::ValueTreeWrapper::nameProperty, getUndoManager()),
+                                              "Marker Name", 256, false));
+
+        props.add (new MarkerListBase::PositionPropertyComponent (*this, "Position", marker,
+                                                                  marker.getPropertyAsValue (DrawableComposite::ValueTreeWrapper::posProperty, getUndoManager())));
         return true;
     }
 

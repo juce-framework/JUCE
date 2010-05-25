@@ -33,16 +33,15 @@
 class MarkerListBase    : public RelativeCoordinate::NamedCoordinateFinder
 {
 public:
-    MarkerListBase (const ValueTree& group_, bool isX_)   : group (group_), isX (isX_) {}
+    MarkerListBase (bool isX_)   : isX (isX_) {}
     virtual ~MarkerListBase() {}
 
     bool isHorizontal() const                                                   { return isX; }
-    static const String getId (const ValueTree& markerState)                    { return markerState [getIdProperty()]; }
-    ValueTree& getGroup()                                                       { return group; }
-    int size() const                                                            { return group.getNumChildren(); }
-    ValueTree getMarker (int index) const                                       { return group.getChild (index); }
-    ValueTree getMarkerNamed (const String& name) const                         { return group.getChildWithProperty (getMarkerNameProperty(), name); }
-    bool contains (const ValueTree& markerState) const                          { return markerState.isAChildOf (group); }
+    virtual const String getId (const ValueTree& markerState) = 0;
+    virtual int size() const = 0;
+    virtual ValueTree getMarker (int index) const = 0;
+    virtual ValueTree getMarkerNamed (const String& name) const = 0;
+    virtual bool contains (const ValueTree& markerState) const = 0;
 
     const String getName (const ValueTree& markerState) const                   { return markerState [getMarkerNameProperty()].toString(); }
     Value getNameAsValue (const ValueTree& markerState) const                   { return markerState.getPropertyAsValue (getMarkerNameProperty(), getUndoManager()); }
@@ -61,20 +60,8 @@ public:
         }
     }
 
-    void createMarker (const String& name, int position)
-    {
-        ValueTree marker (getMarkerTag());
-        marker.setProperty (getMarkerNameProperty(), getNonexistentMarkerName (name), 0);
-        marker.setProperty (getMarkerPosProperty(), RelativeCoordinate (position, isX).toString(), 0);
-        marker.setProperty (getIdProperty(), createAlphaNumericUID(), 0);
-        group.addChild (marker, -1, getUndoManager());
-    }
-
-    void deleteMarker (ValueTree& markerState)
-    {
-        renameAnchor (getName (markerState), String::empty);
-        group.removeChild (markerState, getUndoManager());
-    }
+    virtual void createMarker (const String& name, int position) = 0;
+    virtual void deleteMarker (ValueTree& markerState) = 0;
 
     //==============================================================================
     virtual UndoManager* getUndoManager() const = 0;
@@ -85,7 +72,6 @@ public:
 
     //==============================================================================
     static const Identifier getMarkerTag()           { static Identifier i ("MARKER"); return i; }
-    static const Identifier getIdProperty()          { return Ids::id_;  }
     static const Identifier getMarkerNameProperty()  { return Ids::name;  }
     static const Identifier getMarkerPosProperty()   { return Ids::position;  }
 
@@ -133,10 +119,10 @@ public:
     {
     public:
         //==============================================================================
-        PositionPropertyComponent (NamedCoordinateFinder* nameSource_, MarkerListBase& markerList_,
+        PositionPropertyComponent (MarkerListBase& markerList_,
                                    const String& name, const ValueTree& markerState_,
                                    const Value& coordValue_)
-            : CoordinatePropertyComponent (nameSource_, name, coordValue_, markerList_.isHorizontal()),
+            : CoordinatePropertyComponent (&markerList_, name, coordValue_, markerList_.isHorizontal()),
               markerList (markerList_),
               markerState (markerState_)
         {
@@ -168,7 +154,6 @@ public:
 
     //==============================================================================
 protected:
-    ValueTree group;
     const bool isX;
 
 private:

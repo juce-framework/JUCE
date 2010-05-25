@@ -502,15 +502,12 @@ const RelativeRectangle ComponentDocument::getCoordsFor (const ValueTree& state)
     return RelativeRectangle (state [compBoundsProperty]);
 }
 
-bool ComponentDocument::setCoordsFor (ValueTree& state, const RelativeRectangle& pr)
+void ComponentDocument::setCoordsFor (ValueTree& state, const RelativeRectangle& pr)
 {
     const String newBoundsString (pr.toString());
 
-    if (state[compBoundsProperty] == newBoundsString)
-        return false;
-
-    state.setProperty (compBoundsProperty, newBoundsString, getUndoManager());
-    return true;
+    if (state[compBoundsProperty] != newBoundsString)
+        state.setProperty (compBoundsProperty, newBoundsString, getUndoManager());
 }
 
 const String ComponentDocument::getNonexistentMemberName (String name)
@@ -695,8 +692,9 @@ void ComponentDocument::removeComponent (const ValueTree& state)
 
 //==============================================================================
 ComponentDocument::MarkerList::MarkerList (ComponentDocument& document_, const bool isX_)
-    : MarkerListBase (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag), isX_),
-      document (document_)
+    : MarkerListBase (isX_),
+      document (document_),
+      group (document_.getRoot().getChildWithName (isX_ ? markersGroupXTag : markersGroupYTag))
 {
     jassert (group.isValid());
     jassert (group.isAChildOf (document_.getRoot()));
@@ -715,6 +713,21 @@ const String ComponentDocument::MarkerList::getNonexistentMarkerName (const Stri
 void ComponentDocument::MarkerList::renameAnchor (const String& oldName, const String& newName)
 {
     document.renameAnchor (oldName, newName);
+}
+
+void ComponentDocument::MarkerList::createMarker (const String& name, int position)
+{
+    ValueTree marker (getMarkerTag());
+    marker.setProperty (getMarkerNameProperty(), name, 0);
+    marker.setProperty (getMarkerPosProperty(), RelativeCoordinate (position, isX).toString(), 0);
+    marker.setProperty (Ids::id_, createAlphaNumericUID(), 0);
+    group.addChild (marker, -1, getUndoManager());
+}
+
+void ComponentDocument::MarkerList::deleteMarker (ValueTree& markerState)
+{
+    renameAnchor (getName (markerState), String::empty);
+    group.removeChild (markerState, getUndoManager());
 }
 
 const RelativeCoordinate ComponentDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
@@ -780,7 +793,7 @@ bool ComponentDocument::MarkerList::createProperties (Array <PropertyComponent*>
         props.add (new TextPropertyComponent (Value (new MarkerListBase::MarkerNameValueSource (this, getNameAsValue (marker))),
                                               "Marker Name", 256, false));
 
-        props.add (new MarkerListBase::PositionPropertyComponent (&document, *this, "Position", marker,
+        props.add (new MarkerListBase::PositionPropertyComponent (*this, "Position", marker,
                                                                   marker.getPropertyAsValue (getMarkerPosProperty(), document.getUndoManager())));
         return true;
     }

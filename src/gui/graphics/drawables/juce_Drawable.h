@@ -248,11 +248,13 @@ public:
         void setID (const String& newID, UndoManager* undoManager);
         static const Identifier idProperty;
 
+        static const FillType readFillType (const ValueTree& v);
+        static void writeFillType (ValueTree& v, const FillType& fillType, UndoManager* undoManager);
+
     protected:
         ValueTree state;
         static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
 
-        static const FillType readFillType (const ValueTree& v);
         void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
     };
 

@@ -140,7 +140,6 @@ public:
         void getPath (RelativePointPath& path) const;
         void setPath (const String& newPath, UndoManager* undoManager);
 
-    private:
         static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
     };
 

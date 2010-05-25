@@ -53,9 +53,21 @@ public:
     const File getLastKnownJuceFolder() const;
     void setLastKnownJuceFolder (const File& file);
 
-    Array <Colour> swatchColours;
 
     const StringArray& getFontNames();
+
+    //==============================================================================
+    Array <Colour> swatchColours;
+
+    class ColourSelectorWithSwatches    : public ColourSelector
+    {
+    public:
+        ColourSelectorWithSwatches() {}
+
+        int getNumSwatches() const                                      { return StoredSettings::getInstance()->swatchColours.size(); }
+        const Colour getSwatchColour (int index) const                  { return StoredSettings::getInstance()->swatchColours [index]; }
+        void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator

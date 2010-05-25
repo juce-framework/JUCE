@@ -118,9 +118,7 @@ TextLayout& TextLayout::operator= (const TextLayout& other)
         clear();
 
         totalLines = other.totalLines;
-
-        for (int i = 0; i < other.tokens.size(); ++i)
-            tokens.add (new Token (*other.tokens.getUnchecked(i)));
+        tokens.addCopiesOf (other.tokens);
     }
 
     return *this;

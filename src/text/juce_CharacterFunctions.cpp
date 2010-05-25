@@ -785,11 +785,11 @@ int CharacterFunctions::getHexDigitValue (const juce_wchar digit) throw()
     if (d < (unsigned int) 10)
         return (int) d;
 
-    d += '0' - 'a';
+    d += (unsigned int) ('0' - 'a');
     if (d < (unsigned int) 6)
         return (int) d + 10;
 
-    d += 'a' - 'A';
+    d += (unsigned int) ('a' - 'A');
     if (d < (unsigned int) 6)
         return (int) d + 10;
 

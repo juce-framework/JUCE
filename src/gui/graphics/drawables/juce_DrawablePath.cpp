@@ -251,7 +251,7 @@ void DrawablePath::ValueTreeWrapper::setPath (const String& newPath, UndoManager
     state.setProperty (path, newPath, undoManager);
 }
 
-const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
 {
     Rectangle<float> damageRect;
     ValueTreeWrapper v (tree);
@@ -301,7 +301,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
     return damageRect;
 }
 
-const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawablePath::createValueTree (ImageProvider*) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

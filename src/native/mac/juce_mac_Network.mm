@@ -137,6 +137,7 @@ using namespace JUCE_NAMESPACE;
     bool initialised, hasFailed, hasFinished;
     int position;
     int64 contentLength;
+    NSDictionary* headers;
     NSLock* dataLock;
 }
 
@@ -200,6 +201,7 @@ public:
     hasFailed = false;
     hasFinished = false;
     contentLength = -1;
+    headers = 0;
 
     runLoopThread = new JuceURLConnectionMessageThread (self);
     runLoopThread->startThread();
@@ -224,6 +226,7 @@ public:
     [data release];
     [dataLock release];
     [request release];
+    [headers release];
     [super dealloc];
 }
 
@@ -244,6 +247,12 @@ public:
     [dataLock unlock];
     initialised = true;
     contentLength = [response expectedContentLength];
+
+    [headers release];
+    headers = 0;
+
+    if ([response isKindOfClass: [NSHTTPURLResponse class]])
+        headers = [[((NSHTTPURLResponse*) response) allHeaderFields] retain];
 }
 
 - (void) connection: (NSURLConnection*) conn didFailWithError: (NSError*) error
@@ -415,6 +424,26 @@ int64 juce_getInternetFileContentLength (void* handle)
 
     return -1;
 }
+
+bool juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+{
+    JuceURLConnection* const s = (JuceURLConnection*) handle;
+
+    if (s != 0 && s->headers != 0)
+    {
+        NSEnumerator* enumerator = [s->headers keyEnumerator];
+        NSString* key;
+
+        while ((key = [enumerator nextObject]) != nil)
+            headers.set (nsStringToJuce (key),
+                         nsStringToJuce ((NSString*) [s->headers objectForKey: key]));
+
+        return true;
+    }
+
+    return false;
+}
+
 
 int juce_seekInInternetFile (void* handle, int /*newPosition*/)
 {

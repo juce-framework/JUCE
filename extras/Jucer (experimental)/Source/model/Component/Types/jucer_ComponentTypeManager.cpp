@@ -355,7 +355,7 @@ void ComponentTypeInstance::addFocusOrderProperty (Array <PropertyComponent*>& p
 
 void ComponentTypeInstance::addColourProperty (Array <PropertyComponent*>& props, int colourId, const String& name, const Identifier& propertyName)
 {
-    props.add (new ColourPropertyComponent (document, name, getValue (propertyName),
+    props.add (new ColourPropertyComponent (document.getUndoManager(), name, getValue (propertyName),
                                             LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true));
 }
 

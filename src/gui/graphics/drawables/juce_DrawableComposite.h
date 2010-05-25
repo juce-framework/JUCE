@@ -154,18 +154,17 @@ public:
     struct Marker
     {
         Marker (const Marker&);
-        Marker (const String& name, const RelativeCoordinate& position, bool isOnXAxis);
+        Marker (const String& name, const RelativeCoordinate& position);
         bool operator!= (const Marker&) const throw();
 
         String name;
         RelativeCoordinate position;
-        bool isOnXAxis;
     };
 
     int getNumMarkers (bool xAxis) const throw();
-    const Marker* getMarker (int index) const throw();
+    const Marker* getMarker (bool xAxis, int index) const throw();
     void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
-    void removeMarker (int index);
+    void removeMarker (bool xAxis, int index);
 
     //==============================================================================
     /** @internal */
@@ -212,19 +211,24 @@ public:
         const RelativePoint getTargetPositionForX0Y1() const;
         void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
 
-        int getNumMarkers() const;
-        const Marker getMarker (int index) const;
-        void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position, UndoManager* undoManager);
-        void removeMarker (int index, UndoManager* undoManager);
+        int getNumMarkers (bool xAxis) const;
+        const ValueTree getMarkerState (bool xAxis, int index) const;
+        const ValueTree getMarkerState (bool xAxis, const String& name) const;
+        bool containsMarker (bool xAxis, const ValueTree& state) const;
+        const Marker getMarker (bool xAxis, const ValueTree& state) const;
+        void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
+        void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
+
+        static const Identifier nameProperty, posProperty;
 
     private:
-        static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTag,
-                                markerTag, nameProperty, xAxisProperty, posProperty;
+        static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTagX,
+                                markerGroupTagY, markerTag;
 
         ValueTree getChildList() const;
         ValueTree getChildListCreating (UndoManager* undoManager);
-        ValueTree getMarkerList() const;
-        ValueTree getMarkerListCreating (UndoManager* undoManager);
+        ValueTree getMarkerList (bool xAxis) const;
+        ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
     };
 
     //==============================================================================
@@ -233,7 +237,7 @@ public:
 private:
     OwnedArray <Drawable> drawables;
     RelativePoint controlPoints[3];
-    OwnedArray <Marker> markers;
+    OwnedArray <Marker> markersX, markersY;
 
     const Rectangle<float> getUntransformedBounds() const;
     const AffineTransform calculateTransform() const;

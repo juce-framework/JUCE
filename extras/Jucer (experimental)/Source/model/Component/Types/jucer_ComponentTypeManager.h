@@ -28,7 +28,7 @@
 
 #include "../../../jucer_Headers.h"
 #include "../jucer_ComponentDocument.h"
-#include "../../../utility/jucer_ColourEditorComponent.h"
+#include "../../../utility/jucer_ColourPropertyComponent.h"
 
 class ComponentTypeHandler;
 
@@ -78,6 +78,8 @@ private:
     //==============================================================================
     ComponentDocument& document;
     ValueTree state;
+
+    ComponentTypeInstance& operator= (const ComponentTypeInstance&);
 };
 
 

@@ -462,6 +462,10 @@ public:
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
         const ElementType type;
+
+    private:
+        ElementBase (const ElementBase&);
+        ElementBase& operator= (const ElementBase&);
     };
 
     class JUCE_API  StartSubPath  : public ElementBase
@@ -474,6 +478,10 @@ public:
         RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint startPos;
+
+    private:
+        StartSubPath (const StartSubPath&);
+        StartSubPath& operator= (const StartSubPath&);
     };
 
     class JUCE_API  CloseSubPath  : public ElementBase
@@ -484,6 +492,10 @@ public:
         void write (OutputStream& out, ElementType lastTypeWritten) const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
+
+    private:
+        CloseSubPath (const CloseSubPath&);
+        CloseSubPath& operator= (const CloseSubPath&);
     };
 
     class JUCE_API  LineTo  : public ElementBase
@@ -496,6 +508,10 @@ public:
         RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint endPoint;
+
+    private:
+        LineTo (const LineTo&);
+        LineTo& operator= (const LineTo&);
     };
 
     class JUCE_API  QuadraticTo  : public ElementBase
@@ -508,6 +524,10 @@ public:
         RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint controlPoints[2];
+
+    private:
+        QuadraticTo (const QuadraticTo&);
+        QuadraticTo& operator= (const QuadraticTo&);
     };
 
     class JUCE_API  CubicTo  : public ElementBase
@@ -520,6 +540,10 @@ public:
         RelativePoint* getControlPoints (int& numPoints);
 
         RelativePoint controlPoints[3];
+
+    private:
+        CubicTo (const CubicTo&);
+        CubicTo& operator= (const CubicTo&);
     };
 
     //==============================================================================

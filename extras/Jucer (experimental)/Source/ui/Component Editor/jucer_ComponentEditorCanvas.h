@@ -89,6 +89,11 @@ public:
         return getDocument().getMarkerList (isX);
     }
 
+    double limitMarkerPosition (double pos)
+    {
+        return jmax (0.0, pos);
+    }
+
     const SelectedItems::ItemType findObjectIdAt (const Point<int>& position)
     {
         for (int i = getComponentHolder()->getNumChildComponents(); --i >= 0;)
@@ -166,10 +171,10 @@ public:
     {
     public:
         DragOperation (ComponentEditorCanvas* canvas_,
-                       const MouseEvent& e,
+                       const MouseEvent& e, const Point<int>& mousePos,
                        Component* snapGuideParentComp_,
                        const ResizableBorderComponent::Zone& zone_)
-            : EditorDragOperation (canvas_, e, snapGuideParentComp_, zone_)
+            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_)
         {
         }
 
@@ -206,19 +211,47 @@ public:
 
         UndoManager& getUndoManager()                           { return *getDocument().getUndoManager(); }
 
+        void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps)
+        {
+            ComponentDocument& doc = getDocument();
+            RelativeRectangle pr (doc.getCoordsFor (state));
+
+            StringArray anchors;
+            anchors.addIfNotAlreadyThere (pr.left.getAnchorName1());
+            anchors.addIfNotAlreadyThere (pr.left.getAnchorName2());
+            anchors.addIfNotAlreadyThere (pr.top.getAnchorName1());
+            anchors.addIfNotAlreadyThere (pr.top.getAnchorName2());
+            anchors.addIfNotAlreadyThere (pr.right.getAnchorName1());
+            anchors.addIfNotAlreadyThere (pr.right.getAnchorName2());
+            anchors.addIfNotAlreadyThere (pr.bottom.getAnchorName1());
+            anchors.addIfNotAlreadyThere (pr.bottom.getAnchorName2());
+
+            for (int i = 0; i < anchors.size(); ++i)
+            {
+                const String anchor (anchors[i]);
+                if (anchor.isNotEmpty() && ! anchor.startsWith ("parent."))
+                {
+                    const ValueTree v (doc.getComponentWithMemberName (anchor.upToFirstOccurrenceOf (".", false, false)));
+
+                    if (v.isValid())
+                        deps.add (v);
+                }
+            }
+        }
+
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
             ComponentDocument& doc = getDocument();
             return doc.getCoordsFor (state).resolve (&doc);
         }
 
-        bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
+        void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
             ComponentDocument& doc = getDocument();
             RelativeRectangle pr (doc.getCoordsFor (state));
             pr.moveToAbsolute (newBounds, &doc);
 
-            return doc.setCoordsFor (state, pr);
+            doc.setCoordsFor (state, pr);
         }
 
         float getMarkerPosition (const ValueTree& marker, bool isX)
@@ -231,7 +264,7 @@ public:
     DragOperation* createDragOperation (const MouseEvent& e, Component* snapGuideParentComponent,
                                         const ResizableBorderComponent::Zone& zone)
     {
-        DragOperation* d = new DragOperation (this, e, snapGuideParentComponent, zone);
+        DragOperation* d = new DragOperation (this, e, e.getPosition() - origin, snapGuideParentComponent, zone);
 
         Array<ValueTree> selected, unselected;
 

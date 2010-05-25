@@ -41,6 +41,8 @@ class JUCE_API  PositionedGlyph
 {
 public:
     //==============================================================================
+    PositionedGlyph (const PositionedGlyph& other);
+
     /** Returns the character the glyph represents. */
     juce_wchar getCharacter() const             { return character; }
     /** Checks whether the glyph is actually empty. */
@@ -91,7 +93,6 @@ private:
     int glyph;
 
     PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
-    PositionedGlyph (const PositionedGlyph& other);
 };
 
 

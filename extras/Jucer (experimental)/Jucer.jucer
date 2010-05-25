@@ -203,8 +203,8 @@
             file="Source/utility/jucer_CodeHelpers.cpp"/>
       <FILE id="L5cAZdBjr" name="jucer_CodeHelpers.h" compile="0" resource="0"
             file="Source/utility/jucer_CodeHelpers.h"/>
-      <FILE id="hmWl0ODQe" name="jucer_ColourEditorComponent.h" compile="0"
-            resource="0" file="Source/utility/jucer_ColourEditorComponent.h"/>
+      <FILE id="hmWl0ODQe" name="jucer_ColourPropertyComponent.h" compile="0"
+            resource="0" file="Source/utility/jucer_ColourPropertyComponent.h"/>
       <FILE id="bjibbvm3S" name="jucer_Colours.h" compile="0" resource="0"
             file="Source/utility/jucer_Colours.h"/>
       <FILE id="DDCunFHcy" name="jucer_CoordinatePropertyComponent.h" compile="0"
@@ -213,8 +213,14 @@
             file="Source/utility/jucer_FileHelpers.cpp"/>
       <FILE id="4paLQmzFf" name="jucer_FileHelpers.h" compile="0" resource="0"
             file="Source/utility/jucer_FileHelpers.h"/>
+      <FILE id="e22s8D7" name="jucer_FillTypePropertyComponent.h" compile="0"
+            resource="0" file="Source/utility/jucer_FillTypePropertyComponent.h"/>
       <FILE id="ZYrHhSqnP" name="jucer_MarkerListBase.h" compile="0" resource="0"
             file="Source/utility/jucer_MarkerListBase.h"/>
+      <FILE id="4RGcC516Z" name="jucer_MiscUtilities.cpp" compile="1" resource="0"
+            file="Source/utility/jucer_MiscUtilities.cpp"/>
+      <FILE id="kNy0Xya3H" name="jucer_MiscUtilities.h" compile="0" resource="0"
+            file="Source/utility/jucer_MiscUtilities.h"/>
       <FILE id="nMKxowe0" name="jucer_RelativePath.h" compile="0" resource="0"
             file="Source/utility/jucer_RelativePath.h"/>
       <FILE id="gb8kYJDkJ" name="jucer_StoredSettings.cpp" compile="1" resource="0"
@@ -223,10 +229,6 @@
             file="Source/utility/jucer_StoredSettings.h"/>
       <FILE id="Ihan8wumM" name="jucer_TickIterator.h" compile="0" resource="0"
             file="Source/utility/jucer_TickIterator.h"/>
-      <FILE id="4RGcC516Z" name="jucer_MiscUtilities.cpp" compile="1" resource="0"
-            file="Source/utility/jucer_MiscUtilities.cpp"/>
-      <FILE id="kNy0Xya3H" name="jucer_MiscUtilities.h" compile="0" resource="0"
-            file="Source/utility/jucer_MiscUtilities.h"/>
       <FILE id="0uDzmAAml" name="jucer_ValueSourceHelpers.h" compile="0"
             resource="0" file="Source/utility/jucer_ValueSourceHelpers.h"/>
     </GROUP>

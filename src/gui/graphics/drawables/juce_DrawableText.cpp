@@ -100,7 +100,7 @@ DrawableText::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     jassert (state.hasType (valueTreeType));
 }
 
-const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
+const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
 {
     ValueTreeWrapper v (tree);
     setName (v.getID());
@@ -110,7 +110,7 @@ const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree
     return Rectangle<float>();
 }
 
-const ValueTree DrawableText::createValueTree (ImageProvider* imageProvider) const
+const ValueTree DrawableText::createValueTree (ImageProvider*) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);

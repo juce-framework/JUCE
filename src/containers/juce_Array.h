@@ -534,7 +534,10 @@ public:
             data.ensureAllocatedSize (numUsed + numElementsToAdd);
 
             while (--numElementsToAdd >= 0)
-                new (data.elements + numUsed++) ElementType (*elementsToAdd++);
+            {
+                new (data.elements + numUsed) ElementType (*elementsToAdd++);
+                ++numUsed;
+            }
         }
     }
 

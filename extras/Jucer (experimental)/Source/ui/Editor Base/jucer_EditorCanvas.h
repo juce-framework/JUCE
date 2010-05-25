@@ -69,6 +69,7 @@ public:
     virtual void setCanvasBounds (const Rectangle<int>& newBounds) = 0;
     virtual bool canResizeCanvas() const = 0;
     virtual MarkerListBase& getMarkerList (bool isX) = 0;
+    virtual double limitMarkerPosition (double pos) = 0;
 
     virtual const SelectedItems::ItemType findObjectIdAt (const Point<int>& position) = 0;
     virtual void showPopupMenu (bool isClickOnSelectedObject) = 0;
@@ -91,8 +92,7 @@ public:
         DragOperation() {}
         virtual ~DragOperation() {}
 
-        virtual void drag (const MouseEvent& e) = 0;
-        virtual bool dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<float>& originalPos) = 0;
+        virtual void drag (const MouseEvent& e, const Point<int>& newPos) = 0;
     };
 
     virtual DragOperation* createDragOperation (const MouseEvent& e,

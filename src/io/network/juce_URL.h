@@ -96,7 +96,7 @@ public:
     const URL withNewSubPath (const String& newPath) const;
 
     //==============================================================================
-    /** Returns a copy of this URL, with a GET parameter added to the end.
+    /** Returns a copy of this URL, with a GET or POST parameter added to the end.
 
         Any control characters in the value will be encoded.
 
@@ -203,12 +203,17 @@ public:
         @param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
                                 a negative number, it will be infinite. Otherwise it specifies a
                                 time in milliseconds.
-    */
+        @param responseHeaders  if this is non-zero, all the (key, value) pairs received as headers
+                                in the response will be stored in this array
+        @returns    an input stream that the caller must delete, or a null pointer if there was an
+                    error trying to open it.
+     */
     InputStream* createInputStream (bool usePostCommand,
                                     OpenStreamProgressCallback* progressCallback = 0,
                                     void* progressCallbackContext = 0,
                                     const String& extraHeaders = String::empty,
-                                    int connectionTimeOutMs = 0) const;
+                                    int connectionTimeOutMs = 0,
+                                    StringPairArray* responseHeaders = 0) const;
 
 
     //==============================================================================

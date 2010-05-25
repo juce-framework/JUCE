@@ -244,6 +244,8 @@ void juce_closeInternetFile (void* handle);
 int juce_readFromInternetFile (void* handle, void* dest, int bytesToRead);
 int juce_seekInInternetFile (void* handle, int newPosition);
 int64 juce_getInternetFileContentLength (void* handle);
+void juce_getInternetFileHeaders (void* handle, StringPairArray& headers);
+
 
 
 //==============================================================================
@@ -256,7 +258,8 @@ public:
                     URL::OpenStreamProgressCallback* const progressCallback_,
                     void* const progressCallbackContext_,
                     const String& extraHeaders,
-                    int timeOutMs_)
+                    const int timeOutMs_,
+                    StringPairArray* const responseHeaders)
       : position (0),
         finished (false),
         isPost (isPost_),
@@ -277,6 +280,9 @@ public:
         handle = juce_openInternetFile (server, headers, postData, isPost,
                                         progressCallback_, progressCallbackContext_,
                                         timeOutMs);
+
+        if (responseHeaders != 0)
+			juce_getInternetFileHeaders (handle, *responseHeaders);
     }
 
     ~WebInputStream()
@@ -419,12 +425,12 @@ InputStream* URL::createInputStream (const bool usePostCommand,
                                      OpenStreamProgressCallback* const progressCallback,
                                      void* const progressCallbackContext,
                                      const String& extraHeaders,
-                                     const int timeOutMs) const
+                                     const int timeOutMs,
+                                     StringPairArray* const responseHeaders) const
 {
     ScopedPointer <WebInputStream> wi (new WebInputStream (*this, usePostCommand,
                                                            progressCallback, progressCallbackContext,
-                                                           extraHeaders,
-                                                           timeOutMs));
+                                                           extraHeaders, timeOutMs, responseHeaders));
 
     return wi->isError() ? 0 : wi.release();
 }

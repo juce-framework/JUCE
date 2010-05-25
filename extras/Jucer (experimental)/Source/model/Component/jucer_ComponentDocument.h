@@ -80,7 +80,7 @@ public:
     bool isStateForComponent (const ValueTree& storedState, Component* comp) const;
     void removeComponent (const ValueTree& state);
     const RelativeRectangle getCoordsFor (const ValueTree& componentState) const;
-    bool setCoordsFor (ValueTree& componentState, const RelativeRectangle& newSize);
+    void setCoordsFor (ValueTree& componentState, const RelativeRectangle& newSize);
     void renameAnchor (const String& oldName, const String& newName);
 
     // for RelativeCoordinate::Resolver:
@@ -111,11 +111,20 @@ public:
         UndoManager* getUndoManager() const;
         void renameAnchor (const String& oldName, const String& newName);
         const String getNonexistentMarkerName (const String& name);
+        const String getId (const ValueTree& markerState)                   { return markerState [Ids::id_]; }
+        int size() const                                                    { return group.getNumChildren(); }
+        ValueTree getMarker (int index) const                               { return group.getChild (index); }
+        ValueTree getMarkerNamed (const String& name) const                 { return group.getChildWithProperty (getMarkerNameProperty(), name); }
+        bool contains (const ValueTree& markerState) const                  { return markerState.isAChildOf (group); }
+        void createMarker (const String& name, int position);
+        void deleteMarker (ValueTree& markerState);
 
         ComponentDocument& getDocument() throw()    { return document; }
+        ValueTree& getGroup()                       { return group; }
 
     private:
         ComponentDocument& document;
+        ValueTree group;
 
         MarkerList (const MarkerList&);
         MarkerList& operator= (const MarkerList&);

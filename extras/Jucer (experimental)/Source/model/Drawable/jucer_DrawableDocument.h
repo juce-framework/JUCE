@@ -33,7 +33,6 @@
 
 //==============================================================================
 class DrawableDocument  :  public ValueTree::Listener,
-                           public ChangeBroadcaster,
                            public Drawable::ImageProvider
 {
 public:
@@ -52,9 +51,6 @@ public:
 
     ValueTree& getRoot()                    { return root; }
     DrawableComposite::ValueTreeWrapper getRootDrawableNode() const;
-
-//    Value getCanvasWidth() const            { return getRootValueNonUndoable (Ids::width); }
-  //  Value getCanvasHeight() const           { return getRootValueNonUndoable (Ids::height); }
 
     ValueTree findDrawableState (const String& objectId, bool recursive) const;
     const String createUniqueID (const String& suggestion) const;
@@ -78,9 +74,17 @@ public:
         UndoManager* getUndoManager() const;
         const String getNonexistentMarkerName (const String& name);
         void renameAnchor (const String& oldName, const String& newName);
+        const String getId (const ValueTree& markerState);
+        int size() const;
+        ValueTree getMarker (int index) const;
+        ValueTree getMarkerNamed (const String& name) const;
+        bool contains (const ValueTree& markerState) const;
+        void createMarker (const String& name, int position);
+        void deleteMarker (ValueTree& markerState);
 
     private:
         DrawableDocument& document;
+        DrawableComposite::ValueTreeWrapper object;
 
         MarkerList (const MarkerList&);
         MarkerList& operator= (const MarkerList&);

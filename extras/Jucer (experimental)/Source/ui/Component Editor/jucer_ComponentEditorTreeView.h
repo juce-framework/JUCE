@@ -291,7 +291,7 @@ namespace ComponentEditorTreeView
         }
 
         //==============================================================================
-        const String getItemId() const              { return MarkerListBase::getId (markerState); }
+        const String getItemId() const              { return markerState [Ids::id_]; }
 
         bool mightContainSubItems()                 { return false; }
         void refreshSubItems()                      {}

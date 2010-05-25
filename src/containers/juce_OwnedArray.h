@@ -350,8 +350,53 @@ public:
         if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
             numElementsToAdd = arrayToAddFrom.size() - startIndex;
 
+        data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
         while (--numElementsToAdd >= 0)
-            add (arrayToAddFrom.getUnchecked (startIndex++));
+        {
+            data.elements [numUsed] = arrayToAddFrom.getUnchecked (startIndex++);
+            ++numUsed;
+        }
+    }
+
+    /** Adds copies of the elements in another array to the end of this array.
+
+        The other array must be either an OwnedArray of a compatible type of object, or an Array
+        containing pointers to the same kind of object. The objects involved must provide
+        a copy constructor, and this will be used to create new copies of each element, and
+        add them to this array.
+
+        @param arrayToAddFrom       the array from which to copy the elements
+        @param startIndex           the first element of the other array to start copying from
+        @param numElementsToAdd     how many elements to add from the other array. If this
+                                    value is negative or greater than the number of available elements,
+                                    all available elements will be copied.
+        @see add
+    */
+    template <class OtherArrayType>
+    void addCopiesOf (const OtherArrayType& arrayToAddFrom,
+                      int startIndex = 0,
+                      int numElementsToAdd = -1)
+    {
+        const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+        const ScopedLockType lock2 (getLock());
+
+        if (startIndex < 0)
+        {
+            jassertfalse;
+            startIndex = 0;
+        }
+
+        if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+            numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+        data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
+        while (--numElementsToAdd >= 0)
+        {
+            data.elements [numUsed] = new ObjectClass (*arrayToAddFrom.getUnchecked (startIndex++));
+            ++numUsed;
+        }
     }
 
     /** Inserts a new object into the array assuming that the array is sorted.

@@ -50,8 +50,8 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
     for (i = 0; i < drawables.size(); ++i)
         drawables.add (other.drawables.getUnchecked(i)->createCopy());
 
-    for (i = 0; i < markers.size(); ++i)
-        markers.add (new Marker (*other.markers.getUnchecked(i)));
+    markersX.addCopiesOf (other.markersX);
+    markersY.addCopiesOf (other.markersY);
 }
 
 DrawableComposite::~DrawableComposite()
@@ -106,40 +106,40 @@ void DrawableComposite::setTransform (const RelativePoint& targetPositionForOrig
 
 //==============================================================================
 DrawableComposite::Marker::Marker (const DrawableComposite::Marker& other)
-    : name (other.name), position (other.position), isOnXAxis (other.isOnXAxis)
+    : name (other.name), position (other.position)
 {
 }
 
-DrawableComposite::Marker::Marker (const String& name_, const RelativeCoordinate& position_, const bool isOnXAxis_)
-    : name (name_), position (position_), isOnXAxis (isOnXAxis_)
+DrawableComposite::Marker::Marker (const String& name_, const RelativeCoordinate& position_)
+    : name (name_), position (position_)
 {
 }
 
 bool DrawableComposite::Marker::operator!= (const DrawableComposite::Marker& other) const throw()
 {
-    return name != other.name || position != other.position || isOnXAxis != other.isOnXAxis;
+    return name != other.name || position != other.position;
 }
 
 //==============================================================================
-int DrawableComposite::getNumMarkers (bool xAxis) const throw()
+int DrawableComposite::getNumMarkers (const bool xAxis) const throw()
 {
-    return markers.size();
+    return (xAxis ? markersX : markersY).size();
 }
 
-const DrawableComposite::Marker* DrawableComposite::getMarker (int index) const throw()
+const DrawableComposite::Marker* DrawableComposite::getMarker (const bool xAxis, const int index) const throw()
 {
-    return markers [index];
+    return (xAxis ? markersX : markersY) [index];
 }
 
-void DrawableComposite::setMarker (const String& name, bool xAxis, const RelativeCoordinate& position)
+void DrawableComposite::setMarker (const String& name, const bool xAxis, const RelativeCoordinate& position)
 {
+    OwnedArray <Marker>& markers = (xAxis ? markersX : markersY);
+
     for (int i = 0; i < markers.size(); ++i)
     {
         Marker* const m = markers.getUnchecked(i);
         if (m->name == name)
         {
-            jassert (m->isOnXAxis == xAxis); // trying to either have two markers with the same name on different axes?
-
             if (m->position != position)
             {
                 m->position = position;
@@ -150,13 +150,13 @@ void DrawableComposite::setMarker (const String& name, bool xAxis, const Relativ
         }
     }
 
-    markers.add (new Marker (name, position, xAxis));
+    (xAxis ? markersX : markersY).add (new Marker (name, position));
     invalidatePoints();
 }
 
-void DrawableComposite::removeMarker (int index)
+void DrawableComposite::removeMarker (const bool xAxis, const int index)
 {
-    markers.remove (index);
+    (xAxis ? markersX : markersY).remove (index);
 }
 
 //==============================================================================
@@ -221,9 +221,17 @@ const RelativeCoordinate DrawableComposite::findNamedCoordinate (const String& o
         }
     }
 
-    for (int i = 0; i < markers.size(); ++i)
+    int i;
+    for (i = 0; i < markersX.size(); ++i)
     {
-        Marker* const m = markers.getUnchecked(i);
+        Marker* const m = markersX.getUnchecked(i);
+        if (m->name == objectName)
+            return m->position;
+    }
+
+    for (i = 0; i < markersY.size(); ++i)
+    {
+        Marker* const m = markersY.getUnchecked(i);
         if (m->name == objectName)
             return m->position;
     }
@@ -235,8 +243,65 @@ const Rectangle<float> DrawableComposite::getUntransformedBounds() const
 {
     Rectangle<float> bounds;
 
-    for (int i = 0; i < drawables.size(); ++i)
+    int i;
+    for (i = 0; i < drawables.size(); ++i)
         bounds = bounds.getUnion (drawables.getUnchecked(i)->getBounds());
+
+    if (markersX.size() > 0)
+    {
+        float minX = std::numeric_limits<float>::max();
+        float maxX = std::numeric_limits<float>::min();
+
+        for (i = markersX.size(); --i >= 0;)
+        {
+            const Marker* m = markersX.getUnchecked(i);
+            const float pos = (float) m->position.resolve (parent);
+            minX = jmin (minX, pos);
+            maxX = jmax (maxX, pos);
+        }
+
+        if (minX <= maxX)
+        {
+            if (bounds.getWidth() == 0)
+            {
+                bounds.setLeft (minX);
+                bounds.setWidth (maxX - minX);
+            }
+            else
+            {
+                bounds.setLeft (jmin (bounds.getX(), minX));
+                bounds.setRight (jmax (bounds.getRight(), maxX));
+            }
+        }
+    }
+
+    if (markersY.size() > 0)
+    {
+        float minY = std::numeric_limits<float>::max();
+        float maxY = std::numeric_limits<float>::min();
+
+        for (i = markersY.size(); --i >= 0;)
+        {
+            const Marker* m = markersY.getUnchecked(i);
+            const float pos = (float) m->position.resolve (parent);
+            minY = jmin (minY, pos);
+            maxY = jmax (maxY, pos);
+        }
+
+        if (minY <= maxY)
+        {
+            if (bounds.getHeight() == 0)
+            {
+                bounds.setTop (minY);
+                bounds.setHeight (maxY - minY);
+            }
+            else
+            {
+                bounds.setTop (jmin (bounds.getY(), minY));
+                bounds.setBottom (jmax (bounds.getBottom(), maxY));
+            }
+        }
+    }
 
     return bounds;
 }
@@ -275,10 +340,10 @@ const Identifier DrawableComposite::ValueTreeWrapper::topLeft ("topLeft");
 const Identifier DrawableComposite::ValueTreeWrapper::topRight ("topRight");
 const Identifier DrawableComposite::ValueTreeWrapper::bottomLeft ("bottomLeft");
 const Identifier DrawableComposite::ValueTreeWrapper::childGroupTag ("Drawables");
-const Identifier DrawableComposite::ValueTreeWrapper::markerGroupTag ("Markers");
+const Identifier DrawableComposite::ValueTreeWrapper::markerGroupTagX ("MarkersX");
+const Identifier DrawableComposite::ValueTreeWrapper::markerGroupTagY ("MarkersY");
 const Identifier DrawableComposite::ValueTreeWrapper::markerTag ("Marker");
 const Identifier DrawableComposite::ValueTreeWrapper::nameProperty ("name");
-const Identifier DrawableComposite::ValueTreeWrapper::xAxisProperty ("xAxis");
 const Identifier DrawableComposite::ValueTreeWrapper::posProperty ("position");
 
 //==============================================================================
@@ -301,21 +366,6 @@ ValueTree DrawableComposite::ValueTreeWrapper::getChildListCreating (UndoManager
 
     state.addChild (ValueTree (childGroupTag), 0, undoManager);
     return getChildList();
-}
-
-ValueTree DrawableComposite::ValueTreeWrapper::getMarkerList() const
-{
-    return state.getChildWithName (markerGroupTag);
-}
-
-ValueTree DrawableComposite::ValueTreeWrapper::getMarkerListCreating (UndoManager* undoManager)
-{
-    const ValueTree markerList (getMarkerList());
-    if (markerList.isValid())
-        return markerList;
-
-    state.addChild (ValueTree (markerGroupTag), -1, undoManager);
-    return getMarkerList();
 }
 
 int DrawableComposite::ValueTreeWrapper::getNumDrawables() const
@@ -409,44 +459,69 @@ void DrawableComposite::ValueTreeWrapper::setTargetPositionForX0Y1 (const Relati
     state.setProperty (bottomLeft, newPoint.toString(), undoManager);
 }
 
-int DrawableComposite::ValueTreeWrapper::getNumMarkers() const
+ValueTree DrawableComposite::ValueTreeWrapper::getMarkerList (bool xAxis) const
 {
-    return getMarkerList().getNumChildren();
+    return state.getChildWithName (xAxis ? markerGroupTagX : markerGroupTagY);
 }
 
-const DrawableComposite::Marker DrawableComposite::ValueTreeWrapper::getMarker (int index) const
+ValueTree DrawableComposite::ValueTreeWrapper::getMarkerListCreating (bool xAxis, UndoManager* undoManager)
 {
-    const ValueTree marker (getMarkerList().getChild (index));
-    const bool isXAxis = marker [xAxisProperty];
+    const ValueTree markerList (getMarkerList (xAxis));
+    if (markerList.isValid())
+        return markerList;
 
-    return Marker (marker [nameProperty],
-                   RelativeCoordinate (marker [posProperty].toString(), isXAxis),
-                   isXAxis);
+    state.addChild (ValueTree (xAxis ? markerGroupTagX : markerGroupTagY), -1, undoManager);
+    return getMarkerList (xAxis);
 }
 
-void DrawableComposite::ValueTreeWrapper::setMarker (const String& name, bool xAxis, const RelativeCoordinate& position, UndoManager* undoManager)
+int DrawableComposite::ValueTreeWrapper::getNumMarkers (bool xAxis) const
 {
-    ValueTree markerList (getMarkerListCreating (undoManager));
-    ValueTree marker (markerList.getChildWithProperty (nameProperty, name));
+    return getMarkerList (xAxis).getNumChildren();
+}
+
+const ValueTree DrawableComposite::ValueTreeWrapper::getMarkerState (bool xAxis, int index) const
+{
+    return getMarkerList (xAxis).getChild (index);
+}
+
+const ValueTree DrawableComposite::ValueTreeWrapper::getMarkerState (bool xAxis, const String& name) const
+{
+    return getMarkerList (xAxis).getChildWithProperty (nameProperty, name);
+}
+
+bool DrawableComposite::ValueTreeWrapper::containsMarker (bool xAxis, const ValueTree& state) const
+{
+    return state.isAChildOf (getMarkerList (xAxis));
+}
+
+const DrawableComposite::Marker DrawableComposite::ValueTreeWrapper::getMarker (bool xAxis, const ValueTree& state) const
+{
+    jassert (containsMarker (xAxis, state));
+
+    return Marker (state [nameProperty], RelativeCoordinate (state [posProperty].toString(), xAxis));
+}
+
+void DrawableComposite::ValueTreeWrapper::setMarker (bool xAxis, const Marker& m, UndoManager* undoManager)
+{
+    ValueTree markerList (getMarkerListCreating (xAxis, undoManager));
+    ValueTree marker (markerList.getChildWithProperty (nameProperty, m.name));
 
     if (marker.isValid())
     {
-        jassert ((bool) marker [xAxisProperty] == xAxis); // shouldn't change the axis of a marker after it has been created!
-        marker.setProperty (posProperty, position.toString(), undoManager);
+        marker.setProperty (posProperty, m.position.toString(), undoManager);
     }
     else
     {
         marker = ValueTree (markerTag);
-        marker.setProperty (nameProperty, name, 0);
-        marker.setProperty (xAxisProperty, xAxis, 0);
-        marker.setProperty (posProperty, position.toString(), 0);
+        marker.setProperty (nameProperty, m.name, 0);
+        marker.setProperty (posProperty, m.position.toString(), 0);
         markerList.addChild (marker, -1, undoManager);
     }
 }
 
-void DrawableComposite::ValueTreeWrapper::removeMarker (int index, UndoManager* undoManager)
+void DrawableComposite::ValueTreeWrapper::removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager)
 {
-    return getMarkerList().removeChild (index, undoManager);
+    return getMarkerList (xAxis).removeChild (state, undoManager);
 }
 
 //==============================================================================
@@ -473,21 +548,32 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
         controlPoints[2] = newControlPoint[2];
     }
 
+    const int numMarkersX = controller.getNumMarkers (true);
+    const int numMarkersY = controller.getNumMarkers (false);
+
     // Remove deleted markers...
     int i;
-    for (i = markers.size(); --i >= controller.getNumMarkers();)
+    for (i = markersX.size(); --i >= numMarkersX;)
     {
         if (damageRect.isEmpty())
             damageRect = getUntransformedBounds();
 
-        removeMarker (i);
+        markersX.remove (i);
+    }
+
+    for (i = markersY.size(); --i >= numMarkersY;)
+    {
+        if (damageRect.isEmpty())
+            damageRect = getUntransformedBounds();
+
+        markersY.remove (i);
     }
 
     // Update markers and add new ones..
-    for (i = 0; i < controller.getNumMarkers(); ++i)
+    for (i = 0; i < numMarkersX; ++i)
     {
-        const Marker newMarker (controller.getMarker (i));
-        Marker* m = markers[i];
+        const Marker newMarker (controller.getMarker (true, controller.getMarkerState (true, i)));
+        Marker* m = markersX[i];
 
         if (m == 0 || newMarker != *m)
         {
@@ -496,7 +582,25 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
                 damageRect = getUntransformedBounds();
 
             if (m == 0)
-                markers.add (new Marker (newMarker));
+                markersX.add (new Marker (newMarker));
+            else
+                *m = newMarker;
+        }
+    }
+
+    for (i = 0; i < numMarkersY; ++i)
+    {
+        const Marker newMarker (controller.getMarker (false, controller.getMarkerState (false, i)));
+        Marker* m = markersY[i];
+
+        if (m == 0 || newMarker != *m)
+        {
+            redrawAll = true;
+            if (damageRect.isEmpty())
+                damageRect = getUntransformedBounds();
+
+            if (m == 0)
+                markersY.add (new Marker (newMarker));
             else
                 *m = newMarker;
         }
@@ -561,11 +665,11 @@ const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider
     for (i = 0; i < drawables.size(); ++i)
         v.addDrawable (drawables.getUnchecked(i)->createValueTree (imageProvider), -1, 0);
 
-    for (i = 0; i < markers.size(); ++i)
-    {
-        const Marker* m = markers.getUnchecked(i);
-        v.setMarker (m->name, m->isOnXAxis, m->position, 0);
-    }
+    for (i = 0; i < markersX.size(); ++i)
+        v.setMarker (true, *markersX.getUnchecked(i), 0);
+
+    for (i = 0; i < markersY.size(); ++i)
+        v.setMarker (false, *markersY.getUnchecked(i), 0);
 
     return tree;
 }

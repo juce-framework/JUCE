@@ -269,14 +269,47 @@ int64 juce_getInternetFileContentLength (void* handle)
     {
         DWORD index = 0, result = 0, size = sizeof (result);
 
-        if (HttpQueryInfo (crs->request, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
-                           &result, &size, &index))
-        {
+        if (HttpQueryInfo (crs->request, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER, &result, &size, &index))
             return (int64) result;
-        }
     }
 
     return -1;
+}
+
+void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+{
+    const ConnectionAndRequestStruct* const crs = static_cast <ConnectionAndRequestStruct*> (handle);
+
+    if (crs != 0)
+    {
+        DWORD bufferSizeBytes = 4096;
+
+        for (;;)
+        {
+            HeapBlock<char> buffer ((size_t) bufferSizeBytes);
+
+            if (HttpQueryInfo (crs->request, HTTP_QUERY_RAW_HEADERS_CRLF, buffer.getData(), &bufferSizeBytes, 0))
+            {
+                StringArray headersArray;
+                headersArray.addLines (reinterpret_cast <const WCHAR*> (buffer.getData()));
+
+                for (int i = 0; i < headersArray.size(); ++i)
+                {
+                    const String& header = headersArray[i];
+                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                    const String previousValue (headers [key]);
+
+                    headers.set (key, previousValue.isEmpty() ? value : (previousValue + ";" + value));
+                }
+
+                break;
+            }
+
+            if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+                break;
+        }
+    }
 }
 
 void juce_closeInternetFile (void* handle)

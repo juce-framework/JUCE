@@ -1275,10 +1275,7 @@ PopupMenu::PopupMenu (const PopupMenu& other)
     : lookAndFeel (other.lookAndFeel),
       separatorPending (false)
 {
-    items.ensureStorageAllocated (other.items.size());
-
-    for (int i = 0; i < other.items.size(); ++i)
-        items.add (new Item (*other.items.getUnchecked(i)));
+    items.addCopiesOf (other.items);
 }
 
 PopupMenu& PopupMenu::operator= (const PopupMenu& other)
@@ -1288,10 +1285,7 @@ PopupMenu& PopupMenu::operator= (const PopupMenu& other)
         lookAndFeel = other.lookAndFeel;
 
         clear();
-        items.ensureStorageAllocated (other.items.size());
-
-        for (int i = 0; i < other.items.size(); ++i)
-            items.add (new Item (*other.items.getUnchecked(i)));
+        items.addCopiesOf (other.items);
     }
 
     return *this;

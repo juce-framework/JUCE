@@ -458,6 +458,17 @@ int64 juce_getInternetFileContentLength (void* handle)
     return -1;
 }
 
+void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+{
+    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
+
+    if (s != 0)
+    {
+        // xxx todo
+        jassertfalse;
+    }
+}
+
 int juce_seekInInternetFile (void* handle, int newPosition)
 {
     JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;

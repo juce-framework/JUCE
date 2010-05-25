@@ -165,9 +165,7 @@ PositionedGlyph& GlyphArrangement::getGlyph (const int index) const
 void GlyphArrangement::addGlyphArrangement (const GlyphArrangement& other)
 {
     glyphs.ensureStorageAllocated (glyphs.size() + other.glyphs.size());
-
-    for (int i = 0; i < other.glyphs.size(); ++i)
-        glyphs.add (new PositionedGlyph (*other.glyphs.getUnchecked (i)));
+    glyphs.addCopiesOf (other.glyphs);
 }
 
 void GlyphArrangement::removeRangeOfGlyphs (int startIndex, const int num)

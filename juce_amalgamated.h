@@ -3921,7 +3921,10 @@ public:
 			data.ensureAllocatedSize (numUsed + numElementsToAdd);
 
 			while (--numElementsToAdd >= 0)
-				new (data.elements + numUsed++) ElementType (*elementsToAdd++);
+			{
+				new (data.elements + numUsed) ElementType (*elementsToAdd++);
+				++numUsed;
+			}
 		}
 	}
 
@@ -6763,8 +6766,53 @@ public:
 		if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
 			numElementsToAdd = arrayToAddFrom.size() - startIndex;
 
+		data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
 		while (--numElementsToAdd >= 0)
-			add (arrayToAddFrom.getUnchecked (startIndex++));
+		{
+			data.elements [numUsed] = arrayToAddFrom.getUnchecked (startIndex++);
+			++numUsed;
+		}
+	}
+
+	/** Adds copies of the elements in another array to the end of this array.
+
+		The other array must be either an OwnedArray of a compatible type of object, or an Array
+		containing pointers to the same kind of object. The objects involved must provide
+		a copy constructor, and this will be used to create new copies of each element, and
+		add them to this array.
+
+		@param arrayToAddFrom	   the array from which to copy the elements
+		@param startIndex	   the first element of the other array to start copying from
+		@param numElementsToAdd	 how many elements to add from the other array. If this
+									value is negative or greater than the number of available elements,
+									all available elements will be copied.
+		@see add
+	*/
+	template <class OtherArrayType>
+	void addCopiesOf (const OtherArrayType& arrayToAddFrom,
+					  int startIndex = 0,
+					  int numElementsToAdd = -1)
+	{
+		const typename OtherArrayType::ScopedLockType lock1 (arrayToAddFrom.getLock());
+		const ScopedLockType lock2 (getLock());
+
+		if (startIndex < 0)
+		{
+			jassertfalse;
+			startIndex = 0;
+		}
+
+		if (numElementsToAdd < 0 || startIndex + numElementsToAdd > arrayToAddFrom.size())
+			numElementsToAdd = arrayToAddFrom.size() - startIndex;
+
+		data.ensureAllocatedSize (numUsed + numElementsToAdd);
+
+		while (--numElementsToAdd >= 0)
+		{
+			data.elements [numUsed] = new ObjectClass (*arrayToAddFrom.getUnchecked (startIndex++));
+			++numUsed;
+		}
 	}
 
 	/** Inserts a new object into the array assuming that the array is sorted.
@@ -15993,7 +16041,7 @@ public:
 	*/
 	const URL withNewSubPath (const String& newPath) const;
 
-	/** Returns a copy of this URL, with a GET parameter added to the end.
+	/** Returns a copy of this URL, with a GET or POST parameter added to the end.
 
 		Any control characters in the value will be encoded.
 
@@ -16097,12 +16145,17 @@ public:
 		@param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
 								a negative number, it will be infinite. Otherwise it specifies a
 								time in milliseconds.
-	*/
+		@param responseHeaders  if this is non-zero, all the (key, value) pairs received as headers
+								in the response will be stored in this array
+		@returns	an input stream that the caller must delete, or a null pointer if there was an
+					error trying to open it.
+	 */
 	InputStream* createInputStream (bool usePostCommand,
 									OpenStreamProgressCallback* progressCallback = 0,
 									void* progressCallbackContext = 0,
 									const String& extraHeaders = String::empty,
-									int connectionTimeOutMs = 0) const;
+									int connectionTimeOutMs = 0,
+									StringPairArray* responseHeaders = 0) const;
 
 	/** Tries to download the entire contents of this URL into a binary data block.
 
@@ -42228,6 +42281,10 @@ public:
 		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
 		const ElementType type;
+
+	private:
+		ElementBase (const ElementBase&);
+		ElementBase& operator= (const ElementBase&);
 	};
 
 	class JUCE_API  StartSubPath  : public ElementBase
@@ -42240,6 +42297,10 @@ public:
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint startPos;
+
+	private:
+		StartSubPath (const StartSubPath&);
+		StartSubPath& operator= (const StartSubPath&);
 	};
 
 	class JUCE_API  CloseSubPath  : public ElementBase
@@ -42250,6 +42311,10 @@ public:
 		void write (OutputStream& out, ElementType lastTypeWritten) const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
+
+	private:
+		CloseSubPath (const CloseSubPath&);
+		CloseSubPath& operator= (const CloseSubPath&);
 	};
 
 	class JUCE_API  LineTo  : public ElementBase
@@ -42262,6 +42327,10 @@ public:
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint endPoint;
+
+	private:
+		LineTo (const LineTo&);
+		LineTo& operator= (const LineTo&);
 	};
 
 	class JUCE_API  QuadraticTo  : public ElementBase
@@ -42274,6 +42343,10 @@ public:
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint controlPoints[2];
+
+	private:
+		QuadraticTo (const QuadraticTo&);
+		QuadraticTo& operator= (const QuadraticTo&);
 	};
 
 	class JUCE_API  CubicTo  : public ElementBase
@@ -42286,6 +42359,10 @@ public:
 		RelativePoint* getControlPoints (int& numPoints);
 
 		RelativePoint controlPoints[3];
+
+	private:
+		CubicTo (const CubicTo&);
+		CubicTo& operator= (const CubicTo&);
 	};
 
 	OwnedArray <ElementBase> elements;
@@ -42509,11 +42586,13 @@ public:
 		void setID (const String& newID, UndoManager* undoManager);
 		static const Identifier idProperty;
 
+		static const FillType readFillType (const ValueTree& v);
+		static void writeFillType (ValueTree& v, const FillType& fillType, UndoManager* undoManager);
+
 	protected:
 		ValueTree state;
 		static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
 
-		static const FillType readFillType (const ValueTree& v);
 		void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
 	};
 
@@ -49362,6 +49441,8 @@ class JUCE_API  PositionedGlyph
 {
 public:
 
+	PositionedGlyph (const PositionedGlyph& other);
+
 	/** Returns the character the glyph represents. */
 	juce_wchar getCharacter() const		 { return character; }
 	/** Checks whether the glyph is actually empty. */
@@ -49409,7 +49490,6 @@ private:
 	int glyph;
 
 	PositionedGlyph (float x, float y, float w, const Font& font, juce_wchar character, int glyph);
-	PositionedGlyph (const PositionedGlyph& other);
 };
 
 /**
@@ -58158,18 +58238,17 @@ public:
 	struct Marker
 	{
 		Marker (const Marker&);
-		Marker (const String& name, const RelativeCoordinate& position, bool isOnXAxis);
+		Marker (const String& name, const RelativeCoordinate& position);
 		bool operator!= (const Marker&) const throw();
 
 		String name;
 		RelativeCoordinate position;
-		bool isOnXAxis;
 	};
 
 	int getNumMarkers (bool xAxis) const throw();
-	const Marker* getMarker (int index) const throw();
+	const Marker* getMarker (bool xAxis, int index) const throw();
 	void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
-	void removeMarker (int index);
+	void removeMarker (bool xAxis, int index);
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -58214,19 +58293,24 @@ public:
 		const RelativePoint getTargetPositionForX0Y1() const;
 		void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
 
-		int getNumMarkers() const;
-		const Marker getMarker (int index) const;
-		void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position, UndoManager* undoManager);
-		void removeMarker (int index, UndoManager* undoManager);
+		int getNumMarkers (bool xAxis) const;
+		const ValueTree getMarkerState (bool xAxis, int index) const;
+		const ValueTree getMarkerState (bool xAxis, const String& name) const;
+		bool containsMarker (bool xAxis, const ValueTree& state) const;
+		const Marker getMarker (bool xAxis, const ValueTree& state) const;
+		void setMarker (bool xAxis, const Marker& marker, UndoManager* undoManager);
+		void removeMarker (bool xAxis, const ValueTree& state, UndoManager* undoManager);
+
+		static const Identifier nameProperty, posProperty;
 
 	private:
-		static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTag,
-								markerTag, nameProperty, xAxisProperty, posProperty;
+		static const Identifier topLeft, topRight, bottomLeft, childGroupTag, markerGroupTagX,
+								markerGroupTagY, markerTag;
 
 		ValueTree getChildList() const;
 		ValueTree getChildListCreating (UndoManager* undoManager);
-		ValueTree getMarkerList() const;
-		ValueTree getMarkerListCreating (UndoManager* undoManager);
+		ValueTree getMarkerList (bool xAxis) const;
+		ValueTree getMarkerListCreating (bool xAxis, UndoManager* undoManager);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -58234,7 +58318,7 @@ public:
 private:
 	OwnedArray <Drawable> drawables;
 	RelativePoint controlPoints[3];
-	OwnedArray <Marker> markers;
+	OwnedArray <Marker> markersX, markersY;
 
 	const Rectangle<float> getUntransformedBounds() const;
 	const AffineTransform calculateTransform() const;
@@ -58521,7 +58605,6 @@ public:
 		void getPath (RelativePointPath& path) const;
 		void setPath (const String& newPath, UndoManager* undoManager);
 
-	private:
 		static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
 	};
 

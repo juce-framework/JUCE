@@ -69,8 +69,8 @@ OBJECTS := \
   $(OBJDIR)/jucer_TreeViewTypes.o \
   $(OBJDIR)/jucer_CodeHelpers.o \
   $(OBJDIR)/jucer_FileHelpers.o \
-  $(OBJDIR)/jucer_StoredSettings.o \
   $(OBJDIR)/jucer_MiscUtilities.o \
+  $(OBJDIR)/jucer_StoredSettings.o \
   $(OBJDIR)/jucer_Main.o \
   $(OBJDIR)/BinaryData.o \
   $(OBJDIR)/JuceLibraryCode1.o \
@@ -223,14 +223,14 @@ $(OBJDIR)/jucer_FileHelpers.o: ../../Source/utility/jucer_FileHelpers.cpp
 	@echo "Compiling jucer_FileHelpers.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/jucer_StoredSettings.o: ../../Source/utility/jucer_StoredSettings.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_StoredSettings.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_MiscUtilities.o: ../../Source/utility/jucer_MiscUtilities.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_MiscUtilities.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_StoredSettings.o: ../../Source/utility/jucer_StoredSettings.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_StoredSettings.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_Main.o: ../../Source/jucer_Main.cpp

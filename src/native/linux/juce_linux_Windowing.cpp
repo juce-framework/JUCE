@@ -2763,6 +2763,9 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
         {
             void* h = dlopen ("libXinerama.so", RTLD_GLOBAL | RTLD_NOW);
 
+            if (h == 0)
+                h = dlopen ("libXinerama.so.1", RTLD_GLOBAL | RTLD_NOW);
+
             if (h != 0)
             {
                 xXineramaIsActive = (tXineramaIsActive) dlsym (h, "XineramaIsActive");

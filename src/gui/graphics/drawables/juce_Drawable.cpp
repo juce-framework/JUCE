@@ -223,16 +223,8 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v)
     return FillType();
 }
 
-void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager)
+void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType, UndoManager* const undoManager)
 {
-    ValueTree v (state.getChildWithName (tag));
-
-    if (! v.isValid())
-    {
-        state.addChild (ValueTree (tag), -1, undoManager);
-        v = state.getChildWithName (tag);
-    }
-
     if (fillType.isColour())
     {
         v.setProperty (type, "solid", undoManager);
@@ -279,6 +271,19 @@ void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, con
     {
         jassertfalse;
     }
+}
+
+void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* const undoManager)
+{
+    ValueTree v (state.getChildWithName (tag));
+
+    if (! v.isValid())
+    {
+        state.addChild (ValueTree (tag), -1, undoManager);
+        v = state.getChildWithName (tag);
+    }
+
+    writeFillType (v, fillType, undoManager);
 }
 
 

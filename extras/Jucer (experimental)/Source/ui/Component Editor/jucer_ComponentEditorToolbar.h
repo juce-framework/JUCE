@@ -26,7 +26,7 @@
 #ifndef __JUCER_COMPONENTEDITORTOOLBAR_H_6B5CA931__
 #define __JUCER_COMPONENTEDITORTOOLBAR_H_6B5CA931__
 
-#include "../../utility/jucer_ColourEditorComponent.h"
+#include "../../utility/jucer_ColourPropertyComponent.h"
 
 
 //==============================================================================

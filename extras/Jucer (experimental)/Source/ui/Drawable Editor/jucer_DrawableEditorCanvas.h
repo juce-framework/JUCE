@@ -86,6 +86,11 @@ public:
         return getDocument().getMarkerList (isX);
     }
 
+    double limitMarkerPosition (double pos)
+    {
+        return pos;
+    }
+
     const SelectedItems::ItemType findObjectIdAt (const Point<int>& position)
     {
         if (drawable != 0)
@@ -134,6 +139,36 @@ public:
         return getDocument().findDrawableState (objectId, false);
     }
 
+    void getObjectPositionDependencies (const ValueTree& state, Array<ValueTree>& deps)
+    {
+        DrawableDocument& doc = getDocument();
+        DrawableTypeInstance item (doc, state);
+
+        Array <RelativePoint> points;
+        item.getAllControlPoints (points);
+
+        StringArray anchors;
+        for (int i = 0; i < points.size(); ++i)
+        {
+            anchors.addIfNotAlreadyThere (points.getReference(i).x.getAnchorName1());
+            anchors.addIfNotAlreadyThere (points.getReference(i).x.getAnchorName2());
+            anchors.addIfNotAlreadyThere (points.getReference(i).y.getAnchorName1());
+            anchors.addIfNotAlreadyThere (points.getReference(i).y.getAnchorName2());
+        }
+
+        for (int i = 0; i < anchors.size(); ++i)
+        {
+            const String anchor (anchors[i]);
+            if (anchor.isNotEmpty() && ! anchor.startsWith ("parent."))
+            {
+                const ValueTree v (doc.findDrawableState (anchor.upToFirstOccurrenceOf (".", false, false), false));
+
+                if (v.isValid())
+                    deps.add (v);
+            }
+        }
+    }
+
     const Rectangle<float> getObjectPositionFloat (const ValueTree& state)
     {
         if (drawable != 0)
@@ -147,7 +182,7 @@ public:
         return Rectangle<float>();
     }
 
-    bool setObjectPositionFloat (const ValueTree& state, const Rectangle<float>& newPos)
+    void setObjectPositionFloat (const ValueTree& state, const Rectangle<float>& newPos)
     {
         if (drawable != 0)
         {
@@ -157,11 +192,9 @@ public:
             {
                 d->refreshFromValueTree (state, &getDocument());
                 DrawableTypeInstance di (getDocument(), state);
-                return di.setBounds (d, newPos);
+                di.setBounds (d, newPos);
             }
         }
-
-        return false;
     }
 
     const Rectangle<int> getObjectPosition (const ValueTree& state)
@@ -204,10 +237,10 @@ public:
     {
     public:
         DragOperation (DrawableEditorCanvas* canvas_,
-                       const MouseEvent& e,
+                       const MouseEvent& e, const Point<int>& mousePos,
                        Component* snapGuideParentComp_,
                        const ResizableBorderComponent::Zone& zone_)
-            : EditorDragOperation (canvas_, e, snapGuideParentComp_, zone_)
+            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_)
         {
         }
 
@@ -224,14 +257,19 @@ public:
 
         UndoManager& getUndoManager()                           { return *getDocument().getUndoManager(); }
 
+        void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps)
+        {
+            static_cast <DrawableEditorCanvas*> (canvas)->getObjectPositionDependencies (state, deps);
+        }
+
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
             return static_cast <DrawableEditorCanvas*> (canvas)->getObjectPositionFloat (state);
         }
 
-        bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
+        void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
-            return static_cast <DrawableEditorCanvas*> (canvas)->setObjectPositionFloat (state, newBounds);
+            static_cast <DrawableEditorCanvas*> (canvas)->setObjectPositionFloat (state, newBounds);
         }
 
         float getMarkerPosition (const ValueTree& marker, bool isX)
@@ -243,7 +281,7 @@ public:
     DragOperation* createDragOperation (const MouseEvent& e, Component* snapGuideParentComponent,
                                         const ResizableBorderComponent::Zone& zone)
     {
-        DragOperation* d = new DragOperation (this, e, snapGuideParentComponent, zone);
+        DragOperation* d = new DragOperation (this, e, e.getPosition() - origin, snapGuideParentComponent, zone);
 
         Array<ValueTree> selected, unselected;
 
@@ -300,6 +338,7 @@ public:
 
         void paint (Graphics& g)
         {
+            canvas->handleUpdateNowIfNeeded();
             g.fillAll (Colours::white);
 
             const Point<int> origin (canvas->getOrigin());
@@ -307,14 +346,14 @@ public:
 
             if (origin.getX() > 0)
             {
-                g.setColour (Colour::greyLevel (0.8f));
-                g.drawVerticalLine (0, 0, 10000.0f);
+                g.setColour (Colour::greyLevel (0.87f));
+                g.drawVerticalLine (0, -10000.0f, 10000.0f);
             }
 
             if (origin.getY() > 0)
             {
-                g.setColour (Colour::greyLevel (0.8f));
-                g.drawHorizontalLine (0, 0, 10000.0f);
+                g.setColour (Colour::greyLevel (0.87f));
+                g.drawHorizontalLine (0, -10000.0f, 10000.0f);
             }
 
             canvas->drawable->draw (g, 1.0f);

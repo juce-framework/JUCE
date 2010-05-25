@@ -33,13 +33,13 @@
 class EditorDragOperation  : public EditorCanvasBase::DragOperation
 {
 public:
-    EditorDragOperation (EditorCanvasBase* canvas_, const MouseEvent& e,
+    EditorDragOperation (EditorCanvasBase* canvas_, const MouseEvent& e, const Point<int>& mousePos,
                          Component* snapGuideParentComp_,
                          const ResizableBorderComponent::Zone& zone_)
         : canvas (canvas_),
           snapGuideParentComp (snapGuideParentComp_),
           zone (zone_),
-          mouseDownPos (e.getPosition())
+          mouseDownPos (mousePos)
     {
     }
 
@@ -50,12 +50,13 @@ public:
     void initialise (const Array<ValueTree>& objects,
                      const Array<ValueTree>& objectsToSnapTo)
     {
-        draggedObjects = objects;
-
         int i;
         for (i = 0; i < objects.size(); ++i)
+            addObjectToList (objects.getReference(i), objects);
+
+        for (i = 0; i < updateList.size(); ++i)
         {
-            const Rectangle<float> floatPos (getObjectPosition (objects.getReference(i)));
+            const Rectangle<float> floatPos (getObjectPosition (updateList.getReference(i)));
             originalPositions.add (floatPos);
 
             if (zone.isDraggingWholeObject() || zone.isDraggingLeftEdge())
@@ -185,12 +186,12 @@ public:
     };
 
     //==============================================================================
-    void drag (const MouseEvent& e)
+    void drag (const MouseEvent& e, const Point<int>& newPos)
     {
         getUndoManager().undoCurrentTransactionOnly();
 
         // (can't use getOffsetFromDragStart() because of auto-scrolling)
-        Point<int> distance (e.getPosition() - mouseDownPos);
+        Point<int> distance (newPos - mouseDownPos);
         if (! isDraggingLeftRight())
             distance = distance.withX (0);
 
@@ -205,32 +206,15 @@ public:
             performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
         }
 
-        for (int n = 50;;)
-        {
-            // Need to repeatedly apply the new positions until they all settle down, in case some of
-            // the coords are relative to each other..
-            bool anyUpdated = false;
-
-            for (int i = 0; i < draggedObjects.size(); ++i)
-                if (dragItem (draggedObjects.getReference(i), distance, originalPositions.getReference(i)))
-                    anyUpdated = true;
-
-            if (! anyUpdated)
-                break;
-
-            if (--n == 0)
-            {
-                jassertfalse;
-                break;
-            }
-        }
+        for (int i = 0; i < updateList.size(); ++i)
+            dragItem (updateList.getReference(i), distance, originalPositions.getReference(i));
     }
 
-    bool dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<float>& originalPos)
+    void dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<float>& originalPos)
     {
         const Rectangle<float> newBounds (zone.resizeRectangleBy (originalPos, Point<float> ((float) distance.getX(),
                                                                                              (float) distance.getY())));
-        return setObjectPosition (v, newBounds);
+        setObjectPosition (v, newBounds);
     }
 
 protected:
@@ -239,8 +223,9 @@ protected:
     virtual void getSnapPointsY (Array<float>& points, bool includeCentre) = 0;
     virtual float getMarkerPosition (const ValueTree& marker, bool isX) = 0;
 
+    virtual void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps) = 0;
     virtual const Rectangle<float> getObjectPosition (const ValueTree& state) = 0;
-    virtual bool setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds) = 0;
+    virtual void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds) = 0;
 
     virtual UndoManager& getUndoManager() = 0;
 
@@ -248,7 +233,7 @@ protected:
 
 private:
     //==============================================================================
-    Array <ValueTree> draggedObjects;
+    Array <ValueTree> updateList;
     Array <Rectangle<float> > originalPositions;
     Array <SnapLine> verticalSnapPositions, horizontalSnapPositions;
     Array <SnapLine> verticalSnapTargets, horizontalSnapTargets;
@@ -256,6 +241,43 @@ private:
     OwnedArray<Component> snapGuides;
     Component* snapGuideParentComp;
     Point<int> mouseDownPos;
+
+    void getCompleteDependencyList (const ValueTree& object, Array <ValueTree>& deps, const Array<ValueTree>& activeObjects)
+    {
+        Array <ValueTree> d;
+        getObjectDependencies (object, d);
+
+        for (int i = 0; i < d.size(); ++i)
+        {
+            const ValueTree& dep = d.getReference(i);
+            if (activeObjects.contains (dep) && ! deps.contains (dep))
+            {
+                deps.add (dep);
+                getCompleteDependencyList (dep, deps, activeObjects);
+            }
+        }
+    }
+
+    void addObjectToList (const ValueTree& object, const Array<ValueTree>& activeObjects)
+    {
+        Array <ValueTree> deps;
+        getCompleteDependencyList (object, deps, activeObjects);
+
+        int lastIndexInList = updateList.indexOf (object);
+
+        int i;
+        for (i = lastIndexInList; --i >= 0;)
+            deps.removeValue (updateList.getReference(i));
+
+        if (deps.size() > 0 || lastIndexInList < 0)
+        {
+            for (i = 0; i < deps.size(); ++i)
+                if (! updateList.contains (deps.getReference(i)))
+                    updateList.add (deps.getReference(i));
+
+            updateList.add (object);
+        }
+    }
 
     static void mergeSnapLines (Array <SnapLine>& lines)
     {
