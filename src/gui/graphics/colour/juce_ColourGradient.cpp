@@ -38,19 +38,15 @@ ColourGradient::ColourGradient() throw()
 #endif
 }
 
-ColourGradient::ColourGradient (const Colour& colour1,
-                                const float x1_,
-                                const float y1_,
-                                const Colour& colour2,
-                                const float x2_,
-                                const float y2_,
+ColourGradient::ColourGradient (const Colour& colour1, const float x1_, const float y1_,
+                                const Colour& colour2, const float x2_, const float y2_,
                                 const bool isRadial_)
     : point1 (x1_, y1_),
       point2 (x2_, y2_),
       isRadial (isRadial_)
 {
-    colours.add (ColourPoint (0, colour1));
-    colours.add (ColourPoint (1 << 16, colour2));
+    colours.add (ColourPoint (0.0, colour1));
+    colours.add (ColourPoint (1.0, colour2));
 }
 
 ColourGradient::~ColourGradient()
@@ -75,13 +71,12 @@ void ColourGradient::clearColours()
     colours.clear();
 }
 
-void ColourGradient::addColour (const double proportionAlongGradient,
-                                const Colour& colour)
+int ColourGradient::addColour (const double proportionAlongGradient, const Colour& colour)
 {
     // must be within the two end-points
     jassert (proportionAlongGradient >= 0 && proportionAlongGradient <= 1.0);
 
-    const uint32 pos = jlimit (0, 65535, roundToInt (proportionAlongGradient * 65536.0));
+    const double pos = jlimit (0.0, 1.0, proportionAlongGradient);
 
     int i;
     for (i = 0; i < colours.size(); ++i)
@@ -89,6 +84,13 @@ void ColourGradient::addColour (const double proportionAlongGradient,
             break;
 
     colours.insert (i, ColourPoint (pos, colour));
+    return i;
+}
+
+void ColourGradient::removeColour (int index)
+{
+    jassert (index > 0 && index < colours.size() - 1);
+    colours.remove (index);
 }
 
 void ColourGradient::multiplyOpacity (const float multiplier) throw()
@@ -109,7 +111,7 @@ int ColourGradient::getNumColours() const throw()
 double ColourGradient::getColourPosition (const int index) const throw()
 {
     if (((unsigned int) index) < (unsigned int) colours.size())
-        return jlimit (0.0, 1.0, colours.getReference (index).position / 65535.0);
+        return colours.getReference (index).position;
 
     return 0;
  }
@@ -122,26 +124,31 @@ const Colour ColourGradient::getColour (const int index) const throw()
     return Colour();
 }
 
-const Colour ColourGradient::getColourAtPosition (const float position) const throw()
+void ColourGradient::setColour (int index, const Colour& newColour) throw()
+{
+    if (((unsigned int) index) < (unsigned int) colours.size())
+        colours.getReference (index).colour = newColour;
+}
+
+const Colour ColourGradient::getColourAtPosition (const double position) const throw()
 {
     jassert (colours.getReference(0).position == 0); // the first colour specified has to go at position 0
 
-    const int integerPos = jlimit (0, 65535, roundToInt (position * 65536.0f));
-
-    if (integerPos <= 0 || colours.size() <= 1)
-        return getColour (0);
+    if (position <= 0 || colours.size() <= 1)
+        return colours.getReference(0).colour;
 
     int i = colours.size() - 1;
-    while (integerPos < (int) colours.getReference(i).position)
+    while (position < colours.getReference(i).position)
         --i;
 
-    if (i >= colours.size() - 1)
-        return colours.getReference(i).colour;
-
     const ColourPoint& p1 = colours.getReference (i);
+
+    if (i >= colours.size() - 1)
+        return p1.colour;
+
     const ColourPoint& p2 = colours.getReference (i + 1);
 
-    return p1.colour.interpolatedWith (p2.colour, (integerPos - p1.position) / (float) (p2.position - p1.position));
+    return p1.colour.interpolatedWith (p2.colour, (float) ((position - p1.position) / (p2.position - p1.position)));
 }
 
 //==============================================================================
@@ -168,7 +175,7 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
         for (int j = 1; j < colours.size(); ++j)
         {
             const ColourPoint& p = colours.getReference (j);
-            const int numToDo = ((p.position * (numEntries - 1)) >> 16) - index;
+            const int numToDo = roundToInt (p.position * (numEntries - 1)) - index;
             const PixelARGB pix2 (p.colour.getPixelARGB());
 
             for (int i = 0; i < numToDo; ++i)

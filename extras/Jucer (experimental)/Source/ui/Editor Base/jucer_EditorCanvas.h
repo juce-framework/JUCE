@@ -64,27 +64,29 @@ public:
     void hideSizeGuides();
 
     //==============================================================================
+    virtual UndoManager& getUndoManager() = 0;
     virtual void documentChanged() = 0;
+    virtual Component* createComponentHolder() = 0;
+
     virtual const Rectangle<int> getCanvasBounds() = 0;
     virtual void setCanvasBounds (const Rectangle<int>& newBounds) = 0;
     virtual bool canResizeCanvas() const = 0;
-    virtual MarkerListBase& getMarkerList (bool isX) = 0;
-    virtual double limitMarkerPosition (double pos) = 0;
 
     virtual const SelectedItems::ItemType findObjectIdAt (const Point<int>& position) = 0;
     virtual void showPopupMenu (bool isClickOnSelectedObject) = 0;
     virtual void objectDoubleClicked (const MouseEvent& e, const ValueTree& state) = 0;
 
     virtual const ValueTree getObjectState (const String& objectId) = 0;
-    virtual const Rectangle<int> getObjectPosition (const ValueTree& state) = 0;
-
-    virtual bool hasSizeGuides() const = 0;
     virtual RelativeRectangle getObjectCoords (const ValueTree& state) = 0;
+    virtual const Rectangle<int> getObjectPosition (const ValueTree& state) = 0;
+    virtual bool hasSizeGuides() const = 0;
+
+    virtual MarkerListBase& getMarkerList (bool isX) = 0;
+    virtual double limitMarkerPosition (double pos) = 0;
+
     virtual SelectedItems& getSelection() = 0;
-    virtual UndoManager& getUndoManager() = 0;
     virtual void deselectNonDraggableObjects() = 0;
     virtual void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area) = 0;
-    virtual Component* createComponentHolder() = 0;
 
     class DragOperation
     {
@@ -125,6 +127,10 @@ public:
     protected:
         EditorCanvasBase* canvas;
     };
+
+    //==============================================================================
+    virtual void updateExtraComponentsForObject (const ValueTree& state, Component* parent,
+                                                 OwnedArray<OverlayItemComponent>& existingComps) = 0;
 
 protected:
     //==============================================================================

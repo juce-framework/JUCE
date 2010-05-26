@@ -68,6 +68,8 @@ public:
             anotherInstanceStarted (commandLine);
 
         theMainWindow->reloadLastProject();
+
+        theMainWindow->getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
     }
 
     void shutdown()

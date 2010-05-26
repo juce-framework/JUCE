@@ -134,3 +134,11 @@ const StringArray& StoredSettings::getFontNames()
 
     return fontNames;
 }
+
+Image* StoredSettings::getFallbackImage()
+{
+    if (fallbackImage == 0)
+        fallbackImage = ImageFileFormat::loadFrom (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+
+    return fallbackImage;
+}

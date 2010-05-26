@@ -146,6 +146,10 @@ public:
         return getDocument().getCoordsFor (state);
     }
 
+    void updateExtraComponentsForObject (const ValueTree& state, Component* parent, OwnedArray<OverlayItemComponent>& existingComps)
+    {
+    }
+
     SelectedItems& getSelection()
     {
         return editor.getSelection();

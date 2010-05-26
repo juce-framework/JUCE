@@ -197,24 +197,46 @@ DrawablePath::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     jassert (state.hasType (valueTreeType));
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getMainFill() const
+ValueTree DrawablePath::ValueTreeWrapper::getMainFillState()
 {
-    return readFillType (state.getChildWithName (fill));
+    ValueTree v (state.getChildWithName (fill));
+    if (v.isValid())
+        return v;
+
+    setMainFill (Colours::black, 0, 0, 0);
+    return getMainFillState();
 }
 
-void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, UndoManager* undoManager)
+ValueTree DrawablePath::ValueTreeWrapper::getStrokeFillState()
 {
-    replaceFillType (fill, newFill, undoManager);
+    ValueTree v (state.getChildWithName (stroke));
+    if (v.isValid())
+        return v;
+
+    setStrokeFill (Colours::black, 0, 0, 0);
+    return getStrokeFillState();
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getStrokeFill() const
+const FillType DrawablePath::ValueTreeWrapper::getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
 {
-    return readFillType (state.getChildWithName (stroke));
+    return readFillType (state.getChildWithName (fill), 0, 0, nameFinder);
 }
 
-void DrawablePath::ValueTreeWrapper::setStrokeFill (const FillType& newFill, UndoManager* undoManager)
+void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, const RelativePoint* gp1,
+                                                  const RelativePoint* gp2, UndoManager* undoManager)
 {
-    replaceFillType (stroke, newFill, undoManager);
+    replaceFillType (fill, newFill, gp1, gp2, undoManager);
+}
+
+const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+{
+    return readFillType (state.getChildWithName (stroke), 0, 0, nameFinder);
+}
+
+void DrawablePath::ValueTreeWrapper::setStrokeFill (const FillType& newFill, const RelativePoint* gp1,
+                                                    const RelativePoint* gp2, UndoManager* undoManager)
+{
+    replaceFillType (stroke, newFill, gp1, gp2, undoManager);
 }
 
 const PathStrokeType DrawablePath::ValueTreeWrapper::getStrokeType() const
@@ -258,7 +280,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
     setName (v.getID());
 
     bool needsRedraw = false;
-    const FillType newFill (v.getMainFill());
+    const FillType newFill (v.getMainFill (parent));
 
     if (mainFill != newFill)
     {
@@ -266,7 +288,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
         mainFill = newFill;
     }
 
-    const FillType newStrokeFill (v.getStrokeFill());
+    const FillType newStrokeFill (v.getStrokeFill (parent));
 
     if (strokeFill != newStrokeFill)
     {
@@ -307,8 +329,8 @@ const ValueTree DrawablePath::createValueTree (ImageProvider*) const
     ValueTreeWrapper v (tree);
 
     v.setID (getName(), 0);
-    v.setMainFill (mainFill, 0);
-    v.setStrokeFill (strokeFill, 0);
+    v.setMainFill (mainFill, 0, 0, 0);
+    v.setStrokeFill (strokeFill, 0, 0, 0);
     v.setStrokeType (strokeType, 0);
 
     if (relativePath != 0)

@@ -248,14 +248,20 @@ public:
         void setID (const String& newID, UndoManager* undoManager);
         static const Identifier idProperty;
 
-        static const FillType readFillType (const ValueTree& v);
-        static void writeFillType (ValueTree& v, const FillType& fillType, UndoManager* undoManager);
+        static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1, RelativePoint* gradientPoint2,
+                                            RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+        static void writeFillType (ValueTree& v, const FillType& fillType,
+                                   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+                                   UndoManager* undoManager);
 
     protected:
         ValueTree state;
-        static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
+        static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
 
-        void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
+        void replaceFillType (const Identifier& tag, const FillType& fillType,
+                              const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+                              UndoManager* undoManager);
     };
 
     //==============================================================================

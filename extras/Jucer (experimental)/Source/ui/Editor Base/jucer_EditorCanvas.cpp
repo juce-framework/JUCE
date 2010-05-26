@@ -114,12 +114,14 @@ public:
         const Rectangle<int> bounds (canvas->getObjectPosition (objectState));
         setBoundsInTargetSpace (bounds.expanded (borderThickness, borderThickness));
 
-        for (int i = sizeGuides.size(); --i >= 0;)
+        int i;
+        for (i = sizeGuides.size(); --i >= 0;)
         {
             sizeGuides.getUnchecked(i)->setVisible (isVisible());
             sizeGuides.getUnchecked(i)->updatePosition (bounds);
         }
 
+        canvas->updateExtraComponentsForObject (objectState, getParentComponent(), extraEditorComps);
         return true;
     }
 
@@ -200,6 +202,7 @@ private:
     const int borderThickness;
     OwnedArray <SizeGuideComponent> sizeGuides;
     bool isDragging;
+    OwnedArray <OverlayItemComponent> extraEditorComps;
 
     const Rectangle<int> getCentreArea() const
     {
@@ -399,6 +402,8 @@ public:
         getSelection().removeChangeListener (this);
         lasso = 0;
         resizers.clear();
+        markersX.clear();
+        markersY.clear();
         deleteAllChildren();
     }
 
@@ -563,6 +568,21 @@ public:
         }
     }
 
+    void update()
+    {
+        updateResizeFrames();
+        updateMarkers();
+    }
+
+private:
+    //==============================================================================
+    EditorCanvasBase* canvas;
+    ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
+    bool mouseDownResult, isDraggingClickedComp;
+    SelectedItems::ItemType mouseDownCompUID;
+    OwnedArray <ResizeFrame> resizers;
+    OwnedArray <MarkerComponent> markersX, markersY;
+
     void updateResizeFrames()
     {
         SelectedItems& selection = getSelection();
@@ -610,49 +630,34 @@ public:
         }
     }
 
-    void update()
+    void updateMarkers (OwnedArray <MarkerComponent>& markers, const bool isX)
     {
-        updateResizeFrames();
-        updateMarkers();
-    }
-
-private:
-    //==============================================================================
-    EditorCanvasBase* canvas;
-    ScopedPointer <LassoComponent <SelectedItems::ItemType> > lasso;
-    bool mouseDownResult, isDraggingClickedComp;
-    SelectedItems::ItemType mouseDownCompUID;
-    OwnedArray <ResizeFrame> resizers;
-
-    void updateMarkers (bool isX)
-    {
-        Array<ValueTree> requiredMarkers;
-
         MarkerListBase& markerList = canvas->getMarkerList (isX);
         const int num = markerList.size();
+
+        Array<ValueTree> requiredMarkers;
+        requiredMarkers.ensureStorageAllocated (num);
+
         int i;
         for (i = 0; i < num; ++i)
             requiredMarkers.add (markerList.getMarker (i));
 
-        for (i = getNumChildComponents(); --i >= 0;)
+        for (i = markers.size(); --i >= 0;)
         {
-            MarkerComponent* marker = dynamic_cast <MarkerComponent*> (getChildComponent(i));
+            MarkerComponent* marker = markers.getUnchecked (i);
+            const int index = requiredMarkers.indexOf (marker->marker);
 
-            if (marker != 0 && marker->isX == isX)
+            if (index >= 0)
             {
-                if (requiredMarkers.contains (marker->marker))
-                {
-                    marker->setVisible (true);
-                    marker->updatePosition();
-                    requiredMarkers.removeValue (marker->marker);
-                }
+                marker->updatePosition();
+                requiredMarkers.removeValue (marker->marker);
+            }
+            else
+            {
+                if (marker->isMouseButtonDown())
+                    marker->setBounds (-1, -1, 1, 1);
                 else
-                {
-                    if (marker->isMouseButtonDown())
-                        marker->setBounds (-1, -1, 1, 1);
-                    else
-                        delete marker;
-                }
+                    markers.remove (i);
             }
         }
 
@@ -661,6 +666,7 @@ private:
             MarkerComponent* marker = new MarkerComponent (canvas, requiredMarkers.getReference(i),
                                                            isX, isX ? canvas->border.getTop()
                                                                     : canvas->border.getLeft());
+            markers.add (marker);
             addAndMakeVisible (marker);
             marker->updatePosition();
         }
@@ -668,8 +674,8 @@ private:
 
     void updateMarkers()
     {
-        updateMarkers (true);
-        updateMarkers (false);
+        updateMarkers (markersX, true);
+        updateMarkers (markersY, false);
     }
 };
 

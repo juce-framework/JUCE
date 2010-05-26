@@ -53,7 +53,6 @@ public:
     const File getLastKnownJuceFolder() const;
     void setLastKnownJuceFolder (const File& file);
 
-
     const StringArray& getFontNames();
 
     //==============================================================================
@@ -69,12 +68,17 @@ public:
         void setSwatchColour (int index, const Colour& newColour) const { StoredSettings::getInstance()->swatchColours.set (index, newColour); }
     };
 
+
+    Image* getFallbackImage();
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;
+
+    ScopedPointer<Image> fallbackImage;
 };
 
 

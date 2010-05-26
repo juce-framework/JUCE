@@ -207,6 +207,77 @@ public:
         return RelativeRectangle();
     }
 
+    class ControlPointComponent  : public OverlayItemComponent
+    {
+    public:
+        ControlPointComponent (DrawableEditorCanvas* canvas)
+            : OverlayItemComponent (canvas)
+        {
+        }
+
+        ~ControlPointComponent()
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (Colours::pink);
+        }
+
+        void mouseDown (const MouseEvent& e)
+        {
+        }
+
+        void mouseDrag (const MouseEvent& e)
+        {
+        }
+
+        void mouseUp (const MouseEvent& e)
+        {
+        }
+
+        void updatePosition (const RelativePoint& point, RelativeCoordinate::NamedCoordinateFinder* nameFinder)
+        {
+            const Point<float> p (point.resolve (nameFinder));
+            setBoundsInTargetSpace (Rectangle<int> (roundToInt (p.getX()) - 2, roundToInt (p.getY()) - 2, 5, 5));
+        }
+    };
+
+    void updateExtraComponentsForObject (const ValueTree& state, Component* parent, OwnedArray<OverlayItemComponent>& comps)
+    {
+        if (drawable == 0)
+        {
+            comps.clear();
+            return;
+        }
+
+        DrawableTypeInstance item (getDocument(), state);
+        Array<RelativePoint> points;
+        item.getAllControlPoints (points);
+
+        Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (state).getID());
+        DrawableComposite* parentDrawable = d->getParent();
+
+        comps.removeRange (points.size(), comps.size());
+
+        BigInteger requiredIndexes;
+        requiredIndexes.setRange (0, points.size(), true);
+
+        for (int i = 0; i < points.size(); ++i)
+        {
+            ControlPointComponent* c = dynamic_cast <ControlPointComponent*> (comps[i]);
+
+            if (c == 0)
+            {
+                c = new ControlPointComponent (this);
+                comps.set (i, c);
+                parent->addAndMakeVisible (c);
+            }
+
+            c->updatePosition (points.getReference(i), parentDrawable);
+        }
+    }
+
     SelectedItems& getSelection()
     {
         return editor.getSelection();

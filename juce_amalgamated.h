@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	6
+#define JUCE_BUILDNUMBER	7
 
 /** Current Juce version number.
 
@@ -23179,9 +23179,13 @@ public:
 											of the distance along the line between the two points
 											at which the colour should occur.
 		@param colour			   the colour that should be used at this point
+		@returns the index at which the new point was added
 	*/
-	void addColour (double proportionAlongGradient,
-					const Colour& colour);
+	int addColour (double proportionAlongGradient,
+				   const Colour& colour);
+
+	/** Removes one of the colours from the gradient. */
+	void removeColour (int index);
 
 	/** Multiplies the alpha value of all the colours by the given scale factor */
 	void multiplyOpacity (float multiplier) throw();
@@ -23196,15 +23200,19 @@ public:
 	double getColourPosition (int index) const throw();
 
 	/** Returns the colour that was added with a given index.
-
-		The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
+		The index is from 0 to getNumColours() - 1.
 	*/
 	const Colour getColour (int index) const throw();
+
+	/** Changes the colour at a given index.
+		The index is from 0 to getNumColours() - 1.
+	*/
+	void setColour (int index, const Colour& newColour) throw();
 
 	/** Returns the an interpolated colour at any position along the gradient.
 		@param position	 the position along the gradient, between 0 and 1
 	*/
-	const Colour getColourAtPosition (float position) const throw();
+	const Colour getColourAtPosition (double position) const throw();
 
 	/** Creates a set of interpolated premultiplied ARGB values.
 		This will resize the HeapBlock, fill it with the colours, and will return the number of
@@ -23237,14 +23245,14 @@ private:
 	{
 		ColourPoint() throw() {}
 
-		ColourPoint (uint32 position_, const Colour& colour_) throw()
+		ColourPoint (const double position_, const Colour& colour_) throw()
 			: position (position_), colour (colour_)
 		{}
 
 		bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
 		bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
 
-		uint32 position;
+		double position;
 		Colour colour;
 	};
 
@@ -42586,14 +42594,20 @@ public:
 		void setID (const String& newID, UndoManager* undoManager);
 		static const Identifier idProperty;
 
-		static const FillType readFillType (const ValueTree& v);
-		static void writeFillType (ValueTree& v, const FillType& fillType, UndoManager* undoManager);
+		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1, RelativePoint* gradientPoint2,
+											RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+
+		static void writeFillType (ValueTree& v, const FillType& fillType,
+								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+								   UndoManager* undoManager);
 
 	protected:
 		ValueTree state;
-		static const Identifier type, x1, x2, y1, y2, colour, radial, colours;
+		static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
 
-		void replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* undoManager);
+		void replaceFillType (const Identifier& tag, const FillType& fillType,
+							  const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+							  UndoManager* undoManager);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -58593,11 +58607,15 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const FillType getMainFill() const;
-		void setMainFill (const FillType& newFill, UndoManager* undoManager);
+		const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+		ValueTree getMainFillState();
+		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+						  const RelativePoint* gradientPoint2, UndoManager* undoManager);
 
-		const FillType getStrokeFill() const;
-		void setStrokeFill (const FillType& newFill, UndoManager* undoManager);
+		const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+		ValueTree getStrokeFillState();
+		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+							const RelativePoint* gradientPoint2, UndoManager* undoManager);
 
 		const PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);

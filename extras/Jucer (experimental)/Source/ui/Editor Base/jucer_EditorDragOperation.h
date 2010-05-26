@@ -172,6 +172,11 @@ public:
                                                         roundToInt (line.end - line.start) + extraEndLength * 2, 1));
         }
 
+        bool updatePosition()
+        {
+            return true;
+        }
+
         void paint (Graphics& g)
         {
             g.fillAll (alignmentMarkerColour);

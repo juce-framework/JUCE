@@ -158,10 +158,8 @@ Drawable* Drawable::createFromValueTree (const ValueTree& tree, ImageProvider* i
 //==============================================================================
 const Identifier Drawable::ValueTreeWrapperBase::idProperty ("id");
 const Identifier Drawable::ValueTreeWrapperBase::type ("type");
-const Identifier Drawable::ValueTreeWrapperBase::x1 ("x1");
-const Identifier Drawable::ValueTreeWrapperBase::x2 ("x2");
-const Identifier Drawable::ValueTreeWrapperBase::y1 ("y1");
-const Identifier Drawable::ValueTreeWrapperBase::y2 ("y2");
+const Identifier Drawable::ValueTreeWrapperBase::gradientPoint1 ("point1");
+const Identifier Drawable::ValueTreeWrapperBase::gradientPoint2 ("point2");
 const Identifier Drawable::ValueTreeWrapperBase::colour ("colour");
 const Identifier Drawable::ValueTreeWrapperBase::radial ("radial");
 const Identifier Drawable::ValueTreeWrapperBase::colours ("colours");
@@ -188,7 +186,8 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* un
         state.setProperty (idProperty, newID, undoManager);
 }
 
-const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v)
+const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* gp1, RelativePoint* gp2,
+                                                             RelativeCoordinate::NamedCoordinateFinder* nameFinder)
 {
     const String newType (v[type].toString());
 
@@ -200,9 +199,17 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v)
     }
     else if (newType == "gradient")
     {
+        RelativePoint p1 (v [gradientPoint1]), p2 (v [gradientPoint2]);
+
         ColourGradient g;
-        g.point1.setXY (v[x1], v[y1]);
-        g.point2.setXY (v[x2], v[y2]);
+
+        if (gp1 != 0)
+            *gp1 = p1;
+        if (gp2 != 0)
+            *gp2 = p2;
+
+        g.point1 = p1.resolve (nameFinder);
+        g.point2 = p2.resolve (nameFinder);
         g.isRadial = v[radial];
 
         StringArray colourSteps;
@@ -223,26 +230,24 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v)
     return FillType();
 }
 
-void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType, UndoManager* const undoManager)
+void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType,
+                                                    const RelativePoint* gp1, const RelativePoint* gp2,
+                                                    UndoManager* const undoManager)
 {
     if (fillType.isColour())
     {
         v.setProperty (type, "solid", undoManager);
         v.setProperty (colour, String::toHexString ((int) fillType.colour.getARGB()), undoManager);
-        v.removeProperty (x1, undoManager);
-        v.removeProperty (x2, undoManager);
-        v.removeProperty (y1, undoManager);
-        v.removeProperty (y2, undoManager);
+        v.removeProperty (gradientPoint1, undoManager);
+        v.removeProperty (gradientPoint2, undoManager);
         v.removeProperty (radial, undoManager);
         v.removeProperty (colours, undoManager);
     }
     else if (fillType.isGradient())
     {
         v.setProperty (type, "gradient", undoManager);
-        v.setProperty (x1, fillType.gradient->point1.getX(), undoManager);
-        v.setProperty (y1, fillType.gradient->point1.getY(), undoManager);
-        v.setProperty (x2, fillType.gradient->point2.getX(), undoManager);
-        v.setProperty (y2, fillType.gradient->point2.getY(), undoManager);
+        v.setProperty (gradientPoint1, gp1 != 0 ? gp1->toString() : fillType.gradient->point1.toString(), undoManager);
+        v.setProperty (gradientPoint2, gp2 != 0 ? gp2->toString() : fillType.gradient->point2.toString(), undoManager);
         v.setProperty (radial, fillType.gradient->isRadial, undoManager);
 
         String s;
@@ -259,10 +264,8 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
 
         jassertfalse; //xxx todo
 
-        v.removeProperty (x1, undoManager);
-        v.removeProperty (x2, undoManager);
-        v.removeProperty (y1, undoManager);
-        v.removeProperty (y2, undoManager);
+        v.removeProperty (gradientPoint1, undoManager);
+        v.removeProperty (gradientPoint2, undoManager);
         v.removeProperty (radial, undoManager);
         v.removeProperty (colours, undoManager);
         v.removeProperty (colour, undoManager);
@@ -273,7 +276,9 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
     }
 }
 
-void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, const FillType& fillType, UndoManager* const undoManager)
+void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, const FillType& fillType,
+                                                      const RelativePoint* gp1, const RelativePoint* gp2,
+                                                      UndoManager* const undoManager)
 {
     ValueTree v (state.getChildWithName (tag));
 
@@ -283,7 +288,7 @@ void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, con
         v = state.getChildWithName (tag);
     }
 
-    writeFillType (v, fillType, undoManager);
+    writeFillType (v, fillType, gp1, gp2, undoManager);
 }
 
 

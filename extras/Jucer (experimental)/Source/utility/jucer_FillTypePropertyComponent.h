@@ -37,15 +37,43 @@ public:
         : fillState (fillState_),
           undoManager (undoManager_)
     {
-        addAndMakeVisible (&colourPicker);
+        colourButton.setButtonText ("Colour");
+        colourButton.setConnectedEdges (TextButton::ConnectedOnRight);
+        gradientButton.setButtonText ("Gradient");
+        gradientButton.setConnectedEdges (TextButton::ConnectedOnRight | TextButton::ConnectedOnLeft);
+        imageButton.setButtonText ("Image");
+        imageButton.setConnectedEdges (TextButton::ConnectedOnLeft);
+
+        addAndMakeVisible (&colourButton);
+        addAndMakeVisible (&gradientButton);
+        addAndMakeVisible (&imageButton);
+
+        addChildComponent (&colourPicker);
+        colourPicker.setCurrentColour (Colours::green);
         colourPicker.setName ("Colour");
         colourPicker.addChangeListener (this);
 
+        addChildComponent (&gradientPicker);
+        gradientPicker.addChangeListener (this);
+
         fillState.addListener (this);
+
+        colourButton.setRadioGroupId (123);
+        gradientButton.setRadioGroupId (123);
+        imageButton.setRadioGroupId (123);
+
+        colourButton.addButtonListener (this);
+        gradientButton.addButtonListener (this);
+        imageButton.addButtonListener (this);
+
+        refresh();
     }
 
     ~PopupFillSelector()
     {
+        colourButton.removeButtonListener (this);
+        gradientButton.removeButtonListener (this);
+        imageButton.removeButtonListener (this);
     }
 
     static void showAt (Component* comp, const ValueTree& fill, UndoManager* undoManager)
@@ -59,32 +87,84 @@ public:
 
     void resized()
     {
-        colourPicker.setBounds (0, 0, getWidth(), getHeight());
+        const int y = 2, w = 80, h = 22;
+        gradientButton.setBounds (getWidth() / 2 - w / 2, y, w, h);
+        colourButton.setBounds (gradientButton.getX() - w, y, w, h);
+        imageButton.setBounds (gradientButton.getRight(), y, w, h);
+
+        const Rectangle<int> content (2, y + h + 4, getWidth() - 4, getHeight() - (y + h + 6));
+        colourPicker.setBounds (content);
+        gradientPicker.setBounds (content);
     }
 
-    void buttonClicked (Button*)
+    void buttonClicked (Button* b)
     {
+        if (b == &colourButton)
+        {
+            setFillType (colourPicker.getCurrentColour());
+        }
+        else if (b == &gradientButton)
+        {
+            setFillType (gradientPicker.getGradient());
+        }
+        else if (b == &imageButton)
+        {
+            setFillType (FillType (*StoredSettings::getInstance()->getFallbackImage(),
+                                   AffineTransform::identity));
+        }
     }
 
-    void changeListenerCallback (void* source)
+    const FillType readFillType (RelativePoint* gp1, RelativePoint* gp2) const
     {
-        const FillType currentFill (Drawable::ValueTreeWrapperBase::readFillType (fillState));
+        return Drawable::ValueTreeWrapperBase::readFillType (fillState, gp1, gp2, 0);
+    }
+
+    void setFillType (const FillType& newFill)
+    {
+        RelativePoint gp1, gp2;
+        const FillType currentFill (readFillType (&gp1, &gp2));
+
+        if (currentFill != newFill)
+        {
+            if (undoManager != 0)
+                undoManager->undoCurrentTransactionOnly();
+
+            Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, undoManager);
+            refresh();
+        }
+    }
+
+    void changeListenerCallback (void*)
+    {
+        const FillType currentFill (readFillType (0, 0));
 
         if (currentFill.isColour())
-        {
-            const FillType newFill (colourPicker.getCurrentColour());
-
-            if (currentFill != newFill)
-                Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, undoManager);
-        }
+            setFillType (colourPicker.getCurrentColour());
+        else if (currentFill.isGradient())
+            setFillType (gradientPicker.getGradient());
     }
 
     void refresh()
     {
-        const FillType newFill (Drawable::ValueTreeWrapperBase::readFillType (fillState));
+        const FillType newFill (readFillType (0, 0));
+
+        colourPicker.setVisible (newFill.isColour());
+        gradientPicker.setVisible (newFill.isGradient());
 
         if (newFill.isColour())
+        {
+            colourButton.setToggleState (true, false);
             colourPicker.setCurrentColour (newFill.colour);
+        }
+        else if (newFill.isGradient())
+        {
+            gradientButton.setToggleState (true, false);
+            gradientPicker.setGradient (*newFill.gradient);
+        }
+        else
+        {
+            imageButton.setToggleState (true, false);
+        }
     }
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { refresh(); }
@@ -92,9 +172,215 @@ public:
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)                                  {}
 
 private:
+    //==============================================================================
+    class GradientDesigner  : public Component,
+                              public ChangeBroadcaster,
+                              private ChangeListener
+    {
+    public:
+        GradientDesigner()
+            : gradient (Colours::red, 0.0f, 0.0f, Colours::blue, 200.0f, 200.0f, false),
+              selectedPoint (-1),
+              dragging (false),
+              draggingNewPoint (false),
+              draggingPos (0)
+        {
+            addChildComponent (&colourPicker);
+            colourPicker.addChangeListener (this);
+        }
+
+        ~GradientDesigner()
+        {
+        }
+
+        void paint (Graphics& g)
+        {
+            g.fillAll (getLookAndFeel().findColour (ColourSelector::backgroundColourId));
+
+            g.fillCheckerBoard (previewArea.getX(), previewArea.getY(),
+                                previewArea.getWidth(), previewArea.getHeight(), 10, 10,
+                                Colour (0xffdddddd), Colour (0xffffffff));
+
+            FillType f (gradient);
+            f.gradient->point1.setXY ((float) previewArea.getX(), (float) previewArea.getCentreY());
+            f.gradient->point2.setXY ((float) previewArea.getRight(), (float) previewArea.getCentreY());
+            g.setFillType (f);
+            g.fillRect (previewArea);
+
+            Path marker;
+            const float headSize = 4.5f;
+            marker.addLineSegment (0.0f, -2.0f, 0.0f, previewArea.getHeight() + 2.0f, 1.5f);
+            marker.addTriangle (0.0f, 1.0f, -headSize, -headSize, headSize, -headSize);
+
+            for (int i = 0; i < gradient.getNumColours(); ++i)
+            {
+                const double pos = gradient.getColourPosition (i);
+                const Colour col (gradient.getColour (i));
+
+                const AffineTransform t (AffineTransform::translation (previewArea.getX() + 0.5f + (float) (previewArea.getWidth() * pos),
+                                                                       (float) previewArea.getY()));
+
+                g.setColour (Colours::black.withAlpha (0.8f));
+                g.strokePath (marker, PathStrokeType (i == selectedPoint ? 2.0f : 1.5f), t);
+                g.setColour (i == selectedPoint ? Colours::lightblue : Colours::white);
+                g.fillPath (marker, t);
+            }
+        }
+
+        void resized()
+        {
+            previewArea.setBounds (7, 8, getWidth() - 14, 24);
+            colourPicker.setBounds (0, previewArea.getBottom() + 8,
+                                    getWidth(), getHeight() - previewArea.getBottom() - 8);
+        }
+
+        void mouseDown (const MouseEvent& e)
+        {
+            dragging = false;
+            draggingNewPoint = false;
+            int point = getPointAt (e.x);
+
+            if (point >= 0)
+                setSelectedPoint (point);
+        }
+
+        void mouseDrag (const MouseEvent& e)
+        {
+            if ((! dragging) && ! e.mouseWasClicked())
+            {
+                preDragGradient = gradient;
+                const int mouseDownPoint = getPointAt (e.getMouseDownX());
+
+                if (mouseDownPoint >= 0)
+                {
+                    if (mouseDownPoint > 0 && mouseDownPoint < gradient.getNumColours() - 1)
+                    {
+                        dragging = true;
+                        draggingNewPoint = false;
+                        draggingColour = gradient.getColour (mouseDownPoint);
+                        preDragGradient.removeColour (mouseDownPoint);
+                        selectedPoint = -1;
+                    }
+                }
+                else
+                {
+                    dragging = true;
+                    draggingNewPoint = true;
+                    selectedPoint = -1;
+                }
+            }
+
+            if (dragging)
+            {
+                draggingPos = jlimit (0.001, 0.999, (e.x - previewArea.getX()) / (double) previewArea.getWidth());
+                gradient = preDragGradient;
+
+                if (previewArea.expanded (6, 6).contains (e.x, e.y))
+                {
+                    if (draggingNewPoint)
+                        draggingColour = preDragGradient.getColourAtPosition (draggingPos);
+
+                    selectedPoint = gradient.addColour (draggingPos, draggingColour);
+                    updatePicker();
+                }
+                else
+                {
+                    selectedPoint = -1;
+                }
+
+                sendChangeMessage (this);
+                repaint (previewArea.expanded (30, 30));
+            }
+        }
+
+        void mouseUp (const MouseEvent& e)
+        {
+            dragging = false;
+        }
+
+        const ColourGradient& getGradient() const throw()   { return gradient; }
+
+        void setGradient (const ColourGradient& newGradient)
+        {
+            if (newGradient != gradient)
+            {
+                gradient = newGradient;
+
+                if (selectedPoint < 0)
+                    selectedPoint = 0;
+
+                updatePicker();
+                sendChangeMessage (this);
+                repaint();
+            }
+        }
+
+        void setSelectedPoint (int newIndex)
+        {
+            if (selectedPoint != newIndex)
+            {
+                selectedPoint = newIndex;
+                updatePicker();
+                repaint();
+            }
+        }
+
+        void changeListenerCallback (void*)
+        {
+            if (selectedPoint >= 0 && (! dragging) && gradient.getColour (selectedPoint) != colourPicker.getCurrentColour())
+            {
+                gradient.setColour (selectedPoint, colourPicker.getCurrentColour());
+                repaint (previewArea);
+                sendChangeMessage (this);
+            }
+        }
+
+    private:
+        StoredSettings::ColourSelectorWithSwatches colourPicker;
+        ColourGradient gradient;
+        int selectedPoint;
+        bool dragging, draggingNewPoint;
+        double draggingPos;
+        Colour draggingColour;
+        ColourGradient preDragGradient;
+
+        Rectangle<int> previewArea;
+
+        void updatePicker()
+        {
+            colourPicker.setVisible (selectedPoint >= 0);
+            if (selectedPoint >= 0)
+                colourPicker.setCurrentColour (gradient.getColour (selectedPoint));
+        }
+
+        int getPointAt (const int x) const
+        {
+            int best = -1;
+            double bestDiff = 6;
+
+            for (int i = gradient.getNumColours(); --i >= 0;)
+            {
+                const double pos = previewArea.getX() + previewArea.getWidth() * gradient.getColourPosition (i);
+                const double diff = std::abs (pos - x);
+
+                if (diff < bestDiff)
+                {
+                    bestDiff = diff;
+                    best = i;
+                }
+            }
+
+            return best;
+        }
+    };
+
+    //==============================================================================
     StoredSettings::ColourSelectorWithSwatches colourPicker;
+    GradientDesigner gradientPicker;
     ValueTree fillState;
     UndoManager* undoManager;
+
+    TextButton colourButton, gradientButton, imageButton;
 };
 
 
@@ -149,7 +435,7 @@ public:
 
     void refresh()
     {
-        const FillType newFill (Drawable::ValueTreeWrapperBase::readFillType (fillState));
+        const FillType newFill (Drawable::ValueTreeWrapperBase::readFillType (fillState, 0, 0, 0));
 
         if (newFill != fillType)
         {
@@ -185,6 +471,7 @@ public:
         : PropertyComponent (name),
           editor (fill, undoManager)
     {
+        jassert (fill.isValid());
         addAndMakeVisible (&editor);
     }
 

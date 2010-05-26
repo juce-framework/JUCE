@@ -214,8 +214,8 @@ public:
         {
             //DBG (responseHeader);
 
-            StringArray lines;
-            lines.addLines (responseHeader);
+            headerLines.clear();
+            headerLines.addLines (responseHeader);
 
             const int statusCode = responseHeader.fromFirstOccurrenceOf (" ", false, false)
                                                  .substring (0, 3).getIntValue();
@@ -223,7 +223,7 @@ public:
             //int contentLength = findHeaderItem (lines, "Content-Length:").getIntValue();
             //bool isChunked = findHeaderItem (lines, "Transfer-Encoding:").equalsIgnoreCase ("chunked");
 
-            String location (findHeaderItem (lines, "Location:"));
+            String location (findHeaderItem (headerLines, "Location:"));
 
             if (statusCode >= 300 && statusCode < 400
                 && location.isNotEmpty())
@@ -266,6 +266,7 @@ public:
 
     //==============================================================================
     int readPosition;
+    StringArray headerLines;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -420,13 +421,11 @@ void* juce_openInternetFile (const String& url,
                              void* callbackContext,
                              int timeOutMs)
 {
-    JUCE_HTTPSocketStream* const s = new JUCE_HTTPSocketStream();
+    ScopedPointer<JUCE_HTTPSocketStream> s (new JUCE_HTTPSocketStream());
 
-    if (s->open (url, headers, postData, isPost,
-                 callback, callbackContext, timeOutMs))
-        return s;
+    if (s->open (url, headers, postData, isPost, callback, callbackContext, timeOutMs))
+        return s.release();
 
-    delete s;
     return 0;
 }
 
@@ -437,46 +436,46 @@ void juce_closeInternetFile (void* handle)
 
 int juce_readFromInternetFile (void* handle, void* buffer, int bytesToRead)
 {
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
+    JUCE_HTTPSocketStream* const s = static_cast <JUCE_HTTPSocketStream*> (handle);
 
-    if (s != 0)
-        return s->read (buffer, bytesToRead);
-
-    return 0;
+    return s != 0 ? s->read (buffer, bytesToRead) : 0;
 }
 
 int64 juce_getInternetFileContentLength (void* handle)
 {
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
+    JUCE_HTTPSocketStream* const s = static_cast <JUCE_HTTPSocketStream*> (handle);
 
     if (s != 0)
     {
         //xxx todo
-        jassertfalse;
+        jassertfalse
     }
 
     return -1;
 }
 
-void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+bool juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
 {
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
+    JUCE_HTTPSocketStream* const s = static_cast <JUCE_HTTPSocketStream*> (handle);
 
     if (s != 0)
     {
-        // xxx todo
-        jassertfalse;
+        for (int i = 0; i < s->headerLines.size(); ++i)
+        {
+            const String& headersEntry = s->headerLines[i];
+            const String key (headersEntry.upToFirstOccurrenceOf (": ", false, false));
+            const String value (headersEntry.fromFirstOccurrenceOf (": ", false, false));
+            const String previousValue (headers [key]);
+            headers.set (key, previousValue.isEmpty() ? value : (previousValue + ";" + value));
+        }
     }
 }
 
 int juce_seekInInternetFile (void* handle, int newPosition)
 {
-    JUCE_HTTPSocketStream* const s = (JUCE_HTTPSocketStream*) handle;
+    JUCE_HTTPSocketStream* const s = static_cast <JUCE_HTTPSocketStream*> (handle);
 
-    if (s != 0)
-        return s->readPosition;
-
-    return 0;
+    return s != 0 ? s->readPosition : 0;
 }
 
 #endif

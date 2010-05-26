@@ -128,11 +128,15 @@ public:
     public:
         ValueTreeWrapper (const ValueTree& state);
 
-        const FillType getMainFill() const;
-        void setMainFill (const FillType& newFill, UndoManager* undoManager);
+        const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+        ValueTree getMainFillState();
+        void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+                          const RelativePoint* gradientPoint2, UndoManager* undoManager);
 
-        const FillType getStrokeFill() const;
-        void setStrokeFill (const FillType& newFill, UndoManager* undoManager);
+        const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+        ValueTree getStrokeFillState();
+        void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+                            const RelativePoint* gradientPoint2, UndoManager* undoManager);
 
         const PathStrokeType getStrokeType() const;
         void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);

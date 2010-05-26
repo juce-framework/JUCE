@@ -133,7 +133,12 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** inputChannelData
     const ScopedLock sl (lock);
 
     if (processor != 0)
-        processor->processBlock (buffer, incomingMidi);
+    {
+        const ScopedLock sl (processor->getCallbackLock());
+
+        if (! processor->isSuspended())
+            processor->processBlock (buffer, incomingMidi);
+    }
 }
 
 void AudioProcessorPlayer::audioDeviceAboutToStart (AudioIODevice* device)

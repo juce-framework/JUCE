@@ -90,9 +90,13 @@ public:
                                             of the distance along the line between the two points
                                             at which the colour should occur.
         @param colour                       the colour that should be used at this point
+        @returns the index at which the new point was added
     */
-    void addColour (double proportionAlongGradient,
-                    const Colour& colour);
+    int addColour (double proportionAlongGradient,
+                   const Colour& colour);
+
+    /** Removes one of the colours from the gradient. */
+    void removeColour (int index);
 
     /** Multiplies the alpha value of all the colours by the given scale factor */
     void multiplyOpacity (float multiplier) throw();
@@ -108,15 +112,19 @@ public:
     double getColourPosition (int index) const throw();
 
     /** Returns the colour that was added with a given index.
-
-        The index is from 0 to getNumColours() - 1. The return value will be between 0.0 and 1.0
+        The index is from 0 to getNumColours() - 1.
     */
     const Colour getColour (int index) const throw();
+
+    /** Changes the colour at a given index.
+        The index is from 0 to getNumColours() - 1.
+    */
+    void setColour (int index, const Colour& newColour) throw();
 
     /** Returns the an interpolated colour at any position along the gradient.
         @param position     the position along the gradient, between 0 and 1
     */
-    const Colour getColourAtPosition (float position) const throw();
+    const Colour getColourAtPosition (double position) const throw();
 
     //==============================================================================
     /** Creates a set of interpolated premultiplied ARGB values.
@@ -152,14 +160,14 @@ private:
     {
         ColourPoint() throw() {}
 
-        ColourPoint (uint32 position_, const Colour& colour_) throw()
+        ColourPoint (const double position_, const Colour& colour_) throw()
             : position (position_), colour (colour_)
         {}
 
         bool operator== (const ColourPoint& other) const throw()   { return position == other.position && colour == other.colour; }
         bool operator!= (const ColourPoint& other) const throw()   { return position != other.position || colour != other.colour; }
 
-        uint32 position;
+        double position;
         Colour colour;
     };
 

@@ -146,6 +146,13 @@ public:
 
     void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
     {
+        DrawablePath::ValueTreeWrapper wrapper (item.getState());
+
+        props.add (new FillTypePropertyComponent (item.getDocument().getUndoManager(),
+                                                  "Fill", wrapper.getMainFillState()));
+
+        props.add (new FillTypePropertyComponent (item.getDocument().getUndoManager(),
+                                                  "Stroke", wrapper.getStrokeFillState()));
     }
 
     void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
