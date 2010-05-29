@@ -146,7 +146,7 @@ public:
         return getDocument().getCoordsFor (state);
     }
 
-    void updateExtraComponentsForObject (const ValueTree& state, Component* parent, OwnedArray<OverlayItemComponent>& existingComps)
+    void updateControlPointComponents (Component* parent, OwnedArray<OverlayItemComponent>& existingComps)
     {
     }
 
@@ -184,7 +184,6 @@ public:
 
         ~DragOperation()
         {
-            getUndoManager().beginNewTransaction();
         }
 
     protected:

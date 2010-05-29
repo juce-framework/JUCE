@@ -381,6 +381,18 @@ ValueTree ValueTree::SharedObject::getChildWithName (const Identifier& typeToMat
     return ValueTree::invalid;
 }
 
+ValueTree ValueTree::SharedObject::getOrCreateChildWithName (const Identifier& typeToMatch, UndoManager* undoManager)
+{
+    for (int i = 0; i < children.size(); ++i)
+        if (children.getUnchecked(i)->type == typeToMatch)
+            return ValueTree (static_cast <SharedObject*> (children.getUnchecked(i)));
+
+    SharedObject* const newObject = new SharedObject (typeToMatch);
+    addChild (newObject, -1, undoManager);
+    return ValueTree (newObject);
+
+}
+
 ValueTree ValueTree::SharedObject::getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const
 {
     for (int i = 0; i < children.size(); ++i)
@@ -715,6 +727,11 @@ ValueTree ValueTree::getChild (int index) const
 ValueTree ValueTree::getChildWithName (const Identifier& type) const
 {
     return object != 0 ? object->getChildWithName (type) : ValueTree::invalid;
+}
+
+ValueTree ValueTree::getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager)
+{
+    return object != 0 ? object->getOrCreateChildWithName (type, undoManager) : ValueTree::invalid;
 }
 
 ValueTree ValueTree::getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const

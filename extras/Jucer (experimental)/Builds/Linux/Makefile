@@ -47,6 +47,7 @@ OBJECTS := \
   $(OBJDIR)/jucer_ComponentDocument.o \
   $(OBJDIR)/jucer_ComponentTypeManager.o \
   $(OBJDIR)/jucer_DrawableDocument.o \
+  $(OBJDIR)/jucer_DrawableTypeHandler.o \
   $(OBJDIR)/jucer_NewFileWizard.o \
   $(OBJDIR)/jucer_Project.o \
   $(OBJDIR)/jucer_ProjectExporter.o \
@@ -111,6 +112,11 @@ $(OBJDIR)/jucer_ComponentTypeManager.o: ../../Source/model/Component/Types/jucer
 $(OBJDIR)/jucer_DrawableDocument.o: ../../Source/model/Drawable/jucer_DrawableDocument.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_DrawableDocument.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/jucer_DrawableTypeHandler.o: ../../Source/model/Drawable/jucer_DrawableTypeHandler.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling jucer_DrawableTypeHandler.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_NewFileWizard.o: ../../Source/model/Project/jucer_NewFileWizard.cpp

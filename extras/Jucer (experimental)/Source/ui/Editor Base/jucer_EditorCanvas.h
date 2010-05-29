@@ -88,6 +88,7 @@ public:
     virtual void deselectNonDraggableObjects() = 0;
     virtual void findLassoItemsInArea (Array <SelectedItems::ItemType>& itemsFound, const Rectangle<int>& area) = 0;
 
+    //==============================================================================
     class DragOperation
     {
     public:
@@ -104,6 +105,12 @@ public:
     void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone);
     void continueDrag (const MouseEvent& e);
     void endDrag (const MouseEvent& e);
+
+    void enableResizingMode();
+    void enableControlPointMode (const ValueTree& objectToEdit);
+
+    bool isResizingMode() const         { return ! isControlPointMode(); }
+    bool isControlPointMode() const     { return controlPointEditingTarget.isValid(); }
 
     //==============================================================================
     Component* getComponentHolder() const       { return componentHolder; }
@@ -129,14 +136,15 @@ public:
     };
 
     //==============================================================================
-    virtual void updateExtraComponentsForObject (const ValueTree& state, Component* parent,
-                                                 OwnedArray<OverlayItemComponent>& existingComps) = 0;
+    virtual void updateControlPointComponents (Component* parent,
+                                               OwnedArray<OverlayItemComponent>& existingComps) = 0;
 
 protected:
     //==============================================================================
     const BorderSize border;
     Point<int> origin;
     double scaleFactor;
+    ValueTree controlPointEditingTarget;
 
     friend class OverlayItemComponent;
     class ResizeFrame;

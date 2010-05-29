@@ -28,80 +28,6 @@
 
 
 //==============================================================================
-class DrawableTypeManager   : public DeletedAtShutdown
-{
-public:
-    DrawableTypeManager()
-    {
-        handlers.add (new DrawablePathHandler());
-        handlers.add (new DrawableImageHandler());
-        handlers.add (new DrawableCompositeHandler());
-    }
-
-    ~DrawableTypeManager()
-    {
-    }
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (DrawableTypeManager);
-
-    //==============================================================================
-    int getNumHandlers() const                                      { return handlers.size(); }
-    DrawableTypeHandler* getHandler (const int index) const         { return handlers[index]; }
-
-    DrawableTypeHandler* getHandlerFor (const Identifier& type)
-    {
-        for (int i = handlers.size(); --i >= 0;)
-            if (handlers.getUnchecked(i)->getValueTreeType() == type)
-                return handlers.getUnchecked(i);
-
-        jassertfalse;
-        return 0;
-    }
-
-private:
-    OwnedArray <DrawableTypeHandler> handlers;
-};
-
-juce_ImplementSingleton_SingleThreaded (DrawableTypeManager);
-
-
-//==============================================================================
-DrawableTypeInstance::DrawableTypeInstance (DrawableDocument& document_, const ValueTree& state_)
-    : document (document_), state (state_)
-{
-}
-
-Value DrawableTypeInstance::getValue (const Identifier& name) const
-{
-    return state.getPropertyAsValue (name, document.getUndoManager());
-}
-
-void DrawableTypeInstance::createProperties (Array <PropertyComponent*>& props)
-{
-    props.add (new TextPropertyComponent (getValue (Drawable::ValueTreeWrapperBase::idProperty), "Object ID", 128, false));
-
-    getHandler()->createPropertyEditors (*this, props);
-}
-
-DrawableTypeHandler* DrawableTypeInstance::getHandler() const
-{
-    DrawableTypeHandler* h = DrawableTypeManager::getInstance()->getHandlerFor (state.getType());
-    jassert (h != 0);
-    return h;
-}
-
-void DrawableTypeInstance::setBounds (Drawable* drawable, const Rectangle<float>& newBounds)
-{
-    return getHandler()->setBounds (*this, drawable, newBounds);
-}
-
-void DrawableTypeInstance::getAllControlPoints (Array <RelativePoint>& points)
-{
-    return getHandler()->getAllControlPoints (*this, points);
-}
-
-
-//==============================================================================
 namespace Tags
 {
     const Identifier drawableTag ("DRAWABLE");
@@ -158,12 +84,6 @@ void DrawableDocument::checkRootObject()
     if (markersY == 0)
         markersY = new MarkerList (*this, false);
 
-/*    if ((int) getCanvasWidth().getValue() <= 0)
-        getCanvasWidth() = 500;
-
-    if ((int) getCanvasHeight().getValue() <= 0)
-        getCanvasHeight() = 500;
-*/
     DrawableComposite::ValueTreeWrapper rootObject (getRootDrawableNode());
     recursivelyUpdateIDs (rootObject);
 }
@@ -325,35 +245,30 @@ const int menuItemOffset = 0x63451fa4;
 
 void DrawableDocument::addNewItemMenuItems (PopupMenu& menu) const
 {
-    DrawableTypeManager* const typeMan = DrawableTypeManager::getInstance();
+    const StringArray newItems (DrawableTypeManager::getInstance()->getNewItemList());
 
-    for (int i = 0; i < typeMan->getNumHandlers(); ++i)
-        if (typeMan->getHandler(i)->canBeCreated)
-            menu.addItem (i + menuItemOffset, "New " + typeMan->getHandler(i)->getDisplayName());
+    for (int i = 0; i < newItems.size(); ++i)
+        menu.addItem (i + menuItemOffset, newItems[i]);
 }
 
 const ValueTree DrawableDocument::performNewItemMenuItem (int menuResultCode)
 {
-    DrawableTypeManager* const typeMan = DrawableTypeManager::getInstance();
+    const StringArray newItems (DrawableTypeManager::getInstance()->getNewItemList());
 
-    if (menuResultCode >= menuItemOffset && menuResultCode < menuItemOffset + typeMan->getNumHandlers())
+    int index = menuResultCode - menuItemOffset;
+    if (index >= 0 && index < newItems.size())
     {
-        DrawableTypeHandler* handler = typeMan->getHandler (menuResultCode - menuItemOffset);
-        jassert (handler != 0);
+        ValueTree state (DrawableTypeManager::getInstance()
+                            ->createNewItem (index, *this,
+                                             Point<float> (Random::getSystemRandom().nextFloat() * 100.0f + 100.0f,
+                                                           Random::getSystemRandom().nextFloat() * 100.0f + 100.0f)));
 
-        if (handler != 0)
-        {
-            ValueTree state (handler->createNewInstance (*this,
-                                                         Point<float> (Random::getSystemRandom().nextFloat() * 100.0f + 100.0f,
-                                                                       Random::getSystemRandom().nextFloat() * 100.0f + 100.0f)));
+        Drawable::ValueTreeWrapperBase wrapper (state);
+        recursivelyUpdateIDs (wrapper);
 
-            Drawable::ValueTreeWrapperBase wrapper (state);
-            recursivelyUpdateIDs (wrapper);
+        getRootDrawableNode().addDrawable (state, -1, getUndoManager());
 
-            getRootDrawableNode().addDrawable (state, -1, getUndoManager());
-
-            return state;
-        }
+        return state;
     }
 
     return ValueTree::invalid;
@@ -391,23 +306,11 @@ const RelativeCoordinate DrawableDocument::findNamedCoordinate (const String& ob
 {
     if (objectName == "parent")
     {
-//        if (edge == "right")     return RelativeCoordinate ((double) getCanvasWidth().getValue(), true);
-  //      if (edge == "bottom")    return RelativeCoordinate ((double) getCanvasHeight().getValue(), false);
+        jassert (edge != "right" && edge != "bottom"); // drawables don't have a canvas size..
     }
 
     if (objectName.isNotEmpty() && edge.isNotEmpty())
     {
-/*            const ValueTree comp (getComponentWithMemberName (compName));
-
-        if (comp.isValid())
-        {
-            const RelativeRectangle coords (getCoordsFor (comp));
-
-            if (edge == RelativeCoordinate::leftName)   return coords.left;
-            if (edge == "right")  return coords.right;
-            if (edge == "top")    return coords.top;
-            if (edge == "bottom") return coords.bottom;
-        }*/
     }
 
     {
@@ -473,8 +376,7 @@ const RelativeCoordinate DrawableDocument::MarkerList::findNamedCoordinate (cons
 {
     if (objectName == "parent")
     {
-//        if (edge == "right")     return RelativeCoordinate ((double) document.getCanvasWidth().getValue(), true);
-  //      if (edge == "bottom")    return RelativeCoordinate ((double) document.getCanvasHeight().getValue(), false);
+        jassert (edge != "right" && edge != "bottom"); // drawables don't have a canvas size..
     }
 
     const ValueTree marker (getMarkerNamed (objectName));

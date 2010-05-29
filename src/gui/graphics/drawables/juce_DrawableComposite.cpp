@@ -360,12 +360,7 @@ ValueTree DrawableComposite::ValueTreeWrapper::getChildList() const
 
 ValueTree DrawableComposite::ValueTreeWrapper::getChildListCreating (UndoManager* undoManager)
 {
-    const ValueTree childList (getChildList());
-    if (childList.isValid())
-        return childList;
-
-    state.addChild (ValueTree (childGroupTag), 0, undoManager);
-    return getChildList();
+    return state.getOrCreateChildWithName (childGroupTag, undoManager);
 }
 
 int DrawableComposite::ValueTreeWrapper::getNumDrawables() const
@@ -466,12 +461,7 @@ ValueTree DrawableComposite::ValueTreeWrapper::getMarkerList (bool xAxis) const
 
 ValueTree DrawableComposite::ValueTreeWrapper::getMarkerListCreating (bool xAxis, UndoManager* undoManager)
 {
-    const ValueTree markerList (getMarkerList (xAxis));
-    if (markerList.isValid())
-        return markerList;
-
-    state.addChild (ValueTree (xAxis ? markerGroupTagX : markerGroupTagY), -1, undoManager);
-    return getMarkerList (xAxis);
+    return state.getOrCreateChildWithName (xAxis ? markerGroupTagX : markerGroupTagY, undoManager);
 }
 
 int DrawableComposite::ValueTreeWrapper::getNumMarkers (bool xAxis) const

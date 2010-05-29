@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_RelativeCoordinate.h"
+#include "../drawables/juce_DrawablePath.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
@@ -494,6 +495,11 @@ RelativePoint::RelativePoint (const Point<float>& absolutePoint)
 {
 }
 
+RelativePoint::RelativePoint (const float x_, const float y_)
+    : x (x_, true), y (y_, false)
+{
+}
+
 RelativePoint::RelativePoint (const RelativeCoordinate& x_, const RelativeCoordinate& y_)
     : x (x_), y (y_)
 {
@@ -625,88 +631,83 @@ RelativePointPath::RelativePointPath (const RelativePointPath& other)
     : usesNonZeroWinding (true),
       containsDynamicPoints (false)
 {
-    parseString (other.toString());
+    ValueTree state (DrawablePath::valueTreeType);
+    writeTo (state, 0);
+    parse (state);
 }
 
-RelativePointPath::RelativePointPath (const String& s)
+RelativePointPath::RelativePointPath (const ValueTree& drawable)
     : usesNonZeroWinding (true),
       containsDynamicPoints (false)
 {
-    parseString (s);
+    parse (drawable);
 }
 
-void RelativePointPath::parseString (const String& s)
+RelativePointPath::RelativePointPath (const Path& path)
 {
-    int i = 0;
-    juce_wchar marker = 'm';
-    int numValues = 2;
-    RelativePoint points [3];
+    usesNonZeroWinding = path.isUsingNonZeroWinding();
 
-    for (;;)
+    Path::Iterator i (path);
+
+    while (i.next())
     {
-        RelativeCoordinateHelpers::skipWhitespace (s, i);
-        const juce_wchar firstChar = s[i];
-
-        if (firstChar == 0)
-            break;
-
-        const juce_wchar secondChar = s[i + 1];
-
-        if (secondChar == 0 || CharacterFunctions::isWhitespace (secondChar))
+        switch (i.elementType)
         {
-            if (firstChar == 'm' || firstChar == 'l')
-            {
-                ++i;
-                marker = firstChar;
-                numValues = 1;
-            }
-            else if (firstChar == 'q')
-            {
-                ++i;
-                marker = firstChar;
-                numValues = 2;
-            }
-            else if (firstChar == 'c')
-            {
-                ++i;
-                marker = firstChar;
-                numValues = 3;
-            }
-            else if (firstChar == 'z')
-            {
-                ++i;
-                marker = 'm';
-                numValues = 2;
-                elements.add (new CloseSubPath());
-                continue;
-            }
-            else if (firstChar == 'a')
-            {
-                ++i;
-                usesNonZeroWinding = false;
-                continue;
-            }
+            case Path::Iterator::startNewSubPath:   elements.add (new StartSubPath (RelativePoint (i.x1, i.y1))); break;
+            case Path::Iterator::lineTo:            elements.add (new LineTo (RelativePoint (i.x1, i.y1))); break;
+            case Path::Iterator::quadraticTo:       elements.add (new QuadraticTo (RelativePoint (i.x1, i.y1), RelativePoint (i.x2, i.y2))); break;
+            case Path::Iterator::cubicTo:           elements.add (new CubicTo (RelativePoint (i.x1, i.y1), RelativePoint (i.x2, i.y2), RelativePoint (i.x3, i.y3))); break;
+            case Path::Iterator::closePath:         elements.add (new CloseSubPath()); break;
+            default:                                jassertfalse; break;
         }
+    }
+}
 
-        if (firstChar == '#')
-            ++i;
+void RelativePointPath::writeTo (ValueTree state, UndoManager* undoManager)
+{
+    DrawablePath::ValueTreeWrapper wrapper (state);
+    wrapper.setUsesNonZeroWinding (usesNonZeroWinding, undoManager);
 
-        for (int j = 0; j < numValues; ++j)
+    ValueTree pathTree (wrapper.getPathState());
+    pathTree.removeAllChildren (undoManager);
+
+    for (int i = 0; i < elements.size(); ++i)
+        pathTree.addChild (elements.getUnchecked(i)->createTree(), -1, undoManager);
+}
+
+void RelativePointPath::parse (const ValueTree& state)
+{
+    DrawablePath::ValueTreeWrapper wrapper (state);
+    usesNonZeroWinding = wrapper.usesNonZeroWinding();
+    RelativePoint points[3];
+
+    const ValueTree pathTree (wrapper.getPathState());
+    const int num = pathTree.getNumChildren();
+    for (int i = 0; i < num; ++i)
+    {
+        const DrawablePath::ValueTreeWrapper::Element e (pathTree.getChild(i));
+
+        const int numCps = e.getNumControlPoints();
+        for (int j = 0; j < numCps; ++j)
         {
-            const RelativeCoordinate x (RelativeCoordinateHelpers::readNextCoordinate (s, i, true));
-            const RelativeCoordinate y (RelativeCoordinateHelpers::readNextCoordinate (s, i, false));
-            points[j] = RelativePoint (x, y);
+            points[j] = e.getControlPoint (j);
             containsDynamicPoints = containsDynamicPoints || points[j].isDynamic();
         }
 
-        switch (marker)
-        {
-            case 'm':   elements.add (new StartSubPath (points[0])); break;
-            case 'l':   elements.add (new LineTo (points[0])); break;
-            case 'q':   elements.add (new QuadraticTo (points[0], points[1])); break;
-            case 'c':   elements.add (new CubicTo (points[0], points[1], points[2])); break;
-            default: jassertfalse; break;  // illegal string format?
-        }
+        const Identifier type (e.getType());
+
+        if (type == DrawablePath::ValueTreeWrapper::Element::startSubPathElement)
+            elements.add (new StartSubPath (points[0]));
+        else if (type == DrawablePath::ValueTreeWrapper::Element::closeSubPathElement)
+            elements.add (new CloseSubPath());
+        else if (type == DrawablePath::ValueTreeWrapper::Element::lineToElement)
+            elements.add (new LineTo (points[0]));
+        else if (type == DrawablePath::ValueTreeWrapper::Element::quadraticToElement)
+            elements.add (new QuadraticTo (points[0], points[1]));
+        else if (type == DrawablePath::ValueTreeWrapper::Element::cubicToElement)
+            elements.add (new CubicTo (points[0], points[1], points[2]));
+        else
+            jassertfalse;
     }
 }
 
@@ -731,27 +732,6 @@ bool RelativePointPath::containsAnyDynamicPoints() const
     return containsDynamicPoints;
 }
 
-const String RelativePointPath::toString() const
-{
-    ElementType lastType = nullElement;
-    MemoryOutputStream out;
-
-    if (! usesNonZeroWinding)
-        out << 'a';
-
-    for (int i = 0; i < elements.size(); ++i)
-    {
-        if (out.getDataSize() > 0)
-            out << ' ';
-
-        const ElementBase* const e = elements.getUnchecked(i);
-        e->write (out, lastType);
-        lastType = e->type;
-    }
-
-    return out.toUTF8();
-}
-
 //==============================================================================
 RelativePointPath::ElementBase::ElementBase (const ElementType type_) : type (type_)
 {
@@ -763,16 +743,11 @@ RelativePointPath::StartSubPath::StartSubPath (const RelativePoint& pos)
 {
 }
 
-void RelativePointPath::StartSubPath::write (OutputStream& out, ElementType lastTypeWritten) const
+const ValueTree RelativePointPath::StartSubPath::createTree() const
 {
-    const String p (startPos.toString());
-
-    if (lastTypeWritten != startSubPathElement)
-        out << "m ";
-    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p))
-        out << '#';
-
-    out << p;
+    ValueTree v (DrawablePath::ValueTreeWrapper::Element::startSubPathElement);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, startPos.toString(), 0);
+    return v;
 }
 
 void RelativePointPath::StartSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
@@ -793,10 +768,9 @@ RelativePointPath::CloseSubPath::CloseSubPath()
 {
 }
 
-void RelativePointPath::CloseSubPath::write (OutputStream& out, ElementType lastTypeWritten) const
+const ValueTree RelativePointPath::CloseSubPath::createTree() const
 {
-    if (lastTypeWritten != closeSubPathElement)
-        out << 'z';
+    return ValueTree (DrawablePath::ValueTreeWrapper::Element::closeSubPathElement);
 }
 
 void RelativePointPath::CloseSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder*) const
@@ -816,16 +790,11 @@ RelativePointPath::LineTo::LineTo (const RelativePoint& endPoint_)
 {
 }
 
-void RelativePointPath::LineTo::write (OutputStream& out, ElementType lastTypeWritten) const
+const ValueTree RelativePointPath::LineTo::createTree() const
 {
-    const String p (endPoint.toString());
-
-    if (lastTypeWritten != lineToElement)
-        out << "l ";
-    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p))
-        out << '#';
-
-    out << p;
+    ValueTree v (DrawablePath::ValueTreeWrapper::Element::lineToElement);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, endPoint.toString(), 0);
+    return v;
 }
 
 void RelativePointPath::LineTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
@@ -848,16 +817,12 @@ RelativePointPath::QuadraticTo::QuadraticTo (const RelativePoint& controlPoint, 
     controlPoints[1] = endPoint;
 }
 
-void RelativePointPath::QuadraticTo::write (OutputStream& out, ElementType lastTypeWritten) const
+const ValueTree RelativePointPath::QuadraticTo::createTree() const
 {
-    const String p1 (controlPoints[0].toString());
-
-    if (lastTypeWritten != quadraticToElement)
-        out << "q ";
-    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
-        out << '#';
-
-    out << p1 << ' ' << controlPoints[1].toString();
+    ValueTree v (DrawablePath::ValueTreeWrapper::Element::quadraticToElement);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), 0);
+    return v;
 }
 
 void RelativePointPath::QuadraticTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
@@ -882,16 +847,13 @@ RelativePointPath::CubicTo::CubicTo (const RelativePoint& controlPoint1, const R
     controlPoints[2] = endPoint;
 }
 
-void RelativePointPath::CubicTo::write (OutputStream& out, ElementType lastTypeWritten) const
+const ValueTree RelativePointPath::CubicTo::createTree() const
 {
-    const String p1 (controlPoints[0].toString());
-
-    if (lastTypeWritten != cubicToElement)
-        out << "c ";
-    else if (RelativeCoordinateHelpers::couldBeMistakenForPathCommand (p1))
-        out << '#';
-
-    out << p1 << ' ' << controlPoints[1].toString() << ' ' << controlPoints[2].toString();
+    ValueTree v (DrawablePath::ValueTreeWrapper::Element::cubicToElement);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point1, controlPoints[0].toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point2, controlPoints[1].toString(), 0);
+    v.setProperty (DrawablePath::ValueTreeWrapper::point3, controlPoints[2].toString(), 0);
+    return v;
 }
 
 void RelativePointPath::CubicTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const

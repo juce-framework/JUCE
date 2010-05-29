@@ -72,6 +72,8 @@
               file="Source/model/Drawable/jucer_DrawableDocument.cpp"/>
         <FILE id="qMcrWuCal" name="jucer_DrawableDocument.h" compile="0" resource="0"
               file="Source/model/Drawable/jucer_DrawableDocument.h"/>
+        <FILE id="9y0VHaD" name="jucer_DrawableTypeHandler.cpp" compile="1"
+              resource="0" file="Source/model/Drawable/jucer_DrawableTypeHandler.cpp"/>
         <FILE id="tGjXOXiR9" name="jucer_DrawableTypeHandler.h" compile="0"
               resource="0" file="Source/model/Drawable/jucer_DrawableTypeHandler.h"/>
       </GROUP>

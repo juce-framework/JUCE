@@ -29,6 +29,7 @@
 #include "juce_Path.h"
 #include "juce_Rectangle.h"
 #include "../../../containers/juce_OwnedArray.h"
+#include "../../../containers/juce_ValueTree.h"
 
 
 //==============================================================================
@@ -289,6 +290,9 @@ public:
     /** Creates an absolute point, relative to the origin. */
     RelativePoint (const Point<float>& absolutePoint);
 
+    /** Creates an absolute point, relative to the origin. */
+    RelativePoint (float absoluteX, float absoluteY);
+
     /** Creates an absolute point from two coordinates. */
     RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
 
@@ -416,7 +420,8 @@ public:
     //==============================================================================
     RelativePointPath();
     RelativePointPath (const RelativePointPath& other);
-    RelativePointPath (const String& stringVersion);
+    RelativePointPath (const ValueTree& drawable);
+    RelativePointPath (const Path& path);
     ~RelativePointPath();
 
     //==============================================================================
@@ -426,11 +431,8 @@ public:
     /** Returns true if the path contains any non-fixed points. */
     bool containsAnyDynamicPoints() const;
 
-    /** Returns a string version of the path.
-        This has the same format as Path::toString(), but since it can contain RelativeCoordinate
-        positions, it can't be parsed by the Path class if any of the points are dynamic.
-    */
-    const String toString() const;
+    /** Writes the path to this drawable encoding. */
+    void writeTo (ValueTree state, UndoManager* undoManager);
 
     /** Quickly swaps the contents of this path with another. */
     void swapWith (RelativePointPath& other) throw();
@@ -457,7 +459,7 @@ public:
     public:
         ElementBase (ElementType type);
         virtual ~ElementBase() {}
-        virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
+        virtual const ValueTree createTree() const = 0;
         virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
         virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
@@ -473,7 +475,7 @@ public:
     public:
         StartSubPath (const RelativePoint& pos);
         ~StartSubPath() {}
-        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        const ValueTree createTree() const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
 
@@ -489,7 +491,7 @@ public:
     public:
         CloseSubPath();
         ~CloseSubPath() {}
-        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        const ValueTree createTree() const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
 
@@ -503,7 +505,7 @@ public:
     public:
         LineTo (const RelativePoint& endPoint);
         ~LineTo() {}
-        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        const ValueTree createTree() const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
 
@@ -519,7 +521,7 @@ public:
     public:
         QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
         ~QuadraticTo() {}
-        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        const ValueTree createTree() const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
 
@@ -535,7 +537,7 @@ public:
     public:
         CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
         ~CubicTo() {}
-        void write (OutputStream& out, ElementType lastTypeWritten) const;
+        const ValueTree createTree() const;
         void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
         RelativePoint* getControlPoints (int& numPoints);
 
@@ -553,7 +555,7 @@ public:
 private:
     bool containsDynamicPoints;
 
-    void parseString (const String& s);
+    void parse (const ValueTree& state);
 
     RelativePointPath& operator= (const RelativePointPath&);
 };

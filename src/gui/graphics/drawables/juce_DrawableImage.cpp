@@ -313,6 +313,8 @@ const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tre
          || controlPoints[1] != newControlPoint[1]
          || controlPoints[2] != newControlPoint[2])
     {
+        const Rectangle<float> damage (getBounds());
+
         opacity = newOpacity;
         overlayColour = newOverlayColour;
         controlPoints[0] = newControlPoint[0];
@@ -328,7 +330,7 @@ const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tre
             image = newImage;
         }
 
-        return getBounds();
+        return damage.getUnion (getBounds());
     }
 
     ImageCache::release (newImage);

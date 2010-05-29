@@ -21,6 +21,7 @@
 		061C981D0E9FB70DE5A3D32C = { isa = PBXBuildFile; fileRef = 829C5DA65FB46B99756428C5; };
 		FEDBCD721085272D356BBAEB = { isa = PBXBuildFile; fileRef = D08D9DB99315F76093CF6EE6; };
 		268807D7091702D29033CC27 = { isa = PBXBuildFile; fileRef = B1471E8698D193FBCF0DD13D; };
+		91CCD0421DDD432C1C4903D4 = { isa = PBXBuildFile; fileRef = 330A51CC68AED92F7F5BEC15; };
 		06838545183964D8C1E60530 = { isa = PBXBuildFile; fileRef = 9DCB32BBD7053ACCB598CE79; };
 		048D33BDE7413EFE05D09901 = { isa = PBXBuildFile; fileRef = 4179D4C7BF616A4A3C3E11CA; };
 		9DA1913A62297D7111E0A6C9 = { isa = PBXBuildFile; fileRef = 48A4236550741B9D05208C60; };
@@ -84,6 +85,7 @@
 		E894E1F6D582678EE1F02763 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Viewport.h; path = ../../Source/model/Component/Types/jucer_Viewport.h; sourceTree = SOURCE_ROOT; };
 		B1471E8698D193FBCF0DD13D = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_DrawableDocument.cpp; path = ../../Source/model/Drawable/jucer_DrawableDocument.cpp; sourceTree = SOURCE_ROOT; };
 		739F94CA6213B43D867AB0FD = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_DrawableDocument.h; path = ../../Source/model/Drawable/jucer_DrawableDocument.h; sourceTree = SOURCE_ROOT; };
+		330A51CC68AED92F7F5BEC15 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_DrawableTypeHandler.cpp; path = ../../Source/model/Drawable/jucer_DrawableTypeHandler.cpp; sourceTree = SOURCE_ROOT; };
 		BDE8CD9273E1B0D0E500D283 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_DrawableTypeHandler.h; path = ../../Source/model/Drawable/jucer_DrawableTypeHandler.h; sourceTree = SOURCE_ROOT; };
 		9DCB32BBD7053ACCB598CE79 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_NewFileWizard.cpp; path = ../../Source/model/Project/jucer_NewFileWizard.cpp; sourceTree = SOURCE_ROOT; };
 		201DF0B7B4AA3E03B1AA5144 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_NewFileWizard.h; path = ../../Source/model/Project/jucer_NewFileWizard.h; sourceTree = SOURCE_ROOT; };
@@ -204,6 +206,7 @@
 		E70E3BE796E91EA86CFE10FE = { isa = PBXGroup; children = (
 				B1471E8698D193FBCF0DD13D,
 				739F94CA6213B43D867AB0FD,
+				330A51CC68AED92F7F5BEC15,
 				BDE8CD9273E1B0D0E500D283 ); name = Drawable; sourceTree = "<group>"; };
 		ADA17383E5554BCDF567AACC = { isa = PBXGroup; children = (
 				9DCB32BBD7053ACCB598CE79,
@@ -416,6 +419,7 @@
 				061C981D0E9FB70DE5A3D32C,
 				FEDBCD721085272D356BBAEB,
 				268807D7091702D29033CC27,
+				91CCD0421DDD432C1C4903D4,
 				06838545183964D8C1E60530,
 				048D33BDE7413EFE05D09901,
 				9DA1913A62297D7111E0A6C9,

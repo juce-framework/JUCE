@@ -119,7 +119,7 @@ public:
     /** @internal */
     static const Identifier valueTreeType;
     /** @internal */
-    const Identifier getValueTreeType() const    { return valueTreeType; }
+    const Identifier getValueTreeType() const       { return valueTreeType; }
 
     //==============================================================================
     /** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
@@ -141,10 +141,31 @@ public:
         const PathStrokeType getStrokeType() const;
         void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
 
-        void getPath (RelativePointPath& path) const;
-        void setPath (const String& newPath, UndoManager* undoManager);
+        bool usesNonZeroWinding() const;
+        void setUsesNonZeroWinding (bool b, UndoManager* undoManager);
 
-        static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
+        class Element
+        {
+        public:
+            explicit Element (const ValueTree& state);
+            ~Element();
+
+            const Identifier getType() const throw()    { return state.getType(); }
+            int getNumControlPoints() const throw();
+
+            const RelativePoint getControlPoint (int index) const;
+            void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
+
+            static const Identifier startSubPathElement, closeSubPathElement,
+                                    lineToElement, quadraticToElement, cubicToElement;
+
+            ValueTree state;
+        };
+
+        ValueTree getPathState();
+
+        static const Identifier fill, stroke, path, jointStyle, capStyle, strokeWidth,
+                                nonZeroWinding, point1, point2, point3;
     };
 
     //==============================================================================

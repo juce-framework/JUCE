@@ -154,6 +154,7 @@
         <Filter Name="Drawable">
           <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp"/>
           <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.h"/>
+          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.cpp"/>
           <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h"/>
         </Filter>
         <Filter Name="Project">

@@ -26,6 +26,8 @@
 #ifndef __JUCER_FILLTYPEPROPERTYCOMPONENT_H_88CF1300__
 #define __JUCER_FILLTYPEPROPERTYCOMPONENT_H_88CF1300__
 
+class FillTypeEditorComponent;
+
 //==============================================================================
 class PopupFillSelector   : public Component,
                             public ChangeListener,
@@ -33,8 +35,10 @@ class PopupFillSelector   : public Component,
                             public ButtonListener
 {
 public:
-    PopupFillSelector (const ValueTree& fillState_, UndoManager* undoManager_)
-        : fillState (fillState_),
+    PopupFillSelector (const ValueTree& fillState_, const ColourGradient& defaultGradient_, UndoManager* undoManager_)
+        : gradientPicker (defaultGradient_),
+          defaultGradient (defaultGradient_),
+          fillState (fillState_),
           undoManager (undoManager_)
     {
         colourButton.setButtonText ("Colour");
@@ -76,15 +80,6 @@ public:
         imageButton.removeButtonListener (this);
     }
 
-    static void showAt (Component* comp, const ValueTree& fill, UndoManager* undoManager)
-    {
-        PopupFillSelector popup (fill, undoManager);
-
-        PopupMenu m;
-        m.addCustomItem (1234, &popup, 300, 400, false);
-        m.showAt (comp);
-    }
-
     void resized()
     {
         const int y = 2, w = 80, h = 22;
@@ -99,18 +94,44 @@ public:
 
     void buttonClicked (Button* b)
     {
+        RelativePoint gp1, gp2;
+        FillType currentFill (readFillType (&gp1, &gp2));
+
         if (b == &colourButton)
         {
-            setFillType (colourPicker.getCurrentColour());
+            if (! currentFill.isColour())
+                setFillType (colourPicker.getCurrentColour());
         }
         else if (b == &gradientButton)
         {
-            setFillType (gradientPicker.getGradient());
+            if (! currentFill.isGradient())
+            {
+                // Use a cunning trick to make the wrapper dig out the earlier gradient settings, if there are any..
+                FillType newFill (defaultGradient);
+                ValueTree temp ("dummy");
+                Drawable::ValueTreeWrapperBase::writeFillType (temp, newFill, 0, 0, 0);
+
+                fillState.setProperty (Drawable::ValueTreeWrapperBase::type, temp [Drawable::ValueTreeWrapperBase::type], undoManager);
+                newFill = readFillType (&gp1, &gp2);
+
+                if (newFill.gradient->getNumColours() <= 1)
+                {
+                    newFill = FillType (defaultGradient);
+                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, undoManager);
+                }
+                else
+                {
+                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, undoManager);
+                }
+
+                refresh();
+            }
         }
         else if (b == &imageButton)
         {
-            setFillType (FillType (*StoredSettings::getInstance()->getFallbackImage(),
-                                   AffineTransform::identity));
+            if (! currentFill.isTiledImage())
+                setFillType (FillType (*StoredSettings::getInstance()->getFallbackImage(),
+                                       AffineTransform::identity));
         }
     }
 
@@ -122,7 +143,7 @@ public:
     void setFillType (const FillType& newFill)
     {
         RelativePoint gp1, gp2;
-        const FillType currentFill (readFillType (&gp1, &gp2));
+        FillType currentFill (readFillType (&gp1, &gp2));
 
         if (currentFill != newFill)
         {
@@ -146,7 +167,7 @@ public:
 
     void refresh()
     {
-        const FillType newFill (readFillType (0, 0));
+        FillType newFill (readFillType (0, 0));
 
         colourPicker.setVisible (newFill.isColour());
         gradientPicker.setVisible (newFill.isGradient());
@@ -158,6 +179,12 @@ public:
         }
         else if (newFill.isGradient())
         {
+            if (newFill.gradient->getNumColours() <= 1)
+            {
+                newFill = FillType (defaultGradient);
+                Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, undoManager);
+            }
+
             gradientButton.setToggleState (true, false);
             gradientPicker.setGradient (*newFill.gradient);
         }
@@ -178,8 +205,8 @@ private:
                               private ChangeListener
     {
     public:
-        GradientDesigner()
-            : gradient (Colours::red, 0.0f, 0.0f, Colours::blue, 200.0f, 200.0f, false),
+        GradientDesigner (const ColourGradient& gradient_)
+            : gradient (gradient_),
               selectedPoint (-1),
               dragging (false),
               draggingNewPoint (false),
@@ -302,8 +329,10 @@ private:
 
         void setGradient (const ColourGradient& newGradient)
         {
-            if (newGradient != gradient)
+            if (newGradient != gradient || selectedPoint < 0)
             {
+                jassert (newGradient.getNumColours() > 1);
+
                 gradient = newGradient;
 
                 if (selectedPoint < 0)
@@ -375,8 +404,10 @@ private:
     };
 
     //==============================================================================
+    FillTypeEditorComponent* owner;
     StoredSettings::ColourSelectorWithSwatches colourPicker;
     GradientDesigner gradientPicker;
+    ColourGradient defaultGradient;
     ValueTree fillState;
     UndoManager* undoManager;
 
@@ -403,6 +434,8 @@ public:
     ~FillTypeEditorComponent()
     {
     }
+
+    const ColourGradient getDefaultGradient() const;
 
     void paint (Graphics& g)
     {
@@ -447,7 +480,12 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         undoManager->beginNewTransaction();
-        PopupFillSelector::showAt (this, fillState, undoManager);
+
+        PopupFillSelector popup (fillState, getDefaultGradient(), undoManager);
+
+        PopupMenu m;
+        m.addCustomItem (1234, &popup, 300, 450, false);
+        m.showAt (this);
     }
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { refresh(); }
@@ -461,6 +499,7 @@ private:
     UndoManager* undoManager;
     FillType fillType;
 };
+
 
 //==============================================================================
 class FillTypePropertyComponent  : public PropertyComponent
@@ -483,6 +522,8 @@ public:
     {
         editor.setBounds (getLookAndFeel().getPropertyComponentContentPosition (*this));
     }
+
+    virtual const ColourGradient getDefaultGradient() = 0;
 
     void refresh() {}
 

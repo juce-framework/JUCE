@@ -35,6 +35,7 @@ class DrawableEditorCanvas  : public EditorCanvasBase,
                               public Timer
 {
 public:
+    //==============================================================================
     DrawableEditorCanvas (DrawableEditor& editor_)
         : editor (editor_)
     {
@@ -47,6 +48,11 @@ public:
         getDocument().getRoot().removeListener (this);
         shutdown();
     }
+
+    //==============================================================================
+    UndoManager& getUndoManager() throw()                       { return *getDocument().getUndoManager(); }
+    DrawableEditor& getEditor() throw()                         { return editor; }
+    DrawableDocument& getDocument() throw()                     { return editor.getDocument(); }
 
     Component* createComponentHolder()
     {
@@ -67,7 +73,7 @@ public:
         else
         {
             const Rectangle<float> damage (drawable->refreshFromValueTree (doc.getRootDrawableNode().getState(), &doc));
-            getComponentHolder()->repaint (damage.getSmallestIntegerContainer());
+            getComponentHolder()->repaint (objectSpaceToScreenSpace (damage.getSmallestIntegerContainer()));
         }
 
         startTimer (500);
@@ -81,14 +87,10 @@ public:
     void setCanvasBounds (const Rectangle<int>& newBounds)  {}
     bool canResizeCanvas() const                            { return false; }
 
-    MarkerListBase& getMarkerList (bool isX)
+    //==============================================================================
+    const ValueTree getObjectState (const String& objectId)
     {
-        return getDocument().getMarkerList (isX);
-    }
-
-    double limitMarkerPosition (double pos)
-    {
-        return pos;
+        return getDocument().findDrawableState (objectId, false);
     }
 
     const SelectedItems::ItemType findObjectIdAt (const Point<int>& position)
@@ -130,30 +132,36 @@ public:
 
     void objectDoubleClicked (const MouseEvent& e, const ValueTree& state)
     {
+        if (state.hasType (DrawablePath::valueTreeType)
+             || state.hasType (DrawableImage::valueTreeType)
+             || state.hasType (DrawableText::valueTreeType))
+        {
+            enableControlPointMode (state);
+        }
+        else if (state.hasType (DrawableComposite::valueTreeType))
+        {
+            // xxx
+        }
     }
 
     bool hasSizeGuides() const  { return false; }
-
-    const ValueTree getObjectState (const String& objectId)
-    {
-        return getDocument().findDrawableState (objectId, false);
-    }
 
     void getObjectPositionDependencies (const ValueTree& state, Array<ValueTree>& deps)
     {
         DrawableDocument& doc = getDocument();
         DrawableTypeInstance item (doc, state);
 
-        Array <RelativePoint> points;
+        OwnedArray <ControlPoint> points;
         item.getAllControlPoints (points);
 
         StringArray anchors;
         for (int i = 0; i < points.size(); ++i)
         {
-            anchors.addIfNotAlreadyThere (points.getReference(i).x.getAnchorName1());
-            anchors.addIfNotAlreadyThere (points.getReference(i).x.getAnchorName2());
-            anchors.addIfNotAlreadyThere (points.getReference(i).y.getAnchorName1());
-            anchors.addIfNotAlreadyThere (points.getReference(i).y.getAnchorName2());
+            const RelativePoint p (points.getUnchecked(i)->getPosition());
+            anchors.addIfNotAlreadyThere (p.x.getAnchorName1());
+            anchors.addIfNotAlreadyThere (p.x.getAnchorName2());
+            anchors.addIfNotAlreadyThere (p.y.getAnchorName1());
+            anchors.addIfNotAlreadyThere (p.y.getAnchorName2());
         }
 
         for (int i = 0; i < anchors.size(); ++i)
@@ -207,12 +215,15 @@ public:
         return RelativeRectangle();
     }
 
+    //==============================================================================
     class ControlPointComponent  : public OverlayItemComponent
     {
     public:
-        ControlPointComponent (DrawableEditorCanvas* canvas)
-            : OverlayItemComponent (canvas)
+        ControlPointComponent (DrawableEditorCanvas* canvas, const ValueTree& drawableState_, int controlPointNum_)
+            : OverlayItemComponent (canvas), drawableState (drawableState_),
+              controlPointNum (controlPointNum_), isDragging (false), mouseDownResult (false), selected (false)
         {
+            selectionId = getControlPointId (drawableState, controlPointNum);
         }
 
         ~ControlPointComponent()
@@ -221,29 +232,79 @@ public:
 
         void paint (Graphics& g)
         {
-            g.fillAll (Colours::pink);
+            g.setColour (Colour (selected ? 0xaaaaaaaa : 0xaa333333));
+            g.drawRect (0, 0, getWidth(), getHeight());
+
+            g.setColour (Colour (selected ? 0xaa000000 : 0x99ffffff));
+            g.fillRect (1, 1, getWidth() - 2, getHeight() - 2);
         }
 
         void mouseDown (const MouseEvent& e)
         {
+            isDragging = false;
+
+            if (e.mods.isPopupMenu())
+            {
+                canvas->showPopupMenu (true);
+            }
+            else
+            {
+                mouseDownResult = canvas->getSelection().addToSelectionOnMouseDown (selectionId, e.mods);
+            }
         }
 
         void mouseDrag (const MouseEvent& e)
         {
+            if (! (isDragging || e.mouseWasClicked() || e.mods.isPopupMenu()))
+            {
+                canvas->getSelection().addToSelectionOnMouseUp (selectionId, e.mods, true, mouseDownResult);
+
+                isDragging = true;
+                canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()).getEventRelativeTo (getParentComponent()),
+                                   ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
+            }
+
+            if (isDragging)
+            {
+                canvas->continueDrag (e.getEventRelativeTo (getParentComponent()));
+                autoScrollForMouseEvent (e);
+            }
         }
 
         void mouseUp (const MouseEvent& e)
         {
+            if (isDragging)
+            {
+                canvas->endDrag (e.getEventRelativeTo (getParentComponent()));
+            }
         }
 
-        void updatePosition (const RelativePoint& point, RelativeCoordinate::NamedCoordinateFinder* nameFinder)
+        void mouseDoubleClick (const MouseEvent& e)
         {
-            const Point<float> p (point.resolve (nameFinder));
-            setBoundsInTargetSpace (Rectangle<int> (roundToInt (p.getX()) - 2, roundToInt (p.getY()) - 2, 5, 5));
         }
+
+        void updatePosition (ControlPoint& point, RelativeCoordinate::NamedCoordinateFinder* nameFinder)
+        {
+            const Point<float> p (point.getPosition().resolve (nameFinder));
+            setBoundsInTargetSpace (Rectangle<int> (roundToInt (p.getX()) - 2, roundToInt (p.getY()) - 2, 7, 7));
+
+            const bool nowSelected = canvas->getSelection().isSelected (selectionId);
+
+            if (selected != nowSelected)
+            {
+                selected = nowSelected;
+                repaint();
+            }
+        }
+
+    private:
+        ValueTree drawableState;
+        int controlPointNum;
+        bool isDragging, mouseDownResult, selected;
+        String selectionId;
     };
 
-    void updateExtraComponentsForObject (const ValueTree& state, Component* parent, OwnedArray<OverlayItemComponent>& comps)
+    void updateControlPointComponents (Component* parent, OwnedArray<OverlayItemComponent>& comps)
     {
         if (drawable == 0)
         {
@@ -251,11 +312,11 @@ public:
             return;
         }
 
-        DrawableTypeInstance item (getDocument(), state);
-        Array<RelativePoint> points;
+        DrawableTypeInstance item (getDocument(), controlPointEditingTarget);
+        OwnedArray <ControlPoint> points;
         item.getAllControlPoints (points);
 
-        Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (state).getID());
+        Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (controlPointEditingTarget).getID());
         DrawableComposite* parentDrawable = d->getParent();
 
         comps.removeRange (points.size(), comps.size());
@@ -269,15 +330,27 @@ public:
 
             if (c == 0)
             {
-                c = new ControlPointComponent (this);
+                c = new ControlPointComponent (this, controlPointEditingTarget, i);
                 comps.set (i, c);
                 parent->addAndMakeVisible (c);
             }
 
-            c->updatePosition (points.getReference(i), parentDrawable);
+            c->updatePosition (*points.getUnchecked(i), parentDrawable);
         }
     }
 
+    //==============================================================================
+    MarkerListBase& getMarkerList (bool isX)
+    {
+        return getDocument().getMarkerList (isX);
+    }
+
+    double limitMarkerPosition (double pos)
+    {
+        return pos;
+    }
+
+    //==============================================================================
     SelectedItems& getSelection()
     {
         return editor.getSelection();
@@ -303,25 +376,32 @@ public:
         }
     }
 
+    bool isControlPointId (const String& itemId)
+    {
+        return itemId.containsChar ('/');
+    }
+
+    static const String getControlPointId (const ValueTree& drawableState, int index)
+    {
+        return Drawable::ValueTreeWrapperBase (drawableState).getID() + "/" + String (index);
+    }
+
     //==============================================================================
-    class DragOperation  : public EditorDragOperation
+    class ObjectDragOperation  : public EditorDragOperation
     {
     public:
-        DragOperation (DrawableEditorCanvas* canvas_,
-                       const MouseEvent& e, const Point<int>& mousePos,
-                       Component* snapGuideParentComp_,
-                       const ResizableBorderComponent::Zone& zone_)
-            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_)
+        ObjectDragOperation (DrawableEditorCanvas* canvas_,
+                             const MouseEvent& e, const Point<int>& mousePos,
+                             Component* snapGuideParentComp_,
+                             const ResizableBorderComponent::Zone& zone_)
+            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_), drawableCanvas (canvas_)
         {
         }
 
-        ~DragOperation()
-        {
-            getUndoManager().beginNewTransaction();
-        }
+        ~ObjectDragOperation() {}
 
     protected:
-        DrawableDocument& getDocument() throw()                 { return static_cast <DrawableEditorCanvas*> (canvas)->getDocument(); }
+        DrawableDocument& getDocument() throw()                 { return drawableCanvas->getDocument(); }
 
         void getSnapPointsX (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
         void getSnapPointsY (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
@@ -330,55 +410,143 @@ public:
 
         void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps)
         {
-            static_cast <DrawableEditorCanvas*> (canvas)->getObjectPositionDependencies (state, deps);
+            drawableCanvas->getObjectPositionDependencies (state, deps);
         }
 
         const Rectangle<float> getObjectPosition (const ValueTree& state)
         {
-            return static_cast <DrawableEditorCanvas*> (canvas)->getObjectPositionFloat (state);
+            return drawableCanvas->getObjectPositionFloat (state);
         }
 
         void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
         {
-            static_cast <DrawableEditorCanvas*> (canvas)->setObjectPositionFloat (state, newBounds);
+            drawableCanvas->setObjectPositionFloat (state, newBounds);
         }
 
         float getMarkerPosition (const ValueTree& marker, bool isX)
         {
             return 0;
         }
+
+    private:
+        DrawableEditorCanvas* drawableCanvas;
     };
 
+    //==============================================================================
+    class ControlPointDragOperation  : public EditorDragOperation
+    {
+    public:
+        ControlPointDragOperation (DrawableEditorCanvas* canvas_,
+                                   const DrawableTypeInstance& drawableItem_,
+                                   Drawable* drawable_,
+                                   const MouseEvent& e, const Point<int>& mousePos,
+                                   Component* snapGuideParentComp_,
+                                   const ResizableBorderComponent::Zone& zone_)
+            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_),
+              drawableCanvas (canvas_), drawableItem (drawableItem_), drawable (drawable_)
+        {
+            drawableItem.getAllControlPoints (points);
+        }
+
+        ~ControlPointDragOperation() {}
+
+        OwnedArray <ControlPoint> points;
+
+    protected:
+        DrawableDocument& getDocument() throw()                 { return drawableCanvas->getDocument(); }
+
+        void getSnapPointsX (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
+        void getSnapPointsY (Array<float>& points, bool /*includeCentre*/)  { points.add (0.0f); }
+
+        UndoManager& getUndoManager()                           { return *getDocument().getUndoManager(); }
+
+        void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps)
+        {
+            drawableCanvas->getObjectPositionDependencies (drawableItem.getState(), deps);
+        }
+
+        const Rectangle<float> getObjectPosition (const ValueTree& state)
+        {
+            int index = state [Ids::id_].toString().fromFirstOccurrenceOf ("/", false, false).getIntValue();
+            ControlPoint* cp = points[index];
+            if (cp == 0)
+                return Rectangle<float>();
+
+            Point<float> p (cp->getPosition().resolve (drawable->getParent()));
+            return Rectangle<float> (p, p);
+        }
+
+        void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds)
+        {
+            int index = state [Ids::id_].toString().fromFirstOccurrenceOf ("/", false, false).getIntValue();
+            ControlPoint* cp = points[index];
+            if (cp != 0)
+            {
+                RelativePoint p (cp->getPosition());
+                p.moveToAbsolute (newBounds.getPosition(), drawable->getParent());
+                cp->setPosition (p, getDocument().getUndoManager());
+            }
+        }
+
+        float getMarkerPosition (const ValueTree& marker, bool isX)
+        {
+            return 0;
+        }
+
+    private:
+        DrawableEditorCanvas* drawableCanvas;
+        DrawableTypeInstance drawableItem;
+        Drawable* drawable;
+    };
+
+    //==============================================================================
     DragOperation* createDragOperation (const MouseEvent& e, Component* snapGuideParentComponent,
                                         const ResizableBorderComponent::Zone& zone)
     {
-        DragOperation* d = new DragOperation (this, e, e.getPosition() - origin, snapGuideParentComponent, zone);
-
         Array<ValueTree> selected, unselected;
+        EditorDragOperation* drag = 0;
 
-        DrawableComposite::ValueTreeWrapper mainGroup (getDocument().getRootDrawableNode());
-
-        for (int i = mainGroup.getNumDrawables(); --i >= 0;)
+        if (isControlPointMode())
         {
-            const ValueTree v (mainGroup.getDrawableState (i));
+            Drawable* d = drawable->getDrawableWithName (Drawable::ValueTreeWrapperBase (controlPointEditingTarget).getID());
+            DrawableTypeInstance item (getDocument(), controlPointEditingTarget);
 
-            if (editor.getSelection().isSelected (v[Drawable::ValueTreeWrapperBase::idProperty]))
-                selected.add (v);
-            else
-                unselected.add (v);
+            ControlPointDragOperation* cpd = new ControlPointDragOperation (this, item, d, e, e.getPosition() - origin, snapGuideParentComponent, zone);
+            drag = cpd;
+
+            for (int i = 0; i < cpd->points.size(); ++i)
+            {
+                const String pointId (getControlPointId (item.getState(), i));
+
+                ValueTree v (Ids::controlPoint);
+                v.setProperty (Ids::id_, pointId, 0);
+
+                if (editor.getSelection().isSelected (pointId))
+                    selected.add (v);
+                else
+                    unselected.add (v);
+            }
+        }
+        else
+        {
+            drag = new ObjectDragOperation (this, e, e.getPosition() - origin, snapGuideParentComponent, zone);
+
+            DrawableComposite::ValueTreeWrapper mainGroup (getDocument().getRootDrawableNode());
+
+            for (int i = mainGroup.getNumDrawables(); --i >= 0;)
+            {
+                const ValueTree v (mainGroup.getDrawableState (i));
+
+                if (editor.getSelection().isSelected (v[Drawable::ValueTreeWrapperBase::idProperty]))
+                    selected.add (v);
+                else
+                    unselected.add (v);
+            }
         }
 
-        d->initialise (selected, unselected);
-        return d;
+        drag->initialise (selected, unselected);
+        return drag;
     }
-
-    UndoManager& getUndoManager()
-    {
-        return *getDocument().getUndoManager();
-    }
-
-    DrawableEditor& getEditor() throw()                         { return editor; }
-    DrawableDocument& getDocument() throw()                     { return editor.getDocument(); }
 
     void timerCallback()
     {

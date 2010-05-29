@@ -255,13 +255,8 @@ public:
                                    const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
                                    UndoManager* undoManager);
 
-    protected:
         ValueTree state;
         static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
-
-        void replaceFillType (const Identifier& tag, const FillType& fillType,
-                              const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-                              UndoManager* undoManager);
     };
 
     //==============================================================================

@@ -183,18 +183,27 @@ Drawable* DrawablePath::createCopy() const
 //==============================================================================
 const Identifier DrawablePath::valueTreeType ("Path");
 
-const Identifier DrawablePath::ValueTreeWrapper::fill ("fill");
-const Identifier DrawablePath::ValueTreeWrapper::stroke ("stroke");
+const Identifier DrawablePath::ValueTreeWrapper::fill ("Fill");
+const Identifier DrawablePath::ValueTreeWrapper::stroke ("Stroke");
+const Identifier DrawablePath::ValueTreeWrapper::path ("Path");
 const Identifier DrawablePath::ValueTreeWrapper::jointStyle ("jointStyle");
 const Identifier DrawablePath::ValueTreeWrapper::capStyle ("capStyle");
 const Identifier DrawablePath::ValueTreeWrapper::strokeWidth ("strokeWidth");
-const Identifier DrawablePath::ValueTreeWrapper::path ("path");
+const Identifier DrawablePath::ValueTreeWrapper::nonZeroWinding ("nonZeroWinding");
+const Identifier DrawablePath::ValueTreeWrapper::point1 ("p1");
+const Identifier DrawablePath::ValueTreeWrapper::point2 ("p2");
+const Identifier DrawablePath::ValueTreeWrapper::point3 ("p3");
 
 //==============================================================================
 DrawablePath::ValueTreeWrapper::ValueTreeWrapper (const ValueTree& state_)
     : ValueTreeWrapperBase (state_)
 {
     jassert (state.hasType (valueTreeType));
+}
+
+ValueTree DrawablePath::ValueTreeWrapper::getPathState()
+{
+    return state.getOrCreateChildWithName (path, 0);
 }
 
 ValueTree DrawablePath::ValueTreeWrapper::getMainFillState()
@@ -225,7 +234,8 @@ const FillType DrawablePath::ValueTreeWrapper::getMainFill (RelativeCoordinate::
 void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, const RelativePoint* gp1,
                                                   const RelativePoint* gp2, UndoManager* undoManager)
 {
-    replaceFillType (fill, newFill, gp1, gp2, undoManager);
+    ValueTree v (state.getOrCreateChildWithName (fill, undoManager));
+    writeFillType (v, newFill, gp1, gp2, undoManager);
 }
 
 const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
@@ -236,7 +246,8 @@ const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate
 void DrawablePath::ValueTreeWrapper::setStrokeFill (const FillType& newFill, const RelativePoint* gp1,
                                                     const RelativePoint* gp2, UndoManager* undoManager)
 {
-    replaceFillType (stroke, newFill, gp1, gp2, undoManager);
+    ValueTree v (state.getOrCreateChildWithName (stroke, undoManager));
+    writeFillType (v, newFill, gp1, gp2, undoManager);
 }
 
 const PathStrokeType DrawablePath::ValueTreeWrapper::getStrokeType() const
@@ -262,17 +273,54 @@ void DrawablePath::ValueTreeWrapper::setStrokeType (const PathStrokeType& newStr
                                    ? "butt" : (newStrokeType.getEndStyle() == PathStrokeType::square ? "square" : "round"), undoManager);
 }
 
-void DrawablePath::ValueTreeWrapper::getPath (RelativePointPath& p) const
+bool DrawablePath::ValueTreeWrapper::usesNonZeroWinding() const
 {
-    RelativePointPath newPath (state [path]);
-    p.swapWith (newPath);
+    return state [nonZeroWinding];
 }
 
-void DrawablePath::ValueTreeWrapper::setPath (const String& newPath, UndoManager* undoManager)
+void DrawablePath::ValueTreeWrapper::setUsesNonZeroWinding (bool b, UndoManager* undoManager)
 {
-    state.setProperty (path, newPath, undoManager);
+    state.setProperty (nonZeroWinding, b, undoManager);
 }
 
+const Identifier DrawablePath::ValueTreeWrapper::Element::startSubPathElement ("Move");
+const Identifier DrawablePath::ValueTreeWrapper::Element::closeSubPathElement ("Close");
+const Identifier DrawablePath::ValueTreeWrapper::Element::lineToElement ("Line");
+const Identifier DrawablePath::ValueTreeWrapper::Element::quadraticToElement ("Quad");
+const Identifier DrawablePath::ValueTreeWrapper::Element::cubicToElement ("Cubic");
+
+DrawablePath::ValueTreeWrapper::Element::Element (const ValueTree& state_)
+    : state (state_)
+{
+}
+
+DrawablePath::ValueTreeWrapper::Element::~Element()
+{
+}
+
+int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const throw()
+{
+    const Identifier i (state.getType());
+    if (i == startSubPathElement || i == lineToElement) return 1;
+    if (i == quadraticToElement) return 2;
+    if (i == cubicToElement) return 3;
+    return 0;
+}
+
+const RelativePoint DrawablePath::ValueTreeWrapper::Element::getControlPoint (const int index) const
+{
+    jassert (index >= 0 && index < getNumControlPoints());
+    return RelativePoint (state [index == 0 ? point1 : (index == 1 ? point2 : point3)].toString());
+}
+
+void DrawablePath::ValueTreeWrapper::Element::setControlPoint (const int index, const RelativePoint& point, UndoManager* undoManager)
+{
+    jassert (index >= 0 && index < getNumControlPoints());
+    return state.setProperty (index == 0 ? point1 : (index == 1 ? point2 : point3), point.toString(), undoManager);
+}
+
+
+//==============================================================================
 const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
 {
     Rectangle<float> damageRect;
@@ -298,8 +346,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
 
     const PathStrokeType newStroke (v.getStrokeType());
 
-    ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath());
-    v.getPath (*newRelativePath);
+    ScopedPointer<RelativePointPath> newRelativePath (new RelativePointPath (tree));
 
     Path newPath;
     newRelativePath->createPath (newPath, parent);
@@ -334,9 +381,14 @@ const ValueTree DrawablePath::createValueTree (ImageProvider*) const
     v.setStrokeType (strokeType, 0);
 
     if (relativePath != 0)
-        v.setPath (relativePath->toString(), 0);
+    {
+        relativePath->writeTo (tree, 0);
+    }
     else
-        v.setPath (path.toString(), 0);
+    {
+        RelativePointPath rp (path);
+        rp.writeTo (tree, 0);
+    }
 
     return tree;
 }

@@ -69,7 +69,7 @@ public:
         else
         {
             isDragging = true;
-            canvas->beginDrag (e.getEventRelativeTo (getParentComponent()), dragZone);
+            canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()).getEventRelativeTo (getParentComponent()), dragZone);
             canvas->showSizeGuides();
         }
     }
@@ -121,7 +121,6 @@ public:
             sizeGuides.getUnchecked(i)->updatePosition (bounds);
         }
 
-        canvas->updateExtraComponentsForObject (objectState, getParentComponent(), extraEditorComps);
         return true;
     }
 
@@ -202,7 +201,6 @@ private:
     const int borderThickness;
     OwnedArray <SizeGuideComponent> sizeGuides;
     bool isDragging;
-    OwnedArray <OverlayItemComponent> extraEditorComps;
 
     const Rectangle<int> getCentreArea() const
     {
@@ -404,6 +402,7 @@ public:
         resizers.clear();
         markersX.clear();
         markersY.clear();
+        controlPoints.clear();
         deleteAllChildren();
     }
 
@@ -420,7 +419,10 @@ public:
         if (e.mods.isPopupMenu())
         {
             if (underMouse.isNotEmpty() && ! getSelection().isSelected (underMouse))
+            {
+                canvas->enableResizingMode();
                 getSelection().selectOnly (underMouse);
+            }
 
             canvas->showPopupMenu (underMouse.isNotEmpty());
         }
@@ -436,6 +438,7 @@ public:
             {
                 mouseDownCompUID = underMouse;
                 canvas->deselectNonDraggableObjects();
+                canvas->enableResizingMode();
                 mouseDownResult = getSelection().addToSelectionOnMouseDown (mouseDownCompUID, e.mods);
 
                 updateResizeFrames();
@@ -456,8 +459,9 @@ public:
             if (! isDraggingClickedComp)
             {
                 isDraggingClickedComp = true;
+                canvas->enableResizingMode();
                 getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
-                canvas->beginDrag (e, ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
+                canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()), ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
             }
 
             canvas->continueDrag (e);
@@ -526,15 +530,9 @@ public:
     SelectedItems& getSelection()               { return canvas->getSelection(); }
     SelectedItems& getLassoSelection()          { return getSelection(); }
 
-    void resized()
-    {
-        updateMarkers();
-        updateResizeFrames();
-    }
-
     void changeListenerCallback (void*)
     {
-        updateResizeFrames();
+        update();
     }
 
     void modifierKeysChanged (const ModifierKeys&)
@@ -571,6 +569,7 @@ public:
     void update()
     {
         updateResizeFrames();
+        updateControlPoints();
         updateMarkers();
     }
 
@@ -582,9 +581,16 @@ private:
     SelectedItems::ItemType mouseDownCompUID;
     OwnedArray <ResizeFrame> resizers;
     OwnedArray <MarkerComponent> markersX, markersY;
+    OwnedArray <OverlayItemComponent> controlPoints;
 
     void updateResizeFrames()
     {
+        if (! canvas->isResizingMode())
+        {
+            resizers.clear();
+            return;
+        }
+
         SelectedItems& selection = getSelection();
         StringArray requiredIds;
         const int num = selection.getNumSelected();
@@ -628,6 +634,17 @@ private:
                 frame->updatePosition();
             }
         }
+    }
+
+    void updateControlPoints()
+    {
+        if (! canvas->isControlPointMode())
+        {
+            controlPoints.clear();
+            return;
+        }
+
+        canvas->updateControlPointComponents (this, controlPoints);
     }
 
     void updateMarkers (OwnedArray <MarkerComponent>& markers, const bool isX)
@@ -827,6 +844,21 @@ const Rectangle<int> EditorCanvasBase::objectSpaceToScreenSpace (const Rectangle
     return r + origin;
 }
 
+void EditorCanvasBase::enableResizingMode()
+{
+    enableControlPointMode (ValueTree::invalid);
+}
+
+void EditorCanvasBase::enableControlPointMode (const ValueTree& objectToEdit)
+{
+    if (controlPointEditingTarget != objectToEdit)
+    {
+        controlPointEditingTarget = objectToEdit;
+        getSelection().deselectAll();
+        overlay->update();
+    }
+}
+
 //==============================================================================
 void EditorCanvasBase::paint (Graphics& g)
 {
@@ -938,6 +970,8 @@ void EditorCanvasBase::endDrag (const MouseEvent& e)
     {
         dragger->drag (e, e.getPosition() - origin);
         dragger = 0;
+
+        getUndoManager().beginNewTransaction();
     }
 }
 

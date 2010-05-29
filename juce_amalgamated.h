@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	7
+#define JUCE_BUILDNUMBER	8
 
 /** Current Juce version number.
 
@@ -13094,11 +13094,21 @@ public:
 	*/
 	ValueTree getChild (int index) const;
 
-	/** Looks for a child node with the speficied type name.
+	/** Returns the first child node with the speficied type name.
 		If no such node is found, it'll return an invalid node. (See isValid() to find out
 		whether a node is valid).
+		@see getOrCreateChildWithName
 	*/
 	ValueTree getChildWithName (const Identifier& type) const;
+
+	/** Returns the first child node with the speficied type name, creating and adding
+		a child with this name if there wasn't already one there.
+
+		The only time this will return an invalid object is when the object that you're calling
+		the method on is itself invalid.
+		@see getChildWithName
+	*/
+	ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
 
 	/** Looks for the first child node that has the speficied property value.
 
@@ -13342,6 +13352,7 @@ private:
 		bool isAChildOf (const SharedObject* possibleParent) const;
 		int indexOf (const ValueTree& child) const;
 		ValueTree getChildWithName (const Identifier& type) const;
+		ValueTree getOrCreateChildWithName (const Identifier& type, UndoManager* undoManager);
 		ValueTree getChildWithProperty (const Identifier& propertyName, const var& propertyValue) const;
 		void addChild (SharedObject* child, int index, UndoManager*);
 		void removeChild (int childIndex, UndoManager*);
@@ -42124,6 +42135,9 @@ public:
 	/** Creates an absolute point, relative to the origin. */
 	RelativePoint (const Point<float>& absolutePoint);
 
+	/** Creates an absolute point, relative to the origin. */
+	RelativePoint (float absoluteX, float absoluteY);
+
 	/** Creates an absolute point from two coordinates. */
 	RelativePoint (const RelativeCoordinate& x, const RelativeCoordinate& y);
 
@@ -42246,7 +42260,8 @@ public:
 
 	RelativePointPath();
 	RelativePointPath (const RelativePointPath& other);
-	RelativePointPath (const String& stringVersion);
+	RelativePointPath (const ValueTree& drawable);
+	RelativePointPath (const Path& path);
 	~RelativePointPath();
 
 	/** Resolves this points in this path and adds them to a normal Path object. */
@@ -42255,11 +42270,8 @@ public:
 	/** Returns true if the path contains any non-fixed points. */
 	bool containsAnyDynamicPoints() const;
 
-	/** Returns a string version of the path.
-		This has the same format as Path::toString(), but since it can contain RelativeCoordinate
-		positions, it can't be parsed by the Path class if any of the points are dynamic.
-	*/
-	const String toString() const;
+	/** Writes the path to this drawable encoding. */
+	void writeTo (ValueTree state, UndoManager* undoManager);
 
 	/** Quickly swaps the contents of this path with another. */
 	void swapWith (RelativePointPath& other) throw();
@@ -42284,7 +42296,7 @@ public:
 	public:
 		ElementBase (ElementType type);
 		virtual ~ElementBase() {}
-		virtual void write (OutputStream& out, ElementType lastTypeWritten) const = 0;
+		virtual const ValueTree createTree() const = 0;
 		virtual void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const = 0;
 		virtual RelativePoint* getControlPoints (int& numPoints) = 0;
 
@@ -42300,7 +42312,7 @@ public:
 	public:
 		StartSubPath (const RelativePoint& pos);
 		~StartSubPath() {}
-		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		const ValueTree createTree() const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
@@ -42316,7 +42328,7 @@ public:
 	public:
 		CloseSubPath();
 		~CloseSubPath() {}
-		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		const ValueTree createTree() const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
@@ -42330,7 +42342,7 @@ public:
 	public:
 		LineTo (const RelativePoint& endPoint);
 		~LineTo() {}
-		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		const ValueTree createTree() const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
@@ -42346,7 +42358,7 @@ public:
 	public:
 		QuadraticTo (const RelativePoint& controlPoint, const RelativePoint& endPoint);
 		~QuadraticTo() {}
-		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		const ValueTree createTree() const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
@@ -42362,7 +42374,7 @@ public:
 	public:
 		CubicTo (const RelativePoint& controlPoint1, const RelativePoint& controlPoint2, const RelativePoint& endPoint);
 		~CubicTo() {}
-		void write (OutputStream& out, ElementType lastTypeWritten) const;
+		const ValueTree createTree() const;
 		void addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
 		RelativePoint* getControlPoints (int& numPoints);
 
@@ -42379,7 +42391,7 @@ public:
 private:
 	bool containsDynamicPoints;
 
-	void parseString (const String& s);
+	void parse (const ValueTree& state);
 
 	RelativePointPath& operator= (const RelativePointPath&);
 };
@@ -42601,13 +42613,8 @@ public:
 								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
 								   UndoManager* undoManager);
 
-	protected:
 		ValueTree state;
 		static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
-
-		void replaceFillType (const Identifier& tag, const FillType& fillType,
-							  const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-							  UndoManager* undoManager);
 	};
 
 	juce_UseDebuggingNewOperator
@@ -58599,7 +58606,7 @@ public:
 	/** @internal */
 	static const Identifier valueTreeType;
 	/** @internal */
-	const Identifier getValueTreeType() const	{ return valueTreeType; }
+	const Identifier getValueTreeType() const	   { return valueTreeType; }
 
 	/** Internally-used class for wrapping a DrawablePath's state into a ValueTree. */
 	class ValueTreeWrapper   : public ValueTreeWrapperBase
@@ -58620,10 +58627,31 @@ public:
 		const PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);
 
-		void getPath (RelativePointPath& path) const;
-		void setPath (const String& newPath, UndoManager* undoManager);
+		bool usesNonZeroWinding() const;
+		void setUsesNonZeroWinding (bool b, UndoManager* undoManager);
 
-		static const Identifier fill, stroke, jointStyle, capStyle, strokeWidth, path;
+		class Element
+		{
+		public:
+			explicit Element (const ValueTree& state);
+			~Element();
+
+			const Identifier getType() const throw()	{ return state.getType(); }
+			int getNumControlPoints() const throw();
+
+			const RelativePoint getControlPoint (int index) const;
+			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
+
+			static const Identifier startSubPathElement, closeSubPathElement,
+									lineToElement, quadraticToElement, cubicToElement;
+
+			ValueTree state;
+		};
+
+		ValueTree getPathState();
+
+		static const Identifier fill, stroke, path, jointStyle, capStyle, strokeWidth,
+								nonZeroWinding, point1, point2, point3;
 	};
 
 	juce_UseDebuggingNewOperator

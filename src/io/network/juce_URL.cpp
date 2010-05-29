@@ -282,7 +282,7 @@ public:
                                         timeOutMs);
 
         if (responseHeaders != 0)
-			juce_getInternetFileHeaders (handle, *responseHeaders);
+            juce_getInternetFileHeaders (handle, *responseHeaders);
     }
 
     ~WebInputStream()

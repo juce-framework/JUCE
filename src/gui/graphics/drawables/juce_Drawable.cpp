@@ -238,10 +238,6 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
     {
         v.setProperty (type, "solid", undoManager);
         v.setProperty (colour, String::toHexString ((int) fillType.colour.getARGB()), undoManager);
-        v.removeProperty (gradientPoint1, undoManager);
-        v.removeProperty (gradientPoint2, undoManager);
-        v.removeProperty (radial, undoManager);
-        v.removeProperty (colours, undoManager);
     }
     else if (fillType.isGradient())
     {
@@ -256,39 +252,17 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
               << " " << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
 
         v.setProperty (colours, s.trimStart(), undoManager);
-        v.removeProperty (colour, undoManager);
     }
     else if (fillType.isTiledImage())
     {
         v.setProperty (type, "image", undoManager);
 
         jassertfalse; //xxx todo
-
-        v.removeProperty (gradientPoint1, undoManager);
-        v.removeProperty (gradientPoint2, undoManager);
-        v.removeProperty (radial, undoManager);
-        v.removeProperty (colours, undoManager);
-        v.removeProperty (colour, undoManager);
     }
     else
     {
         jassertfalse;
     }
-}
-
-void Drawable::ValueTreeWrapperBase::replaceFillType (const Identifier& tag, const FillType& fillType,
-                                                      const RelativePoint* gp1, const RelativePoint* gp2,
-                                                      UndoManager* const undoManager)
-{
-    ValueTree v (state.getChildWithName (tag));
-
-    if (! v.isValid())
-    {
-        state.addChild (ValueTree (tag), -1, undoManager);
-        v = state.getChildWithName (tag);
-    }
-
-    writeFillType (v, fillType, gp1, gp2, undoManager);
 }
 
 

@@ -160,7 +160,7 @@ int ColourGradient::createLookupTable (const AffineTransform& transform, HeapBlo
     jassert (point1.getX() != 987654.0f);
 #endif
 
-    const int numEntries = jlimit (1, (colours.size() - 1) << 8,
+    const int numEntries = jlimit (1, jmax (1, (colours.size() - 1) << 8),
                                    3 * (int) point1.transformedBy (transform)
                                                 .getDistanceFrom (point2.transformedBy (transform)));
     lookupTable.malloc (numEntries);

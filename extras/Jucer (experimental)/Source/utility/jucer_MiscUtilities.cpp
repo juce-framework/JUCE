@@ -24,6 +24,7 @@
 */
 
 #include "../jucer_Headers.h"
+#include "jucer_FillTypePropertyComponent.h"
 
 
 //==============================================================================
@@ -405,4 +406,12 @@ RelativeRectangleLayoutManager::MarkerPosition::MarkerPosition (const String& na
 RelativeRectangleLayoutManager::ComponentPosition::ComponentPosition (Component* component_, const String& name_, const RelativeRectangle& coords_)
     : component (component_), name (name_), coords (coords_)
 {
+}
+
+//==============================================================================
+const ColourGradient FillTypeEditorComponent::getDefaultGradient() const
+{
+    FillTypePropertyComponent* p = dynamic_cast <FillTypePropertyComponent*> (getParentComponent());
+    jassert (p != 0);
+    return p->getDefaultGradient();
 }
