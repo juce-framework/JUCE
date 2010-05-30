@@ -1983,13 +1983,13 @@ public:
         else
         {
             Path p;
-            p.addRectangle (0.0f, 0.0f, (float) srcClip.getWidth(), (float) srcClip.getHeight());
+            p.addRectangle (srcClip);
 
             SoftwareRendererClasses::ClipRegionBase::Ptr c (clip->clone());
             c = c->clipToPath (p, transform);
 
             if (c != 0)
-                c->renderImageTransformed (destData, srcData, alpha, transform, betterQuality, true);
+                c->renderImageTransformed (destData, srcData, alpha, transform, betterQuality, false);
         }
     }
 

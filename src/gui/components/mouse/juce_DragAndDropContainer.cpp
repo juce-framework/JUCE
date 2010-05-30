@@ -227,12 +227,11 @@ public:
                     ddt->itemDragEnter (dragDescLocal, source, relPos.getX(), relPos.getY());
             }
 
-            if (getCurrentlyOver() != 0 && getCurrentlyOver()->isInterestedInDragSource (dragDescLocal, source))
-                getCurrentlyOver()->itemDragMove (dragDescLocal, source, relPos.getX(), relPos.getY());
+            DragAndDropTarget* target = getCurrentlyOver();
+            if (target != 0 && target->isInterestedInDragSource (dragDescLocal, source))
+                target->itemDragMove (dragDescLocal, source, relPos.getX(), relPos.getY());
 
-            if (getCurrentlyOver() == 0
-                 && canDoExternalDrag
-                 && ! hasCheckedForExternalDrag)
+            if (getCurrentlyOver() == 0 && canDoExternalDrag && ! hasCheckedForExternalDrag)
             {
                 if (Desktop::getInstance().findComponentAt (screenPos) == 0)
                 {
@@ -426,11 +425,7 @@ const String DragAndDropContainer::getCurrentDragDescription() const
 
 DragAndDropContainer* DragAndDropContainer::findParentDragContainerFor (Component* c)
 {
-    if (c == 0)
-        return 0;
-
-    // (unable to use the syntax findParentComponentOfClass <DragAndDropContainer> () because of a VC6 compiler bug)
-    return c->findParentComponentOfClass ((DragAndDropContainer*) 0);
+    return c == 0 ? 0 : c->findParentComponentOfClass ((DragAndDropContainer*) 0);
 }
 
 bool DragAndDropContainer::shouldDropFilesWhenDraggedExternally (const String&, Component*, StringArray&, bool&)

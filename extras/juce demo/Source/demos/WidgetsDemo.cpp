@@ -863,14 +863,12 @@ private:
 
                 for (int i = 0; i < icons.getNumEntries(); ++i)
                 {
-                    InputStream* svgFileStream = icons.createStreamForEntry (i);
+                    ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (i));
 
                     if (svgFileStream != 0)
                     {
                         iconNames.add (icons.getEntry(i)->filename);
                         iconsFromZipFile.add (Drawable::createFromImageDataStream (*svgFileStream));
-
-                        delete svgFileStream;
                     }
                 }
             }

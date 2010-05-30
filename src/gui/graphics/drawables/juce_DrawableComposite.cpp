@@ -47,7 +47,7 @@ DrawableComposite::DrawableComposite (const DrawableComposite& other)
     for (i = 0; i < 3; ++i)
         controlPoints[i] = other.controlPoints[i];
 
-    for (i = 0; i < drawables.size(); ++i)
+    for (i = 0; i < other.drawables.size(); ++i)
         drawables.add (other.drawables.getUnchecked(i)->createCopy());
 
     markersX.addCopiesOf (other.markersX);

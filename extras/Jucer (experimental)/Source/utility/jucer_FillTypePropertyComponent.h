@@ -202,7 +202,8 @@ private:
     //==============================================================================
     class GradientDesigner  : public Component,
                               public ChangeBroadcaster,
-                              private ChangeListener
+                              public ChangeListener,
+                              public ButtonListener
     {
     public:
         GradientDesigner (const ColourGradient& gradient_)
@@ -213,6 +214,19 @@ private:
               draggingPos (0)
         {
             addChildComponent (&colourPicker);
+
+            linearButton.setButtonText ("Linear");
+            linearButton.setRadioGroupId (321);
+            linearButton.setConnectedEdges (TextButton::ConnectedOnRight | TextButton::ConnectedOnLeft);
+            radialButton.setButtonText ("Radial");
+            radialButton.setRadioGroupId (321);
+            radialButton.setConnectedEdges (TextButton::ConnectedOnRight | TextButton::ConnectedOnLeft);
+
+            addAndMakeVisible (&linearButton);
+            addAndMakeVisible (&radialButton);
+
+            linearButton.addButtonListener (this);
+            radialButton.addButtonListener (this);
             colourPicker.addChangeListener (this);
         }
 
@@ -256,9 +270,14 @@ private:
 
         void resized()
         {
-            previewArea.setBounds (7, 8, getWidth() - 14, 24);
-            colourPicker.setBounds (0, previewArea.getBottom() + 8,
-                                    getWidth(), getHeight() - previewArea.getBottom() - 8);
+            previewArea.setBounds (7, 35, getWidth() - 14, 24);
+
+            const int w = 60;
+            linearButton.setBounds (getWidth() / 2 - w, 2, w, 20);
+            radialButton.setBounds (getWidth() / 2, 2, w, 20);
+
+            colourPicker.setBounds (0, previewArea.getBottom() + 16,
+                                    getWidth(), getHeight() - previewArea.getBottom() - 16);
         }
 
         void mouseDown (const MouseEvent& e)
@@ -338,6 +357,9 @@ private:
                 if (selectedPoint < 0)
                     selectedPoint = 0;
 
+                linearButton.setToggleState (! gradient.isRadial, false);
+                radialButton.setToggleState (gradient.isRadial, false);
+
                 updatePicker();
                 sendChangeMessage (this);
                 repaint();
@@ -364,6 +386,13 @@ private:
             }
         }
 
+        void buttonClicked (Button* b)
+        {
+            ColourGradient g (gradient);
+            g.isRadial = (b == &radialButton);
+            setGradient (g);
+        }
+
     private:
         StoredSettings::ColourSelectorWithSwatches colourPicker;
         ColourGradient gradient;
@@ -374,6 +403,7 @@ private:
         ColourGradient preDragGradient;
 
         Rectangle<int> previewArea;
+        TextButton linearButton, radialButton;
 
         void updatePicker()
         {
