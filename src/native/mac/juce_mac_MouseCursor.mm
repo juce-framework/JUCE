@@ -47,10 +47,10 @@ namespace MouseCursorHelpers
         BufferedInputStream buf (&fileStream, 4096, false);
 
         PNGImageFormat pngFormat;
-        const ScopedPointer <Image> im (pngFormat.decodeImage (buf));
+        Image im (pngFormat.decodeImage (buf));
 
-        if (im != 0)
-            return createFromImage (*im, hx * im->getWidth(), hy * im->getHeight());
+        if (im.isValid())
+            return createFromImage (im, hx * im.getWidth(), hy * im.getHeight());
 
         jassertfalse;
         return 0;

@@ -54,16 +54,10 @@ void JucerTreeViewBase::paintItem (Graphics& g, int width, int height)
     const int x = getTextX();
 
     g.setColour (isMissing() ? Colours::red : Colours::black);
-    Image* icon = getIcon();
 
-    if (icon != 0)
-    {
-        g.drawImageWithin (icon, 2, 2, x - 4, height - 4,
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                           false);
-
-        ImageCache::release (icon);
-    }
+    g.drawImageWithin (getIcon(), 2, 2, x - 4, height - 4,
+                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
+                       false);
 
     g.setFont (getFont());
     g.drawFittedText (getDisplayName(), x, 0, width - x, height, Justification::centredLeft, 1, 0.8f);

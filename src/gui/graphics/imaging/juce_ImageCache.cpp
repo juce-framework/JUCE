@@ -30,178 +30,126 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_ImageCache.h"
 #include "juce_ImageFileFormat.h"
 #include "../../../threads/juce_ScopedLock.h"
+#include "../../../utilities/juce_DeletedAtShutdown.h"
+#include "../../../containers/juce_OwnedArray.h"
+#include "../../../events/juce_Timer.h"
+#include "../../../core/juce_Singleton.h"
 
 
 //==============================================================================
-struct ImageCache::Item
+class ImageCache::Pimpl     : public Timer,
+                              public DeletedAtShutdown
 {
-    ScopedPointer <Image> image;
-    int64 hashCode;
-    int refCount;
-    uint32 releaseTime;
-
-    juce_UseDebuggingNewOperator
-};
-
-ImageCache* ImageCache::instance = 0;
-int ImageCache::cacheTimeout = 5000;
-
-
-//==============================================================================
-ImageCache::ImageCache()
-{
-}
-
-ImageCache::~ImageCache()
-{
-    jassert (instance == this);
-    instance = 0;
-}
-
-Image* ImageCache::getFromHashCode (const int64 hashCode)
-{
-    if (instance != 0)
+public:
+    Pimpl()
+        : cacheTimeout (5000)
     {
-        const ScopedLock sl (instance->lock);
+    }
 
-        for (int i = instance->images.size(); --i >= 0;)
+    ~Pimpl()
+    {
+        clearSingletonInstance();
+    }
+
+    const Image getFromHashCode (const int64 hashCode)
+    {
+        const ScopedLock sl (lock);
+
+        for (int i = images.size(); --i >= 0;)
         {
-            Item* const ci = instance->images.getUnchecked(i);
+            Item* const item = images.getUnchecked(i);
 
-            if (ci->hashCode == hashCode)
-            {
-                ci->refCount++;
-                return ci->image;
-            }
+            if (item->hashCode == hashCode)
+                return item->image;
+        }
+
+        return Image();
+    }
+
+    void addImageToCache (const Image& image, const int64 hashCode)
+    {
+        if (image.isValid())
+        {
+            if (! isTimerRunning())
+                startTimer (2000);
+
+            Item* const item = new Item();
+            item->hashCode = hashCode;
+            item->image = image;
+            item->lastUseTime = Time::getApproximateMillisecondCounter();
+
+            const ScopedLock sl (lock);
+            images.add (item);
         }
     }
 
-    return 0;
-}
-
-void ImageCache::addImageToCache (Image* const image, const int64 hashCode)
-{
-    if (image != 0)
+    void timerCallback()
     {
-        if (instance == 0)
-            instance = new ImageCache();
+        const uint32 now = Time::getApproximateMillisecondCounter();
 
-        Item* const newC = new Item();
-        newC->hashCode = hashCode;
-        newC->image = image;
-        newC->refCount = 1;
-        newC->releaseTime = 0;
+        const ScopedLock sl (lock);
 
-        const ScopedLock sl (instance->lock);
-        instance->images.add (newC);
-    }
-}
-
-void ImageCache::release (Image* const imageToRelease)
-{
-    if (imageToRelease != 0 && instance != 0)
-    {
-        const ScopedLock sl (instance->lock);
-
-        for (int i = instance->images.size(); --i >= 0;)
+        for (int i = images.size(); --i >= 0;)
         {
-            Item* const ci = instance->images.getUnchecked(i);
+            Item* const item = images.getUnchecked(i);
 
-            if (static_cast <Image*> (ci->image) == imageToRelease)
+            if (item->image.getReferenceCount() <= 1)
             {
-                if (--(ci->refCount) == 0)
-                    ci->releaseTime = Time::getApproximateMillisecondCounter();
-
-                if (! instance->isTimerRunning())
-                    instance->startTimer (999);
-
-                break;
-            }
-        }
-    }
-}
-
-void ImageCache::releaseOrDelete (Image* const imageToRelease)
-{
-    if (isImageInCache (imageToRelease))
-        release (imageToRelease);
-    else
-        delete imageToRelease;
-}
-
-bool ImageCache::isImageInCache (Image* const imageToLookFor)
-{
-    if (imageToLookFor == 0)
-        return false;
-
-    if (instance != 0)
-    {
-        const ScopedLock sl (instance->lock);
-
-        for (int i = instance->images.size(); --i >= 0;)
-            if (static_cast <Image*> (instance->images.getUnchecked(i)->image) == imageToLookFor)
-                return true;
-    }
-
-    return false;
-}
-
-void ImageCache::incReferenceCount (Image* const image)
-{
-    if (instance != 0)
-    {
-        const ScopedLock sl (instance->lock);
-
-        for (int i = instance->images.size(); --i >= 0;)
-        {
-            Item* const ci = instance->images.getUnchecked(i);
-
-            if (static_cast <Image*> (ci->image) == image)
-            {
-                ci->refCount++;
-                return;
-            }
-        }
-    }
-
-    jassertfalse;  // (trying to inc the ref count of an image that's not in the cache)
-}
-
-void ImageCache::timerCallback()
-{
-    int numberStillNeedingReleasing = 0;
-    const uint32 now = Time::getApproximateMillisecondCounter();
-
-    const ScopedLock sl (lock);
-
-    for (int i = images.size(); --i >= 0;)
-    {
-        Item* const ci = images.getUnchecked(i);
-
-        if (ci->refCount <= 0)
-        {
-            if (now > ci->releaseTime + cacheTimeout
-                 || now < ci->releaseTime - 1000)
-            {
-                images.remove (i);
+                if (now > item->lastUseTime + cacheTimeout || now < item->lastUseTime - 1000)
+                    images.remove (i);
             }
             else
             {
-                ++numberStillNeedingReleasing;
+                item->lastUseTime = now; // multiply-referenced, so this image is still in use.
             }
         }
+
+        if (images.size() == 0)
+            stopTimer();
     }
 
-    if (numberStillNeedingReleasing == 0)
-        stopTimer();
+    struct Item
+    {
+        Image image;
+        int64 hashCode;
+        uint32 lastUseTime;
+    };
+
+    int cacheTimeout;
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (ImageCache::Pimpl);
+
+private:
+    OwnedArray<Item> images;
+    CriticalSection lock;
+
+    Pimpl (const Pimpl&);
+    Pimpl& operator= (const Pimpl&);
+};
+
+juce_ImplementSingleton_SingleThreaded (ImageCache::Pimpl);
+
+
+//==============================================================================
+const Image ImageCache::getFromHashCode (const int64 hashCode)
+{
+    if (Pimpl::getInstanceWithoutCreating() != 0)
+        return Pimpl::getInstanceWithoutCreating()->getFromHashCode (hashCode);
+
+    return Image();
 }
 
-Image* ImageCache::getFromFile (const File& file)
+void ImageCache::addImageToCache (const Image& image, const int64 hashCode)
+{
+    Pimpl::getInstance()->addImageToCache (image, hashCode);
+}
+
+const Image ImageCache::getFromFile (const File& file)
 {
     const int64 hashCode = file.hashCode64();
-    Image* image = getFromHashCode (hashCode);
+    Image image (getFromHashCode (hashCode));
 
-    if (image == 0)
+    if (image.isNull())
     {
         image = ImageFileFormat::loadFrom (file);
         addImageToCache (image, hashCode);
@@ -210,12 +158,12 @@ Image* ImageCache::getFromFile (const File& file)
     return image;
 }
 
-Image* ImageCache::getFromMemory (const void* imageData, const int dataSize)
+const Image ImageCache::getFromMemory (const void* imageData, const int dataSize)
 {
     const int64 hashCode = (int64) (pointer_sized_int) imageData;
-    Image* image = getFromHashCode (hashCode);
+    Image image (getFromHashCode (hashCode));
 
-    if (image == 0)
+    if (image.isNull())
     {
         image = ImageFileFormat::loadFrom (imageData, dataSize);
         addImageToCache (image, hashCode);
@@ -226,7 +174,7 @@ Image* ImageCache::getFromMemory (const void* imageData, const int dataSize)
 
 void ImageCache::setCacheTimeout (const int millisecs)
 {
-    cacheTimeout = millisecs;
+    Pimpl::getInstance()->cacheTimeout = millisecs;
 }
 
 

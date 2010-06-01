@@ -661,7 +661,7 @@ bool Project::Item::addFile (const File& file, int insertIndex)
     return true;
 }
 
-Image* Project::Item::getIcon() const
+const Image Project::Item::getIcon() const
 {
     if (isFile())
         return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();

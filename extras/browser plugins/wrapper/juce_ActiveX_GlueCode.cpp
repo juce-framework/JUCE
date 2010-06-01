@@ -164,7 +164,7 @@ class IDispatchWrappingDynamicObject   : public IDispatch
 public:
     IDispatchWrappingDynamicObject (const var& object_)
         : object (object_),
-          refCount (0)
+          refCount (1)
     {
         DBG ("num Juce wrapper objs: " + String (++numJuceSO));
     }

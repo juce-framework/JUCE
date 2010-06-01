@@ -58,13 +58,13 @@ void GlowEffect::applyEffect (Image& image, Graphics& g)
     blurKernel.createGaussianBlur (radius);
     blurKernel.rescaleAllValues (radius);
 
-    blurKernel.applyToImage (temp, &image, image.getBounds());
+    blurKernel.applyToImage (temp, image, image.getBounds());
 
     g.setColour (colour);
-    g.drawImageAt (&temp, 0, 0, true);
+    g.drawImageAt (temp, 0, 0, true);
 
     g.setOpacity (1.0f);
-    g.drawImageAt (&image, 0, 0, false);
+    g.drawImageAt (image, 0, 0, false);
 }
 
 END_JUCE_NAMESPACE

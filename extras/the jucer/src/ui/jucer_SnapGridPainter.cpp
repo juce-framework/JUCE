@@ -37,7 +37,6 @@ SnapGridPainter::SnapGridPainter()
 
 SnapGridPainter::~SnapGridPainter()
 {
-    delete backgroundFill;
 }
 
 bool SnapGridPainter::updateFromDesign (JucerDocument& design)
@@ -48,7 +47,7 @@ bool SnapGridPainter::updateFromDesign (JucerDocument& design)
         snapGridSize = design.getSnappingGridSize();
         snapShown = design.isSnapShown() && design.isSnapActive (false);
 
-        deleteAndZero (backgroundFill);
+        backgroundFill = Image();
         return true;
     }
 
@@ -57,16 +56,16 @@ bool SnapGridPainter::updateFromDesign (JucerDocument& design)
 
 void SnapGridPainter::updateColour()
 {
-    deleteAndZero (backgroundFill);
+    backgroundFill = Image();
 }
 
 void SnapGridPainter::draw (Graphics& g, PaintRoutine* backgroundGraphics)
 {
-    if (backgroundFill == 0 && snapShown)
+    if (backgroundFill.isNull() && snapShown)
     {
-        backgroundFill = new Image (Image::ARGB, snapGridSize, snapGridSize, true);
+        backgroundFill = Image (Image::ARGB, snapGridSize, snapGridSize, true);
 
-        Graphics g (*backgroundFill);
+        Graphics g (backgroundFill);
 
         Colour col (Colours::black);
 
@@ -83,9 +82,9 @@ void SnapGridPainter::draw (Graphics& g, PaintRoutine* backgroundGraphics)
         g.setPixel (0, 0);
     }
 
-    if (backgroundFill != 0)
+    if (backgroundFill.isValid())
     {
-        g.setTiledImageFill (*backgroundFill, 0, 0, 1.0f);
+        g.setTiledImageFill (backgroundFill, 0, 0, 1.0f);
         g.fillAll();
     }
 }

@@ -42,7 +42,6 @@ public:
 
         cameraDevice = 0;
         cameraPreviewComp = 0;
-        lastSnapshot = 0;
         recordingMovie = false;
 
         addAndMakeVisible (cameraSelectorComboBox = new ComboBox (T("Camera")));
@@ -65,16 +64,14 @@ public:
     {
         deleteAllChildren();
         delete cameraDevice;
-        delete lastSnapshot;
     }
 
     void paint (Graphics& g)
     {
-        if (lastSnapshot != 0)
-            g.drawImageWithin (lastSnapshot,
-                               getWidth() / 2 + 10, 40,
-                               getWidth() / 2 - 20, getHeight() - 50,
-                               RectanglePlacement::centred, false);
+        g.drawImageWithin (lastSnapshot,
+                           getWidth() / 2 + 10, 40,
+                           getWidth() / 2 - 20, getHeight() - 50,
+                           RectanglePlacement::centred, false);
     }
 
     void resized()
@@ -160,7 +157,7 @@ public:
     }
 
     // This is called by the camera device when a new image arrives
-    void imageReceived (Image& image)
+    void imageReceived (const Image& image)
     {
         // In this app we just want to take one image, so as soon as this happens,
         // we'll unregister ourselves as a listener.
@@ -170,8 +167,7 @@ public:
         // This callback won't be on the message thread, so need to lock it before using
         // data that may already be in use..
         const MessageManagerLock mm;
-        deleteAndZero (lastSnapshot);
-        lastSnapshot = image.createCopy();
+        lastSnapshot = image;
         repaint();
     }
 
@@ -185,7 +181,7 @@ private:
     Component* cameraPreviewComp;
     bool recordingMovie;
 
-    Image* lastSnapshot;
+    Image lastSnapshot;
 };
 
 

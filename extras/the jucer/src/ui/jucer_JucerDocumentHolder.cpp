@@ -1300,10 +1300,10 @@ JucerDocumentHolder* JucerDocumentHolder::getActiveDocumentHolder()
     return dynamic_cast <JucerDocumentHolder*> (target);
 }
 
-Image* JucerDocumentHolder::createComponentLayerSnapshot() const
+const Image JucerDocumentHolder::createComponentLayerSnapshot() const
 {
     if (compLayoutPanel != 0)
         return compLayoutPanel->createComponentSnapshot();
 
-    return 0;
+    return Image();
 }

@@ -36,34 +36,32 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 SplashScreen::SplashScreen()
-    : backgroundImage (0)
 {
     setOpaque (true);
 }
 
 SplashScreen::~SplashScreen()
 {
-    ImageCache::releaseOrDelete (backgroundImage);
 }
 
 //==============================================================================
 void SplashScreen::show (const String& title,
-                         Image* const backgroundImage_,
+                         const Image& backgroundImage_,
                          const int minimumTimeToDisplayFor,
                          const bool useDropShadow,
                          const bool removeOnMouseClick)
 {
     backgroundImage = backgroundImage_;
 
-    jassert (backgroundImage_ != 0);
+    jassert (backgroundImage_.isValid());
 
-    if (backgroundImage_ != 0)
+    if (backgroundImage_.isValid())
     {
-        setOpaque (! backgroundImage_->hasAlphaChannel());
+        setOpaque (! backgroundImage_.hasAlphaChannel());
 
         show (title,
-              backgroundImage_->getWidth(),
-              backgroundImage_->getHeight(),
+              backgroundImage_.getWidth(),
+              backgroundImage_.getHeight(),
               minimumTimeToDisplayFor,
               useDropShadow,
               removeOnMouseClick);
@@ -101,14 +99,11 @@ void SplashScreen::show (const String& title,
 //==============================================================================
 void SplashScreen::paint (Graphics& g)
 {
-    if (backgroundImage != 0)
-    {
-        g.setOpacity (1.0f);
+    g.setOpacity (1.0f);
 
-        g.drawImage (backgroundImage,
-                     0, 0, getWidth(), getHeight(),
-                     0, 0, backgroundImage->getWidth(), backgroundImage->getHeight());
-    }
+    g.drawImage (backgroundImage,
+                 0, 0, getWidth(), getHeight(),
+                 0, 0, backgroundImage.getWidth(), backgroundImage.getHeight());
 }
 
 void SplashScreen::timerCallback()

@@ -114,13 +114,13 @@ public:
 
     void paint (Graphics& g)
     {
-        if (colours == 0)
+        if (colours.isNull())
         {
             const int width = getWidth() / 2;
             const int height = getHeight() / 2;
-            colours = new Image (Image::RGB, width, height, false);
+            colours = Image (Image::RGB, width, height, false);
 
-            Image::BitmapData pixels (*colours, 0, 0, width, height, true);
+            Image::BitmapData pixels (colours, 0, 0, width, height, true);
 
             for (int y = 0; y < height; ++y)
             {
@@ -129,17 +129,15 @@ public:
                 for (int x = 0; x < width; ++x)
                 {
                     const float sat = x / (float) width;
-                    const Colour col (h, sat, val, 1.0f);
 
-                    PixelRGB* const pix = (PixelRGB*) pixels.getPixelPointer (x, y);
-                    pix->set (col.getPixelARGB());
+                    pixels.setPixelColour (x, y, Colour (h, sat, val, 1.0f));
                 }
             }
         }
 
         g.setOpacity (1.0f);
         g.drawImage (colours, edge, edge, getWidth() - edge * 2, getHeight() - edge * 2,
-                     0, 0, colours->getWidth(), colours->getHeight());
+                     0, 0, colours.getWidth(), colours.getHeight());
     }
 
     void mouseDown (const MouseEvent& e)
@@ -160,7 +158,7 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
-            colours = 0;
+            colours = Image();
             repaint();
         }
 
@@ -169,7 +167,7 @@ public:
 
     void resized()
     {
-        colours = 0;
+        colours = Image();
         updateMarker();
     }
 
@@ -181,8 +179,7 @@ private:
     float lastHue;
     ColourSpaceMarker* marker;
     const int edge;
-
-    ScopedPointer <Image> colours;
+    Image colours;
 
     void updateMarker() const
     {

@@ -39,17 +39,19 @@ BEGIN_JUCE_NAMESPACE
 class ShadowWindow  : public Component
 {
     Component* owner;
-    Image** shadowImageSections;
+    Image shadowImageSections [12];
     const int type;   // 0 = left, 1 = right, 2 = top, 3 = bottom. left + right are full-height
 
 public:
     ShadowWindow (Component* const owner_,
                   const int type_,
-                  Image** const shadowImageSections_)
+                  const Image shadowImageSections_ [12])
         : owner (owner_),
-          shadowImageSections (shadowImageSections_),
           type (type_)
     {
+        for  (int i = 0; i < numElementsInArray (shadowImageSections); ++i)
+            shadowImageSections [i] = shadowImageSections_ [i];
+
         setInterceptsMouseClicks (false, false);
 
         if (owner_->isOnDesktop())
@@ -71,41 +73,41 @@ public:
 
     void paint (Graphics& g)
     {
-        Image* const topLeft      = shadowImageSections [type * 3];
-        Image* const bottomRight  = shadowImageSections [type * 3 + 1];
-        Image* const filler       = shadowImageSections [type * 3 + 2];
+        const Image& topLeft      = shadowImageSections [type * 3];
+        const Image& bottomRight  = shadowImageSections [type * 3 + 1];
+        const Image& filler       = shadowImageSections [type * 3 + 2];
 
         g.setOpacity (1.0f);
 
         if (type < 2)
         {
-            int imH = jmin (topLeft->getHeight(), getHeight() / 2);
+            int imH = jmin (topLeft.getHeight(), getHeight() / 2);
             g.drawImage (topLeft,
-                         0, 0, topLeft->getWidth(), imH,
-                         0, 0, topLeft->getWidth(), imH);
+                         0, 0, topLeft.getWidth(), imH,
+                         0, 0, topLeft.getWidth(), imH);
 
-            imH = jmin (bottomRight->getHeight(), getHeight() - getHeight() / 2);
+            imH = jmin (bottomRight.getHeight(), getHeight() - getHeight() / 2);
             g.drawImage (bottomRight,
-                         0, getHeight() - imH, bottomRight->getWidth(), imH,
-                         0, bottomRight->getHeight() - imH, bottomRight->getWidth(), imH);
+                         0, getHeight() - imH, bottomRight.getWidth(), imH,
+                         0, bottomRight.getHeight() - imH, bottomRight.getWidth(), imH);
 
-            g.setTiledImageFill (*filler, 0, 0, 1.0f);
-            g.fillRect (0, topLeft->getHeight(), getWidth(), getHeight() - (topLeft->getHeight() + bottomRight->getHeight()));
+            g.setTiledImageFill (filler, 0, 0, 1.0f);
+            g.fillRect (0, topLeft.getHeight(), getWidth(), getHeight() - (topLeft.getHeight() + bottomRight.getHeight()));
         }
         else
         {
-            int imW = jmin (topLeft->getWidth(), getWidth() / 2);
+            int imW = jmin (topLeft.getWidth(), getWidth() / 2);
             g.drawImage (topLeft,
-                         0, 0, imW, topLeft->getHeight(),
-                         0, 0, imW, topLeft->getHeight());
+                         0, 0, imW, topLeft.getHeight(),
+                         0, 0, imW, topLeft.getHeight());
 
-            imW = jmin (bottomRight->getWidth(), getWidth() - getWidth() / 2);
+            imW = jmin (bottomRight.getWidth(), getWidth() - getWidth() / 2);
             g.drawImage (bottomRight,
-                         getWidth() - imW, 0, imW, bottomRight->getHeight(),
-                         bottomRight->getWidth() - imW, 0, imW, bottomRight->getHeight());
+                         getWidth() - imW, 0, imW, bottomRight.getHeight(),
+                         bottomRight.getWidth() - imW, 0, imW, bottomRight.getHeight());
 
-            g.setTiledImageFill (*filler, 0, 0, 1.0f);
-            g.fillRect (topLeft->getWidth(), 0, getWidth() - (topLeft->getWidth() + bottomRight->getWidth()), getHeight());
+            g.setTiledImageFill (filler, 0, 0, 1.0f);
+            g.fillRect (topLeft.getWidth(), 0, getWidth() - (topLeft.getWidth() + bottomRight.getWidth()), getHeight());
         }
     }
 
@@ -154,9 +156,6 @@ void DropShadower::deleteShadowWindows()
         int i;
         for (i = numShadows; --i >= 0;)
             delete shadowWindows[i];
-
-        for (i = 12; --i >= 0;)
-            delete shadowImageSections[i];
 
         numShadows = 0;
     }
@@ -235,31 +234,31 @@ void DropShadower::updateShadows()
 
         const int hash = imageId.hashCode();
 
-        Image* bigIm = ImageCache::getFromHashCode (hash);
+        Image bigIm (ImageCache::getFromHashCode (hash));
 
-        if (bigIm == 0)
+        if (bigIm.isNull())
         {
-            bigIm = Image::createNativeImage (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true);
+            bigIm = Image (Image::ARGB, shadowEdge * 5, shadowEdge * 5, true, Image::NativeImage);
 
-            Graphics bigG (*bigIm);
+            Graphics bigG (bigIm);
             bigG.setColour (Colours::black.withAlpha (alpha));
             bigG.fillRect (shadowEdge + xOffset,
                            shadowEdge + yOffset,
-                           bigIm->getWidth() - (shadowEdge * 2),
-                           bigIm->getHeight() - (shadowEdge * 2));
+                           bigIm.getWidth() - (shadowEdge * 2),
+                           bigIm.getHeight() - (shadowEdge * 2));
 
             ImageConvolutionKernel blurKernel (roundToInt (blurRadius * 2.0f));
             blurKernel.createGaussianBlur (blurRadius);
 
-            blurKernel.applyToImage (*bigIm, 0,
+            blurKernel.applyToImage (bigIm, bigIm,
                                      Rectangle<int> (xOffset, yOffset,
-                                                     bigIm->getWidth(), bigIm->getHeight()));
+                                                     bigIm.getWidth(), bigIm.getHeight()));
 
             ImageCache::addImageToCache (bigIm, hash);
         }
 
-        const int iw = bigIm->getWidth();
-        const int ih = bigIm->getHeight();
+        const int iw = bigIm.getWidth();
+        const int ih = bigIm.getHeight();
         const int shadowEdge2 = shadowEdge * 2;
 
         setShadowImage (bigIm, 0, shadowEdge, shadowEdge2, 0, 0);
@@ -274,8 +273,6 @@ void DropShadower::updateShadows()
         setShadowImage (bigIm, 9, shadowEdge, shadowEdge, shadowEdge, ih - shadowEdge);
         setShadowImage (bigIm, 10, shadowEdge, shadowEdge, iw - shadowEdge2, ih - shadowEdge);
         setShadowImage (bigIm, 11, shadowEdge, shadowEdge, shadowEdge2, ih - shadowEdge);
-
-        ImageCache::release (bigIm);
 
         for (int i = 0; i < 4; ++i)
         {
@@ -324,12 +321,12 @@ void DropShadower::updateShadows()
         bringShadowWindowsToFront();
 }
 
-void DropShadower::setShadowImage (Image* const src, const int num, const int w, const int h,
+void DropShadower::setShadowImage (const Image& src, const int num, const int w, const int h,
                                    const int sx, const int sy)
 {
-    shadowImageSections[num] = new Image (Image::ARGB, w, h, true);
+    shadowImageSections[num] = Image (Image::ARGB, w, h, true, Image::NativeImage);
 
-    Graphics g (*shadowImageSections[num]);
+    Graphics g (shadowImageSections[num]);
     g.drawImage (src, 0, 0, w, h, sx, sy, w, h);
 }
 

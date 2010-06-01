@@ -46,7 +46,7 @@ class DragImageComponent  : public Component,
                             public Timer
 {
 public:
-    DragImageComponent (Image* const im,
+    DragImageComponent (const Image& im,
                         const String& desc,
                         Component* const sourceComponent,
                         Component* const mouseDragSource_,
@@ -61,7 +61,7 @@ public:
           hasCheckedForExternalDrag (false),
           drawImage (true)
     {
-        setSize (im->getWidth(), im->getHeight());
+        setSize (im.getWidth(), im.getHeight());
 
         if (mouseDragSource == 0)
             mouseDragSource = source;
@@ -280,7 +280,7 @@ public:
     }
 
 private:
-    ScopedPointer<Image> image;
+    Image image;
     Component::SafePointer<Component> source;
     Component::SafePointer<Component> mouseDragSource;
     DragAndDropContainer* const owner;
@@ -312,11 +312,11 @@ DragAndDropContainer::~DragAndDropContainer()
 
 void DragAndDropContainer::startDragging (const String& sourceDescription,
                                           Component* sourceComponent,
-                                          Image* dragImage_,
+                                          const Image& dragImage_,
                                           const bool allowDraggingToExternalWindows,
                                           const Point<int>* imageOffsetFromMouse)
 {
-    ScopedPointer <Image> dragImage (dragImage_);
+    Image dragImage (dragImage_);
 
     if (dragImageComponent == 0)
     {
@@ -339,32 +339,24 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         const Point<int> lastMouseDown (Desktop::getLastMouseDownPosition());
         Point<int> imageOffset;
 
-        if (dragImage == 0)
+        if (dragImage.isNull())
         {
-            dragImage = sourceComponent->createComponentSnapshot (sourceComponent->getLocalBounds());
+            dragImage = sourceComponent->createComponentSnapshot (sourceComponent->getLocalBounds())
+                            .convertedToFormat (Image::ARGB);
 
-            if (dragImage->getFormat() != Image::ARGB)
-            {
-                Image* newIm = Image::createNativeImage (Image::ARGB, dragImage->getWidth(), dragImage->getHeight(), true);
-                Graphics g2 (*newIm);
-                g2.drawImageAt (dragImage, 0, 0);
-
-                dragImage = newIm;
-            }
-
-            dragImage->multiplyAllAlphas (0.6f);
+            dragImage.multiplyAllAlphas (0.6f);
 
             const int lo = 150;
             const int hi = 400;
 
             Point<int> relPos (sourceComponent->globalPositionToRelative (lastMouseDown));
-            Point<int> clipped (dragImage->getBounds().getConstrainedPoint (relPos));
+            Point<int> clipped (dragImage.getBounds().getConstrainedPoint (relPos));
 
-            for (int y = dragImage->getHeight(); --y >= 0;)
+            for (int y = dragImage.getHeight(); --y >= 0;)
             {
                 const double dy = (y - clipped.getY()) * (y - clipped.getY());
 
-                for (int x = dragImage->getWidth(); --x >= 0;)
+                for (int x = dragImage.getWidth(); --x >= 0;)
                 {
                     const int dx = x - clipped.getX();
                     const int distance = roundToInt (std::sqrt (dx * dx + dy));
@@ -375,7 +367,7 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
                                                             : (hi - distance) / (float) (hi - lo)
                                                                + Random::getSystemRandom().nextFloat() * 0.008f;
 
-                        dragImage->multiplyAlphaAt (x, y, alpha);
+                        dragImage.multiplyAlphaAt (x, y, alpha);
                     }
                 }
             }
@@ -385,12 +377,12 @@ void DragAndDropContainer::startDragging (const String& sourceDescription,
         else
         {
             if (imageOffsetFromMouse == 0)
-                imageOffset = -dragImage->getBounds().getCentre();
+                imageOffset = -dragImage.getBounds().getCentre();
             else
-                imageOffset = -(dragImage->getBounds().getConstrainedPoint (-*imageOffsetFromMouse));
+                imageOffset = -(dragImage.getBounds().getConstrainedPoint (-*imageOffsetFromMouse));
         }
 
-        dragImageComponent = new DragImageComponent (dragImage.release(), sourceDescription, sourceComponent,
+        dragImageComponent = new DragImageComponent (dragImage, sourceDescription, sourceComponent,
                                                      draggingSource->getComponentUnderMouse(), this, imageOffset);
 
         currentDragDesc = sourceDescription;

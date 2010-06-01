@@ -72,11 +72,14 @@ void ToolbarButton::paintButtonArea (Graphics& g,
     if (! isEnabled())
     {
         Image im (Image::ARGB, width, height, true);
-        Graphics g2 (im);
-        d->drawWithin (g2, 0, 0, width, height, RectanglePlacement::centred, 1.0f);
-        im.desaturate();
 
-        g.drawImageAt (&im, 0, 0);
+        {
+            Graphics g2 (im);
+            d->drawWithin (g2, 0, 0, width, height, RectanglePlacement::centred, 1.0f);
+        }
+
+        im.desaturate();
+        g.drawImageAt (im, 0, 0);
     }
     else
     {

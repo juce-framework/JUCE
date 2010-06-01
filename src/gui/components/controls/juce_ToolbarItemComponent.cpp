@@ -96,7 +96,7 @@ public:
 
             if (dnd != 0)
             {
-                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), 0, true);
+                dnd->startDragging (Toolbar::toolbarDragDescriptor, getParentComponent(), Image(), true);
 
                 ToolbarItemComponent* const tc = dynamic_cast <ToolbarItemComponent*> (getParentComponent());
 

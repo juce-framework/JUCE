@@ -27,6 +27,7 @@
 #define __JUCE_DRAWABLEIMAGE_JUCEHEADER__
 
 #include "juce_Drawable.h"
+#include "../imaging/juce_Image.h"
 
 
 //==============================================================================
@@ -46,30 +47,11 @@ public:
     virtual ~DrawableImage();
 
     //==============================================================================
-    /** Sets the image that this drawable will render.
-
-        An internal copy is made of the image passed-in. If you want to provide an
-        image that this object can take charge of without needing to create a copy,
-        use the other setImage() method.
-    */
-    void setImage (const Image& imageToCopy);
-
-    /** Sets the image that this drawable will render.
-
-        A good way to use this is with the ImageCache - if you create an image
-        with ImageCache and pass it in here with releaseWhenNotNeeded = true, then
-        it'll be released neatly with its reference count being decreased.
-
-        @param imageToUse               the image to render (may be a null pointer)
-        @param releaseWhenNotNeeded     if false, a simple pointer is kept to the image; if true,
-                                        then the image will be deleted when this object no longer
-                                        needs it - unless the image was created by the ImageCache,
-                                        in which case it will be released with ImageCache::release().
-    */
-    void setImage (Image* imageToUse, bool releaseWhenNotNeeded);
+    /** Sets the image that this drawable will render. */
+    void setImage (const Image& imageToUse);
 
     /** Returns the current image. */
-    Image* getImage() const throw()                             { return image; }
+    const Image getImage() const                                { return image; }
 
     /** Sets the opacity to use when drawing the image. */
     void setOpacity (float newOpacity);
@@ -176,8 +158,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Image* image;
-    bool canDeleteImage;
+    Image image;
     float opacity;
     Colour overlayColour;
     RelativePoint controlPoints[3];

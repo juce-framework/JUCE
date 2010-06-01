@@ -166,7 +166,7 @@ public:
         const String resName (getImageResource (ib, role));
 
         if (resName.isEmpty())
-            return "0";
+            return "Image()";
 
         return "ImageCache::getFromMemory (" + resName + ", " + resName + "Size)";
     }
@@ -522,9 +522,9 @@ public:
     //==============================================================================
     static void updateButtonImages (JucerDocument& document, ImageButton* const ib)
     {
-        Image* norm = document.getResources().getImageFromCache (getImageResource (ib, normalImage));
-        Image* over = document.getResources().getImageFromCache (getImageResource (ib, overImage));
-        Image* down = document.getResources().getImageFromCache (getImageResource (ib, downImage));
+        Image norm = document.getResources().getImageFromCache (getImageResource (ib, normalImage));
+        Image over = document.getResources().getImageFromCache (getImageResource (ib, overImage));
+        Image down = document.getResources().getImageFromCache (getImageResource (ib, downImage));
 
         ib->setImages (false, true, doesImageKeepProportions (ib),
                        norm,

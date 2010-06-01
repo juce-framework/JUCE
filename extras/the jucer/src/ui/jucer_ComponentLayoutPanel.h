@@ -45,7 +45,7 @@ public:
     void updatePropertiesList();
     const Rectangle<int> getComponentArea() const;
 
-    Image* createComponentSnapshot() const;
+    const Image createComponentSnapshot() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

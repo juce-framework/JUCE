@@ -64,7 +64,7 @@ public:
 class AboutPage   : public Component
 {
     HyperlinkButton* link;
-    Image* logo;
+    Image logo;
     TextLayout text1, text2;
 
 public:
@@ -89,7 +89,6 @@ public:
     ~AboutPage()
     {
         deleteAllChildren();
-        ImageCache::release (logo);
     }
 
     void paint (Graphics& g)

@@ -425,7 +425,7 @@ int64 juce_getInternetFileContentLength (void* handle)
     return -1;
 }
 
-bool juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
 {
     JuceURLConnection* const s = (JuceURLConnection*) handle;
 
@@ -437,11 +437,7 @@ bool juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
         while ((key = [enumerator nextObject]) != nil)
             headers.set (nsStringToJuce (key),
                          nsStringToJuce ((NSString*) [s->headers objectForKey: key]));
-
-        return true;
     }
-
-    return false;
 }
 
 

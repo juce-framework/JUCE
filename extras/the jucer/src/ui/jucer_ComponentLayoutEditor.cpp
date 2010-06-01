@@ -184,10 +184,10 @@ const Rectangle<int> ComponentLayoutEditor::getComponentArea() const
     }
 }
 
-Image* ComponentLayoutEditor::createComponentLayerSnapshot() const
+const Image ComponentLayoutEditor::createComponentLayerSnapshot() const
 {
     ((SubComponentHolderComp*) subCompHolder)->dontFillBackground = true;
-    Image* const im = subCompHolder->createComponentSnapshot (Rectangle<int> (0, 0, subCompHolder->getWidth(), subCompHolder->getHeight()));
+    Image im = subCompHolder->createComponentSnapshot (Rectangle<int> (0, 0, subCompHolder->getWidth(), subCompHolder->getHeight()));
     ((SubComponentHolderComp*) subCompHolder)->dontFillBackground = false;
 
     return im;

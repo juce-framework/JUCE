@@ -151,10 +151,10 @@ bool PNGImageFormat::canUnderstand (InputStream& in)
             && header[3] == 'G';
 }
 
-Image* PNGImageFormat::decodeImage (InputStream& in)
+const Image PNGImageFormat::decodeImage (InputStream& in)
 {
     using namespace pnglibNamespace;
-    Image* image = 0;
+    Image image;
 
     png_structp pngReadStruct;
     png_infop pngInfoStruct;
@@ -168,7 +168,7 @@ Image* PNGImageFormat::decodeImage (InputStream& in)
         if (pngInfoStruct == 0)
         {
             png_destroy_read_struct (&pngReadStruct, 0, 0);
-            return 0;
+            return Image();
         }
 
         png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback );
@@ -221,12 +221,12 @@ Image* PNGImageFormat::decodeImage (InputStream& in)
         png_destroy_read_struct (&pngReadStruct, &pngInfoStruct, 0);
 
         // now convert the data to a juce image format..
-        image = Image::createNativeImage (hasAlphaChan ? Image::ARGB : Image::RGB,
-                                          (int) width, (int) height, hasAlphaChan);
+        image = Image (hasAlphaChan ? Image::ARGB : Image::RGB,
+                       (int) width, (int) height, hasAlphaChan);
 
-        hasAlphaChan = image->hasAlphaChannel(); // (the native image creator may not give back what we expect)
+        hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-        const Image::BitmapData destData (*image, 0, 0, (int) width, (int) height, true);
+        const Image::BitmapData destData (image, 0, 0, (int) width, (int) height, true);
         uint8* srcRow = tempBuffer;
         uint8* destRow = destData.data;
 

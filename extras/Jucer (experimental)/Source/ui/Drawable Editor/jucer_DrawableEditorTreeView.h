@@ -124,7 +124,7 @@ public:
 
     bool isMissing()            { return false; }
 
-    Image* getIcon() const
+    const Image getIcon() const
     {
         return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage();
     }

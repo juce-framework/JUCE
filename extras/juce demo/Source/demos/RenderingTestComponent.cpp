@@ -68,8 +68,6 @@ public:
 
     ~RenderingTestCanvas()
     {
-        delete rgbImage;
-        delete argbImage;
         delete svgDrawable;
     }
 
@@ -151,8 +149,7 @@ private:
     RenderingTestComponent& owner;
     double averageTime;
 
-    Image* rgbImage;
-    Image* argbImage;
+    Image rgbImage, argbImage;
     DrawableComposite* svgDrawable;
     GlyphArrangement glyphs;
     ColourGradient linearGradient, radialGradient;
@@ -191,12 +188,12 @@ private:
 
     void clipToImage (Graphics& g)
     {
-        AffineTransform transform (AffineTransform::translation (argbImage->getWidth() / -2.0f, argbImage->getHeight() / -2.0f)
+        AffineTransform transform (AffineTransform::translation (argbImage.getWidth() / -2.0f, argbImage.getHeight() / -2.0f)
                                                    .rotated (bouncingNumber[3])
                                                    .scaled (bouncingNumber[2] + 4.0f, bouncingNumber[2] + 4.0f)
                                                    .translated (bouncingPointX[2], bouncingPointY[2]));
-        g.reduceClipRegion (*argbImage,
-                            Rectangle<int> (0, 0, argbImage->getWidth(), argbImage->getHeight()),
+        g.reduceClipRegion (argbImage,
+                            Rectangle<int> (0, 0, argbImage.getWidth(), argbImage.getHeight()),
                             transform);
     }
 
@@ -264,24 +261,24 @@ private:
         g.strokePath (p, stroke, AffineTransform::identity);
     }
 
-    void drawImages (Graphics& g, Image* image)
+    void drawImages (Graphics& g, const Image& image)
     {
-        AffineTransform transform (AffineTransform::translation ((float) (image->getWidth() / -2),
-                                                                 (float) (image->getHeight() / -2))
+        AffineTransform transform (AffineTransform::translation ((float) (image.getWidth() / -2),
+                                                                 (float) (image.getHeight() / -2))
                                                    .followedBy (getTransform()));
 
         g.setOpacity ((float) owner.opacitySlider->getValue());
-        g.drawImageTransformed (image, image->getBounds(),
+        g.drawImageTransformed (image, image.getBounds(),
                                 transform, false);
     }
 
-    void drawTiling (Graphics& g, Image* image)
+    void drawTiling (Graphics& g, const Image& image)
     {
-        AffineTransform transform (AffineTransform::translation ((float) (image->getWidth() / -2),
-                                                                 (float) (image->getHeight() / -2))
+        AffineTransform transform (AffineTransform::translation ((float) (image.getWidth() / -2),
+                                                                 (float) (image.getHeight() / -2))
                                                    .followedBy (getTransform()));
 
-        FillType fill (*image, transform);
+        FillType fill (image, transform);
         fill.setOpacity ((float) owner.opacitySlider->getValue());
         g.setFillType (fill);
         g.fillAll();

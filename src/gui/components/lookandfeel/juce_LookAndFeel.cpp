@@ -1084,7 +1084,7 @@ void LookAndFeel::drawPopupMenuItem (Graphics& g,
 
         if (image != 0)
         {
-            g.drawImageWithin (image,
+            g.drawImageWithin (*image,
                                2, 1, leftBorder - 4, height - 2,
                                RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
         }
@@ -1701,7 +1701,7 @@ void LookAndFeel::drawImageButton (Graphics& g, Image* image,
     {
         g.setOpacity (imageOpacity);
 
-        g.drawImage (image, imageX, imageY, imageW, imageH,
+        g.drawImage (*image, imageX, imageY, imageW, imageH,
                      0, 0, image->getWidth(), image->getHeight(), false);
     }
 
@@ -1709,7 +1709,7 @@ void LookAndFeel::drawImageButton (Graphics& g, Image* image,
     {
         g.setColour (overlayColour);
 
-        g.drawImage (image, imageX, imageY, imageW, imageH,
+        g.drawImage (*image, imageX, imageY, imageW, imageH,
                      0, 0, image->getWidth(), image->getHeight(), true);
     }
 }
@@ -1804,7 +1804,7 @@ void LookAndFeel::drawDocumentWindowTitleBar (DocumentWindow& window,
     if (icon != 0)
     {
         g.setOpacity (isActive ? 1.0f : 0.6f);
-        g.drawImageWithin (icon, textX, (h - iconH) / 2, iconW, iconH,
+        g.drawImageWithin (*icon, textX, (h - iconH) / 2, iconW, iconH,
                            RectanglePlacement::centred, false);
         textX += iconW;
         textW -= iconW;
@@ -2559,24 +2559,21 @@ void LookAndFeel::drawFileBrowserRow (Graphics& g, int width, int height,
     g.setColour (findColour (DirectoryContentsDisplayComponent::textColourId));
     g.setFont (height * 0.7f);
 
-    Image* im = icon;
-    Image* toRelease = 0;
+    Image im;
+    if (icon != 0)
+        im = *icon;
 
-    if (im == 0)
-    {
-        toRelease = im = (isDirectory ? getDefaultFolderImage()
-                                      : getDefaultDocumentFileImage());
-    }
+    if (im.isNull())
+        im = isDirectory ? getDefaultFolderImage()
+                         : getDefaultDocumentFileImage();
 
     const int x = 32;
 
-    if (im != 0)
+    if (im.isValid())
     {
         g.drawImageWithin (im, 2, 2, x - 4, height - 4,
                            RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
                            false);
-
-        ImageCache::release (toRelease);
     }
 
     if (width > 450 && ! isDirectory)
@@ -2663,7 +2660,7 @@ void LookAndFeel::layoutFileBrowserComponent (FileBrowserComponent& browserComp,
     filenameBox->setBounds (x + 50, y, w - 50, controlsHeight);
 }
 
-Image* LookAndFeel::getDefaultFolderImage()
+const Image LookAndFeel::getDefaultFolderImage()
 {
     static const unsigned char foldericon_png[] = { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,32,0,0,0,28,8,6,0,0,0,0,194,189,34,0,0,0,4,103,65,77,65,0,0,175,200,55,5,
         138,233,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,9,46,73,68,65,84,120,218,98,252,255,255,63,3,50,240,41,95,192,
@@ -2713,7 +2710,7 @@ Image* LookAndFeel::getDefaultFolderImage()
     return ImageCache::getFromMemory (foldericon_png, sizeof (foldericon_png));
 }
 
-Image* LookAndFeel::getDefaultDocumentFileImage()
+const Image LookAndFeel::getDefaultDocumentFileImage()
 {
     static const unsigned char fileicon_png[] = { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,32,0,0,0,32,8,6,0,0,0,115,122,122,244,0,0,0,4,103,65,77,65,0,0,175,200,55,5,
         138,233,0,0,0,25,116,69,88,116,83,111,102,116,119,97,114,101,0,65,100,111,98,101,32,73,109,97,103,101,82,101,97,100,121,113,201,101,60,0,0,4,99,73,68,65,84,120,218,98,252,255,255,63,3,12,48,50,50,50,1,

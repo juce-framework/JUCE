@@ -57,7 +57,7 @@ public:
     void setViewportToLastPos (Viewport* vp);
     void storeLastViewportPos (Viewport* vp);
 
-    Image* createComponentLayerSnapshot() const;
+    const Image createComponentLayerSnapshot() const;
 
     //==============================================================================
     void paint (Graphics& g);

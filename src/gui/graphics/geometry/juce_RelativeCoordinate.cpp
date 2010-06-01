@@ -204,25 +204,6 @@ namespace RelativeCoordinateHelpers
 
         return String (n, 3).trimCharactersAtEnd ("0").trimCharactersAtEnd (".");
     }
-
-    static bool couldBeMistakenForPathCommand (const String& s)
-    {
-        switch (s[0])
-        {
-        case 'a':
-        case 'm':
-        case 'l':
-        case 'z':
-        case 'q':
-        case 'c':
-            return s[1] == 0 || CharacterFunctions::isWhitespace (s[1]);
-
-        default:
-            break;
-        }
-
-        return false;
-    }
 }
 
 //==============================================================================
@@ -632,7 +613,7 @@ RelativePointPath::RelativePointPath (const RelativePointPath& other)
       containsDynamicPoints (false)
 {
     ValueTree state (DrawablePath::valueTreeType);
-    writeTo (state, 0);
+    other.writeTo (state, 0);
     parse (state);
 }
 
@@ -663,7 +644,7 @@ RelativePointPath::RelativePointPath (const Path& path)
     }
 }
 
-void RelativePointPath::writeTo (ValueTree state, UndoManager* undoManager)
+void RelativePointPath::writeTo (ValueTree state, UndoManager* undoManager) const
 {
     DrawablePath::ValueTreeWrapper wrapper (state);
     wrapper.setUsesNonZeroWinding (usesNonZeroWinding, undoManager);

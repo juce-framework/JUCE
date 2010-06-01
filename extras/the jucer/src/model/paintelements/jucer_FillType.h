@@ -78,7 +78,7 @@ public:
 
     //==============================================================================
 private:
-    Image* image;
+    Image image;
 
     void reset();
     void loadImage (JucerDocument* const document);

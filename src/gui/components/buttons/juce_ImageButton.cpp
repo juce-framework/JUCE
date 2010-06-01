@@ -50,40 +50,30 @@ ImageButton::ImageButton (const String& text_)
 
 ImageButton::~ImageButton()
 {
-    deleteImages();
-}
-
-void ImageButton::deleteImages()
-{
-    ImageCache::releaseOrDelete (normalImage);
-    ImageCache::releaseOrDelete (overImage);
-    ImageCache::releaseOrDelete (downImage);
 }
 
 void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
                              const bool rescaleImagesWhenButtonSizeChanges,
                              const bool preserveImageProportions,
-                             Image* const normalImage_,
+                             const Image& normalImage_,
                              const float imageOpacityWhenNormal,
                              const Colour& overlayColourWhenNormal,
-                             Image* const overImage_,
+                             const Image& overImage_,
                              const float imageOpacityWhenOver,
                              const Colour& overlayColourWhenOver,
-                             Image* const downImage_,
+                             const Image& downImage_,
                              const float imageOpacityWhenDown,
                              const Colour& overlayColourWhenDown,
                              const float hitTestAlphaThreshold)
 {
-    deleteImages();
-
     normalImage = normalImage_;
     overImage = overImage_;
     downImage = downImage_;
 
-    if (resizeButtonNowToFitThisImage && normalImage != 0)
+    if (resizeButtonNowToFitThisImage && normalImage.isValid())
     {
-        imageW = normalImage->getWidth();
-        imageH = normalImage->getHeight();
+        imageW = normalImage.getWidth();
+        imageH = normalImage.getHeight();
 
         setSize (imageW, imageH);
     }
@@ -103,7 +93,7 @@ void ImageButton::setImages (const bool resizeButtonNowToFitThisImage,
     repaint();
 }
 
-Image* ImageButton::getCurrentImage() const
+const Image ImageButton::getCurrentImage() const
 {
     if (isDown() || getToggleState())
         return getDownImage();
@@ -114,21 +104,21 @@ Image* ImageButton::getCurrentImage() const
     return getNormalImage();
 }
 
-Image* ImageButton::getNormalImage() const throw()
+const Image ImageButton::getNormalImage() const
 {
     return normalImage;
 }
 
-Image* ImageButton::getOverImage() const throw()
+const Image ImageButton::getOverImage() const
 {
-    return (overImage != 0) ? overImage
-                            : normalImage;
+    return overImage.isValid() ? overImage
+                               : normalImage;
 }
 
-Image* ImageButton::getDownImage() const throw()
+const Image ImageButton::getDownImage() const
 {
-    return (downImage != 0) ? downImage
-                            : getOverImage();
+    return downImage.isValid() ? downImage
+                               : getOverImage();
 }
 
 void ImageButton::paintButton (Graphics& g,
@@ -141,12 +131,12 @@ void ImageButton::paintButton (Graphics& g,
         isButtonDown = false;
     }
 
-    Image* const im = getCurrentImage();
+    Image im (getCurrentImage());
 
-    if (im != 0)
+    if (im.isValid())
     {
-        const int iw = im->getWidth();
-        const int ih = im->getHeight();
+        const int iw = im.getWidth();
+        const int ih = im.getHeight();
         imageW = getWidth();
         imageH = getHeight();
         imageX = (imageW - iw) >> 1;
@@ -189,7 +179,7 @@ void ImageButton::paintButton (Graphics& g,
             imageH = ih;
         }
 
-        getLookAndFeel().drawImageButton (g, im, imageX, imageY, imageW, imageH,
+        getLookAndFeel().drawImageButton (g, &im, imageX, imageY, imageW, imageH,
                                           isButtonDown ? downOverlay
                                                        : (isMouseOverButton ? overOverlay
                                                                             : normalOverlay),
@@ -205,12 +195,11 @@ bool ImageButton::hitTest (int x, int y)
     if (alphaThreshold == 0)
         return true;
 
-    Image* const im = getCurrentImage();
+    Image im (getCurrentImage());
 
-    return im == 0
-             || (imageW > 0 && imageH > 0
-                  && alphaThreshold < im->getPixelAt (((x - imageX) * im->getWidth()) / imageW,
-                                                      ((y - imageY) * im->getHeight()) / imageH).getAlpha());
+    return im.isNull() || (imageW > 0 && imageH > 0
+                            && alphaThreshold < im.getPixelAt (((x - imageX) * im.getWidth()) / imageW,
+                                                               ((y - imageY) * im.getHeight()) / imageH).getAlpha());
 }
 
 END_JUCE_NAMESPACE

@@ -41,8 +41,8 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer    : public LowLevelGraphicsCon
 {
 public:
     //==============================================================================
-    LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn);
-    LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn);
+    LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
     ~LowLevelGraphicsSoftwareRenderer();
 
     bool isVectorDevice() const;
@@ -91,7 +91,7 @@ public:
 
 protected:
     //==============================================================================
-    Image& image;
+    Image image;
 
     class GlyphCache;
     class CachedGlyph;

@@ -48,7 +48,7 @@ FillType::FillType (const ColourGradient& gradient_)
 }
 
 FillType::FillType (const Image& image_, const AffineTransform& transform_) throw()
-    : colour (0xff000000), image (&image_), transform (transform_)
+    : colour (0xff000000), image (image_), transform (transform_)
 {
 }
 
@@ -89,7 +89,7 @@ bool FillType::operator!= (const FillType& other) const
 void FillType::setColour (const Colour& newColour) throw()
 {
     gradient = 0;
-    image = 0;
+    image = Image();
     colour = newColour;
 }
 
@@ -101,7 +101,7 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
     else
     {
-        image = 0;
+        image = Image();
         gradient = new ColourGradient (newGradient);
         colour = Colours::black;
     }
@@ -110,7 +110,7 @@ void FillType::setGradient (const ColourGradient& newGradient)
 void FillType::setTiledImage (const Image& image_, const AffineTransform& transform_) throw()
 {
     gradient = 0;
-    image = &image_;
+    image = image_;
     transform = transform_;
     colour = Colours::black;
 }

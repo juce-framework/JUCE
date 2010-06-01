@@ -79,7 +79,7 @@ private:
     JucerDocumentHolder* const documentHolder;
     LassoComponent <PaintElement*> lassoComp;
     SnapGridPainter grid;
-    Image* componentOverlay;
+    Image componentOverlay;
     float componentOverlayOpacity;
 
     Colour currentBackgroundColour;

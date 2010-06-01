@@ -52,7 +52,7 @@ public:
 private:
     int snapGridSize;
     bool snapShown;
-    Image* backgroundFill;
+    Image backgroundFill;
 };
 
 

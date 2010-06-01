@@ -302,7 +302,7 @@ const String File::getPathUpToLastSlash() const
 
 const File File::getParentDirectory() const
 {
-    return File (getPathUpToLastSlash());
+    return File (getPathUpToLastSlash(), (int) 0);
 }
 
 //==============================================================================

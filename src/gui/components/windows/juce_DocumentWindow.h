@@ -115,7 +115,7 @@ public:
         image after calling this. If 0 is passed-in, any existing icon will be
         removed.
     */
-    void setIcon (const Image* imageToUse);
+    void setIcon (const Image& imageToUse);
 
     /** Changes the height of the title-bar. */
     void setTitleBarHeight (int newHeight);
@@ -249,7 +249,7 @@ private:
     int titleBarHeight, menuBarHeight, requiredButtons;
     bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
     ScopedPointer <Button> titleBarButtons [3];
-    ScopedPointer <Image> titleBarIcon;
+    Image titleBarIcon;
     ScopedPointer <MenuBarComponent> menuBar;
     MenuBarModel* menuBarModel;
 

@@ -55,6 +55,9 @@ public:
     /** Destructor. */
     ~RSAKey();
 
+    bool operator== (const RSAKey& other) const throw();
+    bool operator!= (const RSAKey& other) const throw();
+
     //==============================================================================
     /** Turns the key into a string representation.
 

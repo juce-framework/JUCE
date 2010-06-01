@@ -4692,6 +4692,68 @@ typedef BigInteger BitArray;
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 #define __JUCE_IDENTIFIER_JUCEHEADER__
 
+
+/*** Start of inlined file: juce_StringPool.h ***/
+#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
+#define __JUCE_STRINGPOOL_JUCEHEADER__
+
+/**
+	A StringPool holds a set of shared strings, which reduces storage overheads and improves
+	comparison speed when dealing with many duplicate strings.
+
+	When you add a string to a pool using getPooledString, it'll return a character
+	array containing the same string. This array is owned by the pool, and the same array
+	is returned every time a matching string is asked for. This means that it's trivial to
+	compare two pooled strings for equality, as you can simply compare their pointers. It
+	also cuts down on storage if you're using many copies of the same string.
+*/
+class JUCE_API  StringPool
+{
+public:
+
+	/** Creates an empty pool. */
+	StringPool() throw();
+
+	/** Destructor */
+	~StringPool();
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const String& original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const char* original);
+
+	/** Returns a pointer to a copy of the string that is passed in.
+
+		The pool will always return the same pointer when asked for a string that matches it.
+		The pool will own all the pointers that it returns, deleting them when the pool itself
+		is deleted.
+	*/
+	const juce_wchar* getPooledString (const juce_wchar* original);
+
+	/** Returns the number of strings in the pool. */
+	int size() const throw();
+
+	/** Returns one of the strings in the pool, by index. */
+	const juce_wchar* operator[] (int index) const throw();
+
+private:
+	Array <String> strings;
+};
+
+#endif   // __JUCE_STRINGPOOL_JUCEHEADER__
+/*** End of inlined file: juce_StringPool.h ***/
+
 /**
 	Represents a string identifier, designed for accessing properties by name.
 
@@ -4744,7 +4806,7 @@ private:
 
 	const juce_wchar* name;
 
-	class Pool;
+	static StringPool pool;
 };
 
 #endif   // __JUCE_IDENTIFIER_JUCEHEADER__
@@ -14859,6 +14921,9 @@ public:
 	/** Destructor. */
 	~RSAKey();
 
+	bool operator== (const RSAKey& other) const throw();
+	bool operator!= (const RSAKey& other) const throw();
+
 	/** Turns the key into a string representation.
 
 		This can be reloaded using the constructor that takes a string.
@@ -16866,68 +16931,6 @@ private:
 
 #endif
 #ifndef __JUCE_STRINGPOOL_JUCEHEADER__
-
-/*** Start of inlined file: juce_StringPool.h ***/
-#ifndef __JUCE_STRINGPOOL_JUCEHEADER__
-#define __JUCE_STRINGPOOL_JUCEHEADER__
-
-/**
-	A StringPool holds a set of shared strings, which reduces storage overheads and improves
-	comparison speed when dealing with many duplicate strings.
-
-	When you add a string to a pool using getPooledString, it'll return a character
-	array containing the same string. This array is owned by the pool, and the same array
-	is returned every time a matching string is asked for. This means that it's trivial to
-	compare two pooled strings for equality, as you can simply compare their pointers. It
-	also cuts down on storage if you're using many copies of the same string.
-*/
-class JUCE_API  StringPool
-{
-public:
-
-	/** Creates an empty pool. */
-	StringPool() throw();
-
-	/** Destructor */
-	~StringPool();
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const juce_wchar* getPooledString (const String& original);
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const juce_wchar* getPooledString (const char* original);
-
-	/** Returns a pointer to a copy of the string that is passed in.
-
-		The pool will always return the same pointer when asked for a string that matches it.
-		The pool will own all the pointers that it returns, deleting them when the pool itself
-		is deleted.
-	*/
-	const juce_wchar* getPooledString (const juce_wchar* original);
-
-	/** Returns the number of strings in the pool. */
-	int size() const throw();
-
-	/** Returns one of the strings in the pool, by index. */
-	const juce_wchar* operator[] (int index) const throw();
-
-private:
-	Array <String> strings;
-};
-
-#endif   // __JUCE_STRINGPOOL_JUCEHEADER__
-/*** End of inlined file: juce_StringPool.h ***/
-
 
 #endif
 #ifndef __JUCE_XMLDOCUMENT_JUCEHEADER__
@@ -23125,11 +23128,6 @@ private:
 /*** End of inlined file: juce_Colours.h ***/
 
 
-/*** Start of inlined file: juce_FillType.h ***/
-#ifndef __JUCE_FILLTYPE_JUCEHEADER__
-#define __JUCE_FILLTYPE_JUCEHEADER__
-
-
 /*** Start of inlined file: juce_ColourGradient.h ***/
 #ifndef __JUCE_COLOURGRADIENT_JUCEHEADER__
 #define __JUCE_COLOURGRADIENT_JUCEHEADER__
@@ -23273,117 +23271,6 @@ private:
 #endif   // __JUCE_COLOURGRADIENT_JUCEHEADER__
 /*** End of inlined file: juce_ColourGradient.h ***/
 
-class Image;
-
-/**
-	Represents a colour or fill pattern to use for rendering paths.
-
-	This is used by the Graphics and DrawablePath classes as a way to encapsulate
-	a brush type. It can either be a solid colour, a gradient, or a tiled image.
-
-	@see Graphics::setFillType, DrawablePath::setFill
-*/
-class JUCE_API  FillType
-{
-public:
-	/** Creates a default fill type, of solid black. */
-	FillType() throw();
-
-	/** Creates a fill type of a solid colour.
-		@see setColour
-	*/
-	FillType (const Colour& colour) throw();
-
-	/** Creates a gradient fill type.
-		@see setGradient
-	*/
-	FillType (const ColourGradient& gradient);
-
-	/** Creates a tiled image fill type. The transform allows you to set the scaling, offset
-		and rotation of the pattern.
-		@see setTiledImage
-	*/
-	FillType (const Image& image, const AffineTransform& transform) throw();
-
-	/** Creates a copy of another FillType. */
-	FillType (const FillType& other);
-
-	/** Makes a copy of another FillType. */
-	FillType& operator= (const FillType& other);
-
-	/** Destructor. */
-	~FillType() throw();
-
-	/** Returns true if this is a solid colour fill, and not a gradient or image. */
-	bool isColour() const throw()	   { return gradient == 0 && image == 0; }
-
-	/** Returns true if this is a gradient fill. */
-	bool isGradient() const throw()	 { return gradient != 0; }
-
-	/** Returns true if this is a tiled image pattern fill. */
-	bool isTiledImage() const throw()	   { return image != 0; }
-
-	/** Turns this object into a solid colour fill.
-		If the object was an image or gradient, those fields will no longer be valid. */
-	void setColour (const Colour& newColour) throw();
-
-	/** Turns this object into a gradient fill. */
-	void setGradient (const ColourGradient& newGradient);
-
-	/** Turns this object into a tiled image fill type. The transform allows you to set
-		the scaling, offset and rotation of the pattern.
-	*/
-	void setTiledImage (const Image& image, const AffineTransform& transform) throw();
-
-	/** Changes the opacity that should be used.
-		If the fill is a solid colour, this just changes the opacity of that colour. For
-		gradients and image tiles, it changes the opacity that will be used for them.
-	*/
-	void setOpacity (float newOpacity) throw();
-
-	/** Returns the current opacity to be applied to the colour, gradient, or image.
-		@see setOpacity
-	*/
-	float getOpacity() const throw()	{ return colour.getFloatAlpha(); }
-
-	/** Returns true if this fill type is completely transparent. */
-	bool isInvisible() const throw();
-
-	bool operator== (const FillType& other) const;
-	bool operator!= (const FillType& other) const;
-
-	/** The solid colour being used.
-
-		If the fill type is not a solid colour, the alpha channel of this colour indicates
-		the opacity that should be used for the fill, and the RGB channels are ignored.
-	*/
-	Colour colour;
-
-	/** Returns the gradient that should be used for filling.
-		This will be zero if the object is some other type of fill.
-		If a gradient is active, the overall opacity with which it should be applied
-		is indicated by the alpha channel of the colour variable.
-	*/
-	ScopedPointer <ColourGradient> gradient;
-
-	/** Returns the image that should be used for tiling.
-		The FillType object just keeps a pointer to this image, it doesn't own it, so you have to
-		be careful to make sure the image doesn't get deleted while it's being used.
-		If an image fill is active, the overall opacity with which it should be applied
-		is indicated by the alpha channel of the colour variable.
-	*/
-	const Image* image;
-
-	/** The transform that should be applied to the image or gradient that's being drawn.
-	*/
-	AffineTransform transform;
-
-	juce_UseDebuggingNewOperator
-};
-
-#endif   // __JUCE_FILLTYPE_JUCEHEADER__
-/*** End of inlined file: juce_FillType.h ***/
-
 
 /*** Start of inlined file: juce_RectanglePlacement.h ***/
 #ifndef __JUCE_RECTANGLEPLACEMENT_JUCEHEADER__
@@ -23513,6 +23400,7 @@ private:
 
 class LowLevelGraphicsContext;
 class Image;
+class FillType;
 class RectangleList;
 
 /**
@@ -23540,7 +23428,7 @@ public:
 
 		Obviously you shouldn't delete the image before this context is deleted.
 	*/
-	explicit Graphics (Image& imageToDrawOnto);
+	explicit Graphics (const Image& imageToDrawOnto);
 
 	/** Destructor. */
 	~Graphics();
@@ -23929,7 +23817,7 @@ public:
 		don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
 		(or setColour() with an opaque colour) before drawing images.
 	*/
-	void drawImageAt (const Image* const imageToDraw, int topLeftX, int topLeftY,
+	void drawImageAt (const Image& imageToDraw, int topLeftX, int topLeftY,
 					  bool fillAlphaChannelWithCurrentBrush = false) const;
 
 	/** Draws part of an image, rescaling it to fit in a given target region.
@@ -23957,7 +23845,7 @@ public:
 													it will just fill the target with a solid rectangle)
 		@see setImageResamplingQuality, drawImageAt, drawImageWithin, fillAlphaMap
 	*/
-	void drawImage (const Image* const imageToDraw,
+	void drawImage (const Image& imageToDraw,
 					int destX, int destY, int destWidth, int destHeight,
 					int sourceX, int sourceY, int sourceWidth, int sourceHeight,
 					bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -23983,7 +23871,7 @@ public:
 
 		@see setImageResamplingQuality, drawImage
 	*/
-	void drawImageTransformed (const Image* imageToDraw,
+	void drawImageTransformed (const Image& imageToDraw,
 							   const Rectangle<int>& imageSubRegion,
 							   const AffineTransform& transform,
 							   bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -24009,7 +23897,7 @@ public:
 													similar to fillAlphaMap(), and see also drawImage()
 		@see setImageResamplingQuality, drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
 	*/
-	void drawImageWithin (const Image* imageToDraw,
+	void drawImageWithin (const Image& imageToDraw,
 						  int destX, int destY, int destWidth, int destHeight,
 						  const RectanglePlacement& placementWithinTarget,
 						  bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -24160,6 +24048,355 @@ public:
 
 #endif   // __JUCE_IMAGEEFFECTFILTER_JUCEHEADER__
 /*** End of inlined file: juce_ImageEffectFilter.h ***/
+
+
+/*** Start of inlined file: juce_Image.h ***/
+#ifndef __JUCE_IMAGE_JUCEHEADER__
+#define __JUCE_IMAGE_JUCEHEADER__
+
+/**
+	Holds a fixed-size bitmap.
+
+	The image is stored in either 24-bit RGB or 32-bit premultiplied-ARGB format.
+
+	To draw into an image, create a Graphics object for it.
+	e.g. @code
+
+	// create a transparent 500x500 image..
+	Image myImage (Image::RGB, 500, 500, true);
+
+	Graphics g (myImage);
+	g.setColour (Colours::red);
+	g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
+	@endcode
+
+	Other useful ways to create an image are with the ImageCache class, or the
+	ImageFileFormat, which provides a way to load common image files.
+
+	@see Graphics, ImageFileFormat, ImageCache, ImageConvolutionKernel
+*/
+class JUCE_API  Image
+{
+public:
+
+	/**
+	*/
+	enum PixelFormat
+	{
+		UnknownFormat,
+		RGB,		/**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
+		ARGB,		   /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
+		SingleChannel	   /**<< each pixel is a 1-byte alpha channel value. */
+	};
+
+	/**
+	*/
+	enum ImageType
+	{
+		SoftwareImage = 0,
+		NativeImage
+	};
+
+	/** Creates a null image. */
+	Image();
+
+	/** Creates an image with a specified size and format.
+
+		@param format	   the number of colour channels in the image
+		@param imageWidth	   the desired width of the image, in pixels - this value must be
+								greater than zero (otherwise a width of 1 will be used)
+		@param imageHeight	  the desired width of the image, in pixels - this value must be
+								greater than zero (otherwise a height of 1 will be used)
+		@param clearImage	   if true, the image will initially be cleared to black (if it's RGB)
+								or transparent black (if it's ARGB). If false, the image may contain
+								junk initially, so you need to make sure you overwrite it thoroughly.
+		@param type		 the type of image - this lets you specify whether you want a purely
+								memory-based image, or one that may be managed by the OS if possible.
+	*/
+	Image (PixelFormat format,
+		   int imageWidth,
+		   int imageHeight,
+		   bool clearImage,
+		   ImageType type = NativeImage);
+
+	/** Creates a shared reference to another image.
+
+		This won't create a duplicate of the image - when Image objects are copied, they simply
+		point to the same shared image data. To make sure that an Image object has its own unique,
+		unshared internal data, call duplicateIfShared().
+	*/
+	Image (const Image& other);
+
+	/** Makes this image refer to the same underlying image as another object.
+
+		This won't create a duplicate of the image - when Image objects are copied, they simply
+		point to the same shared image data. To make sure that an Image object has its own unique,
+		unshared internal data, call duplicateIfShared().
+	*/
+	Image& operator= (const Image&);
+
+	/** Destructor. */
+	~Image();
+
+	/** Returns true if the two images are referring to the same internal, shared image. */
+	bool operator== (const Image& other) const throw()	  { return image == other.image; }
+
+	/** Returns true if the two images are not referring to the same internal, shared image. */
+	bool operator!= (const Image& other) const throw()	  { return image != other.image; }
+
+	/** Returns true if this image isn't null.
+		If you create an Image with the default constructor, it has no size or content, and is null
+		until you reassign it to an Image which contains some actual data.
+		The isNull() method is the opposite of isValid().
+		@see isNull
+	*/
+	inline bool isValid() const throw()			 { return image != 0; }
+
+	/** Returns true if this image is not valid.
+		If you create an Image with the default constructor, it has no size or content, and is null
+		until you reassign it to an Image which contains some actual data.
+		The isNull() method is the opposite of isValid().
+		@see isValid
+	*/
+	inline bool isNull() const throw()			  { return image == 0; }
+
+	/** Returns the image's width (in pixels). */
+	int getWidth() const throw()				{ return image == 0 ? 0 : image->width; }
+
+	/** Returns the image's height (in pixels). */
+	int getHeight() const throw()			   { return image == 0 ? 0 : image->height; }
+
+	/** Returns a rectangle with the same size as this image.
+		The rectangle's origin is always (0, 0).
+	*/
+	const Rectangle<int> getBounds() const throw()	  { return image == 0 ? Rectangle<int>() : Rectangle<int> (0, 0, image->width, image->height); }
+
+	/** Returns the image's pixel format. */
+	PixelFormat getFormat() const throw()		   { return image == 0 ? UnknownFormat : image->format; }
+
+	/** True if the image's format is ARGB. */
+	bool isARGB() const throw()				 { return getFormat() == ARGB; }
+
+	/** True if the image's format is RGB. */
+	bool isRGB() const throw()				  { return getFormat() == RGB; }
+
+	/** True if the image contains an alpha-channel. */
+	bool hasAlphaChannel() const throw()			{ return getFormat() != RGB; }
+
+	/** Clears a section of the image with a given colour.
+
+		This won't do any alpha-blending - it just sets all pixels in the image to
+		the given colour (which may be non-opaque if the image has an alpha channel).
+	*/
+	void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
+
+	/** Returns a rescaled version of this image.
+
+		A new image is returned which is a copy of this one, rescaled to the given size.
+
+		Note that if the new size is identical to the existing image, this will just return
+		a reference to the original image, and won't actually create a duplicate.
+	*/
+	const Image rescaled (int newWidth, int newHeight,
+						  Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+
+	/** Returns a version of this image with a different image format.
+
+		A new image is returned which has been converted to the specified format.
+
+		Note that if the new format is no different to the current one, this will just return
+		a reference to the original image, and won't actually create a copy.
+	*/
+	const Image convertedToFormat (PixelFormat newFormat) const;
+
+	/** Makes sure that no other Image objects share the same underlying data as this one.
+
+		If no other Image objects refer to the same shared data as this one, this method has no
+		effect. But if there are other references to the data, this will create a new copy of
+		the data internally.
+
+		Call this if you want to draw onto the image, but want to make sure that this doesn't
+		affect any other code that may be sharing the same data.
+	*/
+	void duplicateIfShared();
+
+	/** Returns the colour of one of the pixels in the image.
+
+		If the co-ordinates given are beyond the image's boundaries, this will
+		return Colours::transparentBlack.
+
+		@see setPixelAt, Image::BitmapData::getPixelColour
+	*/
+	const Colour getPixelAt (int x, int y) const;
+
+	/** Sets the colour of one of the image's pixels.
+
+		If the co-ordinates are beyond the image's boundaries, then nothing will happen.
+
+		Note that this won't do any alpha-blending, it'll just replace the existing pixel
+		with the given one. The colour's opacity will be ignored if this image doesn't have
+		an alpha-channel.
+
+		@see getPixelAt, Image::BitmapData::setPixelColour
+	*/
+	void setPixelAt (int x, int y, const Colour& colour);
+
+	/** Changes the opacity of a pixel.
+
+		This only has an effect if the image has an alpha channel and if the
+		given co-ordinates are inside the image's boundary.
+
+		The multiplier must be in the range 0 to 1.0, and the current alpha
+		at the given co-ordinates will be multiplied by this value.
+
+		@see setPixelAt
+	*/
+	void multiplyAlphaAt (int x, int y, float multiplier);
+
+	/** Changes the overall opacity of the image.
+
+		This will multiply the alpha value of each pixel in the image by the given
+		amount (limiting the resulting alpha values between 0 and 255). This allows
+		you to make an image more or less transparent.
+
+		If the image doesn't have an alpha channel, this won't have any effect.
+	*/
+	void multiplyAllAlphas (float amountToMultiplyBy);
+
+	/** Changes all the colours to be shades of grey, based on their current luminosity.
+	*/
+	void desaturate();
+
+	/** Retrieves a section of an image as raw pixel data, so it can be read or written to.
+
+		You should only use this class as a last resort - messing about with the internals of
+		an image is only recommended for people who really know what they're doing!
+
+		A BitmapData object should be used as a temporary, stack-based object. Don't keep one
+		hanging around while the image is being used elsewhere.
+
+		Depending on the way the image class is implemented, this may create a temporary buffer
+		which is copied back to the image when the object is deleted, or it may just get a pointer
+		directly into the image's raw data.
+
+		You can use the stride and data values in this class directly, but don't alter them!
+		The actual format of the pixel data depends on the image's format - see Image::getFormat(),
+		and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
+	*/
+	class BitmapData
+	{
+	public:
+		BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
+		BitmapData (const Image& image, int x, int y, int w, int h);
+		~BitmapData();
+
+		/** Returns a pointer to the start of a line in the image.
+			The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
+			sure it's not out-of-range.
+		*/
+		inline uint8* getLinePointer (int y) const throw()		  { return data + y * lineStride; }
+
+		/** Returns a pointer to a pixel in the image.
+			The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
+			not out-of-range.
+		*/
+		inline uint8* getPixelPointer (int x, int y) const throw()	  { return data + y * lineStride + x * pixelStride; }
+
+		/** Returns the colour of a given pixel.
+			For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
+			repsonsibility to make sure they're within the image's size.
+		*/
+		const Colour getPixelColour (int x, int y) const throw();
+
+		/** Sets the colour of a given pixel.
+			For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
+			repsonsibility to make sure they're within the image's size.
+		*/
+		void setPixelColour (int x, int y, const Colour& colour) const throw();
+
+		uint8* data;
+		const PixelFormat pixelFormat;
+		int lineStride, pixelStride, width, height;
+
+	private:
+		BitmapData (const BitmapData&);
+		BitmapData& operator= (const BitmapData&);
+	};
+
+	/** Copies some pixel values to a rectangle of the image.
+
+		The format of the pixel data must match that of the image itself, and the
+		rectangle supplied must be within the image's bounds.
+	*/
+	void setPixelData (int destX, int destY, int destW, int destH,
+					   const uint8* sourcePixelData, int sourceLineStride);
+
+	/** Copies a section of the image to somewhere else within itself. */
+	void moveImageSection (int destX, int destY,
+						   int sourceX, int sourceY,
+						   int width, int height);
+
+	/** Creates a RectangleList containing rectangles for all non-transparent pixels
+		of the image.
+
+		@param result	   the list that will have the area added to it
+		@param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
+								above this level will be considered opaque
+	*/
+	void createSolidAreaMask (RectangleList& result,
+							  float alphaThreshold = 0.5f) const;
+
+	/** Creates a context suitable for drawing onto this image.
+		Don't call this method directly! It's used internally by the Graphics class.
+	*/
+	LowLevelGraphicsContext* createLowLevelContext() const;
+
+	/**
+	*/
+	class SharedImage  : public ReferenceCountedObject
+	{
+	public:
+		SharedImage (PixelFormat format, int width, int height);
+		~SharedImage();
+
+		virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
+		virtual SharedImage* clone() = 0;
+		virtual ImageType getType() const = 0;
+
+		static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
+		static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
+
+	protected:
+		friend class Image;
+		friend class Image::BitmapData;
+		const PixelFormat format;
+		const int width, height;
+		int pixelStride, lineStride;
+		uint8* imageData;
+
+		uint8* getPixelData (int x, int y) const throw();
+
+		SharedImage (const SharedImage&);
+		SharedImage& operator= (const SharedImage&);
+	};
+
+	/** @internal */
+	SharedImage* getSharedImage() const throw()	 { return image; }
+
+	/** @internal */
+	explicit Image (SharedImage* instance);
+
+	/** @internal */
+	int getReferenceCount() const throw()		   { return image->getReferenceCount(); }
+
+	juce_UseDebuggingNewOperator
+
+private:
+	ReferenceCountedObjectPtr<SharedImage> image;
+};
+
+#endif   // __JUCE_IMAGE_JUCEHEADER__
+/*** End of inlined file: juce_Image.h ***/
 
 
 /*** Start of inlined file: juce_RectangleList.h ***/
@@ -25280,12 +25517,10 @@ public:
 		the size of the component, it'll be clipped. If clipImageToComponentBounds is false
 		then parts of the component beyond its bounds can be drawn.
 
-		The caller is responsible for deleting the image that is returned.
-
 		@see paintEntireComponent
 	*/
-	Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
-									bool clipImageToComponentBounds = true);
+	const Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
+										 bool clipImageToComponentBounds = true);
 
 	/** Draws this component and all its subcomponents onto the specified graphics
 		context.
@@ -26399,7 +26634,7 @@ private:
 	LookAndFeel* lookAndFeel_;
 	MouseCursor cursor_;
 	ImageEffectFilter* effect_;
-	Image* bufferedImage_;
+	Image bufferedImage_;
 	Array <MouseListener*>* mouseListeners_;
 	Array <KeyListener*>* keyListeners_;
 	ListenerList <ComponentListener> componentListeners;
@@ -34373,7 +34608,7 @@ public:
 				  const String& itemText,
 				  bool isActive = true,
 				  bool isTicked = false,
-				  const Image* iconToUse = 0);
+				  const Image& iconToUse = Image());
 
 	/** Adds an item that represents one of the commands in a command manager object.
 
@@ -34398,7 +34633,7 @@ public:
 						  const Colour& itemTextColour,
 						  bool isActive = true,
 						  bool isTicked = false,
-						  const Image* iconToUse = 0);
+						  const Image& iconToUse = Image());
 
 	/** Appends a custom menu item.
 
@@ -34436,7 +34671,7 @@ public:
 	void addSubMenu (const String& subMenuName,
 					 const PopupMenu& subMenu,
 					 bool isActive = true,
-					 Image* iconToUse = 0,
+					 const Image& iconToUse = Image(),
 					 bool isTicked = false);
 
 	/** Appends a separator to the menu, to help break it up into sections.
@@ -34602,7 +34837,7 @@ public:
 		bool isCustomComponent;
 		bool isSectionHeader;
 		const Colour* customColour;
-		const Image* customImage;
+		Image customImage;
 		ApplicationCommandManager* commandManager;
 
 		juce_UseDebuggingNewOperator
@@ -39382,7 +39617,7 @@ public:
 
 		@see Component::createComponentSnapshot
 	*/
-	Image* createSnapshotOfSelectedRows (int& x, int& y);
+	const Image createSnapshotOfSelectedRows (int& x, int& y);
 
 	/** Returns the viewport that this ListBox uses.
 
@@ -42271,7 +42506,7 @@ public:
 	bool containsAnyDynamicPoints() const;
 
 	/** Writes the path to this drawable encoding. */
-	void writeTo (ValueTree state, UndoManager* undoManager);
+	void writeTo (ValueTree state, UndoManager* undoManager) const;
 
 	/** Quickly swaps the contents of this path with another. */
 	void swapWith (RelativePointPath& other) throw();
@@ -42560,13 +42795,13 @@ public:
 			The image that is returned will be owned by the caller, but it may come
 			from the ImageCache.
 		*/
-		virtual Image* getImageForIdentifier (const var& imageIdentifier) = 0;
+		virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
 		/** Returns an identifier to be used to refer to a given image.
 			This is used when converting a drawable into a ValueTree, so if you're
 			only loading drawables, you can just return a var::null here.
 		*/
-		virtual const var getIdentifierForImage (Image* image) = 0;
+		virtual const var getIdentifierForImage (const Image& image) = 0;
 	};
 
 	/** Tries to create a Drawable from a previously-saved ValueTree.
@@ -42899,10 +43134,6 @@ public:
 
 	/** Sets up the images to draw in various states.
 
-		Important! Bear in mind that if you pass the same image in for more than one of
-		these parameters, this button will delete it (or release from the ImageCache)
-		multiple times!
-
 		@param resizeButtonNowToFitThisImage	if true, the button will be immediately
 													resized to the same dimensions as the normal image
 		@param rescaleImagesWhenButtonSizeChanges   if true, the image will be rescaled to fit the
@@ -42911,9 +43142,7 @@ public:
 													the button will keep the image's x and y proportions
 													correct - i.e. it won't distort its shape, although
 													this might create gaps around the edges
-		@param normalImage			  the image to use when the button is in its normal state. The
-													image passed in will be deleted (or released if it
-													was created by the ImageCache class) when the
+		@param normalImage			  the image to use when the button is in its normal state.
 													button no longer needs it.
 		@param imageOpacityWhenNormal		   the opacity to use when drawing the normal image.
 		@param overlayColourWhenNormal		  an overlay colour to use to fill the alpha channel of the
@@ -42923,19 +43152,15 @@ public:
 													colour to the image to brighten or darken it
 		@param overImage				the image to use when the mouse is over the button. If
 													you want to use the same image as was set in the normalImage
-													parameter, this value can be 0. As for normalImage, it
-													will be deleted or released by the button when no longer
-													needed
+													parameter, this value can be a null image.
 		@param imageOpacityWhenOver		 the opacity to use when drawing the image when the mouse
 													is over the button
 		@param overlayColourWhenOver		an overlay colour to use to fill the alpha channel of the
 													image when the mouse is over - if this colour is transparent,
 													no overlay will be drawn
 		@param downImage				an image to use when the button is pressed down. If set
-													to zero, the 'over' image will be drawn instead (or the
-													normal image if there isn't an 'over' image either). This
-													image will be deleted or released by the button when no
-													longer needed
+													to a null image, the 'over' image will be drawn instead (or the
+													normal image if there isn't an 'over' image either).
 		@param imageOpacityWhenDown		 the opacity to use when drawing the image when the button
 													is pressed
 		@param overlayColourWhenDown		an overlay colour to use to fill the alpha channel of the
@@ -42951,33 +43176,33 @@ public:
 	void setImages (bool resizeButtonNowToFitThisImage,
 					bool rescaleImagesWhenButtonSizeChanges,
 					bool preserveImageProportions,
-					Image* normalImage,
+					const Image& normalImage,
 					float imageOpacityWhenNormal,
 					const Colour& overlayColourWhenNormal,
-					Image* overImage,
+					const Image& overImage,
 					float imageOpacityWhenOver,
 					const Colour& overlayColourWhenOver,
-					Image* downImage,
+					const Image& downImage,
 					float imageOpacityWhenDown,
 					const Colour& overlayColourWhenDown,
 					float hitTestAlphaThreshold = 0.0f);
 
 	/** Returns the currently set 'normal' image. */
-	Image* getNormalImage() const throw();
+	const Image getNormalImage() const;
 
 	/** Returns the image that's drawn when the mouse is over the button.
 
-		If an 'over' image has been set, this will return it; otherwise it'll
+		If a valid 'over' image has been set, this will return it; otherwise it'll
 		just return the normal image.
 	*/
-	Image* getOverImage() const throw();
+	const Image getOverImage() const;
 
 	/** Returns the image that's drawn when the button is held down.
 
-		If a 'down' image has been set, this will return it; otherwise it'll
+		If a valid 'down' image has been set, this will return it; otherwise it'll
 		return the 'over' image or normal image, depending on what's available.
 	*/
-	Image* getDownImage() const throw();
+	const Image getDownImage() const;
 
 	juce_UseDebuggingNewOperator
 
@@ -42994,14 +43219,11 @@ private:
 	bool scaleImageToFit, preserveProportions;
 	unsigned char alphaThreshold;
 	int imageX, imageY, imageW, imageH;
-	Image* normalImage;
-	Image* overImage;
-	Image* downImage;
+	Image normalImage, overImage, downImage;
 	float normalOpacity, overOpacity, downOpacity;
 	Colour normalOverlay, overOverlay, downOverlay;
 
-	Image* getCurrentImage() const;
-	void deleteImages();
+	const Image getCurrentImage() const;
 
 	ImageButton (const ImageButton&);
 	ImageButton& operator= (const ImageButton&);
@@ -43349,10 +43571,8 @@ public:
 									dropped-onto so they can decide if they want to handle it or
 									not
 		@param sourceComponent	  the component that is being dragged
-		@param dragImage		the image to drag around underneath the mouse. If this is
-									zero, a snapshot of the sourceComponent will be used instead. An
-									image passed-in will be deleted by this object when no longer
-									needed.
+		@param dragImage		the image to drag around underneath the mouse. If this is a null image,
+									a snapshot of the sourceComponent will be used instead.
 		@param allowDraggingToOtherJuceWindows   if true, the dragged component will appear as a desktop
 									window, and can be dragged to DragAndDropTargets that are the
 									children of components other than this one.
@@ -43363,7 +43583,7 @@ public:
 	*/
 	void startDragging (const String& sourceDescription,
 						Component* sourceComponent,
-						Image* dragImage = 0,
+						const Image& dragImage = Image(),
 						bool allowDraggingToOtherJuceWindows = false,
 						const Point<int>* imageOffsetFromMouse = 0);
 
@@ -47455,275 +47675,6 @@ protected:
 #endif   // __JUCE_FILEFILTER_JUCEHEADER__
 /*** End of inlined file: juce_FileFilter.h ***/
 
-
-/*** Start of inlined file: juce_Image.h ***/
-#ifndef __JUCE_IMAGE_JUCEHEADER__
-#define __JUCE_IMAGE_JUCEHEADER__
-
-/**
-	Holds a fixed-size bitmap.
-
-	The image is stored in either 24-bit RGB or 32-bit premultiplied-ARGB format.
-
-	To draw into an image, create a Graphics object for it.
-	e.g. @code
-
-	// create a transparent 500x500 image..
-	Image myImage (Image::RGB, 500, 500, true);
-
-	Graphics g (myImage);
-	g.setColour (Colours::red);
-	g.fillEllipse (20, 20, 300, 200);  // draws a red ellipse in our image.
-	@endcode
-
-	Other useful ways to create an image are with the ImageCache class, or the
-	ImageFileFormat, which provides a way to load common image files.
-
-	@see Graphics, ImageFileFormat, ImageCache, ImageConvolutionKernel
-*/
-class JUCE_API  Image
-{
-public:
-
-	enum PixelFormat
-	{
-		RGB,		/**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
-		ARGB,		   /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
-		SingleChannel	   /**<< each pixel is a 1-byte alpha channel value. */
-	};
-
-	/** Creates an in-memory image with a specified size and format.
-
-		To create an image that can use native OS rendering methods, see createNativeImage().
-
-		@param format	   the number of colour channels in the image
-		@param imageWidth	   the desired width of the image, in pixels - this value must be
-								greater than zero (otherwise a width of 1 will be used)
-		@param imageHeight	  the desired width of the image, in pixels - this value must be
-								greater than zero (otherwise a height of 1 will be used)
-		@param clearImage	   if true, the image will initially be cleared to black or transparent
-								black. If false, the image may contain random data, and the
-								user will have to deal with this
-	*/
-	Image (PixelFormat format,
-		   int imageWidth,
-		   int imageHeight,
-		   bool clearImage);
-
-	/** Creates a copy of another image.
-
-		@see createCopy
-	*/
-	Image (const Image& other);
-
-	/** Destructor. */
-	virtual ~Image();
-
-	/** Tries to create an image that is uses native drawing methods when you render
-		onto it.
-
-		On some platforms this will just return a normal software-based image.
-	*/
-	static Image* createNativeImage (PixelFormat format,
-									 int imageWidth,
-									 int imageHeight,
-									 bool clearImage);
-
-	/** Returns the image's width (in pixels). */
-	int getWidth() const throw()			{ return imageWidth; }
-
-	/** Returns the image's height (in pixels). */
-	int getHeight() const throw()		   { return imageHeight; }
-
-	/** Returns a rectangle with the same size as this image.
-		The rectangle is always at position (0, 0).
-	*/
-	const Rectangle<int> getBounds() const throw()  { return Rectangle<int> (0, 0, imageWidth, imageHeight); }
-
-	/** Returns the image's pixel format. */
-	PixelFormat getFormat() const throw()	   { return format; }
-
-	/** True if the image's format is ARGB. */
-	bool isARGB() const throw()			 { return format == ARGB; }
-
-	/** True if the image's format is RGB. */
-	bool isRGB() const throw()			  { return format == RGB; }
-
-	/** True if the image contains an alpha-channel. */
-	bool hasAlphaChannel() const throw()		{ return format != RGB; }
-
-	/** Clears a section of the image with a given colour.
-
-		This won't do any alpha-blending - it just sets all pixels in the image to
-		the given colour (which may be non-opaque if the image has an alpha channel).
-	*/
-	virtual void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
-
-	/** Returns a new image that's a copy of this one.
-
-		A new size for the copied image can be specified, or values less than
-		zero can be passed-in to use the image's existing dimensions.
-
-		It's up to the caller to delete the image when no longer needed.
-	*/
-	virtual Image* createCopy (int newWidth = -1,
-							   int newHeight = -1,
-							   Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
-
-	/** Returns a new single-channel image which is a copy of the alpha-channel of this image.
-	*/
-	virtual Image* createCopyOfAlphaChannel() const;
-
-	/** Returns the colour of one of the pixels in the image.
-
-		If the co-ordinates given are beyond the image's boundaries, this will
-		return Colours::transparentBlack.
-
-		(0, 0) is the image's top-left corner.
-
-		@see getAlphaAt, setPixelAt, blendPixelAt
-	*/
-	virtual const Colour getPixelAt (int x, int y) const;
-
-	/** Sets the colour of one of the image's pixels.
-
-		If the co-ordinates are beyond the image's boundaries, then nothing will
-		happen.
-
-		Note that unlike blendPixelAt(), this won't do any alpha-blending, it'll
-		just replace the existing pixel with the given one. The colour's opacity
-		will be ignored if this image doesn't have an alpha-channel.
-
-		(0, 0) is the image's top-left corner.
-
-		@see blendPixelAt
-	*/
-	virtual void setPixelAt (int x, int y, const Colour& colour);
-
-	/** Changes the opacity of a pixel.
-
-		This only has an effect if the image has an alpha channel and if the
-		given co-ordinates are inside the image's boundary.
-
-		The multiplier must be in the range 0 to 1.0, and the current alpha
-		at the given co-ordinates will be multiplied by this value.
-
-		@see getAlphaAt, setPixelAt
-	*/
-	virtual void multiplyAlphaAt (int x, int y, float multiplier);
-
-	/** Changes the overall opacity of the image.
-
-		This will multiply the alpha value of each pixel in the image by the given
-		amount (limiting the resulting alpha values between 0 and 255). This allows
-		you to make an image more or less transparent.
-
-		If the image doesn't have an alpha channel, this won't have any effect.
-	*/
-	virtual void multiplyAllAlphas (float amountToMultiplyBy);
-
-	/** Changes all the colours to be shades of grey, based on their current luminosity.
-	*/
-	virtual void desaturate();
-
-	/** Retrieves a section of an image as raw pixel data, so it can be read or written to.
-
-		You should only use this class as a last resort - messing about with the internals of
-		an image is only recommended for people who really know what they're doing!
-
-		A BitmapData object should be used as a temporary, stack-based object. Don't keep one
-		hanging around while the image is being used elsewhere.
-
-		Depending on the way the image class is implemented, this may create a temporary buffer
-		which is copied back to the image when the object is deleted, or it may just get a pointer
-		directly into the image's raw data.
-
-		You can use the stride and data values in this class directly, but don't alter them!
-		The actual format of the pixel data depends on the image's format - see Image::getFormat(),
-		and the PixelRGB, PixelARGB and PixelAlpha classes for more info.
-	*/
-	class BitmapData
-	{
-	public:
-		BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
-		BitmapData (const Image& image, int x, int y, int w, int h);
-		~BitmapData();
-
-		/** Returns a pointer to the start of a line in the image.
-			The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
-			sure it's not out-of-range.
-		*/
-		inline uint8* getLinePointer (int y) const			  { return data + y * lineStride; }
-
-		/** Returns a pointer to a pixel in the image.
-			The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
-			not out-of-range.
-		*/
-		inline uint8* getPixelPointer (int x, int y) const		  { return data + y * lineStride + x * pixelStride; }
-
-		uint8* data;
-		const PixelFormat pixelFormat;
-		int lineStride, pixelStride, width, height;
-
-	private:
-		BitmapData (const BitmapData&);
-		BitmapData& operator= (const BitmapData&);
-	};
-
-	/** Copies some pixel values to a rectangle of the image.
-
-		The format of the pixel data must match that of the image itself, and the
-		rectangle supplied must be within the image's bounds.
-	*/
-	virtual void setPixelData (int destX, int destY, int destW, int destH,
-							   const uint8* sourcePixelData, int sourceLineStride);
-
-	/** Copies a section of the image to somewhere else within itself.
-	*/
-	virtual void moveImageSection (int destX, int destY,
-								   int sourceX, int sourceY,
-								   int width, int height);
-
-	/** Creates a RectangleList containing rectangles for all non-transparent pixels
-		of the image.
-
-		@param result	   the list that will have the area added to it
-		@param alphaThreshold   for a semi-transparent image, any pixels whose alpha is
-								above this level will be considered opaque
-	*/
-	void createSolidAreaMask (RectangleList& result,
-							  float alphaThreshold = 0.5f) const;
-
-	juce_UseDebuggingNewOperator
-
-	/** Creates a context suitable for drawing onto this image.
-
-		Don't call this method directly! It's used internally by the Graphics class.
-	*/
-	virtual LowLevelGraphicsContext* createLowLevelContext();
-
-protected:
-	friend class BitmapData;
-	const PixelFormat format;
-	const int imageWidth, imageHeight;
-
-	/** Used internally so that subclasses can call a constructor that doesn't allocate memory */
-	Image (PixelFormat format,
-		   int imageWidth,
-		   int imageHeight);
-
-	int pixelStride, lineStride;
-	HeapBlock <uint8> imageDataAllocated;
-	uint8* imageData;
-
-private:
-
-	Image& operator= (const Image&);
-};
-
-#endif   // __JUCE_IMAGE_JUCEHEADER__
-/*** End of inlined file: juce_Image.h ***/
-
 /**
 	A class to asynchronously scan for details about the files in a directory.
 
@@ -48504,13 +48455,13 @@ private:
 	Component* owner;
 	int numShadows;
 	Component* shadowWindows[4];
-	Image* shadowImageSections[12];
+	Image shadowImageSections[12];
 	const int shadowEdge, xOffset, yOffset;
 	const float alpha, blurRadius;
 	bool inDestructor, reentrant;
 
 	void updateShadows();
-	void setShadowImage (Image* const src,
+	void setShadowImage (const Image& src,
 						 const int num,
 						 const int w, const int h,
 						 const int sx, const int sy);
@@ -50323,7 +50274,7 @@ public:
 
 private:
 	File fileToLoad;
-	ScopedPointer <Image> currentThumbnail;
+	Image currentThumbnail;
 	String currentDetails;
 
 	void getThumbSize (int& w, int& h) const;
@@ -51722,7 +51673,7 @@ public:
 		image after calling this. If 0 is passed-in, any existing icon will be
 		removed.
 	*/
-	void setIcon (const Image* imageToUse);
+	void setIcon (const Image& imageToUse);
 
 	/** Changes the height of the title-bar. */
 	void setTitleBarHeight (int newHeight);
@@ -51851,7 +51802,7 @@ private:
 	int titleBarHeight, menuBarHeight, requiredButtons;
 	bool positionTitleBarButtonsOnLeft, drawTitleTextCentred;
 	ScopedPointer <Button> titleBarButtons [3];
-	ScopedPointer <Image> titleBarIcon;
+	Image titleBarIcon;
 	ScopedPointer <MenuBarComponent> menuBar;
 	MenuBarModel* menuBarModel;
 
@@ -53247,8 +53198,8 @@ public:
 	virtual void drawTextEditorOutline (Graphics& g, int width, int height, TextEditor& textEditor);
 
 	// these return an image from the ImageCache, so use ImageCache::release() to free it
-	virtual Image* getDefaultFolderImage();
-	virtual Image* getDefaultDocumentFileImage();
+	virtual const Image getDefaultFolderImage();
+	virtual const Image getDefaultDocumentFileImage();
 
 	virtual void createFileChooserHeaderText (const String& title,
 											  const String& instructions,
@@ -56512,7 +56463,7 @@ public:
 		@param imageDataSize	the size of the image data, in bytes
 	*/
 	void addSettingsPage (const String& pageTitle,
-						  const char* imageData,
+						  const void* imageData,
 						  int imageDataSize);
 
 	/** Utility method to display this panel in a DialogWindow.
@@ -57465,7 +57416,7 @@ public:
 								the mouse (anywhere)
 	*/
 	void show (const String& title,
-			   Image* backgroundImage,
+			   const Image& backgroundImage,
 			   int minimumTimeToDisplayFor,
 			   bool useDropShadow,
 			   bool removeOnMouseClick = true);
@@ -57507,7 +57458,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Image* backgroundImage;
+	Image backgroundImage;
 	Time earliestTimeToDelete;
 	int originalClickCounter;
 
@@ -57863,6 +57814,118 @@ private:
 #endif
 #ifndef __JUCE_FILLTYPE_JUCEHEADER__
 
+/*** Start of inlined file: juce_FillType.h ***/
+#ifndef __JUCE_FILLTYPE_JUCEHEADER__
+#define __JUCE_FILLTYPE_JUCEHEADER__
+
+/**
+	Represents a colour or fill pattern to use for rendering paths.
+
+	This is used by the Graphics and DrawablePath classes as a way to encapsulate
+	a brush type. It can either be a solid colour, a gradient, or a tiled image.
+
+	@see Graphics::setFillType, DrawablePath::setFill
+*/
+class JUCE_API  FillType
+{
+public:
+	/** Creates a default fill type, of solid black. */
+	FillType() throw();
+
+	/** Creates a fill type of a solid colour.
+		@see setColour
+	*/
+	FillType (const Colour& colour) throw();
+
+	/** Creates a gradient fill type.
+		@see setGradient
+	*/
+	FillType (const ColourGradient& gradient);
+
+	/** Creates a tiled image fill type. The transform allows you to set the scaling, offset
+		and rotation of the pattern.
+		@see setTiledImage
+	*/
+	FillType (const Image& image, const AffineTransform& transform) throw();
+
+	/** Creates a copy of another FillType. */
+	FillType (const FillType& other);
+
+	/** Makes a copy of another FillType. */
+	FillType& operator= (const FillType& other);
+
+	/** Destructor. */
+	~FillType() throw();
+
+	/** Returns true if this is a solid colour fill, and not a gradient or image. */
+	bool isColour() const throw()	   { return gradient == 0 && image.isNull(); }
+
+	/** Returns true if this is a gradient fill. */
+	bool isGradient() const throw()	 { return gradient != 0; }
+
+	/** Returns true if this is a tiled image pattern fill. */
+	bool isTiledImage() const throw()	   { return image.isValid(); }
+
+	/** Turns this object into a solid colour fill.
+		If the object was an image or gradient, those fields will no longer be valid. */
+	void setColour (const Colour& newColour) throw();
+
+	/** Turns this object into a gradient fill. */
+	void setGradient (const ColourGradient& newGradient);
+
+	/** Turns this object into a tiled image fill type. The transform allows you to set
+		the scaling, offset and rotation of the pattern.
+	*/
+	void setTiledImage (const Image& image, const AffineTransform& transform) throw();
+
+	/** Changes the opacity that should be used.
+		If the fill is a solid colour, this just changes the opacity of that colour. For
+		gradients and image tiles, it changes the opacity that will be used for them.
+	*/
+	void setOpacity (float newOpacity) throw();
+
+	/** Returns the current opacity to be applied to the colour, gradient, or image.
+		@see setOpacity
+	*/
+	float getOpacity() const throw()	{ return colour.getFloatAlpha(); }
+
+	/** Returns true if this fill type is completely transparent. */
+	bool isInvisible() const throw();
+
+	bool operator== (const FillType& other) const;
+	bool operator!= (const FillType& other) const;
+
+	/** The solid colour being used.
+
+		If the fill type is not a solid colour, the alpha channel of this colour indicates
+		the opacity that should be used for the fill, and the RGB channels are ignored.
+	*/
+	Colour colour;
+
+	/** Returns the gradient that should be used for filling.
+		This will be zero if the object is some other type of fill.
+		If a gradient is active, the overall opacity with which it should be applied
+		is indicated by the alpha channel of the colour variable.
+	*/
+	ScopedPointer <ColourGradient> gradient;
+
+	/** The image that should be used for tiling.
+		If an image fill is active, the overall opacity with which it should be applied
+		is indicated by the alpha channel of the colour variable.
+	*/
+	Image image;
+
+	/** The transform that should be applied to the image or gradient that's being drawn.
+	*/
+	AffineTransform transform;
+
+	juce_UseDebuggingNewOperator
+};
+
+#endif   // __JUCE_FILLTYPE_JUCEHEADER__
+/*** End of inlined file: juce_FillType.h ***/
+
+
 #endif
 #ifndef __JUCE_GRAPHICS_JUCEHEADER__
 
@@ -58060,8 +58123,8 @@ class JUCE_API  LowLevelGraphicsSoftwareRenderer	: public LowLevelGraphicsContex
 {
 public:
 
-	LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn);
-	LowLevelGraphicsSoftwareRenderer (Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
+	LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn);
+	LowLevelGraphicsSoftwareRenderer (const Image& imageToRenderOn, int xOffset, int yOffset, const RectangleList& initialClip);
 	~LowLevelGraphicsSoftwareRenderer();
 
 	bool isVectorDevice() const;
@@ -58105,7 +58168,7 @@ public:
 
 protected:
 
-	Image& image;
+	Image image;
 
 	class GlyphCache;
 	class CachedGlyph;
@@ -58373,30 +58436,11 @@ public:
 	/** Destructor. */
 	virtual ~DrawableImage();
 
-	/** Sets the image that this drawable will render.
-
-		An internal copy is made of the image passed-in. If you want to provide an
-		image that this object can take charge of without needing to create a copy,
-		use the other setImage() method.
-	*/
-	void setImage (const Image& imageToCopy);
-
-	/** Sets the image that this drawable will render.
-
-		A good way to use this is with the ImageCache - if you create an image
-		with ImageCache and pass it in here with releaseWhenNotNeeded = true, then
-		it'll be released neatly with its reference count being decreased.
-
-		@param imageToUse		   the image to render (may be a null pointer)
-		@param releaseWhenNotNeeded	 if false, a simple pointer is kept to the image; if true,
-										then the image will be deleted when this object no longer
-										needs it - unless the image was created by the ImageCache,
-										in which case it will be released with ImageCache::release().
-	*/
-	void setImage (Image* imageToUse, bool releaseWhenNotNeeded);
+	/** Sets the image that this drawable will render. */
+	void setImage (const Image& imageToUse);
 
 	/** Returns the current image. */
-	Image* getImage() const throw()				 { return image; }
+	const Image getImage() const				{ return image; }
 
 	/** Sets the opacity to use when drawing the image. */
 	void setOpacity (float newOpacity);
@@ -58500,8 +58544,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Image* image;
-	bool canDeleteImage;
+	Image image;
 	float opacity;
 	Colour overlayColour;
 	RelativePoint controlPoints[3];
@@ -59335,7 +59378,7 @@ public:
 		and make sure that you process the data as quickly as possible to
 		avoid glitching!
 	*/
-	virtual void imageReceived (Image& image) = 0;
+	virtual void imageReceived (const Image& image) = 0;
 };
 
 /**
@@ -59466,8 +59509,7 @@ private:
 
 	@see Image, ImageFileFormat
 */
-class JUCE_API  ImageCache  : private DeletedAtShutdown,
-							  private Timer
+class JUCE_API  ImageCache
 {
 public:
 
@@ -59477,17 +59519,15 @@ public:
 		that image will be returned. Otherwise, this method will try to load the
 		file, add it to the cache, and return it.
 
-		It's very important not to delete the image that is returned - instead use
-		the ImageCache::release() method.
-
-		Also, remember that the image returned is shared, so drawing into it might
-		affect other things that are using it!
+		Remember that the image returned is shared, so drawing into it might
+		affect other things that are using it! If you want to draw on it, first
+		call Image::duplicateIfShared()
 
 		@param file	 the file to try to load
 		@returns	the image, or null if it there was an error loading it
-		@see release, getFromMemory, getFromCache, ImageFileFormat::loadFrom
+		@see getFromMemory, getFromCache, ImageFileFormat::loadFrom
 	*/
-	static Image* getFromFile (const File& file);
+	static const Image getFromFile (const File& file);
 
 	/** Loads an image from an in-memory image file, (or just returns the image if it's already cached).
 
@@ -59495,78 +59535,40 @@ public:
 		that image will be returned. Otherwise, this method will try to load the
 		file, add it to the cache, and return it.
 
-		It's very important not to delete the image that is returned - instead use
-		the ImageCache::release() method.
-
-		Also, remember that the image returned is shared, so drawing into it might
-		affect other things that are using it!
+		Remember that the image returned is shared, so drawing into it might
+		affect other things that are using it! If you want to draw on it, first
+		call Image::duplicateIfShared()
 
 		@param imageData	the block of memory containing the image data
 		@param dataSize	 the data size in bytes
-		@returns		the image, or null if it there was an error loading it
-		@see release, getFromMemory, getFromCache, ImageFileFormat::loadFrom
+		@returns		the image, or an invalid image if it there was an error loading it
+		@see getFromMemory, getFromCache, ImageFileFormat::loadFrom
 	*/
-	static Image* getFromMemory (const void* imageData, int dataSize);
-
-	/** Releases an image that was previously created by the ImageCache.
-
-		If an image has been returned by the getFromFile() or getFromMemory() methods,
-		it mustn't be deleted directly, but should be released with this method
-		instead.
-
-		@see getFromFile, getFromMemory
-	*/
-	static void release (Image* imageToRelease);
-
-	/** Releases an image if it's in the cache, or deletes it if it isn't cached.
-
-		This is a handy function to use if you want to delete an image but are afraid that
-		it might be cached.
-	*/
-	static void releaseOrDelete (Image* imageToRelease);
-
-	/** Checks whether an image is in the cache or not.
-
-		@returns true if the image is currently in the cache
-	*/
-	static bool isImageInCache (Image* imageToLookFor);
-
-	/** Increments the reference-count for a cached image.
-
-		If the image isn't in the cache, this method won't do anything.
-	*/
-	static void incReferenceCount (Image* image);
+	static const Image getFromMemory (const void* imageData, int dataSize);
 
 	/** Checks the cache for an image with a particular hashcode.
 
 		If there's an image in the cache with this hashcode, it will be returned,
-		otherwise it will return zero.
+		otherwise it will return an invalid image.
 
-		If an image is returned, it must be released with the release() method
-		when no longer needed, to maintain the correct reference counts.
-
-		@param hashCode the hash code that would have been associated with the
-						image by addImageToCache()
+		@param hashCode the hash code that was associated with the image by addImageToCache()
 		@see addImageToCache
 	*/
-	static Image* getFromHashCode (int64 hashCode);
+	static const Image getFromHashCode (int64 hashCode);
 
 	/** Adds an image to the cache with a user-defined hash-code.
 
-		After calling this, responsibilty for deleting the image will be taken
-		by the ImageCache.
-
-		The image will be initially be given a reference count of 1, so call
-		the release() method to delete it.
+		The image passed-in will be referenced (not copied) by the cache, so it's probably
+		a good idea not to draw into it after adding it, otherwise this will affect all
+		instances of it that may be in use.
 
 		@param image	the image to add
 		@param hashCode the hash-code to associate with it
 		@see getFromHashCode
 	*/
-	static void addImageToCache (Image* image, int64 hashCode);
+	static void addImageToCache (const Image& image, int64 hashCode);
 
 	/** Changes the amount of time before an unused image will be removed from the cache.
-
 		By default this is about 5 seconds.
 	*/
 	static void setCacheTimeout (int millisecs);
@@ -59575,21 +59577,12 @@ public:
 
 private:
 
-	CriticalSection lock;
-	struct Item;
-	friend class ScopedPointer<Item>;
-	friend class OwnedArray<Item>;
-	OwnedArray<Item> images;
-
-	static ImageCache* instance;
-	static int cacheTimeout;
+	class Pimpl;
 
 	ImageCache();
 	ImageCache (const ImageCache&);
 	ImageCache& operator= (const ImageCache&);
 	~ImageCache();
-
-	void timerCallback();
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__
@@ -59663,14 +59656,13 @@ public:
 	/** Applies the kernel to an image.
 
 		@param destImage	the image that will receive the resultant convoluted pixels.
-		@param sourceImage	  an optional source image to read from - if this is 0, then the
-								destination image will be used as the source. If an image is
-								specified, it must be exactly the same size and type as the destination
-								image.
+		@param sourceImage	  the source image to read from - this can be the same image as
+								the destination, but if different, it must be exactly the same
+								size and format.
 		@param destinationArea  the region of the image to apply the filter to
 	*/
 	void applyToImage (Image& destImage,
-					   const Image* sourceImage,
+					   const Image& sourceImage,
 					   const Rectangle<int>& destinationArea) const;
 
 	juce_UseDebuggingNewOperator
@@ -59739,11 +59731,10 @@ public:
 		@param input	the stream to read the data from. The stream will be positioned
 						at the start of the image data (but this may not necessarily
 						be position 0)
-		@returns	the image that was decoded, or 0 if it fails. It's the
-						caller's responsibility to delete this image when no longer needed.
+		@returns	the image that was decoded, or an invalid image if it fails.
 		@see loadFrom
 	*/
-	virtual Image* decodeImage (InputStream& input) = 0;
+	virtual const Image decodeImage (InputStream& input) = 0;
 
 	/** Attempts to write an image to a stream.
 
@@ -59770,31 +59761,28 @@ public:
 		This will use the findImageFormatForStream() method to locate a suitable
 		codec, and use that to load the image.
 
-		@returns  the image that was decoded, or 0 if it fails to load one. It's the
-				  caller's responsibility to delete this image when no longer needed.
+		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static Image* loadFrom (InputStream& input);
+	static const Image loadFrom (InputStream& input);
 
 	/** Tries to load an image from a file.
 
 		This will use the findImageFormatForStream() method to locate a suitable
 		codec, and use that to load the image.
 
-		@returns  the image that was decoded, or 0 if it fails to load one. It's the
-				  caller's responsibility to delete this image when no longer needed.
+		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static Image* loadFrom (const File& file);
+	static const Image loadFrom (const File& file);
 
 	/** Tries to load an image from a block of raw image data.
 
 		This will use the findImageFormatForStream() method to locate a suitable
 		codec, and use that to load the image.
 
-		@returns  the image that was decoded, or 0 if it fails to load one. It's the
-				  caller's responsibility to delete this image when no longer needed.
+		@returns	the image that was decoded, or an invalid image if it fails.
 	*/
-	static Image* loadFrom (const void* rawData,
-							const int numBytesOfData);
+	static const Image loadFrom (const void* rawData,
+								 const int numBytesOfData);
 
 };
 
@@ -59813,7 +59801,7 @@ public:
 	const String getFormatName();
 	bool canUnderstand (InputStream& input);
 
-	Image* decodeImage (InputStream& input);
+	const Image decodeImage (InputStream& input);
 
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
@@ -59841,7 +59829,7 @@ public:
 
 	bool canUnderstand (InputStream& input);
 
-	Image* decodeImage (InputStream& input);
+	const Image decodeImage (InputStream& input);
 
 	bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 

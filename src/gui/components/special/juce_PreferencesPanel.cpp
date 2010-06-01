@@ -67,16 +67,16 @@ void PreferencesPanel::addSettingsPage (const String& title,
 }
 
 void PreferencesPanel::addSettingsPage (const String& title,
-                                        const char* imageData,
+                                        const void* imageData,
                                         const int imageDataSize)
 {
     DrawableImage icon, iconOver, iconDown;
-    icon.setImage (ImageCache::getFromMemory (imageData, imageDataSize), true);
+    icon.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
 
-    iconOver.setImage (ImageCache::getFromMemory (imageData, imageDataSize), true);
+    iconOver.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
     iconOver.setOverlayColour (Colours::black.withAlpha (0.12f));
 
-    iconDown.setImage (ImageCache::getFromMemory (imageData, imageDataSize), true);
+    iconDown.setImage (ImageCache::getFromMemory (imageData, imageDataSize));
     iconDown.setOverlayColour (Colours::black.withAlpha (0.25f));
 
     addSettingsPage (title, &icon, &iconOver, &iconDown);

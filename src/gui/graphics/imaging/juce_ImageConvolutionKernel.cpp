@@ -114,25 +114,22 @@ void ImageConvolutionKernel::createGaussianBlur (const float radius)
 
 //==============================================================================
 void ImageConvolutionKernel::applyToImage (Image& destImage,
-                                           const Image* sourceImage,
+                                           const Image& sourceImage,
                                            const Rectangle<int>& destinationArea) const
 {
-    ScopedPointer <Image> imageCreated;
-
-    if (sourceImage == 0)
+    if (sourceImage == destImage)
     {
-        sourceImage = imageCreated = destImage.createCopy();
+        destImage.duplicateIfShared();
     }
     else
     {
-        jassert (sourceImage->getWidth() == destImage.getWidth()
-                  && sourceImage->getHeight() == destImage.getHeight()
-                  && sourceImage->getFormat() == destImage.getFormat());
-
-        if (sourceImage->getWidth() != destImage.getWidth()
-             || sourceImage->getHeight() != destImage.getHeight()
-             || sourceImage->getFormat() != destImage.getFormat())
+        if (sourceImage.getWidth() != destImage.getWidth()
+             || sourceImage.getHeight() != destImage.getHeight()
+             || sourceImage.getFormat() != destImage.getFormat())
+        {
+            jassertfalse;
             return;
+        }
     }
 
     const Rectangle<int> area (destinationArea.getIntersection (destImage.getBounds()));
@@ -146,7 +143,7 @@ void ImageConvolutionKernel::applyToImage (Image& destImage,
     const Image::BitmapData destData (destImage, area.getX(), area.getY(), area.getWidth(), area.getHeight(), true);
     uint8* line = destData.data;
 
-    const Image::BitmapData srcData (*sourceImage, 0, 0, sourceImage->getWidth(), sourceImage->getHeight());
+    const Image::BitmapData srcData (sourceImage, 0, 0, sourceImage.getWidth(), sourceImage.getHeight());
 
     if (destData.pixelStride == 4)
     {

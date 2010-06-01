@@ -31,10 +31,11 @@
 #include "../geometry/juce_PathStrokeType.h"
 #include "../geometry/juce_Line.h"
 #include "../colour/juce_Colours.h"
-#include "juce_FillType.h"
+#include "../colour/juce_ColourGradient.h"
 #include "juce_RectanglePlacement.h"
 class LowLevelGraphicsContext;
 class Image;
+class FillType;
 class RectangleList;
 
 
@@ -64,7 +65,7 @@ public:
 
         Obviously you shouldn't delete the image before this context is deleted.
     */
-    explicit Graphics (Image& imageToDrawOnto);
+    explicit Graphics (const Image& imageToDrawOnto);
 
     /** Destructor. */
     ~Graphics();
@@ -462,7 +463,7 @@ public:
         don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
         (or setColour() with an opaque colour) before drawing images.
     */
-    void drawImageAt (const Image* const imageToDraw, int topLeftX, int topLeftY,
+    void drawImageAt (const Image& imageToDraw, int topLeftX, int topLeftY,
                       bool fillAlphaChannelWithCurrentBrush = false) const;
 
     /** Draws part of an image, rescaling it to fit in a given target region.
@@ -490,7 +491,7 @@ public:
                                                     it will just fill the target with a solid rectangle)
         @see setImageResamplingQuality, drawImageAt, drawImageWithin, fillAlphaMap
     */
-    void drawImage (const Image* const imageToDraw,
+    void drawImage (const Image& imageToDraw,
                     int destX, int destY, int destWidth, int destHeight,
                     int sourceX, int sourceY, int sourceWidth, int sourceHeight,
                     bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -516,7 +517,7 @@ public:
 
         @see setImageResamplingQuality, drawImage
     */
-    void drawImageTransformed (const Image* imageToDraw,
+    void drawImageTransformed (const Image& imageToDraw,
                                const Rectangle<int>& imageSubRegion,
                                const AffineTransform& transform,
                                bool fillAlphaChannelWithCurrentBrush = false) const;
@@ -542,7 +543,7 @@ public:
                                                     similar to fillAlphaMap(), and see also drawImage()
         @see setImageResamplingQuality, drawImage, drawImageTransformed, drawImageAt, RectanglePlacement
     */
-    void drawImageWithin (const Image* imageToDraw,
+    void drawImageWithin (const Image& imageToDraw,
                           int destX, int destY, int destWidth, int destHeight,
                           const RectanglePlacement& placementWithinTarget,
                           bool fillAlphaChannelWithCurrentBrush = false) const;

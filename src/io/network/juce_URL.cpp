@@ -247,7 +247,6 @@ int64 juce_getInternetFileContentLength (void* handle);
 void juce_getInternetFileHeaders (void* handle, StringPairArray& headers);
 
 
-
 //==============================================================================
 class WebInputStream  : public InputStream
 {

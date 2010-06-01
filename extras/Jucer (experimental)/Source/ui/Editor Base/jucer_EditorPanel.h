@@ -190,10 +190,9 @@ private:
 
         void paint (Graphics& g)
         {
-            Image* im = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
-            g.setTiledImageFill (*im, 0, 0, 1.0f);
+            g.setTiledImageFill (ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize),
+                                 0, 0, 1.0f);
             g.fillAll();
-            ImageCache::release (im);
         }
 
         void paintOverChildren (Graphics& g)

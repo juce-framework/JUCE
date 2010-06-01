@@ -57,10 +57,6 @@ public:
     //==============================================================================
     /** Sets up the images to draw in various states.
 
-        Important! Bear in mind that if you pass the same image in for more than one of
-        these parameters, this button will delete it (or release from the ImageCache)
-        multiple times!
-
         @param resizeButtonNowToFitThisImage        if true, the button will be immediately
                                                     resized to the same dimensions as the normal image
         @param rescaleImagesWhenButtonSizeChanges   if true, the image will be rescaled to fit the
@@ -69,9 +65,7 @@ public:
                                                     the button will keep the image's x and y proportions
                                                     correct - i.e. it won't distort its shape, although
                                                     this might create gaps around the edges
-        @param normalImage                          the image to use when the button is in its normal state. The
-                                                    image passed in will be deleted (or released if it
-                                                    was created by the ImageCache class) when the
+        @param normalImage                          the image to use when the button is in its normal state.
                                                     button no longer needs it.
         @param imageOpacityWhenNormal               the opacity to use when drawing the normal image.
         @param overlayColourWhenNormal              an overlay colour to use to fill the alpha channel of the
@@ -81,19 +75,15 @@ public:
                                                     colour to the image to brighten or darken it
         @param overImage                            the image to use when the mouse is over the button. If
                                                     you want to use the same image as was set in the normalImage
-                                                    parameter, this value can be 0. As for normalImage, it
-                                                    will be deleted or released by the button when no longer
-                                                    needed
+                                                    parameter, this value can be a null image.
         @param imageOpacityWhenOver                 the opacity to use when drawing the image when the mouse
                                                     is over the button
         @param overlayColourWhenOver                an overlay colour to use to fill the alpha channel of the
                                                     image when the mouse is over - if this colour is transparent,
                                                     no overlay will be drawn
         @param downImage                            an image to use when the button is pressed down. If set
-                                                    to zero, the 'over' image will be drawn instead (or the
-                                                    normal image if there isn't an 'over' image either). This
-                                                    image will be deleted or released by the button when no
-                                                    longer needed
+                                                    to a null image, the 'over' image will be drawn instead (or the
+                                                    normal image if there isn't an 'over' image either).
         @param imageOpacityWhenDown                 the opacity to use when drawing the image when the button
                                                     is pressed
         @param overlayColourWhenDown                an overlay colour to use to fill the alpha channel of the
@@ -109,33 +99,33 @@ public:
     void setImages (bool resizeButtonNowToFitThisImage,
                     bool rescaleImagesWhenButtonSizeChanges,
                     bool preserveImageProportions,
-                    Image* normalImage,
+                    const Image& normalImage,
                     float imageOpacityWhenNormal,
                     const Colour& overlayColourWhenNormal,
-                    Image* overImage,
+                    const Image& overImage,
                     float imageOpacityWhenOver,
                     const Colour& overlayColourWhenOver,
-                    Image* downImage,
+                    const Image& downImage,
                     float imageOpacityWhenDown,
                     const Colour& overlayColourWhenDown,
                     float hitTestAlphaThreshold = 0.0f);
 
     /** Returns the currently set 'normal' image. */
-    Image* getNormalImage() const throw();
+    const Image getNormalImage() const;
 
     /** Returns the image that's drawn when the mouse is over the button.
 
-        If an 'over' image has been set, this will return it; otherwise it'll
+        If a valid 'over' image has been set, this will return it; otherwise it'll
         just return the normal image.
     */
-    Image* getOverImage() const throw();
+    const Image getOverImage() const;
 
     /** Returns the image that's drawn when the button is held down.
 
-        If a 'down' image has been set, this will return it; otherwise it'll
+        If a valid 'down' image has been set, this will return it; otherwise it'll
         return the 'over' image or normal image, depending on what's available.
     */
-    Image* getDownImage() const throw();
+    const Image getDownImage() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -153,14 +143,11 @@ private:
     bool scaleImageToFit, preserveProportions;
     unsigned char alphaThreshold;
     int imageX, imageY, imageW, imageH;
-    Image* normalImage;
-    Image* overImage;
-    Image* downImage;
+    Image normalImage, overImage, downImage;
     float normalOpacity, overOpacity, downOpacity;
     Colour normalOverlay, overOverlay, downOverlay;
 
-    Image* getCurrentImage() const;
-    void deleteImages();
+    const Image getCurrentImage() const;
 
     ImageButton (const ImageButton&);
     ImageButton& operator= (const ImageButton&);

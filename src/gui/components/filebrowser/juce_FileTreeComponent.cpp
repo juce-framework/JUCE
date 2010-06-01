@@ -32,7 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_ImageCache.h"
 #include "../../../events/juce_AsyncUpdater.h"
 
-Image* juce_createIconForFile (const File& file);
+const Image juce_createIconForFile (const File& file);
 
 
 //==============================================================================
@@ -77,7 +77,6 @@ public:
         thread.removeTimeSliceClient (this);
 
         clearSubItems();
-        ImageCache::release (icon);
 
         if (canDeleteSubContentsList)
             delete subContentsList;
@@ -145,15 +144,14 @@ public:
         {
             updateIcon (true);
 
-            if (icon == 0)
+            if (icon.isNull())
                 thread.addTimeSliceClient (this);
         }
 
         owner.getLookAndFeel()
             .drawFileBrowserRow (g, width, height,
                                  file.getFileName(),
-                                 icon,
-                                 fileSize, modTime,
+                                 &icon, fileSize, modTime,
                                  isDirectory, isSelected(),
                                  indexInContentsList);
     }
@@ -199,26 +197,26 @@ private:
     DirectoryContentsList* subContentsList;
     bool isDirectory, canDeleteSubContentsList;
     TimeSliceThread& thread;
-    Image* icon;
+    Image icon;
     String fileSize;
     String modTime;
 
     void updateIcon (const bool onlyUpdateIfCached)
     {
-        if (icon == 0)
+        if (icon.isNull())
         {
             const int hashCode = (file.getFullPathName() + "_iconCacheSalt").hashCode();
-            Image* im = ImageCache::getFromHashCode (hashCode);
+            Image im (ImageCache::getFromHashCode (hashCode));
 
-            if (im == 0 && ! onlyUpdateIfCached)
+            if (im.isNull() && ! onlyUpdateIfCached)
             {
                 im = juce_createIconForFile (file);
 
-                if (im != 0)
+                if (im.isValid())
                     ImageCache::addImageToCache (im, hashCode);
             }
 
-            if (im != 0)
+            if (im.isValid())
             {
                 icon = im;
                 triggerAsyncUpdate();

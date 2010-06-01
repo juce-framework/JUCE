@@ -249,7 +249,7 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
     return false;
 }
 
-Image* JPEGImageFormat::decodeImage (InputStream& in)
+const Image JPEGImageFormat::decodeImage (InputStream& in)
 {
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
@@ -257,7 +257,7 @@ Image* JPEGImageFormat::decodeImage (InputStream& in)
     MemoryBlock mb;
     in.readIntoMemoryBlock (mb);
 
-    Image* image = 0;
+    Image image;
 
     if (mb.getSize() > 16)
     {
@@ -299,10 +299,10 @@ Image* JPEGImageFormat::decodeImage (InputStream& in)
 
             if (jpeg_start_decompress (&jpegDecompStruct))
             {
-                image = Image::createNativeImage (Image::RGB, width, height, false);
-                const bool hasAlphaChan = image->hasAlphaChannel();
+                image = Image (Image::RGB, width, height, false);
+                const bool hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-                const Image::BitmapData destData (*image, 0, 0, width, height, true);
+                const Image::BitmapData destData (image, 0, 0, width, height, true);
 
                 for (int y = 0; y < height; ++y)
                 {

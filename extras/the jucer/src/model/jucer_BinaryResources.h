@@ -76,7 +76,7 @@ public:
     const StringArray getResourceNames() const;
 
     const Drawable* getDrawable (const String& name) const;
-    Image* getImageFromCache (const String& name) const;
+    const Image getImageFromCache (const String& name) const;
 
     template <class ElementComparator>
     void sort (ElementComparator& sorter)

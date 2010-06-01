@@ -454,9 +454,15 @@ public:
         {
             lasso->dragLasso (e);
         }
-        else if (mouseDownCompUID.isNotEmpty() && (! e.mouseWasClicked()) && (! e.mods.isPopupMenu()))
+        else
         {
-            if (! isDraggingClickedComp)
+            if ((! isDraggingClickedComp)
+                && mouseDownCompUID.isNotEmpty()
+                && (! e.mouseWasClicked())
+                && (! e.mods.isPopupMenu())
+                && e.getDistanceFromDragStart() > 7) // whenever this drag occurs, it's selecting the object
+                                                     // and beginning a drag, so allow for more wobble than
+                                                     // when when dragging an already-selected object
             {
                 isDraggingClickedComp = true;
                 canvas->enableResizingMode();
@@ -464,8 +470,11 @@ public:
                 canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()), ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
             }
 
-            canvas->continueDrag (e);
-            showSizeGuides();
+            if (isDraggingClickedComp)
+            {
+                canvas->continueDrag (e);
+                showSizeGuides();
+            }
         }
 
         autoScrollForMouseEvent (e);

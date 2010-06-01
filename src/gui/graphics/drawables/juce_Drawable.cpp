@@ -91,12 +91,12 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
 {
     Drawable* result = 0;
 
-    Image* const image = ImageFileFormat::loadFrom (data, (int) numBytes);
+    Image image (ImageFileFormat::loadFrom (data, (int) numBytes));
 
-    if (image != 0)
+    if (image.isValid())
     {
         DrawableImage* const di = new DrawableImage();
-        di->setImage (image, true);
+        di->setImage (image);
         result = di;
     }
     else

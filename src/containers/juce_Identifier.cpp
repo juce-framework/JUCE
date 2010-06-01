@@ -28,27 +28,11 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Identifier.h"
-#include "../utilities/juce_DeletedAtShutdown.h"
-#include "../core/juce_Singleton.h"
-#include "../text/juce_StringPool.h"
 
 
 //==============================================================================
-class Identifier::Pool   : public DeletedAtShutdown
-{
-public:
-    Pool()    {}
-    ~Pool()   { clearSingletonInstance(); }
+StringPool Identifier::pool;
 
-    StringPool pool;
-
-    juce_DeclareSingleton_SingleThreaded_Minimal (Pool);
-};
-
-juce_ImplementSingleton_SingleThreaded (Identifier::Pool);
-
-
-//==============================================================================
 Identifier::Identifier() throw()
     : name (0)
 {
@@ -66,7 +50,7 @@ Identifier& Identifier::operator= (const Identifier& other) throw()
 }
 
 Identifier::Identifier (const String& name_)
-    : name (Identifier::Pool::getInstance()->pool.getPooledString (name_))
+    : name (Identifier::pool.getPooledString (name_))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
@@ -74,7 +58,7 @@ Identifier::Identifier (const String& name_)
 }
 
 Identifier::Identifier (const char* const name_)
-    : name (Identifier::Pool::getInstance()->pool.getPooledString (name_))
+    : name (Identifier::pool.getPooledString (name_))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */

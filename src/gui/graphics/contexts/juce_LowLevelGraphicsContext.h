@@ -30,6 +30,7 @@
 #include "../geometry/juce_Path.h"
 #include "../geometry/juce_RectangleList.h"
 #include "../colour/juce_ColourGradient.h"
+#include "juce_FillType.h"
 
 
 //==============================================================================

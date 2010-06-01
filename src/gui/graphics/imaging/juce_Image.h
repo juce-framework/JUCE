@@ -56,75 +56,111 @@ class JUCE_API  Image
 {
 public:
     //==============================================================================
+    /**
+    */
     enum PixelFormat
     {
+        UnknownFormat,
         RGB,                /**<< each pixel is a 3-byte packed RGB colour value. For byte order, see the PixelRGB class. */
         ARGB,               /**<< each pixel is a 4-byte ARGB premultiplied colour value. For byte order, see the PixelARGB class. */
         SingleChannel       /**<< each pixel is a 1-byte alpha channel value. */
     };
 
-    //==============================================================================
-    /** Creates an in-memory image with a specified size and format.
+    /**
+    */
+    enum ImageType
+    {
+        SoftwareImage = 0,
+        NativeImage
+    };
 
-        To create an image that can use native OS rendering methods, see createNativeImage().
+    //==============================================================================
+    /** Creates a null image. */
+    Image();
+
+    /** Creates an image with a specified size and format.
 
         @param format           the number of colour channels in the image
         @param imageWidth       the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a width of 1 will be used)
         @param imageHeight      the desired width of the image, in pixels - this value must be
                                 greater than zero (otherwise a height of 1 will be used)
-        @param clearImage       if true, the image will initially be cleared to black or transparent
-                                black. If false, the image may contain random data, and the
-                                user will have to deal with this
+        @param clearImage       if true, the image will initially be cleared to black (if it's RGB)
+                                or transparent black (if it's ARGB). If false, the image may contain
+                                junk initially, so you need to make sure you overwrite it thoroughly.
+        @param type             the type of image - this lets you specify whether you want a purely
+                                memory-based image, or one that may be managed by the OS if possible.
     */
     Image (PixelFormat format,
            int imageWidth,
            int imageHeight,
-           bool clearImage);
+           bool clearImage,
+           ImageType type = NativeImage);
 
-    /** Creates a copy of another image.
+    /** Creates a shared reference to another image.
 
-        @see createCopy
+        This won't create a duplicate of the image - when Image objects are copied, they simply
+        point to the same shared image data. To make sure that an Image object has its own unique,
+        unshared internal data, call duplicateIfShared().
     */
     Image (const Image& other);
 
-    /** Destructor. */
-    virtual ~Image();
+    /** Makes this image refer to the same underlying image as another object.
 
-    //==============================================================================
-    /** Tries to create an image that is uses native drawing methods when you render
-        onto it.
-
-        On some platforms this will just return a normal software-based image.
+        This won't create a duplicate of the image - when Image objects are copied, they simply
+        point to the same shared image data. To make sure that an Image object has its own unique,
+        unshared internal data, call duplicateIfShared().
     */
-    static Image* createNativeImage (PixelFormat format,
-                                     int imageWidth,
-                                     int imageHeight,
-                                     bool clearImage);
+    Image& operator= (const Image&);
+
+    /** Destructor. */
+    ~Image();
+
+    /** Returns true if the two images are referring to the same internal, shared image. */
+    bool operator== (const Image& other) const throw()      { return image == other.image; }
+
+    /** Returns true if the two images are not referring to the same internal, shared image. */
+    bool operator!= (const Image& other) const throw()      { return image != other.image; }
+
+    /** Returns true if this image isn't null.
+        If you create an Image with the default constructor, it has no size or content, and is null
+        until you reassign it to an Image which contains some actual data.
+        The isNull() method is the opposite of isValid().
+        @see isNull
+    */
+    inline bool isValid() const throw()                     { return image != 0; }
+
+    /** Returns true if this image is not valid.
+        If you create an Image with the default constructor, it has no size or content, and is null
+        until you reassign it to an Image which contains some actual data.
+        The isNull() method is the opposite of isValid().
+        @see isValid
+    */
+    inline bool isNull() const throw()                      { return image == 0; }
 
     //==============================================================================
     /** Returns the image's width (in pixels). */
-    int getWidth() const throw()                    { return imageWidth; }
+    int getWidth() const throw()                            { return image == 0 ? 0 : image->width; }
 
     /** Returns the image's height (in pixels). */
-    int getHeight() const throw()                   { return imageHeight; }
+    int getHeight() const throw()                           { return image == 0 ? 0 : image->height; }
 
     /** Returns a rectangle with the same size as this image.
-        The rectangle is always at position (0, 0).
+        The rectangle's origin is always (0, 0).
     */
-    const Rectangle<int> getBounds() const throw()  { return Rectangle<int> (0, 0, imageWidth, imageHeight); }
+    const Rectangle<int> getBounds() const throw()          { return image == 0 ? Rectangle<int>() : Rectangle<int> (0, 0, image->width, image->height); }
 
     /** Returns the image's pixel format. */
-    PixelFormat getFormat() const throw()           { return format; }
+    PixelFormat getFormat() const throw()                   { return image == 0 ? UnknownFormat : image->format; }
 
     /** True if the image's format is ARGB. */
-    bool isARGB() const throw()                     { return format == ARGB; }
+    bool isARGB() const throw()                             { return getFormat() == ARGB; }
 
     /** True if the image's format is RGB. */
-    bool isRGB() const throw()                      { return format == RGB; }
+    bool isRGB() const throw()                              { return getFormat() == RGB; }
 
     /** True if the image contains an alpha-channel. */
-    bool hasAlphaChannel() const throw()            { return format != RGB; }
+    bool hasAlphaChannel() const throw()                    { return getFormat() != RGB; }
 
     //==============================================================================
     /** Clears a section of the image with a given colour.
@@ -132,22 +168,37 @@ public:
         This won't do any alpha-blending - it just sets all pixels in the image to
         the given colour (which may be non-opaque if the image has an alpha channel).
     */
-    virtual void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
+    void clear (const Rectangle<int>& area, const Colour& colourToClearTo = Colour (0x00000000));
 
-    /** Returns a new image that's a copy of this one.
+    /** Returns a rescaled version of this image.
 
-        A new size for the copied image can be specified, or values less than
-        zero can be passed-in to use the image's existing dimensions.
+        A new image is returned which is a copy of this one, rescaled to the given size.
 
-        It's up to the caller to delete the image when no longer needed.
+        Note that if the new size is identical to the existing image, this will just return
+        a reference to the original image, and won't actually create a duplicate.
     */
-    virtual Image* createCopy (int newWidth = -1,
-                               int newHeight = -1,
-                               Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
+    const Image rescaled (int newWidth, int newHeight,
+                          Graphics::ResamplingQuality quality = Graphics::mediumResamplingQuality) const;
 
-    /** Returns a new single-channel image which is a copy of the alpha-channel of this image.
+    /** Returns a version of this image with a different image format.
+
+        A new image is returned which has been converted to the specified format.
+
+        Note that if the new format is no different to the current one, this will just return
+        a reference to the original image, and won't actually create a copy.
     */
-    virtual Image* createCopyOfAlphaChannel() const;
+    const Image convertedToFormat (PixelFormat newFormat) const;
+
+    /** Makes sure that no other Image objects share the same underlying data as this one.
+
+        If no other Image objects refer to the same shared data as this one, this method has no
+        effect. But if there are other references to the data, this will create a new copy of
+        the data internally.
+
+        Call this if you want to draw onto the image, but want to make sure that this doesn't
+        affect any other code that may be sharing the same data.
+    */
+    void duplicateIfShared();
 
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.
@@ -155,26 +206,21 @@ public:
         If the co-ordinates given are beyond the image's boundaries, this will
         return Colours::transparentBlack.
 
-        (0, 0) is the image's top-left corner.
-
-        @see getAlphaAt, setPixelAt, blendPixelAt
+        @see setPixelAt, Image::BitmapData::getPixelColour
     */
-    virtual const Colour getPixelAt (int x, int y) const;
+    const Colour getPixelAt (int x, int y) const;
 
     /** Sets the colour of one of the image's pixels.
 
-        If the co-ordinates are beyond the image's boundaries, then nothing will
-        happen.
+        If the co-ordinates are beyond the image's boundaries, then nothing will happen.
 
-        Note that unlike blendPixelAt(), this won't do any alpha-blending, it'll
-        just replace the existing pixel with the given one. The colour's opacity
-        will be ignored if this image doesn't have an alpha-channel.
+        Note that this won't do any alpha-blending, it'll just replace the existing pixel
+        with the given one. The colour's opacity will be ignored if this image doesn't have
+        an alpha-channel.
 
-        (0, 0) is the image's top-left corner.
-
-        @see blendPixelAt
+        @see getPixelAt, Image::BitmapData::setPixelColour
     */
-    virtual void setPixelAt (int x, int y, const Colour& colour);
+    void setPixelAt (int x, int y, const Colour& colour);
 
     /** Changes the opacity of a pixel.
 
@@ -184,9 +230,9 @@ public:
         The multiplier must be in the range 0 to 1.0, and the current alpha
         at the given co-ordinates will be multiplied by this value.
 
-        @see getAlphaAt, setPixelAt
+        @see setPixelAt
     */
-    virtual void multiplyAlphaAt (int x, int y, float multiplier);
+    void multiplyAlphaAt (int x, int y, float multiplier);
 
     /** Changes the overall opacity of the image.
 
@@ -196,11 +242,11 @@ public:
 
         If the image doesn't have an alpha channel, this won't have any effect.
     */
-    virtual void multiplyAllAlphas (float amountToMultiplyBy);
+    void multiplyAllAlphas (float amountToMultiplyBy);
 
     /** Changes all the colours to be shades of grey, based on their current luminosity.
     */
-    virtual void desaturate();
+    void desaturate();
 
     //==============================================================================
     /** Retrieves a section of an image as raw pixel data, so it can be read or written to.
@@ -230,13 +276,25 @@ public:
             The co-ordinate you provide here isn't checked, so it's the caller's responsibility to make
             sure it's not out-of-range.
         */
-        inline uint8* getLinePointer (int y) const                      { return data + y * lineStride; }
+        inline uint8* getLinePointer (int y) const throw()                  { return data + y * lineStride; }
 
         /** Returns a pointer to a pixel in the image.
             The co-ordinates you give here are not checked, so it's the caller's responsibility to make sure they're
             not out-of-range.
         */
-        inline uint8* getPixelPointer (int x, int y) const              { return data + y * lineStride + x * pixelStride; }
+        inline uint8* getPixelPointer (int x, int y) const throw()          { return data + y * lineStride + x * pixelStride; }
+
+        /** Returns the colour of a given pixel.
+            For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
+            repsonsibility to make sure they're within the image's size.
+        */
+        const Colour getPixelColour (int x, int y) const throw();
+
+        /** Sets the colour of a given pixel.
+            For performance reasons, this won't do any bounds-checking on the coordinates, so it's the caller's
+            repsonsibility to make sure they're within the image's size.
+        */
+        void setPixelColour (int x, int y, const Colour& colour) const throw();
 
         uint8* data;
         const PixelFormat pixelFormat;
@@ -252,14 +310,13 @@ public:
         The format of the pixel data must match that of the image itself, and the
         rectangle supplied must be within the image's bounds.
     */
-    virtual void setPixelData (int destX, int destY, int destW, int destH,
-                               const uint8* sourcePixelData, int sourceLineStride);
+    void setPixelData (int destX, int destY, int destW, int destH,
+                       const uint8* sourcePixelData, int sourceLineStride);
 
-    /** Copies a section of the image to somewhere else within itself.
-    */
-    virtual void moveImageSection (int destX, int destY,
-                                   int sourceX, int sourceY,
-                                   int width, int height);
+    /** Copies a section of the image to somewhere else within itself. */
+    void moveImageSection (int destX, int destY,
+                           int sourceX, int sourceY,
+                           int width, int height);
 
     /** Creates a RectangleList containing rectangles for all non-transparent pixels
         of the image.
@@ -271,32 +328,55 @@ public:
     void createSolidAreaMask (RectangleList& result,
                               float alphaThreshold = 0.5f) const;
 
+    /** Creates a context suitable for drawing onto this image.
+        Don't call this method directly! It's used internally by the Graphics class.
+    */
+    LowLevelGraphicsContext* createLowLevelContext() const;
+
+    //==============================================================================
+    /**
+    */
+    class SharedImage  : public ReferenceCountedObject
+    {
+    public:
+        SharedImage (PixelFormat format, int width, int height);
+        ~SharedImage();
+
+        virtual LowLevelGraphicsContext* createLowLevelContext() = 0;
+        virtual SharedImage* clone() = 0;
+        virtual ImageType getType() const = 0;
+
+        static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
+        static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
+
+    protected:
+        friend class Image;
+        friend class Image::BitmapData;
+        const PixelFormat format;
+        const int width, height;
+        int pixelStride, lineStride;
+        uint8* imageData;
+
+        uint8* getPixelData (int x, int y) const throw();
+
+        SharedImage (const SharedImage&);
+        SharedImage& operator= (const SharedImage&);
+    };
+
+    /** @internal */
+    SharedImage* getSharedImage() const throw()     { return image; }
+
+    /** @internal */
+    explicit Image (SharedImage* instance);
+
+    /** @internal */
+    int getReferenceCount() const throw()               { return image->getReferenceCount(); }
+
     //==============================================================================
     juce_UseDebuggingNewOperator
 
-    /** Creates a context suitable for drawing onto this image.
-
-        Don't call this method directly! It's used internally by the Graphics class.
-    */
-    virtual LowLevelGraphicsContext* createLowLevelContext();
-
-protected:
-    friend class BitmapData;
-    const PixelFormat format;
-    const int imageWidth, imageHeight;
-
-    /** Used internally so that subclasses can call a constructor that doesn't allocate memory */
-    Image (PixelFormat format,
-           int imageWidth,
-           int imageHeight);
-
-    int pixelStride, lineStride;
-    HeapBlock <uint8> imageDataAllocated;
-    uint8* imageData;
-
 private:
-    //==============================================================================
-    Image& operator= (const Image&);
+    ReferenceCountedObjectPtr<SharedImage> image;
 };
 
 

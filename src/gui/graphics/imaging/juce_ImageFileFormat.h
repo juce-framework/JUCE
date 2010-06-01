@@ -78,11 +78,10 @@ public:
         @param input    the stream to read the data from. The stream will be positioned
                         at the start of the image data (but this may not necessarily
                         be position 0)
-        @returns        the image that was decoded, or 0 if it fails. It's the
-                        caller's responsibility to delete this image when no longer needed.
+        @returns        the image that was decoded, or an invalid image if it fails.
         @see loadFrom
     */
-    virtual Image* decodeImage (InputStream& input) = 0;
+    virtual const Image decodeImage (InputStream& input) = 0;
 
     //==============================================================================
     /** Attempts to write an image to a stream.
@@ -112,31 +111,28 @@ public:
         This will use the findImageFormatForStream() method to locate a suitable
         codec, and use that to load the image.
 
-        @returns  the image that was decoded, or 0 if it fails to load one. It's the
-                  caller's responsibility to delete this image when no longer needed.
+        @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static Image* loadFrom (InputStream& input);
+    static const Image loadFrom (InputStream& input);
 
     /** Tries to load an image from a file.
 
         This will use the findImageFormatForStream() method to locate a suitable
         codec, and use that to load the image.
 
-        @returns  the image that was decoded, or 0 if it fails to load one. It's the
-                  caller's responsibility to delete this image when no longer needed.
+        @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static Image* loadFrom (const File& file);
+    static const Image loadFrom (const File& file);
 
     /** Tries to load an image from a block of raw image data.
 
         This will use the findImageFormatForStream() method to locate a suitable
         codec, and use that to load the image.
 
-        @returns  the image that was decoded, or 0 if it fails to load one. It's the
-                  caller's responsibility to delete this image when no longer needed.
+        @returns        the image that was decoded, or an invalid image if it fails.
     */
-    static Image* loadFrom (const void* rawData,
-                            const int numBytesOfData);
+    static const Image loadFrom (const void* rawData,
+                                 const int numBytesOfData);
 
 };
 
@@ -157,7 +153,7 @@ public:
     const String getFormatName();
     bool canUnderstand (InputStream& input);
 
-    Image* decodeImage (InputStream& input);
+    const Image decodeImage (InputStream& input);
 
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 };
@@ -189,7 +185,7 @@ public:
 
     bool canUnderstand (InputStream& input);
 
-    Image* decodeImage (InputStream& input);
+    const Image decodeImage (InputStream& input);
 
     bool writeImageToStream (const Image& sourceImage, OutputStream& destStream);
 

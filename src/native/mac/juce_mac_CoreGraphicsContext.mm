@@ -28,21 +28,24 @@
 #if JUCE_INCLUDED_FILE
 
 //==============================================================================
-class CoreGraphicsImage : public Image
+class CoreGraphicsImage : public Image::SharedImage
 {
 public:
     //==============================================================================
-    CoreGraphicsImage (const PixelFormat format_,
-                       const int imageWidth_,
-                       const int imageHeight_,
-                       const bool clearImage)
-        : Image (format_, imageWidth_, imageHeight_, clearImage)
+    CoreGraphicsImage (const Image::PixelFormat format_, const int width_, const int height_, const bool clearImage)
+        : Image::SharedImage (format_, width_, height_)
     {
+        pixelStride = format_ == Image::RGB ? 3 : ((format_ == Image::ARGB) ? 4 : 1);
+        lineStride = (pixelStride * jmax (1, width) + 3) & ~3;
+
+        imageDataAllocated.allocate (lineStride * jmax (1, height), clearImage);
+        imageData = imageDataAllocated;
+
         CGColorSpaceRef colourSpace = (format == Image::SingleChannel) ? CGColorSpaceCreateDeviceGray()
                                                                        : CGColorSpaceCreateDeviceRGB();
 
-        context = CGBitmapContextCreate (imageData, imageWidth, imageHeight, 8, lineStride,
-                                         colourSpace, getCGImageFlags (*this));
+        context = CGBitmapContextCreate (imageData, width, height, 8, lineStride,
+                                         colourSpace, getCGImageFlags (format_));
 
         CGColorSpaceRelease (colourSpace);
     }
@@ -52,12 +55,20 @@ public:
         CGContextRelease (context);
     }
 
+    Image::ImageType getType() const    { return Image::NativeImage; }
     LowLevelGraphicsContext* createLowLevelContext();
+
+    SharedImage* clone()
+    {
+        CoreGraphicsImage* im = new CoreGraphicsImage (format, width, height, false);
+        memcpy (im->imageData, imageData, lineStride * height);
+        return im;
+    }
 
     //==============================================================================
     static CGImageRef createImage (const Image& juceImage, const bool forAlpha, CGColorSpaceRef colourSpace)
     {
-        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (&juceImage);
+        const CoreGraphicsImage* nativeImage = dynamic_cast <const CoreGraphicsImage*> (juceImage.getSharedImage());
 
         if (nativeImage != 0 && (juceImage.getFormat() == Image::SingleChannel || ! forAlpha))
         {
@@ -71,7 +82,7 @@ public:
 
             CGImageRef imageRef = CGImageCreate (srcData.width, srcData.height,
                                                  8, srcData.pixelStride * 8, srcData.lineStride,
-                                                 colourSpace, getCGImageFlags (juceImage), provider,
+                                                 colourSpace, getCGImageFlags (juceImage.getFormat()), provider,
                                                  0, true, kCGRenderingIntentDefault);
 
             CGDataProviderRelease (provider);
@@ -104,24 +115,25 @@ public:
 
     //==============================================================================
     CGContextRef context;
+    HeapBlock<uint8> imageDataAllocated;
 
 private:
-    static CGBitmapInfo getCGImageFlags (const Image& image)
+    static CGBitmapInfo getCGImageFlags (const Image::PixelFormat& format)
     {
 #if JUCE_BIG_ENDIAN
-        return image.getFormat() == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big) : kCGBitmapByteOrderDefault;
+        return format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Big) : kCGBitmapByteOrderDefault;
 #else
-        return image.getFormat() == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault;
+        return format == Image::ARGB ? (kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little) : kCGBitmapByteOrderDefault;
 #endif
     }
 };
 
-Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
 {
 #if USE_COREGRAPHICS_RENDERING
-    return new CoreGraphicsImage (format == RGB ? ARGB : format, imageWidth, imageHeight, clearImage);
+    return new CoreGraphicsImage (format == RGB ? ARGB : format, width, height, clearImage);
 #else
-    return new Image (format, imageWidth, imageHeight, clearImage);
+    return createSoftwareImage (format, width, height, clearImage);
 #endif
 }
 
@@ -210,16 +222,12 @@ public:
     {
         if (! transform.isSingularity())
         {
-            ScopedPointer<Image> imageToDelete;
-            const Image* singleChannelImage = &sourceImage;
+            Image singleChannelImage (sourceImage);
 
             if (sourceImage.getFormat() != Image::SingleChannel)
-            {
-                imageToDelete = sourceImage.createCopyOfAlphaChannel();
-                singleChannelImage = imageToDelete;
-            }
+                singleChannelImage = sourceImage.convertedToFormat (Image::SingleChannel);
 
-            CGImageRef image = CoreGraphicsImage::createImage (*singleChannelImage, true, greyColourSpace);
+            CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace);
 
             flip();
             AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
@@ -343,7 +351,7 @@ public:
             {
                 CGContextSaveGState (context);
                 CGContextClipToRect (context, cgRect);
-                drawImage (*(state->fillType.image), state->fillType.image->getBounds(), state->fillType.transform, true);
+                drawImage (state->fillType.image, state->fillType.image.getBounds(), state->fillType.transform, true);
                 CGContextRestoreGState (context);
             }
         }
@@ -376,7 +384,7 @@ public:
             if (state->fillType.isGradient())
                 drawGradient();
             else
-                drawImage (*(state->fillType.image), state->fillType.image->getBounds(), state->fillType.transform, true);
+                drawImage (state->fillType.image, state->fillType.image.getBounds(), state->fillType.transform, true);
         }
 
         CGContextRestoreGState (context);
@@ -717,7 +725,7 @@ private:
 
 LowLevelGraphicsContext* CoreGraphicsImage::createLowLevelContext()
 {
-    return new CoreGraphicsContext (context, imageHeight);
+    return new CoreGraphicsContext (context, height);
 }
 
 #endif

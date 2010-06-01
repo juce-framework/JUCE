@@ -201,13 +201,13 @@ public:
             The image that is returned will be owned by the caller, but it may come
             from the ImageCache.
         */
-        virtual Image* getImageForIdentifier (const var& imageIdentifier) = 0;
+        virtual const Image getImageForIdentifier (const var& imageIdentifier) = 0;
 
         /** Returns an identifier to be used to refer to a given image.
             This is used when converting a drawable into a ValueTree, so if you're
             only loading drawables, you can just return a var::null here.
         */
-        virtual const var getIdentifierForImage (Image* image) = 0;
+        virtual const var getIdentifierForImage (const Image& image) = 0;
     };
 
     /** Tries to create a Drawable from a previously-saved ValueTree.

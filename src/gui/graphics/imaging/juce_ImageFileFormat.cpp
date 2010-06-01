@@ -57,7 +57,7 @@ public:
                 && header[2] == 'F';
     }
 
-    Image* decodeImage (InputStream& in)
+    const Image decodeImage (InputStream& in)
     {
         const ScopedPointer <GIFLoader> loader (new GIFLoader (in));
         return loader->getImage();
@@ -99,17 +99,17 @@ ImageFileFormat* ImageFileFormat::findImageFormatForStream (InputStream& input)
 }
 
 //==============================================================================
-Image* ImageFileFormat::loadFrom (InputStream& input)
+const Image ImageFileFormat::loadFrom (InputStream& input)
 {
     ImageFileFormat* const format = findImageFormatForStream (input);
 
     if (format != 0)
         return format->decodeImage (input);
 
-    return 0;
+    return Image();
 }
 
-Image* ImageFileFormat::loadFrom (const File& file)
+const Image ImageFileFormat::loadFrom (const File& file)
 {
     InputStream* const in = file.createInputStream();
 
@@ -119,10 +119,10 @@ Image* ImageFileFormat::loadFrom (const File& file)
         return loadFrom (b);
     }
 
-    return 0;
+    return Image();
 }
 
-Image* ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
+const Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
 {
     if (rawData != 0 && numBytes > 4)
     {
@@ -130,7 +130,7 @@ Image* ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
         return loadFrom (stream);
     }
 
-    return 0;
+    return Image();
 }
 
 END_JUCE_NAMESPACE

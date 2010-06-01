@@ -192,7 +192,7 @@ public:
 
         Item getParent() const;
 
-        Image* getIcon() const;
+        const Image getIcon() const;
 
     private:
         //==============================================================================

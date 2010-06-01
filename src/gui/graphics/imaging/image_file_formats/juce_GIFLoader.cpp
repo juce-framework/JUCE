@@ -97,8 +97,8 @@ GIFLoader::GIFLoader (InputStream& in)
             if (! readPalette (numColours))
                 break;
 
-        image = Image::createNativeImage ((transparent >= 0) ? Image::ARGB : Image::RGB,
-                                          imageWidth, imageHeight, (transparent >= 0));
+        image = Image ((transparent >= 0) ? Image::ARGB : Image::RGB,
+                       imageWidth, imageHeight, (transparent >= 0));
 
         readImage (imageWidth, imageHeight,
                    (buf[8] & 0x40) != 0,
@@ -382,9 +382,9 @@ bool GIFLoader::readImage (const int width, const int height,
     int index;
     int xpos = 0, ypos = 0, pass = 0;
 
-    const Image::BitmapData destData (*image, 0, 0, width, height, true);
+    const Image::BitmapData destData (image, 0, 0, width, height, true);
     uint8* p = destData.data;
-    const bool hasAlpha = image->hasAlphaChannel();
+    const bool hasAlpha = image.hasAlphaChannel();
 
     while ((index = readLZWByte (false, c)) >= 0)
     {

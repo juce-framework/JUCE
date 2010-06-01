@@ -32,6 +32,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../geometry/juce_PathStrokeType.h"
 #include "juce_LowLevelGraphicsContext.h"
 
+
 static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
 
 //==============================================================================
@@ -56,7 +57,7 @@ LowLevelGraphicsContext::~LowLevelGraphicsContext()
 }
 
 //==============================================================================
-Graphics::Graphics (Image& imageToDrawOnto)
+Graphics::Graphics (const Image& imageToDrawOnto)
     : context (imageToDrawOnto.createLowLevelContext()),
       contextToDelete (context),
       saveStatePending (false)
@@ -608,23 +609,20 @@ void Graphics::setImageResamplingQuality (const Graphics::ResamplingQuality newQ
 }
 
 //==============================================================================
-void Graphics::drawImageAt (const Image* const imageToDraw,
+void Graphics::drawImageAt (const Image& imageToDraw,
                             const int topLeftX, const int topLeftY,
                             const bool fillAlphaChannelWithCurrentBrush) const
 {
-    if (imageToDraw != 0)
-    {
-        const int imageW = imageToDraw->getWidth();
-        const int imageH = imageToDraw->getHeight();
+    const int imageW = imageToDraw.getWidth();
+    const int imageH = imageToDraw.getHeight();
 
-        drawImage (imageToDraw,
-                   topLeftX, topLeftY, imageW, imageH,
-                   0, 0, imageW, imageH,
-                   fillAlphaChannelWithCurrentBrush);
-    }
+    drawImage (imageToDraw,
+               topLeftX, topLeftY, imageW, imageH,
+               0, 0, imageW, imageH,
+               fillAlphaChannelWithCurrentBrush);
 }
 
-void Graphics::drawImageWithin (const Image* const imageToDraw,
+void Graphics::drawImageWithin (const Image& imageToDraw,
                                 const int destX, const int destY,
                                 const int destW, const int destH,
                                 const RectanglePlacement& placementWithinTarget,
@@ -633,10 +631,10 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (destX, destY, destW, destH));
 
-    if (imageToDraw != 0)
+    if (imageToDraw.isValid())
     {
-        const int imageW = imageToDraw->getWidth();
-        const int imageH = imageToDraw->getHeight();
+        const int imageW = imageToDraw.getWidth();
+        const int imageH = imageToDraw.getHeight();
 
         if (imageW > 0 && imageH > 0)
         {
@@ -659,7 +657,7 @@ void Graphics::drawImageWithin (const Image* const imageToDraw,
     }
 }
 
-void Graphics::drawImage (const Image* const imageToDraw,
+void Graphics::drawImage (const Image& imageToDraw,
                           int dx, int dy, int dw, int dh,
                           int sx, int sy, int sw, int sh,
                           const bool fillAlphaChannelWithCurrentBrush) const
@@ -668,7 +666,7 @@ void Graphics::drawImage (const Image* const imageToDraw,
     jassert (areCoordsSensibleNumbers (dx, dy, dw, dh));
     jassert (areCoordsSensibleNumbers (sx, sy, sw, sh));
 
-    if (context->clipRegionIntersects  (Rectangle<int> (dx, dy, dw, dh)))
+    if (imageToDraw.isValid() && context->clipRegionIntersects  (Rectangle<int> (dx, dy, dw, dh)))
     {
         drawImageTransformed (imageToDraw, Rectangle<int> (sx, sy, sw, sh),
                               AffineTransform::scale (dw / (float) sw, dh / (float) sh)
@@ -677,25 +675,25 @@ void Graphics::drawImage (const Image* const imageToDraw,
     }
 }
 
-void Graphics::drawImageTransformed (const Image* const imageToDraw,
+void Graphics::drawImageTransformed (const Image& imageToDraw,
                                      const Rectangle<int>& imageSubRegion,
                                      const AffineTransform& transform,
                                      const bool fillAlphaChannelWithCurrentBrush) const
 {
-    if (imageToDraw != 0 && ! context->isClipEmpty())
+    if (imageToDraw.isValid() && ! context->isClipEmpty())
     {
-        const Rectangle<int> srcClip (imageSubRegion.getIntersection (imageToDraw->getBounds()));
+        const Rectangle<int> srcClip (imageSubRegion.getIntersection (imageToDraw.getBounds()));
 
         if (fillAlphaChannelWithCurrentBrush)
         {
             context->saveState();
-            context->clipToImageAlpha (*imageToDraw, srcClip, transform);
+            context->clipToImageAlpha (imageToDraw, srcClip, transform);
             fillAll();
             context->restoreState();
         }
         else
         {
-            context->drawImage (*imageToDraw, srcClip, transform, false);
+            context->drawImage (imageToDraw, srcClip, transform, false);
         }
     }
 }

@@ -97,8 +97,8 @@ public:
     const String getNonexistentMarkerName (const String& name);
     void renameAnchor (const String& oldName, const String& newName);
 
-    Image* getImageForIdentifier (const var& imageIdentifier);
-    const var getIdentifierForImage (Image* image);
+    const Image getImageForIdentifier (const var& imageIdentifier);
+    const var getIdentifierForImage (const Image& image);
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& name);

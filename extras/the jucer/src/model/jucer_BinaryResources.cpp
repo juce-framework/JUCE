@@ -199,14 +199,14 @@ const Drawable* BinaryResources::getDrawable (const String& name) const
     return res->drawable;
 }
 
-Image* BinaryResources::getImageFromCache (const String& name) const
+const Image BinaryResources::getImageFromCache (const String& name) const
 {
     const BinaryResources::BinaryResource* const res = getResource (name);
 
     if (res != 0 && res->data.getSize() > 0)
         return ImageCache::getFromMemory (res->data.getData(), (int) res->data.getSize());
 
-    return 0;
+    return Image();
 }
 
 void BinaryResources::loadFromCpp (const File& cppFileLocation, const String& cppFile)

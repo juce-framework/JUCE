@@ -275,12 +275,12 @@ const ValueTree DrawableDocument::performNewItemMenuItem (int menuResultCode)
 }
 
 //==============================================================================
-Image* DrawableDocument::getImageForIdentifier (const var& imageIdentifier)
+const Image DrawableDocument::getImageForIdentifier (const var& imageIdentifier)
 {
     return ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
 }
 
-const var DrawableDocument::getIdentifierForImage (Image* image)
+const var DrawableDocument::getIdentifierForImage (const Image& image)
 {
     return var::null; //xxx todo
 }

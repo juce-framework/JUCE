@@ -199,7 +199,7 @@ void DrawableComposite::render (const Drawable::RenderingContext& context) const
             }
 
             context.g.setOpacity (context.opacity);
-            context.g.drawImageAt (&tempImage, clipBounds.getX(), clipBounds.getY());
+            context.g.drawImageAt (tempImage, clipBounds.getX(), clipBounds.getY());
         }
     }
 }

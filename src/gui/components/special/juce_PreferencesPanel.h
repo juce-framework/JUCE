@@ -95,7 +95,7 @@ public:
         @param imageDataSize    the size of the image data, in bytes
     */
     void addSettingsPage (const String& pageTitle,
-                          const char* imageData,
+                          const void* imageData,
                           int imageDataSize);
 
     /** Utility method to display this panel in a DialogWindow.

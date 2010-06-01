@@ -1925,7 +1925,7 @@ public:
             }
             else if (fillType.isTiledImage())
             {
-                renderImage (image, *(fillType.image), fillType.image->getBounds(), fillType.transform, shapeToFill);
+                renderImage (image, fillType.image, fillType.image.getBounds(), fillType.transform, shapeToFill);
             }
             else
             {
@@ -2012,13 +2012,13 @@ private:
 
 
 //==============================================================================
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image_)
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_)
     : image (image_)
 {
     currentState = new SavedState (image_.getBounds(), 0, 0);
 }
 
-LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (Image& image_, const int xOffset, const int yOffset,
+LowLevelGraphicsSoftwareRenderer::LowLevelGraphicsSoftwareRenderer (const Image& image_, const int xOffset, const int yOffset,
                                                                     const RectangleList& initialClip)
     : image (image_)
 {

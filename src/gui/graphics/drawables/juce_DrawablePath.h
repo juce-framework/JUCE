@@ -28,6 +28,7 @@
 
 #include "juce_Drawable.h"
 #include "../colour/juce_ColourGradient.h"
+#include "../contexts/juce_FillType.h"
 
 
 //==============================================================================

@@ -443,19 +443,19 @@ namespace Visuals
 }
 
 //==============================================================================
-class XBitmapImage  : public Image
+class XBitmapImage  : public Image::SharedImage
 {
 public:
     //==============================================================================
-    XBitmapImage (const PixelFormat format_, const int w, const int h,
+    XBitmapImage (const Image::PixelFormat format_, const int w, const int h,
                   const bool clearImage, const int imageDepth_, Visual* visual)
-        : Image (format_, w, h),
+        : Image::SharedImage (format_, w, h),
           imageDepth (imageDepth_),
           gc (None)
     {
-        jassert (format_ == RGB || format_ == ARGB);
+        jassert (format_ == Image::RGB || format_ == Image::ARGB);
 
-        pixelStride = (format_ == RGB) ? 3 : 4;
+        pixelStride = (format_ == Image::RGB) ? 3 : 4;
         lineStride = ((w * pixelStride + 3) & ~3);
 
         ScopedXLock xlock;
@@ -510,7 +510,7 @@ public:
             imageDataAllocated.malloc (lineStride * h);
             imageData = imageDataAllocated;
 
-            if (format_ == ARGB && clearImage)
+            if (format_ == Image::ARGB && clearImage)
                 zeromem (imageData, h * lineStride);
 
             xImage = (XImage*) juce_calloc (sizeof (XImage));
@@ -578,6 +578,19 @@ public:
         }
     }
 
+    Image::ImageType getType() const    { return Image::NativeImage; }
+
+    LowLevelGraphicsContext* createLowLevelContext()
+    {
+        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+    }
+
+    SharedImage* clone()
+    {
+        jassertfalse;
+        return 0;
+    }
+
     void blitToWindow (Window window, int dx, int dy, int dw, int dh, int sx, int sy)
     {
         ScopedXLock xlock;
@@ -609,7 +622,7 @@ public:
             const uint32 bShiftL = jmax (0, getShiftNeeded (bMask));
             const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
 
-            const Image::BitmapData srcData (*this, 0, 0, getWidth(), getHeight());
+            const Image::BitmapData srcData (Image (this), 0, 0, width, height);
 
             for (int y = sy; y < sy + dh; ++y)
             {
@@ -643,6 +656,7 @@ public:
 private:
     XImage* xImage;
     const int imageDepth;
+    HeapBlock <uint8> imageDataAllocated;
     HeapBlock <char> imageData16Bit;
 
     GC gc;
@@ -1694,7 +1708,7 @@ public:
     void setTaskBarIcon (const Image& image)
     {
         ScopedXLock xlock;
-        taskbarImage = image.createCopy();
+        taskbarImage = image;
 
         Screen* const screen = XDefaultScreenOfDisplay (display);
         const int screenNumber = XScreenNumberOfScreen (screen);
@@ -1748,7 +1762,7 @@ public:
         XFree (hints);
     }
 
-    const Image* getTaskbarIcon() const throw()           { return taskbarImage; }
+    const Image& getTaskbarIcon() const throw()           { return taskbarImage; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -1805,7 +1819,7 @@ private:
             else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
             {
                 stopTimer();
-                image = 0;
+                image = Image();
             }
         }
 
@@ -1835,34 +1849,32 @@ private:
 
             if (! totalArea.isEmpty())
             {
-                if (image == 0 || image->getWidth() < totalArea.getWidth()
-                     || image->getHeight() < totalArea.getHeight())
+                if (image.isNull() || image.getWidth() < totalArea.getWidth()
+                     || image.getHeight() < totalArea.getHeight())
                 {
 #if JUCE_USE_XSHM
-                    image = new XBitmapImage (useARGBImagesForRendering ? Image::ARGB
-                                                                        : Image::RGB,
+                    image = Image (new XBitmapImage (useARGBImagesForRendering ? Image::ARGB
+                                                                               : Image::RGB,
 #else
-                    image = new XBitmapImage (Image::RGB,
+                    image = Image (new XBitmapImage (Image::RGB,
 #endif
-                                              (totalArea.getWidth() + 31) & ~31,
-                                              (totalArea.getHeight() + 31) & ~31,
-                                              false,
-                                              peer->depth,
-                                              peer->visual);
+                                                     (totalArea.getWidth() + 31) & ~31,
+                                                     (totalArea.getHeight() + 31) & ~31,
+                                                     false, peer->depth, peer->visual));
                 }
 
                 startTimer (repaintTimerPeriod);
 
                 RectangleList adjustedList (originalRepaintRegion);
                 adjustedList.offsetAll (-totalArea.getX(), -totalArea.getY());
-                LowLevelGraphicsSoftwareRenderer context (*image, -totalArea.getX(), -totalArea.getY(), adjustedList);
+                LowLevelGraphicsSoftwareRenderer context (image, -totalArea.getX(), -totalArea.getY(), adjustedList);
 
                 if (peer->depth == 32)
                 {
                     RectangleList::Iterator i (originalRepaintRegion);
 
                     while (i.next())
-                        image->clear (*i.getRectangle() - totalArea.getPosition());
+                        image.clear (*i.getRectangle() - totalArea.getPosition());
                 }
 
                 peer->handlePaint (context);
@@ -1877,9 +1889,10 @@ private:
 #endif
                     const Rectangle<int>& r = *i.getRectangle();
 
-                    image->blitToWindow (peer->windowH,
-                                         r.getX(), r.getY(), r.getWidth(), r.getHeight(),
-                                         r.getX() - totalArea.getX(), r.getY() - totalArea.getY());
+                    static_cast<XBitmapImage*> (image.getSharedImage())
+                        ->blitToWindow (peer->windowH,
+                                        r.getX(), r.getY(), r.getWidth(), r.getHeight(),
+                                        r.getX() - totalArea.getX(), r.getY() - totalArea.getY());
                 }
             }
 
@@ -1895,7 +1908,7 @@ private:
         enum { repaintTimerPeriod = 1000 / 100 };
 
         LinuxComponentPeer* const peer;
-        ScopedPointer <XBitmapImage> image;
+        Image image;
         uint32 lastTimeImageUsed;
         RectangleList regionsNeedingRepaint;
 
@@ -1911,7 +1924,7 @@ private:
     friend class LinuxRepaintManager;
     Window windowH, parentWindow;
     int wx, wy, ww, wh;
-    ScopedPointer<Image> taskbarImage;
+    Image taskbarImage;
     bool fullScreen, mapped;
     Visual* visual;
     int depth;
@@ -2988,6 +3001,7 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
         return 0;
 
     Image im (Image::ARGB, cursorW, cursorH, true);
+
     {
         Graphics g (im);
 
@@ -2996,13 +3010,13 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
             hotspotX = (hotspotX * cursorW) / imageW;
             hotspotY = (hotspotY * cursorH) / imageH;
 
-            g.drawImageWithin (&image, 0, 0, imageW, imageH,
+            g.drawImageWithin (image, 0, 0, imageW, imageH,
                                RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
                                false);
         }
         else
         {
-            g.drawImageAt (&image, 0, 0);
+            g.drawImageAt (image, 0, 0);
         }
     }
 
@@ -3084,8 +3098,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               132,117,151,116,132,146,248,60,209,138,98,22,203,114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
             const int dragHandDataSize = 99;
 
-            const ScopedPointer <Image> im (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize));
-            return createMouseCursorFromImage (*im, 8, 7);
+            return createMouseCursorFromImage (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), 8, 7);
         }
 
         case CopyingCursor:
@@ -3096,8 +3109,7 @@ void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType ty
               252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
             const int copyCursorSize = 119;
 
-            const ScopedPointer <Image> im (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize));
-            return createMouseCursorFromImage (*im, 1, 3);
+            return createMouseCursorFromImage (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), 1, 3);
         }
 
         default:
@@ -3124,14 +3136,14 @@ void MouseCursor::showInAllWindows() const
 }
 
 //==============================================================================
-Image* juce_createIconForFile (const File& file)
+const Image juce_createIconForFile (const File& file)
 {
-    return 0;
+    return Image();
 }
 
-Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
 {
-    return new Image (format, imageWidth, imageHeight, clearImage);
+    return createSoftwareImage (format, width, height, clearImage);
 }
 
 
@@ -3364,14 +3376,9 @@ void SystemTrayIconComponent::paint (Graphics& g)
 
     if (wp != 0)
     {
-        const Image* const image = wp->getTaskbarIcon();
-
-        if (image != 0)
-        {
-            g.drawImageWithin (image, 0, 0, getWidth(), getHeight(),
-                               RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
-                               false);
-        }
+        g.drawImageWithin (wp->getTaskbarIcon(), 0, 0, getWidth(), getHeight(),
+                           RectanglePlacement::xLeft | RectanglePlacement::yTop | RectanglePlacement::onlyReduceInSize,
+                           false);
     }
 }
 

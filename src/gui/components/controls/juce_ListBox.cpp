@@ -880,7 +880,7 @@ void ListBox::repaintRow (const int rowNumber) throw()
     repaint (getRowPosition (rowNumber, true));
 }
 
-Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
+const Image ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
 {
     Rectangle<int> imageArea;
     const int firstRow = getRowContainingPosition (0, 0);
@@ -901,7 +901,7 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
     imageArea = imageArea.getIntersection (getLocalBounds());
     imageX = imageArea.getX();
     imageY = imageArea.getY();
-    Image* snapshot = Image::createNativeImage (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true);
+    Image snapshot (Image::ARGB, imageArea.getWidth(), imageArea.getHeight(), true, Image::NativeImage);
 
     for (i = getNumRowsOnScreen() + 2; --i >= 0;)
     {
@@ -911,7 +911,7 @@ Image* ListBox::createSnapshotOfSelectedRows (int& imageX, int& imageY)
         {
             const Point<int> pos (rowComp->relativePositionToOtherComponent (this, Point<int>()));
 
-            Graphics g (*snapshot);
+            Graphics g (snapshot);
             g.setOrigin (pos.getX() - imageX, pos.getY() - imageY);
             if (g.reduceClipRegion (0, 0, rowComp->getWidth(), rowComp->getHeight()))
                 rowComp->paintEntireComponent (g);
@@ -929,8 +929,8 @@ void ListBox::startDragAndDrop (const MouseEvent& e, const String& dragDescripti
     if (dragContainer != 0)
     {
         int x, y;
-        Image* dragImage = createSnapshotOfSelectedRows (x, y);
-        dragImage->multiplyAllAlphas (0.6f);
+        Image dragImage (createSnapshotOfSelectedRows (x, y));
+        dragImage.multiplyAllAlphas (0.6f);
 
         MouseEvent e2 (e.getEventRelativeTo (this));
         const Point<int> p (x - e2.x, y - e2.y);

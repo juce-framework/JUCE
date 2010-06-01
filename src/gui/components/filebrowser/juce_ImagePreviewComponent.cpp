@@ -68,7 +68,7 @@ void ImagePreviewComponent::timerCallback()
 {
     stopTimer();
 
-    currentThumbnail = 0;
+    currentThumbnail = Image();
     currentDetails = String::empty;
     repaint();
 
@@ -82,10 +82,10 @@ void ImagePreviewComponent::timerCallback()
         {
             currentThumbnail = format->decodeImage (*in);
 
-            if (currentThumbnail != 0)
+            if (currentThumbnail.isValid())
             {
-                int w = currentThumbnail->getWidth();
-                int h = currentThumbnail->getHeight();
+                int w = currentThumbnail.getWidth();
+                int h = currentThumbnail.getHeight();
 
                 currentDetails
                     << fileToLoad.getFileName() << "\n"
@@ -95,7 +95,7 @@ void ImagePreviewComponent::timerCallback()
 
                 getThumbSize (w, h);
 
-                currentThumbnail = currentThumbnail->createCopy (w, h);
+                currentThumbnail = currentThumbnail.rescaled (w, h);
             }
         }
     }
@@ -103,12 +103,12 @@ void ImagePreviewComponent::timerCallback()
 
 void ImagePreviewComponent::paint (Graphics& g)
 {
-    if (currentThumbnail != 0)
+    if (currentThumbnail.isValid())
     {
         g.setFont (13.0f);
 
-        int w = currentThumbnail->getWidth();
-        int h = currentThumbnail->getHeight();
+        int w = currentThumbnail.getWidth();
+        int h = currentThumbnail.getHeight();
         getThumbSize (w, h);
 
         const int numLines = 4;

@@ -97,7 +97,7 @@ public:
                                 the mouse (anywhere)
     */
     void show (const String& title,
-               Image* backgroundImage,
+               const Image& backgroundImage,
                int minimumTimeToDisplayFor,
                bool useDropShadow,
                bool removeOnMouseClick = true);
@@ -141,7 +141,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Image* backgroundImage;
+    Image backgroundImage;
     Time earliestTimeToDelete;
     int originalClickCounter;
 

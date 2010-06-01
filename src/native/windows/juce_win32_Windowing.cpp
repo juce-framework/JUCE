@@ -140,7 +140,7 @@ const int KeyPress::rewindKey               = 0x30003;
 
 
 //==============================================================================
-class WindowsBitmapImage  : public Image
+class WindowsBitmapImage  : public Image::SharedImage
 {
 public:
     //==============================================================================
@@ -150,13 +150,13 @@ public:
     unsigned char* bitmapData;
 
     //==============================================================================
-    WindowsBitmapImage (const PixelFormat format_,
+    WindowsBitmapImage (const Image::PixelFormat format_,
                         const int w, const int h, const bool clearImage)
-        : Image (format_, w, h)
+        : Image::SharedImage (format_, w, h)
     {
-        jassert (format_ == RGB || format_ == ARGB);
+        jassert (format_ == Image::RGB || format_ == Image::ARGB);
 
-        pixelStride = (format_ == RGB) ? 3 : 4;
+        pixelStride = (format_ == Image::RGB) ? 3 : 4;
 
         zerostruct (bitmapInfo);
         bitmapInfo.bV4Size = sizeof (BITMAPV4HEADER);
@@ -166,7 +166,7 @@ public:
         bitmapInfo.bV4CSType = 1;
         bitmapInfo.bV4BitCount = (unsigned short) (pixelStride * 8);
 
-        if (format_ == ARGB)
+        if (format_ == Image::ARGB)
         {
             bitmapInfo.bV4AlphaMask        = 0xff000000;
             bitmapInfo.bV4RedMask          = 0xff0000;
@@ -195,7 +195,7 @@ public:
 
         SelectObject (hdc, hBitmap);
 
-        if (format_ == ARGB && clearImage)
+        if (format_ == Image::ARGB && clearImage)
             zeromem (bitmapData, abs (h * lineStride));
 
         imageData = bitmapData - (lineStride * (h - 1));
@@ -205,6 +205,23 @@ public:
     {
         DeleteDC (hdc);
         DeleteObject (hBitmap);
+    }
+
+    Image::ImageType getType() const    { return Image::NativeImage; }
+
+    LowLevelGraphicsContext* createLowLevelContext()
+    {
+        return new LowLevelGraphicsSoftwareRenderer (Image (this));
+    }
+
+    SharedImage* clone()
+    {
+        WindowsBitmapImage* im = new WindowsBitmapImage (format, width, height, false);
+
+        for (int i = 0; i < height; ++i)
+            memcpy (im->imageData + i * lineStride, imageData + i * lineStride, lineStride);
+
+        return im;
     }
 
     void blitToWindow (HWND hwnd, HDC dc, const bool transparent,
@@ -295,14 +312,11 @@ public:
                 }
             }
 
-            const int w = getWidth();
-            const int h = getHeight();
-
             if (hdd == 0)
             {
                 StretchDIBits (dc,
-                               x, y, w, h,
-                               0, 0, w, h,
+                               x, y, width, height,
+                               0, 0, width, height,
                                bitmapData, (const BITMAPINFO*) &bitmapInfo,
                                DIB_RGB_COLORS, SRCCOPY);
             }
@@ -310,7 +324,7 @@ public:
             {
                 DrawDibDraw (hdd, dc, x, y, -1, -1,
                              (BITMAPINFOHEADER*) &bitmapInfo, bitmapData,
-                             0, 0, w, h, 0);
+                             0, 0, width, height, 0);
             }
 
             if (! maskedRegion.isEmpty())
@@ -401,7 +415,7 @@ public:
 
     ~Win32ComponentPeer()
     {
-        setTaskBarIcon (0);
+        setTaskBarIcon (Image());
         deleteAndZero (shadower);
 
         // do this before the next bit to avoid messages arriving for this window
@@ -728,11 +742,11 @@ public:
     }
 
     //==============================================================================
-    void setTaskBarIcon (const Image* const image)
+    void setTaskBarIcon (const Image& image)
     {
-        if (image != 0)
+        if (image.isValid())
         {
-            HICON hicon = createHICONFromImage (*image, TRUE, 0, 0);
+            HICON hicon = createHICONFromImage (image, TRUE, 0, 0);
 
             if (taskBarIcon == 0)
             {
@@ -848,12 +862,12 @@ private:
         ~TemporaryImage() {}
 
         //==============================================================================
-        WindowsBitmapImage* getImage (const bool transparent, const int w, const int h) throw()
+        const Image& getImage (const bool transparent, const int w, const int h)
         {
             const Image::PixelFormat format = transparent ? Image::ARGB : Image::RGB;
 
-            if (image == 0 || image->getWidth() < w || image->getHeight() < h || image->getFormat() != format)
-                image = new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false);
+            if ((! image.isValid()) || image.getWidth() < w || image.getHeight() < h || image.getFormat() != format)
+                image = Image (new WindowsBitmapImage (format, (w + 31) & ~31, (h + 31) & ~31, false));
 
             startTimer (3000);
             return image;
@@ -863,11 +877,11 @@ private:
         void timerCallback()
         {
             stopTimer();
-            image = 0;
+            image = Image();
         }
 
     private:
-        ScopedPointer <WindowsBitmapImage> image;
+        Image image;
 
         TemporaryImage (const TemporaryImage&);
         TemporaryImage& operator= (const TemporaryImage&);
@@ -1118,7 +1132,7 @@ private:
         {
             clearMaskedRegion();
 
-            WindowsBitmapImage* const offscreenImage = offscreenImageGenerator.getImage (transparent, w, h);
+            Image offscreenImage (offscreenImageGenerator.getImage (transparent, w, h));
 
             RectangleList contextClip;
             const Rectangle<int> clipBounds (0, 0, w, h);
@@ -1179,7 +1193,7 @@ private:
                 RectangleList::Iterator i (contextClip);
 
                 while (i.next())
-                    offscreenImage->clear (*i.getRectangle());
+                    offscreenImage.clear (*i.getRectangle());
             }
 
             // if the component's not opaque, this won't draw properly unless the platform can support this
@@ -1187,11 +1201,12 @@ private:
 
             updateCurrentModifiers();
 
-            LowLevelGraphicsSoftwareRenderer context (*offscreenImage, -x, -y, contextClip);
+            LowLevelGraphicsSoftwareRenderer context (offscreenImage, -x, -y, contextClip);
             handlePaint (context);
 
             if (! dontRepaint)
-                offscreenImage->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion);
+                static_cast <WindowsBitmapImage*> (offscreenImage.getSharedImage())
+                    ->blitToWindow (hwnd, dc, transparent, x, y, maskedRegion);
         }
 
         DeleteObject (rgn);
@@ -2118,7 +2133,7 @@ void SystemTrayIconComponent::setIconImage (const Image& newImage)
     Win32ComponentPeer* const wp = dynamic_cast <Win32ComponentPeer*> (getPeer());
 
     if (wp != 0)
-        wp->setTaskBarIcon (&newImage);
+        wp->setTaskBarIcon (newImage);
 }
 
 void SystemTrayIconComponent::setIconTooltip (const String& tooltip)
@@ -2200,9 +2215,9 @@ void Desktop::setMousePosition (const Point<int>& newPosition)
 }
 
 //==============================================================================
-Image* Image::createNativeImage (const PixelFormat format, const int imageWidth, const int imageHeight, const bool clearImage)
+Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)
 {
-    return new Image (format, imageWidth, imageHeight, clearImage);
+    return createSoftwareImage (format, width, height, clearImage);
 }
 
 //==============================================================================
@@ -2323,9 +2338,9 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 }
 
 //==============================================================================
-static Image* createImageFromHBITMAP (HBITMAP bitmap) throw()
+static const Image createImageFromHBITMAP (HBITMAP bitmap) throw()
 {
-    Image* im = 0;
+    Image im;
 
     if (bitmap != 0)
     {
@@ -2340,7 +2355,8 @@ static Image* createImageFromHBITMAP (HBITMAP bitmap) throw()
 
             SelectObject (dc, bitmap);
 
-            im = new Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+            im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+            Image::BitmapData imageData (im, 0, 0, bm.bmWidth, bm.bmHeight, true);
 
             for (int y = bm.bmHeight; --y >= 0;)
             {
@@ -2348,9 +2364,9 @@ static Image* createImageFromHBITMAP (HBITMAP bitmap) throw()
                 {
                     COLORREF col = GetPixel (dc, x, y);
 
-                    im->setPixelAt (x, y, Colour ((uint8) GetRValue (col),
-                                                  (uint8) GetGValue (col),
-                                                  (uint8) GetBValue (col)));
+                    imageData.setPixelColour (x, y, Colour ((uint8) GetRValue (col),
+                                                            (uint8) GetGValue (col),
+                                                            (uint8) GetBValue (col)));
                 }
             }
 
@@ -2361,44 +2377,43 @@ static Image* createImageFromHBITMAP (HBITMAP bitmap) throw()
     return im;
 }
 
-static Image* createImageFromHICON (HICON icon) throw()
+static const Image createImageFromHICON (HICON icon) throw()
 {
     ICONINFO info;
 
     if (GetIconInfo (icon, &info))
     {
-        ScopedPointer<Image> mask (createImageFromHBITMAP (info.hbmMask));
-        if (mask == 0)
-            return 0;
+        Image mask (createImageFromHBITMAP (info.hbmMask));
+        Image image (createImageFromHBITMAP (info.hbmColor));
 
-        ScopedPointer<Image> image (createImageFromHBITMAP (info.hbmColor));
-        if (image == 0)
-            return mask.release();
-
-        for (int y = image->getHeight(); --y >= 0;)
+        if (mask.isValid() && image.isValid())
         {
-            for (int x = image->getWidth(); --x >= 0;)
+            for (int y = image.getHeight(); --y >= 0;)
             {
-                const float brightness = mask->getPixelAt (x, y).getBrightness();
+                for (int x = image.getWidth(); --x >= 0;)
+                {
+                    const float brightness = mask.getPixelAt (x, y).getBrightness();
 
-                if (brightness > 0.0f)
-                    image->multiplyAlphaAt (x, y, 1.0f - brightness);
+                    if (brightness > 0.0f)
+                        image.multiplyAlphaAt (x, y, 1.0f - brightness);
+                }
             }
-        }
 
-        return image.release();
+            return image;
+        }
     }
 
-    return 0;
+    return Image();
 }
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw()
 {
-    WindowsBitmapImage bitmap (Image::ARGB, image.getWidth(), image.getHeight(), true);
+    WindowsBitmapImage* nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
+    Image bitmap (nativeBitmap);
 
     {
         Graphics g (bitmap);
-        g.drawImageAt (&image, 0, 0);
+        g.drawImageAt (image, 0, 0);
     }
 
     HBITMAP mask = CreateBitmap (image.getWidth(), image.getHeight(), 1, 1, 0);
@@ -2408,16 +2423,16 @@ static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int ho
     info.xHotspot = hotspotX;
     info.yHotspot = hotspotY;
     info.hbmMask = mask;
-    info.hbmColor = bitmap.hBitmap;
+    info.hbmColor = nativeBitmap->hBitmap;
 
     HICON hi = CreateIconIndirect (&info);
     DeleteObject (mask);
     return hi;
 }
 
-Image* juce_createIconForFile (const File& file)
+const Image juce_createIconForFile (const File& file)
 {
-    Image* image = 0;
+    Image image;
 
     WCHAR filename [1024];
     file.getFullPathName().copyToUnicode (filename, 1023);
@@ -2441,18 +2456,17 @@ void* MouseCursor::createMouseCursorFromImage (const Image& image, int hotspotX,
     const int maxW = GetSystemMetrics (SM_CXCURSOR);
     const int maxH = GetSystemMetrics (SM_CYCURSOR);
 
-    const Image* im = &image;
-    ScopedPointer<Image> newIm;
+    Image im (image);
 
-    if (image.getWidth() > maxW || image.getHeight() > maxH)
+    if (im.getWidth() > maxW || im.getHeight() > maxH)
     {
-        im = newIm = image.createCopy (maxW, maxH);
+        im = im.rescaled (maxW, maxH);
 
         hotspotX = (hotspotX * maxW) / image.getWidth();
         hotspotY = (hotspotY * maxH) / image.getHeight();
     }
 
-    return createHICONFromImage (*im, FALSE, hotspotX, hotspotY);
+    return createHICONFromImage (im, FALSE, hotspotX, hotspotY);
 }
 
 void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool isStandard)
@@ -2502,8 +2516,7 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39, 132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                const ScopedPointer <Image> image (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)));
-                dragHandCursor = createMouseCursorFromImage (*image, 8, 7);
+                dragHandCursor = createMouseCursorFromImage (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), 8, 7);
             }
 
             return dragHandCursor;

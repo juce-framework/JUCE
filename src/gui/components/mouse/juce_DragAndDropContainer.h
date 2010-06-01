@@ -78,10 +78,8 @@ public:
                                     dropped-onto so they can decide if they want to handle it or
                                     not
         @param sourceComponent      the component that is being dragged
-        @param dragImage            the image to drag around underneath the mouse. If this is
-                                    zero, a snapshot of the sourceComponent will be used instead. An
-                                    image passed-in will be deleted by this object when no longer
-                                    needed.
+        @param dragImage            the image to drag around underneath the mouse. If this is a null image,
+                                    a snapshot of the sourceComponent will be used instead.
         @param allowDraggingToOtherJuceWindows   if true, the dragged component will appear as a desktop
                                     window, and can be dragged to DragAndDropTargets that are the
                                     children of components other than this one.
@@ -92,7 +90,7 @@ public:
     */
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
-                        Image* dragImage = 0,
+                        const Image& dragImage = Image(),
                         bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = 0);
 

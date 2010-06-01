@@ -294,8 +294,8 @@ public:
 
     //==============================================================================
     // these return an image from the ImageCache, so use ImageCache::release() to free it
-    virtual Image* getDefaultFolderImage();
-    virtual Image* getDefaultDocumentFileImage();
+    virtual const Image getDefaultFolderImage();
+    virtual const Image getDefaultDocumentFileImage();
 
     virtual void createFileChooserHeaderText (const String& title,
                                               const String& instructions,

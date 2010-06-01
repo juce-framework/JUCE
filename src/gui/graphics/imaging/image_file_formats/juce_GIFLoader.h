@@ -45,10 +45,10 @@ public:
     GIFLoader (InputStream& in);
     ~GIFLoader();
 
-    Image* getImage() const             { return image; }
+    const Image& getImage() const             { return image; }
 
 private:
-    Image* image;
+    Image image;
     InputStream& input;
     uint8 buffer [300];
     uint8 palette [256][4];

@@ -48,7 +48,7 @@ public:
 private:
     StringArray facts;
     File file;
-    ScopedPointer <Image> image;
+    Image image;
 
     void tryToLoadImage (InputStream* input);
 };

@@ -55,6 +55,16 @@ RSAKey::~RSAKey()
 {
 }
 
+bool RSAKey::operator== (const RSAKey& other) const throw()
+{
+    return part1 == other.part1 && part2 == other.part2;
+}
+
+bool RSAKey::operator!= (const RSAKey& other) const throw()
+{
+    return ! operator== (other);
+}
+
 const String RSAKey::toString() const
 {
     return part1.toString (16) + "," + part2.toString (16);

@@ -61,8 +61,8 @@ void ItemPreviewComponent::tryToLoadImage (InputStream* in)
 
         image = ImageFileFormat::loadFrom (*input);
 
-        if (image != 0)
-            facts.add (String (image->getWidth()) + " x " + String (image->getHeight()) + formatName);
+        if (image.isValid())
+            facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
 
         const int64 totalSize = input->getTotalLength();
 
@@ -73,19 +73,14 @@ void ItemPreviewComponent::tryToLoadImage (InputStream* in)
 
 void ItemPreviewComponent::paint (Graphics& g)
 {
-    if (image != 0)
-    {
-        g.drawImageWithin (image,
-                           2, 22, getWidth() - 4, getHeight() - 24,
-                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                           false);
-    }
+    g.drawImageWithin (image, 2, 22, getWidth() - 4, getHeight() - 24,
+                       RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
+                       false);
 
     g.setFont (15.0f, Font::bold);
     g.setColour (Colours::white);
     g.drawMultiLineText (facts.joinIntoString ("\n"),
                          10, 15, getWidth() - 16);
-
 }
 
 void ItemPreviewComponent::resized()

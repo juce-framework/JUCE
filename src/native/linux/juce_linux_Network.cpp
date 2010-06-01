@@ -454,7 +454,7 @@ int64 juce_getInternetFileContentLength (void* handle)
     return -1;
 }
 
-bool juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
+void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
 {
     JUCE_HTTPSocketStream* const s = static_cast <JUCE_HTTPSocketStream*> (handle);
 

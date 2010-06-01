@@ -72,7 +72,7 @@ public:
 
     const Rectangle<int> getComponentArea() const;
 
-    Image* createComponentLayerSnapshot() const;
+    const Image createComponentLayerSnapshot() const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

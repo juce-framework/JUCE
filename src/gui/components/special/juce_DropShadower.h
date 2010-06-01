@@ -86,13 +86,13 @@ private:
     Component* owner;
     int numShadows;
     Component* shadowWindows[4];
-    Image* shadowImageSections[12];
+    Image shadowImageSections[12];
     const int shadowEdge, xOffset, yOffset;
     const float alpha, blurRadius;
     bool inDestructor, reentrant;
 
     void updateShadows();
-    void setShadowImage (Image* const src,
+    void setShadowImage (const Image& src,
                          const int num,
                          const int w, const int h,
                          const int sx, const int sy);

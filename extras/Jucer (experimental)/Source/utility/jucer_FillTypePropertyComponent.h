@@ -130,7 +130,7 @@ public:
         else if (b == &imageButton)
         {
             if (! currentFill.isTiledImage())
-                setFillType (FillType (*StoredSettings::getInstance()->getFallbackImage(),
+                setFillType (FillType (StoredSettings::getInstance()->getFallbackImage(),
                                        AffineTransform::identity));
         }
     }

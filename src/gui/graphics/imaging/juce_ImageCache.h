@@ -28,9 +28,6 @@
 
 #include "juce_Image.h"
 #include "../../../io/files/juce_File.h"
-#include "../../../events/juce_Timer.h"
-#include "../../../utilities/juce_DeletedAtShutdown.h"
-#include "../../../containers/juce_OwnedArray.h"
 
 
 //==============================================================================
@@ -48,8 +45,7 @@
 
     @see Image, ImageFileFormat
 */
-class JUCE_API  ImageCache  : private DeletedAtShutdown,
-                              private Timer
+class JUCE_API  ImageCache
 {
 public:
     //==============================================================================
@@ -59,17 +55,15 @@ public:
         that image will be returned. Otherwise, this method will try to load the
         file, add it to the cache, and return it.
 
-        It's very important not to delete the image that is returned - instead use
-        the ImageCache::release() method.
-
-        Also, remember that the image returned is shared, so drawing into it might
-        affect other things that are using it!
+        Remember that the image returned is shared, so drawing into it might
+        affect other things that are using it! If you want to draw on it, first
+        call Image::duplicateIfShared()
 
         @param file     the file to try to load
         @returns        the image, or null if it there was an error loading it
-        @see release, getFromMemory, getFromCache, ImageFileFormat::loadFrom
+        @see getFromMemory, getFromCache, ImageFileFormat::loadFrom
     */
-    static Image* getFromFile (const File& file);
+    static const Image getFromFile (const File& file);
 
     /** Loads an image from an in-memory image file, (or just returns the image if it's already cached).
 
@@ -77,79 +71,41 @@ public:
         that image will be returned. Otherwise, this method will try to load the
         file, add it to the cache, and return it.
 
-        It's very important not to delete the image that is returned - instead use
-        the ImageCache::release() method.
-
-        Also, remember that the image returned is shared, so drawing into it might
-        affect other things that are using it!
+        Remember that the image returned is shared, so drawing into it might
+        affect other things that are using it! If you want to draw on it, first
+        call Image::duplicateIfShared()
 
         @param imageData    the block of memory containing the image data
         @param dataSize     the data size in bytes
-        @returns            the image, or null if it there was an error loading it
-        @see release, getFromMemory, getFromCache, ImageFileFormat::loadFrom
+        @returns            the image, or an invalid image if it there was an error loading it
+        @see getFromMemory, getFromCache, ImageFileFormat::loadFrom
     */
-    static Image* getFromMemory (const void* imageData, int dataSize);
-
-    /** Releases an image that was previously created by the ImageCache.
-
-        If an image has been returned by the getFromFile() or getFromMemory() methods,
-        it mustn't be deleted directly, but should be released with this method
-        instead.
-
-        @see getFromFile, getFromMemory
-    */
-    static void release (Image* imageToRelease);
-
-    /** Releases an image if it's in the cache, or deletes it if it isn't cached.
-
-        This is a handy function to use if you want to delete an image but are afraid that
-        it might be cached.
-    */
-    static void releaseOrDelete (Image* imageToRelease);
-
-    /** Checks whether an image is in the cache or not.
-
-        @returns true if the image is currently in the cache
-    */
-    static bool isImageInCache (Image* imageToLookFor);
-
-    /** Increments the reference-count for a cached image.
-
-        If the image isn't in the cache, this method won't do anything.
-    */
-    static void incReferenceCount (Image* image);
+    static const Image getFromMemory (const void* imageData, int dataSize);
 
     //==============================================================================
     /** Checks the cache for an image with a particular hashcode.
 
         If there's an image in the cache with this hashcode, it will be returned,
-        otherwise it will return zero.
+        otherwise it will return an invalid image.
 
-        If an image is returned, it must be released with the release() method
-        when no longer needed, to maintain the correct reference counts.
-
-        @param hashCode the hash code that would have been associated with the
-                        image by addImageToCache()
+        @param hashCode the hash code that was associated with the image by addImageToCache()
         @see addImageToCache
     */
-    static Image* getFromHashCode (int64 hashCode);
+    static const Image getFromHashCode (int64 hashCode);
 
     /** Adds an image to the cache with a user-defined hash-code.
 
-        After calling this, responsibilty for deleting the image will be taken
-        by the ImageCache.
-
-        The image will be initially be given a reference count of 1, so call
-        the release() method to delete it.
+        The image passed-in will be referenced (not copied) by the cache, so it's probably
+        a good idea not to draw into it after adding it, otherwise this will affect all
+        instances of it that may be in use.
 
         @param image    the image to add
         @param hashCode the hash-code to associate with it
         @see getFromHashCode
     */
-    static void addImageToCache (Image* image, int64 hashCode);
+    static void addImageToCache (const Image& image, int64 hashCode);
 
     /** Changes the amount of time before an unused image will be removed from the cache.
-
         By default this is about 5 seconds.
     */
     static void setCacheTimeout (int millisecs);
@@ -159,21 +115,12 @@ public:
 
 private:
     //==============================================================================
-    CriticalSection lock;
-    struct Item;
-    friend class ScopedPointer<Item>;
-    friend class OwnedArray<Item>;
-    OwnedArray<Item> images;
-
-    static ImageCache* instance;
-    static int cacheTimeout;
+    class Pimpl;
 
     ImageCache();
     ImageCache (const ImageCache&);
     ImageCache& operator= (const ImageCache&);
     ~ImageCache();
-
-    void timerCallback();
 };
 
 #endif   // __JUCE_IMAGECACHE_JUCEHEADER__

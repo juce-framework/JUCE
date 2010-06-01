@@ -53,8 +53,6 @@ PaintRoutineEditor::~PaintRoutineEditor()
 
     removeChildComponent (&lassoComp);
     deleteAllChildren();
-
-    delete componentOverlay;
 }
 
 void PaintRoutineEditor::removeAllElementComps()
@@ -99,10 +97,10 @@ void PaintRoutineEditor::paint (Graphics& g)
 
 void PaintRoutineEditor::paintOverChildren (Graphics& g)
 {
-    if (componentOverlay == 0 && document.getComponentOverlayOpacity() > 0.0f)
+    if (componentOverlay.isNull() && document.getComponentOverlayOpacity() > 0.0f)
         updateComponentOverlay();
 
-    if (componentOverlay != 0)
+    if (componentOverlay.isValid())
     {
         const Rectangle<int> clip (getComponentArea());
         g.drawImageAt (componentOverlay, clip.getX(), clip.getY());
@@ -113,7 +111,7 @@ void PaintRoutineEditor::resized()
 {
     if (getWidth() > 0 && getHeight() > 0)
     {
-        deleteAndZero (componentOverlay);
+        componentOverlay = Image();
         refreshAllElements();
     }
 }
@@ -133,11 +131,10 @@ void PaintRoutineEditor::updateChildBounds()
 
 void PaintRoutineEditor::updateComponentOverlay()
 {
-    if (componentOverlay != 0)
+    if (componentOverlay.isValid())
         repaint();
 
-    deleteAndZero (componentOverlay);
-
+    componentOverlay = Image();
     componentOverlayOpacity = document.getComponentOverlayOpacity();
 
     if (componentOverlayOpacity > 0.0f)
@@ -145,9 +142,9 @@ void PaintRoutineEditor::updateComponentOverlay()
         if (documentHolder != 0)
             componentOverlay = documentHolder->createComponentLayerSnapshot();
 
-        if (componentOverlay != 0)
+        if (componentOverlay.isValid())
         {
-            componentOverlay->multiplyAllAlphas (componentOverlayOpacity);
+            componentOverlay.multiplyAllAlphas (componentOverlayOpacity);
             repaint();
         }
     }
@@ -165,7 +162,7 @@ void PaintRoutineEditor::visibilityChanged()
     else
     {
         document.removeChangeListener (this);
-        deleteAndZero (componentOverlay);
+        componentOverlay = Image();
     }
 }
 
@@ -210,7 +207,7 @@ void PaintRoutineEditor::refreshAllElements()
 
     if (componentOverlayOpacity != document.getComponentOverlayOpacity())
     {
-        deleteAndZero (componentOverlay);
+        componentOverlay = Image();
         componentOverlayOpacity = document.getComponentOverlayOpacity();
         repaint();
     }

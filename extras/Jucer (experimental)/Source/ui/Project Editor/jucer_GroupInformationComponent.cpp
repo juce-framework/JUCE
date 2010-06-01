@@ -97,16 +97,9 @@ public:
     void paint (Graphics& g)
     {
         int x = getHeight() + 6;
-        Image* icon = item.getIcon();
-
-        if (icon != 0)
-        {
-            g.drawImageWithin (icon, 2, 2, x - 4, getHeight() - 4,
-                               RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
-                               false);
-
-            ImageCache::release (icon);
-        }
+        g.drawImageWithin (item.getIcon(), 2, 2, x - 4, getHeight() - 4,
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize,
+                           false);
 
         g.setColour (Colours::black);
         g.setFont (getHeight() * 0.6f);

@@ -111,7 +111,6 @@ Component::~Component()
     for (int i = childComponentList_.size(); --i >= 0;)
         childComponentList_.getUnchecked(i)->parentComponent_ = 0;
 
-    delete bufferedImage_;
     delete mouseListeners_;
     delete keyListeners_;
 }
@@ -258,7 +257,6 @@ public:
 
     ~FadeOutProxyComponent()
     {
-        delete image;
     }
 
     void paint (Graphics& g)
@@ -267,7 +265,7 @@ public:
 
         g.drawImage (image,
                      0, 0, getWidth(), getHeight(),
-                     0, 0, image->getWidth(), image->getHeight());
+                     0, 0, image.getWidth(), image.getHeight());
     }
 
     void timerCallback()
@@ -290,8 +288,8 @@ public:
                 centreY += yChangePerMs * msPassed;
                 scale += scaleChangePerMs * msPassed;
 
-                const int w = roundToInt (image->getWidth() * scale);
-                const int h = roundToInt (image->getHeight() * scale);
+                const int w = roundToInt (image.getWidth() * scale);
+                const int h = roundToInt (image.getHeight() * scale);
 
                 setBounds (roundToInt (centreX) - w / 2,
                            roundToInt (centreY) - h / 2,
@@ -309,7 +307,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Image* image;
+    Image image;
     uint32 lastTime;
     float alpha, alphaChangePerMs;
     float centreX, xChangePerMs;
@@ -511,7 +509,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
 {
     if (shouldBeBuffered != flags.bufferToImageFlag)
     {
-        deleteAndZero (bufferedImage_);
+        bufferedImage_ = Image();
         flags.bufferToImageFlag = shouldBeBuffered;
     }
 }
@@ -1549,7 +1547,7 @@ void Component::repaint()
 void Component::repaint (const int x, const int y,
                          const int w, const int h)
 {
-    deleteAndZero (bufferedImage_);
+    bufferedImage_ = Image();
 
     if (flags.visibleFlag)
         internalRepaint (x, y, w, h);
@@ -1619,12 +1617,12 @@ void Component::renderComponent (Graphics& g)
     {
         if (flags.bufferToImageFlag)
         {
-            if (bufferedImage_ == 0)
+            if (bufferedImage_.isNull())
             {
-                bufferedImage_ = Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                           getWidth(), getHeight(), ! flags.opaqueFlag);
+                bufferedImage_ = Image (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                                        getWidth(), getHeight(), ! flags.opaqueFlag, Image::NativeImage);
 
-                Graphics imG (*bufferedImage_);
+                Graphics imG (bufferedImage_);
                 paint (imG);
             }
 
@@ -1684,15 +1682,15 @@ void Component::paintEntireComponent (Graphics& g)
 
     if (effect_ != 0)
     {
-        ScopedPointer<Image> effectImage (Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                                    getWidth(), getHeight(),
-                                                                    ! flags.opaqueFlag));
+        Image effectImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                           getWidth(), getHeight(),
+                           ! flags.opaqueFlag, Image::NativeImage);
         {
-            Graphics g2 (*effectImage);
+            Graphics g2 (effectImage);
             renderComponent (g2);
         }
 
-        effect_->applyEffect (*effectImage, g);
+        effect_->applyEffect (effectImage, g);
     }
     else
     {
@@ -1705,24 +1703,24 @@ void Component::paintEntireComponent (Graphics& g)
 }
 
 //==============================================================================
-Image* Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                           const bool clipImageToComponentBounds)
+const Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
+                                                const bool clipImageToComponentBounds)
 {
     Rectangle<int> r (areaToGrab);
 
     if (clipImageToComponentBounds)
         r = r.getIntersection (getLocalBounds());
 
-    ScopedPointer<Image> componentImage (Image::createNativeImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                                                                   jmax (1, r.getWidth()),
-                                                                   jmax (1, r.getHeight()),
-                                                                   true));
+    Image componentImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
+                          jmax (1, r.getWidth()),
+                          jmax (1, r.getHeight()),
+                          true);
 
-    Graphics imageContext (*componentImage);
+    Graphics imageContext (componentImage);
     imageContext.setOrigin (-r.getX(), -r.getY());
     paintEntireComponent (imageContext);
 
-    return componentImage.release();
+    return componentImage;
 }
 
 void Component::setComponentEffect (ImageEffectFilter* const effect)

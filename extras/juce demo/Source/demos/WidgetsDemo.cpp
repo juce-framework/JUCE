@@ -512,7 +512,7 @@ public:
         over.setStrokeThickness (5.0f);
 
         DrawableImage down;
-        down.setImage (ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize), true);
+        down.setImage (ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize));
         down.setOverlayColour (Colours::black.withAlpha (0.3f));
 
         //==============================================================================
@@ -567,10 +567,7 @@ public:
         ImageButton* imageButton = new ImageButton ("imagebutton");
         addAndMakeVisible (imageButton);
 
-        Image* juceImage = ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize);
-        ImageCache::incReferenceCount (juceImage);
-        ImageCache::incReferenceCount (juceImage);
-
+        Image juceImage = ImageCache::getFromMemory (BinaryData::juce_png, BinaryData::juce_pngSize);
         imageButton->setImages (true, true, true,
                                 juceImage, 0.7f, Colours::transparentBlack,
                                 juceImage, 1.0f, Colours::transparentBlack,

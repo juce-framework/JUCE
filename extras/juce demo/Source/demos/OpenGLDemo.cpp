@@ -56,7 +56,7 @@ class DemoOpenGLCanvas  : public OpenGLComponent,
                           public Timer
 {
     float rotation, delta;
-    Image* image;
+    Image image;
 
 public:
     DemoOpenGLCanvas()
@@ -69,12 +69,12 @@ public:
         rotation = 0.0f;
         delta = 1.0f;
 
-        Image* im = ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize);
-        image = new Image (Image::RGB, 512, 512, true);
-        Graphics g (*image);
+        image = Image (Image::RGB, 512, 512, true, Image::SoftwareImage);
+        Graphics g (image);
+
         g.fillAll (Colours::white);
-        g.drawImage (im, 0, 0, 512, 512, 0, 0, im->getWidth(), im->getHeight());
-        delete im;
+        g.drawImageWithin (ImageFileFormat::loadFrom (BinaryData::juce_png, BinaryData::juce_pngSize),
+                           0, 0, 512, 512, RectanglePlacement::stretchToFit);
 
         startTimer (20);
 
@@ -107,7 +107,6 @@ public:
 
     ~DemoOpenGLCanvas()
     {
-        delete image;
     }
 
     // when the component creates a new internal context, this is called, and
@@ -133,9 +132,9 @@ public:
 
         glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
-        Image::BitmapData srcData (*image, 0, 0, image->getWidth(), image->getHeight());
+        Image::BitmapData srcData (image, 0, 0, image.getWidth(), image.getHeight());
 
-        glTexImage2D (GL_TEXTURE_2D, 0, 4, image->getWidth(), image->getHeight(),
+        glTexImage2D (GL_TEXTURE_2D, 0, 4, image.getWidth(), image.getHeight(),
                       0, GL_RGB,
                       GL_UNSIGNED_BYTE, srcData.data);
 

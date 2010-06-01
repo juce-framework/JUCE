@@ -54,7 +54,7 @@ public:
           const String& text_,
           const bool active_,
           const bool isTicked_,
-          const Image* im,
+          const Image& im,
           const Colour& textColour_,
           const bool usesColour_,
           PopupMenuCustomComponent* const customComp_,
@@ -62,14 +62,11 @@ public:
           ApplicationCommandManager* const commandManager_)
       : itemId (itemId_), text (text_), textColour (textColour_),
         active (active_), isSeparator (false), isTicked (isTicked_),
-        usesColour (usesColour_), customComp (customComp_),
+        usesColour (usesColour_), image (im), customComp (customComp_),
         commandManager (commandManager_)
     {
         if (subMenu_ != 0)
             subMenu = new PopupMenu (*subMenu_);
-
-        if (im != 0)
-            image = im->createCopy();
 
         if (commandManager_ != 0 && itemId_ != 0)
         {
@@ -106,14 +103,12 @@ public:
           isSeparator (other.isSeparator),
           isTicked (other.isTicked),
           usesColour (other.usesColour),
+          image (other.image),
           customComp (other.customComp),
           commandManager (other.commandManager)
     {
         if (other.subMenu != 0)
             subMenu = new PopupMenu (*(other.subMenu));
-
-        if (other.image != 0)
-            image = other.image->createCopy();
     }
 
     ~Item()
@@ -136,7 +131,7 @@ public:
     String text;
     const Colour textColour;
     const bool active, isSeparator, isTicked, usesColour;
-    ScopedPointer <Image> image;
+    Image image;
     ReferenceCountedObjectPtr <PopupMenuCustomComponent> customComp;
     ScopedPointer <PopupMenu> subMenu;
     ApplicationCommandManager* const commandManager;
@@ -207,7 +202,7 @@ public:
                                     itemInfo.isTicked,
                                     itemInfo.subMenu != 0,
                                     mainText, endText,
-                                    itemInfo.image,
+                                    itemInfo.image.isValid() ? &itemInfo.image : 0,
                                     itemInfo.usesColour ? &(itemInfo.textColour) : 0);
         }
     }
@@ -1317,7 +1312,7 @@ void PopupMenu::addItem (const int itemResultId,
                          const String& itemText,
                          const bool isActive,
                          const bool isTicked,
-                         const Image* const iconToUse)
+                         const Image& iconToUse)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1325,8 +1320,8 @@ void PopupMenu::addItem (const int itemResultId,
 
     addSeparatorIfPending();
 
-    items.add (new Item (itemResultId, itemText, isActive, isTicked,
-                         iconToUse, Colours::black, false, 0, 0, 0));
+    items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
+                         Colours::black, false, 0, 0, 0));
 }
 
 void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
@@ -1349,7 +1344,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                                       : info.shortName,
                              target != 0 && (info.flags & ApplicationCommandInfo::isDisabled) == 0,
                              (info.flags & ApplicationCommandInfo::isTicked) != 0,
-                             0,
+                             Image(),
                              Colours::black,
                              false,
                              0, 0,
@@ -1362,7 +1357,7 @@ void PopupMenu::addColouredItem (const int itemResultId,
                                  const Colour& itemTextColour,
                                  const bool isActive,
                                  const bool isTicked,
-                                 const Image* const iconToUse)
+                                 const Image& iconToUse)
 {
     jassert (itemResultId != 0);    // 0 is used as a return value to indicate that the user
                                     // didn't pick anything, so you shouldn't use it as the id
@@ -1370,8 +1365,8 @@ void PopupMenu::addColouredItem (const int itemResultId,
 
     addSeparatorIfPending();
 
-    items.add (new Item (itemResultId, itemText, isActive, isTicked,
-                         iconToUse, itemTextColour, true, 0, 0, 0));
+    items.add (new Item (itemResultId, itemText, isActive, isTicked, iconToUse,
+                         itemTextColour, true, 0, 0, 0));
 }
 
 //==============================================================================
@@ -1384,7 +1379,7 @@ void PopupMenu::addCustomItem (const int itemResultId,
 
     addSeparatorIfPending();
 
-    items.add (new Item (itemResultId, String::empty, true, false, 0,
+    items.add (new Item (itemResultId, String::empty, true, false, Image(),
                          Colours::black, false, customComponent, 0, 0));
 }
 
@@ -1439,7 +1434,7 @@ void PopupMenu::addCustomItem (const int itemResultId,
 void PopupMenu::addSubMenu (const String& subMenuName,
                             const PopupMenu& subMenu,
                             const bool isActive,
-                            Image* const iconToUse,
+                            const Image& iconToUse,
                             const bool isTicked)
 {
     addSeparatorIfPending();

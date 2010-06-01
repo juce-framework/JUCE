@@ -107,9 +107,9 @@ void DocumentWindow::setName (const String& newName)
     }
 }
 
-void DocumentWindow::setIcon (const Image* imageToUse)
+void DocumentWindow::setIcon (const Image& imageToUse)
 {
-    titleBarIcon = imageToUse != 0 ? imageToUse->createCopy() : 0;
+    titleBarIcon = imageToUse;
     repaintTitleBar();
 }
 
@@ -227,7 +227,7 @@ void DocumentWindow::paint (Graphics& g)
                                                  titleBarArea.getHeight(),
                                                  titleSpaceX1,
                                                  jmax (1, titleSpaceX2 - titleSpaceX1),
-                                                 titleBarIcon,
+                                                 titleBarIcon.isValid() ? &titleBarIcon : 0,
                                                  ! drawTitleTextCentred);
 }
 

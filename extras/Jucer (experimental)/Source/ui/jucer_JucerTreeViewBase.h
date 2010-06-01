@@ -52,7 +52,7 @@ public:
     virtual const String getDisplayName() const = 0;
     virtual void setName (const String& newName) = 0;
     virtual bool isMissing() = 0;
-    virtual Image* getIcon() const = 0;
+    virtual const Image getIcon() const = 0;
 
     virtual void showRenameBox();
 

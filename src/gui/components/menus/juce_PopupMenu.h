@@ -119,7 +119,7 @@ public:
                   const String& itemText,
                   bool isActive = true,
                   bool isTicked = false,
-                  const Image* iconToUse = 0);
+                  const Image& iconToUse = Image());
 
     /** Adds an item that represents one of the commands in a command manager object.
 
@@ -145,7 +145,7 @@ public:
                           const Colour& itemTextColour,
                           bool isActive = true,
                           bool isTicked = false,
-                          const Image* iconToUse = 0);
+                          const Image& iconToUse = Image());
 
     /** Appends a custom menu item.
 
@@ -183,7 +183,7 @@ public:
     void addSubMenu (const String& subMenuName,
                      const PopupMenu& subMenu,
                      bool isActive = true,
-                     Image* iconToUse = 0,
+                     const Image& iconToUse = Image(),
                      bool isTicked = false);
 
     /** Appends a separator to the menu, to help break it up into sections.
@@ -357,7 +357,7 @@ public:
         bool isCustomComponent;
         bool isSectionHeader;
         const Colour* customColour;
-        const Image* customImage;
+        Image customImage;
         ApplicationCommandManager* commandManager;
 
         //==============================================================================

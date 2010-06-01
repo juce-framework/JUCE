@@ -124,7 +124,7 @@ namespace ComponentEditorTreeView
         const String getDisplayName() const         { return getRenamingName(); }
         const String getRenamingName() const        { return componentState [ComponentDocument::memberNameProperty]; }
 
-        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+        const Image getIcon() const                 { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
 
         const String getDragSourceDescription()     { return getDragIdFor (editor); }
 
@@ -179,7 +179,7 @@ namespace ComponentEditorTreeView
 
         const String getDisplayName() const         { return getRenamingName(); }
         const String getRenamingName() const        { return "Components"; }
-        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const Image getIcon() const                 { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
         const String getDragSourceDescription()     { return String::empty; }
 
         bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
@@ -299,7 +299,7 @@ namespace ComponentEditorTreeView
         const String getDisplayName() const         { return getRenamingName(); }
         const String getRenamingName() const        { return markerState [MarkerListBase::getMarkerNameProperty()]; }
 
-        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
+        const Image getIcon() const                 { return LookAndFeel::getDefaultLookAndFeel().getDefaultDocumentFileImage(); }
 
         const String getDragSourceDescription()     { return String::empty; }
 
@@ -354,7 +354,7 @@ namespace ComponentEditorTreeView
 
         const String getDisplayName() const         { return getRenamingName(); }
         const String getRenamingName() const        { return isX ? "Markers (X-axis)" : "Markers (Y-axis)"; }
-        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const Image getIcon() const                 { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
         const String getDragSourceDescription()     { return String::empty; }
 
     private:
@@ -388,7 +388,7 @@ namespace ComponentEditorTreeView
 
         const String getDisplayName() const         { return getRenamingName(); }
         const String getRenamingName() const        { return editor.getDocument().getClassName().toString(); }
-        Image* getIcon() const                      { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
+        const Image getIcon() const                 { return LookAndFeel::getDefaultLookAndFeel().getDefaultFolderImage(); }
         const String getDragSourceDescription()     { return String::empty; }
     };
 }

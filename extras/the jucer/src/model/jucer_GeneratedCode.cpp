@@ -98,16 +98,13 @@ void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const
         initialisers.add (initialiser);
 
         privateMemberDeclarations
-            << "Image* " << imageMemberName << ";\n";
+            << "Image " << imageMemberName << ";\n";
 
         if (resourceName.isNotEmpty())
         {
             constructorCode
                 << imageMemberName << " = ImageCache::getFromMemory ("
                 << resourceName << ", " << resourceName << "Size);\n";
-
-            destructorCode
-                << "ImageCache::release (" << imageMemberName << ");\n";
         }
     }
 }

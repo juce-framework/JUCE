@@ -27,8 +27,8 @@
 #define __JUCE_FILLTYPE_JUCEHEADER__
 
 #include "../colour/juce_ColourGradient.h"
+#include "../imaging/juce_Image.h"
 #include "../../../containers/juce_ScopedPointer.h"
-class Image;
 
 
 //==============================================================================
@@ -72,13 +72,13 @@ public:
     ~FillType() throw();
 
     /** Returns true if this is a solid colour fill, and not a gradient or image. */
-    bool isColour() const throw()           { return gradient == 0 && image == 0; }
+    bool isColour() const throw()           { return gradient == 0 && image.isNull(); }
 
     /** Returns true if this is a gradient fill. */
     bool isGradient() const throw()         { return gradient != 0; }
 
     /** Returns true if this is a tiled image pattern fill. */
-    bool isTiledImage() const throw()       { return image != 0; }
+    bool isTiledImage() const throw()       { return image.isValid(); }
 
     /** Turns this object into a solid colour fill.
         If the object was an image or gradient, those fields will no longer be valid. */
@@ -123,13 +123,11 @@ public:
     */
     ScopedPointer <ColourGradient> gradient;
 
-    /** Returns the image that should be used for tiling.
-        The FillType object just keeps a pointer to this image, it doesn't own it, so you have to
-        be careful to make sure the image doesn't get deleted while it's being used.
+    /** The image that should be used for tiling.
         If an image fill is active, the overall opacity with which it should be applied
         is indicated by the alpha channel of the colour variable.
     */
-    const Image* image;
+    Image image;
 
     /** The transform that should be applied to the image or gradient that's being drawn.
     */

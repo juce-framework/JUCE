@@ -33,6 +33,7 @@
 #include "keyboard/juce_KeyListener.h"
 #include "keyboard/juce_KeyboardFocusTraverser.h"
 #include "../graphics/effects/juce_ImageEffectFilter.h"
+#include "../graphics/imaging/juce_Image.h"
 #include "../graphics/geometry/juce_RectangleList.h"
 #include "../graphics/geometry/juce_BorderSize.h"
 #include "../../events/juce_MessageListener.h"
@@ -867,12 +868,10 @@ public:
         the size of the component, it'll be clipped. If clipImageToComponentBounds is false
         then parts of the component beyond its bounds can be drawn.
 
-        The caller is responsible for deleting the image that is returned.
-
         @see paintEntireComponent
     */
-    Image* createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                    bool clipImageToComponentBounds = true);
+    const Image createComponentSnapshot (const Rectangle<int>& areaToGrab,
+                                         bool clipImageToComponentBounds = true);
 
     /** Draws this component and all its subcomponents onto the specified graphics
         context.
@@ -2016,7 +2015,7 @@ private:
     LookAndFeel* lookAndFeel_;
     MouseCursor cursor_;
     ImageEffectFilter* effect_;
-    Image* bufferedImage_;
+    Image bufferedImage_;
     Array <MouseListener*>* mouseListeners_;
     Array <KeyListener*>* keyListeners_;
     ListenerList <ComponentListener> componentListeners;

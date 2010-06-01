@@ -104,7 +104,7 @@ protected:
     //==============================================================================
     virtual void addSubItems();
     virtual ProjectTreeViewBase* createSubItem (const Project::Item& node) = 0;
-    Image* getIcon() const      { return item.getIcon(); }
+    const Image getIcon() const         { return item.getIcon(); }
 
     //==============================================================================
     void triggerAsyncRename (const Project::Item& itemToRename);

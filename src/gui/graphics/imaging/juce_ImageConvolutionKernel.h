@@ -93,14 +93,13 @@ public:
     /** Applies the kernel to an image.
 
         @param destImage        the image that will receive the resultant convoluted pixels.
-        @param sourceImage      an optional source image to read from - if this is 0, then the
-                                destination image will be used as the source. If an image is
-                                specified, it must be exactly the same size and type as the destination
-                                image.
+        @param sourceImage      the source image to read from - this can be the same image as
+                                the destination, but if different, it must be exactly the same
+                                size and format.
         @param destinationArea  the region of the image to apply the filter to
     */
     void applyToImage (Image& destImage,
-                       const Image* sourceImage,
+                       const Image& sourceImage,
                        const Rectangle<int>& destinationArea) const;
 
     //==============================================================================

@@ -1659,7 +1659,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 }
 
 //==============================================================================
-Image* juce_createIconForFile (const File& file)
+const Image juce_createIconForFile (const File& file)
 {
     const ScopedAutoReleasePool pool;
 
@@ -1677,7 +1677,7 @@ Image* juce_createIconForFile (const File& file)
     [[NSGraphicsContext currentContext] flushGraphics];
     [NSGraphicsContext restoreGraphicsState];
 
-    return result;
+    return Image (result);
 }
 
 //==============================================================================

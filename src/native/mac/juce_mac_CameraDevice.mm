@@ -181,10 +181,12 @@ public:
 
     void callListeners (CIImage* frame, int w, int h)
     {
-        CoreGraphicsImage image (Image::ARGB, w, h, false);
-        CIContext* cic = [CIContext contextWithCGContext: image.context options: nil];
+        CoreGraphicsImage* cgImage = new CoreGraphicsImage (Image::ARGB, w, h, false);
+        Image image (cgImage);
+
+        CIContext* cic = [CIContext contextWithCGContext: cgImage->context options: nil];
         [cic drawImage: frame inRect: CGRectMake (0, 0, w, h) fromRect: CGRectMake (0, 0, w, h)];
-        CGContextFlush (image.context);
+        CGContextFlush (cgImage->context);
 
         const ScopedLock sl (listenerLock);
 

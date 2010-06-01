@@ -432,7 +432,7 @@ public:
     bool containsAnyDynamicPoints() const;
 
     /** Writes the path to this drawable encoding. */
-    void writeTo (ValueTree state, UndoManager* undoManager);
+    void writeTo (ValueTree state, UndoManager* undoManager) const;
 
     /** Quickly swaps the contents of this path with another. */
     void swapWith (RelativePointPath& other) throw();

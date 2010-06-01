@@ -69,7 +69,7 @@ public:
     };
 
 
-    Image* getFallbackImage();
+    const Image getFallbackImage();
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -78,7 +78,7 @@ private:
     ScopedPointer<PropertiesFile> props;
     StringArray fontNames;
 
-    ScopedPointer<Image> fallbackImage;
+    Image fallbackImage;
 };
 
 

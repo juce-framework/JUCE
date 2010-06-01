@@ -49,7 +49,7 @@ void ReduceOpacityEffect::setOpacity (const float newOpacity)
 void ReduceOpacityEffect::applyEffect (Image& image, Graphics& g)
 {
     g.setOpacity (opacity);
-    g.drawImageAt (&image, 0, 0);
+    g.drawImageAt (image, 0, 0);
 }
 
 END_JUCE_NAMESPACE

@@ -139,10 +139,10 @@ public:
                     if (dragContainer != 0)
                     {
                         pos.setSize (pos.getWidth(), item->itemHeight);
-                        Image* dragImage = Component::createComponentSnapshot (pos, true);
-                        dragImage->multiplyAllAlphas (0.6f);
+                        Image dragImage (Component::createComponentSnapshot (pos, true));
+                        dragImage.multiplyAllAlphas (0.6f);
 
-                        Point<int> imageOffset (pos.getX() - e.x, pos.getY() - e.y);
+                        Point<int> imageOffset (pos.getPosition() - e.getPosition());
                         dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset);
                     }
                     else

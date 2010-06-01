@@ -45,9 +45,7 @@ public:
         width (0),
         height (0),
         activeUsers (0),
-        recordNextFrameTime (false),
-        activeImage (0),
-        loadingImage (0)
+        recordNextFrameTime (false)
     {
         HRESULT hr = graphBuilder.CoCreateInstance (CLSID_FilterGraph);
         if (FAILED (hr))
@@ -137,8 +135,8 @@ public:
         if (connectFilters (sampleGrabberBase, nullFilter)
               && addGraphToRot())
         {
-            activeImage = new Image (Image::RGB, width, height, true);
-            loadingImage = new Image (Image::RGB, width, height, true);
+            activeImage = Image (Image::RGB, width, height, true);
+            loadingImage = Image (Image::RGB, width, height, true);
 
             ok = true;
         }
@@ -164,9 +162,6 @@ public:
         smartTeePreviewOutputPin = 0;
         smartTeeCaptureOutputPin = 0;
         asfWriter = 0;
-
-        delete activeImage;
-        delete loadingImage;
     }
 
     void addUser()
@@ -211,7 +206,7 @@ public:
             const ScopedLock sl (imageSwapLock);
 
             {
-                const Image::BitmapData destData (*loadingImage, 0, 0, width, height, true);
+                const Image::BitmapData destData (loadingImage, 0, 0, width, height, true);
 
                 for (int i = 0; i < height; ++i)
                     memcpy (destData.getLinePointer ((height - 1) - i),
@@ -223,7 +218,7 @@ public:
         }
 
         if (listeners.size() > 0)
-            callListeners (*loadingImage);
+            callListeners (loadingImage);
 
         sendChangeMessage (this);
     }
@@ -362,7 +357,7 @@ public:
             removeUser();
     }
 
-    void callListeners (Image& image)
+    void callListeners (const Image& image)
     {
         const ScopedLock sl (listenerLock);
 
@@ -450,8 +445,8 @@ private:
 
     CriticalSection imageSwapLock;
     bool imageNeedsFlipping;
-    Image* loadingImage;
-    Image* activeImage;
+    Image loadingImage;
+    Image activeImage;
 
     bool recordNextFrameTime;
 

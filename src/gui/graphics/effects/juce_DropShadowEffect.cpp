@@ -102,10 +102,10 @@ void DropShadowEffect::applyEffect (Image& image, Graphics& g)
     }
 
     g.setColour (Colours::black.withAlpha (opacity));
-    g.drawImageAt (&shadowImage, offsetX, offsetY, true);
+    g.drawImageAt (shadowImage, offsetX, offsetY, true);
 
     g.setOpacity (1.0f);
-    g.drawImageAt (&image, 0, 0);
+    g.drawImageAt (image, 0, 0);
 }
 
 #if JUCE_MSVC && JUCE_DEBUG

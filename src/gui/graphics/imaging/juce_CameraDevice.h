@@ -46,7 +46,7 @@ public:
         and make sure that you process the data as quickly as possible to
         avoid glitching!
     */
-    virtual void imageReceived (Image& image) = 0;
+    virtual void imageReceived (const Image& image) = 0;
 };
 
 

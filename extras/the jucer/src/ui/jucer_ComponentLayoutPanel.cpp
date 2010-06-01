@@ -120,7 +120,7 @@ const Rectangle<int> ComponentLayoutPanel::getComponentArea() const
     return ((ComponentLayoutEditor*) editor)->getComponentArea();
 }
 
-Image* ComponentLayoutPanel::createComponentSnapshot() const
+const Image ComponentLayoutPanel::createComponentSnapshot() const
 {
     return ((ComponentLayoutEditor*) editor)->createComponentLayerSnapshot();
 }

@@ -26,7 +26,7 @@
 #ifndef __JUCE_IDENTIFIER_JUCEHEADER__
 #define __JUCE_IDENTIFIER_JUCEHEADER__
 
-#include "../text/juce_String.h"
+#include "../text/juce_StringPool.h"
 
 
 //==============================================================================
@@ -82,7 +82,7 @@ private:
     //==============================================================================
     const juce_wchar* name;
 
-    class Pool;
+    static StringPool pool;
 };
 
 

@@ -36,7 +36,7 @@ JucerFillType::JucerFillType()
 
 JucerFillType::JucerFillType (const JucerFillType& other)
 {
-    image = 0;
+    image = Image();
     mode = other.mode;
     colour = other.colour;
     gradCol1 = other.gradCol1;
@@ -50,9 +50,7 @@ JucerFillType::JucerFillType (const JucerFillType& other)
 
 JucerFillType& JucerFillType::operator= (const JucerFillType& other)
 {
-    ImageCache::release (image);
-    image = 0;
-
+    image = Image();
     mode = other.mode;
     colour = other.colour;
     gradCol1 = other.gradCol1;
@@ -68,7 +66,6 @@ JucerFillType& JucerFillType::operator= (const JucerFillType& other)
 
 JucerFillType::~JucerFillType()
 {
-    ImageCache::release (image);
 }
 
 bool JucerFillType::operator== (const JucerFillType& other) const throw()
@@ -91,9 +88,7 @@ bool JucerFillType::operator!= (const JucerFillType& other) const throw()
 
 void JucerFillType::reset()
 {
-    ImageCache::release (image);
-    image = 0;
-
+    image = Image();
     mode = solidColour;
     colour = Colours::brown.withHue (Random::getSystemRandom().nextFloat());
     gradCol1 = Colours::red;
@@ -114,9 +109,7 @@ void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, con
 {
     if (mode == solidColour)
     {
-        ImageCache::release (image);
-        image = 0;
-
+        image = Image();
         g.setColour (colour);
     }
     else if (mode == imageBrush)
@@ -125,12 +118,11 @@ void JucerFillType::setFillType (Graphics& g, JucerDocument* const document, con
 
         Rectangle<int> r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));
 
-        g.setTiledImageFill (*image, r.getX(), r.getY(), (float) imageOpacity);
+        g.setTiledImageFill (image, r.getX(), r.getY(), (float) imageOpacity);
     }
     else
     {
-        ImageCache::release (image);
-        image = 0;
+        image = Image();
 
         Rectangle<int> r1 (gradPos1.getRectangle (parentArea, document->getComponentLayout()));
         Rectangle<int> r2 (gradPos2.getRectangle (parentArea, document->getComponentLayout()));
@@ -285,9 +277,9 @@ bool JucerFillType::isOpaque() const
         return gradCol1.isOpaque() && gradCol1.isOpaque();
 
     case imageBrush:
-        return image != 0
+        return image.isValid()
                  && imageOpacity >= 1.0f
-                 && ! image->hasAlphaChannel();
+                 && ! image.hasAlphaChannel();
 
     default:
         jassertfalse
@@ -321,28 +313,28 @@ bool JucerFillType::isInvisible() const
 
 void JucerFillType::loadImage (JucerDocument* const document)
 {
-    if (image == 0)
+    if (image.isNull())
     {
         if (document != 0)
             image = document->getResources().getImageFromCache (imageResourceName);
 
-        if (image == 0)
+        if (image.isNull())
         {
             const int hashCode = 0x3437856f;
             image = ImageCache::getFromHashCode (hashCode);
 
-            if (image == 0)
+            if (image.isNull())
             {
-                image = new Image (Image::RGB, 100, 100, true);
+                image = Image (Image::RGB, 100, 100, true);
 
-                Graphics g (*image);
-                g.fillCheckerBoard (0, 0, image->getWidth(), image->getHeight(),
-                                    image->getWidth() / 2, image->getHeight() / 2,
+                Graphics g (image);
+                g.fillCheckerBoard (0, 0, image.getWidth(), image.getHeight(),
+                                    image.getWidth() / 2, image.getHeight() / 2,
                                     Colours::white, Colours::lightgrey);
 
                 g.setFont (12.0f);
                 g.setColour (Colours::grey);
-                g.drawText (T("(image missing)"), 0, 0, image->getWidth(), image->getHeight() / 2, Justification::centred, true);
+                g.drawText (T("(image missing)"), 0, 0, image.getWidth(), image.getHeight() / 2, Justification::centred, true);
 
                 ImageCache::addImageToCache (image, hashCode);
             }
