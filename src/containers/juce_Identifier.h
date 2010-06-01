@@ -82,7 +82,7 @@ private:
     //==============================================================================
     const juce_wchar* name;
 
-    static StringPool pool;
+    static StringPool& getPool();
 };
 
 

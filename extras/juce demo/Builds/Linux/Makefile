@@ -43,32 +43,32 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/ApplicationStartup.o \
-  $(OBJDIR)/MainDemoWindow.o \
-  $(OBJDIR)/AudioDemoLatencyPage.o \
-  $(OBJDIR)/AudioDemoPlaybackPage.o \
-  $(OBJDIR)/AudioDemoRecordPage.o \
-  $(OBJDIR)/AudioDemoSetupPage.o \
-  $(OBJDIR)/AudioDemoSynthPage.o \
-  $(OBJDIR)/AudioDemoTabComponent.o \
-  $(OBJDIR)/CameraDemo.o \
-  $(OBJDIR)/CodeEditorDemo.o \
-  $(OBJDIR)/DragAndDropDemo.o \
-  $(OBJDIR)/FontsAndTextDemo.o \
-  $(OBJDIR)/InterprocessCommsDemo.o \
-  $(OBJDIR)/OpenGLDemo.o \
-  $(OBJDIR)/QuickTimeDemo.o \
-  $(OBJDIR)/RenderingTestComponent.o \
-  $(OBJDIR)/TableDemo.o \
-  $(OBJDIR)/ThreadingDemo.o \
-  $(OBJDIR)/TreeViewDemo.o \
-  $(OBJDIR)/WebBrowserDemo.o \
-  $(OBJDIR)/WidgetsDemo.o \
-  $(OBJDIR)/BinaryData.o \
-  $(OBJDIR)/JuceLibraryCode1.o \
-  $(OBJDIR)/JuceLibraryCode2.o \
-  $(OBJDIR)/JuceLibraryCode3.o \
-  $(OBJDIR)/JuceLibraryCode4.o \
+  $(OBJDIR)/ApplicationStartup_3bf86e16.o \
+  $(OBJDIR)/MainDemoWindow_f9e963d5.o \
+  $(OBJDIR)/AudioDemoLatencyPage_c12cc5dc.o \
+  $(OBJDIR)/AudioDemoPlaybackPage_a7b17745.o \
+  $(OBJDIR)/AudioDemoRecordPage_77bd50fb.o \
+  $(OBJDIR)/AudioDemoSetupPage_e6febadb.o \
+  $(OBJDIR)/AudioDemoSynthPage_6d168c9a.o \
+  $(OBJDIR)/AudioDemoTabComponent_81185e3.o \
+  $(OBJDIR)/CameraDemo_954a4a30.o \
+  $(OBJDIR)/CodeEditorDemo_55f35645.o \
+  $(OBJDIR)/DragAndDropDemo_f8c9e5d7.o \
+  $(OBJDIR)/FontsAndTextDemo_2cefcecb.o \
+  $(OBJDIR)/InterprocessCommsDemo_aa1c1119.o \
+  $(OBJDIR)/OpenGLDemo_f1e721ba.o \
+  $(OBJDIR)/QuickTimeDemo_84dae9df.o \
+  $(OBJDIR)/RenderingTestComponent_dde8a0e7.o \
+  $(OBJDIR)/TableDemo_99f71d3.o \
+  $(OBJDIR)/ThreadingDemo_35b0f31d.o \
+  $(OBJDIR)/TreeViewDemo_c130a3ae.o \
+  $(OBJDIR)/WebBrowserDemo_be24b7bf.o \
+  $(OBJDIR)/WidgetsDemo_9419b474.o \
+  $(OBJDIR)/BinaryData_ce4232d4.o \
+  $(OBJDIR)/JuceLibraryCode1_682c927f.o \
+  $(OBJDIR)/JuceLibraryCode2_683aaa00.o \
+  $(OBJDIR)/JuceLibraryCode3_6848c181.o \
+  $(OBJDIR)/JuceLibraryCode4_6856d902.o \
 
 .PHONY: clean
 
@@ -85,132 +85,132 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
-$(OBJDIR)/ApplicationStartup.o: ../../Source/ApplicationStartup.cpp
+$(OBJDIR)/ApplicationStartup_3bf86e16.o: ../../Source/ApplicationStartup.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ApplicationStartup.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/MainDemoWindow.o: ../../Source/MainDemoWindow.cpp
+$(OBJDIR)/MainDemoWindow_f9e963d5.o: ../../Source/MainDemoWindow.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling MainDemoWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoLatencyPage.o: ../../Source/demos/AudioDemoLatencyPage.cpp
+$(OBJDIR)/AudioDemoLatencyPage_c12cc5dc.o: ../../Source/demos/AudioDemoLatencyPage.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoLatencyPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoPlaybackPage.o: ../../Source/demos/AudioDemoPlaybackPage.cpp
+$(OBJDIR)/AudioDemoPlaybackPage_a7b17745.o: ../../Source/demos/AudioDemoPlaybackPage.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoPlaybackPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoRecordPage.o: ../../Source/demos/AudioDemoRecordPage.cpp
+$(OBJDIR)/AudioDemoRecordPage_77bd50fb.o: ../../Source/demos/AudioDemoRecordPage.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoRecordPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoSetupPage.o: ../../Source/demos/AudioDemoSetupPage.cpp
+$(OBJDIR)/AudioDemoSetupPage_e6febadb.o: ../../Source/demos/AudioDemoSetupPage.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoSetupPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoSynthPage.o: ../../Source/demos/AudioDemoSynthPage.cpp
+$(OBJDIR)/AudioDemoSynthPage_6d168c9a.o: ../../Source/demos/AudioDemoSynthPage.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoSynthPage.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/AudioDemoTabComponent.o: ../../Source/demos/AudioDemoTabComponent.cpp
+$(OBJDIR)/AudioDemoTabComponent_81185e3.o: ../../Source/demos/AudioDemoTabComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling AudioDemoTabComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/CameraDemo.o: ../../Source/demos/CameraDemo.cpp
+$(OBJDIR)/CameraDemo_954a4a30.o: ../../Source/demos/CameraDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling CameraDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/CodeEditorDemo.o: ../../Source/demos/CodeEditorDemo.cpp
+$(OBJDIR)/CodeEditorDemo_55f35645.o: ../../Source/demos/CodeEditorDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling CodeEditorDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/DragAndDropDemo.o: ../../Source/demos/DragAndDropDemo.cpp
+$(OBJDIR)/DragAndDropDemo_f8c9e5d7.o: ../../Source/demos/DragAndDropDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling DragAndDropDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/FontsAndTextDemo.o: ../../Source/demos/FontsAndTextDemo.cpp
+$(OBJDIR)/FontsAndTextDemo_2cefcecb.o: ../../Source/demos/FontsAndTextDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling FontsAndTextDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/InterprocessCommsDemo.o: ../../Source/demos/InterprocessCommsDemo.cpp
+$(OBJDIR)/InterprocessCommsDemo_aa1c1119.o: ../../Source/demos/InterprocessCommsDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling InterprocessCommsDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/OpenGLDemo.o: ../../Source/demos/OpenGLDemo.cpp
+$(OBJDIR)/OpenGLDemo_f1e721ba.o: ../../Source/demos/OpenGLDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling OpenGLDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/QuickTimeDemo.o: ../../Source/demos/QuickTimeDemo.cpp
+$(OBJDIR)/QuickTimeDemo_84dae9df.o: ../../Source/demos/QuickTimeDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling QuickTimeDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/RenderingTestComponent.o: ../../Source/demos/RenderingTestComponent.cpp
+$(OBJDIR)/RenderingTestComponent_dde8a0e7.o: ../../Source/demos/RenderingTestComponent.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling RenderingTestComponent.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/TableDemo.o: ../../Source/demos/TableDemo.cpp
+$(OBJDIR)/TableDemo_99f71d3.o: ../../Source/demos/TableDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling TableDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/ThreadingDemo.o: ../../Source/demos/ThreadingDemo.cpp
+$(OBJDIR)/ThreadingDemo_35b0f31d.o: ../../Source/demos/ThreadingDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling ThreadingDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/TreeViewDemo.o: ../../Source/demos/TreeViewDemo.cpp
+$(OBJDIR)/TreeViewDemo_c130a3ae.o: ../../Source/demos/TreeViewDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling TreeViewDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/WebBrowserDemo.o: ../../Source/demos/WebBrowserDemo.cpp
+$(OBJDIR)/WebBrowserDemo_be24b7bf.o: ../../Source/demos/WebBrowserDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling WebBrowserDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/WidgetsDemo.o: ../../Source/demos/WidgetsDemo.cpp
+$(OBJDIR)/WidgetsDemo_9419b474.o: ../../Source/demos/WidgetsDemo.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling WidgetsDemo.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/BinaryData.o: ../../JuceLibraryCode/BinaryData.cpp
+$(OBJDIR)/BinaryData_ce4232d4.o: ../../JuceLibraryCode/BinaryData.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling BinaryData.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
+$(OBJDIR)/JuceLibraryCode1_682c927f.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
+$(OBJDIR)/JuceLibraryCode2_683aaa00.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
+$(OBJDIR)/JuceLibraryCode3_6848c181.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
+$(OBJDIR)/JuceLibraryCode4_6856d902.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

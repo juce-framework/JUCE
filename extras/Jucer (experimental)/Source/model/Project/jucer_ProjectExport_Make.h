@@ -315,7 +315,8 @@ private:
 
     const String getObjectFileFor (const RelativePath& file) const
     {
-        return file.withFileExtension (".o").getFileName();
+        return file.getFileNameWithoutExtension()
+                + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
     }
 
     MakefileProjectExporter (const MakefileProjectExporter&);

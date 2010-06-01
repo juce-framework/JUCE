@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		846929140A49DB9C00314975 /* juce.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 846929130A49DB9C00314975 /* juce.xcconfig */; };
 		846C10D40DE33F4D00E8CCE8 /* juce_LibrarySource.mm in Sources */ = {isa = PBXBuildFile; fileRef = 846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */; };
 		846C10ED0DE33FA100E8CCE8 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */; };
 		846C10EE0DE33FA100E8CCE8 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 846C10E00DE33FA100E8CCE8 /* CoreAudio.framework */; };
@@ -55,7 +54,6 @@
 
 /* Begin PBXFileReference section */
 		0867D6ABFE840B52C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		846929130A49DB9C00314975 /* juce.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; name = juce.xcconfig; path = ../../../../build/macosx/juce.xcconfig; sourceTree = SOURCE_ROOT; };
 		846C10D20DE33F4D00E8CCE8 /* juce_AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = juce_AppConfig.h; path = ../../src/juce_AppConfig.h; sourceTree = SOURCE_ROOT; };
 		846C10D30DE33F4D00E8CCE8 /* juce_LibrarySource.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = juce_LibrarySource.mm; path = ../../src/juce_LibrarySource.mm; sourceTree = SOURCE_ROOT; };
 		846C10DF0DE33FA100E8CCE8 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -203,7 +201,6 @@
 			isa = PBXGroup;
 			children = (
 				20286C2AFDCF999611CA2CEA /* Sources */,
-				846929130A49DB9C00314975 /* juce.xcconfig */,
 				84F5556A0A22381000A8311C /* Jucer To Do list.txt */,
 				20286C2CFDCF999611CA2CEA /* Resources */,
 				20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */,
@@ -462,7 +459,6 @@
 				8D0C4E8D0486CD37000505A6 /* InfoPlist.strings in Resources */,
 				84F555CF0A22381100A8311C /* Jucer To Do list.txt in Resources */,
 				84F43CC60A2B5F3700284072 /* jucer_icon.icns in Resources */,
-				846929140A49DB9C00314975 /* juce.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

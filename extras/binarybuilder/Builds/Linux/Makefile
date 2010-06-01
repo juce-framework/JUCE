@@ -43,8 +43,8 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/Main.o \
-  $(OBJDIR)/JuceLibraryCode.o \
+  $(OBJDIR)/Main_90ebc5c2.o \
+  $(OBJDIR)/JuceLibraryCode_9800db7c.o \
 
 .PHONY: clean
 
@@ -61,12 +61,12 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
-$(OBJDIR)/Main.o: ../../Source/Main.cpp
+$(OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling Main.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode.o: ../../JuceLibraryCode/JuceLibraryCode.cpp
+$(OBJDIR)/JuceLibraryCode_9800db7c.o: ../../JuceLibraryCode/JuceLibraryCode.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

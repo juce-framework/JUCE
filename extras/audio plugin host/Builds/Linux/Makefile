@@ -43,15 +43,15 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/FilterGraph.o \
-  $(OBJDIR)/GraphEditorPanel.o \
-  $(OBJDIR)/HostStartup.o \
-  $(OBJDIR)/InternalFilters.o \
-  $(OBJDIR)/MainHostWindow.o \
-  $(OBJDIR)/JuceLibraryCode1.o \
-  $(OBJDIR)/JuceLibraryCode2.o \
-  $(OBJDIR)/JuceLibraryCode3.o \
-  $(OBJDIR)/JuceLibraryCode4.o \
+  $(OBJDIR)/FilterGraph_62e9c017.o \
+  $(OBJDIR)/GraphEditorPanel_3dbd4872.o \
+  $(OBJDIR)/HostStartup_5ce96f96.o \
+  $(OBJDIR)/InternalFilters_beb54bdf.o \
+  $(OBJDIR)/MainHostWindow_e920295a.o \
+  $(OBJDIR)/JuceLibraryCode1_682c927f.o \
+  $(OBJDIR)/JuceLibraryCode2_683aaa00.o \
+  $(OBJDIR)/JuceLibraryCode3_6848c181.o \
+  $(OBJDIR)/JuceLibraryCode4_6856d902.o \
 
 .PHONY: clean
 
@@ -68,47 +68,47 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
-$(OBJDIR)/FilterGraph.o: ../../Source/FilterGraph.cpp
+$(OBJDIR)/FilterGraph_62e9c017.o: ../../Source/FilterGraph.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling FilterGraph.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/GraphEditorPanel.o: ../../Source/GraphEditorPanel.cpp
+$(OBJDIR)/GraphEditorPanel_3dbd4872.o: ../../Source/GraphEditorPanel.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling GraphEditorPanel.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/HostStartup.o: ../../Source/HostStartup.cpp
+$(OBJDIR)/HostStartup_5ce96f96.o: ../../Source/HostStartup.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling HostStartup.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/InternalFilters.o: ../../Source/InternalFilters.cpp
+$(OBJDIR)/InternalFilters_beb54bdf.o: ../../Source/InternalFilters.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling InternalFilters.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/MainHostWindow.o: ../../Source/MainHostWindow.cpp
+$(OBJDIR)/MainHostWindow_e920295a.o: ../../Source/MainHostWindow.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling MainHostWindow.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode1.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
+$(OBJDIR)/JuceLibraryCode1_682c927f.o: ../../JuceLibraryCode/JuceLibraryCode1.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode1.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode2.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
+$(OBJDIR)/JuceLibraryCode2_683aaa00.o: ../../JuceLibraryCode/JuceLibraryCode2.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode2.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode3.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
+$(OBJDIR)/JuceLibraryCode3_6848c181.o: ../../JuceLibraryCode/JuceLibraryCode3.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode3.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
-$(OBJDIR)/JuceLibraryCode4.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
+$(OBJDIR)/JuceLibraryCode4_6856d902.o: ../../JuceLibraryCode/JuceLibraryCode4.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling JuceLibraryCode4.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"

@@ -31,7 +31,11 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-StringPool Identifier::pool;
+StringPool& Identifier::getPool()
+{
+    static StringPool pool;
+    return pool;
+}
 
 Identifier::Identifier() throw()
     : name (0)
@@ -50,7 +54,7 @@ Identifier& Identifier::operator= (const Identifier& other) throw()
 }
 
 Identifier::Identifier (const String& name_)
-    : name (Identifier::pool.getPooledString (name_))
+    : name (Identifier::getPool().getPooledString (name_))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
@@ -58,7 +62,7 @@ Identifier::Identifier (const String& name_)
 }
 
 Identifier::Identifier (const char* const name_)
-    : name (Identifier::pool.getPooledString (name_))
+    : name (Identifier::getPool().getPooledString (name_))
 {
     /* An Identifier string must be suitable for use as a script variable or XML
        attribute, so it can only contain this limited set of characters.. */
