@@ -50,6 +50,7 @@ class JUCE_API  SelectedItemSet   : public ChangeBroadcaster
 public:
     //==============================================================================
     typedef SelectableItemType ItemType;
+    typedef PARAMETER_TYPE (SelectableItemType) ParameterType;
 
     //==============================================================================
     /** Creates an empty set. */
@@ -94,7 +95,7 @@ public:
 
         @see addToSelection, addToSelectionBasedOnModifiers
     */
-    void selectOnly (SelectableItemType item)
+    void selectOnly (ParameterType item)
     {
         if (isSelected (item))
         {
@@ -123,7 +124,7 @@ public:
 
         @see selectOnly, addToSelectionBasedOnModifiers
     */
-    void addToSelection (SelectableItemType item)
+    void addToSelection (ParameterType item)
     {
         if (! isSelected (item))
         {
@@ -155,7 +156,7 @@ public:
 
         @see selectOnly, addToSelection, addToSelectionOnMouseDown, addToSelectionOnMouseUp
     */
-    void addToSelectionBasedOnModifiers (SelectableItemType item,
+    void addToSelectionBasedOnModifiers (ParameterType item,
                                          const ModifierKeys& modifiers)
     {
         if (modifiers.isShiftDown())
@@ -192,7 +193,7 @@ public:
 
         @see addToSelectionOnMouseUp, addToSelectionBasedOnModifiers
     */
-    bool addToSelectionOnMouseDown (SelectableItemType item,
+    bool addToSelectionOnMouseDown (ParameterType item,
                                     const ModifierKeys& modifiers)
     {
         if (isSelected (item))
@@ -220,7 +221,7 @@ public:
                                 back from the addToSelectionOnMouseDown() call that you
                                 should have made during the matching mouseDown event
     */
-    void addToSelectionOnMouseUp (SelectableItemType item,
+    void addToSelectionOnMouseUp (ParameterType item,
                                   const ModifierKeys& modifiers,
                                   const bool wasItemDragged,
                                   const bool resultOfMouseDownSelectMethod)
@@ -230,7 +231,7 @@ public:
     }
 
     /** Deselects an item. */
-    void deselect (SelectableItemType item)
+    void deselect (ParameterType item)
     {
         const int i = selectedItems.indexOf (item);
 
@@ -278,7 +279,7 @@ public:
     }
 
     /** True if this item is currently selected. */
-    bool isSelected (const SelectableItemType item) const throw()
+    bool isSelected (const ParameterType item) const throw()
     {
         return selectedItems.contains (item);
     }

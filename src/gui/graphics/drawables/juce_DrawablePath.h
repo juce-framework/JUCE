@@ -155,6 +155,7 @@ public:
             int getNumControlPoints() const throw();
 
             const RelativePoint getControlPoint (int index) const;
+            const RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
 
             static const Identifier startSubPathElement, closeSubPathElement,

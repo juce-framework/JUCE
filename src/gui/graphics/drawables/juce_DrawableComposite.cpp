@@ -406,6 +406,11 @@ ValueTree DrawableComposite::ValueTreeWrapper::getDrawableWithId (const String& 
     }
 }
 
+int DrawableComposite::ValueTreeWrapper::indexOfDrawable (const ValueTree& item) const
+{
+    return getChildList().indexOf (item);
+}
+
 void DrawableComposite::ValueTreeWrapper::addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager)
 {
     getChildListCreating (undoManager).addChild (newDrawableState, index, undoManager);
@@ -416,9 +421,9 @@ void DrawableComposite::ValueTreeWrapper::moveDrawableOrder (int currentIndex, i
     getChildListCreating (undoManager).moveChild (currentIndex, newIndex, undoManager);
 }
 
-void DrawableComposite::ValueTreeWrapper::removeDrawable (int index, UndoManager* undoManager)
+void DrawableComposite::ValueTreeWrapper::removeDrawable (const ValueTree& child, UndoManager* undoManager)
 {
-    getChildList().removeChild (index, undoManager);
+    getChildList().removeChild (child, undoManager);
 }
 
 const RelativePoint DrawableComposite::ValueTreeWrapper::getTargetPositionForOrigin() const

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	8
+#define JUCE_BUILDNUMBER	9
 
 /** Current Juce version number.
 
@@ -53789,6 +53789,7 @@ class JUCE_API  SelectedItemSet   : public ChangeBroadcaster
 public:
 
 	typedef SelectableItemType ItemType;
+	typedef PARAMETER_TYPE (SelectableItemType) ParameterType;
 
 	/** Creates an empty set. */
 	SelectedItemSet()
@@ -53831,7 +53832,7 @@ public:
 
 		@see addToSelection, addToSelectionBasedOnModifiers
 	*/
-	void selectOnly (SelectableItemType item)
+	void selectOnly (ParameterType item)
 	{
 		if (isSelected (item))
 		{
@@ -53860,7 +53861,7 @@ public:
 
 		@see selectOnly, addToSelectionBasedOnModifiers
 	*/
-	void addToSelection (SelectableItemType item)
+	void addToSelection (ParameterType item)
 	{
 		if (! isSelected (item))
 		{
@@ -53892,7 +53893,7 @@ public:
 
 		@see selectOnly, addToSelection, addToSelectionOnMouseDown, addToSelectionOnMouseUp
 	*/
-	void addToSelectionBasedOnModifiers (SelectableItemType item,
+	void addToSelectionBasedOnModifiers (ParameterType item,
 										 const ModifierKeys& modifiers)
 	{
 		if (modifiers.isShiftDown())
@@ -53929,7 +53930,7 @@ public:
 
 		@see addToSelectionOnMouseUp, addToSelectionBasedOnModifiers
 	*/
-	bool addToSelectionOnMouseDown (SelectableItemType item,
+	bool addToSelectionOnMouseDown (ParameterType item,
 									const ModifierKeys& modifiers)
 	{
 		if (isSelected (item))
@@ -53957,7 +53958,7 @@ public:
 								back from the addToSelectionOnMouseDown() call that you
 								should have made during the matching mouseDown event
 	*/
-	void addToSelectionOnMouseUp (SelectableItemType item,
+	void addToSelectionOnMouseUp (ParameterType item,
 								  const ModifierKeys& modifiers,
 								  const bool wasItemDragged,
 								  const bool resultOfMouseDownSelectMethod)
@@ -53967,7 +53968,7 @@ public:
 	}
 
 	/** Deselects an item. */
-	void deselect (SelectableItemType item)
+	void deselect (ParameterType item)
 	{
 		const int i = selectedItems.indexOf (item);
 
@@ -54014,7 +54015,7 @@ public:
 	}
 
 	/** True if this item is currently selected. */
-	bool isSelected (const SelectableItemType item) const throw()
+	bool isSelected (const ParameterType item) const throw()
 	{
 		return selectedItems.contains (item);
 	}
@@ -56364,6 +56365,12 @@ public:
 	*/
 	void* getNativeWindowHandle() const;
 
+	/** Call this to manually delete the current GL context, if there is one.
+		This can be useful to cause a clear-out of the context, which will be automatically
+		re-created when it's needed.
+	*/
+	void deleteContext();
+
 	juce_UseDebuggingNewOperator
 
 private:
@@ -56381,7 +56388,6 @@ private:
 	bool needToUpdateViewport;
 
 	OpenGLContext* createContext();
-	void deleteContext();
 	void updateContextPosition();
 	void internalRepaint (int x, int y, int w, int h);
 
@@ -58364,9 +58370,10 @@ public:
 		int getNumDrawables() const;
 		ValueTree getDrawableState (int index) const;
 		ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
+		int indexOfDrawable (const ValueTree& item) const;
 		void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
 		void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
-		void removeDrawable (int index, UndoManager* undoManager);
+		void removeDrawable (const ValueTree& child, UndoManager* undoManager);
 
 		const RelativePoint getTargetPositionForOrigin() const;
 		void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
@@ -58683,6 +58690,7 @@ public:
 			int getNumControlPoints() const throw();
 
 			const RelativePoint getControlPoint (int index) const;
+			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
 
 			static const Identifier startSubPathElement, closeSubPathElement,

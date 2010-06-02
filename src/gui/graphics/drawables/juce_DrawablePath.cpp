@@ -319,6 +319,15 @@ void DrawablePath::ValueTreeWrapper::Element::setControlPoint (const int index, 
     return state.setProperty (index == 0 ? point1 : (index == 1 ? point2 : point3), point.toString(), undoManager);
 }
 
+const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
+{
+    const Identifier i (state.getType());
+    if (i == startSubPathElement || i == lineToElement)  return getControlPoint (0);
+    if (i == quadraticToElement)                         return getControlPoint (1);
+    if (i == cubicToElement)                             return getControlPoint (2);
+
+    return RelativePoint();
+}
 
 //==============================================================================
 const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider*)

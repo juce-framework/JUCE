@@ -330,6 +330,12 @@ public:
     */
     void* getNativeWindowHandle() const;
 
+    /** Call this to manually delete the current GL context, if there is one.
+        This can be useful to cause a clear-out of the context, which will be automatically
+        re-created when it's needed.
+    */
+    void deleteContext();
+
     juce_UseDebuggingNewOperator
 
 private:
@@ -347,7 +353,6 @@ private:
     bool needToUpdateViewport;
 
     OpenGLContext* createContext();
-    void deleteContext();
     void updateContextPosition();
     void internalRepaint (int x, int y, int w, int h);
 

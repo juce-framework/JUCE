@@ -198,9 +198,10 @@ public:
         int getNumDrawables() const;
         ValueTree getDrawableState (int index) const;
         ValueTree getDrawableWithId (const String& objectId, bool recursive) const;
+        int indexOfDrawable (const ValueTree& item) const;
         void addDrawable (const ValueTree& newDrawableState, int index, UndoManager* undoManager);
         void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
-        void removeDrawable (int index, UndoManager* undoManager);
+        void removeDrawable (const ValueTree& child, UndoManager* undoManager);
 
         const RelativePoint getTargetPositionForOrigin() const;
         void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
