@@ -549,9 +549,11 @@ public:
 
     void inputAttemptWhenModal()
     {
+        Component::SafePointer<Component> deletionChecker (this);
+
         timerCallback();
 
-        if (! isOverAnyMenu())
+        if (deletionChecker != 0 && ! isOverAnyMenu())
         {
             if (componentAttachedTo != 0)
             {
