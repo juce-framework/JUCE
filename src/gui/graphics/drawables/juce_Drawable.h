@@ -267,6 +267,8 @@ protected:
     DrawableComposite* parent;
     virtual void invalidatePoints() = 0;
 
+    static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
+
 private:
     String name;
 

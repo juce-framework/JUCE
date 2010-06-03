@@ -36,6 +36,7 @@ CriticalSection::CriticalSection() throw()
     pthread_mutexattr_t atts;
     pthread_mutexattr_init (&atts);
     pthread_mutexattr_settype (&atts, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
     pthread_mutex_init (&internal, &atts);
 }
 

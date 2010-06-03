@@ -2156,7 +2156,7 @@ void Component::internalMouseEnter (MouseInputSource& source, const Point<int>& 
             repaint();
 
         const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             this, time, relativePos,
+                             this, this, time, relativePos,
                              time, 0, false);
 
         mouseEnter (me);
@@ -2229,7 +2229,7 @@ void Component::internalMouseExit (MouseInputSource& source, const Point<int>& r
             repaint();
 
         const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             this, time, relativePos,
+                             this, this, time, relativePos,
                              time, 0, false);
         mouseExit (me);
 
@@ -2355,7 +2355,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
         {
             // allow blocked mouse-events to go to global listeners..
             const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                                 this, time, relativePos, time,
+                                 this, this, time, relativePos, time,
                                  source.getNumberOfMultipleClicks(), false);
 
             desktop.resetTimer();
@@ -2396,7 +2396,7 @@ void Component::internalMouseDown (MouseInputSource& source, const Point<int>& r
         repaint();
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                         this, time, relativePos, time,
+                         this, this, time, relativePos, time,
                          source.getNumberOfMultipleClicks(), false);
     mouseDown (me);
 
@@ -2460,7 +2460,7 @@ void Component::internalMouseUp (MouseInputSource& source, const Point<int>& rel
             repaint();
 
         const MouseEvent me (source, relativePos,
-                             oldModifiers, this, time,
+                             oldModifiers, this, this, time,
                              globalPositionToRelative (source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
@@ -2578,7 +2578,7 @@ void Component::internalMouseDrag (MouseInputSource& source, const Point<int>& r
         BailOutChecker checker (this);
 
         const MouseEvent me (source, relativePos,
-                             source.getCurrentModifiers(), this, time,
+                             source.getCurrentModifiers(), this, this, time,
                              globalPositionToRelative (source.getLastMouseDownPosition()),
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
@@ -2638,7 +2638,7 @@ void Component::internalMouseMove (MouseInputSource& source, const Point<int>& r
     BailOutChecker checker (this);
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                         this, time, relativePos,
+                         this, this, time, relativePos,
                          time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
@@ -2708,7 +2708,7 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
     const float wheelIncrementY = amountY * (1.0f / 256.0f);
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                         this, time, relativePos, time, 0, false);
+                         this, this, time, relativePos, time, 0, false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {

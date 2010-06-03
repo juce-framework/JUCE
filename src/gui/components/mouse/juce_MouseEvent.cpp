@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 MouseEvent::MouseEvent (MouseInputSource& source_,
                         const Point<int>& position,
                         const ModifierKeys& mods_,
+                        Component* const eventComponent_,
                         Component* const originator,
                         const Time& eventTime_,
                         const Point<int> mouseDownPos_,
@@ -44,7 +45,7 @@ MouseEvent::MouseEvent (MouseInputSource& source_,
     : x (position.getX()),
       y (position.getY()),
       mods (mods_),
-      eventComponent (originator),
+      eventComponent (eventComponent_),
       originalComponent (originator),
       eventTime (eventTime_),
       source (source_),
@@ -69,14 +70,14 @@ const MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent
     }
 
     return MouseEvent (source, eventComponent->relativePositionToOtherComponent (otherComponent, getPosition()),
-                       mods, originalComponent, eventTime,
+                       mods, otherComponent, originalComponent, eventTime,
                        eventComponent->relativePositionToOtherComponent (otherComponent, mouseDownPos),
                        mouseDownTime, numberOfClicks, wasMovedSinceMouseDown);
 }
 
 const MouseEvent MouseEvent::withNewPosition (const Point<int>& newPosition) const throw()
 {
-    return MouseEvent (source, newPosition, mods, originalComponent,
+    return MouseEvent (source, newPosition, mods, eventComponent, originalComponent,
                        eventTime, mouseDownPos, mouseDownTime,
                        numberOfClicks, wasMovedSinceMouseDown);
 }

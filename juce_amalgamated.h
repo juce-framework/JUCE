@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	9
+#define JUCE_BUILDNUMBER	10
 
 /** Current Juce version number.
 
@@ -19128,7 +19128,8 @@ public:
 		@param source	   the source that's invoking the event
 		@param position	 the position of the mouse, relative to the component that is passed-in
 		@param modifiers	the key modifiers at the time of the event
-		@param originator	   the component that the mouse event applies to
+		@param eventComponent   the component that the mouse event applies to
+		@param originator	   the component that originally received the event
 		@param eventTime	the time the event happened
 		@param mouseDownPos	 the position of the corresponding mouse-down event (relative to the component that is passed-in).
 								If there isn't a corresponding mouse-down (e.g. for a mouse-move), this will just be
@@ -19142,6 +19143,7 @@ public:
 	MouseEvent (MouseInputSource& source,
 				const Point<int>& position,
 				const ModifierKeys& modifiers,
+				Component* eventComponent,
 				Component* originator,
 				const Time& eventTime,
 				const Point<int> mouseDownPos,
@@ -42859,6 +42861,8 @@ protected:
 	DrawableComposite* parent;
 	virtual void invalidatePoints() = 0;
 
+	static Drawable* createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider);
+
 private:
 	String name;
 
@@ -58544,7 +58548,6 @@ public:
 		const RelativePoint getTargetPositionForBottomLeft() const;
 		void setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager);
 
-	private:
 		static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
 	};
 
@@ -58690,8 +58693,11 @@ public:
 			int getNumControlPoints() const throw();
 
 			const RelativePoint getControlPoint (int index) const;
+			Value getControlPointValue (int index, UndoManager* undoManager) const;
 			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
+
+			ValueTreeWrapper getParent() const;
 
 			static const Identifier startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;

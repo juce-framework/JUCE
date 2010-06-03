@@ -625,16 +625,14 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
             else
             {
                 damageRect = damageRect.getUnion (d->getBounds());
-                d = createFromValueTree (newDrawable, imageProvider);
-                d->parent = this;
+                d = createChildFromValueTree (this, newDrawable, imageProvider);
                 drawables.set (i, d);
                 damageRect = damageRect.getUnion (d->getBounds());
             }
         }
         else
         {
-            d = createFromValueTree (newDrawable, imageProvider);
-            d->parent = this;
+            d = createChildFromValueTree (this, newDrawable, imageProvider);
             drawables.set (i, d);
             damageRect = damageRect.getUnion (d->getBounds());
         }

@@ -298,6 +298,11 @@ DrawablePath::ValueTreeWrapper::Element::~Element()
 {
 }
 
+DrawablePath::ValueTreeWrapper DrawablePath::ValueTreeWrapper::Element::getParent() const
+{
+    return ValueTreeWrapper (state.getParent().getParent());
+}
+
 int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const throw()
 {
     const Identifier i (state.getType());
@@ -311,6 +316,12 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getControlPoint (co
 {
     jassert (index >= 0 && index < getNumControlPoints());
     return RelativePoint (state [index == 0 ? point1 : (index == 1 ? point2 : point3)].toString());
+}
+
+Value DrawablePath::ValueTreeWrapper::Element::getControlPointValue (int index, UndoManager* undoManager) const
+{
+    jassert (index >= 0 && index < getNumControlPoints());
+    return state.getPropertyAsValue (index == 0 ? point1 : (index == 1 ? point2 : point3), undoManager);
 }
 
 void DrawablePath::ValueTreeWrapper::Element::setControlPoint (const int index, const RelativePoint& point, UndoManager* undoManager)
@@ -328,6 +339,7 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
 
     return RelativePoint();
 }
+
 
 //==============================================================================
 const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider*)

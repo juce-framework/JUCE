@@ -155,8 +155,11 @@ public:
             int getNumControlPoints() const throw();
 
             const RelativePoint getControlPoint (int index) const;
+            Value getControlPointValue (int index, UndoManager* undoManager) const;
             const RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
+
+            ValueTreeWrapper getParent() const;
 
             static const Identifier startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;

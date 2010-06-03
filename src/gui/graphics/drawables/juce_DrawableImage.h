@@ -150,7 +150,6 @@ public:
         const RelativePoint getTargetPositionForBottomLeft() const;
         void setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager);
 
-    private:
         static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
     };
 

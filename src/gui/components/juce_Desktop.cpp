@@ -305,7 +305,7 @@ void Desktop::sendMouseMove()
             const Time now (Time::getCurrentTime());
 
             const MouseEvent me (getMainMouseSource(), pos, ModifierKeys::getCurrentModifiers(),
-                                 target, now, pos, now, 0, false);
+                                 target, target, now, pos, now, 0, false);
 
             if (me.mods.isAnyMouseButtonDown())
                 mouseListeners.callChecked (checker, &MouseListener::mouseDrag, me);

@@ -136,6 +136,11 @@ Drawable* Drawable::createFromImageFile (const File& file)
 //==============================================================================
 Drawable* Drawable::createFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
+    return createChildFromValueTree (0, tree, imageProvider);
+}
+
+Drawable* Drawable::createChildFromValueTree (DrawableComposite* parent, const ValueTree& tree, ImageProvider* imageProvider)
+{
     const Identifier type (tree.getType());
 
     Drawable* d = 0;
@@ -149,7 +154,10 @@ Drawable* Drawable::createFromValueTree (const ValueTree& tree, ImageProvider* i
         d = new DrawableText();
 
     if (d != 0)
+    {
+        d->parent = parent;
         d->refreshFromValueTree (tree, imageProvider);
+    }
 
     return d;
 }

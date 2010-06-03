@@ -51,7 +51,8 @@ public:
         @param source           the source that's invoking the event
         @param position         the position of the mouse, relative to the component that is passed-in
         @param modifiers        the key modifiers at the time of the event
-        @param originator       the component that the mouse event applies to
+        @param eventComponent   the component that the mouse event applies to
+        @param originator       the component that originally received the event
         @param eventTime        the time the event happened
         @param mouseDownPos     the position of the corresponding mouse-down event (relative to the component that is passed-in).
                                 If there isn't a corresponding mouse-down (e.g. for a mouse-move), this will just be
@@ -65,6 +66,7 @@ public:
     MouseEvent (MouseInputSource& source,
                 const Point<int>& position,
                 const ModifierKeys& modifiers,
+                Component* eventComponent,
                 Component* originator,
                 const Time& eventTime,
                 const Point<int> mouseDownPos,

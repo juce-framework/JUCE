@@ -78,7 +78,9 @@ FillType::~FillType() throw()
 
 bool FillType::operator== (const FillType& other) const
 {
-    return colour == other.colour && gradient == other.gradient && image == other.image;
+    return colour == other.colour && image == other.image
+            && (gradient == other.gradient
+                 || (gradient != 0 && other.gradient != 0 && *gradient == *other.gradient));
 }
 
 bool FillType::operator!= (const FillType& other) const
