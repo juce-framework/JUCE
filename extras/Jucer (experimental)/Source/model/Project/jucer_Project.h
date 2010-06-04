@@ -166,6 +166,7 @@ public:
 
         const String getID() const;
         Item findItemWithID (const String& targetId) const; // (recursive search)
+        const String getImageFileID() const;
 
         //==============================================================================
         Value getName() const;
@@ -206,6 +207,8 @@ public:
     Item getMainGroup();
     Item createNewGroup();
     Item createNewItem (const File& file);
+
+    void findAllImageItems (OwnedArray<Item>& items);
 
     //==============================================================================
     class BuildConfiguration

@@ -175,10 +175,10 @@ public:
     {
     public:
         DragOperation (ComponentEditorCanvas* canvas_,
-                       const MouseEvent& e, const Point<int>& mousePos,
+                       const Point<int>& mousePos,
                        Component* snapGuideParentComp_,
                        const ResizableBorderComponent::Zone& zone_)
-            : EditorDragOperation (canvas_, e, mousePos, snapGuideParentComp_, zone_)
+            : EditorDragOperation (canvas_, mousePos, snapGuideParentComp_, zone_, false)
         {
         }
 
@@ -262,12 +262,18 @@ public:
             ComponentDocument& doc = getDocument();
             return (float) doc.getMarkerList (isX).getCoordinate (marker).resolve (&doc);
         }
+
+        void transformObject (ValueTree& state, const AffineTransform& transform)
+        {
+        }
     };
 
-    DragOperation* createDragOperation (const MouseEvent& e, Component* snapGuideParentComponent,
-                                        const ResizableBorderComponent::Zone& zone)
+    bool canRotate() const  { return false; }
+
+    DragOperation* createDragOperation (const Point<int>& mouseDownPos, Component* snapGuideParentComponent,
+                                        const ResizableBorderComponent::Zone& zone, bool isRotating)
     {
-        DragOperation* d = new DragOperation (this, e, e.getPosition() - origin, snapGuideParentComponent, zone);
+        DragOperation* d = new DragOperation (this, mouseDownPos, snapGuideParentComponent, zone);
 
         Array<ValueTree> selected, unselected;
 

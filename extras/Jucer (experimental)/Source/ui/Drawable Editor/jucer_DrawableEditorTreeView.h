@@ -32,7 +32,8 @@
 */
 class DrawableTreeViewItem  : public JucerTreeViewBase,
                               public ValueTree::Listener,
-                              public ChangeListener
+                              public ChangeListener,
+                              public AsyncUpdater
 {
 public:
     DrawableTreeViewItem (DrawableEditor& editor_, const ValueTree& drawableRoot)
@@ -51,16 +52,23 @@ public:
     //==============================================================================
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
     {
+        if (property == Drawable::ValueTreeWrapperBase::idProperty)
+            repaintItem();
     }
 
     void valueTreeChildrenChanged (ValueTree& tree)
     {
-        if (tree == node.getState())
-            refreshSubItems();
+        if (tree == node.getState() || tree.isAChildOf (node.getState()))
+            triggerAsyncUpdate();
     }
 
     void valueTreeParentChanged (ValueTree& tree)
     {
+    }
+
+    void handleAsyncUpdate()
+    {
+        refreshSubItems();
     }
 
     //==============================================================================
@@ -157,9 +165,14 @@ public:
         return String::empty;
     }
 
+    static const String getDragIdFor (DrawableEditor& editor)
+    {
+        return drawableItemDragType + editor.getDocument().getUniqueId();
+    }
+
     const String getDragSourceDescription()
     {
-        return drawableItemDragType;
+        return getDragIdFor (editor);
     }
 
     //==============================================================================
@@ -175,11 +188,94 @@ public:
 
     bool isInterestedInDragSource (const String& sourceDescription, Component* sourceComponent)
     {
-        return false;
+        return node.getState().getType() == DrawableComposite::valueTreeType
+                && sourceDescription == getDragIdFor (editor)
+                    && editor.getSelection().getNumSelected() > 0;
     }
 
     void itemDropped (const String& sourceDescription, Component* sourceComponent, int insertIndex)
     {
+        if (editor.getSelection().getNumSelected() > 0)
+        {
+            TreeView* tree = getOwnerView();
+            const ScopedPointer <XmlElement> oldOpenness (tree->getOpennessState (false));
+
+            Array <ValueTree> selectedComps;
+            // scan the source tree rather than look at the selection manager, because it might
+            // be from a different editor, and the order needs to be correct.
+            getAllSelectedNodesInTree (sourceComponent, selectedComps);
+            insertItems (selectedComps, insertIndex);
+
+            if (oldOpenness != 0)
+                tree->restoreOpennessState (*oldOpenness);
+        }
+    }
+
+    static void getAllSelectedNodesInTree (Component* componentInTree, Array<ValueTree>& selectedItems)
+    {
+        TreeView* tree = dynamic_cast <TreeView*> (componentInTree);
+
+        if (tree == 0)
+            tree = componentInTree->findParentComponentOfClass ((TreeView*) 0);
+
+        if (tree != 0)
+        {
+            const int numSelected = tree->getNumSelectedItems();
+
+            for (int i = 0; i < numSelected; ++i)
+            {
+                DrawableTreeViewItem* const item = dynamic_cast <DrawableTreeViewItem*> (tree->getSelectedItem (i));
+
+                if (item != 0)
+                    selectedItems.add (item->node.getState());
+            }
+        }
+    }
+
+    void insertItems (Array <ValueTree>& items, int insertIndex)
+    {
+        DrawableComposite::ValueTreeWrapper composite (node.getState());
+
+        int i;
+        for (i = items.size(); --i >= 0;)
+            if (node.getState() == items.getReference(i) || composite.getState().isAChildOf (items.getReference(i))) // Check for recursion.
+                return;
+
+        // Don't include any nodes that are children of other selected nodes..
+        for (i = items.size(); --i >= 0;)
+        {
+            const ValueTree& n = items.getReference(i);
+
+            for (int j = items.size(); --j >= 0;)
+            {
+                if (j != i && n.isAChildOf (items.getReference(j)))
+                {
+                    items.remove (i);
+                    break;
+                }
+            }
+        }
+
+        // Remove and re-insert them one at a time..
+        for (i = 0; i < items.size(); ++i)
+        {
+            ValueTree& n = items.getReference(i);
+
+            int index = composite.indexOfDrawable (n);
+
+            if (index >= 0 && index < insertIndex)
+                --insertIndex;
+
+            if (index >= 0)
+            {
+                composite.moveDrawableOrder (index, insertIndex++, editor.getDocument().getUndoManager());
+            }
+            else
+            {
+                n.getParent().removeChild (n, editor.getDocument().getUndoManager());
+                composite.addDrawable (n, insertIndex++, editor.getDocument().getUndoManager());
+            }
+        }
     }
 
     //==============================================================================

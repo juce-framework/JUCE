@@ -96,13 +96,19 @@ public:
         virtual ~DragOperation() {}
 
         virtual void drag (const MouseEvent& e, const Point<int>& newPos) = 0;
+        virtual void setRotationCentre (const Point<float>& rotationCentre) = 0;
+        virtual bool isRotating() const = 0;
     };
 
-    virtual DragOperation* createDragOperation (const MouseEvent& e,
+    virtual DragOperation* createDragOperation (const Point<int>& mouseDownPos,
                                                 Component* snapGuideParentComponent,
-                                                const ResizableBorderComponent::Zone& zone) = 0;
+                                                const ResizableBorderComponent::Zone& zone,
+                                                bool isRotating) = 0;
 
-    void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone);
+    virtual bool canRotate() const = 0;
+
+    void beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone,
+                    bool isRotating, const Point<float>& rotationCentre);
     void continueDrag (const MouseEvent& e);
     void endDrag (const MouseEvent& e);
 
@@ -111,6 +117,7 @@ public:
 
     bool isResizingMode() const         { return ! isControlPointMode(); }
     bool isControlPointMode() const     { return controlPointEditingTarget.isValid(); }
+    bool isRotating() const;
 
     //==============================================================================
     Component* getComponentHolder() const       { return componentHolder; }
@@ -118,7 +125,9 @@ public:
 
     const Point<int>& getOrigin() const throw()                             { return origin; }
     const Point<int> screenSpaceToObjectSpace (const Point<int>& p) const;
+    const Point<float> screenSpaceToObjectSpace (const Point<float>& p) const;
     const Point<int> objectSpaceToScreenSpace (const Point<int>& p) const;
+    const Point<float> objectSpaceToScreenSpace (const Point<float>& p) const;
     const Rectangle<int> screenSpaceToObjectSpace (const Rectangle<int>& r) const;
     const Rectangle<int> objectSpaceToScreenSpace (const Rectangle<int>& r) const;
 
@@ -130,6 +139,7 @@ public:
         ~OverlayItemComponent();
 
         void setBoundsInTargetSpace (const Rectangle<int>& r);
+        const Point<float> pointToLocalSpace (const Point<float>& p) const;
 
     protected:
         EditorCanvasBase* canvas;

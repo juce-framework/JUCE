@@ -35,7 +35,6 @@ class ItemPreviewComponent  : public Component
 public:
     //==============================================================================
     // This will delete the stream
-    ItemPreviewComponent (InputStream* input, const String& name);
     ItemPreviewComponent (const File& file);
     ~ItemPreviewComponent();
 
@@ -50,7 +49,7 @@ private:
     File file;
     Image image;
 
-    void tryToLoadImage (InputStream* input);
+    void tryToLoadImage();
 };
 
 

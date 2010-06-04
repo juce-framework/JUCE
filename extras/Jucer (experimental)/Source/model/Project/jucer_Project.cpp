@@ -411,6 +411,25 @@ Project::Item Project::createNewItem (const File& file)
     return item;
 }
 
+static void findImages (const Project::Item& item, OwnedArray<Project::Item>& found)
+{
+    if (item.isFile())
+    {
+        if (item.getFile().hasFileExtension ("png;jpg;jpeg;gif"))
+            found.add (new Project::Item (item));
+    }
+    else if (item.isGroup())
+    {
+        for (int i = 0; i < item.getNumChildren(); ++i)
+            findImages (item.getChild (i), found);
+    }
+}
+
+void Project::findAllImageItems (OwnedArray<Project::Item>& items)
+{
+    findImages (getMainGroup(), items);
+}
+
 //==============================================================================
 Project::Item::Item (Project& project_, const ValueTree& node_)
     : project (project_), node (node_)
@@ -426,7 +445,8 @@ Project::Item::~Item()
 {
 }
 
-const String Project::Item::getID() const  { return node [Ids::id_]; }
+const String Project::Item::getID() const               { return node [Ids::id_]; }
+const String Project::Item::getImageFileID() const      { return "id:" + getID(); }
 
 bool Project::Item::isFile() const         { return node.hasType (Tags::file); }
 bool Project::Item::isGroup() const        { return node.hasType (Tags::group) || isMainGroup(); }

@@ -26,19 +26,25 @@
 #ifndef __JUCER_FILLTYPEPROPERTYCOMPONENT_H_88CF1300__
 #define __JUCER_FILLTYPEPROPERTYCOMPONENT_H_88CF1300__
 
+#include "../model/Project/jucer_Project.h"
 class FillTypeEditorComponent;
+
 
 //==============================================================================
 class PopupFillSelector   : public Component,
                             public ChangeListener,
                             public ValueTree::Listener,
-                            public ButtonListener
+                            public ButtonListener,
+                            public AsyncUpdater
 {
 public:
-    PopupFillSelector (const ValueTree& fillState_, const ColourGradient& defaultGradient_, UndoManager* undoManager_)
+    PopupFillSelector (const ValueTree& fillState_, const ColourGradient& defaultGradient_,
+                       Drawable::ImageProvider* imageProvider_, Project* project, UndoManager* undoManager_)
         : gradientPicker (defaultGradient_),
           defaultGradient (defaultGradient_),
+          tilePicker (imageProvider_, project),
           fillState (fillState_),
+          imageProvider (imageProvider_),
           undoManager (undoManager_)
     {
         colourButton.setButtonText ("Colour");
@@ -59,6 +65,9 @@ public:
 
         addChildComponent (&gradientPicker);
         gradientPicker.addChangeListener (this);
+
+        addChildComponent (&tilePicker);
+        tilePicker.addChangeListener (this);
 
         fillState.addListener (this);
 
@@ -90,6 +99,7 @@ public:
         const Rectangle<int> content (2, y + h + 4, getWidth() - 4, getHeight() - (y + h + 6));
         colourPicker.setBounds (content);
         gradientPicker.setBounds (content);
+        tilePicker.setBounds (content);
     }
 
     void buttonClicked (Button* b)
@@ -109,7 +119,7 @@ public:
                 // Use a cunning trick to make the wrapper dig out the earlier gradient settings, if there are any..
                 FillType newFill (defaultGradient);
                 ValueTree temp ("dummy");
-                Drawable::ValueTreeWrapperBase::writeFillType (temp, newFill, 0, 0, 0);
+                Drawable::ValueTreeWrapperBase::writeFillType (temp, newFill, 0, 0, 0, 0);
 
                 fillState.setProperty (Drawable::ValueTreeWrapperBase::type, temp [Drawable::ValueTreeWrapperBase::type], undoManager);
                 newFill = readFillType (&gp1, &gp2);
@@ -117,11 +127,11 @@ public:
                 if (newFill.gradient->getNumColours() <= 1)
                 {
                     newFill = FillType (defaultGradient);
-                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, undoManager);
+                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, imageProvider, undoManager);
                 }
                 else
                 {
-                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, undoManager);
+                    Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, imageProvider, undoManager);
                 }
 
                 refresh();
@@ -137,7 +147,7 @@ public:
 
     const FillType readFillType (RelativePoint* gp1, RelativePoint* gp2) const
     {
-        return Drawable::ValueTreeWrapperBase::readFillType (fillState, gp1, gp2, 0);
+        return Drawable::ValueTreeWrapperBase::readFillType (fillState, gp1, gp2, 0, imageProvider);
     }
 
     void setFillType (const FillType& newFill)
@@ -150,7 +160,7 @@ public:
             if (undoManager != 0)
                 undoManager->undoCurrentTransactionOnly();
 
-            Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, undoManager);
+            Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, &gp1, &gp2, imageProvider, undoManager);
             refresh();
         }
     }
@@ -163,6 +173,8 @@ public:
             setFillType (colourPicker.getCurrentColour());
         else if (currentFill.isGradient())
             setFillType (gradientPicker.getGradient());
+        else if (currentFill.isTiledImage())
+            setFillType (tilePicker.getFill());
     }
 
     void refresh()
@@ -171,6 +183,7 @@ public:
 
         colourPicker.setVisible (newFill.isColour());
         gradientPicker.setVisible (newFill.isGradient());
+        tilePicker.setVisible (newFill.isTiledImage());
 
         if (newFill.isColour())
         {
@@ -182,7 +195,7 @@ public:
             if (newFill.gradient->getNumColours() <= 1)
             {
                 newFill = FillType (defaultGradient);
-                Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, undoManager);
+                Drawable::ValueTreeWrapperBase::writeFillType (fillState, newFill, 0, 0, imageProvider, undoManager);
             }
 
             gradientButton.setToggleState (true, false);
@@ -190,12 +203,14 @@ public:
         }
         else
         {
+            tilePicker.setFill (newFill);
             imageButton.setToggleState (true, false);
         }
     }
 
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { refresh(); }
-    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)                                 { refresh(); }
+    void handleAsyncUpdate()                                                                            { refresh(); }
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { triggerAsyncUpdate(); }
+    void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged)                                 { triggerAsyncUpdate(); }
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged)                                  {}
 
 private:
@@ -434,11 +449,123 @@ private:
     };
 
     //==============================================================================
+    class TiledFillDesigner  : public Component,
+                               public ChangeBroadcaster,
+                               public ComboBoxListener,
+                               public SliderListener
+    {
+    public:
+        TiledFillDesigner (Drawable::ImageProvider* imageProvider_, Project* project_)
+            : imageProvider (imageProvider_), project (project_)
+        {
+            addAndMakeVisible (&imageBox);
+            addAndMakeVisible (&opacitySlider);
+            opacitySlider.setRange (0.0, 1.0, 0.001);
+
+            sliderLabel.setText ("Opacity:", false);
+            sliderLabel.attachToComponent (&opacitySlider, false);
+
+            OwnedArray<Project::Item> images;
+            project->findAllImageItems (images);
+
+            for (int i = 0; i < images.size(); ++i)
+                imageBox.addItem (images.getUnchecked(i)->getName().toString(), i + 1);
+
+            imageBox.setTextWhenNothingSelected ("Select an image...");
+
+            opacitySlider.addListener (this);
+            imageBox.addListener (this);
+        }
+
+        ~TiledFillDesigner()
+        {
+        }
+
+        const FillType getFill() const
+        {
+            return fill;
+        }
+
+        void setFill (const FillType& newFill)
+        {
+            if (fill != newFill)
+            {
+                fill = newFill;
+
+                OwnedArray<Project::Item> images;
+                project->findAllImageItems (images);
+
+                const String currentID (imageProvider->getIdentifierForImage (fill.image).toString());
+                int idToSelect = -1;
+                for (int i = 0; i < images.size(); ++i)
+                {
+                    if (images.getUnchecked(i)->getImageFileID() == currentID)
+                    {
+                        idToSelect = i + 1;
+                        break;
+                    }
+                }
+
+                imageBox.setSelectedId (idToSelect, true);
+                opacitySlider.setValue (fill.getOpacity(), false, false);
+            }
+        }
+
+        void resized()
+        {
+            imageBox.setBounds (20, 10, getWidth() - 40, 22);
+            opacitySlider.setBounds (20, 60, getWidth() - 40, 22);
+        }
+
+        void sliderValueChanged (Slider* slider)
+        {
+            if (opacitySlider.getValue() != fill.getOpacity())
+            {
+                FillType f (fill);
+                f.setOpacity ((float) opacitySlider.getValue());
+                setFill (f);
+                sendChangeMessage (this);
+            }
+        }
+
+        void comboBoxChanged (ComboBox* comboBoxThatHasChanged)
+        {
+            OwnedArray<Project::Item> images;
+            project->findAllImageItems (images);
+
+            Project::Item* item = images [imageBox.getSelectedId() - 1];
+            if (item != 0)
+            {
+                Image im (imageProvider->getImageForIdentifier (item->getImageFileID()));
+
+                if (im.isValid() && im != fill.image)
+                {
+                    FillType f (fill);
+                    f.image = im;
+                    setFill (f);
+                    sendChangeMessage (this);
+                }
+            }
+        }
+
+    private:
+        FillType fill;
+        Drawable::ImageProvider* imageProvider;
+        Project* project;
+
+        ComboBox imageBox;
+        Slider opacitySlider;
+        Label sliderLabel;
+    };
+
+    //==============================================================================
     FillTypeEditorComponent* owner;
     StoredSettings::ColourSelectorWithSwatches colourPicker;
     GradientDesigner gradientPicker;
+    TiledFillDesigner tilePicker;
     ColourGradient defaultGradient;
     ValueTree fillState;
+    Drawable::ImageProvider* imageProvider;
     UndoManager* undoManager;
 
     TextButton colourButton, gradientButton, imageButton;
@@ -454,8 +581,10 @@ class FillTypeEditorComponent    : public Component,
                                    public ValueTree::Listener
 {
 public:
-    FillTypeEditorComponent (const ValueTree& fillState_, UndoManager* undoManager_)
-        : fillState (fillState_), undoManager (undoManager_)
+    FillTypeEditorComponent (const ValueTree& fillState_, Drawable::ImageProvider* imageProvider_,
+                             Project* project_, UndoManager* undoManager_)
+        : fillState (fillState_), undoManager (undoManager_),
+          imageProvider (imageProvider_), project (project_)
     {
         fillState.addListener (this);
         refresh();
@@ -498,7 +627,7 @@ public:
 
     void refresh()
     {
-        const FillType newFill (Drawable::ValueTreeWrapperBase::readFillType (fillState, 0, 0, 0));
+        const FillType newFill (Drawable::ValueTreeWrapperBase::readFillType (fillState, 0, 0, 0, imageProvider));
 
         if (newFill != fillType)
         {
@@ -511,7 +640,7 @@ public:
     {
         undoManager->beginNewTransaction();
 
-        PopupFillSelector popup (fillState, getDefaultGradient(), undoManager);
+        PopupFillSelector popup (fillState, getDefaultGradient(), imageProvider, project, undoManager);
 
         PopupMenu m;
         m.addCustomItem (1234, &popup, 300, 450, false);
@@ -526,7 +655,9 @@ public:
 
 private:
     ValueTree fillState;
+    Drawable::ImageProvider* imageProvider;
     UndoManager* undoManager;
+    Project* project;
     FillType fillType;
 };
 
@@ -536,9 +667,10 @@ class FillTypePropertyComponent  : public PropertyComponent
 {
 public:
     //==============================================================================
-    FillTypePropertyComponent (UndoManager* undoManager, const String& name, const ValueTree& fill)
+    FillTypePropertyComponent (UndoManager* undoManager, const String& name, const ValueTree& fill,
+                               Drawable::ImageProvider* imageProvider, Project* project)
         : PropertyComponent (name),
-          editor (fill, undoManager)
+          editor (fill, imageProvider, project, undoManager)
     {
         jassert (fill.isValid());
         addAndMakeVisible (&editor);

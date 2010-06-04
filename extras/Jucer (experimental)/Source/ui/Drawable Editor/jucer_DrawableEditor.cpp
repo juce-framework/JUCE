@@ -115,14 +115,57 @@ const StringArray DrawableEditor::getSelectedIds() const
 
 void DrawableEditor::deleteSelection()
 {
+    getUndoManager()->beginNewTransaction();
+    DrawableComposite::ValueTreeWrapper root (getDocument().getRootDrawableNode());
+
+    const StringArray ids (getSelectedIds());
+    for (int i = ids.size(); --i >= 0;)
+    {
+        const ValueTree v (root.getDrawableWithId (ids[i], false));
+        root.removeDrawable (v, getUndoManager());
+    }
+
+    getUndoManager()->beginNewTransaction();
 }
 
 void DrawableEditor::selectionToFront()
 {
+    getUndoManager()->beginNewTransaction();
+
+    DrawableComposite::ValueTreeWrapper root (getDocument().getRootDrawableNode());
+    int index = 0;
+
+    for (int i = root.getNumDrawables(); --i >= 0;)
+    {
+        const Drawable::ValueTreeWrapperBase d (root.getDrawableState (index));
+
+        if (getSelection().isSelected (d.getID()))
+            root.moveDrawableOrder (index, -1, getUndoManager());
+        else
+            ++index;
+    }
+
+    getUndoManager()->beginNewTransaction();
 }
 
 void DrawableEditor::selectionToBack()
 {
+    getUndoManager()->beginNewTransaction();
+
+    DrawableComposite::ValueTreeWrapper root (getDocument().getRootDrawableNode());
+    int index = root.getNumDrawables() - 1;
+
+    for (int i = root.getNumDrawables(); --i >= 0;)
+    {
+        const Drawable::ValueTreeWrapperBase d (root.getDrawableState (index));
+
+        if (getSelection().isSelected (d.getID()))
+            root.moveDrawableOrder (index, 0, getUndoManager());
+        else
+            --index;
+    }
+
+    getUndoManager()->beginNewTransaction();
 }
 
 void DrawableEditor::showNewShapeMenu (Component* componentToAttachTo)
@@ -130,7 +173,11 @@ void DrawableEditor::showNewShapeMenu (Component* componentToAttachTo)
     PopupMenu m;
     getDocument().addNewItemMenuItems (m);
     const int r = m.showAt (componentToAttachTo);
-    getDocument().performNewItemMenuItem (r);
+
+    ValueTree newItem (getDocument().performNewItemMenuItem (r));
+
+    if (newItem.isValid())
+        getSelection().selectOnly (Drawable::ValueTreeWrapperBase (newItem).getID());
 }
 
 //==============================================================================
@@ -213,13 +260,13 @@ bool DrawableEditor::perform (const InvocationInfo& info)
     switch (info.commandID)
     {
     case CommandIDs::undo:
-        getDocument().getUndoManager()->beginNewTransaction();
-        getDocument().getUndoManager()->undo();
+        getUndoManager()->beginNewTransaction();
+        getUndoManager()->undo();
         return true;
 
     case CommandIDs::redo:
-        getDocument().getUndoManager()->beginNewTransaction();
-        getDocument().getUndoManager()->redo();
+        getUndoManager()->beginNewTransaction();
+        getUndoManager()->redo();
         return true;
 
     case CommandIDs::toFront:

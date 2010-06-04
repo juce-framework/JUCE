@@ -31,44 +31,41 @@
 ItemPreviewComponent::ItemPreviewComponent (const File& file_)
     : file (file_)
 {
-    facts.add (file.getFullPathName());
-    tryToLoadImage (file.createInputStream());
-    facts.removeEmptyStrings (true);
-}
-
-ItemPreviewComponent::ItemPreviewComponent (InputStream* input, const String& name)
-{
-    facts.add (name);
-    tryToLoadImage (input);
-    facts.removeEmptyStrings (true);
+    tryToLoadImage();
 }
 
 ItemPreviewComponent::~ItemPreviewComponent()
 {
 }
 
-void ItemPreviewComponent::tryToLoadImage (InputStream* in)
+void ItemPreviewComponent::tryToLoadImage()
 {
-    if (in != 0)
-    {
-        ScopedPointer <InputStream> input (in);
+    facts.clear();
+    facts.add (file.getFullPathName());
+    image = Image();
 
+    ScopedPointer <InputStream> input (file.createInputStream());
+
+    if (input != 0)
+    {
+        const int64 totalSize = input->getTotalLength();
         ImageFileFormat* format = ImageFileFormat::findImageFormatForStream (*input);
+        input = 0;
 
         String formatName;
         if (format != 0)
             formatName = " " + format->getFormatName();
 
-        image = ImageFileFormat::loadFrom (*input);
+        image = ImageCache::getFromFile (file);
 
         if (image.isValid())
             facts.add (String (image.getWidth()) + " x " + String (image.getHeight()) + formatName);
 
-        const int64 totalSize = input->getTotalLength();
-
         if (totalSize > 0)
             facts.add (File::descriptionOfSizeInBytes (totalSize));
     }
+
+    facts.removeEmptyStrings (true);
 }
 
 void ItemPreviewComponent::paint (Graphics& g)

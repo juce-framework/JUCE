@@ -33,13 +33,14 @@
 class EditorDragOperation  : public EditorCanvasBase::DragOperation
 {
 public:
-    EditorDragOperation (EditorCanvasBase* canvas_, const MouseEvent& e, const Point<int>& mousePos,
-                         Component* snapGuideParentComp_,
-                         const ResizableBorderComponent::Zone& zone_)
+    EditorDragOperation (EditorCanvasBase* canvas_, const Point<int>& mousePos,
+                         Component* snapGuideParentComp_, const ResizableBorderComponent::Zone& zone_,
+                         bool rotating_)
         : canvas (canvas_),
           snapGuideParentComp (snapGuideParentComp_),
           zone (zone_),
-          mouseDownPos (mousePos)
+          mouseDownPos (mousePos),
+          rotating (rotating_)
     {
     }
 
@@ -141,6 +142,16 @@ public:
         getUndoManager().beginNewTransaction();
     }
 
+    void setRotationCentre (const Point<float>& rotationCentre)
+    {
+        centre = rotationCentre;
+    }
+
+    bool isRotating() const
+    {
+        return rotating;
+    }
+
     //==============================================================================
     struct SnapLine
     {
@@ -195,31 +206,35 @@ public:
     {
         getUndoManager().undoCurrentTransactionOnly();
 
-        // (can't use getOffsetFromDragStart() because of auto-scrolling)
-        Point<int> distance (newPos - mouseDownPos);
-        if (! isDraggingLeftRight())
-            distance = distance.withX (0);
-
-        if (! isDraggingUpDown())
-            distance = distance.withY (0);
-
-        snapGuides.clear();
-
-        if (canvas->getPanel()->isSnappingEnabled() != (e.mods.isCommandDown() || e.mods.isCtrlDown()))
+        if (rotating)
         {
-            performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
-            performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
+            const float angle = centre.getAngleToPoint (mouseDownPos.toFloat()) - centre.getAngleToPoint (newPos.toFloat());
+            const AffineTransform transform (AffineTransform::rotation (angle, centre.getX(), centre.getY()));
+
+            for (int i = 0; i < updateList.size(); ++i)
+                transformObject (updateList.getReference(i), transform);
         }
+        else
+        {
+            // (can't use getOffsetFromDragStart() because of auto-scrolling)
+            Point<int> distance (newPos - mouseDownPos);
+            if (! isDraggingLeftRight())
+                distance = distance.withX (0);
 
-        for (int i = 0; i < updateList.size(); ++i)
-            dragItem (updateList.getReference(i), distance, originalPositions.getReference(i));
-    }
+            if (! isDraggingUpDown())
+                distance = distance.withY (0);
 
-    void dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<float>& originalPos)
-    {
-        const Rectangle<float> newBounds (zone.resizeRectangleBy (originalPos, Point<float> ((float) distance.getX(),
-                                                                                             (float) distance.getY())));
-        setObjectPosition (v, newBounds);
+            snapGuides.clear();
+
+            if (canvas->getPanel()->isSnappingEnabled() != (e.mods.isCommandDown() || e.mods.isCtrlDown()))
+            {
+                performSnap (verticalSnapTargets, getVerticalSnapPositions (distance), true, distance);
+                performSnap (horizontalSnapTargets, getHorizontalSnapPositions (distance), false, distance);
+            }
+
+            for (int i = 0; i < updateList.size(); ++i)
+                dragItem (updateList.getReference(i), distance, originalPositions.getReference(i));
+        }
     }
 
 protected:
@@ -231,6 +246,7 @@ protected:
     virtual void getObjectDependencies (const ValueTree& state, Array<ValueTree>& deps) = 0;
     virtual const Rectangle<float> getObjectPosition (const ValueTree& state) = 0;
     virtual void setObjectPosition (ValueTree& state, const Rectangle<float>& newBounds) = 0;
+    virtual void transformObject (ValueTree& state, const AffineTransform& transform) = 0;
 
     virtual UndoManager& getUndoManager() = 0;
 
@@ -246,6 +262,15 @@ private:
     OwnedArray<Component> snapGuides;
     Component* snapGuideParentComp;
     Point<int> mouseDownPos;
+    Point<float> centre;
+    bool rotating;
+
+    void dragItem (ValueTree& v, const Point<int>& distance, const Rectangle<float>& originalPos)
+    {
+        const Rectangle<float> newBounds (zone.resizeRectangleBy (originalPos, Point<float> ((float) distance.getX(),
+                                                                                             (float) distance.getY())));
+        setObjectPosition (v, newBounds);
+    }
 
     void getCompleteDependencyList (const ValueTree& object, Array <ValueTree>& deps, const Array<ValueTree>& activeObjects)
     {

@@ -56,10 +56,10 @@ DrawableDocument::~DrawableDocument()
     root.removeListener (this);
 }
 
-void DrawableDocument::recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d)
+void DrawableDocument::recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d, StringArray& recentlyUsedIdCache)
 {
     if (d.getID().isEmpty())
-        d.setID (createUniqueID (d.getState().getType().toString().toLowerCase() + "1"), 0);
+        d.setID (createUniqueID (d.getState().getType().toString().toLowerCase() + "1", recentlyUsedIdCache), 0);
 
     if (d.getState().getType() == DrawableComposite::valueTreeType)
     {
@@ -68,7 +68,7 @@ void DrawableDocument::recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d)
         for (int i = 0; i < composite.getNumDrawables(); ++i)
         {
             Drawable::ValueTreeWrapperBase child (composite.getDrawableState (i));
-            recursivelyUpdateIDs (child);
+            recursivelyUpdateIDs (child, recentlyUsedIdCache);
         }
     }
 }
@@ -85,7 +85,13 @@ void DrawableDocument::checkRootObject()
         markersY = new MarkerList (*this, false);
 
     DrawableComposite::ValueTreeWrapper rootObject (getRootDrawableNode());
-    recursivelyUpdateIDs (rootObject);
+    StringArray idCache;
+    recursivelyUpdateIDs (rootObject, idCache);
+}
+
+const String DrawableDocument::getUniqueId() const
+{
+    return root [Ids::id_];
 }
 
 //==============================================================================
@@ -201,26 +207,59 @@ ValueTree DrawableDocument::findDrawableState (const String& objectId, bool recu
     return getRootDrawableNode().getDrawableWithId (objectId, recursive);
 }
 
-const String DrawableDocument::createUniqueID (const String& name) const
+const String DrawableDocument::createUniqueID (const String& name, StringArray& recentlyUsedIdCache) const
 {
     String n (CodeHelpers::makeValidIdentifier (name, false, true, false));
     int suffix = 2;
+    int cacheIndex = -1;
+
+    const String withoutNumbers (n.trimCharactersAtEnd ("0123456789"));
+
+    for (int i = 0; i < recentlyUsedIdCache.size(); ++i)
+    {
+        if (recentlyUsedIdCache[i].startsWith (withoutNumbers))
+        {
+            cacheIndex = i;
+            suffix = jmax (suffix, recentlyUsedIdCache[i].substring (withoutNumbers.length()).getIntValue() + 1);
+            n = withoutNumbers + String (suffix++);
+            break;
+        }
+    }
 
     while (markersX->getMarkerNamed (n).isValid() || markersY->getMarkerNamed (n).isValid()
             || findDrawableState (n, true).isValid())
-        n = n.trimCharactersAtEnd ("0123456789") + String (suffix++);
+        n = withoutNumbers + String (suffix++);
+
+    if (cacheIndex >= 0)
+        recentlyUsedIdCache.set (cacheIndex, n);
+    else
+        recentlyUsedIdCache.add (n);
 
     return n;
 }
 
 bool DrawableDocument::createItemProperties (Array <PropertyComponent*>& props, const String& itemId)
 {
-    ValueTree drawable (findDrawableState (itemId, false));
+    ValueTree drawable (findDrawableState (itemId.upToFirstOccurrenceOf ("/", false, false), false));
 
     if (drawable.isValid())
     {
         DrawableTypeInstance item (*this, drawable);
-        item.createProperties (props);
+
+        if (itemId.containsChar ('/'))
+        {
+            OwnedArray <ControlPoint> points;
+            item.getAllControlPoints (points);
+
+            for (int i = 0; i < points.size(); ++i)
+                if (points.getUnchecked(i)->getID() == itemId)
+                    points.getUnchecked(i)->createProperties (*this, props);
+        }
+        else
+        {
+            item.createProperties (props);
+        }
+
         return true;
     }
 
@@ -264,8 +303,8 @@ const ValueTree DrawableDocument::performNewItemMenuItem (int menuResultCode)
                                                            Random::getSystemRandom().nextFloat() * 100.0f + 100.0f)));
 
         Drawable::ValueTreeWrapperBase wrapper (state);
-        recursivelyUpdateIDs (wrapper);
-
+        StringArray idCache;
+        recursivelyUpdateIDs (wrapper, idCache);
         getRootDrawableNode().addDrawable (state, -1, getUndoManager());
 
         return state;
@@ -274,15 +313,80 @@ const ValueTree DrawableDocument::performNewItemMenuItem (int menuResultCode)
     return ValueTree::invalid;
 }
 
+const ValueTree DrawableDocument::insertSVG (const File& file, const Point<float>& position)
+{
+    ScopedPointer<Drawable> d (Drawable::createFromImageFile (file));
+    DrawableComposite* dc = dynamic_cast <DrawableComposite*> (static_cast <Drawable*> (d));
+
+    if (dc != 0)
+    {
+        ValueTree state (dc->createValueTree (this));
+
+        if (state.isValid())
+        {
+            Drawable::ValueTreeWrapperBase wrapper (state);
+            getRootDrawableNode().addDrawable (state, -1, getUndoManager());
+            StringArray idCache;
+            recursivelyUpdateIDs (wrapper, idCache);
+
+            return state;
+        }
+    }
+
+    return ValueTree::invalid;
+}
+
 //==============================================================================
 const Image DrawableDocument::getImageForIdentifier (const var& imageIdentifier)
 {
-    return ImageCache::getFromMemory (BinaryData::juce_icon_png, BinaryData::juce_icon_pngSize);
+    const String s (imageIdentifier.toString());
+
+    if (s.startsWithIgnoreCase ("id:"))
+    {
+        jassert (project != 0);
+
+        if (project != 0)
+        {
+            Project::Item item (project->getMainGroup().findItemWithID (s.substring (3).trim()));
+
+            if (item.isValid())
+            {
+                Image im (ImageCache::getFromFile (item.getFile()));
+
+                if (im.isValid())
+                {
+                    im.setTag (imageIdentifier);
+                    return im;
+                }
+            }
+        }
+    }
+
+    static Image dummy;
+
+    if (dummy.isNull())
+    {
+        dummy = Image (Image::ARGB, 128, 128, true);
+        Graphics g (dummy);
+        g.fillAll (Colours::khaki.withAlpha (0.51f));
+        g.setColour (Colours::grey);
+        g.drawRect (0, 0, 128, 128);
+
+        for (int i = -128; i < 128; i += 16)
+            g.drawLine (i, 0, i + 128, 128);
+
+        g.setColour (Colours::darkgrey);
+        g.drawRect (0, 0, 128, 128);
+        g.setFont (16.0f, Font::bold);
+        g.drawText ("(Image Missing)", 0, 0, 128, 128, Justification::centred, false);
+    }
+
+    return dummy;
 }
 
 const var DrawableDocument::getIdentifierForImage (const Image& image)
 {
-    return var::null; //xxx todo
+    return image.getTag();
 }
 
 //==============================================================================
@@ -403,50 +507,40 @@ bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>&
     return false;
 }
 
-void DrawableDocument::addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge, PopupMenu& menu,
-                                          bool isAnchor1, const String& fullCoordName)
+void DrawableDocument::MarkerList::addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& name, const String& edge, PopupMenu& menu,
+                                                      bool isAnchor1, const String& fullCoordName)
 {
-//    RelativeCoordinate requestedCoord (findNamedCoordinate (objectName, edge, coord.isHorizontal()));
+    RelativeCoordinate requestedCoord (findNamedCoordinate (name, edge));
 
-//    menu.addItem (i, name,
-  //                ! (name == fullCoordName || requestedCoord.referencesIndirectly (fullCoordName, *this)),
-    //              name == (isAnchor1 ? coord.getAnchor1() : coord.getAnchor2()));
+    menu.addItem (i, edge.isEmpty() ? name : (name + "." + edge),
+                  ! (name == fullCoordName || (fullCoordName.isNotEmpty() && requestedCoord.references (fullCoordName, this))),
+                  name == (isAnchor1 ? coord.getAnchorName1() : coord.getAnchorName2()));
 }
 
 void DrawableDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerState, const RelativeCoordinate& coord, PopupMenu& menu, bool isAnchor1)
 {
-/*    const String fullCoordName (getName (markerState));
+    const String fullCoordName (getName (markerState));
 
-    if (coord.isHorizontal())
-    {
-        document.addMarkerMenuItem (1, coord, "parent", "left", menu, isAnchor1, fullCoordName);
-        document.addMarkerMenuItem (2, coord, "parent", "right", menu, isAnchor1, fullCoordName);
-    }
+    if (isHorizontal())
+        addMarkerMenuItem (1, coord, "parent", "left", menu, isAnchor1, fullCoordName);
     else
-    {
-        document.addMarkerMenuItem (1, coord, "parent", "top", menu, isAnchor1, fullCoordName);
-        document.addMarkerMenuItem (2, coord, "parent", "bottom", menu, isAnchor1, fullCoordName);
-    }
+        addMarkerMenuItem (1, coord, "parent", "top", menu, isAnchor1, fullCoordName);
 
     menu.addSeparator();
-    const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
 
-    for (int i = 0; i < markerList.size(); ++i)
-        document.addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)),
-                                    String::empty, menu, isAnchor1, fullCoordName);*/
+    for (int i = 0; i < size(); ++i)
+        addMarkerMenuItem (100 + i, coord, getName (getMarker (i)),
+                           String::empty, menu, isAnchor1, fullCoordName);
 }
 
 const String DrawableDocument::MarkerList::getChosenMarkerMenuItem (const RelativeCoordinate& coord, int i) const
 {
-/*    if (i == 1)  return coord.isHorizontal() ? "parent.left" : "parent.top";
-    if (i == 2)  return coord.isHorizontal() ? "parent.right" : "parent.bottom";
-
-    const MarkerList& markerList = document.getMarkerList (coord.isHorizontal());
+    if (i == 1)  return isHorizontal() ? "parent.left" : "parent.top";
 
     if (i >= 100 && i < 10000)
-        return markerList.getName (markerList.getMarker (i - 100));
+        return getName (getMarker (i - 100));
 
-    jassertfalse;*/
+    jassertfalse;
     return String::empty;
 }
 

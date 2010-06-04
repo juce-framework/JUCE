@@ -761,10 +761,9 @@ void ComponentDocument::MarkerList::addMarkerMenuItems (const ValueTree& markerS
     }
 
     menu.addSeparator();
-    const MarkerList& markerList = document.getMarkerList (isX);
 
-    for (int i = 0; i < markerList.size(); ++i)
-        document.addMarkerMenuItem (100 + i, coord, markerList.getName (markerList.getMarker (i)),
+    for (int i = 0; i < size(); ++i)
+        document.addMarkerMenuItem (100 + i, coord, getName (getMarker (i)),
                                     String::empty, menu, isAnchor1, fullCoordName);
 }
 
@@ -773,10 +772,8 @@ const String ComponentDocument::MarkerList::getChosenMarkerMenuItem (const Relat
     if (i == 1)  return isX ? "parent.left" : "parent.top";
     if (i == 2)  return isX ? "parent.right" : "parent.bottom";
 
-    const MarkerList& markerList = document.getMarkerList (isX);
-
     if (i >= 100 && i < 10000)
-        return markerList.getName (markerList.getMarker (i - 100));
+        return getName (getMarker (i - 100));
 
     jassertfalse;
     return String::empty;

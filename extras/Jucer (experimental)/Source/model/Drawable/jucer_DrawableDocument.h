@@ -49,16 +49,20 @@ public:
     bool hasChangedSinceLastSave() const;
     void changed();
 
+    Project* getProject() const throw()     { return project; }
+    const String getUniqueId() const;
+
     ValueTree& getRoot()                    { return root; }
     DrawableComposite::ValueTreeWrapper getRootDrawableNode() const;
 
     ValueTree findDrawableState (const String& objectId, bool recursive) const;
-    const String createUniqueID (const String& suggestion) const;
+    const String createUniqueID (const String& suggestion, StringArray& recentlyUsedIdCache) const;
 
     void createItemProperties (Array <PropertyComponent*>& props, const StringArray& selectedItemIds);
 
     void addNewItemMenuItems (PopupMenu& menu) const;
     const ValueTree performNewItemMenuItem (int menuResultCode);
+    const ValueTree insertSVG (const File& file, const Point<float>& position);
 
     //==============================================================================
     class MarkerList    : public MarkerListBase
@@ -85,6 +89,9 @@ public:
     private:
         DrawableDocument& document;
         DrawableComposite::ValueTreeWrapper object;
+
+        void addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge,
+                                PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 
         MarkerList (const MarkerList&);
         MarkerList& operator= (const MarkerList&);
@@ -116,7 +123,7 @@ private:
     bool saveAsXml, needsSaving;
 
     void checkRootObject();
-    void recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d);
+    void recursivelyUpdateIDs (Drawable::ValueTreeWrapperBase& d, StringArray& recentlyUsedIdCache);
 
     Value getRootValueUndoable (const Identifier& name) const        { return root.getPropertyAsValue (name, getUndoManager()); }
     Value getRootValueNonUndoable (const Identifier& name) const     { return root.getPropertyAsValue (name, 0); }
@@ -127,8 +134,6 @@ private:
     bool createItemProperties (Array <PropertyComponent*>& props, const String& itemId);
 
     const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
-    void addMarkerMenuItem (int i, const RelativeCoordinate& coord, const String& objectName, const String& edge,
-                            PopupMenu& menu, bool isAnchor1, const String& fullCoordName);
 };
 
 

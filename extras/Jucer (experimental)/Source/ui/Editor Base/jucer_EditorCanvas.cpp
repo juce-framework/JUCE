@@ -38,7 +38,9 @@ public:
           objectState (objectState_),
           objectId (objectId_),
           borderThickness (4),
-          isDragging (false)
+          isDragging (false),
+          isRotating (false),
+          canRotate (canvas_->canRotate())
     {
         jassert (objectState.isValid());
     }
@@ -49,8 +51,13 @@ public:
 
     void paint (Graphics& g)
     {
-        g.setColour (resizableBorderColour);
-        g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
+        if (! canvas->isRotating())
+        {
+            g.setColour (resizableBorderColour);
+            g.drawRect (0, 0, getWidth(), getHeight(), borderThickness);
+
+            g.fillRect (rotateArea);
+        }
     }
 
     void mouseEnter (const MouseEvent& e)                       { updateDragZone (e.getPosition()); }
@@ -60,36 +67,47 @@ public:
     void mouseDown (const MouseEvent& e)
     {
         updateDragZone (e.getPosition());
+        isDragging = false;
 
         if (e.mods.isPopupMenu())
         {
-            isDragging = false;
             canvas->showPopupMenu (true);
-        }
-        else
-        {
-            isDragging = true;
-            canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()).getEventRelativeTo (getParentComponent()), dragZone);
-            canvas->showSizeGuides();
         }
     }
 
     void mouseDrag (const MouseEvent& e)
     {
+        if (! (isDragging || e.mods.isPopupMenu() || e.mouseWasClicked()))
+        {
+            isDragging = true;
+            bool isRotating = rotateArea.contains (e.getMouseDownPosition());
+
+            canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()),
+                               dragZone, isRotating, canvas->getObjectPosition (objectState).getCentre().toFloat());
+
+            if (! isRotating)
+                canvas->showSizeGuides();
+
+            repaint();
+        }
+
         if (isDragging)
         {
-            canvas->continueDrag (e.getEventRelativeTo (getParentComponent()));
+            canvas->continueDrag (e);
             autoScrollForMouseEvent (e);
         }
     }
 
     void mouseUp (const MouseEvent& e)
     {
-        if (isDragging)
+        if (isDragging || isRotating)
         {
+            isRotating = false;
             canvas->hideSizeGuides();
-            canvas->endDrag (e.getEventRelativeTo (getParentComponent()));
+            canvas->endDrag (e);
             updateDragZone (e.getPosition());
+
+            repaint();
         }
     }
 
@@ -101,7 +119,7 @@ public:
     bool hitTest (int x, int y)
     {
         if (ModifierKeys::getCurrentModifiers().isAnyModifierKeyDown())
-            return ! getCentreArea().contains (x, y);
+            return rotateArea.contains (x, y) || ! getCentreArea().contains (x, y);
 
         return true;
     }
@@ -114,6 +132,9 @@ public:
         const Rectangle<int> bounds (canvas->getObjectPosition (objectState));
         setBoundsInTargetSpace (bounds.expanded (borderThickness, borderThickness));
 
+        if (canRotate)
+            rotateArea = Rectangle<int> (2, 2, 10, 10);
+
         int i;
         for (i = sizeGuides.size(); --i >= 0;)
         {
@@ -125,7 +146,6 @@ public:
     }
 
     const String& getTargetObjectID() const     { return objectId; }
-
 
     //==============================================================================
     class SizeGuideComponent   : public OverlayItemComponent,
@@ -200,7 +220,8 @@ private:
     ResizableBorderComponent::Zone dragZone;
     const int borderThickness;
     OwnedArray <SizeGuideComponent> sizeGuides;
-    bool isDragging;
+    Rectangle<int> rotateArea;
+    bool isDragging, canRotate, isRotating;
 
     const Rectangle<int> getCentreArea() const
     {
@@ -467,7 +488,9 @@ public:
                 isDraggingClickedComp = true;
                 canvas->enableResizingMode();
                 getSelection().addToSelectionOnMouseUp (mouseDownCompUID, e.mods, true, mouseDownResult);
-                canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()), ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre));
+                canvas->beginDrag (e.withNewPosition (e.getMouseDownPosition()),
+                                   ResizableBorderComponent::Zone (ResizableBorderComponent::Zone::centre),
+                                   false, Point<float>());
             }
 
             if (isDraggingClickedComp)
@@ -843,6 +866,16 @@ const Point<int> EditorCanvasBase::objectSpaceToScreenSpace (const Point<int>& p
     return p + origin;
 }
 
+const Point<float> EditorCanvasBase::screenSpaceToObjectSpace (const Point<float>& p) const
+{
+    return p - origin.toFloat();
+}
+
+const Point<float> EditorCanvasBase::objectSpaceToScreenSpace (const Point<float>& p) const
+{
+    return p + origin.toFloat();
+}
+
 const Rectangle<int> EditorCanvasBase::screenSpaceToObjectSpace (const Rectangle<int>& r) const
 {
     return r - origin;
@@ -866,6 +899,11 @@ void EditorCanvasBase::enableControlPointMode (const ValueTree& objectToEdit)
         getSelection().deselectAll();
         overlay->update();
     }
+}
+
+bool EditorCanvasBase::isRotating() const
+{
+    return dragger != 0 && dragger->isRotating();
 }
 
 //==============================================================================
@@ -927,6 +965,9 @@ void EditorCanvasBase::handleAsyncUpdate()
     const Rectangle<int> canvasBounds (getCanvasBounds());
 
     const Point<int> newOrigin (jmax (0, -canvasBounds.getX()), jmax (0, -canvasBounds.getY()));
+    const int newWidth = jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight();
+    const int newHeight = jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom();
+
     if (origin != newOrigin)
     {
         repaint();
@@ -936,16 +977,16 @@ void EditorCanvasBase::handleAsyncUpdate()
 
         setBounds (jmin (0, getX() + oldOrigin.getX() - origin.getX()),
                    jmin (0, getY() + oldOrigin.getY() - origin.getY()),
-                   jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
-                   jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+                   newWidth, newHeight);
+    }
+    else if (getWidth() != newWidth || getHeight() != newHeight)
+    {
+        setSize (newWidth, newHeight);
     }
     else
     {
-        setSize (jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight(),
-                 jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom());
+        overlay->update();
     }
-
-    overlay->update();
 }
 
 void EditorCanvasBase::resized()
@@ -954,6 +995,7 @@ void EditorCanvasBase::resized()
     overlay->setBounds (getLocalBounds());
     resizeFrame->setBounds (getLocalBounds());
     overlay->update();
+    handleUpdateNowIfNeeded();
 }
 
 //==============================================================================
@@ -962,25 +1004,33 @@ void EditorCanvasBase::hideSizeGuides()   { overlay->hideSizeGuides(); }
 
 
 //==============================================================================
-void EditorCanvasBase::beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone)
+void EditorCanvasBase::beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone,
+                                  bool isRotating, const Point<float>& rotationCentre)
 {
-    dragger = createDragOperation (e, overlay, zone);
+    dragger = createDragOperation (e.getEventRelativeTo (overlay).getPosition() - origin, overlay, zone, isRotating);
+    dragger->setRotationCentre (rotationCentre);
+    repaint();
 }
 
 void EditorCanvasBase::continueDrag (const MouseEvent& e)
 {
+    MouseEvent e2 (e.getEventRelativeTo (overlay));
+
     if (dragger != 0)
-        dragger->drag (e, e.getPosition() - origin);
+        dragger->drag (e2, e2.getPosition() - origin);
 }
 
 void EditorCanvasBase::endDrag (const MouseEvent& e)
 {
     if (dragger != 0)
     {
-        dragger->drag (e, e.getPosition() - origin);
+        MouseEvent e2 (e.getEventRelativeTo (overlay));
+        dragger->drag (e2, e2.getPosition() - origin);
         dragger = 0;
 
         getUndoManager().beginNewTransaction();
+
+        repaint();
     }
 }
 
@@ -998,4 +1048,11 @@ void EditorCanvasBase::OverlayItemComponent::setBoundsInTargetSpace (const Recta
 {
     setBounds (canvas->objectSpaceToScreenSpace (r)
                 + canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>()));
+}
+
+const Point<float> EditorCanvasBase::OverlayItemComponent::pointToLocalSpace (const Point<float>& p) const
+{
+    return canvas->objectSpaceToScreenSpace (p)
+            + (canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>())
+                - getPosition()).toFloat();
 }

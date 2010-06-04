@@ -28,21 +28,35 @@
 
 #include "jucer_DrawableDocument.h"
 #include "../../utility/jucer_FillTypePropertyComponent.h"
+#include "../../ui/Editor Base/jucer_EditorCanvas.h"
 class DrawableTypeHandler;
+
 
 //==============================================================================
 class ControlPoint
 {
 public:
-    ControlPoint() {}
+    ControlPoint (const String& pointID_) : pointID (pointID_) {}
     virtual ~ControlPoint() {}
+
+    const String& getID() const throw()         { return pointID; }
 
     virtual const RelativePoint getPosition() = 0;
     virtual void setPosition (const RelativePoint& newPoint, UndoManager* undoManager) = 0;
 
     virtual bool hasLine() = 0;
     virtual RelativePoint getEndOfLine() = 0;
+
+    virtual const Value getPositionValue (UndoManager* undoManager) = 0;
+    virtual void createProperties (DrawableDocument& document, Array <PropertyComponent*>& props) = 0;
+
+private:
+    const String pointID;
+
+    ControlPoint (const ControlPoint&);
+    ControlPoint& operator= (const ControlPoint&);
 };
+
 
 //==============================================================================
 class DrawableTypeInstance  : public RelativeCoordinate::NamedCoordinateFinder
@@ -52,13 +66,17 @@ public:
 
     //==============================================================================
     DrawableDocument& getDocument() throw()             { return document; }
+    Project* getProject()                               { return document.getProject(); }
     ValueTree& getState() throw()                       { return state; }
+    const String getID() const                          { return Drawable::ValueTreeWrapperBase (state).getID(); }
 
     Value getValue (const Identifier& name) const;
     void createProperties (Array <PropertyComponent*>& props);
     const Rectangle<float> getBounds();
     void setBounds (Drawable* drawable, const Rectangle<float>& newBounds);
+    void applyTransform (Drawable* drawable, const AffineTransform& transform);
     void getAllControlPoints (OwnedArray <ControlPoint>& points);
+    void getVisibleControlPoints (OwnedArray <ControlPoint>& points, const EditorCanvasBase::SelectedItems& selection);
 
     const RelativeCoordinate findNamedCoordinate (const String& objectName, const String& edge) const;
 
@@ -87,7 +105,7 @@ public:
     virtual void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props) = 0;
     virtual void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item) = 0;
     virtual void getAllControlPoints (DrawableTypeInstance& item, OwnedArray <ControlPoint>& points) = 0;
-    virtual const RelativeCoordinate findNamedCoordinate (const DrawableTypeInstance& item, const String& objectName, const String& edge) const { return RelativeCoordinate(); }
+    virtual void getVisibleControlPoints (DrawableTypeInstance& item, OwnedArray <ControlPoint>& points, const EditorCanvasBase::SelectedItems& selection) = 0;
 
     const String& getDisplayName() const        { return displayName; }
     const Identifier& getValueTreeType() const  { return valueTreeType; }

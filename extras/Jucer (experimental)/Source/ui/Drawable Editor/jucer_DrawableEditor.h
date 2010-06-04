@@ -59,6 +59,7 @@ public:
 
     //==============================================================================
     DrawableDocument& getDocument() const   { return *drawableDocument; }
+    UndoManager* getUndoManager() const     { return getDocument().getUndoManager(); }
 
     EditorCanvasBase::SelectedItems& getSelection()         { return selection; }
 
