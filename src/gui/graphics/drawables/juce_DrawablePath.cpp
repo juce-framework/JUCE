@@ -212,7 +212,7 @@ ValueTree DrawablePath::ValueTreeWrapper::getMainFillState()
     if (v.isValid())
         return v;
 
-    setMainFill (Colours::black, 0, 0, 0);
+    setMainFill (Colours::black, 0, 0, 0, 0);
     return getMainFillState();
 }
 
@@ -222,32 +222,34 @@ ValueTree DrawablePath::ValueTreeWrapper::getStrokeFillState()
     if (v.isValid())
         return v;
 
-    setStrokeFill (Colours::black, 0, 0, 0);
+    setStrokeFill (Colours::black, 0, 0, 0, 0);
     return getStrokeFillState();
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+const FillType DrawablePath::ValueTreeWrapper::getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+                                                            ImageProvider* imageProvider) const
 {
-    return readFillType (state.getChildWithName (fill), 0, 0, nameFinder);
+    return readFillType (state.getChildWithName (fill), 0, 0, nameFinder, imageProvider);
 }
 
 void DrawablePath::ValueTreeWrapper::setMainFill (const FillType& newFill, const RelativePoint* gp1,
-                                                  const RelativePoint* gp2, UndoManager* undoManager)
+                                                  const RelativePoint* gp2, ImageProvider* imageProvider, UndoManager* undoManager)
 {
     ValueTree v (state.getOrCreateChildWithName (fill, undoManager));
-    writeFillType (v, newFill, gp1, gp2, undoManager);
+    writeFillType (v, newFill, gp1, gp2, imageProvider, undoManager);
 }
 
-const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+const FillType DrawablePath::ValueTreeWrapper::getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+                                                              ImageProvider* imageProvider) const
 {
-    return readFillType (state.getChildWithName (stroke), 0, 0, nameFinder);
+    return readFillType (state.getChildWithName (stroke), 0, 0, nameFinder, imageProvider);
 }
 
 void DrawablePath::ValueTreeWrapper::setStrokeFill (const FillType& newFill, const RelativePoint* gp1,
-                                                    const RelativePoint* gp2, UndoManager* undoManager)
+                                                    const RelativePoint* gp2, ImageProvider* imageProvider, UndoManager* undoManager)
 {
     ValueTree v (state.getOrCreateChildWithName (stroke, undoManager));
-    writeFillType (v, newFill, gp1, gp2, undoManager);
+    writeFillType (v, newFill, gp1, gp2, imageProvider, undoManager);
 }
 
 const PathStrokeType DrawablePath::ValueTreeWrapper::getStrokeType() const
@@ -283,6 +285,7 @@ void DrawablePath::ValueTreeWrapper::setUsesNonZeroWinding (bool b, UndoManager*
     state.setProperty (nonZeroWinding, b, undoManager);
 }
 
+//==============================================================================
 const Identifier DrawablePath::ValueTreeWrapper::Element::startSubPathElement ("Move");
 const Identifier DrawablePath::ValueTreeWrapper::Element::closeSubPathElement ("Close");
 const Identifier DrawablePath::ValueTreeWrapper::Element::lineToElement ("Line");
@@ -342,14 +345,14 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
 
 
 //==============================================================================
-const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
+const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
     Rectangle<float> damageRect;
     ValueTreeWrapper v (tree);
     setName (v.getID());
 
     bool needsRedraw = false;
-    const FillType newFill (v.getMainFill (parent));
+    const FillType newFill (v.getMainFill (parent, imageProvider));
 
     if (mainFill != newFill)
     {
@@ -357,7 +360,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
         mainFill = newFill;
     }
 
-    const FillType newStrokeFill (v.getStrokeFill (parent));
+    const FillType newStrokeFill (v.getStrokeFill (parent, imageProvider));
 
     if (strokeFill != newStrokeFill)
     {
@@ -391,14 +394,14 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
     return damageRect;
 }
 
-const ValueTree DrawablePath::createValueTree (ImageProvider*) const
+const ValueTree DrawablePath::createValueTree (ImageProvider* imageProvider) const
 {
     ValueTree tree (valueTreeType);
     ValueTreeWrapper v (tree);
 
     v.setID (getName(), 0);
-    v.setMainFill (mainFill, 0, 0, 0);
-    v.setStrokeFill (strokeFill, 0, 0, 0);
+    v.setMainFill (mainFill, 0, 0, imageProvider, 0);
+    v.setStrokeFill (strokeFill, 0, 0, imageProvider, 0);
     v.setStrokeType (strokeType, 0);
 
     if (relativePath != 0)

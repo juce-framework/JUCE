@@ -249,14 +249,16 @@ public:
         static const Identifier idProperty;
 
         static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1, RelativePoint* gradientPoint2,
-                                            RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+                                            RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+                                            ImageProvider* imageProvider);
 
         static void writeFillType (ValueTree& v, const FillType& fillType,
                                    const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+                                   ImageProvider* imageProvider,
                                    UndoManager* undoManager);
 
         ValueTree state;
-        static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
+        static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours, imageId, imageOpacity;
     };
 
     //==============================================================================

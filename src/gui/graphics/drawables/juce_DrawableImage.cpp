@@ -199,6 +199,11 @@ const var DrawableImage::ValueTreeWrapper::getImageIdentifier() const
     return state [image];
 }
 
+Value DrawableImage::ValueTreeWrapper::getImageIdentifierValue (UndoManager* undoManager)
+{
+    return state.getPropertyAsValue (image, undoManager);
+}
+
 void DrawableImage::ValueTreeWrapper::setImageIdentifier (const var& newIdentifier, UndoManager* undoManager)
 {
     state.setProperty (image, newIdentifier, undoManager);
@@ -207,6 +212,14 @@ void DrawableImage::ValueTreeWrapper::setImageIdentifier (const var& newIdentifi
 float DrawableImage::ValueTreeWrapper::getOpacity() const
 {
     return (float) state.getProperty (opacity, 1.0);
+}
+
+Value DrawableImage::ValueTreeWrapper::getOpacityValue (UndoManager* undoManager)
+{
+    if (! state.hasProperty (opacity))
+        state.setProperty (opacity, 1.0, undoManager);
+
+    return state.getPropertyAsValue (opacity, undoManager);
 }
 
 void DrawableImage::ValueTreeWrapper::setOpacity (float newOpacity, UndoManager* undoManager)
@@ -225,6 +238,11 @@ void DrawableImage::ValueTreeWrapper::setOverlayColour (const Colour& newColour,
         state.removeProperty (overlay, undoManager);
     else
         state.setProperty (overlay, String::toHexString ((int) newColour.getARGB()), undoManager);
+}
+
+Value DrawableImage::ValueTreeWrapper::getOverlayColourValue (UndoManager* undoManager)
+{
+    return state.getPropertyAsValue (overlay, undoManager);
 }
 
 const RelativePoint DrawableImage::ValueTreeWrapper::getTargetPositionForTopLeft() const

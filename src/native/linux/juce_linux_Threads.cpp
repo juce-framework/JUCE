@@ -100,10 +100,10 @@ bool juce_setThreadPriority (void* handle, int priority)
 
         int pri = ((maxp - minp) / 2) * (priority - 1) / 9;
 
-        if (param.__sched_priority >= (minp + (maxp - minp) / 2))
-            param.__sched_priority = minp + ((maxp - minp) / 2) + pri;  // (realtime)
+        if (param.sched_priority >= (minp + (maxp - minp) / 2))
+            param.sched_priority = minp + ((maxp - minp) / 2) + pri;  // (realtime)
         else
-            param.__sched_priority = minp + pri;  // (high)
+            param.sched_priority = minp + pri;  // (high)
 
         param.sched_priority = jlimit (1, 127, 1 + (priority * 126) / 11);
         return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
@@ -172,13 +172,13 @@ void Process::setPriority (ProcessPriority prior)
     maxp = sched_get_priority_max (policy);
 
     if (p < 2)
-        param.__sched_priority = 0;
+        param.sched_priority = 0;
     else if (p == 2 )
         // Set to middle of lower realtime priority range
-        param.__sched_priority = minp + (maxp - minp) / 4;
+        param.sched_priority = minp + (maxp - minp) / 4;
     else
         // Set to middle of higher realtime priority range
-        param.__sched_priority = minp + (3 * (maxp - minp) / 4);
+        param.sched_priority = minp + (3 * (maxp - minp) / 4);
 
     pthread_setschedparam (pthread_self(), policy, &param);
 }

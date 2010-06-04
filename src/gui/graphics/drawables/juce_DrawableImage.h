@@ -134,12 +134,15 @@ public:
 
         const var getImageIdentifier() const;
         void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
+        Value getImageIdentifierValue (UndoManager* undoManager);
 
         float getOpacity() const;
         void setOpacity (float newOpacity, UndoManager* undoManager);
+        Value getOpacityValue (UndoManager* undoManager);
 
         const Colour getOverlayColour() const;
         void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
+        Value getOverlayColourValue (UndoManager* undoManager);
 
         const RelativePoint getTargetPositionForTopLeft() const;
         void setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager);

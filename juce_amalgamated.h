@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	10
+#define JUCE_BUILDNUMBER	11
 
 /** Current Juce version number.
 
@@ -24182,6 +24182,9 @@ public:
 	/** True if the image's format is RGB. */
 	bool isRGB() const throw()				  { return getFormat() == RGB; }
 
+	/** True if the image's format is a single-channel alpha map. */
+	bool isSingleChannel() const throw()			{ return getFormat() == SingleChannel; }
+
 	/** True if the image contains an alpha-channel. */
 	bool hasAlphaChannel() const throw()			{ return getFormat() != RGB; }
 
@@ -24219,6 +24222,8 @@ public:
 
 		Call this if you want to draw onto the image, but want to make sure that this doesn't
 		affect any other code that may be sharing the same data.
+
+		@see getReferenceCount
 	*/
 	void duplicateIfShared();
 
@@ -24348,12 +24353,37 @@ public:
 	void createSolidAreaMask (RectangleList& result,
 							  float alphaThreshold = 0.5f) const;
 
+	/** Returns a user-specified data item that was set with setTag().
+		setTag() and getTag() allow you to attach an arbitrary identifier value to an
+		image. The value is shared between all Image object that are referring to the
+		same underlying image data object.
+	*/
+	const var getTag() const;
+
+	/** Attaches a user-specified data item to this image, which can be retrieved using getTag().
+		setTag() and getTag() allow you to attach an arbitrary identifier value to an
+		image. The value is shared between all Image object that are referring to the
+		same underlying image data object.
+
+		Note that if this Image is null, this method will fail to store the data.
+	*/
+	void setTag (const var& newTag);
+
 	/** Creates a context suitable for drawing onto this image.
 		Don't call this method directly! It's used internally by the Graphics class.
 	*/
 	LowLevelGraphicsContext* createLowLevelContext() const;
 
-	/**
+	/** Returns the number of Image objects which are currently referring to the same internal
+		shared image data.
+
+		@see duplicateIfShared
+	*/
+	int getReferenceCount() const throw()		   { return image == 0 ? 0 : image->getReferenceCount(); }
+
+	/** This is a base class for task-specific types of image.
+
+		Don't use this class directly! It's used internally by the Image class.
 	*/
 	class SharedImage  : public ReferenceCountedObject
 	{
@@ -24375,6 +24405,7 @@ public:
 		const int width, height;
 		int pixelStride, lineStride;
 		uint8* imageData;
+		var userTag;
 
 		uint8* getPixelData (int x, int y) const throw();
 
@@ -24384,12 +24415,8 @@ public:
 
 	/** @internal */
 	SharedImage* getSharedImage() const throw()	 { return image; }
-
 	/** @internal */
 	explicit Image (SharedImage* instance);
-
-	/** @internal */
-	int getReferenceCount() const throw()		   { return image->getReferenceCount(); }
 
 	juce_UseDebuggingNewOperator
 
@@ -42844,14 +42871,16 @@ public:
 		static const Identifier idProperty;
 
 		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1, RelativePoint* gradientPoint2,
-											RelativeCoordinate::NamedCoordinateFinder* nameFinder);
+											RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+											ImageProvider* imageProvider);
 
 		static void writeFillType (ValueTree& v, const FillType& fillType,
 								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+								   ImageProvider* imageProvider,
 								   UndoManager* undoManager);
 
 		ValueTree state;
-		static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours;
+		static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours, imageId, imageOpacity;
 	};
 
 	juce_UseDebuggingNewOperator
@@ -58532,12 +58561,15 @@ public:
 
 		const var getImageIdentifier() const;
 		void setImageIdentifier (const var& newIdentifier, UndoManager* undoManager);
+		Value getImageIdentifierValue (UndoManager* undoManager);
 
 		float getOpacity() const;
 		void setOpacity (float newOpacity, UndoManager* undoManager);
+		Value getOpacityValue (UndoManager* undoManager);
 
 		const Colour getOverlayColour() const;
 		void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
+		Value getOverlayColourValue (UndoManager* undoManager);
 
 		const RelativePoint getTargetPositionForTopLeft() const;
 		void setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager);
@@ -58667,15 +58699,17 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+		const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+									ImageProvider* imageProvider) const;
 		ValueTree getMainFillState();
-		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-						  const RelativePoint* gradientPoint2, UndoManager* undoManager);
+		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+						  ImageProvider* imageProvider, UndoManager* undoManager);
 
-		const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
+		const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
+									  ImageProvider* imageProvider) const;
 		ValueTree getStrokeFillState();
-		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
-							const RelativePoint* gradientPoint2, UndoManager* undoManager);
+		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+							ImageProvider* imageProvider, UndoManager* undoManager);
 
 		const PathStrokeType getStrokeType() const;
 		void setStrokeType (const PathStrokeType& newStrokeType, UndoManager* undoManager);

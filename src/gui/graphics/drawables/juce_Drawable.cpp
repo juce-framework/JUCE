@@ -171,6 +171,8 @@ const Identifier Drawable::ValueTreeWrapperBase::gradientPoint2 ("point2");
 const Identifier Drawable::ValueTreeWrapperBase::colour ("colour");
 const Identifier Drawable::ValueTreeWrapperBase::radial ("radial");
 const Identifier Drawable::ValueTreeWrapperBase::colours ("colours");
+const Identifier Drawable::ValueTreeWrapperBase::imageId ("imageId");
+const Identifier Drawable::ValueTreeWrapperBase::imageOpacity ("imageOpacity");
 
 Drawable::ValueTreeWrapperBase::ValueTreeWrapperBase (const ValueTree& state_)
     : state (state_)
@@ -186,7 +188,7 @@ const String Drawable::ValueTreeWrapperBase::getID() const
     return state [idProperty];
 }
 
-void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* undoManager)
+void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* const undoManager)
 {
     if (newID.isEmpty())
         state.removeProperty (idProperty, undoManager);
@@ -194,8 +196,8 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* un
         state.setProperty (idProperty, newID, undoManager);
 }
 
-const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* gp1, RelativePoint* gp2,
-                                                             RelativeCoordinate::NamedCoordinateFinder* nameFinder)
+const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2,
+                                                             RelativeCoordinate::NamedCoordinateFinder* const nameFinder, ImageProvider* imageProvider)
 {
     const String newType (v[type].toString());
 
@@ -231,7 +233,13 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v,
     }
     else if (newType == "image")
     {
-        jassertfalse; //xxx todo
+        Image im;
+        if (imageProvider != 0)
+            im = imageProvider->getImageForIdentifier (v[imageId]);
+
+        FillType f (im, AffineTransform::identity);
+        f.setOpacity ((float) v.getProperty (imageOpacity, 1.0f));
+        return f;
     }
 
     jassertfalse;
@@ -239,8 +247,8 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v,
 }
 
 void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType,
-                                                    const RelativePoint* gp1, const RelativePoint* gp2,
-                                                    UndoManager* const undoManager)
+                                                    const RelativePoint* const gp1, const RelativePoint* const gp2,
+                                                    ImageProvider* imageProvider, UndoManager* const undoManager)
 {
     if (fillType.isColour())
     {
@@ -256,8 +264,8 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
 
         String s;
         for (int i = 0; i < fillType.gradient->getNumColours(); ++i)
-            s << " " << fillType.gradient->getColourPosition (i)
-              << " " << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
+            s << ' ' << fillType.gradient->getColourPosition (i)
+              << ' ' << String::toHexString ((int) fillType.gradient->getColour(i).getARGB());
 
         v.setProperty (colours, s.trimStart(), undoManager);
     }
@@ -265,7 +273,13 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
     {
         v.setProperty (type, "image", undoManager);
 
-        jassertfalse; //xxx todo
+        if (imageProvider != 0)
+            v.setProperty (imageId, imageProvider->getIdentifierForImage (fillType.image), undoManager);
+
+        if (fillType.getOpacity() < 1.0f)
+            v.setProperty (imageOpacity, fillType.getOpacity(), undoManager);
+        else
+            v.removeProperty (imageOpacity, undoManager);
     }
     else
     {

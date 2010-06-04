@@ -198,6 +198,16 @@ const Image Image::convertedToFormat (PixelFormat newFormat) const
     return newImage;
 }
 
+const var Image::getTag() const
+{
+    return image == 0 ? var::null : image->userTag;
+}
+
+void Image::setTag (const var& newTag)
+{
+    if (image != 0)
+        image->userTag = newTag;
+}
 
 //==============================================================================
 Image::BitmapData::BitmapData (Image& image, const int x, const int y, const int w, const int h, const bool /*makeWritable*/)
