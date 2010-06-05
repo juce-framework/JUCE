@@ -74,8 +74,15 @@ public:
     */
     AudioSource* getCurrentSource() const throw()       { return source; }
 
-    /** Sets a gain to apply to the audio data. */
+    /** Sets a gain to apply to the audio data.
+        @see getGain
+    */
     void setGain (const float newGain) throw();
+
+    /** Returns the current gain.
+        @see setGain
+    */
+    float getGain() const throw()                       { return gain; }
 
     //==============================================================================
     /** Implementation of the AudioIODeviceCallback method. */

@@ -145,7 +145,8 @@ public:
         : context (context_),
           flipHeight (flipHeight_),
           state (new SavedState()),
-          numGradientLookupEntries (0)
+          numGradientLookupEntries (0),
+          lastClipRectIsValid (false)
     {
         CGContextRetain (context);
         CGContextSaveGState(context);
@@ -174,11 +175,21 @@ public:
     void setOrigin (int x, int y)
     {
         CGContextTranslateCTM (context, x, -y);
+
+        if (lastClipRectIsValid)
+            lastClipRect.translate (-x, -y);
     }
 
     bool clipToRectangle (const Rectangle<int>& r)
     {
         CGContextClipToRect (context, CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()));
+
+        if (lastClipRectIsValid)
+        {
+            lastClipRect = lastClipRect.getIntersection (r);
+            return ! r.isEmpty();
+        }
+
         return ! isClipEmpty();
     }
 
@@ -187,6 +198,8 @@ public:
         if (clipRegion.isEmpty())
         {
             CGContextClipToRect (context, CGRectMake (0, 0, 0, 0));
+            lastClipRectIsValid = true;
+            lastClipRect = Rectangle<int>();
             return false;
         }
         else
@@ -201,6 +214,7 @@ public:
             }
 
             CGContextClipToRects (context, rects, numRects);
+            lastClipRectIsValid = false;
             return ! isClipEmpty();
         }
     }
@@ -210,12 +224,14 @@ public:
         RectangleList remaining (getClipBounds());
         remaining.subtract (r);
         clipToRectangleList (remaining);
+        lastClipRectIsValid = false;
     }
 
     void clipToPath (const Path& path, const AffineTransform& transform)
     {
         createPath (path, transform);
         CGContextClip (context);
+        lastClipRectIsValid = false;
     }
 
     void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform)
@@ -240,6 +256,7 @@ public:
             flip();
 
             CGImageRelease (image);
+            lastClipRectIsValid = false;
         }
     }
 
@@ -250,17 +267,23 @@ public:
 
     const Rectangle<int> getClipBounds() const
     {
-        CGRect bounds = CGRectIntegral (CGContextGetClipBoundingBox (context));
+        if (! lastClipRectIsValid)
+        {
+            CGRect bounds = CGRectIntegral (CGContextGetClipBoundingBox (context));
 
-        return Rectangle<int> (roundToInt (bounds.origin.x),
-                               roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
-                               roundToInt (bounds.size.width),
-                               roundToInt (bounds.size.height));
+            lastClipRectIsValid = true;
+            lastClipRect.setBounds (roundToInt (bounds.origin.x),
+                                    roundToInt (flipHeight - (bounds.origin.y + bounds.size.height)),
+                                    roundToInt (bounds.size.width),
+                                    roundToInt (bounds.size.height));
+        }
+
+        return lastClipRect;
     }
 
     bool isClipEmpty() const
     {
-        return CGRectIsEmpty (CGContextGetClipBoundingBox (context));
+        return getClipBounds().isEmpty();
     }
 
     //==============================================================================
@@ -280,6 +303,7 @@ public:
         {
             state = top;
             stateStack.removeLast (1, false);
+            lastClipRectIsValid = false;
         }
         else
         {
@@ -564,6 +588,8 @@ private:
     const CGFloat flipHeight;
     CGColorSpaceRef rgbColourSpace, greyColourSpace;
     CGFunctionCallbacks gradientCallbacks;
+    mutable Rectangle<int> lastClipRect;
+    mutable bool lastClipRectIsValid;
 
     struct SavedState
     {

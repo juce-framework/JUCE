@@ -18946,6 +18946,12 @@ public:
 												   float x10, float y10,
 												   float x01, float y01) throw();
 
+	/** Returns the transform that will map three specified points onto three target points.
+	*/
+	static const AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
+												   float sourceX2, float sourceY2, float targetX2, float targetY2,
+												   float sourceX3, float sourceY3, float targetX3, float targetY3) throw();
+
 	/** Returns the result of concatenating another transformation after this one. */
 	const AffineTransform followedBy (const AffineTransform& other) const throw();
 
@@ -19981,6 +19987,18 @@ public:
 		return findIntersection (start, end, line.start, line.end, intersection);
 	}
 
+	/** Finds the intersection between two lines.
+
+		@param line	 the line to intersect with
+		@returns	the point at which the lines intersect, even if this lies beyond the end of the lines
+	*/
+	const Point<ValueType> getIntersection (const Line& line) const throw()
+	{
+		Point<ValueType> p;
+		findIntersection (start, end, line.start, line.end, p);
+		return p;
+	}
+
 	/** Returns the location of the point which is a given distance along this line.
 
 		@param distanceFromStart	the distance to move along the line from its
@@ -20658,6 +20676,28 @@ public:
 		const int y2 = (int) std::floor (static_cast<float> (y + h + 0.9999f));
 
 		return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
+	}
+
+	/** Returns the smallest Rectangle that can contain a set of points. */
+	static const Rectangle findAreaContainingPoints (const Point<ValueType>* const points, const int numPoints) throw()
+	{
+		if (numPoints == 0)
+			return Rectangle();
+
+		ValueType minX (points[0].getX());
+		ValueType maxX (minX);
+		ValueType minY (points[0].getY());
+		ValueType maxY (minY);
+
+		for (int i = 1; i < numPoints; ++i)
+		{
+			minX = jmin (minX, points[i].getX());
+			maxX = jmax (maxX, points[i].getX());
+			minY = jmin (minY, points[i].getY());
+			maxY = jmax (maxY, points[i].getY());
+		}
+
+		return Rectangle (minX, minY, maxX - minX, maxY - minY);
 	}
 
 	/** Casts this rectangle to a Rectangle<float>.
@@ -22147,11 +22187,20 @@ public:
 	/** Returns the stroke thickness. */
 	float getStrokeThickness() const throw()			{ return thickness; }
 
+	/** Sets the stroke thickness. */
+	void setStrokeThickness (float newThickness) throw()	{ thickness = newThickness; }
+
 	/** Returns the joint style. */
 	JointStyle getJointStyle() const throw()			{ return jointStyle; }
 
+	/** Sets the joint style. */
+	void setJointStyle (JointStyle newStyle) throw()		{ jointStyle = newStyle; }
+
 	/** Returns the end-cap style. */
 	EndCapStyle getEndStyle() const throw()			 { return endStyle; }
+
+	/** Sets the end-cap style. */
+	void setEndStyle (EndCapStyle newStyle) throw()		 { endStyle = newStyle; }
 
 	juce_UseDebuggingNewOperator
 
@@ -31096,8 +31145,15 @@ public:
 	*/
 	AudioSource* getCurrentSource() const throw()	   { return source; }
 
-	/** Sets a gain to apply to the audio data. */
+	/** Sets a gain to apply to the audio data.
+		@see getGain
+	*/
 	void setGain (const float newGain) throw();
+
+	/** Returns the current gain.
+		@see setGain
+	*/
+	float getGain() const throw()			   { return gain; }
 
 	/** Implementation of the AudioIODeviceCallback method. */
 	void audioDeviceIOCallback (const float** inputChannelData,
@@ -58788,25 +58844,45 @@ public:
 	/** Destructor. */
 	virtual ~DrawableText();
 
-	/** Sets the block of text to render */
-	void setText (const GlyphArrangement& newText);
-
-	/** Sets a single line of text to render.
-
-		This is a convenient method of adding a single line - for
-		more complex text, use the setText() that takes a
-		GlyphArrangement instead.
-	*/
-	void setText (const String& newText, const Font& fontToUse);
-
-	/** Returns the text arrangement that was set with setText(). */
-	const GlyphArrangement& getText() const throw()	 { return text; }
+	/** Sets the text to display.*/
+	void setText (const String& newText);
 
 	/** Sets the colour of the text. */
 	void setColour (const Colour& newColour);
 
 	/** Returns the current text colour. */
 	const Colour& getColour() const throw()		 { return colour; }
+
+	/** Sets the font to use.
+		Note that the font height and horizontal scale are actually based upon the position
+		of the fontSizeAndScaleAnchor parameter to setBounds(). If applySizeAndScale is true, then
+		the height and scale control point will be moved to match the dimensions of the font supplied;
+		if it is false, then the new font's height and scale are ignored.
+	*/
+	void setFont (const Font& newFont, bool applySizeAndScale);
+
+	/** Changes the justification of the text within the bounding box. */
+	void setJustification (const Justification& newJustification);
+
+	/** Sets the bounding box and the control point that controls the font size.
+		The three bounding box points define the parallelogram within which the text will be
+		placed. The fontSizeAndScaleAnchor specifies a position within that parallelogram, whose
+		Y position (relative to the parallelogram's origin and possibly distorted shape) specifies
+		the font's height, and its X defines the font's horizontal scale.
+	*/
+	void setBounds (const RelativePoint& boundingBoxTopLeft,
+					const RelativePoint& boundingBoxTopRight,
+					const RelativePoint& boundingBoxBottomLeft,
+					const RelativePoint& fontSizeAndScaleAnchor);
+
+	/** Returns the origin of the text bounding box. */
+	const RelativePoint& getBoundingBoxTopLeft() const throw()	  { return controlPoints[0]; }
+	/** Returns the top-right of the text bounding box. */
+	const RelativePoint& getBoundingBoxTopRight() const throw()	 { return controlPoints[1]; }
+	/** Returns the bottom-left of the text bounding box. */
+	const RelativePoint& getBoundingBoxBottomLeft() const throw()	   { return controlPoints[2]; }
+	/** Returns the point within the text bounding box which defines the size and scale of the font. */
+	const RelativePoint& getFontSizeAndScaleAnchor() const throw()	  { return controlPoints[3]; }
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -58833,17 +58909,43 @@ public:
 	public:
 		ValueTreeWrapper (const ValueTree& state);
 
-		//xxx todo
+		const String getText() const;
+		void setText (const String& newText, UndoManager* undoManager);
 
-	private:
-		static const Identifier text;
+		const Colour getColour() const;
+		void setColour (const Colour& newColour, UndoManager* undoManager);
+
+		const Justification getJustification() const;
+		void setJustification (const Justification& newJustification, UndoManager* undoManager);
+
+		const Font getFont() const;
+		void setFont (const Font& newFont, UndoManager* undoManager);
+
+		const RelativePoint getBoundingBoxTopLeft() const;
+		void setBoundingBoxTopLeft (const RelativePoint& p, UndoManager* undoManager);
+
+		const RelativePoint getBoundingBoxTopRight() const;
+		void setBoundingBoxTopRight (const RelativePoint& p, UndoManager* undoManager);
+
+		const RelativePoint getBoundingBoxBottomLeft() const;
+		void setBoundingBoxBottomLeft (const RelativePoint& p, UndoManager* undoManager);
+
+		const RelativePoint getFontSizeAndScaleAnchor() const;
+		void setFontSizeAndScaleAnchor (const RelativePoint& p, UndoManager* undoManager);
+
+		static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
 	};
 
 	juce_UseDebuggingNewOperator
 
 private:
-	GlyphArrangement text;
+	RelativePoint controlPoints[4];
+	Font font;
+	String text;
 	Colour colour;
+	Justification justification;
+
+	void resolveCorners (Point<float>* corners) const;
 
 	DrawableText& operator= (const DrawableText&);
 };

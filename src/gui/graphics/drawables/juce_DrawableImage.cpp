@@ -130,25 +130,12 @@ const Rectangle<float> DrawableImage::getBounds() const
     if (image.isNull())
         return Rectangle<float>();
 
-    Point<float> resolved[3];
+    Point<float> corners[4];
     for (int i = 0; i < 3; ++i)
-        resolved[i] = controlPoints[i].resolve (parent);
+        corners[i] = controlPoints[i].resolve (parent);
 
-    const Point<float> bottomRight (resolved[1] + (resolved[2] - resolved[0]));
-    float minX = bottomRight.getX();
-    float maxX = minX;
-    float minY = bottomRight.getY();
-    float maxY = minY;
-
-    for (int i = 0; i < 3; ++i)
-    {
-        minX = jmin (minX, resolved[i].getX());
-        maxX = jmax (maxX, resolved[i].getX());
-        minY = jmin (minY, resolved[i].getY());
-        maxY = jmax (maxY, resolved[i].getY());
-    }
-
-    return Rectangle<float> (minX, minY, maxX - minX, maxY - minY);
+    corners[3] = corners[1] + (corners[2] - corners[0]);
+    return Rectangle<float>::findAreaContainingPoints (corners, 4);
 }
 
 bool DrawableImage::hitTest (float x, float y) const

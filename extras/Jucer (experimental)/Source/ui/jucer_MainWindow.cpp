@@ -83,7 +83,7 @@ MainWindow::MainWindow()
     // don't want the window to take focus when the title-bar is clicked..
     setWantsKeyboardFocus (false);
 
-    getPeer()->setCurrentRenderingEngine (0);
+    //getPeer()->setCurrentRenderingEngine (0);
 }
 
 MainWindow::~MainWindow()

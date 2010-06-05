@@ -141,12 +141,20 @@ public:
     /** Returns the stroke thickness. */
     float getStrokeThickness() const throw()                    { return thickness; }
 
+    /** Sets the stroke thickness. */
+    void setStrokeThickness (float newThickness) throw()        { thickness = newThickness; }
+
     /** Returns the joint style. */
     JointStyle getJointStyle() const throw()                    { return jointStyle; }
+
+    /** Sets the joint style. */
+    void setJointStyle (JointStyle newStyle) throw()            { jointStyle = newStyle; }
 
     /** Returns the end-cap style. */
     EndCapStyle getEndStyle() const throw()                     { return endStyle; }
 
+    /** Sets the end-cap style. */
+    void setEndStyle (EndCapStyle newStyle) throw()             { endStyle = newStyle; }
 
     //==============================================================================
     juce_UseDebuggingNewOperator

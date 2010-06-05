@@ -509,6 +509,28 @@ public:
         return Rectangle<int> (x1, y1, x2 - x1, y2 - y1);
     }
 
+    /** Returns the smallest Rectangle that can contain a set of points. */
+    static const Rectangle findAreaContainingPoints (const Point<ValueType>* const points, const int numPoints) throw()
+    {
+        if (numPoints == 0)
+            return Rectangle();
+
+        ValueType minX (points[0].getX());
+        ValueType maxX (minX);
+        ValueType minY (points[0].getY());
+        ValueType maxY (minY);
+
+        for (int i = 1; i < numPoints; ++i)
+        {
+            minX = jmin (minX, points[i].getX());
+            maxX = jmax (maxX, points[i].getX());
+            minY = jmin (minY, points[i].getY());
+            maxY = jmax (maxY, points[i].getY());
+        }
+
+        return Rectangle (minX, minY, maxX - minX, maxY - minY);
+    }
+
     /** Casts this rectangle to a Rectangle<float>.
         Obviously this is mainly useful for rectangles that use integer types.
         @see getSmallestIntegerContainer

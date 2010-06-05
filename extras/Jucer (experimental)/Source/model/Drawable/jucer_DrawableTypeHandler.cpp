@@ -185,6 +185,10 @@ public:
         DrawablePath::ValueTreeWrapper wrapper (item.getState());
 
         props.add (new DrawablePathFillPropComp (item, "Fill", wrapper.getMainFillState()));
+
+        props.add (StrokeThicknessValueSource::create (wrapper, item.getDocument().getUndoManager()));
+        props.add (StrokeJoinStyleValueSource::create (wrapper, item.getDocument().getUndoManager()));
+        props.add (StrokeCapStyleValueSource::create (wrapper, item.getDocument().getUndoManager()));
         props.add (new DrawablePathFillPropComp (item, "Stroke", wrapper.getStrokeFillState()));
     }
 
@@ -327,7 +331,7 @@ public:
         if (stroke.isGradient())
         {
             points.add (new GradientControlPoint (itemId + "/gs1", item.getState(), true, true));
-            points.add (new GradientControlPoint (itemId + "/gs1", item.getState(), false, true));
+            points.add (new GradientControlPoint (itemId + "/gs2", item.getState(), false, true));
         }
     }
 
@@ -412,6 +416,113 @@ public:
 
         getGradientControlPoints (wrapper, item, points, itemId);
     }
+
+    //==============================================================================
+    class StrokeValueSourceBase    : public Value::ValueSource,
+                                     public ValueTree::Listener
+    {
+    public:
+        StrokeValueSourceBase (const DrawablePath::ValueTreeWrapper& wrapper_, UndoManager* undoManager_)
+           : wrapper (wrapper_), undoManager (undoManager_)
+        {
+            wrapper.getState().addListener (this);
+        }
+
+        ~StrokeValueSourceBase() {}
+
+        void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property) { sendChangeMessage (true); }
+        void valueTreeChildrenChanged (ValueTree& treeWhoseChildHasChanged) {}
+        void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) {}
+
+    protected:
+        DrawablePath::ValueTreeWrapper wrapper;
+        UndoManager* undoManager;
+    };
+
+    //==============================================================================
+    class StrokeThicknessValueSource    : public StrokeValueSourceBase
+    {
+    public:
+        StrokeThicknessValueSource (const DrawablePath::ValueTreeWrapper& wrapper_, UndoManager* undoManager_)
+           : StrokeValueSourceBase (wrapper_, undoManager_)
+        {}
+
+        const var getValue() const
+        {
+            return wrapper.getStrokeType().getStrokeThickness();
+        }
+
+        void setValue (const var& newValue)
+        {
+            PathStrokeType s (wrapper.getStrokeType());
+            s.setStrokeThickness (newValue);
+            wrapper.setStrokeType (s, undoManager);
+        }
+
+        static PropertyComponent* create (const DrawablePath::ValueTreeWrapper& wrapper, UndoManager* undoManager)
+        {
+            return new SliderPropertyComponent (Value (new StrokeThicknessValueSource (wrapper, undoManager)),
+                                                "Stroke Thickness", 0, 50.0, 0.1);
+        }
+    };
+
+    //==============================================================================
+    class StrokeJoinStyleValueSource    : public StrokeValueSourceBase
+    {
+    public:
+        StrokeJoinStyleValueSource (const DrawablePath::ValueTreeWrapper& wrapper_, UndoManager* undoManager_)
+           : StrokeValueSourceBase (wrapper_, undoManager_)
+        {}
+
+        const var getValue() const
+        {
+            return (int) wrapper.getStrokeType().getJointStyle();
+        }
+
+        void setValue (const var& newValue)
+        {
+            PathStrokeType s (wrapper.getStrokeType());
+            s.setJointStyle ((PathStrokeType::JointStyle) (int) newValue);
+            wrapper.setStrokeType (s, undoManager);
+        }
+
+        static PropertyComponent* create (const DrawablePath::ValueTreeWrapper& wrapper, UndoManager* undoManager)
+        {
+            const char* types[] = { "Miter", "Curved", "Bevel", 0 };
+            const int mappings[] =  { PathStrokeType::mitered, PathStrokeType::curved, PathStrokeType::beveled };
+            return new ChoicePropertyComponent (Value (new StrokeJoinStyleValueSource (wrapper, undoManager)),
+                                                "Joint Style", StringArray (types), Array<var> (mappings, numElementsInArray (mappings)));
+        }
+    };
+
+    //==============================================================================
+    class StrokeCapStyleValueSource    : public StrokeValueSourceBase
+    {
+    public:
+        StrokeCapStyleValueSource (const DrawablePath::ValueTreeWrapper& wrapper_, UndoManager* undoManager_)
+           : StrokeValueSourceBase (wrapper_, undoManager_)
+        {}
+
+        const var getValue() const
+        {
+            return (int) wrapper.getStrokeType().getEndStyle();
+        }
+
+        void setValue (const var& newValue)
+        {
+            PathStrokeType s (wrapper.getStrokeType());
+            s.setEndStyle ((PathStrokeType::EndCapStyle) (int) newValue);
+            wrapper.setStrokeType (s, undoManager);
+        }
+
+        static PropertyComponent* create (const DrawablePath::ValueTreeWrapper& wrapper, UndoManager* undoManager)
+        {
+            const char* types[] = { "Butt", "Square", "Round", 0 };
+            const int mappings[] =  { PathStrokeType::butt, PathStrokeType::square, PathStrokeType::rounded };
+            return new ChoicePropertyComponent (Value (new StrokeCapStyleValueSource (wrapper, undoManager)),
+                                                "Cap Style", StringArray (types), Array<var> (mappings, numElementsInArray (mappings)));
+        }
+    };
 };
 
 //==============================================================================
@@ -713,6 +824,119 @@ public:
     };
 };
 
+//==============================================================================
+class DrawableTextHandler : public DrawableTypeHandler
+{
+public:
+    DrawableTextHandler()  : DrawableTypeHandler ("Text", DrawableText::valueTreeType) {}
+    ~DrawableTextHandler() {}
+
+    static const ValueTree createNewInstance (DrawableDocument& document, const Point<float>& approxPosition)
+    {
+        DrawableText dt;
+        dt.setText ("Text");
+        dt.setBounds (RelativePoint (approxPosition),
+                      RelativePoint (approxPosition + Point<float> (100.0f, 0.0f)),
+                      RelativePoint (approxPosition + Point<float> (0.0f, 100.0f)),
+                      RelativePoint (approxPosition + Point<float> (25.0f, 25.0f)));
+        dt.setFont (Font (25.0f), true);
+        return dt.createValueTree (&document);
+    }
+
+    void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
+    {
+        DrawableText::ValueTreeWrapper wrapper (item.getState());
+        //props.add (new ResetButtonPropertyComponent (item, wrapper));
+    }
+
+    void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
+    {
+    }
+
+    //==============================================================================
+    class TextControlPoint  : public ControlPoint
+    {
+    public:
+        TextControlPoint (const String& id_, const ValueTree& item_, const int cpNum_)
+            : ControlPoint (id_), item (item_), cpNum (cpNum_)
+        {}
+
+        ~TextControlPoint() {}
+
+        const RelativePoint getPosition()
+        {
+            DrawableText::ValueTreeWrapper wrapper (item);
+
+            switch (cpNum)
+            {
+                case 0: return wrapper.getBoundingBoxTopLeft();
+                case 1: return wrapper.getBoundingBoxTopRight();
+                case 2: return wrapper.getBoundingBoxBottomLeft();
+                case 3: return wrapper.getFontSizeAndScaleAnchor();
+                default: jassertfalse; break;
+            }
+
+            return RelativePoint();
+        }
+
+        void setPosition (const RelativePoint& newPoint, UndoManager* undoManager)
+        {
+            DrawableText::ValueTreeWrapper wrapper (item);
+
+            switch (cpNum)
+            {
+                case 0: wrapper.setBoundingBoxTopLeft (newPoint, undoManager); break;
+                case 1: wrapper.setBoundingBoxTopRight (newPoint, undoManager); break;
+                case 2: wrapper.setBoundingBoxBottomLeft (newPoint, undoManager); break;
+                case 3: wrapper.setFontSizeAndScaleAnchor (newPoint, undoManager); break;
+                default: jassertfalse; break;
+            }
+        }
+
+        const Value getPositionValue (UndoManager* undoManager)
+        {
+            DrawableText::ValueTreeWrapper wrapper (item);
+
+            switch (cpNum)
+            {
+                case 0: return item.getPropertyAsValue (DrawableText::ValueTreeWrapper::topLeft, undoManager);
+                case 1: return item.getPropertyAsValue (DrawableText::ValueTreeWrapper::topRight, undoManager);
+                case 2: return item.getPropertyAsValue (DrawableText::ValueTreeWrapper::bottomLeft, undoManager);
+                case 3: return item.getPropertyAsValue (DrawableText::ValueTreeWrapper::fontSizeAnchor, undoManager);
+                default: jassertfalse; break;
+            }
+            return Value();
+        }
+
+        bool hasLine()                  { return false; }
+        RelativePoint getEndOfLine()    { return RelativePoint(); }
+
+        void createProperties (DrawableDocument& document, Array <PropertyComponent*>& props)
+        {
+            DrawableTypeInstance instance (document, item);
+            props.add (new ControlPointPropertyComp (instance, this, "X", true, document.getUndoManager()));
+            props.add (new ControlPointPropertyComp (instance, this, "Y", false, document.getUndoManager()));
+        }
+
+    private:
+        ValueTree item;
+        int cpNum;
+    };
+
+    void getAllControlPoints (DrawableTypeInstance& item, OwnedArray <ControlPoint>& points)
+    {
+        const String itemIDRoot (item.getID() + "/");
+
+        for (int i = 0; i < 4; ++i)
+            points.add (new TextControlPoint (itemIDRoot + String(i), item.getState(), i));
+    }
+
+    void getVisibleControlPoints (DrawableTypeInstance& item, OwnedArray <ControlPoint>& points, const EditorCanvasBase::SelectedItems&)
+    {
+        return getAllControlPoints (item, points);
+    }
+};
+
 
 //==============================================================================
 DrawableTypeManager::DrawableTypeManager()
@@ -720,6 +944,7 @@ DrawableTypeManager::DrawableTypeManager()
     handlers.add (new DrawablePathHandler());
     handlers.add (new DrawableImageHandler());
     handlers.add (new DrawableCompositeHandler());
+    handlers.add (new DrawableTextHandler());
 }
 
 DrawableTypeManager::~DrawableTypeManager()
@@ -738,7 +963,7 @@ DrawableTypeHandler* DrawableTypeManager::getHandlerFor (const Identifier& type)
 
 const StringArray DrawableTypeManager::getNewItemList()
 {
-    const char* types[] = { "New Triangle", "New Rectangle", "New Ellipse", "New Image", 0 };
+    const char* types[] = { "New Triangle", "New Rectangle", "New Ellipse", "New Image", "New Text Object", 0 };
     return StringArray (types);
 }
 
@@ -750,6 +975,7 @@ const ValueTree DrawableTypeManager::createNewItem (const int index, DrawableDoc
         case 1: return DrawablePathHandler::createNewRectangle (document, approxPosition);
         case 2: return DrawablePathHandler::createNewEllipse (document, approxPosition);
         case 3: return DrawableImageHandler::createNewInstance (document, approxPosition);
+        case 4: return DrawableTextHandler::createNewInstance (document, approxPosition);
         default: jassertfalse; break;
     }
 

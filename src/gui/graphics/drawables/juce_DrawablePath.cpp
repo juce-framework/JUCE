@@ -382,6 +382,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
     {
         damageRect = getBounds();
         path.swapWithPath (newPath);
+        strokeNeedsUpdating = true;
         strokeType = newStroke;
         needsRedraw = true;
     }

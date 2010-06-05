@@ -156,6 +156,12 @@ public:
                                                    float x10, float y10,
                                                    float x01, float y01) throw();
 
+    /** Returns the transform that will map three specified points onto three target points.
+    */
+    static const AffineTransform fromTargetPoints (float sourceX1, float sourceY1, float targetX1, float targetY1,
+                                                   float sourceX2, float sourceY2, float targetX2, float targetY2,
+                                                   float sourceX3, float sourceY3, float targetX3, float targetY3) throw();
+
     //==============================================================================
     /** Returns the result of concatenating another transformation after this one. */
     const AffineTransform followedBy (const AffineTransform& other) const throw();

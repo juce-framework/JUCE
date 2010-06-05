@@ -241,6 +241,15 @@ const AffineTransform AffineTransform::fromTargetPoints (const float x00, const 
                             y10 - y00, y01 - y00, y00);
 }
 
+const AffineTransform AffineTransform::fromTargetPoints (const float sx1, const float sy1, const float tx1, const float ty1,
+                                                         const float sx2, const float sy2, const float tx2, const float ty2,
+                                                         const float sx3, const float sy3, const float tx3, const float ty3) throw()
+{
+    return fromTargetPoints (sx1, sy1, sx2, sy2, sx3, sy3)
+            .inverted()
+            .followedBy (fromTargetPoints (tx1, ty1, tx2, ty2, tx3, ty3));
+}
+
 bool AffineTransform::isOnlyTranslation() const throw()
 {
     return (mat01 == 0)

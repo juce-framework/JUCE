@@ -164,6 +164,18 @@ public:
         return findIntersection (start, end, line.start, line.end, intersection);
     }
 
+    /** Finds the intersection between two lines.
+
+        @param line     the line to intersect with
+        @returns        the point at which the lines intersect, even if this lies beyond the end of the lines
+    */
+    const Point<ValueType> getIntersection (const Line& line) const throw()
+    {
+        Point<ValueType> p;
+        findIntersection (start, end, line.start, line.end, p);
+        return p;
+    }
+
     //==============================================================================
     /** Returns the location of the point which is a given distance along this line.
 
