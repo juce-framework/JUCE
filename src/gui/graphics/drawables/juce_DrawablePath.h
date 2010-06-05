@@ -46,7 +46,7 @@ public:
     DrawablePath (const DrawablePath& other);
 
     /** Destructor. */
-    virtual ~DrawablePath();
+    ~DrawablePath();
 
     //==============================================================================
     /** Changes the path that will be drawn.

@@ -187,7 +187,7 @@ public:
         if (lastClipRectIsValid)
         {
             lastClipRect = lastClipRect.getIntersection (r);
-            return ! r.isEmpty();
+            return ! lastClipRect.isEmpty();
         }
 
         return ! isClipEmpty();

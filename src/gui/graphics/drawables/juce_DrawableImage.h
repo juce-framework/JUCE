@@ -44,7 +44,7 @@ public:
     DrawableImage (const DrawableImage& other);
 
     /** Destructor. */
-    virtual ~DrawableImage();
+    ~DrawableImage();
 
     //==============================================================================
     /** Sets the image that this drawable will render. */

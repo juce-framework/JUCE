@@ -54104,7 +54104,7 @@ public:
 	}
 
 	/** True if this item is currently selected. */
-	bool isSelected (const ParameterType item) const throw()
+	bool isSelected (ParameterType item) const throw()
 	{
 		return selectedItems.contains (item);
 	}
@@ -58312,7 +58312,7 @@ public:
 	DrawableComposite (const DrawableComposite& other);
 
 	/** Destructor. */
-	virtual ~DrawableComposite();
+	~DrawableComposite();
 
 	/** Adds a new sub-drawable to this one.
 
@@ -58530,7 +58530,7 @@ public:
 	DrawableImage (const DrawableImage& other);
 
 	/** Destructor. */
-	virtual ~DrawableImage();
+	~DrawableImage();
 
 	/** Sets the image that this drawable will render. */
 	void setImage (const Image& imageToUse);
@@ -58677,7 +58677,7 @@ public:
 	DrawablePath (const DrawablePath& other);
 
 	/** Destructor. */
-	virtual ~DrawablePath();
+	~DrawablePath();
 
 	/** Changes the path that will be drawn.
 
@@ -58842,7 +58842,7 @@ public:
 	DrawableText (const DrawableText& other);
 
 	/** Destructor. */
-	virtual ~DrawableText();
+	~DrawableText();
 
 	/** Sets the text to display.*/
 	void setText (const String& newText);

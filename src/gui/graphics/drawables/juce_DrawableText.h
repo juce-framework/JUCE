@@ -45,7 +45,7 @@ public:
     DrawableText (const DrawableText& other);
 
     /** Destructor. */
-    virtual ~DrawableText();
+    ~DrawableText();
 
     //==============================================================================
     /** Sets the text to display.*/

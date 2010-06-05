@@ -373,7 +373,7 @@ const Image DrawableDocument::getImageForIdentifier (const var& imageIdentifier)
         g.drawRect (0, 0, 128, 128);
 
         for (int i = -128; i < 128; i += 16)
-            g.drawLine (i, 0, i + 128, 128);
+            g.drawLine ((float) i, 0.0f, i + 128.0f, 128.0f);
 
         g.setColour (Colours::darkgrey);
         g.drawRect (0, 0, 128, 128);

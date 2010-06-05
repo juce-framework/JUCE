@@ -279,7 +279,7 @@ public:
     }
 
     /** True if this item is currently selected. */
-    bool isSelected (const ParameterType item) const throw()
+    bool isSelected (ParameterType item) const throw()
     {
         return selectedItems.contains (item);
     }

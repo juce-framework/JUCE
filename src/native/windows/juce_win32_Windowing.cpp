@@ -1931,7 +1931,7 @@ private:
                             eventMods = eventMods.withoutMouseButtons();
 
                         const MouseEvent e (Desktop::getInstance().getMainMouseSource(),
-                                            Point<int>(), eventMods, component, getMouseEventTime(),
+                                            Point<int>(), eventMods, component, component, getMouseEventTime(),
                                             Point<int>(), getMouseEventTime(), 1, false);
 
                         if (lParam == WM_LBUTTONDOWN || lParam == WM_RBUTTONDOWN)

@@ -47,7 +47,7 @@ public:
     DrawableComposite (const DrawableComposite& other);
 
     /** Destructor. */
-    virtual ~DrawableComposite();
+    ~DrawableComposite();
 
     //==============================================================================
     /** Adds a new sub-drawable to this one.

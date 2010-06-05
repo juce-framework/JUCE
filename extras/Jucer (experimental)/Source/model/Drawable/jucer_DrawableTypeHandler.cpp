@@ -689,8 +689,8 @@ public:
                 RelativePoint topRight (wrapper.getTargetPositionForTopRight());
                 RelativePoint bottomLeft (wrapper.getTargetPositionForBottomLeft());
 
-                topRight.moveToAbsolute (topLeft.resolve (&item) + Point<float> (im.getWidth(), 0.0f), &item);
-                bottomLeft.moveToAbsolute (topLeft.resolve (&item) + Point<float> (0.0f, im.getHeight()), &item);
+                topRight.moveToAbsolute (topLeft.resolve (&item) + Point<float> ((float) im.getWidth(), 0.0f), &item);
+                bottomLeft.moveToAbsolute (topLeft.resolve (&item) + Point<float> (0.0f, (float) im.getHeight()), &item);
 
                 wrapper.setTargetPositionForTopRight (topRight, item.getDocument().getUndoManager());
                 wrapper.setTargetPositionForBottomLeft (bottomLeft, item.getDocument().getUndoManager());
