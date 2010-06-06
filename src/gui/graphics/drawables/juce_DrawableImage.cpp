@@ -38,17 +38,16 @@ DrawableImage::DrawableImage()
       opacity (1.0f),
       overlayColour (0x00000000)
 {
-    controlPoints[1] = RelativePoint (Point<float> (1.0f, 0.0f));
-    controlPoints[2] = RelativePoint (Point<float> (0.0f, 1.0f));
+    bounds.topRight = RelativePoint (Point<float> (1.0f, 0.0f));
+    bounds.bottomLeft = RelativePoint (Point<float> (0.0f, 1.0f));
 }
 
 DrawableImage::DrawableImage (const DrawableImage& other)
     : image (other.image),
       opacity (other.opacity),
-      overlayColour (other.overlayColour)
+      overlayColour (other.overlayColour),
+      bounds (other.bounds)
 {
-    for (int i = 0; i < numElementsInArray (controlPoints); ++i)
-        controlPoints[i] = other.controlPoints[i];
 }
 
 DrawableImage::~DrawableImage()
@@ -62,9 +61,9 @@ void DrawableImage::setImage (const Image& imageToUse)
 
     if (image.isValid())
     {
-        controlPoints[0] = RelativePoint (Point<float> (0.0f, 0.0f));
-        controlPoints[1] = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
-        controlPoints[2] = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
+        bounds.topLeft = RelativePoint (Point<float> (0.0f, 0.0f));
+        bounds.topRight = RelativePoint (Point<float> ((float) image.getWidth(), 0.0f));
+        bounds.bottomLeft = RelativePoint (Point<float> (0.0f, (float) image.getHeight()));
     }
 }
 
@@ -78,13 +77,9 @@ void DrawableImage::setOverlayColour (const Colour& newOverlayColour)
     overlayColour = newOverlayColour;
 }
 
-void DrawableImage::setTransform (const RelativePoint& imageTopLeftPosition,
-                                  const RelativePoint& imageTopRightPosition,
-                                  const RelativePoint& imageBottomLeftPosition)
+void DrawableImage::setBoundingBox (const RelativeParallelogram& newBounds)
 {
-    controlPoints[0] = imageTopLeftPosition;
-    controlPoints[1] = imageTopRightPosition;
-    controlPoints[2] = imageBottomLeftPosition;
+    bounds = newBounds;
 }
 
 //==============================================================================
@@ -94,8 +89,7 @@ const AffineTransform DrawableImage::calculateTransform() const
         return AffineTransform::identity;
 
     Point<float> resolved[3];
-    for (int i = 0; i < 3; ++i)
-        resolved[i] = controlPoints[i].resolve (parent);
+    bounds.resolveThreePoints (resolved, parent);
 
     const Point<float> tr (resolved[0] + (resolved[1] - resolved[0]) / (float) image.getWidth());
     const Point<float> bl (resolved[0] + (resolved[2] - resolved[0]) / (float) image.getHeight());
@@ -130,12 +124,7 @@ const Rectangle<float> DrawableImage::getBounds() const
     if (image.isNull())
         return Rectangle<float>();
 
-    Point<float> corners[4];
-    for (int i = 0; i < 3; ++i)
-        corners[i] = controlPoints[i].resolve (parent);
-
-    corners[3] = corners[1] + (corners[2] - corners[0]);
-    return Rectangle<float>::findAreaContainingPoints (corners, 4);
+    return bounds.getBounds (parent);
 }
 
 bool DrawableImage::hitTest (float x, float y) const
@@ -232,37 +221,18 @@ Value DrawableImage::ValueTreeWrapper::getOverlayColourValue (UndoManager* undoM
     return state.getPropertyAsValue (overlay, undoManager);
 }
 
-const RelativePoint DrawableImage::ValueTreeWrapper::getTargetPositionForTopLeft() const
+const RelativeParallelogram DrawableImage::ValueTreeWrapper::getBoundingBox() const
 {
-    const String pos (state [topLeft].toString());
-    return pos.isNotEmpty() ? RelativePoint (pos) : RelativePoint();
+    return RelativeParallelogram (state.getProperty (topLeft, "0, 0"),
+                                  state.getProperty (topRight, "100, 0"),
+                                  state.getProperty (bottomLeft, "0, 100"));
 }
 
-void DrawableImage::ValueTreeWrapper::setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager)
+void DrawableImage::ValueTreeWrapper::setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager)
 {
-    state.setProperty (topLeft, newPoint.toString(), undoManager);
-}
-
-const RelativePoint DrawableImage::ValueTreeWrapper::getTargetPositionForTopRight() const
-{
-    const String pos (state [topRight].toString());
-    return pos.isNotEmpty() ? RelativePoint (pos) : RelativePoint (Point<float> (100.0f, 0.0f));
-}
-
-void DrawableImage::ValueTreeWrapper::setTargetPositionForTopRight (const RelativePoint& newPoint, UndoManager* undoManager)
-{
-    state.setProperty (topRight, newPoint.toString(), undoManager);
-}
-
-const RelativePoint DrawableImage::ValueTreeWrapper::getTargetPositionForBottomLeft() const
-{
-    const String pos (state [bottomLeft].toString());
-    return pos.isNotEmpty() ? RelativePoint (pos) : RelativePoint (Point<float> (0.0f, 100.0f));
-}
-
-void DrawableImage::ValueTreeWrapper::setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager)
-{
-    state.setProperty (bottomLeft, newPoint.toString(), undoManager);
+    state.setProperty (topLeft, newBounds.topLeft.toString(), undoManager);
+    state.setProperty (topRight, newBounds.topRight.toString(), undoManager);
+    state.setProperty (bottomLeft, newBounds.bottomLeft.toString(), undoManager);
 }
 
 
@@ -283,22 +253,15 @@ const Rectangle<float> DrawableImage::refreshFromValueTree (const ValueTree& tre
     if (imageProvider != 0)
         newImage = imageProvider->getImageForIdentifier (imageIdentifier);
 
-    RelativePoint newControlPoint[3] = { controller.getTargetPositionForTopLeft(),
-                                         controller.getTargetPositionForTopRight(),
-                                         controller.getTargetPositionForBottomLeft() };
+    const RelativeParallelogram newBounds (controller.getBoundingBox());
 
-    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage
-         || controlPoints[0] != newControlPoint[0]
-         || controlPoints[1] != newControlPoint[1]
-         || controlPoints[2] != newControlPoint[2])
+    if (newOpacity != opacity || overlayColour != newOverlayColour || image != newImage || bounds != newBounds)
     {
         const Rectangle<float> damage (getBounds());
 
         opacity = newOpacity;
         overlayColour = newOverlayColour;
-        controlPoints[0] = newControlPoint[0];
-        controlPoints[1] = newControlPoint[1];
-        controlPoints[2] = newControlPoint[2];
+        bounds = newBounds;
         image = newImage;
 
         return damage.getUnion (getBounds());
@@ -315,9 +278,7 @@ const ValueTree DrawableImage::createValueTree (ImageProvider* imageProvider) co
     v.setID (getName(), 0);
     v.setOpacity (opacity, 0);
     v.setOverlayColour (overlayColour, 0);
-    v.setTargetPositionForTopLeft (controlPoints[0], 0);
-    v.setTargetPositionForTopRight (controlPoints[1], 0);
-    v.setTargetPositionForBottomLeft (controlPoints[2], 0);
+    v.setBoundingBox (bounds, 0);
 
     if (image.isValid())
     {

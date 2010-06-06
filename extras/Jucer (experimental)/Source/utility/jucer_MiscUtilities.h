@@ -82,6 +82,31 @@ private:
 };
 
 //==============================================================================
+class PopupComponent    : public Component
+{
+public:
+    PopupComponent()
+    {
+    }
+
+    ~PopupComponent()
+    {
+    }
+
+    static PopupComponent* create (Component* parent, Component* content,
+                                   const Point<int>& targetPoint,
+                                   const Rectangle<int>& area)
+    {
+        ScopedPointer<PopupComponent> p (new PopupComponent());
+
+        parent->addAndMakeVisible (p);
+
+        return p.release();
+    }
+};
+
+
+//==============================================================================
 class JucerToolbarButton   : public ToolbarItemComponent
 {
 public:

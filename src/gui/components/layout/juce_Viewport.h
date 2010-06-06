@@ -215,16 +215,14 @@ public:
     void setScrollBarButtonVisibility (bool buttonsVisible);
 
     /** Returns a pointer to the scrollbar component being used.
-
         Handy if you need to customise the bar somehow.
     */
-    ScrollBar* getVerticalScrollBar() const throw()             { return verticalScrollBar; }
+    ScrollBar* getVerticalScrollBar() throw()                   { return &verticalScrollBar; }
 
     /** Returns a pointer to the scrollbar component being used.
-
         Handy if you need to customise the bar somehow.
     */
-    ScrollBar* getHorizontalScrollBar() const throw()           { return horizontalScrollBar; }
+    ScrollBar* getHorizontalScrollBar() throw()                 { return &horizontalScrollBar; }
 
 
     //==============================================================================
@@ -249,9 +247,9 @@ private:
     int scrollBarThickness;
     int singleStepX, singleStepY;
     bool showHScrollbar, showVScrollbar;
-    Component* contentHolder;
-    ScrollBar* verticalScrollBar;
-    ScrollBar* horizontalScrollBar;
+    Component contentHolder;
+    ScrollBar verticalScrollBar;
+    ScrollBar horizontalScrollBar;
 
     void updateVisibleArea();
 

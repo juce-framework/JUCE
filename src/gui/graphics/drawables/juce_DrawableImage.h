@@ -73,37 +73,14 @@ public:
     /** Returns the overlay colour. */
     const Colour& getOverlayColour() const throw()              { return overlayColour; }
 
-    /** Sets the transform to be applied to this image, by defining the positions
-        where three anchor points should end up in the target rendering space.
-
-        @param imageTopLeftPosition     the position that the image's top-left corner should be mapped to
-                                        in the target coordinate space.
-        @param imageTopRightPosition    the position that the image's top-right corner should be mapped to
-                                        in the target coordinate space.
-        @param imageBottomLeftPosition  the position that the image's bottom-left corner should be mapped to
-                                        in the target coordinate space.
-    */
-    void setTransform (const RelativePoint& imageTopLeftPosition,
-                       const RelativePoint& imageTopRightPosition,
-                       const RelativePoint& imageBottomLeftPosition);
+    /** Sets the bounding box within which the image should be displayed. */
+    void setBoundingBox (const RelativeParallelogram& newBounds);
 
     /** Returns the position to which the image's top-left corner should be remapped in the target
         coordinate space when rendering this object.
         @see setTransform
     */
-    const RelativePoint& getTargetPositionForTopLeft() const throw()         { return controlPoints[0]; }
-
-    /** Returns the position to which the image's top-right corner should be remapped in the target
-        coordinate space when rendering this object.
-        @see setTransform
-    */
-    const RelativePoint& getTargetPositionForTopRight() const throw()        { return controlPoints[1]; }
-
-    /** Returns the position to which the image's bottom-left corner should be remapped in the target
-        coordinate space when rendering this object.
-        @see setTransform
-    */
-    const RelativePoint& getTargetPositionForBottomLeft() const throw()      { return controlPoints[2]; }
+    const RelativeParallelogram& getBoundingBox() const throw()         { return bounds; }
 
     //==============================================================================
     /** @internal */
@@ -144,14 +121,8 @@ public:
         void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
         Value getOverlayColourValue (UndoManager* undoManager);
 
-        const RelativePoint getTargetPositionForTopLeft() const;
-        void setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager);
-
-        const RelativePoint getTargetPositionForTopRight() const;
-        void setTargetPositionForTopRight (const RelativePoint& newPoint, UndoManager* undoManager);
-
-        const RelativePoint getTargetPositionForBottomLeft() const;
-        void setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager);
+        const RelativeParallelogram getBoundingBox() const;
+        void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
         static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
     };
@@ -163,7 +134,7 @@ private:
     Image image;
     float opacity;
     Colour overlayColour;
-    RelativePoint controlPoints[3];
+    RelativeParallelogram bounds;
 
     const AffineTransform calculateTransform() const;
 

@@ -26,6 +26,7 @@
 #include "jucer_ComponentTypeManager.h"
 #include "jucer_ComponentTypes.h"
 #include "../../../utility/jucer_CoordinatePropertyComponent.h"
+#include "../../../utility/jucer_FontPropertyComponent.h"
 
 
 //==============================================================================
@@ -358,136 +359,6 @@ void ComponentTypeInstance::addColourProperty (Array <PropertyComponent*>& props
     props.add (new ColourPropertyComponent (document.getUndoManager(), name, getValue (propertyName),
                                             LookAndFeel::getDefaultLookAndFeel().findColour (colourId), true));
 }
-
-//==============================================================================
-class FontNameValueSource   : public Value::ValueSource,
-                              public Value::Listener
-{
-public:
-    FontNameValueSource (const Value& source)
-       : sourceValue (source)
-    {
-        sourceValue.addListener (this);
-    }
-
-    ~FontNameValueSource() {}
-
-    void valueChanged (Value&)      { sendChangeMessage (true); }
-
-    const var getValue() const
-    {
-        return Font::fromString (sourceValue.toString()).getTypefaceName();
-    }
-
-    void setValue (const var& newValue)
-    {
-        Font font (Font::fromString (sourceValue.toString()));
-        font.setTypefaceName (newValue.toString());
-        sourceValue = font.toString();
-    }
-
-    static ChoicePropertyComponent* createProperty (const String& title, const Value& value)
-    {
-        StringArray fontNames;
-        fontNames.add (Font::getDefaultSansSerifFontName());
-        fontNames.add (Font::getDefaultSerifFontName());
-        fontNames.add (Font::getDefaultMonospacedFontName());
-        fontNames.add (String::empty);
-        fontNames.addArray (StoredSettings::getInstance()->getFontNames());
-
-        Array<var> values;
-        for (int i = 0; i < fontNames.size(); ++i)
-            values.add (fontNames[i]);
-
-        return new ChoicePropertyComponent (Value (new FontNameValueSource (value)), title, fontNames, values);
-    }
-
-private:
-    Value sourceValue;
-};
-
-class FontSizeValueSource   : public Value::ValueSource,
-                              public Value::Listener
-{
-public:
-    FontSizeValueSource (const Value& source)
-       : sourceValue (source)
-    {
-        sourceValue.addListener (this);
-    }
-
-    ~FontSizeValueSource() {}
-
-    void valueChanged (Value&)      { sendChangeMessage (true); }
-
-    const var getValue() const
-    {
-        return Font::fromString (sourceValue.toString()).getHeight();
-    }
-
-    void setValue (const var& newValue)
-    {
-        Font font (Font::fromString (sourceValue.toString()));
-        font.setHeight (newValue);
-        sourceValue = font.toString();
-    }
-
-    static PropertyComponent* createProperty (const String& title, const Value& value)
-    {
-        return new SliderPropertyComponent (Value (new FontSizeValueSource (value)), title, 1.0, 150.0, 0.1, 0.5);
-    }
-
-private:
-    Value sourceValue;
-};
-
-class FontStyleValueSource   : public Value::ValueSource,
-                               public Value::Listener
-{
-public:
-    FontStyleValueSource (const Value& source)
-       : sourceValue (source)
-    {
-        sourceValue.addListener (this);
-    }
-
-    ~FontStyleValueSource() {}
-
-    void valueChanged (Value&)      { sendChangeMessage (true); }
-
-    const var getValue() const
-    {
-        const Font f (Font::fromString (sourceValue.toString()));
-
-        if (f.isBold() && f.isItalic()) return getStyles() [3];
-        if (f.isBold())                 return getStyles() [1];
-        if (f.isItalic())               return getStyles() [2];
-
-        return getStyles() [0];
-    }
-
-    void setValue (const var& newValue)
-    {
-        Font font (Font::fromString (sourceValue.toString()));
-        font.setBold (newValue.toString().containsIgnoreCase ("Bold"));
-        font.setItalic (newValue.toString().containsIgnoreCase ("Italic"));
-        sourceValue = font.toString();
-    }
-
-    static PropertyComponent* createProperty (const String& title, const Value& value)
-    {
-        return new ChoicePropertyComponent (Value (new FontStyleValueSource (value)), title, StringArray (getStyles()), Array<var> (getStyles()));
-    }
-
-    static const char* const* getStyles()
-    {
-        static const char* const fontStyles[] = { "Normal", "Bold", "Italic", "Bold + Italic", 0 };
-        return fontStyles;
-    }
-
-private:
-    Value sourceValue;
-};
 
 void ComponentTypeInstance::addFontProperties (Array <PropertyComponent*>& props, const Identifier& name)
 {

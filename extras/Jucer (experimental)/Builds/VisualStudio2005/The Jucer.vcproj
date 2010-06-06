@@ -235,6 +235,7 @@
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.h"/>
         <File RelativePath="..\..\Source\utility\jucer_FillTypePropertyComponent.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_FontPropertyComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_MarkerListBase.h"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.h"/>

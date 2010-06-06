@@ -19089,7 +19089,7 @@ public:
 	/** Returns the angle from this point to another one.
 
 		The return value is the number of radians clockwise from the 3 o'clock direction,
-		where this point is the centre and the other point is on the radius.
+		where this point is the centre and the other point is on the circumference.
 	*/
 	ValueType getAngleToPoint (const Point& other) const throw()	{ return (ValueType) std::atan2 (other.x - x, other.y - y); }
 
@@ -34554,16 +34554,14 @@ public:
 	void setScrollBarButtonVisibility (bool buttonsVisible);
 
 	/** Returns a pointer to the scrollbar component being used.
-
 		Handy if you need to customise the bar somehow.
 	*/
-	ScrollBar* getVerticalScrollBar() const throw()		 { return verticalScrollBar; }
+	ScrollBar* getVerticalScrollBar() throw()		   { return &verticalScrollBar; }
 
 	/** Returns a pointer to the scrollbar component being used.
-
 		Handy if you need to customise the bar somehow.
 	*/
-	ScrollBar* getHorizontalScrollBar() const throw()	   { return horizontalScrollBar; }
+	ScrollBar* getHorizontalScrollBar() throw()		 { return &horizontalScrollBar; }
 
 	juce_UseDebuggingNewOperator
 
@@ -34586,9 +34584,9 @@ private:
 	int scrollBarThickness;
 	int singleStepX, singleStepY;
 	bool showHScrollbar, showVScrollbar;
-	Component* contentHolder;
-	ScrollBar* verticalScrollBar;
-	ScrollBar* horizontalScrollBar;
+	Component contentHolder;
+	ScrollBar verticalScrollBar;
+	ScrollBar horizontalScrollBar;
 
 	void updateVisibleArea();
 
@@ -42714,6 +42712,35 @@ private:
 	void parse (const ValueTree& state);
 
 	RelativePointPath& operator= (const RelativePointPath&);
+};
+
+/**
+	A parallelogram defined by three RelativePoint positions.
+
+	@see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativeParallelogram
+{
+public:
+
+	RelativeParallelogram();
+	RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
+	RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
+	~RelativeParallelogram();
+
+	void resolveThreePoints (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+	void resolveFourCorners (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+	const Rectangle<float> getBounds (RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+	void getPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+	const AffineTransform resetToPerpendicular (RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+
+	bool operator== (const RelativeParallelogram& other) const throw();
+	bool operator!= (const RelativeParallelogram& other) const throw();
+
+	static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
+	static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
+
+	RelativePoint topLeft, topRight, bottomLeft;
 };
 
 #endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__
@@ -58558,37 +58585,14 @@ public:
 	/** Returns the overlay colour. */
 	const Colour& getOverlayColour() const throw()		  { return overlayColour; }
 
-	/** Sets the transform to be applied to this image, by defining the positions
-		where three anchor points should end up in the target rendering space.
-
-		@param imageTopLeftPosition	 the position that the image's top-left corner should be mapped to
-										in the target coordinate space.
-		@param imageTopRightPosition	the position that the image's top-right corner should be mapped to
-										in the target coordinate space.
-		@param imageBottomLeftPosition  the position that the image's bottom-left corner should be mapped to
-										in the target coordinate space.
-	*/
-	void setTransform (const RelativePoint& imageTopLeftPosition,
-					   const RelativePoint& imageTopRightPosition,
-					   const RelativePoint& imageBottomLeftPosition);
+	/** Sets the bounding box within which the image should be displayed. */
+	void setBoundingBox (const RelativeParallelogram& newBounds);
 
 	/** Returns the position to which the image's top-left corner should be remapped in the target
 		coordinate space when rendering this object.
 		@see setTransform
 	*/
-	const RelativePoint& getTargetPositionForTopLeft() const throw()	 { return controlPoints[0]; }
-
-	/** Returns the position to which the image's top-right corner should be remapped in the target
-		coordinate space when rendering this object.
-		@see setTransform
-	*/
-	const RelativePoint& getTargetPositionForTopRight() const throw()	{ return controlPoints[1]; }
-
-	/** Returns the position to which the image's bottom-left corner should be remapped in the target
-		coordinate space when rendering this object.
-		@see setTransform
-	*/
-	const RelativePoint& getTargetPositionForBottomLeft() const throw()	  { return controlPoints[2]; }
+	const RelativeParallelogram& getBoundingBox() const throw()	 { return bounds; }
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -58627,14 +58631,8 @@ public:
 		void setOverlayColour (const Colour& newColour, UndoManager* undoManager);
 		Value getOverlayColourValue (UndoManager* undoManager);
 
-		const RelativePoint getTargetPositionForTopLeft() const;
-		void setTargetPositionForTopLeft (const RelativePoint& newPoint, UndoManager* undoManager);
-
-		const RelativePoint getTargetPositionForTopRight() const;
-		void setTargetPositionForTopRight (const RelativePoint& newPoint, UndoManager* undoManager);
-
-		const RelativePoint getTargetPositionForBottomLeft() const;
-		void setTargetPositionForBottomLeft (const RelativePoint& newPoint, UndoManager* undoManager);
+		const RelativeParallelogram getBoundingBox() const;
+		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
 		static const Identifier opacity, overlay, image, topLeft, topRight, bottomLeft;
 	};
@@ -58645,7 +58643,7 @@ private:
 	Image image;
 	float opacity;
 	Colour overlayColour;
-	RelativePoint controlPoints[3];
+	RelativeParallelogram bounds;
 
 	const AffineTransform calculateTransform() const;
 
@@ -58864,25 +58862,21 @@ public:
 	/** Changes the justification of the text within the bounding box. */
 	void setJustification (const Justification& newJustification);
 
-	/** Sets the bounding box and the control point that controls the font size.
-		The three bounding box points define the parallelogram within which the text will be
-		placed. The fontSizeAndScaleAnchor specifies a position within that parallelogram, whose
-		Y position (relative to the parallelogram's origin and possibly distorted shape) specifies
-		the font's height, and its X defines the font's horizontal scale.
-	*/
-	void setBounds (const RelativePoint& boundingBoxTopLeft,
-					const RelativePoint& boundingBoxTopRight,
-					const RelativePoint& boundingBoxBottomLeft,
-					const RelativePoint& fontSizeAndScaleAnchor);
+	/** Returns the parallelogram that defines the text bounding box. */
+	const RelativeParallelogram& getBoundingBox() const throw()	 { return bounds; }
 
-	/** Returns the origin of the text bounding box. */
-	const RelativePoint& getBoundingBoxTopLeft() const throw()	  { return controlPoints[0]; }
-	/** Returns the top-right of the text bounding box. */
-	const RelativePoint& getBoundingBoxTopRight() const throw()	 { return controlPoints[1]; }
-	/** Returns the bottom-left of the text bounding box. */
-	const RelativePoint& getBoundingBoxBottomLeft() const throw()	   { return controlPoints[2]; }
-	/** Returns the point within the text bounding box which defines the size and scale of the font. */
-	const RelativePoint& getFontSizeAndScaleAnchor() const throw()	  { return controlPoints[3]; }
+	/** Sets the bounding box that contains the text. */
+	void setBoundingBox (const RelativeParallelogram& newBounds);
+
+	/** Returns the point within the bounds that defines the font's size and scale. */
+	const RelativePoint& getFontSizeControlPoint() const throw()	{ return fontSizeControlPoint; }
+
+	/** Sets the control point that defines the font's height and horizontal scale.
+		This position is a point within the bounding box parallelogram, whose Y position (relative
+		to the parallelogram's origin and possibly distorted shape) specifies the font's height,
+		and its X defines the font's horizontal scale.
+	*/
+	void setFontSizeControlPoint (const RelativePoint& newPoint);
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -58911,6 +58905,7 @@ public:
 
 		const String getText() const;
 		void setText (const String& newText, UndoManager* undoManager);
+		Value getTextValue (UndoManager* undoManager);
 
 		const Colour getColour() const;
 		void setColour (const Colour& newColour, UndoManager* undoManager);
@@ -58920,15 +58915,10 @@ public:
 
 		const Font getFont() const;
 		void setFont (const Font& newFont, UndoManager* undoManager);
+		Value getFontValue (UndoManager* undoManager);
 
-		const RelativePoint getBoundingBoxTopLeft() const;
-		void setBoundingBoxTopLeft (const RelativePoint& p, UndoManager* undoManager);
-
-		const RelativePoint getBoundingBoxTopRight() const;
-		void setBoundingBoxTopRight (const RelativePoint& p, UndoManager* undoManager);
-
-		const RelativePoint getBoundingBoxBottomLeft() const;
-		void setBoundingBoxBottomLeft (const RelativePoint& p, UndoManager* undoManager);
+		const RelativeParallelogram getBoundingBox() const;
+		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
 		const RelativePoint getFontSizeAndScaleAnchor() const;
 		void setFontSizeAndScaleAnchor (const RelativePoint& p, UndoManager* undoManager);
@@ -58939,13 +58929,12 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	RelativePoint controlPoints[4];
+	RelativeParallelogram bounds;
+	RelativePoint fontSizeControlPoint;
 	Font font;
 	String text;
 	Colour colour;
 	Justification justification;
-
-	void resolveCorners (Point<float>* corners) const;
 
 	DrawableText& operator= (const DrawableText&);
 };

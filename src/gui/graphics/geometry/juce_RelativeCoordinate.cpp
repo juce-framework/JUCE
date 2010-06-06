@@ -852,4 +852,101 @@ RelativePoint* RelativePointPath::CubicTo::getControlPoints (int& numPoints)
 }
 
 
+//==============================================================================
+RelativeParallelogram::RelativeParallelogram()
+{
+}
+
+RelativeParallelogram::RelativeParallelogram (const RelativePoint& topLeft_, const RelativePoint& topRight_, const RelativePoint& bottomLeft_)
+    : topLeft (topLeft_), topRight (topRight_), bottomLeft (bottomLeft_)
+{
+}
+
+RelativeParallelogram::RelativeParallelogram (const String& topLeft_, const String& topRight_, const String& bottomLeft_)
+    : topLeft (topLeft_), topRight (topRight_), bottomLeft (bottomLeft_)
+{
+}
+
+RelativeParallelogram::~RelativeParallelogram()
+{
+}
+
+void RelativeParallelogram::resolveThreePoints (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* const coordFinder) const
+{
+    points[0] = topLeft.resolve (coordFinder);
+    points[1] = topRight.resolve (coordFinder);
+    points[2] = bottomLeft.resolve (coordFinder);
+}
+
+void RelativeParallelogram::resolveFourCorners (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* const coordFinder) const
+{
+    resolveThreePoints (points, coordFinder);
+    points[3] = points[1] + (points[2] - points[0]);
+}
+
+const Rectangle<float> RelativeParallelogram::getBounds (RelativeCoordinate::NamedCoordinateFinder* const coordFinder) const
+{
+    Point<float> points[4];
+    resolveFourCorners (points, coordFinder);
+    return Rectangle<float>::findAreaContainingPoints (points, 4);
+}
+
+void RelativeParallelogram::getPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* const coordFinder) const
+{
+    Point<float> points[4];
+    resolveFourCorners (points, coordFinder);
+
+    path.startNewSubPath (points[0].getX(), points[0].getY());
+    path.lineTo (points[1].getX(), points[1].getY());
+    path.lineTo (points[3].getX(), points[3].getY());
+    path.lineTo (points[2].getX(), points[2].getY());
+    path.closeSubPath();
+}
+
+const AffineTransform RelativeParallelogram::resetToPerpendicular (RelativeCoordinate::NamedCoordinateFinder* const coordFinder)
+{
+    Point<float> corners[3];
+    resolveThreePoints (corners, coordFinder);
+
+    const Line<float> top (corners[0], corners[1]);
+    const Line<float> left (corners[0], corners[2]);
+    const Point<float> newTopRight (corners[0] + Point<float> (top.getLength(), 0.0f));
+    const Point<float> newBottomLeft (corners[0] + Point<float> (0.0f, left.getLength()));
+
+    topRight.moveToAbsolute (newTopRight, coordFinder);
+    bottomLeft.moveToAbsolute (newBottomLeft, coordFinder);
+
+    return AffineTransform::fromTargetPoints (corners[0].getX(), corners[0].getY(), corners[0].getX(), corners[0].getY(),
+                                              corners[1].getX(), corners[1].getY(), newTopRight.getX(), newTopRight.getY(),
+                                              corners[2].getX(), corners[2].getY(), newBottomLeft.getX(), newBottomLeft.getY());
+}
+
+bool RelativeParallelogram::operator== (const RelativeParallelogram& other) const throw()
+{
+    return topLeft == other.topLeft && topRight == other.topRight && bottomLeft == other.bottomLeft;
+}
+
+bool RelativeParallelogram::operator!= (const RelativeParallelogram& other) const throw()
+{
+    return ! operator== (other);
+}
+
+const Point<float> RelativeParallelogram::getInternalCoordForPoint (const Point<float>* const corners, Point<float> target) throw()
+{
+    const Point<float> tr (corners[1] - corners[0]);
+    const Point<float> bl (corners[2] - corners[0]);
+    target -= corners[0];
+
+    return Point<float> (Line<float> (Point<float>(), tr).getIntersection (Line<float> (target, target - bl)).getDistanceFromOrigin(),
+                         Line<float> (Point<float>(), bl).getIntersection (Line<float> (target, target - tr)).getDistanceFromOrigin());
+}
+
+const Point<float> RelativeParallelogram::getPointForInternalCoord (const Point<float>* const corners, const Point<float>& point) throw()
+{
+    return corners[0]
+            + Line<float> (Point<float>(), corners[1] - corners[0]).getPointAlongLine (point.getX())
+            + Line<float> (Point<float>(), corners[2] - corners[0]).getPointAlongLine (point.getY());
+}
+
+
 END_JUCE_NAMESPACE

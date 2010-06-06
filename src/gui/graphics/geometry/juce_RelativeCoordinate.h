@@ -560,5 +560,37 @@ private:
     RelativePointPath& operator= (const RelativePointPath&);
 };
 
+//==============================================================================
+/**
+    A parallelogram defined by three RelativePoint positions.
+
+    @see RelativePoint, RelativeCoordinate
+*/
+class JUCE_API  RelativeParallelogram
+{
+public:
+    //==============================================================================
+    RelativeParallelogram();
+    RelativeParallelogram (const RelativePoint& topLeft, const RelativePoint& topRight, const RelativePoint& bottomLeft);
+    RelativeParallelogram (const String& topLeft, const String& topRight, const String& bottomLeft);
+    ~RelativeParallelogram();
+
+    //==============================================================================
+    void resolveThreePoints (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+    void resolveFourCorners (Point<float>* points, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+    const Rectangle<float> getBounds (RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+    void getPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const;
+    const AffineTransform resetToPerpendicular (RelativeCoordinate::NamedCoordinateFinder* coordFinder);
+
+    bool operator== (const RelativeParallelogram& other) const throw();
+    bool operator!= (const RelativeParallelogram& other) const throw();
+
+    static const Point<float> getInternalCoordForPoint (const Point<float>* parallelogramCorners, Point<float> point) throw();
+    static const Point<float> getPointForInternalCoord (const Point<float>* parallelogramCorners, const Point<float>& internalPoint) throw();
+
+    //==============================================================================
+    RelativePoint topLeft, topRight, bottomLeft;
+};
+
 
 #endif   // __JUCE_RELATIVECOORDINATE_JUCEHEADER__

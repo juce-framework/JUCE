@@ -125,7 +125,7 @@ public:
     /** Returns the angle from this point to another one.
 
         The return value is the number of radians clockwise from the 3 o'clock direction,
-        where this point is the centre and the other point is on the radius.
+        where this point is the centre and the other point is on the circumference.
     */
     ValueType getAngleToPoint (const Point& other) const throw()        { return (ValueType) std::atan2 (other.x - x, other.y - y); }
 

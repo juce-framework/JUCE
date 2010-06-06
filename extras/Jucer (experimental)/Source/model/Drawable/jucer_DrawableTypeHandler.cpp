@@ -25,6 +25,7 @@
 
 #include "jucer_DrawableTypeHandler.h"
 #include "../../utility/jucer_ColourPropertyComponent.h"
+#include "../../utility/jucer_FontPropertyComponent.h"
 
 //==============================================================================
 class ControlPointPropertyComp  : public CoordinatePropertyComponent
@@ -186,9 +187,9 @@ public:
 
         props.add (new DrawablePathFillPropComp (item, "Fill", wrapper.getMainFillState()));
 
-        props.add (StrokeThicknessValueSource::create (wrapper, item.getDocument().getUndoManager()));
-        props.add (StrokeJoinStyleValueSource::create (wrapper, item.getDocument().getUndoManager()));
-        props.add (StrokeCapStyleValueSource::create (wrapper, item.getDocument().getUndoManager()));
+        props.add (StrokeThicknessValueSource::create (wrapper, item.getUndoManager()));
+        props.add (StrokeJoinStyleValueSource::create (wrapper, item.getUndoManager()));
+        props.add (StrokeCapStyleValueSource::create (wrapper, item.getUndoManager()));
         props.add (new DrawablePathFillPropComp (item, "Stroke", wrapper.getStrokeFillState()));
     }
 
@@ -545,9 +546,9 @@ public:
         }
 
         DrawableImage di;
-        di.setTransform (RelativePoint (approxPosition),
-                         RelativePoint (approxPosition + Point<float> (100.0f, 0.0f)),
-                         RelativePoint (approxPosition + Point<float> (0.0f, 100.0f)));
+        di.setBoundingBox (RelativeParallelogram (approxPosition,
+                                                  approxPosition + Point<float> (100.0f, 0.0f),
+                                                  approxPosition + Point<float> (0.0f, 100.0f)));
         return di.createValueTree (&document);
     }
 
@@ -569,15 +570,15 @@ public:
                 ids.add (images.getUnchecked(i)->getImageFileID());
             }
 
-            props.add (new ChoicePropertyComponent (wrapper.getImageIdentifierValue (item.getDocument().getUndoManager()),
+            props.add (new ChoicePropertyComponent (wrapper.getImageIdentifierValue (item.getUndoManager()),
                                                     "Image", choices, ids));
         }
 
-        props.add (new SliderPropertyComponent (wrapper.getOpacityValue (item.getDocument().getUndoManager()),
+        props.add (new SliderPropertyComponent (wrapper.getOpacityValue (item.getUndoManager()),
                                                 "Opacity", 0, 1.0, 0.001));
 
-        props.add (new ColourPropertyComponent (item.getDocument().getUndoManager(), "Overlay Colour",
-                                                wrapper.getOverlayColourValue (item.getDocument().getUndoManager()),
+        props.add (new ColourPropertyComponent (item.getUndoManager(), "Overlay Colour",
+                                                wrapper.getOverlayColourValue (item.getUndoManager()),
                                                 Colours::transparentBlack, true));
 
         props.add (new ResetButtonPropertyComponent (item, wrapper));
@@ -600,12 +601,13 @@ public:
         const RelativePoint getPosition()
         {
             DrawableImage::ValueTreeWrapper wrapper (item.getState());
+            const RelativeParallelogram bounds (wrapper.getBoundingBox());
 
             switch (cpNum)
             {
-                case 0: return wrapper.getTargetPositionForTopLeft();
-                case 1: return wrapper.getTargetPositionForTopRight();
-                case 2: return wrapper.getTargetPositionForBottomLeft();
+                case 0: return bounds.topLeft;
+                case 1: return bounds.topRight;
+                case 2: return bounds.bottomLeft;
                 default: jassertfalse; break;
             }
 
@@ -615,14 +617,17 @@ public:
         void setPosition (const RelativePoint& newPoint, UndoManager* undoManager)
         {
             DrawableImage::ValueTreeWrapper wrapper (item.getState());
+            RelativeParallelogram bounds (wrapper.getBoundingBox());
 
             switch (cpNum)
             {
-                case 0: wrapper.setTargetPositionForTopLeft (newPoint, undoManager); break;
-                case 1: wrapper.setTargetPositionForTopRight (newPoint, undoManager); break;
-                case 2: wrapper.setTargetPositionForBottomLeft (newPoint, undoManager); break;
+                case 0: bounds.topLeft = newPoint; break;
+                case 1: bounds.topRight = newPoint; break;
+                case 2: bounds.bottomLeft = newPoint; break;
                 default: jassertfalse; break;
             }
+
+            wrapper.setBoundingBox (bounds, undoManager);
         }
 
         const Value getPositionValue (UndoManager* undoManager)
@@ -677,7 +682,7 @@ public:
         {
         }
 
-        const String getButtonText() const { return "Reset to Original Size"; }
+        const String getButtonText() const      { return "Reset to Original Size"; }
 
         void buttonClicked()
         {
@@ -685,15 +690,12 @@ public:
 
             if (im.isValid())
             {
-                RelativePoint topLeft (wrapper.getTargetPositionForTopLeft());
-                RelativePoint topRight (wrapper.getTargetPositionForTopRight());
-                RelativePoint bottomLeft (wrapper.getTargetPositionForBottomLeft());
+                RelativeParallelogram bounds (wrapper.getBoundingBox());
 
-                topRight.moveToAbsolute (topLeft.resolve (&item) + Point<float> ((float) im.getWidth(), 0.0f), &item);
-                bottomLeft.moveToAbsolute (topLeft.resolve (&item) + Point<float> (0.0f, (float) im.getHeight()), &item);
+                bounds.topRight.moveToAbsolute (bounds.topLeft.resolve (&item) + Point<float> ((float) im.getWidth(), 0.0f), &item);
+                bounds.bottomLeft.moveToAbsolute (bounds.topLeft.resolve (&item) + Point<float> (0.0f, (float) im.getHeight()), &item);
 
-                wrapper.setTargetPositionForTopRight (topRight, item.getDocument().getUndoManager());
-                wrapper.setTargetPositionForBottomLeft (bottomLeft, item.getDocument().getUndoManager());
+                wrapper.setBoundingBox (bounds, item.getUndoManager());
             }
         }
 
@@ -814,8 +816,8 @@ public:
             topRight.moveToAbsolute (topLeft.resolve (&item) + Point<float> (1.0f, 0.0f), &item);
             bottomLeft.moveToAbsolute (topLeft.resolve (&item) + Point<float> (0.0f, 1.0f), &item);
 
-            wrapper.setTargetPositionForX1Y0 (topRight, item.getDocument().getUndoManager());
-            wrapper.setTargetPositionForX0Y1 (bottomLeft, item.getDocument().getUndoManager());
+            wrapper.setTargetPositionForX1Y0 (topRight, item.getUndoManager());
+            wrapper.setTargetPositionForX0Y1 (bottomLeft, item.getUndoManager());
         }
 
     private:
@@ -835,10 +837,9 @@ public:
     {
         DrawableText dt;
         dt.setText ("Text");
-        dt.setBounds (RelativePoint (approxPosition),
-                      RelativePoint (approxPosition + Point<float> (100.0f, 0.0f)),
-                      RelativePoint (approxPosition + Point<float> (0.0f, 100.0f)),
-                      RelativePoint (approxPosition + Point<float> (25.0f, 25.0f)));
+        dt.setBoundingBox (RelativeParallelogram (approxPosition,
+                                                  approxPosition + Point<float> (100.0f, 0.0f),
+                                                  approxPosition + Point<float> (0.0f, 100.0f)));
         dt.setFont (Font (25.0f), true);
         return dt.createValueTree (&document);
     }
@@ -846,7 +847,12 @@ public:
     void createPropertyEditors (DrawableTypeInstance& item, Array <PropertyComponent*>& props)
     {
         DrawableText::ValueTreeWrapper wrapper (item.getState());
-        //props.add (new ResetButtonPropertyComponent (item, wrapper));
+        props.add (new TextPropertyComponent (wrapper.getTextValue (item.getUndoManager()), "Text", 16384, true));
+
+        Value v (wrapper.getFontValue (item.getUndoManager()));
+        props.add (FontNameValueSource::createProperty ("Font", v));
+        props.add (FontStyleValueSource::createProperty ("Font Style", v));
+        props.add (new ResetButtonPropertyComponent (item, wrapper));
     }
 
     void itemDoubleClicked (const MouseEvent& e, DrawableTypeInstance& item)
@@ -866,12 +872,13 @@ public:
         const RelativePoint getPosition()
         {
             DrawableText::ValueTreeWrapper wrapper (item);
+            RelativeParallelogram bounds (wrapper.getBoundingBox());
 
             switch (cpNum)
             {
-                case 0: return wrapper.getBoundingBoxTopLeft();
-                case 1: return wrapper.getBoundingBoxTopRight();
-                case 2: return wrapper.getBoundingBoxBottomLeft();
+                case 0: return wrapper.getBoundingBox().topLeft;
+                case 1: return wrapper.getBoundingBox().topRight;
+                case 2: return wrapper.getBoundingBox().bottomLeft;
                 case 3: return wrapper.getFontSizeAndScaleAnchor();
                 default: jassertfalse; break;
             }
@@ -883,13 +890,23 @@ public:
         {
             DrawableText::ValueTreeWrapper wrapper (item);
 
-            switch (cpNum)
+            if (cpNum == 3)
             {
-                case 0: wrapper.setBoundingBoxTopLeft (newPoint, undoManager); break;
-                case 1: wrapper.setBoundingBoxTopRight (newPoint, undoManager); break;
-                case 2: wrapper.setBoundingBoxBottomLeft (newPoint, undoManager); break;
-                case 3: wrapper.setFontSizeAndScaleAnchor (newPoint, undoManager); break;
-                default: jassertfalse; break;
+                wrapper.setFontSizeAndScaleAnchor (newPoint, undoManager);
+            }
+            else
+            {
+                RelativeParallelogram bounds (wrapper.getBoundingBox());
+
+                switch (cpNum)
+                {
+                    case 0: bounds.topLeft = newPoint; break;
+                    case 1: bounds.topRight = newPoint; break;
+                    case 2: bounds.bottomLeft = newPoint; break;
+                    default: jassertfalse; break;
+                }
+
+                wrapper.setBoundingBox (bounds, undoManager);
             }
         }
 
@@ -935,6 +952,37 @@ public:
     {
         return getAllControlPoints (item, points);
     }
+
+    //==============================================================================
+    class ResetButtonPropertyComponent  : public ButtonPropertyComponent
+    {
+    public:
+        ResetButtonPropertyComponent (DrawableTypeInstance& item_,
+                                      const DrawableText::ValueTreeWrapper& wrapper_)
+            : ButtonPropertyComponent ("Reset", false),
+              item (item_), wrapper (wrapper_)
+        {
+        }
+
+        const String getButtonText() const      { return "Make Perpendicular"; }
+
+        void buttonClicked()
+        {
+            RelativeParallelogram bounds (wrapper.getBoundingBox());
+
+            const AffineTransform t (bounds.resetToPerpendicular (&item));
+
+            RelativePoint fontPos (wrapper.getFontSizeAndScaleAnchor());
+            fontPos.moveToAbsolute (fontPos.resolve (&item).transformedBy (t), &item);
+
+            wrapper.setBoundingBox (bounds, item.getUndoManager());
+            wrapper.setFontSizeAndScaleAnchor (fontPos, item.getUndoManager());
+        }
+
+    private:
+        DrawableTypeInstance item;
+        DrawableText::ValueTreeWrapper wrapper;
+    };
 };
 
 

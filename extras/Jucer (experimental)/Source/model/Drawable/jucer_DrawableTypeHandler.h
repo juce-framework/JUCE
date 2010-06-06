@@ -66,6 +66,7 @@ public:
 
     //==============================================================================
     DrawableDocument& getDocument() throw()             { return document; }
+    UndoManager* getUndoManager() throw()               { return document.getUndoManager(); }
     Project* getProject()                               { return document.getProject(); }
     ValueTree& getState() throw()                       { return state; }
     const String getID() const                          { return Drawable::ValueTreeWrapperBase (state).getID(); }

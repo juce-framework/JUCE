@@ -149,6 +149,7 @@
 		5533704F0D30A9C62058FEC7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_FileHelpers.cpp; path = ../../Source/utility/jucer_FileHelpers.cpp; sourceTree = SOURCE_ROOT; };
 		27E71DE11448E4D6721D5508 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FileHelpers.h; path = ../../Source/utility/jucer_FileHelpers.h; sourceTree = SOURCE_ROOT; };
 		BE9E52ADB12C9D4F783AFE42 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FillTypePropertyComponent.h; path = ../../Source/utility/jucer_FillTypePropertyComponent.h; sourceTree = SOURCE_ROOT; };
+		BB7B42859CABFB8385039712 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FontPropertyComponent.h; path = ../../Source/utility/jucer_FontPropertyComponent.h; sourceTree = SOURCE_ROOT; };
 		848F9EFCBB691000A4B32346 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_MarkerListBase.h; path = ../../Source/utility/jucer_MarkerListBase.h; sourceTree = SOURCE_ROOT; };
 		49A1C43070A68985C25F34C7 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MiscUtilities.cpp; path = ../../Source/utility/jucer_MiscUtilities.cpp; sourceTree = SOURCE_ROOT; };
 		2B2A6FCA85F56682698864EC = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_MiscUtilities.h; path = ../../Source/utility/jucer_MiscUtilities.h; sourceTree = SOURCE_ROOT; };
@@ -287,6 +288,7 @@
 				5533704F0D30A9C62058FEC7,
 				27E71DE11448E4D6721D5508,
 				BE9E52ADB12C9D4F783AFE42,
+				BB7B42859CABFB8385039712,
 				848F9EFCBB691000A4B32346,
 				49A1C43070A68985C25F34C7,
 				2B2A6FCA85F56682698864EC,
