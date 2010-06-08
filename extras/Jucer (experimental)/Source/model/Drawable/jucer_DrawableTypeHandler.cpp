@@ -766,7 +766,13 @@ public:
 
         const Value getPositionValue (UndoManager* undoManager)
         {
-            jassertfalse
+            switch (cpNum)
+            {
+                case 0: return item.getPropertyAsValue (DrawableImage::ValueTreeWrapper::topLeft, undoManager);
+                case 1: return item.getPropertyAsValue (DrawableImage::ValueTreeWrapper::topRight, undoManager);
+                case 2: return item.getPropertyAsValue (DrawableImage::ValueTreeWrapper::bottomLeft, undoManager);
+                default: jassertfalse; break;
+            }
             return Value();
         }
 

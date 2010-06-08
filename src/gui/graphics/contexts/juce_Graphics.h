@@ -558,7 +558,7 @@ public:
         method can be used to optimise a component's paint() method, by letting it
         avoid drawing complex objects that aren't within the region being repainted.
     */
-    bool clipRegionIntersects (int x, int y, int width, int height) const;
+    bool clipRegionIntersects (const Rectangle<int>& area) const;
 
     /** Intersects the current clipping region with another region.
 

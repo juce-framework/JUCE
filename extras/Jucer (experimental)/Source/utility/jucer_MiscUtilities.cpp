@@ -415,3 +415,208 @@ const ColourGradient FillTypeEditorComponent::getDefaultGradient() const
     jassert (p != 0);
     return p->getDefaultGradient();
 }
+
+
+//==============================================================================
+PopupComponent::PopupComponent (Component* const content_)
+    : edge (20), content (content_)
+{
+    addAndMakeVisible (content);
+}
+
+PopupComponent::~PopupComponent()
+{
+}
+
+void PopupComponent::show (Component* content, Component* targetComp, Component* parentComp)
+{
+    show (content,
+          parentComp,
+          parentComp == 0 ? targetComp->getParentMonitorArea()
+                          : parentComp->getLocalBounds(),
+          parentComp == 0 ? targetComp->getScreenBounds()
+                          : (targetComp->getLocalBounds() + targetComp->relativePositionToOtherComponent (parentComp, Point<int>())));
+}
+
+void PopupComponent::show (Component* content, Component* parent,
+                           const Rectangle<int>& availableAreaInParent,
+                           const Rectangle<int>& targetAreaInParent)
+{
+    PopupComponent p (content);
+    p.updatePosition (targetAreaInParent, availableAreaInParent);
+
+    if (parent != 0)
+        parent->addAndMakeVisible (&p);
+    else
+        p.addToDesktop (ComponentPeer::windowIsTemporary);
+
+    p.runModalLoop();
+}
+
+void PopupComponent::inputAttemptWhenModal()
+{
+    exitModalState (0);
+    setVisible (false);
+}
+
+void PopupComponent::paint (Graphics& g)
+{
+    if (background.isNull())
+    {
+        DropShadowEffect shadow;
+        shadow.setShadowProperties (5.0f, 0.4f, 0.0f, 2.0f);
+
+        Image im (Image::ARGB, getWidth(), getHeight(), true);
+
+        {
+            Graphics g (im);
+
+            g.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
+            g.fillPath (outline);
+
+            g.setColour (Colours::white.withAlpha (0.6f));
+            g.strokePath (outline, PathStrokeType (2.0f));
+        }
+
+        background = Image (Image::ARGB, getWidth(), getHeight(), true);
+        Graphics g (background);
+        shadow.applyEffect (im, g);
+    }
+
+    g.setColour (Colours::black);
+    g.drawImageAt (background, 0, 0);
+}
+
+void PopupComponent::resized()
+{
+    content->setTopLeftPosition (edge, edge);
+    refreshPath();
+}
+
+void PopupComponent::moved()
+{
+    refreshPath();
+}
+
+void PopupComponent::childBoundsChanged (Component*)
+{
+    updatePosition (targetArea, availableArea);
+}
+
+bool PopupComponent::hitTest (int x, int y)
+{
+    return outline.contains (x, y);
+}
+
+void PopupComponent::refreshPath()
+{
+    background = Image();
+    outline.clear();
+
+    const float gap = 4.0f;
+    const float x = content->getX() - gap, y = content->getY() - gap, r = content->getRight() + gap, b = content->getBottom() + gap;
+    const float targetX = targetPoint.getX() - getX(), targetY = targetPoint.getY() - getY();
+
+    const float cs = 8.0f;
+    const float cs2 = 2.0f * cs;
+    const float arrowWidth = edge * 0.8f;
+
+    outline.startNewSubPath (x + cs, y);
+
+    if (targetY < edge)
+    {
+        outline.lineTo (targetX - arrowWidth, y);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (targetX + arrowWidth, y);
+    }
+
+    outline.lineTo (r - cs, y);
+    outline.addArc (r - cs2, y, cs2, cs2, 0, float_Pi * 0.5f);
+
+    if (targetX > r)
+    {
+        outline.lineTo (r, targetY - arrowWidth);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (r, targetY + arrowWidth);
+    }
+
+    outline.lineTo (r, b - cs);
+    outline.addArc (r - cs2, b - cs2, cs2, cs2, float_Pi * 0.5f, float_Pi);
+
+    if (targetY > b)
+    {
+        outline.lineTo (targetX + arrowWidth, b);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (targetX - arrowWidth, b);
+    }
+
+    outline.lineTo (x + cs, b);
+    outline.addArc (x, b - cs2, cs2, cs2, float_Pi, float_Pi * 1.5f);
+
+    if (targetX < x)
+    {
+        outline.lineTo (x, targetY + arrowWidth);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (x, targetY - arrowWidth);
+    }
+
+    outline.lineTo (x, y + cs);
+    outline.addArc (x, y, cs2, cs2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
+
+    outline.closeSubPath();
+    repaint();
+}
+
+void PopupComponent::updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea)
+{
+    targetArea = newTargetArea;
+    availableArea = newArea;
+
+    Rectangle<int> r (0, 0,
+                      content->getWidth() + edge * 2,
+                      content->getHeight() + edge * 2);
+
+
+    const float hw = r.getWidth() / 2.0f;
+    const float hh = r.getHeight() / 2.0f;
+    const float hwReduced = hw - edge * 3;
+    const float hhReduced = hh - edge * 3;
+
+    Point<float> centres[4];
+    Point<float> targets[4] = { Point<float> (targetArea.getCentreX(), targetArea.getBottom()),
+                                Point<float> (targetArea.getRight(), targetArea.getCentreY()),
+                                Point<float> (targetArea.getX(), targetArea.getCentreY()),
+                                Point<float> (targetArea.getCentreX(), targetArea.getY()) };
+
+    Line<float> lines[4] = { Line<float> (targets[0] + Point<float> (-hwReduced, hh), targets[0] + Point<float> (hwReduced, hh)),
+                             Line<float> (targets[1] + Point<float> (hw, -hhReduced), targets[1] + Point<float> (hw, hhReduced)),
+                             Line<float> (targets[2] + Point<float> (-hw, -hhReduced), targets[2] + Point<float> (-hw, hhReduced)),
+                             Line<float> (targets[3] + Point<float> (-hwReduced, -hh), targets[3] + Point<float> (hwReduced, -hh)) };
+
+    int best = 0;
+    float bestDist = 1.0e9f;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        const Rectangle<float> reducedArea (newArea.reduced (hw, hh).toFloat());
+
+        Line<float> constrainedLine (reducedArea.getConstrainedPoint (lines[i].getStart()),
+                                     reducedArea.getConstrainedPoint (lines[i].getEnd()));
+
+        centres[i] = constrainedLine.findNearestPointTo (reducedArea.getCentre());
+        float dist = centres[i].getDistanceFrom (reducedArea.getCentre());
+
+        if (! (reducedArea.contains (lines[i].getStart()) || reducedArea.contains (lines[i].getEnd())))
+            dist *= 2.0f;
+
+        if (dist < bestDist)
+        {
+            bestDist = dist;
+            best = i;
+        }
+    }
+
+    targetPoint = targets[best];
+    r.setPosition (centres[best].getX() - hw, centres[best].getY() - hh);
+    setBounds (r);
+}

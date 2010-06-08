@@ -740,6 +740,11 @@ END_JUCE_NAMESPACE
     if (owner != 0)
         frameRect = owner->constrainRect (frameRect);
 
+    if (JUCE_NAMESPACE::Component::getCurrentlyModalComponent() != 0
+          && owner->getComponent()->isCurrentlyBlockedByAnotherModalComponent()
+          && (owner->getStyleFlags() & JUCE_NAMESPACE::ComponentPeer::windowHasTitleBar) != 0)
+        JUCE_NAMESPACE::Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+
     return frameRect.size;
 }
 

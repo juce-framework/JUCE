@@ -159,9 +159,9 @@ void Graphics::setOrigin (const int newOriginX, const int newOriginY)
     context->setOrigin (newOriginX, newOriginY);
 }
 
-bool Graphics::clipRegionIntersects (const int x, const int y, const int w, const int h) const
+bool Graphics::clipRegionIntersects (const Rectangle<int>& area) const
 {
-    return context->clipRegionIntersects (Rectangle<int> (x, y, w, h));
+    return context->clipRegionIntersects (area);
 }
 
 //==============================================================================
@@ -394,7 +394,7 @@ void Graphics::drawBevel (const int x, const int y, const int width, const int h
     // passing in a silly number can cause maths problems in rendering!
     jassert (areCoordsSensibleNumbers (x, y, width, height));
 
-    if (clipRegionIntersects (x, y, width, height))
+    if (clipRegionIntersects (Rectangle<int> (x, y, width, height)))
     {
         context->saveState();
 

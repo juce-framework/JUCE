@@ -20077,7 +20077,7 @@ public:
 		@returns the point's distance from the line
 		@see getPositionAlongLineOfNearestPoint
 	*/
-	ValueType getDistanceFromLine (const Point<ValueType>& point) const throw()
+	ValueType getDistanceFromPoint (const Point<ValueType>& point) const throw()
 	{
 		const Point<ValueType> delta (end - start);
 		const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
@@ -20101,9 +20101,9 @@ public:
 		@returns	a value 0 to 1.0 which is the distance along this line from the
 					line's start to the point which is nearest to the point passed-in. To
 					turn this number into a position, use getPointAlongLineProportionally().
-		@see getDistanceFromLine, getPointAlongLineProportionally
+		@see getDistanceFromPoint, getPointAlongLineProportionally
 	*/
-	ValueType findNearestPointTo (const Point<ValueType>& point) const throw()
+	ValueType findNearestProportionalPositionTo (const Point<ValueType>& point) const throw()
 	{
 		const Point<ValueType> delta (end - start);
 		const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
@@ -20112,6 +20112,14 @@ public:
 						   : jlimit ((ValueType) 0, (ValueType) 1,
 									 (ValueType) (((point.getX() - start.getX()) * delta.getX()
 													+ (point.getY() - start.getY()) * delta.getY()) / length));
+	}
+
+	/** Finds the point on this line which is nearest to a given point.
+		@see getDistanceFromPoint, findNearestProportionalPositionTo
+	*/
+	const Point<ValueType> findNearestPointTo (const Point<ValueType>& point) const throw()
+	{
+		return getPointAlongLineProportionally (findNearestProportionalPositionTo (point));
 	}
 
 	/** Returns true if the given point lies above this line.
@@ -24064,7 +24072,7 @@ public:
 		method can be used to optimise a component's paint() method, by letting it
 		avoid drawing complex objects that aren't within the region being repainted.
 	*/
-	bool clipRegionIntersects (int x, int y, int width, int height) const;
+	bool clipRegionIntersects (const Rectangle<int>& area) const;
 
 	/** Intersects the current clipping region with another region.
 

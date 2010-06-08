@@ -85,24 +85,33 @@ private:
 class PopupComponent    : public Component
 {
 public:
-    PopupComponent()
-    {
-    }
+    PopupComponent (Component* const content);
+    ~PopupComponent();
 
-    ~PopupComponent()
-    {
-    }
+    static void show (Component* content, Component* targetComp, Component* parentComp);
 
-    static PopupComponent* create (Component* parent, Component* content,
-                                   const Point<int>& targetPoint,
-                                   const Rectangle<int>& area)
-    {
-        ScopedPointer<PopupComponent> p (new PopupComponent());
+    static void show (Component* content, Component* parent,
+                      const Rectangle<int>& availableAreaInParent,
+                      const Rectangle<int>& targetAreaInParent);
 
-        parent->addAndMakeVisible (p);
+    void updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea);
 
-        return p.release();
-    }
+    void inputAttemptWhenModal();
+    void paint (Graphics& g);
+    void resized();
+    void moved();
+    void childBoundsChanged (Component*);
+    bool hitTest (int x, int y);
+
+private:
+    const int edge;
+    Component* content;
+    Path outline;
+    Point<float> targetPoint;
+    Rectangle<int> availableArea, targetArea;
+    Image background;
+
+    void refreshPath();
 };
 
 

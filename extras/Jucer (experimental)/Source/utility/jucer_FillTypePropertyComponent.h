@@ -59,14 +59,17 @@ public:
         addAndMakeVisible (&imageButton);
 
         addChildComponent (&colourPicker);
+        colourPicker.setSize (300, 410);
         colourPicker.setCurrentColour (Colours::green);
         colourPicker.setName ("Colour");
         colourPicker.addChangeListener (this);
 
         addChildComponent (&gradientPicker);
+        gradientPicker.setSize (300, 500);
         gradientPicker.addChangeListener (this);
 
         addChildComponent (&tilePicker);
+        tilePicker.setSize (300, 170);
         tilePicker.addChangeListener (this);
 
         fillState.addListener (this);
@@ -79,6 +82,7 @@ public:
         gradientButton.addButtonListener (this);
         imageButton.addButtonListener (this);
 
+        setSize (300, 200);
         refresh();
     }
 
@@ -96,10 +100,9 @@ public:
         colourButton.setBounds (gradientButton.getX() - w, y, w, h);
         imageButton.setBounds (gradientButton.getRight(), y, w, h);
 
-        const Rectangle<int> content (2, y + h + 4, getWidth() - 4, getHeight() - (y + h + 6));
-        colourPicker.setBounds (content);
-        gradientPicker.setBounds (content);
-        tilePicker.setBounds (content);
+        colourPicker.setTopLeftPosition (2, y + h + 4);
+        gradientPicker.setTopLeftPosition (2, y + h + 4);
+        tilePicker.setTopLeftPosition (2, y + h + 4);
     }
 
     void buttonClicked (Button* b)
@@ -187,11 +190,15 @@ public:
 
         if (newFill.isColour())
         {
+            setSize (getWidth(), colourPicker.getBottom() + 4);
             colourButton.setToggleState (true, false);
             colourPicker.setCurrentColour (newFill.colour);
+
         }
         else if (newFill.isGradient())
         {
+            setSize (getWidth(), gradientPicker.getBottom() + 4);
+
             if (newFill.gradient->getNumColours() <= 1)
             {
                 newFill = FillType (defaultGradient);
@@ -203,6 +210,7 @@ public:
         }
         else
         {
+            setSize (getWidth(), tilePicker.getBottom() + 4);
             tilePicker.setFill (newFill);
             imageButton.setToggleState (true, false);
         }
@@ -463,6 +471,7 @@ private:
             opacitySlider.setRange (0.0, 1.0, 0.001);
 
             sliderLabel.setText ("Opacity:", false);
+            sliderLabel.setColour (Label::textColourId, Colours::white);
             sliderLabel.attachToComponent (&opacitySlider, false);
 
             OwnedArray<Project::Item> images;
@@ -641,10 +650,7 @@ public:
         undoManager->beginNewTransaction();
 
         PopupFillSelector popup (fillState, getDefaultGradient(), imageProvider, project, undoManager);
-
-        PopupMenu m;
-        m.addCustomItem (1234, &popup, 300, 450, false);
-        m.showAt (this);
+        PopupComponent::show (&popup, this, 0 /*getTopLevelComponent()*/);
     }
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { refresh(); }

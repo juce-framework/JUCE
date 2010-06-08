@@ -59,14 +59,13 @@ public:
     {
     }
 
-    static void showAt (Component* comp, const Value& colourValue,
+    static void showAt (Component* targetComp, const Value& colourValue,
                         const Colour& defaultColour, const bool canResetToDefault)
     {
         PopupColourSelector colourSelector (colourValue, defaultColour, canResetToDefault);
+        colourSelector.setSize (300, 400);
 
-        PopupMenu m;
-        m.addCustomItem (1234, &colourSelector, 300, 400, false);
-        m.showAt (comp);
+        PopupComponent::show (&colourSelector, targetComp, 0 /*targetComp->getTopLevelComponent()*/);
     }
 
     void resized()

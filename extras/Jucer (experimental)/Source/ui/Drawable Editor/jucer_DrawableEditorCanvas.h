@@ -136,7 +136,8 @@ public:
     {
         if (state.hasType (DrawablePath::valueTreeType)
              || state.hasType (DrawableImage::valueTreeType)
-             || state.hasType (DrawableText::valueTreeType))
+             || state.hasType (DrawableText::valueTreeType)
+             || state.hasType (DrawableComposite::valueTreeType))
         {
             enableControlPointMode (state);
         }

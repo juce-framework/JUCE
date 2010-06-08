@@ -564,17 +564,17 @@ void DrawableComposite::ValueTreeWrapper::removeMarker (bool xAxis, const ValueT
 //==============================================================================
 const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
 {
-    Rectangle<float> damageRect;
     const ValueTreeWrapper wrapper (tree);
     setName (wrapper.getID());
 
-    const RelativeParallelogram newBounds (wrapper.getBoundingBox());
+    Rectangle<float> damage;
     bool redrawAll = false;
 
+    const RelativeParallelogram newBounds (wrapper.getBoundingBox());
     if (bounds != newBounds)
     {
         redrawAll = true;
-        damageRect = getUntransformedBounds();
+        damage = getBounds();
         bounds = newBounds;
     }
 
@@ -584,8 +584,11 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
     // Remove deleted markers...
     if (markersX.size() > numMarkersX || markersY.size() > numMarkersY)
     {
-        if (damageRect.isEmpty())
-            damageRect = getUntransformedBounds();
+        if (! redrawAll)
+        {
+            redrawAll = true;
+            damage = getBounds();
+        }
 
         markersX.removeRange (jmax (2, numMarkersX), markersX.size());
         markersY.removeRange (jmax (2, numMarkersY), markersY.size());
@@ -600,9 +603,11 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
 
         if (m == 0 || newMarker != *m)
         {
-            redrawAll = true;
-            if (damageRect.isEmpty())
-                damageRect = getUntransformedBounds();
+            if (! redrawAll)
+            {
+                redrawAll = true;
+                damage = getBounds();
+            }
 
             if (m == 0)
                 markersX.add (new Marker (newMarker));
@@ -618,9 +623,11 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
 
         if (m == 0 || newMarker != *m)
         {
-            redrawAll = true;
-            if (damageRect.isEmpty())
-                damageRect = getUntransformedBounds();
+            if (! redrawAll)
+            {
+                redrawAll = true;
+                damage = getBounds();
+            }
 
             if (m == 0)
                 markersY.add (new Marker (newMarker));
@@ -633,7 +640,10 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
     for (i = drawables.size(); --i >= wrapper.getNumDrawables();)
     {
         Drawable* const d = drawables.getUnchecked(i);
-        damageRect = damageRect.getUnion (d->getBounds());
+
+        if (! redrawAll)
+            damage = damage.getUnion (d->getBounds());
+
         d->parent = 0;
         drawables.remove (i);
     }
@@ -648,28 +658,39 @@ const Rectangle<float> DrawableComposite::refreshFromValueTree (const ValueTree&
         {
             if (newDrawable.hasType (d->getValueTreeType()))
             {
-                damageRect = damageRect.getUnion (d->refreshFromValueTree (newDrawable, imageProvider));
+                const Rectangle<float> area (d->refreshFromValueTree (newDrawable, imageProvider));
+
+                if (! redrawAll)
+                    damage = damage.getUnion (area);
             }
             else
             {
-                damageRect = damageRect.getUnion (d->getBounds());
+                if (! redrawAll)
+                    damage = damage.getUnion (d->getBounds());
+
                 d = createChildFromValueTree (this, newDrawable, imageProvider);
                 drawables.set (i, d);
-                damageRect = damageRect.getUnion (d->getBounds());
+
+                if (! redrawAll)
+                    damage = damage.getUnion (d->getBounds());
             }
         }
         else
         {
             d = createChildFromValueTree (this, newDrawable, imageProvider);
             drawables.set (i, d);
-            damageRect = damageRect.getUnion (d->getBounds());
+
+            if (! redrawAll)
+                damage = damage.getUnion (d->getBounds());
         }
     }
 
     if (redrawAll)
-        damageRect = damageRect.getUnion (getUntransformedBounds());
+        damage = damage.getUnion (getBounds());
+    else if (! damage.isEmpty())
+        damage = damage.transformed (calculateTransform());
 
-    return damageRect.transformed (calculateTransform());
+    return damage;
 }
 
 const ValueTree DrawableComposite::createValueTree (ImageProvider* imageProvider) const

@@ -148,6 +148,8 @@ public:
         if (buttonState == newButtonState)
             return false;
 
+        setScreenPos (screenPos, time, false);
+
         // (ignore secondary clicks when there's already a button down)
         if (buttonState.isAnyMouseButtonDown() == newButtonState.isAnyMouseButtonDown())
         {

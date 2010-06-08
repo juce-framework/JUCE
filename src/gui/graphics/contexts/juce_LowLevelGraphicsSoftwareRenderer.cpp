@@ -210,8 +210,7 @@ public:
             p2.applyTransform (transform);
             p3.applyTransform (transform);
 
-            const Line<float> l2 (p2, p3);
-            p2 = l2.getPointAlongLineProportionally (l2.findNearestPointTo (p1));
+            p2 = Line<float> (p2, p3).findNearestPointTo (p1);
         }
 
         vertical = std::abs (p1.getX() - p2.getX()) < 0.001f;
