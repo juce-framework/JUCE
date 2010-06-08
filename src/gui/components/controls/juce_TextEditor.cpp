@@ -1838,7 +1838,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
 
         while (tokenEnd < totalLength)
         {
-            if (CharacterFunctions::isLetterOrDigit (t [tokenEnd]))
+            // (note the slight bodge here - it's because iswalnum only checks for alphabetic chars in the current locale)
+            if (CharacterFunctions::isLetterOrDigit (t [tokenEnd]) || t [tokenEnd] > 128)
                 ++tokenEnd;
             else
                 break;
@@ -1848,7 +1849,8 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
 
         while (tokenStart > 0)
         {
-            if (CharacterFunctions::isLetterOrDigit (t [tokenStart - 1]))
+            // (note the slight bodge here - it's because iswalnum only checks for alphabetic chars in the current locale)
+            if (CharacterFunctions::isLetterOrDigit (t [tokenStart - 1]) || t [tokenStart - 1] > 128)
                 --tokenStart;
             else
                 break;

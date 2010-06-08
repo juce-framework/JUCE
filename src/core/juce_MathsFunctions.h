@@ -322,6 +322,9 @@ inline int roundFloatToInt (const float value) throw()
 */
 namespace TypeHelpers
 {
+#if defined (_MSC_VER) && _MSC_VER <= 1400
+    #define PARAMETER_TYPE(a) a
+#else
     /** The ParameterType struct is used to find the best type to use when passing some kind
         of object as a parameter.
 
@@ -334,10 +337,9 @@ namespace TypeHelpers
         would evaluate to "myfunction (int, const MyObject&)", keeping any primitive types as
         pass-by-value, but passing objects as a const reference, to avoid copying.
     */
-#if defined (_MSC_VER) && _MSC_VER <= 1400
-    #define PARAMETER_TYPE(a) a
-#else
     template <typename Type> struct ParameterType                   { typedef const Type& type; };
+
+#if ! DOXYGEN
     template <typename Type> struct ParameterType <Type&>           { typedef Type& type; };
     template <typename Type> struct ParameterType <Type*>           { typedef Type* type; };
     template <>              struct ParameterType <char>            { typedef char type; };
@@ -353,7 +355,11 @@ namespace TypeHelpers
     template <>              struct ParameterType <bool>            { typedef bool type; };
     template <>              struct ParameterType <float>           { typedef float type; };
     template <>              struct ParameterType <double>          { typedef double type; };
+#endif
 
+    /** A helpful macro to simplify the use of the ParameterType template.
+        @see ParameterType
+    */
     #define PARAMETER_TYPE(a)    typename TypeHelpers::ParameterType<a>::type
 #endif
 }

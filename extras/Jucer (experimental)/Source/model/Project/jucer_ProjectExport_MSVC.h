@@ -517,7 +517,7 @@ private:
             compiler->setAttribute ("AssemblerListingLocation", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ObjectFile", FileHelpers::windowsStylePath (intermediatesPath + "/"));
             compiler->setAttribute ("ProgramDataBaseFileName", FileHelpers::windowsStylePath (intermediatesPath + "/"));
-            compiler->setAttribute ("WarningLevel", project.isLibrary() ? "4" : "3");
+            compiler->setAttribute ("WarningLevel", "4");
             compiler->setAttribute ("SuppressStartupBanner", "true");
 
             if (getExtraCompilerFlags().toString().isNotEmpty())

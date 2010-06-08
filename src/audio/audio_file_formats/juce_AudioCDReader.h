@@ -26,7 +26,7 @@
 #ifndef __JUCE_AUDIOCDREADER_JUCEHEADER__
 #define __JUCE_AUDIOCDREADER_JUCEHEADER__
 
-#if JUCE_USE_CDREADER
+#if JUCE_USE_CDREADER || DOXYGEN
 
 #include "juce_AudioFormatReader.h"
 #include "../../containers/juce_Array.h"

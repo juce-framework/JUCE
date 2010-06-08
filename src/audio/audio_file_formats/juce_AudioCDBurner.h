@@ -26,7 +26,7 @@
 #ifndef __JUCE_AUDIOCDBURNER_JUCEHEADER__
 #define __JUCE_AUDIOCDBURNER_JUCEHEADER__
 
-#if JUCE_USE_CDBURNER
+#if JUCE_USE_CDBURNER || DOXYGEN
 
 #include "juce_AudioFormatReader.h"
 #include "../audio_sources/juce_AudioSource.h"

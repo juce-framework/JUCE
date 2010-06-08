@@ -65,7 +65,7 @@ public:
         PopupColourSelector colourSelector (colourValue, defaultColour, canResetToDefault);
         colourSelector.setSize (300, 400);
 
-        PopupComponent::show (&colourSelector, targetComp, 0 /*targetComp->getTopLevelComponent()*/);
+        CallOutBox::showModal (colourSelector, targetComp, 0 /*targetComp->getTopLevelComponent()*/);
     }
 
     void resized()

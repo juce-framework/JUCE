@@ -650,7 +650,7 @@ public:
         undoManager->beginNewTransaction();
 
         PopupFillSelector popup (fillState, getDefaultGradient(), imageProvider, project, undoManager);
-        PopupComponent::show (&popup, this, 0 /*getTopLevelComponent()*/);
+        CallOutBox::showModal (popup, this, 0 /*getTopLevelComponent()*/);
     }
 
     void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged, const Identifier& property)  { refresh(); }

@@ -82,36 +82,54 @@ private:
 };
 
 //==============================================================================
-class PopupComponent    : public Component
+class CallOutBox    : public Component
 {
 public:
-    PopupComponent (Component* const content);
-    ~PopupComponent();
+    //==============================================================================
+    CallOutBox (Component& content, float arrowSize = 16.0f);
+    ~CallOutBox();
 
-    static void show (Component* content, Component* targetComp, Component* parentComp);
+    //==============================================================================
+    static void showModal (Component& contentComponent, Component* targetComp,
+                           Component* parentComp, float arrowSize = 16.0f);
 
-    static void show (Component* content, Component* parent,
-                      const Rectangle<int>& availableAreaInParent,
-                      const Rectangle<int>& targetAreaInParent);
+    static void showModal (Component& contentComponent, Component* parent,
+                           const Rectangle<int>& availableAreaInParent,
+                           const Rectangle<int>& targetAreaInParent,
+                           float arrowSize = 16.0f);
 
+    //==============================================================================
     void updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea);
 
-    void inputAttemptWhenModal();
+    //==============================================================================
+    /** @internal */
     void paint (Graphics& g);
+    /** @internal */
     void resized();
+    /** @internal */
     void moved();
+    /** @internal */
     void childBoundsChanged (Component*);
+    /** @internal */
     bool hitTest (int x, int y);
+    /** @internal */
+    void inputAttemptWhenModal();
+
+    juce_UseDebuggingNewOperator
 
 private:
     const int edge;
-    Component* content;
+    const float arrowSize;
+    Component& content;
     Path outline;
     Point<float> targetPoint;
     Rectangle<int> availableArea, targetArea;
     Image background;
 
     void refreshPath();
+
+    CallOutBox (const CallOutBox&);
+    CallOutBox& operator= (const CallOutBox&);
 };
 
 

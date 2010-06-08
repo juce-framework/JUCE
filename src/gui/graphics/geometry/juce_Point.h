@@ -89,6 +89,9 @@ public:
     /** Adds a pair of co-ordinates to this value. */
     void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
 
+    /** Returns a point with a given offset from this one. */
+    const Point translated (const ValueType xDelta, const ValueType yDelta) const throw()   { return Point (x + xDelta, y + yDelta); }
+
     /** Adds two points together. */
     const Point operator+ (const Point& other) const throw()            { return Point (x + other.x, y + other.y); }
 

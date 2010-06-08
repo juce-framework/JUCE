@@ -26,7 +26,7 @@
 #ifndef __JUCE_CAMERADEVICE_JUCEHEADER__
 #define __JUCE_CAMERADEVICE_JUCEHEADER__
 
-#if JUCE_USE_CAMERA
+#if JUCE_USE_CAMERA || DOXYGEN
 
 //==============================================================================
 /**

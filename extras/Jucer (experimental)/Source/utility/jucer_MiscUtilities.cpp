@@ -418,31 +418,33 @@ const ColourGradient FillTypeEditorComponent::getDefaultGradient() const
 
 
 //==============================================================================
-PopupComponent::PopupComponent (Component* const content_)
-    : edge (20), content (content_)
+CallOutBox::CallOutBox (Component& content_, const float arrowSize_)
+    : edge (jmax (20, (int) arrowSize_)), content (content_), arrowSize (arrowSize_)
 {
-    addAndMakeVisible (content);
+    addAndMakeVisible (&content);
 }
 
-PopupComponent::~PopupComponent()
+CallOutBox::~CallOutBox()
 {
 }
 
-void PopupComponent::show (Component* content, Component* targetComp, Component* parentComp)
+//==============================================================================
+void CallOutBox::showModal (Component& content, Component* targetComp, Component* parentComp, float arrowSize)
 {
-    show (content,
-          parentComp,
-          parentComp == 0 ? targetComp->getParentMonitorArea()
-                          : parentComp->getLocalBounds(),
-          parentComp == 0 ? targetComp->getScreenBounds()
-                          : (targetComp->getLocalBounds() + targetComp->relativePositionToOtherComponent (parentComp, Point<int>())));
+    showModal (content,
+               parentComp,
+               parentComp == 0 ? targetComp->getParentMonitorArea()
+                               : parentComp->getLocalBounds(),
+               parentComp == 0 ? targetComp->getScreenBounds()
+                               : (targetComp->getLocalBounds() + targetComp->relativePositionToOtherComponent (parentComp, Point<int>())),
+               arrowSize);
 }
 
-void PopupComponent::show (Component* content, Component* parent,
-                           const Rectangle<int>& availableAreaInParent,
-                           const Rectangle<int>& targetAreaInParent)
+void CallOutBox::showModal (Component& content, Component* parent,
+                            const Rectangle<int>& availableAreaInParent,
+                            const Rectangle<int>& targetAreaInParent, float arrowSize)
 {
-    PopupComponent p (content);
+    CallOutBox p (content, arrowSize);
     p.updatePosition (targetAreaInParent, availableAreaInParent);
 
     if (parent != 0)
@@ -453,18 +455,13 @@ void PopupComponent::show (Component* content, Component* parent,
     p.runModalLoop();
 }
 
-void PopupComponent::inputAttemptWhenModal()
-{
-    exitModalState (0);
-    setVisible (false);
-}
-
-void PopupComponent::paint (Graphics& g)
+//==============================================================================
+void CallOutBox::paint (Graphics& g)
 {
     if (background.isNull())
     {
         DropShadowEffect shadow;
-        shadow.setShadowProperties (5.0f, 0.4f, 0.0f, 2.0f);
+        shadow.setShadowProperties (5.0f, 0.4f, 0, 2);
 
         Image im (Image::ARGB, getWidth(), getHeight(), true);
 
@@ -474,7 +471,7 @@ void PopupComponent::paint (Graphics& g)
             g.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
             g.fillPath (outline);
 
-            g.setColour (Colours::white.withAlpha (0.6f));
+            g.setColour (Colours::white.withAlpha (0.8f));
             g.strokePath (outline, PathStrokeType (2.0f));
         }
 
@@ -487,136 +484,140 @@ void PopupComponent::paint (Graphics& g)
     g.drawImageAt (background, 0, 0);
 }
 
-void PopupComponent::resized()
+void CallOutBox::resized()
 {
-    content->setTopLeftPosition (edge, edge);
+    content.setTopLeftPosition (edge, edge);
     refreshPath();
 }
 
-void PopupComponent::moved()
+void CallOutBox::moved()
 {
     refreshPath();
 }
 
-void PopupComponent::childBoundsChanged (Component*)
+void CallOutBox::childBoundsChanged (Component*)
 {
     updatePosition (targetArea, availableArea);
 }
 
-bool PopupComponent::hitTest (int x, int y)
+bool CallOutBox::hitTest (int x, int y)
 {
-    return outline.contains (x, y);
+    return outline.contains ((float) x, (float) y);
 }
 
-void PopupComponent::refreshPath()
+void CallOutBox::inputAttemptWhenModal()
 {
-    background = Image();
-    outline.clear();
-
-    const float gap = 4.0f;
-    const float x = content->getX() - gap, y = content->getY() - gap, r = content->getRight() + gap, b = content->getBottom() + gap;
-    const float targetX = targetPoint.getX() - getX(), targetY = targetPoint.getY() - getY();
-
-    const float cs = 8.0f;
-    const float cs2 = 2.0f * cs;
-    const float arrowWidth = edge * 0.8f;
-
-    outline.startNewSubPath (x + cs, y);
-
-    if (targetY < edge)
-    {
-        outline.lineTo (targetX - arrowWidth, y);
-        outline.lineTo (targetX, targetY);
-        outline.lineTo (targetX + arrowWidth, y);
-    }
-
-    outline.lineTo (r - cs, y);
-    outline.addArc (r - cs2, y, cs2, cs2, 0, float_Pi * 0.5f);
-
-    if (targetX > r)
-    {
-        outline.lineTo (r, targetY - arrowWidth);
-        outline.lineTo (targetX, targetY);
-        outline.lineTo (r, targetY + arrowWidth);
-    }
-
-    outline.lineTo (r, b - cs);
-    outline.addArc (r - cs2, b - cs2, cs2, cs2, float_Pi * 0.5f, float_Pi);
-
-    if (targetY > b)
-    {
-        outline.lineTo (targetX + arrowWidth, b);
-        outline.lineTo (targetX, targetY);
-        outline.lineTo (targetX - arrowWidth, b);
-    }
-
-    outline.lineTo (x + cs, b);
-    outline.addArc (x, b - cs2, cs2, cs2, float_Pi, float_Pi * 1.5f);
-
-    if (targetX < x)
-    {
-        outline.lineTo (x, targetY + arrowWidth);
-        outline.lineTo (targetX, targetY);
-        outline.lineTo (x, targetY - arrowWidth);
-    }
-
-    outline.lineTo (x, y + cs);
-    outline.addArc (x, y, cs2, cs2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
-
-    outline.closeSubPath();
-    repaint();
+    exitModalState (0);
+    setVisible (false);
 }
 
-void PopupComponent::updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea)
+void CallOutBox::updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea)
 {
     targetArea = newTargetArea;
     availableArea = newArea;
 
-    Rectangle<int> r (0, 0,
-                      content->getWidth() + edge * 2,
-                      content->getHeight() + edge * 2);
+    Rectangle<int> bounds (0, 0,
+                           content.getWidth() + edge * 2,
+                           content.getHeight() + edge * 2);
 
+    const int hw = bounds.getWidth() / 2;
+    const int hh = bounds.getHeight() / 2;
+    const float hwReduced = (float) (hw - edge * 3);
+    const float hhReduced = (float) (hh - edge * 3);
+    const float arrowIndent = edge - arrowSize;
 
-    const float hw = r.getWidth() / 2.0f;
-    const float hh = r.getHeight() / 2.0f;
-    const float hwReduced = hw - edge * 3;
-    const float hhReduced = hh - edge * 3;
+    Point<float> targets[4] = { Point<float> ((float) targetArea.getCentreX(), (float) targetArea.getBottom()),
+                                Point<float> ((float) targetArea.getRight(), (float) targetArea.getCentreY()),
+                                Point<float> ((float) targetArea.getX(), (float) targetArea.getCentreY()),
+                                Point<float> ((float) targetArea.getCentreX(), (float) targetArea.getY()) };
 
-    Point<float> centres[4];
-    Point<float> targets[4] = { Point<float> (targetArea.getCentreX(), targetArea.getBottom()),
-                                Point<float> (targetArea.getRight(), targetArea.getCentreY()),
-                                Point<float> (targetArea.getX(), targetArea.getCentreY()),
-                                Point<float> (targetArea.getCentreX(), targetArea.getY()) };
+    Line<float> lines[4] = { Line<float> (targets[0].translated (-hwReduced, hh - arrowIndent), targets[0].translated (hwReduced, hh - arrowIndent)),
+                             Line<float> (targets[1].translated (hw - arrowIndent, -hhReduced), targets[1].translated (hw - arrowIndent, hhReduced)),
+                             Line<float> (targets[2].translated (-(hw - arrowIndent), -hhReduced), targets[2].translated (-(hw - arrowIndent), hhReduced)),
+                             Line<float> (targets[3].translated (-hwReduced, -(hh - arrowIndent)), targets[3].translated (hwReduced, -(hh - arrowIndent))) };
 
-    Line<float> lines[4] = { Line<float> (targets[0] + Point<float> (-hwReduced, hh), targets[0] + Point<float> (hwReduced, hh)),
-                             Line<float> (targets[1] + Point<float> (hw, -hhReduced), targets[1] + Point<float> (hw, hhReduced)),
-                             Line<float> (targets[2] + Point<float> (-hw, -hhReduced), targets[2] + Point<float> (-hw, hhReduced)),
-                             Line<float> (targets[3] + Point<float> (-hwReduced, -hh), targets[3] + Point<float> (hwReduced, -hh)) };
+    const Rectangle<float> reducedArea (newArea.reduced (hw, hh).toFloat());
 
-    int best = 0;
     float bestDist = 1.0e9f;
 
     for (int i = 0; i < 4; ++i)
     {
-        const Rectangle<float> reducedArea (newArea.reduced (hw, hh).toFloat());
-
         Line<float> constrainedLine (reducedArea.getConstrainedPoint (lines[i].getStart()),
                                      reducedArea.getConstrainedPoint (lines[i].getEnd()));
 
-        centres[i] = constrainedLine.findNearestPointTo (reducedArea.getCentre());
-        float dist = centres[i].getDistanceFrom (reducedArea.getCentre());
+        const Point<float> centre (constrainedLine.findNearestPointTo (reducedArea.getCentre()));
+        float distanceFromCentre = centre.getDistanceFrom (reducedArea.getCentre());
 
         if (! (reducedArea.contains (lines[i].getStart()) || reducedArea.contains (lines[i].getEnd())))
-            dist *= 2.0f;
+            distanceFromCentre *= 2.0f;
 
-        if (dist < bestDist)
+        if (distanceFromCentre < bestDist)
         {
-            bestDist = dist;
-            best = i;
+            bestDist = distanceFromCentre;
+
+            targetPoint = targets[i];
+            bounds.setPosition ((int) (centre.getX() - hw),
+                                (int) (centre.getY() - hh));
         }
     }
 
-    targetPoint = targets[best];
-    r.setPosition (centres[best].getX() - hw, centres[best].getY() - hh);
-    setBounds (r);
+    setBounds (bounds);
+}
+
+void CallOutBox::refreshPath()
+{
+    repaint();
+    background = Image();
+    outline.clear();
+
+    const float gap = 4.5f;
+    const float cornerSize = 9.0f;
+    const float cornerSize2 = 2.0f * cornerSize;
+    const float arrowBaseWidth = arrowSize * 0.7f;
+    const float left = content.getX() - gap, top = content.getY() - gap, right = content.getRight() + gap, bottom = content.getBottom() + gap;
+    const float targetX = targetPoint.getX() - getX(), targetY = targetPoint.getY() - getY();
+
+    outline.startNewSubPath (left + cornerSize, top);
+
+    if (targetY < edge)
+    {
+        outline.lineTo (targetX - arrowBaseWidth, top);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (targetX + arrowBaseWidth, top);
+    }
+
+    outline.lineTo (right - cornerSize, top);
+    outline.addArc (right - cornerSize2, top, cornerSize2, cornerSize2, 0, float_Pi * 0.5f);
+
+    if (targetX > right)
+    {
+        outline.lineTo (right, targetY - arrowBaseWidth);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (right, targetY + arrowBaseWidth);
+    }
+
+    outline.lineTo (right, bottom - cornerSize);
+    outline.addArc (right - cornerSize2, bottom - cornerSize2, cornerSize2, cornerSize2, float_Pi * 0.5f, float_Pi);
+
+    if (targetY > bottom)
+    {
+        outline.lineTo (targetX + arrowBaseWidth, bottom);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (targetX - arrowBaseWidth, bottom);
+    }
+
+    outline.lineTo (left + cornerSize, bottom);
+    outline.addArc (left, bottom - cornerSize2, cornerSize2, cornerSize2, float_Pi, float_Pi * 1.5f);
+
+    if (targetX < left)
+    {
+        outline.lineTo (left, targetY + arrowBaseWidth);
+        outline.lineTo (targetX, targetY);
+        outline.lineTo (left, targetY - arrowBaseWidth);
+    }
+
+    outline.lineTo (left, top + cornerSize);
+    outline.addArc (left, top, cornerSize2, cornerSize2, float_Pi * 1.5f, float_Pi * 2.0f - 0.05f);
+
+    outline.closeSubPath();
 }
