@@ -767,8 +767,8 @@ void GlyphArrangement::draw (const Graphics& g, const AffineTransform& transform
                 nextX = glyphs.getUnchecked (i + 1)->x;
 
             Path p;
-            p.addLineSegment (pg->x, pg->y + lineThickness * 2.0f,
-                              nextX, pg->y + lineThickness * 2.0f,
+            p.addLineSegment (Line<float> (pg->x, pg->y + lineThickness * 2.0f,
+                                           nextX, pg->y + lineThickness * 2.0f),
                               lineThickness);
 
             g.fillPath (p, transform);

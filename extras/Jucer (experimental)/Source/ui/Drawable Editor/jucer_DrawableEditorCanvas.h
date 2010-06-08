@@ -68,12 +68,15 @@ public:
         {
             Drawable* newDrawable = Drawable::createFromValueTree (doc.getRootDrawableNode().getState(), &doc);
             drawable = dynamic_cast <DrawableComposite*> (newDrawable);
+            drawable->resetBoundingBoxToContentArea();
             jassert (drawable != 0);
             getComponentHolder()->repaint();
         }
         else
         {
+            doc.getRootDrawableNode().resetBoundingBoxToContentArea (0);
             const Rectangle<float> damage (drawable->refreshFromValueTree (doc.getRootDrawableNode().getState(), &doc));
+
             getComponentHolder()->repaint (objectSpaceToScreenSpace (damage.getSmallestIntegerContainer()));
         }
 

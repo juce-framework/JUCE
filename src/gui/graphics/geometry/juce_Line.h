@@ -115,6 +115,9 @@ public:
     /** Changes this line's end point */
     void setEnd (const Point<ValueType>& newEnd) throw()                    { end = newEnd; }
 
+    /** Returns a line that is the same as this one, but with the start and end reversed, */
+    const Line reversed() const throw()                                     { return Line (end, start); }
+
     /** Applies an affine transform to the line's start and end points. */
     void applyTransform (const AffineTransform& transform) throw()
     {

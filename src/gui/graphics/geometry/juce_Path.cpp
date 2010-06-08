@@ -43,27 +43,6 @@ namespace PathHelpers
 {
     static const float ellipseAngularIncrement = 0.05f;
 
-    static void perpendicularOffset (const float x1, const float y1,
-                                     const float x2, const float y2,
-                                     const float offsetX, const float offsetY,
-                                     float& resultX, float& resultY) throw()
-    {
-        const float dx = x2 - x1;
-        const float dy = y2 - y1;
-        const float len = juce_hypotf (dx, dy);
-
-        if (len == 0)
-        {
-            resultX = x1;
-            resultY = y1;
-        }
-        else
-        {
-            resultX = x1 + ((dx * offsetX) - (dy * offsetY)) / len;
-            resultY = y1 + ((dy * offsetX) + (dx * offsetY)) / len;
-        }
-    }
-
     static const String nextToken (const juce_wchar*& t)
     {
         while (CharacterFunctions::isWhitespace (*t))
@@ -246,6 +225,11 @@ void Path::startNewSubPath (const float x, const float y)
     data.elements [numElements++] = y;
 }
 
+void Path::startNewSubPath (const Point<float>& start)
+{
+    startNewSubPath (start.getX(), start.getY());
+}
+
 void Path::lineTo (const float x, const float y)
 {
     CHECK_COORDS_ARE_VALID (x, y);
@@ -263,6 +247,11 @@ void Path::lineTo (const float x, const float y)
     pathXMax = jmax (pathXMax, x);
     pathYMin = jmin (pathYMin, y);
     pathYMax = jmax (pathYMax, y);
+}
+
+void Path::lineTo (const Point<float>& end)
+{
+    lineTo (end.getX(), end.getY());
 }
 
 void Path::quadraticTo (const float x1, const float y1,
@@ -286,6 +275,13 @@ void Path::quadraticTo (const float x1, const float y1,
     pathXMax = jmax (pathXMax, x1, x2);
     pathYMin = jmin (pathYMin, y1, y2);
     pathYMax = jmax (pathYMax, y1, y2);
+}
+
+void Path::quadraticTo (const Point<float>& controlPoint,
+                        const Point<float>& endPoint)
+{
+    quadraticTo (controlPoint.getX(), controlPoint.getY(),
+                 endPoint.getX(), endPoint.getY());
 }
 
 void Path::cubicTo (const float x1, const float y1,
@@ -313,6 +309,15 @@ void Path::cubicTo (const float x1, const float y1,
     pathXMax = jmax (pathXMax, x1, x2, x3);
     pathYMin = jmin (pathYMin, y1, y2, y3);
     pathYMax = jmax (pathYMax, y1, y2, y3);
+}
+
+void Path::cubicTo (const Point<float>& controlPoint1,
+                    const Point<float>& controlPoint2,
+                    const Point<float>& endPoint)
+{
+    cubicTo (controlPoint1.getX(), controlPoint1.getY(),
+             controlPoint2.getX(), controlPoint2.getY(),
+             endPoint.getX(), endPoint.getY());
 }
 
 void Path::closeSubPath()
@@ -495,19 +500,12 @@ void Path::addCentredArc (const float centreX, const float centreY,
 {
     if (radiusX > 0.0f && radiusY > 0.0f)
     {
+        const Point<float> centre (centreX, centreY);
         const AffineTransform rotation (AffineTransform::rotation (rotationOfEllipse, centreX, centreY));
         float angle = fromRadians;
 
         if (startAsNewSubPath)
-        {
-            float x = centreX + radiusX * std::sin (angle);
-            float y = centreY - radiusY * std::cos (angle);
-
-            if (rotationOfEllipse != 0)
-                rotation.transformPoint (x, y);
-
-            startNewSubPath (x, y);
-        }
+            startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
 
         if (fromRadians < toRadians)
         {
@@ -516,14 +514,7 @@ void Path::addCentredArc (const float centreX, const float centreY,
 
             while (angle < toRadians)
             {
-                float x = centreX + radiusX * std::sin (angle);
-                float y = centreY - radiusY * std::cos (angle);
-
-                if (rotationOfEllipse != 0)
-                    rotation.transformPoint (x, y);
-
-                lineTo (x, y);
-
+                lineTo (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
                 angle += PathHelpers::ellipseAngularIncrement;
             }
         }
@@ -534,25 +525,12 @@ void Path::addCentredArc (const float centreX, const float centreY,
 
             while (angle > toRadians)
             {
-                float x = centreX + radiusX * std::sin (angle);
-                float y = centreY - radiusY * std::cos (angle);
-
-                if (rotationOfEllipse != 0)
-                    rotation.transformPoint (x, y);
-
-                lineTo (x, y);
-
+                lineTo (centre.getPointOnCircumference (radiusX, radiusY, angle).transformedBy (rotation));
                 angle -= PathHelpers::ellipseAngularIncrement;
             }
         }
 
-        float x = centreX + radiusX * std::sin (toRadians);
-        float y = centreY - radiusY * std::cos (toRadians);
-
-        if (rotationOfEllipse != 0)
-            rotation.transformPoint (x, y);
-
-        lineTo (x, y);
+        lineTo (centre.getPointOnCircumference (radiusX, radiusY, toRadians).transformedBy (rotation));
     }
 }
 
@@ -562,14 +540,11 @@ void Path::addPieSegment (const float x, const float y,
                           const float toRadians,
                           const float innerCircleProportionalSize)
 {
-    float hw = width * 0.5f;
-    float hh = height * 0.5f;
-    const float centreX = x + hw;
-    const float centreY = y + hh;
+    float radiusX = width * 0.5f;
+    float radiusY = height * 0.5f;
+    const Point<float> centre (x + radiusX, y + radiusY);
 
-    startNewSubPath (centreX + hw * std::sin (fromRadians),
-                     centreY - hh * std::cos (fromRadians));
-
+    startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, fromRadians));
     addArc (x, y, width, height, fromRadians, toRadians);
 
     if (std::abs (fromRadians - toRadians) > float_Pi * 1.999f)
@@ -578,29 +553,25 @@ void Path::addPieSegment (const float x, const float y,
 
         if (innerCircleProportionalSize > 0)
         {
-            hw *= innerCircleProportionalSize;
-            hh *= innerCircleProportionalSize;
+            radiusX *= innerCircleProportionalSize;
+            radiusY *= innerCircleProportionalSize;
 
-            startNewSubPath (centreX + hw * std::sin (toRadians),
-                             centreY - hh * std::cos (toRadians));
-
-            addArc (centreX - hw, centreY - hh, hw * 2.0f, hh * 2.0f,
-                    toRadians, fromRadians);
+            startNewSubPath (centre.getPointOnCircumference (radiusX, radiusY, toRadians));
+            addArc (centre.getX() - radiusX, centre.getY() - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
     }
     else
     {
         if (innerCircleProportionalSize > 0)
         {
-            hw *= innerCircleProportionalSize;
-            hh *= innerCircleProportionalSize;
+            radiusX *= innerCircleProportionalSize;
+            radiusY *= innerCircleProportionalSize;
 
-            addArc (centreX - hw, centreY - hh, hw * 2.0f, hh * 2.0f,
-                    toRadians, fromRadians);
+            addArc (centre.getX() - radiusX, centre.getY() - radiusY, radiusX * 2.0f, radiusY * 2.0f, toRadians, fromRadians);
         }
         else
         {
-            lineTo (centreX, centreY);
+            lineTo (centre);
         }
     }
 
@@ -608,83 +579,62 @@ void Path::addPieSegment (const float x, const float y,
 }
 
 //==============================================================================
-void Path::addLineSegment (const float startX, const float startY,
-                           const float endX, const float endY,
-                           float lineThickness)
+void Path::addLineSegment (const Line<float>& line, float lineThickness)
 {
+    const Line<float> reversed (line.reversed());
     lineThickness *= 0.5f;
 
-    float x, y;
-
-    PathHelpers::perpendicularOffset (startX, startY, endX, endY,
-                                      0, lineThickness, x, y);
-    startNewSubPath (x, y);
-
-    PathHelpers::perpendicularOffset (startX, startY, endX, endY,
-                                      0, -lineThickness, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      0, lineThickness, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      0, -lineThickness, x, y);
-    lineTo (x, y);
-
+    startNewSubPath (line.getPointAlongLine (0, lineThickness));
+    lineTo (line.getPointAlongLine (0, -lineThickness));
+    lineTo (reversed.getPointAlongLine (0, lineThickness));
+    lineTo (reversed.getPointAlongLine (0, -lineThickness));
     closeSubPath();
 }
 
-void Path::addArrow (const float startX, const float startY,
-                     const float endX, const float endY,
-                     float lineThickness,
-                     float arrowheadWidth,
-                     float arrowheadLength)
+void Path::addArrow (const Line<float>& line, float lineThickness,
+                     float arrowheadWidth, float arrowheadLength)
 {
+    const Line<float> reversed (line.reversed());
     lineThickness *= 0.5f;
     arrowheadWidth *= 0.5f;
-    arrowheadLength = jmin (arrowheadLength, 0.8f * juce_hypotf (startX - endX,
-                                                                 startY - endY));
+    arrowheadLength = jmin (arrowheadLength, 0.8f * line.getLength());
 
-    float x, y;
-
-    PathHelpers::perpendicularOffset (startX, startY, endX, endY,
-                                      0, lineThickness, x, y);
-    startNewSubPath (x, y);
-
-    PathHelpers::perpendicularOffset (startX, startY, endX, endY,
-                                      0, -lineThickness, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      arrowheadLength, lineThickness, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      arrowheadLength, arrowheadWidth, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      0, 0, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      arrowheadLength, -arrowheadWidth, x, y);
-    lineTo (x, y);
-
-    PathHelpers::perpendicularOffset (endX, endY, startX, startY,
-                                      arrowheadLength, -lineThickness, x, y);
-    lineTo (x, y);
-
+    startNewSubPath (line.getPointAlongLine (0, lineThickness));
+    lineTo (line.getPointAlongLine (0, -lineThickness));
+    lineTo (reversed.getPointAlongLine (0, lineThickness));
+    lineTo (reversed.getPointAlongLine (arrowheadLength, arrowheadWidth));
+    lineTo (line.getEnd());
+    lineTo (reversed.getPointAlongLine (arrowheadLength, -arrowheadWidth));
+    lineTo (reversed.getPointAlongLine (arrowheadLength, -lineThickness));
     closeSubPath();
 }
 
-void Path::addStar (const float centreX,
-                    const float centreY,
-                    const int numberOfPoints,
-                    const float innerRadius,
-                    const float outerRadius,
-                    const float startAngle)
+void Path::addPolygon (const Point<float>& centre, const int numberOfSides,
+                       const float radius, const float startAngle)
+{
+    jassert (numberOfSides > 1); // this would be silly.
+
+    if (numberOfSides > 1)
+    {
+        const float angleBetweenPoints = float_Pi * 2.0f / numberOfSides;
+
+        for (int i = 0; i < numberOfSides; ++i)
+        {
+            const float angle = startAngle + i * angleBetweenPoints;
+            const Point<float> p (centre.getPointOnCircumference (radius, angle));
+
+            if (i == 0)
+                startNewSubPath (p);
+            else
+                lineTo (p);
+        }
+
+        closeSubPath();
+    }
+}
+
+void Path::addStar (const Point<float>& centre, const int numberOfPoints,
+                    const float innerRadius, const float outerRadius, const float startAngle)
 {
     jassert (numberOfPoints > 1); // this would be silly.
 
@@ -694,20 +644,15 @@ void Path::addStar (const float centreX,
 
         for (int i = 0; i < numberOfPoints; ++i)
         {
-            float angle = startAngle + i * angleBetweenPoints;
-
-            const float x = centreX + outerRadius * std::sin (angle);
-            const float y = centreY - outerRadius * std::cos (angle);
+            const float angle = startAngle + i * angleBetweenPoints;
+            const Point<float> p (centre.getPointOnCircumference (outerRadius, angle));
 
             if (i == 0)
-                startNewSubPath (x, y);
+                startNewSubPath (p);
             else
-                lineTo (x, y);
+                lineTo (p);
 
-            angle += angleBetweenPoints * 0.5f;
-
-            lineTo (centreX + innerRadius * std::sin (angle),
-                    centreY - innerRadius * std::cos (angle));
+            lineTo (centre.getPointOnCircumference (innerRadius, angle + angleBetweenPoints * 0.5f));
         }
 
         closeSubPath();

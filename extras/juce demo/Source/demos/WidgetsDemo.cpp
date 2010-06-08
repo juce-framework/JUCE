@@ -442,7 +442,7 @@ static Component* createRadioButtonPage()
         DrawablePath normal, over;
 
         Path p;
-        p.addStar (0.0f, 0.0f, i + 5, 20.0f, 50.0f, -0.2f);
+        p.addStar (Point<float>(), i + 5, 20.0f, 50.0f, -0.2f);
         normal.setPath (p);
         normal.setFill (Colours::lightblue);
         normal.setStrokeFill (Colours::black);
@@ -500,12 +500,12 @@ public:
         DrawablePath normal, over;
 
         Path p;
-        p.addStar (0.0f, 0.0f, 5, 20.0f, 50.0f, 0.2f);
+        p.addStar (Point<float>(), 5, 20.0f, 50.0f, 0.2f);
         normal.setPath (p);
         normal.setFill (Colours::red);
 
         p.clear();
-        p.addStar (0.0f, 0.0f, 7, 30.0f, 50.0f, 0.0f);
+        p.addStar (Point<float>(), 7, 30.0f, 50.0f, 0.0f);
         over.setPath (p);
         over.setFill (Colours::pink);
         over.setStrokeFill (Colours::black);

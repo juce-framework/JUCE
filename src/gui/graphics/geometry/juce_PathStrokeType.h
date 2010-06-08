@@ -138,6 +138,29 @@ public:
                              float extraAccuracy = 1.0f) const;
 
     //==============================================================================
+    /** Applies this stroke type to a path and returns the resultant stroke as another Path.
+
+        @param destPath         the resultant stroked outline shape will be copied into this path.
+                                Note that it's ok for the source and destination Paths to be
+                                the same object, so you can easily turn a path into a stroked version
+                                of itself.
+        @param sourcePath       the path to use as the source
+        @param transform        an optional transform to apply to the points from the source path
+                                as they are being used
+        @param extraAccuracy    if this is greater than 1.0, it will subdivide the path to
+                                a higher resolution, which improved the quality if you'll later want
+                                to enlarge the stroked path
+
+        @see createDashedStroke
+    */
+    void createStrokeWithArrowheads (Path& destPath,
+                                     const Path& sourcePath,
+                                     float arrowheadStartWidth, float arrowheadStartLength,
+                                     float arrowheadEndWidth, float arrowheadEndLength,
+                                     const AffineTransform& transform = AffineTransform::identity,
+                                     float extraAccuracy = 1.0f) const;
+
+    //==============================================================================
     /** Returns the stroke thickness. */
     float getStrokeThickness() const throw()                    { return thickness; }
 

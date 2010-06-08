@@ -387,12 +387,13 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
                                               int64 numSamplesToRead)
 {
     const int bufferSize = 16384;
-    const int maxChans = 128;
-    AudioSampleBuffer tempBuffer (reader.numChannels, bufferSize);
-    int* buffers [maxChans];
+    AudioSampleBuffer tempBuffer (numChannels, bufferSize);
 
-    for (int i = maxChans; --i >= 0;)
-        buffers[i] = 0;
+    int* buffers [128];
+    zerostruct (buffers);
+
+    for (int i = tempBuffer.getNumChannels(); --i >= 0;)
+        buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
 
     if (numSamplesToRead < 0)
         numSamplesToRead = reader.lengthInSamples;
@@ -401,10 +402,7 @@ bool AudioFormatWriter::writeFromAudioReader (AudioFormatReader& reader,
     {
         const int numToDo = (int) jmin (numSamplesToRead, (int64) bufferSize);
 
-        for (int i = tempBuffer.getNumChannels(); --i >= 0;)
-            buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
-
-        if (! reader.read (buffers, maxChans, startSample, numToDo, false))
+        if (! reader.read (buffers, numChannels, startSample, numToDo, false))
             return false;
 
         if (reader.usesFloatingPointData != isFloatingPoint())
@@ -455,9 +453,12 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
                                               int numSamplesToRead,
                                               const int samplesPerBlock)
 {
-    const int maxChans = 128;
     AudioSampleBuffer tempBuffer (getNumChannels(), samplesPerBlock);
-    int* buffers [maxChans];
+    int* buffers [128];
+    zerostruct (buffers);
+
+    for (int i = tempBuffer.getNumChannels(); --i >= 0;)
+        buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
 
     while (numSamplesToRead > 0)
     {
@@ -470,13 +471,6 @@ bool AudioFormatWriter::writeFromAudioSource (AudioSource& source,
         info.clearActiveBufferRegion();
 
         source.getNextAudioBlock (info);
-
-        int i;
-        for (i = maxChans; --i >= 0;)
-            buffers[i] = 0;
-
-        for (i = tempBuffer.getNumChannels(); --i >= 0;)
-            buffers[i] = (int*) tempBuffer.getSampleData (i, 0);
 
         if (! isFloatingPoint())
         {

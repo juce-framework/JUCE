@@ -538,8 +538,8 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
 
     if (buttonType == DocumentWindow::closeButton)
     {
-        shape.addLineSegment (0.0f, 0.0f, 1.0f, 1.0f, 0.35f);
-        shape.addLineSegment (1.0f, 0.0f, 0.0f, 1.0f, 0.35f);
+        shape.addLineSegment (Line<float> (0.0f, 0.0f, 1.0f, 1.0f), 0.35f);
+        shape.addLineSegment (Line<float> (1.0f, 0.0f, 0.0f, 1.0f), 0.35f);
 
         ShapeButton* const b = new ShapeButton ("close",
                                                 Colour (0x7fff3333),
@@ -551,7 +551,7 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
     }
     else if (buttonType == DocumentWindow::minimiseButton)
     {
-        shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, 0.25f);
+        shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), 0.25f);
 
         DrawableButton* b = new DrawableButton ("minimise", DrawableButton::ImageFitted);
         DrawablePath dp;
@@ -562,8 +562,8 @@ Button* OldSchoolLookAndFeel::createDocumentWindowButton (int buttonType)
     }
     else if (buttonType == DocumentWindow::maximiseButton)
     {
-        shape.addLineSegment (0.5f, 0.0f, 0.5f, 1.0f, 0.25f);
-        shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, 0.25f);
+        shape.addLineSegment (Line<float> (0.5f, 0.0f, 0.5f, 1.0f), 0.25f);
+        shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), 0.25f);
 
         DrawableButton* b = new DrawableButton ("maximise", DrawableButton::ImageFitted);
         DrawablePath dp;

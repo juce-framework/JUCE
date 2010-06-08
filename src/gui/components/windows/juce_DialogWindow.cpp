@@ -27,8 +27,8 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_DialogWindow.h"
+#include "../../../application/juce_Application.h"
 
 
 //==============================================================================
@@ -68,6 +68,8 @@ public:
     TempDialogWindow (const String& title, const Colour& colour, const bool escapeCloses)
         : DialogWindow (title, colour, escapeCloses, true)
     {
+        if (JUCEApplication::getInstance() == 0)
+            setAlwaysOnTop (true); // for a plugin, make it always-on-top because the host windows are often top-level
     }
 
     ~TempDialogWindow()

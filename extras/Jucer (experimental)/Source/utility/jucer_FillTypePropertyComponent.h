@@ -265,7 +265,7 @@ private:
 
             Path marker;
             const float headSize = 4.5f;
-            marker.addLineSegment (0.0f, -2.0f, 0.0f, previewArea.getHeight() + 2.0f, 1.5f);
+            marker.addLineSegment (Line<float> (0.0f, -2.0f, 0.0f, previewArea.getHeight() + 2.0f), 1.5f);
             marker.addTriangle (0.0f, 1.0f, -headSize, -headSize, headSize, -headSize);
 
             for (int i = 0; i < gradient.getNumColours(); ++i)

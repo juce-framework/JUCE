@@ -154,8 +154,8 @@ public:
                 }
 
                 Path p;
-                p.addArrow (x1, y1, x2, y2, 1.5f, hw, hl);
-                p.addArrow (x3, y3, x4, y4, 1.5f, hw, hl);
+                p.addArrow (Line<float> (x1, y1, x2, y2), 1.5f, hw, hl);
+                p.addArrow (Line<float> (x3, y3, x4, y4), 1.5f, hw, hl);
                 g.fillPath (p);
             }
         }

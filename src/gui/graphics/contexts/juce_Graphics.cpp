@@ -473,12 +473,10 @@ void Graphics::drawRoundedRectangle (const Rectangle<float>& r, const float corn
     drawRoundedRectangle (r.getX(), r.getY(), r.getWidth(), r.getHeight(), cornerSize, lineThickness);
 }
 
-void Graphics::drawArrow (const float startX, const float startY, const float endX, const float endY,
-                          const float lineThickness, const float arrowheadWidth, const float arrowheadLength) const
+void Graphics::drawArrow (const Line<float>& line, const float lineThickness, const float arrowheadWidth, const float arrowheadLength) const
 {
     Path p;
-    p.addArrow (startX, startY, endX, endY,
-                lineThickness, arrowheadWidth, arrowheadLength);
+    p.addArrow (line, lineThickness, arrowheadWidth, arrowheadLength);
     fillPath (p);
 }
 
@@ -545,9 +543,7 @@ void Graphics::drawLine (const float startX, const float startY,
                          const float endX, const float endY,
                          const float lineThickness) const
 {
-    Path p;
-    p.addLineSegment (startX, startY, endX, endY, lineThickness);
-    fillPath (p);
+    drawLine (Line<float> (startX, startY, endX, endY),lineThickness);
 }
 
 void Graphics::drawLine (const Line<float>& line) const
@@ -557,7 +553,9 @@ void Graphics::drawLine (const Line<float>& line) const
 
 void Graphics::drawLine (const Line<float>& line, const float lineThickness) const
 {
-    drawLine (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), lineThickness);
+    Path p;
+    p.addLineSegment (line, lineThickness);
+    fillPath (p);
 }
 
 void Graphics::drawDashedLine (const float startX, const float startY,

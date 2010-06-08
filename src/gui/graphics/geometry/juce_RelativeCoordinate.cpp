@@ -538,6 +538,12 @@ RelativeRectangle::RelativeRectangle()
 {
 }
 
+RelativeRectangle::RelativeRectangle (const RelativeCoordinate& left_, const RelativeCoordinate& right_,
+                                      const RelativeCoordinate& top_, const RelativeCoordinate& bottom_)
+    : left (left_), right (right_), top (top_), bottom (bottom_)
+{
+}
+
 RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect, const String& componentName)
     : left (rect.getX(), true),
       right (rect.getWidth(), componentName + "." + RelativeCoordinate::Strings::left),
@@ -733,8 +739,7 @@ const ValueTree RelativePointPath::StartSubPath::createTree() const
 
 void RelativePointPath::StartSubPath::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p (startPos.resolve (coordFinder));
-    path.startNewSubPath (p.getX(), p.getY());
+    path.startNewSubPath (startPos.resolve (coordFinder));
 }
 
 RelativePoint* RelativePointPath::StartSubPath::getControlPoints (int& numPoints)
@@ -780,8 +785,7 @@ const ValueTree RelativePointPath::LineTo::createTree() const
 
 void RelativePointPath::LineTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p (endPoint.resolve (coordFinder));
-    path.lineTo (p.getX(), p.getY());
+    path.lineTo (endPoint.resolve (coordFinder));
 }
 
 RelativePoint* RelativePointPath::LineTo::getControlPoints (int& numPoints)
@@ -808,9 +812,8 @@ const ValueTree RelativePointPath::QuadraticTo::createTree() const
 
 void RelativePointPath::QuadraticTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p1 (controlPoints[0].resolve (coordFinder));
-    const Point<float> p2 (controlPoints[1].resolve (coordFinder));
-    path.quadraticTo (p1.getX(), p1.getY(), p2.getX(), p2.getY());
+    path.quadraticTo (controlPoints[0].resolve (coordFinder),
+                      controlPoints[1].resolve (coordFinder));
 }
 
 RelativePoint* RelativePointPath::QuadraticTo::getControlPoints (int& numPoints)
@@ -839,10 +842,9 @@ const ValueTree RelativePointPath::CubicTo::createTree() const
 
 void RelativePointPath::CubicTo::addToPath (Path& path, RelativeCoordinate::NamedCoordinateFinder* coordFinder) const
 {
-    const Point<float> p1 (controlPoints[0].resolve (coordFinder));
-    const Point<float> p2 (controlPoints[1].resolve (coordFinder));
-    const Point<float> p3 (controlPoints[2].resolve (coordFinder));
-    path.cubicTo (p1.getX(), p1.getY(), p2.getX(), p2.getY(), p3.getX(), p3.getY());
+    path.cubicTo (controlPoints[0].resolve (coordFinder),
+                  controlPoints[1].resolve (coordFinder),
+                  controlPoints[2].resolve (coordFinder));
 }
 
 RelativePoint* RelativePointPath::CubicTo::getControlPoints (int& numPoints)
@@ -896,10 +898,10 @@ void RelativeParallelogram::getPath (Path& path, RelativeCoordinate::NamedCoordi
     Point<float> points[4];
     resolveFourCorners (points, coordFinder);
 
-    path.startNewSubPath (points[0].getX(), points[0].getY());
-    path.lineTo (points[1].getX(), points[1].getY());
-    path.lineTo (points[3].getX(), points[3].getY());
-    path.lineTo (points[2].getX(), points[2].getY());
+    path.startNewSubPath (points[0]);
+    path.lineTo (points[1]);
+    path.lineTo (points[3]);
+    path.lineTo (points[2]);
     path.closeSubPath();
 }
 

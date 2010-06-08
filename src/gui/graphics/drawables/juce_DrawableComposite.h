@@ -118,39 +118,40 @@ public:
     */
     void bringToFront (int index);
 
-    /** Sets the transform to be applied to this drawable, by defining the positions
-        where three anchor points should end up in the target rendering space.
-
-        @param targetPositionForOrigin  the position that the local coordinate (0, 0) should be
-                                        mapped onto when rendering this object.
-        @param targetPositionForX1Y0    the position that the local coordinate (1, 0) should be
-                                        mapped onto when rendering this object.
-        @param targetPositionForX0Y1    the position that the local coordinate (0, 1) should be
-                                        mapped onto when rendering this object.
+    //==============================================================================
+    /** Changes the main content area.
+        The content area is actually defined by the markers named "left", "right", "top" and
+        "bottom", but this method is a shortcut that sets them all at once.
+        @see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
     */
-    void setTransform (const RelativePoint& targetPositionForOrigin,
-                       const RelativePoint& targetPositionForX1Y0,
-                       const RelativePoint& targetPositionForX0Y1);
+    const RelativeRectangle getContentArea() const;
 
-    /** Returns the position to which the local coordinate (0, 0) should be remapped in the target
-        coordinate space when rendering this object.
-        @see setTransform
+    /** Returns the main content rectangle.
+        The content area is actually defined by the markers named "left", "right", "top" and
+        "bottom", but this method is a shortcut that returns them all at once.
+        @see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
     */
-    const RelativePoint& getTargetPositionForOrigin() const throw()          { return controlPoints[0]; }
+    void setContentArea (const RelativeRectangle& newArea);
 
-    /** Returns the position to which the local coordinate (1, 0) should be remapped in the target
-        coordinate space when rendering this object.
-        @see setTransform
+    /** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
+        @see setContentArea
     */
-    const RelativePoint& getTargetPositionForX1Y0() const throw()            { return controlPoints[1]; }
+    void setBoundingBox (const RelativeParallelogram& newBoundingBox);
 
-    /** Returns the position to which the local coordinate (0, 1) should be remapped in the target
-        coordinate space when rendering this object.
-        @see setTransform
+    /** Returns the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
+        @see setBoundingBox
     */
-    const RelativePoint& getTargetPositionForX0Y1() const throw()            { return controlPoints[2]; }
+    const RelativeParallelogram& getBoundingBox() const throw()             { return bounds; }
+
+    /** Changes the bounding box transform to match the content area, so that any sub-items will
+        be drawn at their untransformed positions.
+    */
+    void resetBoundingBoxToContentArea();
 
     //==============================================================================
+    /** Represents a named marker position.
+        @see DrawableComposite::getMarker
+    */
     struct Marker
     {
         Marker (const Marker&);
@@ -165,6 +166,15 @@ public:
     const Marker* getMarker (bool xAxis, int index) const throw();
     void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
     void removeMarker (bool xAxis, int index);
+
+    /** The name of the marker that defines the left edge of the content area. */
+    static const char* const contentLeftMarkerName;
+    /** The name of the marker that defines the right edge of the content area. */
+    static const char* const contentRightMarkerName;
+    /** The name of the marker that defines the top edge of the content area. */
+    static const char* const contentTopMarkerName;
+    /** The name of the marker that defines the bottom edge of the content area. */
+    static const char* const contentBottomMarkerName;
 
     //==============================================================================
     /** @internal */
@@ -203,14 +213,12 @@ public:
         void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
         void removeDrawable (const ValueTree& child, UndoManager* undoManager);
 
-        const RelativePoint getTargetPositionForOrigin() const;
-        void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
+        const RelativeParallelogram getBoundingBox() const;
+        void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+        void resetBoundingBoxToContentArea (UndoManager* undoManager);
 
-        const RelativePoint getTargetPositionForX1Y0() const;
-        void setTargetPositionForX1Y0 (const RelativePoint& newPoint, UndoManager* undoManager);
-
-        const RelativePoint getTargetPositionForX0Y1() const;
-        void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
+        const RelativeRectangle getContentArea() const;
+        void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
         int getNumMarkers (bool xAxis) const;
         const ValueTree getMarkerState (bool xAxis, int index) const;
@@ -237,7 +245,7 @@ public:
 
 private:
     OwnedArray <Drawable> drawables;
-    RelativePoint controlPoints[3];
+    RelativeParallelogram bounds;
     OwnedArray <Marker> markersX, markersY;
 
     const Rectangle<float> getUntransformedBounds() const;

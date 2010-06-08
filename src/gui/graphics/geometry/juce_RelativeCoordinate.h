@@ -360,6 +360,10 @@ public:
     /** Creates an absolute rectangle, relative to the origin. */
     explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
 
+    /** Creates a rectangle from four coordinates. */
+    RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
+                       const RelativeCoordinate& top, const RelativeCoordinate& bottom);
+
     /** Creates a rectangle from a stringified representation.
         The string must contain a sequence of 4 coordinates, separated by commas, in the order
         left, top, right, bottom. The syntax for the coordinate strings is explained in the

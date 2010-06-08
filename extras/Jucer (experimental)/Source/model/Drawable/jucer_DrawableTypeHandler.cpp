@@ -735,12 +735,13 @@ public:
         const RelativePoint getPosition()
         {
             DrawableComposite::ValueTreeWrapper wrapper (item);
+            const RelativeParallelogram bounds (wrapper.getBoundingBox());
 
             switch (cpNum)
             {
-                case 0: return wrapper.getTargetPositionForOrigin();
-                case 1: return wrapper.getTargetPositionForX1Y0();
-                case 2: return wrapper.getTargetPositionForX0Y1();
+                case 0: return bounds.topLeft;
+                case 1: return bounds.topRight;
+                case 2: return bounds.bottomLeft;
                 default: jassertfalse; break;
             }
 
@@ -750,14 +751,17 @@ public:
         void setPosition (const RelativePoint& newPoint, UndoManager* undoManager)
         {
             DrawableComposite::ValueTreeWrapper wrapper (item);
+            RelativeParallelogram bounds (wrapper.getBoundingBox());
 
             switch (cpNum)
             {
-                case 0: wrapper.setTargetPositionForOrigin (newPoint, undoManager); break;
-                case 1: wrapper.setTargetPositionForX1Y0 (newPoint, undoManager); break;
-                case 2: wrapper.setTargetPositionForX0Y1 (newPoint, undoManager); break;
+                case 0: bounds.topLeft = newPoint; break;
+                case 1: bounds.topRight = newPoint; break;
+                case 2: bounds.bottomLeft = newPoint; break;
                 default: jassertfalse; break;
             }
+
+            wrapper.setBoundingBox (bounds, undoManager);
         }
 
         const Value getPositionValue (UndoManager* undoManager)
@@ -809,15 +813,14 @@ public:
 
         void buttonClicked()
         {
-            RelativePoint topLeft (wrapper.getTargetPositionForOrigin());
-            RelativePoint topRight (wrapper.getTargetPositionForX1Y0());
-            RelativePoint bottomLeft (wrapper.getTargetPositionForX0Y1());
+            RelativeParallelogram bounds (wrapper.getBoundingBox());
+            const RelativeRectangle content (wrapper.getContentArea());
+            const Rectangle<float> resolved (content.resolve (&item));
 
-            topRight.moveToAbsolute (topLeft.resolve (&item) + Point<float> (1.0f, 0.0f), &item);
-            bottomLeft.moveToAbsolute (topLeft.resolve (&item) + Point<float> (0.0f, 1.0f), &item);
+            bounds.topRight.moveToAbsolute (bounds.topLeft.resolve (&item) + Point<float> (resolved.getWidth(), 0), &item);
+            bounds.bottomLeft.moveToAbsolute (bounds.topLeft.resolve (&item) + Point<float> (0, resolved.getHeight()), &item);
 
-            wrapper.setTargetPositionForX1Y0 (topRight, item.getUndoManager());
-            wrapper.setTargetPositionForX0Y1 (bottomLeft, item.getUndoManager());
+            wrapper.setBoundingBox (bounds, item.getUndoManager());
         }
 
     private:

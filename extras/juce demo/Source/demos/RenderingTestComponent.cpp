@@ -178,7 +178,7 @@ private:
         float size = (float) jmin (getWidth(), getHeight());
 
         Path p;
-        p.addStar (bouncingPointX[1], bouncingPointY[1], 7,
+        p.addStar (Point<float> (bouncingPointX[1], bouncingPointY[1]), 7,
                    size * jmax (0.6f, bouncingNumber[4]),
                    size * jmax (0.7f, bouncingNumber[5]),
                    bouncingNumber[4]);
@@ -201,8 +201,8 @@ private:
     {
         Path p;
         p.addRectangle (-50, 0, 100, 100);
-        p.addStar (100.0f, 0.0f, 7, 30.0f, 70.0f, 0.1f);
-        p.addStar (-100.0f, 0.0f, 6, 40.0f, 70.0f, 0.1f);
+        p.addStar (Point<float> (100.0f, 0.0f), 7, 30.0f, 70.0f, 0.1f);
+        p.addStar (Point<float> (-100.0f, 0.0f), 6, 40.0f, 70.0f, 0.1f);
         p.addEllipse (-60.0f, -100.0f, 120.0f, 90.0f);
 
         if (linearGradient || radialGradient)
@@ -336,28 +336,19 @@ private:
         ZipFile icons (&iconsFileStream, false);
 
         // Load a random SVG file from our embedded icons.zip file.
-        InputStream* svgFileStream
-            = icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries()));
+        ScopedPointer<InputStream> svgFileStream (icons.createStreamForEntry (Random::getSystemRandom().nextInt (icons.getNumEntries())));
 
         if (svgFileStream != 0)
         {
             svgDrawable = dynamic_cast <DrawableComposite*> (Drawable::createFromImageDataStream (*svgFileStream));
-            delete svgFileStream;
 
             if (svgDrawable != 0)
             {
-                // to make our icon the right size, we'll put it inside a DrawableComposite, and apply
-                // a transform to get it to the size we want.
-
-                Rectangle<float> bounds = svgDrawable->getBounds();
-                const float scaleFactor = 200.0f / jmax (bounds.getWidth(), bounds.getHeight());
-
-                Point<float> topLeft (-bounds.getCentreX() * scaleFactor,
-                                      -bounds.getCentreY() * scaleFactor);
-
-                svgDrawable->setTransform (topLeft,
-                                           topLeft + Point<float> (scaleFactor, 0),
-                                           topLeft + Point<float> (0, scaleFactor));
+                // to make our icon the right size, we'll put it inside a DrawableComposite, and
+                // set its bounding box to the size and position that we want.
+                svgDrawable->setBoundingBox (RelativeParallelogram (Point<float> (-100, -100),
+                                                                    Point<float> (100, -100),
+                                                                    Point<float> (-100, 100)));
             }
         }
     }

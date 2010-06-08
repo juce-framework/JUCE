@@ -130,8 +130,8 @@ public:
                     r << "g.drawImage (" << imageVariable << ",\n             "
                       << x << ", " << y << ", " << w << ", " << h
                       << ",\n             0, 0, "
-                      << imageVariable << "->getWidth(), "
-                      << imageVariable << "->getHeight());\n\n";
+                      << imageVariable << ".getWidth(), "
+                      << imageVariable << ".getHeight());\n\n";
                 }
                 else
                 {

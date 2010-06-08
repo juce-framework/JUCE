@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	11
+#define JUCE_BUILDNUMBER	12
 
 /** Current Juce version number.
 
@@ -19023,6 +19023,9 @@ public:
 	/** Copies this point from another one. */
 	Point& operator= (const Point& other) throw()			   { x = other.x; y = other.y; return *this; }
 
+	inline bool operator== (const Point& other) const throw()	   { return x == other.x && y == other.y; }
+	inline bool operator!= (const Point& other) const throw()	   { return x != other.x || y != other.y; }
+
 	/** Returns true if the point is (0, 0). */
 	bool isOrigin() const throw()					   { return x == ValueType() && y == ValueType(); }
 
@@ -19049,9 +19052,6 @@ public:
 
 	/** Adds a pair of co-ordinates to this value. */
 	void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
-
-	inline bool operator== (const Point& other) const throw()	   { return x == other.x && y == other.y; }
-	inline bool operator!= (const Point& other) const throw()	   { return x != other.x || y != other.y; }
 
 	/** Adds two points together. */
 	const Point operator+ (const Point& other) const throw()		{ return Point (x + other.x, y + other.y); }
@@ -19092,6 +19092,20 @@ public:
 		where this point is the centre and the other point is on the circumference.
 	*/
 	ValueType getAngleToPoint (const Point& other) const throw()	{ return (ValueType) std::atan2 (other.x - x, other.y - y); }
+
+	/** Taking this point to be the centre of a circle, this returns a point on its circumference.
+		@param radius   the radius of the circle.
+		@param angle	the angle of the point, in radians clockwise from the 12 o'clock position.
+	*/
+	const Point getPointOnCircumference (const float radius, const float angle) const throw()   { return Point<float> (x + radius * std::sin (angle),
+																													   y - radius * std::cos (angle)); }
+	/** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
+		@param radiusX  the horizontal radius of the circle.
+		@param radiusY  the vertical radius of the circle.
+		@param angle	the angle of the point, in radians clockwise from the 12 o'clock position.
+	*/
+	const Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const throw()   { return Point<float> (x + radiusX * std::sin (angle),
+																																			 y - radiusY * std::cos (angle)); }
 
 	/** Uses a transform to change the point's co-ordinates.
 		This will only compile if ValueType = float!
@@ -19941,6 +19955,9 @@ public:
 	/** Changes this line's end point */
 	void setEnd (const Point<ValueType>& newEnd) throw()			{ end = newEnd; }
 
+	/** Returns a line that is the same as this one, but with the start and end reversed, */
+	const Line reversed() const throw()					 { return Line (end, start); }
+
 	/** Applies an affine transform to the line's start and end points. */
 	void applyTransform (const AffineTransform& transform) throw()
 	{
@@ -20312,6 +20329,18 @@ public:
 
 	/** Returns a rectangle with the same size as this one, but a new position. */
 	const Rectangle withPosition (const Point<ValueType>& newPos) const throw()			 { return Rectangle (newPos.getX(), newPos.getY(), w, h); }
+
+	/** Returns the rectangle's top-left position as a Point. */
+	const Point<ValueType> getTopLeft() const throw()						   { return getPosition(); }
+
+	/** Returns the rectangle's top-right position as a Point. */
+	const Point<ValueType> getTopRight() const throw()						  { return Point<float> (x + w, y); }
+
+	/** Returns the rectangle's bottom-left position as a Point. */
+	const Point<ValueType> getBottomLeft() const throw()						{ return Point<float> (x, y + h); }
+
+	/** Returns the rectangle's bottom-right position as a Point. */
+	const Point<ValueType> getBottomRight() const throw()					   { return Point<float> (x + w, y + h); }
 
 	/** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
 	void setSize (const ValueType newWidth, const ValueType newHeight) throw()			  { w = newWidth; h = newHeight; }
@@ -21069,6 +21098,19 @@ public:
 	*/
 	void startNewSubPath (float startX, float startY);
 
+	/** Begins a new subpath with a given starting position.
+
+		This will move the path's current position to the co-ordinates passed in and
+		make it ready to draw lines or curves starting from this position.
+
+		After adding whatever lines and curves are needed, you can either
+		close the current sub-path using closeSubPath() or call startNewSubPath()
+		to move to a new sub-path, leaving the old one open-ended.
+
+		@see lineTo, quadraticTo, cubicTo, closeSubPath
+	*/
+	void startNewSubPath (const Point<float>& start);
+
 	/** Closes a the current sub-path with a line back to its start-point.
 
 		When creating a closed shape such as a triangle, don't use 3 lineTo()
@@ -21094,6 +21136,17 @@ public:
 	*/
 	void lineTo (float endX, float endY);
 
+	/** Adds a line from the shape's last position to a new end-point.
+
+		This will connect the end-point of the last line or curve that was added
+		to a new point, using a straight line.
+
+		See the class description for an example of how to add lines and curves to a path.
+
+		@see startNewSubPath, quadraticTo, cubicTo, closeSubPath
+	*/
+	void lineTo (const Point<float>& end);
+
 	/** Adds a quadratic bezier curve from the shape's last position to a new position.
 
 		This will connect the end-point of the last line or curve that was added
@@ -21107,6 +21160,18 @@ public:
 					  float controlPointY,
 					  float endPointX,
 					  float endPointY);
+
+	/** Adds a quadratic bezier curve from the shape's last position to a new position.
+
+		This will connect the end-point of the last line or curve that was added
+		to a new point, using a quadratic spline with one control-point.
+
+		See the class description for an example of how to add lines and curves to a path.
+
+		@see startNewSubPath, lineTo, cubicTo, closeSubPath
+	*/
+	void quadraticTo (const Point<float>& controlPoint,
+					  const Point<float>& endPoint);
 
 	/** Adds a cubic bezier curve from the shape's last position to a new position.
 
@@ -21123,6 +21188,19 @@ public:
 				  float controlPoint2Y,
 				  float endPointX,
 				  float endPointY);
+
+	/** Adds a cubic bezier curve from the shape's last position to a new position.
+
+		This will connect the end-point of the last line or curve that was added
+		to a new point, using a cubic spline with two control-points.
+
+		See the class description for an example of how to add lines and curves to a path.
+
+		@see startNewSubPath, lineTo, quadraticTo, closeSubPath
+	*/
+	void cubicTo (const Point<float>& controlPoint1,
+				  const Point<float>& controlPoint2,
+				  const Point<float>& endPoint);
 
 	/** Returns the last point that was added to the path by one of the drawing methods.
 	*/
@@ -21294,26 +21372,29 @@ public:
 
 		@see addArrow
 	*/
-	void addLineSegment (float startX, float startY,
-						 float endX, float endY,
-						 float lineThickness);
+	void addLineSegment (const Line<float>& line, float lineThickness);
 
 	/** Adds a line with an arrowhead on the end.
-
-		The arrow is added as a new closed sub-path. (Any currently open paths will be
-		left open).
+		The arrow is added as a new closed sub-path. (Any currently open paths will be left open).
+		@see PathStrokeType::createStrokeWithArrowheads
 	*/
-	void addArrow (float startX, float startY,
-				   float endX, float endY,
+	void addArrow (const Line<float>& line,
 				   float lineThickness,
 				   float arrowheadWidth,
 				   float arrowheadLength);
 
-	/** Adds a star shape to the path.
-
+	/** Adds a polygon shape to the path.
+		@see addStar
 	*/
-	void addStar (float centreX,
-				  float centreY,
+	void addPolygon (const Point<float>& centre,
+					 int numberOfSides,
+					 float radius,
+					 float startAngle = 0.0f);
+
+	/** Adds a star shape to the path.
+		@see addPolygon
+	*/
+	void addStar (const Point<float>& centre,
 				  int numberOfPoints,
 				  float innerRadius,
 				  float outerRadius,
@@ -22183,6 +22264,28 @@ public:
 							 int numDashLengths,
 							 const AffineTransform& transform = AffineTransform::identity,
 							 float extraAccuracy = 1.0f) const;
+
+	/** Applies this stroke type to a path and returns the resultant stroke as another Path.
+
+		@param destPath	 the resultant stroked outline shape will be copied into this path.
+								Note that it's ok for the source and destination Paths to be
+								the same object, so you can easily turn a path into a stroked version
+								of itself.
+		@param sourcePath	   the path to use as the source
+		@param transform	an optional transform to apply to the points from the source path
+								as they are being used
+		@param extraAccuracy	if this is greater than 1.0, it will subdivide the path to
+								a higher resolution, which improved the quality if you'll later want
+								to enlarge the stroked path
+
+		@see createDashedStroke
+	*/
+	void createStrokeWithArrowheads (Path& destPath,
+									 const Path& sourcePath,
+									 float arrowheadStartWidth, float arrowheadStartLength,
+									 float arrowheadEndWidth, float arrowheadEndLength,
+									 const AffineTransform& transform = AffineTransform::identity,
+									 float extraAccuracy = 1.0f) const;
 
 	/** Returns the stroke thickness. */
 	float getStrokeThickness() const throw()			{ return thickness; }
@@ -23822,18 +23925,14 @@ public:
 					 const PathStrokeType& strokeType,
 					 const AffineTransform& transform = AffineTransform::identity) const;
 
-	/** Draws a line with an arrowhead.
+	/** Draws a line with an arrowhead at its end.
 
-		@param startX	   the line's start x co-ordinate
-		@param startY	   the line's start y co-ordinate
-		@param endX		 the line's end x co-ordinate (the tip of the arrowhead)
-		@param endY		 the line's end y co-ordinate (the tip of the arrowhead)
+		@param line		 the line to draw
 		@param lineThickness	the thickness of the line
 		@param arrowheadWidth   the width of the arrow head (perpendicular to the line)
 		@param arrowheadLength  the length of the arrow head (along the length of the line)
 	*/
-	void drawArrow (float startX, float startY,
-					float endX, float endY,
+	void drawArrow (const Line<float>& line,
 					float lineThickness,
 					float arrowheadWidth,
 					float arrowheadLength) const;
@@ -42521,6 +42620,10 @@ public:
 	/** Creates an absolute rectangle, relative to the origin. */
 	explicit RelativeRectangle (const Rectangle<float>& rect, const String& componentName);
 
+	/** Creates a rectangle from four coordinates. */
+	RelativeRectangle (const RelativeCoordinate& left, const RelativeCoordinate& right,
+					   const RelativeCoordinate& top, const RelativeCoordinate& bottom);
+
 	/** Creates a rectangle from a stringified representation.
 		The string must contain a sequence of 4 coordinates, separated by commas, in the order
 		left, top, right, bottom. The syntax for the coordinate strings is explained in the
@@ -58409,38 +58512,38 @@ public:
 	*/
 	void bringToFront (int index);
 
-	/** Sets the transform to be applied to this drawable, by defining the positions
-		where three anchor points should end up in the target rendering space.
-
-		@param targetPositionForOrigin  the position that the local coordinate (0, 0) should be
-										mapped onto when rendering this object.
-		@param targetPositionForX1Y0	the position that the local coordinate (1, 0) should be
-										mapped onto when rendering this object.
-		@param targetPositionForX0Y1	the position that the local coordinate (0, 1) should be
-										mapped onto when rendering this object.
+	/** Changes the main content area.
+		The content area is actually defined by the markers named "left", "right", "top" and
+		"bottom", but this method is a shortcut that sets them all at once.
+		@see contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
 	*/
-	void setTransform (const RelativePoint& targetPositionForOrigin,
-					   const RelativePoint& targetPositionForX1Y0,
-					   const RelativePoint& targetPositionForX0Y1);
+	const RelativeRectangle getContentArea() const;
 
-	/** Returns the position to which the local coordinate (0, 0) should be remapped in the target
-		coordinate space when rendering this object.
-		@see setTransform
+	/** Returns the main content rectangle.
+		The content area is actually defined by the markers named "left", "right", "top" and
+		"bottom", but this method is a shortcut that returns them all at once.
+		@see setBoundingBox, contentLeftMarkerName, contentRightMarkerName, contentTopMarkerName, contentBottomMarkerName
 	*/
-	const RelativePoint& getTargetPositionForOrigin() const throw()	  { return controlPoints[0]; }
+	void setContentArea (const RelativeRectangle& newArea);
 
-	/** Returns the position to which the local coordinate (1, 0) should be remapped in the target
-		coordinate space when rendering this object.
-		@see setTransform
+	/** Sets the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
+		@see setContentArea
 	*/
-	const RelativePoint& getTargetPositionForX1Y0() const throw()		{ return controlPoints[1]; }
+	void setBoundingBox (const RelativeParallelogram& newBoundingBox);
 
-	/** Returns the position to which the local coordinate (0, 1) should be remapped in the target
-		coordinate space when rendering this object.
-		@see setTransform
+	/** Returns the parallelogram that defines the target position of the content rectangle when the drawable is rendered.
+		@see setBoundingBox
 	*/
-	const RelativePoint& getTargetPositionForX0Y1() const throw()		{ return controlPoints[2]; }
+	const RelativeParallelogram& getBoundingBox() const throw()		 { return bounds; }
 
+	/** Changes the bounding box transform to match the content area, so that any sub-items will
+		be drawn at their untransformed positions.
+	*/
+	void resetBoundingBoxToContentArea();
+
+	/** Represents a named marker position.
+		@see DrawableComposite::getMarker
+	*/
 	struct Marker
 	{
 		Marker (const Marker&);
@@ -58455,6 +58558,15 @@ public:
 	const Marker* getMarker (bool xAxis, int index) const throw();
 	void setMarker (const String& name, bool xAxis, const RelativeCoordinate& position);
 	void removeMarker (bool xAxis, int index);
+
+	/** The name of the marker that defines the left edge of the content area. */
+	static const char* const contentLeftMarkerName;
+	/** The name of the marker that defines the right edge of the content area. */
+	static const char* const contentRightMarkerName;
+	/** The name of the marker that defines the top edge of the content area. */
+	static const char* const contentTopMarkerName;
+	/** The name of the marker that defines the bottom edge of the content area. */
+	static const char* const contentBottomMarkerName;
 
 	/** @internal */
 	void render (const Drawable::RenderingContext& context) const;
@@ -58491,14 +58603,12 @@ public:
 		void moveDrawableOrder (int currentIndex, int newIndex, UndoManager* undoManager);
 		void removeDrawable (const ValueTree& child, UndoManager* undoManager);
 
-		const RelativePoint getTargetPositionForOrigin() const;
-		void setTargetPositionForOrigin (const RelativePoint& newPoint, UndoManager* undoManager);
+		const RelativeParallelogram getBoundingBox() const;
+		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
+		void resetBoundingBoxToContentArea (UndoManager* undoManager);
 
-		const RelativePoint getTargetPositionForX1Y0() const;
-		void setTargetPositionForX1Y0 (const RelativePoint& newPoint, UndoManager* undoManager);
-
-		const RelativePoint getTargetPositionForX0Y1() const;
-		void setTargetPositionForX0Y1 (const RelativePoint& newPoint, UndoManager* undoManager);
+		const RelativeRectangle getContentArea() const;
+		void setContentArea (const RelativeRectangle& newArea, UndoManager* undoManager);
 
 		int getNumMarkers (bool xAxis) const;
 		const ValueTree getMarkerState (bool xAxis, int index) const;
@@ -58524,7 +58634,7 @@ public:
 
 private:
 	OwnedArray <Drawable> drawables;
-	RelativePoint controlPoints[3];
+	RelativeParallelogram bounds;
 	OwnedArray <Marker> markersX, markersY;
 
 	const Rectangle<float> getUntransformedBounds() const;

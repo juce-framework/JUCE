@@ -502,7 +502,7 @@ void LowLevelGraphicsPostScriptRenderer::drawImage (const Image& sourceImage, co
 void LowLevelGraphicsPostScriptRenderer::drawLine (const Line <float>& line)
 {
     Path p;
-    p.addLineSegment (line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), 1.0f);
+    p.addLineSegment (line, 1.0f);
     fillPath (p, AffineTransform::identity);
 }
 

@@ -87,6 +87,9 @@ void DrawableDocument::checkRootObject()
     DrawableComposite::ValueTreeWrapper rootObject (getRootDrawableNode());
     StringArray idCache;
     recursivelyUpdateIDs (rootObject, idCache);
+
+    if (rootObject.getNumMarkers (true) < 2 || rootObject.getNumMarkers (false) < 2)
+        rootObject.setContentArea (RelativeRectangle ("0, 0, 100, 100"), 0);
 }
 
 const String DrawableDocument::getUniqueId() const

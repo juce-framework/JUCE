@@ -302,13 +302,13 @@ public:
         if (isX)
         {
             const float centre = getWidth() / 2 + 0.5f;
-            path.addLineSegment (centre, 2.0f, centre, getHeight() + 1.0f, lineThickness);
+            path.addLineSegment (Line<float> (centre, 2.0f, centre, getHeight() + 1.0f), lineThickness);
             path.addTriangle (1.0f, 0.0f, centre * 2.0f - 1.0f, 0.0f, centre, headSize + 1.0f);
         }
         else
         {
             const float centre = getHeight() / 2 + 0.5f;
-            path.addLineSegment (2.0f, centre, getWidth() + 1.0f, centre, lineThickness);
+            path.addLineSegment (Line<float> (2.0f, centre, getWidth() + 1.0f, centre), lineThickness);
             path.addTriangle (0.0f, centre * 2.0f - 1.0f, 0.0f, 1.0f, headSize + 1.0f, centre);
         }
 

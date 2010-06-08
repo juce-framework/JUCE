@@ -415,18 +415,14 @@ public:
                      const PathStrokeType& strokeType,
                      const AffineTransform& transform = AffineTransform::identity) const;
 
-    /** Draws a line with an arrowhead.
+    /** Draws a line with an arrowhead at its end.
 
-        @param startX           the line's start x co-ordinate
-        @param startY           the line's start y co-ordinate
-        @param endX             the line's end x co-ordinate (the tip of the arrowhead)
-        @param endY             the line's end y co-ordinate (the tip of the arrowhead)
+        @param line             the line to draw
         @param lineThickness    the thickness of the line
         @param arrowheadWidth   the width of the arrow head (perpendicular to the line)
         @param arrowheadLength  the length of the arrow head (along the length of the line)
     */
-    void drawArrow (float startX, float startY,
-                    float endX, float endY,
+    void drawArrow (const Line<float>& line,
                     float lineThickness,
                     float arrowheadWidth,
                     float arrowheadLength) const;

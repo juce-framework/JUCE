@@ -1577,7 +1577,7 @@ void LookAndFeel::drawRotarySlider (Graphics& g,
         p.addEllipse (-0.4f * rw, -0.4f * rw, rw * 0.8f, rw * 0.8f);
         PathStrokeType (rw * 0.1f).createStrokedPath (p, p);
 
-        p.addLineSegment (0.0f, 0.0f, 0.0f, -radius, rw * 0.2f);
+        p.addLineSegment (Line<float> (0.0f, 0.0f, 0.0f, -radius), rw * 0.2f);
 
         g.fillPath (p, AffineTransform::rotation (angle).translated (centreX, centreY));
     }
@@ -1899,21 +1899,21 @@ Button* LookAndFeel::createDocumentWindowButton (int buttonType)
 
     if (buttonType == DocumentWindow::closeButton)
     {
-        shape.addLineSegment (0.0f, 0.0f, 1.0f, 1.0f, crossThickness * 1.4f);
-        shape.addLineSegment (1.0f, 0.0f, 0.0f, 1.0f, crossThickness * 1.4f);
+        shape.addLineSegment (Line<float> (0.0f, 0.0f, 1.0f, 1.0f), crossThickness * 1.4f);
+        shape.addLineSegment (Line<float> (1.0f, 0.0f, 0.0f, 1.0f), crossThickness * 1.4f);
 
         return new GlassWindowButton ("close", Colour (0xffdd1100), shape, shape);
     }
     else if (buttonType == DocumentWindow::minimiseButton)
     {
-        shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, crossThickness);
+        shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);
 
         return new GlassWindowButton ("minimise", Colour (0xffaa8811), shape, shape);
     }
     else if (buttonType == DocumentWindow::maximiseButton)
     {
-        shape.addLineSegment (0.5f, 0.0f, 0.5f, 1.0f, crossThickness);
-        shape.addLineSegment (0.0f, 0.5f, 1.0f, 0.5f, crossThickness);
+        shape.addLineSegment (Line<float> (0.5f, 0.0f, 0.5f, 1.0f), crossThickness);
+        shape.addLineSegment (Line<float> (0.0f, 0.5f, 1.0f, 0.5f), crossThickness);
 
         Path fullscreenShape;
         fullscreenShape.startNewSubPath (45.0f, 100.0f);
@@ -2613,7 +2613,7 @@ Button* LookAndFeel::createFileBrowserGoUpButton()
     DrawableButton* goUpButton = new DrawableButton ("up", DrawableButton::ImageOnButtonBackground);
 
     Path arrowPath;
-    arrowPath.addArrow (50.0f, 100.0f, 50.0f, 0.0f, 40.0f, 100.0f, 50.0f);
+    arrowPath.addArrow (Line<float> (50.0f, 100.0f, 50.0f, 0.0f), 40.0f, 100.0f, 50.0f);
 
     DrawablePath arrowImage;
     arrowImage.setFill (Colours::black.withAlpha (0.4f));

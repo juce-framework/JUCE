@@ -59,6 +59,9 @@ public:
     /** Copies this point from another one. */
     Point& operator= (const Point& other) throw()                       { x = other.x; y = other.y; return *this; }
 
+    inline bool operator== (const Point& other) const throw()           { return x == other.x && y == other.y; }
+    inline bool operator!= (const Point& other) const throw()           { return x != other.x || y != other.y; }
+
     /** Returns true if the point is (0, 0). */
     bool isOrigin() const throw()                                       { return x == ValueType() && y == ValueType(); }
 
@@ -85,9 +88,6 @@ public:
 
     /** Adds a pair of co-ordinates to this value. */
     void addXY (const ValueType xToAdd, const ValueType yToAdd) throw() { x += xToAdd; y += yToAdd; }
-
-    inline bool operator== (const Point& other) const throw()           { return x == other.x && y == other.y; }
-    inline bool operator!= (const Point& other) const throw()           { return x != other.x || y != other.y; }
 
     /** Adds two points together. */
     const Point operator+ (const Point& other) const throw()            { return Point (x + other.x, y + other.y); }
@@ -128,6 +128,20 @@ public:
         where this point is the centre and the other point is on the circumference.
     */
     ValueType getAngleToPoint (const Point& other) const throw()        { return (ValueType) std::atan2 (other.x - x, other.y - y); }
+
+    /** Taking this point to be the centre of a circle, this returns a point on its circumference.
+        @param radius   the radius of the circle.
+        @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
+    */
+    const Point getPointOnCircumference (const float radius, const float angle) const throw()   { return Point<float> (x + radius * std::sin (angle),
+                                                                                                                       y - radius * std::cos (angle)); }
+    /** Taking this point to be the centre of an ellipse, this returns a point on its circumference.
+        @param radiusX  the horizontal radius of the circle.
+        @param radiusY  the vertical radius of the circle.
+        @param angle    the angle of the point, in radians clockwise from the 12 o'clock position.
+    */
+    const Point getPointOnCircumference (const float radiusX, const float radiusY, const float angle) const throw()   { return Point<float> (x + radiusX * std::sin (angle),
+                                                                                                                                             y - radiusY * std::cos (angle)); }
 
     /** Uses a transform to change the point's co-ordinates.
         This will only compile if ValueType = float!
