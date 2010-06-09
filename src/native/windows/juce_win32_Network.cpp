@@ -169,7 +169,7 @@ void* juce_openInternetFile (const String& url,
                 {
                     const TCHAR* mimeTypes[] = { _T("*/*"), 0 };
 
-                    DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE;
+                    DWORD flags = INTERNET_FLAG_RELOAD | INTERNET_FLAG_NO_CACHE_WRITE | INTERNET_FLAG_NO_COOKIES;
 
                     if (url.startsWithIgnoreCase ("https:"))
                         flags |= INTERNET_FLAG_SECURE;  // (this flag only seems necessary if the OS is running IE6 -
@@ -214,7 +214,9 @@ void* juce_openInternetFile (const String& url,
                                     result->connection = connection;
                                     result->request = request;
 
-                                    HttpEndRequest (request, 0, 0, 0);
+                                    if (! HttpEndRequest (request, 0, 0, 0))
+                                        break;
+
                                     return result;
                                 }
 
@@ -296,11 +298,11 @@ void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
                 for (int i = 0; i < headersArray.size(); ++i)
                 {
                     const String& header = headersArray[i];
-                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
-                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
+                    const String key (header.upToFirstOccurrenceOf ("; ", false, false));
+                    const String value (header.fromFirstOccurrenceOf ("; ", false, false));
                     const String previousValue (headers [key]);
 
-                    headers.set (key, previousValue.isEmpty() ? value : (previousValue + ";" + value));
+                    headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
                 }
 
                 break;

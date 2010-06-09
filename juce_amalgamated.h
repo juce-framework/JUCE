@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	14
+#define JUCE_BUILDNUMBER	15
 
 /** Current Juce version number.
 
@@ -59161,8 +59161,8 @@ public:
 		const RelativeParallelogram getBoundingBox() const;
 		void setBoundingBox (const RelativeParallelogram& newBounds, UndoManager* undoManager);
 
-		const RelativePoint getFontSizeAndScaleAnchor() const;
-		void setFontSizeAndScaleAnchor (const RelativePoint& p, UndoManager* undoManager);
+		const RelativePoint getFontSizeControlPoint() const;
+		void setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager);
 
 		static const Identifier text, colour, font, justification, topLeft, topRight, bottomLeft, fontSizeAnchor;
 	};

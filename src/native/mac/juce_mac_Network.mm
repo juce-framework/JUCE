@@ -232,8 +232,12 @@ public:
 
 - (void) createConnection
 {
+    NSInteger oldRetainCount = [self retainCount];
     connection = [[NSURLConnection alloc] initWithRequest: request
-                                                 delegate: [self retain]];
+                                                 delegate: self];
+
+    if (oldRetainCount == [self retainCount])
+        [self retain]; // newer SDK should already retain this, but there were problems in older versions..
 
     if (connection == nil)
         runLoopThread->signalThreadShouldExit();

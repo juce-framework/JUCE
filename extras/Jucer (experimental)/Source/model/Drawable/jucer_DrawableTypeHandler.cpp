@@ -861,6 +861,10 @@ public:
         Value v (wrapper.getFontValue (item.getUndoManager()));
         props.add (FontNameValueSource::createProperty ("Font", v));
         props.add (FontStyleValueSource::createProperty ("Font Style", v));
+
+        props.add (new SliderPropertyComponent (Value (new FontDimensionSource (item, true)), "Font Height", 1.0, 150.0, 0.1, 0.5));
+        props.add (new SliderPropertyComponent (Value (new FontDimensionSource (item, false)), "Font Scale", 0.05, 10.0, 0.01, 0.5));
+
         props.add (new ResetButtonPropertyComponent (item, wrapper));
     }
 
@@ -888,7 +892,7 @@ public:
                 case 0: return wrapper.getBoundingBox().topLeft;
                 case 1: return wrapper.getBoundingBox().topRight;
                 case 2: return wrapper.getBoundingBox().bottomLeft;
-                case 3: return wrapper.getFontSizeAndScaleAnchor();
+                case 3: return wrapper.getFontSizeControlPoint();
                 default: jassertfalse; break;
             }
 
@@ -901,7 +905,7 @@ public:
 
             if (cpNum == 3)
             {
-                wrapper.setFontSizeAndScaleAnchor (newPoint, undoManager);
+                wrapper.setFontSizeControlPoint (newPoint, undoManager);
             }
             else
             {
@@ -981,16 +985,91 @@ public:
 
             const AffineTransform t (bounds.resetToPerpendicular (&item));
 
-            RelativePoint fontPos (wrapper.getFontSizeAndScaleAnchor());
+            RelativePoint fontPos (wrapper.getFontSizeControlPoint());
             fontPos.moveToAbsolute (fontPos.resolve (&item).transformedBy (t), &item);
 
             wrapper.setBoundingBox (bounds, item.getUndoManager());
-            wrapper.setFontSizeAndScaleAnchor (fontPos, item.getUndoManager());
+            wrapper.setFontSizeControlPoint (fontPos, item.getUndoManager());
         }
 
     private:
         DrawableTypeInstance item;
         DrawableText::ValueTreeWrapper wrapper;
+    };
+
+    //==============================================================================
+    class FontDimensionSource   : public Value::ValueSource,
+                                  public ValueTree::Listener
+    {
+    public:
+        FontDimensionSource (const DrawableTypeInstance& item_, bool isHeight_)
+           : item (item_), isHeight (isHeight_), reentrant (false)
+        {
+            item.getState().addListener (this);
+        }
+
+        ~FontDimensionSource() {}
+
+        const var getValue() const
+        {
+            DrawableText::ValueTreeWrapper wrapper (item.getState());
+
+            const RelativeParallelogram bounds (wrapper.getBoundingBox());
+            RelativePoint fontPoint (wrapper.getFontSizeControlPoint());
+
+            Point<float> corners[3];
+            bounds.resolveThreePoints (corners, &item);
+
+            Point<float> sizeAndScale (RelativeParallelogram::getInternalCoordForPoint (corners, fontPoint.resolve (&item)));
+
+            if (isHeight)
+                return sizeAndScale.getY();
+            else
+                return sizeAndScale.getX() / sizeAndScale.getY();
+        }
+
+        void setValue (const var& newValue)
+        {
+            if (reentrant)
+                return;
+
+            DrawableText::ValueTreeWrapper wrapper (item.getState());
+
+            const RelativeParallelogram bounds (wrapper.getBoundingBox());
+            RelativePoint fontPoint (wrapper.getFontSizeControlPoint());
+
+            Point<float> corners[3];
+            bounds.resolveThreePoints (corners, &item);
+
+            Point<float> sizeAndScale (RelativeParallelogram::getInternalCoordForPoint (corners, fontPoint.resolve (&item)));
+            const Point<float> oldSize (sizeAndScale);
+
+            if (isHeight)
+                sizeAndScale.setXY ((oldSize.getX() / oldSize.getY()) * (float) newValue, (float) newValue);
+            else
+                sizeAndScale.setX (sizeAndScale.getY() * (float) newValue);
+
+            if (oldSize.getDistanceFrom (sizeAndScale) > 0.001f)
+                wrapper.setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (corners, sizeAndScale)),
+                                                 item.getUndoManager());
+        }
+
+        void valueTreePropertyChanged (ValueTree& tree, const Identifier& property)
+        {
+            reentrant = true;
+            sendChangeMessage (true);
+            reentrant = false;
+        }
+
+        void valueTreeChildrenChanged (ValueTree& tree) {}
+        void valueTreeParentChanged (ValueTree& tree) {}
+
+    protected:
+        mutable DrawableTypeInstance item;
+        bool isHeight, reentrant;
+
+        FontDimensionSource (const FontDimensionSource&);
+        const FontDimensionSource& operator= (const FontDimensionSource&);
     };
 };
 

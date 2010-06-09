@@ -70,7 +70,11 @@ public:
           manualReset (manualReset_)
     {
         pthread_cond_init (&condition, 0);
-        pthread_mutex_init (&mutex, 0);
+
+        pthread_mutexattr_t atts;
+        pthread_mutexattr_init (&atts);
+        pthread_mutexattr_setprotocol (&atts, PTHREAD_PRIO_INHERIT);
+        pthread_mutex_init (&mutex, &atts);
     }
 
     ~WaitableEventImpl()

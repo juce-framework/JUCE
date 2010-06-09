@@ -220,7 +220,7 @@ const String PropertyPanelWithTooltips::findTip (Component* c)
 FloatingLabelComponent::FloatingLabelComponent()
     : font (10.0f)
 {
-    setInterceptsMouseClicks (false ,false);
+    setInterceptsMouseClicks (false, false);
 }
 
 void FloatingLabelComponent::remove()
@@ -243,7 +243,7 @@ void FloatingLabelComponent::update (Component* parent, const String& text, cons
         glyphs.justifyGlyphs (0, std::numeric_limits<int>::max(), 0, 0, 1000, 1000, Justification::topLeft);
 
         r = glyphs.getBoundingBox (0, std::numeric_limits<int>::max(), false)
-                  .getSmallestIntegerContainer().expanded (2, 2);
+                  .getSmallestIntegerContainer().expanded (1, 1);
     }
     else
     {
@@ -259,10 +259,7 @@ void FloatingLabelComponent::paint (Graphics& g)
 {
     g.setFont (font);
     g.setColour (Colours::white.withAlpha (0.5f));
-
-    for (int y = -1; y <= 1; ++y)
-        for (int x = -1; x <= 1; ++x)
-            glyphs.draw (g, AffineTransform::translation (1.0f + x, 1.0f + y));
+    g.fillRoundedRectangle (0, 0, (float) getWidth(), (float) getHeight(), 3);
 
     g.setColour (colour);
     glyphs.draw (g, AffineTransform::translation (1.0f, 1.0f));

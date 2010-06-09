@@ -919,8 +919,7 @@ class TextEditorViewport  : public Viewport
 {
 public:
     TextEditorViewport (TextEditor* const owner_)
-        : owner (owner_),
-          lastWordWrapWidth (0)
+        : owner (owner_), lastWordWrapWidth (0), rentrant (false)
     {
     }
 
@@ -930,18 +929,26 @@ public:
 
     void visibleAreaChanged (int, int, int, int)
     {
-        const float wordWrapWidth = owner->getWordWrapWidth();
-
-        if (wordWrapWidth != lastWordWrapWidth)
+        if (! rentrant) // it's rare, but possible to get into a feedback loop as the viewport's scrollbars
+                        // appear and disappear, causing the wrap width to change.
         {
-            lastWordWrapWidth = wordWrapWidth;
-            owner->updateTextHolderSize();
+            const float wordWrapWidth = owner->getWordWrapWidth();
+
+            if (wordWrapWidth != lastWordWrapWidth)
+            {
+                lastWordWrapWidth = wordWrapWidth;
+
+                rentrant = true;
+                owner->updateTextHolderSize();
+                rentrant = false;
+            }
         }
     }
 
 private:
     TextEditor* const owner;
     float lastWordWrapWidth;
+    bool rentrant;
 
     TextEditorViewport (const TextEditorViewport&);
     TextEditorViewport& operator= (const TextEditorViewport&);

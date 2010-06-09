@@ -148,7 +148,6 @@ private:
     }
 
     const File getProjectBundle() const         { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (".xcodeproj"); }
-    const RelativePath getJuceLibFile() const   { return getJucePathFromTargetFolder().getChildFile ("bin/libjucedebug.a"); }
 
     bool hasPList() const                               { return ! (project.isLibrary() || project.isCommandLineApp()); }
     const String getAudioPluginBundleExtension() const  { return "component"; }
@@ -359,7 +358,11 @@ private:
         }
 
         if (project.getJuceLinkageMode() == Project::useLinkedJuce)
-            getLinkerFlagsForStaticLibrary (getJuceLibFile(), flags, librarySearchPaths);
+        {
+            RelativePath juceLib (getJucePathFromTargetFolder().getChildFile (config.isDebug().getValue() ? "bin/libjucedebug.a"
+                                                                                                          : "bin/libjuce.a"));
+            getLinkerFlagsForStaticLibrary (juceLib, flags, librarySearchPaths);
+        }
 
         flags.add (getExtraLinkerFlags().toString());
         flags.removeEmptyStrings (true);

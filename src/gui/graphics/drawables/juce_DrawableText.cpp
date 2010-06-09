@@ -73,7 +73,7 @@ void DrawableText::setFont (const Font& newFont, bool applySizeAndScale)
         Point<float> corners[3];
         bounds.resolveThreePoints (corners, parent);
 
-        setFontSizeControlPoint (RelativePoint (bounds.getPointForInternalCoord (corners,
+        setFontSizeControlPoint (RelativePoint (RelativeParallelogram::getPointForInternalCoord (corners,
                                     Point<float> (font.getHorizontalScale() * font.getHeight(), font.getHeight()))));
     }
 }
@@ -223,23 +223,24 @@ void DrawableText::ValueTreeWrapper::setBoundingBox (const RelativeParallelogram
     state.setProperty (bottomLeft, newBounds.bottomLeft.toString(), undoManager);
 }
 
-const RelativePoint DrawableText::ValueTreeWrapper::getFontSizeAndScaleAnchor() const
+const RelativePoint DrawableText::ValueTreeWrapper::getFontSizeControlPoint() const
 {
     return state [fontSizeAnchor].toString();
 }
 
-void DrawableText::ValueTreeWrapper::setFontSizeAndScaleAnchor (const RelativePoint& p, UndoManager* undoManager)
+void DrawableText::ValueTreeWrapper::setFontSizeControlPoint (const RelativePoint& p, UndoManager* undoManager)
 {
     state.setProperty (fontSizeAnchor, p.toString(), undoManager);
 }
 
+//==============================================================================
 const Rectangle<float> DrawableText::refreshFromValueTree (const ValueTree& tree, ImageProvider*)
 {
     ValueTreeWrapper v (tree);
     setName (v.getID());
 
     const RelativeParallelogram newBounds (v.getBoundingBox());
-    const RelativePoint newFontPoint (v.getFontSizeAndScaleAnchor());
+    const RelativePoint newFontPoint (v.getFontSizeControlPoint());
     const Colour newColour (v.getColour());
     const Justification newJustification (v.getJustification());
     const String newText (v.getText());
@@ -275,7 +276,7 @@ const ValueTree DrawableText::createValueTree (ImageProvider*) const
     v.setJustification (justification, 0);
     v.setColour (colour, 0);
     v.setBoundingBox (bounds, 0);
-    v.setFontSizeAndScaleAnchor (fontSizeControlPoint, 0);
+    v.setFontSizeControlPoint (fontSizeControlPoint, 0);
 
     return tree;
 }

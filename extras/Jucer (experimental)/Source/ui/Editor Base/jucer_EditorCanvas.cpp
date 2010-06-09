@@ -189,7 +189,7 @@ public:
             }
 
             setBoundsInTargetSpace (r);
-            label.update (getParentComponent(), coord.toString(), resizableBorderColour.withAlpha (0.9f), getX(), getY(), type != left, type != top);
+            label.update (getParentComponent(), coord.toString(), Colours::darkgrey, getX(), getY(), type != left, type != top);
         }
 
     private:
