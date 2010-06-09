@@ -213,6 +213,7 @@ OBJECTS := \
   $(OBJDIR)/juce_PreferencesPanel_dbc7d503.o \
   $(OBJDIR)/juce_SystemTrayIconComponent_fa664512.o \
   $(OBJDIR)/juce_AlertWindow_94d8d1f5.o \
+  $(OBJDIR)/juce_CallOutBox_61f42d7c.o \
   $(OBJDIR)/juce_ComponentPeer_1e4b4b08.o \
   $(OBJDIR)/juce_DialogWindow_535b27b9.o \
   $(OBJDIR)/juce_DocumentWindow_3cb9d4cc.o \
@@ -1220,6 +1221,11 @@ $(OBJDIR)/juce_SystemTrayIconComponent_fa664512.o: ../../src/gui/components/spec
 $(OBJDIR)/juce_AlertWindow_94d8d1f5.o: ../../src/gui/components/windows/juce_AlertWindow.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_AlertWindow.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_CallOutBox_61f42d7c.o: ../../src/gui/components/windows/juce_CallOutBox.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_CallOutBox.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ComponentPeer_1e4b4b08.o: ../../src/gui/components/windows/juce_ComponentPeer.cpp

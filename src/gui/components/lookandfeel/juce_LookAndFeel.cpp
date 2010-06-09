@@ -39,6 +39,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../windows/juce_AlertWindow.h"
 #include "../windows/juce_DocumentWindow.h"
 #include "../windows/juce_ResizableWindow.h"
+#include "../windows/juce_CallOutBox.h"
 #include "../menus/juce_MenuBarComponent.h"
 #include "../menus/juce_PopupMenu.h"
 #include "../layout/juce_ScrollBar.h"
@@ -2527,6 +2528,27 @@ const Rectangle<int> LookAndFeel::getPropertyComponentContentPosition (PropertyC
     return Rectangle<int> (component.getWidth() / 3, 1,
                            component.getWidth() - component.getWidth() / 3 - 1, component.getHeight() - 3);
 }
+
+//==============================================================================
+void LookAndFeel::drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path)
+{
+    Image content (Image::ARGB, box.getWidth(), box.getHeight(), true);
+
+    {
+        Graphics g2 (content);
+
+        g2.setColour (Colour::greyLevel (0.23f).withAlpha (0.9f));
+        g2.fillPath (path);
+
+        g2.setColour (Colours::white.withAlpha (0.8f));
+        g2.strokePath (path, PathStrokeType (2.0f));
+    }
+
+    DropShadowEffect shadow;
+    shadow.setShadowProperties (5.0f, 0.4f, 0, 2);
+    shadow.applyEffect (content, g);
+}
+
 
 //==============================================================================
 void LookAndFeel::createFileChooserHeaderText (const String& title,

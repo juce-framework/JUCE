@@ -182,6 +182,7 @@
 		D9AAB4AE220010CD526C87D2 = { isa = PBXBuildFile; fileRef = A34C0E63D41CFF5E55FD1D9E; };
 		C732ADB05901619B14F1D6BB = { isa = PBXBuildFile; fileRef = CC04F253CB70B20B774801A9; };
 		075D5995E41FDD670ED35E17 = { isa = PBXBuildFile; fileRef = A5AAF4475138358F33D4904A; };
+		BBE02E8719411C8A7D43A401 = { isa = PBXBuildFile; fileRef = 8AEF18EE9B12D4677F96B709; };
 		35E3B9684ED968BAC0BC8021 = { isa = PBXBuildFile; fileRef = 2FFDC7636EFC2D7F74590A31; };
 		736AC4A9DA6515B92644FA02 = { isa = PBXBuildFile; fileRef = 929FEA5458430B7AE23BBB46; };
 		DFFBADCBC9C7E31B391BA560 = { isa = PBXBuildFile; fileRef = 090907E4FE95EE2B11C1A0E1; };
@@ -736,6 +737,8 @@
 		740D1808DB934123F05A1598 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_WebBrowserComponent.h; path = ../../src/gui/components/special/juce_WebBrowserComponent.h; sourceTree = SOURCE_ROOT; };
 		A5AAF4475138358F33D4904A = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_AlertWindow.cpp; path = ../../src/gui/components/windows/juce_AlertWindow.cpp; sourceTree = SOURCE_ROOT; };
 		72C4FDDDB8602591DD4F7B3B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_AlertWindow.h; path = ../../src/gui/components/windows/juce_AlertWindow.h; sourceTree = SOURCE_ROOT; };
+		8AEF18EE9B12D4677F96B709 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_CallOutBox.cpp; path = ../../src/gui/components/windows/juce_CallOutBox.cpp; sourceTree = SOURCE_ROOT; };
+		8F54431CD3A672B1EB8335BE = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_CallOutBox.h; path = ../../src/gui/components/windows/juce_CallOutBox.h; sourceTree = SOURCE_ROOT; };
 		2FFDC7636EFC2D7F74590A31 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_ComponentPeer.cpp; path = ../../src/gui/components/windows/juce_ComponentPeer.cpp; sourceTree = SOURCE_ROOT; };
 		12C66C90F3192AFFD6BCEDB6 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = juce_ComponentPeer.h; path = ../../src/gui/components/windows/juce_ComponentPeer.h; sourceTree = SOURCE_ROOT; };
 		929FEA5458430B7AE23BBB46 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = juce_DialogWindow.cpp; path = ../../src/gui/components/windows/juce_DialogWindow.cpp; sourceTree = SOURCE_ROOT; };
@@ -1427,6 +1430,8 @@
 		48D41BA310DED74E900A5AB0 = { isa = PBXGroup; children = (
 				A5AAF4475138358F33D4904A,
 				72C4FDDDB8602591DD4F7B3B,
+				8AEF18EE9B12D4677F96B709,
+				8F54431CD3A672B1EB8335BE,
 				2FFDC7636EFC2D7F74590A31,
 				12C66C90F3192AFFD6BCEDB6,
 				929FEA5458430B7AE23BBB46,
@@ -2011,6 +2016,7 @@
 				D9AAB4AE220010CD526C87D2,
 				C732ADB05901619B14F1D6BB,
 				075D5995E41FDD670ED35E17,
+				BBE02E8719411C8A7D43A401,
 				35E3B9684ED968BAC0BC8021,
 				736AC4A9DA6515B92644FA02,
 				DFFBADCBC9C7E31B391BA560,

@@ -149,6 +149,17 @@ void DrawableComposite::resetBoundingBoxToContentArea()
                                            RelativePoint (content.left, content.bottom)));
 }
 
+void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
+{
+    const Rectangle<float> bounds (getUntransformedBounds (false));
+
+    setContentArea (RelativeRectangle (RelativeCoordinate (bounds.getX(), true),
+                                       RelativeCoordinate (bounds.getRight(), true),
+                                       RelativeCoordinate (bounds.getY(), false),
+                                       RelativeCoordinate (bounds.getBottom(), false)));
+    resetBoundingBoxToContentArea();
+}
+
 int DrawableComposite::getNumMarkers (const bool xAxis) const throw()
 {
     return (xAxis ? markersX : markersY).size();
@@ -271,7 +282,7 @@ const RelativeCoordinate DrawableComposite::findNamedCoordinate (const String& o
     return RelativeCoordinate();
 }
 
-const Rectangle<float> DrawableComposite::getUntransformedBounds() const
+const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool includeMarkers) const
 {
     Rectangle<float> bounds;
 
@@ -279,58 +290,57 @@ const Rectangle<float> DrawableComposite::getUntransformedBounds() const
     for (i = 0; i < drawables.size(); ++i)
         bounds = bounds.getUnion (drawables.getUnchecked(i)->getBounds());
 
-    if (markersX.size() > 0)
+    if (includeMarkers)
     {
-        float minX = std::numeric_limits<float>::max();
-        float maxX = std::numeric_limits<float>::min();
-
-        for (i = markersX.size(); --i >= 0;)
+        if (markersX.size() > 0)
         {
-            const Marker* m = markersX.getUnchecked(i);
-            const float pos = (float) m->position.resolve (parent);
-            minX = jmin (minX, pos);
-            maxX = jmax (maxX, pos);
-        }
+            float minX = std::numeric_limits<float>::max();
+            float maxX = std::numeric_limits<float>::min();
 
-        if (minX <= maxX)
-        {
-            if (bounds.getWidth() == 0)
+            for (i = markersX.size(); --i >= 0;)
             {
+                const Marker* m = markersX.getUnchecked(i);
+                const float pos = (float) m->position.resolve (parent);
+                minX = jmin (minX, pos);
+                maxX = jmax (maxX, pos);
+            }
+
+            if (minX <= maxX)
+            {
+                if (bounds.getHeight() > 0)
+                {
+                    minX = jmin (minX, bounds.getX());
+                    maxX = jmax (maxX, bounds.getRight());
+                }
+
                 bounds.setLeft (minX);
                 bounds.setWidth (maxX - minX);
             }
-            else
+        }
+
+        if (markersY.size() > 0)
+        {
+            float minY = std::numeric_limits<float>::max();
+            float maxY = std::numeric_limits<float>::min();
+
+            for (i = markersY.size(); --i >= 0;)
             {
-                bounds.setLeft (jmin (bounds.getX(), minX));
-                bounds.setRight (jmax (bounds.getRight(), maxX));
+                const Marker* m = markersY.getUnchecked(i);
+                const float pos = (float) m->position.resolve (parent);
+                minY = jmin (minY, pos);
+                maxY = jmax (maxY, pos);
             }
-        }
-    }
 
-    if (markersY.size() > 0)
-    {
-        float minY = std::numeric_limits<float>::max();
-        float maxY = std::numeric_limits<float>::min();
-
-        for (i = markersY.size(); --i >= 0;)
-        {
-            const Marker* m = markersY.getUnchecked(i);
-            const float pos = (float) m->position.resolve (parent);
-            minY = jmin (minY, pos);
-            maxY = jmax (maxY, pos);
-        }
-
-        if (minY <= maxY)
-        {
-            if (bounds.getHeight() == 0)
+            if (minY <= maxY)
             {
+                if (bounds.getHeight() > 0)
+                {
+                    minY = jmin (minY, bounds.getY());
+                    maxY = jmax (maxY, bounds.getBottom());
+                }
+
                 bounds.setTop (minY);
                 bounds.setHeight (maxY - minY);
-            }
-            else
-            {
-                bounds.setTop (jmin (bounds.getY(), minY));
-                bounds.setBottom (jmax (bounds.getBottom(), maxY));
             }
         }
     }
@@ -340,7 +350,7 @@ const Rectangle<float> DrawableComposite::getUntransformedBounds() const
 
 const Rectangle<float> DrawableComposite::getBounds() const
 {
-    return getUntransformedBounds().transformed (calculateTransform());
+    return getUntransformedBounds (true).transformed (calculateTransform());
 }
 
 bool DrawableComposite::hitTest (float x, float y) const

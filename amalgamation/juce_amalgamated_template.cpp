@@ -309,6 +309,7 @@
  #include "../src/gui/components/special/juce_PreferencesPanel.cpp"
  #include "../src/gui/components/special/juce_SystemTrayIconComponent.cpp"
  #include "../src/gui/components/windows/juce_AlertWindow.cpp"
+ #include "../src/gui/components/windows/juce_CallOutBox.cpp"
  #include "../src/gui/components/windows/juce_ComponentPeer.cpp"
  #include "../src/gui/components/windows/juce_DialogWindow.cpp"
  #include "../src/gui/components/windows/juce_DocumentWindow.cpp"

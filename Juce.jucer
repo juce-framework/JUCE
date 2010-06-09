@@ -887,6 +887,10 @@
                   file="src/gui/components/windows/juce_AlertWindow.cpp"/>
             <FILE id="q2qARl9MO" name="juce_AlertWindow.h" compile="0" resource="0"
                   file="src/gui/components/windows/juce_AlertWindow.h"/>
+            <FILE id="831V8C" name="juce_CallOutBox.cpp" compile="1" resource="0"
+                  file="src/gui/components/windows/juce_CallOutBox.cpp"/>
+            <FILE id="EbIvE5" name="juce_CallOutBox.h" compile="0" resource="0"
+                  file="src/gui/components/windows/juce_CallOutBox.h"/>
             <FILE id="wriH2opIu" name="juce_ComponentPeer.cpp" compile="1" resource="0"
                   file="src/gui/components/windows/juce_ComponentPeer.cpp"/>
             <FILE id="hlmMSNcRL" name="juce_ComponentPeer.h" compile="0" resource="0"

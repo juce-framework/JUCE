@@ -57,6 +57,7 @@ class FileBrowserComponent;
 class DirectoryContentsDisplayComponent;
 class FilePreviewComponent;
 class ImageButton;
+class CallOutBox;
 
 
 //==============================================================================
@@ -596,6 +597,9 @@ public:
                                              PropertyComponent& component);
 
     virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
+
+    //==============================================================================
+    void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
 
     //==============================================================================
     virtual void drawLevelMeter (Graphics& g, int width, int height, float level);

@@ -559,6 +559,8 @@
             <Filter Name="windows">
               <File RelativePath="..\..\src\gui\components\windows\juce_AlertWindow.cpp"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_AlertWindow.h"/>
+              <File RelativePath="..\..\src\gui\components\windows\juce_CallOutBox.cpp"/>
+              <File RelativePath="..\..\src\gui\components\windows\juce_CallOutBox.h"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_ComponentPeer.cpp"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_ComponentPeer.h"/>
               <File RelativePath="..\..\src\gui\components\windows\juce_DialogWindow.cpp"/>

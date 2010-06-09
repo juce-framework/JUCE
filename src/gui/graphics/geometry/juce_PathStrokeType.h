@@ -140,17 +140,20 @@ public:
     //==============================================================================
     /** Applies this stroke type to a path and returns the resultant stroke as another Path.
 
-        @param destPath         the resultant stroked outline shape will be copied into this path.
-                                Note that it's ok for the source and destination Paths to be
-                                the same object, so you can easily turn a path into a stroked version
-                                of itself.
-        @param sourcePath       the path to use as the source
-        @param transform        an optional transform to apply to the points from the source path
-                                as they are being used
-        @param extraAccuracy    if this is greater than 1.0, it will subdivide the path to
-                                a higher resolution, which improved the quality if you'll later want
-                                to enlarge the stroked path
-
+        @param destPath             the resultant stroked outline shape will be copied into this path.
+                                    Note that it's ok for the source and destination Paths to be
+                                    the same object, so you can easily turn a path into a stroked version
+                                    of itself.
+        @param sourcePath           the path to use as the source
+        @param arrowheadStartWidth  the width of the arrowhead at the start of the path
+        @param arrowheadStartLength the length of the arrowhead at the start of the path
+        @param arrowheadEndWidth    the width of the arrowhead at the end of the path
+        @param arrowheadEndLength   the length of the arrowhead at the end of the path
+        @param transform            an optional transform to apply to the points from the source path
+                                    as they are being used
+        @param extraAccuracy        if this is greater than 1.0, it will subdivide the path to
+                                    a higher resolution, which improved the quality if you'll later want
+                                    to enlarge the stroked path
         @see createDashedStroke
     */
     void createStrokeWithArrowheads (Path& destPath,

@@ -130,13 +130,7 @@ public:
 
         newState.parseSubElements (xml, drawable);
 
-        const Rectangle<float> bounds (drawable->getBounds());
-        drawable->setContentArea (RelativeRectangle (RelativeCoordinate (bounds.getX(), true),
-                                                     RelativeCoordinate (bounds.getRight(), true),
-                                                     RelativeCoordinate (bounds.getY(), false),
-                                                     RelativeCoordinate (bounds.getBottom(), false)));
-        drawable->resetBoundingBoxToContentArea();
-
+        drawable->resetContentAreaAndBoundingBoxToFitChildren();
         return drawable;
     }
 
@@ -199,6 +193,7 @@ private:
             parseSubElements (xml, drawable);
         }
 
+        drawable->resetContentAreaAndBoundingBoxToFitChildren();
         return drawable;
     }
 

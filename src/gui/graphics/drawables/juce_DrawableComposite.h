@@ -148,6 +148,11 @@ public:
     */
     void resetBoundingBoxToContentArea();
 
+    /** Resets the content area and the bounding transform to fit around the area occupied
+        by the child components (ignoring any markers).
+    */
+    void resetContentAreaAndBoundingBoxToFitChildren();
+
     //==============================================================================
     /** Represents a named marker position.
         @see DrawableComposite::getMarker
@@ -248,7 +253,7 @@ private:
     RelativeParallelogram bounds;
     OwnedArray <Marker> markersX, markersY;
 
-    const Rectangle<float> getUntransformedBounds() const;
+    const Rectangle<float> getUntransformedBounds (bool includeMarkers) const;
     const AffineTransform calculateTransform() const;
 
     DrawableComposite& operator= (const DrawableComposite&);

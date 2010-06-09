@@ -82,58 +82,6 @@ private:
 };
 
 //==============================================================================
-class CallOutBox    : public Component
-{
-public:
-    //==============================================================================
-    CallOutBox (Component& content, float arrowSize = 16.0f);
-    ~CallOutBox();
-
-    //==============================================================================
-    static void showModal (Component& contentComponent, Component* targetComp,
-                           Component* parentComp, float arrowSize = 16.0f);
-
-    static void showModal (Component& contentComponent, Component* parent,
-                           const Rectangle<int>& availableAreaInParent,
-                           const Rectangle<int>& targetAreaInParent,
-                           float arrowSize = 16.0f);
-
-    //==============================================================================
-    void updatePosition (const Rectangle<int>& newTargetArea, const Rectangle<int>& newArea);
-
-    //==============================================================================
-    /** @internal */
-    void paint (Graphics& g);
-    /** @internal */
-    void resized();
-    /** @internal */
-    void moved();
-    /** @internal */
-    void childBoundsChanged (Component*);
-    /** @internal */
-    bool hitTest (int x, int y);
-    /** @internal */
-    void inputAttemptWhenModal();
-
-    juce_UseDebuggingNewOperator
-
-private:
-    const int edge;
-    const float arrowSize;
-    Component& content;
-    Path outline;
-    Point<float> targetPoint;
-    Rectangle<int> availableArea, targetArea;
-    Image background;
-
-    void refreshPath();
-
-    CallOutBox (const CallOutBox&);
-    CallOutBox& operator= (const CallOutBox&);
-};
-
-
-//==============================================================================
 class JucerToolbarButton   : public ToolbarItemComponent
 {
 public:

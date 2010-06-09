@@ -584,6 +584,9 @@
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
  #include "gui/components/windows/juce_AlertWindow.h"
 #endif
+#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
+ #include "gui/components/windows/juce_CallOutBox.h"
+#endif
 #ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
  #include "gui/components/windows/juce_ComponentPeer.h"
 #endif

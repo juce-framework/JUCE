@@ -256,28 +256,15 @@ public:
     {
         // create two colour selector components for our background and
         // text colour..
-        ColourSelector colourSelector1;
-        colourSelector1.setName ("background");
-        colourSelector1.setCurrentColour (findColour (TextButton::buttonColourId));
-        colourSelector1.addChangeListener (this);
+        ColourSelector colourSelector;
+        colourSelector.setName ("background");
+        colourSelector.setCurrentColour (findColour (TextButton::buttonColourId));
+        colourSelector.addChangeListener (this);
+        colourSelector.setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+        colourSelector.setSize (300, 400);
 
-        ColourSelector colourSelector2;
-        colourSelector2.setName ("text");
-        colourSelector2.setCurrentColour (findColour (TextButton::textColourOffId));
-        colourSelector2.addChangeListener (this);
-
-        // and add the selectors as custom menu items to a PopupMenu, putting
-        // them in two different sub-menus..
-        PopupMenu m, sub1, sub2;
-
-        sub1.addCustomItem (1234, &colourSelector1, 300, 300, false);
-        m.addSubMenu ("background colour", sub1);
-
-        sub2.addCustomItem (1234, &colourSelector2, 300, 300, false);
-        m.addSubMenu ("text colour", sub2);
-
-        // and show the menu (modally)..
-        m.showAt (this);
+        CallOutBox callOut (colourSelector, *this, 0);
+        callOut.runModalLoop();
     }
 
     void changeListenerCallback (void* source)

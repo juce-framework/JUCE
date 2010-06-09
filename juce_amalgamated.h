@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	13
+#define JUCE_BUILDNUMBER	14
 
 /** Current Juce version number.
 
@@ -22284,17 +22284,20 @@ public:
 
 	/** Applies this stroke type to a path and returns the resultant stroke as another Path.
 
-		@param destPath	 the resultant stroked outline shape will be copied into this path.
-								Note that it's ok for the source and destination Paths to be
-								the same object, so you can easily turn a path into a stroked version
-								of itself.
+		@param destPath		 the resultant stroked outline shape will be copied into this path.
+									Note that it's ok for the source and destination Paths to be
+									the same object, so you can easily turn a path into a stroked version
+									of itself.
 		@param sourcePath	   the path to use as the source
-		@param transform	an optional transform to apply to the points from the source path
-								as they are being used
+		@param arrowheadStartWidth  the width of the arrowhead at the start of the path
+		@param arrowheadStartLength the length of the arrowhead at the start of the path
+		@param arrowheadEndWidth	the width of the arrowhead at the end of the path
+		@param arrowheadEndLength   the length of the arrowhead at the end of the path
+		@param transform		an optional transform to apply to the points from the source path
+									as they are being used
 		@param extraAccuracy	if this is greater than 1.0, it will subdivide the path to
-								a higher resolution, which improved the quality if you'll later want
-								to enlarge the stroked path
-
+									a higher resolution, which improved the quality if you'll later want
+									to enlarge the stroked path
 		@see createDashedStroke
 	*/
 	void createStrokeWithArrowheads (Path& destPath,
@@ -53213,6 +53216,7 @@ class FileBrowserComponent;
 class DirectoryContentsDisplayComponent;
 class FilePreviewComponent;
 class ImageButton;
+class CallOutBox;
 
 /**
 	LookAndFeel objects define the appearance of all the JUCE widgets, and subclasses
@@ -53718,6 +53722,8 @@ public:
 											 PropertyComponent& component);
 
 	virtual const Rectangle<int> getPropertyComponentContentPosition (PropertyComponent& component);
+
+	void drawCallOutBoxBackground (CallOutBox& box, Graphics& g, const Path& path);
 
 	virtual void drawLevelMeter (Graphics& g, int width, int height, float level);
 
@@ -57131,6 +57137,109 @@ private:
 #ifndef __JUCE_ALERTWINDOW_JUCEHEADER__
 
 #endif
+#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
+
+/*** Start of inlined file: juce_CallOutBox.h ***/
+#ifndef __JUCE_CALLOUTBOX_JUCEHEADER__
+#define __JUCE_CALLOUTBOX_JUCEHEADER__
+
+/**
+	A box with a small arrow that can be used as a temporary pop-up window to show
+	extra controls when a button or other component is clicked.
+
+	Using one of these is similar to having a popup menu attached to a button or
+	other component - but it looks fancier, and has an arrow that can indicate the
+	object that it applies to.
+
+	Normally, you'd create one of these on the stack and run it modally, e.g.
+
+	@code
+	void mouseUp (const MouseEvent& e)
+	{
+		MyContentComponent content;
+		content.setSize (300, 300);
+
+		CallOutBox callOut (content, *this, 0);
+		callOut.runModalLoop();
+	}
+	@endcode
+
+	The call-out will resize and position itself when the content changes size.
+*/
+class JUCE_API  CallOutBox	: public Component
+{
+public:
+
+	/** Creates a CallOutBox.
+
+		@param contentComponent	 the component to display inside the call-out. This should
+									already have a size set (although the call-out will also
+									update itself when the component's size is changed later).
+									Obviously this component must not be deleted until the
+									call-out box has been deleted.
+		@param componentToPointTo   the component that the call-out's arrow should point towards
+		@param parentComponent	  if non-zero, this is the component to add the call-out to. If
+									this is zero, the call-out will be added to the desktop.
+	*/
+	CallOutBox (Component& contentComponent,
+				Component& componentToPointTo,
+				Component* parentComponent);
+
+	/** Destructor. */
+	~CallOutBox();
+
+	/** Changes the length of the arrow. */
+	void setArrowSize (float newSize);
+
+	/** Updates the position and size of the box.
+
+		You shouldn't normally need to call this, unless you need more precise control over the
+		layout.
+
+		@param newAreaToPointTo	 the rectangle to make the box's arrow point to
+		@param newAreaToFitIn	   the area within which the box's position should be constrained
+	*/
+	void updatePosition (const Rectangle<int>& newAreaToPointTo,
+						 const Rectangle<int>& newAreaToFitIn);
+
+	/** @internal */
+	void paint (Graphics& g);
+	/** @internal */
+	void resized();
+	/** @internal */
+	void moved();
+	/** @internal */
+	void childBoundsChanged (Component*);
+	/** @internal */
+	bool hitTest (int x, int y);
+	/** @internal */
+	void inputAttemptWhenModal();
+	/** @internal */
+	bool keyPressed (const KeyPress& key);
+
+	juce_UseDebuggingNewOperator
+
+private:
+	int borderSpace;
+	float arrowSize;
+	Component& content;
+	Path outline;
+	Point<float> targetPoint;
+	Rectangle<int> availableArea, targetArea;
+	Image background;
+
+	void refreshPath();
+	void drawCallOutBoxBackground (Graphics& g, const Path& outline, int width, int height);
+
+	CallOutBox (const CallOutBox&);
+	CallOutBox& operator= (const CallOutBox&);
+};
+
+#endif   // __JUCE_CALLOUTBOX_JUCEHEADER__
+/*** End of inlined file: juce_CallOutBox.h ***/
+
+
+#endif
 #ifndef __JUCE_COMPONENTPEER_JUCEHEADER__
 
 /*** Start of inlined file: juce_ComponentPeer.h ***/
@@ -58558,6 +58667,11 @@ public:
 	*/
 	void resetBoundingBoxToContentArea();
 
+	/** Resets the content area and the bounding transform to fit around the area occupied
+		by the child components (ignoring any markers).
+	*/
+	void resetContentAreaAndBoundingBoxToFitChildren();
+
 	/** Represents a named marker position.
 		@see DrawableComposite::getMarker
 	*/
@@ -58654,7 +58768,7 @@ private:
 	RelativeParallelogram bounds;
 	OwnedArray <Marker> markersX, markersY;
 
-	const Rectangle<float> getUntransformedBounds() const;
+	const Rectangle<float> getUntransformedBounds (bool includeMarkers) const;
 	const AffineTransform calculateTransform() const;
 
 	DrawableComposite& operator= (const DrawableComposite&);
