@@ -218,23 +218,6 @@ public:
         : type (type_),
           setup (setup_)
     {
-        sampleRateDropDown = 0;
-        sampleRateLabel = 0;
-        bufferSizeDropDown = 0;
-        bufferSizeLabel = 0;
-        outputDeviceDropDown = 0;
-        outputDeviceLabel = 0;
-        inputDeviceDropDown = 0;
-        inputDeviceLabel = 0;
-        testButton = 0;
-        inputLevelMeter = 0;
-        showUIButton = 0;
-        inputChanList = 0;
-        outputChanList = 0;
-        inputChanLabel = 0;
-        outputChanLabel = 0;
-        showAdvancedSettingsButton = 0;
-
         if (hideAdvancedOptionsWithButton)
         {
             addAndMakeVisible (showAdvancedSettingsButton = new TextButton (TRANS("Show advanced settings...")));
@@ -250,17 +233,6 @@ public:
     ~AudioDeviceSettingsPanel()
     {
         setup.manager->removeChangeListener (this);
-
-        deleteAndZero (outputDeviceLabel);
-        deleteAndZero (inputDeviceLabel);
-        deleteAndZero (sampleRateLabel);
-        deleteAndZero (bufferSizeLabel);
-        deleteAndZero (showUIButton);
-        deleteAndZero (inputChanLabel);
-        deleteAndZero (outputChanLabel);
-        deleteAndZero (showAdvancedSettingsButton);
-
-        deleteAllChildren();
     }
 
     void resized()
@@ -434,7 +406,7 @@ public:
     {
         AudioIODevice* const currentDevice = setup.manager->getCurrentAudioDevice();
 
-        deleteAndZero (showUIButton);
+        showUIButton = 0;
 
         if (currentDevice != 0 && currentDevice->hasControlPanel())
         {
@@ -513,8 +485,8 @@ public:
             }
             else
             {
-                deleteAndZero (outputChanLabel);
-                deleteAndZero (outputChanList);
+                outputChanLabel = 0;
+                outputChanList = 0;
             }
 
             if (setup.maxNumInputChannels > 0
@@ -533,8 +505,8 @@ public:
             }
             else
             {
-                deleteAndZero (inputChanLabel);
-                deleteAndZero (inputChanList);
+                inputChanLabel = 0;
+                inputChanList = 0;
             }
 
             // sample rate..
@@ -544,7 +516,6 @@ public:
                     addAndMakeVisible (sampleRateDropDown = new ComboBox (String::empty));
                     sampleRateDropDown->addListener (this);
 
-                    delete sampleRateLabel;
                     sampleRateLabel = new Label (String::empty, TRANS ("sample rate:"));
                     sampleRateLabel->attachToComponent (sampleRateDropDown, true);
                 }
@@ -573,7 +544,6 @@ public:
                     addAndMakeVisible (bufferSizeDropDown = new ComboBox (String::empty));
                     bufferSizeDropDown->addListener (this);
 
-                    delete bufferSizeLabel;
                     bufferSizeLabel = new Label (String::empty, TRANS ("audio buffer size:"));
                     bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
                 }
@@ -604,10 +574,10 @@ public:
         {
             jassert (setup.manager->getCurrentAudioDevice() == 0); // not the correct device type!
 
-            deleteAndZero (sampleRateLabel);
-            deleteAndZero (bufferSizeLabel);
-            deleteAndZero (sampleRateDropDown);
-            deleteAndZero (bufferSizeDropDown);
+            sampleRateLabel = 0;
+            bufferSizeLabel = 0;
+            sampleRateDropDown = 0;
+            bufferSizeDropDown = 0;
 
             if (outputDeviceDropDown != 0)
                 outputDeviceDropDown->setSelectedId (-1, true);
@@ -624,20 +594,11 @@ private:
     AudioIODeviceType* const type;
     const AudioIODeviceType::DeviceSetupDetails setup;
 
-    ComboBox* outputDeviceDropDown;
-    ComboBox* inputDeviceDropDown;
-    ComboBox* sampleRateDropDown;
-    ComboBox* bufferSizeDropDown;
-    Label* outputDeviceLabel;
-    Label* inputDeviceLabel;
-    Label* sampleRateLabel;
-    Label* bufferSizeLabel;
-    Label* inputChanLabel;
-    Label* outputChanLabel;
-    TextButton* testButton;
-    Component* inputLevelMeter;
-    TextButton* showUIButton;
-    TextButton* showAdvancedSettingsButton;
+    ScopedPointer<ComboBox> outputDeviceDropDown, inputDeviceDropDown, sampleRateDropDown, bufferSizeDropDown;
+    ScopedPointer<Label> outputDeviceLabel, inputDeviceLabel, sampleRateLabel, bufferSizeLabel, inputChanLabel, outputChanLabel;
+    ScopedPointer<TextButton> testButton;
+    ScopedPointer<Component> inputLevelMeter;
+    ScopedPointer<TextButton> showUIButton, showAdvancedSettingsButton;
 
     void showCorrectDeviceName (ComboBox* const box, const bool isInput)
     {
@@ -937,8 +898,7 @@ public:
     };
 
 private:
-    ChannelSelectorListBox* inputChanList;
-    ChannelSelectorListBox* outputChanList;
+    ScopedPointer<ChannelSelectorListBox> inputChanList, outputChanList;
 
     AudioDeviceSettingsPanel (const AudioDeviceSettingsPanel&);
     AudioDeviceSettingsPanel& operator= (const AudioDeviceSettingsPanel&);
@@ -958,7 +918,6 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
     : deviceManager (deviceManager_),
       deviceTypeDropDown (0),
       deviceTypeDropDownLabel (0),
-      audioDeviceSettingsComp (0),
       minOutputChannels (minOutputChannels_),
       maxOutputChannels (maxOutputChannels_),
       minInputChannels (minInputChannels_),
@@ -1026,7 +985,6 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 AudioDeviceSelectorComponent::~AudioDeviceSelectorComponent()
 {
     deviceManager.removeChangeListener (this);
-    deleteAllChildren();
 }
 
 void AudioDeviceSelectorComponent::resized()
@@ -1088,7 +1046,7 @@ void AudioDeviceSelectorComponent::comboBoxChanged (ComboBox* comboBoxThatHasCha
 
         if (type != 0)
         {
-            deleteAndZero (audioDeviceSettingsComp);
+            audioDeviceSettingsComp = 0;
 
             deviceManager.setCurrentAudioDeviceType (type->getTypeName(), true);
 
@@ -1112,8 +1070,7 @@ void AudioDeviceSelectorComponent::changeListenerCallback (void*)
          || audioDeviceSettingsCompType != deviceManager.getCurrentAudioDeviceType())
     {
         audioDeviceSettingsCompType = deviceManager.getCurrentAudioDeviceType();
-
-        deleteAndZero (audioDeviceSettingsComp);
+        audioDeviceSettingsComp = 0;
 
         AudioIODeviceType* const type
             = deviceManager.getAvailableDeviceTypes() [deviceTypeDropDown == 0

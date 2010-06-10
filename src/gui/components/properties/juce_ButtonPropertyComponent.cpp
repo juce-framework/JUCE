@@ -35,19 +35,18 @@ ButtonPropertyComponent::ButtonPropertyComponent (const String& name,
                                                   const bool triggerOnMouseDown)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (button = new TextButton (String::empty));
-    button->setTriggeredOnMouseDown (triggerOnMouseDown);
-    button->addButtonListener (this);
+    addAndMakeVisible (&button);
+    button.setTriggeredOnMouseDown (triggerOnMouseDown);
+    button.addButtonListener (this);
 }
 
 ButtonPropertyComponent::~ButtonPropertyComponent()
 {
-    deleteAllChildren();
 }
 
 void ButtonPropertyComponent::refresh()
 {
-    button->setButtonText (getButtonText());
+    button.setButtonText (getButtonText());
 }
 
 void ButtonPropertyComponent::buttonClicked (Button*)

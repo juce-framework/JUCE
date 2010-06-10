@@ -75,7 +75,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    TextButton* button;
+    TextButton button;
 
     ButtonPropertyComponent (const ButtonPropertyComponent&);
     ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);

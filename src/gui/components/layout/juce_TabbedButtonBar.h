@@ -283,7 +283,7 @@ private:
     Array <Colour> tabColours;
     int currentTabIndex;
     Component* behindFrontTab;
-    Button* extraTabsButton;
+    ScopedPointer<Button> extraTabsButton;
 
     TabbedButtonBar (const TabbedButtonBar&);
     TabbedButtonBar& operator= (const TabbedButtonBar&);

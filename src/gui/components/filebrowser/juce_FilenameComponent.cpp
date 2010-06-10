@@ -50,13 +50,12 @@ FilenameComponent::FilenameComponent (const String& name,
       wildcard (fileBrowserWildcard),
       enforcedSuffix (enforcedSuffix_)
 {
-    addAndMakeVisible (filenameBox = new ComboBox ("fn"));
-    filenameBox->setEditableText (canEditFilename);
-    filenameBox->addListener (this);
-    filenameBox->setTextWhenNothingSelected (textWhenNothingSelected);
-    filenameBox->setTextWhenNoChoicesAvailable (TRANS("(no recently seleced files)"));
+    addAndMakeVisible (&filenameBox);
+    filenameBox.setEditableText (canEditFilename);
+    filenameBox.addListener (this);
+    filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
+    filenameBox.setTextWhenNoChoicesAvailable (TRANS("(no recently seleced files)"));
 
-    browseButton = 0;
     setBrowseButtonText ("...");
 
     setCurrentFile (currentFile, true);
@@ -64,7 +63,6 @@ FilenameComponent::FilenameComponent (const String& name,
 
 FilenameComponent::~FilenameComponent()
 {
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -79,7 +77,7 @@ void FilenameComponent::paintOverChildren (Graphics& g)
 
 void FilenameComponent::resized()
 {
-    getLookAndFeel().layoutFilenameComponent (*this, filenameBox, browseButton);
+    getLookAndFeel().layoutFilenameComponent (*this, &filenameBox, browseButton);
 }
 
 void FilenameComponent::setBrowseButtonText (const String& newBrowseButtonText)
@@ -90,7 +88,7 @@ void FilenameComponent::setBrowseButtonText (const String& newBrowseButtonText)
 
 void FilenameComponent::lookAndFeelChanged()
 {
-    deleteAndZero (browseButton);
+    browseButton = 0;
 
     addAndMakeVisible (browseButton = getLookAndFeel().createFilenameComponentBrowseButton (browseButtonText));
     browseButton->setConnectedEdges (Button::ConnectedOnLeft);
@@ -102,7 +100,7 @@ void FilenameComponent::lookAndFeelChanged()
 void FilenameComponent::setTooltip (const String& newTooltip)
 {
     SettableTooltipClient::setTooltip (newTooltip);
-    filenameBox->setTooltip (newTooltip);
+    filenameBox.setTooltip (newTooltip);
 }
 
 void FilenameComponent::setDefaultBrowseTarget (const File& newDefaultDirectory)
@@ -161,7 +159,7 @@ void FilenameComponent::fileDragExit (const StringArray&)
 //==============================================================================
 const File FilenameComponent::getCurrentFile() const
 {
-    File f (filenameBox->getText());
+    File f (filenameBox.getText());
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);
@@ -183,7 +181,7 @@ void FilenameComponent::setCurrentFile (File newFile,
         if (addToRecentlyUsedList)
             addRecentlyUsedFile (newFile);
 
-        filenameBox->setText (lastFilename, true);
+        filenameBox.setText (lastFilename, true);
 
         if (sendChangeNotification)
             triggerAsyncUpdate();
@@ -192,15 +190,15 @@ void FilenameComponent::setCurrentFile (File newFile,
 
 void FilenameComponent::setFilenameIsEditable (const bool shouldBeEditable)
 {
-    filenameBox->setEditableText (shouldBeEditable);
+    filenameBox.setEditableText (shouldBeEditable);
 }
 
 const StringArray FilenameComponent::getRecentlyUsedFilenames() const
 {
     StringArray names;
 
-    for (int i = 0; i < filenameBox->getNumItems(); ++i)
-        names.add (filenameBox->getItemText (i));
+    for (int i = 0; i < filenameBox.getNumItems(); ++i)
+        names.add (filenameBox.getItemText (i));
 
     return names;
 }
@@ -209,10 +207,10 @@ void FilenameComponent::setRecentlyUsedFilenames (const StringArray& filenames)
 {
     if (filenames != getRecentlyUsedFilenames())
     {
-        filenameBox->clear();
+        filenameBox.clear();
 
         for (int i = 0; i < jmin (filenames.size(), maxRecentFiles); ++i)
-            filenameBox->addItem (filenames[i], i + 1);
+            filenameBox.addItem (filenames[i], i + 1);
     }
 }
 

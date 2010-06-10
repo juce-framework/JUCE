@@ -38,13 +38,13 @@ SliderPropertyComponent::SliderPropertyComponent (const String& name,
                                                   const double skewFactor)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (slider = new Slider (name));
+    addAndMakeVisible (&slider);
 
-    slider->setRange (rangeMin, rangeMax, interval);
-    slider->setSkewFactor (skewFactor);
-    slider->setSliderStyle (Slider::LinearBar);
+    slider.setRange (rangeMin, rangeMax, interval);
+    slider.setSkewFactor (skewFactor);
+    slider.setSliderStyle (Slider::LinearBar);
 
-    slider->addListener (this);
+    slider.addListener (this);
 }
 
 SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
@@ -55,18 +55,17 @@ SliderPropertyComponent::SliderPropertyComponent (const Value& valueToControl,
                                                   const double skewFactor)
     : PropertyComponent (name)
 {
-    addAndMakeVisible (slider = new Slider (name));
+    addAndMakeVisible (&slider);
 
-    slider->setRange (rangeMin, rangeMax, interval);
-    slider->setSkewFactor (skewFactor);
-    slider->setSliderStyle (Slider::LinearBar);
+    slider.setRange (rangeMin, rangeMax, interval);
+    slider.setSkewFactor (skewFactor);
+    slider.setSliderStyle (Slider::LinearBar);
 
-    slider->getValueObject().referTo (valueToControl);
+    slider.getValueObject().referTo (valueToControl);
 }
 
 SliderPropertyComponent::~SliderPropertyComponent()
 {
-    deleteAllChildren();
 }
 
 void SliderPropertyComponent::setValue (const double /*newValue*/)
@@ -75,18 +74,18 @@ void SliderPropertyComponent::setValue (const double /*newValue*/)
 
 double SliderPropertyComponent::getValue() const
 {
-    return slider->getValue();
+    return slider.getValue();
 }
 
 void SliderPropertyComponent::refresh()
 {
-    slider->setValue (getValue(), false);
+    slider.setValue (getValue(), false);
 }
 
 void SliderPropertyComponent::sliderValueChanged (Slider*)
 {
-    if (getValue() != slider->getValue())
-        setValue (slider->getValue());
+    if (getValue() != slider.getValue())
+        setValue (slider.getValue());
 }
 
 

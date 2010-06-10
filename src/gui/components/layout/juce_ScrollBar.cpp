@@ -91,9 +91,7 @@ ScrollBar::ScrollBar (const bool vertical_,
       minimumDelayInMillisecs (10),
       vertical (vertical_),
       isDraggingThumb (false),
-      autohides (true),
-      upButton (0),
-      downButton (0)
+      autohides (true)
 {
     setButtonVisibility (buttonsAreVisible);
 
@@ -103,7 +101,8 @@ ScrollBar::ScrollBar (const bool vertical_,
 
 ScrollBar::~ScrollBar()
 {
-    deleteAllChildren();
+    upButton = 0;
+    downButton = 0;
 }
 
 //==============================================================================
@@ -256,9 +255,7 @@ void ScrollBar::setOrientation (const bool shouldBeVertical)
 
 void ScrollBar::setButtonVisibility (const bool buttonsAreVisible)
 {
-    delete upButton;
     upButton = 0;
-    delete downButton;
     downButton = 0;
 
     if (buttonsAreVisible)

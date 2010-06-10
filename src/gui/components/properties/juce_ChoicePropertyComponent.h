@@ -117,7 +117,7 @@ protected:
     StringArray choices;
 
 private:
-    ComboBox* comboBox;
+    ComboBox comboBox;
     bool isCustomClass;
 
     class RemapperValueSource;

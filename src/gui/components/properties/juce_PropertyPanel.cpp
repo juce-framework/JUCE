@@ -226,15 +226,14 @@ PropertyPanel::PropertyPanel()
 {
     messageWhenEmpty = TRANS("(nothing selected)");
 
-    addAndMakeVisible (viewport = new Viewport());
-    viewport->setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
-    viewport->setFocusContainer (true);
+    addAndMakeVisible (&viewport);
+    viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
+    viewport.setFocusContainer (true);
 }
 
 PropertyPanel::~PropertyPanel()
 {
     clear();
-    deleteAllChildren();
 }
 
 //==============================================================================
@@ -251,7 +250,7 @@ void PropertyPanel::paint (Graphics& g)
 
 void PropertyPanel::resized()
 {
-    viewport->setBounds (0, 0, getWidth(), getHeight());
+    viewport.setBounds (0, 0, getWidth(), getHeight());
     updatePropHolderLayout();
 }
 
@@ -294,10 +293,10 @@ void PropertyPanel::addSection (const String& sectionTitle,
 
 void PropertyPanel::updatePropHolderLayout() const
 {
-    const int maxWidth = viewport->getMaximumVisibleWidth();
+    const int maxWidth = viewport.getMaximumVisibleWidth();
     propertyHolderComponent->updateLayout (maxWidth);
 
-    const int newMaxWidth = viewport->getMaximumVisibleWidth();
+    const int newMaxWidth = viewport.getMaximumVisibleWidth();
     if (maxWidth != newMaxWidth)
     {
         // need to do this twice because of scrollbars changing the size, etc.
@@ -393,7 +392,7 @@ XmlElement* PropertyPanel::getOpennessState() const
 {
     XmlElement* const xml = new XmlElement ("PROPERTYPANELSTATE");
 
-    xml->setAttribute ("scrollPos", viewport->getViewPositionY());
+    xml->setAttribute ("scrollPos", viewport.getViewPositionY());
 
     const StringArray sections (getSectionNames());
 
@@ -422,8 +421,8 @@ void PropertyPanel::restoreOpennessState (const XmlElement& xml)
                             e->getBoolAttribute ("open"));
         }
 
-        viewport->setViewPosition (viewport->getViewPositionX(),
-                                   xml.getIntAttribute ("scrollPos", viewport->getViewPositionY()));
+        viewport.setViewPosition (viewport.getViewPositionX(),
+                                  xml.getIntAttribute ("scrollPos", viewport.getViewPositionY()));
     }
 }
 

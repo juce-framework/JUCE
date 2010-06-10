@@ -71,7 +71,6 @@ public:
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5
          audioProcID (0),
 #endif
-         inputDevice (0),
          isSlaveDevice (false),
          deviceID (id),
          started (false),
@@ -105,7 +104,6 @@ public:
         AudioObjectRemovePropertyListener (deviceID, &pa, deviceListenerProc, this);
 
         stop (false);
-        delete inputDevice;
     }
 
     void allocateTempBuffers()
@@ -770,7 +768,7 @@ public:
     AudioDeviceIOProcID audioProcID;
 #endif
 
-    CoreAudioInternal* inputDevice;
+    ScopedPointer<CoreAudioInternal> inputDevice;
     bool isSlaveDevice;
 
 private:
@@ -874,7 +872,6 @@ public:
           isOpen_ (false),
           isStarted (false)
     {
-        internal = 0;
         CoreAudioInternal* device = 0;
 
         if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
@@ -914,8 +911,6 @@ public:
         pa.mElement = kAudioObjectPropertyElementWildcard;
 
         AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal);
-
-        delete internal;
     }
 
     const StringArray getOutputChannelNames()
@@ -1084,7 +1079,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    CoreAudioInternal* internal;
+    ScopedPointer<CoreAudioInternal> internal;
     bool isOpen_, isStarted;
     String lastError;
 

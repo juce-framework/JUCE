@@ -77,7 +77,6 @@ protected:
 //==============================================================================
 ChoicePropertyComponent::ChoicePropertyComponent (const String& name)
     : PropertyComponent (name),
-      comboBox (0),
       isCustomClass (true)
 {
 }
@@ -88,7 +87,6 @@ ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
                                                   const Array <var>& correspondingValues)
     : PropertyComponent (name),
       choices (choices_),
-      comboBox (0),
       isCustomClass (false)
 {
     // The array of corresponding values must contain one value for each of the items in
@@ -97,28 +95,27 @@ ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,
 
     createComboBox();
 
-    comboBox->getSelectedIdAsValue().referTo (Value (new RemapperValueSource (valueToControl, correspondingValues)));
+    comboBox.getSelectedIdAsValue().referTo (Value (new RemapperValueSource (valueToControl, correspondingValues)));
 }
 
 ChoicePropertyComponent::~ChoicePropertyComponent()
 {
-    deleteAllChildren();
 }
 
 //==============================================================================
 void ChoicePropertyComponent::createComboBox()
 {
-    addAndMakeVisible (comboBox = new ComboBox());
+    addAndMakeVisible (&comboBox);
 
     for (int i = 0; i < choices.size(); ++i)
     {
         if (choices[i].isNotEmpty())
-            comboBox->addItem (choices[i], i + 1);
+            comboBox.addItem (choices[i], i + 1);
         else
-            comboBox->addSeparator();
+            comboBox.addSeparator();
     }
 
-    comboBox->setEditableText (false);
+    comboBox.setEditableText (false);
 }
 
 void ChoicePropertyComponent::setIndex (const int /*newIndex*/)
@@ -142,13 +139,13 @@ void ChoicePropertyComponent::refresh()
 {
     if (isCustomClass)
     {
-        if (comboBox == 0)
+        if (! comboBox.isVisible())
         {
             createComboBox();
-            comboBox->addListener (this);
+            comboBox.addListener (this);
         }
 
-        comboBox->setSelectedId (getIndex() + 1, true);
+        comboBox.setSelectedId (getIndex() + 1, true);
     }
 }
 
@@ -156,7 +153,7 @@ void ChoicePropertyComponent::comboBoxChanged (ComboBox*)
 {
     if (isCustomClass)
     {
-        const int newIndex = comboBox->getSelectedId() - 1;
+        const int newIndex = comboBox.getSelectedId() - 1;
 
         if (newIndex != getIndex())
             setIndex (newIndex);

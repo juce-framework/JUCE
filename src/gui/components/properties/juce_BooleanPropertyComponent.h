@@ -89,10 +89,8 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    ToggleButton* button;
+    ToggleButton button;
     String onText, offText;
-
-    void createButton();
 
     BooleanPropertyComponent (const BooleanPropertyComponent&);
     BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);

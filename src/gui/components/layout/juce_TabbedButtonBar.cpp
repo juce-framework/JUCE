@@ -176,8 +176,7 @@ private:
 //==============================================================================
 TabbedButtonBar::TabbedButtonBar (const Orientation orientation_)
     : orientation (orientation_),
-      currentTabIndex (-1),
-      extraTabsButton (0)
+      currentTabIndex (-1)
 {
     setInterceptsMouseClicks (false, true);
     addAndMakeVisible (behindFrontTab = new TabAreaBehindFrontButtonComponent (this));
@@ -186,6 +185,7 @@ TabbedButtonBar::TabbedButtonBar (const Orientation orientation_)
 
 TabbedButtonBar::~TabbedButtonBar()
 {
+    extraTabsButton = 0;
     deleteAllChildren();
 }
 
@@ -212,7 +212,7 @@ void TabbedButtonBar::clearTabs()
     tabColours.clear();
     currentTabIndex = -1;
 
-    deleteAndZero (extraTabsButton);
+    extraTabsButton = 0;
     removeChildComponent (behindFrontTab);
     deleteAllChildren();
     addChildComponent (behindFrontTab);
@@ -357,7 +357,7 @@ TabBarButton* TabbedButtonBar::getTabButton (const int index) const
 
 void TabbedButtonBar::lookAndFeelChanged()
 {
-    deleteAndZero (extraTabsButton);
+    extraTabsButton = 0;
     resized();
 }
 
@@ -445,7 +445,7 @@ void TabbedButtonBar::resized()
     }
     else
     {
-        deleteAndZero (extraTabsButton);
+        extraTabsButton = 0;
     }
 
     int pos = 0;
@@ -510,7 +510,7 @@ void TabbedButtonBar::setTabBackgroundColour (const int tabIndex, const Colour& 
 
 void TabbedButtonBar::buttonClicked (Button* button)
 {
-    if (extraTabsButton == button)
+    if (button == extraTabsButton)
     {
         PopupMenu m;
 

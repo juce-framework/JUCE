@@ -39,8 +39,9 @@ BooleanPropertyComponent::BooleanPropertyComponent (const String& name,
       onText (buttonTextWhenTrue),
       offText (buttonTextWhenFalse)
 {
-    createButton();
-    button->addButtonListener (this);
+    addAndMakeVisible (&button);
+    button.setClickingTogglesState (false);
+    button.addButtonListener (this);
 }
 
 BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,
@@ -50,31 +51,25 @@ BooleanPropertyComponent::BooleanPropertyComponent (const Value& valueToControl,
       onText (buttonText),
       offText (buttonText)
 {
-    createButton();
-    button->setButtonText (buttonText);
-    button->getToggleStateValue().referTo (valueToControl);
-    button->setClickingTogglesState (true);
+    addAndMakeVisible (&button);
+    button.setClickingTogglesState (false);
+    button.setButtonText (buttonText);
+    button.getToggleStateValue().referTo (valueToControl);
+    button.setClickingTogglesState (true);
 }
 
 BooleanPropertyComponent::~BooleanPropertyComponent()
 {
-    deleteAllChildren();
-}
-
-void BooleanPropertyComponent::createButton()
-{
-    addAndMakeVisible (button = new ToggleButton (String::empty));
-    button->setClickingTogglesState (false);
 }
 
 void BooleanPropertyComponent::setState (const bool newState)
 {
-    button->setToggleState (newState, true);
+    button.setToggleState (newState, true);
 }
 
 bool BooleanPropertyComponent::getState() const
 {
-    return button->getToggleState();
+    return button.getToggleState();
 }
 
 void BooleanPropertyComponent::paint (Graphics& g)
@@ -82,16 +77,16 @@ void BooleanPropertyComponent::paint (Graphics& g)
     PropertyComponent::paint (g);
 
     g.setColour (Colours::white);
-    g.fillRect (button->getBounds());
+    g.fillRect (button.getBounds());
 
     g.setColour (findColour (ComboBox::outlineColourId));
-    g.drawRect (button->getBounds());
+    g.drawRect (button.getBounds());
 }
 
 void BooleanPropertyComponent::refresh()
 {
-    button->setToggleState (getState(), false);
-    button->setButtonText (button->getToggleState() ? onText : offText);
+    button.setToggleState (getState(), false);
+    button.setButtonText (button.getToggleState() ? onText : offText);
 }
 
 void BooleanPropertyComponent::buttonClicked (Button*)

@@ -152,7 +152,7 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    Viewport* viewport;
+    Viewport viewport;
     class PropertyHolderComponent;
     PropertyHolderComponent* propertyHolderComponent;
     String messageWhenEmpty;

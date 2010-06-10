@@ -203,9 +203,9 @@ public:
 
 private:
     //==============================================================================
-    ComboBox* filenameBox;
+    ComboBox filenameBox;
     String lastFilename;
-    Button* browseButton;
+    ScopedPointer<Button> browseButton;
     int maxRecentFiles;
     bool isDir, isSaving, isFileDragOver;
     String wildcard, enforcedSuffix, browseButtonText;

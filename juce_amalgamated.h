@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	15
+#define JUCE_BUILDNUMBER	16
 
 /** Current Juce version number.
 
@@ -34478,8 +34478,8 @@ private:
 	int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
 	bool vertical, isDraggingThumb, autohides;
 	class ScrollbarButton;
-	ScrollbarButton* upButton;
-	ScrollbarButton* downButton;
+	friend class ScopedPointer<ScrollbarButton>;
+	ScopedPointer<ScrollbarButton> upButton, downButton;
 	ListenerList <ScrollBarListener> listeners;
 
 	void updateThumbPosition();
@@ -40731,7 +40731,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	Viewport* viewport;
+	Viewport viewport;
 	class PropertyHolderComponent;
 	PropertyHolderComponent* propertyHolderComponent;
 	String messageWhenEmpty;
@@ -47821,13 +47821,16 @@ private:
 	friend class TreeViewItem;
 	friend class TreeViewContentComponent;
 	class TreeViewport;
-	TreeViewport* viewport;
-	CriticalSection nodeAlterationLock;
-	TreeViewItem* rootItem;
 	class InsertPointHighlight;
 	class TargetGroupHighlight;
-	InsertPointHighlight* dragInsertPointHighlight;
-	TargetGroupHighlight* dragTargetGroupHighlight;
+	friend class ScopedPointer<TreeViewport>;
+	friend class ScopedPointer<InsertPointHighlight>;
+	friend class ScopedPointer<TargetGroupHighlight>;
+	ScopedPointer<TreeViewport> viewport;
+	CriticalSection nodeAlterationLock;
+	TreeViewItem* rootItem;
+	ScopedPointer<InsertPointHighlight> dragInsertPointHighlight;
+	ScopedPointer<TargetGroupHighlight> dragTargetGroupHighlight;
 	int indentSize;
 	bool defaultOpenness : 1;
 	bool needsRecalculating : 1;
@@ -50282,9 +50285,9 @@ public:
 
 private:
 
-	ComboBox* filenameBox;
+	ComboBox filenameBox;
 	String lastFilename;
-	Button* browseButton;
+	ScopedPointer<Button> browseButton;
 	int maxRecentFiles;
 	bool isDir, isSaving, isFileDragOver;
 	String wildcard, enforcedSuffix, browseButtonText;
@@ -51366,7 +51369,7 @@ private:
 	Array <Colour> tabColours;
 	int currentTabIndex;
 	Component* behindFrontTab;
-	Button* extraTabsButton;
+	ScopedPointer<Button> extraTabsButton;
 
 	TabbedButtonBar (const TabbedButtonBar&);
 	TabbedButtonBar& operator= (const TabbedButtonBar&);
@@ -54836,10 +54839,8 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	ToggleButton* button;
+	ToggleButton button;
 	String onText, offText;
-
-	void createButton();
 
 	BooleanPropertyComponent (const BooleanPropertyComponent&);
 	BooleanPropertyComponent& operator= (const BooleanPropertyComponent&);
@@ -54898,7 +54899,7 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
-	TextButton* button;
+	TextButton button;
 
 	ButtonPropertyComponent (const ButtonPropertyComponent&);
 	ButtonPropertyComponent& operator= (const ButtonPropertyComponent&);
@@ -54998,7 +54999,7 @@ protected:
 	StringArray choices;
 
 private:
-	ComboBox* comboBox;
+	ComboBox comboBox;
 	bool isCustomClass;
 
 	class RemapperValueSource;
@@ -55092,7 +55093,7 @@ protected:
 
 		Your subclass has access to this in case it needs to customise it in some way.
 	*/
-	Slider* slider;
+	Slider slider;
 
 	SliderPropertyComponent (const SliderPropertyComponent&);
 	SliderPropertyComponent& operator= (const SliderPropertyComponent&);
@@ -55356,19 +55357,19 @@ public:
 
 private:
 	AudioDeviceManager& deviceManager;
-	ComboBox* deviceTypeDropDown;
-	Label* deviceTypeDropDownLabel;
-	Component* audioDeviceSettingsComp;
+	ScopedPointer<ComboBox> deviceTypeDropDown;
+	ScopedPointer<Label> deviceTypeDropDownLabel;
+	ScopedPointer<Component> audioDeviceSettingsComp;
 	String audioDeviceSettingsCompType;
 	const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
 	const bool showChannelsAsStereoPairs;
 	const bool hideAdvancedOptionsWithButton;
 
 	class MidiInputSelectorComponentListBox;
-	MidiInputSelectorComponentListBox* midiInputsList;
-	Label* midiInputsLabel;
-	ComboBox* midiOutputSelector;
-	Label* midiOutputLabel;
+	friend class ScopedPointer<MidiInputSelectorComponentListBox>;
+	ScopedPointer<MidiInputSelectorComponentListBox> midiInputsList;
+	ScopedPointer<ComboBox> midiOutputSelector;
+	ScopedPointer<Label> midiInputsLabel, midiOutputLabel;
 
 	AudioDeviceSelectorComponent (const AudioDeviceSelectorComponent&);
 	AudioDeviceSelectorComponent& operator= (const AudioDeviceSelectorComponent&);

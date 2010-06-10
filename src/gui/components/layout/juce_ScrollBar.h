@@ -324,8 +324,8 @@ private:
     int initialDelayInMillisecs, repeatDelayInMillisecs, minimumDelayInMillisecs;
     bool vertical, isDraggingThumb, autohides;
     class ScrollbarButton;
-    ScrollbarButton* upButton;
-    ScrollbarButton* downButton;
+    friend class ScopedPointer<ScrollbarButton>;
+    ScopedPointer<ScrollbarButton> upButton, downButton;
     ListenerList <ScrollBarListener> listeners;
 
     void updateThumbPosition();
