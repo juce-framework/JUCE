@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	16
+#define JUCE_BUILDNUMBER	17
 
 /** Current Juce version number.
 
@@ -2701,6 +2701,9 @@ protected:
 		@see setCurrentLogger
 	*/
 	virtual void logMessage (const String& message) = 0;
+
+private:
+	static Logger* currentLogger;
 };
 
 #endif   // __JUCE_LOGGER_JUCEHEADER__
@@ -5027,6 +5030,7 @@ private:
 
 	HeapBlock <char> data;
 	size_t size;
+	static const char* const encodingTable;
 };
 
 #endif   // __JUCE_MEMORYBLOCK_JUCEHEADER__
@@ -14530,20 +14534,20 @@ public:
 	static const String getCpuVendor();
 
 	/** Checks whether Intel MMX instructions are available. */
-	static bool hasMMX();
+	static bool hasMMX() throw()	{ return cpuFlags.hasMMX; }
 
 	/** Checks whether Intel SSE instructions are available. */
-	static bool hasSSE();
+	static bool hasSSE() throw()	{ return cpuFlags.hasSSE; }
 
 	/** Checks whether Intel SSE2 instructions are available. */
-	static bool hasSSE2();
+	static bool hasSSE2() throw()	   { return cpuFlags.hasSSE2; }
 
 	/** Checks whether AMD 3DNOW instructions are available. */
-	static bool has3DNow();
+	static bool has3DNow() throw()	  { return cpuFlags.has3DNow; }
 
 	/** Returns the number of CPUs.
 	*/
-	static int getNumCpus();
+	static int getNumCpus() throw()	 { return cpuFlags.numCpus; }
 
 	/** Finds out how much RAM is in the machine.
 
@@ -14590,6 +14594,17 @@ public:
 	static void initialiseStats();
 
 private:
+	struct CPUFlags
+	{
+		int numCpus;
+		bool hasMMX : 1;
+		bool hasSSE : 1;
+		bool hasSSE2 : 1;
+		bool has3DNow : 1;
+	};
+
+	static CPUFlags cpuFlags;
+
 	SystemStats();
 	SystemStats (const SystemStats&);
 	SystemStats& operator= (const SystemStats&);
@@ -14973,6 +14988,9 @@ public:
 
 protected:
 	BigInteger part1, part2;
+
+private:
+	static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
 };
 
 #endif   // __JUCE_RSAKEY_JUCEHEADER__
@@ -19419,6 +19437,7 @@ private:
 	const Time mouseDownTime;
 	const int numberOfClicks;
 	const bool wasMovedSinceMouseDown;
+	static int doubleClickTimeOutMs;
 
 	MouseEvent& operator= (const MouseEvent&);
 };
@@ -56234,6 +56253,9 @@ private:
 	Array <int> keyPressNotes;
 	int keyMappingOctave;
 	int octaveNumForMiddleC;
+
+	static const uint8 whiteNotes[];
+	static const uint8 blackNotes[];
 
 	void getKeyPos (int midiNoteNumber, int& x, int& w) const;
 	int xyToNote (const Point<int>& pos, float& mousePositionVelocity);

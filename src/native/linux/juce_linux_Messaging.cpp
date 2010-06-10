@@ -254,11 +254,11 @@ namespace LinuxErrorHandling
     static int ioErrorHandler (Display* display)
     {
         DBG ("ERROR: connection to X server broken.. terminating.");
-        errorOccurred = true;
 
         if (JUCEApplication::getInstance() != 0)
             MessageManager::getInstance()->stopDispatchLoop();
 
+        errorOccurred = true;
         return 0;
     }
 

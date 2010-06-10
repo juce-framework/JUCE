@@ -77,14 +77,14 @@ const String createGUID (const String& seed)
 }
 
 //==============================================================================
-void autoScrollForMouseEvent (const MouseEvent& e)
+void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX, bool scrollY)
 {
     Viewport* const viewport = e.eventComponent->findParentComponentOfClass ((Viewport*) 0);
 
     if (viewport != 0)
     {
         const MouseEvent e2 (e.getEventRelativeTo (viewport));
-        viewport->autoScroll (e2.x, e2.y, 8, 16);
+        viewport->autoScroll (scrollX ? e2.x : 20, scrollY ? e2.y : 20, 8, 16);
     }
 }
 

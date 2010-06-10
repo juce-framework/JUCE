@@ -51,8 +51,6 @@ public:
     void resized();
 
     const Rectangle<int> getContentArea() const;
-    void drawXAxis (Graphics& g, const Rectangle<int>& r);
-    void drawYAxis (Graphics& g, const Rectangle<int>& r);
 
     //==============================================================================
     void valueTreePropertyChanged (ValueTree&, const Identifier&)         { triggerAsyncUpdate(); }
@@ -62,6 +60,17 @@ public:
     //==============================================================================
     void showSizeGuides();
     void hideSizeGuides();
+
+    struct Scale
+    {
+        Scale();
+
+        Point<int> origin;
+        double scale;
+    };
+
+    const Scale& getScale() const throw()                                   { return scale; }
+    void setScale (const Scale& newScale);
 
     //==============================================================================
     virtual UndoManager& getUndoManager() = 0;
@@ -123,7 +132,6 @@ public:
     Component* getComponentHolder() const       { return componentHolder; }
     EditorPanelBase* getPanel() const;
 
-    const Point<int>& getOrigin() const throw()                             { return origin; }
     const Point<int> screenSpaceToObjectSpace (const Point<int>& p) const;
     const Point<float> screenSpaceToObjectSpace (const Point<float>& p) const;
     const Point<int> objectSpaceToScreenSpace (const Point<int>& p) const;
@@ -152,8 +160,7 @@ public:
 protected:
     //==============================================================================
     const BorderSize border;
-    Point<int> origin;
-    double scaleFactor;
+    Scale scale;
     ValueTree controlPointEditingTarget;
 
     friend class OverlayItemComponent;

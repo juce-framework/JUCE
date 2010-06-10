@@ -722,7 +722,7 @@ public:
             canvas->handleUpdateNowIfNeeded();
             g.fillAll (Colours::white);
 
-            const Point<int> origin (canvas->getOrigin());
+            const Point<int> origin (canvas->getScale().origin);
             g.setOrigin (origin.getX(), origin.getY());
 
             if (origin.getX() > 0)

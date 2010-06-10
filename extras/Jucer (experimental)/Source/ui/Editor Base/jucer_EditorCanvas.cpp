@@ -243,167 +243,6 @@ private:
 };
 
 //==============================================================================
-class EditorCanvasBase::MarkerComponent   : public EditorCanvasBase::OverlayItemComponent
-{
-public:
-    MarkerComponent (EditorCanvasBase* canvas_, const ValueTree& marker_, bool isX_, int headSize_)
-        : OverlayItemComponent (canvas_), marker (marker_), isX (isX_), headSize (headSize_ - 2),
-          dragStartPos (0), isDragging (false)
-    {
-    }
-
-    ~MarkerComponent()
-    {
-    }
-
-    void paint (Graphics& g)
-    {
-        g.setColour (Colours::lightblue.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
-        g.fillPath (path);
-    }
-
-    void updatePosition()
-    {
-        RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
-        const int pos = roundToInt (coord.resolve (&getMarkerList()));
-        const int width = 8;
-
-        if (isX)
-            setBoundsInTargetSpace (Rectangle<int> (pos - width, -canvas->getOrigin().getY() - headSize,
-                                                    width * 2, getParentHeight()));
-        else
-            setBoundsInTargetSpace (Rectangle<int> (-canvas->getOrigin().getX() - headSize, pos - width,
-                                                    getParentWidth(), width * 2));
-
-        labelText = "name: " + getMarkerList().getName (marker) + "\nposition: " + coord.toString();
-        updateLabel();
-    }
-
-    void updateLabel()
-    {
-        if (isMouseOverOrDragging() && (getWidth() > 1 || getHeight() > 1))
-            label.update (getParentComponent(), labelText, Colours::darkgreen,
-                          isX ? getBounds().getCentreX() : getX() + headSize,
-                          isX ? getY() + headSize : getBounds().getCentreY(), true, true);
-        else
-            label.remove();
-    }
-
-    bool hitTest (int x, int y)
-    {
-        return (isX ? y : x) < headSize;
-    }
-
-    void resized()
-    {
-        const float lineThickness = 1.0f;
-        path.clear();
-
-        if (isX)
-        {
-            const float centre = getWidth() / 2 + 0.5f;
-            path.addLineSegment (Line<float> (centre, 2.0f, centre, getHeight() + 1.0f), lineThickness);
-            path.addTriangle (1.0f, 0.0f, centre * 2.0f - 1.0f, 0.0f, centre, headSize + 1.0f);
-        }
-        else
-        {
-            const float centre = getHeight() / 2 + 0.5f;
-            path.addLineSegment (Line<float> (2.0f, centre, getWidth() + 1.0f, centre), lineThickness);
-            path.addTriangle (0.0f, centre * 2.0f - 1.0f, 0.0f, 1.0f, headSize + 1.0f, centre);
-        }
-
-        updateLabel();
-    }
-
-    void mouseDown (const MouseEvent& e)
-    {
-        mouseDownPos = e.getEventRelativeTo (getParentComponent()).getMouseDownPosition();
-        toFront (false);
-        updateLabel();
-
-        canvas->getSelection().selectOnly (getMarkerList().getId (marker));
-
-        if (e.mods.isPopupMenu())
-        {
-            isDragging = false;
-        }
-        else
-        {
-            isDragging = true;
-            canvas->getUndoManager().beginNewTransaction();
-
-            RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
-            dragStartPos = coord.resolve (&getMarkerList());
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e)
-    {
-        if (isDragging)
-        {
-            autoScrollForMouseEvent (e);
-            const MouseEvent e2 (e.getEventRelativeTo (getParentComponent()));
-
-            canvas->getUndoManager().undoCurrentTransactionOnly();
-
-            Rectangle<int> axis;
-            if (isX)
-                axis.setBounds (0, 0, getParentWidth(), headSize);
-            else
-                axis.setBounds (0, 0, headSize, getParentHeight());
-
-            if (axis.expanded (isX ? 500 : 30, isX ? 30 : 500).contains (e.x, e.y))
-            {
-                RelativeCoordinate coord (getMarkerList().getCoordinate (marker));
-
-                // (can't use getDistanceFromDragStart() because it doesn't take into account auto-scrolling)
-                coord.moveToAbsolute (canvas->limitMarkerPosition (dragStartPos + (isX ? e2.x - mouseDownPos.getX()
-                                                                                       : e2.y - mouseDownPos.getY())),
-                                      &getMarkerList());
-                getMarkerList().setCoordinate (marker, coord);
-            }
-            else
-            {
-                getMarkerList().deleteMarker (marker);
-            }
-        }
-    }
-
-    void mouseUp (const MouseEvent& e)
-    {
-        canvas->getUndoManager().beginNewTransaction();
-        updateLabel();
-    }
-
-    void mouseEnter (const MouseEvent& e)
-    {
-        updateLabel();
-        repaint();
-    }
-
-    void mouseExit (const MouseEvent& e)
-    {
-        updateLabel();
-        repaint();
-    }
-
-    MarkerListBase& getMarkerList()      { return canvas->getMarkerList (isX); }
-
-    ValueTree marker;
-    const bool isX;
-
-private:
-    const int headSize;
-    Path path;
-    double dragStartPos;
-    bool isDragging;
-    FloatingLabelComponent label;
-    String labelText;
-    Point<int> mouseDownPos;
-};
-
-
-//==============================================================================
 class EditorCanvasBase::OverlayComponent  : public Component,
                                             public LassoSource <SelectedItems::ItemType>,
                                             public ChangeListener
@@ -421,8 +260,6 @@ public:
         getSelection().removeChangeListener (this);
         lasso = 0;
         resizers.clear();
-        markersX.clear();
-        markersY.clear();
         controlPoints.clear();
         deleteAllChildren();
     }
@@ -526,30 +363,13 @@ public:
 
     void mouseDoubleClick (const MouseEvent& e)
     {
-        const BorderSize& border = canvas->border;
-        const Rectangle<int> xAxis (border.getLeft(), 0, getWidth() - border.getLeftAndRight(), border.getTop());
-        const Rectangle<int> yAxis (0, border.getTop(), border.getLeft(), getHeight() - border.getTopAndBottom());
+        const MouseEvent e2 (e.getEventRelativeTo (canvas->getComponentHolder()));
+        const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (canvas->screenSpaceToObjectSpace (e2.getPosition())));
 
-        if (xAxis.contains (e.x, e.y))
+        if (underMouse.isNotEmpty())
         {
-            canvas->getMarkerList (true).createMarker (canvas->getMarkerList (true).getNonexistentMarkerName ("Marker"),
-                                                       e.x - xAxis.getX());
-        }
-        else if (yAxis.contains (e.x, e.y))
-        {
-            canvas->getMarkerList (false).createMarker (canvas->getMarkerList (false).getNonexistentMarkerName ("Marker"),
-                                                        e.y - yAxis.getY());
-        }
-        else
-        {
-            const MouseEvent e2 (e.getEventRelativeTo (canvas->getComponentHolder()));
-            const SelectedItems::ItemType underMouse (canvas->findObjectIdAt (canvas->screenSpaceToObjectSpace (e2.getPosition())));
-
-            if (underMouse.isNotEmpty())
-            {
-                const ValueTree state (canvas->getObjectState (underMouse));
-                canvas->objectDoubleClicked (e2, state);
-            }
+            const ValueTree state (canvas->getObjectState (underMouse));
+            canvas->objectDoubleClicked (e2, state);
         }
     }
 
@@ -602,7 +422,6 @@ public:
     {
         updateResizeFrames();
         updateControlPoints();
-        updateMarkers();
     }
 
 private:
@@ -612,7 +431,6 @@ private:
     bool mouseDownResult, isDraggingClickedComp;
     SelectedItems::ItemType mouseDownCompUID;
     OwnedArray <ResizeFrame> resizers;
-    OwnedArray <MarkerComponent> markersX, markersY;
     OwnedArray <OverlayItemComponent> controlPoints;
 
     void updateResizeFrames()
@@ -677,54 +495,6 @@ private:
         }
 
         canvas->updateControlPointComponents (this, controlPoints);
-    }
-
-    void updateMarkers (OwnedArray <MarkerComponent>& markers, const bool isX)
-    {
-        MarkerListBase& markerList = canvas->getMarkerList (isX);
-        const int num = markerList.size();
-
-        Array<ValueTree> requiredMarkers;
-        requiredMarkers.ensureStorageAllocated (num);
-
-        int i;
-        for (i = 0; i < num; ++i)
-            requiredMarkers.add (markerList.getMarker (i));
-
-        for (i = markers.size(); --i >= 0;)
-        {
-            MarkerComponent* marker = markers.getUnchecked (i);
-            const int index = requiredMarkers.indexOf (marker->marker);
-
-            if (index >= 0)
-            {
-                marker->updatePosition();
-                requiredMarkers.removeValue (marker->marker);
-            }
-            else
-            {
-                if (marker->isMouseButtonDown())
-                    marker->setBounds (-1, -1, 1, 1);
-                else
-                    markers.remove (i);
-            }
-        }
-
-        for (i = requiredMarkers.size(); --i >= 0;)
-        {
-            MarkerComponent* marker = new MarkerComponent (canvas, requiredMarkers.getReference(i),
-                                                           isX, isX ? canvas->border.getTop()
-                                                                    : canvas->border.getLeft());
-            markers.add (marker);
-            addAndMakeVisible (marker);
-            marker->updatePosition();
-        }
-    }
-
-    void updateMarkers()
-    {
-        updateMarkers (markersX, true);
-        updateMarkers (markersY, false);
     }
 };
 
@@ -824,8 +594,7 @@ private:
 
 //==============================================================================
 EditorCanvasBase::EditorCanvasBase()
-    : border (14),
-      scaleFactor (1.0)
+    : border (8, 8, 14, 14)
 {
     //setOpaque (true);
 }
@@ -858,32 +627,32 @@ EditorPanelBase* EditorCanvasBase::getPanel() const
 
 const Point<int> EditorCanvasBase::screenSpaceToObjectSpace (const Point<int>& p) const
 {
-    return p - origin;
+    return p - scale.origin;
 }
 
 const Point<int> EditorCanvasBase::objectSpaceToScreenSpace (const Point<int>& p) const
 {
-    return p + origin;
+    return p + scale.origin;
 }
 
 const Point<float> EditorCanvasBase::screenSpaceToObjectSpace (const Point<float>& p) const
 {
-    return p - origin.toFloat();
+    return p - scale.origin.toFloat();
 }
 
 const Point<float> EditorCanvasBase::objectSpaceToScreenSpace (const Point<float>& p) const
 {
-    return p + origin.toFloat();
+    return p + scale.origin.toFloat();
 }
 
 const Rectangle<int> EditorCanvasBase::screenSpaceToObjectSpace (const Rectangle<int>& r) const
 {
-    return r - origin;
+    return r - scale.origin;
 }
 
 const Rectangle<int> EditorCanvasBase::objectSpaceToScreenSpace (const Rectangle<int>& r) const
 {
-    return r + origin;
+    return r + scale.origin;
 }
 
 void EditorCanvasBase::enableResizingMode()
@@ -909,47 +678,11 @@ bool EditorCanvasBase::isRotating() const
 //==============================================================================
 void EditorCanvasBase::paint (Graphics& g)
 {
-    g.setFont (border.getTop() - 5.0f);
-    g.setColour (Colour::greyLevel (0.9f));
-
-    //g.drawHorizontalLine (border.getTop() - 1, 2.0f, (float) getWidth() - border.getRight());
-    //g.drawVerticalLine (border.getLeft() - 1, 2.0f, (float) getHeight() - border.getBottom());
-
-    drawXAxis (g, Rectangle<int> (border.getLeft(), 0, componentHolder->getWidth(), border.getTop()));
-    drawYAxis (g, Rectangle<int> (0, border.getTop(), border.getLeft(), componentHolder->getHeight()));
 }
 
-void EditorCanvasBase::drawXAxis (Graphics& g, const Rectangle<int>& r)
+void EditorCanvasBase::setScale (const Scale& newScale)
 {
-    TickIterator ticks (-origin.getX(), r.getWidth(), 1.0, 10, 50);
-    float pos, tickLength;
-    String label;
-
-    while (ticks.getNextTick (pos, tickLength, label))
-    {
-        if (pos > 0)
-        {
-            g.drawVerticalLine (r.getX() + (int) pos, r.getBottom() - tickLength * r.getHeight(), (float) r.getBottom());
-            g.drawSingleLineText (label, r.getX() + (int) pos + 2, (int) r.getBottom() - 6);
-        }
-    }
-}
-
-void EditorCanvasBase::drawYAxis (Graphics& g, const Rectangle<int>& r)
-{
-    TickIterator ticks (-origin.getY(), r.getHeight(), 1.0, 10, 80);
-    float pos, tickLength;
-    String label;
-
-    while (ticks.getNextTick (pos, tickLength, label))
-    {
-        if (pos > 0)
-        {
-            g.drawHorizontalLine (r.getY() + (int) pos, r.getRight() - tickLength * r.getWidth(), (float) r.getRight());
-            g.drawTextAsPath (label, AffineTransform::rotation (float_Pi / -2.0f)
-                                                     .translated (r.getRight() - 6.0f, r.getY() + pos - 2.0f));
-        }
-    }
+    jassertfalse;
 }
 
 const Rectangle<int> EditorCanvasBase::getContentArea() const
@@ -968,16 +701,20 @@ void EditorCanvasBase::handleAsyncUpdate()
     const int newWidth = jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight();
     const int newHeight = jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom();
 
-    if (origin != newOrigin)
+    if (scale.origin != newOrigin)
     {
         repaint();
 
-        const Point<int> oldOrigin (origin);
-        origin = newOrigin;
+        const Point<int> oldOrigin (scale.origin);
+        scale.origin = newOrigin;
 
-        setBounds (jmin (0, getX() + oldOrigin.getX() - origin.getX()),
-                   jmin (0, getY() + oldOrigin.getY() - origin.getY()),
+        setBounds (jmin (0, getX() + oldOrigin.getX() - scale.origin.getX()),
+                   jmin (0, getY() + oldOrigin.getY() - scale.origin.getY()),
                    newWidth, newHeight);
+
+        EditorPanelBase* panel = getPanel();
+        if (panel != 0)
+            panel->updateRulers();
     }
     else if (getWidth() != newWidth || getHeight() != newHeight)
     {
@@ -986,6 +723,10 @@ void EditorCanvasBase::handleAsyncUpdate()
     else
     {
         overlay->update();
+
+        EditorPanelBase* panel = getPanel();
+        if (panel != 0)
+            panel->updateMarkers();
     }
 }
 
@@ -1007,7 +748,7 @@ void EditorCanvasBase::hideSizeGuides()   { overlay->hideSizeGuides(); }
 void EditorCanvasBase::beginDrag (const MouseEvent& e, const ResizableBorderComponent::Zone& zone,
                                   bool isRotating, const Point<float>& rotationCentre)
 {
-    dragger = createDragOperation (e.getEventRelativeTo (overlay).getPosition() - origin, overlay, zone, isRotating);
+    dragger = createDragOperation (screenSpaceToObjectSpace (e.getEventRelativeTo (overlay).getPosition()), overlay, zone, isRotating);
     dragger->setRotationCentre (rotationCentre);
     repaint();
 }
@@ -1017,7 +758,7 @@ void EditorCanvasBase::continueDrag (const MouseEvent& e)
     MouseEvent e2 (e.getEventRelativeTo (overlay));
 
     if (dragger != 0)
-        dragger->drag (e2, e2.getPosition() - origin);
+        dragger->drag (e2, screenSpaceToObjectSpace (e2.getPosition()));
 }
 
 void EditorCanvasBase::endDrag (const MouseEvent& e)
@@ -1025,7 +766,7 @@ void EditorCanvasBase::endDrag (const MouseEvent& e)
     if (dragger != 0)
     {
         MouseEvent e2 (e.getEventRelativeTo (overlay));
-        dragger->drag (e2, e2.getPosition() - origin);
+        dragger->drag (e2, screenSpaceToObjectSpace (e2.getPosition()));
         dragger = 0;
 
         getUndoManager().beginNewTransaction();
@@ -1055,4 +796,10 @@ const Point<float> EditorCanvasBase::OverlayItemComponent::pointToLocalSpace (co
     return canvas->objectSpaceToScreenSpace (p)
             + (canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>())
                 - getPosition()).toFloat();
+}
+
+//==============================================================================
+EditorCanvasBase::Scale::Scale()
+    : scale (1.0)
+{
 }

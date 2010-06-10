@@ -36,7 +36,7 @@ const String createGUID (const String& seed); // Turns a seed into a windows GUI
 //==============================================================================
 int indexOfLineStartingWith (const StringArray& lines, const String& text, int startIndex);
 
-void autoScrollForMouseEvent (const MouseEvent& e);
+void autoScrollForMouseEvent (const MouseEvent& e, bool scrollX = true, bool scrollY = true);
 
 void drawComponentPlaceholder (Graphics& g, int w, int h, const String& text);
 void drawRecessedShadows (Graphics& g, int w, int h, int shadowSize);

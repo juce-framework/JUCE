@@ -298,8 +298,8 @@ void juce_getInternetFileHeaders (void* handle, StringPairArray& headers)
                 for (int i = 0; i < headersArray.size(); ++i)
                 {
                     const String& header = headersArray[i];
-                    const String key (header.upToFirstOccurrenceOf ("; ", false, false));
-                    const String value (header.fromFirstOccurrenceOf ("; ", false, false));
+                    const String key (header.upToFirstOccurrenceOf (": ", false, false));
+                    const String value (header.fromFirstOccurrenceOf (": ", false, false));
                     const String previousValue (headers [key]);
 
                     headers.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
