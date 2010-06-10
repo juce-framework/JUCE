@@ -117,20 +117,20 @@ public:
     static const String getCpuVendor();
 
     /** Checks whether Intel MMX instructions are available. */
-    static bool hasMMX();
+    static bool hasMMX() throw()        { return cpuFlags.hasMMX; }
 
     /** Checks whether Intel SSE instructions are available. */
-    static bool hasSSE();
+    static bool hasSSE() throw()        { return cpuFlags.hasSSE; }
 
     /** Checks whether Intel SSE2 instructions are available. */
-    static bool hasSSE2();
+    static bool hasSSE2() throw()       { return cpuFlags.hasSSE2; }
 
     /** Checks whether AMD 3DNOW instructions are available. */
-    static bool has3DNow();
+    static bool has3DNow() throw()      { return cpuFlags.has3DNow; }
 
     /** Returns the number of CPUs.
     */
-    static int getNumCpus();
+    static int getNumCpus() throw()     { return cpuFlags.numCpus; }
 
     //==============================================================================
     /** Finds out how much RAM is in the machine.
@@ -181,6 +181,17 @@ public:
     static void initialiseStats();
 
 private:
+    struct CPUFlags
+    {
+        int numCpus;
+        bool hasMMX : 1;
+        bool hasSSE : 1;
+        bool hasSSE2 : 1;
+        bool has3DNow : 1;
+    };
+
+    static CPUFlags cpuFlags;
+
     SystemStats();
     SystemStats (const SystemStats&);
     SystemStats& operator= (const SystemStats&);

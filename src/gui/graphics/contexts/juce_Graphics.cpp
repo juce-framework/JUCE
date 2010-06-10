@@ -33,8 +33,6 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_LowLevelGraphicsContext.h"
 
 
-static const Graphics::ResamplingQuality defaultQuality = Graphics::mediumResamplingQuality;
-
 //==============================================================================
 template <typename Type>
 static bool areCoordsSensibleNumbers (Type x, Type y, Type w, Type h)
@@ -80,7 +78,7 @@ void Graphics::resetToDefaultState()
     saveStateIfPending();
     context->setFill (FillType());
     context->setFont (Font());
-    context->setInterpolationQuality (defaultQuality);
+    context->setInterpolationQuality (Graphics::mediumResamplingQuality);
 }
 
 bool Graphics::isVectorDevice() const

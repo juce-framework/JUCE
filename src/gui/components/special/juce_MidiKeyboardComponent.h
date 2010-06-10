@@ -404,6 +404,9 @@ private:
     int keyMappingOctave;
     int octaveNumForMiddleC;
 
+    static const uint8 whiteNotes[];
+    static const uint8 blackNotes[];
+
     void getKeyPos (int midiNoteNumber, int& x, int& w) const;
     int xyToNote (const Point<int>& pos, float& mousePositionVelocity);
     int remappedXYToNote (const Point<int>& pos, float& mousePositionVelocity) const;

@@ -88,6 +88,9 @@ protected:
         @see setCurrentLogger
     */
     virtual void logMessage (const String& message) = 0;
+
+private:
+    static Logger* currentLogger;
 };
 
 

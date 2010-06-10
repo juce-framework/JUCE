@@ -27,12 +27,12 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_PathIterator.h"
 #include "juce_Line.h"
 #include "../../../io/streams/juce_MemoryInputStream.h"
 #include "../../../io/streams/juce_MemoryOutputStream.h"
 #include "../imaging/juce_Image.h"
+
 
 // tests that some co-ords aren't NaNs
 #define CHECK_COORDS_ARE_VALID(x, y) \

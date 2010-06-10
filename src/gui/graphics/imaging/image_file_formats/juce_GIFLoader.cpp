@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_GIFLoader.h"
 #include "../../colour/juce_PixelFormats.h"
 

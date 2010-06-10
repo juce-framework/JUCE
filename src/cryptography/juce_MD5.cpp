@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_MD5.h"
 #include "../io/files/juce_FileInputStream.h"
 #include "../containers/juce_ScopedPointer.h"

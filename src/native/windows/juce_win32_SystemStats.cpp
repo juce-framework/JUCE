@@ -113,36 +113,6 @@ const String SystemStats::getCpuVendor()
 
 
 //==============================================================================
-struct CPUFlags
-{
-    bool hasMMX : 1;
-    bool hasSSE : 1;
-    bool hasSSE2 : 1;
-    bool has3DNow : 1;
-};
-
-static CPUFlags cpuFlags;
-
-bool SystemStats::hasMMX()
-{
-    return cpuFlags.hasMMX;
-}
-
-bool SystemStats::hasSSE()
-{
-    return cpuFlags.hasSSE;
-}
-
-bool SystemStats::hasSSE2()
-{
-    return cpuFlags.hasSSE2;
-}
-
-bool SystemStats::has3DNow()
-{
-    return cpuFlags.has3DNow;
-}
-
 void SystemStats::initialiseStats()
 {
     juce_initialiseThreadEvents();
@@ -156,6 +126,12 @@ void SystemStats::initialiseStats()
     cpuFlags.has3DNow = IsProcessorFeaturePresent (PF_3DNOW_INSTRUCTIONS_AVAILABLE) != 0;
 #endif
 
+    {
+        SYSTEM_INFO systemInfo;
+        GetSystemInfo (&systemInfo);
+        cpuFlags.numCpus = systemInfo.dwNumberOfProcessors;
+    }
+
     LARGE_INTEGER f;
     QueryPerformanceFrequency (&f);
     hiResTicksPerSecond = f.QuadPart;
@@ -163,12 +139,9 @@ void SystemStats::initialiseStats()
 
     String s (SystemStats::getJUCEVersion());
 
-#if JUCE_DEBUG
     const MMRESULT res = timeBeginPeriod (1);
+    (void) res;
     jassert (res == TIMERR_NOERROR);
-#else
-    timeBeginPeriod (1);
-#endif
 
 #if JUCE_DEBUG && JUCE_MSVC && JUCE_CHECK_MEMORY_LEAKS
     _CrtSetDbgFlag (_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -242,14 +215,6 @@ int SystemStats::getMemorySizeInMegabytes()
     mem.dwLength = sizeof (mem);
     GlobalMemoryStatusEx (&mem);
     return (int) (mem.ullTotalPhys / (1024 * 1024)) + 1;
-}
-
-int SystemStats::getNumCpus()
-{
-    SYSTEM_INFO systemInfo;
-    GetSystemInfo (&systemInfo);
-
-    return systemInfo.dwNumberOfProcessors;
 }
 
 //==============================================================================

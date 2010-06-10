@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_PathIterator.h"
 
 #if JUCE_MSVC && JUCE_DEBUG

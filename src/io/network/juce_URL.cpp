@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_URL.h"
 #include "../../core/juce_Random.h"
 #include "../../core/juce_PlatformUtilities.h"

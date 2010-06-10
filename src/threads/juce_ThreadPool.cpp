@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_ThreadPool.h"
 #include "../core/juce_Time.h"
 

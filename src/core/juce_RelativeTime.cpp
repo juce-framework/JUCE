@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_RelativeTime.h"
 #include "../text/juce_LocalisedStrings.h"
 

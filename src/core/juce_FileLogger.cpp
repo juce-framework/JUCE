@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_FileLogger.h"
 #include "../io/files/juce_FileOutputStream.h"
 #include "../io/files/juce_FileInputStream.h"

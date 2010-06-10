@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_RSAKey.h"
 #include "juce_Primes.h"
 
@@ -97,7 +96,7 @@ bool RSAKey::applyToValue (BigInteger& value) const
     return true;
 }
 
-static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q)
+const BigInteger RSAKey::findBestCommonDivisor (const BigInteger& p, const BigInteger& q)
 {
     // try 3, 5, 9, 17, etc first because these only contain 2 bits and so
     // are fast to divide + multiply

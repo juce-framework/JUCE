@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_ZipFile.h"
 #include "../streams/juce_GZIPDecompressorInputStream.h"
 #include "../streams/juce_BufferedInputStream.h"
@@ -35,6 +34,7 @@ BEGIN_JUCE_NAMESPACE
 #include "juce_FileInputStream.h"
 #include "juce_FileOutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
+
 
 //==============================================================================
 class ZipFile::ZipEntryInfo

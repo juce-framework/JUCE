@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_OutputStream.h"
 #include "../../threads/juce_ScopedLock.h"
 #include "../../containers/juce_Array.h"

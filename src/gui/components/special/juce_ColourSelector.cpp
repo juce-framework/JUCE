@@ -33,8 +33,6 @@ BEGIN_JUCE_NAMESPACE
 #include "../../graphics/imaging/juce_Image.h"
 #include "../../../text/juce_LocalisedStrings.h"
 
-static const int swatchesPerRow = 8;
-static const int swatchHeight = 22;
 
 //==============================================================================
 class ColourComponentSlider  : public Slider
@@ -515,6 +513,9 @@ void ColourSelector::paint (Graphics& g)
 
 void ColourSelector::resized()
 {
+    const int swatchesPerRow = 8;
+    const int swatchHeight = 22;
+
     const int numSliders = ((flags & showAlphaChannel) != 0) ? 4 : 3;
     const int numSwatches = getNumSwatches();
 

@@ -27,10 +27,10 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_Thread.h"
 #include "juce_ScopedLock.h"
 #include "../core/juce_Time.h"
+
 
 // these functions are implemented in the platform-specific code.
 void* juce_createThread (void* userData);

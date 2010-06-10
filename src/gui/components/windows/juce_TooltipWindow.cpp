@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_TooltipWindow.h"
 #include "../windows/juce_ComponentPeer.h"
 #include "../../../core/juce_Time.h"

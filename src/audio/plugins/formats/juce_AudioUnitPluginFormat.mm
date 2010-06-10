@@ -66,127 +66,127 @@ BEGIN_JUCE_NAMESPACE
  #define log(a)
 #endif
 
-static int insideCallback = 0;
-
-//==============================================================================
-static const String osTypeToString (OSType type)
+namespace AudioUnitFormatHelpers
 {
-    char s[4];
-    s[0] = (char) (((uint32) type) >> 24);
-    s[1] = (char) (((uint32) type) >> 16);
-    s[2] = (char) (((uint32) type) >> 8);
-    s[3] = (char) ((uint32) type);
-    return String (s, 4);
-}
+    static int insideCallback = 0;
 
-static OSType stringToOSType (const String& s1)
-{
-    const String s (s1 + "    ");
-
-    return (((OSType) (unsigned char) s[0]) << 24)
-         | (((OSType) (unsigned char) s[1]) << 16)
-         | (((OSType) (unsigned char) s[2]) << 8)
-         | ((OSType) (unsigned char) s[3]);
-}
-
-static const char* auIdentifierPrefix = "AudioUnit:";
-
-static const String createAUPluginIdentifier (const ComponentDescription& desc)
-{
-    jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
-    jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
-
-    String s (auIdentifierPrefix);
-
-    if (desc.componentType == kAudioUnitType_MusicDevice)
-        s << "Synths/";
-    else if (desc.componentType == kAudioUnitType_MusicEffect
-              || desc.componentType == kAudioUnitType_Effect)
-        s << "Effects/";
-    else if (desc.componentType == kAudioUnitType_Generator)
-        s << "Generators/";
-    else if (desc.componentType == kAudioUnitType_Panner)
-        s << "Panners/";
-
-    s << osTypeToString (desc.componentType) << ","
-      << osTypeToString (desc.componentSubType) << ","
-      << osTypeToString (desc.componentManufacturer);
-
-    return s;
-}
-
-static void getAUDetails (ComponentRecord* comp, String& name, String& manufacturer)
-{
-    Handle componentNameHandle = NewHandle (sizeof (void*));
-    Handle componentInfoHandle = NewHandle (sizeof (void*));
-
-    if (componentNameHandle != 0 && componentInfoHandle != 0)
+    static const String osTypeToString (OSType type)
     {
-        ComponentDescription desc;
-
-        if (GetComponentInfo (comp, &desc, componentNameHandle, componentInfoHandle, 0) == noErr)
-        {
-            ConstStr255Param nameString = (ConstStr255Param) (*componentNameHandle);
-            ConstStr255Param infoString = (ConstStr255Param) (*componentInfoHandle);
-
-            if (nameString != 0 && nameString[0] != 0)
-            {
-                const String all ((const char*) nameString + 1, nameString[0]);
-                DBG ("name: "+ all);
-
-                manufacturer = all.upToFirstOccurrenceOf (":", false, false).trim();
-                name = all.fromFirstOccurrenceOf (":", false, false).trim();
-            }
-
-            if (infoString != 0 && infoString[0] != 0)
-            {
-                DBG ("info: " + String ((const char*) infoString + 1, infoString[0]));
-            }
-
-            if (name.isEmpty())
-                name = "<Unknown>";
-        }
-
-        DisposeHandle (componentNameHandle);
-        DisposeHandle (componentInfoHandle);
+        char s[4];
+        s[0] = (char) (((uint32) type) >> 24);
+        s[1] = (char) (((uint32) type) >> 16);
+        s[2] = (char) (((uint32) type) >> 8);
+        s[3] = (char) ((uint32) type);
+        return String (s, 4);
     }
-}
 
-static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, ComponentDescription& desc,
-                                            String& name, String& version, String& manufacturer)
-{
-    zerostruct (desc);
-
-    if (fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
+    static OSType stringToOSType (const String& s1)
     {
-        String s (fileOrIdentifier.substring (jmax (fileOrIdentifier.lastIndexOfChar (':'),
-                                                    fileOrIdentifier.lastIndexOfChar ('/')) + 1));
+        const String s (s1 + "    ");
 
-        StringArray tokens;
-        tokens.addTokens (s, ",", String::empty);
-        tokens.trim();
-        tokens.removeEmptyStrings();
+        return (((OSType) (unsigned char) s[0]) << 24)
+             | (((OSType) (unsigned char) s[1]) << 16)
+             | (((OSType) (unsigned char) s[2]) << 8)
+             | ((OSType) (unsigned char) s[3]);
+    }
 
-        if (tokens.size() == 3)
+    static const char* auIdentifierPrefix = "AudioUnit:";
+
+    static const String createAUPluginIdentifier (const ComponentDescription& desc)
+    {
+        jassert (osTypeToString ('abcd') == "abcd"); // agh, must have got the endianness wrong..
+        jassert (stringToOSType ("abcd") == (OSType) 'abcd'); // ditto
+
+        String s (auIdentifierPrefix);
+
+        if (desc.componentType == kAudioUnitType_MusicDevice)
+            s << "Synths/";
+        else if (desc.componentType == kAudioUnitType_MusicEffect
+                  || desc.componentType == kAudioUnitType_Effect)
+            s << "Effects/";
+        else if (desc.componentType == kAudioUnitType_Generator)
+            s << "Generators/";
+        else if (desc.componentType == kAudioUnitType_Panner)
+            s << "Panners/";
+
+        s << osTypeToString (desc.componentType) << ","
+          << osTypeToString (desc.componentSubType) << ","
+          << osTypeToString (desc.componentManufacturer);
+
+        return s;
+    }
+
+    static void getAUDetails (ComponentRecord* comp, String& name, String& manufacturer)
+    {
+        Handle componentNameHandle = NewHandle (sizeof (void*));
+        Handle componentInfoHandle = NewHandle (sizeof (void*));
+
+        if (componentNameHandle != 0 && componentInfoHandle != 0)
         {
-            desc.componentType = stringToOSType (tokens[0]);
-            desc.componentSubType = stringToOSType (tokens[1]);
-            desc.componentManufacturer = stringToOSType (tokens[2]);
+            ComponentDescription desc;
 
-            ComponentRecord* comp = FindNextComponent (0, &desc);
-
-            if (comp != 0)
+            if (GetComponentInfo (comp, &desc, componentNameHandle, componentInfoHandle, 0) == noErr)
             {
-                getAUDetails (comp, name, manufacturer);
+                ConstStr255Param nameString = (ConstStr255Param) (*componentNameHandle);
+                ConstStr255Param infoString = (ConstStr255Param) (*componentInfoHandle);
 
-                return true;
+                if (nameString != 0 && nameString[0] != 0)
+                {
+                    const String all ((const char*) nameString + 1, nameString[0]);
+                    DBG ("name: "+ all);
+
+                    manufacturer = all.upToFirstOccurrenceOf (":", false, false).trim();
+                    name = all.fromFirstOccurrenceOf (":", false, false).trim();
+                }
+
+                if (infoString != 0 && infoString[0] != 0)
+                {
+                    DBG ("info: " + String ((const char*) infoString + 1, infoString[0]));
+                }
+
+                if (name.isEmpty())
+                    name = "<Unknown>";
             }
+
+            DisposeHandle (componentNameHandle);
+            DisposeHandle (componentInfoHandle);
         }
     }
 
-    return false;
-}
+    static bool getComponentDescFromIdentifier (const String& fileOrIdentifier, ComponentDescription& desc,
+                                                String& name, String& version, String& manufacturer)
+    {
+        zerostruct (desc);
 
+        if (fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
+        {
+            String s (fileOrIdentifier.substring (jmax (fileOrIdentifier.lastIndexOfChar (':'),
+                                                        fileOrIdentifier.lastIndexOfChar ('/')) + 1));
+
+            StringArray tokens;
+            tokens.addTokens (s, ",", String::empty);
+            tokens.trim();
+            tokens.removeEmptyStrings();
+
+            if (tokens.size() == 3)
+            {
+                desc.componentType = stringToOSType (tokens[0]);
+                desc.componentSubType = stringToOSType (tokens[1]);
+                desc.componentManufacturer = stringToOSType (tokens[2]);
+
+                ComponentRecord* comp = FindNextComponent (0, &desc);
+
+                if (comp != 0)
+                {
+                    getAUDetails (comp, name, manufacturer);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+}
 
 //==============================================================================
 class AudioUnitPluginWindowCarbon;
@@ -205,7 +205,7 @@ public:
     void fillInPluginDescription (PluginDescription& desc) const
     {
         desc.name = pluginName;
-        desc.fileOrIdentifier = createAUPluginIdentifier (componentDesc);
+        desc.fileOrIdentifier = AudioUnitFormatHelpers::createAUPluginIdentifier (componentDesc);
         desc.uid = ((int) componentDesc.componentType)
                     ^ ((int) componentDesc.componentSubType)
                     ^ ((int) componentDesc.componentManufacturer);
@@ -375,6 +375,8 @@ AudioUnitPluginInstance::AudioUnitPluginInstance (const String& fileOrIdentifier
       audioUnit (0),
       currentBuffer (0)
 {
+    using namespace AudioUnitFormatHelpers;
+
     try
     {
         ++insideCallback;
@@ -406,7 +408,7 @@ AudioUnitPluginInstance::~AudioUnitPluginInstance()
 {
     const ScopedLock sl (lock);
 
-    jassert (insideCallback == 0);
+    jassert (AudioUnitFormatHelpers::insideCallback == 0);
 
     if (audioUnit != 0)
     {
@@ -420,7 +422,7 @@ bool AudioUnitPluginInstance::getComponentDescFromFile (const String& fileOrIden
 {
     zerostruct (componentDesc);
 
-    if (getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
+    if (AudioUnitFormatHelpers::getComponentDescFromIdentifier (fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
         return true;
 
     const File file (fileOrIdentifier);
@@ -1469,7 +1471,7 @@ const StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearch
              || desc.componentType == kAudioUnitType_Generator
              || desc.componentType == kAudioUnitType_Panner)
         {
-            const String s (createAUPluginIdentifier (desc));
+            const String s (AudioUnitFormatHelpers::createAUPluginIdentifier (desc));
             DBG (s);
             result.add (s);
         }
@@ -1483,7 +1485,7 @@ bool AudioUnitPluginFormat::fileMightContainThisPluginType (const String& fileOr
     ComponentDescription desc;
 
     String name, version, manufacturer;
-    if (getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer))
+    if (AudioUnitFormatHelpers::getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer))
         return FindNextComponent (0, &desc) != 0;
 
     const File f (fileOrIdentifier);
@@ -1496,7 +1498,7 @@ const String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String&
 {
     ComponentDescription desc;
     String name, version, manufacturer;
-    getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer);
+    AudioUnitFormatHelpers::getComponentDescFromIdentifier (fileOrIdentifier, desc, name, version, manufacturer);
 
     if (name.isEmpty())
         name = fileOrIdentifier;
@@ -1506,7 +1508,7 @@ const String AudioUnitPluginFormat::getNameOfPluginFromIdentifier (const String&
 
 bool AudioUnitPluginFormat::doesPluginStillExist (const PluginDescription& desc)
 {
-    if (desc.fileOrIdentifier.startsWithIgnoreCase (auIdentifierPrefix))
+    if (desc.fileOrIdentifier.startsWithIgnoreCase (AudioUnitFormatHelpers::auIdentifierPrefix))
         return fileMightContainThisPluginType (desc.fileOrIdentifier);
     else
         return File (desc.fileOrIdentifier).exists();

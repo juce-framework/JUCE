@@ -168,7 +168,7 @@ const Point<int> MouseEvent::getMouseDownScreenPosition() const
 }
 
 //==============================================================================
-static int doubleClickTimeOutMs = 400;
+int MouseEvent::doubleClickTimeOutMs = 400;
 
 void MouseEvent::setDoubleClickTimeout (const int newTime) throw()
 {

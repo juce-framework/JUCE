@@ -40,6 +40,8 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
+SystemStats::CPUFlags SystemStats::cpuFlags;
+
 const String SystemStats::getJUCEVersion()
 {
     return "JUCE v" + String (JUCE_MAJOR_VERSION)
@@ -121,6 +123,7 @@ static void juce_testAtomics()
 }
 #endif
 
+//==============================================================================
 void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
 {
     if (! juceInitialisedNonGUI)
@@ -194,36 +197,35 @@ void JUCE_PUBLIC_FUNCTION initialiseJuce_NonGUI()
     }
 }
 
+//==============================================================================
 #if JUCE_WINDOWS
- // This is imported from the sockets code..
- typedef int (__stdcall juce_CloseWin32SocketLibCall) (void);
- extern juce_CloseWin32SocketLibCall* juce_CloseWin32SocketLib;
+  extern void juce_shutdownWin32Sockets();  // (defined in the sockets code)
 #endif
 
 #if JUCE_DEBUG
   extern void juce_CheckForDanglingStreams();
 #endif
 
+//==============================================================================
 void JUCE_PUBLIC_FUNCTION shutdownJuce_NonGUI()
 {
     if (juceInitialisedNonGUI)
     {
-#if JUCE_MAC || JUCE_IPHONE
+      #if JUCE_MAC || JUCE_IPHONE
         const ScopedAutoReleasePool pool;
-#endif
+      #endif
 
-#if JUCE_WINDOWS
+      #if JUCE_WINDOWS
         // need to shut down sockets if they were used..
-        if (juce_CloseWin32SocketLib != 0)
-            (*juce_CloseWin32SocketLib)();
-#endif
+        juce_shutdownWin32Sockets();
+      #endif
 
         LocalisedStrings::setCurrentMappings (0);
         Thread::stopAllThreads (3000);
 
-#if JUCE_DEBUG
+      #if JUCE_DEBUG
         juce_CheckForDanglingStreams();
-#endif
+      #endif
 
         juceInitialisedNonGUI = false;
     }

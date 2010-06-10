@@ -68,11 +68,6 @@ static const String juce_getCpuInfo (const char* const key)
     return String::empty;
 }
 
-bool SystemStats::hasMMX()      { return juce_getCpuInfo ("flags").contains ("mmx"); }
-bool SystemStats::hasSSE()      { return juce_getCpuInfo ("flags").contains ("sse"); }
-bool SystemStats::hasSSE2()     { return juce_getCpuInfo ("flags").contains ("sse2"); }
-bool SystemStats::has3DNow()    { return juce_getCpuInfo ("flags").contains ("3dnow"); }
-
 const String SystemStats::getCpuVendor()
 {
     return juce_getCpuInfo ("vendor_id");
@@ -98,11 +93,6 @@ int SystemStats::getPageSize()
     return sysconf (_SC_PAGESIZE);
 }
 
-int SystemStats::getNumCpus()
-{
-    return juce_getCpuInfo ("processor").getIntValue() + 1;
-}
-
 //==============================================================================
 const String SystemStats::getLogonName()
 {
@@ -126,6 +116,13 @@ const String SystemStats::getFullUserName()
 //==============================================================================
 void SystemStats::initialiseStats()
 {
+    const String flags (juce_getCpuInfo ("flags"));
+    cpuFlags.hasMMX = flags.contains ("mmx");
+    cpuFlags.hasSSE = flags.contains ("sse");
+    cpuFlags.hasSSE2 = flags.contains ("sse2");
+    cpuFlags.has3DNow = flags.contains ("3dnow");
+
+    cpuFlags.numCpus = juce_getCpuInfo ("processor").getIntValue() + 1;
 }
 
 void PlatformUtilities::fpuReset()

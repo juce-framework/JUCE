@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_DocumentWindow.h"
 #include "juce_ComponentPeer.h"
 #include "../lookandfeel/juce_LookAndFeel.h"

@@ -40,7 +40,7 @@ Logger::~Logger()
 }
 
 //==============================================================================
-static Logger* currentLogger = 0;
+Logger* Logger::currentLogger = 0;
 
 void Logger::setCurrentLogger (Logger* const newLogger,
                                const bool deleteOldLogger)

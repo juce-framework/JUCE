@@ -27,14 +27,12 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_Image.h"
 #include "../contexts/juce_Graphics.h"
 #include "../contexts/juce_LowLevelGraphicsSoftwareRenderer.h"
 #include "../colour/juce_PixelFormats.h"
 #include "../../../containers/juce_SparseSet.h"
 
-static const int fullAlphaThreshold = 253;
 
 //==============================================================================
 Image::SharedImage::SharedImage (const PixelFormat format_, const int width_, const int height_)

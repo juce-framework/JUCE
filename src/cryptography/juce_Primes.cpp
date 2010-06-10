@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_Primes.h"
 #include "../core/juce_Random.h"
 

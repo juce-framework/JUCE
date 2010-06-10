@@ -237,6 +237,7 @@ private:
     //==============================================================================
     HeapBlock <char> data;
     size_t size;
+    static const char* const encodingTable;
 };
 
 

@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_Desktop.h"
 #include "windows/juce_ComponentPeer.h"
 #include "mouse/juce_MouseInputSource.h"

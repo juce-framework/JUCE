@@ -337,8 +337,7 @@ void MemoryBlock::loadFromHexString (const String& hex) throw()
 }
 
 //==============================================================================
-static const char* const encodingTable
-    = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
+const char* const MemoryBlock::encodingTable = ".ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+";
 
 const String MemoryBlock::toBase64Encoding() const throw()
 {

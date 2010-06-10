@@ -320,6 +320,7 @@ private:
     const Time mouseDownTime;
     const int numberOfClicks;
     const bool wasMovedSinceMouseDown;
+    static int doubleClickTimeOutMs;
 
     MouseEvent& operator= (const MouseEvent&);
 };

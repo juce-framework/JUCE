@@ -42,299 +42,297 @@ CPlusPlusCodeTokeniser::~CPlusPlusCodeTokeniser()
 //==============================================================================
 namespace CppTokeniser
 {
-
-static bool isIdentifierStart (const juce_wchar c) throw()
-{
-    return CharacterFunctions::isLetter (c)
-            || c == '_' || c == '@';
-}
-
-static bool isIdentifierBody (const juce_wchar c) throw()
-{
-    return CharacterFunctions::isLetterOrDigit (c)
-            || c == '_' || c == '@';
-}
-
-static bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
-{
-    static const juce_wchar* const keywords2Char[] =
-        { JUCE_T("if"), JUCE_T("do"), JUCE_T("or"), JUCE_T("id"), 0 };
-
-    static const juce_wchar* const keywords3Char[] =
-        { JUCE_T("for"), JUCE_T("int"), JUCE_T("new"), JUCE_T("try"), JUCE_T("xor"), JUCE_T("and"), JUCE_T("asm"), JUCE_T("not"), 0 };
-
-    static const juce_wchar* const keywords4Char[] =
-        { JUCE_T("bool"), JUCE_T("void"), JUCE_T("this"), JUCE_T("true"), JUCE_T("long"), JUCE_T("else"), JUCE_T("char"),
-          JUCE_T("enum"), JUCE_T("case"), JUCE_T("goto"), JUCE_T("auto"), 0 };
-
-    static const juce_wchar* const keywords5Char[] =
-        {  JUCE_T("while"), JUCE_T("bitor"), JUCE_T("break"), JUCE_T("catch"), JUCE_T("class"), JUCE_T("compl"), JUCE_T("const"), JUCE_T("false"),
-            JUCE_T("float"), JUCE_T("short"), JUCE_T("throw"), JUCE_T("union"), JUCE_T("using"), JUCE_T("or_eq"), 0 };
-
-    static const juce_wchar* const keywords6Char[] =
-        { JUCE_T("return"), JUCE_T("struct"), JUCE_T("and_eq"), JUCE_T("bitand"), JUCE_T("delete"), JUCE_T("double"), JUCE_T("extern"),
-          JUCE_T("friend"), JUCE_T("inline"), JUCE_T("not_eq"), JUCE_T("public"), JUCE_T("sizeof"), JUCE_T("static"), JUCE_T("signed"),
-          JUCE_T("switch"), JUCE_T("typeid"), JUCE_T("wchar_t"), JUCE_T("xor_eq"), 0};
-
-    static const juce_wchar* const keywordsOther[] =
-        { JUCE_T("const_cast"), JUCE_T("continue"), JUCE_T("default"), JUCE_T("explicit"), JUCE_T("mutable"), JUCE_T("namespace"),
-          JUCE_T("operator"), JUCE_T("private"), JUCE_T("protected"), JUCE_T("register"), JUCE_T("reinterpret_cast"), JUCE_T("static_cast"),
-          JUCE_T("template"), JUCE_T("typedef"), JUCE_T("typename"), JUCE_T("unsigned"), JUCE_T("virtual"), JUCE_T("volatile"),
-          JUCE_T("@implementation"), JUCE_T("@interface"), JUCE_T("@end"), JUCE_T("@synthesize"), JUCE_T("@dynamic"), JUCE_T("@public"),
-          JUCE_T("@private"), JUCE_T("@property"), JUCE_T("@protected"), JUCE_T("@class"), 0 };
-
-    const juce_wchar* const* k;
-
-    switch (tokenLength)
+    static bool isIdentifierStart (const juce_wchar c) throw()
     {
-        case 2:     k = keywords2Char; break;
-        case 3:     k = keywords3Char; break;
-        case 4:     k = keywords4Char; break;
-        case 5:     k = keywords5Char; break;
-        case 6:     k = keywords6Char; break;
-
-        default:
-            if (tokenLength < 2 || tokenLength > 16)
-                return false;
-
-            k = keywordsOther;
-            break;
+        return CharacterFunctions::isLetter (c)
+                || c == '_' || c == '@';
     }
 
-    int i = 0;
-    while (k[i] != 0)
+    static bool isIdentifierBody (const juce_wchar c) throw()
     {
-        if (k[i][0] == token[0] && CharacterFunctions::compare (k[i], token) == 0)
-            return true;
-
-        ++i;
+        return CharacterFunctions::isLetterOrDigit (c)
+                || c == '_' || c == '@';
     }
 
-    return false;
-}
-
-static int parseIdentifier (CodeDocument::Iterator& source) throw()
-{
-    int tokenLength = 0;
-    juce_wchar possibleIdentifier [19];
-
-    while (isIdentifierBody (source.peekNextChar()))
+    static bool isReservedKeyword (const juce_wchar* const token, const int tokenLength) throw()
     {
-        const juce_wchar c = source.nextChar();
+        static const juce_wchar* const keywords2Char[] =
+            { JUCE_T("if"), JUCE_T("do"), JUCE_T("or"), JUCE_T("id"), 0 };
 
-        if (tokenLength < numElementsInArray (possibleIdentifier) - 1)
-            possibleIdentifier [tokenLength] = c;
+        static const juce_wchar* const keywords3Char[] =
+            { JUCE_T("for"), JUCE_T("int"), JUCE_T("new"), JUCE_T("try"), JUCE_T("xor"), JUCE_T("and"), JUCE_T("asm"), JUCE_T("not"), 0 };
 
-        ++tokenLength;
-    }
+        static const juce_wchar* const keywords4Char[] =
+            { JUCE_T("bool"), JUCE_T("void"), JUCE_T("this"), JUCE_T("true"), JUCE_T("long"), JUCE_T("else"), JUCE_T("char"),
+              JUCE_T("enum"), JUCE_T("case"), JUCE_T("goto"), JUCE_T("auto"), 0 };
 
-    if (tokenLength > 1 && tokenLength <= 16)
-    {
-        possibleIdentifier [tokenLength] = 0;
+        static const juce_wchar* const keywords5Char[] =
+            {  JUCE_T("while"), JUCE_T("bitor"), JUCE_T("break"), JUCE_T("catch"), JUCE_T("class"), JUCE_T("compl"), JUCE_T("const"), JUCE_T("false"),
+                JUCE_T("float"), JUCE_T("short"), JUCE_T("throw"), JUCE_T("union"), JUCE_T("using"), JUCE_T("or_eq"), 0 };
 
-        if (isReservedKeyword (possibleIdentifier, tokenLength))
-            return CPlusPlusCodeTokeniser::tokenType_builtInKeyword;
-    }
+        static const juce_wchar* const keywords6Char[] =
+            { JUCE_T("return"), JUCE_T("struct"), JUCE_T("and_eq"), JUCE_T("bitand"), JUCE_T("delete"), JUCE_T("double"), JUCE_T("extern"),
+              JUCE_T("friend"), JUCE_T("inline"), JUCE_T("not_eq"), JUCE_T("public"), JUCE_T("sizeof"), JUCE_T("static"), JUCE_T("signed"),
+              JUCE_T("switch"), JUCE_T("typeid"), JUCE_T("wchar_t"), JUCE_T("xor_eq"), 0};
 
-    return CPlusPlusCodeTokeniser::tokenType_identifier;
-}
+        static const juce_wchar* const keywordsOther[] =
+            { JUCE_T("const_cast"), JUCE_T("continue"), JUCE_T("default"), JUCE_T("explicit"), JUCE_T("mutable"), JUCE_T("namespace"),
+              JUCE_T("operator"), JUCE_T("private"), JUCE_T("protected"), JUCE_T("register"), JUCE_T("reinterpret_cast"), JUCE_T("static_cast"),
+              JUCE_T("template"), JUCE_T("typedef"), JUCE_T("typename"), JUCE_T("unsigned"), JUCE_T("virtual"), JUCE_T("volatile"),
+              JUCE_T("@implementation"), JUCE_T("@interface"), JUCE_T("@end"), JUCE_T("@synthesize"), JUCE_T("@dynamic"), JUCE_T("@public"),
+              JUCE_T("@private"), JUCE_T("@property"), JUCE_T("@protected"), JUCE_T("@class"), 0 };
 
-static bool skipNumberSuffix (CodeDocument::Iterator& source)
-{
-    const juce_wchar c = source.peekNextChar();
-    if (c == 'l' || c == 'L' || c == 'u' || c == 'U')
-        source.skip();
+        const juce_wchar* const* k;
 
-    if (CharacterFunctions::isLetterOrDigit (source.peekNextChar()))
+        switch (tokenLength)
+        {
+            case 2:     k = keywords2Char; break;
+            case 3:     k = keywords3Char; break;
+            case 4:     k = keywords4Char; break;
+            case 5:     k = keywords5Char; break;
+            case 6:     k = keywords6Char; break;
+
+            default:
+                if (tokenLength < 2 || tokenLength > 16)
+                    return false;
+
+                k = keywordsOther;
+                break;
+        }
+
+        int i = 0;
+        while (k[i] != 0)
+        {
+            if (k[i][0] == token[0] && CharacterFunctions::compare (k[i], token) == 0)
+                return true;
+
+            ++i;
+        }
+
         return false;
-
-    return true;
-}
-
-static bool isHexDigit (const juce_wchar c) throw()
-{
-    return (c >= '0' && c <= '9')
-            || (c >= 'a' && c <= 'f')
-            || (c >= 'A' && c <= 'F');
-}
-
-static bool parseHexLiteral (CodeDocument::Iterator& source) throw()
-{
-    if (source.nextChar() != '0')
-        return false;
-
-    juce_wchar c = source.nextChar();
-    if (c != 'x' && c != 'X')
-        return false;
-
-    int numDigits = 0;
-    while (isHexDigit (source.peekNextChar()))
-    {
-        ++numDigits;
-        source.skip();
     }
 
-    if (numDigits == 0)
-        return false;
-
-    return skipNumberSuffix (source);
-}
-
-static bool isOctalDigit (const juce_wchar c) throw()
-{
-    return c >= '0' && c <= '7';
-}
-
-static bool parseOctalLiteral (CodeDocument::Iterator& source) throw()
-{
-    if (source.nextChar() != '0')
-        return false;
-
-    if (! isOctalDigit (source.nextChar()))
-         return false;
-
-    while (isOctalDigit (source.peekNextChar()))
-        source.skip();
-
-    return skipNumberSuffix (source);
-}
-
-static bool isDecimalDigit (const juce_wchar c) throw()
-{
-    return c >= '0' && c <= '9';
-}
-
-static bool parseDecimalLiteral (CodeDocument::Iterator& source) throw()
-{
-    int numChars = 0;
-    while (isDecimalDigit (source.peekNextChar()))
+    static int parseIdentifier (CodeDocument::Iterator& source) throw()
     {
-        ++numChars;
-        source.skip();
+        int tokenLength = 0;
+        juce_wchar possibleIdentifier [19];
+
+        while (isIdentifierBody (source.peekNextChar()))
+        {
+            const juce_wchar c = source.nextChar();
+
+            if (tokenLength < numElementsInArray (possibleIdentifier) - 1)
+                possibleIdentifier [tokenLength] = c;
+
+            ++tokenLength;
+        }
+
+        if (tokenLength > 1 && tokenLength <= 16)
+        {
+            possibleIdentifier [tokenLength] = 0;
+
+            if (isReservedKeyword (possibleIdentifier, tokenLength))
+                return CPlusPlusCodeTokeniser::tokenType_builtInKeyword;
+        }
+
+        return CPlusPlusCodeTokeniser::tokenType_identifier;
     }
 
-    if (numChars == 0)
-        return false;
-
-    return skipNumberSuffix (source);
-}
-
-static bool parseFloatLiteral (CodeDocument::Iterator& source) throw()
-{
-    int numDigits = 0;
-
-    while (isDecimalDigit (source.peekNextChar()))
+    static bool skipNumberSuffix (CodeDocument::Iterator& source)
     {
-        source.skip();
-        ++numDigits;
+        const juce_wchar c = source.peekNextChar();
+        if (c == 'l' || c == 'L' || c == 'u' || c == 'U')
+            source.skip();
+
+        if (CharacterFunctions::isLetterOrDigit (source.peekNextChar()))
+            return false;
+
+        return true;
     }
 
-    const bool hasPoint = (source.peekNextChar() == '.');
-
-    if (hasPoint)
+    static bool isHexDigit (const juce_wchar c) throw()
     {
-        source.skip();
+        return (c >= '0' && c <= '9')
+                || (c >= 'a' && c <= 'f')
+                || (c >= 'A' && c <= 'F');
+    }
+
+    static bool parseHexLiteral (CodeDocument::Iterator& source) throw()
+    {
+        if (source.nextChar() != '0')
+            return false;
+
+        juce_wchar c = source.nextChar();
+        if (c != 'x' && c != 'X')
+            return false;
+
+        int numDigits = 0;
+        while (isHexDigit (source.peekNextChar()))
+        {
+            ++numDigits;
+            source.skip();
+        }
+
+        if (numDigits == 0)
+            return false;
+
+        return skipNumberSuffix (source);
+    }
+
+    static bool isOctalDigit (const juce_wchar c) throw()
+    {
+        return c >= '0' && c <= '7';
+    }
+
+    static bool parseOctalLiteral (CodeDocument::Iterator& source) throw()
+    {
+        if (source.nextChar() != '0')
+            return false;
+
+        if (! isOctalDigit (source.nextChar()))
+             return false;
+
+        while (isOctalDigit (source.peekNextChar()))
+            source.skip();
+
+        return skipNumberSuffix (source);
+    }
+
+    static bool isDecimalDigit (const juce_wchar c) throw()
+    {
+        return c >= '0' && c <= '9';
+    }
+
+    static bool parseDecimalLiteral (CodeDocument::Iterator& source) throw()
+    {
+        int numChars = 0;
+        while (isDecimalDigit (source.peekNextChar()))
+        {
+            ++numChars;
+            source.skip();
+        }
+
+        if (numChars == 0)
+            return false;
+
+        return skipNumberSuffix (source);
+    }
+
+    static bool parseFloatLiteral (CodeDocument::Iterator& source) throw()
+    {
+        int numDigits = 0;
 
         while (isDecimalDigit (source.peekNextChar()))
         {
             source.skip();
             ++numDigits;
         }
-    }
 
-    if (numDigits == 0)
-        return false;
+        const bool hasPoint = (source.peekNextChar() == '.');
 
-    juce_wchar c = source.peekNextChar();
-    const bool hasExponent = (c == 'e' || c == 'E');
-
-    if (hasExponent)
-    {
-        source.skip();
-
-        c = source.peekNextChar();
-        if (c == '+' || c == '-')
-            source.skip();
-
-        int numExpDigits = 0;
-        while (isDecimalDigit (source.peekNextChar()))
+        if (hasPoint)
         {
             source.skip();
-            ++numExpDigits;
+
+            while (isDecimalDigit (source.peekNextChar()))
+            {
+                source.skip();
+                ++numDigits;
+            }
         }
 
-        if (numExpDigits == 0)
+        if (numDigits == 0)
             return false;
-    }
 
-    c = source.peekNextChar();
-    if (c == 'f' || c == 'F')
-        source.skip();
-    else if (! (hasExponent || hasPoint))
-        return false;
+        juce_wchar c = source.peekNextChar();
+        const bool hasExponent = (c == 'e' || c == 'E');
 
-    return true;
-}
-
-static int parseNumber (CodeDocument::Iterator& source)
-{
-    const CodeDocument::Iterator original (source);
-
-    if (parseFloatLiteral (source))
-        return CPlusPlusCodeTokeniser::tokenType_floatLiteral;
-
-    source = original;
-
-    if (parseHexLiteral (source))
-        return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
-
-    source = original;
-
-    if (parseOctalLiteral (source))
-        return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
-
-    source = original;
-
-    if (parseDecimalLiteral (source))
-        return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
-
-    source = original;
-    source.skip();
-
-    return CPlusPlusCodeTokeniser::tokenType_error;
-}
-
-static void skipQuotedString (CodeDocument::Iterator& source) throw()
-{
-    const juce_wchar quote = source.nextChar();
-
-    for (;;)
-    {
-        const juce_wchar c = source.nextChar();
-
-        if (c == quote || c == 0)
-            break;
-
-        if (c == '\\')
+        if (hasExponent)
+        {
             source.skip();
+
+            c = source.peekNextChar();
+            if (c == '+' || c == '-')
+                source.skip();
+
+            int numExpDigits = 0;
+            while (isDecimalDigit (source.peekNextChar()))
+            {
+                source.skip();
+                ++numExpDigits;
+            }
+
+            if (numExpDigits == 0)
+                return false;
+        }
+
+        c = source.peekNextChar();
+        if (c == 'f' || c == 'F')
+            source.skip();
+        else if (! (hasExponent || hasPoint))
+            return false;
+
+        return true;
     }
-}
 
-static void skipComment (CodeDocument::Iterator& source) throw()
-{
-    bool lastWasStar = false;
-
-    for (;;)
+    static int parseNumber (CodeDocument::Iterator& source)
     {
-        const juce_wchar c = source.nextChar();
+        const CodeDocument::Iterator original (source);
 
-        if (c == 0 || (c == '/' && lastWasStar))
-            break;
+        if (parseFloatLiteral (source))
+            return CPlusPlusCodeTokeniser::tokenType_floatLiteral;
 
-        lastWasStar = (c == '*');
+        source = original;
+
+        if (parseHexLiteral (source))
+            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+
+        source = original;
+
+        if (parseOctalLiteral (source))
+            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+
+        source = original;
+
+        if (parseDecimalLiteral (source))
+            return CPlusPlusCodeTokeniser::tokenType_integerLiteral;
+
+        source = original;
+        source.skip();
+
+        return CPlusPlusCodeTokeniser::tokenType_error;
     }
-}
 
+    static void skipQuotedString (CodeDocument::Iterator& source) throw()
+    {
+        const juce_wchar quote = source.nextChar();
+
+        for (;;)
+        {
+            const juce_wchar c = source.nextChar();
+
+            if (c == quote || c == 0)
+                break;
+
+            if (c == '\\')
+                source.skip();
+        }
+    }
+
+    static void skipComment (CodeDocument::Iterator& source) throw()
+    {
+        bool lastWasStar = false;
+
+        for (;;)
+        {
+            const juce_wchar c = source.nextChar();
+
+            if (c == 0 || (c == '/' && lastWasStar))
+                break;
+
+            lastWasStar = (c == '*');
+        }
+    }
 }
 
 //==============================================================================

@@ -106,6 +106,9 @@ public:
 
 protected:
     BigInteger part1, part2;
+
+private:
+    static const BigInteger findBestCommonDivisor (const BigInteger& p, const BigInteger& q);
 };
 
 

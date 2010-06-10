@@ -27,7 +27,6 @@
 
 BEGIN_JUCE_NAMESPACE
 
-
 #include "juce_TopLevelWindow.h"
 #include "../windows/juce_ComponentPeer.h"
 #include "../juce_Desktop.h"
