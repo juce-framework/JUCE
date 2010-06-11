@@ -323,7 +323,7 @@ public:
 protected:
     virtual const String getProjectVersionString() const    { return "9.00"; }
     virtual const String getSolutionVersionString() const   { return String ("10.00") + newLine + "# Visual C++ Express 2008"; }
-    
+
     const File getVCProjFile() const    { return getProjectFile (".vcproj"); }
     const File getSLNFile() const       { return getProjectFile (".sln"); }
 
@@ -427,7 +427,7 @@ protected:
         addGroup (files, "Juce VST Wrapper", getVSTFilesRequired(), false);
         addGroup (files, "Juce RTAS Wrapper", getRTASFilesRequired(), true);
     }
-    
+
     //==============================================================================
     XmlElement* createToolElement (XmlElement& parent, const String& toolName) const
     {
@@ -1006,11 +1006,11 @@ protected:
         {
             XmlElement* configsGroup = projectXml.createNewChildElement ("ItemGroup");
             configsGroup->setAttribute ("Label", "ProjectConfigurations");
-            
+
             for (int i = 0; i < project.getNumConfigurations(); ++i)
             {
                 Project::BuildConfiguration config (project.getConfiguration (i));
-                
+
                 XmlElement* e = configsGroup->createNewChildElement ("ProjectConfiguration");
                 e->setAttribute ("Include", createConfigName (config));
                 e->createNewChildElement ("Configuration")->addTextElement (config.getName().toString());
@@ -1028,11 +1028,11 @@ protected:
             XmlElement* imports = projectXml.createNewChildElement ("Import");
             imports->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
         }
-        
+
         for (int i = 0; i < project.getNumConfigurations(); ++i)
         {
             Project::BuildConfiguration config (project.getConfiguration (i));
-            
+
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
             e->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
             e->setAttribute ("Label", "Configuration");
@@ -1075,7 +1075,7 @@ protected:
             for (int i = 0; i < project.getNumConfigurations(); ++i)
             {
                 Project::BuildConfiguration config (project.getConfiguration (i));
-                
+
                 XmlElement* outdir = props->createNewChildElement ("OutDir");
                 outdir->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
                 outdir->addTextElement (getConfigTargetPath (config) + "\\");
@@ -1110,10 +1110,10 @@ protected:
             midl->createNewChildElement ("TargetEnvironment")->addTextElement ("Win32");
             //midl->createNewChildElement ("TypeLibraryName")->addTextElement ("");
             midl->createNewChildElement ("HeaderFileName");
-            
+
             XmlElement* cl = group->createNewChildElement ("ClCompile");
             cl->createNewChildElement ("Optimization")->addTextElement (isDebug ? "Disabled" : "MaxSpeed");
-            
+
             if (isDebug)
                 cl->createNewChildElement ("DebugInformationFormat")->addTextElement ("EditAndContinue");
 
@@ -1130,7 +1130,7 @@ protected:
             cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/"));
             cl->createNewChildElement ("WarningLevel")->addTextElement ("Level4");
             cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-            
+
             XmlElement* res = group->createNewChildElement ("ResourceCompile");
             res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
                                                                                             : "NDEBUG;%(PreprocessorDefinitions)");
@@ -1138,19 +1138,19 @@ protected:
             XmlElement* link = group->createNewChildElement ("Link");
             link->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (binariesPath + "/" + outputFileName));
             link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-            link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)" 
+            link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                     : "%(IgnoreSpecificDefaultLibraries)");
             link->createNewChildElement ("GenerateDebugInformation")->addTextElement (isDebug ? "true" : "false");
             link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".pdb"));
             link->createNewChildElement ("SubSystem")->addTextElement (project.isCommandLineApp() ? "Console" : "Windows");
             link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
-            
+
             if (! isDebug)
             {
                 link->createNewChildElement ("OptimizeReferences")->addTextElement ("true");
                 link->createNewChildElement ("EnableCOMDATFolding")->addTextElement ("true");
             }
-            
+
             XmlElement* bsc = group->createNewChildElement ("Bscmake");
             bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
             bsc->createNewChildElement ("OutputFile")->addTextElement (FileHelpers::windowsStylePath (intermediatesPath + "/" + binaryName + ".bsc"));
@@ -1159,7 +1159,7 @@ protected:
         {
             XmlElement* cppFiles = projectXml.createNewChildElement ("ItemGroup");
             XmlElement* headerFiles = projectXml.createNewChildElement ("ItemGroup");
-        
+
             addFilesToCompile (project.getMainGroup(), *cppFiles, *headerFiles);
             addFilesToCompile (juceWrapperFiles, *cppFiles, *headerFiles, false);
             addFilesToCompile (getVSTFilesRequired(), *cppFiles, *headerFiles, false);
@@ -1189,7 +1189,7 @@ protected:
         jassertfalse;
         return String::empty;
     }
-    
+
     //==============================================================================
     void addFileToCompile (const RelativePath& file, XmlElement& cpps, XmlElement& headers, const bool excludeFromBuild, const bool useStdcall)
     {
@@ -1251,12 +1251,12 @@ protected:
     void addFileToFilter (const RelativePath& file, const String& groupPath, XmlElement& cpps, XmlElement& headers)
     {
         XmlElement* e;
-        
+
         if (file.hasFileExtension ("h"))
             e = headers.createNewChildElement ("ClInclude");
         else
             e = cpps.createNewChildElement ("ClCompile");
-            
+
         jassert (file.getRoot() == RelativePath::buildTargetFolder);
         e->setAttribute ("Include", file.toWindowsStyle());
         e->createNewChildElement ("Filter")->addTextElement (groupPath);
@@ -1267,9 +1267,9 @@ protected:
         if (projectItem.isGroup())
         {
             addFilterGroup (groups, path);
-            
+
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addFilesToFilter (projectItem.getChild(i), 
+                addFilesToFilter (projectItem.getChild(i),
                                   (path.isEmpty() ? String::empty : (path + "\\")) + projectItem.getChild(i).getName().toString(),
                                   cpps, headers, groups);
         }
@@ -1277,7 +1277,7 @@ protected:
         {
             if (projectItem.shouldBeAddedToTargetProject())
             {
-                addFileToFilter (RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder), 
+                addFileToFilter (RelativePath (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder),
                                  path.upToLastOccurrenceOf ("\\", false, false), cpps, headers);
             }
         }
@@ -1298,7 +1298,7 @@ protected:
     {
         filterXml.setAttribute ("ToolsVersion", "4.0");
         filterXml.setAttribute ("xmlns", "http://schemas.microsoft.com/developer/msbuild/2003");
-        
+
         XmlElement* groups = filterXml.createNewChildElement ("ItemGroup");
         XmlElement* cpps = filterXml.createNewChildElement ("ItemGroup");
         XmlElement* headers = filterXml.createNewChildElement ("ItemGroup");

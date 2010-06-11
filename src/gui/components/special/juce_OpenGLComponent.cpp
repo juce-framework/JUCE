@@ -164,7 +164,7 @@ public:
         if (wasShowing != isShowingNow)
         {
             wasShowing = isShowingNow;
-            
+
             if (! isShowingNow)
             {
                 const ScopedLock sl (owner->getContextLock());
