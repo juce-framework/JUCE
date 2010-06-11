@@ -160,7 +160,7 @@ namespace XmlOutputFunctions
                 || (character >= '0' && character <= '9'))
             return true;
 
-        const char* t = " .,;:-()_+=?!'#@[]/\\*%~{}";
+        const char* t = " .,;:-()_+=?!'#@[]/\\*%~{}$|";
 
         do
         {
@@ -189,7 +189,7 @@ namespace XmlOutputFunctions
 
     static bool isLegalXmlChar (const uint32 c) throw()
     {
-        static const unsigned char legalChars[] = { 0, 0, 0, 0, 171, 255, 255, 175, 255, 255, 255, 191, 254, 255, 255, 111 };
+        static const unsigned char legalChars[] = { 0, 0, 0, 0, 187, 255, 255, 175, 255, 255, 255, 191, 254, 255, 255, 127 };
 
         return c < sizeof (legalChars) * 8
                  && (legalChars [c >> 3] & (1 << (c & 7))) != 0;

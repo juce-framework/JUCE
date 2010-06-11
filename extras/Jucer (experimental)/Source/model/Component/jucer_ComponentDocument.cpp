@@ -715,7 +715,7 @@ void ComponentDocument::MarkerList::renameAnchor (const String& oldName, const S
     document.renameAnchor (oldName, newName);
 }
 
-void ComponentDocument::MarkerList::createMarker (const String& name, int position)
+void ComponentDocument::MarkerList::createMarker (const String& name, double position)
 {
     ValueTree marker (getMarkerTag());
     marker.setProperty (getMarkerNameProperty(), name, 0);

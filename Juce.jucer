@@ -24,6 +24,10 @@
             rtasFolder="c:\SDKs\PT_80_SDK" libraryType="2" juceFolder="."
             extraDefs="JUCE_DLL_BUILD=1 JUCE_DLL=1" libraryName_Debug="JUCE_debug.dll"
             libraryName_Release="JUCE.dll"/>
+    <VS2010 targetFolder="Builds/VisualStudio2010" vstFolder="c:\SDKs\vstsdk2.4"
+            rtasFolder="c:\SDKs\PT_80_SDK" libraryType="1" juceFolder="."
+            extraDefs="" libraryName_Debug="jucelib_static_Win32_debug.lib"
+            libraryName_Release="jucelib_static_Win32.lib"/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="jucedebug"

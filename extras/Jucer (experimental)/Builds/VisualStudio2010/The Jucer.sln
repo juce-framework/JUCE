@@ -1,0 +1,19 @@
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+Project("{4E9D0CBA-BFAB-E5E4-0A60-A20FD97F37CA}") = "The Jucer", "The Jucer.vcxproj", "{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Debug|Win32.Build.0 = Debug|Win32
+		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Release|Win32.ActiveCfg = Release|Win32
+		{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

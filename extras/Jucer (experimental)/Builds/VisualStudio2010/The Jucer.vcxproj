@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C9C4A72E-8CC9-D57E-C0D0-2E6109E48884}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+  <ImportGroup Label="ExtensionSettings"/>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+            Label="LocalAppDataPlatform"/>
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros"/>
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Jucer</TargetName>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Jucer</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <HeaderFileName/>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>JUCER_VS2010_78A501D;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader/>
+      <AssemblerListingLocation>.\Debug\</AssemblerListingLocation>
+      <ObjectFileName>.\Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug\</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>.\Debug\Jucer.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug\Jucer.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug\Jucer.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <HeaderFileName/>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>JUCER_VS2010_78A501D;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader/>
+      <AssemblerListingLocation>.\Release\</AssemblerListingLocation>
+      <ObjectFileName>.\Release\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release\</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Link>
+      <OutputFile>.\Release\Jucer.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Release\Jucer.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release\Jucer.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Source\model\Component\jucer_CodeGenerator.cpp"/>
+    <ClCompile Include="..\..\Source\model\Component\jucer_ComponentDocument.cpp"/>
+    <ClCompile Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.cpp"/>
+    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp"/>
+    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.cpp"/>
+    <ClCompile Include="..\..\Source\model\Project\jucer_NewFileWizard.cpp"/>
+    <ClCompile Include="..\..\Source\model\Project\jucer_Project.cpp"/>
+    <ClCompile Include="..\..\Source\model\Project\jucer_ProjectExporter.cpp"/>
+    <ClCompile Include="..\..\Source\model\Project\jucer_ProjectWizard.cpp"/>
+    <ClCompile Include="..\..\Source\model\Project\jucer_ResourceFile.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.cpp"/>
+    <ClCompile Include="..\..\Source\ui\jucer_DocumentEditorComponent.cpp"/>
+    <ClCompile Include="..\..\Source\ui\jucer_JucerTreeViewBase.cpp"/>
+    <ClCompile Include="..\..\Source\ui\jucer_MainWindow.cpp"/>
+    <ClCompile Include="..\..\Source\ui\jucer_OpenDocumentManager.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.cpp"/>
+    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.cpp"/>
+    <ClCompile Include="..\..\Source\utility\jucer_CodeHelpers.cpp"/>
+    <ClCompile Include="..\..\Source\utility\jucer_FileHelpers.cpp"/>
+    <ClCompile Include="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
+    <ClCompile Include="..\..\Source\utility\jucer_StoredSettings.cpp"/>
+    <ClCompile Include="..\..\Source\jucer_Main.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\JuceLibraryCode1.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Source\model\Component\jucer_CodeGenerator.h"/>
+    <ClInclude Include="..\..\Source\model\Component\jucer_ComponentDocument.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComboBox.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypes.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GenericComponent.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GroupComponent.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_JucerComponent.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Label.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Slider.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TabbedComponent.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextButton.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextEditor.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ToggleButton.h"/>
+    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Viewport.h"/>
+    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableDocument.h"/>
+    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_NewFileWizard.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_Project.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExporter.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_Make.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_MSVC.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_XCode.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectSaver.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectWizard.h"/>
+    <ClInclude Include="..\..\Source\model\Project\jucer_ResourceFile.h"/>
+    <ClInclude Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h"/>
+    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.h"/>
+    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.h"/>
+    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorCanvas.h"/>
+    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorToolbar.h"/>
+    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorTreeView.h"/>
+    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.h"/>
+    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorDragOperation.h"/>
+    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorPanel.h"/>
+    <ClInclude Include="..\..\Source\ui\jucer_CommandIDs.h"/>
+    <ClInclude Include="..\..\Source\ui\jucer_DocumentEditorComponent.h"/>
+    <ClInclude Include="..\..\Source\ui\jucer_JucerTreeViewBase.h"/>
+    <ClInclude Include="..\..\Source\ui\jucer_MainWindow.h"/>
+    <ClInclude Include="..\..\Source\ui\jucer_OpenDocumentManager.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.h"/>
+    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_CodeHelpers.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_ColourPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_Colours.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_CoordinatePropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_FileHelpers.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_FillTypePropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_FontPropertyComponent.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_MarkerListBase.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_MiscUtilities.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_RelativePath.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_StoredSettings.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_TickIterator.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_ValueSourceHelpers.h"/>
+    <ClInclude Include="..\..\Source\jucer_Headers.h"/>
+    <ClInclude Include="..\..\Source\templates\jucer_AudioPluginEditorTemplate.h"/>
+    <ClInclude Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h"/>
+    <ClInclude Include="..\..\Source\templates\jucer_ComponentTemplate.h"/>
+    <ClInclude Include="..\..\Source\templates\jucer_NewCppFileTemplate.h"/>
+    <ClInclude Include="..\..\Source\templates\jucer_WindowTemplate.h"/>
+    <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>
+    <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+  <ImportGroup Label="ExtensionTargets"/>
+</Project>

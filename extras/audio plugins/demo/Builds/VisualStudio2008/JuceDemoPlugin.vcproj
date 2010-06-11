@@ -10,7 +10,7 @@
   </Platforms>
   <ToolFiles/>
   <Configurations>
-    <Configuration Name="Debug&#124;Win32"
+    <Configuration Name="Debug|Win32"
                    OutputDirectory=".\Debug"
                    IntermediateDirectory=".\Debug"
                    ConfigurationType="2"
@@ -65,7 +65,7 @@
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
-    <Configuration Name="Release&#124;Win32"
+    <Configuration Name="Release|Win32"
                    OutputDirectory=".\Release"
                    IntermediateDirectory=".\Release"
                    ConfigurationType="2"

@@ -4,7 +4,7 @@
 <plist>
   <dict>
     <key>CFBundleExecutable</key>
-    <string>&#36;{EXECUTABLE_NAME}</string>
+    <string>${EXECUTABLE_NAME}</string>
     <key>CFBundleIconFile</key>
     <string></string>
     <key>CFBundleIdentifier</key>

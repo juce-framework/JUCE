@@ -10,7 +10,7 @@
   </Platforms>
   <ToolFiles/>
   <Configurations>
-    <Configuration Name="Debug&#124;Win32"
+    <Configuration Name="Debug|Win32"
                    OutputDirectory=".\..\..\bin"
                    IntermediateDirectory=".\Debug"
                    ConfigurationType="2"
@@ -53,7 +53,7 @@
       <Tool Name="VCFxCopTool"/>
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
-    <Configuration Name="Release&#124;Win32"
+    <Configuration Name="Release|Win32"
                    OutputDirectory=".\..\..\bin"
                    IntermediateDirectory=".\Release"
                    ConfigurationType="2"

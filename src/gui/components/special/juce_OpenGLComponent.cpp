@@ -164,7 +164,12 @@ public:
         if (wasShowing != isShowingNow)
         {
             wasShowing = isShowingNow;
-            owner->updateContextPosition();
+            
+            if (! isShowingNow)
+            {
+                const ScopedLock sl (owner->getContextLock());
+                owner->deleteContext();
+            }
         }
     }
 

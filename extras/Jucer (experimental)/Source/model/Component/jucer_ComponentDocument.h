@@ -116,7 +116,7 @@ public:
         ValueTree getMarker (int index) const                               { return group.getChild (index); }
         ValueTree getMarkerNamed (const String& name) const                 { return group.getChildWithProperty (getMarkerNameProperty(), name); }
         bool contains (const ValueTree& markerState) const                  { return markerState.isAChildOf (group); }
-        void createMarker (const String& name, int position);
+        void createMarker (const String& name, double position);
         void deleteMarker (ValueTree& markerState);
 
         ComponentDocument& getDocument() throw()    { return document; }

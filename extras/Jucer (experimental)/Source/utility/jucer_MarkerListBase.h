@@ -60,7 +60,7 @@ public:
         }
     }
 
-    virtual void createMarker (const String& name, int position) = 0;
+    virtual void createMarker (const String& name, double position) = 0;
     virtual void deleteMarker (ValueTree& markerState) = 0;
 
     //==============================================================================

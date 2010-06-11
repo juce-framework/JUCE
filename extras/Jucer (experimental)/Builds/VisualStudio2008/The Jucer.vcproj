@@ -10,7 +10,7 @@
   </Platforms>
   <ToolFiles/>
   <Configurations>
-    <Configuration Name="Debug&#124;Win32"
+    <Configuration Name="Debug|Win32"
                    OutputDirectory=".\Debug"
                    IntermediateDirectory=".\Debug"
                    ConfigurationType="1"
@@ -65,7 +65,7 @@
       <Tool Name="VCAppVerifierTool"/>
       <Tool Name="VCPostBuildEventTool"/>
     </Configuration>
-    <Configuration Name="Release&#124;Win32"
+    <Configuration Name="Release|Win32"
                    OutputDirectory=".\Release"
                    IntermediateDirectory=".\Release"
                    ConfigurationType="1"
@@ -251,151 +251,151 @@
       </Filter>
       <Filter Name="Resources">
         <File RelativePath="..\..\Source\templates\brushed_aluminium.png">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\AudioPluginXCodeScript.txt">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginEditorTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginEditorTemplate.h">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.h">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_MainConsoleAppTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_MainTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_NewCppFileTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_NewCppFileTemplate.h">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_WindowTemplate.cpp">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_WindowTemplate.h">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\juce_icon.png">
-          <FileConfiguration Name="Debug&#124;Win32"
+          <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
-          <FileConfiguration Name="Release&#124;Win32"
+          <FileConfiguration Name="Release|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>

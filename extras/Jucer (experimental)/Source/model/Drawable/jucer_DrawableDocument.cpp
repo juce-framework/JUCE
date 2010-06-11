@@ -468,9 +468,9 @@ bool DrawableDocument::MarkerList::contains (const ValueTree& markerState) const
     return object.containsMarker (isX, markerState);
 }
 
-void DrawableDocument::MarkerList::createMarker (const String& name, int position)
+void DrawableDocument::MarkerList::createMarker (const String& name, double position)
 {
-    object.setMarker (isX, DrawableComposite::Marker (name, RelativeCoordinate ((double) position, isX)),
+    object.setMarker (isX, DrawableComposite::Marker (name, RelativeCoordinate (position, isX)),
                       getUndoManager());
 }
 

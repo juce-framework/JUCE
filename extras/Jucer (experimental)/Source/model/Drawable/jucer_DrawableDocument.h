@@ -83,7 +83,7 @@ public:
         ValueTree getMarker (int index) const;
         ValueTree getMarkerNamed (const String& name) const;
         bool contains (const ValueTree& markerState) const;
-        void createMarker (const String& name, int position);
+        void createMarker (const String& name, double position);
         void deleteMarker (ValueTree& markerState);
 
     private:

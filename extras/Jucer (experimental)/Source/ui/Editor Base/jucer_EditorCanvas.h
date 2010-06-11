@@ -49,6 +49,8 @@ public:
     //==============================================================================
     void paint (Graphics& g);
     void resized();
+    bool keyStateChanged (bool isKeyDown);
+    bool keyPressed (const KeyPress& key);
 
     const Rectangle<int> getContentArea() const;
 
@@ -169,10 +171,29 @@ protected:
     class DocumentResizeFrame;
     class OverlayComponent;
 
+    class SpacebarDragOverlay  : public Component
+    {
+    public:
+        SpacebarDragOverlay();
+        ~SpacebarDragOverlay();
+
+        bool updateVisibility();
+
+        void paint (Graphics&);
+        void mouseMove (const MouseEvent& e);
+        void mouseDown (const MouseEvent& e);
+        void mouseDrag (const MouseEvent& e);
+        void modifierKeysChanged (const ModifierKeys& modifiers);
+
+    private:
+        Point<int> dragStart;
+    };
+
     //==============================================================================
-    Component* componentHolder;
-    OverlayComponent* overlay;
-    DocumentResizeFrame* resizeFrame;
+    ScopedPointer<Component> componentHolder;
+    ScopedPointer<OverlayComponent> overlay;
+    ScopedPointer<DocumentResizeFrame> resizeFrame;
+    SpacebarDragOverlay spacebarDragOverlay;
     ScopedPointer<DragOperation> dragger;
 
     void handleAsyncUpdate();

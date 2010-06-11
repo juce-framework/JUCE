@@ -597,6 +597,7 @@ EditorCanvasBase::EditorCanvasBase()
     : border (8, 8, 14, 14)
 {
     //setOpaque (true);
+    addChildComponent (&spacebarDragOverlay);
 }
 
 EditorCanvasBase::~EditorCanvasBase()
@@ -616,8 +617,9 @@ void EditorCanvasBase::initialise()
 void EditorCanvasBase::shutdown()
 {
     dragger = 0;
-    deleteAndZero (overlay);
-    deleteAllChildren();
+    resizeFrame = 0;
+    overlay = 0;
+    componentHolder = 0;
 }
 
 EditorPanelBase* EditorCanvasBase::getPanel() const
@@ -680,6 +682,16 @@ void EditorCanvasBase::paint (Graphics& g)
 {
 }
 
+bool EditorCanvasBase::keyStateChanged (bool)
+{
+    return spacebarDragOverlay.updateVisibility();
+}
+
+bool EditorCanvasBase::keyPressed (const KeyPress& key)
+{
+    return key.isKeyCode (KeyPress::spaceKey); // required to consume the spacebar events and avoid a warning beep
+}
+
 void EditorCanvasBase::setScale (const Scale& newScale)
 {
     jassertfalse;
@@ -735,6 +747,7 @@ void EditorCanvasBase::resized()
     componentHolder->setBounds (getContentArea());
     overlay->setBounds (getLocalBounds());
     resizeFrame->setBounds (getLocalBounds());
+    spacebarDragOverlay.setBounds (getLocalBounds());
     overlay->update();
     handleUpdateNowIfNeeded();
 }
@@ -796,6 +809,58 @@ const Point<float> EditorCanvasBase::OverlayItemComponent::pointToLocalSpace (co
     return canvas->objectSpaceToScreenSpace (p)
             + (canvas->getComponentHolder()->relativePositionToOtherComponent (getParentComponent(), Point<int>())
                 - getPosition()).toFloat();
+}
+
+//==============================================================================
+EditorCanvasBase::SpacebarDragOverlay::SpacebarDragOverlay()
+{
+    setAlwaysOnTop (true);
+    setMouseCursor (MouseCursor::DraggingHandCursor);
+}
+
+EditorCanvasBase::SpacebarDragOverlay::~SpacebarDragOverlay()
+{
+}
+
+bool EditorCanvasBase::SpacebarDragOverlay::updateVisibility()
+{
+    bool isSpaceDown = KeyPress::isKeyCurrentlyDown (KeyPress::spaceKey);
+
+    if (isSpaceDown == isVisible())
+        return false;
+
+    setVisible (isSpaceDown);
+    return true;
+}
+
+void EditorCanvasBase::SpacebarDragOverlay::paint (Graphics&)
+{
+}
+
+void EditorCanvasBase::SpacebarDragOverlay::mouseMove (const MouseEvent& e)
+{
+    updateVisibility();
+}
+
+void EditorCanvasBase::SpacebarDragOverlay::mouseDown (const MouseEvent& e)
+{
+    Viewport* vp = findParentComponentOfClass ((Viewport*) 0);
+
+    if (vp != 0)
+        dragStart = vp->getViewPosition();
+}
+
+void EditorCanvasBase::SpacebarDragOverlay::mouseDrag (const MouseEvent& e)
+{
+    Viewport* vp = findParentComponentOfClass ((Viewport*) 0);
+
+    if (vp != 0)
+        vp->setViewPosition (dragStart - Point<int> (e.getDistanceFromDragStartX(),
+                                                     e.getDistanceFromDragStartY()));
+}
+
+void EditorCanvasBase::SpacebarDragOverlay::modifierKeysChanged (const ModifierKeys& modifiers)
+{
 }
 
 //==============================================================================
