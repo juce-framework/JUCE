@@ -82,7 +82,7 @@ public:
         setTopLeftPosition ((int) x, (int) y);
     }
 
-    bool hitTest (int x, int y)
+    bool hitTest (int /*x*/, int /*y*/)
     {
         return false;
     }
@@ -110,7 +110,7 @@ public:
         deleteAllChildren();
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent&)
     {
         dragger.startDraggingComponent (this, 0);
     }
@@ -647,7 +647,7 @@ class ToolbarDemoComp   : public Component,
                           public ButtonListener
 {
 public:
-    ToolbarDemoComp (ApplicationCommandManager* commandManager)
+    ToolbarDemoComp()
     {
         // Create and add the toolbar...
         addAndMakeVisible (toolbar = new Toolbar());
@@ -701,7 +701,7 @@ public:
             toolbar->setBounds (0, 0, getWidth(), (int) depthSlider->getValue());
     }
 
-    void sliderValueChanged (Slider* slider)
+    void sliderValueChanged (Slider*)
     {
         resized();
     }
@@ -883,8 +883,7 @@ private:
                 delete comboBox;
             }
 
-            bool getToolbarItemSizes (int toolbarDepth,
-                                      bool isToolbarVertical,
+            bool getToolbarItemSizes (int /*toolbarDepth*/, bool isToolbarVertical,
                                       int& preferredSize, int& minSize, int& maxSize)
             {
                 if (isToolbarVertical)
@@ -921,11 +920,11 @@ class DemoTabbedComponent  : public TabbedComponent,
                              public ButtonListener
 {
 public:
-    DemoTabbedComponent (ApplicationCommandManager* commandManager)
+    DemoTabbedComponent()
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
         addTab ("sliders",       getRandomBrightColour(), createSlidersPage(),      true);
-        addTab ("toolbars",      getRandomBrightColour(), new ToolbarDemoComp (commandManager),    true);
+        addTab ("toolbars",      getRandomBrightColour(), new ToolbarDemoComp(),    true);
         addTab ("buttons",       getRandomBrightColour(), new ButtonsPage (this),   true);
         addTab ("radio buttons", getRandomBrightColour(), createRadioButtonPage(),  true);
         addTab ("misc widgets",  getRandomBrightColour(), createMiscPage(),         true);
@@ -1125,11 +1124,11 @@ class WidgetsDemo  : public Component,
 
 public:
     //==============================================================================
-    WidgetsDemo (ApplicationCommandManager* commandManager)
+    WidgetsDemo()
     {
         setName ("Widgets");
 
-        addAndMakeVisible (tabs = new DemoTabbedComponent (commandManager));
+        addAndMakeVisible (tabs = new DemoTabbedComponent());
 
         //==============================================================================
         menuButton = new TextButton ("click for a popup menu..",
@@ -1432,7 +1431,7 @@ public:
 
 
 //==============================================================================
-Component* createWidgetsDemo (ApplicationCommandManager* commandManager)
+Component* createWidgetsDemo()
 {
-    return new WidgetsDemo (commandManager);
+    return new WidgetsDemo();
 }

@@ -55,7 +55,7 @@ public:
         deleteAllChildren();
     }
 
-    void filenameComponentChanged (FilenameComponent* fileComponentThatHasChanged)
+    void filenameComponentChanged (FilenameComponent*)
     {
         File f (fileChooser->getCurrentFile());
         editor->loadContent (f.loadFileAsString());

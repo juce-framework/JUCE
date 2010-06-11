@@ -112,8 +112,7 @@ public:
         return StringArray ((const tchar**) names);
     }
 
-    const PopupMenu getMenuForIndex (int menuIndex,
-                                     const String& menuName)
+    const PopupMenu getMenuForIndex (int menuIndex, const String& /*menuName*/)
     {
         ApplicationCommandManager* const commandManager = mainWindow->commandManager;
 
@@ -168,8 +167,7 @@ public:
         return menu;
     }
 
-    void menuItemSelected (int menuItemID,
-                           int topLevelMenuIndex)
+    void menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/)
     {
         // most of our menu items are invoked automatically as commands, but we can handle the
         // other special cases here..
@@ -377,7 +375,7 @@ public:
             break;
 
         case showWidgets:
-            showDemo (createWidgetsDemo (mainWindow->commandManager));
+            showDemo (createWidgetsDemo());
             currentDemoId = showWidgets;
             break;
 
@@ -522,7 +520,7 @@ public:
     {
     }
 
-    void mouseDown (const MouseEvent& e)
+    void mouseDown (const MouseEvent&)
     {
         PopupMenu m;
         m.addItem (1, T("Quit the Juce demo"));

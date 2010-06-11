@@ -93,6 +93,18 @@ public:
     */
     void setViewPosition (int xPixelsOffset, int yPixelsOffset);
 
+    /** Changes the position of the viewed component.
+
+        The inner component will be moved so that the pixel at the top left of
+        the viewport will be the pixel at the specified coordinates within the
+        inner component.
+
+        This will update the scrollbars and might cause a call to visibleAreaChanged().
+
+        @see getViewPositionX, getViewPositionY, setViewPositionProportionately
+    */
+    void setViewPosition (const Point<int>& newPosition);
+
     /** Changes the view position as a proportion of the distance it can move.
 
         The values here are from 0.0 to 1.0 - where (0, 0) would put the

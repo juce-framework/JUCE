@@ -173,7 +173,11 @@ inline void swapVariables (Type& variable1, Type& variable2)
     @endcode
 */
 template <typename Type>
-inline int numElementsInArray (Type& array)         { return static_cast<int> (sizeof (array) / sizeof (array[0])); }
+inline int numElementsInArray (Type& array)
+{
+    (void) array; // (required to avoid a spurious warning in MS compilers)
+    return static_cast<int> (sizeof (array) / sizeof (array[0]));
+}
 
 //==============================================================================
 // Some useful maths functions that aren't always present with all compilers and build settings.

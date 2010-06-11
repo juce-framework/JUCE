@@ -146,8 +146,7 @@ public:
     }
 
     //==============================================================================
-    bool isInterestedInDragSource (const String& sourceDescription,
-                                   Component* sourceComponent)
+    bool isInterestedInDragSource (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
     {
         // normally you'd check the sourceDescription value to see if it's the
         // sort of object that you're interested in before returning true, but for
@@ -155,30 +154,23 @@ public:
         return true;
     }
 
-    void itemDragEnter (const String& sourceDescription,
-                        Component* sourceComponent,
-                        int x, int y)
+    void itemDragEnter (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
     {
         somethingIsBeingDraggedOver = true;
         repaint();
     }
 
-    void itemDragMove (const String& sourceDescription,
-                       Component* sourceComponent,
-                       int x, int y)
+    void itemDragMove (const String& /*sourceDescription*/, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
     {
     }
 
-    void itemDragExit (const String& sourceDescription,
-                       Component* sourceComponent)
+    void itemDragExit (const String& /*sourceDescription*/, Component* /*sourceComponent*/)
     {
         somethingIsBeingDraggedOver = false;
         repaint();
     }
 
-    void itemDropped (const String& sourceDescription,
-                      Component* sourceComponent,
-                      int x, int y)
+    void itemDropped (const String& sourceDescription, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
     {
         message = T("last rows dropped: ") + sourceDescription;
 

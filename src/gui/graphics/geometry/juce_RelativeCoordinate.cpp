@@ -79,20 +79,20 @@ namespace RelativeCoordinateHelpers
     };
 
     //==============================================================================
-    static void skipWhitespace (const String& s, int& i)
+    static void skipWhitespace (const juce_wchar* const s, int& i)
     {
         while (CharacterFunctions::isWhitespace (s[i]))
             ++i;
     }
 
-    static void skipComma (const String& s, int& i)
+    static void skipComma (const juce_wchar* const s, int& i)
     {
         skipWhitespace (s, i);
         if (s[i] == ',')
             ++i;
     }
 
-    static const String readAnchorName (const String& s, int& i)
+    static const String readAnchorName (const juce_wchar* const s, int& i)
     {
         skipWhitespace (s, i);
 
@@ -102,13 +102,13 @@ namespace RelativeCoordinateHelpers
             while (CharacterFunctions::isLetterOrDigit (s[i]) || s[i] == '_' || s[i] == '.')
                 ++i;
 
-            return s.substring (start, i);
+            return String (s + start, i - start);
         }
 
         return String::empty;
     }
 
-    static double readNumber (const String& s, int& i)
+    static double readNumber (const juce_wchar* const s, int& i)
     {
         skipWhitespace (s, i);
 
@@ -130,14 +130,14 @@ namespace RelativeCoordinateHelpers
                 ++i;
         }
 
-        const double value = s.substring (start, i).getDoubleValue();
+        const double value = String (s + start, i - start).getDoubleValue();
         while (CharacterFunctions::isWhitespace (s[i]) || s[i] == ',')
             ++i;
 
         return value;
     }
 
-    static const RelativeCoordinate readNextCoordinate (const String& s, int& i, const bool isHorizontal)
+    static const RelativeCoordinate readNextCoordinate (const juce_wchar* const s, int& i, const bool isHorizontal)
     {
         String anchor1 (readAnchorName (s, i));
         double value = 0;

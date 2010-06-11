@@ -84,7 +84,7 @@ public:
     }
 
     // This is overloaded from TableListBoxModel, and should fill in the background of the whole row
-    void paintRowBackground (Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)
+    void paintRowBackground (Graphics& g, int /*rowNumber*/, int /*width*/, int /*height*/, bool rowIsSelected)
     {
         if (rowIsSelected)
             g.fillAll (Colours::lightblue);
@@ -96,7 +96,7 @@ public:
                     int rowNumber,
                     int columnId,
                     int width, int height,
-                    bool rowIsSelected)
+                    bool /*rowIsSelected*/)
     {
         g.setColour (Colours::black);
         g.setFont (font);
@@ -128,7 +128,7 @@ public:
     }
 
     // This is overloaded from TableListBoxModel, and must update any custom components that we're using
-    Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
+    Component* refreshComponentForCell (int rowNumber, int columnId, bool /*isRowSelected*/,
                                         Component* existingComponentToUpdate)
     {
         if (columnId == 5) // If it's the ratings column, we'll return our custom component..
@@ -180,12 +180,12 @@ public:
 
     // A couple of quick methods to set and get the "rating" value when the user
     // changes the combo box
-    int getRating (const int rowNumber, const int columnId) const
+    int getRating (const int rowNumber) const
     {
         return dataList->getChildElement (rowNumber)->getIntAttribute ("Rating");
     }
 
-    void setRating (const int rowNumber, const int columnId, const int newRating)
+    void setRating (const int rowNumber, const int newRating)
     {
         dataList->getChildElement (rowNumber)->setAttribute ("Rating", newRating);
     }
@@ -249,12 +249,12 @@ private:
         {
             row = newRow;
             columnId = newColumn;
-            comboBox->setSelectedId (owner.getRating (row, columnId), true);
+            comboBox->setSelectedId (owner.getRating (row), true);
         }
 
-        void comboBoxChanged (ComboBox* comboBoxThatHasChanged)
+        void comboBoxChanged (ComboBox* /*comboBoxThatHasChanged*/)
         {
-            owner.setRating (row, columnId, comboBox->getSelectedId());
+            owner.setRating (row, comboBox->getSelectedId());
         }
 
     private:

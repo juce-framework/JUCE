@@ -197,7 +197,7 @@ private:
                             transform);
     }
 
-    void drawPaths (Graphics& g, bool solid, bool linearGradient, bool radialGradient)
+    void drawPaths (Graphics& g, bool /*solid*/, bool linearGradient, bool radialGradient)
     {
         Path p;
         p.addRectangle (-50, 0, 100, 100);

@@ -58,7 +58,7 @@ public:
     }
 
     //==============================================================================
-    void initialise (const String& commandLine)
+    void initialise (const String& /*commandLine*/)
     {
         // just create the main window...
         theMainWindow = new MainDemoWindow();
@@ -105,7 +105,7 @@ public:
         return true;
     }
 
-    void anotherInstanceStarted (const String& commandLine)
+    void anotherInstanceStarted (const String& /*commandLine*/)
     {
         // This will get called if the user launches another copy of the app, but
         // there's nothing that the demo app needs to do here.

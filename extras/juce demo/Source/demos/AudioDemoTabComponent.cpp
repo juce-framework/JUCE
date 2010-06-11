@@ -65,7 +65,7 @@ void LiveAudioInputDisplayComp::timerCallback()
     repaint();
 }
 
-void LiveAudioInputDisplayComp::audioDeviceAboutToStart (AudioIODevice* device)
+void LiveAudioInputDisplayComp::audioDeviceAboutToStart (AudioIODevice*)
 {
     zeromem (samples, sizeof (samples));
 }

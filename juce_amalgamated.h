@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	17
+#define JUCE_BUILDNUMBER	18
 
 /** Current Juce version number.
 
@@ -1103,7 +1103,11 @@ inline void swapVariables (Type& variable1, Type& variable2)
 	@endcode
 */
 template <typename Type>
-inline int numElementsInArray (Type& array)	 { return static_cast<int> (sizeof (array) / sizeof (array[0])); }
+inline int numElementsInArray (Type& array)
+{
+	(void) array; // (required to avoid a spurious warning in MS compilers)
+	return static_cast<int> (sizeof (array) / sizeof (array[0]));
+}
 
 // Some useful maths functions that aren't always present with all compilers and build settings.
 
@@ -34571,6 +34575,18 @@ public:
 		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
 	*/
 	void setViewPosition (int xPixelsOffset, int yPixelsOffset);
+
+	/** Changes the position of the viewed component.
+
+		The inner component will be moved so that the pixel at the top left of
+		the viewport will be the pixel at the specified coordinates within the
+		inner component.
+
+		This will update the scrollbars and might cause a call to visibleAreaChanged().
+
+		@see getViewPositionX, getViewPositionY, setViewPositionProportionately
+	*/
+	void setViewPosition (const Point<int>& newPosition);
 
 	/** Changes the view position as a proportion of the distance it can move.
 

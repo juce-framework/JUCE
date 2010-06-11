@@ -108,9 +108,9 @@ public:
         forwardButton->setBounds (55, 10, 35, 25);
     }
 
-    void textEditorTextChanged (TextEditor& editor)             {}
-    void textEditorEscapeKeyPressed (TextEditor& editor)        {}
-    void textEditorFocusLost (TextEditor& editor)               {}
+    void textEditorTextChanged (TextEditor&)             {}
+    void textEditorEscapeKeyPressed (TextEditor&)        {}
+    void textEditorFocusLost (TextEditor&)               {}
 
     void textEditorReturnKeyPressed (TextEditor&)
     {

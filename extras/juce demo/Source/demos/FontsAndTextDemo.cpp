@@ -176,12 +176,12 @@ public:
         textBox->applyFontToAllText (font);
     }
 
-    void selectedRowsChanged (int lastRowselected)
+    void selectedRowsChanged (int /*lastRowselected*/)
     {
         updatePreviewBoxText();
     }
 
-    void buttonClicked (Button* button)
+    void buttonClicked (Button*)
     {
         updatePreviewBoxText();
     }

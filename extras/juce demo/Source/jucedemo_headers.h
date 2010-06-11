@@ -36,7 +36,7 @@
 // Pre-declare the functions that create each of the demo components..
 Component* createFontsAndTextDemo();
 Component* createRenderingDemo();
-Component* createWidgetsDemo (ApplicationCommandManager* commandManager);
+Component* createWidgetsDemo();
 Component* createThreadingDemo();
 Component* createTreeViewDemo();
 Component* createTableDemo();

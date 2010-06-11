@@ -102,7 +102,13 @@ int Viewport::getMaximumVisibleHeight() const
 void Viewport::setViewPosition (const int xPixelsOffset, const int yPixelsOffset)
 {
     if (contentComp != 0)
-        contentComp->setTopLeftPosition (-xPixelsOffset, -yPixelsOffset);
+        contentComp->setTopLeftPosition (jmax (jmin (0, contentHolder.getWidth() - contentComp->getWidth()), jmin (0, -xPixelsOffset)),
+                                         jmax (jmin (0, contentHolder.getHeight() - contentComp->getHeight()), jmin (0, -yPixelsOffset)));
+}
+
+void Viewport::setViewPosition (const Point<int>& newPosition)
+{
+    setViewPosition (newPosition.getX(), newPosition.getY());
 }
 
 void Viewport::setViewPositionProportionately (const double x, const double y)

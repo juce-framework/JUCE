@@ -61,7 +61,7 @@ public:
         }
     }
 
-    void mouseWheelMove (const MouseEvent& e, float wheelIncrementX, float wheelIncrementY)
+    void mouseWheelMove (const MouseEvent&, float wheelIncrementX, float wheelIncrementY)
     {
         if (thumbnail.getTotalLength() > 0)
         {
@@ -298,11 +298,11 @@ void AudioDemoPlaybackPage::selectionChanged()
     thumbnail->setFile (fileTreeComp->getSelectedFile());
 }
 
-void AudioDemoPlaybackPage::fileClicked (const File& file, const MouseEvent& e)
+void AudioDemoPlaybackPage::fileClicked (const File&, const MouseEvent&)
 {
 }
 
-void AudioDemoPlaybackPage::fileDoubleClicked (const File& file)
+void AudioDemoPlaybackPage::fileDoubleClicked (const File&)
 {
 }
 //[/MiscUserCode]

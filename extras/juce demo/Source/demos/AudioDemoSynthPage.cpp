@@ -37,8 +37,8 @@ public:
     {
     }
 
-    bool appliesToNote (const int midiNoteNumber)           { return true; }
-    bool appliesToChannel (const int midiChannel)           { return true; }
+    bool appliesToNote (const int /*midiNoteNumber*/)           { return true; }
+    bool appliesToChannel (const int /*midiChannel*/)           { return true; }
 };
 
 
@@ -60,7 +60,7 @@ public:
     }
 
     void startNote (const int midiNoteNumber, const float velocity,
-                    SynthesiserSound* sound, const int currentPitchWheelPosition)
+                    SynthesiserSound* /*sound*/, const int /*currentPitchWheelPosition*/)
     {
         currentAngle = 0.0;
         level = velocity * 0.15;
@@ -92,12 +92,12 @@ public:
         }
     }
 
-    void pitchWheelMoved (const int newValue)
+    void pitchWheelMoved (const int /*newValue*/)
     {
         // can't be bothered implementing this for the demo!
     }
 
-    void controllerMoved (const int controllerNumber, const int newValue)
+    void controllerMoved (const int /*controllerNumber*/, const int /*newValue*/)
     {
         // not interested in controllers in this case.
     }
@@ -215,8 +215,7 @@ public:
         delete audioReader;
     }
 
-    void prepareToPlay (int samplesPerBlockExpected,
-                        double sampleRate)
+    void prepareToPlay (int /*samplesPerBlockExpected*/, double sampleRate)
     {
         midiCollector.reset (sampleRate);
 
