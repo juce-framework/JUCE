@@ -56,6 +56,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
     [hostWindow retain];
     [hostWindow setCanHide: YES];
     [hostWindow setReleasedWhenClosed: YES];
+    NSRect oldWindowFrame = [hostWindow frame];
 
     NSView* content = [hostWindow contentView];
     NSRect f = [content frame];
@@ -77,6 +78,7 @@ void* attachSubWindow (void* hostWindowRef, Component* comp)
 #endif
 
     NSPoint windowPos = [hostWindow convertBaseToScreen: f.origin];
+    windowPos.x = windowPos.x + jmax (0.0f, (oldWindowFrame.size.width - f.size.width) / 2.0f);
     windowPos.y = hostWindowScreenFrame.size.height  + hostWindowScreenFrame.origin.y - (windowPos.y + f.size.height);
 
     comp->setTopLeftPosition ((int) windowPos.x, (int) windowPos.y);

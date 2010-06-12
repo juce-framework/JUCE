@@ -45,6 +45,7 @@ public:
         AbletonLive8,
         AbletonLiveGeneric,
         AppleLogic,
+        EmagicLogic,
         DigidesignProTools,
         CakewalkSonar8,
         CakewalkSonarGeneric,
@@ -54,6 +55,8 @@ public:
         SteinbergCubase4,
         SteinbergCubase5,
         SteinbergCubaseGeneric,
+        SteinbergWavelab5,
+        SteinbergWavelab6,
         SteinbergWavelabGeneric
     };
 
@@ -80,9 +83,14 @@ public:
         return type == CakewalkSonar8 || type == CakewalkSonarGeneric;
     }
 
+    bool isLogic() const throw()
+    {
+        return type == AppleLogic || type == EmagicLogic;
+    }
+
     bool isWavelab() const throw()
     {
-        return type == SteinbergWavelabGeneric;
+        return type == SteinbergWavelabGeneric || type == SteinbergWavelab5 || type == SteinbergWavelab6;
     }
 
     //==============================================================================
@@ -115,8 +123,11 @@ private:
         if (hostFilename.containsIgnoreCase ("Cubase4"))    return SteinbergCubase4;
         if (hostFilename.containsIgnoreCase ("Cubase5"))    return SteinbergCubase5;
         if (hostFilename.containsIgnoreCase ("Cubase"))     return SteinbergCubaseGeneric;
+        if (hostFilename.containsIgnoreCase ("Wavelab 5"))  return SteinbergWavelab5;
+        if (hostFilename.containsIgnoreCase ("Wavelab 6" )) return SteinbergWavelab6;
         if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("reaper"))     return Reaper;
+        if (hostFilename.containsIgnoreCase ("Logic"))      return EmagicLogic;
 
 #elif JUCE_LINUX
         jassertfalse   // not yet done!

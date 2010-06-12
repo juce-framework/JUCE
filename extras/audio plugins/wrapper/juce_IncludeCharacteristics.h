@@ -36,7 +36,7 @@
 */
 #include "JucePluginCharacteristics.h"
 
-#define SUPPORT_CARBON 1
+#define JUCE_SUPPORT_CARBON 1
 
 //==============================================================================
 // The following stuff is just to cause a compile error if you've forgotten to
@@ -88,6 +88,11 @@
 
 #ifndef JucePlugin_TailLengthSeconds
  #error "You need to define the JucePlugin_TailLengthSeconds value in your JucePluginCharacteristics.h file!"
+#endif
+
+#if __LP64__  // (disable VSTs and RTAS in a 64-bit build)
+ #undef JucePlugin_Build_VST
+ #undef JucePlugin_Build_RTAS
 #endif
 
 #if ! (JucePlugin_Build_VST || JucePlugin_Build_AU || JucePlugin_Build_RTAS || JucePlugin_Build_Standalone)

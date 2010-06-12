@@ -96,8 +96,19 @@ public:
 
             embeddedView = attachView (wrapperWindow, HIViewGetRoot (wrapperWindow));
 
-            EventTypeSpec  windowEventTypes[] = { { kEventClassWindow, kEventWindowGetClickActivation },
-                                                  { kEventClassWindow, kEventWindowHandleDeactivate } };
+            EventTypeSpec windowEventTypes[] =
+            {
+                { kEventClassWindow, kEventWindowGetClickActivation },
+                { kEventClassWindow, kEventWindowHandleDeactivate },
+                { kEventClassWindow, kEventWindowBoundsChanging },
+                { kEventClassMouse, kEventMouseDown },
+                { kEventClassMouse, kEventMouseMoved },
+                { kEventClassMouse, kEventMouseDragged },
+                { kEventClassMouse, kEventMouseUp},
+                { kEventClassWindow, kEventWindowDrawContent },
+                { kEventClassWindow, kEventWindowShown },
+                { kEventClassWindow, kEventWindowHidden }
+            };
 
             EventHandlerUPP upp = NewEventHandlerUPP (carbonEventCallback);
             InstallWindowEventHandler (wrapperWindow, upp,

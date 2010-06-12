@@ -996,6 +996,11 @@ protected:
         return config.getName().toString() + "|Win32";
     }
 
+    static void setConditionAttribute (XmlElement& xml, const Project::BuildConfiguration& config)
+    {
+        xml.setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+    }
+
     //==============================================================================
     void fillInProjectXml (XmlElement& projectXml)
     {
@@ -1034,7 +1039,7 @@ protected:
             Project::BuildConfiguration config (project.getConfiguration (i));
 
             XmlElement* e = projectXml.createNewChildElement ("PropertyGroup");
-            e->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+            setConditionAttribute (*e, config);
             e->setAttribute ("Label", "Configuration");
             e->createNewChildElement ("ConfigurationType")->addTextElement (getProjectType());
             e->createNewChildElement ("UseOfMfc")->addTextElement ("false");
@@ -1077,15 +1082,15 @@ protected:
                 Project::BuildConfiguration config (project.getConfiguration (i));
 
                 XmlElement* outdir = props->createNewChildElement ("OutDir");
-                outdir->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+                setConditionAttribute (*outdir, config);
                 outdir->addTextElement (getConfigTargetPath (config) + "\\");
 
                 XmlElement* intdir = props->createNewChildElement ("IntDir");
-                intdir->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+                setConditionAttribute (*intdir, config);
                 intdir->addTextElement (getConfigTargetPath (config) + "\\");
 
                 XmlElement* name = props->createNewChildElement ("TargetName");
-                name->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+                setConditionAttribute (*name, config);
                 name->addTextElement (getBinaryFileForConfig (config).upToLastOccurrenceOf (".", false, false));
             }
         }
@@ -1100,7 +1105,7 @@ protected:
             const String outputFileName (getBinaryFileForConfig (config));
 
             XmlElement* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
-            group->setAttribute ("Condition", "'$(Configuration)|$(Platform)'=='" + createConfigName (config) + "'");
+            setConditionAttribute (*group, config);
 
             XmlElement* midl = group->createNewChildElement ("Midl");
             midl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"

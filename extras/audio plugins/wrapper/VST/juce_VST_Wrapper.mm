@@ -50,6 +50,9 @@ static pascal OSStatus windowVisibilityBodge (EventHandlerCallRef, EventRef e, v
 
     switch (GetEventKind (e))
     {
+    case kEventWindowInit:
+        [hostWindow display];
+        break;
     case kEventWindowShown:
         [hostWindow orderFront: nil];
         break;
@@ -157,18 +160,22 @@ void* attachComponentToWindowRef (Component* comp, void* windowRef)
     [pluginWindow orderFront: nil];
 
 #if ADD_CARBON_BODGE
-    // Adds a callback bodge to work around some problems with wrapped
-    // carbon windows..
-    const EventTypeSpec eventsToCatch[] = {
-        { kEventClassWindow, kEventWindowShown },
-        { kEventClassWindow, kEventWindowHidden }
-    };
+    {
+        // Adds a callback bodge to work around some problems with wrapped
+        // carbon windows..
+        const EventTypeSpec eventsToCatch[] = {
+            { kEventClassWindow, kEventWindowInit },
+            { kEventClassWindow, kEventWindowShown },
+            { kEventClassWindow, kEventWindowHidden }
+        };
 
-    InstallWindowEventHandler ((WindowRef) windowRef,
-                               NewEventHandlerUPP (windowVisibilityBodge),
-                               GetEventTypeCount (eventsToCatch), eventsToCatch,
-                               (void*) hostWindow, &ref);
-    comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+        InstallWindowEventHandler ((WindowRef) windowRef,
+                                   NewEventHandlerUPP (windowVisibilityBodge),
+                                   GetEventTypeCount (eventsToCatch), eventsToCatch,
+                                   (void*) hostWindow, &ref);
+        comp->getProperties().set ("carbonEventRef", String::toHexString ((pointer_sized_int) (void*) ref));
+    }
+
 #endif
 
     return hostWindow;
