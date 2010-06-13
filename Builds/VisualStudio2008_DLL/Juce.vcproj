@@ -351,6 +351,8 @@
             <File RelativePath="..\..\src\gui\components\juce_ComponentListener.h"/>
             <File RelativePath="..\..\src\gui\components\juce_Desktop.cpp"/>
             <File RelativePath="..\..\src\gui\components\juce_Desktop.h"/>
+            <File RelativePath="..\..\src\gui\components\juce_ModalComponentManager.cpp"/>
+            <File RelativePath="..\..\src\gui\components\juce_ModalComponentManager.h"/>
             <Filter Name="buttons">
               <File RelativePath="..\..\src\gui\components\buttons\juce_ArrowButton.cpp"/>
               <File RelativePath="..\..\src\gui\components\buttons\juce_ArrowButton.h"/>

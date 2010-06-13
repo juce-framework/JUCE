@@ -41,6 +41,8 @@
 #include "../../text/juce_StringArray.h"
 #include "../../containers/juce_Array.h"
 #include "../../containers/juce_NamedValueSet.h"
+#include "juce_ModalComponentManager.h"
+
 class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
@@ -1728,7 +1730,7 @@ public:
         passed into exitModalState().
 
         @see enterModalState, exitModalState, isCurrentlyModal, getCurrentlyModalComponent,
-             isCurrentlyBlockedByAnotherModalComponent, MessageManager::dispatchNextMessage
+             isCurrentlyBlockedByAnotherModalComponent, ModalComponentManager
     */
     int runModalLoop();
 
@@ -1742,9 +1744,15 @@ public:
         get the focus, which is usually what you'll want it to do. If not, it will leave
         the focus unchanged.
 
-        @see exitModalState, runModalLoop
+        The callback is an optional object which will receive a callback when the modal
+        component loses its modal status, either by being hidden or when exitModalState()
+        is called. If you pass an object in here, the system will take care of deleting it
+        later, after making the callback
+
+        @see exitModalState, runModalLoop, ModalComponentManager::attachCallback
     */
-    void enterModalState (bool takeKeyboardFocus = true);
+    void enterModalState (bool takeKeyboardFocus = true,
+                          ModalComponentManager::Callback* callback = 0);
 
     /** Ends a component's modal state.
 

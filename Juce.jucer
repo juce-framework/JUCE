@@ -495,6 +495,10 @@
                 file="src/gui/components/juce_Desktop.cpp"/>
           <FILE id="kteq7JUyy" name="juce_Desktop.h" compile="0" resource="0"
                 file="src/gui/components/juce_Desktop.h"/>
+          <FILE id="OSpcyIq" name="juce_ModalComponentManager.cpp" compile="1"
+                resource="0" file="src/gui/components/juce_ModalComponentManager.cpp"/>
+          <FILE id="hHLSn88" name="juce_ModalComponentManager.h" compile="0"
+                resource="0" file="src/gui/components/juce_ModalComponentManager.h"/>
           <GROUP id="bZKiEBSYn" name="buttons">
             <FILE id="XWJvOnuh3" name="juce_ArrowButton.cpp" compile="1" resource="0"
                   file="src/gui/components/buttons/juce_ArrowButton.cpp"/>

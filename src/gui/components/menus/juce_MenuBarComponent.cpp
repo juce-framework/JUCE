@@ -33,30 +33,13 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-class DummyMenuComponent  : public Component
-{
-    DummyMenuComponent (const DummyMenuComponent&);
-    DummyMenuComponent& operator= (const DummyMenuComponent&);
-
-public:
-    DummyMenuComponent()    {}
-    ~DummyMenuComponent()   {}
-
-    void inputAttemptWhenModal()
-    {
-        exitModalState (0);
-    }
-};
-
-//==============================================================================
 MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
     : model (0),
       itemUnderMouse (-1),
       currentPopupIndex (-1),
-      indexToShowAgain (-1),
+      topLevelIndexClicked (0),
       lastMouseX (0),
-      lastMouseY (0),
-      inModalState (false)
+      lastMouseY (0)
 {
     setRepaintsOnMouseActivity (true);
     setWantsKeyboardFocus (false);
@@ -68,9 +51,12 @@ MenuBarComponent::MenuBarComponent (MenuBarModel* model_)
 MenuBarComponent::~MenuBarComponent()
 {
     setModel (0);
-
     Desktop::getInstance().removeGlobalMouseListener (this);
-    currentPopup = 0;
+}
+
+MenuBarModel* MenuBarComponent::getModel() const throw()
+{
+    return model;
 }
 
 void MenuBarComponent::setModel (MenuBarModel* const newModel)
@@ -158,144 +144,102 @@ void MenuBarComponent::repaintMenuItem (int index)
     }
 }
 
-void MenuBarComponent::updateItemUnderMouse (int x, int y)
+void MenuBarComponent::setItemUnderMouse (const int index)
 {
-    const int newItem = getItemAt (x, y);
-
-    if (itemUnderMouse != newItem)
+    if (itemUnderMouse != index)
     {
         repaintMenuItem (itemUnderMouse);
-        itemUnderMouse = newItem;
+        itemUnderMouse = index;
         repaintMenuItem (itemUnderMouse);
     }
 }
 
-void MenuBarComponent::hideCurrentMenu()
+void MenuBarComponent::setOpenItem (int index)
 {
-    currentPopup = 0;
-    repaint();
+    if (currentPopupIndex != index)
+    {
+        repaintMenuItem (currentPopupIndex);
+        currentPopupIndex = index;
+        repaintMenuItem (currentPopupIndex);
+
+        if (index >= 0)
+            Desktop::getInstance().addGlobalMouseListener (this);
+        else
+            Desktop::getInstance().removeGlobalMouseListener (this);
+    }
 }
+
+void MenuBarComponent::updateItemUnderMouse (int x, int y)
+{
+    setItemUnderMouse (getItemAt (x, y));
+}
+
+class MenuBarComponent::AsyncCallback  : public ModalComponentManager::Callback
+{
+public:
+    AsyncCallback (MenuBarComponent* const bar_, const int topLevelIndex_)
+        : bar (bar_), topLevelIndex (topLevelIndex_)
+    {
+    }
+
+    ~AsyncCallback()  {}
+
+    void modalStateFinished (int returnValue)
+    {
+        if (bar != 0)
+            bar->menuDismissed (topLevelIndex, returnValue);
+    }
+
+private:
+    Component::SafePointer<MenuBarComponent> bar;
+    const int topLevelIndex;
+
+    AsyncCallback (const AsyncCallback&);
+    AsyncCallback& operator= (const AsyncCallback&);
+};
 
 void MenuBarComponent::showMenu (int index)
 {
     if (index != currentPopupIndex)
     {
-        if (inModalState)
-        {
-            hideCurrentMenu();
-            indexToShowAgain = index;
-            return;
-        }
-
-        indexToShowAgain = -1;
-        currentPopupIndex = -1;
-        itemUnderMouse = index;
-        currentPopup = 0;
+        PopupMenu::dismissAllActiveMenus();
         menuBarItemsChanged (0);
 
-        Component::SafePointer<Component> prevFocused (getCurrentlyFocusedComponent());
-        Component::SafePointer<Component> deletionChecker (this);
+        setOpenItem (index);
+        setItemUnderMouse (index);
 
-        enterModalState (false);
-        inModalState = true;
-        int result = 0;
-        ApplicationCommandManager* managerOfChosenCommand = 0;
-
-        Desktop::getInstance().addGlobalMouseListener (this);
-
-        for (;;)
+        if (index >= 0)
         {
-            const int x = getScreenX() + xPositions [itemUnderMouse];
-            const int w = xPositions [itemUnderMouse + 1] - xPositions [itemUnderMouse];
+            PopupMenu m (model->getMenuForIndex (itemUnderMouse,
+                                                 menuNames [itemUnderMouse]));
 
-            currentPopupIndex = itemUnderMouse;
-            indexToShowAgain = -1;
-            repaint();
+            if (m.lookAndFeel == 0)
+                m.setLookAndFeel (&getLookAndFeel());
 
-            if (((unsigned int) itemUnderMouse) < (unsigned int) menuNames.size())
-            {
-                PopupMenu m (model->getMenuForIndex (itemUnderMouse,
-                                                     menuNames [itemUnderMouse]));
+            const Rectangle<int> itemPos (xPositions [index], 0, xPositions [index + 1] - xPositions [index], getHeight());
 
-                if (m.lookAndFeel == 0)
-                    m.setLookAndFeel (&getLookAndFeel());
-
-                currentPopup = m.createMenuComponent (x, getScreenY(),
-                                                      w, getHeight(),
-                                                      0, w, 0, 0,
-                                                      true, this,
-                                                      &managerOfChosenCommand,
-                                                      this);
-            }
-
-            if (currentPopup == 0)
-            {
-                currentPopup = new DummyMenuComponent();
-                addAndMakeVisible (currentPopup);
-            }
-
-            currentPopup->enterModalState (false);
-            currentPopup->toFront (false);  // need to do this after making it modal, or it could
-                                            // be stuck behind other comps that are already modal..
-            result = currentPopup->runModalLoop();
-
-            if (deletionChecker == 0)
-                return;
-
-            const int lastPopupIndex = currentPopupIndex;
-            currentPopup = 0;
-            currentPopupIndex = -1;
-
-            if (result != 0)
-            {
-                topLevelIndexClicked = lastPopupIndex;
-                break;
-            }
-            else if (indexToShowAgain >= 0)
-            {
-                menuBarItemsChanged (0);
-                repaint();
-                itemUnderMouse = indexToShowAgain;
-
-                if (((unsigned int) itemUnderMouse) >= (unsigned int) menuNames.size())
-                    break;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        Desktop::getInstance().removeGlobalMouseListener (this);
-
-        inModalState = false;
-        exitModalState (0);
-
-        if (prevFocused != 0)
-            prevFocused->grabKeyboardFocus();
-
-        const Point<int> mousePos (getMouseXYRelative());
-        updateItemUnderMouse (mousePos.getX(), mousePos.getY());
-        repaint();
-
-        if (result != 0)
-        {
-            if (managerOfChosenCommand != 0)
-            {
-                ApplicationCommandTarget::InvocationInfo info (result);
-                info.invocationMethod = ApplicationCommandTarget::InvocationInfo::fromMenu;
-
-                managerOfChosenCommand->invoke (info, true);
-            }
-
-            postCommandMessage (result);
+            m.showMenu (itemPos + getScreenPosition(),
+                        0, itemPos.getWidth(), 0, 0, true, this,
+                        new AsyncCallback (this, index));
         }
     }
 }
 
+void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)
+{
+    topLevelIndexClicked = topLevelIndex;
+    postCommandMessage (itemId);
+}
+
 void MenuBarComponent::handleCommandMessage (int commandId)
 {
-    if (model != 0)
+    const Point<int> mousePos (getMouseXYRelative());
+    updateItemUnderMouse (mousePos.getX(), mousePos.getY());
+
+    if (! isCurrentlyBlockedByAnotherModalComponent())
+        setOpenItem (-1);
+
+    if (commandId != 0 && model != 0)
         model->menuItemSelected (commandId, topLevelIndexClicked);
 }
 
@@ -327,7 +271,6 @@ void MenuBarComponent::mouseDown (const MouseEvent& e)
 void MenuBarComponent::mouseDrag (const MouseEvent& e)
 {
     const MouseEvent e2 (e.getEventRelativeTo (this));
-
     const int item = getItemAt (e2.x, e2.y);
 
     if (item >= 0)
@@ -340,8 +283,11 @@ void MenuBarComponent::mouseUp (const MouseEvent& e)
 
     updateItemUnderMouse (e2.x, e2.y);
 
-    if (itemUnderMouse < 0 && dynamic_cast <DummyMenuComponent*> (static_cast <Component*> (currentPopup)) != 0)
-        hideCurrentMenu();
+    if (itemUnderMouse < 0 && getLocalBounds().contains (e2.x, e2.y))
+    {
+        setOpenItem (-1);
+        PopupMenu::dismissAllActiveMenus();
+    }
 }
 
 void MenuBarComponent::mouseMove (const MouseEvent& e)
@@ -387,11 +333,6 @@ bool MenuBarComponent::keyPressed (const KeyPress& key)
     return used;
 }
 
-void MenuBarComponent::inputAttemptWhenModal()
-{
-    hideCurrentMenu();
-}
-
 void MenuBarComponent::menuBarItemsChanged (MenuBarModel* /*menuBarModel*/)
 {
     StringArray newNames;
@@ -410,8 +351,7 @@ void MenuBarComponent::menuBarItemsChanged (MenuBarModel* /*menuBarModel*/)
 void MenuBarComponent::menuCommandInvoked (MenuBarModel* /*menuBarModel*/,
                                            const ApplicationCommandTarget::InvocationInfo& info)
 {
-    if (model == 0
-         || (info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) != 0)
+    if (model == 0 || (info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) != 0)
         return;
 
     for (int i = 0; i < menuNames.size(); ++i)
@@ -420,10 +360,8 @@ void MenuBarComponent::menuCommandInvoked (MenuBarModel* /*menuBarModel*/,
 
         if (menu.containsCommandItem (info.commandID))
         {
-            itemUnderMouse = i;
-            repaintMenuItem (i);
+            setItemUnderMouse (i);
             startTimer (200);
-
             break;
         }
     }

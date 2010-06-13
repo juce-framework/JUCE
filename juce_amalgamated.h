@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	19
+#define JUCE_BUILDNUMBER	20
 
 /** Current Juce version number.
 
@@ -14254,7 +14254,7 @@ private:
 	static classname* _singletonInstance;  \
 	static JUCE_NAMESPACE::CriticalSection _singletonLock; \
 \
-	static classname* getInstance() \
+	static classname* JUCE_CALLTYPE getInstance() \
 	{ \
 		if (_singletonInstance == 0) \
 		{\
@@ -14282,12 +14282,12 @@ private:
 		return _singletonInstance; \
 	} \
 \
-	static inline classname* getInstanceWithoutCreating() throw() \
+	static inline classname* JUCE_CALLTYPE getInstanceWithoutCreating() throw() \
 	{ \
 		return _singletonInstance; \
 	} \
 \
-	static void deleteInstance() \
+	static void JUCE_CALLTYPE deleteInstance() \
 	{ \
 		const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
 		if (_singletonInstance != 0) \
@@ -24927,6 +24927,167 @@ private:
 #endif   // __JUCE_BORDERSIZE_JUCEHEADER__
 /*** End of inlined file: juce_BorderSize.h ***/
 
+
+/*** Start of inlined file: juce_ModalComponentManager.h ***/
+#ifndef __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
+#define __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
+
+
+/*** Start of inlined file: juce_DeletedAtShutdown.h ***/
+#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+#define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+
+/**
+	Classes derived from this will be automatically deleted when the application exits.
+
+	After JUCEApplication::shutdown() has been called, any objects derived from
+	DeletedAtShutdown which are still in existence will be deleted in the reverse
+	order to that in which they were created.
+
+	So if you've got a singleton and don't want to have to explicitly delete it, just
+	inherit from this and it'll be taken care of.
+*/
+class JUCE_API  DeletedAtShutdown
+{
+protected:
+	/** Creates a DeletedAtShutdown object. */
+	DeletedAtShutdown();
+
+	/** Destructor.
+
+		It's ok to delete these objects explicitly - it's only the ones left
+		dangling at the end that will be deleted automatically.
+	*/
+	virtual ~DeletedAtShutdown();
+
+public:
+	/** Deletes all extant objects.
+
+		This shouldn't be used by applications, as it's called automatically
+		in the shutdown code of the JUCEApplication class.
+	*/
+	static void deleteAll();
+
+private:
+	DeletedAtShutdown (const DeletedAtShutdown&);
+	DeletedAtShutdown& operator= (const DeletedAtShutdown&);
+
+	static CriticalSection& getLock();
+	static Array <DeletedAtShutdown*>& getObjects();
+};
+
+#endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
+/*** End of inlined file: juce_DeletedAtShutdown.h ***/
+
+/**
+	Manages the system's stack of modal components.
+
+	Normally you'll just use the Component methods to invoke modal states in components,
+	and won't have to deal with this class directly, but this is the singleton object that's
+	used internally to manage the stack.
+
+	@see Component::enterModalState, Component::exitModalState, Component::isCurrentlyModal,
+		 Component::getCurrentlyModalComponent, Component::isCurrentlyBlockedByAnotherModalComponent
+*/
+class JUCE_API  ModalComponentManager   : public AsyncUpdater,
+										  public DeletedAtShutdown
+{
+public:
+
+	/** Receives callbacks when a modal component is dismissed.
+
+		You can register a callback using Component::enterModalState() or
+		ModalComponentManager::attachCallback().
+	*/
+	class Callback
+	{
+	public:
+		/** */
+		Callback() {}
+
+		/** Destructor. */
+		virtual ~Callback() {}
+
+		/** Called to indicate that a modal component has been dismissed.
+
+			You can register a callback using Component::enterModalState() or
+			ModalComponentManager::attachCallback().
+
+			The returnValue parameter is the value that was passed to Component::exitModalState()
+			when the component was dismissed.
+
+			The callback object will be deleted shortly after this method is called.
+		*/
+		virtual void modalStateFinished (int returnValue) = 0;
+	};
+
+	/** Returns the number of components currently being shown modally.
+		@see getModalComponent
+	*/
+	int getNumModalComponents() const;
+
+	/** Returns one of the components being shown modally.
+		An index of 0 is the most recently-shown, topmost component.
+	*/
+	Component* getModalComponent (int index) const;
+
+	/** Returns true if the specified component is in a modal state. */
+	bool isModal (Component* component) const;
+
+	/** Returns true if the specified component is currently the topmost modal component. */
+	bool isFrontModalComponent (Component* component) const;
+
+	/** Adds a new callback that will be called when the specified modal component is dismissed.
+
+		If the component is modal, then when it is dismissed, either by being hidden, or by calling
+		Component::exitModalState(), then the Callback::modalStateFinished() method will be
+		called.
+
+		Each component can have any number of callbacks associated with it, and this one is added
+		to that list.
+
+		The object that is passed in will be deleted by the manager when it's no longer needed. If
+		the given component is not currently modal, the callback object is deleted immediately and
+		no action is taken.
+	*/
+	void attachCallback (Component* component, Callback* callback);
+
+	/** Runs the event loop until the currently topmost modal component is dismissed, and
+		returns the exit code for that component.
+	*/
+	int runEventLoopForCurrentComponent();
+
+	juce_DeclareSingleton_SingleThreaded_Minimal (ModalComponentManager);
+
+protected:
+	/** Creates a ModalComponentManager.
+		You shouldn't ever call the constructor - it's a singleton, so use ModalComponentManager::getInstance()
+	*/
+	ModalComponentManager();
+
+	/** Destructor. */
+	~ModalComponentManager();
+
+	/** @internal */
+	void handleAsyncUpdate();
+
+private:
+	class ModalItem;
+	class ReturnValueRetriever;
+
+	friend class Component;
+	friend class OwnedArray <ModalItem>;
+	OwnedArray <ModalItem> stack;
+
+	void startModal (Component* component, Callback* callback);
+	void endModal (Component* component, int returnValue);
+	void endModal (Component* component);
+
+};
+
+#endif   // __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
+/*** End of inlined file: juce_ModalComponentManager.h ***/
+
 class LookAndFeel;
 class MouseInputSource;
 class MouseInputSourceInternal;
@@ -26576,7 +26737,7 @@ public:
 		passed into exitModalState().
 
 		@see enterModalState, exitModalState, isCurrentlyModal, getCurrentlyModalComponent,
-			 isCurrentlyBlockedByAnotherModalComponent, MessageManager::dispatchNextMessage
+			 isCurrentlyBlockedByAnotherModalComponent, ModalComponentManager
 	*/
 	int runModalLoop();
 
@@ -26590,9 +26751,15 @@ public:
 		get the focus, which is usually what you'll want it to do. If not, it will leave
 		the focus unchanged.
 
-		@see exitModalState, runModalLoop
+		The callback is an optional object which will receive a callback when the modal
+		component loses its modal status, either by being hidden or when exitModalState()
+		is called. If you pass an object in here, the system will take care of deleting it
+		later, after making the callback
+
+		@see exitModalState, runModalLoop, ModalComponentManager::attachCallback
 	*/
-	void enterModalState (bool takeKeyboardFocus = true);
+	void enterModalState (bool takeKeyboardFocus = true,
+						  ModalComponentManager::Callback* callback = 0);
 
 	/** Ends a component's modal state.
 
@@ -27715,53 +27882,6 @@ public:
 /*** Start of inlined file: juce_Desktop.h ***/
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
 #define __JUCE_DESKTOP_JUCEHEADER__
-
-
-/*** Start of inlined file: juce_DeletedAtShutdown.h ***/
-#ifndef __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-#define __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-
-/**
-	Classes derived from this will be automatically deleted when the application exits.
-
-	After JUCEApplication::shutdown() has been called, any objects derived from
-	DeletedAtShutdown which are still in existence will be deleted in the reverse
-	order to that in which they were created.
-
-	So if you've got a singleton and don't want to have to explicitly delete it, just
-	inherit from this and it'll be taken care of.
-*/
-class JUCE_API  DeletedAtShutdown
-{
-protected:
-	/** Creates a DeletedAtShutdown object. */
-	DeletedAtShutdown();
-
-	/** Destructor.
-
-		It's ok to delete these objects explicitly - it's only the ones left
-		dangling at the end that will be deleted automatically.
-	*/
-	virtual ~DeletedAtShutdown();
-
-public:
-	/** Deletes all extant objects.
-
-		This shouldn't be used by applications, as it's called automatically
-		in the shutdown code of the JUCEApplication class.
-	*/
-	static void deleteAll();
-
-private:
-	DeletedAtShutdown (const DeletedAtShutdown&);
-	DeletedAtShutdown& operator= (const DeletedAtShutdown&);
-
-	static CriticalSection& getLock();
-	static Array <DeletedAtShutdown*>& getObjects();
-};
-
-#endif   // __JUCE_DELETEDATSHUTDOWN_JUCEHEADER__
-/*** End of inlined file: juce_DeletedAtShutdown.h ***/
 
 
 /*** Start of inlined file: juce_Timer.h ***/
@@ -34964,12 +35084,19 @@ public:
 										in zero.
 		@param standardItemHeight	   if this is non-zero, it will be used as the standard
 										height for menu items (apart from custom items)
+		@param callback		 if this is non-zero, the menu will be launched asynchronously,
+										returning immediately, and the callback will receive a
+										call when the menu is either dismissed or has an item
+										selected. This object will be owned and deleted by the
+										system, so make sure that it works safely and that any
+										pointers that it uses are safely within scope.
 		@see showAt
 	*/
 	int show (int itemIdThatMustBeVisible = 0,
 			  int minimumWidth = 0,
 			  int maximumNumColumns = 0,
-			  int standardItemHeight = 0);
+			  int standardItemHeight = 0,
+			  ModalComponentManager::Callback* callback = 0);
 
 	/** Displays the menu at a specific location.
 
@@ -34987,7 +35114,8 @@ public:
 				int itemIdThatMustBeVisible = 0,
 				int minimumWidth = 0,
 				int maximumNumColumns = 0,
-				int standardItemHeight = 0);
+				int standardItemHeight = 0,
+				ModalComponentManager::Callback* callback = 0);
 
 	/** Displays the menu as if it's attached to a component such as a button.
 
@@ -34999,7 +35127,8 @@ public:
 				int itemIdThatMustBeVisible = 0,
 				int minimumWidth = 0,
 				int maximumNumColumns = 0,
-				int standardItemHeight = 0);
+				int standardItemHeight = 0,
+				ModalComponentManager::Callback* callback = 0);
 
 	/** Closes any menus that are currently open.
 
@@ -35098,6 +35227,7 @@ private:
 	friend class ItemComponent;
 	friend class Window;
 	friend class PopupMenuCustomComponent;
+	friend class MenuBarComponent;
 	friend class OwnedArray <Item>;
 	friend class ScopedPointer <Window>;
 
@@ -35107,16 +35237,16 @@ private:
 
 	void addSeparatorIfPending();
 
-	int showMenu (int x, int y, int w, int h,
+	int showMenu (const Rectangle<int>& target,
 				  int itemIdThatMustBeVisible,
 				  int minimumWidth,
 				  int maximumNumColumns,
 				  int standardItemHeight,
 				  bool alignToRectangle,
-				  Component* componentAttachedTo);
+				  Component* componentAttachedTo,
+				  ModalComponentManager::Callback* callback);
 
-	friend class MenuBarComponent;
-	Component* createMenuComponent (int x, int y, int w, int h,
+	Component* createMenuComponent (const Rectangle<int>& target,
 									int itemIdThatMustBeVisible,
 									int minimumWidth,
 									int maximumNumColumns,
@@ -35660,10 +35790,6 @@ public:
 	/** @internal */
 	bool isTextInputActive() const;
 
-	juce_UseDebuggingNewOperator
-
-protected:
-
 	/** This adds the items to the popup menu.
 
 		By default it adds the cut/copy/paste items, but you can override this if
@@ -35700,6 +35826,10 @@ protected:
 		@see addPopupMenuItems, setPopupMenuEnabled, isPopupMenuEnabled
 	*/
 	virtual void performPopupMenuAction (int menuItemID);
+
+	juce_UseDebuggingNewOperator
+
+protected:
 
 	/** Scrolls the minimum distance needed to get the caret into view. */
 	void scrollToMakeSureCursorIsVisible();
@@ -36461,6 +36591,9 @@ private:
 		bool isSeparator() const throw();
 		bool isRealItem() const throw();
 	};
+
+	class Callback;
+	friend class Callback;
 
 	OwnedArray <ItemInfo> items;
 	Value currentId;
@@ -50012,7 +50145,16 @@ public:
 
 		Leave the width or height as 0 to use the default size
 	*/
-	bool show (int width = 0,int height = 0);
+	bool show (int width = 0, int height = 0);
+
+	/** Displays and runs the dialog box modally.
+
+		This will show the box with the specified size at the specified location,
+		returning true if the user pressed 'ok', or false if they cancelled.
+
+		Leave the width or height as 0 to use the default size.
+	*/
+	bool showAt (int x, int y, int width, int height);
 
 	/** A set of colour IDs to use to change the colour of various aspects of the box.
 
@@ -50627,6 +50769,9 @@ private:
 
 #endif
 #ifndef __JUCE_DESKTOP_JUCEHEADER__
+
+#endif
+#ifndef __JUCE_MODALCOMPONENTMANAGER_JUCEHEADER__
 
 #endif
 #ifndef __JUCE_KEYBOARDFOCUSTRAVERSER_JUCEHEADER__
@@ -51809,6 +51954,10 @@ public:
 	*/
 	void setModel (MenuBarModel* newModel);
 
+	/** Returns the current menu bar model being used.
+	*/
+	MenuBarModel* getModel() const throw();
+
 	/** Pops up one of the menu items.
 
 		This lets you manually open one of the menus - it could be triggered by a
@@ -51833,8 +51982,6 @@ public:
 	/** @internal */
 	void mouseMove (const MouseEvent& e);
 	/** @internal */
-	void inputAttemptWhenModal();
-	/** @internal */
 	void handleCommandMessage (int commandId);
 	/** @internal */
 	bool keyPressed (const KeyPress& key);
@@ -51847,20 +51994,22 @@ public:
 	juce_UseDebuggingNewOperator
 
 private:
+	class AsyncCallback;
+	friend class AsyncCallback;
 	MenuBarModel* model;
 
 	StringArray menuNames;
 	Array <int> xPositions;
-	int itemUnderMouse, currentPopupIndex, topLevelIndexClicked, indexToShowAgain;
+	int itemUnderMouse, currentPopupIndex, topLevelIndexClicked;
 	int lastMouseX, lastMouseY;
-	bool inModalState;
-	ScopedPointer <Component> currentPopup;
 
 	int getItemAt (int x, int y);
+	void setItemUnderMouse (int index);
+	void setOpenItem (int index);
 	void updateItemUnderMouse (int x, int y);
-	void hideCurrentMenu();
 	void timerCallback();
 	void repaintMenuItem (int index);
+	void menuDismissed (int topLevelIndex, int itemId);
 
 	MenuBarComponent (const MenuBarComponent&);
 	MenuBarComponent& operator= (const MenuBarComponent&);

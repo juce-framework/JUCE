@@ -601,7 +601,7 @@ void Path::addArrow (const Line<float>& line, float lineThickness,
 
     startNewSubPath (line.getPointAlongLine (0, lineThickness));
     lineTo (line.getPointAlongLine (0, -lineThickness));
-    lineTo (reversed.getPointAlongLine (0, lineThickness));
+    lineTo (reversed.getPointAlongLine (arrowheadLength, lineThickness));
     lineTo (reversed.getPointAlongLine (arrowheadLength, arrowheadWidth));
     lineTo (line.getEnd());
     lineTo (reversed.getPointAlongLine (arrowheadLength, -arrowheadWidth));

@@ -223,6 +223,7 @@
  #include "../src/gui/components/juce_Component.cpp"
  #include "../src/gui/components/juce_ComponentListener.cpp"
  #include "../src/gui/components/juce_Desktop.cpp"
+ #include "../src/gui/components/juce_ModalComponentManager.cpp"
  #include "../src/gui/components/buttons/juce_ArrowButton.cpp"
  #include "../src/gui/components/buttons/juce_Button.cpp"
  #include "../src/gui/components/buttons/juce_DrawableButton.cpp"

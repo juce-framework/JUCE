@@ -525,15 +525,40 @@ void ComboBox::labelTextChanged (Label*)
 
 
 //==============================================================================
+class ComboBox::Callback  : public ModalComponentManager::Callback
+{
+public:
+    Callback (ComboBox* const box_)
+        : box (box_)
+    {
+    }
+
+    void modalStateFinished (int returnValue)
+    {
+        if (box != 0)
+        {
+            box->menuActive = false;
+
+            if (returnValue != 0)
+                box->setSelectedId (returnValue);
+        }
+    }
+
+private:
+    Component::SafePointer<ComboBox> box;
+
+    Callback (const Callback&);
+    Callback& operator= (const Callback&);
+};
+
+
 void ComboBox::showPopup()
 {
     if (! menuActive)
     {
         const int selectedId = getSelectedId();
-        Component::SafePointer<Component> deletionWatcher (this);
 
         PopupMenu menu;
-
         menu.setLookAndFeel (&getLookAndFeel());
 
         for (int i = 0; i < items.size(); ++i)
@@ -552,19 +577,9 @@ void ComboBox::showPopup()
         if (items.size() == 0)
             menu.addItem (1, noChoicesMessage, false);
 
-        const int itemHeight = jlimit (12, 24, getHeight());
-
         menuActive = true;
-        const int resultId = menu.showAt (this, selectedId,
-                                          getWidth(), 1, itemHeight);
-
-        if (deletionWatcher == 0)
-            return;
-
-        menuActive = false;
-
-        if (resultId != 0)
-            setSelectedId (resultId);
+        menu.showAt (this, selectedId, getWidth(), 1, jlimit (12, 24, getHeight()),
+                     new Callback (this));
     }
 }
 

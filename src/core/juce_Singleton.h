@@ -93,7 +93,7 @@
     static classname* _singletonInstance;  \
     static JUCE_NAMESPACE::CriticalSection _singletonLock; \
 \
-    static classname* getInstance() \
+    static classname* JUCE_CALLTYPE getInstance() \
     { \
         if (_singletonInstance == 0) \
         {\
@@ -121,12 +121,12 @@
         return _singletonInstance; \
     } \
 \
-    static inline classname* getInstanceWithoutCreating() throw() \
+    static inline classname* JUCE_CALLTYPE getInstanceWithoutCreating() throw() \
     { \
         return _singletonInstance; \
     } \
 \
-    static void deleteInstance() \
+    static void JUCE_CALLTYPE deleteInstance() \
     { \
         const JUCE_NAMESPACE::ScopedLock sl (_singletonLock); \
         if (_singletonInstance != 0) \

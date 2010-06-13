@@ -210,6 +210,7 @@
     <ClCompile Include="..\..\src\gui\components\juce_Component.cpp"/>
     <ClCompile Include="..\..\src\gui\components\juce_ComponentListener.cpp"/>
     <ClCompile Include="..\..\src\gui\components\juce_Desktop.cpp"/>
+    <ClCompile Include="..\..\src\gui\components\juce_ModalComponentManager.cpp"/>
     <ClCompile Include="..\..\src\gui\components\buttons\juce_ArrowButton.cpp"/>
     <ClCompile Include="..\..\src\gui\components\buttons\juce_Button.cpp"/>
     <ClCompile Include="..\..\src\gui\components\buttons\juce_DrawableButton.cpp"/>
@@ -549,6 +550,7 @@
     <ClInclude Include="..\..\src\gui\components\juce_Component.h"/>
     <ClInclude Include="..\..\src\gui\components\juce_ComponentListener.h"/>
     <ClInclude Include="..\..\src\gui\components\juce_Desktop.h"/>
+    <ClInclude Include="..\..\src\gui\components\juce_ModalComponentManager.h"/>
     <ClInclude Include="..\..\src\gui\components\buttons\juce_ArrowButton.h"/>
     <ClInclude Include="..\..\src\gui\components\buttons\juce_Button.h"/>
     <ClInclude Include="..\..\src\gui\components\buttons\juce_DrawableButton.h"/>

@@ -11,11 +11,11 @@
               bundleIdentifier="com.rawmaterialsoftware.JuceDemoPlugin" jucerVersion="3.0.0">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               juceFolder="../../../../juce" objCExtraSuffix="JuceDemo"/>
+               juceFolder="../../.." objCExtraSuffix="JuceDemo"/>
     <VS2005 targetFolder="Builds/VisualStudio2005" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../../juce"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../.." libraryType="1"/>
     <VS2008 targetFolder="Builds/VisualStudio2008" vstFolder="c:\SDKs\vstsdk2.4"
-            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../../../juce"/>
+            rtasFolder="c:\SDKs\PT_80_SDK" juceFolder="../../.." libraryType="1"/>
   </EXPORTFORMATS>
   <CONFIGURATIONS>
     <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="JuceDemoPlugin"

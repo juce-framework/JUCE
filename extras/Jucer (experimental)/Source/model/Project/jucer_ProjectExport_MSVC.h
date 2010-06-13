@@ -1184,7 +1184,7 @@ protected:
 
     const String getProjectType() const
     {
-        if (project.isGUIApplication())
+        if (project.isGUIApplication() || project.isCommandLineApp())
             return "Application";
         else if (project.isAudioPlugin() || project.isBrowserPlugin())
             return "DynamicLibrary";

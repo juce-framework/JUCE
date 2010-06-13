@@ -39,15 +39,12 @@ BEGIN_JUCE_NAMESPACE
 #include "../../events/juce_MessageManager.h"
 #include "../../events/juce_Timer.h"
 #include "../../core/juce_Time.h"
-#include "../../core/juce_Singleton.h"
 #include "../../core/juce_PlatformUtilities.h"
 #include "mouse/juce_MouseInputSource.h"
 
-//==============================================================================
-Component* Component::currentlyFocusedComponent = 0;
 
-static Array <Component*> modalComponentStack, modalComponentReturnValueKeys;
-static Array <int> modalReturnValues;
+//==============================================================================
+#define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 enum ComponentMessageNumbers
 {
@@ -55,10 +52,8 @@ enum ComponentMessageNumbers
     exitModalStateMessage  = 0x7fff0002
 };
 
-//==============================================================================
-#define checkMessageManagerIsLocked     jassert (MessageManager::getInstance()->currentThreadHasLockedMessageManager());
-
 static uint32 nextComponentUID = 0;
+Component* Component::currentlyFocusedComponent = 0;
 
 
 //==============================================================================
@@ -105,8 +100,6 @@ Component::~Component()
 
     if (flags.hasHeavyweightPeerFlag)
         removeFromDesktop();
-
-    modalComponentStack.removeValue (this);
 
     for (int i = childComponentList_.size(); --i >= 0;)
         childComponentList_.getUnchecked(i)->parentComponent_ = 0;
@@ -1330,59 +1323,17 @@ int Component::runModalLoop()
     if (! MessageManager::getInstance()->isThisTheMessageThread())
     {
         // use a callback so this can be called from non-gui threads
-        return (int) (pointer_sized_int)
-                    MessageManager::getInstance()
-                       ->callFunctionOnMessageThread (&runModalLoopCallback, this);
+        return (int) (pointer_sized_int) MessageManager::getInstance()
+                                           ->callFunctionOnMessageThread (&runModalLoopCallback, this);
     }
-
-    SafePointer<Component> prevFocused (getCurrentlyFocusedComponent());
 
     if (! isCurrentlyModal())
-        enterModalState();
+        enterModalState (true);
 
-    JUCE_TRY
-    {
-        while (flags.currentlyModalFlag && flags.visibleFlag)
-        {
-            if  (! MessageManager::getInstance()->runDispatchLoopUntil (20))
-                break;
-
-            // check whether this component was deleted during the last message
-            if (! isValidMessageListener())
-                break;
-        }
-    }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-    catch (const std::exception& e)
-    {
-        JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__);
-        return 0;
-    }
-    catch (...)
-    {
-        JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__);
-        return 0;
-    }
-#endif
-
-    const int modalIndex = modalComponentReturnValueKeys.indexOf (this);
-    int returnValue = 0;
-
-    if (modalIndex >= 0)
-    {
-        modalComponentReturnValueKeys.remove (modalIndex);
-        returnValue = modalReturnValues.remove (modalIndex);
-    }
-
-    modalComponentStack.removeValue (this);
-
-    if (prevFocused != 0)
-        prevFocused->grabKeyboardFocus();
-
-    return returnValue;
+    return ModalComponentManager::getInstance()->runEventLoopForCurrentComponent();
 }
 
-void Component::enterModalState (const bool takeKeyboardFocus_)
+void Component::enterModalState (const bool takeKeyboardFocus_, ModalComponentManager::Callback* const callback)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -1394,10 +1345,7 @@ void Component::enterModalState (const bool takeKeyboardFocus_)
 
     if (! isCurrentlyModal())
     {
-        modalComponentStack.add (this);
-        modalComponentReturnValueKeys.add (this);
-        modalReturnValues.add (0);
-
+        ModalComponentManager::getInstance()->startModal (this, callback);
         flags.currentlyModalFlag = true;
         setVisible (true);
 
@@ -1412,20 +1360,7 @@ void Component::exitModalState (const int returnValue)
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            const int modalIndex = modalComponentReturnValueKeys.indexOf (this);
-
-            if (modalIndex >= 0)
-            {
-                modalReturnValues.set (modalIndex, returnValue);
-            }
-            else
-            {
-                modalComponentReturnValueKeys.add (this);
-                modalReturnValues.add (returnValue);
-            }
-
-            modalComponentStack.removeValue (this);
-
+            ModalComponentManager::getInstance()->endModal (this, returnValue);
             flags.currentlyModalFlag = false;
 
             bringModalComponentToFront();
@@ -1455,14 +1390,12 @@ bool Component::isCurrentlyBlockedByAnotherModalComponent() const
 
 int JUCE_CALLTYPE Component::getNumCurrentlyModalComponents() throw()
 {
-    return modalComponentStack.size();
+    return ModalComponentManager::getInstance()->getNumModalComponents();
 }
 
 Component* JUCE_CALLTYPE Component::getCurrentlyModalComponent (int index) throw()
 {
-    Component* const c = static_cast <Component*> (modalComponentStack [modalComponentStack.size() - index - 1]);
-
-    return c->isValidComponent() ? c : 0;
+    return ModalComponentManager::getInstance()->getModalComponent (index);
 }
 
 void Component::bringModalComponentToFront()

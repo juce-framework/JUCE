@@ -538,9 +538,6 @@ public:
     /** @internal */
     bool isTextInputActive() const;
 
-    juce_UseDebuggingNewOperator
-
-protected:
     //==============================================================================
     /** This adds the items to the popup menu.
 
@@ -579,6 +576,10 @@ protected:
     */
     virtual void performPopupMenuAction (int menuItemID);
 
+    //==============================================================================
+    juce_UseDebuggingNewOperator
+
+protected:
     //==============================================================================
     /** Scrolls the minimum distance needed to get the caret into view. */
     void scrollToMakeSureCursorIsVisible();

@@ -1773,6 +1773,28 @@ void TextEditor::paintOverChildren (Graphics& g)
 }
 
 //==============================================================================
+class TextEditorMenuPerformer  : public ModalComponentManager::Callback
+{
+public:
+    TextEditorMenuPerformer (TextEditor* const editor_)
+        : editor (editor_)
+    {
+    }
+
+    void modalStateFinished (int returnValue)
+    {
+        if (editor != 0 && returnValue != 0)
+            editor->performPopupMenuAction (returnValue);
+    }
+
+private:
+    Component::SafePointer<TextEditor> editor;
+
+    TextEditorMenuPerformer (const TextEditorMenuPerformer&);
+    TextEditorMenuPerformer& operator= (const TextEditorMenuPerformer&);
+};
+
+
 void TextEditor::mouseDown (const MouseEvent& e)
 {
     beginDragAutoRepeat (100);
@@ -1791,12 +1813,7 @@ void TextEditor::mouseDown (const MouseEvent& e)
             m.setLookAndFeel (&getLookAndFeel());
             addPopupMenuItems (m, &e);
 
-            menuActive = true;
-            const int result = m.show();
-            menuActive = false;
-
-            if (result != 0)
-                performPopupMenuAction (result);
+            m.show (0, 0, 0, 0, new TextEditorMenuPerformer (this));
         }
     }
 }
@@ -2221,7 +2238,7 @@ void TextEditor::enablementChanged()
 //==============================================================================
 UndoManager* TextEditor::getUndoManager() throw()
 {
-    return isReadOnly() ? &undoManager : 0;
+    return isReadOnly() ? 0 : &undoManager;
 }
 
 void TextEditor::clearInternal (UndoManager* const um)

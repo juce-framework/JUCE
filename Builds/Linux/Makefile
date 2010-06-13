@@ -127,6 +127,7 @@ OBJECTS := \
   $(OBJDIR)/juce_Component_49f01dfa.o \
   $(OBJDIR)/juce_ComponentListener_e0eda7ce.o \
   $(OBJDIR)/juce_Desktop_e3b47b99.o \
+  $(OBJDIR)/juce_ModalComponentManager_b87bddba.o \
   $(OBJDIR)/juce_ArrowButton_ebac7066.o \
   $(OBJDIR)/juce_Button_886d3491.o \
   $(OBJDIR)/juce_DrawableButton_e03899cf.o \
@@ -791,6 +792,11 @@ $(OBJDIR)/juce_ComponentListener_e0eda7ce.o: ../../src/gui/components/juce_Compo
 $(OBJDIR)/juce_Desktop_e3b47b99.o: ../../src/gui/components/juce_Desktop.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling juce_Desktop.cpp"
+	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
+
+$(OBJDIR)/juce_ModalComponentManager_b87bddba.o: ../../src/gui/components/juce_ModalComponentManager.cpp
+	-@mkdir -p $(OBJDIR)
+	@echo "Compiling juce_ModalComponentManager.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/juce_ArrowButton_ebac7066.o: ../../src/gui/components/buttons/juce_ArrowButton.cpp

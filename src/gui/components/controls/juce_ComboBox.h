@@ -388,6 +388,9 @@ private:
         bool isRealItem() const throw();
     };
 
+    class Callback;
+    friend class Callback;
+
     OwnedArray <ItemInfo> items;
     Value currentId;
     int lastCurrentId;

@@ -430,6 +430,9 @@
     <ClCompile Include="..\..\src\gui\components\juce_Desktop.cpp">
       <Filter>Juce\Source\gui\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\gui\components\juce_ModalComponentManager.cpp">
+      <Filter>Juce\Source\gui\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\src\gui\components\buttons\juce_ArrowButton.cpp">
       <Filter>Juce\Source\gui\components\buttons</Filter>
     </ClCompile>
@@ -1519,6 +1522,9 @@
       <Filter>Juce\Source\gui\components</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\juce_Desktop.h">
+      <Filter>Juce\Source\gui\components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gui\components\juce_ModalComponentManager.h">
       <Filter>Juce\Source\gui\components</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\gui\components\buttons\juce_ArrowButton.h">

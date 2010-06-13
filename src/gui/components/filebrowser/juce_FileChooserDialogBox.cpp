@@ -76,6 +76,11 @@ FileChooserDialogBox::~FileChooserDialogBox()
 //==============================================================================
 bool FileChooserDialogBox::show (int w, int h)
 {
+    return showAt (-1, -1, w, h);
+}
+
+bool FileChooserDialogBox::showAt (int x, int y, int w, int h)
+{
     if (w <= 0)
     {
         Component* const previewComp = content->chooserComponent->getPreviewComponent();
@@ -88,7 +93,10 @@ bool FileChooserDialogBox::show (int w, int h)
     if (h <= 0)
         h = 500;
 
-    centreWithSize (w, h);
+    if (x < 0 || y < 0)
+        centreWithSize (w, h);
+    else
+        setBounds (x, y, w, h);
 
     const bool ok = (runModalLoop() != 0);
     setVisible (false);
