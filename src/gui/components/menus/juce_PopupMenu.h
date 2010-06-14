@@ -410,16 +410,6 @@ private:
                   bool alignToRectangle,
                   Component* componentAttachedTo,
                   ModalComponentManager::Callback* callback);
-
-    Component* createMenuComponent (const Rectangle<int>& target,
-                                    int itemIdThatMustBeVisible,
-                                    int minimumWidth,
-                                    int maximumNumColumns,
-                                    int standardItemHeight,
-                                    bool alignToRectangle,
-                                    Component* menuBarComponent,
-                                    ApplicationCommandManager** managerOfChosenCommand,
-                                    Component* componentAttachedTo);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

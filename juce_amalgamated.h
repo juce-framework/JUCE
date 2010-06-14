@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	20
+#define JUCE_BUILDNUMBER	21
 
 /** Current Juce version number.
 
@@ -35245,16 +35245,6 @@ private:
 				  bool alignToRectangle,
 				  Component* componentAttachedTo,
 				  ModalComponentManager::Callback* callback);
-
-	Component* createMenuComponent (const Rectangle<int>& target,
-									int itemIdThatMustBeVisible,
-									int minimumWidth,
-									int maximumNumColumns,
-									int standardItemHeight,
-									bool alignToRectangle,
-									Component* menuBarComponent,
-									ApplicationCommandManager** managerOfChosenCommand,
-									Component* componentAttachedTo);
 };
 
 #endif   // __JUCE_POPUPMENU_JUCEHEADER__

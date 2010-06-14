@@ -263,7 +263,6 @@ public:
          owner (0),
          currentChild (0),
          activeSubMenu (0),
-         menuBarComponent (0),
          managerOfChosenCommand (0),
          minimumWidth (0),
          maximumNumColumns (7),
@@ -315,7 +314,6 @@ public:
                            const int standardItemHeight,
                            const bool alignToRectangle,
                            const int itemIdThatMustBeVisible,
-                           Component* const menuBarComponent,
                            ApplicationCommandManager** managerOfChosenCommand,
                            Component* const componentAttachedTo)
     {
@@ -342,7 +340,6 @@ public:
             if (totalItems > 0)
             {
                 mw->owner = owner_;
-                mw->menuBarComponent = menuBarComponent;
                 mw->managerOfChosenCommand = managerOfChosenCommand;
                 mw->componentAttachedTo = componentAttachedTo;
                 mw->componentAttachedToOriginal = componentAttachedTo;
@@ -509,9 +506,9 @@ public:
 
                 disableTimerUntilMouseMoves();
             }
-            else if (menuBarComponent != 0)
+            else if (componentAttachedTo != 0)
             {
-                menuBarComponent->keyPressed (key);
+                componentAttachedTo->keyPressed (key);
             }
         }
         else if (key.isKeyCode (KeyPress::rightKey))
@@ -525,9 +522,9 @@ public:
                 if (activeSubMenu != 0 && activeSubMenu->isVisible())
                     activeSubMenu->selectNextItem (1);
             }
-            else if (menuBarComponent != 0)
+            else if (componentAttachedTo != 0)
             {
-                menuBarComponent->keyPressed (key);
+                componentAttachedTo->keyPressed (key);
             }
         }
         else if (key.isKeyCode (KeyPress::returnKey))
@@ -740,7 +737,6 @@ private:
     Window* owner;
     PopupMenu::ItemComponent* currentChild;
     ScopedPointer <Window> activeSubMenu;
-    Component* menuBarComponent;
     ApplicationCommandManager** managerOfChosenCommand;
     Component::SafePointer<Component> componentAttachedTo;
     Component* componentAttachedToOriginal;
@@ -1109,8 +1105,7 @@ private:
                                             childComp->getScreenBounds(),
                                             0, maximumNumColumns,
                                             standardItemHeight,
-                                            false, 0, menuBarComponent,
-                                            managerOfChosenCommand,
+                                            false, 0, managerOfChosenCommand,
                                             componentAttachedTo);
 
             if (activeSubMenu != 0)
@@ -1487,27 +1482,6 @@ void PopupMenu::addSectionHeader (const String& title)
 }
 
 //==============================================================================
-Component* PopupMenu::createMenuComponent (const Rectangle<int>& target,
-                                           const int itemIdThatMustBeVisible,
-                                           const int minimumWidth,
-                                           const int maximumNumColumns,
-                                           const int standardItemHeight,
-                                           const bool alignToRectangle,
-                                           Component* menuBarComponent,
-                                           ApplicationCommandManager** managerOfChosenCommand,
-                                           Component* const componentAttachedTo)
-{
-    Window* const pw = Window::create (*this, ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
-                                       0, target, minimumWidth, maximumNumColumns, standardItemHeight,
-                                       alignToRectangle, itemIdThatMustBeVisible, menuBarComponent,
-                                       managerOfChosenCommand, componentAttachedTo);
-
-    if (pw != 0)
-        pw->setVisible (true);
-
-    return pw;
-}
-
 // This invokes any command manager commands and deletes the menu window when it is dismissed
 class PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 {
@@ -1557,14 +1531,10 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
     PopupMenuCompletionCallback* callback = new PopupMenuCompletionCallback();
     ScopedPointer<PopupMenuCompletionCallback> callbackDeleter (callback);
 
-    callback->component = createMenuComponent (target,
-                                               itemIdThatMustBeVisible,
-                                               minimumWidth,
-                                               maximumNumColumns > 0 ? maximumNumColumns : 7,
-                                               standardItemHeight,
-                                               alignToRectangle, 0,
-                                               &callback->managerOfChosenCommand,
-                                               componentAttachedTo);
+    callback->component = Window::create (*this, ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
+                                          0, target, minimumWidth, maximumNumColumns > 0 ? maximumNumColumns : 7,
+                                          standardItemHeight, alignToRectangle, 0,
+                                          &callback->managerOfChosenCommand, componentAttachedTo);
 
     if (callback->component == 0)
         return 0;
