@@ -3160,7 +3160,8 @@ public:
                        GLXContext sharedContext)
         : renderContext (0),
           embeddedWindow (0),
-          pixelFormat (pixelFormat_)
+          pixelFormat (pixelFormat_),
+          swapInterval (0)
     {
         jassert (component != 0);
         LinuxComponentPeer* const peer = dynamic_cast <LinuxComponentPeer*> (component->getTopLevelComponent()->getPeer());
@@ -3288,14 +3289,21 @@ public:
 
     bool setSwapInterval (const int numFramesPerSwap)
     {
-        // xxx needs doing..
+        static PFNGLXSWAPINTERVALSGIPROC GLXSwapIntervalSGI = (PFNGLXSWAPINTERVALSGIPROC) glXGetProcAddress ((const GLubyte*) "glXSwapIntervalSGI");
+
+        if (GLXSwapIntervalSGI != 0)
+        {
+            swapInterval = numFramesPerSwap;
+            GLXSwapIntervalSGI (numFramesPerSwap);
+            return true;
+        }
+
         return false;
     }
 
     int getSwapInterval() const
     {
-        // xxx needs doing..
-        return 0;
+        return swapInterval;
     }
 
     void repaint()
@@ -3310,6 +3318,7 @@ public:
 private:
     Window embeddedWindow;
     OpenGLPixelFormat pixelFormat;
+    int swapInterval;
 
     //==============================================================================
     WindowedGLContext (const WindowedGLContext&);

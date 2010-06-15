@@ -235,6 +235,8 @@ public:
             for (int i = 0; i < updateList.size(); ++i)
                 dragItem (updateList.getReference(i), distance, originalPositions.getReference(i));
         }
+
+        canvas->handleUpdateNowIfNeeded();
     }
 
 protected:

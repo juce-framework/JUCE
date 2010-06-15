@@ -801,9 +801,8 @@ private:
             capStyle = PathStrokeType::square;
 
         float ox = 0.0f, oy = 0.0f;
-        transform.transformPoint (ox, oy);
         float x = getCoordLength (strokeWidth, viewBoxW), y = 0.0f;
-        transform.transformPoint (x, y);
+        transform.transformPoints (ox, oy, x, y);
 
         return PathStrokeType (strokeWidth.isNotEmpty() ? juce_hypotf (x - ox, y - oy) : 1.0f,
                                joinStyle, capStyle);

@@ -494,10 +494,8 @@ public:
         float x3 = x,     y3 = y + h;
         float x4 = x2,    y4 = y3;
 
-        transform.transformPoint (x1, y1);
-        transform.transformPoint (x2, y2);
-        transform.transformPoint (x3, y3);
-        transform.transformPoint (x4, y4);
+        transform.transformPoints (x1, y1, x2, y2);
+        transform.transformPoints (x3, y3, x4, y4);
 
         const float rx = jmin (x1, x2, x3, x4);
         const float ry = jmin (y1, y2, y3, y4);

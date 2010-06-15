@@ -889,9 +889,8 @@ private:
         void setStartOfLine (float x, float y, const int numPixels) throw()
         {
             float x1 = x, y1 = y;
-            inverseTransform.transformPoint (x1, y1);
             x += numPixels;
-            inverseTransform.transformPoint (x, y);
+            inverseTransform.transformPoints (x1, y1, x, y);
 
             xBresenham.set ((int) (x1 * 256.0f), (int) (x * 256.0f), numPixels);
             yBresenham.set ((int) (y1 * 256.0f), (int) (y * 256.0f), numPixels);

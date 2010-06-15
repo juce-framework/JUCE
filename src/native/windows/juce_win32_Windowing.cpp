@@ -2513,7 +2513,7 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
             {
                 static const unsigned char dragHandData[] =
                     { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
-                      16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39, 132,117,151,116,132,146,248,60,209,138,
+                      16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
                 dragHandCursor = createMouseCursorFromImage (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), 8, 7);
@@ -2651,13 +2651,6 @@ private:
 
 class JuceDataObject  : public ComBaseClassHelper <IDataObject>
 {
-    JuceDropSource* const dropSource;
-    const FORMATETC* const format;
-    const STGMEDIUM* const medium;
-
-    JuceDataObject (const JuceDataObject&);
-    JuceDataObject& operator= (const JuceDataObject&);
-
 public:
     JuceDataObject (JuceDropSource* const dropSource_,
                     const FORMATETC* const format_,
@@ -2739,6 +2732,14 @@ public:
     HRESULT __stdcall DAdvise (FORMATETC __RPC_FAR*, DWORD, IAdviseSink __RPC_FAR*, DWORD __RPC_FAR*)   { return OLE_E_ADVISENOTSUPPORTED; }
     HRESULT __stdcall DUnadvise (DWORD)                                                                 { return E_NOTIMPL; }
     HRESULT __stdcall EnumDAdvise (IEnumSTATDATA __RPC_FAR *__RPC_FAR *)                                { return OLE_E_ADVISENOTSUPPORTED; }
+
+private:
+    JuceDropSource* const dropSource;
+    const FORMATETC* const format;
+    const STGMEDIUM* const medium;
+
+    JuceDataObject (const JuceDataObject&);
+    JuceDataObject& operator= (const JuceDataObject&);
 };
 
 static HDROP createHDrop (const StringArray& fileNames) throw()

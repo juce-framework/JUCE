@@ -38,7 +38,9 @@ class DrawableEditorCanvas  : public EditorCanvasBase,
 public:
     //==============================================================================
     DrawableEditorCanvas (DrawableEditor& editor_)
-        : editor (editor_)
+        : editor (editor_),
+          backgroundColour (Colour::greyLevel (0.95f)),
+          contentAreaColour (Colours::white)
     {
         initialise();
         getDocument().getRoot().addListener (this);
@@ -83,6 +85,11 @@ public:
         startTimer (500);
     }
 
+    void fillBackground (Graphics& g)
+    {
+        g.fillAll (backgroundColour);
+    }
+
     const Rectangle<int> getCanvasBounds()
     {
         return drawable->getBounds().getSmallestIntegerContainer();
@@ -90,6 +97,11 @@ public:
 
     void setCanvasBounds (const Rectangle<int>& newBounds)  {}
     bool canResizeCanvas() const                            { return false; }
+
+    const Rectangle<float> getContentArea() const
+    {
+        return drawable->getContentArea().resolve (drawable->getParent());
+    }
 
     //==============================================================================
     const ValueTree getObjectState (const String& objectId)
@@ -705,27 +717,23 @@ public:
         DrawableComponent (DrawableEditorCanvas* canvas_)
             : canvas (canvas_)
         {
-            setOpaque (true);
         }
 
         ~DrawableComponent()
         {
         }
 
-        void updateDrawable()
-        {
-            repaint();
-        }
-
         void paint (Graphics& g)
         {
-            canvas->handleUpdateNowIfNeeded();
-            g.fillAll (Colours::white);
+            // do not call canvas->handleUpdateNowIfNeeded() here! It resizes the component while we're painting it!
 
             const Point<int> origin (canvas->getScale().origin);
             g.setOrigin (origin.getX(), origin.getY());
 
-            if (origin.getX() > 0)
+            g.setColour (canvas->contentAreaColour);
+            g.fillRect (canvas->getContentArea().getSmallestIntegerContainer());
+
+/*            if (origin.getX() > 0)
             {
                 g.setColour (Colour::greyLevel (0.87f));
                 g.drawVerticalLine (0, -10000.0f, 10000.0f);
@@ -736,7 +744,7 @@ public:
                 g.setColour (Colour::greyLevel (0.87f));
                 g.drawHorizontalLine (0, -10000.0f, 10000.0f);
             }
-
+*/
             canvas->drawable->draw (g, 1.0f);
         }
 
@@ -746,6 +754,7 @@ public:
     };
 
     ScopedPointer<DrawableComposite> drawable;
+    Colour backgroundColour, contentAreaColour;
 
 private:
     //==============================================================================

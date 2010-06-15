@@ -257,22 +257,5 @@ bool AffineTransform::isOnlyTranslation() const throw()
         && (mat11 == 1.0f);
 }
 
-//==============================================================================
-void AffineTransform::transformPoint (float& x,
-                                      float& y) const throw()
-{
-    const float oldX = x;
-    x = mat00 * oldX + mat01 * y + mat02;
-    y = mat10 * oldX + mat11 * y + mat12;
-}
-
-void AffineTransform::transformPoint (double& x,
-                                      double& y) const throw()
-{
-    const double oldX = x;
-    x = mat00 * oldX + mat01 * y + mat02;
-    y = mat10 * oldX + mat11 * y + mat12;
-}
-
 
 END_JUCE_NAMESPACE

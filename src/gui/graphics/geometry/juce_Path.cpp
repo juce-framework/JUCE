@@ -829,8 +829,7 @@ void Path::addPath (const Path& other,
                 float y2 = other.data.elements [i++];
                 float x3 = other.data.elements [i++];
                 float y3 = other.data.elements [i++];
-                transformToApply.transformPoint (x2, y2);
-                transformToApply.transformPoint (x3, y3);
+                transformToApply.transformPoints (x2, y2, x3, y3);
 
                 cubicTo (x, y, x2, y2, x3, y3);
             }
@@ -857,8 +856,7 @@ void Path::applyTransform (const AffineTransform& transform) throw()
 
         if (type == moveMarker)
         {
-            transform.transformPoint (data.elements [i],
-                                      data.elements [i + 1]);
+            transform.transformPoint (data.elements [i], data.elements [i + 1]);
 
             if (setMaxMin)
             {
@@ -878,8 +876,7 @@ void Path::applyTransform (const AffineTransform& transform) throw()
         }
         else if (type == lineMarker)
         {
-            transform.transformPoint (data.elements [i],
-                                      data.elements [i + 1]);
+            transform.transformPoint (data.elements [i], data.elements [i + 1]);
 
             pathXMin = jmin (pathXMin, data.elements [i]);
             pathXMax = jmax (pathXMax, data.elements [i]);
@@ -890,11 +887,8 @@ void Path::applyTransform (const AffineTransform& transform) throw()
         }
         else if (type == quadMarker)
         {
-            transform.transformPoint (data.elements [i],
-                                      data.elements [i + 1]);
-
-            transform.transformPoint (data.elements [i + 2],
-                                      data.elements [i + 3]);
+            transform.transformPoints (data.elements [i], data.elements [i + 1],
+                                       data.elements [i + 2], data.elements [i + 3]);
 
             pathXMin = jmin (pathXMin, data.elements [i], data.elements [i + 2]);
             pathXMax = jmax (pathXMax, data.elements [i], data.elements [i + 2]);
@@ -905,14 +899,9 @@ void Path::applyTransform (const AffineTransform& transform) throw()
         }
         else if (type == cubicMarker)
         {
-            transform.transformPoint (data.elements [i],
-                                      data.elements [i + 1]);
-
-            transform.transformPoint (data.elements [i + 2],
-                                      data.elements [i + 3]);
-
-            transform.transformPoint (data.elements [i + 4],
-                                      data.elements [i + 5]);
+            transform.transformPoints (data.elements [i], data.elements [i + 1],
+                                       data.elements [i + 2], data.elements [i + 3],
+                                       data.elements [i + 4], data.elements [i + 5]);
 
             pathXMin = jmin (pathXMin, data.elements [i], data.elements [i + 2], data.elements [i + 4]);
             pathXMax = jmax (pathXMax, data.elements [i], data.elements [i + 2], data.elements [i + 4]);

@@ -499,8 +499,15 @@ bool DrawableDocument::MarkerList::createProperties (Array <PropertyComponent*>&
 
     if (marker.isValid())
     {
-        props.add (new TextPropertyComponent (marker.getPropertyAsValue (DrawableComposite::ValueTreeWrapper::nameProperty, getUndoManager()),
-                                              "Marker Name", 256, false));
+        const String markerName (marker [DrawableComposite::ValueTreeWrapper::nameProperty].toString());
+
+        TextPropertyComponent* nameProp = new TextPropertyComponent (Value (new MarkerListBase::MarkerNameValueSource (this, marker.getPropertyAsValue (DrawableComposite::ValueTreeWrapper::nameProperty, getUndoManager()))),
+                                                                     "Marker Name", 256, false);
+        nameProp->setEnabled (markerName != DrawableComposite::contentLeftMarkerName
+                                && markerName != DrawableComposite::contentRightMarkerName
+                                && markerName != DrawableComposite::contentTopMarkerName
+                                && markerName != DrawableComposite::contentBottomMarkerName);
+        props.add (nameProp);
 
         props.add (new MarkerListBase::PositionPropertyComponent (*this, "Position", marker,
                                                                   marker.getPropertyAsValue (DrawableComposite::ValueTreeWrapper::posProperty, getUndoManager())));
@@ -575,4 +582,27 @@ void DrawableDocument::MarkerList::renameAnchor (const String& oldName, const St
 
 void DrawableDocument::renameAnchor (const String& oldName, const String& newName)
 {
+    markersX->renameAnchorInMarkers (oldName, newName);
+    markersY->renameAnchorInMarkers (oldName, newName);
+
+    DrawableComposite::ValueTreeWrapper root (getRootDrawableNode());
+    DrawableTypeInstance rootItem (*this, root.getState());
+
+    for (int i = root.getNumDrawables(); --i >= 0;)
+    {
+        DrawableTypeInstance item (*this, root.getDrawableState(i));
+
+        OwnedArray <ControlPoint> points;
+        item.getAllControlPoints (points);
+
+        for (int j = points.size(); --j >= 0;)
+        {
+            const RelativePoint oldPoint (points.getUnchecked(j)->getPosition());
+            RelativePoint newPoint (oldPoint);
+            newPoint.renameAnchorIfUsed (oldName, newName, &rootItem);
+
+            if (newPoint != oldPoint)
+                points.getUnchecked(j)->setPosition (newPoint, getUndoManager());
+        }
+    }
 }

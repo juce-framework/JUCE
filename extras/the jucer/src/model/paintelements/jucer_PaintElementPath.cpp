@@ -235,7 +235,7 @@ void PaintElementPath::rescalePoint (RelativePositionedRectangle& pos, int dx, i
 //==============================================================================
 static void drawArrow (Graphics& g, float x1, float y1, float x2, float y2)
 {
-    g.drawArrow (x1, y1, (x1 + x2) * 0.5f, (y1 + y2) * 0.5f, 1.0f, 8.0f, 10.0f);
+    g.drawArrow (Line<float> (x1, y1, (x1 + x2) * 0.5f, (y1 + y2) * 0.5f), 1.0f, 8.0f, 10.0f);
     g.drawLine (x1 + (x2 - x1) * 0.49f, y1 + (y2 - y1) * 0.49f, x2, y2);
 }
 
@@ -1052,7 +1052,7 @@ int PaintElementPath::findSegmentAtXY (int x, int y) const
         case Path::Iterator::lineTo:
             positionToXY (p->pos [0], x1, y1, area, layout);
 
-            segmentPath.addLineSegment ((float) lastX, (float) lastY, (float) x1, (float) y1, thickness);
+            segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) x1, (float) y1), thickness);
             if (segmentPath.contains ((float) x, (float) y))
                 return i;
 
@@ -1092,7 +1092,7 @@ int PaintElementPath::findSegmentAtXY (int x, int y) const
             break;
 
         case Path::Iterator::closePath:
-            segmentPath.addLineSegment ((float) lastX, (float) lastY, (float) subPathStartX, (float) subPathStartY, thickness);
+            segmentPath.addLineSegment (Line<float> ((float) lastX, (float) lastY, (float) subPathStartX, (float) subPathStartY), thickness);
             if (segmentPath.contains ((float) x, (float) y))
                 return subpathStartIndex;
 

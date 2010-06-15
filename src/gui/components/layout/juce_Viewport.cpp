@@ -223,6 +223,7 @@ void Viewport::updateVisibleArea()
         horizontalScrollBar.setRangeLimits (0.0, contentBounds.getWidth());
         horizontalScrollBar.setCurrentRange (visibleOrigin.getX(), contentArea.getWidth());
         horizontalScrollBar.setSingleStepSize (singleStepX);
+        horizontalScrollBar.cancelPendingUpdate();
     }
 
     if (vBarVisible)
@@ -231,6 +232,7 @@ void Viewport::updateVisibleArea()
         verticalScrollBar.setRangeLimits (0.0, contentBounds.getHeight());
         verticalScrollBar.setCurrentRange (visibleOrigin.getY(), contentArea.getHeight());
         verticalScrollBar.setSingleStepSize (singleStepY);
+        verticalScrollBar.cancelPendingUpdate();
     }
 
     // Force the visibility *after* setting the ranges to avoid flicker caused by edge conditions in the numbers.
@@ -322,20 +324,46 @@ bool Viewport::useMouseWheelMoveIfNeeded (const MouseEvent& e, float wheelIncrem
         const bool hasVertBar = verticalScrollBar.isVisible();
         const bool hasHorzBar = horizontalScrollBar.isVisible();
 
-        if (hasHorzBar && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! hasVertBar))
+        if (hasHorzBar || hasVertBar)
         {
-            if (wheelIncrementX == 0 && ! hasVertBar)
-                wheelIncrementX = wheelIncrementY;
+            if (wheelIncrementX != 0)
+            {
+                wheelIncrementX *= 14.0f * singleStepX;
+                wheelIncrementX = (wheelIncrementX < 0) ? jmin (wheelIncrementX, -1.0f)
+                                                        : jmax (wheelIncrementX, 1.0f);
+            }
 
-            horizontalScrollBar.mouseWheelMove (e.getEventRelativeTo (&horizontalScrollBar),
-                                                wheelIncrementX, wheelIncrementY);
-            return true;
-        }
-        else if (hasVertBar && wheelIncrementY != 0)
-        {
-            verticalScrollBar.mouseWheelMove (e.getEventRelativeTo (&verticalScrollBar),
-                                              wheelIncrementX, wheelIncrementY);
-            return true;
+            if (wheelIncrementY != 0)
+            {
+                wheelIncrementY *= 14.0f * singleStepY;
+                wheelIncrementY = (wheelIncrementY < 0) ? jmin (wheelIncrementY, -1.0f)
+                                                        : jmax (wheelIncrementY, 1.0f);
+            }
+
+            Point<int> pos (getViewPosition());
+
+            if (wheelIncrementX != 0 && wheelIncrementY != 0 && hasHorzBar && hasVertBar)
+            {
+                pos.setX (pos.getX() - roundToInt (wheelIncrementX));
+                pos.setY (pos.getY() - roundToInt (wheelIncrementY));
+            }
+            else if (hasHorzBar && (wheelIncrementX != 0 || e.mods.isShiftDown() || ! hasVertBar))
+            {
+                if (wheelIncrementX == 0 && ! hasVertBar)
+                    wheelIncrementX = wheelIncrementY;
+
+                pos.setX (pos.getX() - roundToInt (wheelIncrementX));
+            }
+            else if (hasVertBar && wheelIncrementY != 0)
+            {
+                pos.setY (pos.getY() - roundToInt (wheelIncrementY));
+            }
+
+            if (pos != getViewPosition())
+            {
+                setViewPosition (pos);
+                return true;
+            }
         }
     }
 

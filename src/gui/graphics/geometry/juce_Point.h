@@ -153,7 +153,8 @@ public:
     void applyTransform (const AffineTransform& transform) throw()      { transform.transformPoint (x, y); }
 
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
-    const Point transformedBy (const AffineTransform& transform) const throw()    { ValueType x2 (x), y2 (y); transform.transformPoint (x2, y2); return Point (x2, y2); }
+    const Point transformedBy (const AffineTransform& transform) const throw()    { return Point (transform.mat00 * x + transform.mat01 * y + transform.mat02,
+                                                                                                  transform.mat10 * x + transform.mat11 * y + transform.mat12); }
 
     /** Casts this point to a Point<float> object. */
     const Point<float> toFloat() const throw()                          { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }

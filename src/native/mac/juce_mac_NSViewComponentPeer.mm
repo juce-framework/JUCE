@@ -32,6 +32,11 @@ class NSViewComponentPeer;
 //==============================================================================
 END_JUCE_NAMESPACE
 
+@interface NSEvent (JuceDeviceDelta)
+ - (float) deviceDeltaX;
+ - (float) deviceDeltaY;
+@end
+
 #define JuceNSView MakeObjCClassName(JuceNSView)
 
 @interface JuceNSView : NSView<NSTextInput>
@@ -1424,8 +1429,20 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
 {
     updateModifiers (ev);
 
-    handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev),
-                      [ev deltaX] * 10.0f, [ev deltaY] * 10.0f);
+    float x = 0, y = 0;
+
+    @try
+    {
+        x = [ev deviceDeltaX] * 0.5f;
+        y = [ev deviceDeltaY] * 0.5f;
+    }
+    @catch (...)
+    {
+        x = [ev deltaX] * 10.0f;
+        y = [ev deltaY] * 10.0f;
+    }
+
+    handleMouseWheel (0, getMousePos (ev, view), getMouseTime (ev), x, y);
 }
 
 void NSViewComponentPeer::showArrowCursorIfNeeded()

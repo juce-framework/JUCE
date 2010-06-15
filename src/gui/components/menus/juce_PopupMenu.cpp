@@ -1533,7 +1533,7 @@ int PopupMenu::showMenu (const Rectangle<int>& target,
 
     callback->component = Window::create (*this, ModifierKeys::getCurrentModifiers().isAnyMouseButtonDown(),
                                           0, target, minimumWidth, maximumNumColumns > 0 ? maximumNumColumns : 7,
-                                          standardItemHeight, alignToRectangle, 0,
+                                          standardItemHeight, alignToRectangle, itemIdThatMustBeVisible,
                                           &callback->managerOfChosenCommand, componentAttachedTo);
 
     if (callback->component == 0)

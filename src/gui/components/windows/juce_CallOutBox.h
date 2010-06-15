@@ -105,6 +105,8 @@ public:
     void inputAttemptWhenModal();
     /** @internal */
     bool keyPressed (const KeyPress& key);
+    /** @internal */
+    void handleCommandMessage (int commandId);
 
     juce_UseDebuggingNewOperator
 

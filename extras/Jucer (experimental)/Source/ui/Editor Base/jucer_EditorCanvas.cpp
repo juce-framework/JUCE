@@ -597,6 +597,7 @@ EditorCanvasBase::EditorCanvasBase()
     : border (8, 8, 14, 14)
 {
     //setOpaque (true);
+    trimCanvasTimer.owner = this;
     addChildComponent (&spacebarDragOverlay);
 }
 
@@ -609,7 +610,9 @@ void EditorCanvasBase::initialise()
 {
     addAndMakeVisible (componentHolder = createComponentHolder());
     addAndMakeVisible (overlay = new OverlayComponent (this));
-    overlay->addAndMakeVisible (resizeFrame = new DocumentResizeFrame (this));
+
+    if (canResizeCanvas())
+        overlay->addAndMakeVisible (resizeFrame = new DocumentResizeFrame (this));
 
     handleAsyncUpdate();
 }
@@ -706,50 +709,79 @@ const Rectangle<int> EditorCanvasBase::getContentArea() const
 void EditorCanvasBase::handleAsyncUpdate()
 {
     documentChanged();
+    updateCanvasArea (false, false);
 
+    EditorPanelBase* panel = getPanel();
+    if (panel != 0)
+        panel->updateRulers(); // also updates markers
+
+    overlay->update();
+}
+
+void EditorCanvasBase::updateCanvasArea (bool trimIfPossible, bool updateOverlay)
+{
     const Rectangle<int> canvasBounds (getCanvasBounds());
 
-    const Point<int> newOrigin (jmax (0, -canvasBounds.getX()), jmax (0, -canvasBounds.getY()));
-    const int newWidth = jmax (canvasBounds.getWidth(), canvasBounds.getRight()) + border.getLeftAndRight();
-    const int newHeight = jmax (canvasBounds.getHeight(), canvasBounds.getBottom()) + border.getTopAndBottom();
-
-    if (scale.origin != newOrigin)
+    if (lastCanvasBounds != canvasBounds || trimIfPossible)
     {
-        repaint();
+        lastCanvasBounds = canvasBounds;
 
-        const Point<int> oldOrigin (scale.origin);
-        scale.origin = newOrigin;
+        if (! canResizeCanvas())
+        {
+            Rectangle<int> bounds (getBounds());
+            const Point<int> originInParent (scale.origin + componentHolder->getPosition() + bounds.getPosition());
+            bounds = border.addedTo (canvasBounds) + originInParent;
 
-        setBounds (jmin (0, getX() + oldOrigin.getX() - scale.origin.getX()),
-                   jmin (0, getY() + oldOrigin.getY() - scale.origin.getY()),
-                   newWidth, newHeight);
+            if (getParentComponent() != 0)
+                bounds = bounds.getUnion (getParentComponent()->getLocalBounds());
 
-        EditorPanelBase* panel = getPanel();
-        if (panel != 0)
-            panel->updateRulers();
+            const Point<int> newOrigin (originInParent - bounds.getPosition() - componentHolder->getPosition());
+
+            if (scale.origin != newOrigin)
+            {
+                repaint();
+                scale.origin = newOrigin;
+            }
+
+            if (getBounds() != bounds)
+            {
+                setBounds (bounds);
+
+                if (updateOverlay)
+                    overlay->update();
+            }
+        }
+        else if (getWidth() != canvasBounds.getWidth() || getHeight() != canvasBounds.getHeight())
+        {
+            setBounds (canvasBounds);
+        }
     }
-    else if (getWidth() != newWidth || getHeight() != newHeight)
+}
+
+void EditorCanvasBase::TrimCanvasTimer::timerCallback()
+{
+    if (! isMouseButtonDownAnywhere())
     {
-        setSize (newWidth, newHeight);
+        stopTimer();
+        owner->updateCanvasArea (true, true);
     }
-    else
-    {
-        overlay->update();
+}
 
-        EditorPanelBase* panel = getPanel();
-        if (panel != 0)
-            panel->updateMarkers();
-    }
+void EditorCanvasBase::moved()
+{
+    trimCanvasTimer.startTimer (500);
 }
 
 void EditorCanvasBase::resized()
 {
     componentHolder->setBounds (getContentArea());
     overlay->setBounds (getLocalBounds());
-    resizeFrame->setBounds (getLocalBounds());
+
+    if (resizeFrame != 0)
+        resizeFrame->setBounds (getLocalBounds());
+
     spacebarDragOverlay.setBounds (getLocalBounds());
-    overlay->update();
-    handleUpdateNowIfNeeded();
+    trimCanvasTimer.startTimer (500);
 }
 
 //==============================================================================

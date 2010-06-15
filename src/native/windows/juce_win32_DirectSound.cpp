@@ -143,60 +143,24 @@ static const String getDSErrorMessage (HRESULT hr)
 
     switch (hr)
     {
-    case MAKE_HRESULT(1, 0x878, 10):
-        result = "Device already allocated";
-        break;
-    case MAKE_HRESULT(1, 0x878, 30):
-        result = "Control unavailable";
-        break;
-    case E_INVALIDARG:
-        result = "Invalid parameter";
-        break;
-    case MAKE_HRESULT(1, 0x878, 50):
-        result = "Invalid call";
-        break;
-    case E_FAIL:
-        result = "Generic error";
-        break;
-    case MAKE_HRESULT(1, 0x878, 70):
-        result = "Priority level error";
-        break;
-    case E_OUTOFMEMORY:
-        result = "Out of memory";
-        break;
-    case MAKE_HRESULT(1, 0x878, 100):
-        result = "Bad format";
-        break;
-    case E_NOTIMPL:
-        result = "Unsupported function";
-        break;
-    case MAKE_HRESULT(1, 0x878, 120):
-        result = "No driver";
-        break;
-    case MAKE_HRESULT(1, 0x878, 130):
-        result = "Already initialised";
-        break;
-    case CLASS_E_NOAGGREGATION:
-        result = "No aggregation";
-        break;
-    case MAKE_HRESULT(1, 0x878, 150):
-        result = "Buffer lost";
-        break;
-    case MAKE_HRESULT(1, 0x878, 160):
-        result = "Another app has priority";
-        break;
-    case MAKE_HRESULT(1, 0x878, 170):
-        result = "Uninitialised";
-        break;
-    case E_NOINTERFACE:
-        result = "No interface";
-        break;
-    case S_OK:
-        result = "No error";
-        break;
-
-    default:
-        return "Unknown error: " + String ((int) hr);
+        case MAKE_HRESULT(1, 0x878, 10):    result = "Device already allocated"; break;
+        case MAKE_HRESULT(1, 0x878, 30):    result = "Control unavailable"; break;
+        case E_INVALIDARG:                  result = "Invalid parameter"; break;
+        case MAKE_HRESULT(1, 0x878, 50):    result = "Invalid call"; break;
+        case E_FAIL:                        result = "Generic error"; break;
+        case MAKE_HRESULT(1, 0x878, 70):    result = "Priority level error"; break;
+        case E_OUTOFMEMORY:                 result = "Out of memory"; break;
+        case MAKE_HRESULT(1, 0x878, 100):   result = "Bad format"; break;
+        case E_NOTIMPL:                     result = "Unsupported function"; break;
+        case MAKE_HRESULT(1, 0x878, 120):   result = "No driver"; break;
+        case MAKE_HRESULT(1, 0x878, 130):   result = "Already initialised"; break;
+        case CLASS_E_NOAGGREGATION:         result = "No aggregation"; break;
+        case MAKE_HRESULT(1, 0x878, 150):   result = "Buffer lost"; break;
+        case MAKE_HRESULT(1, 0x878, 160):   result = "Another app has priority"; break;
+        case MAKE_HRESULT(1, 0x878, 170):   result = "Uninitialised"; break;
+        case E_NOINTERFACE:                 result = "No interface"; break;
+        case S_OK:                          result = "No error"; break;
+        default:                            return "Unknown error: " + String ((int) hr);
     }
 
     return result;

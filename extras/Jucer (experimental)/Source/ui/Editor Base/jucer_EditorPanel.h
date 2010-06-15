@@ -38,6 +38,7 @@ public:
         : rulerX (true), rulerY (false), markersVisible (true), snappingEnabled (true), canvas (0)
     {
         setOpaque (true);
+
         background = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
 
         addAndMakeVisible (&toolbar);
@@ -525,8 +526,8 @@ private:
     {
     public:
         CanvasViewport()
+            : canvas (0)
         {
-            background = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
             setOpaque (true);
         }
 
@@ -536,8 +537,11 @@ private:
 
         void paint (Graphics& g)
         {
-            g.setTiledImageFill (background, 0, 0, 1.0f);
-            g.fillAll();
+            if (canvas == 0)
+                canvas = dynamic_cast <EditorCanvasBase*> (getViewedComponent());
+
+            if (canvas != 0)
+                canvas->fillBackground (g);
         }
 
         void paintOverChildren (Graphics& g)
@@ -554,7 +558,7 @@ private:
         }
 
     private:
-        Image background;
+        EditorCanvasBase* canvas;
     };
 
     //==============================================================================

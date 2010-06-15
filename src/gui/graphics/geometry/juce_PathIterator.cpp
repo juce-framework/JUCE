@@ -87,16 +87,13 @@ bool PathFlatteningIterator::next()
                     x2 = points [index++];
                     y2 = points [index++];
 
-                    if (! isIdentityTransform)
-                        transform.transformPoint (x2, y2);
-
                     if (type == Path::quadMarker)
                     {
                         x3 = points [index++];
                         y3 = points [index++];
 
                         if (! isIdentityTransform)
-                            transform.transformPoint (x3, y3);
+                            transform.transformPoints (x2, y2, x3, y3);
                     }
                     else if (type == Path::cubicMarker)
                     {
@@ -106,10 +103,12 @@ bool PathFlatteningIterator::next()
                         y4 = points [index++];
 
                         if (! isIdentityTransform)
-                        {
-                            transform.transformPoint (x3, y3);
-                            transform.transformPoint (x4, y4);
-                        }
+                            transform.transformPoints (x2, y2, x3, y3, x4, y4);
+                    }
+                    else
+                    {
+                        if (! isIdentityTransform)
+                            transform.transformPoint (x2, y2);
                     }
                 }
             }

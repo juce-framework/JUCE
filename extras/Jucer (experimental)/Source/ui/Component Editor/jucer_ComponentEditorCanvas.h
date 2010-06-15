@@ -36,6 +36,8 @@ public:
     ComponentEditorCanvas (ComponentEditor& editor_)
         : editor (editor_)
     {
+        background = ImageCache::getFromMemory (BinaryData::brushed_aluminium_png, BinaryData::brushed_aluminium_pngSize);
+
         initialise();
         getDocument().getRoot().addListener (this);
     }
@@ -66,6 +68,12 @@ public:
     {
         getDocument().updateComponentsIn (getComponentHolder());
         startTimer (500);
+    }
+
+    void fillBackground (Graphics& g)
+    {
+        g.setTiledImageFill (background, 0, 0, 1.0f);
+        g.fillAll();
     }
 
     const Rectangle<int> getCanvasBounds()
@@ -298,6 +306,7 @@ public:
 private:
     //==============================================================================
     ComponentEditor& editor;
+    Image background;
 
     class ComponentHolder   : public Component,
                               public Value::Listener

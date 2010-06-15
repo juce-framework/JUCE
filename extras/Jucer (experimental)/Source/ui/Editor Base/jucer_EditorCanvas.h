@@ -49,6 +49,7 @@ public:
     //==============================================================================
     void paint (Graphics& g);
     void resized();
+    void moved();
     bool keyStateChanged (bool isKeyDown);
     bool keyPressed (const KeyPress& key);
 
@@ -79,6 +80,7 @@ public:
     virtual void documentChanged() = 0;
     virtual Component* createComponentHolder() = 0;
 
+    virtual void fillBackground (Graphics& g) = 0;
     virtual const Rectangle<int> getCanvasBounds() = 0;
     virtual void setCanvasBounds (const Rectangle<int>& newBounds) = 0;
     virtual bool canResizeCanvas() const = 0;
@@ -164,6 +166,7 @@ protected:
     const BorderSize border;
     Scale scale;
     ValueTree controlPointEditingTarget;
+    Rectangle<int> lastCanvasBounds;
 
     friend class OverlayItemComponent;
     class ResizeFrame;
@@ -196,7 +199,21 @@ protected:
     SpacebarDragOverlay spacebarDragOverlay;
     ScopedPointer<DragOperation> dragger;
 
+    class TrimCanvasTimer   : public Timer
+    {
+    public:
+        TrimCanvasTimer() {}
+        ~TrimCanvasTimer() {}
+
+        void timerCallback();
+
+        EditorCanvasBase* owner;
+    };
+
+    friend class TrimCanvasTimer;
+    TrimCanvasTimer trimCanvasTimer;
     void handleAsyncUpdate();
+    void updateCanvasArea (bool trimIfPossible, bool updateOverlay);
 };
 
 

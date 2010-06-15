@@ -35,7 +35,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 DrawablePath::DrawablePath()
     : mainFill (Colours::black),
-      strokeFill (Colours::transparentBlack),
+      strokeFill (Colours::black),
       strokeType (0.0f),
       pathNeedsUpdating (true),
       strokeNeedsUpdating (true)

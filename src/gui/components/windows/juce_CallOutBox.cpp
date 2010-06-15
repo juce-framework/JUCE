@@ -103,10 +103,35 @@ bool CallOutBox::hitTest (int x, int y)
     return outline.contains ((float) x, (float) y);
 }
 
+enum { callOutBoxDismissCommandId = 0x4f83a04b };
+
 void CallOutBox::inputAttemptWhenModal()
 {
-    exitModalState (0);
-    setVisible (false);
+    const Point<int> mousePos (getMouseXYRelative() + getBounds().getPosition());
+
+    if (targetArea.contains (mousePos))
+    {
+        // if you click on the area that originally popped-up the callout, you expect it
+        // to get rid of the box, but deleting the box here allows the click to pass through and
+        // probably re-trigger it, so we need to dismiss the box asynchronously to consume the click..
+        postCommandMessage (callOutBoxDismissCommandId);
+    }
+    else
+    {
+        exitModalState (0);
+        setVisible (false);
+    }
+}
+
+void CallOutBox::handleCommandMessage (int commandId)
+{
+    Component::handleCommandMessage (commandId);
+
+    if (commandId == callOutBoxDismissCommandId)
+    {
+        exitModalState (0);
+        setVisible (false);
+    }
 }
 
 bool CallOutBox::keyPressed (const KeyPress& key)

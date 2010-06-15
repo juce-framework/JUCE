@@ -717,14 +717,11 @@ private:
                 CGContextAddLineToPoint (context, i.x1, flipHeight - i.y1);
                 break;
             case Path::Iterator::quadraticTo:
-                transform.transformPoint (i.x1, i.y1);
-                transform.transformPoint (i.x2, i.y2);
+                transform.transformPoints (i.x1, i.y1, i.x2, i.y2);
                 CGContextAddQuadCurveToPoint (context, i.x1, flipHeight - i.y1, i.x2, flipHeight - i.y2);
                 break;
             case Path::Iterator::cubicTo:
-                transform.transformPoint (i.x1, i.y1);
-                transform.transformPoint (i.x2, i.y2);
-                transform.transformPoint (i.x3, i.y3);
+                transform.transformPoints (i.x1, i.y1, i.x2, i.y2, i.x3, i.y3);
                 CGContextAddCurveToPoint (context, i.x1, flipHeight - i.y1, i.x2, flipHeight - i.y2, i.x3, flipHeight - i.y3);
                 break;
             case Path::Iterator::closePath:
