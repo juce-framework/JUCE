@@ -73,7 +73,7 @@ public:
             if (customComp != 0)
             {
                 addAndMakeVisible (customComp);
-                customComp->setBounds (0, 0, getWidth(), getHeight());
+                customComp->setBounds (getLocalBounds());
 
                 for (int i = getNumChildComponents(); --i >= 0;)
                     if (getChildComponent (i) != customComp)
@@ -146,7 +146,7 @@ public:
     void resized()
     {
         if (getNumChildComponents() > 0)
-            getChildComponent(0)->setBounds (0, 0, getWidth(), getHeight());
+            getChildComponent(0)->setBounds (getLocalBounds());
     }
 
     const String getTooltip()
@@ -333,7 +333,6 @@ private:
 ListBox::ListBox (const String& name, ListBoxModel* const model_)
     : Component (name),
       model (model_),
-      headerComponent (0),
       totalItems (0),
       rowHeight (22),
       minimumRowWidth (0),
@@ -351,7 +350,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const model_)
 
 ListBox::~ListBox()
 {
-    deleteAllChildren();
+    headerComponent = 0;
+    viewport = 0;
 }
 
 void ListBox::setModel (ListBoxModel* const newModel)
@@ -865,9 +865,8 @@ void ListBox::setOutlineThickness (const int outlineThickness_)
 
 void ListBox::setHeaderComponent (Component* const newHeaderComponent)
 {
-    if (headerComponent != newHeaderComponent)
+    if (newHeaderComponent != headerComponent)
     {
-        delete headerComponent;
         headerComponent = newHeaderComponent;
 
         addAndMakeVisible (newHeaderComponent);

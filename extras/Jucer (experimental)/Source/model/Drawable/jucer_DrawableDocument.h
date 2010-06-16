@@ -85,6 +85,7 @@ public:
         bool contains (const ValueTree& markerState) const;
         void createMarker (const String& name, double position);
         void deleteMarker (ValueTree& markerState);
+        bool isSpecialMarker (const ValueTree& markerState) const;
 
     private:
         DrawableDocument& document;

@@ -568,8 +568,8 @@ private:
     friend class ListViewport;
     friend class TableListBox;
     ListBoxModel* model;
-    ListViewport* viewport;
-    Component* headerComponent;
+    ScopedPointer<ListViewport> viewport;
+    ScopedPointer<Component> headerComponent;
     int totalItems, rowHeight, minimumRowWidth;
     int outlineThickness;
     int lastRowSelected;

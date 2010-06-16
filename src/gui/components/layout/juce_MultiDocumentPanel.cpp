@@ -464,7 +464,7 @@ void MultiDocumentPanel::resized()
     if (mode == MaximisedWindowsWithTabs || components.size() == numDocsBeforeTabsUsed)
     {
         for (int i = getNumChildComponents(); --i >= 0;)
-            getChildComponent (i)->setBounds (0, 0, getWidth(), getHeight());
+            getChildComponent (i)->setBounds (getLocalBounds());
     }
 
     setWantsKeyboardFocus (components.size() == 0);

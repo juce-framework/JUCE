@@ -880,13 +880,13 @@ void Slider::resized()
     if (style == LinearBar)
     {
         if (valueBox != 0)
-            valueBox->setBounds (0, 0, getWidth(), getHeight());
+            valueBox->setBounds (getLocalBounds());
     }
     else
     {
         if (textBoxPos == NoTextBox)
         {
-            sliderRect.setBounds (0, 0, getWidth(), getHeight());
+            sliderRect = getLocalBounds();
         }
         else if (textBoxPos == TextBoxLeft)
         {

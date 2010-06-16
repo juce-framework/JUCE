@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	22
+#define JUCE_BUILDNUMBER	23
 
 /** Current Juce version number.
 
@@ -20577,6 +20577,72 @@ public:
 		return expanded (-deltaX, -deltaY);
 	}
 
+	/** Removes a strip from the top of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 100, 300, 50) and leave this rectangle as (100, 150, 300, 250).
+
+		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
+		that value.
+	*/
+	const Rectangle removeFromTop (const ValueType amountToRemove) throw()
+	{
+		const Rectangle r (x, y, w, jmin (amountToRemove, h));
+		y += r.h; h -= r.h;
+		return r;
+	}
+
+	/** Removes a strip from the left-hand edge of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 100, 50, 300) and leave this rectangle as (150, 100, 250, 300).
+
+		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
+		that value.
+	*/
+	const Rectangle removeFromLeft (const ValueType amountToRemove) throw()
+	{
+		const Rectangle r (x, y, jmin (amountToRemove, w), h);
+		x += r.w; w -= r.w;
+		return r;
+	}
+
+	/** Removes a strip from the right-hand edge of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (250, 100, 50, 300) and leave this rectangle as (100, 100, 250, 300).
+
+		If amountToRemove is greater than the width of this rectangle, it'll be clipped to
+		that value.
+	*/
+	const Rectangle removeFromRight (ValueType amountToRemove) throw()
+	{
+		amountToRemove = jmin (amountToRemove, w);
+		const Rectangle r (x + w - amountToRemove, y, amountToRemove, h);
+		w -= amountToRemove;
+		return r;
+	}
+
+	/** Removes a strip from the bottom of this rectangle, reducing this rectangle
+		by the specified amount and returning the section that was removed.
+
+		E.g. if this rectangle is (100, 100, 300, 300) and amountToRemove is 50, this will
+		return (100, 250, 300, 50) and leave this rectangle as (100, 100, 300, 250).
+
+		If amountToRemove is greater than the height of this rectangle, it'll be clipped to
+		that value.
+	*/
+	const Rectangle removeFromBottom (ValueType amountToRemove) throw()
+	{
+		amountToRemove = jmin (amountToRemove, h);
+		const Rectangle r (x, y + h - amountToRemove, w, amountToRemove);
+		h -= amountToRemove;
+		return r;
+	}
+
 	/** Returns true if the two rectangles are identical. */
 	bool operator== (const Rectangle& other) const throw()
 	{
@@ -40053,8 +40119,8 @@ private:
 	friend class ListViewport;
 	friend class TableListBox;
 	ListBoxModel* model;
-	ListViewport* viewport;
-	Component* headerComponent;
+	ScopedPointer<ListViewport> viewport;
+	ScopedPointer<Component> headerComponent;
 	int totalItems, rowHeight, minimumRowWidth;
 	int outlineThickness;
 	int lastRowSelected;

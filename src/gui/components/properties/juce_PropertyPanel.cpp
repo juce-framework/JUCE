@@ -250,7 +250,7 @@ void PropertyPanel::paint (Graphics& g)
 
 void PropertyPanel::resized()
 {
-    viewport.setBounds (0, 0, getWidth(), getHeight());
+    viewport.setBounds (getLocalBounds());
     updatePropHolderLayout();
 }
 

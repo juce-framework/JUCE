@@ -650,7 +650,7 @@ void TreeView::paint (Graphics& g)
 
 void TreeView::resized()
 {
-    viewport->setBounds (0, 0, getWidth(), getHeight());
+    viewport->setBounds (getLocalBounds());
 
     itemsChanged();
     handleAsyncUpdate();

@@ -160,9 +160,9 @@ private:
 class ValueTree::MoveChildAction  : public UndoableAction
 {
 public:
-    MoveChildAction (const SharedObjectPtr& target_,
+    MoveChildAction (const SharedObjectPtr& parent_,
                      const int startIndex_, const int endIndex_)
-        : target (target_),
+        : parent (parent_),
           startIndex (startIndex_),
           endIndex (endIndex_)
     {
@@ -172,13 +172,13 @@ public:
 
     bool perform()
     {
-        target->moveChild (startIndex, endIndex, 0);
+        parent->moveChild (startIndex, endIndex, 0);
         return true;
     }
 
     bool undo()
     {
-        target->moveChild (endIndex, startIndex, 0);
+        parent->moveChild (endIndex, startIndex, 0);
         return true;
     }
 
@@ -191,14 +191,14 @@ public:
     {
         MoveChildAction* next = dynamic_cast <MoveChildAction*> (nextAction);
 
-        if (next != 0 && next->target == target && next->child == child)
-            return new MoveChildAction (target, startIndex, next->endIndex);
+        if (next != 0 && next->parent == parent && next->startIndex == endIndex)
+            return new MoveChildAction (parent, startIndex, next->endIndex);
 
         return 0;
     }
 
 private:
-    const SharedObjectPtr target, child;
+    const SharedObjectPtr parent;
     const int startIndex, endIndex;
 
     MoveChildAction (const MoveChildAction&);

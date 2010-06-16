@@ -1397,7 +1397,7 @@ public:
     void resized()
     {
         if (getChildComponent(0) != 0)
-            getChildComponent(0)->setBounds (0, 0, getWidth(), getHeight());
+            getChildComponent(0)->setBounds (getLocalBounds());
     }
 
     juce_UseDebuggingNewOperator

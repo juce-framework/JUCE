@@ -47,6 +47,7 @@ public:
         addAndMakeVisible (&viewport);
         addAndMakeVisible (&rulerX);
         addAndMakeVisible (&rulerY);
+        addAndMakeVisible (&tooltipBar);
 
         addChildComponent (&tree);
         tree.setRootItemVisible (true);
@@ -114,6 +115,8 @@ public:
     virtual SelectedItemSet<String>& getSelection() = 0;
     virtual void getSelectedItemProperties (Array<PropertyComponent*>& newComps) = 0;
 
+    static int getRulerThickness() throw()   { return 16; }
+
     void paint (Graphics& g)
     {
         g.setTiledImageFill (background, 0, 0, 1.0f);
@@ -122,31 +125,29 @@ public:
 
     void resized()
     {
-        const int toolbarHeight = 22;
+        Rectangle<int> area (getLocalBounds());
 
-        toolbar.setBounds (0, 0, getWidth(), toolbarHeight);
-
-        int contentL = 0, contentR = getWidth();
+        toolbar.setBounds (area.removeFromTop (22));
 
         if (infoPanel != 0 && infoPanel->isVisible())
         {
-            contentR -= 200;
-            infoPanel->setBounds (contentR, toolbar.getBottom(), getWidth() - contentR, getHeight() - toolbar.getBottom());
+            Rectangle<int> panel (area.removeFromRight (200));
+            tooltipBar.setBounds (panel.removeFromBottom (30));
+            infoPanel->setBounds (panel);
+        }
+        else
+        {
+            tooltipBar.setBounds (area.removeFromBottom (18));
         }
 
         if (tree.isVisible())
-        {
-            contentL = 200;
-            tree.setBounds (0, toolbar.getBottom(), contentL, getHeight() - toolbar.getBottom());
-        }
+            tree.setBounds (area.removeFromLeft (200));
 
-        const int rulerThickness = 16;
-        viewport.setBounds (contentL + rulerThickness, toolbar.getBottom() + rulerThickness,
-                            contentR - contentL - rulerThickness,
-                            getHeight() - toolbar.getBottom() - rulerThickness);
-
-        rulerX.setBounds (viewport.getX(), viewport.getY() - rulerThickness, viewport.getWidth(), rulerThickness);
-        rulerY.setBounds (viewport.getX() - rulerThickness, viewport.getY(), rulerThickness, viewport.getHeight());
+        Rectangle<int> ry (area.removeFromLeft (getRulerThickness()));
+        ry.removeFromTop (getRulerThickness());
+        rulerY.setBounds (ry);
+        rulerX.setBounds (area.removeFromTop (getRulerThickness()));
+        viewport.setBounds (area);
         updateRulers();
     }
 
@@ -247,7 +248,8 @@ private:
             }
         }
 
-        void updateMarkers (MarkerListBase& markerList, EditorCanvasBase* canvas_, const int viewportWidth, const int viewportHeight)
+        void updateMarkers (MarkerListBase& markerList, EditorCanvasBase* canvas_,
+                            const int viewportWidth, const int viewportHeight)
         {
             canvas = canvas_;
             const int num = markerList.size();
@@ -281,7 +283,7 @@ private:
             for (i = requiredMarkers.size(); --i >= 0;)
             {
                 MarkerComponent* marker = new MarkerComponent (*this, canvas, requiredMarkers.getReference(i),
-                                                               isX, isX ? getHeight() : getWidth());
+                                                               markerList.isSpecialMarker (requiredMarkers.getReference(i)), isX);
                 markers.add (marker);
                 getParentComponent()->addAndMakeVisible (marker);
                 marker->updatePosition (viewportWidth, viewportHeight);
@@ -340,23 +342,39 @@ private:
         }
 
         //==============================================================================
-        class MarkerComponent   : public Component
+        class MarkerComponent   : public Component,
+                                  public ChangeListener
         {
         public:
             MarkerComponent (RulerComponent& ruler_, EditorCanvasBase* const canvas_,
-                             const ValueTree& marker_, bool isX_, int headSize_)
-                : ruler (ruler_), canvas (canvas_), marker (marker_), isX (isX_), headSize (headSize_ - 2),
-                  isDragging (false)
+                             const ValueTree& marker_, bool isSpecial_, bool isX_)
+                : ruler (ruler_), canvas (canvas_), marker (marker_), isX (isX_), headSize (getRulerThickness() - 2),
+                  isDragging (false), isSpecial (isSpecial_), isSelected (false)
             {
+                updateSelectionState();
+
+                canvas->getSelection().addChangeListener (this);
             }
 
             ~MarkerComponent()
             {
+                canvas->getSelection().removeChangeListener (this);
             }
 
             void paint (Graphics& g)
             {
-                g.setColour (Colours::lightblue.withAlpha (isMouseOverOrDragging() ? 0.9f : 0.5f));
+                if (isSelected || isMouseOverOrDragging())
+                {
+                    g.setColour (Colours::white.withAlpha (0.5f));
+                    g.strokePath (path, PathStrokeType (isSelected ? 2.5f : 1.5f));
+                }
+
+                Colour c (isSpecial ? Colours::darkgreen : Colours::darkgrey);
+
+                if (isSelected)
+                    c = c.overlaidWith (Colours::red.withAlpha (0.5f));
+
+                g.setColour (c.withAlpha (isMouseOverOrDragging() ? 0.95f : 0.6f));
                 g.fillPath (path);
             }
 
@@ -415,15 +433,29 @@ private:
 
                 if (isX)
                 {
-                    const float centre = getWidth() / 2 + 0.5f;
-                    path.addLineSegment (Line<float> (centre, 2.0f, centre, getHeight() + 1.0f), lineThickness);
-                    path.addTriangle (1.0f, 0.0f, centre * 2.0f - 1.0f, 0.0f, centre, headSize + 1.0f);
+                    float w = getWidth() / 2.0f;
+                    const float centre = w + 0.5f;
+                    w -= 2.0f;
+                    path.startNewSubPath (centre - w, 1.0f);
+                    path.lineTo (centre + w, 1.0f);
+                    path.lineTo (centre + lineThickness / 2.0f, headSize);
+                    path.lineTo (centre + lineThickness / 2.0f, (float) getHeight());
+                    path.lineTo (centre - lineThickness / 2.0f, (float) getHeight());
+                    path.lineTo (centre - lineThickness / 2.0f, headSize);
+                    path.closeSubPath();
                 }
                 else
                 {
-                    const float centre = getHeight() / 2 + 0.5f;
-                    path.addLineSegment (Line<float> (2.0f, centre, getWidth() + 1.0f, centre), lineThickness);
-                    path.addTriangle (0.0f, centre * 2.0f - 1.0f, 0.0f, 1.0f, headSize + 1.0f, centre);
+                    float w = getHeight() / 2.0f;
+                    const float centre = w + 0.5f;
+                    w -= 2.0f;
+                    path.startNewSubPath (1.0f, centre + w);
+                    path.lineTo (1.0f, centre - w);
+                    path.lineTo (headSize, centre - lineThickness / 2.0f);
+                    path.lineTo ((float) getWidth(), centre - lineThickness / 2.0f);
+                    path.lineTo ((float) getWidth(), centre + lineThickness / 2.0f);
+                    path.lineTo (headSize, centre + lineThickness / 2.0f);
+                    path.closeSubPath();
                 }
 
                 updateLabel();
@@ -471,6 +503,8 @@ private:
 
                         coord.moveToAbsolute (canvas->limitMarkerPosition (ruler.xToPosition (rulerPos)), &getMarkerList());
                         getMarkerList().setCoordinate (marker, coord);
+
+                        canvas->handleUpdateNowIfNeeded();
                     }
                     else
                     {
@@ -497,6 +531,22 @@ private:
                 repaint();
             }
 
+            void updateSelectionState()
+            {
+                bool nowSelected = canvas->getSelection().isSelected (getMarkerList().getId (marker));
+
+                if (isSelected != nowSelected)
+                {
+                    isSelected = nowSelected;
+                    repaint();
+                }
+            }
+
+            void changeListenerCallback (void*)
+            {
+                updateSelectionState();
+            }
+
             MarkerListBase& getMarkerList()      { return canvas->getMarkerList (isX); }
 
             ValueTree marker;
@@ -507,7 +557,7 @@ private:
             EditorCanvasBase* canvas;
             const int headSize;
             Path path;
-            bool isDragging;
+            bool isSpecial, isDragging, isSelected;
             FloatingLabelComponent label;
             String labelText;
             Point<int> mouseDownPos;
@@ -562,11 +612,84 @@ private:
     };
 
     //==============================================================================
+    class TooltipBar    : public Component,
+                          public Timer
+    {
+    public:
+        TooltipBar()
+            : lastComp (0)
+        {
+            label.setColour (Label::textColourId, Colour::greyLevel (0.15f));
+            label.setColour (Label::backgroundColourId, Colour::greyLevel (0.75f));
+            label.setFont (Font (13.0f));
+            label.setJustificationType (Justification::centredLeft);
+
+            addAndMakeVisible (&label);
+        }
+
+        ~TooltipBar()
+        {
+        }
+
+        void timerCallback()
+        {
+            Component* const newComp = Desktop::getInstance().getMainMouseSource().getComponentUnderMouse();
+
+            if (newComp != lastComp)
+            {
+                lastComp = newComp;
+                label.setText (findTip (newComp), false);
+            }
+        }
+
+        void resized()
+        {
+            label.setBounds (getLocalBounds());
+        }
+
+        void visibilityChanged()
+        {
+            if (isVisible())
+                startTimer (150);
+            else
+                stopTimer();
+        }
+
+    private:
+        Label label;
+        Component* lastComp;
+
+        const String findTip (Component* c)
+        {
+            while (c != 0 && c != this)
+            {
+                TooltipClient* const tc = dynamic_cast <TooltipClient*> (c);
+                if (tc != 0)
+                {
+                    const String tip (tc->getTooltip());
+
+                    if (tip.isNotEmpty())
+                        return tip;
+                }
+
+                c = c->getParentComponent();
+            }
+
+            return String::empty;
+        }
+
+        TooltipBar (const TooltipBar&);
+        TooltipBar& operator= (const TooltipBar&);
+    };
+
+    //==============================================================================
     Toolbar toolbar;
     CanvasViewport viewport;
     RulerComponent rulerX, rulerY;
     ScopedPointer<InfoPanel> infoPanel;
     TreeView tree;
+    TooltipBar tooltipBar;
+
     EditorCanvasBase* canvas;
     bool markersVisible, snappingEnabled;
     Image background;

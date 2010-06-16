@@ -483,7 +483,7 @@ void TabbedButtonBar::resized()
         }
     }
 
-    behindFrontTab->setBounds (0, 0, getWidth(), getHeight());
+    behindFrontTab->setBounds (getLocalBounds());
 
     if (frontTab != 0)
     {

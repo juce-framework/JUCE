@@ -479,6 +479,15 @@ void DrawableDocument::MarkerList::deleteMarker (ValueTree& markerState)
     object.removeMarker (isX, markerState, getUndoManager());
 }
 
+bool DrawableDocument::MarkerList::isSpecialMarker (const ValueTree& markerState) const
+{
+    const String name (markerState [DrawableComposite::ValueTreeWrapper::nameProperty].toString());
+    return name == DrawableComposite::contentLeftMarkerName
+            || name == DrawableComposite::contentRightMarkerName
+            || name == DrawableComposite::contentTopMarkerName
+            || name == DrawableComposite::contentBottomMarkerName;
+}
+
 const RelativeCoordinate DrawableDocument::MarkerList::findNamedCoordinate (const String& objectName, const String& edge) const
 {
     if (objectName == "parent")

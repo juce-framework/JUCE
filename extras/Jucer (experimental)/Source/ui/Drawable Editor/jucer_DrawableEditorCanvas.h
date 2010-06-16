@@ -706,6 +706,9 @@ public:
             }
             else if (f.hasFileExtension ("jpg;jpeg;gif;png"))
             {
+                AlertWindow::showMessageBox (AlertWindow::NoIcon,
+                                             "Images",
+                                             "To add an image, first add it to the project, and then insert it into the drawable");
             }
         }
     }

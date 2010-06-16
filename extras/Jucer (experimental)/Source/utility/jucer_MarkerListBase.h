@@ -42,6 +42,7 @@ public:
     virtual ValueTree getMarker (int index) const = 0;
     virtual ValueTree getMarkerNamed (const String& name) const = 0;
     virtual bool contains (const ValueTree& markerState) const = 0;
+    virtual bool isSpecialMarker (const ValueTree& markerState) const = 0;
 
     const String getName (const ValueTree& markerState) const                   { return markerState [getMarkerNameProperty()].toString(); }
     Value getNameAsValue (const ValueTree& markerState) const                   { return markerState.getPropertyAsValue (getMarkerNameProperty(), getUndoManager()); }
