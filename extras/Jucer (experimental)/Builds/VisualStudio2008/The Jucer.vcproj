@@ -128,75 +128,69 @@
   <References/>
   <Files>
     <Filter Name="The Jucer">
-      <Filter Name="Model">
-        <Filter Name="Project">
-          <File RelativePath="..\..\Source\model\Project\jucer_NewFileWizard.cpp"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_NewFileWizard.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_Project.cpp"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_Project.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectExporter.cpp"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectExporter.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectExport_Make.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectExport_MSVC.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectExport_XCode.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectSaver.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectWizard.cpp"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ProjectWizard.h"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ResourceFile.cpp"/>
-          <File RelativePath="..\..\Source\model\Project\jucer_ResourceFile.h"/>
-        </Filter>
+      <Filter Name="Application">
+        <File RelativePath="..\..\Source\Application\jucer_Application.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_CommandIDs.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_CommonHeaders.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_DocumentEditorComponent.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_FilePreviewComponent.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_FilePreviewComponent.h"/>
+        <File RelativePath="..\..\Source\jucer_Headers.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_Main.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_MainWindow.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_MainWindow.h"/>
+        <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
+        <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
       </Filter>
-      <Filter Name="UI">
-        <Filter Name="Code Editor">
-          <File RelativePath="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp"/>
-          <File RelativePath="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h"/>
-        </Filter>
-        <File RelativePath="..\..\Source\ui\jucer_CommandIDs.h"/>
-        <File RelativePath="..\..\Source\ui\jucer_DocumentEditorComponent.cpp"/>
-        <File RelativePath="..\..\Source\ui\jucer_DocumentEditorComponent.h"/>
-        <File RelativePath="..\..\Source\ui\jucer_JucerTreeViewBase.cpp"/>
-        <File RelativePath="..\..\Source\ui\jucer_JucerTreeViewBase.h"/>
-        <File RelativePath="..\..\Source\ui\jucer_MainWindow.cpp"/>
-        <File RelativePath="..\..\Source\ui\jucer_MainWindow.h"/>
-        <File RelativePath="..\..\Source\ui\jucer_OpenDocumentManager.cpp"/>
-        <File RelativePath="..\..\Source\ui\jucer_OpenDocumentManager.h"/>
-        <Filter Name="Project Editor">
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.h"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.h"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.h"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.h"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.h"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.cpp"/>
-          <File RelativePath="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.h"/>
-        </Filter>
+      <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
+      <Filter Name="Code Editor">
+        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
+      </Filter>
+      <Filter Name="Project">
+        <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_GroupInformationComponent.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_NewFileWizard.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_NewProjectWizard.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_Project.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_Project.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectContentComponent.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExporter.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_Make.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_MSVC.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectExport_XCode.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectInformationComponent.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectSaver.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ProjectTreeViewBase.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_ResourceFile.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_ResourceFile.h"/>
+        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.cpp"/>
+        <File RelativePath="..\..\Source\Project\jucer_TreeViewTypes.h"/>
       </Filter>
       <Filter Name="Utility">
-        <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_Colours.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_FileHelpers.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_FileHelpers.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_PresetIDs.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_RelativePath.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_StoredSettings.cpp"/>
-        <File RelativePath="..\..\Source\utility\jucer_StoredSettings.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_ValueSourceHelpers.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_CodeHelpers.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_Colours.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_FileHelpers.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_FileHelpers.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_JucerTreeViewBase.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_MiscUtilities.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_MiscUtilities.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_PresetIDs.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_RelativePath.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.cpp"/>
+        <File RelativePath="..\..\Source\Utility\jucer_StoredSettings.h"/>
+        <File RelativePath="..\..\Source\Utility\jucer_ValueSourceHelpers.h"/>
       </Filter>
-      <Filter Name="Main">
-        <File RelativePath="..\..\Source\jucer_Application.h"/>
-        <File RelativePath="..\..\Source\jucer_CommonHeaders.h"/>
-        <File RelativePath="..\..\Source\jucer_Headers.h"/>
-        <File RelativePath="..\..\Source\jucer_Main.cpp"/>
-      </Filter>
-      <Filter Name="Resources">
-        <File RelativePath="..\..\Source\templates\brushed_aluminium.png">
+      <Filter Name="BinaryData">
+        <File RelativePath="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -206,7 +200,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\AudioPluginXCodeScript.txt">
+        <File RelativePath="..\..\Source\BinaryData\brushed_aluminium.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -216,7 +210,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_AudioPluginEditorTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -226,7 +220,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_AudioPluginEditorTemplate.h">
+        <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -236,7 +230,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -246,7 +240,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
+        <File RelativePath="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -256,7 +250,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_MainConsoleAppTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -266,7 +260,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_MainTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -276,7 +270,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_NewCppFileTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -286,7 +280,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_NewCppFileTemplate.h">
+        <File RelativePath="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -296,7 +290,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_WindowTemplate.cpp">
+        <File RelativePath="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -306,7 +300,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\jucer_WindowTemplate.h">
+        <File RelativePath="..\..\Source\BinaryData\jucer_WindowTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>
@@ -316,7 +310,7 @@
             <Tool Name="VCCLCompilerTool"/>
           </FileConfiguration>
         </File>
-        <File RelativePath="..\..\Source\templates\juce_icon.png">
+        <File RelativePath="..\..\Source\BinaryData\juce_icon.png">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

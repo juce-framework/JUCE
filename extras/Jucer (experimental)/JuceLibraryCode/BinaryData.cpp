@@ -17,8 +17,8 @@ const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& num
 
     switch (hash)
     {
-        case 0x950fd7dd:  numBytes = BinaryData::brushed_aluminium_pngSize; return BinaryData::brushed_aluminium_png;
         case 0x44be9398:  numBytes = BinaryData::AudioPluginXCodeScript_txtSize; return BinaryData::AudioPluginXCodeScript_txt;
+        case 0x950fd7dd:  numBytes = BinaryData::brushed_aluminium_pngSize; return BinaryData::brushed_aluminium_png;
         case 0x27c5a93a:  numBytes = BinaryData::jucer_AudioPluginEditorTemplate_cppSize; return BinaryData::jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = BinaryData::jucer_AudioPluginEditorTemplate_hSize; return BinaryData::jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = BinaryData::jucer_AudioPluginFilterTemplate_cppSize; return BinaryData::jucer_AudioPluginFilterTemplate_cpp;
@@ -38,8 +38,57 @@ const char* BinaryData::getNamedResource (const char* resourceNameUTF8, int& num
 }
 
 
+//================== AudioPluginXCodeScript.txt ==================
+static const unsigned char temp_5985dfa5[] =
+"\r\n"
+"# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \r\n"
+"# which plugin types you've built\r\n"
+"\r\n"
+"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
+"\r\n"
+"# this looks inside the binary to detect which platforms are needed.. \r\n"
+"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
+"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
+"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
+"\r\n"
+"if [ $copyAU -gt 0 ]; then\r\n"
+"  echo \"Copying to AudioUnit folder...\"\r\n"
+"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
+"  if [ -d \"$AU\" ]; then \r\n"
+"    rm -r \"$AU\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$AU\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyVST -gt 0 ]; then\r\n"
+"  echo \"Copying to VST folder...\"\r\n"
+"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
+"  if [ -d \"$VST\" ]; then \r\n"
+"    rm -r \"$VST\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$VST\"\r\n"
+"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
+"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
+"fi\r\n"
+"\r\n"
+"if [ $copyRTAS -gt 0 ]; then\r\n"
+"  echo \"Copying to RTAS folder...\"\r\n"
+"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
+"  if [ -d \"$RTAS\" ]; then\r\n"
+"    rm -r \"$RTAS\"\r\n"
+"  fi\r\n"
+"\r\n"
+"  cp -r \"$original\" \"$RTAS\"\r\n"
+"fi\r\n";
+
+const char* BinaryData::AudioPluginXCodeScript_txt = (const char*) temp_5985dfa5;
+
 //================== brushed_aluminium.png ==================
-static const unsigned char temp_152dd670[] =
+static const unsigned char temp_31c089f2[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,1,84,0,0,0,110,8,2,0,0,0,247,102,124,157,0,0,0,9,112,72,89,115,0,0,11,19,0,0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,
 0,0,128,233,0,0,117,48,0,0,234,96,0,0,58,152,0,0,23,111,146,95,197,70,0,0,56,250,73,68,65,84,120,218,172,83,71,14,192,32,12,75,248,255,153,231,66,17,81,45,203,97,244,80,31,16,114,246,242,90,171,153,185,187,189,224,127,239,221,8,33,10,178,79,240,135,245,
 197,48,152,48,247,137,80,64,44,72,51,66,196,230,87,125,206,22,177,6,74,41,98,216,90,147,4,144,24,107,242,7,10,97,203,140,148,47,53,230,90,196,231,1,185,88,97,174,221,56,48,255,226,139,127,214,217,181,98,12,75,218,190,172,37,147,60,71,225,151,185,241,
@@ -248,59 +297,10 @@ static const unsigned char temp_152dd670[] =
 141,20,180,27,72,224,103,149,105,220,112,255,4,89,131,64,4,23,42,115,215,231,245,156,43,234,151,42,11,138,116,121,82,135,79,3,255,178,101,152,75,177,57,53,232,244,11,46,246,251,67,98,174,121,193,110,222,30,8,28,132,216,112,88,219,73,10,62,169,115,60,
 233,137,16,177,58,98,69,178,95,87,93,157,5,174,93,143,182,244,186,210,167,70,131,11,5,88,2,12,0,52,103,80,26,178,200,170,15,0,0,0,0,73,69,78,68,174,66,96,130,0,0 };
 
-const char* BinaryData::brushed_aluminium_png = (const char*) temp_152dd670;
-
-//================== AudioPluginXCodeScript.txt ==================
-static const unsigned char temp_198ab1e7[] =
-"\r\n"
-"# This script takes the build product and copies it to the AU, VST, and RTAS folders, depending on \r\n"
-"# which plugin types you've built\r\n"
-"\r\n"
-"original=$CONFIGURATION_BUILD_DIR/$FULL_PRODUCT_NAME\r\n"
-"\r\n"
-"# this looks inside the binary to detect which platforms are needed.. \r\n"
-"copyAU=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'AudioUnit' | wc -l`\r\n"
-"copyVST=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'VSTPlugin' | wc -l`\r\n"
-"copyRTAS=`nm -g \"$CONFIGURATION_BUILD_DIR/$EXECUTABLE_PATH\" | grep -i 'CProcess' | wc -l`\r\n"
-"\r\n"
-"if [ $copyAU -gt 0 ]; then\r\n"
-"  echo \"Copying to AudioUnit folder...\"\r\n"
-"  AU=~/Library/Audio/Plug-Ins/Components/$PRODUCT_NAME.component\r\n"
-"  if [ -d \"$AU\" ]; then \r\n"
-"    rm -r \"$AU\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$AU\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$AU/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$AU/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyVST -gt 0 ]; then\r\n"
-"  echo \"Copying to VST folder...\"\r\n"
-"  VST=~/Library/Audio/Plug-Ins/VST/$PRODUCT_NAME.vst\r\n"
-"  if [ -d \"$VST\" ]; then \r\n"
-"    rm -r \"$VST\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$VST\"\r\n"
-"  sed -i \"\" -e 's/TDMwPTul/BNDLPTul/g' \"$VST/Contents/PkgInfo\"\r\n"
-"  sed -i \"\" -e 's/TDMw/BNDL/g' \"$VST/Contents/$INFOPLIST_FILE\"\r\n"
-"fi\r\n"
-"\r\n"
-"if [ $copyRTAS -gt 0 ]; then\r\n"
-"  echo \"Copying to RTAS folder...\"\r\n"
-"  RTAS=/Library/Application\\ Support/Digidesign/Plug-Ins/$PRODUCT_NAME.dpm\r\n"
-"  if [ -d \"$RTAS\" ]; then\r\n"
-"    rm -r \"$RTAS\"\r\n"
-"  fi\r\n"
-"\r\n"
-"  cp -r \"$original\" \"$RTAS\"\r\n"
-"fi\r\n";
-
-const char* BinaryData::AudioPluginXCodeScript_txt = (const char*) temp_198ab1e7;
+const char* BinaryData::brushed_aluminium_png = (const char*) temp_31c089f2;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
-static const unsigned char temp_9d632c4d[] =
+static const unsigned char temp_5f2c944f[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -337,10 +337,10 @@ static const unsigned char temp_9d632c4d[] =
 "                      Justification::centred, 1);\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_9d632c4d;
+const char* BinaryData::jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_5f2c944f;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_ac404d92[] =
+static const unsigned char temp_39e7ce14[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -374,10 +374,10 @@ static const unsigned char temp_ac404d92[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_AudioPluginEditorTemplate_h = (const char*) temp_ac404d92;
+const char* BinaryData::jucer_AudioPluginEditorTemplate_h = (const char*) temp_39e7ce14;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_c7521dd8[] =
+static const unsigned char temp_891b85da[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -551,10 +551,10 @@ static const unsigned char temp_c7521dd8[] =
 "    return new FILTERCLASSNAME();\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_c7521dd8;
+const char* BinaryData::jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_891b85da;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_a7c425dd[] =
+static const unsigned char temp_356ba65f[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -627,10 +627,10 @@ static const unsigned char temp_a7c425dd[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_AudioPluginFilterTemplate_h = (const char*) temp_a7c425dd;
+const char* BinaryData::jucer_AudioPluginFilterTemplate_h = (const char*) temp_356ba65f;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_a4c7812a[] =
+static const unsigned char temp_77cce868[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -659,10 +659,10 @@ static const unsigned char temp_a4c7812a[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_MainConsoleAppTemplate_cpp = (const char*) temp_a4c7812a;
+const char* BinaryData::jucer_MainConsoleAppTemplate_cpp = (const char*) temp_77cce868;
 
 //================== jucer_MainTemplate.cpp ==================
-static const unsigned char temp_3f9400[] =
+static const unsigned char temp_760350be[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -741,10 +741,10 @@ static const unsigned char temp_3f9400[] =
 "// This macro generates the main() routine that starts the app.\r\n"
 "START_JUCE_APPLICATION(APPCLASSNAME)\r\n";
 
-const char* BinaryData::jucer_MainTemplate_cpp = (const char*) temp_3f9400;
+const char* BinaryData::jucer_MainTemplate_cpp = (const char*) temp_760350be;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_28679746[] =
+static const unsigned char temp_564e4d84[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -756,10 +756,10 @@ static const unsigned char temp_28679746[] =
 "*/\r\n"
 "\r\n";
 
-const char* BinaryData::jucer_NewCppFileTemplate_cpp = (const char*) temp_28679746;
+const char* BinaryData::jucer_NewCppFileTemplate_cpp = (const char*) temp_564e4d84;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_dd2522cb[] =
+static const unsigned char temp_1d205089[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -779,10 +779,10 @@ static const unsigned char temp_dd2522cb[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_NewCppFileTemplate_h = (const char*) temp_dd2522cb;
+const char* BinaryData::jucer_NewCppFileTemplate_h = (const char*) temp_1d205089;
 
 //================== jucer_WindowTemplate.cpp ==================
-static const unsigned char temp_817c51b7[] =
+static const unsigned char temp_9543d6f5[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -815,10 +815,10 @@ static const unsigned char temp_817c51b7[] =
 "    JUCEApplication::getInstance()->systemRequestedQuit();\r\n"
 "}\r\n";
 
-const char* BinaryData::jucer_WindowTemplate_cpp = (const char*) temp_817c51b7;
+const char* BinaryData::jucer_WindowTemplate_cpp = (const char*) temp_9543d6f5;
 
 //================== jucer_WindowTemplate.h ==================
-static const unsigned char temp_3857c57c[] =
+static const unsigned char temp_ae1b823a[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -864,10 +864,10 @@ static const unsigned char temp_3857c57c[] =
 "\r\n"
 "#endif  // HEADERGUARD\r\n";
 
-const char* BinaryData::jucer_WindowTemplate_h = (const char*) temp_3857c57c;
+const char* BinaryData::jucer_WindowTemplate_h = (const char*) temp_ae1b823a;
 
 //================== juce_icon.png ==================
-static const unsigned char temp_cf125308[] =
+static const unsigned char temp_cf09a88a[] =
 { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,128,0,0,0,128,8,6,0,0,0,195,62,97,203,0,0,0,9,112,72,89,115,0,0,11,19,0,0,11,19,1,0,154,156,24,0,0,0,4,103,65,77,65,0,0,177,142,124,251,81,147,0,0,0,32,99,72,82,77,0,0,122,37,0,0,128,131,0,0,249,255,
 0,0,128,233,0,0,117,48,0,0,234,96,0,0,58,152,0,0,23,111,146,95,197,70,0,0,76,232,73,68,65,84,120,218,98,252,255,255,63,3,35,35,35,195,16,4,140,88,216,76,72,124,70,36,113,70,52,113,108,102,192,192,127,52,246,127,52,241,255,104,226,255,112,232,27,18,0,
 32,128,88,134,120,164,35,99,38,44,52,54,117,216,18,2,182,68,128,45,194,209,241,63,52,250,63,150,200,31,212,137,1,32,128,88,134,88,196,163,71,56,19,82,132,51,99,17,99,194,146,0,112,149,12,248,114,58,174,72,135,225,191,88,196,254,15,133,82,1,32,128,88,
@@ -1145,4 +1145,4 @@ static const unsigned char temp_cf125308[] =
 169,9,0,87,15,129,129,1,247,197,140,255,7,123,160,2,4,208,80,74,0,184,18,2,250,200,222,95,34,70,253,24,73,176,3,215,216,5,190,132,57,100,0,64,0,13,197,4,64,76,201,64,40,146,73,77,0,164,202,15,25,0,16,96,0,155,121,235,71,10,157,3,42,0,0,0,0,73,69,78,68,
 174,66,96,130,0,0 };
 
-const char* BinaryData::juce_icon_png = (const char*) temp_cf125308;
+const char* BinaryData::juce_icon_png = (const char*) temp_cf09a88a;

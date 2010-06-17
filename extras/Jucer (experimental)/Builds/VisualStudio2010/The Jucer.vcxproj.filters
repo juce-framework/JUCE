@@ -5,124 +5,115 @@
     <Filter Include="The Jucer">
       <UniqueIdentifier>{251378DC-2EBB-4B5D-54B9-F55AC57A478F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Jucer\Model">
-      <UniqueIdentifier>{A5344922-0D8B-B045-F28C-FED2183BC2C7}</UniqueIdentifier>
+    <Filter Include="The Jucer\Application">
+      <UniqueIdentifier>{31EDBA88-31A5-997C-9F07-EE6B43F914D0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Jucer\Model\Project">
-      <UniqueIdentifier>{F9D69347-AF9F-BE13-7C53-9C497443E5AE}</UniqueIdentifier>
+    <Filter Include="The Jucer\Code Editor">
+      <UniqueIdentifier>{F41CE18D-09FC-818B-809B-287ED61EC70C}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Jucer\UI">
-      <UniqueIdentifier>{0FF8ACAB-44CE-46E5-1696-551E75158B70}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\UI\Code Editor">
-      <UniqueIdentifier>{F4F08AA9-6601-8093-5779-F29289064327}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\UI\Project Editor">
-      <UniqueIdentifier>{B34892C3-DBB0-4445-A3A2-FF5FB798F25B}</UniqueIdentifier>
+    <Filter Include="The Jucer\Project">
+      <UniqueIdentifier>{0F8BE833-CD54-C01F-F820-48DFE266AE32}</UniqueIdentifier>
     </Filter>
     <Filter Include="The Jucer\Utility">
       <UniqueIdentifier>{E870C076-EBCA-BE3D-D4EB-5D91F2FF6C9F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Jucer\Main">
-      <UniqueIdentifier>{2E88444F-D7BD-E1A9-66EC-392A5E9341E5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\Resources">
-      <UniqueIdentifier>{80A084D8-BC07-0004-6213-67EFCAD6DC64}</UniqueIdentifier>
+    <Filter Include="The Jucer\BinaryData">
+      <UniqueIdentifier>{FC97072F-FF15-52B0-B523-A4C3265DA556}</UniqueIdentifier>
     </Filter>
     <Filter Include="Juce Library Code">
       <UniqueIdentifier>{F7048EA6-F4B2-F31B-E402-E05D678A1111}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\model\Project\jucer_NewFileWizard.cpp">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClCompile Include="..\..\Source\Application\jucer_DocumentEditorComponent.cpp">
+      <Filter>The Jucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\model\Project\jucer_Project.cpp">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClCompile Include="..\..\Source\Application\jucer_FilePreviewComponent.cpp">
+      <Filter>The Jucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\model\Project\jucer_ProjectExporter.cpp">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClCompile Include="..\..\Source\Application\jucer_Main.cpp">
+      <Filter>The Jucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\model\Project\jucer_ProjectWizard.cpp">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp">
+      <Filter>The Jucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\model\Project\jucer_ResourceFile.cpp">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClCompile Include="..\..\Source\Application\jucer_OpenDocumentManager.cpp">
+      <Filter>The Jucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp">
-      <Filter>The Jucer\UI\Code Editor</Filter>
+    <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
+      <Filter>The Jucer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\jucer_DocumentEditorComponent.cpp">
-      <Filter>The Jucer\UI</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\jucer_JucerTreeViewBase.cpp">
-      <Filter>The Jucer\UI</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_NewFileWizard.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\jucer_MainWindow.cpp">
-      <Filter>The Jucer\UI</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_NewProjectWizard.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\jucer_OpenDocumentManager.cpp">
-      <Filter>The Jucer\UI</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_Project.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectContentComponent.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectExporter.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectInformationComponent.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_ProjectTreeViewBase.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_ResourceFile.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.cpp">
-      <Filter>The Jucer\UI\Project Editor</Filter>
+    <ClCompile Include="..\..\Source\Project\jucer_TreeViewTypes.cpp">
+      <Filter>The Jucer\Project</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\utility\jucer_CodeHelpers.cpp">
+    <ClCompile Include="..\..\Source\Utility\jucer_CodeHelpers.cpp">
       <Filter>The Jucer\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\utility\jucer_FileHelpers.cpp">
+    <ClCompile Include="..\..\Source\Utility\jucer_FileHelpers.cpp">
       <Filter>The Jucer\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\utility\jucer_MiscUtilities.cpp">
+    <ClCompile Include="..\..\Source\Utility\jucer_JucerTreeViewBase.cpp">
       <Filter>The Jucer\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\utility\jucer_StoredSettings.cpp">
+    <ClCompile Include="..\..\Source\Utility\jucer_MiscUtilities.cpp">
       <Filter>The Jucer\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\jucer_Main.cpp">
-      <Filter>The Jucer\Main</Filter>
+    <ClCompile Include="..\..\Source\Utility\jucer_StoredSettings.cpp">
+      <Filter>The Jucer\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\brushed_aluminium.png">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\AudioPluginXCodeScript.txt">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\AudioPluginXCodeScript.txt">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\brushed_aluminium.png">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_AudioPluginEditorTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_MainConsoleAppTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainConsoleAppTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_MainTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_MainTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_NewCppFileTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_WindowTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\jucer_WindowTemplate.cpp">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\juce_icon.png">
-      <Filter>The Jucer\Resources</Filter>
+    <ClCompile Include="..\..\Source\BinaryData\juce_icon.png">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>Juce Library Code</Filter>
@@ -141,113 +132,113 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\model\Project\jucer_NewFileWizard.h">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_Application.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_Project.h">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_CommandIDs.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExporter.h">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_Make.h">
-      <Filter>The Jucer\Model\Project</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_DocumentEditorComponent.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_MSVC.h">
-      <Filter>The Jucer\Model\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExport_XCode.h">
-      <Filter>The Jucer\Model\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectSaver.h">
-      <Filter>The Jucer\Model\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ProjectWizard.h">
-      <Filter>The Jucer\Model\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Project\jucer_ResourceFile.h">
-      <Filter>The Jucer\Model\Project</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h">
-      <Filter>The Jucer\UI\Code Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\jucer_CommandIDs.h">
-      <Filter>The Jucer\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\jucer_DocumentEditorComponent.h">
-      <Filter>The Jucer\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\jucer_JucerTreeViewBase.h">
-      <Filter>The Jucer\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\jucer_MainWindow.h">
-      <Filter>The Jucer\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\jucer_OpenDocumentManager.h">
-      <Filter>The Jucer\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_GroupInformationComponent.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ItemPreviewComponent.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectContentComponent.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectInformationComponent.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.h">
-      <Filter>The Jucer\UI\Project Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_CodeHelpers.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_Colours.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_FileHelpers.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_MiscUtilities.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_PresetIDs.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_RelativePath.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_StoredSettings.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_ValueSourceHelpers.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\jucer_Application.h">
-      <Filter>The Jucer\Main</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\jucer_CommonHeaders.h">
-      <Filter>The Jucer\Main</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_FilePreviewComponent.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
-      <Filter>The Jucer\Main</Filter>
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\templates\jucer_AudioPluginEditorTemplate.h">
-      <Filter>The Jucer\Resources</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
-      <Filter>The Jucer\Resources</Filter>
+    <ClInclude Include="..\..\Source\Application\jucer_OpenDocumentManager.h">
+      <Filter>The Jucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\templates\jucer_NewCppFileTemplate.h">
-      <Filter>The Jucer\Resources</Filter>
+    <ClInclude Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.h">
+      <Filter>The Jucer\Code Editor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\templates\jucer_WindowTemplate.h">
-      <Filter>The Jucer\Resources</Filter>
+    <ClInclude Include="..\..\Source\Project\jucer_GroupInformationComponent.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_NewFileWizard.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_NewProjectWizard.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_Project.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectContentComponent.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExporter.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_Make.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_MSVC.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectExport_XCode.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectInformationComponent.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectSaver.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ProjectTreeViewBase.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_ResourceFile.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Project\jucer_TreeViewTypes.h">
+      <Filter>The Jucer\Project</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_CodeHelpers.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_Colours.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_FileHelpers.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_JucerTreeViewBase.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_MiscUtilities.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_PresetIDs.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_RelativePath.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_StoredSettings.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Utility\jucer_ValueSourceHelpers.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginEditorTemplate.h">
+      <Filter>The Jucer\BinaryData</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_AudioPluginFilterTemplate.h">
+      <Filter>The Jucer\BinaryData</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_NewCppFileTemplate.h">
+      <Filter>The Jucer\BinaryData</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\jucer_WindowTemplate.h">
+      <Filter>The Jucer\BinaryData</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>Juce Library Code</Filter>
