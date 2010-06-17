@@ -143,8 +143,8 @@
         <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.cpp"/>
         <File RelativePath="..\..\Source\Application\jucer_OpenDocumentManager.h"/>
       </Filter>
-      <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
       <Filter Name="Code Editor">
+        <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp"/>
         <File RelativePath="..\..\Source\Code Editor\jucer_SourceCodeEditor.h"/>
       </Filter>
       <Filter Name="Project">

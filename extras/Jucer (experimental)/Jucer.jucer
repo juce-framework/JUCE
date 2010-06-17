@@ -55,9 +55,9 @@
       <FILE id="NYEknlp" name="jucer_OpenDocumentManager.h" compile="0" resource="0"
             file="Source/Application/jucer_OpenDocumentManager.h"/>
     </GROUP>
-    <FILE id="36CkPUf" name="jucer_SourceCodeEditor.cpp" compile="1" resource="0"
-          file="Source/Code Editor/jucer_SourceCodeEditor.cpp"/>
     <GROUP id="i1s14uV" name="Code Editor">
+      <FILE id="36CkPUf" name="jucer_SourceCodeEditor.cpp" compile="1" resource="0"
+            file="Source/Code Editor/jucer_SourceCodeEditor.cpp"/>
       <FILE id="CygyGGA" name="jucer_SourceCodeEditor.h" compile="0" resource="0"
             file="Source/Code Editor/jucer_SourceCodeEditor.h"/>
     </GROUP>

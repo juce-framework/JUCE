@@ -41,7 +41,7 @@
       <Filter>The Jucer\Application</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Code Editor\jucer_SourceCodeEditor.cpp">
-      <Filter>The Jucer</Filter>
+      <Filter>The Jucer\Code Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\jucer_GroupInformationComponent.cpp">
       <Filter>The Jucer\Project</Filter>
