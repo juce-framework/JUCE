@@ -27,7 +27,6 @@
 #define __JUCER_OPENDOCUMENTMANAGER_JUCEHEADER__
 
 #include "../model/Project/jucer_Project.h"
-#include "../model/Drawable/jucer_DrawableDocument.h"
 
 
 //==============================================================================
@@ -96,9 +95,23 @@ public:
     void removeListener (DocumentCloseListener* listener);
 
     //==============================================================================
+    class DocumentType
+    {
+    public:
+        DocumentType() {}
+        virtual ~DocumentType() {}
+
+        virtual bool canOpenFile (const File& file) = 0;
+        virtual Document* openFile (Project* project, const File& file) = 0;
+    };
+
+    void registerType (DocumentType* type);
+
+    //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
+    OwnedArray <DocumentType> types;
     OwnedArray <Document> documents;
     Array <DocumentCloseListener*> listeners;
 };

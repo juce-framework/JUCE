@@ -57,7 +57,7 @@ void SourceCodeEditor::resized()
 
 bool SourceCodeEditor::isTextFile (const File& file)
 {
-    return file.hasFileExtension (textFileExtensions);
+    return file.hasFileExtension ("cpp;h;hpp;mm;m;c;txt;xml;plist;rtf;html;htm;php;py;rb;cs");
 }
 
 bool SourceCodeEditor::isCppFile (const File& file)

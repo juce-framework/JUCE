@@ -138,7 +138,7 @@ void GroupTreeViewItem::addCreateFileMenuItems (PopupMenu& m)
     m.addItem (1002, "Add Existing Files...");
 
     m.addSeparator();
-    NewFileWizard::addWizardsToMenu (m);
+    NewFileWizard::getInstance()->addWizardsToMenu (m);
 }
 
 void GroupTreeViewItem::processCreateFileMenuItem (int menuID)
@@ -149,7 +149,7 @@ void GroupTreeViewItem::processCreateFileMenuItem (int menuID)
         case 1002:  browseToAddExistingFiles(); break;
 
         default:
-            NewFileWizard::runWizardFromMenu (menuID, item);
+            NewFileWizard::getInstance()->runWizardFromMenu (menuID, item);
             break;
     }
 }
@@ -172,9 +172,9 @@ const String SourceFileTreeViewItem::getDisplayName() const
 
 static const File findCorrespondingHeaderOrCpp (const File& f)
 {
-    if (f.hasFileExtension (".cpp"))
+    if (f.hasFileExtension ("cpp;c;mm;m"))
         return f.withFileExtension (".h");
-    else if (f.hasFileExtension (".h"))
+    else if (f.hasFileExtension (headerFileExtensions))
         return f.withFileExtension (".cpp");
 
     return File::nonexistent;

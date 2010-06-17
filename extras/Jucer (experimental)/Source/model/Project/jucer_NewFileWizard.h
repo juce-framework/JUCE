@@ -31,31 +31,42 @@
 
 
 //==============================================================================
-class NewFileWizard
+class NewFileWizard  : public DeletedAtShutdown
 {
 public:
-    virtual ~NewFileWizard()  {}
+    //==============================================================================
+    NewFileWizard();
+    ~NewFileWizard();
+
+    juce_DeclareSingleton_SingleThreaded_Minimal (NewFileWizard);
 
     //==============================================================================
-    static const StringArray getWizards();
-    static int getNumWizards();
-    static NewFileWizard* createWizard (int index);
+    class Type
+    {
+    public:
+        Type() {}
+        virtual ~Type()  {}
 
-    static void addWizardsToMenu (PopupMenu& m);
-    static bool runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo);
+        //==============================================================================
+        virtual const String getName() = 0;
+        virtual void createNewFile (Project::Item projectGroupToAddTo) = 0;
+
+    protected:
+        //==============================================================================
+        const File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
+                                           const Project::Item& projectGroupToAddTo);
+
+        void showFailedToWriteMessage (const File& file);
+    };
 
     //==============================================================================
-    virtual const String getName() = 0;
-    virtual void createNewFile (Project::Item projectGroupToAddTo) = 0;
+    void addWizardsToMenu (PopupMenu& m) const;
+    bool runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo) const;
 
-protected:
-    //==============================================================================
-    NewFileWizard() {}
+    void registerWizard (Type* newWizard);
 
-    const File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
-                                       const Project::Item& projectGroupToAddTo);
-
-    void showFailedToWriteMessage (const File& file);
+private:
+    OwnedArray <Type> wizards;
 };
 
 

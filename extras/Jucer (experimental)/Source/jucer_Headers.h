@@ -28,115 +28,11 @@
 
 #ifdef _MSC_VER
  #pragma warning (disable: 4100 4505)
- #define DONT_LIST_JUCE_AUTOLINKEDLIBS 1
 #endif
 
 //==============================================================================
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "utility/jucer_StoredSettings.h"
-#include "utility/jucer_MiscUtilities.h"
-#include "utility/jucer_CodeHelpers.h"
-#include "utility/jucer_FileHelpers.h"
-#include "utility/jucer_RelativePath.h"
-#include "utility/jucer_ValueSourceHelpers.h"
-#include "ui/jucer_CommandIDs.h"
+#include "jucer_CommonHeaders.h"
 
-//==============================================================================
-extern ApplicationCommandManager* commandManager;
-
-//==============================================================================
-static const char* const newLine = "\r\n";
-
-const char* const projectItemDragType   = "Project Items";
-const char* const drawableItemDragType  = "Drawable Items";
-const char* const componentItemDragType = "Components";
-
-const char* const textFileExtensions    = "cpp;h;hpp;mm;m;c;txt;xml;plist;rtf;html;htm;php;py;rb;cs";
-const char* const sourceFileExtensions  = "cpp;mm;m;c;h;hpp";
-const char* const headerFileExtensions  = "h;hpp";
-
-const int numSwatchColours = 24;
-const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
-
-const float snapDistance = 8.0f;
-static const Colour alignmentMarkerColour (0x77ff0000);
-static const Colour resizableBorderColour (0x7066aaff);
-
-// Handy list of static Identifiers..
-namespace Ids
-{
-    #define DECLARE_ID(name)      const Identifier name (#name)
-
-    DECLARE_ID (text);
-    DECLARE_ID (name);
-    DECLARE_ID (file);
-    DECLARE_ID (font);
-    DECLARE_ID (mode);
-    DECLARE_ID (type);
-    DECLARE_ID (version);
-    DECLARE_ID (position);
-    DECLARE_ID (source);
-    DECLARE_ID (readOnly);
-    DECLARE_ID (editMode);
-    DECLARE_ID (justification);
-    DECLARE_ID (items);
-    DECLARE_ID (editable);
-    DECLARE_ID (textJustification);
-    DECLARE_ID (unselectedText);
-    DECLARE_ID (noItemsText);
-    DECLARE_ID (min);
-    DECLARE_ID (max);
-    DECLARE_ID (width);
-    DECLARE_ID (height);
-    DECLARE_ID (background);
-    DECLARE_ID (interval);
-    DECLARE_ID (textBoxPos);
-    DECLARE_ID (textBoxWidth);
-    DECLARE_ID (textBoxHeight);
-    DECLARE_ID (skew);
-    DECLARE_ID (scrollBarV);
-    DECLARE_ID (scrollBarH);
-    DECLARE_ID (scrollbarWidth);
-    DECLARE_ID (initialState);
-    DECLARE_ID (scrollbarsShown);
-    DECLARE_ID (caretVisible);
-    DECLARE_ID (popupMenuEnabled);
-    DECLARE_ID (radioGroup);
-    DECLARE_ID (connectedLeft);
-    DECLARE_ID (connectedRight);
-    DECLARE_ID (connectedTop);
-    DECLARE_ID (connectedBottom);
-    DECLARE_ID (juceFolder);
-    DECLARE_ID (targetFolder);
-    DECLARE_ID (vstFolder);
-    DECLARE_ID (rtasFolder);
-    DECLARE_ID (auFolder);
-    DECLARE_ID (extraCompilerFlags);
-    DECLARE_ID (extraLinkerFlags);
-    DECLARE_ID (extraDefs);
-    DECLARE_ID (libraryName_Debug);
-    DECLARE_ID (libraryName_Release);
-    DECLARE_ID (libraryType);
-    DECLARE_ID (isDebug);
-    DECLARE_ID (targetName);
-    DECLARE_ID (binaryPath);
-    DECLARE_ID (optimisation);
-    DECLARE_ID (defines);
-    DECLARE_ID (headerPath);
-    DECLARE_ID (osxSDK);
-    DECLARE_ID (osxCompatibility);
-    DECLARE_ID (jucerVersion);
-    DECLARE_ID (projectType);
-    DECLARE_ID (juceLinkage);
-    DECLARE_ID (buildVST);
-    DECLARE_ID (bundleIdentifier);
-    DECLARE_ID (compile);
-    DECLARE_ID (resource);
-    DECLARE_ID (className);
-    DECLARE_ID (classDesc);
-    DECLARE_ID (controlPoint);
-    const Identifier class_ ("class");
-    const Identifier id_ ("id");
-}
 
 #endif   // __JUCER_HEADERS_JUCEHEADER__

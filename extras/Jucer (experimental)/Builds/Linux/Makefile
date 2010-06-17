@@ -43,21 +43,12 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS := \
-  $(OBJDIR)/jucer_CodeGenerator_294a5b95.o \
-  $(OBJDIR)/jucer_ComponentDocument_d2c1f367.o \
-  $(OBJDIR)/jucer_ComponentTypeManager_21664b47.o \
-  $(OBJDIR)/jucer_DrawableDocument_d699b7df.o \
-  $(OBJDIR)/jucer_DrawableTypeHandler_5b2f1d76.o \
   $(OBJDIR)/jucer_NewFileWizard_6b466712.o \
   $(OBJDIR)/jucer_Project_60ace9e4.o \
   $(OBJDIR)/jucer_ProjectExporter_8b6a09e5.o \
   $(OBJDIR)/jucer_ProjectWizard_2f72feaf.o \
   $(OBJDIR)/jucer_ResourceFile_4a6c0189.o \
   $(OBJDIR)/jucer_SourceCodeEditor_39e7ba7a.o \
-  $(OBJDIR)/jucer_ComponentEditor_bb50044d.o \
-  $(OBJDIR)/jucer_ComponentViewer_c7a43a72.o \
-  $(OBJDIR)/jucer_DrawableEditor_fdd9b221.o \
-  $(OBJDIR)/jucer_EditorCanvas_26232846.o \
   $(OBJDIR)/jucer_DocumentEditorComponent_18f9dc69.o \
   $(OBJDIR)/jucer_JucerTreeViewBase_15bcb6cd.o \
   $(OBJDIR)/jucer_MainWindow_a480b21f.o \
@@ -94,31 +85,6 @@ clean:
 	-@rm -rf $(OBJDIR)/*
 	-@rm -rf $(OBJDIR)
 
-$(OBJDIR)/jucer_CodeGenerator_294a5b95.o: ../../Source/model/Component/jucer_CodeGenerator.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_CodeGenerator.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ComponentDocument_d2c1f367.o: ../../Source/model/Component/jucer_ComponentDocument.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ComponentDocument.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ComponentTypeManager_21664b47.o: ../../Source/model/Component/Types/jucer_ComponentTypeManager.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ComponentTypeManager.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_DrawableDocument_d699b7df.o: ../../Source/model/Drawable/jucer_DrawableDocument.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_DrawableDocument.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_DrawableTypeHandler_5b2f1d76.o: ../../Source/model/Drawable/jucer_DrawableTypeHandler.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_DrawableTypeHandler.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
 $(OBJDIR)/jucer_NewFileWizard_6b466712.o: ../../Source/model/Project/jucer_NewFileWizard.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_NewFileWizard.cpp"
@@ -147,26 +113,6 @@ $(OBJDIR)/jucer_ResourceFile_4a6c0189.o: ../../Source/model/Project/jucer_Resour
 $(OBJDIR)/jucer_SourceCodeEditor_39e7ba7a.o: ../../Source/ui/Code\ Editor/jucer_SourceCodeEditor.cpp
 	-@mkdir -p $(OBJDIR)
 	@echo "Compiling jucer_SourceCodeEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ComponentEditor_bb50044d.o: ../../Source/ui/Component\ Editor/jucer_ComponentEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ComponentEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_ComponentViewer_c7a43a72.o: ../../Source/ui/Component\ Editor/jucer_ComponentViewer.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_ComponentViewer.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_DrawableEditor_fdd9b221.o: ../../Source/ui/Drawable\ Editor/jucer_DrawableEditor.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_DrawableEditor.cpp"
-	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
-
-$(OBJDIR)/jucer_EditorCanvas_26232846.o: ../../Source/ui/Editor\ Base/jucer_EditorCanvas.cpp
-	-@mkdir -p $(OBJDIR)
-	@echo "Compiling jucer_EditorCanvas.cpp"
 	@$(CXX) $(CXXFLAGS) -o "$@" -c "$<"
 
 $(OBJDIR)/jucer_DocumentEditorComponent_18f9dc69.o: ../../Source/ui/jucer_DocumentEditorComponent.cpp

@@ -26,7 +26,6 @@
 #include "jucer_ProjectContentComponent.h"
 #include "../jucer_MainWindow.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
-#include "../Drawable Editor/jucer_DrawableEditor.h"
 #include "jucer_ProjectInformationComponent.h"
 #include "jucer_TreeViewTypes.h"
 #include "../../model/Project/jucer_ProjectExporter.h"
@@ -49,7 +48,7 @@ ProjectContentComponent::~ProjectContentComponent()
 {
     setProject (0);
     contentView = 0;
-    deleteAllChildren();
+    jassert (getNumChildComponents() == 0);
 }
 
 void ProjectContentComponent::paint (Graphics& g)
@@ -81,7 +80,6 @@ void ProjectContentComponent::setProject (Project* newProject)
         projectTree = 0;
         contentView = 0;
         resizerBar = 0;
-        deleteAllChildren();
 
         project = newProject;
 

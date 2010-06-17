@@ -999,3 +999,36 @@ const String Project::getFileTemplate (const String& templateName)
 
     return String::fromUTF8 (data, dataSize);
 }
+
+//==============================================================================
+void Project::resaveJucerFile (const File& file)
+{
+    if (! file.exists())
+    {
+        std::cout << "The file " << file.getFullPathName() << " doesn't exist!" << std::endl;
+        return;
+    }
+
+    if (! file.hasFileExtension (Project::projectFileExtension))
+    {
+        std::cout << file.getFullPathName() << " isn't a valid jucer project file!" << std::endl;
+        return;
+    }
+
+    Project newDoc (file);
+
+    if (! newDoc.loadFrom (file, true))
+    {
+        std::cout << "Failed to load the project file: " << file.getFullPathName() << std::endl;
+        return;
+    }
+
+    std::cout << "The Jucer - Re-saving file: " << file.getFullPathName() << std::endl;
+    String error (newDoc.saveDocument (file));
+
+    if (error.isNotEmpty())
+    {
+        std::cout << "Error when writing project: " << error << std::endl;
+        return;
+    }
+}

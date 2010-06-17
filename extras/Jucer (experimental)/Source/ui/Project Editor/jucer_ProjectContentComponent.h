@@ -69,12 +69,12 @@ public:
     juce_UseDebuggingNewOperator
 
 private:
-    TreeView* projectTree;
+    ScopedPointer<TreeView> projectTree;
     Project* project;
     ScopedPointer <Component> contentView;
     OpenDocumentManager::Document* currentDocument;
 
-    StretchableLayoutResizerBar* resizerBar;
+    ScopedPointer<StretchableLayoutResizerBar> resizerBar;
 
     void updateMainWindowTitle();
 };

@@ -1213,7 +1213,7 @@ protected:
                 jassertfalse;
             }
         }
-        else if (file.hasFileExtension ("h"))
+        else if (file.hasFileExtension (headerFileExtensions))
         {
             headers.createNewChildElement ("ClInclude")->setAttribute ("Include", file.toWindowsStyle());
         }
@@ -1239,7 +1239,7 @@ protected:
             {
                 const RelativePath path (projectItem.getFile(), getTargetFolder(), RelativePath::buildTargetFolder);
 
-                if (path.hasFileExtension ("h") || (path.hasFileExtension ("cpp;c") && projectItem.shouldBeCompiled()))
+                if (path.hasFileExtension (headerFileExtensions) || (path.hasFileExtension ("cpp;c") && projectItem.shouldBeCompiled()))
                     addFileToCompile (path, cpps, headers, false, false);
             }
         }
@@ -1257,7 +1257,7 @@ protected:
     {
         XmlElement* e;
 
-        if (file.hasFileExtension ("h"))
+        if (file.hasFileExtension (headerFileExtensions))
             e = headers.createNewChildElement ("ClInclude");
         else
             e = cpps.createNewChildElement ("ClCompile");

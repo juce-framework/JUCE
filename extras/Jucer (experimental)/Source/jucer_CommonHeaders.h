@@ -23,14 +23,31 @@
   ==============================================================================
 */
 
-#include "jucer_TextButton.h"
-#include "jucer_ToggleButton.h"
-#include "jucer_TextEditor.h"
-#include "jucer_Label.h"
-#include "jucer_ComboBox.h"
-#include "jucer_Slider.h"
-#include "jucer_GroupComponent.h"
-#include "jucer_Viewport.h"
-#include "jucer_TabbedComponent.h"
-#include "jucer_JucerComponent.h"
-#include "jucer_GenericComponent.h"
+#ifndef __JUCER_COMMONINCLUDES_H__
+#define __JUCER_COMMONINCLUDES_H__
+
+
+#include "utility/jucer_StoredSettings.h"
+#include "utility/jucer_MiscUtilities.h"
+#include "utility/jucer_CodeHelpers.h"
+#include "utility/jucer_FileHelpers.h"
+#include "utility/jucer_RelativePath.h"
+#include "utility/jucer_ValueSourceHelpers.h"
+#include "utility/jucer_PresetIDs.h"
+#include "ui/jucer_CommandIDs.h"
+
+//==============================================================================
+extern ApplicationCommandManager* commandManager;
+
+//==============================================================================
+static const char* const newLine = "\r\n";
+
+const char* const projectItemDragType   = "Project Items";
+const char* const drawableItemDragType  = "Drawable Items";
+const char* const componentItemDragType = "Components";
+
+const char* const sourceFileExtensions  = "cpp;mm;m;c;h;hpp";
+const char* const headerFileExtensions  = "h;hpp";
+
+
+#endif

@@ -27,7 +27,7 @@
 #define __JUCER_MAINWINDOW_JUCEHEADER__
 
 #include "Project Editor/jucer_ProjectContentComponent.h"
-#include "Component Editor/jucer_ComponentEditor.h"
+
 
 //==============================================================================
 /**

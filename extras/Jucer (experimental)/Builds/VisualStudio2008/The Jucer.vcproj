@@ -129,34 +129,6 @@
   <Files>
     <Filter Name="The Jucer">
       <Filter Name="Model">
-        <Filter Name="Component">
-          <File RelativePath="..\..\Source\model\Component\jucer_CodeGenerator.cpp"/>
-          <File RelativePath="..\..\Source\model\Component\jucer_CodeGenerator.h"/>
-          <File RelativePath="..\..\Source\model\Component\jucer_ComponentDocument.cpp"/>
-          <File RelativePath="..\..\Source\model\Component\jucer_ComponentDocument.h"/>
-          <Filter Name="Types">
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_ComboBox.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.cpp"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_ComponentTypes.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_GenericComponent.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_GroupComponent.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_JucerComponent.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_Label.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_Slider.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_TabbedComponent.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_TextButton.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_TextEditor.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_ToggleButton.h"/>
-            <File RelativePath="..\..\Source\model\Component\Types\jucer_Viewport.h"/>
-          </Filter>
-        </Filter>
-        <Filter Name="Drawable">
-          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp"/>
-          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableDocument.h"/>
-          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.cpp"/>
-          <File RelativePath="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h"/>
-        </Filter>
         <Filter Name="Project">
           <File RelativePath="..\..\Source\model\Project\jucer_NewFileWizard.cpp"/>
           <File RelativePath="..\..\Source\model\Project\jucer_NewFileWizard.h"/>
@@ -178,29 +150,6 @@
         <Filter Name="Code Editor">
           <File RelativePath="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp"/>
           <File RelativePath="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h"/>
-        </Filter>
-        <Filter Name="Component Editor">
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentViewer.cpp"/>
-          <File RelativePath="..\..\Source\ui\Component Editor\jucer_ComponentViewer.h"/>
-        </Filter>
-        <Filter Name="Drawable Editor">
-          <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>
-          <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.h"/>
-          <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorCanvas.h"/>
-          <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorToolbar.h"/>
-          <File RelativePath="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorTreeView.h"/>
-        </Filter>
-        <Filter Name="Editor Base">
-          <File RelativePath="..\..\Source\ui\Editor Base\jucer_EditorCanvas.cpp"/>
-          <File RelativePath="..\..\Source\ui\Editor Base\jucer_EditorCanvas.h"/>
-          <File RelativePath="..\..\Source\ui\Editor Base\jucer_EditorDragOperation.h"/>
-          <File RelativePath="..\..\Source\ui\Editor Base\jucer_EditorPanel.h"/>
         </Filter>
         <File RelativePath="..\..\Source\ui\jucer_CommandIDs.h"/>
         <File RelativePath="..\..\Source\ui\jucer_DocumentEditorComponent.cpp"/>
@@ -229,23 +178,20 @@
       <Filter Name="Utility">
         <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_CodeHelpers.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_ColourPropertyComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_Colours.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_CoordinatePropertyComponent.h"/>
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_FileHelpers.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_FillTypePropertyComponent.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_FontPropertyComponent.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_MarkerListBase.h"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_MiscUtilities.h"/>
+        <File RelativePath="..\..\Source\utility\jucer_PresetIDs.h"/>
         <File RelativePath="..\..\Source\utility\jucer_RelativePath.h"/>
         <File RelativePath="..\..\Source\utility\jucer_StoredSettings.cpp"/>
         <File RelativePath="..\..\Source\utility\jucer_StoredSettings.h"/>
-        <File RelativePath="..\..\Source\utility\jucer_TickIterator.h"/>
         <File RelativePath="..\..\Source\utility\jucer_ValueSourceHelpers.h"/>
       </Filter>
       <Filter Name="Main">
+        <File RelativePath="..\..\Source\jucer_Application.h"/>
+        <File RelativePath="..\..\Source\jucer_CommonHeaders.h"/>
         <File RelativePath="..\..\Source\jucer_Headers.h"/>
         <File RelativePath="..\..\Source\jucer_Main.cpp"/>
       </Filter>
@@ -301,26 +247,6 @@
           </FileConfiguration>
         </File>
         <File RelativePath="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
-        <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.cpp">
-          <FileConfiguration Name="Debug|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-          <FileConfiguration Name="Release|Win32"
-                             ExcludedFromBuild="true">
-            <Tool Name="VCCLCompilerTool"/>
-          </FileConfiguration>
-        </File>
-        <File RelativePath="..\..\Source\templates\jucer_ComponentTemplate.h">
           <FileConfiguration Name="Debug|Win32"
                              ExcludedFromBuild="true">
             <Tool Name="VCCLCompilerTool"/>

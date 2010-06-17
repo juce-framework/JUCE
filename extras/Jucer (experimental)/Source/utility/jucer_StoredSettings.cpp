@@ -92,6 +92,8 @@ void StoredSettings::flush()
 
     #undef COL
 
+    const int numSwatchColours = 24;
+
     for (int i = 0; i < numSwatchColours; ++i)
     {
         Colour defaultCol (colours [2 + i]);

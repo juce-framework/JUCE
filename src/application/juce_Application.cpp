@@ -203,6 +203,7 @@ bool JUCEApplication::initialiseApp (String& commandLine)
 
         if (! appLock->enter(0))
         {
+            appLock = 0;
             MessageManager::broadcastMessage (getApplicationName() + "/" + commandLineParameters);
 
             delete appInstance;

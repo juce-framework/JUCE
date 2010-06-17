@@ -24,8 +24,6 @@
 */
 
 #include "jucer_NewFileWizard.h"
-#include "../Drawable/jucer_DrawableDocument.h"
-#include "../Component/jucer_ComponentDocument.h"
 
 
 //==============================================================================
@@ -41,7 +39,7 @@ static bool fillInNewCppFileTemplate (const File& file, const Project::Item& ite
 }
 
 //==============================================================================
-class NewCppFileWizard  : public NewFileWizard
+class NewCppFileWizard  : public NewFileWizard::Type
 {
 public:
     NewCppFileWizard() {}
@@ -64,7 +62,7 @@ public:
 };
 
 //==============================================================================
-class NewHeaderFileWizard  : public NewFileWizard
+class NewHeaderFileWizard  : public NewFileWizard::Type
 {
 public:
     NewHeaderFileWizard() {}
@@ -86,139 +84,17 @@ public:
     }
 };
 
-//==============================================================================
-class NewComponentWizard  : public NewFileWizard
-{
-public:
-    NewComponentWizard() {}
-    ~NewComponentWizard() {}
-
-    const String getName()  { return "Component"; }
-
-    void createNewFile (Project::Item parent)
-    {
-        File cppFile = askUserToChooseNewFile ("Component.cpp", "*.cpp", parent);
-
-        if (cppFile != File::nonexistent)
-        {
-            File header (cppFile.withFileExtension (".h"));
-
-            if (header.exists())
-            {
-                if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Create New Component",
-                                                    "The file " + header.getFileName() + " already exists...\n\nDo you want to overwrite it?",
-                                                    "Overwrite", "Cancel"))
-                    return;
-            }
-
-            ComponentDocument doc (&parent.getProject(), cppFile);
-
-            if (doc.save())
-            {
-                parent.addFile (header, 0);
-                parent.addFile (cppFile, 0);
-            }
-            else
-            {
-                showFailedToWriteMessage (cppFile);
-            }
-        }
-    }
-};
 
 //==============================================================================
-class NewDrawableWizard  : public NewFileWizard
-{
-public:
-    NewDrawableWizard() {}
-    ~NewDrawableWizard() {}
-
-    const String getName()  { return "Drawable"; }
-
-    void createNewFile (Project::Item parent)
-    {
-        File newFile = askUserToChooseNewFile ("New Drawable.drawable", "*.drawable", parent);
-
-        if (newFile != File::nonexistent)
-        {
-            DrawableDocument newDrawable (&(parent.getProject()));
-
-            if (newDrawable.save (newFile))
-                parent.addFile (newFile, 0);
-            else
-                showFailedToWriteMessage (newFile);
-        }
-    }
-};
-
-//==============================================================================
-const StringArray NewFileWizard::getWizards()
-{
-    StringArray s;
-
-    for (int i = 0; i < getNumWizards(); ++i)
-    {
-        ScopedPointer <NewFileWizard> wiz (createWizard (i));
-        s.add (wiz->getName());
-    }
-
-    return s;
-}
-
-int NewFileWizard::getNumWizards()
-{
-    return 2;
-}
-
-NewFileWizard* NewFileWizard::createWizard (int index)
-{
-    switch (index)
-    {
-        case 0:     return new NewCppFileWizard();
-        case 1:     return new NewHeaderFileWizard();
-        case 2:     return new NewComponentWizard();
-        case 3:     return new NewDrawableWizard();
-        default:    jassertfalse; break;
-    }
-
-    return 0;
-}
-
-static const int menuBaseID = 0x12d83f0;
-
-void NewFileWizard::addWizardsToMenu (PopupMenu& m)
-{
-    for (int i = 0; i < getNumWizards(); ++i)
-    {
-        ScopedPointer <NewFileWizard> wiz (createWizard (i));
-        m.addItem (menuBaseID + i, "Add New " + wiz->getName() + "...");
-    }
-}
-
-bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo)
-{
-    int index = chosenMenuItemID - menuBaseID;
-
-    if (index >= 0 && index < getNumWizards())
-    {
-        ScopedPointer <NewFileWizard> wiz (createWizard (index));
-
-        wiz->createNewFile (projectGroupToAddTo);
-        return true;
-    }
-
-    return false;
-}
-
-void NewFileWizard::showFailedToWriteMessage (const File& file)
+void NewFileWizard::Type::showFailedToWriteMessage (const File& file)
 {
     AlertWindow::showMessageBox (AlertWindow::WarningIcon,
                                  "Failed to Create File!",
                                  "Couldn't write to the file: " + file.getFullPathName());
 }
 
-const File NewFileWizard::askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
-                                                  const Project::Item& projectGroupToAddTo)
+const File NewFileWizard::Type::askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
+                                                               const Project::Item& projectGroupToAddTo)
 {
     FileChooser fc ("Select File to Create",
                     projectGroupToAddTo.determineGroupFolder()
@@ -230,4 +106,44 @@ const File NewFileWizard::askUserToChooseNewFile (const String& suggestedFilenam
         return fc.getResult();
 
     return File::nonexistent;
+}
+
+//==============================================================================
+NewFileWizard::NewFileWizard()
+{
+    registerWizard (new NewCppFileWizard());
+    registerWizard (new NewHeaderFileWizard());
+}
+
+NewFileWizard::~NewFileWizard()
+{
+    clearSingletonInstance();
+}
+
+juce_ImplementSingleton_SingleThreaded (NewFileWizard)
+
+static const int menuBaseID = 0x12d83f0;
+
+void NewFileWizard::addWizardsToMenu (PopupMenu& m) const
+{
+    for (int i = 0; i < wizards.size(); ++i)
+        m.addItem (menuBaseID + i, "Add New " + wizards.getUnchecked(i)->getName() + "...");
+}
+
+bool NewFileWizard::runWizardFromMenu (int chosenMenuItemID, const Project::Item& projectGroupToAddTo) const
+{
+    Type* wiz = wizards [chosenMenuItemID - menuBaseID];
+
+    if (wiz != 0)
+    {
+        wiz->createNewFile (projectGroupToAddTo);
+        return true;
+    }
+
+    return false;
+}
+
+void NewFileWizard::registerWizard (Type* newWizard)
+{
+    wizards.add (newWizard);
 }

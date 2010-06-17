@@ -25,16 +25,14 @@
 
 #include "jucer_OpenDocumentManager.h"
 #include "Code Editor/jucer_SourceCodeEditor.h"
-#include "Drawable Editor/jucer_DrawableEditor.h"
 #include "Project Editor/jucer_ItemPreviewComponent.h"
-#include "Component Editor/jucer_ComponentEditor.h"
-#include "Component Editor/jucer_ComponentViewer.h"
 
 
 //==============================================================================
 class SourceCodeDocument  : public OpenDocumentManager::Document
 {
 public:
+    //==============================================================================
     SourceCodeDocument (const File& file_)
         : modDetector (file_)
     {
@@ -46,6 +44,18 @@ public:
     {
     }
 
+    //==============================================================================
+    class Type  : public OpenDocumentManager::DocumentType
+    {
+    public:
+        Type() {}
+        ~Type() {}
+
+        bool canOpenFile (const File& file)                 { return SourceCodeEditor::isTextFile (file); }
+        Document* openFile (Project*, const File& file)     { return new SourceCodeDocument (file); }
+    };
+
+    //==============================================================================
     bool loadedOk() const                               { return true; }
     bool isForFile (const File& file) const             { return modDetector.getFile() == file; }
     bool isForNode (const ValueTree& node) const        { return false; }
@@ -101,162 +111,6 @@ private:
 };
 
 //==============================================================================
-class ComponentDocumentType  : public OpenDocumentManager::Document
-{
-public:
-    ComponentDocumentType (Project* project_, const File& file_)
-        : project (project_),
-          modDetector (file_)
-    {
-        reloadFromFile();
-    }
-
-    ~ComponentDocumentType()
-    {
-        componentDoc = 0;
-    }
-
-    static bool isComponentFile (const File& file)  { return ComponentDocument::isComponentFile (file); }
-
-    bool loadedOk() const                           { return componentDoc != 0; }
-    bool isForFile (const File& file) const         { return modDetector.getFile() == file; }
-    bool isForNode (const ValueTree& node) const    { return false; }
-    bool refersToProject (Project& p) const         { return project == &p; }
-    const String getType() const                    { return "Jucer Component"; }
-    const String getName() const                    { return modDetector.getFile().getFileName(); }
-    bool needsSaving() const                        { return componentDoc != 0 && componentDoc->hasChangedSinceLastSave(); }
-    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
-
-    void fileHasBeenRenamed (const File& newFile)
-    {
-        if (componentDoc != 0)
-            componentDoc->cppFileHasMoved (newFile);
-
-        modDetector.fileHasBeenRenamed (newFile);
-    }
-
-    void reloadFromFile()
-    {
-        modDetector.updateHash();
-
-        if (componentDoc == 0)
-            componentDoc = new ComponentDocument (project, modDetector.getFile());
-
-        if (! componentDoc->reload())
-            componentDoc = 0;
-    }
-
-    bool save()
-    {
-        if (componentDoc->save())
-        {
-            modDetector.updateHash();
-            return true;
-        }
-
-        return false;
-    }
-
-    Component* createEditor()
-    {
-        if (componentDoc == 0)
-        {
-            jassertfalse;
-            return 0;
-        }
-
-        return new ComponentEditor (this, project, componentDoc);
-    }
-
-    Component* createViewer()
-    {
-        if (componentDoc == 0)
-        {
-            jassertfalse;
-            return 0;
-        }
-
-        return new ComponentViewer (this, project, componentDoc);
-    }
-
-private:
-    Project* project;
-    FileModificationDetector modDetector;
-    ScopedPointer <ComponentDocument> componentDoc;
-};
-
-//==============================================================================
-class DrawableDocumentType  : public OpenDocumentManager::Document
-{
-public:
-    DrawableDocumentType (Project* project_, const File& file_)
-        : project (project_),
-          modDetector (file_)
-    {
-        reloadFromFile();
-    }
-
-    ~DrawableDocumentType()
-    {
-        drawableDoc = 0;
-    }
-
-    static bool isDrawableFile (const File& file)   { return file.hasFileExtension (".drawable"); }
-
-    bool loadedOk() const                           { return drawableDoc != 0; }
-    bool isForFile (const File& file) const         { return modDetector.getFile() == file; }
-    bool isForNode (const ValueTree& node) const    { return false; }
-    bool refersToProject (Project& p) const         { return project == &p; }
-    const String getType() const                    { return "Drawable"; }
-    const String getName() const                    { return modDetector.getFile().getFileName(); }
-    bool needsSaving() const                        { return drawableDoc != 0 && drawableDoc->hasChangedSinceLastSave(); }
-    bool hasFileBeenModifiedExternally()            { return modDetector.hasBeenModified(); }
-    void fileHasBeenRenamed (const File& newFile)   { modDetector.fileHasBeenRenamed (newFile); }
-
-    void reloadFromFile()
-    {
-        modDetector.updateHash();
-
-        if (drawableDoc == 0)
-            drawableDoc = new DrawableDocument (project);
-
-        if (! drawableDoc->reload (modDetector.getFile()))
-            drawableDoc = 0;
-    }
-
-    bool save()
-    {
-        if (drawableDoc->save (modDetector.getFile()))
-        {
-            modDetector.updateHash();
-            return true;
-        }
-
-        return false;
-    }
-
-    Component* createEditor()
-    {
-        jassert (drawableDoc != 0);
-
-        if (drawableDoc == 0)
-            return 0;
-
-        return new DrawableEditor (this, project, drawableDoc);
-    }
-
-    Component* createViewer()
-    {
-        return createEditor(); //xxx
-    }
-
-private:
-    Project* project;
-    FileModificationDetector modDetector;
-    ScopedPointer <DrawableDocument> drawableDoc;
-};
-
-//==============================================================================
 class UnknownDocument  : public OpenDocumentManager::Document
 {
 public:
@@ -268,6 +122,18 @@ public:
 
     ~UnknownDocument() {}
 
+    //==============================================================================
+    class Type  : public OpenDocumentManager::DocumentType
+    {
+    public:
+        Type() {}
+        ~Type() {}
+
+        bool canOpenFile (const File& file)                         { return true; }
+        Document* openFile (Project* project, const File& file)     { return new UnknownDocument (project, file); }
+    };
+
+    //==============================================================================
     bool loadedOk() const                           { return true; }
     bool isForFile (const File& file_) const        { return file == file_; }
     bool isForNode (const ValueTree& node_) const   { return false; }
@@ -303,6 +169,8 @@ private:
 //==============================================================================
 OpenDocumentManager::OpenDocumentManager()
 {
+    registerType (new UnknownDocument::Type());
+    registerType (new SourceCodeDocument::Type());
 }
 
 OpenDocumentManager::~OpenDocumentManager()
@@ -311,6 +179,12 @@ OpenDocumentManager::~OpenDocumentManager()
 }
 
 juce_ImplementSingleton_SingleThreaded (OpenDocumentManager);
+
+//==============================================================================
+void OpenDocumentManager::registerType (DocumentType* type)
+{
+    types.add (type);
+}
 
 //==============================================================================
 void OpenDocumentManager::addListener (DocumentCloseListener* listener)
@@ -326,8 +200,11 @@ void OpenDocumentManager::removeListener (DocumentCloseListener* listener)
 //==============================================================================
 bool OpenDocumentManager::canOpenFile (const File& file)
 {
-    return DrawableDocumentType::isDrawableFile (file)
-            || SourceCodeEditor::isTextFile (file);
+    for (int i = types.size(); --i >= 0;)
+        if (types.getUnchecked(i)->canOpenFile (file))
+            return true;
+
+    return false;
 }
 
 OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project* project, const File& file)
@@ -338,16 +215,20 @@ OpenDocumentManager::Document* OpenDocumentManager::getDocumentForFile (Project*
 
     Document* d = 0;
 
-    if (ComponentDocumentType::isComponentFile (file))
-        d = new ComponentDocumentType (project, file);
-    else if (DrawableDocumentType::isDrawableFile (file))
-        d = new DrawableDocumentType (project, file);
-    else if (SourceCodeEditor::isTextFile (file))
-        d = new SourceCodeDocument (file);
-    else
-        d = new UnknownDocument (project, file);
+    for (int i = types.size(); --i >= 0 && d == 0;)
+    {
+        if (types.getUnchecked(i)->canOpenFile (file))
+        {
+            d = types.getUnchecked(i)->openFile (project, file);
+            jassert (d != 0);
+        }
+    }
 
-    documents.add (d);
+    jassert (d != 0);
+
+    if (d != 0)
+        documents.add (d);
+
     commandManager->commandStatusChanged();
     return d;
 }

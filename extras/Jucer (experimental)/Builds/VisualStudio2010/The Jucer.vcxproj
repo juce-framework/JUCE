@@ -122,21 +122,12 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\model\Component\jucer_CodeGenerator.cpp"/>
-    <ClCompile Include="..\..\Source\model\Component\jucer_ComponentDocument.cpp"/>
-    <ClCompile Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.cpp"/>
-    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp"/>
-    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.cpp"/>
     <ClCompile Include="..\..\Source\model\Project\jucer_NewFileWizard.cpp"/>
     <ClCompile Include="..\..\Source\model\Project\jucer_Project.cpp"/>
     <ClCompile Include="..\..\Source\model\Project\jucer_ProjectExporter.cpp"/>
     <ClCompile Include="..\..\Source\model\Project\jucer_ProjectWizard.cpp"/>
     <ClCompile Include="..\..\Source\model\Project\jucer_ResourceFile.cpp"/>
     <ClCompile Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.cpp"/>
-    <ClCompile Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp"/>
-    <ClCompile Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.cpp"/>
     <ClCompile Include="..\..\Source\ui\jucer_DocumentEditorComponent.cpp"/>
     <ClCompile Include="..\..\Source\ui\jucer_JucerTreeViewBase.cpp"/>
     <ClCompile Include="..\..\Source\ui\jucer_MainWindow.cpp"/>
@@ -159,23 +150,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\model\Component\jucer_CodeGenerator.h"/>
-    <ClInclude Include="..\..\Source\model\Component\jucer_ComponentDocument.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComboBox.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypes.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GenericComponent.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GroupComponent.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_JucerComponent.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Label.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Slider.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TabbedComponent.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextButton.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextEditor.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ToggleButton.h"/>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Viewport.h"/>
-    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableDocument.h"/>
-    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h"/>
     <ClInclude Include="..\..\Source\model\Project\jucer_NewFileWizard.h"/>
     <ClInclude Include="..\..\Source\model\Project\jucer_Project.h"/>
     <ClInclude Include="..\..\Source\model\Project\jucer_ProjectExporter.h"/>
@@ -186,19 +160,6 @@
     <ClInclude Include="..\..\Source\model\Project\jucer_ProjectWizard.h"/>
     <ClInclude Include="..\..\Source\model\Project\jucer_ResourceFile.h"/>
     <ClInclude Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h"/>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.h"/>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.h"/>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorCanvas.h"/>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorToolbar.h"/>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorTreeView.h"/>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.h"/>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorDragOperation.h"/>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorPanel.h"/>
     <ClInclude Include="..\..\Source\ui\jucer_CommandIDs.h"/>
     <ClInclude Include="..\..\Source\ui\jucer_DocumentEditorComponent.h"/>
     <ClInclude Include="..\..\Source\ui\jucer_JucerTreeViewBase.h"/>
@@ -211,22 +172,18 @@
     <ClInclude Include="..\..\Source\ui\Project Editor\jucer_ProjectTreeViewBase.h"/>
     <ClInclude Include="..\..\Source\ui\Project Editor\jucer_TreeViewTypes.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_CodeHelpers.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_ColourPropertyComponent.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_Colours.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_CoordinatePropertyComponent.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_FileHelpers.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_FillTypePropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_FontPropertyComponent.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_MarkerListBase.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_MiscUtilities.h"/>
+    <ClInclude Include="..\..\Source\utility\jucer_PresetIDs.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_RelativePath.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_StoredSettings.h"/>
-    <ClInclude Include="..\..\Source\utility\jucer_TickIterator.h"/>
     <ClInclude Include="..\..\Source\utility\jucer_ValueSourceHelpers.h"/>
+    <ClInclude Include="..\..\Source\jucer_Application.h"/>
+    <ClInclude Include="..\..\Source\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\jucer_Headers.h"/>
     <ClInclude Include="..\..\Source\templates\jucer_AudioPluginEditorTemplate.h"/>
     <ClInclude Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h"/>
-    <ClInclude Include="..\..\Source\templates\jucer_ComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\templates\jucer_NewCppFileTemplate.h"/>
     <ClInclude Include="..\..\Source\templates\jucer_WindowTemplate.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h"/>

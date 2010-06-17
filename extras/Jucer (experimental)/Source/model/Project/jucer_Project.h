@@ -298,6 +298,8 @@ public:
     //==============================================================================
     static const char* projectFileExtension;
 
+    static void resaveJucerFile (const File& file);
+
 private:
     ValueTree projectRoot;
     static File lastDocumentOpened;

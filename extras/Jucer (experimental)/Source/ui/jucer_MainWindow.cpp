@@ -57,7 +57,6 @@ MainWindow::MainWindow()
 
     // Register all the app commands..
     {
-        commandManager->registerAllCommandsForTarget (JUCEApplication::getInstance());
         commandManager->registerAllCommandsForTarget (this);
 
         // use a temporary one of these to harvest its commands..
@@ -66,9 +65,6 @@ MainWindow::MainWindow()
 
         DocumentEditorComponent dec (0);
         commandManager->registerAllCommandsForTarget (&dec);
-
-        ComponentEditor compEd (0, 0, 0);
-        commandManager->registerAllCommandsForTarget (&compEd);
     }
 
     commandManager->getKeyMappings()->resetToDefaultMappings();
@@ -84,6 +80,8 @@ MainWindow::MainWindow()
     setWantsKeyboardFocus (false);
 
     //getPeer()->setCurrentRenderingEngine (0);
+
+    setVisible (true);
 }
 
 MainWindow::~MainWindow()

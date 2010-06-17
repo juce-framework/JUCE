@@ -8,15 +8,6 @@
     <Filter Include="The Jucer\Model">
       <UniqueIdentifier>{A5344922-0D8B-B045-F28C-FED2183BC2C7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="The Jucer\Model\Component">
-      <UniqueIdentifier>{BB130AC7-0080-F6A3-9A33-66D8D081545C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\Model\Component\Types">
-      <UniqueIdentifier>{373D0BD7-814C-7145-4C25-6D9C9E6D1D5D}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\Model\Drawable">
-      <UniqueIdentifier>{7C9CA237-B750-662B-7DF8-5FD8FCAF4E3C}</UniqueIdentifier>
-    </Filter>
     <Filter Include="The Jucer\Model\Project">
       <UniqueIdentifier>{F9D69347-AF9F-BE13-7C53-9C497443E5AE}</UniqueIdentifier>
     </Filter>
@@ -25,15 +16,6 @@
     </Filter>
     <Filter Include="The Jucer\UI\Code Editor">
       <UniqueIdentifier>{F4F08AA9-6601-8093-5779-F29289064327}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\UI\Component Editor">
-      <UniqueIdentifier>{F476DB92-615F-54AF-2D4B-35031423FB68}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\UI\Drawable Editor">
-      <UniqueIdentifier>{37D72050-852A-B36C-3674-277B759737F1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="The Jucer\UI\Editor Base">
-      <UniqueIdentifier>{04730C9B-9F60-192C-2577-97984C6BC024}</UniqueIdentifier>
     </Filter>
     <Filter Include="The Jucer\UI\Project Editor">
       <UniqueIdentifier>{B34892C3-DBB0-4445-A3A2-FF5FB798F25B}</UniqueIdentifier>
@@ -52,21 +34,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Source\model\Component\jucer_CodeGenerator.cpp">
-      <Filter>The Jucer\Model\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\model\Component\jucer_ComponentDocument.cpp">
-      <Filter>The Jucer\Model\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.cpp">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableDocument.cpp">
-      <Filter>The Jucer\Model\Drawable</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.cpp">
-      <Filter>The Jucer\Model\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\model\Project\jucer_NewFileWizard.cpp">
       <Filter>The Jucer\Model\Project</Filter>
     </ClCompile>
@@ -84,18 +51,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.cpp">
       <Filter>The Jucer\UI\Code Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.cpp">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.cpp">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.cpp">
-      <Filter>The Jucer\UI\Drawable Editor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.cpp">
-      <Filter>The Jucer\UI\Editor Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\ui\jucer_DocumentEditorComponent.cpp">
       <Filter>The Jucer\UI</Filter>
@@ -154,9 +109,6 @@
     <ClCompile Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.cpp">
       <Filter>The Jucer\Resources</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\templates\jucer_ComponentTemplate.cpp">
-      <Filter>The Jucer\Resources</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\templates\jucer_MainConsoleAppTemplate.cpp">
       <Filter>The Jucer\Resources</Filter>
     </ClCompile>
@@ -189,57 +141,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\model\Component\jucer_CodeGenerator.h">
-      <Filter>The Jucer\Model\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\jucer_ComponentDocument.h">
-      <Filter>The Jucer\Model\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComboBox.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypeManager.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ComponentTypes.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GenericComponent.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_GroupComponent.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_JucerComponent.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Label.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Slider.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TabbedComponent.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextButton.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_TextEditor.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_ToggleButton.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Component\Types\jucer_Viewport.h">
-      <Filter>The Jucer\Model\Component\Types</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableDocument.h">
-      <Filter>The Jucer\Model\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\model\Drawable\jucer_DrawableTypeHandler.h">
-      <Filter>The Jucer\Model\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\model\Project\jucer_NewFileWizard.h">
       <Filter>The Jucer\Model\Project</Filter>
     </ClInclude>
@@ -269,45 +170,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\ui\Code Editor\jucer_SourceCodeEditor.h">
       <Filter>The Jucer\UI\Code Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditor.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCanvas.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorCodeView.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorToolbar.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentEditorTreeView.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Component Editor\jucer_ComponentViewer.h">
-      <Filter>The Jucer\UI\Component Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditor.h">
-      <Filter>The Jucer\UI\Drawable Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorCanvas.h">
-      <Filter>The Jucer\UI\Drawable Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorToolbar.h">
-      <Filter>The Jucer\UI\Drawable Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Drawable Editor\jucer_DrawableEditorTreeView.h">
-      <Filter>The Jucer\UI\Drawable Editor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorCanvas.h">
-      <Filter>The Jucer\UI\Editor Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorDragOperation.h">
-      <Filter>The Jucer\UI\Editor Base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\ui\Editor Base\jucer_EditorPanel.h">
-      <Filter>The Jucer\UI\Editor Base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\ui\jucer_CommandIDs.h">
       <Filter>The Jucer\UI</Filter>
@@ -345,28 +207,16 @@
     <ClInclude Include="..\..\Source\utility\jucer_CodeHelpers.h">
       <Filter>The Jucer\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_ColourPropertyComponent.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\utility\jucer_Colours.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_CoordinatePropertyComponent.h">
       <Filter>The Jucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\utility\jucer_FileHelpers.h">
       <Filter>The Jucer\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_FillTypePropertyComponent.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_FontPropertyComponent.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_MarkerListBase.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\utility\jucer_MiscUtilities.h">
+      <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\utility\jucer_PresetIDs.h">
       <Filter>The Jucer\Utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\utility\jucer_RelativePath.h">
@@ -375,11 +225,14 @@
     <ClInclude Include="..\..\Source\utility\jucer_StoredSettings.h">
       <Filter>The Jucer\Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\utility\jucer_TickIterator.h">
-      <Filter>The Jucer\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\utility\jucer_ValueSourceHelpers.h">
       <Filter>The Jucer\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\jucer_Application.h">
+      <Filter>The Jucer\Main</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\jucer_CommonHeaders.h">
+      <Filter>The Jucer\Main</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\jucer_Headers.h">
       <Filter>The Jucer\Main</Filter>
@@ -388,9 +241,6 @@
       <Filter>The Jucer\Resources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\templates\jucer_AudioPluginFilterTemplate.h">
-      <Filter>The Jucer\Resources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\templates\jucer_ComponentTemplate.h">
       <Filter>The Jucer\Resources</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\templates\jucer_NewCppFileTemplate.h">
