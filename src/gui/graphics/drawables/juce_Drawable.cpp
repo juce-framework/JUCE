@@ -168,6 +168,7 @@ const Identifier Drawable::ValueTreeWrapperBase::idProperty ("id");
 const Identifier Drawable::ValueTreeWrapperBase::type ("type");
 const Identifier Drawable::ValueTreeWrapperBase::gradientPoint1 ("point1");
 const Identifier Drawable::ValueTreeWrapperBase::gradientPoint2 ("point2");
+const Identifier Drawable::ValueTreeWrapperBase::gradientPoint3 ("point3");
 const Identifier Drawable::ValueTreeWrapperBase::colour ("colour");
 const Identifier Drawable::ValueTreeWrapperBase::radial ("radial");
 const Identifier Drawable::ValueTreeWrapperBase::colours ("colours");
@@ -196,7 +197,7 @@ void Drawable::ValueTreeWrapperBase::setID (const String& newID, UndoManager* co
         state.setProperty (idProperty, newID, undoManager);
 }
 
-const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2,
+const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v, RelativePoint* const gp1, RelativePoint* const gp2, RelativePoint* const gp3,
                                                              RelativeCoordinate::NamedCoordinateFinder* const nameFinder, ImageProvider* imageProvider)
 {
     const String newType (v[type].toString());
@@ -209,14 +210,13 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v,
     }
     else if (newType == "gradient")
     {
-        RelativePoint p1 (v [gradientPoint1]), p2 (v [gradientPoint2]);
+        RelativePoint p1 (v [gradientPoint1]), p2 (v [gradientPoint2]), p3 (v [gradientPoint3]);
 
         ColourGradient g;
 
-        if (gp1 != 0)
-            *gp1 = p1;
-        if (gp2 != 0)
-            *gp2 = p2;
+        if (gp1 != 0)  *gp1 = p1;
+        if (gp2 != 0)  *gp2 = p2;
+        if (gp3 != 0)  *gp3 = p3;
 
         g.point1 = p1.resolve (nameFinder);
         g.point2 = p2.resolve (nameFinder);
@@ -229,7 +229,20 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v,
             g.addColour (colourSteps[i * 2].getDoubleValue(),
                          Colour ((uint32)  colourSteps[i * 2 + 1].getHexValue32()));
 
-        return FillType (g);
+        FillType fillType (g);
+
+        if (g.isRadial)
+        {
+            const Point<float> point3 (p3.resolve (nameFinder));
+            const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
+                                             g.point1.getY() + g.point1.getX() - g.point2.getX());
+
+            fillType.transform = AffineTransform::fromTargetPoints (g.point1.getX(), g.point1.getY(), g.point1.getX(), g.point1.getY(),
+                                                                    g.point2.getX(), g.point2.getY(), g.point2.getX(), g.point2.getY(),
+                                                                    point3Source.getX(), point3Source.getY(), point3.getX(), point3.getY());
+        }
+
+        return fillType;
     }
     else if (newType == "image")
     {
@@ -246,8 +259,17 @@ const FillType Drawable::ValueTreeWrapperBase::readFillType (const ValueTree& v,
     return FillType();
 }
 
+static const Point<float> calcThirdGradientPoint (const FillType& fillType)
+{
+    const ColourGradient& g = *fillType.gradient;
+    const Point<float> point3Source (g.point1.getX() + g.point2.getY() - g.point1.getY(),
+                                     g.point1.getY() + g.point1.getX() - g.point2.getX());
+
+    return point3Source.transformedBy (fillType.transform);
+}
+
 void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType& fillType,
-                                                    const RelativePoint* const gp1, const RelativePoint* const gp2,
+                                                    const RelativePoint* const gp1, const RelativePoint* const gp2, const RelativePoint* gp3,
                                                     ImageProvider* imageProvider, UndoManager* const undoManager)
 {
     if (fillType.isColour())
@@ -260,6 +282,8 @@ void Drawable::ValueTreeWrapperBase::writeFillType (ValueTree& v, const FillType
         v.setProperty (type, "gradient", undoManager);
         v.setProperty (gradientPoint1, gp1 != 0 ? gp1->toString() : fillType.gradient->point1.toString(), undoManager);
         v.setProperty (gradientPoint2, gp2 != 0 ? gp2->toString() : fillType.gradient->point2.toString(), undoManager);
+        v.setProperty (gradientPoint3, gp3 != 0 ? gp3->toString() : calcThirdGradientPoint (fillType).toString(), undoManager);
+
         v.setProperty (radial, fillType.gradient->isRadial, undoManager);
 
         String s;

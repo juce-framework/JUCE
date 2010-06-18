@@ -132,13 +132,15 @@ public:
         const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
                                     ImageProvider* imageProvider) const;
         ValueTree getMainFillState();
-        void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+        void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+                          const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
                           ImageProvider* imageProvider, UndoManager* undoManager);
 
         const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
                                       ImageProvider* imageProvider) const;
         ValueTree getStrokeFillState();
-        void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+        void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+                            const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
                             ImageProvider* imageProvider, UndoManager* undoManager);
 
         const PathStrokeType getStrokeType() const;

@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	24
+#define JUCE_BUILDNUMBER	25
 
 /** Current Juce version number.
 
@@ -43362,17 +43362,19 @@ public:
 		void setID (const String& newID, UndoManager* undoManager);
 		static const Identifier idProperty;
 
-		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1, RelativePoint* gradientPoint2,
+		static const FillType readFillType (const ValueTree& v, RelativePoint* gradientPoint1,
+											RelativePoint* gradientPoint2, RelativePoint* gradientPoint3,
 											RelativeCoordinate::NamedCoordinateFinder* nameFinder,
 											ImageProvider* imageProvider);
 
 		static void writeFillType (ValueTree& v, const FillType& fillType,
 								   const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
-								   ImageProvider* imageProvider,
+								   const RelativePoint* gradientPoint3, ImageProvider* imageProvider,
 								   UndoManager* undoManager);
 
 		ValueTree state;
-		static const Identifier type, gradientPoint1, gradientPoint2, colour, radial, colours, imageId, imageOpacity;
+		static const Identifier type, gradientPoint1, gradientPoint2, gradientPoint3,
+								colour, radial, colours, imageId, imageOpacity;
 	};
 
 	juce_UseDebuggingNewOperator
@@ -59305,13 +59307,15 @@ public:
 		const FillType getMainFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
 									ImageProvider* imageProvider) const;
 		ValueTree getMainFillState();
-		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+		void setMainFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+						  const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
 						  ImageProvider* imageProvider, UndoManager* undoManager);
 
 		const FillType getStrokeFill (RelativeCoordinate::NamedCoordinateFinder* nameFinder,
 									  ImageProvider* imageProvider) const;
 		ValueTree getStrokeFillState();
-		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1, const RelativePoint* gradientPoint2,
+		void setStrokeFill (const FillType& newFill, const RelativePoint* gradientPoint1,
+							const RelativePoint* gradientPoint2, const RelativePoint* gradientPoint3,
 							ImageProvider* imageProvider, UndoManager* undoManager);
 
 		const PathStrokeType getStrokeType() const;

@@ -85,7 +85,7 @@ bool AudioFormatReader::read (int** destSamples,
         {
             int* lastFullChannel = destSamples[0];
 
-            for (int i = numDestChannels; --i > 0;)
+            for (int i = (int) numChannels; --i > 0;)
             {
                 if (destSamples[i] != 0)
                 {

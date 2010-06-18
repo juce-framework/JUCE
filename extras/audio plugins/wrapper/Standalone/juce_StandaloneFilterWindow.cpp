@@ -45,7 +45,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 {
     setTitleBarButtonsRequired (DocumentWindow::minimiseButton | DocumentWindow::closeButton, false);
 
-    optionsButton = new TextButton (T("options"));
+    optionsButton = new TextButton ("options");
     Component::addAndMakeVisible (optionsButton);
     optionsButton->addButtonListener (this);
     optionsButton->setTriggeredOnMouseDown (true);
@@ -68,7 +68,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
             XmlElement* savedState = 0;
 
             if (globalSettings != 0)
-                savedState = globalSettings->getXmlValue (T("audioSetup"));
+                savedState = globalSettings->getXmlValue ("audioSetup");
 
             deviceManager->initialise (filter->getNumInputChannels(),
                                        filter->getNumOutputChannels(),
@@ -81,7 +81,7 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
             {
                 MemoryBlock data;
 
-                if (data.fromBase64Encoding (globalSettings->getValue (T("filterState")))
+                if (data.fromBase64Encoding (globalSettings->getValue ("filterState"))
                      && data.getSize() > 0)
                 {
                     filter->setStateInformation (data.getData(), data.getSize());
@@ -90,8 +90,8 @@ StandaloneFilterWindow::StandaloneFilterWindow (const String& title,
 
             setContentComponent (filter->createEditorIfNeeded(), true, true);
 
-            const int x = globalSettings->getIntValue (T("windowX"), -100);
-            const int y = globalSettings->getIntValue (T("windowY"), -100);
+            const int x = globalSettings->getIntValue ("windowX", -100);
+            const int y = globalSettings->getIntValue ("windowY", -100);
 
             if (x != -100 && y != -100)
                 setBoundsConstrained (Rectangle<int> (x, y, getWidth(), getHeight()));
@@ -112,15 +112,15 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
 {
     PropertySet* const globalSettings = getGlobalSettings();
 
-    globalSettings->setValue (T("windowX"), getX());
-    globalSettings->setValue (T("windowY"), getY());
+    globalSettings->setValue ("windowX", getX());
+    globalSettings->setValue ("windowY", getY());
 
     deleteAndZero (optionsButton);
 
     if (globalSettings != 0 && deviceManager != 0)
     {
         XmlElement* const xml = deviceManager->createStateXml();
-        globalSettings->setValue (T("audioSetup"), xml);
+        globalSettings->setValue ("audioSetup", xml);
         delete xml;
     }
 
@@ -131,7 +131,7 @@ StandaloneFilterWindow::~StandaloneFilterWindow()
         MemoryBlock data;
         filter->getStateInformation (data);
 
-        globalSettings->setValue (T("filterState"), data.toBase64Encoding());
+        globalSettings->setValue ("filterState", data.toBase64Encoding());
     }
 
     deleteFilter();
@@ -169,7 +169,7 @@ void StandaloneFilterWindow::resetFilter()
     PropertySet* const globalSettings = getGlobalSettings();
 
     if (globalSettings != 0)
-        globalSettings->removeValue (T("filterState"));
+        globalSettings->removeValue ("filterState");
 }
 
 //==============================================================================
@@ -178,7 +178,7 @@ void StandaloneFilterWindow::saveState()
     PropertySet* const globalSettings = getGlobalSettings();
 
     FileChooser fc (TRANS("Save current state"),
-                    globalSettings != 0 ? File (globalSettings->getValue (T("lastStateFile")))
+                    globalSettings != 0 ? File (globalSettings->getValue ("lastStateFile"))
                                         : File::nonexistent);
 
     if (fc.browseForFileToSave (true))
@@ -200,7 +200,7 @@ void StandaloneFilterWindow::loadState()
     PropertySet* const globalSettings = getGlobalSettings();
 
     FileChooser fc (TRANS("Load a saved state"),
-                    globalSettings != 0 ? File (globalSettings->getValue (T("lastStateFile")))
+                    globalSettings != 0 ? File (globalSettings->getValue ("lastStateFile"))
                                         : File::nonexistent);
 
     if (fc.browseForFileToOpen())
