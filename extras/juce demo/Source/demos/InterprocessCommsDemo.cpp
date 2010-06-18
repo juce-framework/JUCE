@@ -37,56 +37,56 @@ public:
     {
         server = new DemoInterprocessConnectionServer (*this);
 
-        setName (T("Interprocess Communication"));
+        setName ("Interprocess Communication");
 
         // create all our UI bits and pieces..
-        addAndMakeVisible (modeSelector = new ComboBox (T("mode:")));
+        addAndMakeVisible (modeSelector = new ComboBox ("mode:"));
         modeSelector->setBounds (100, 25, 200, 24);
         (new Label (modeSelector->getName(), modeSelector->getName()))->attachToComponent (modeSelector, true);
 
-        modeSelector->addItem (T("(Disconnected)"), 8);
+        modeSelector->addItem ("(Disconnected)", 8);
         modeSelector->addSeparator();
-        modeSelector->addItem (T("Named pipe (listening)"), 1);
-        modeSelector->addItem (T("Named pipe (connect to existing pipe)"), 5);
+        modeSelector->addItem ("Named pipe (listening)", 1);
+        modeSelector->addItem ("Named pipe (connect to existing pipe)", 5);
         modeSelector->addSeparator();
-        modeSelector->addItem (T("Socket (listening)"), 2);
-        modeSelector->addItem (T("Socket (connect to existing socket)"), 6);
+        modeSelector->addItem ("Socket (listening)", 2);
+        modeSelector->addItem ("Socket (connect to existing socket)", 6);
 
         modeSelector->setSelectedId (8);
         modeSelector->addListener (this);
 
-        addAndMakeVisible (pipeName = new TextEditor (T("pipe name:")));
+        addAndMakeVisible (pipeName = new TextEditor ("pipe name:"));
         pipeName->setBounds (100, 60, 130, 24);
         pipeName->setMultiLine (false);
-        pipeName->setText (T("juce demo pipe"));
+        pipeName->setText ("juce demo pipe");
         (new Label (pipeName->getName(), pipeName->getName()))->attachToComponent (pipeName, true);
 
-        addAndMakeVisible (socketNumber = new TextEditor (T("socket port:")));
+        addAndMakeVisible (socketNumber = new TextEditor ("socket port:"));
         socketNumber->setBounds (350, 60, 80, 24);
         socketNumber->setMultiLine (false);
-        socketNumber->setText (T("12345"));
-        socketNumber->setInputRestrictions (5, T("0123456789"));
+        socketNumber->setText ("12345");
+        socketNumber->setInputRestrictions (5, "0123456789");
         (new Label (socketNumber->getName(), socketNumber->getName()))->attachToComponent (socketNumber, true);
 
-        addAndMakeVisible (socketHost = new TextEditor (T("socket host:")));
+        addAndMakeVisible (socketHost = new TextEditor ("socket host:"));
         socketHost->setBounds (530, 60, 130, 24);
         socketHost->setMultiLine (false);
-        socketHost->setText (T("localhost"));
+        socketHost->setText ("localhost");
         socketNumber->setInputRestrictions (512);
         (new Label (socketHost->getName(), socketHost->getName()))->attachToComponent (socketHost, true);
 
-        addChildComponent (sendText = new TextEditor (T("sendtext")));
+        addChildComponent (sendText = new TextEditor ("sendtext"));
         sendText->setBounds (30, 120, 200, 24);
         sendText->setMultiLine (false);
         sendText->setReadOnly (false);
-        sendText->setText (T("testing 1234"));
+        sendText->setText ("testing 1234");
 
-        addChildComponent (sendButton = new TextButton (T("send"), T("Fires off the message")));
+        addChildComponent (sendButton = new TextButton ("send", "Fires off the message"));
         sendButton->setBounds (240, 120, 200, 24);
         sendButton->changeWidthToFitText();
         sendButton->addButtonListener (this);
 
-        addChildComponent (incomingMessages = new TextEditor (T("messages")));
+        addChildComponent (incomingMessages = new TextEditor ("messages"));
         incomingMessages->setReadOnly (true);
         incomingMessages->setMultiLine (true);
         incomingMessages->setBounds (30, 150, 500, 250);
@@ -117,7 +117,7 @@ public:
                 if (! activeConnections[i]->sendMessage (messageData))
                 {
                     // the write failed, so indicate that the connection has broken..
-                    appendMessage (T("send message failed!"));
+                    appendMessage ("send message failed!");
                 }
             }
         }
@@ -205,7 +205,7 @@ public:
                 openedOk = server->beginWaitingForSocket (socketNumber->getText().getIntValue());
 
                 if (openedOk)
-                    appendMessage (T("Waiting for another app to connect to this socket.."));
+                    appendMessage ("Waiting for another app to connect to this socket..");
             }
             else
             {
@@ -215,7 +215,7 @@ public:
 
                 if (openedOk)
                 {
-                    appendMessage (T("Waiting for another app to connect to this pipe.."));
+                    appendMessage ("Waiting for another app to connect to this pipe..");
                     activeConnections.add (newConnection);
                 }
                 else
@@ -230,15 +230,15 @@ public:
             modeSelector->setSelectedId (8);
 
             AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         T("Interprocess Comms Demo"),
-                                         T("Failed to open the socket or pipe..."));
+                                         "Interprocess Comms Demo",
+                                         "Failed to open the socket or pipe...");
         }
     }
 
     void appendMessage (const String& message)
     {
         incomingMessages->setCaretPosition (INT_MAX);
-        incomingMessages->insertTextAtCaret (message + T("\n"));
+        incomingMessages->insertTextAtCaret (message + "\n");
         incomingMessages->setCaretPosition (INT_MAX);
     }
 
@@ -263,17 +263,17 @@ public:
 
         void connectionMade()
         {
-            owner.appendMessage (T("Connection #") + String (ourNumber) + T(" - connection started"));
+            owner.appendMessage ("Connection #" + String (ourNumber) + " - connection started");
         }
 
         void connectionLost()
         {
-            owner.appendMessage (T("Connection #") + String (ourNumber) + T(" - connection lost"));
+            owner.appendMessage ("Connection #" + String (ourNumber) + " - connection lost");
         }
 
         void messageReceived (const MemoryBlock& message)
         {
-            owner.appendMessage (T("Connection #") + String (ourNumber) + T(" - message received: ") + message.toString());
+            owner.appendMessage ("Connection #" + String (ourNumber) + " - message received: " + message.toString());
         }
     };
 

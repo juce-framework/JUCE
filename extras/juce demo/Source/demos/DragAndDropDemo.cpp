@@ -34,7 +34,7 @@ class DragAndDropDemoSource  : public ListBox,
 public:
     //==============================================================================
     DragAndDropDemoSource()
-        : ListBox (T("d+d source"), 0)
+        : ListBox ("d+d source", 0)
     {
         // tells the ListBox that this object supplies the info about
         // its rows.
@@ -66,7 +66,7 @@ public:
         g.setColour (Colours::black);
         g.setFont (height * 0.7f);
 
-        g.drawText (T("Row Number ") + String (rowNumber + 1),
+        g.drawText ("Row Number " + String (rowNumber + 1),
                     5, 0, width, height,
                     Justification::centredLeft, true);
     }
@@ -79,7 +79,7 @@ public:
         String desc;
 
         for (int i = 0; i < selectedRows.size(); ++i)
-            desc << (selectedRows [i] + 1) << T(" ");
+            desc << (selectedRows [i] + 1) << " ";
 
         return desc.trim();
     }
@@ -121,7 +121,7 @@ public:
     {
         somethingIsBeingDraggedOver = false;
 
-        message = T("Drag-and-drop some rows from the top-left box onto this component!");
+        message = "Drag-and-drop some rows from the top-left box onto this component!";
     }
 
     ~DragAndDropDemoTarget()
@@ -172,7 +172,7 @@ public:
 
     void itemDropped (const String& sourceDescription, Component* /*sourceComponent*/, int /*x*/, int /*y*/)
     {
-        message = T("last rows dropped: ") + sourceDescription;
+        message = "last rows dropped: " + sourceDescription;
 
         somethingIsBeingDraggedOver = false;
         repaint();
@@ -192,7 +192,7 @@ public:
     //==============================================================================
     DragAndDropDemo()
     {
-        setName (T("Drag-and-Drop"));
+        setName ("Drag-and-Drop");
 
         source = new DragAndDropDemoSource();
         addAndMakeVisible (source);

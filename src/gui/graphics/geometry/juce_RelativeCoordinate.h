@@ -64,7 +64,7 @@ public:
         @param absoluteDistanceFromOrigin   the distance from the origin
         @param isHorizontal                 this must be true if this is an X coordinate, or false if it's on the Y axis.
     */
-    RelativeCoordinate (double absoluteDistanceFromOrigin, bool isHorizontal);
+    RelativeCoordinate (double absoluteDistanceFromOrigin);
 
     /** Creates an absolute position relative to a named coordinate.
 
@@ -182,7 +182,8 @@ public:
         Note that calling this will reset the names of any anchor points, and just make the
         coordinate relative to the parent origin and parent size.
     */
-    void toggleProportionality (const NamedCoordinateFinder* nameFinder, bool isHorizontal);
+    void toggleProportionality (const NamedCoordinateFinder* nameFinder,
+                                const String& proportionalAnchor1, const String& proportionalAnchor2);
 
     /** Returns a value that can be edited to set this coordinate's position.
         The meaning of this number depends on the coordinate's mode. If the coordinate is
@@ -203,12 +204,12 @@ public:
     //==============================================================================
     /** Returns the name of the first anchor point from which this coordinate is relative.
     */
-    const String getAnchorName1() const                     { return anchor1; }
+    const String getAnchorName1 (const String& returnValueIfOrigin) const;
 
     /** Returns the name of the second anchor point from which this coordinate is relative.
         The second anchor is only valid if the coordinate is in proportional mode.
     */
-    const String getAnchorName2() const                     { return anchor2; }
+    const String getAnchorName2 (const String& returnValueIfOrigin) const;
 
     /** Returns the first anchor point as a coordinate. */
     const RelativeCoordinate getAnchorCoordinate1() const;

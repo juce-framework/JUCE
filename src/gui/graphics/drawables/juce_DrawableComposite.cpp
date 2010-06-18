@@ -38,10 +38,10 @@ BEGIN_JUCE_NAMESPACE
 DrawableComposite::DrawableComposite()
     : bounds (Point<float>(), Point<float> (100.0f, 0.0f), Point<float> (0.0f, 100.0f))
 {
-    setContentArea (RelativeRectangle (RelativeCoordinate (0.0, true),
-                                       RelativeCoordinate (100.0, true),
-                                       RelativeCoordinate (0.0, false),
-                                       RelativeCoordinate (100.0, false)));
+    setContentArea (RelativeRectangle (RelativeCoordinate (0.0),
+                                       RelativeCoordinate (100.0),
+                                       RelativeCoordinate (0.0),
+                                       RelativeCoordinate (100.0)));
 }
 
 DrawableComposite::DrawableComposite (const DrawableComposite& other)
@@ -153,10 +153,10 @@ void DrawableComposite::resetContentAreaAndBoundingBoxToFitChildren()
 {
     const Rectangle<float> bounds (getUntransformedBounds (false));
 
-    setContentArea (RelativeRectangle (RelativeCoordinate (bounds.getX(), true),
-                                       RelativeCoordinate (bounds.getRight(), true),
-                                       RelativeCoordinate (bounds.getY(), false),
-                                       RelativeCoordinate (bounds.getBottom(), false)));
+    setContentArea (RelativeRectangle (RelativeCoordinate (bounds.getX()),
+                                       RelativeCoordinate (bounds.getRight()),
+                                       RelativeCoordinate (bounds.getY()),
+                                       RelativeCoordinate (bounds.getBottom())));
     resetBoundingBoxToContentArea();
 }
 
@@ -251,16 +251,10 @@ const RelativeCoordinate DrawableComposite::findNamedCoordinate (const String& o
 {
     if (objectName == RelativeCoordinate::Strings::parent)
     {
-        if (edge == RelativeCoordinate::Strings::right)
+        if (edge == RelativeCoordinate::Strings::right || edge == RelativeCoordinate::Strings::bottom)
         {
-            jassertfalse; // a Drawable doesn't have a fixed right-hand edge - use a marker instead if you need a point of reference.
-            return RelativeCoordinate (100.0, true);
-        }
-
-        if (edge == RelativeCoordinate::Strings::bottom)
-        {
-            jassertfalse; // a Drawable doesn't have a fixed bottom edge - use a marker instead if you need a point of reference.
-            return RelativeCoordinate (100.0, false);
+            jassertfalse; // a Drawable doesn't have a fixed right-hand or bottom edge - use a marker instead if you need a point of reference.
+            return RelativeCoordinate (100.0);
         }
     }
 
@@ -300,7 +294,7 @@ const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool inc
             for (i = markersX.size(); --i >= 0;)
             {
                 const Marker* m = markersX.getUnchecked(i);
-                const float pos = (float) m->position.resolve (parent);
+                const float pos = (float) m->position.resolve (this);
                 minX = jmin (minX, pos);
                 maxX = jmax (maxX, pos);
             }
@@ -326,7 +320,7 @@ const Rectangle<float> DrawableComposite::getUntransformedBounds (const bool inc
             for (i = markersY.size(); --i >= 0;)
             {
                 const Marker* m = markersY.getUnchecked(i);
-                const float pos = (float) m->position.resolve (parent);
+                const float pos = (float) m->position.resolve (this);
                 minY = jmin (minY, pos);
                 maxY = jmax (maxY, pos);
             }

@@ -42,12 +42,6 @@ namespace RelativeCoordinateHelpers
                 || name == RelativeCoordinate::Strings::parentTop;
     }
 
-    static const String getOriginAnchorName (const bool isHorizontal) throw()
-    {
-        return isHorizontal ? RelativeCoordinate::Strings::parentLeft
-                            : RelativeCoordinate::Strings::parentTop;
-    }
-
     static const String getExtentAnchorName (const bool isHorizontal) throw()
     {
         return isHorizontal ? RelativeCoordinate::Strings::parentRight
@@ -168,9 +162,6 @@ namespace RelativeCoordinateHelpers
                 {
                     anchor1 = readAnchorName (s, ++i);
 
-                    if (anchor1.isEmpty())
-                        anchor1 = getOriginAnchorName (isHorizontal);
-
                     skipWhitespace (s, i);
 
                     if (s[i] == '-' && s[i + 1] == '>')
@@ -181,19 +172,19 @@ namespace RelativeCoordinateHelpers
                     else
                     {
                         anchor2 = anchor1;
-                        anchor1 = getOriginAnchorName (isHorizontal);
+                        anchor1 = String::empty;
                     }
                 }
                 else
                 {
-                    anchor1 = getOriginAnchorName (isHorizontal);
+                    anchor1 = String::empty;
                     anchor2 = getExtentAnchorName (isHorizontal);
                 }
 
                 return RelativeCoordinate (value, anchor1, anchor2);
             }
 
-            return RelativeCoordinate (value, isHorizontal);
+            return RelativeCoordinate (value);
         }
     }
 
@@ -223,9 +214,8 @@ RelativeCoordinate::RelativeCoordinate()
 {
 }
 
-RelativeCoordinate::RelativeCoordinate (const double absoluteDistanceFromOrigin, const bool horizontal_)
-    : anchor1 (RelativeCoordinateHelpers::getOriginAnchorName (horizontal_)),
-      value (absoluteDistanceFromOrigin)
+RelativeCoordinate::RelativeCoordinate (const double absoluteDistanceFromOrigin)
+    : value (absoluteDistanceFromOrigin)
 {
 }
 
@@ -233,7 +223,6 @@ RelativeCoordinate::RelativeCoordinate (const double absoluteDistance, const Str
     : anchor1 (source.trim()),
       value (absoluteDistance)
 {
-    jassert (anchor1.isNotEmpty());
 }
 
 RelativeCoordinate::RelativeCoordinate (const double relativeProportion, const String& pos1, const String& pos2)
@@ -241,8 +230,6 @@ RelativeCoordinate::RelativeCoordinate (const double relativeProportion, const S
       anchor2 (pos2.trim()),
       value (relativeProportion)
 {
-    jassert (anchor1.isNotEmpty());
-    jassert (anchor2.isNotEmpty());
 }
 
 RelativeCoordinate::RelativeCoordinate (const String& s, const bool isHorizontal)
@@ -347,13 +334,13 @@ void RelativeCoordinate::moveToAbsolute (double newPos, const NamedCoordinateFin
     {}
 }
 
-void RelativeCoordinate::toggleProportionality (const NamedCoordinateFinder* nameFinder, bool isHorizontal)
+void RelativeCoordinate::toggleProportionality (const NamedCoordinateFinder* nameFinder,
+                                                const String& proportionalAnchor1, const String& proportionalAnchor2)
 {
     const double oldValue = resolve (nameFinder);
 
-    anchor1 = RelativeCoordinateHelpers::getOriginAnchorName (isHorizontal);
-    anchor2 = isProportional() ? String::empty
-                               : RelativeCoordinateHelpers::getExtentAnchorName (isHorizontal);
+    anchor1 = proportionalAnchor1;
+    anchor2 = isProportional() ? String::empty : proportionalAnchor2;
 
     moveToAbsolute (oldValue, nameFinder);
 }
@@ -387,7 +374,7 @@ const String RelativeCoordinate::toString() const
 
         if (isOrigin (anchor1))
         {
-            if (anchor2 == "parent.right" || anchor2 == "parent.bottom")
+            if (anchor2 == Strings::parentRight || anchor2 == Strings::parentBottom)
                 return percent + "%";
             else
                 return percent + "% * " + anchor2;
@@ -420,12 +407,22 @@ void RelativeCoordinate::setEditableNumber (const double newValue)
 }
 
 //==============================================================================
+const String RelativeCoordinate::getAnchorName1 (const String& returnValueIfOrigin) const
+{
+    return RelativeCoordinateHelpers::isOrigin (anchor1) ? returnValueIfOrigin : anchor1;
+}
+
+const String RelativeCoordinate::getAnchorName2 (const String& returnValueIfOrigin) const
+{
+    return RelativeCoordinateHelpers::isOrigin (anchor2) ? returnValueIfOrigin : anchor2;
+}
+
 void RelativeCoordinate::changeAnchor1 (const String& newAnchorName, const NamedCoordinateFinder* nameFinder)
 {
     jassert (newAnchorName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
 
     const double oldValue = resolve (nameFinder);
-    anchor1 = newAnchorName;
+    anchor1 = RelativeCoordinateHelpers::isOrigin (newAnchorName) ? String::empty : newAnchorName;
     moveToAbsolute (oldValue, nameFinder);
 }
 
@@ -435,7 +432,7 @@ void RelativeCoordinate::changeAnchor2 (const String& newAnchorName, const Named
     jassert (newAnchorName.toLowerCase().containsOnly ("abcdefghijklmnopqrstuvwxyz0123456789_."));
 
     const double oldValue = resolve (nameFinder);
-    anchor2 = newAnchorName;
+    anchor2 = RelativeCoordinateHelpers::isOrigin (newAnchorName) ? String::empty : newAnchorName;
     moveToAbsolute (oldValue, nameFinder);
 }
 
@@ -467,17 +464,16 @@ void RelativeCoordinate::renameAnchorIfUsed (const String& oldName, const String
 
 //==============================================================================
 RelativePoint::RelativePoint()
-    : x (0, true), y (0, false)
 {
 }
 
 RelativePoint::RelativePoint (const Point<float>& absolutePoint)
-    : x (absolutePoint.getX(), true), y (absolutePoint.getY(), false)
+    : x (absolutePoint.getX()), y (absolutePoint.getY())
 {
 }
 
 RelativePoint::RelativePoint (const float x_, const float y_)
-    : x (x_, true), y (y_, false)
+    : x (x_), y (y_)
 {
 }
 
@@ -545,9 +541,9 @@ RelativeRectangle::RelativeRectangle (const RelativeCoordinate& left_, const Rel
 }
 
 RelativeRectangle::RelativeRectangle (const Rectangle<float>& rect, const String& componentName)
-    : left (rect.getX(), true),
+    : left (rect.getX()),
       right (rect.getWidth(), componentName + "." + RelativeCoordinate::Strings::left),
-      top (rect.getY(), false),
+      top (rect.getY()),
       bottom (rect.getHeight(), componentName + "." + RelativeCoordinate::Strings::top)
 {
 }

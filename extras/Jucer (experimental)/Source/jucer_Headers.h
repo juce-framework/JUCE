@@ -32,7 +32,7 @@
 
 //==============================================================================
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "jucer_CommonHeaders.h"
+#include "Application/jucer_CommonHeaders.h"
 
 
 #endif   // __JUCER_HEADERS_JUCEHEADER__

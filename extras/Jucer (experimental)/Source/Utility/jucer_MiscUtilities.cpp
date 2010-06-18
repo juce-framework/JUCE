@@ -337,8 +337,8 @@ const RelativeCoordinate RelativeRectangleLayoutManager::findNamedCoordinate (co
 {
     if (objectName == RelativeCoordinate::Strings::parent)
     {
-        if (edge == RelativeCoordinate::Strings::right)     return RelativeCoordinate ((double) parent->getWidth(), true);
-        if (edge == RelativeCoordinate::Strings::bottom)    return RelativeCoordinate ((double) parent->getHeight(), false);
+        if (edge == RelativeCoordinate::Strings::right)     return RelativeCoordinate ((double) parent->getWidth());
+        if (edge == RelativeCoordinate::Strings::bottom)    return RelativeCoordinate ((double) parent->getHeight());
     }
 
     if (objectName.isNotEmpty() && edge.isNotEmpty())
