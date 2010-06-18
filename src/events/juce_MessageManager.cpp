@@ -39,7 +39,7 @@ BEGIN_JUCE_NAMESPACE
 //==============================================================================
 // platform-specific functions..
 bool juce_dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
-bool juce_postMessageToSystemQueue (void* message);
+bool juce_postMessageToSystemQueue (Message* message);
 
 //==============================================================================
 MessageManager* MessageManager::instance = 0;
@@ -99,26 +99,26 @@ void MessageManager::postCallbackMessage (Message* const message)
 
 //==============================================================================
 // not for public use..
-void MessageManager::deliverMessage (void* const message)
+void MessageManager::deliverMessage (Message* const message)
 {
-    const ScopedPointer <Message> m (static_cast <Message*> (message));
-    MessageListener* const recipient = m->messageRecipient;
+    const ScopedPointer <Message> messageDeleter (message);
+    MessageListener* const recipient = message->messageRecipient;
 
     JUCE_TRY
     {
         if (messageListeners.contains (recipient))
         {
-            recipient->handleMessage (*m);
+            recipient->handleMessage (*message);
         }
         else if (recipient == 0)
         {
-            if (m->intParameter1 == quitMessageId)
+            if (message->intParameter1 == quitMessageId)
             {
                 quitMessageReceived = true;
             }
             else
             {
-                CallbackMessage* const cm = dynamic_cast <CallbackMessage*> (static_cast <Message*> (m));
+                CallbackMessage* const cm = dynamic_cast <CallbackMessage*> (message);
 
                 if (cm != 0)
                     cm->messageCallback();

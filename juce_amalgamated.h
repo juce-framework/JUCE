@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	23
+#define JUCE_BUILDNUMBER	24
 
 /** Current Juce version number.
 
@@ -6993,6 +6993,38 @@ public:
 		}
 	}
 
+	/** Removes and returns an object from the array without deleting it.
+
+		This will remove the object at a given index and return it, moving back all
+		the subsequent objects to close the gap. If the index passed in is out-of-range,
+		nothing will happen.
+
+		@param indexToRemove	the index of the element to remove
+		@see remove, removeObject, removeRange
+	*/
+	ObjectClass* removeAndReturn (const int indexToRemove)
+	{
+		ObjectClass* removedItem = 0;
+		const ScopedLockType lock (getLock());
+
+		if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+		{
+			ObjectClass** const e = data.elements + indexToRemove;
+			removedItem = *e;
+
+			--numUsed;
+			const int numToShift = numUsed - indexToRemove;
+
+			if (numToShift > 0)
+				memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+
+			if ((numUsed << 1) < data.numAllocated)
+				minimiseStorageOverheads();
+		}
+
+		return removedItem;
+	}
+
 	/** Removes a specified object from the array.
 
 		If the item isn't found, no action is taken.
@@ -7079,14 +7111,9 @@ public:
 		const ScopedLockType lock (getLock());
 
 		if (howManyToRemove >= numUsed)
-		{
 			clear (deleteObjects);
-		}
 		else
-		{
-			while (--howManyToRemove >= 0)
-				remove (numUsed - 1, deleteObjects);
-		}
+			removeRange (numUsed - howManyToRemove, howManyToRemove, deleteObjects);
 	}
 
 	/** Swaps a pair of objects in the array.
@@ -42183,7 +42210,7 @@ public:
 	void deregisterBroadcastListener (ActionListener* listener) throw();
 
 	/** @internal */
-	void deliverMessage (void*);
+	void deliverMessage (Message*);
 	/** @internal */
 	void deliverBroadcastMessage (const String&);
 	/** @internal */
@@ -49874,7 +49901,7 @@ protected:
 	ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
-	ScopedPointer <Component> contentComponent;
+	Component::SafePointer <Component> contentComponent;
 	bool resizeToFitContent, fullscreen;
 	ComponentDragger dragger;
 	Rectangle<int> lastNonFullScreenPos;

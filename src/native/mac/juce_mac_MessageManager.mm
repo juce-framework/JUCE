@@ -60,9 +60,6 @@ public:
         CFRunLoopRemoveSource (runLoop, runLoopSource, kCFRunLoopCommonModes);
         CFRunLoopSourceInvalidate (runLoopSource);
         CFRelease (runLoopSource);
-
-        while (messages.size() > 0)
-            delete static_cast <Message*> (messages.remove(0));
     }
 
     virtual NSApplicationTerminateReply shouldTerminate()
@@ -129,7 +126,7 @@ public:
         delete this;
     }
 
-    void postMessage (void* m)
+    void postMessage (Message* const m)
     {
         messages.add (m);
         CFRunLoopSourceSignal (runLoopSource);
@@ -139,7 +136,7 @@ public:
 private:
     CFRunLoopRef runLoop;
     CFRunLoopSourceRef runLoopSource;
-    Array <void*, CriticalSection> messages;
+    OwnedArray <Message, CriticalSection> messages;
 
     void runLoopCallback()
     {
@@ -147,7 +144,7 @@ private:
 
         do
         {
-            void* const nextMessage = messages.remove (0);
+            Message* const nextMessage = messages.removeAndReturn (0);
 
             if (nextMessage == 0)
                 return;
@@ -467,7 +464,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool juce_postMessageToSystemQueue (void* message)
+bool juce_postMessageToSystemQueue (Message* message)
 {
     juceAppDelegate->redirector->postMessage (message);
     return true;

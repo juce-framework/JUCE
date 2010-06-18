@@ -160,7 +160,6 @@ BEGIN_JUCE_NAMESPACE
 
  #if JUCE_LINUX
   extern Display* display;
-  extern bool juce_postMessageToSystemQueue (void* message);
  #endif
 END_JUCE_NAMESPACE
 

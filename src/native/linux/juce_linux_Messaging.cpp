@@ -207,9 +207,7 @@ private:
             (void) numBytes;
         }
 
-        Message* m = queue[0];
-        queue.remove (0, false /* deleteObject */);
-        return m;
+        return queue.removeAndReturn (0);
     }
 
     bool dispatchNextInternalMessage()
@@ -380,12 +378,12 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool juce_postMessageToSystemQueue (void* message)
+bool juce_postMessageToSystemQueue (Message* message)
 {
     if (LinuxErrorHandling::errorOccurred)
         return false;
 
-    InternalMessageQueue::getInstanceWithoutCreating()->postMessage ((Message*) message);
+    InternalMessageQueue::getInstanceWithoutCreating()->postMessage (message);
     return true;
 }
 

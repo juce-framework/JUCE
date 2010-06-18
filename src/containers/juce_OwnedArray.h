@@ -502,6 +502,38 @@ public:
         }
     }
 
+    /** Removes and returns an object from the array without deleting it.
+
+        This will remove the object at a given index and return it, moving back all
+        the subsequent objects to close the gap. If the index passed in is out-of-range,
+        nothing will happen.
+
+        @param indexToRemove    the index of the element to remove
+        @see remove, removeObject, removeRange
+    */
+    ObjectClass* removeAndReturn (const int indexToRemove)
+    {
+        ObjectClass* removedItem = 0;
+        const ScopedLockType lock (getLock());
+
+        if (((unsigned int) indexToRemove) < (unsigned int) numUsed)
+        {
+            ObjectClass** const e = data.elements + indexToRemove;
+            removedItem = *e;
+
+            --numUsed;
+            const int numToShift = numUsed - indexToRemove;
+
+            if (numToShift > 0)
+                memmove (e, e + 1, numToShift * sizeof (ObjectClass*));
+
+            if ((numUsed << 1) < data.numAllocated)
+                minimiseStorageOverheads();
+        }
+
+        return removedItem;
+    }
+
     /** Removes a specified object from the array.
 
         If the item isn't found, no action is taken.
@@ -588,14 +620,9 @@ public:
         const ScopedLockType lock (getLock());
 
         if (howManyToRemove >= numUsed)
-        {
             clear (deleteObjects);
-        }
         else
-        {
-            while (--howManyToRemove >= 0)
-                remove (numUsed - 1, deleteObjects);
-        }
+            removeRange (numUsed - howManyToRemove, howManyToRemove, deleteObjects);
     }
 
     /** Swaps a pair of objects in the array.

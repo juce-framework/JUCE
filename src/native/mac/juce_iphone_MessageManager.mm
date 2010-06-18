@@ -108,7 +108,7 @@ bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 //==============================================================================
 static CFRunLoopRef runLoop = 0;
 static CFRunLoopSourceRef runLoopSource = 0;
-static Array <void*, CriticalSection>* pendingMessages = 0;
+static OwnedArray <Message, CriticalSection>* pendingMessages = 0;
 static JuceCustomMessageHandler* juceCustomMessageHandler = 0;
 
 static void runLoopSourceCallback (void*)
@@ -119,7 +119,7 @@ static void runLoopSourceCallback (void*)
 
         do
         {
-            void* const nextMessage = pendingMessages->remove (0);
+            Message* const nextMessage = pendingMessages->removeAndReturn (0);
 
             if (nextMessage == 0)
                 return;
@@ -136,7 +136,7 @@ static void runLoopSourceCallback (void*)
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
-    pendingMessages = new Array <void*, CriticalSection>();
+    pendingMessages = new OwnedArray <Message, CriticalSection>();
 
     runLoop = CFRunLoopGetCurrent();
     CFRunLoopSourceContext sourceContext;
@@ -154,14 +154,7 @@ void MessageManager::doPlatformSpecificShutdown()
     CFRunLoopSourceInvalidate (runLoopSource);
     CFRelease (runLoopSource);
     runLoopSource = 0;
-
-    if (pendingMessages != 0)
-    {
-        while (pendingMessages->size() > 0)
-            delete ((Message*) pendingMessages->remove(0));
-
-        deleteAndZero (pendingMessages);
-    }
+    deleteAndZero (pendingMessages);
 
     if (juceCustomMessageHandler != 0)
     {
@@ -171,7 +164,7 @@ void MessageManager::doPlatformSpecificShutdown()
     }
 }
 
-bool juce_postMessageToSystemQueue (void* message)
+bool juce_postMessageToSystemQueue (Message* message)
 {
     if (pendingMessages != 0)
     {

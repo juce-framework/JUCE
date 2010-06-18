@@ -156,7 +156,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void deliverMessage (void*);
+    void deliverMessage (Message*);
     /** @internal */
     void deliverBroadcastMessage (const String&);
     /** @internal */

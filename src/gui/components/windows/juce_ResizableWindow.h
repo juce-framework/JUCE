@@ -342,7 +342,7 @@ protected:
     ScopedPointer <ResizableBorderComponent> resizableBorder;
 
 private:
-    ScopedPointer <Component> contentComponent;
+    Component::SafePointer <Component> contentComponent;
     bool resizeToFitContent, fullscreen;
     ComponentDragger dragger;
     Rectangle<int> lastNonFullScreenPos;
