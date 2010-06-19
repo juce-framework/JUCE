@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	26
+#define JUCE_BUILDNUMBER	27
 
 /** Current Juce version number.
 
@@ -620,21 +620,25 @@
 
   #define JUCE_TRY try
 
-  /** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
-	  object so they can be logged by the application if it wants to.
-  */
-  #define JUCE_CATCH_EXCEPTION \
-	catch (const std::exception& e)  \
-	{ \
-		JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
-	} \
-	catch (...) \
-	{ \
-		JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__); \
-	}
-
   #define JUCE_CATCH_ALL		catch (...) {}
   #define JUCE_CATCH_ALL_ASSERT	 catch (...) { jassertfalse; }
+
+  #if JUCE_ONLY_BUILD_CORE_LIBRARY
+	#define JUCE_CATCH_EXCEPTION	JUCE_CATCH_ALL
+  #else
+	/** Used in try-catch blocks, this macro will send exceptions to the JUCEApplication
+		object so they can be logged by the application if it wants to.
+	*/
+	#define JUCE_CATCH_EXCEPTION \
+	  catch (const std::exception& e)  \
+	  { \
+		  JUCEApplication::sendUnhandledException (&e, __FILE__, __LINE__); \
+	  } \
+	  catch (...) \
+	  { \
+		  JUCEApplication::sendUnhandledException (0, __FILE__, __LINE__); \
+	  }
+  #endif
 
 #else
 
