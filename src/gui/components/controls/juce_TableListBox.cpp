@@ -330,7 +330,7 @@ TableListBox::TableListBox (const String& name, TableListBoxModel* const model_)
 
 TableListBox::~TableListBox()
 {
-    deleteAllChildren();
+    header = 0;
 }
 
 void TableListBox::setModel (TableListBoxModel* const newModel)

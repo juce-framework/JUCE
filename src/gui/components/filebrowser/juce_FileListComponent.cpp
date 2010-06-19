@@ -47,7 +47,6 @@ FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
 FileListComponent::~FileListComponent()
 {
     fileList.removeChangeListener (this);
-    deleteAllChildren();
 }
 
 int FileListComponent::getNumSelectedFiles() const

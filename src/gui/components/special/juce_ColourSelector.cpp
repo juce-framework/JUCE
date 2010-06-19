@@ -101,13 +101,12 @@ public:
           lastHue (0.0f),
           edge (edgeSize)
     {
-        addAndMakeVisible (marker = new ColourSpaceMarker());
+        addAndMakeVisible (&marker);
         setMouseCursor (MouseCursor::CrosshairCursor);
     }
 
     ~ColourSpaceView()
     {
-        deleteAllChildren();
     }
 
     void paint (Graphics& g)
@@ -175,15 +174,15 @@ private:
     float& s;
     float& v;
     float lastHue;
-    ColourSpaceMarker* marker;
+    ColourSpaceMarker marker;
     const int edge;
     Image colours;
 
-    void updateMarker() const
+    void updateMarker()
     {
-        marker->setBounds (roundToInt ((getWidth() - edge * 2) * s),
-                           roundToInt ((getHeight() - edge * 2) * (1.0f - v)),
-                           edge * 2, edge * 2);
+        marker.setBounds (roundToInt ((getWidth() - edge * 2) * s),
+                          roundToInt ((getHeight() - edge * 2) * (1.0f - v)),
+                          edge * 2, edge * 2);
     }
 
     ColourSpaceView (const ColourSpaceView&);
@@ -238,12 +237,11 @@ public:
           lastHue (0.0f),
           edge (edgeSize)
     {
-        addAndMakeVisible (marker = new HueSelectorMarker());
+        addAndMakeVisible (&marker);
     }
 
     ~HueSelectorComp()
     {
-        deleteAllChildren();
     }
 
     void paint (Graphics& g)
@@ -261,8 +259,8 @@ public:
 
     void resized()
     {
-        marker->setBounds (0, roundToInt ((getHeight() - edge * 2) * h),
-                           getWidth(), edge * 2);
+        marker.setBounds (0, roundToInt ((getHeight() - edge * 2) * h),
+                          getWidth(), edge * 2);
     }
 
     void mouseDown (const MouseEvent& e)
@@ -288,7 +286,7 @@ private:
     float& s;
     float& v;
     float lastHue;
-    HueSelectorMarker* marker;
+    HueSelectorMarker marker;
     const int edge;
 
     HueSelectorComp (const HueSelectorComp&);
@@ -355,6 +353,8 @@ ColourSelector::ColourSelector (const int flags_,
                                 const int edgeGap_,
                                 const int gapAroundColourSpaceComponent)
     : colour (Colours::white),
+      colourSpace (0),
+      hueSelector (0),
       flags (flags_),
       topSpace (0),
       edgeGap (edgeGap_)
@@ -385,11 +385,6 @@ ColourSelector::ColourSelector (const int flags_,
     {
         addAndMakeVisible (colourSpace = new ColourSpaceView (this, h, s, v, gapAroundColourSpaceComponent));
         addAndMakeVisible (hueSelector = new HueSelectorComp (this, h, s, v, gapAroundColourSpaceComponent));
-    }
-    else
-    {
-        colourSpace = 0;
-        hueSelector = 0;
     }
 
     update();
