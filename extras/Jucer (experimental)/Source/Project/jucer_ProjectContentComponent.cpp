@@ -281,8 +281,12 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
         break;
 
     case CommandIDs::closeProject:
-        if (((MainWindow*) getParentComponent())->closeCurrentProject())
-            StoredSettings::getInstance()->setLastProject (File::nonexistent);
+        {
+            MainWindow* mw = Component::findParentComponentOfClass ((MainWindow*) 0);
+
+            if (mw != 0)
+                mw->closeCurrentProject();
+        }
 
         break;
 

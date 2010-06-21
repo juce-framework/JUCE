@@ -102,14 +102,25 @@ void StoredSettings::flush()
     }
 }
 
-const File StoredSettings::getLastProject() const
+const Array<File> StoredSettings::getLastProjects() const
 {
-    return props->getValue ("lastProject");
+    StringArray s;
+    s.addTokens (props->getValue ("lastProjects"), "|", "");
+
+    Array<File> f;
+    for (int i = 0; i < s.size(); ++i)
+        f.add (File (s[i]));
+
+    return f;
 }
 
-void StoredSettings::setLastProject (const File& file)
+void StoredSettings::setLastProjects (const Array<File>& files)
 {
-    props->setValue ("lastProject", file.getFullPathName());
+    StringArray s;
+    for (int i = 0; i < files.size(); ++i)
+        s.add (files.getReference(i).getFullPathName());
+
+    props->setValue ("lastProjects", s.joinIntoString ("|"));
 }
 
 const File StoredSettings::getLastKnownJuceFolder() const

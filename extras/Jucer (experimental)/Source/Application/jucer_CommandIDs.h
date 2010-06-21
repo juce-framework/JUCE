@@ -44,6 +44,7 @@ namespace CommandIDs
     static const int undo                   = 0x200090;
     static const int redo                   = 0x2000a0;
 
+    static const int closeWindow            = 0x201001;
     static const int closeAllDocuments      = 0x201000;
 
     static const int test                   = 0x202090;
@@ -53,6 +54,13 @@ namespace CommandIDs
     static const int showOrHideTree         = 0x2030b1;
     static const int showOrHideMarkers      = 0x2030b2;
     static const int toggleSnapping         = 0x2030b3;
+
+    static const int makeLineSegment        = 0x2030c0;
+    static const int makeCubicSegment       = 0x2030c1;
+    static const int breakSegment           = 0x2030c2;
+    static const int pointModeCorner        = 0x2030c3;
+    static const int pointModeRounded       = 0x2030c4;
+    static const int pointModeSymmetric     = 0x2030c5;
 
     static const int group                  = 0x202170;
     static const int ungroup                = 0x202180;

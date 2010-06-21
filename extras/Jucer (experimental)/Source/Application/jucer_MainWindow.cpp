@@ -24,10 +24,13 @@
 */
 
 #include "../jucer_Headers.h"
+#include "jucer_Application.h"
 #include "jucer_MainWindow.h"
 #include "jucer_OpenDocumentManager.h"
 #include "../Code Editor/jucer_SourceCodeEditor.h"
 #include "../Project/jucer_NewProjectWizard.h"
+
+ApplicationCommandManager* commandManager = 0;
 
 
 //==============================================================================
@@ -39,21 +42,14 @@ MainWindow::MainWindow()
     setUsingNativeTitleBar (true);
     setContentComponent (new ProjectContentComponent());
 
-    setApplicationCommandManagerToWatch (commandManager);
-
-#if JUCE_MAC
-    setMacMainMenu (this);
-#else
-    setMenuBar (this);
+#if ! JUCE_MAC
+    JucerApplication* app = static_cast<JucerApplication*> (JUCEApplication::getInstance());
+    setMenuBar (app);
 #endif
 
     setResizable (true, false);
 
     centreWithSize (700, 600);
-
-    // restore the last size and position from our settings file..
-    restoreWindowStateFromString (StoredSettings::getInstance()->getProps()
-                                    .getValue ("lastMainWindowPos"));
 
     // Register all the app commands..
     {
@@ -80,15 +76,12 @@ MainWindow::MainWindow()
     setWantsKeyboardFocus (false);
 
     //getPeer()->setCurrentRenderingEngine (0);
-
-    setVisible (true);
+    getLookAndFeel().setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
 }
 
 MainWindow::~MainWindow()
 {
-#if JUCE_MAC
-    setMacMainMenu (0);
-#else
+#if ! JUCE_MAC
     setMenuBar (0);
 #endif
 
@@ -109,7 +102,11 @@ ProjectContentComponent* MainWindow::getProjectContentComponent() const
 
 void MainWindow::closeButtonPressed()
 {
-    JUCEApplication::getInstance()->systemRequestedQuit();
+    if (! closeCurrentProject())
+        return;
+
+    JucerApplication* jucer = static_cast<JucerApplication*> (JUCEApplication::getInstance());
+    jucer->closeWindow (this);
 }
 
 bool MainWindow::closeProject (Project* project)
@@ -118,6 +115,9 @@ bool MainWindow::closeProject (Project* project)
 
     if (project == 0)
         return true;
+
+    StoredSettings::getInstance()->getProps()
+        .setValue (getProjectWindowPosName(), getWindowStateAsString());
 
     if (! OpenDocumentManager::getInstance()->closeAllDocumentsUsingProject (*project, true))
         return false;
@@ -138,41 +138,29 @@ bool MainWindow::closeCurrentProject()
     return currentProject == 0 || closeProject (currentProject);
 }
 
-bool MainWindow::closeAllDocuments (bool askUserToSave)
-{
-    for (int i = OpenDocumentManager::getInstance()->getNumOpenDocuments(); --i >= 0;)
-    {
-        OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (i);
-        getProjectContentComponent()->hideDocument (doc);
-
-        if (! OpenDocumentManager::getInstance()->closeDocument (i, askUserToSave))
-            return false;
-    }
-
-    return true;
-}
-
 void MainWindow::setProject (Project* newProject)
 {
-    if (newProject != 0)
-        StoredSettings::getInstance()->setLastProject (newProject->getFile());
-
     getProjectContentComponent()->setProject (newProject);
     currentProject = newProject;
     commandManager->commandStatusChanged();
+
+    // (mustn't do this when the project is 0, because that'll happen on shutdown,
+    // which will erase the list of recent projects)
+    if (newProject != 0)
+        static_cast<JucerApplication*> (JUCEApplication::getInstance())->updateRecentProjectList();
 }
 
-void MainWindow::reloadLastProject()
+void MainWindow::restoreWindowPosition()
 {
-    openFile (StoredSettings::getInstance()->getLastProject());
-}
+    String windowState;
 
-void MainWindow::askUserToOpenFile()
-{
-    FileChooser fc ("Open File");
+    if (currentProject != 0)
+        windowState = StoredSettings::getInstance()->getProps().getValue (getProjectWindowPosName());
 
-    if (fc.browseForFileToOpen())
-        openFile (fc.getResult());
+    if (windowState.isEmpty())
+        windowState = StoredSettings::getInstance()->getProps().getValue ("lastMainWindowPos");
+
+    restoreWindowStateFromString (windowState);
 }
 
 bool MainWindow::canOpenFile (const File& file) const
@@ -203,14 +191,6 @@ bool MainWindow::openFile (const File& file)
     }
 
     return false;
-}
-
-void MainWindow::createNewProject()
-{
-    ScopedPointer <Project> newProj (NewProjectWizard::runNewProjectWizard (this));
-
-    if (newProj != 0 && closeCurrentProject())
-        setProject (newProj.release());
 }
 
 bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
@@ -252,140 +232,6 @@ void MainWindow::updateTitle (const String& documentName)
     setName (name);
 }
 
-//==============================================================================
-const StringArray MainWindow::getMenuBarNames()
-{
-    const char* const names[] = { "File", "Edit", "View", "Window", 0 };
-    return StringArray ((const char**) names);
-}
-
-const PopupMenu MainWindow::getMenuForIndex (int topLevelMenuIndex,
-                                             const String& menuName)
-{
-    PopupMenu menu;
-
-    if (topLevelMenuIndex == 0)
-    {
-        // "File" menu
-
-        menu.addCommandItem (commandManager, CommandIDs::newProject);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::open);
-
-        PopupMenu recentFiles;
-        StoredSettings::getInstance()->recentFiles.createPopupMenuItems (recentFiles, 100, true, true);
-        menu.addSubMenu ("Open recent file", recentFiles);
-
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::closeDocument);
-        menu.addCommandItem (commandManager, CommandIDs::saveDocument);
-        menu.addCommandItem (commandManager, CommandIDs::saveDocumentAs);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::closeProject);
-        menu.addCommandItem (commandManager, CommandIDs::saveProject);
-        menu.addCommandItem (commandManager, CommandIDs::saveProjectAs);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::openProjectInIDE);
-
-#if ! JUCE_MAC
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::quit);
-#endif
-    }
-    else if (topLevelMenuIndex == 1)
-    {
-        // "Edit" menu
-
-        menu.addCommandItem (commandManager, CommandIDs::undo);
-        menu.addCommandItem (commandManager, CommandIDs::redo);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::cut);
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::copy);
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::del);
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::selectAll);
-        menu.addCommandItem (commandManager, StandardApplicationCommandIDs::deselectAll);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::toFront);
-        menu.addCommandItem (commandManager, CommandIDs::toBack);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::group);
-        menu.addCommandItem (commandManager, CommandIDs::ungroup);
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::bringBackLostItems);
-    }
-    else if (topLevelMenuIndex == 2)
-    {
-        // "View" menu
-
-        menu.addCommandItem (commandManager, CommandIDs::showProjectSettings);
-        menu.addSeparator();
-
-        menu.addCommandItem (commandManager, CommandIDs::test);
-        menu.addSeparator();
-
-        menu.addCommandItem (commandManager, CommandIDs::showGrid);
-        menu.addCommandItem (commandManager, CommandIDs::enableSnapToGrid);
-
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::zoomIn);
-        menu.addCommandItem (commandManager, CommandIDs::zoomOut);
-        menu.addCommandItem (commandManager, CommandIDs::zoomNormal);
-
-/*        menu.addSeparator();
-        PopupMenu overlays;
-        overlays.addCommandItem (commandManager, CommandIDs::compOverlay0);
-        overlays.addCommandItem (commandManager, CommandIDs::compOverlay33);
-        overlays.addCommandItem (commandManager, CommandIDs::compOverlay66);
-        overlays.addCommandItem (commandManager, CommandIDs::compOverlay100);
-        menu.addSubMenu ("Component Overlay", overlays,
-                         getActiveDocument() != 0 && getActiveDocument()->getComponentLayout() != 0);*/
-
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::useTabbedWindows);
-        //menu.addSeparator();
-        //menu.addCommandItem (commandManager, CommandIDs::showPrefs);
-    }
-    else if (topLevelMenuIndex == 3)
-    {
-        // "Window" menu
-
-        const int numDocs = jmin (50, OpenDocumentManager::getInstance()->getNumOpenDocuments());
-
-        for (int i = 0; i < numDocs; ++i)
-        {
-            OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument(i);
-
-            menu.addItem (300 + i, doc->getName());
-        }
-
-        menu.addSeparator();
-        menu.addCommandItem (commandManager, CommandIDs::closeAllDocuments);
-    }
-
-    return menu;
-}
-
-void MainWindow::menuItemSelected (int menuItemID,
-                                   int topLevelMenuIndex)
-{
-    if (menuItemID >= 100 && menuItemID < 200)
-    {
-        // open a file from the "recent files" menu
-        const File file (StoredSettings::getInstance()->recentFiles.getFile (menuItemID - 100));
-
-        openFile (file);
-    }
-    else if (menuItemID == 201)
-    {
-        LookAndFeel::setDefaultLookAndFeel (0);
-    }
-    else if (menuItemID >= 300 && menuItemID < 400)
-    {
-        OpenDocumentManager::Document* doc = OpenDocumentManager::getInstance()->getOpenDocument (menuItemID - 300);
-        getProjectContentComponent()->showDocument (doc);
-    }
-}
 
 //==============================================================================
 ApplicationCommandTarget* MainWindow::getNextCommandTarget()
@@ -395,11 +241,7 @@ ApplicationCommandTarget* MainWindow::getNextCommandTarget()
 
 void MainWindow::getAllCommands (Array <CommandID>& commands)
 {
-    const CommandID ids[] = { CommandIDs::newProject,
-                              CommandIDs::open,
-                              CommandIDs::showPrefs,
-                              CommandIDs::closeAllDocuments,
-                              CommandIDs::saveAll };
+    const CommandID ids[] = { CommandIDs::closeWindow };
 
     commands.addArray (ids, numElementsInArray (ids));
 }
@@ -408,39 +250,9 @@ void MainWindow::getCommandInfo (const CommandID commandID, ApplicationCommandIn
 {
     switch (commandID)
     {
-    case CommandIDs::newProject:
-        result.setInfo ("New Project...",
-                        "Creates a new Jucer project",
-                        CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
-        break;
-
-    case CommandIDs::open:
-        result.setInfo ("Open...",
-                        "Opens a Jucer project",
-                        CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress ('o', ModifierKeys::commandModifier, 0));
-        break;
-
-    case CommandIDs::showPrefs:
-        result.setInfo ("Preferences...",
-                        "Shows the preferences panel.",
-                        CommandCategories::general, 0);
-        result.defaultKeypresses.add (KeyPress (',', ModifierKeys::commandModifier, 0));
-        break;
-
-    case CommandIDs::closeAllDocuments:
-        result.setInfo ("Close All Documents",
-                        "Closes all open documents",
-                        CommandCategories::general, 0);
-        result.setActive (OpenDocumentManager::getInstance()->getNumOpenDocuments() > 0);
-        break;
-
-    case CommandIDs::saveAll:
-        result.setInfo ("Save All",
-                        "Saves all open documents",
-                        CommandCategories::general, 0);
-        result.setActive (OpenDocumentManager::getInstance()->anyFilesNeedSaving());
+    case CommandIDs::closeWindow:
+        result.setInfo ("Close Window", "Closes the current window", CommandCategories::general, 0);
+        result.defaultKeypresses.add (KeyPress ('w', ModifierKeys::commandModifier, 0));
         break;
 
     default:
@@ -452,28 +264,12 @@ bool MainWindow::perform (const InvocationInfo& info)
 {
     switch (info.commandID)
     {
-    case CommandIDs::newProject:
-        createNewProject();
-        break;
+        case CommandIDs::closeWindow:
+            closeButtonPressed();
+            break;
 
-    case CommandIDs::open:
-        askUserToOpenFile();
-        break;
-
-    case CommandIDs::showPrefs:
-   //     PrefsPanel::show();
-        break;
-
-    case CommandIDs::saveAll:
-        OpenDocumentManager::getInstance()->saveAll();
-        break;
-
-    case CommandIDs::closeAllDocuments:
-        closeAllDocuments (true);
-        break;
-
-    default:
-        return false;
+        default:
+            return false;
     }
 
     return true;

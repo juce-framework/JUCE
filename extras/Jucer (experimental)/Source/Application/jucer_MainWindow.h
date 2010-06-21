@@ -34,7 +34,6 @@
     The big top-level window where everything happens.
 */
 class MainWindow  : public DocumentWindow,
-                    public MenuBarModel,
                     public ApplicationCommandTarget,
                     public FileDragAndDropTarget,
                     public DragAndDropContainer
@@ -48,16 +47,14 @@ public:
     void closeButtonPressed();
 
     //==============================================================================
-    void askUserToOpenFile();
     bool canOpenFile (const File& file) const;
     bool openFile (const File& file);
-    void createNewProject();
     void setProject (Project* newProject);
-    void reloadLastProject();
+    Project* getProject() const                 { return currentProject; }
 
+    void restoreWindowPosition();
     bool closeProject (Project* project);
     bool closeCurrentProject();
-    bool closeAllDocuments (bool askUserToSave);
 
     bool isInterestedInFileDrag (const StringArray& files);
     void filesDropped (const StringArray& filenames, int mouseX, int mouseY);
@@ -66,10 +63,7 @@ public:
 
     void updateTitle (const String& documentName);
 
-    //==============================================================================
-    const StringArray getMenuBarNames();
-    const PopupMenu getMenuForIndex (int topLevelMenuIndex, const String& menuName);
-    void menuItemSelected (int menuItemID, int topLevelMenuIndex);
+    ProjectContentComponent* getProjectContentComponent() const;
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget();
@@ -83,7 +77,14 @@ public:
 private:
     ScopedPointer <Project> currentProject;
 
-    ProjectContentComponent* getProjectContentComponent() const;
+    const String getProjectWindowPosName() const
+    {
+        jassert (currentProject != 0);
+        if (currentProject == 0)
+            return String::empty;
+
+        return "projectWindowPos_" + currentProject->getProjectUID();
+    }
 };
 
 
