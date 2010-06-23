@@ -424,9 +424,10 @@ public:
         StoredSettings::getInstance()->setLastProjects (projects);
     }
 
+    ScopedPointer<MainMenuModel> menuModel;
+
 private:
     OwnedArray <MainWindow> mainWindows;
-    ScopedPointer<MainMenuModel> menuModel;
 
     MainWindow* createNewMainWindow (bool makeVisible)
     {

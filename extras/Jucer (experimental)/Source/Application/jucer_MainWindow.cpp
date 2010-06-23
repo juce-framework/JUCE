@@ -44,7 +44,7 @@ MainWindow::MainWindow()
 
 #if ! JUCE_MAC
     JucerApplication* app = static_cast<JucerApplication*> (JUCEApplication::getInstance());
-    setMenuBar (app);
+    setMenuBar (app->menuModel);
 #endif
 
     setResizable (true, false);
