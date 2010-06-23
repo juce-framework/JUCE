@@ -1468,6 +1468,7 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                             false);
 
     inputBuffers.setSize (jmax (1, enabledInputs.countNumberOfSetBits()), bufferSizeSamples);
+    inputBuffers.clear();
     int i, numIns = 0;
 
     for (i = 0; i <= enabledInputs.getHighestBit(); i += 2)
@@ -1493,6 +1494,7 @@ const String DSoundAudioIODevice::openDevice (const BigInteger& inputChannels,
                              false);
 
     outputBuffers.setSize (jmax (1, enabledOutputs.countNumberOfSetBits()), bufferSizeSamples);
+    outputBuffers.clear();
     int numOuts = 0;
 
     for (i = 0; i <= enabledOutputs.getHighestBit(); i += 2)
