@@ -295,6 +295,10 @@ const Identifier DrawablePath::ValueTreeWrapper::Element::lineToElement ("Line")
 const Identifier DrawablePath::ValueTreeWrapper::Element::quadraticToElement ("Quad");
 const Identifier DrawablePath::ValueTreeWrapper::Element::cubicToElement ("Cubic");
 
+const char* DrawablePath::ValueTreeWrapper::Element::cornerMode = "corner";
+const char* DrawablePath::ValueTreeWrapper::Element::roundedMode = "round";
+const char* DrawablePath::ValueTreeWrapper::Element::symmetricMode = "symm";
+
 DrawablePath::ValueTreeWrapper::Element::Element (const ValueTree& state_)
     : state (state_)
 {
@@ -364,6 +368,33 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
     return RelativePoint();
 }
 
+float DrawablePath::ValueTreeWrapper::Element::getLength (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+{
+    const Identifier i (state.getType());
+
+    if (i == lineToElement || i == closeSubPathElement)
+        return getEndPoint().resolve (nameFinder).getDistanceFrom (getStartPoint().resolve (nameFinder));
+
+    if (i == cubicToElement)
+    {
+        Path p;
+        p.startNewSubPath (getStartPoint().resolve (nameFinder));
+        p.cubicTo (getControlPoint (0).resolve (nameFinder), getControlPoint (1).resolve (nameFinder), getControlPoint (2).resolve (nameFinder));
+        return p.getLength();
+    }
+
+    if (i == quadraticToElement)
+    {
+        Path p;
+        p.startNewSubPath (getStartPoint().resolve (nameFinder));
+        p.quadraticTo (getControlPoint (0).resolve (nameFinder), getControlPoint (1).resolve (nameFinder));
+        return p.getLength();
+    }
+
+    jassert (i == startSubPathElement);
+    return 0;
+}
+
 const String DrawablePath::ValueTreeWrapper::Element::getModeOfEndPoint() const
 {
     return state [mode].toString();
@@ -422,8 +453,129 @@ void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* u
     }
 }
 
-void DrawablePath::ValueTreeWrapper::Element::insertPoint (double, RelativeCoordinate::NamedCoordinateFinder*, UndoManager*)
+static const Point<float> findCubicSubdivisionPoint (double proportion, const Point<float> points[4])
 {
+    const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
+                       mid2 (points[1] + (points[2] - points[1]) * proportion),
+                       mid3 (points[2] + (points[3] - points[2]) * proportion);
+
+    const Point<float> newCp1 (mid1 + (mid2 - mid1) * proportion),
+                       newCp2 (mid2 + (mid3 - mid2) * proportion);
+
+    return newCp1 + (newCp2 - newCp1) * proportion;
+}
+
+static const Point<float> findQuadraticSubdivisionPoint (double proportion, const Point<float> points[3])
+{
+    const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
+                       mid2 (points[1] + (points[2] - points[1]) * proportion);
+
+    return mid1 + (mid2 - mid1) * proportion;
+}
+
+ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+{
+    ValueTree newTree;
+    const Identifier i (state.getType());
+
+    if (i == cubicToElement)
+    {
+        RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getControlPoint (1)), rp4 (getEndPoint());
+
+        const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder), rp4.resolve (nameFinder) };
+
+        double bestProp = 0;
+        float bestDistance = std::numeric_limits<float>::max();
+
+        for (int i = 110; --i >= 0;)
+        {
+            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
+            const Point<float> centre (findCubicSubdivisionPoint (prop, points));
+            const float distance = centre.getDistanceFrom (targetPoint);
+
+            if (distance < bestDistance)
+            {
+                bestProp = prop;
+                bestDistance = distance;
+            }
+        }
+
+        const Point<float> mid1 (points[0] + (points[1] - points[0]) * bestProp),
+                           mid2 (points[1] + (points[2] - points[1]) * bestProp),
+                           mid3 (points[2] + (points[3] - points[2]) * bestProp);
+
+        const Point<float> newCp1 (mid1 + (mid2 - mid1) * bestProp),
+                           newCp2 (mid2 + (mid3 - mid2) * bestProp);
+
+        const Point<float> newCentre (newCp1 + (newCp2 - newCp1) * bestProp);
+
+        setControlPoint (0, mid1, undoManager);
+        setControlPoint (1, newCp1, undoManager);
+        setControlPoint (2, newCentre, undoManager);
+        setModeOfEndPoint (roundedMode, undoManager);
+
+        Element newElement (newTree = ValueTree (cubicToElement));
+        newElement.setControlPoint (0, newCp2, 0);
+        newElement.setControlPoint (1, mid3, 0);
+        newElement.setControlPoint (2, rp4, 0);
+
+        state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
+    }
+    else if (i == quadraticToElement)
+    {
+        RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getEndPoint());
+
+        const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder) };
+
+        double bestProp = 0;
+        float bestDistance = std::numeric_limits<float>::max();
+
+        for (int i = 110; --i >= 0;)
+        {
+            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
+            const Point<float> centre (findQuadraticSubdivisionPoint (prop, points));
+            const float distance = centre.getDistanceFrom (targetPoint);
+
+            if (distance < bestDistance)
+            {
+                bestProp = prop;
+                bestDistance = distance;
+            }
+        }
+
+        const Point<float> mid1 (points[0] + (points[1] - points[0]) * bestProp),
+                           mid2 (points[1] + (points[2] - points[1]) * bestProp);
+
+        const Point<float> newCentre (mid1 + (mid2 - mid1) * bestProp);
+
+        setControlPoint (0, mid1, undoManager);
+        setControlPoint (1, newCentre, undoManager);
+        setModeOfEndPoint (roundedMode, undoManager);
+
+        Element newElement (newTree = ValueTree (quadraticToElement));
+        newElement.setControlPoint (0, mid2, 0);
+        newElement.setControlPoint (1, rp3, 0);
+
+        state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
+    }
+    else if (i == lineToElement)
+    {
+        RelativePoint rp1 (getStartPoint()), rp2 (getEndPoint());
+        const Line<float> line (rp1.resolve (nameFinder), rp2.resolve (nameFinder));
+        const Point<float> newPoint (line.findNearestPointTo (targetPoint));
+
+        setControlPoint (0, newPoint, undoManager);
+
+        Element newElement (newTree = ValueTree (lineToElement));
+        newElement.setControlPoint (0, rp2, 0);
+
+        state.getParent().addChild (newTree, state.getParent().indexOf (state) + 1, undoManager);
+    }
+    else if (i == closeSubPathElement)
+    {
+    }
+
+    return newTree;
 }
 
 void DrawablePath::ValueTreeWrapper::Element::removePoint (UndoManager* undoManager)

@@ -59392,6 +59392,7 @@ public:
 			const RelativePoint getStartPoint() const;
 			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
+			float getLength (RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
 
 			ValueTreeWrapper getParent() const;
 			Element getPreviousElement() const;
@@ -59402,7 +59403,7 @@ public:
 			void convertToLine (UndoManager* undoManager);
 			void convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
 			void convertToPathBreak (UndoManager* undoManager);
-			void insertPoint (double proportionOfLength, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+			ValueTree insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
 			void removePoint (UndoManager* undoManager);
 
 			static const Identifier mode, startSubPathElement, closeSubPathElement,

@@ -616,7 +616,7 @@ ValueTree ValueTree::getSibling (const int delta) const
         return invalid;
 
     const int index = object->parent->indexOf (*this) + delta;
-    return ValueTree (static_cast <SharedObject*> (object->children [index]));
+    return ValueTree (static_cast <SharedObject*> (object->parent->children [index]));
 }
 
 const var& ValueTree::operator[] (const Identifier& name) const
