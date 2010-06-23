@@ -1185,7 +1185,7 @@ private:
             if (needToPaintAll)
             {
                 contextClip.clear();
-                contextClip.addWithoutMerging (Rectangle<int> (0, 0, w, h));
+                contextClip.addWithoutMerging (Rectangle<int> (w, h));
             }
 
             if (transparent)

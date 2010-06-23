@@ -143,7 +143,7 @@ void PositionedRectangle::getRectangleDouble (const Rectangle<int>& target,
 
 void PositionedRectangle::applyToComponent (Component& comp) const throw()
 {
-    comp.setBounds (getRectangle (Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight())));
+    comp.setBounds (getRectangle (Rectangle<int> (comp.getParentWidth(), comp.getParentHeight())));
 }
 
 //==============================================================================
@@ -167,7 +167,7 @@ void PositionedRectangle::updateFromComponent (const Component& comp) throw()
     if (comp.getParentComponent() == 0 && ! comp.isOnDesktop())
         updateFrom (comp.getBounds(), Rectangle<int>());
     else
-        updateFrom (comp.getBounds(), Rectangle<int> (0, 0, comp.getParentWidth(), comp.getParentHeight()));
+        updateFrom (comp.getBounds(), Rectangle<int> (comp.getParentWidth(), comp.getParentHeight()));
 }
 
 //==============================================================================

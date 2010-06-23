@@ -232,7 +232,7 @@ public:
 
 - (void) createConnection
 {
-    NSInteger oldRetainCount = [self retainCount];
+    NSUInteger oldRetainCount = [self retainCount];
     connection = [[NSURLConnection alloc] initWithRequest: request
                                                  delegate: self];
 

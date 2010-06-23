@@ -159,6 +159,27 @@ public:
     */
     const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
 
+    /** Returns the length of the path.
+        @see getPointAlongPath
+    */
+    float getLength (const AffineTransform& transform = AffineTransform::identity) const;
+
+    /** Returns a point that is the specified distance along the path.
+        If the distance is greater than the total length of the path, this will return the
+        end point.
+        @see getLength
+    */
+    const Point<float> getPointAlongPath (float distanceFromStart,
+                                          const AffineTransform& transform = AffineTransform::identity) const;
+
+    /** Finds the point along the path which is nearest to a given position.
+        This sets pointOnPath to the nearest point, and returns the distance of this point from the start
+        of the path.
+    */
+    float getNearestPoint (const Point<float>& targetPoint,
+                           Point<float>& pointOnPath,
+                           const AffineTransform& transform = AffineTransform::identity) const;
+
     //==============================================================================
     /** Removes all lines and curves, resetting the path completely. */
     void clear() throw();

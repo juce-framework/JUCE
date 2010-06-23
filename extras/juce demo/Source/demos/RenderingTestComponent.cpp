@@ -88,7 +88,7 @@ public:
         if (owner.clipToImageToggle->getToggleState())
             clipToImage (g);
 
-        g.fillCheckerBoard (0, 0, getWidth(), getHeight(), 50, 50,
+        g.fillCheckerBoard (getLocalBounds(), 50, 50,
                             Colour (0xffdddddd), Colours::transparentBlack);
 
         switch (owner.testTypeComboBox->getSelectedId())

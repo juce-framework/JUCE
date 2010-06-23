@@ -791,7 +791,7 @@ const Point<int> Component::relativePositionToOtherComponent (const Component* c
 }
 
 //==============================================================================
-void Component::setBounds (int x, int y, int w, int h)
+void Component::setBounds (const int x, const int y, int w, int h)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
@@ -925,18 +925,16 @@ void Component::setCentreRelative (const float x, const float y)
 
 void Component::centreWithSize (const int width, const int height)
 {
-    setBounds ((getParentWidth() - width) / 2,
-               (getParentHeight() - height) / 2,
-               width,
-               height);
+    const Rectangle<int> parentArea (getParentOrMainMonitorBounds());
+
+    setBounds (parentArea.getCentreX() - width / 2,
+               parentArea.getCentreY() - height / 2,
+               width, height);
 }
 
 void Component::setBoundsInset (const BorderSize& borders)
 {
-    setBounds (borders.getLeft(),
-               borders.getTop(),
-               getParentWidth() - (borders.getLeftAndRight()),
-               getParentHeight() - (borders.getTopAndBottom()));
+    setBounds (borders.subtractedFrom (getParentOrMainMonitorBounds()));
 }
 
 void Component::setBoundsToFit (int x, int y, int width, int height,
@@ -1781,7 +1779,13 @@ void Component::colourChanged()
 //==============================================================================
 const Rectangle<int> Component::getLocalBounds() const throw()
 {
-    return Rectangle<int> (0, 0, getWidth(), getHeight());
+    return Rectangle<int> (getWidth(), getHeight());
+}
+
+const Rectangle<int> Component::getParentOrMainMonitorBounds() const
+{
+    return parentComponent_ != 0 ? parentComponent_->getLocalBounds()
+                                 : Desktop::getInstance().getMainMonitorArea();
 }
 
 const Rectangle<int> Component::getUnclippedArea() const
@@ -2637,8 +2641,8 @@ void Component::internalMouseWheel (MouseInputSource& source, const Point<int>& 
     Desktop& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
-    const float wheelIncrementX = amountX * (1.0f / 256.0f);
-    const float wheelIncrementY = amountY * (1.0f / 256.0f);
+    const float wheelIncrementX = amountX / 256.0f;
+    const float wheelIncrementY = amountY / 256.0f;
 
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
                          this, this, time, relativePos, time, 0, false);
@@ -3081,8 +3085,7 @@ const Point<int> Component::getMouseXYRelative() const
 const Rectangle<int> Component::getParentMonitorArea() const
 {
     return Desktop::getInstance()
-            .getMonitorAreaContaining (relativePositionToGlobal (Point<int> (getWidth() / 2,
-                                                                             getHeight() / 2)));
+            .getMonitorAreaContaining (relativePositionToGlobal (getLocalBounds().getCentre()));
 }
 
 //==============================================================================

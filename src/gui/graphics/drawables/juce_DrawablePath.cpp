@@ -288,6 +288,7 @@ void DrawablePath::ValueTreeWrapper::setUsesNonZeroWinding (bool b, UndoManager*
 }
 
 //==============================================================================
+const Identifier DrawablePath::ValueTreeWrapper::Element::mode ("mode");
 const Identifier DrawablePath::ValueTreeWrapper::Element::startSubPathElement ("Move");
 const Identifier DrawablePath::ValueTreeWrapper::Element::closeSubPathElement ("Close");
 const Identifier DrawablePath::ValueTreeWrapper::Element::lineToElement ("Line");
@@ -306,6 +307,11 @@ DrawablePath::ValueTreeWrapper::Element::~Element()
 DrawablePath::ValueTreeWrapper DrawablePath::ValueTreeWrapper::Element::getParent() const
 {
     return ValueTreeWrapper (state.getParent().getParent());
+}
+
+DrawablePath::ValueTreeWrapper::Element DrawablePath::ValueTreeWrapper::Element::getPreviousElement() const
+{
+    return Element (state.getSibling (-1));
 }
 
 int DrawablePath::ValueTreeWrapper::Element::getNumControlPoints() const throw()
@@ -335,6 +341,18 @@ void DrawablePath::ValueTreeWrapper::Element::setControlPoint (const int index, 
     return state.setProperty (index == 0 ? point1 : (index == 1 ? point2 : point3), point.toString(), undoManager);
 }
 
+const RelativePoint DrawablePath::ValueTreeWrapper::Element::getStartPoint() const
+{
+    const Identifier i (state.getType());
+
+    if (i == startSubPathElement)
+        return getControlPoint (0);
+
+    jassert (i == lineToElement || i == quadraticToElement || i == cubicToElement || i == closeSubPathElement);
+
+    return getPreviousElement().getEndPoint();
+}
+
 const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
 {
     const Identifier i (state.getType());
@@ -342,9 +360,76 @@ const RelativePoint DrawablePath::ValueTreeWrapper::Element::getEndPoint() const
     if (i == quadraticToElement)                         return getControlPoint (1);
     if (i == cubicToElement)                             return getControlPoint (2);
 
+    jassert (i == closeSubPathElement);
     return RelativePoint();
 }
 
+const String DrawablePath::ValueTreeWrapper::Element::getModeOfEndPoint() const
+{
+    return state [mode].toString();
+}
+
+void DrawablePath::ValueTreeWrapper::Element::setModeOfEndPoint (const String& newMode, UndoManager* undoManager)
+{
+    if (state.hasType (cubicToElement))
+        state.setProperty (mode, newMode, undoManager);
+}
+
+void DrawablePath::ValueTreeWrapper::Element::convertToLine (UndoManager* undoManager)
+{
+    const Identifier i (state.getType());
+
+    if (i == quadraticToElement || i == cubicToElement)
+    {
+        ValueTree newState (lineToElement);
+        Element e (newState);
+        e.setControlPoint (0, getEndPoint(), undoManager);
+        state = newState;
+    }
+}
+
+void DrawablePath::ValueTreeWrapper::Element::convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+{
+    const Identifier i (state.getType());
+
+    if (i == lineToElement || i == quadraticToElement)
+    {
+        ValueTree newState (cubicToElement);
+        Element e (newState);
+
+        const RelativePoint start (getStartPoint());
+        const RelativePoint end (getEndPoint());
+        const Point<float> startResolved (start.resolve (nameFinder));
+        const Point<float> endResolved (end.resolve (nameFinder));
+        e.setControlPoint (0, startResolved + (endResolved - startResolved) * 0.3f, undoManager);
+        e.setControlPoint (1, startResolved + (endResolved - startResolved) * 0.7f, undoManager);
+        e.setControlPoint (2, end, undoManager);
+
+        state = newState;
+    }
+}
+
+void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* undoManager)
+{
+    const Identifier i (state.getType());
+
+    if (i != startSubPathElement)
+    {
+        ValueTree newState (startSubPathElement);
+        Element e (newState);
+        e.setControlPoint (0, getEndPoint(), undoManager);
+        state = newState;
+    }
+}
+
+void DrawablePath::ValueTreeWrapper::Element::insertPoint (double, RelativeCoordinate::NamedCoordinateFinder*, UndoManager*)
+{
+}
+
+void DrawablePath::ValueTreeWrapper::Element::removePoint (UndoManager* undoManager)
+{
+    state.getParent().removeChild (state, undoManager);
+}
 
 //==============================================================================
 const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree, ImageProvider* imageProvider)
@@ -389,7 +474,7 @@ const Rectangle<float> DrawablePath::refreshFromValueTree (const ValueTree& tree
         needsRedraw = true;
     }
 
-    relativePath = newRelativePath.release();
+    relativePath = newRelativePath;
 
     if (needsRedraw)
         damageRect = damageRect.getUnion (getBounds());

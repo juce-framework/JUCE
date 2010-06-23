@@ -1051,6 +1051,61 @@ const Line<float> Path::getClippedLine (const Line<float>& line, const bool keep
     return result;
 }
 
+float Path::getLength (const AffineTransform& transform) const
+{
+    float length = 0;
+    PathFlatteningIterator i (*this, transform);
+
+    while (i.next())
+        length += Line<float> (i.x1, i.y1, i.x2, i.y2).getLength();
+
+    return length;
+}
+
+const Point<float> Path::getPointAlongPath (float distanceFromStart, const AffineTransform& transform) const
+{
+    PathFlatteningIterator i (*this, transform);
+
+    while (i.next())
+    {
+        const Line<float> line (i.x1, i.y1, i.x2, i.y2);
+        const float lineLength = line.getLength();
+
+        if (distanceFromStart <= lineLength)
+            return line.getPointAlongLine (distanceFromStart);
+
+        distanceFromStart -= lineLength;
+    }
+
+    return Point<float> (i.x2, i.y2);
+}
+
+float Path::getNearestPoint (const Point<float>& targetPoint, Point<float>& pointOnPath,
+                             const AffineTransform& transform) const
+{
+    PathFlatteningIterator i (*this, transform);
+    float bestPosition = 0, bestDistance = std::numeric_limits<float>::max();
+    float length = 0;
+    Point<float> pointOnLine;
+
+    while (i.next())
+    {
+        const Line<float> line (i.x1, i.y1, i.x2, i.y2);
+        const float distance = line.getDistanceFromPoint (targetPoint, pointOnLine);
+
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            bestPosition = length + pointOnLine.getDistanceFrom (line.getStart());
+            pointOnPath = pointOnLine;
+        }
+
+        length += line.getLength();
+    }
+
+    return bestPosition;
+}
+
 //==============================================================================
 const Path Path::createPathWithRoundedCorners (const float cornerRadius) const
 {

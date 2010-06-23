@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	29
+#define JUCE_BUILDNUMBER	30
 
 /** Current Juce version number.
 
@@ -13289,6 +13289,14 @@ public:
 	*/
 	ValueTree getParent() const;
 
+	/** Returns one of this node's siblings in its parent's child list.
+
+		The delta specifies how far to move through the list, so a value of 1 would return the node
+		that follows this one, -1 would return the node before it, 0 will return this node itself, etc.
+		If the requested position is beyond the range of available nodes, this will return ValueTree::invalid.
+	*/
+	ValueTree getSibling (int delta) const;
+
 	/** Creates an XmlElement that holds a complete image of this node and all its children.
 
 		If this node is invalid, this may return 0. Otherwise, the XML that is produced can
@@ -20174,25 +20182,42 @@ public:
 		distance from the line; if the point is a long way beyond one of the line's
 		end-point's, it'll return the straight-line distance to the nearest end-point.
 
+		pointOnLine receives the position of the point that is found.
+
 		@returns the point's distance from the line
 		@see getPositionAlongLineOfNearestPoint
 	*/
-	ValueType getDistanceFromPoint (const Point<ValueType>& point) const throw()
+	ValueType getDistanceFromPoint (const Point<ValueType>& targetPoint,
+									Point<ValueType>& pointOnLine) const throw()
 	{
 		const Point<ValueType> delta (end - start);
 		const double length = delta.getX() * delta.getX() + delta.getY() * delta.getY();
 
 		if (length > 0)
 		{
-			const double prop = ((point.getX() - start.getX()) * delta.getX()
-								  + (point.getY() - start.getY()) * delta.getY()) / length;
+			const double prop = ((targetPoint.getX() - start.getX()) * delta.getX()
+								  + (targetPoint.getY() - start.getY()) * delta.getY()) / length;
 
 			if (prop >= 0 && prop <= 1.0)
-				return point.getDistanceFrom (start + delta * (ValueType) prop);
+			{
+				pointOnLine = start + delta * (ValueType) prop;
+				return targetPoint.getDistanceFrom (pointOnLine);
+			}
 		}
 
-		return jmin (point.getDistanceFrom (start),
-					 point.getDistanceFrom (end));
+		const float fromStart = targetPoint.getDistanceFrom (start);
+		const float fromEnd = targetPoint.getDistanceFrom (end);
+
+		if (fromStart < fromEnd)
+		{
+			pointOnLine = start;
+			return fromStart;
+		}
+		else
+		{
+			pointOnLine = end;
+			return fromEnd;
+		}
 	}
 
 	/** Finds the point on this line which is nearest to a given point, and
@@ -21253,6 +21278,27 @@ public:
 										the path
 	*/
 	const Line<float> getClippedLine (const Line<float>& line, bool keepSectionOutsidePath) const;
+
+	/** Returns the length of the path.
+		@see getPointAlongPath
+	*/
+	float getLength (const AffineTransform& transform = AffineTransform::identity) const;
+
+	/** Returns a point that is the specified distance along the path.
+		If the distance is greater than the total length of the path, this will return the
+		end point.
+		@see getLength
+	*/
+	const Point<float> getPointAlongPath (float distanceFromStart,
+										  const AffineTransform& transform = AffineTransform::identity) const;
+
+	/** Finds the point along the path which is nearest to a given position.
+		This sets pointOnPath to the nearest point, and returns the distance of this point from the start
+		of the path.
+	*/
+	float getNearestPoint (const Point<float>& targetPoint,
+						   Point<float>& pointOnPath,
+						   const AffineTransform& transform = AffineTransform::identity) const;
 
 	/** Removes all lines and curves, resetting the path completely. */
 	void clear() throw();
@@ -23944,7 +23990,7 @@ public:
 
 	/** Fills a rectangle with a checkerboard pattern, alternating between two colours.
 	*/
-	void fillCheckerBoard (int x, int y, int width, int height,
+	void fillCheckerBoard (const Rectangle<int>& area,
 						   int checkWidth, int checkHeight,
 						   const Colour& colour1, const Colour& colour2) const;
 
@@ -24494,7 +24540,7 @@ public:
 	/** Returns a rectangle with the same size as this image.
 		The rectangle's origin is always (0, 0).
 	*/
-	const Rectangle<int> getBounds() const throw()	  { return image == 0 ? Rectangle<int>() : Rectangle<int> (0, 0, image->width, image->height); }
+	const Rectangle<int> getBounds() const throw()	  { return image == 0 ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
 
 	/** Returns the image's pixel format. */
 	PixelFormat getFormat() const throw()		   { return image == 0 ? UnknownFormat : image->format; }
@@ -25648,7 +25694,8 @@ public:
 	/** Changes the component's size and centres it within its parent.
 
 		After changing the size, the component will be moved so that it's
-		centred within its parent.
+		centred within its parent. If the component is on the desktop (or has no
+		parent component), then it'll be centred within the main monitor area.
 	*/
 	void centreWithSize (int width, int height);
 
@@ -25809,7 +25856,7 @@ public:
 
 	/** Checks whether a component is anywhere inside this component or its children.
 
-		This will recursively check through this components children to see if the
+		This will recursively check through this component's children to see if the
 		given component is anywhere inside.
 	*/
 	bool isParentOf (const Component* possibleChild) const throw();
@@ -27224,6 +27271,7 @@ private:
 	// how much of the component is not off the edges of its parents
 	const Rectangle<int> getUnclippedArea() const;
 	void sendVisibilityChangeMessage();
+	const Rectangle<int> getParentOrMainMonitorBounds() const;
 
 	// This is included here just to cause a compile error if your code is still handling
 	// drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
@@ -56052,7 +56100,8 @@ private:
 	HueSelectorComp* hueSelector;
 	OwnedArray <SwatchComponent> swatchComponents;
 	const int flags;
-	int topSpace, edgeGap;
+	int edgeGap;
+	Rectangle<int> previewArea;
 
 	void setHue (float newH);
 	void setSV (float newS, float newV);
@@ -59340,13 +59389,27 @@ public:
 
 			const RelativePoint getControlPoint (int index) const;
 			Value getControlPointValue (int index, UndoManager* undoManager) const;
+			const RelativePoint getStartPoint() const;
 			const RelativePoint getEndPoint() const;
 			void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
 
 			ValueTreeWrapper getParent() const;
+			Element getPreviousElement() const;
 
-			static const Identifier startSubPathElement, closeSubPathElement,
+			const String getModeOfEndPoint() const;
+			void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
+
+			void convertToLine (UndoManager* undoManager);
+			void convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+			void convertToPathBreak (UndoManager* undoManager);
+			void insertPoint (double proportionOfLength, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+			void removePoint (UndoManager* undoManager);
+
+			static const Identifier mode, startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;
+			static const char* cornerMode;
+			static const char* roundedMode;
+			static const char* symmetricMode;
 
 			ValueTree state;
 		};

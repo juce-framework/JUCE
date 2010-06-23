@@ -78,8 +78,8 @@ ResizableWindow::~ResizableWindow()
 {
     resizableCorner = 0;
     resizableBorder = 0;
-    deleteAndZero (contentComponent); // (avoid using a scoped pointer for this, so that it survives
-                                      //  external deletion of the content comp)
+    delete static_cast <Component*> (contentComponent);
+    contentComponent = 0;
 
     // have you been adding your own components directly to this window..? tut tut tut.
     // Read the instructions for using a ResizableWindow!
@@ -108,6 +108,9 @@ void ResizableWindow::setContentComponent (Component* const newContentComponent,
         if (deleteOldOne)
             delete static_cast <Component*> (contentComponent); // (avoid using a scoped pointer for this, so that it survives
                                                                 //  external deletion of the content comp)
+        else
+            removeChildComponent (contentComponent);
+
         contentComponent = newContentComponent;
 
         Component::addAndMakeVisible (contentComponent);
@@ -201,12 +204,13 @@ void ResizableWindow::childBoundsChanged (Component* child)
 //==============================================================================
 void ResizableWindow::activeWindowStatusChanged()
 {
-    const BorderSize borders (getContentComponentBorder());
+    const BorderSize border (getContentComponentBorder());
 
-    repaint (0, 0, getWidth(), borders.getTop());
-    repaint (0, borders.getTop(), borders.getLeft(), getHeight() - borders.getBottom() - borders.getTop());
-    repaint (0, getHeight() - borders.getBottom(), getWidth(), borders.getBottom());
-    repaint (getWidth() - borders.getRight(), borders.getTop(), borders.getRight(), getHeight() - borders.getBottom() - borders.getTop());
+    Rectangle<int> area (getLocalBounds());
+    repaint (area.removeFromTop (border.getTop()));
+    repaint (area.removeFromLeft (border.getLeft()));
+    repaint (area.removeFromRight (border.getRight()));
+    repaint (area.removeFromBottom (border.getBottom()));
 }
 
 //==============================================================================

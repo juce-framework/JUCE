@@ -481,7 +481,8 @@ public:
     /** Changes the component's size and centres it within its parent.
 
         After changing the size, the component will be moved so that it's
-        centred within its parent.
+        centred within its parent. If the component is on the desktop (or has no
+        parent component), then it'll be centred within the main monitor area.
     */
     void centreWithSize (int width, int height);
 
@@ -644,7 +645,7 @@ public:
 
     /** Checks whether a component is anywhere inside this component or its children.
 
-        This will recursively check through this components children to see if the
+        This will recursively check through this component's children to see if the
         given component is anywhere inside.
     */
     bool isParentOf (const Component* possibleChild) const throw();
@@ -2095,6 +2096,7 @@ private:
     // how much of the component is not off the edges of its parents
     const Rectangle<int> getUnclippedArea() const;
     void sendVisibilityChangeMessage();
+    const Rectangle<int> getParentOrMainMonitorBounds() const;
 
     //==============================================================================
     // This is included here just to cause a compile error if your code is still handling

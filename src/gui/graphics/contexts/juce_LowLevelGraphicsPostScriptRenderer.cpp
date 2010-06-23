@@ -57,7 +57,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
       needToClip (true)
 {
     stateStack.add (new SavedState());
-    stateStack.getLast()->clip = Rectangle<int> (0, 0, totalWidth_, totalHeight_);
+    stateStack.getLast()->clip = Rectangle<int> (totalWidth_, totalHeight_);
 
     const float scale = jmin ((520.0f / totalWidth_), (750.0f / totalHeight));
 

@@ -311,8 +311,7 @@ public:
     {
         const Colour colour (owner->getSwatchColour (index));
 
-        g.fillCheckerBoard (0, 0, getWidth(), getHeight(),
-                            6, 6,
+        g.fillCheckerBoard (getLocalBounds(), 6, 6,
                             Colour (0xffdddddd).overlaidWith (colour),
                             Colour (0xffffffff).overlaidWith (colour));
     }
@@ -356,7 +355,6 @@ ColourSelector::ColourSelector (const int flags_,
       colourSpace (0),
       hueSelector (0),
       flags (flags_),
-      topSpace (0),
       edgeGap (edgeGap_)
 {
     // not much point having a selector with no components in it!
@@ -464,7 +462,7 @@ void ColourSelector::update()
     }
 
     if ((flags & showColourAtTop) != 0)
-        repaint (0, edgeGap, getWidth(), topSpace - edgeGap);
+        repaint (previewArea);
 
     sendChangeMessage (this);
 }
@@ -478,15 +476,14 @@ void ColourSelector::paint (Graphics& g)
     {
         const Colour currentColour (getCurrentColour());
 
-        g.fillCheckerBoard (edgeGap, edgeGap, getWidth() - edgeGap - edgeGap, topSpace - edgeGap - edgeGap,
-                            10, 10,
+        g.fillCheckerBoard (previewArea, 10, 10,
                             Colour (0xffdddddd).overlaidWith (currentColour),
                             Colour (0xffffffff).overlaidWith (currentColour));
 
         g.setColour (Colours::white.overlaidWith (currentColour).contrasting());
         g.setFont (14.0f, true);
         g.drawText (currentColour.toDisplayString ((flags & showAlphaChannel) != 0),
-                    0, edgeGap, getWidth(), topSpace - edgeGap * 2,
+                    previewArea.getX(), previewArea.getY(), previewArea.getWidth(), previewArea.getHeight(),
                     Justification::centred, false);
     }
 
@@ -516,7 +513,9 @@ void ColourSelector::resized()
 
     const int swatchSpace = numSwatches > 0 ? edgeGap + swatchHeight * ((numSwatches + 7) / swatchesPerRow) : 0;
     const int sliderSpace = ((flags & showSliders) != 0)  ? jmin (22 * numSliders + edgeGap, proportionOfHeight (0.3f)) : 0;
-    topSpace = ((flags & showColourAtTop) != 0) ? jmin (30 + edgeGap * 2, proportionOfHeight (0.2f)) : edgeGap;
+    const int topSpace = ((flags & showColourAtTop) != 0) ? jmin (30 + edgeGap * 2, proportionOfHeight (0.2f)) : edgeGap;
+
+    previewArea.setBounds (edgeGap, edgeGap, getWidth() - edgeGap * 2, topSpace - edgeGap * 2);
 
     int y = topSpace;
 

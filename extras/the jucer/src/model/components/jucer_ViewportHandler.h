@@ -297,8 +297,7 @@ private:
 
         void paint (Graphics& g)
         {
-            g.fillCheckerBoard (0, 0, getWidth(), getHeight(),
-                                50, 50,
+            g.fillCheckerBoard (getLocalBounds(), 50, 50,
                                 Colours::lightgrey.withAlpha (0.5f),
                                 Colours::darkgrey.withAlpha (0.5f));
         }

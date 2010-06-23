@@ -2851,8 +2851,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 
         if (monitorCoords.size() == 0)
         {
-            monitorCoords.add (Rectangle<int> (0, 0,
-                                               DisplayWidth (display, DefaultScreen (display)),
+            monitorCoords.add (Rectangle<int> (DisplayWidth (display, DefaultScreen (display)),
                                                DisplayHeight (display, DefaultScreen (display))));
         }
     }

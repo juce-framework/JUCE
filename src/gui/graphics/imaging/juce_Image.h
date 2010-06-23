@@ -149,7 +149,7 @@ public:
     /** Returns a rectangle with the same size as this image.
         The rectangle's origin is always (0, 0).
     */
-    const Rectangle<int> getBounds() const throw()          { return image == 0 ? Rectangle<int>() : Rectangle<int> (0, 0, image->width, image->height); }
+    const Rectangle<int> getBounds() const throw()          { return image == 0 ? Rectangle<int>() : Rectangle<int> (image->width, image->height); }
 
     /** Returns the image's pixel format. */
     PixelFormat getFormat() const throw()                   { return image == 0 ? UnknownFormat : image->format; }

@@ -302,6 +302,14 @@ public:
     */
     ValueTree getParent() const;
 
+    /** Returns one of this node's siblings in its parent's child list.
+
+        The delta specifies how far to move through the list, so a value of 1 would return the node
+        that follows this one, -1 would return the node before it, 0 will return this node itself, etc.
+        If the requested position is beyond the range of available nodes, this will return ValueTree::invalid.
+    */
+    ValueTree getSibling (int delta) const;
+
     //==============================================================================
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 

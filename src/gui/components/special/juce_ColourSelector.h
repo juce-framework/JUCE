@@ -149,7 +149,8 @@ private:
     HueSelectorComp* hueSelector;
     OwnedArray <SwatchComponent> swatchComponents;
     const int flags;
-    int topSpace, edgeGap;
+    int edgeGap;
+    Rectangle<int> previewArea;
 
     void setHue (float newH);
     void setSV (float newS, float newV);

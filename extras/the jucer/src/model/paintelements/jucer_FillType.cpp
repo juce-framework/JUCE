@@ -328,7 +328,7 @@ void JucerFillType::loadImage (JucerDocument* const document)
                 image = Image (Image::RGB, 100, 100, true);
 
                 Graphics g (image);
-                g.fillCheckerBoard (0, 0, image.getWidth(), image.getHeight(),
+                g.fillCheckerBoard (image.getBounds(),
                                     image.getWidth() / 2, image.getHeight() / 2,
                                     Colours::white, Colours::lightgrey);
 

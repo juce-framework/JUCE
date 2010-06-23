@@ -160,13 +160,27 @@ public:
 
             const RelativePoint getControlPoint (int index) const;
             Value getControlPointValue (int index, UndoManager* undoManager) const;
+            const RelativePoint getStartPoint() const;
             const RelativePoint getEndPoint() const;
             void setControlPoint (int index, const RelativePoint& point, UndoManager* undoManager);
 
             ValueTreeWrapper getParent() const;
+            Element getPreviousElement() const;
 
-            static const Identifier startSubPathElement, closeSubPathElement,
+            const String getModeOfEndPoint() const;
+            void setModeOfEndPoint (const String& newMode, UndoManager* undoManager);
+
+            void convertToLine (UndoManager* undoManager);
+            void convertToCubic (RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+            void convertToPathBreak (UndoManager* undoManager);
+            void insertPoint (double proportionOfLength, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
+            void removePoint (UndoManager* undoManager);
+
+            static const Identifier mode, startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;
+            static const char* cornerMode;
+            static const char* roundedMode;
+            static const char* symmetricMode;
 
             ValueTree state;
         };

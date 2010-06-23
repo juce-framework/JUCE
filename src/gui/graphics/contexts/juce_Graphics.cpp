@@ -478,7 +478,7 @@ void Graphics::drawArrow (const Line<float>& line, const float lineThickness, co
     fillPath (p);
 }
 
-void Graphics::fillCheckerBoard (int x, int y, int width, int height,
+void Graphics::fillCheckerBoard (const Rectangle<int>& area,
                                  const int checkWidth, const int checkHeight,
                                  const Colour& colour1, const Colour& colour2) const
 {
@@ -491,29 +491,29 @@ void Graphics::fillCheckerBoard (int x, int y, int width, int height,
         if (colour1 == colour2)
         {
             context->setFill (colour1);
-            context->fillRect (Rectangle<int> (x, y, width, height), false);
+            context->fillRect (area, false);
         }
         else
         {
-            const Rectangle<int> clip (context->getClipBounds());
+            const Rectangle<int> clipped (context->getClipBounds().getIntersection (area));
 
-            const int right  = jmin (x + width, clip.getRight());
-            const int bottom = jmin (y + height, clip.getBottom());
-
-            int cy = 0;
-            while (y < bottom)
+            if (! clipped.isEmpty())
             {
-                int cx = cy;
+                context->clipToRectangle (clipped);
+                const int startX = area.getX() + ((clipped.getX() - area.getX()) / checkWidth) * checkWidth;
+                const int startY = area.getY() + ((clipped.getY() - area.getY()) / checkHeight) * checkHeight;
+                const int right  = clipped.getRight();
+                const int bottom = clipped.getBottom();
 
-                for (int xx = x; xx < right; xx += checkWidth)
+                for (int i = 0; i < 2; ++i)
                 {
-                    context->setFill (((cx++ & 1) == 0) ? colour1 : colour2);
-                    context->fillRect (Rectangle<int> (xx, y, jmin (checkWidth, right - xx), jmin (checkHeight, bottom - y)),
-                                       false);
-                }
+                    context->setFill (i == 0 ? colour1 : colour2);
 
-                ++cy;
-                y += checkHeight;
+                    int cy = i;
+                    for (int y = startY; y < bottom; y += checkHeight)
+                        for (int x = startX + (cy++ & 1) * checkWidth; x < right; x += checkWidth * 2)
+                            context->fillRect (Rectangle<int> (x, y, checkWidth, checkHeight), false);
+                }
             }
         }
 

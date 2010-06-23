@@ -610,6 +610,15 @@ ValueTree ValueTree::getParent() const
     return ValueTree (object != 0 ? object->parent : (SharedObject*) 0);
 }
 
+ValueTree ValueTree::getSibling (const int delta) const
+{
+    if (object == 0 || object->parent == 0)
+        return invalid;
+
+    const int index = object->parent->indexOf (*this) + delta;
+    return ValueTree (static_cast <SharedObject*> (object->children [index]));
+}
+
 const var& ValueTree::operator[] (const Identifier& name) const
 {
     return object == 0 ? var::null : object->getProperty (name);

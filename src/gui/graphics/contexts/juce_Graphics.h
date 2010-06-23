@@ -256,7 +256,7 @@ public:
 
     /** Fills a rectangle with a checkerboard pattern, alternating between two colours.
     */
-    void fillCheckerBoard (int x, int y, int width, int height,
+    void fillCheckerBoard (const Rectangle<int>& area,
                            int checkWidth, int checkHeight,
                            const Colour& colour1, const Colour& colour2) const;
 

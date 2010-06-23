@@ -49,7 +49,7 @@ public:
     {
         g.fillAll (Colours::grey);
 
-        g.fillCheckerBoard (2, 2, getWidth() - 4, getHeight() - 4,
+        g.fillCheckerBoard (getLocalBounds().reduced (2, 2),
                             10, 10,
                             Colour (0xffdddddd).overlaidWith (colour),
                             Colour (0xffffffff).overlaidWith (colour));
