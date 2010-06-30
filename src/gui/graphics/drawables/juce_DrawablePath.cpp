@@ -453,7 +453,7 @@ void DrawablePath::ValueTreeWrapper::Element::convertToPathBreak (UndoManager* u
     }
 }
 
-static const Point<float> findCubicSubdivisionPoint (double proportion, const Point<float> points[4])
+static const Point<float> findCubicSubdivisionPoint (float proportion, const Point<float> points[4])
 {
     const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                        mid2 (points[1] + (points[2] - points[1]) * proportion),
@@ -465,7 +465,7 @@ static const Point<float> findCubicSubdivisionPoint (double proportion, const Po
     return newCp1 + (newCp2 - newCp1) * proportion;
 }
 
-static const Point<float> findQuadraticSubdivisionPoint (double proportion, const Point<float> points[3])
+static const Point<float> findQuadraticSubdivisionPoint (float proportion, const Point<float> points[3])
 {
     const Point<float> mid1 (points[0] + (points[1] - points[0]) * proportion),
                        mid2 (points[1] + (points[2] - points[1]) * proportion);
@@ -473,10 +473,10 @@ static const Point<float> findQuadraticSubdivisionPoint (double proportion, cons
     return mid1 + (mid2 - mid1) * proportion;
 }
 
-double DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
+float DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
 {
     const Identifier i (state.getType());
-    double bestProp = 0;
+    float bestProp = 0;
 
     if (i == cubicToElement)
     {
@@ -488,7 +488,7 @@ double DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const P
 
         for (int i = 110; --i >= 0;)
         {
-            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
+            float prop = i > 10 ? ((i - 10) / 100.0f) : (bestProp + ((i - 5) / 1000.0f));
             const Point<float> centre (findCubicSubdivisionPoint (prop, points));
             const float distance = centre.getDistanceFrom (targetPoint);
 
@@ -508,8 +508,8 @@ double DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const P
 
         for (int i = 110; --i >= 0;)
         {
-            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
-            const Point<float> centre (findQuadraticSubdivisionPoint (prop, points));
+            float prop = i > 10 ? ((i - 10) / 100.0f) : (bestProp + ((i - 5) / 1000.0f));
+            const Point<float> centre (findQuadraticSubdivisionPoint ((float) prop, points));
             const float distance = centre.getDistanceFrom (targetPoint);
 
             if (distance < bestDistance)
@@ -536,7 +536,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
 
     if (i == cubicToElement)
     {
-        double bestProp = findProportionAlongLine (targetPoint, nameFinder);
+        float bestProp = findProportionAlongLine (targetPoint, nameFinder);
 
         RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getControlPoint (1)), rp4 (getEndPoint());
         const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder), rp4.resolve (nameFinder) };
@@ -564,7 +564,7 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
     }
     else if (i == quadraticToElement)
     {
-        double bestProp = findProportionAlongLine (targetPoint, nameFinder);
+        float bestProp = findProportionAlongLine (targetPoint, nameFinder);
 
         RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getEndPoint());
         const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder) };

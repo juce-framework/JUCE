@@ -90,13 +90,13 @@ public:
     const String toString() const;
     DynamicObject* getObject() const;
 
-    bool isVoid() const throw()         { return type == voidType; }
-    bool isInt() const throw()          { return type == intType; }
-    bool isBool() const throw()         { return type == boolType; }
-    bool isDouble() const throw()       { return type == doubleType; }
-    bool isString() const throw()       { return type == stringType; }
-    bool isObject() const throw()       { return type == objectType; }
-    bool isMethod() const throw()       { return type == methodType; }
+    bool isVoid() const throw();
+    bool isInt() const throw();
+    bool isBool() const throw();
+    bool isDouble() const throw();
+    bool isString() const throw();
+    bool isObject() const throw();
+    bool isMethod() const throw();
 
     //==============================================================================
     /** Writes a binary representation of this value to a stream.
@@ -142,16 +142,24 @@ public:
     bool equals (const var& other) const throw();
 
 private:
-    enum Type
-    {
-        voidType = 0,
-        intType,
-        boolType,
-        doubleType,
-        stringType,
-        objectType,
-        methodType
-    };
+    class VariantType;
+    friend class VariantType;
+    class VariantType_Void;
+    friend class VariantType_Void;
+    class VariantType_Int;
+    friend class VariantType_Int;
+    class VariantType_Double;
+    friend class VariantType_Double;
+    class VariantType_Float;
+    friend class VariantType_Float;
+    class VariantType_Bool;
+    friend class VariantType_Bool;
+    class VariantType_String;
+    friend class VariantType_String;
+    class VariantType_Object;
+    friend class VariantType_Object;
+    class VariantType_Method;
+    friend class VariantType_Method;
 
     union ValueUnion
     {
@@ -163,7 +171,7 @@ private:
         MethodFunction methodValue;
     };
 
-    Type type;
+    const VariantType* type;
     ValueUnion value;
 };
 

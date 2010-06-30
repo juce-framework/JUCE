@@ -110,6 +110,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     bufferPos %= bufferSize;
 
     int endOfBufferPos = bufferPos + sampsInBuffer;
+    const int channelsToProcess = jmin (numChannels, info.buffer->getNumChannels());
 
     while (sampsNeeded > sampsInBuffer)
     {
@@ -129,7 +130,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         {
             // for down-sampling, pre-apply the filter..
 
-            for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
+            for (int i = channelsToProcess; --i >= 0;)
                 applyFilter (buffer.getSampleData (i, endOfBufferPos), numToDo, filterStates[i]);
         }
 
@@ -137,7 +138,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         endOfBufferPos += numToDo;
     }
 
-    for (int channel = 0; channel < numChannels; ++channel)
+    for (int channel = 0; channel < channelsToProcess; ++channel)
     {
         destBuffers[channel] = info.buffer->getSampleData (channel, info.startSample);
         srcBuffers[channel] = buffer.getSampleData (channel, 0);
@@ -149,7 +150,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         const float alpha = (float) subSampleOffset;
         const float invAlpha = 1.0f - alpha;
 
-        for (int channel = 0; channel < numChannels; ++channel)
+        for (int channel = 0; channel < channelsToProcess; ++channel)
             *destBuffers[channel]++ = srcBuffers[channel][bufferPos] * invAlpha + srcBuffers[channel][nextPos] * alpha;
 
         subSampleOffset += ratio;
@@ -171,13 +172,13 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     if (ratio < 0.9999)
     {
         // for up-sampling, apply the filter after transposing..
-        for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
+        for (int i = channelsToProcess; --i >= 0;)
             applyFilter (info.buffer->getSampleData (i, info.startSample), info.numSamples, filterStates[i]);
     }
     else if (ratio <= 1.0001)
     {
         // if the filter's not currently being applied, keep it stoked with the last couple of samples to avoid discontinuities
-        for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
+        for (int i = channelsToProcess; --i >= 0;)
         {
             const float* const endOfBuffer = info.buffer->getSampleData (i, info.startSample + info.numSamples - 1);
             FilterState& fs = filterStates[i];

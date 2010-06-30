@@ -349,8 +349,6 @@ public:
           callback (0),
           inputId (inputId_),
           outputId (outputId_),
-          outputDevice (0),
-          inputDevice (0),
           numCallbacks (0),
           inputChannelBuffer (1, 1),
           outputChannelBuffer (1, 1)
@@ -415,7 +413,7 @@ public:
             if (outputDevice->error.isNotEmpty())
             {
                 error = outputDevice->error;
-                deleteAndZero (outputDevice);
+                outputDevice = 0;
                 return;
             }
 
@@ -426,7 +424,7 @@ public:
                                                bufferSize))
             {
                 error = outputDevice->error;
-                deleteAndZero (outputDevice);
+                outputDevice = 0;
                 return;
             }
         }
@@ -438,7 +436,7 @@ public:
             if (inputDevice->error.isNotEmpty())
             {
                 error = inputDevice->error;
-                deleteAndZero (inputDevice);
+                inputDevice = 0;
                 return;
             }
 
@@ -449,7 +447,7 @@ public:
                                               bufferSize))
             {
                 error = inputDevice->error;
-                deleteAndZero (inputDevice);
+                inputDevice = 0;
                 return;
             }
         }
@@ -491,8 +489,8 @@ public:
     {
         stopThread (6000);
 
-        deleteAndZero (inputDevice);
-        deleteAndZero (outputDevice);
+        inputDevice = 0;
+        outputDevice = 0;
 
         inputChannelBuffer.setSize (1, 1);
         outputChannelBuffer.setSize (1, 1);
@@ -585,8 +583,7 @@ public:
 private:
     //==============================================================================
     const String inputId, outputId;
-    ALSADevice* outputDevice;
-    ALSADevice* inputDevice;
+    ScopedPointer<ALSADevice> outputDevice, inputDevice;
     int numCallbacks;
 
     CriticalSection callbackLock;
@@ -643,7 +640,7 @@ public:
           outputId (outputId_),
           isOpen_ (false),
           isStarted (false),
-          internal (new ALSAThread (inputId_, outputId_))
+          internal (inputId_, outputId_)
     {
     }
 
@@ -653,22 +650,22 @@ public:
 
     const StringArray getOutputChannelNames()
     {
-        return internal->channelNamesOut;
+        return internal.channelNamesOut;
     }
 
     const StringArray getInputChannelNames()
     {
-        return internal->channelNamesIn;
+        return internal.channelNamesIn;
     }
 
     int getNumSampleRates()
     {
-        return internal->sampleRates.size();
+        return internal.sampleRates.size();
     }
 
     double getSampleRate (int index)
     {
-        return internal->sampleRates [index];
+        return internal.sampleRates [index];
     }
 
     int getNumBufferSizesAvailable()
@@ -715,17 +712,17 @@ public:
             }
         }
 
-        internal->open (inputChannels, outputChannels,
-                        sampleRate, bufferSizeSamples);
+        internal.open (inputChannels, outputChannels,
+                       sampleRate, bufferSizeSamples);
 
-        isOpen_ = internal->error.isEmpty();
-        return internal->error;
+        isOpen_ = internal.error.isEmpty();
+        return internal.error;
     }
 
     void close()
     {
         stop();
-        internal->close();
+        internal.close();
         isOpen_ = false;
     }
 
@@ -736,27 +733,27 @@ public:
 
     int getCurrentBufferSizeSamples()
     {
-        return internal->bufferSize;
+        return internal.bufferSize;
     }
 
     double getCurrentSampleRate()
     {
-        return internal->sampleRate;
+        return internal.sampleRate;
     }
 
     int getCurrentBitDepth()
     {
-        return internal->getBitDepth();
+        return internal.getBitDepth();
     }
 
     const BigInteger getActiveOutputChannels() const
     {
-        return internal->currentOutputChans;
+        return internal.currentOutputChans;
     }
 
     const BigInteger getActiveInputChannels() const
     {
-        return internal->currentInputChans;
+        return internal.currentInputChans;
     }
 
     int getOutputLatencyInSamples()
@@ -774,17 +771,17 @@ public:
         if (! isOpen_)
             callback = 0;
 
-        internal->setCallback (callback);
-
         if (callback != 0)
             callback->audioDeviceAboutToStart (this);
+
+        internal.setCallback (callback);
 
         isStarted = (callback != 0);
     }
 
     void stop()
     {
-        AudioIODeviceCallback* const oldCallback = internal->callback;
+        AudioIODeviceCallback* const oldCallback = internal.callback;
 
         start (0);
 
@@ -794,19 +791,19 @@ public:
 
     bool isPlaying()
     {
-        return isStarted && internal->error.isEmpty();
+        return isStarted && internal.error.isEmpty();
     }
 
     const String getLastError()
     {
-        return internal->error;
+        return internal.error;
     }
 
     String inputId, outputId;
 
 private:
     bool isOpen_, isStarted;
-    ScopedPointer<ALSAThread> internal;
+    ALSAThread internal;
 };
 
 
