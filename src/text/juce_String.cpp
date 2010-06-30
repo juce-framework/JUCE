@@ -1928,6 +1928,10 @@ const char* String::toUTF8() const
         mutableThis->text = StringHolder::makeUniqueWithSize (mutableThis->text, currentLen + 1 + utf8BytesNeeded / sizeof (juce_wchar));
 
         char* const otherCopy = reinterpret_cast <char*> (mutableThis->text + currentLen);
+
+#if JUCE_DEBUG // (This just avoids spurious warnings from valgrind about the uninitialised bytes at the end of the buffer..)
+        *(juce_wchar*) (otherCopy + (utf8BytesNeeded & ~(sizeof (juce_wchar) - 1))) = 0;
+#endif
         copyToUTF8 (otherCopy, std::numeric_limits<int>::max());
 
         return otherCopy;

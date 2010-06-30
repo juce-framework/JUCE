@@ -53,6 +53,7 @@ PluginListComponent::PluginListComponent (KnownPluginList& listToEdit,
 
     setSize (400, 600);
     list.addChangeListener (this);
+    changeListenerCallback (0);
 }
 
 PluginListComponent::~PluginListComponent()

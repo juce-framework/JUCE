@@ -574,7 +574,7 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
                                              const int numSamples,
                                              const int readerStartSample,
                                              const bool useLeftChan,
-                                             const bool useRightChan) throw()
+                                             const bool useRightChan)
 {
     jassert (reader != 0);
     jassert (startSample >= 0 && startSample + numSamples <= size);
@@ -631,62 +631,46 @@ void AudioSampleBuffer::readFromAudioReader (AudioFormatReader* reader,
 
 void AudioSampleBuffer::writeToAudioWriter (AudioFormatWriter* writer,
                                             const int startSample,
-                                            const int numSamples) const throw()
+                                            const int numSamples) const
 {
-    jassert (startSample >= 0 && startSample + numSamples <= size);
+    jassert (startSample >= 0 && startSample + numSamples <= size && numChannels > 0);
 
     if (numSamples > 0)
     {
-        int* chans [3];
+        HeapBlock<int> tempBuffer;
+        HeapBlock<int*> chans (numChannels + 1);
+        chans [numChannels] = 0;
 
         if (writer->isFloatingPoint())
         {
-            chans[0] = (int*) getSampleData (0, startSample);
-
-            if (numChannels > 1)
-                chans[1] = (int*) getSampleData (1, startSample);
-            else
-                chans[1] = 0;
-
-            chans[2] = 0;
-            writer->write ((const int**) chans, numSamples);
+            for (int i = numChannels; --i >= 0;)
+                chans[i] = (int*) channels[i] + startSample;
         }
         else
         {
-            HeapBlock <int> tempBuffer (numSamples * 2);
-            chans[0] = tempBuffer;
+            tempBuffer.malloc (numSamples * numChannels);
 
-            if (numChannels > 1)
-                chans[1] = chans[0] + numSamples;
-            else
-                chans[1] = 0;
-
-            chans[2] = 0;
-
-            for (int j = 0; j < 2; ++j)
+            for (int j = 0; j < numChannels; ++j)
             {
-                int* const dest = chans[j];
+                int* const dest = tempBuffer + j * numSamples;
+                const float* const src = channels[j] + startSample;
+                chans[j] = dest;
 
-                if (dest != 0)
+                for (int i = 0; i < numSamples; ++i)
                 {
-                    const float* const src = channels [j] + startSample;
+                    const double samp = src[i];
 
-                    for (int i = 0; i < numSamples; ++i)
-                    {
-                        const double samp = src[i];
-
-                        if (samp <= -1.0)
-                            dest[i] = std::numeric_limits<int>::min();
-                        else if (samp >= 1.0)
-                            dest[i] = std::numeric_limits<int>::max();
-                        else
-                            dest[i] = roundToInt (std::numeric_limits<int>::max() * samp);
-                    }
+                    if (samp <= -1.0)
+                        dest[i] = std::numeric_limits<int>::min();
+                    else if (samp >= 1.0)
+                        dest[i] = std::numeric_limits<int>::max();
+                    else
+                        dest[i] = roundToInt (std::numeric_limits<int>::max() * samp);
                 }
             }
-
-            writer->write ((const int**) chans, numSamples);
         }
+
+        writer->write ((const int**) chans.getData(), numSamples);
     }
 }
 

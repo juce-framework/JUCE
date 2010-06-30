@@ -33,13 +33,15 @@ BEGIN_JUCE_NAMESPACE
 
 //==============================================================================
 ResamplingAudioSource::ResamplingAudioSource (AudioSource* const inputSource,
-                                              const bool deleteInputWhenDeleted_)
+                                              const bool deleteInputWhenDeleted_,
+                                              const int numChannels_)
     : input (inputSource),
       deleteInputWhenDeleted (deleteInputWhenDeleted_),
       ratio (1.0),
       lastRatio (1.0),
-      buffer (2, 0),
-      sampsInBuffer (0)
+      buffer (numChannels_, 0),
+      sampsInBuffer (0),
+      numChannels (numChannels_)
 {
     jassert (input != 0);
 }
@@ -65,12 +67,15 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected,
 
     input->prepareToPlay (samplesPerBlockExpected, sampleRate);
 
-    buffer.setSize (2, roundToInt (samplesPerBlockExpected * ratio) + 32);
+    buffer.setSize (numChannels, roundToInt (samplesPerBlockExpected * ratio) + 32);
     buffer.clear();
     sampsInBuffer = 0;
     bufferPos = 0;
     subSampleOffset = 0.0;
 
+    filterStates.calloc (numChannels);
+    srcBuffers.calloc (numChannels);
+    destBuffers.calloc (numChannels);
     createLowPass (ratio);
     resetFilters();
 }
@@ -78,7 +83,7 @@ void ResamplingAudioSource::prepareToPlay (int samplesPerBlockExpected,
 void ResamplingAudioSource::releaseResources()
 {
     input->releaseResources();
-    buffer.setSize (2, 0);
+    buffer.setSize (numChannels, 0);
 }
 
 void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& info)
@@ -124,7 +129,7 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         {
             // for down-sampling, pre-apply the filter..
 
-            for (int i = jmin (2, info.buffer->getNumChannels()); --i >= 0;)
+            for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
                 applyFilter (buffer.getSampleData (i, endOfBufferPos), numToDo, filterStates[i]);
         }
 
@@ -132,23 +137,20 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
         endOfBufferPos += numToDo;
     }
 
-    float* dl = info.buffer->getSampleData (0, info.startSample);
-    float* dr = (info.buffer->getNumChannels() > 1) ? info.buffer->getSampleData (1, info.startSample) : 0;
-
-    const float* const bl = buffer.getSampleData (0, 0);
-    const float* const br = buffer.getSampleData (1, 0);
+    for (int channel = 0; channel < numChannels; ++channel)
+    {
+        destBuffers[channel] = info.buffer->getSampleData (channel, info.startSample);
+        srcBuffers[channel] = buffer.getSampleData (channel, 0);
+    }
 
     int nextPos = (bufferPos + 1) % bufferSize;
-
     for (int m = info.numSamples; --m >= 0;)
     {
         const float alpha = (float) subSampleOffset;
         const float invAlpha = 1.0f - alpha;
 
-        *dl++ = bl [bufferPos] * invAlpha + bl [nextPos] * alpha;
-
-        if (dr != 0)
-            *dr++ = br [bufferPos] * invAlpha + br [nextPos] * alpha;
+        for (int channel = 0; channel < numChannels; ++channel)
+            *destBuffers[channel]++ = srcBuffers[channel][bufferPos] * invAlpha + srcBuffers[channel][nextPos] * alpha;
 
         subSampleOffset += ratio;
 
@@ -169,14 +171,13 @@ void ResamplingAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& inf
     if (ratio < 0.9999)
     {
         // for up-sampling, apply the filter after transposing..
-
-        for (int i = jmin (2, info.buffer->getNumChannels()); --i >= 0;)
+        for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
             applyFilter (info.buffer->getSampleData (i, info.startSample), info.numSamples, filterStates[i]);
     }
     else if (ratio <= 1.0001)
     {
         // if the filter's not currently being applied, keep it stoked with the last couple of samples to avoid discontinuities
-        for (int i = jmin (2, info.buffer->getNumChannels()); --i >= 0;)
+        for (int i = jmin (numChannels, info.buffer->getNumChannels()); --i >= 0;)
         {
             const float* const endOfBuffer = info.buffer->getSampleData (i, info.startSample + info.numSamples - 1);
             FilterState& fs = filterStates[i];
@@ -235,7 +236,7 @@ void ResamplingAudioSource::setFilterCoefficients (double c1, double c2, double 
 
 void ResamplingAudioSource::resetFilters()
 {
-    zeromem (filterStates, sizeof (filterStates));
+    zeromem (filterStates, sizeof (FilterState) * numChannels);
 }
 
 void ResamplingAudioSource::applyFilter (float* samples, int num, FilterState& fs)

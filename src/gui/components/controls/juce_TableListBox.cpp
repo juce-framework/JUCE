@@ -237,14 +237,6 @@ public:
         return String::empty;
     }
 
-    juce_UseDebuggingNewOperator
-
-private:
-    TableListBox& owner;
-    int row;
-    bool isSelected, isDragging, selectRowOnMouseUp;
-    BigInteger columnsWithComponents;
-
     Component* findChildComponentForColumn (const int columnId) const
     {
         for (int i = getNumChildComponents(); --i >= 0;)
@@ -257,6 +249,14 @@ private:
 
         return 0;
     }
+
+    juce_UseDebuggingNewOperator
+
+private:
+    TableListBox& owner;
+    int row;
+    bool isSelected, isDragging, selectRowOnMouseUp;
+    BigInteger columnsWithComponents;
 
     TableListRowComp (const TableListRowComp&);
     TableListRowComp& operator= (const TableListRowComp&);
@@ -390,6 +390,12 @@ const Rectangle<int> TableListBox::getCellPosition (const int columnId,
 
     return Rectangle<int> (headerCell.getX(), row.getY(),
                            headerCell.getWidth(), row.getHeight());
+}
+
+Component* TableListBox::getCellComponent (int columnId, int rowNumber) const
+{
+    TableListRowComp* const rowComp = dynamic_cast <TableListRowComp*> (getComponentForRowNumber (rowNumber));
+    return rowComp != 0 ? rowComp->findChildComponentForColumn (columnId) : 0;
 }
 
 void TableListBox::scrollToEnsureColumnIsOnscreen (const int columnId)

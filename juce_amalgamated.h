@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	30
+#define JUCE_BUILDNUMBER	31
 
 /** Current Juce version number.
 
@@ -29669,7 +29669,7 @@ public:
 							  int numSamples,
 							  int readerStartSample,
 							  bool useReaderLeftChan,
-							  bool useReaderRightChan) throw();
+							  bool useReaderRightChan);
 
 	/** Writes a section of this buffer to an audio writer.
 
@@ -29680,7 +29680,7 @@ public:
 	*/
 	void writeToAudioWriter (AudioFormatWriter* writer,
 							 int startSample,
-							 int numSamples) const throw();
+							 int numSamples) const;
 
 	juce_UseDebuggingNewOperator
 
@@ -31739,9 +31739,11 @@ public:
 		@param inputSource		  the input source to read from
 		@param deleteInputWhenDeleted   if true, the input source will be deleted when
 										this object is deleted
+		@param numChannels		  the number of channels to process
 	*/
 	ResamplingAudioSource (AudioSource* const inputSource,
-						   const bool deleteInputWhenDeleted);
+						   const bool deleteInputWhenDeleted,
+						   int numChannels = 2);
 
 	/** Destructor. */
 	~ResamplingAudioSource();
@@ -31777,6 +31779,8 @@ private:
 	double subSampleOffset;
 	double coefficients[6];
 	CriticalSection ratioLock;
+	const int numChannels;
+	HeapBlock<float*> destBuffers, srcBuffers;
 
 	void setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6);
 	void createLowPass (const double proportionalRate);
@@ -31786,7 +31790,7 @@ private:
 		double x1, x2, y1, y2;
 	};
 
-	FilterState filterStates[2];
+	HeapBlock<FilterState> filterStates;
 	void resetFilters();
 
 	void applyFilter (float* samples, int num, FilterState& fs);
@@ -36664,6 +36668,9 @@ public:
 	*/
 	void showEditor();
 
+	/** Pops up the combo box's list. */
+	void showPopup();
+
 	/** Registers a listener that will be called when the box's content changes. */
 	void addListener (ComboBoxListener* listener) throw();
 
@@ -36772,8 +36779,6 @@ private:
 	ListenerList <ComboBoxListener> listeners;
 	ScopedPointer<Label> label;
 	String textWhenNothingSelected, noChoicesMessage;
-
-	void showPopup();
 
 	ItemInfo* getItemForId (int itemId) const throw();
 	ItemInfo* getItemForIndex (int index) const throw();
@@ -47165,9 +47170,15 @@ public:
 		If relativeToComponentTopLeft is false, the co-ords are relative to the
 		top-left of the table's top-left cell.
 	*/
-	const Rectangle<int> getCellPosition (int columnId,
-										  int rowNumber,
+	const Rectangle<int> getCellPosition (int columnId, int rowNumber,
 										  bool relativeToComponentTopLeft) const;
+
+	/** Returns the component that currently represents a given cell.
+		If the component for this cell is off-screen or if the position is out-of-range,
+		this may return 0.
+		@see getCellPosition
+	*/
+	Component* getCellComponent (int columnId, int rowNumber) const;
 
 	/** Scrolls horizontally if necessary to make sure that a particular column is visible.
 
@@ -59405,6 +59416,7 @@ public:
 			void convertToPathBreak (UndoManager* undoManager);
 			ValueTree insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
 			void removePoint (UndoManager* undoManager);
+			double findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
 
 			static const Identifier mode, startSubPathElement, closeSubPathElement,
 									lineToElement, quadraticToElement, cubicToElement;

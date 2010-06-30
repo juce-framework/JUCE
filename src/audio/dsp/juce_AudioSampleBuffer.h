@@ -407,7 +407,7 @@ public:
                               int numSamples,
                               int readerStartSample,
                               bool useReaderLeftChan,
-                              bool useReaderRightChan) throw();
+                              bool useReaderRightChan);
 
     /** Writes a section of this buffer to an audio writer.
 
@@ -418,7 +418,7 @@ public:
     */
     void writeToAudioWriter (AudioFormatWriter* writer,
                              int startSample,
-                             int numSamples) const throw();
+                             int numSamples) const;
 
     //==============================================================================
     juce_UseDebuggingNewOperator

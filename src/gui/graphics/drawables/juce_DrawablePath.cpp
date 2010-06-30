@@ -473,10 +473,10 @@ static const Point<float> findQuadraticSubdivisionPoint (double proportion, cons
     return mid1 + (mid2 - mid1) * proportion;
 }
 
-ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+double DrawablePath::ValueTreeWrapper::Element::findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const
 {
-    ValueTree newTree;
     const Identifier i (state.getType());
+    double bestProp = 0;
 
     if (i == cubicToElement)
     {
@@ -484,7 +484,6 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
 
         const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder), rp4.resolve (nameFinder) };
 
-        double bestProp = 0;
         float bestDistance = std::numeric_limits<float>::max();
 
         for (int i = 110; --i >= 0;)
@@ -499,6 +498,48 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
                 bestDistance = distance;
             }
         }
+    }
+    else if (i == quadraticToElement)
+    {
+        RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getEndPoint());
+        const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder) };
+
+        float bestDistance = std::numeric_limits<float>::max();
+
+        for (int i = 110; --i >= 0;)
+        {
+            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
+            const Point<float> centre (findQuadraticSubdivisionPoint (prop, points));
+            const float distance = centre.getDistanceFrom (targetPoint);
+
+            if (distance < bestDistance)
+            {
+                bestProp = prop;
+                bestDistance = distance;
+            }
+        }
+    }
+    else if (i == lineToElement)
+    {
+        RelativePoint rp1 (getStartPoint()), rp2 (getEndPoint());
+        const Line<float> line (rp1.resolve (nameFinder), rp2.resolve (nameFinder));
+        bestProp = line.findNearestProportionalPositionTo (targetPoint);
+    }
+
+    return bestProp;
+}
+
+ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager)
+{
+    ValueTree newTree;
+    const Identifier i (state.getType());
+
+    if (i == cubicToElement)
+    {
+        double bestProp = findProportionAlongLine (targetPoint, nameFinder);
+
+        RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getControlPoint (1)), rp4 (getEndPoint());
+        const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder), rp4.resolve (nameFinder) };
 
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * bestProp),
                            mid2 (points[1] + (points[2] - points[1]) * bestProp),
@@ -523,25 +564,10 @@ ValueTree DrawablePath::ValueTreeWrapper::Element::insertPoint (const Point<floa
     }
     else if (i == quadraticToElement)
     {
+        double bestProp = findProportionAlongLine (targetPoint, nameFinder);
+
         RelativePoint rp1 (getStartPoint()), rp2 (getControlPoint (0)), rp3 (getEndPoint());
-
         const Point<float> points[] = { rp1.resolve (nameFinder), rp2.resolve (nameFinder), rp3.resolve (nameFinder) };
-
-        double bestProp = 0;
-        float bestDistance = std::numeric_limits<float>::max();
-
-        for (int i = 110; --i >= 0;)
-        {
-            double prop = i > 10 ? ((i - 10) / 100.0) : (bestProp + ((i - 5) / 1000.0));
-            const Point<float> centre (findQuadraticSubdivisionPoint (prop, points));
-            const float distance = centre.getDistanceFrom (targetPoint);
-
-            if (distance < bestDistance)
-            {
-                bestProp = prop;
-                bestDistance = distance;
-            }
-        }
 
         const Point<float> mid1 (points[0] + (points[1] - points[0]) * bestProp),
                            mid2 (points[1] + (points[2] - points[1]) * bestProp);

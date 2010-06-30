@@ -29,6 +29,7 @@
 #include "juce_AudioSource.h"
 #include "../../threads/juce_CriticalSection.h"
 
+
 //==============================================================================
 /**
     A type of AudioSource that takes an input source and changes its sample rate.
@@ -44,9 +45,11 @@ public:
         @param inputSource              the input source to read from
         @param deleteInputWhenDeleted   if true, the input source will be deleted when
                                         this object is deleted
+        @param numChannels              the number of channels to process
     */
     ResamplingAudioSource (AudioSource* const inputSource,
-                           const bool deleteInputWhenDeleted);
+                           const bool deleteInputWhenDeleted,
+                           int numChannels = 2);
 
     /** Destructor. */
     ~ResamplingAudioSource();
@@ -84,6 +87,8 @@ private:
     double subSampleOffset;
     double coefficients[6];
     CriticalSection ratioLock;
+    const int numChannels;
+    HeapBlock<float*> destBuffers, srcBuffers;
 
     void setFilterCoefficients (double c1, double c2, double c3, double c4, double c5, double c6);
     void createLowPass (const double proportionalRate);
@@ -93,7 +98,7 @@ private:
         double x1, x2, y1, y2;
     };
 
-    FilterState filterStates[2];
+    HeapBlock<FilterState> filterStates;
     void resetFilters();
 
     void applyFilter (float* samples, int num, FilterState& fs);

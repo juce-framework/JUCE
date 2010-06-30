@@ -176,6 +176,7 @@ public:
             void convertToPathBreak (UndoManager* undoManager);
             ValueTree insertPoint (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder, UndoManager* undoManager);
             void removePoint (UndoManager* undoManager);
+            double findProportionAlongLine (const Point<float>& targetPoint, RelativeCoordinate::NamedCoordinateFinder* nameFinder) const;
 
             static const Identifier mode, startSubPathElement, closeSubPathElement,
                                     lineToElement, quadraticToElement, cubicToElement;

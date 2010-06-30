@@ -282,6 +282,9 @@ public:
     */
     void showEditor();
 
+    /** Pops up the combo box's list. */
+    void showPopup();
+
     //==============================================================================
     /** Registers a listener that will be called when the box's content changes. */
     void addListener (ComboBoxListener* listener) throw();
@@ -398,8 +401,6 @@ private:
     ListenerList <ComboBoxListener> listeners;
     ScopedPointer<Label> label;
     String textWhenNothingSelected, noChoicesMessage;
-
-    void showPopup();
 
     ItemInfo* getItemForId (int itemId) const throw();
     ItemInfo* getItemForIndex (int index) const throw();
