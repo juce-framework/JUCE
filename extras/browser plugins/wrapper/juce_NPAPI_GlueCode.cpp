@@ -686,16 +686,20 @@ private:
         if (o == 0 || ! o->hasMethod (methodName))
             return false;
 
-        HeapBlock <var> params;
-        params.calloc (argCount);
+        struct ParamHolder
+        {
+            ParamHolder (uint32_t num)  { params = new var [num]; }
+            ~ParamHolder()              { delete[] params; }
+
+            var* params;        
+        };
+
+        ParamHolder params (argCount);
 
         for (uint32_t i = 0; i < argCount; ++i)
-            params[i] = createValueFromNPVariant (npp, args[i]);
+            params.params[i] = createValueFromNPVariant (npp, args[i]);
 
-        const var result (o->invokeMethod (methodName, params, argCount));
-
-        for (int i = argCount; --i >= 0;)
-            params[i] = var();
+        const var result (o->invokeMethod (methodName, params.params, argCount));
 
         if (out != 0)
             createNPVariantFromValue (npp, *out, result);
