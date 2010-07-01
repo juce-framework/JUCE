@@ -691,7 +691,7 @@ private:
             ParamHolder (uint32_t num)  { params = new var [num]; }
             ~ParamHolder()              { delete[] params; }
 
-            var* params;        
+            var* params;
         };
 
         ParamHolder params (argCount);

@@ -500,14 +500,17 @@ void Graphics::fillCheckerBoard (const Rectangle<int>& area,
             if (! clipped.isEmpty())
             {
                 context->clipToRectangle (clipped);
-                const int startX = area.getX() + ((clipped.getX() - area.getX()) / checkWidth) * checkWidth;
-                const int startY = area.getY() + ((clipped.getY() - area.getY()) / checkHeight) * checkHeight;
+
+                const int checkNumX = (clipped.getX() - area.getX()) / checkWidth;
+                const int checkNumY = (clipped.getY() - area.getY()) / checkHeight;
+                const int startX = area.getX() + checkNumX * checkWidth;
+                const int startY = area.getY() + checkNumY * checkHeight;
                 const int right  = clipped.getRight();
                 const int bottom = clipped.getBottom();
 
                 for (int i = 0; i < 2; ++i)
                 {
-                    context->setFill (i == 0 ? colour1 : colour2);
+                    context->setFill (i == ((checkNumX ^ checkNumY) & 1) ? colour1 : colour2);
 
                     int cy = i;
                     for (int y = startY; y < bottom; y += checkHeight)

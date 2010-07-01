@@ -514,7 +514,6 @@ public:
                 if (sampleRateDropDown == 0)
                 {
                     addAndMakeVisible (sampleRateDropDown = new ComboBox (String::empty));
-                    sampleRateDropDown->addListener (this);
 
                     sampleRateLabel = new Label (String::empty, TRANS ("sample rate:"));
                     sampleRateLabel->attachToComponent (sampleRateDropDown, true);
@@ -542,7 +541,6 @@ public:
                 if (bufferSizeDropDown == 0)
                 {
                     addAndMakeVisible (bufferSizeDropDown = new ComboBox (String::empty));
-                    bufferSizeDropDown->addListener (this);
 
                     bufferSizeLabel = new Label (String::empty, TRANS ("audio buffer size:"));
                     bufferSizeLabel->attachToComponent (bufferSizeDropDown, true);
@@ -550,6 +548,7 @@ public:
                 else
                 {
                     bufferSizeDropDown->clear();
+                    bufferSizeDropDown->removeListener (this);
                 }
 
                 const int numBufferSizes = currentDevice->getNumBufferSizesAvailable();
@@ -568,6 +567,7 @@ public:
                 }
 
                 bufferSizeDropDown->setSelectedId (currentDevice->getCurrentBufferSizeSamples(), true);
+                bufferSizeDropDown->addListener (this);
             }
         }
         else

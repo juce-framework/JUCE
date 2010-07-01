@@ -40,7 +40,6 @@ public:
 
     virtual int toInt (const ValueUnion&) const                 { return 0; }
     virtual double toDouble (const ValueUnion&) const           { return 0; }
-    virtual float toFloat (const ValueUnion&) const             { return 0; }
     virtual const String toString (const ValueUnion&) const     { return String::empty; }
     virtual bool toBool (const ValueUnion&) const               { return false; }
     virtual DynamicObject* toObject (const ValueUnion&) const   { return 0; }
@@ -78,7 +77,6 @@ public:
 
     int toInt (const ValueUnion& data) const                 { return data.intValue; };
     double toDouble (const ValueUnion& data) const           { return (double) data.intValue; }
-    float toFloat (const ValueUnion& data) const             { return (float) data.intValue; }
     const String toString (const ValueUnion& data) const     { return String (data.intValue); }
     bool toBool (const ValueUnion& data) const               { return data.intValue != 0; }
 
@@ -105,7 +103,6 @@ public:
 
     int toInt (const ValueUnion& data) const                 { return (int) data.doubleValue; };
     double toDouble (const ValueUnion& data) const           { return data.doubleValue; }
-    float toFloat (const ValueUnion& data) const             { return (float) data.doubleValue; }
     const String toString (const ValueUnion& data) const     { return String (data.doubleValue); }
     bool toBool (const ValueUnion& data) const               { return data.doubleValue != 0; }
 
@@ -132,7 +129,6 @@ public:
 
     int toInt (const ValueUnion& data) const                 { return data.boolValue ? 1 : 0; };
     double toDouble (const ValueUnion& data) const           { return data.boolValue ? 1.0 : 0.0; }
-    float toFloat (const ValueUnion& data) const             { return data.boolValue ? 1.0f : 0.0f; }
     const String toString (const ValueUnion& data) const     { return String::charToString (data.boolValue ? '1' : '0'); }
     bool toBool (const ValueUnion& data) const               { return data.boolValue; }
 
@@ -161,7 +157,6 @@ public:
 
     int toInt (const ValueUnion& data) const                    { return data.stringValue->getIntValue(); };
     double toDouble (const ValueUnion& data) const              { return data.stringValue->getDoubleValue(); }
-    float toFloat (const ValueUnion& data) const                { return data.stringValue->getFloatValue(); }
     const String toString (const ValueUnion& data) const        { return *data.stringValue; }
     bool toBool (const ValueUnion& data) const                  { return data.stringValue->getIntValue() != 0
                                                                           || data.stringValue->trim().equalsIgnoreCase ("true")
@@ -250,7 +245,7 @@ var::~var() throw()
 const var var::null;
 
 //==============================================================================
-var::var (const var& valueToCopy)   : type (valueToCopy.type)
+var::var (const var& valueToCopy)  : type (valueToCopy.type)
 {
     type->createCopy (value, valueToCopy.value);
 }
@@ -280,7 +275,7 @@ var::var (const char* const value_)  : type (VariantType_String::getInstance())
     value.stringValue = new String (value_);
 }
 
-var::var (const juce_wchar* const value_) : type (VariantType_String::getInstance())
+var::var (const juce_wchar* const value_)  : type (VariantType_String::getInstance())
 {
     value.stringValue = new String (value_);
 }
@@ -309,7 +304,7 @@ bool var::isMethod() const throw()              { return type->isMethod(); }
 
 var::operator int() const                       { return type->toInt (value); }
 var::operator bool() const                      { return type->toBool (value); }
-var::operator float() const                     { return type->toFloat (value); }
+var::operator float() const                     { return (float) type->toDouble (value); }
 var::operator double() const                    { return type->toDouble (value); }
 const String var::toString() const              { return type->toString (value); }
 var::operator const String() const              { return type->toString (value); }
