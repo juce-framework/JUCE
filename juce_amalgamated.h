@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	33
+#define JUCE_BUILDNUMBER	34
 
 /** Current Juce version number.
 
@@ -5869,6 +5869,10 @@ public:
 
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
+
+  #if JUCE_IPHONE
+	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
+  #endif
 
 #else
   #define JUCE_ATOMICS_WINDOWS 1	// Windows with intrinsics
@@ -42704,7 +42708,6 @@ public:
 	/** Creates an absolute position from the parent origin on either the X or Y axis.
 
 		@param absoluteDistanceFromOrigin   the distance from the origin
-		@param isHorizontal		 this must be true if this is an X coordinate, or false if it's on the Y axis.
 	*/
 	RelativeCoordinate (double absoluteDistanceFromOrigin);
 

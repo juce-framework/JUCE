@@ -169,6 +169,11 @@ public:
 //==============================================================================
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
+
+  #if JUCE_IPHONE
+    #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
+  #endif
+
 //==============================================================================
 #else
   #define JUCE_ATOMICS_WINDOWS 1    // Windows with intrinsics

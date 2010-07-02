@@ -319,6 +319,7 @@
  #include "../src/gui/components/windows/juce_ThreadWithProgressWindow.cpp"
  #include "../src/gui/components/windows/juce_TooltipWindow.cpp"
  #include "../src/gui/components/windows/juce_TopLevelWindow.cpp"
+ #include "../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"
 #endif
 
 #if JUCE_BUILD_MISC  // (put these in misc to balance the file sizes and avoid problems in iphone build)
@@ -352,7 +353,6 @@
  #include "../src/gui/graphics/geometry/juce_PathStrokeType.cpp"
  #include "../src/gui/graphics/geometry/juce_PositionedRectangle.cpp"
  #include "../src/gui/graphics/geometry/juce_RectangleList.cpp"
- #include "../src/gui/graphics/geometry/juce_RelativeCoordinate.cpp"
  #include "../src/gui/graphics/imaging/juce_Image.cpp"
  #include "../src/gui/graphics/imaging/juce_ImageCache.cpp"
  #include "../src/gui/graphics/imaging/juce_ImageConvolutionKernel.cpp"

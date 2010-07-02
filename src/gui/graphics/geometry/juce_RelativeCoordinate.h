@@ -62,7 +62,6 @@ public:
     /** Creates an absolute position from the parent origin on either the X or Y axis.
 
         @param absoluteDistanceFromOrigin   the distance from the origin
-        @param isHorizontal                 this must be true if this is an X coordinate, or false if it's on the Y axis.
     */
     RelativeCoordinate (double absoluteDistanceFromOrigin);
 

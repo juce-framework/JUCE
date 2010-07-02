@@ -60,6 +60,10 @@ MessageManager::~MessageManager() throw()
 
     doPlatformSpecificShutdown();
 
+    // If you hit this assertion, then you've probably leaked a Component or some other
+    // kind of MessageListener object...
+    jassert (messageListeners.size() == 0);
+
     jassert (instance == this);
     instance = 0;  // do this last in case this instance is still needed by doPlatformSpecificShutdown()
 }

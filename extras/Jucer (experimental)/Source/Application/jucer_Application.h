@@ -292,7 +292,7 @@ public:
         commands.addArray (ids, numElementsInArray (ids));
     }
 
-    void getCommandInfo (const CommandID commandID, ApplicationCommandInfo& result)
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
     {
         switch (commandID)
         {
