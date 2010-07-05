@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_XmlDocument.h"
 #include "../io/streams/juce_FileInputSource.h"
+#include "../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -80,20 +81,9 @@ XmlElement* XmlDocument::getDocumentElement (const bool onlyReadOuterDocumentEle
 
         if (in != 0)
         {
-            MemoryBlock data;
-
-            in->readIntoMemoryBlock (data, onlyReadOuterDocumentElement ? 8192 : -1);
-
-            if (data.getSize() >= 2
-                 && ((data[0] == (char)-2 && data[1] == (char)-1)
-                      || (data[0] == (char)-1 && data[1] == (char)-2)))
-            {
-                textToParse = String::createStringFromData (static_cast <const char*> (data.getData()), (int) data.getSize());
-            }
-            else
-            {
-                textToParse = String::fromUTF8 (static_cast <const char*> (data.getData()), (int) data.getSize());
-            }
+            MemoryOutputStream data;
+            data.writeFromInputStream (*in, onlyReadOuterDocumentElement ? 8192 : -1);
+            textToParse = data.toString();
 
             if (! onlyReadOuterDocumentElement)
                 originalText = textToParse;

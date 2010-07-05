@@ -128,7 +128,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "../juce_ImageFileFormat.h"
 #include "../../../../io/streams/juce_InputStream.h"
-#include "../../../../io/streams/juce_OutputStream.h"
+#include "../../../../io/streams/juce_MemoryOutputStream.h"
 #include "../../colour/juce_PixelFormats.h"
 
 //==============================================================================
@@ -254,12 +254,12 @@ const Image JPEGImageFormat::decodeImage (InputStream& in)
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
-    MemoryBlock mb;
-    in.readIntoMemoryBlock (mb);
+    MemoryOutputStream mb;
+    mb.writeFromInputStream (in, -1);
 
     Image image;
 
-    if (mb.getSize() > 16)
+    if (mb.getDataSize() > 16)
     {
         struct jpeg_decompress_struct jpegDecompStruct;
 
@@ -279,7 +279,7 @@ const Image JPEGImageFormat::decodeImage (InputStream& in)
         jpegDecompStruct.src->term_source       = dummyCallback1;
 
         jpegDecompStruct.src->next_input_byte   = static_cast <const unsigned char*> (mb.getData());
-        jpegDecompStruct.src->bytes_in_buffer   = mb.getSize();
+        jpegDecompStruct.src->bytes_in_buffer   = mb.getDataSize();
 
         try
         {

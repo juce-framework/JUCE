@@ -29,6 +29,7 @@ BEGIN_JUCE_NAMESPACE
 
 #include "juce_Variant.h"
 #include "juce_DynamicObject.h"
+#include "../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -358,9 +359,9 @@ const var var::readFromStream (InputStream& input)
             case 4:     return var (input.readDouble());
             case 5:
             {
-                MemoryBlock mb;
-                input.readIntoMemoryBlock (mb, numBytes - 1);
-                return var (String::fromUTF8 (static_cast <const char*> (mb.getData()), (int) mb.getSize()));
+                MemoryOutputStream mo;
+                mo.writeFromInputStream (input, numBytes - 1);
+                return var (mo.toUTF8());
             }
 
             default:    input.skipNextBytes (numBytes - 1); break;

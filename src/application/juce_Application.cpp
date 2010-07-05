@@ -257,6 +257,8 @@ int JUCEApplication::shutdownAppAndClearUp()
 
         JUCE_TRY
         {
+            app->releaseMessageListener();
+
             shutdownJuce_GUI();
 
             returnValue = app->getApplicationReturnValue();

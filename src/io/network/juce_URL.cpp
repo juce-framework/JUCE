@@ -361,7 +361,7 @@ private:
 
     void createHeadersAndPostData (const URL& url)
     {
-        MemoryOutputStream data (256, 256, &postData);
+        MemoryOutputStream data (postData, false);
 
         if (url.getFilesToUpload().size() > 0)
         {
@@ -444,7 +444,7 @@ bool URL::readEntireBinaryStream (MemoryBlock& destData,
 
     if (in != 0)
     {
-        in->readIntoMemoryBlock (destData, -1);
+        in->readIntoMemoryBlock (destData);
         return true;
     }
 

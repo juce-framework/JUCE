@@ -41,21 +41,28 @@ class JUCE_API  MemoryOutputStream  : public OutputStream
 {
 public:
     //==============================================================================
-    /** Creates a memory stream ready for writing into.
+    /** Creates an empty memory stream ready for writing into.
 
-        @param initialSize  the intial amount of space to allocate for writing into
-        @param granularity  the increments by which the internal storage will be increased
-        @param memoryBlockToWriteTo if this is non-zero, then this block will be used as the
-                                    place that the data gets stored. If it's zero, the stream
-                                    will allocate its own storage internally, which you can
-                                    access using getData() and getDataSize()
+        @param initialSize  the intial amount of capacity to allocate for writing into
     */
-    MemoryOutputStream (size_t initialSize = 256,
-                        size_t granularity = 256,
-                        MemoryBlock* memoryBlockToWriteTo = 0);
+    MemoryOutputStream (size_t initialSize = 256);
+
+    /** Creates a memory stream for writing into into a pre-existing MemoryBlock object.
+
+        Note that the destination block will always be larger than the amount of data
+        that has been written to the stream, because the MemoryOutputStream keeps some
+        spare capactity at its end. To trim the block's size down to fit the actual
+        data, call flush(), or delete the MemoryOutputStream.
+
+        @param memoryBlockToWriteTo             the block into which new data will be written.
+        @param appendToExistingBlockContent     if this is true, the contents of the block will be
+                                                kept, and new data will be appended to it. If false,
+                                                the block will be cleared before use
+    */
+    MemoryOutputStream (MemoryBlock& memoryBlockToWriteTo,
+                        bool appendToExistingBlockContent);
 
     /** Destructor.
-
         This will free any data that was written to it.
     */
     ~MemoryOutputStream();
@@ -65,7 +72,7 @@ public:
 
         @see getDataSize
     */
-    const char* getData() const throw();
+    const void* getData() const throw();
 
     /** Returns the number of bytes of data that have been written to the stream.
 
@@ -76,26 +83,46 @@ public:
     /** Resets the stream, clearing any data that has been written to it so far. */
     void reset() throw();
 
+    /** Increases the internal storage capacity to be able to contain at least the specified
+        amount of data without needing to be resized.
+    */
+    void preallocate (size_t bytesToPreallocate);
+
     /** Returns a String created from the (UTF8) data that has been written to the stream. */
     const String toUTF8() const;
 
+    /** Attempts to detect the encoding of the data and convert it to a string.
+        @see String::createStringFromData
+    */
+    const String toString() const;
+
     //==============================================================================
+    /** If the stream is writing to a user-supplied MemoryBlock, this will trim any excess
+        capacity off the block, so that its length matches the amount of actual data that
+        has been written so far.
+    */
     void flush();
+
     bool write (const void* buffer, int howMany);
     int64 getPosition()                                 { return position; }
     bool setPosition (int64 newPosition);
+    int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
 
     //==============================================================================
     juce_UseDebuggingNewOperator
 
 private:
-    MemoryBlock* data;
-    ScopedPointer <MemoryBlock> dataToDelete;
+    MemoryBlock& data;
+    MemoryBlock internalBlock;
     size_t position, size, blockSize;
 
     MemoryOutputStream (const MemoryOutputStream&);
     MemoryOutputStream& operator= (const MemoryOutputStream&);
 };
+
+/** Copies all the data that has been written to a MemoryOutputStream into another stream. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead);
+
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__

@@ -38,6 +38,11 @@ ApplicationCommandTarget::ApplicationCommandTarget()
 
 ApplicationCommandTarget::~ApplicationCommandTarget()
 {
+    releaseMessageListener();
+}
+
+void ApplicationCommandTarget::releaseMessageListener()
+{
     messageInvoker = 0;
 }
 

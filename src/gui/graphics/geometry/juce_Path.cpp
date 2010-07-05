@@ -1385,7 +1385,7 @@ void Path::writePathToStream (OutputStream& dest) const
 
 const String Path::toString() const
 {
-    MemoryOutputStream s (2048, 2048);
+    MemoryOutputStream s (2048);
     if (! useNonZeroWinding)
         s << 'a';
 

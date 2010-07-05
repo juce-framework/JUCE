@@ -28,6 +28,7 @@
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_InputStream.h"
+#include "juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -206,62 +207,15 @@ const String InputStream::readNextLine()
 
 int InputStream::readIntoMemoryBlock (MemoryBlock& block, int numBytes)
 {
-    const int64 totalLength = getTotalLength();
-
-    if (totalLength >= 0)
-    {
-        const int totalBytesRemaining = (int) jmin ((int64) 0x7fffffff,
-                                                    totalLength - getPosition());
-
-        if (numBytes < 0)
-            numBytes = totalBytesRemaining;
-        else if (numBytes > 0)
-            numBytes = jmin (numBytes, totalBytesRemaining);
-        else
-            return 0;
-    }
-
-    const size_t originalBlockSize = block.getSize();
-    int totalBytesRead = 0;
-
-    if (numBytes > 0)
-    {
-        // know how many bytes we want, so we can resize the block first..
-        block.setSize (originalBlockSize + numBytes, false);
-        totalBytesRead = read (static_cast<char*> (block.getData()) + originalBlockSize, numBytes);
-    }
-    else
-    {
-        // read until end of stram..
-        const int chunkSize = 32768;
-
-        for (;;)
-        {
-            block.ensureSize (originalBlockSize + totalBytesRead + chunkSize, false);
-
-            const int bytesJustIn = read (static_cast<char*> (block.getData())
-                                            + originalBlockSize
-                                            + totalBytesRead,
-                                          chunkSize);
-
-            if (bytesJustIn == 0)
-                break;
-
-            totalBytesRead += bytesJustIn;
-        }
-    }
-
-    // trim off any excess left at the end
-    block.setSize (originalBlockSize +  totalBytesRead, false);
-    return totalBytesRead;
+    MemoryOutputStream mo (block, true);
+    return mo.writeFromInputStream (*this, numBytes);
 }
 
 const String InputStream::readEntireStreamAsString()
 {
-    MemoryBlock mb;
-    const int size = readIntoMemoryBlock (mb);
-
-    return String::createStringFromData (static_cast<const char*> (mb.getData()), size);
+    MemoryOutputStream mo;
+    mo.writeFromInputStream (*this, -1);
+    return mo.toString();
 }
 
 //==============================================================================

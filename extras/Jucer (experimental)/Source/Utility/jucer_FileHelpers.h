@@ -33,7 +33,7 @@ namespace FileHelpers
     int64 calculateStreamHashCode (InputStream& stream);
     int64 calculateFileHashCode (const File& file);
 
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const char* data, int numBytes);
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes);
     bool overwriteFileWithNewDataIfDifferent (const File& file, const MemoryOutputStream& newData);
     bool overwriteFileWithNewDataIfDifferent (const File& file, const String& newData);
 

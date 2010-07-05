@@ -55,7 +55,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <linux/if.h>
+#include <net/if.h>
 #include <sys/sysinfo.h>
 #include <sys/file.h>
 #include <signal.h>

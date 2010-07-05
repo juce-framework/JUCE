@@ -43,7 +43,7 @@ namespace FileHelpers
         return stream != 0 ? calculateStreamHashCode (*stream) : 0;
     }
 
-    bool overwriteFileWithNewDataIfDifferent (const File& file, const char* data, int numBytes)
+    bool overwriteFileWithNewDataIfDifferent (const File& file, const void* data, int numBytes)
     {
         if (file.getSize() == numBytes)
         {

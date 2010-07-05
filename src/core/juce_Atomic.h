@@ -144,7 +144,7 @@ public:
         This is exposed publically in case you need to manipulate it directly
         for performance reasons.
     */
-    Type value;
+    volatile Type value;
 };
 
 
@@ -158,9 +158,9 @@ public:
 
   #if JUCE_PPC || JUCE_IPHONE
     // None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-    template <typename Type> static Type OSAtomicAdd64 (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
-    template <typename Type> static Type OSAtomicIncrement64 (volatile Type* a) throw()     { jassertfalse; return ++*a; }
-    template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()     { jassertfalse; return --*a; }
+    template <typename Type> static Type OSAtomicAdd64Barrier (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
+    template <typename Type> static Type OSAtomicIncrement64Barrier (volatile Type* a) throw()     { jassertfalse; return ++*a; }
+    template <typename Type> static Type OSAtomicDecrement64Barrier (volatile Type* a) throw()     { jassertfalse; return --*a; }
     template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
         { jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
@@ -250,8 +250,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32 ((int32_t) amountToAdd, (int32_t*) &value)
-                              : (Type) OSAtomicAdd64 ((int64_t) amountToAdd, (int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (int32_t*) &value)
+                              : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
                               : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
@@ -270,8 +270,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator++() throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32 ((int32_t*) &value)
-                              : (Type) OSAtomicIncrement64 ((int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((int32_t*) &value)
+                              : (Type) OSAtomicIncrement64Barrier ((int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
                               : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
@@ -284,8 +284,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator--() throw()
 {
   #if JUCE_ATOMICS_MAC
-    return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32 ((int32_t*) &value)
-                              : (Type) OSAtomicDecrement64 ((int64_t*) &value);
+    return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((int32_t*) &value)
+                              : (Type) OSAtomicDecrement64Barrier ((int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
     return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
                               : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);

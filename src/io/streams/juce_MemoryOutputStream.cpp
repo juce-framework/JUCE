@@ -31,18 +31,22 @@ BEGIN_JUCE_NAMESPACE
 
 
 //==============================================================================
-MemoryOutputStream::MemoryOutputStream (const size_t initialSize,
-                                        const size_t blockSizeToIncreaseBy,
-                                        MemoryBlock* const memoryBlockToWriteTo)
+MemoryOutputStream::MemoryOutputStream (const size_t initialSize)
+  : data (internalBlock),
+    position (0),
+    size (0)
+{
+    internalBlock.setSize (initialSize, false);
+}
+
+MemoryOutputStream::MemoryOutputStream (MemoryBlock& memoryBlockToWriteTo,
+                                        const bool appendToExistingBlockContent)
   : data (memoryBlockToWriteTo),
     position (0),
-    size (0),
-    blockSize (jmax ((size_t) 16, blockSizeToIncreaseBy))
+    size (0)
 {
-    if (data == 0)
-        dataToDelete = data = new MemoryBlock (initialSize);
-    else
-        data->setSize (initialSize, false);
+    if (appendToExistingBlockContent)
+        position = size = memoryBlockToWriteTo.getSize();
 }
 
 MemoryOutputStream::~MemoryOutputStream()
@@ -52,8 +56,13 @@ MemoryOutputStream::~MemoryOutputStream()
 
 void MemoryOutputStream::flush()
 {
-    if (dataToDelete == 0)
-        data->setSize (size, false);
+    if (&data != &internalBlock)
+        data.setSize (size, false);
+}
+
+void MemoryOutputStream::preallocate (const size_t bytesToPreallocate)
+{
+    data.ensureSize (bytesToPreallocate + 1);
 }
 
 void MemoryOutputStream::reset() throw()
@@ -66,18 +75,12 @@ bool MemoryOutputStream::write (const void* const buffer, int howMany)
 {
     if (howMany > 0)
     {
-        size_t storageNeeded = position + howMany;
+        const size_t storageNeeded = position + howMany;
 
-        if (storageNeeded >= data->getSize())
-        {
-            // if we need more space, increase the block by at least 10%..
-            storageNeeded += jmax (blockSize, storageNeeded / 10);
-            storageNeeded = storageNeeded - (storageNeeded % blockSize) + blockSize;
+        if (storageNeeded >= data.getSize())
+            data.ensureSize ((storageNeeded + jmin (storageNeeded / 2, (size_t) (1024 * 1024)) + 32) & ~31);
 
-            data->ensureSize (storageNeeded);
-        }
-
-        data->copyFrom (buffer, (int) position, howMany);
+        memcpy (static_cast<char*> (data.getData()) + position, buffer, howMany);
         position += howMany;
         size = jmax (size, position);
     }
@@ -85,12 +88,12 @@ bool MemoryOutputStream::write (const void* const buffer, int howMany)
     return true;
 }
 
-const char* MemoryOutputStream::getData() const throw()
+const void* MemoryOutputStream::getData() const throw()
 {
-    char* const d = static_cast <char*> (data->getData());
+    void* const d = data.getData();
 
-    if (data->getSize() > size)
-        d [size] = 0;
+    if (data.getSize() > size)
+        static_cast <char*> (d) [size] = 0;
 
     return d;
 }
@@ -110,9 +113,36 @@ bool MemoryOutputStream::setPosition (int64 newPosition)
     }
 }
 
+int MemoryOutputStream::writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite)
+{
+    // before writing from an input, see if we can preallocate to make it more efficient..
+    int64 availableData = source.getTotalLength() - source.getPosition();
+
+    if (availableData > 0)
+    {
+        if (maxNumBytesToWrite > 0 && maxNumBytesToWrite < availableData)
+            availableData = maxNumBytesToWrite;
+
+        preallocate (data.getSize() + (size_t) maxNumBytesToWrite);
+    }
+
+    return OutputStream::writeFromInputStream (source, maxNumBytesToWrite);
+}
+
 const String MemoryOutputStream::toUTF8() const
 {
-    return String (getData(), getDataSize());
+    return String (static_cast <const char*> (getData()), getDataSize());
+}
+
+const String MemoryOutputStream::toString() const
+{
+    return String::createStringFromData (getData(), getDataSize());
+}
+
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead)
+{
+    stream.write (streamToRead.getData(), streamToRead.getDataSize());
+    return stream;
 }
 
 END_JUCE_NAMESPACE

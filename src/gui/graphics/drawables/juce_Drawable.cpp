@@ -35,6 +35,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../imaging/juce_ImageFileFormat.h"
 #include "../../../text/juce_XmlDocument.h"
 #include "../../../io/files/juce_FileInputStream.h"
+#include "../../../io/streams/juce_MemoryOutputStream.h"
 
 
 //==============================================================================
@@ -120,10 +121,10 @@ Drawable* Drawable::createFromImageData (const void* data, const size_t numBytes
 
 Drawable* Drawable::createFromImageDataStream (InputStream& dataSource)
 {
-    MemoryBlock mb;
-    dataSource.readIntoMemoryBlock (mb);
+    MemoryOutputStream mo;
+    mo.writeFromInputStream (dataSource, -1);
 
-    return createFromImageData (mb.getData(), mb.getSize());
+    return createFromImageData (mo.getData(), mo.getDataSize());
 }
 
 Drawable* Drawable::createFromImageFile (const File& file)

@@ -232,9 +232,11 @@ public:
     */
     ApplicationCommandTarget* findFirstTargetParentComponent();
 
-
     //==============================================================================
     juce_UseDebuggingNewOperator
+
+    /** @internal */
+    void releaseMessageListener();
 
 private:
     // (for async invocation of commands)
