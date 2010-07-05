@@ -102,7 +102,7 @@ void ProjectContentComponent::setProject (Project* newProject)
             project->addChangeListener (this);
 
             if (currentDocument == 0)
-                commandManager->invoke (CommandIDs::showProjectSettings, true);
+                invokeDirectly (CommandIDs::showProjectSettings, true);
 
             updateMissingFileStatuses();
         }

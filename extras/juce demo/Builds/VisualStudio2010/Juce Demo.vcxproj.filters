@@ -94,6 +94,9 @@
     <ClCompile Include="..\..\Binary Data\juce.png">
       <Filter>Juce Demo\Source\Binary Data</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Binary Data\juce_icon.png">
+      <Filter>Juce Demo\Source\Binary Data</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Binary Data\treedemo.xml">
       <Filter>Juce Demo\Source\Binary Data</Filter>
     </ClCompile>
@@ -150,5 +153,15 @@
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
       <Filter>Juce Library Code</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".\icon.ico">
+      <Filter>Juce Library Code</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include=".\resources.rc">
+      <Filter>Juce Library Code</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

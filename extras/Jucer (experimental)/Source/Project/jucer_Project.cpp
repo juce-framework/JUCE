@@ -322,6 +322,31 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
     props.add (new TextPropertyComponent (getBundleIdentifier(), "Bundle Identifier", 256, false));
     props.getLast()->setTooltip ("A unique identifier for this product, mainly for use in Mac builds. It should be something like 'com.yourcompanyname.yourproductname'");
 
+    {
+        OwnedArray<Project::Item> images;
+        findAllImageItems (images);
+
+        StringArray choices;
+        Array<var> ids;
+
+        choices.add ("<None>");
+        ids.add (var::null);
+        choices.add (String::empty);
+        ids.add (var::null);
+
+        for (int i = 0; i < images.size(); ++i)
+        {
+            choices.add (images.getUnchecked(i)->getName().toString());
+            ids.add (images.getUnchecked(i)->getID());
+        }
+
+        props.add (new ChoicePropertyComponent (getSmallIconImageItemID(), "Icon (small)", choices, ids));
+        props.getLast()->setTooltip ("Sets an icon to use for the executable.");
+
+        props.add (new ChoicePropertyComponent (getBigIconImageItemID(), "Icon (large)", choices, ids));
+        props.getLast()->setTooltip ("Sets an icon to use for the executable.");
+    }
+
     if (isAudioPlugin())
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"));
@@ -385,6 +410,26 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
 
     for (int i = props.size(); --i >= 0;)
         props.getUnchecked(i)->setPreferredHeight (22);
+}
+
+const Image Project::getBigIcon()
+{
+    Item icon (getMainGroup().findItemWithID (getBigIconImageItemID().toString()));
+
+    if (icon.isValid())
+        return ImageCache::getFromFile (icon.getFile());
+
+    return Image();
+}
+
+const Image Project::getSmallIcon()
+{
+    Item icon (getMainGroup().findItemWithID (getSmallIconImageItemID().toString()));
+
+    if (icon.isValid())
+        return ImageCache::getFromFile (icon.getFile());
+
+    return Image();
 }
 
 //==============================================================================
@@ -659,18 +704,24 @@ bool Project::Item::addFile (const File& file, int insertIndex)
 
         DirectoryIterator iter (file, false, "*", File::findFilesAndDirectories);
         while (iter.next())
-            group.addFile (iter.getFile(), -1);
+        {
+            if (! project.getMainGroup().findItemForFile (iter.getFile()).isValid())
+                group.addFile (iter.getFile(), -1);
+        }
 
         group.sortAlphabetically();
     }
     else if (file.existsAsFile())
     {
-        Item item (project.createNewItem (file));
-
-        if (canContain (item))
+        if (! project.getMainGroup().findItemForFile (file).isValid())
         {
-            item.setFile (file);
-            addChild (item, insertIndex);
+            Item item (project.createNewItem (file));
+
+            if (canContain (item))
+            {
+                item.setFile (file);
+                addChild (item, insertIndex);
+            }
         }
     }
     else

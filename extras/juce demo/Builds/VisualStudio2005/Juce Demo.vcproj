@@ -202,6 +202,7 @@
               <Tool Name="VCCLCompilerTool"/>
             </FileConfiguration>
           </File>
+          <File RelativePath="..\..\Binary Data\juce_icon.png"/>
           <File RelativePath="..\..\Binary Data\treedemo.xml">
             <FileConfiguration Name="Debug|Win32"
                                ExcludedFromBuild="true">
@@ -224,6 +225,8 @@
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode2.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode3.cpp"/>
       <File RelativePath="..\..\JuceLibraryCode\JuceLibraryCode4.cpp"/>
+      <File RelativePath="icon.ico"/>
+      <File RelativePath="resources.rc"/>
     </Filter>
   </Files>
   <Globals/>

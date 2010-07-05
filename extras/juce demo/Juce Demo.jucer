@@ -7,7 +7,8 @@
               pluginCode="Abcd" pluginChannelConfigs="{ {1, 1}, {2, 2} }" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginSilenceInIsSilenceOut="0"
               pluginTailLength="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="JuceDemoAU"
-              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="">
+              pluginAUViewClass="JuceDemoAU_V1" pluginRTASCategory="" icon="Duj062Top"
+              bigIcon="f4hwldS">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                juceFolder="../../../juce"/>
@@ -97,6 +98,7 @@
               file="Binary Data/demo table data.xml"/>
         <FILE id="lEVfO5KTK" name="icons.zip" compile="0" resource="1" file="Binary Data/icons.zip"/>
         <FILE id="Duj062Top" name="juce.png" compile="0" resource="1" file="Binary Data/juce.png"/>
+        <FILE id="f4hwldS" name="juce_icon.png" compile="0" resource="0" file="Binary Data/juce_icon.png"/>
         <FILE id="UvweoM7iM" name="treedemo.xml" compile="0" resource="1" file="Binary Data/treedemo.xml"/>
       </GROUP>
     </GROUP>

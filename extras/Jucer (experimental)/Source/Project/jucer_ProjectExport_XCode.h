@@ -109,6 +109,9 @@ public:
     {
         infoPlistFile = getTargetFolder().getChildFile ("Info.plist");
 
+        if (! createIconFile())
+            return "Can't write the icon file";
+
         File projectBundle (getProjectBundle());
         if (! projectBundle.createDirectory())
             return "Can't write to the target directory";
@@ -135,7 +138,7 @@ private:
     OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, groups, misc, projectConfigs, targetConfigs;
     StringArray buildPhaseIDs, resourceIDs, sourceIDs, frameworkIDs;
     StringArray frameworkFileIDs, rezFileIDs, resourceFileRefs;
-    File infoPlistFile;
+    File infoPlistFile, iconFile;
     int64 projectIDSalt;
     const bool iPhone;
 
@@ -179,6 +182,14 @@ private:
             resourceFileRefs.add (createID (plistPath));
         }
 
+        if (iconFile.exists())
+        {
+            RelativePath iconPath (iconFile, getTargetFolder(), RelativePath::buildTargetFolder);
+            addFileReference (iconPath);
+            resourceIDs.add (addBuildFile (iconPath, false, false));
+            resourceFileRefs.add (createID (iconPath));
+        }
+
         addProjectItem (project.getMainGroup());
 
         for (int i = 0; i < project.getNumConfigurations(); ++i)
@@ -210,6 +221,109 @@ private:
         addProjectObject();
     }
 
+    static const Image fixMacIconImageSize (Image& image)
+    {
+        const int w = image.getWidth();
+        const int h = image.getHeight();
+
+        if (w != h || (w != 16 && w != 32 && w != 48 && w != 64))
+        {
+            const int newSize = w >= 128 ? 128 : (w >= 64 ? 64 : (w >= 32 ? 32 : 16));
+            Image newIm (Image::ARGB, newSize, newSize, true);
+            Graphics g (newIm);
+            g.drawImageWithin (image, 0, 0, newSize, newSize,
+                               RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+            return newIm;
+        }
+
+        return image;
+    }
+
+    void writeIcnsFile (const Array<Image>& images, OutputStream& out)
+    {
+        MemoryOutputStream data;
+
+        for (int i = 0; i < images.size(); ++i)
+        {
+            Image image (fixMacIconImageSize (images.getReference (i)));
+
+            const int w = image.getWidth();
+            const int h = image.getHeight();
+
+            const char* type = 0;
+            const char* maskType = 0;
+
+            if (w == h)
+            {
+                if (w == 16)  { type = "is32"; maskType = "s8mk"; }
+                if (w == 32)  { type = "il32"; maskType = "l8mk"; }
+                if (w == 48)  { type = "ih32"; maskType = "h8mk"; }
+                if (w == 128) { type = "it32"; maskType = "t8mk"; }
+            }
+
+            if (type != 0)
+            {
+                data.write (type, 4);
+                data.writeIntBigEndian (8 + 4 * w * h);
+
+                const Image::BitmapData bitmap (image, 0, 0, w, h);
+
+                int y;
+                for (y = 0; y < h; ++y)
+                {
+                    for (int x = 0; x < w; ++x)
+                    {
+                        const Colour pixel (bitmap.getPixelColour (x, y));
+                        data.writeByte ((char) pixel.getAlpha());
+                        data.writeByte ((char) pixel.getRed());
+                        data.writeByte ((char) pixel.getGreen());
+                        data.writeByte ((char) pixel.getBlue());
+                    }
+                }
+
+                data.write (maskType, 4);
+                data.writeIntBigEndian (8 + w * h);
+
+                for (y = 0; y < h; ++y)
+                {
+                    for (int x = 0; x < w; ++x)
+                    {
+                        const Colour pixel (bitmap.getPixelColour (x, y));
+                        data.writeByte ((char) pixel.getAlpha());
+                    }
+                }
+            }
+        }
+
+        jassert (data.getDataSize() > 0); // no suitable sized images?
+
+        out.write ("icns", 4);
+        out.writeIntBigEndian (data.getDataSize() + 8);
+        out << data;
+    }
+
+    bool createIconFile()
+    {
+        Array<Image> images;
+
+        Image bigIcon (project.getBigIcon());
+        if (bigIcon.isValid())
+            images.add (bigIcon);
+
+        Image smallIcon (project.getSmallIcon());
+        if (smallIcon.isValid())
+            images.add (smallIcon);
+
+        if (images.size() == 0)
+            return true;
+
+        MemoryOutputStream mo;
+        writeIcnsFile (images, mo);
+
+        iconFile = getTargetFolder().getChildFile ("Icon.icns");
+        return FileHelpers::overwriteFileWithNewDataIfDifferent (iconFile, mo);
+    }
+
     bool writeInfoPlistFile()
     {
         if (! hasPList())
@@ -219,7 +333,7 @@ private:
         XmlElement* dict = plist.createNewChildElement ("dict");
 
         addPlistDictionaryKey (dict, "CFBundleExecutable",          "${EXECUTABLE_NAME}");
-        addPlistDictionaryKey (dict, "CFBundleIconFile",            "");
+        addPlistDictionaryKey (dict, "CFBundleIconFile",            iconFile.exists() ? iconFile.getFileName() : String::empty);
         addPlistDictionaryKey (dict, "CFBundleIdentifier",          project.getBundleIdentifier().toString());
         addPlistDictionaryKey (dict, "CFBundleName",                project.getProjectName().toString());
 

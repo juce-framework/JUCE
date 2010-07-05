@@ -12,6 +12,7 @@
 		36AEC0EAE7AB9D061AD9EFEF = { isa = PBXBuildFile; fileRef = 7B6D428682221857EAEA1C7D; };
 		F1BAE9DCD179C8784FF28F8D = { isa = PBXBuildFile; fileRef = 4A96850C150C1C6D87A0D21A; };
 		268F2BF480CF9844E2F2B974 = { isa = PBXBuildFile; fileRef = B72353F9624D99DB6F93E400; };
+		C0A3C433D146C7E1FFCADFB2 = { isa = PBXBuildFile; fileRef = 4ADECB09FD213B2E910EA229; };
 		78A66C2F9A9E2E6D011D8E5E = { isa = PBXBuildFile; fileRef = 885A20D277AD743C21C822B5; };
 		CE5C46E66485B7D77B5ADB4E = { isa = PBXBuildFile; fileRef = 42291DB48BF81754D90FE200; };
 		2E2DB52D03DD6A56FAC937A4 = { isa = PBXBuildFile; fileRef = 0704E2D6B0D1B38FBBBC6B85; };
@@ -46,6 +47,7 @@
 		B72353F9624D99DB6F93E400 = { isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		39B98C60B57B831FE5215CDD = { isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JuceDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A9DEA62F6A3CD1FB5CF105B = { isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = Info.plist; sourceTree = SOURCE_ROOT; };
+		4ADECB09FD213B2E910EA229 = { isa = PBXFileReference; lastKnownFileType = file.icns; name = Icon.icns; path = Icon.icns; sourceTree = SOURCE_ROOT; };
 		885A20D277AD743C21C822B5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ApplicationStartup.cpp; path = ../../Source/ApplicationStartup.cpp; sourceTree = SOURCE_ROOT; };
 		42291DB48BF81754D90FE200 = { isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MainDemoWindow.cpp; path = ../../Source/MainDemoWindow.cpp; sourceTree = SOURCE_ROOT; };
 		49138F5652E637AA67CD4B70 = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainDemoWindow.h; path = ../../Source/MainDemoWindow.h; sourceTree = SOURCE_ROOT; };
@@ -80,6 +82,7 @@
 		A869663CA0E96FE15BB42A97 = { isa = PBXFileReference; lastKnownFileType = file.xml; name = "demo table data.xml"; path = "../../Binary Data/demo table data.xml"; sourceTree = SOURCE_ROOT; };
 		A76B69386F1F19647804510D = { isa = PBXFileReference; lastKnownFileType = file.zip; name = icons.zip; path = "../../Binary Data/icons.zip"; sourceTree = SOURCE_ROOT; };
 		013E12213AD7B4BEB28A31BE = { isa = PBXFileReference; lastKnownFileType = image.png; name = juce.png; path = "../../Binary Data/juce.png"; sourceTree = SOURCE_ROOT; };
+		3369CDF7AFD79D6F3B3744B1 = { isa = PBXFileReference; lastKnownFileType = image.png; name = juce_icon.png; path = "../../Binary Data/juce_icon.png"; sourceTree = SOURCE_ROOT; };
 		C7327AD5191A22C1FBD4F5F9 = { isa = PBXFileReference; lastKnownFileType = file.xml; name = treedemo.xml; path = "../../Binary Data/treedemo.xml"; sourceTree = SOURCE_ROOT; };
 		EE37A0ECE471A928C6170F9B = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AppConfig.h; path = ../../JuceLibraryCode/AppConfig.h; sourceTree = SOURCE_ROOT; };
 		A6B37799E63CCE882A3383FB = { isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
@@ -121,6 +124,7 @@
 				A869663CA0E96FE15BB42A97,
 				A76B69386F1F19647804510D,
 				013E12213AD7B4BEB28A31BE,
+				3369CDF7AFD79D6F3B3744B1,
 				C7327AD5191A22C1FBD4F5F9 ); name = "Binary Data"; sourceTree = "<group>"; };
 		A10CCE1B2A215D5AE12386E3 = { isa = PBXGroup; children = (
 				885A20D277AD743C21C822B5,
@@ -139,7 +143,8 @@
 				4D526A336B2E97ED42CADAD7,
 				8679333E781A0A0116AE5D26 ); name = "Juce Library Code"; sourceTree = "<group>"; };
 		019CD423F1EFF7A1A0A079DD = { isa = PBXGroup; children = (
-				1A9DEA62F6A3CD1FB5CF105B ); name = Resources; sourceTree = "<group>"; };
+				1A9DEA62F6A3CD1FB5CF105B,
+				4ADECB09FD213B2E910EA229 ); name = Resources; sourceTree = "<group>"; };
 		244B9AF7D858999910FD243E = { isa = PBXGroup; children = (
 				CE3A43E4FB4D61350C000764,
 				90E63FC1333F952D526FF194,
@@ -219,7 +224,8 @@
 		C264FE1BF62B589B345E0C81 = { isa = XCConfigurationList; buildConfigurations = (
 				F46B3E8DBAFA746E04F4F62C,
 				8EF7C7FFD55219581A5075F3 ); defaultConfigurationIsVisible = 0; defaultConfigurationName = Debug; };
-		AE930F136F638C3C939F7146 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (  ); runOnlyForDeploymentPostprocessing = 0; };
+		AE930F136F638C3C939F7146 = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (
+				C0A3C433D146C7E1FFCADFB2 ); runOnlyForDeploymentPostprocessing = 0; };
 		7A3A0C722E5F96990CA1B5F2 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (
 				78A66C2F9A9E2E6D011D8E5E,
 				CE5C46E66485B7D77B5ADB4E,

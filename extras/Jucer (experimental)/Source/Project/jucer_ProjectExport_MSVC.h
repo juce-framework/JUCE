@@ -35,7 +35,7 @@ class MSVCProjectExporterBase   : public ProjectExporter
 public:
     //==============================================================================
     MSVCProjectExporterBase (Project& project_, const ValueTree& settings_, const char* const folderName)
-        : ProjectExporter (project_, settings_)
+        : ProjectExporter (project_, settings_), hasIcon (false)
     {
         if (getTargetLocation().toString().isEmpty())
             getTargetLocation() = getDefaultBuildsRootFolder() + folderName;
@@ -78,6 +78,8 @@ public:
 
 protected:
     String projectGUID;
+    File rcFile, iconFile;
+    bool hasIcon;
 
     const File getProjectFile (const String& extension) const   { return getTargetFolder().getChildFile (project.getProjectFilenameRoot()).withFileExtension (extension); }
 
@@ -255,6 +257,180 @@ protected:
             << "EndGlobal" << newLine;
     }
 
+    //==============================================================================
+    static bool writeRCFile (const File& file, const File& iconFile)
+    {
+        return file.deleteFile()
+                && file.appendText ("IDI_ICON1 ICON DISCARDABLE "
+                                        + iconFile.getFileName().quoted(), false, false);
+    }
+
+    static void writeIconFile (const Array<Image>& images, OutputStream& out)
+    {
+        out.writeShort (0); // reserved
+        out.writeShort (1); // .ico tag
+        out.writeShort ((short) images.size());
+
+        MemoryOutputStream dataBlock;
+
+        const int imageDirEntrySize = 16;
+        const int dataBlockStart = 6 + images.size() * imageDirEntrySize;
+
+        for (int i = 0; i < images.size(); ++i)
+        {
+            const Image& image = images.getReference (i);
+            const int w = image.getWidth();
+            const int h = image.getHeight();
+            const int maskStride = (w / 8 + 3) & ~3;
+
+            const size_t oldDataSize = dataBlock.getDataSize();
+            dataBlock.writeInt (40); // bitmapinfoheader size
+            dataBlock.writeInt (w);
+            dataBlock.writeInt (h * 2);
+            dataBlock.writeShort (1); // planes
+            dataBlock.writeShort (32); // bits
+            dataBlock.writeInt (0); // compression
+            dataBlock.writeInt ((h * w * 4) + (h * maskStride)); // size image
+            dataBlock.writeInt (0); // x pixels per meter
+            dataBlock.writeInt (0); // y pixels per meter
+            dataBlock.writeInt (0); // clr used
+            dataBlock.writeInt (0); // clr important
+
+            const Image::BitmapData bitmap (image, 0, 0, w, h);
+            const int alphaThreshold = 5;
+
+            int y;
+            for (y = h; --y >= 0;)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    const Colour pixel (bitmap.getPixelColour (x, y));
+
+                    if (pixel.getAlpha() <= alphaThreshold)
+                    {
+                        dataBlock.writeInt (0);
+                    }
+                    else
+                    {
+                        dataBlock.writeByte ((char) pixel.getBlue());
+                        dataBlock.writeByte ((char) pixel.getGreen());
+                        dataBlock.writeByte ((char) pixel.getRed());
+                        dataBlock.writeByte ((char) pixel.getAlpha());
+                    }
+                }
+            }
+
+            for (y = h; --y >= 0;)
+            {
+                int mask = 0, count = 0;
+
+                for (int x = 0; x < w; ++x)
+                {
+                    const Colour pixel (bitmap.getPixelColour (x, y));
+
+                    mask <<= 1;
+                    if (pixel.getAlpha() <= alphaThreshold)
+                        mask |= 1;
+
+                    if (++count == 8)
+                    {
+                        dataBlock.writeByte (mask);
+                        count = 0;
+                        mask = 0;
+                    }
+                }
+
+                if (mask != 0)
+                    dataBlock.writeByte (mask);
+
+                for (int i = maskStride - w / 8; --i >= 0;)
+                    dataBlock.writeByte (0);
+            }
+
+            out.writeByte ((char) w);
+            out.writeByte ((char) h);
+            out.writeByte (0);
+            out.writeByte (0);
+            out.writeShort (1); // colour planes
+            out.writeShort (32); // bits per pixel
+            out.writeInt ((int) (dataBlock.getDataSize() - oldDataSize));
+            out.writeInt (dataBlockStart + oldDataSize);
+        }
+
+        jassert (out.getPosition() == dataBlockStart);
+        out << dataBlock;
+    }
+
+    static const Image getBestIconImage (const Image& im1, const Image& im2, int size)
+    {
+        Image im;
+
+        if (im1.isValid() && im2.isValid())
+        {
+            if (im1.getWidth() >= size && im2.getWidth() >= size)
+                im = im1.getWidth() < im2.getWidth() ? im1 : im2;
+            else if (im1.getWidth() >= size)
+                im = im1;
+            else if (im2.getWidth() >= size)
+                im = im2;
+            else
+                return Image();
+        }
+        else
+        {
+            im = im1.isValid() ? im1 : im2;
+        }
+
+        if (size == im.getWidth() && size == im.getHeight())
+            return im;
+
+        if (im.getWidth() < size && im.getHeight() < size)
+            return Image();
+
+        Image newIm (Image::ARGB, size, size, true);
+        Graphics g (newIm);
+        g.drawImageWithin (im, 0, 0, size, size,
+                           RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, false);
+        return newIm;
+    }
+
+    bool createIconFile()
+    {
+        Array<Image> images;
+
+        const Image smallIcon (project.getSmallIcon());
+        const Image bigIcon (project.getBigIcon());
+
+        Image im (getBestIconImage (smallIcon, bigIcon, 16));
+        if (im.isValid())
+            images.add (im);
+
+        im = getBestIconImage (smallIcon, bigIcon, 32);
+        if (im.isValid())
+            images.add (im);
+
+        im = getBestIconImage (smallIcon, bigIcon, 48);
+        if (im.isValid())
+            images.add (im);
+
+        im = getBestIconImage (smallIcon, bigIcon, 128);
+        if (im.isValid())
+            images.add (im);
+
+        if (images.size() == 0)
+            return true;
+
+        MemoryOutputStream mo;
+        writeIconFile (images, mo);
+
+        iconFile = getTargetFolder().getChildFile ("icon.ico");
+        rcFile = getTargetFolder().getChildFile ("resources.rc");
+
+        hasIcon = FileHelpers::overwriteFileWithNewDataIfDifferent (iconFile, mo)
+                    && writeRCFile (rcFile, iconFile);
+        return hasIcon;
+    }
+
     MSVCProjectExporterBase (const MSVCProjectExporterBase&);
     MSVCProjectExporterBase& operator= (const MSVCProjectExporterBase&);
 };
@@ -298,6 +474,14 @@ public:
     //==============================================================================
     const String create()
     {
+        createIconFile();
+
+        if (hasIcon)
+        {
+            juceWrapperFiles.add (RelativePath (iconFile.getFileName(), RelativePath::buildTargetFolder));
+            juceWrapperFiles.add (RelativePath (rcFile.getFileName(), RelativePath::buildTargetFolder));
+        }
+
         {
             XmlElement projectXml ("VisualStudioProject");
             fillInProjectXml (projectXml);
@@ -413,7 +597,7 @@ protected:
             XmlElement* const group = createGroup (groupName, parent);
 
             for (int i = 0; i < files.size(); ++i)
-                if (files.getReference(i).hasFileExtension ("cpp;c;h"))
+                if (files.getReference(i).hasFileExtension ("cpp;c;cc;h;hpp;rc;ico"))
                     addFile (files.getReference(i), *group, false,
                              useStdcall && shouldFileBeCompiledByDefault (files.getReference(i)));
         }
@@ -953,6 +1137,8 @@ public:
     //==============================================================================
     const String create()
     {
+        createIconFile();
+
         {
             XmlElement projectXml ("Project");
             fillInProjectXml (projectXml);
@@ -1171,6 +1357,21 @@ protected:
             addFilesToCompile (getRTASFilesRequired(), *cppFiles, *headerFiles, true);
         }
 
+        if (hasIcon)
+        {
+            {
+                XmlElement* iconGroup = projectXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = iconGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+            }
+
+            {
+                XmlElement* rcGroup = projectXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", ".\\" + rcFile.getFileName());
+            }
+        }
+
         {
             XmlElement* e = projectXml.createNewChildElement ("Import");
             e->setAttribute ("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");
@@ -1313,6 +1514,23 @@ protected:
         addFilesToFilter (juceWrapperFiles, project.getJuceCodeGroupName(), *cpps, *headers, *groups);
         addFilesToFilter (getVSTFilesRequired(), "Juce VST Wrapper", *cpps, *headers, *groups);
         addFilesToFilter (getRTASFilesRequired(), "Juce RTAS Wrapper", *cpps, *headers, *groups);
+
+        if (iconFile.exists())
+        {
+            {
+                XmlElement* iconGroup = filterXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = iconGroup->createNewChildElement ("None");
+                e->setAttribute ("Include", ".\\" + iconFile.getFileName());
+                e->createNewChildElement ("Filter")->addTextElement (project.getJuceCodeGroupName());
+            }
+
+            {
+                XmlElement* rcGroup = filterXml.createNewChildElement ("ItemGroup");
+                XmlElement* e = rcGroup->createNewChildElement ("ResourceCompile");
+                e->setAttribute ("Include", ".\\" + rcFile.getFileName());
+                e->createNewChildElement ("Filter")->addTextElement (project.getJuceCodeGroupName());
+            }
+        }
     }
 
     //==============================================================================

@@ -102,6 +102,11 @@ public:
     //==============================================================================
     Value getProjectValue (const Identifier& name) const       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
 
+    Value getBigIconImageItemID() const                 { return getProjectValue ("bigIcon"); }
+    Value getSmallIconImageItemID() const               { return getProjectValue ("smallIcon"); }
+    const Image getBigIcon();
+    const Image getSmallIcon();
+
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
     Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }

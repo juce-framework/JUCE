@@ -308,7 +308,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
 
             defs += line1;
 
-            MemoryOutputStream out (65536, 16384);
+            MemoryOutputStream out (65536);
             int charsOnLine = line1.length();
 
             for (size_t j = 0; j < mb.getSize(); ++j)

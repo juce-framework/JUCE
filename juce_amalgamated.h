@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	34
+#define JUCE_BUILDNUMBER	35
 
 /** Current Juce version number.
 
@@ -2574,83 +2574,83 @@ private:
 };
 
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (const char* string1,	   const String& string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (const char* string1,	   const String& string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (const juce_wchar* string1, const String& string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (const juce_wchar* string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (char string1,		  const String& string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (char string1,		  const String& string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (juce_wchar string1,	const String& string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (juce_wchar string1,	const String& string2);
 
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (String string1, const String& string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const String& string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (String string1, const char* string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const char* string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (String string1, const juce_wchar* string2);
+const String JUCE_PUBLIC_FUNCTION operator+  (String string1, const juce_wchar* string2);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (String string1, char characterToAppend);
+const String JUCE_PUBLIC_FUNCTION operator+  (String string1, char characterToAppend);
 /** Concatenates two strings. */
-const String JUCE_CALLTYPE operator+  (String string1, juce_wchar characterToAppend);
+const String JUCE_PUBLIC_FUNCTION operator+  (String string1, juce_wchar characterToAppend);
 
 /** Appends a character at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, char characterToAppend);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, char characterToAppend);
 /** Appends a character at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, juce_wchar characterToAppend);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, juce_wchar characterToAppend);
 /** Appends a string to the end of the first one. */
-String& JUCE_CALLTYPE operator<< (String& string1, const char* string2);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const char* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_CALLTYPE operator<< (String& string1, const juce_wchar* string2);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const juce_wchar* string2);
 /** Appends a string to the end of the first one. */
-String& JUCE_CALLTYPE operator<< (String& string1, const String& string2);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, const String& string2);
 
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, short number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, short number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, int number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, unsigned int number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned int number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, long number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, unsigned long number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, unsigned long number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, float number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, float number);
 /** Appends a decimal number at the end of a string. */
-String& JUCE_CALLTYPE operator<< (String& string1, double number);
+String& JUCE_PUBLIC_FUNCTION operator<< (String& string1, double number);
 
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator== (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator== (const String& string1, const char* string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator== (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator== (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator!= (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator!= (const String& string1, const char* string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const char* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator!= (const String& string1, const juce_wchar* string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator!= (const String& string1, const juce_wchar* string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator>  (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator>  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator<  (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator<  (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator>= (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator>= (const String& string1, const String& string2) throw();
 /** Case-sensitive comparison of two strings. */
-bool JUCE_CALLTYPE operator<= (const String& string1, const String& string2) throw();
+bool JUCE_PUBLIC_FUNCTION operator<= (const String& string1, const String& string2) throw();
 
 /** This streaming override allows you to pass a juce String directly into std output streams.
 	This is very handy for writing strings to std::cout, std::cerr, etc.
 */
 template <class charT, class traits>
-std::basic_ostream <charT, traits>& JUCE_CALLTYPE operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
+std::basic_ostream <charT, traits>& JUCE_PUBLIC_FUNCTION operator<< (std::basic_ostream <charT, traits>& stream, const String& stringToWrite)
 {
 	return stream << stringToWrite.toUTF8();
 }
 
 /** Writes a string to an OutputStream as UTF8. */
-OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const String& text);
+OutputStream& JUCE_PUBLIC_FUNCTION operator<< (OutputStream& stream, const String& text);
 
 #endif   // __JUCE_STRING_JUCEHEADER__
 /*** End of inlined file: juce_String.h ***/
@@ -5847,7 +5847,7 @@ public:
 		This is exposed publically in case you need to manipulate it directly
 		for performance reasons.
 	*/
-	Type value;
+	volatile Type value;
 };
 
 /*
@@ -5859,9 +5859,9 @@ public:
 
   #if JUCE_PPC || JUCE_IPHONE
 	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
-	template <typename Type> static Type OSAtomicAdd64 (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
-	template <typename Type> static Type OSAtomicIncrement64 (volatile Type* a) throw()	 { jassertfalse; return ++*a; }
-	template <typename Type> static Type OSAtomicDecrement64 (volatile Type* a) throw()	 { jassertfalse; return --*a; }
+	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
+	template <typename Type> static Type OSAtomicIncrement64Barrier (volatile Type* a) throw()	 { jassertfalse; return ++*a; }
+	template <typename Type> static Type OSAtomicDecrement64Barrier (volatile Type* a) throw()	 { jassertfalse; return --*a; }
 	template <typename Type> static bool OSAtomicCompareAndSwap64Barrier (Type old, Type newValue, volatile Type* value) throw()
 		{ jassertfalse; if (old == *value) { *value = newValue; return true; } return false; }
 	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1
@@ -5948,8 +5948,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator+= (const Type amountToAdd) throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32 ((int32_t) amountToAdd, (int32_t*) &value)
-							  : (Type) OSAtomicAdd64 ((int64_t) amountToAdd, (int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicAdd32Barrier ((int32_t) amountToAdd, (int32_t*) &value)
+							  : (Type) OSAtomicAdd64Barrier ((int64_t) amountToAdd, (int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) (juce_InterlockedExchangeAdd ((volatile long*) &value, (long) amountToAdd) + (long) amountToAdd)
 							  : (Type) (juce_InterlockedExchangeAdd64 ((volatile __int64*) &value, (__int64) amountToAdd) + (__int64) amountToAdd);
@@ -5968,8 +5968,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator++() throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32 ((int32_t*) &value)
-							  : (Type) OSAtomicIncrement64 ((int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicIncrement32Barrier ((int32_t*) &value)
+							  : (Type) OSAtomicIncrement64Barrier ((int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedIncrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedIncrement64 ((volatile __int64*) &value);
@@ -5982,8 +5982,8 @@ template <typename Type>
 inline Type Atomic<Type>::operator--() throw()
 {
   #if JUCE_ATOMICS_MAC
-	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32 ((int32_t*) &value)
-							  : (Type) OSAtomicDecrement64 ((int64_t*) &value);
+	return sizeof (Type) == 4 ? (Type) OSAtomicDecrement32Barrier ((int32_t*) &value)
+							  : (Type) OSAtomicDecrement64Barrier ((int64_t*) &value);
   #elif JUCE_ATOMICS_WINDOWS
 	return sizeof (Type) == 4 ? (Type) juce_InterlockedDecrement ((volatile long*) &value)
 							  : (Type) juce_InterlockedDecrement64 ((volatile __int64*) &value);
@@ -16706,21 +16706,28 @@ class JUCE_API  MemoryOutputStream  : public OutputStream
 {
 public:
 
-	/** Creates a memory stream ready for writing into.
+	/** Creates an empty memory stream ready for writing into.
 
-		@param initialSize  the intial amount of space to allocate for writing into
-		@param granularity  the increments by which the internal storage will be increased
-		@param memoryBlockToWriteTo if this is non-zero, then this block will be used as the
-									place that the data gets stored. If it's zero, the stream
-									will allocate its own storage internally, which you can
-									access using getData() and getDataSize()
+		@param initialSize  the intial amount of capacity to allocate for writing into
 	*/
-	MemoryOutputStream (size_t initialSize = 256,
-						size_t granularity = 256,
-						MemoryBlock* memoryBlockToWriteTo = 0);
+	MemoryOutputStream (size_t initialSize = 256);
+
+	/** Creates a memory stream for writing into into a pre-existing MemoryBlock object.
+
+		Note that the destination block will always be larger than the amount of data
+		that has been written to the stream, because the MemoryOutputStream keeps some
+		spare capactity at its end. To trim the block's size down to fit the actual
+		data, call flush(), or delete the MemoryOutputStream.
+
+		@param memoryBlockToWriteTo		 the block into which new data will be written.
+		@param appendToExistingBlockContent	 if this is true, the contents of the block will be
+												kept, and new data will be appended to it. If false,
+												the block will be cleared before use
+	*/
+	MemoryOutputStream (MemoryBlock& memoryBlockToWriteTo,
+						bool appendToExistingBlockContent);
 
 	/** Destructor.
-
 		This will free any data that was written to it.
 	*/
 	~MemoryOutputStream();
@@ -16729,7 +16736,7 @@ public:
 
 		@see getDataSize
 	*/
-	const char* getData() const throw();
+	const void* getData() const throw();
 
 	/** Returns the number of bytes of data that have been written to the stream.
 
@@ -16740,24 +16747,43 @@ public:
 	/** Resets the stream, clearing any data that has been written to it so far. */
 	void reset() throw();
 
+	/** Increases the internal storage capacity to be able to contain at least the specified
+		amount of data without needing to be resized.
+	*/
+	void preallocate (size_t bytesToPreallocate);
+
 	/** Returns a String created from the (UTF8) data that has been written to the stream. */
 	const String toUTF8() const;
 
+	/** Attempts to detect the encoding of the data and convert it to a string.
+		@see String::createStringFromData
+	*/
+	const String toString() const;
+
+	/** If the stream is writing to a user-supplied MemoryBlock, this will trim any excess
+		capacity off the block, so that its length matches the amount of actual data that
+		has been written so far.
+	*/
 	void flush();
+
 	bool write (const void* buffer, int howMany);
 	int64 getPosition()				 { return position; }
 	bool setPosition (int64 newPosition);
+	int writeFromInputStream (InputStream& source, int64 maxNumBytesToWrite);
 
 	juce_UseDebuggingNewOperator
 
 private:
-	MemoryBlock* data;
-	ScopedPointer <MemoryBlock> dataToDelete;
-	size_t position, size, blockSize;
+	MemoryBlock& data;
+	MemoryBlock internalBlock;
+	size_t position, size;
 
 	MemoryOutputStream (const MemoryOutputStream&);
 	MemoryOutputStream& operator= (const MemoryOutputStream&);
 };
+
+/** Copies all the data that has been written to a MemoryOutputStream into another stream. */
+OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryOutputStream& streamToRead);
 
 #endif   // __JUCE_MEMORYOUTPUTSTREAM_JUCEHEADER__
 /*** End of inlined file: juce_MemoryOutputStream.h ***/
@@ -27730,6 +27756,9 @@ public:
 	ApplicationCommandTarget* findFirstTargetParentComponent();
 
 	juce_UseDebuggingNewOperator
+
+	/** @internal */
+	void releaseMessageListener();
 
 private:
 	// (for async invocation of commands)

@@ -115,7 +115,7 @@ public:
 private:
     MemoryBlock& data;
     MemoryBlock internalBlock;
-    size_t position, size, blockSize;
+    size_t position, size;
 
     MemoryOutputStream (const MemoryOutputStream&);
     MemoryOutputStream& operator= (const MemoryOutputStream&);
