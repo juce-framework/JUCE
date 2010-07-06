@@ -284,7 +284,7 @@ public:
                 if (peer != 0)
                 {
                     // (seems to be required in PT6.4, but not in 7.x)
-                    peer->repaint (0, 0, wrapper->getWidth(), wrapper->getHeight());
+                    peer->repaint (wrapper->getLocalBounds());
                 }
             }
 #endif

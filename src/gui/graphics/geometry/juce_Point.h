@@ -159,6 +159,9 @@ public:
     /** Casts this point to a Point<float> object. */
     const Point<float> toFloat() const throw()                          { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
+    /** Casts this point to a Point<int> object. */
+    const Point<int> toInt() const throw()                              { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+
     /** Returns the point as a string in the form "x, y". */
     const String toString() const                                       { return String (x) + ", " + String (y); }
 

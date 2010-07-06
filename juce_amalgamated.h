@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	36
+#define JUCE_BUILDNUMBER	37
 
 /** Current Juce version number.
 
@@ -19265,6 +19265,9 @@ public:
 	/** Casts this point to a Point<float> object. */
 	const Point<float> toFloat() const throw()			  { return Point<float> (static_cast <float> (x), static_cast<float> (y)); }
 
+	/** Casts this point to a Point<int> object. */
+	const Point<int> toInt() const throw()				  { return Point<int> (static_cast <int> (x), static_cast<int> (y)); }
+
 	/** Returns the point as a string in the form "x, y". */
 	const String toString() const                                       { return String (x) + ", " + String (y); }
 
@@ -20506,13 +20509,13 @@ public:
 	const Point<ValueType> getTopLeft() const throw()						   { return getPosition(); }
 
 	/** Returns the rectangle's top-right position as a Point. */
-	const Point<ValueType> getTopRight() const throw()						  { return Point<float> (x + w, y); }
+	const Point<ValueType> getTopRight() const throw()						  { return Point<ValueType> (x + w, y); }
 
 	/** Returns the rectangle's bottom-left position as a Point. */
-	const Point<ValueType> getBottomLeft() const throw()						{ return Point<float> (x, y + h); }
+	const Point<ValueType> getBottomLeft() const throw()						{ return Point<ValueType> (x, y + h); }
 
 	/** Returns the rectangle's bottom-right position as a Point. */
-	const Point<ValueType> getBottomRight() const throw()					   { return Point<float> (x + w, y + h); }
+	const Point<ValueType> getBottomRight() const throw()					   { return Point<ValueType> (x + w, y + h); }
 
 	/** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
 	void setSize (const ValueType newWidth, const ValueType newHeight) throw()			  { w = newWidth; h = newHeight; }

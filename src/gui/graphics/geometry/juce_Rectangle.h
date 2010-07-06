@@ -146,13 +146,13 @@ public:
     const Point<ValueType> getTopLeft() const throw()                                               { return getPosition(); }
 
     /** Returns the rectangle's top-right position as a Point. */
-    const Point<ValueType> getTopRight() const throw()                                              { return Point<float> (x + w, y); }
+    const Point<ValueType> getTopRight() const throw()                                              { return Point<ValueType> (x + w, y); }
 
     /** Returns the rectangle's bottom-left position as a Point. */
-    const Point<ValueType> getBottomLeft() const throw()                                            { return Point<float> (x, y + h); }
+    const Point<ValueType> getBottomLeft() const throw()                                            { return Point<ValueType> (x, y + h); }
 
     /** Returns the rectangle's bottom-right position as a Point. */
-    const Point<ValueType> getBottomRight() const throw()                                           { return Point<float> (x + w, y + h); }
+    const Point<ValueType> getBottomRight() const throw()                                           { return Point<ValueType> (x + w, y + h); }
 
     /** Changes the rectangle's size, leaving the position of its top-left corner unchanged. */
     void setSize (const ValueType newWidth, const ValueType newHeight) throw()                      { w = newWidth; h = newHeight; }
