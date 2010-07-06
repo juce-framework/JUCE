@@ -122,7 +122,9 @@ public:
 
         AudioSessionSetActive (true);
 
-        UInt32 audioCategory = kAudioSessionCategory_PlayAndRecord;
+        UInt32 audioCategory = audioInputIsAvailable ? kAudioSessionCategory_PlayAndRecord
+                                                     : kAudioSessionCategory_MediaPlayback;
+
         AudioSessionSetProperty (kAudioSessionProperty_AudioCategory, sizeof (audioCategory), &audioCategory);
         AudioSessionAddPropertyListener (kAudioSessionProperty_AudioRouteChange, propertyChangedStatic, this);
 

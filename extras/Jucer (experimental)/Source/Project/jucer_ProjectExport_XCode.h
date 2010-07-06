@@ -494,7 +494,17 @@ private:
         s.add ("GCC_WARN_NON_VIRTUAL_DESTRUCTOR = YES");
         s.add ("GCC_WARN_TYPECHECK_CALLS_TO_PRINTF = YES");
         s.add ("GCC_MODEL_TUNING = G5");
-        s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
+
+        if (project.isLibrary() || project.getJuceLinkageMode() == Project::useLinkedJuce)
+        {
+            s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = NO");
+            s.add ("GCC_SYMBOLS_PRIVATE_EXTERN = NO");
+        }
+        else
+        {
+            s.add ("GCC_INLINES_ARE_PRIVATE_EXTERN = YES");
+        }
+
         s.add ("ZERO_LINK = NO");
         s.add ("DEBUG_INFORMATION_FORMAT = \"dwarf-with-dsym\"");
         s.add ("PRODUCT_NAME = \"" + config.getTargetBinaryName().toString() + "\"");

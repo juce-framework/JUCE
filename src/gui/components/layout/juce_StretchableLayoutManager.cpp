@@ -251,8 +251,8 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
         layout->currentSize = sizeToRealSize (layout->minSize, totalSize);
 
         totalMinimums += layout->currentSize;
-        totalIdealSize += sizeToRealSize (layout->preferredSize, availableSpace);
-    }
+        totalIdealSize += sizeToRealSize (layout->preferredSize, totalSize);
+   }
 
     if (totalIdealSize <= 0)
         totalIdealSize = 1.0;
@@ -270,7 +270,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
         {
             ItemLayoutProperties* const layout = items.getUnchecked (i);
 
-            double sizeWanted = sizeToRealSize (layout->preferredSize, availableSpace);
+            double sizeWanted = sizeToRealSize (layout->preferredSize, totalSize);
 
             const int bestSize = jlimit (layout->currentSize,
                                          jmax (layout->currentSize,
@@ -286,7 +286,7 @@ int StretchableLayoutManager::fitComponentsIntoSpace (const int startIndex,
         {
             ItemLayoutProperties* const layout = items.getUnchecked (i);
 
-            double sizeWanted = sizeToRealSize (layout->preferredSize, availableSpace);
+            double sizeWanted = sizeToRealSize (layout->preferredSize, totalSize);
 
             int bestSize = jlimit (layout->currentSize,
                                    jmax (layout->currentSize, sizeToRealSize (layout->maxSize, totalSize)),
