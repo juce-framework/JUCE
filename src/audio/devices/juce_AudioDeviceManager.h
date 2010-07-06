@@ -91,38 +91,53 @@ public:
     /**
         This structure holds a set of properties describing the current audio setup.
 
-        @see AudioDeviceManager::setAudioDeviceSetup()
+        An AudioDeviceManager uses this class to save/load its current settings, and to
+        specify your preferred options when opening a device.
+
+        @see AudioDeviceManager::setAudioDeviceSetup(), AudioDeviceManager::initialise()
     */
     struct JUCE_API  AudioDeviceSetup
     {
+        /** Creates an AudioDeviceSetup object.
+
+            The default constructor sets all the member variables to indicate default values.
+            You can then fill-in any values you want to before passing the object to
+            AudioDeviceManager::initialise().
+        */
         AudioDeviceSetup();
+
         bool operator== (const AudioDeviceSetup& other) const;
 
         /** The name of the audio device used for output.
             The name has to be one of the ones listed by the AudioDeviceManager's currently
             selected device type.
             This may be the same as the input device.
+            An empty string indicates the default device.
         */
         String outputDeviceName;
 
         /** The name of the audio device used for input.
             This may be the same as the output device.
+            An empty string indicates the default device.
         */
         String inputDeviceName;
 
         /** The current sample rate.
             This rate is used for both the input and output devices.
+            A value of 0 indicates the default rate.
         */
         double sampleRate;
 
         /** The buffer size, in samples.
             This buffer size is used for both the input and output devices.
+            A value of 0 indicates the default buffer size.
         */
         int bufferSize;
 
         /** The set of active input channels.
             The bits that are set in this array indicate the channels of the
             input device that are active.
+            If useDefaultInputChannels is true, this value is ignored.
         */
         BigInteger inputChannels;
 
@@ -135,6 +150,7 @@ public:
         /** The set of active output channels.
             The bits that are set in this array indicate the channels of the
             input device that are active.
+            If useDefaultOutputChannels is true, this value is ignored.
         */
         BigInteger outputChannels;
 

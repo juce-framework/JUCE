@@ -92,7 +92,8 @@ public:
 
         The randomSeeds parameter lets you optionally pass it a set of values with
         which to seed the random number generation, improving the security of the
-        keys generated.
+        keys generated. If you supply these, make sure you provide more than 2 values,
+        and the more your provide, the better the security.
     */
     static void createKeyPair (RSAKey& publicKey,
                                RSAKey& privateKey,
