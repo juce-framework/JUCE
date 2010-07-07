@@ -109,7 +109,7 @@
 #undef MemoryBlock
 
 //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
   extern void JUCE_CALLTYPE attachSubWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
   extern void JUCE_CALLTYPE resizeHostWindow (void* hostWindow, int& titleW, int& titleH, JUCE_NAMESPACE::Component* comp);
  #if ! JucePlugin_EditorRequiresKeyboardFocus
@@ -257,7 +257,7 @@ public:
             {
                 updateSize();
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
                 void* const hostWindow = (void*) ASI_GethWnd ((WindowPtr) port);
 #else
                 void* const hostWindow = (void*) GetWindowFromPort (port);
@@ -276,7 +276,7 @@ public:
 
         void DrawContents (Rect*)
         {
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             if (wrapper != 0)
             {
                 ComponentPeer* const peer = wrapper->getPeer();
@@ -346,21 +346,21 @@ public:
                 editorComp->setTopLeftPosition (0, 0);
                 addAndMakeVisible (editorComp);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
                 attachSubWindow (hostWindow, titleW, titleH, this);
 #else
                 nsWindow = attachSubWindow (hostWindow, this);
 #endif
                 setVisible (true);
 
-#if JUCE_WIN32 && ! JucePlugin_EditorRequiresKeyboardFocus
+#if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().addFocusChangeListener (this);
 #endif
             }
 
             ~EditorCompWrapper()
             {
-#if JUCE_WIN32 && ! JucePlugin_EditorRequiresKeyboardFocus
+#if JUCE_WINDOWS && ! JucePlugin_EditorRequiresKeyboardFocus
                 Desktop::getInstance().removeFocusChangeListener (this);
 #endif
 
@@ -383,7 +383,7 @@ public:
                 repaint();
             }
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             void globalFocusChanged (JUCE_NAMESPACE::Component*)
             {
   #if ! JucePlugin_EditorRequiresKeyboardFocus
@@ -398,7 +398,7 @@ public:
                 setSize (child->getWidth(), child->getHeight());
                 child->setTopLeftPosition (0, 0);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
                 resizeHostWindow (hostWindow, titleW, titleH, this);
 #endif
                 owner->updateSize();
@@ -954,7 +954,7 @@ private:
     static CEffectProcess* createNewProcess()
     {
         // Juce setup
-#if JUCE_WIN32
+#if JUCE_WINDOWS
         PlatformUtilities::setCurrentModuleInstanceHandle (gThisModule);
 #endif
         initialiseJuce_GUI();

@@ -36,6 +36,9 @@ DrawableText::DrawableText()
     : colour (Colours::black),
       justification (Justification::centredLeft)
 {
+    setBoundingBox (RelativeParallelogram (RelativePoint (0.0f, 0.0f),
+                                           RelativePoint (50.0f, 0.0f),
+                                           RelativePoint (0.0f, 20.0f)));
     setFont (Font (15.0f), true);
 }
 

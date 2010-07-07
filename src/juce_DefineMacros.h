@@ -53,7 +53,7 @@
   #endif
 
   // "Rectangle" is defined in some of the newer windows header files..
-  #if JUCE_WIN32
+  #if JUCE_WINDOWS
     #define Rectangle       JUCE_NAMESPACE::Rectangle
   #endif
 #endif

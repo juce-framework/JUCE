@@ -495,7 +495,7 @@ public:
 };
 
 //==============================================================================
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
 
 // Just add a simple icon to the Window system tray area..
 class DemoTaskbarComponent  : public SystemTrayIconComponent
@@ -569,14 +569,14 @@ MainDemoWindow::MainDemoWindow()
 
     setVisible (true);
 
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
     taskbarIcon = new DemoTaskbarComponent();
 #endif
 }
 
 MainDemoWindow::~MainDemoWindow()
 {
-#if JUCE_WIN32 || JUCE_LINUX
+#if JUCE_WINDOWS || JUCE_LINUX
     deleteAndZero (taskbarIcon);
 #endif
 

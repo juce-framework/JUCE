@@ -165,7 +165,7 @@ END_JUCE_NAMESPACE
 
 
 //==============================================================================
-#if JUCE_WIN32
+#if JUCE_WINDOWS
 
 static HWND findMDIParentOf (HWND w)
 {
@@ -255,103 +255,7 @@ juce_ImplementSingleton (SharedMessageThread)
 
 #endif
 
-//==============================================================================
-// A component to hold the AudioProcessorEditor, and cope with some housekeeping
-// chores when it changes or repaints.
-class EditorCompWrapper  : public Component,
-                           public AsyncUpdater
-{
-    JuceVSTWrapper* wrapper;
-
-public:
-    EditorCompWrapper (JuceVSTWrapper* const wrapper_,
-                       AudioProcessorEditor* const editor)
-        : wrapper (wrapper_)
-    {
-        setOpaque (true);
-        editor->setOpaque (true);
-
-        setBounds (editor->getBounds());
-        editor->setTopLeftPosition (0, 0);
-        addAndMakeVisible (editor);
-
-#if JUCE_WIN32
-        addMouseListener (this, true);
-#endif
-    }
-
-    ~EditorCompWrapper()
-    {
-        deleteAllChildren();
-    }
-
-    void paint (Graphics& g)
-    {
-    }
-
-    void paintOverChildren (Graphics& g)
-    {
-        // this causes an async call to masterIdle() to help
-        // creaky old DAWs like Nuendo repaint themselves while we're
-        // repainting. Otherwise they just seem to give up and sit there
-        // waiting.
-        triggerAsyncUpdate();
-    }
-
-#if JUCE_MAC
-    bool keyPressed (const KeyPress& kp)
-    {
-        // If we have an unused keypress, move the key-focus to a host window
-        // and re-inject the event..
-        forwardCurrentKeyEventToHost (this);
-        return true;
-    }
-#endif
-
-    AudioProcessorEditor* getEditorComp() const
-    {
-        return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
-    }
-
-    void resized()
-    {
-        Component* const c = getChildComponent (0);
-
-        if (c != 0)
-            c->setBounds (0, 0, getWidth(), getHeight());
-    }
-
-    void childBoundsChanged (Component* child);
-    void handleAsyncUpdate();
-
-#if JUCE_WIN32
-    void mouseDown (const MouseEvent&)
-    {
-        broughtToFront();
-    }
-
-    void broughtToFront()
-    {
-        // for hosts like nuendo, need to also pop the MDI container to the
-        // front when our comp is clicked on.
-        HWND parent = findMDIParentOf ((HWND) getWindowHandle());
-
-        if (parent != 0)
-        {
-            SetWindowPos (parent,
-                          HWND_TOP,
-                          0, 0, 0, 0,
-                          SWP_NOMOVE | SWP_NOSIZE);
-        }
-    }
-#endif
-
-    //==============================================================================
-    juce_UseDebuggingNewOperator
-};
-
 static Array<void*> activePlugins;
-
 
 //==============================================================================
 /**
@@ -642,7 +546,7 @@ public:
 
             filter->setNonRealtime (getCurrentProcessLevel() == 4 /* kVstProcessLevelOffline */);
 
-#if JUCE_WIN32
+#if JUCE_WINDOWS
             if (GetThreadPriority (GetCurrentThread()) <= THREAD_PRIORITY_NORMAL
                   && GetThreadPriority (GetCurrentThread()) >= THREAD_PRIORITY_LOWEST)
                 filter->setNonRealtime (true);
@@ -1181,7 +1085,7 @@ public:
                 ed->setOpaque (true);
                 ed->setVisible (true);
 
-                editorComp = new EditorCompWrapper (this, ed);
+                editorComp = new EditorCompWrapper (*this, ed);
             }
             else
             {
@@ -1262,7 +1166,7 @@ public:
                 editorComp->setOpaque (true);
                 editorComp->setVisible (false);
 
-#if JUCE_WIN32
+              #if JUCE_WINDOWS
                 editorComp->addToDesktop (0);
                 hostWindow = (HWND) ptr;
                 HWND editorWnd = (HWND) editorComp->getWindowHandle();
@@ -1271,14 +1175,14 @@ public:
                 DWORD val = GetWindowLong (editorWnd, GWL_STYLE);
                 val = (val & ~WS_POPUP) | WS_CHILD;
                 SetWindowLong (editorWnd, GWL_STYLE, val);
-#elif JUCE_LINUX
+              #elif JUCE_LINUX
                 editorComp->addToDesktop (0);
                 hostWindow = (Window) ptr;
                 Window editorWnd = (Window) editorComp->getWindowHandle();
                 XReparentWindow (display, editorWnd, hostWindow, 0, 0);
-#else
+              #else
                 hostWindow = attachComponentToWindowRef (editorComp, (WindowRef) ptr);
-#endif
+              #endif
                 editorComp->setVisible (true);
 
                 return 1;
@@ -1397,6 +1301,117 @@ public:
         }
     }
 
+    static PluginHostType& getHostType()
+    {
+        static PluginHostType hostType;
+        return hostType;
+    }
+
+    //==============================================================================
+    // A component to hold the AudioProcessorEditor, and cope with some housekeeping
+    // chores when it changes or repaints.
+    class EditorCompWrapper  : public Component,
+                               public AsyncUpdater
+    {
+    public:
+        EditorCompWrapper (JuceVSTWrapper& wrapper_, AudioProcessorEditor* editor)
+            : wrapper (wrapper_)
+        {
+            setOpaque (true);
+            editor->setOpaque (true);
+
+            setBounds (editor->getBounds());
+            editor->setTopLeftPosition (0, 0);
+            addAndMakeVisible (editor);
+
+          #if JUCE_WIN
+            if (! getHostType().isReceptor())
+                addMouseListener (this, true);
+          #endif
+        }
+
+        ~EditorCompWrapper()
+        {
+            deleteAllChildren();
+        }
+
+        void paint (Graphics& g) {}
+
+        void paintOverChildren (Graphics& g)
+        {
+            // this causes an async call to masterIdle() to help
+            // creaky old DAWs like Nuendo repaint themselves while we're
+            // repainting. Otherwise they just seem to give up and sit there
+            // waiting.
+            triggerAsyncUpdate();
+        }
+
+      #if JUCE_MAC
+        bool keyPressed (const KeyPress& kp)
+        {
+            // If we have an unused keypress, move the key-focus to a host window
+            // and re-inject the event..
+            forwardCurrentKeyEventToHost (this);
+            return true;
+        }
+      #endif
+
+        AudioProcessorEditor* getEditorComp() const
+        {
+            return dynamic_cast <AudioProcessorEditor*> (getChildComponent (0));
+        }
+
+        void resized()
+        {
+            Component* const c = getChildComponent (0);
+
+            if (c != 0)
+                c->setBounds (0, 0, getWidth(), getHeight());
+        }
+
+        void childBoundsChanged (Component* child)
+        {
+            child->setTopLeftPosition (0, 0);
+
+            const int cw = child->getWidth();
+            const int ch = child->getHeight();
+
+            wrapper.resizeHostWindow (cw, ch);
+            setSize (cw, ch);
+
+            #if JUCE_MAC
+            wrapper.resizeHostWindow (cw, ch);  // (doing this a second time seems to be necessary in tracktion)
+            #endif
+        }
+
+        void handleAsyncUpdate()
+        {
+            wrapper.tryMasterIdle();
+        }
+
+      #if JUCE_WINDOWS
+        void mouseDown (const MouseEvent&)
+        {
+            broughtToFront();
+        }
+
+        void broughtToFront()
+        {
+            // for hosts like nuendo, need to also pop the MDI container to the
+            // front when our comp is clicked on.
+            HWND parent = findMDIParentOf ((HWND) getWindowHandle());
+
+            if (parent != 0)
+                SetWindowPos (parent, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        }
+      #endif
+
+        //==============================================================================
+        juce_UseDebuggingNewOperator
+
+    private:
+        JuceVSTWrapper& wrapper;
+    };
 
     //==============================================================================
     juce_UseDebuggingNewOperator
@@ -1421,12 +1436,6 @@ private:
     bool shouldDeleteEditor;
 
     //==============================================================================
-    static PluginHostType& getHostType()
-    {
-        static PluginHostType hostType;
-        return hostType;
-    }
-
 #if JUCE_WINDOWS   // Workarounds for Wavelab's happy-go-lucky use of threads.
     class NonWavelabMMLock
     {
@@ -1478,27 +1487,6 @@ private:
     HWND hostWindow;
 #endif
 };
-
-//==============================================================================
-void EditorCompWrapper::childBoundsChanged (Component* child)
-{
-    child->setTopLeftPosition (0, 0);
-
-    const int cw = child->getWidth();
-    const int ch = child->getHeight();
-
-    wrapper->resizeHostWindow (cw, ch);
-    setSize (cw, ch);
-
-#if JUCE_MAC
-    wrapper->resizeHostWindow (cw, ch);  // (doing this a second time seems to be necessary in tracktion)
-#endif
-}
-
-void EditorCompWrapper::handleAsyncUpdate()
-{
-    wrapper->tryMasterIdle();
-}
 
 //==============================================================================
 /** Somewhere in the codebase of your plugin, you need to implement this function

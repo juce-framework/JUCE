@@ -57,7 +57,8 @@ public:
         SteinbergCubaseGeneric,
         SteinbergWavelab5,
         SteinbergWavelab6,
-        SteinbergWavelabGeneric
+        SteinbergWavelabGeneric,
+        MuseReceptorGeneric
     };
 
     const HostType type;
@@ -91,6 +92,11 @@ public:
     bool isWavelab() const throw()
     {
         return type == SteinbergWavelabGeneric || type == SteinbergWavelab5 || type == SteinbergWavelab6;
+    }
+
+    bool isReceptor() const throw()
+    {
+        return type == MuseReceptorGeneric;
     }
 
     //==============================================================================
@@ -128,6 +134,8 @@ private:
         if (hostFilename.containsIgnoreCase ("Wavelab"))    return SteinbergWavelabGeneric;
         if (hostFilename.containsIgnoreCase ("reaper"))     return Reaper;
         if (hostFilename.containsIgnoreCase ("Logic"))      return EmagicLogic;
+        if (hostFilename.containsIgnoreCase ("rm-host"))    return MuseReceptorGeneric;
+
 
 #elif JUCE_LINUX
         jassertfalse   // not yet done!
