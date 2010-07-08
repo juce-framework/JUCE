@@ -87,7 +87,7 @@ END_JUCE_NAMESPACE
 - (NSRange) markedRange;
 - (NSRange) selectedRange;
 - (NSRect) firstRectForCharacterRange: (NSRange) theRange;
-- (unsigned int) characterIndexForPoint: (NSPoint) thePoint;
+- (NSUInteger) characterIndexForPoint: (NSPoint) thePoint;
 - (NSArray*) validAttributesForMarkedText;
 
 - (void) flagsChanged: (NSEvent*) ev;
@@ -474,13 +474,15 @@ END_JUCE_NAMESPACE
 - (void) insertText: (id) aString
 {
     // This commits multi-byte text when return is pressed, or after every keypress for western keyboards
-    if ([aString length] > 0)
+    NSString* newText = [aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString;
+
+    if ([newText length] > 0)
     {
         TextInputTarget* const target = owner->findCurrentTextInputTarget();
 
         if (target != 0)
         {
-            target->insertTextAtCaret (nsStringToJuce ([aString isKindOfClass: [NSAttributedString class]] ? [aString string] : aString));
+            target->insertTextAtCaret (nsStringToJuce (newText));
             textWasInserted = true;
         }
     }
@@ -591,7 +593,7 @@ END_JUCE_NAMESPACE
                        bounds.getHeight());
 }
 
-- (unsigned int) characterIndexForPoint: (NSPoint) thePoint
+- (NSUInteger) characterIndexForPoint: (NSPoint) thePoint
 {
     (void) thePoint;
     return NSNotFound;
@@ -1437,6 +1439,9 @@ void NSViewComponentPeer::redirectMouseWheel (NSEvent* ev)
         y = [ev deviceDeltaY] * 0.5f;
     }
     @catch (...)
+    {}
+
+    if (x == 0 && y == 0)
     {
         x = [ev deltaX] * 10.0f;
         y = [ev deltaY] * 10.0f;
