@@ -332,7 +332,7 @@ void BinaryResources::fillInGeneratedCode (GeneratedCode& code) const
             out << (char) 0;
 
             defs
-              << out.getData()
+              << (const char*) out.getData()
               << "0,0};\n\nconst char* "
               << code.className << "::" << name
               << " = (const char*) resource_" << code.className << "_" << name
