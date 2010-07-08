@@ -134,8 +134,8 @@ void Project::setMissingDefaultValues()
         getPluginName() = getProjectName().toString();
         getPluginDesc() = getProjectName().toString();
         getPluginManufacturer() = "yourcompany";
-        getPluginManufacturerCode() = "abcd";
-        getPluginCode() = "Abcd";
+        getPluginManufacturerCode() = "Manu";
+        getPluginCode() = "Plug";
         getPluginChannelConfigs() = "{1, 1}, {2, 2}";
         getPluginIsSynth() = false;
         getPluginWantsMidiInput() = false;
@@ -347,6 +347,9 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.getLast()->setTooltip ("Sets an icon to use for the executable.");
     }
 
+    props.add (new TextPropertyComponent (getObjectiveCClassSuffix(), "Objective-C Name Suffix", 256, false));
+    props.getLast()->setTooltip ("An optional string which will be appended to objective-C class names. If you're building a plugin, it's important to define this, to avoid name clashes between multiple plugin modules that are dynamically loaded into the same address space.");
+    
     if (isAudioPlugin())
     {
         props.add (new BooleanPropertyComponent (shouldBuildVST(), "Build VST", "Enabled"));
@@ -367,7 +370,7 @@ void Project::createPropertyEditors (Array <PropertyComponent*>& props)
         props.add (new TextPropertyComponent (getPluginManufacturer(), "Plugin Manufacturer", 256, false));
         props.getLast()->setTooltip ("The name of your company (cannot be blank).");
         props.add (new TextPropertyComponent (getPluginManufacturerCode(), "Plugin Manufacturer Code", 4, false));
-        props.getLast()->setTooltip ("A four-character unique ID for your company.");
+        props.getLast()->setTooltip ("A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
         props.add (new TextPropertyComponent (getPluginCode(), "Plugin Code", 4, false));
         props.getLast()->setTooltip ("A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
 

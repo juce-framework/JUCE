@@ -362,8 +362,12 @@ private:
             << "#define JucePlugin_AUCocoaViewClassName " << project.getPluginAUCocoaViewClassName().toString() << newLine
             << "#define JucePlugin_RTASCategory         " << ((bool) project.getPluginIsSynth().getValue() ? "ePlugInCategory_SWGenerators" : "ePlugInCategory_None") << newLine
             << "#define JucePlugin_RTASManufacturerCode JucePlugin_ManufacturerCode" << newLine
-            << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine
-            << "#define JUCE_USE_VSTSDK_2_4             1" << newLine
+            << "#define JucePlugin_RTASProductId        JucePlugin_PluginCode" << newLine;
+        
+        if (project.getObjectiveCClassSuffix().toString().isNotEmpty())
+            out << "#define JUCE_ObjCExtraSuffix            " << project.getObjectiveCClassSuffix().toString() << newLine;
+    
+        out << "#define JUCE_USE_VSTSDK_2_4             1" << newLine
             << newLine
             << "#endif   // " << headerGuard << newLine;
     }
