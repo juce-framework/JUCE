@@ -58,7 +58,7 @@ static HPALETTE palette = 0;
 static bool createPaletteIfNeeded = true;
 static bool shouldDeactivateTitleBar = true;
 
-static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw();
+static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
 #define WM_TRAYNOTIFY WM_USER + 100
 
 using ::abs;
@@ -2338,7 +2338,7 @@ void juce_updateMultiMonitorInfo (Array <Rectangle<int> >& monitorCoords, const 
 }
 
 //==============================================================================
-static const Image createImageFromHBITMAP (HBITMAP bitmap) throw()
+static const Image createImageFromHBITMAP (HBITMAP bitmap)
 {
     Image im;
 
@@ -2377,7 +2377,7 @@ static const Image createImageFromHBITMAP (HBITMAP bitmap) throw()
     return im;
 }
 
-static const Image createImageFromHICON (HICON icon) throw()
+static const Image createImageFromHICON (HICON icon)
 {
     ICONINFO info;
 
@@ -2406,7 +2406,7 @@ static const Image createImageFromHICON (HICON icon) throw()
     return Image();
 }
 
-static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY) throw()
+static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
 {
     WindowsBitmapImage* nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
     Image bitmap (nativeBitmap);
@@ -2742,15 +2742,14 @@ private:
     JuceDataObject& operator= (const JuceDataObject&);
 };
 
-static HDROP createHDrop (const StringArray& fileNames) throw()
+static HDROP createHDrop (const StringArray& fileNames)
 {
     int totalChars = 0;
     for (int i = fileNames.size(); --i >= 0;)
         totalChars += fileNames[i].length() + 1;
 
     HDROP hDrop = (HDROP) GlobalAlloc (GMEM_MOVEABLE | GMEM_ZEROINIT,
-                                       sizeof (DROPFILES)
-                                         + sizeof (WCHAR) * (totalChars + 2));
+                                       sizeof (DROPFILES) + sizeof (WCHAR) * (totalChars + 2));
 
     if (hDrop != 0)
     {
@@ -2775,7 +2774,7 @@ static HDROP createHDrop (const StringArray& fileNames) throw()
     return hDrop;
 }
 
-static bool performDragDrop (FORMATETC* const format, STGMEDIUM* const medium, const DWORD whatToDo) throw()
+static bool performDragDrop (FORMATETC* const format, STGMEDIUM* const medium, const DWORD whatToDo)
 {
     JuceDropSource* const source = new JuceDropSource();
     JuceDataObject* const data = new JuceDataObject (source, format, medium);

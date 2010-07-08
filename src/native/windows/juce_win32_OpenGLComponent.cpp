@@ -115,12 +115,15 @@ public:
 
     ~WindowedGLContext()
     {
-        makeInactive();
-
-        wglDeleteContext (renderContext);
-
+        deleteContext();
         ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
         delete nativeWindow;
+    }
+
+    void deleteContext()
+    {
+        makeInactive();
+        wglDeleteContext (renderContext);
     }
 
     bool makeActive() const throw()

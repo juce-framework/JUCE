@@ -50,8 +50,7 @@ public:
         @param deleteStreamWhenDestroyed    if set to true, the object passed-in
                                             will be deleted when this ZipFile object is deleted
     */
-    ZipFile (InputStream* inputStream,
-             bool deleteStreamWhenDestroyed) throw();
+    ZipFile (InputStream* inputStream, bool deleteStreamWhenDestroyed);
 
     /** Creates a ZipFile based for a file. */
     ZipFile (const File& file);
@@ -64,7 +63,7 @@ public:
     ZipFile (InputSource* inputSource);
 
     /** Destructor. */
-    ~ZipFile() throw();
+    ~ZipFile();
 
     //==============================================================================
     /**

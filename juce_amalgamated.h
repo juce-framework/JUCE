@@ -15750,8 +15750,7 @@ public:
 		@param deleteStreamWhenDestroyed	if set to true, the object passed-in
 											will be deleted when this ZipFile object is deleted
 	*/
-	ZipFile (InputStream* inputStream,
-			 bool deleteStreamWhenDestroyed) throw();
+	ZipFile (InputStream* inputStream, bool deleteStreamWhenDestroyed);
 
 	/** Creates a ZipFile based for a file. */
 	ZipFile (const File& file);
@@ -15764,7 +15763,7 @@ public:
 	ZipFile (InputSource* inputSource);
 
 	/** Destructor. */
-	~ZipFile() throw();
+	~ZipFile();
 
 	/**
 		Contains information about one of the entries in a ZipFile.
@@ -51455,8 +51454,8 @@ private:
 	bool reentrant;
 	Rectangle<int> lastBounds;
 
-	void unregister() throw();
-	void registerWithParentComps() throw();
+	void unregister();
+	void registerWithParentComps();
 
 	ComponentMovementWatcher (const ComponentMovementWatcher&);
 	ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
@@ -56878,6 +56877,12 @@ public:
 	*/
 	virtual void* getRawContext() const throw() = 0;
 
+	/** Deletes the context.
+		This doesn't touch other resources, such as window handles, etc.
+		You'll probably never have to call this method directly.
+	*/
+	virtual void deleteContext() = 0;
+
 	/** Returns the context that's currently in active use by the calling thread.
 
 		Returns 0 if there isn't an active context.
@@ -57050,10 +57055,8 @@ public:
 	*/
 	void* getNativeWindowHandle() const;
 
-	/** Call this to manually delete the current GL context, if there is one.
-		This can be useful to cause a clear-out of the context, which will be automatically
-		re-created when it's needed.
-	*/
+	/** Delete the context.
+		This can be called back on the same thread that created the context. */
 	void deleteContext();
 
 	juce_UseDebuggingNewOperator

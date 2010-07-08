@@ -3233,13 +3233,19 @@ public:
 
     ~WindowedGLContext()
     {
+        ScopedXLock xlock;
+        deleteContext();
+
+        XUnmapWindow (display, embeddedWindow);
+        XDestroyWindow (display, embeddedWindow);
+    }
+
+    void deleteContext()
+    {
         makeInactive();
 
         ScopedXLock xlock;
         glXDestroyContext (display, renderContext);
-
-        XUnmapWindow (display, embeddedWindow);
-        XDestroyWindow (display, embeddedWindow);
     }
 
     bool makeActive() const throw()

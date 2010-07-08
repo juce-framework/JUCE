@@ -176,9 +176,14 @@ public:
 
     ~WindowedGLContext()
     {
+        deleteContext();
+        viewHolder = 0;
+    }
+
+    void deleteContext()
+    {
         makeInactive();
         [renderContext clearDrawable];
-        viewHolder = 0;
     }
 
     bool makeActive() const throw()

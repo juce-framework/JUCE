@@ -108,12 +108,12 @@ public:
     const Image getSmallIcon();
 
     Value getObjectiveCClassSuffix() const              { return getProjectValue ("objCSuffix"); }
-    
+
     Value shouldBuildVST() const                        { return getProjectValue ("buildVST"); }
     Value shouldBuildRTAS() const                       { return getProjectValue ("buildRTAS"); }
     Value shouldBuildAU() const                         { return getProjectValue ("buildAU"); }
     bool shouldAddVSTFolderToPath()                     { return (isAudioPlugin() && (bool) shouldBuildVST().getValue()) || getJuceConfigFlag ("JUCE_PLUGINHOST_VST").toString() == configFlagEnabled; }
-    
+
     Value getPluginName() const                         { return getProjectValue ("pluginName"); }
     Value getPluginDesc() const                         { return getProjectValue ("pluginDesc"); }
     Value getPluginManufacturer() const                 { return getProjectValue ("pluginManufacturer"); }

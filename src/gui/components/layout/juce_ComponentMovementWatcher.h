@@ -82,8 +82,8 @@ private:
     bool reentrant;
     Rectangle<int> lastBounds;
 
-    void unregister() throw();
-    void registerWithParentComps() throw();
+    void unregister();
+    void registerWithParentComps();
 
     ComponentMovementWatcher (const ComponentMovementWatcher&);
     ComponentMovementWatcher& operator= (const ComponentMovementWatcher&);
