@@ -103,7 +103,7 @@ void Project::setMissingDefaultValues()
         setTitle ("Juce Project");
 
     if (! projectRoot.hasProperty (Ids::projectType))
-        getProjectType() = (int) application;
+        getProjectType() = application;
 
     if (! projectRoot.hasProperty (Ids::version))
         getVersion() = "1.0.0";

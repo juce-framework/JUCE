@@ -167,6 +167,9 @@ private:
     {
         out << "  LDFLAGS += -L$(BINDIR) -L$(LIBDIR)";
 
+        if (project.isAudioPlugin())
+            out << " -shared";
+
         {
             Array<RelativePath> libraryPaths;
             libraryPaths.add (RelativePath ("/usr/X11R6/lib/", RelativePath::unknown));
@@ -206,6 +209,9 @@ private:
 
         if (config.isDebug().getValue())
             out << " -g -ggdb";
+
+        if (project.isAudioPlugin())
+            out << " -fPIC";
 
         out << " -O" << config.getGCCOptimisationFlag() << newLine;
 

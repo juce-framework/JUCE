@@ -74,50 +74,68 @@ static bool juceInitialisedNonGUI = false;
 
 #if JUCE_DEBUG
 template <typename Type>
-static void juce_testAtomicType (Type)
+class AtomicTester
 {
-    Atomic<Type> a, b;
-    a.set ((Type) 10);
-    a += (Type) 15;
-    a.memoryBarrier();
-    a -= (Type) 5;
-    ++a;
-    ++a;
-    --a;
-    a.memoryBarrier();
+public:
+    AtomicTester() {}
 
-    /*  These are some simple test cases to check the atomics - let me know
-        if any of these assertions fail on your system!
-    */
-    jassert (a.get() == (Type) 21);
-    jassert (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
-    jassert (a.get() == (Type) 21);
-    jassert (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
-    jassert (a.get() == (Type) 101);
-    jassert (! a.compareAndSetBool ((Type) 300, (Type) 200));
-    jassert (a.get() == (Type) 101);
-    jassert (a.compareAndSetBool ((Type) 200, a.get()));
-    jassert (a.get() == (Type) 200);
+    static void testInteger()
+    {
+        Atomic<Type> a, b;
+        a.set ((Type) 10);
+        a += (Type) 15;
 
-    jassert (a.exchange ((Type) 300) == (Type) 200);
-    jassert (a.get() == (Type) 300);
+        a.memoryBarrier();
+        a -= (Type) 5;
+        ++a;
+        ++a;
+        --a;
+        a.memoryBarrier();
 
-    b = a;
-    jassert (b.get() == a.get());
-}
+        testFloat();
+    }
+
+    static void testFloat()
+    {
+        Atomic<Type> a, b;
+        a = (Type) 21;
+        a.memoryBarrier();
+
+        /*  These are some simple test cases to check the atomics - let me know
+            if any of these assertions fail on your system!
+        */
+        jassert (a.get() == (Type) 21);
+        jassert (a.compareAndSetValue ((Type) 100, (Type) 50) == (Type) 21);
+        jassert (a.get() == (Type) 21);
+        jassert (a.compareAndSetValue ((Type) 101, a.get()) == (Type) 21);
+        jassert (a.get() == (Type) 101);
+        jassert (! a.compareAndSetBool ((Type) 300, (Type) 200));
+        jassert (a.get() == (Type) 101);
+        jassert (a.compareAndSetBool ((Type) 200, a.get()));
+        jassert (a.get() == (Type) 200);
+
+        jassert (a.exchange ((Type) 300) == (Type) 200);
+        jassert (a.get() == (Type) 300);
+
+        b = a;
+        jassert (b.get() == a.get());
+    }
+};
 
 static void juce_testAtomics()
 {
-    juce_testAtomicType ((int) 0);
-    juce_testAtomicType ((unsigned int) 0);
-    juce_testAtomicType ((int32) 0);
-    juce_testAtomicType ((uint32) 0);
-    juce_testAtomicType ((long) 0);
-    juce_testAtomicType ((void*) 0);
-    juce_testAtomicType ((int*) 0);
+    AtomicTester <int>::testInteger();
+    AtomicTester <unsigned int>::testInteger();
+    AtomicTester <int32>::testInteger();
+    AtomicTester <uint32>::testInteger();
+    AtomicTester <long>::testInteger();
+    AtomicTester <void*>::testInteger();
+    AtomicTester <int*>::testInteger();
+    AtomicTester <float>::testFloat();
   #if ! JUCE_64BIT_ATOMICS_UNAVAILABLE  // 64-bit intrinsics aren't available on some old platforms
-    juce_testAtomicType ((int64) 0);
-    juce_testAtomicType ((uint64) 0);
+    AtomicTester <int64>::testInteger();
+    AtomicTester <uint64>::testInteger();
+    AtomicTester <double>::testFloat();
   #endif
 
 }
