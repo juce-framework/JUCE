@@ -147,6 +147,10 @@ public:
     virtual void* getRawContext() const throw() = 0;
 
     /** Deletes the context.
+
+        This must only be called on the message thread, or will deadlock.
+        On background threads, call getCurrentContext()->deleteContext(), but be careful not
+        to call any other OpenGL function afterwards.
         This doesn't touch other resources, such as window handles, etc.
         You'll probably never have to call this method directly.
     */

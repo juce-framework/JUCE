@@ -3244,8 +3244,12 @@ public:
     {
         makeInactive();
 
-        ScopedXLock xlock;
-        glXDestroyContext (display, renderContext);
+        if (renderContext != 0)
+        {
+            ScopedXLock xlock;
+            glXDestroyContext (display, renderContext);
+            renderContext = 0;
+        }
     }
 
     bool makeActive() const throw()

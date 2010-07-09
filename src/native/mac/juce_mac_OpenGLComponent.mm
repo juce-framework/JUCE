@@ -184,6 +184,9 @@ public:
     {
         makeInactive();
         [renderContext clearDrawable];
+        [renderContext setView: nil];
+        [view setOpenGLContext: nil];
+        renderContext = nil;
     }
 
     bool makeActive() const throw()

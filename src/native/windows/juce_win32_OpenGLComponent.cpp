@@ -123,7 +123,12 @@ public:
     void deleteContext()
     {
         makeInactive();
-        wglDeleteContext (renderContext);
+
+        if (renderContext != 0)
+        {
+            wglDeleteContext (renderContext);
+            renderContext = 0;
+        }
     }
 
     bool makeActive() const throw()
