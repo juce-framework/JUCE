@@ -199,7 +199,7 @@ private:
 
     void clearIcon()
     {
-        icon = Image();
+        icon = Image::null;
     }
 
     void updateIcon (const bool onlyUpdateIfCached)

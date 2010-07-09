@@ -986,7 +986,7 @@ public:
     virtual const Ptr excludeClipRectangle (const Rectangle<int>& r) = 0;
     virtual const Ptr clipToPath (const Path& p, const AffineTransform& transform) = 0;
     virtual const Ptr clipToEdgeTable (const EdgeTable& et) = 0;
-    virtual const Ptr clipToImageAlpha (const Image& image, const Rectangle<int>& srcClip, const AffineTransform& t, const bool betterQuality) = 0;
+    virtual const Ptr clipToImageAlpha (const Image& image, const AffineTransform& t, const bool betterQuality) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) const = 0;
     virtual const Rectangle<int> getClipBounds() const = 0;
@@ -1224,9 +1224,9 @@ public:
         return edgeTable.isEmpty() ? 0 : this;
     }
 
-    const Ptr clipToImageAlpha (const Image& image, const Rectangle<int>& srcClip, const AffineTransform& transform, const bool betterQuality)
+    const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
-        const Image::BitmapData srcData (image, srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
+        const Image::BitmapData srcData (image, false);
 
         if (transform.isOnlyTranslation())
         {
@@ -1416,9 +1416,9 @@ public:
         return Ptr (new ClipRegion_EdgeTable (clip))->clipToEdgeTable (et);
     }
 
-    const Ptr clipToImageAlpha (const Image& image, const Rectangle<int>& srcClip, const AffineTransform& transform, const bool betterQuality)
+    const Ptr clipToImageAlpha (const Image& image, const AffineTransform& transform, const bool betterQuality)
     {
-        return Ptr (new ClipRegion_EdgeTable (clip))->clipToImageAlpha (image, srcClip, transform, betterQuality);
+        return Ptr (new ClipRegion_EdgeTable (clip))->clipToImageAlpha (image, transform, betterQuality);
     }
 
     bool clipRegionIntersects (const Rectangle<int>& r) const
@@ -1803,20 +1803,20 @@ public:
         }
     }
 
-    void clipToImageAlpha (const Image& image, const Rectangle<int>& srcClip, const AffineTransform& t)
+    void clipToImageAlpha (const Image& image, const AffineTransform& t)
     {
         if (clip != 0)
         {
             if (image.hasAlphaChannel())
             {
                 cloneClipIfMultiplyReferenced();
-                clip = clip->clipToImageAlpha (image, srcClip, t.translated ((float) xOffset, (float) yOffset),
+                clip = clip->clipToImageAlpha (image, t.translated ((float) xOffset, (float) yOffset),
                                                interpolationQuality != Graphics::lowResamplingQuality);
             }
             else
             {
                 Path p;
-                p.addRectangle (srcClip);
+                p.addRectangle (image.getBounds());
                 clipToPath (p, t);
             }
         }
@@ -1839,7 +1839,7 @@ public:
         {
             if (fillType.isColour())
             {
-                Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
+                Image::BitmapData destData (image, true);
                 clip->fillRectWithColour (destData, r.translated (xOffset, yOffset), fillType.colour.getPixelARGB(), replaceContents);
             }
             else
@@ -1859,7 +1859,7 @@ public:
         {
             if (fillType.isColour())
             {
-                Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
+                Image::BitmapData destData (image, true);
                 clip->fillRectWithColour (destData, r.translated ((float) xOffset, (float) yOffset), fillType.colour.getPixelARGB());
             }
             else
@@ -1898,7 +1898,7 @@ public:
 
         if (shapeToFill != 0)
         {
-            Image::BitmapData destData (image, 0, 0, image.getWidth(), image.getHeight(), true);
+            Image::BitmapData destData (image, true);
 
             if (fillType.isGradient())
             {
@@ -1923,7 +1923,7 @@ public:
             }
             else if (fillType.isTiledImage())
             {
-                renderImage (image, fillType.image, fillType.image.getBounds(), fillType.transform, shapeToFill);
+                renderImage (image, fillType.image, fillType.transform, shapeToFill);
             }
             else
             {
@@ -1933,13 +1933,12 @@ public:
     }
 
     //==============================================================================
-    void renderImage (Image& destImage, const Image& sourceImage, const Rectangle<int>& srcClip,
-                      const AffineTransform& t, const SoftwareRendererClasses::ClipRegionBase* const tiledFillClipRegion)
+    void renderImage (Image& destImage, const Image& sourceImage, const AffineTransform& t, const SoftwareRendererClasses::ClipRegionBase* const tiledFillClipRegion)
     {
         const AffineTransform transform (t.translated ((float) xOffset, (float) yOffset));
 
-        const Image::BitmapData destData (destImage, 0, 0, destImage.getWidth(), destImage.getHeight(), true);
-        const Image::BitmapData srcData (sourceImage, srcClip.getX(), srcClip.getY(), srcClip.getWidth(), srcClip.getHeight());
+        const Image::BitmapData destData (destImage, true);
+        const Image::BitmapData srcData (sourceImage, false);
         const int alpha = fillType.colour.getAlpha();
         const bool betterQuality = (interpolationQuality != Graphics::lowResamplingQuality);
 
@@ -1960,7 +1959,7 @@ public:
                 }
                 else
                 {
-                    SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, srcClip.getWidth(), srcClip.getHeight()).getIntersection (destImage.getBounds())));
+                    SoftwareRendererClasses::ClipRegionBase::Ptr c (new SoftwareRendererClasses::ClipRegion_EdgeTable (Rectangle<int> (tx, ty, sourceImage.getWidth(), sourceImage.getHeight()).getIntersection (destImage.getBounds())));
                     c = clip->applyClipTo (c);
 
                     if (c != 0)
@@ -1981,7 +1980,7 @@ public:
         else
         {
             Path p;
-            p.addRectangle (srcClip);
+            p.addRectangle (sourceImage.getBounds());
 
             SoftwareRendererClasses::ClipRegionBase::Ptr c (clip->clone());
             c = c->clipToPath (p, transform);
@@ -2058,9 +2057,9 @@ void LowLevelGraphicsSoftwareRenderer::clipToPath (const Path& path, const Affin
     currentState->clipToPath (path, transform);
 }
 
-void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform)
+void LowLevelGraphicsSoftwareRenderer::clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
 {
-    currentState->clipToImageAlpha (sourceImage, srcClip, transform);
+    currentState->clipToImageAlpha (sourceImage, transform);
 }
 
 bool LowLevelGraphicsSoftwareRenderer::clipRegionIntersects (const Rectangle<int>& r)
@@ -2126,12 +2125,9 @@ void LowLevelGraphicsSoftwareRenderer::fillPath (const Path& path, const AffineT
     currentState->fillPath (image, path, transform);
 }
 
-void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                                                  const AffineTransform& transform, const bool fillEntireClipAsTiles)
+void LowLevelGraphicsSoftwareRenderer::drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
 {
-    jassert (sourceImage.getBounds().contains (srcClip));
-
-    currentState->renderImage (image, sourceImage, srcClip, transform,
+    currentState->renderImage (image, sourceImage, transform,
                                fillEntireClipAsTiles ? currentState->clip : 0);
 }
 

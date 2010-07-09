@@ -877,7 +877,7 @@ private:
         void timerCallback()
         {
             stopTimer();
-            image = Image();
+            image = Image::null;
         }
 
     private:
@@ -2356,7 +2356,7 @@ static const Image createImageFromHBITMAP (HBITMAP bitmap)
             SelectObject (dc, bitmap);
 
             im = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
-            Image::BitmapData imageData (im, 0, 0, bm.bmWidth, bm.bmHeight, true);
+            Image::BitmapData imageData (im, true);
 
             for (int y = bm.bmHeight; --y >= 0;)
             {
@@ -2403,7 +2403,7 @@ static const Image createImageFromHICON (HICON icon)
         }
     }
 
-    return Image();
+    return Image::null;
 }
 
 static HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)

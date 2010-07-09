@@ -878,7 +878,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* windowToAttachTo)
 //==============================================================================
 const Image juce_createIconForFile (const File& file)
 {
-    return Image();
+    return Image::null;
 }
 
 //==============================================================================

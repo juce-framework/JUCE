@@ -71,7 +71,7 @@ public:
     virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
     virtual void excludeClipRectangle (const Rectangle<int>& r) = 0;
     virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
-    virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform) = 0;
+    virtual void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform) = 0;
 
     virtual bool clipRegionIntersects (const Rectangle<int>& r) = 0;
     virtual const Rectangle<int> getClipBounds() const = 0;
@@ -89,8 +89,7 @@ public:
     virtual void fillRect (const Rectangle<int>& r, bool replaceExistingContents) = 0;
     virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-    virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                            const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
+    virtual void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
 
     virtual void drawLine (const Line <float>& line) = 0;
     virtual void drawVerticalLine (int x, float top, float bottom) = 0;

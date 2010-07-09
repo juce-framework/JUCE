@@ -139,6 +139,11 @@ public:
     */
     inline bool isNull() const throw()                      { return image == 0; }
 
+    /** A null Image object that can be used when you need to return an invalid image.
+        This object is the equivalient to an Image created with the default constructor.
+    */
+    static const Image null;
+
     //==============================================================================
     /** Returns the image's width (in pixels). */
     int getWidth() const throw()                            { return image == 0 ? 0 : image->width; }
@@ -205,6 +210,19 @@ public:
         @see getReferenceCount
     */
     void duplicateIfShared();
+
+    /** Returns an image which refers to a subsection of this image.
+
+        This will not make a copy of the original - the new image will keep a reference to it, so that
+        if the original image is changed, the contents of the subsection will also change. Likewise if you
+        draw into the subimage, you'll also be drawing onto that area of the original image. Note that if
+        you use operator= to make the original Image object refer to something else, the subsection image
+        won't pick up this change, it'll remain pointing at the original.
+
+        The area passed-in will be clipped to the bounds of this image, so this may return a smaller
+        image than the area you asked for, or even a null image if the area was out-of-bounds.
+    */
+    const Image getClippedImage (const Rectangle<int>& area) const;
 
     //==============================================================================
     /** Returns the colour of one of the pixels in the image.
@@ -276,6 +294,7 @@ public:
     public:
         BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
         BitmapData (const Image& image, int x, int y, int w, int h);
+        BitmapData (const Image& image, bool needsToBeWritable);
         ~BitmapData();
 
         /** Returns a pointer to the start of a line in the image.
@@ -382,6 +401,13 @@ public:
         static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
         static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
 
+        const PixelFormat getPixelFormat() const throw()    { return format; }
+        int getWidth() const throw()                        { return width; }
+        int getHeight() const throw()                       { return height; }
+        int getPixelStride() const throw()                  { return pixelStride; }
+        int getLineStride() const throw()                   { return lineStride; }
+        uint8* getPixelData (int x, int y) const throw();
+
     protected:
         friend class Image;
         friend class Image::BitmapData;
@@ -390,8 +416,6 @@ public:
         int pixelStride, lineStride;
         uint8* imageData;
         var userTag;
-
-        uint8* getPixelData (int x, int y) const throw();
 
         SharedImage (const SharedImage&);
         SharedImage& operator= (const SharedImage&);

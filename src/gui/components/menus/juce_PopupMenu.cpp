@@ -1334,7 +1334,7 @@ void PopupMenu::addCommandItem (ApplicationCommandManager* commandManager,
                                                       : info.shortName,
                              target != 0 && (info.flags & ApplicationCommandInfo::isDisabled) == 0,
                              (info.flags & ApplicationCommandInfo::isTicked) != 0,
-                             Image(),
+                             Image::null,
                              Colours::black,
                              false,
                              0, 0,
@@ -1369,7 +1369,7 @@ void PopupMenu::addCustomItem (const int itemResultId,
 
     addSeparatorIfPending();
 
-    items.add (new Item (itemResultId, String::empty, true, false, Image(),
+    items.add (new Item (itemResultId, String::empty, true, false, Image::null,
                          Colours::black, false, customComponent, 0, 0));
 }
 

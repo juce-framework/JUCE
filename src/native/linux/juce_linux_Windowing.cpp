@@ -622,7 +622,7 @@ public:
             const uint32 bShiftL = jmax (0, getShiftNeeded (bMask));
             const uint32 bShiftR = jmax (0, -getShiftNeeded (bMask));
 
-            const Image::BitmapData srcData (Image (this), 0, 0, width, height);
+            const Image::BitmapData srcData (Image (this), false);
 
             for (int y = sy; y < sy + dh; ++y)
             {
@@ -1819,7 +1819,7 @@ private:
             else if (Time::getApproximateMillisecondCounter() > lastTimeImageUsed + 3000)
             {
                 stopTimer();
-                image = Image();
+                image = Image::null;
             }
         }
 
@@ -3137,7 +3137,7 @@ void MouseCursor::showInAllWindows() const
 //==============================================================================
 const Image juce_createIconForFile (const File& file)
 {
-    return Image();
+    return Image::null;
 }
 
 Image::SharedImage* Image::SharedImage::createNativeImage (PixelFormat format, int width, int height, bool clearImage)

@@ -192,9 +192,7 @@ private:
                                                    .rotated (bouncingNumber[3])
                                                    .scaled (bouncingNumber[2] + 4.0f, bouncingNumber[2] + 4.0f)
                                                    .translated (bouncingPointX[2], bouncingPointY[2]));
-        g.reduceClipRegion (argbImage,
-                            Rectangle<int> (0, 0, argbImage.getWidth(), argbImage.getHeight()),
-                            transform);
+        g.reduceClipRegion (argbImage, transform);
     }
 
     void drawPaths (Graphics& g, bool /*solid*/, bool linearGradient, bool radialGradient)
@@ -268,8 +266,7 @@ private:
                                                    .followedBy (getTransform()));
 
         g.setOpacity ((float) owner.opacitySlider->getValue());
-        g.drawImageTransformed (image, image.getBounds(),
-                                transform, false);
+        g.drawImageTransformed (image, transform, false);
     }
 
     void drawTiling (Graphics& g, const Image& image)

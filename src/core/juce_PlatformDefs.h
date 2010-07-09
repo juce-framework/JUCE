@@ -68,7 +68,7 @@
 
     @see Logger::outputDebugString
   */
-  #define DBG(dbgtext)                  Logger::outputDebugString (dbgtext);
+  #define DBG(dbgtext)                  JUCE_NAMESPACE::Logger::outputDebugString (dbgtext);
 
   //==============================================================================
   // Assertions..

@@ -90,7 +90,7 @@ public:
     */
     void startDragging (const String& sourceDescription,
                         Component* sourceComponent,
-                        const Image& dragImage = Image(),
+                        const Image& dragImage = Image::null,
                         bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = 0);
 

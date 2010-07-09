@@ -117,7 +117,7 @@ public:
             const int height = getHeight() / 2;
             colours = Image (Image::RGB, width, height, false);
 
-            Image::BitmapData pixels (colours, 0, 0, width, height, true);
+            Image::BitmapData pixels (colours, true);
 
             for (int y = 0; y < height; ++y)
             {
@@ -155,7 +155,7 @@ public:
         if (lastHue != h)
         {
             lastHue = h;
-            colours = Image();
+            colours = Image::null;
             repaint();
         }
 
@@ -164,7 +164,7 @@ public:
 
     void resized()
     {
-        colours = Image();
+        colours = Image::null;
         updateMarker();
     }
 

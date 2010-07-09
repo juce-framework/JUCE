@@ -502,7 +502,7 @@ void Component::setBufferedToImage (const bool shouldBeBuffered)
 {
     if (shouldBeBuffered != flags.bufferToImageFlag)
     {
-        bufferedImage_ = Image();
+        bufferedImage_ = Image::null;
         flags.bufferToImageFlag = shouldBeBuffered;
     }
 }
@@ -1478,7 +1478,7 @@ void Component::repaint()
 void Component::repaint (const int x, const int y,
                          const int w, const int h)
 {
-    bufferedImage_ = Image();
+    bufferedImage_ = Image::null;
 
     if (flags.visibleFlag)
         internalRepaint (x, y, w, h);

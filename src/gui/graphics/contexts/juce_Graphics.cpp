@@ -105,10 +105,10 @@ bool Graphics::reduceClipRegion (const Path& path, const AffineTransform& transf
     return ! context->isClipEmpty();
 }
 
-bool Graphics::reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion, const AffineTransform& transform)
+bool Graphics::reduceClipRegion (const Image& image, const AffineTransform& transform)
 {
     saveStateIfPending();
-    context->clipToImageAlpha (image, sourceClipRegion, transform);
+    context->clipToImageAlpha (image, transform);
     return ! context->isClipEmpty();
 }
 
@@ -667,7 +667,7 @@ void Graphics::drawImage (const Image& imageToDraw,
 
     if (imageToDraw.isValid() && context->clipRegionIntersects  (Rectangle<int> (dx, dy, dw, dh)))
     {
-        drawImageTransformed (imageToDraw, Rectangle<int> (sx, sy, sw, sh),
+        drawImageTransformed (imageToDraw.getClippedImage (Rectangle<int> (sx, sy, sw, sh)),
                               AffineTransform::scale (dw / (float) sw, dh / (float) sh)
                                               .translated ((float) dx, (float) dy),
                               fillAlphaChannelWithCurrentBrush);
@@ -675,24 +675,21 @@ void Graphics::drawImage (const Image& imageToDraw,
 }
 
 void Graphics::drawImageTransformed (const Image& imageToDraw,
-                                     const Rectangle<int>& imageSubRegion,
                                      const AffineTransform& transform,
                                      const bool fillAlphaChannelWithCurrentBrush) const
 {
     if (imageToDraw.isValid() && ! context->isClipEmpty())
     {
-        const Rectangle<int> srcClip (imageSubRegion.getIntersection (imageToDraw.getBounds()));
-
         if (fillAlphaChannelWithCurrentBrush)
         {
             context->saveState();
-            context->clipToImageAlpha (imageToDraw, srcClip, transform);
+            context->clipToImageAlpha (imageToDraw, transform);
             fillAll();
             context->restoreState();
         }
         else
         {
-            context->drawImage (imageToDraw, srcClip, transform, false);
+            context->drawImage (imageToDraw, transform, false);
         }
     }
 }

@@ -96,6 +96,57 @@ Image::SharedImage* Image::SharedImage::createSoftwareImage (Image::PixelFormat 
 }
 
 //==============================================================================
+class SubsectionSharedImage  : public Image::SharedImage
+{
+public:
+    SubsectionSharedImage (Image::SharedImage* const image_, const Rectangle<int>& area_)
+        : Image::SharedImage (image_->getPixelFormat(), area_.getWidth(), area_.getHeight()),
+          image (image_), area (area_)
+    {
+        pixelStride = image_->getPixelStride();
+        lineStride = image_->getLineStride();
+        imageData = image_->getPixelData (area_.getX(), area_.getY());
+    }
+
+    ~SubsectionSharedImage() {}
+
+    Image::ImageType getType() const
+    {
+        return Image::SoftwareImage;
+    }
+
+    LowLevelGraphicsContext* createLowLevelContext()
+    {
+        LowLevelGraphicsContext* g = image->createLowLevelContext();
+        g->clipToRectangle (area);
+        g->setOrigin (area.getX(), area.getY());
+        return g;
+    }
+
+    SharedImage* clone()
+    {
+        return new SubsectionSharedImage (image->clone(), area);
+    }
+
+private:
+    const ReferenceCountedObjectPtr<Image::SharedImage> image;
+    const Rectangle<int> area;
+};
+
+const Image Image::getClippedImage (const Rectangle<int>& area) const
+{
+    if (area.contains (getBounds()))
+        return *this;
+
+    const Rectangle<int> validArea (area.getIntersection (getBounds()));
+    if (validArea.isEmpty())
+        return Image::null;
+
+    return Image (new SubsectionSharedImage (image, validArea));
+}
+
+
+//==============================================================================
 Image::Image()
 {
 }
@@ -127,6 +178,8 @@ Image& Image::operator= (const Image& other)
 Image::~Image()
 {
 }
+
+const Image Image::null;
 
 LowLevelGraphicsContext* Image::createLowLevelContext() const
 {
@@ -229,6 +282,16 @@ Image::BitmapData::BitmapData (const Image& image, const int x, const int y, con
       height (h)
 {
     jassert (x >= 0 && y >= 0 && w > 0 && h > 0 && x + w <= image.getWidth() && y + h <= image.getHeight());
+}
+
+Image::BitmapData::BitmapData (const Image& image, bool /*needsToBeWritable*/)
+    : data (image.image == 0 ? 0 : image.image->imageData),
+      pixelFormat (image.getFormat()),
+      lineStride (image.image == 0 ? 0 : image.image->lineStride),
+      pixelStride (image.image == 0 ? 0 : image.image->pixelStride),
+      width (image.getWidth()),
+      height (image.getHeight())
+{
 }
 
 Image::BitmapData::~BitmapData()

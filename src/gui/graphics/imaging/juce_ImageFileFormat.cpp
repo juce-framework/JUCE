@@ -106,7 +106,7 @@ const Image ImageFileFormat::loadFrom (InputStream& input)
     if (format != 0)
         return format->decodeImage (input);
 
-    return Image();
+    return Image::null;
 }
 
 const Image ImageFileFormat::loadFrom (const File& file)
@@ -119,7 +119,7 @@ const Image ImageFileFormat::loadFrom (const File& file)
         return loadFrom (b);
     }
 
-    return Image();
+    return Image::null;
 }
 
 const Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
@@ -130,7 +130,7 @@ const Image ImageFileFormat::loadFrom (const void* rawData, const int numBytes)
         return loadFrom (stream);
     }
 
-    return Image();
+    return Image::null;
 }
 
 END_JUCE_NAMESPACE

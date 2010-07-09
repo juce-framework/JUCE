@@ -54,7 +54,7 @@ public:
     bool clipToRectangleList (const RectangleList& clipRegion);
     void excludeClipRectangle (const Rectangle<int>& r);
     void clipToPath (const Path& path, const AffineTransform& transform);
-    void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
+    void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
 
     void saveState();
     void restoreState();
@@ -72,8 +72,7 @@ public:
     void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
     void fillPath (const Path& path, const AffineTransform& transform);
 
-    void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                    const AffineTransform& transform, bool fillEntireClipAsTiles);
+    void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
 
     void drawLine (const Line <float>& line);
 

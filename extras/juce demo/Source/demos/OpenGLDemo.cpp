@@ -132,7 +132,7 @@ public:
 
         glPixelStorei (GL_UNPACK_ALIGNMENT, 4);
 
-        Image::BitmapData srcData (image, 0, 0, image.getWidth(), image.getHeight());
+        Image::BitmapData srcData (image, false);
 
         glTexImage2D (GL_TEXTURE_2D, 0, 4, image.getWidth(), image.getHeight(),
                       0, GL_RGB,

@@ -92,7 +92,7 @@ bool FillType::operator!= (const FillType& other) const
 void FillType::setColour (const Colour& newColour) throw()
 {
     gradient = 0;
-    image = Image();
+    image = Image::null;
     colour = newColour;
 }
 
@@ -104,7 +104,7 @@ void FillType::setGradient (const ColourGradient& newGradient)
     }
     else
     {
-        image = Image();
+        image = Image::null;
         gradient = new ColourGradient (newGradient);
         colour = Colours::black;
     }

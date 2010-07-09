@@ -168,7 +168,7 @@ const Image PNGImageFormat::decodeImage (InputStream& in)
         if (pngInfoStruct == 0)
         {
             png_destroy_read_struct (&pngReadStruct, 0, 0);
-            return Image();
+            return Image::null;
         }
 
         png_set_error_fn (pngReadStruct, 0, PNGHelpers::errorCallback, PNGHelpers::errorCallback );
@@ -226,7 +226,7 @@ const Image PNGImageFormat::decodeImage (InputStream& in)
 
         hasAlphaChan = image.hasAlphaChannel(); // (the native image creator may not give back what we expect)
 
-        const Image::BitmapData destData (image, 0, 0, (int) width, (int) height, true);
+        const Image::BitmapData destData (image, true);
         uint8* srcRow = tempBuffer;
         uint8* destRow = destData.data;
 
@@ -304,7 +304,7 @@ bool PNGImageFormat::writeImageToStream (const Image& image, OutputStream& out)
     png_set_shift (pngWriteStruct, &sig_bit);
     png_set_packing (pngWriteStruct);
 
-    const Image::BitmapData srcData (image, 0, 0, width, height);
+    const Image::BitmapData srcData (image, false);
 
     for (int y = 0; y < height; ++y)
     {

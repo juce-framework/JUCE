@@ -76,7 +76,7 @@ public:
         }
         else
         {
-            const Image::BitmapData srcData (juceImage, 0, 0, juceImage.getWidth(), juceImage.getHeight());
+            const Image::BitmapData srcData (juceImage, false);
 
             CGDataProviderRef provider = CGDataProviderCreateWithData (0, srcData.data, srcData.lineStride * srcData.height, 0);
 
@@ -234,7 +234,7 @@ public:
         lastClipRectIsValid = false;
     }
 
-    void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform)
+    void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform)
     {
         if (! transform.isSingularity())
         {
@@ -245,19 +245,11 @@ public:
 
             CGImageRef image = CoreGraphicsImage::createImage (singleChannelImage, true, greyColourSpace);
 
-            if (srcClip != sourceImage.getBounds())
-            {
-                CGImageRef fullImage = image;
-                image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), srcClip.getY(),
-                                                                             srcClip.getWidth(), srcClip.getHeight()));
-                CGImageRelease (fullImage);
-            }
-
             flip();
-            AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, srcClip.getHeight()).followedBy (transform));
+            AffineTransform t (AffineTransform::scale (1.0f, -1.0f).translated (0, sourceImage.getHeight()).followedBy (transform));
             applyTransform (t);
 
-            CGRect r = CGRectMake (0, 0, srcClip.getWidth(), srcClip.getHeight());
+            CGRect r = CGRectMake (0, 0, sourceImage.getWidth(), sourceImage.getHeight());
             CGContextClipToMask (context, r, image);
 
             applyTransform (t.inverted());
@@ -383,7 +375,7 @@ public:
             {
                 CGContextSaveGState (context);
                 CGContextClipToRect (context, cgRect);
-                drawImage (state->fillType.image, state->fillType.image.getBounds(), state->fillType.transform, true);
+                drawImage (state->fillType.image, state->fillType.transform, true);
                 CGContextRestoreGState (context);
             }
         }
@@ -416,33 +408,24 @@ public:
             if (state->fillType.isGradient())
                 drawGradient();
             else
-                drawImage (state->fillType.image, state->fillType.image.getBounds(), state->fillType.transform, true);
+                drawImage (state->fillType.image, state->fillType.transform, true);
         }
 
         CGContextRestoreGState (context);
     }
 
-    void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-                    const AffineTransform& transform, const bool fillEntireClipAsTiles)
+    void drawImage (const Image& sourceImage, const AffineTransform& transform, const bool fillEntireClipAsTiles)
     {
-        jassert (sourceImage.getBounds().contains (srcClip));
-
-        CGImageRef fullImage = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace);
-        CGImageRef image = fullImage;
-
-        if (srcClip != sourceImage.getBounds())
-        {
-            image = CGImageCreateWithImageInRect (fullImage, CGRectMake (srcClip.getX(), srcClip.getY(),
-                                                                         srcClip.getWidth(), srcClip.getHeight()));
-            CGImageRelease (fullImage);
-        }
+        const int iw = sourceImage.getWidth();
+        const int ih = sourceImage.getHeight();
+        CGImageRef image = CoreGraphicsImage::createImage (sourceImage, false, rgbColourSpace);
 
         CGContextSaveGState (context);
         CGContextSetAlpha (context, state->fillType.getOpacity());
 
         flip();
-        applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, srcClip.getHeight()).followedBy (transform));
-        CGRect imageRect = CGRectMake (0, 0, srcClip.getWidth(), srcClip.getHeight());
+        applyTransform (AffineTransform::scale (1.0f, -1.0f).translated (0, ih).followedBy (transform));
+        CGRect imageRect = CGRectMake (0, 0, iw, ih);
 
         if (fillEntireClipAsTiles)
         {
@@ -459,8 +442,6 @@ public:
             {
                 // Fallback to manually doing a tiled fill on 10.4
                 CGRect clip = CGRectIntegral (CGContextGetClipBoundingBox (context));
-                const int iw = srcClip.getWidth();
-                const int ih = srcClip.getHeight();
 
                 int x = 0, y = 0;
                 while (x > clip.origin.x)   x -= iw;
