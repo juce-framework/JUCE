@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	39
+#define JUCE_BUILDNUMBER	40
 
 /** Current Juce version number.
 
@@ -535,7 +535,7 @@
 
 	@see Logger::outputDebugString
   */
-  #define DBG(dbgtext)		  Logger::outputDebugString (dbgtext);
+  #define DBG(dbgtext)		  JUCE_NAMESPACE::Logger::outputDebugString (dbgtext);
 
   // Assertions..
 
@@ -24272,17 +24272,10 @@ public:
 					int sourceX, int sourceY, int sourceWidth, int sourceHeight,
 					bool fillAlphaChannelWithCurrentBrush = false) const;
 
-	/** Draws part of an image, having applied an affine transform to it.
+	/** Draws an image, having applied an affine transform to it.
 
 		This lets you throw the image around in some wacky ways, rotate it, shear,
 		scale it, etc.
-
-		A subregion is specified within the source image, and all transformations
-		will be treated as relative to the origin of this sub-region. So, for example if
-		your subregion is (50, 50, 100, 100), and your transform is a translation of (20, 20),
-		the resulting pixel drawn at (20, 20) in the destination context is from (50, 50) in
-		your image. If you want to use the whole image, then Image::getBounds() returns a
-		suitable rectangle to use as the imageSubRegion parameter.
 
 		Images are composited using the context's current opacity, so if you
 		don't want it to be drawn semi-transparently, be sure to call setOpacity (1.0f)
@@ -24291,10 +24284,12 @@ public:
 		If fillAlphaChannelWithCurrentBrush is set to true, then the image's RGB channels
 		are ignored and it is filled with the current brush, masked by its alpha channel.
 
+		If you want to render only a subsection of an image, use Image::getClippedImage() to
+		create the section that you need.
+
 		@see setImageResamplingQuality, drawImage
 	*/
 	void drawImageTransformed (const Image& imageToDraw,
-							   const Rectangle<int>& imageSubRegion,
 							   const AffineTransform& transform,
 							   bool fillAlphaChannelWithCurrentBrush = false) const;
 
@@ -24366,15 +24361,11 @@ public:
 
 		@param image	the image whose alpha-channel should be used. If the image doesn't
 						have an alpha-channel, it is treated as entirely opaque.
-		@param sourceClipRegion	 a subsection of the image that should be used. To use the
-									entire image, just pass a rectangle of bounds
-									(0, 0, image.getWidth(), image.getHeight()).
 		@param transform	a matrix to apply to the image
 		@returns true if the resulting clipping region is non-zero in size
 		@see reduceClipRegion
 	*/
-	bool reduceClipRegion (const Image& image, const Rectangle<int>& sourceClipRegion,
-						   const AffineTransform& transform);
+	bool reduceClipRegion (const Image& image, const AffineTransform& transform);
 
 	/** Excludes a rectangle to stop it being drawn into. */
 	void excludeClipRegion (const Rectangle<int>& rectangleToExclude);
@@ -24582,6 +24573,11 @@ public:
 	*/
 	inline bool isNull() const throw()			  { return image == 0; }
 
+	/** A null Image object that can be used when you need to return an invalid image.
+		This object is the equivalient to an Image created with the default constructor.
+	*/
+	static const Image null;
+
 	/** Returns the image's width (in pixels). */
 	int getWidth() const throw()				{ return image == 0 ? 0 : image->width; }
 
@@ -24646,6 +24642,19 @@ public:
 		@see getReferenceCount
 	*/
 	void duplicateIfShared();
+
+	/** Returns an image which refers to a subsection of this image.
+
+		This will not make a copy of the original - the new image will keep a reference to it, so that
+		if the original image is changed, the contents of the subsection will also change. Likewise if you
+		draw into the subimage, you'll also be drawing onto that area of the original image. Note that if
+		you use operator= to make the original Image object refer to something else, the subsection image
+		won't pick up this change, it'll remain pointing at the original.
+
+		The area passed-in will be clipped to the bounds of this image, so this may return a smaller
+		image than the area you asked for, or even a null image if the area was out-of-bounds.
+	*/
+	const Image getClippedImage (const Rectangle<int>& area) const;
 
 	/** Returns the colour of one of the pixels in the image.
 
@@ -24715,6 +24724,7 @@ public:
 	public:
 		BitmapData (Image& image, int x, int y, int w, int h, bool needsToBeWritable);
 		BitmapData (const Image& image, int x, int y, int w, int h);
+		BitmapData (const Image& image, bool needsToBeWritable);
 		~BitmapData();
 
 		/** Returns a pointer to the start of a line in the image.
@@ -24818,6 +24828,13 @@ public:
 		static SharedImage* createNativeImage (PixelFormat format, int width, int height, bool clearImage);
 		static SharedImage* createSoftwareImage (PixelFormat format, int width, int height, bool clearImage);
 
+		const PixelFormat getPixelFormat() const throw()	{ return format; }
+		int getWidth() const throw()			{ return width; }
+		int getHeight() const throw()			   { return height; }
+		int getPixelStride() const throw()		  { return pixelStride; }
+		int getLineStride() const throw()		   { return lineStride; }
+		uint8* getPixelData (int x, int y) const throw();
+
 	protected:
 		friend class Image;
 		friend class Image::BitmapData;
@@ -24826,8 +24843,6 @@ public:
 		int pixelStride, lineStride;
 		uint8* imageData;
 		var userTag;
-
-		uint8* getPixelData (int x, int y) const throw();
 
 		SharedImage (const SharedImage&);
 		SharedImage& operator= (const SharedImage&);
@@ -35203,7 +35218,7 @@ public:
 				  const String& itemText,
 				  bool isActive = true,
 				  bool isTicked = false,
-				  const Image& iconToUse = Image());
+				  const Image& iconToUse = Image::null);
 
 	/** Adds an item that represents one of the commands in a command manager object.
 
@@ -35228,7 +35243,7 @@ public:
 						  const Colour& itemTextColour,
 						  bool isActive = true,
 						  bool isTicked = false,
-						  const Image& iconToUse = Image());
+						  const Image& iconToUse = Image::null);
 
 	/** Appends a custom menu item.
 
@@ -35266,7 +35281,7 @@ public:
 	void addSubMenu (const String& subMenuName,
 					 const PopupMenu& subMenu,
 					 bool isActive = true,
-					 const Image& iconToUse = Image(),
+					 const Image& iconToUse = Image::null,
 					 bool isTicked = false);
 
 	/** Appends a separator to the menu, to help break it up into sections.
@@ -44237,7 +44252,7 @@ public:
 	*/
 	void startDragging (const String& sourceDescription,
 						Component* sourceComponent,
-						const Image& dragImage = Image(),
+						const Image& dragImage = Image::null,
 						bool allowDraggingToOtherJuceWindows = false,
 						const Point<int>* imageOffsetFromMouse = 0);
 
@@ -58778,7 +58793,7 @@ public:
 	virtual bool clipToRectangleList (const RectangleList& clipRegion) = 0;
 	virtual void excludeClipRectangle (const Rectangle<int>& r) = 0;
 	virtual void clipToPath (const Path& path, const AffineTransform& transform) = 0;
-	virtual void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform) = 0;
+	virtual void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform) = 0;
 
 	virtual bool clipRegionIntersects (const Rectangle<int>& r) = 0;
 	virtual const Rectangle<int> getClipBounds() const = 0;
@@ -58794,8 +58809,7 @@ public:
 	virtual void fillRect (const Rectangle<int>& r, bool replaceExistingContents) = 0;
 	virtual void fillPath (const Path& path, const AffineTransform& transform) = 0;
 
-	virtual void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-							const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
+	virtual void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles) = 0;
 
 	virtual void drawLine (const Line <float>& line) = 0;
 	virtual void drawVerticalLine (int x, float top, float bottom) = 0;
@@ -58840,7 +58854,7 @@ public:
 	bool clipToRectangleList (const RectangleList& clipRegion);
 	void excludeClipRectangle (const Rectangle<int>& r);
 	void clipToPath (const Path& path, const AffineTransform& transform);
-	void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
+	void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
 
 	void saveState();
 	void restoreState();
@@ -58856,8 +58870,7 @@ public:
 	void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
-	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-					const AffineTransform& transform, bool fillEntireClipAsTiles);
+	void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
 
 	void drawLine (const Line <float>& line);
 
@@ -58938,7 +58951,7 @@ public:
 	bool clipToRectangleList (const RectangleList& clipRegion);
 	void excludeClipRectangle (const Rectangle<int>& r);
 	void clipToPath (const Path& path, const AffineTransform& transform);
-	void clipToImageAlpha (const Image& sourceImage, const Rectangle<int>& srcClip, const AffineTransform& transform);
+	void clipToImageAlpha (const Image& sourceImage, const AffineTransform& transform);
 
 	bool clipRegionIntersects (const Rectangle<int>& r);
 	const Rectangle<int> getClipBounds() const;
@@ -58954,8 +58967,7 @@ public:
 	void fillRect (const Rectangle<int>& r, bool replaceExistingContents);
 	void fillPath (const Path& path, const AffineTransform& transform);
 
-	void drawImage (const Image& sourceImage, const Rectangle<int>& srcClip,
-					const AffineTransform& transform, bool fillEntireClipAsTiles);
+	void drawImage (const Image& sourceImage, const AffineTransform& transform, bool fillEntireClipAsTiles);
 
 	void drawLine (const Line <float>& line);
 
