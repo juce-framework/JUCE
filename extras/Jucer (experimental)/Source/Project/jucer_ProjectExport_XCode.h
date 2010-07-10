@@ -35,7 +35,7 @@ class XCodeProjectExporter  : public ProjectExporter
 public:
     //==============================================================================
     static const char* getNameMac()                         { return "XCode (MacOSX)"; }
-    static const char* getNameiPhone()                      { return "XCode (iPhone)"; }
+    static const char* getNameiOS()                         { return "XCode (iOS)"; }
     static const char* getValueTreeTypeName (bool iPhone)   { return iPhone ? "XCODE_IPHONE" : "XCODE_MAC"; }
 
     //==============================================================================
@@ -43,12 +43,12 @@ public:
         : ProjectExporter (project_, settings_),
           iPhone (iPhone_)
     {
-        name = iPhone ? getNameiPhone() : getNameMac();
+        name = iPhone ? getNameiOS() : getNameMac();
 
         projectIDSalt = hashCode64 (project.getProjectUID());
 
         if (getTargetLocation().toString().isEmpty())
-            getTargetLocation() = getDefaultBuildsRootFolder() + (iPhone ? "iPhone" : "MacOSX");
+            getTargetLocation() = getDefaultBuildsRootFolder() + (iPhone ? "iOS" : "MacOSX");
 
         if (getVSTFolder().toString().isEmpty())
             getVSTFolder() = "~/SDKs/vstsdk2.4";
@@ -566,7 +566,7 @@ private:
 
         if (iPhone)
         {
-            s.add ("SDKROOT = iphonesimulator3.0");
+            s.add ("SDKROOT = iphonesimulator3.2");
         }
         else
         {

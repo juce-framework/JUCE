@@ -55,7 +55,7 @@ public:
 
         bool needsItalicTransform = false;
 
-#if JUCE_IPHONE
+#if JUCE_IOS
         NSString* fontName = juceStringToNS (font.getTypefaceName());
 
         if (font.isItalic() || font.isBold())
@@ -171,7 +171,7 @@ public:
 
     ~MacTypeface()
     {
-#if ! JUCE_IPHONE
+#if ! JUCE_IOS
         [nsFont release];
 #endif
         if (fontRef != 0)
@@ -289,7 +289,7 @@ public:
 
     bool getOutlineForGlyph (int glyphNumber, Path& path)
     {
-#if JUCE_IPHONE
+#if JUCE_IOS
         return false;
 #else
         if (nsFont == 0)
@@ -343,7 +343,7 @@ public:
 private:
     float ascent, unitsToHeightScaleFactor;
 
-#if JUCE_IPHONE
+#if JUCE_IOS
 
 #else
     NSFont* nsFont;
@@ -495,7 +495,7 @@ const StringArray Font::findAllTypefaceNames()
 
     const ScopedAutoReleasePool pool;
 
-#if JUCE_IPHONE
+#if JUCE_IOS
     NSArray* fonts = [UIFont familyNames];
 #else
     NSArray* fonts = [[NSFontManager sharedFontManager] availableFontFamilies];
@@ -510,7 +510,7 @@ const StringArray Font::findAllTypefaceNames()
 
 void Font::getPlatformDefaultFontNames (String& defaultSans, String& defaultSerif, String& defaultFixed)
 {
-#if JUCE_IPHONE
+#if JUCE_IOS
     defaultSans  = "Helvetica";
     defaultSerif = "Times New Roman";
     defaultFixed = "Courier New";

@@ -157,7 +157,7 @@ bool juce_dispatchNextMessageOnSystemQueue (const bool returnIfNoPendingMessages
         }
         else if (m.message == WM_QUIT)
         {
-            if (JUCEApplication::getInstance())
+            if (JUCEApplication::getInstance() != 0)
                 JUCEApplication::getInstance()->systemRequestedQuit();
         }
         else if (! isEventBlockedByModalComps (m))

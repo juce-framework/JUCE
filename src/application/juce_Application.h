@@ -263,7 +263,7 @@ public:
     // These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
     /** @internal */
-    static int main (String& commandLine, JUCEApplication* newApp);
+    static int main (const String& commandLine, JUCEApplication* newApp);
     /** @internal */
     static int main (int argc, const char* argv[], JUCEApplication* newApp);
 
@@ -283,6 +283,10 @@ public:
     bool perform (const InvocationInfo& info);
     /** @internal */
     void actionListenerCallback (const String& message);
+    /** @internal */
+    bool initialiseApp (const String& commandLine);
+    /** @internal */
+    int shutdownApp();
 
 private:
     //==============================================================================
@@ -290,15 +294,10 @@ private:
     int appReturnValue;
     bool stillInitialising;
     ScopedPointer<InterProcessLock> appLock;
+    static JUCEApplication* appInstance;
 
     JUCEApplication (const JUCEApplication&);
     JUCEApplication& operator= (const JUCEApplication&);
-
-public:
-    /** @internal */
-    bool initialiseApp (String& commandLine);
-    /** @internal */
-    static int shutdownAppAndClearUp();
 };
 
 

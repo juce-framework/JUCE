@@ -101,11 +101,11 @@
     If you're building on Windows, you'll need to have the Apple QuickTime SDK
     installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
+#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IOS || (JUCE_WINDOWS && ! JUCE_MSVC))
   #define JUCE_QUICKTIME 0
 #endif
 
-#if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
+#if (JUCE_IOS || JUCE_LINUX) && JUCE_QUICKTIME
   #undef JUCE_QUICKTIME
 #endif
 

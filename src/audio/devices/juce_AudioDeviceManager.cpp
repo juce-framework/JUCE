@@ -131,7 +131,7 @@ void AudioDeviceManager::createAudioDeviceTypes (OwnedArray <AudioIODeviceType>&
      list.add (juce_createAudioIODeviceType_CoreAudio());
     #endif
 
-    #if JUCE_IPHONE
+    #if JUCE_IOS
      list.add (juce_createAudioIODeviceType_iPhoneAudio());
     #endif
 

@@ -52,7 +52,7 @@ public:
                                             const String& bodyText,
                                             const StringArray& filesToAttach);
 
-#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
     //==============================================================================
     /** MAC ONLY - Turns a Core CF String into a juce one. */
     static const String cfStringToJuceString (CFStringRef cfString);
@@ -208,7 +208,7 @@ private:
 
 
 //==============================================================================
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
 
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
     using RAII.
@@ -225,6 +225,12 @@ private:
     ScopedAutoReleasePool (const ScopedAutoReleasePool&);
     ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
+
+#define JUCE_AUTORELEASEPOOL  const ScopedAutoReleasePool pool;
+
+#else
+
+#define JUCE_AUTORELEASEPOOL
 
 #endif
 

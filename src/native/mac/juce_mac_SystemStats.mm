@@ -101,7 +101,7 @@ void SystemStats::initialiseStats()
             cpuFlags.has3DNow = false;
         #endif
 
-        #if JUCE_IPHONE || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
+        #if JUCE_IOS || (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_5)
             cpuFlags.numCpus = (int) [[NSProcessInfo processInfo] activeProcessorCount];
         #else
             cpuFlags.numCpus = (int) MPProcessors();

@@ -76,7 +76,7 @@ bool PlatformUtilities::launchEmailWithAttachments (const String& targetEmailAdd
                                                     const String& bodyText,
                                                     const StringArray& filesToAttach)
 {
-#if JUCE_IPHONE
+#if JUCE_IOS
     //xxx probably need to use MFMailComposeViewController
     jassertfalse;
     return false;

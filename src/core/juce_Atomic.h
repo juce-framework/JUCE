@@ -157,11 +157,11 @@ private:
 /*
     The following code is in the header so that the atomics can be inlined where possible...
 */
-#if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
+#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
       || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1        // Older OSX builds using gcc4.1 or earlier
 
-  #if JUCE_PPC || JUCE_IPHONE
+  #if JUCE_PPC || JUCE_IOS
     // None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
     template <typename Type> static Type OSAtomicAdd64Barrier (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
     template <typename Type> static Type OSAtomicIncrement64Barrier (volatile Type* a) throw()     { jassertfalse; return ++*a; }
@@ -175,7 +175,7 @@ private:
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1        // GCC with intrinsics
 
-  #if JUCE_IPHONE
+  #if JUCE_IOS
     #define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
   #endif
 

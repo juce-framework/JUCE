@@ -37,7 +37,7 @@
 
 #define USE_COREGRAPHICS_RENDERING 1
 
-#if JUCE_IPHONE
+#if JUCE_IOS
  #import <Foundation/Foundation.h>
  #import <UIKit/UIKit.h>
  #import <AudioToolbox/AudioToolbox.h>

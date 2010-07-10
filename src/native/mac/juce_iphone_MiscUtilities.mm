@@ -29,8 +29,6 @@
 
 
 //==============================================================================
-static JUCEApplication* juce_intialisingApp;
-
 END_JUCE_NAMESPACE
 
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -38,7 +36,7 @@ END_JUCE_NAMESPACE
 }
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application;
-- (void) applicationWillResignActive: (UIApplication*) application;
+- (void) applicationWillTerminate: (UIApplication*) application;
 
 @end
 
@@ -48,22 +46,25 @@ END_JUCE_NAMESPACE
 {
     String dummy;
 
-    if (! juce_intialisingApp->initialiseApp (dummy))
+    if (! JUCEApplication::getInstance()->initialiseApp (dummy))
         exit (0);
 }
 
-- (void) applicationWillResignActive: (UIApplication*) application
+- (void) applicationWillTerminate: (UIApplication*) application
 {
-    JUCEApplication::shutdownAppAndClearUp();
+    JUCEApplication::getInstance()->shutdownApp();
+
+    // need to do this stuff because the OS kills the process before our scope-based cleanup code gets executed..
+    delete JUCEApplication::getInstance();
+    shutdownJuce_GUI();
 }
 
 @end
 
 BEGIN_JUCE_NAMESPACE
 
-int juce_IPhoneMain (int argc, const char* argv[], JUCEApplication* app)
+int juce_iOSMain (int argc, const char* argv[])
 {
-    juce_intialisingApp = app;
     return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
 }
 

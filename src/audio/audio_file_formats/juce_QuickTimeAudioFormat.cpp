@@ -26,7 +26,7 @@
 #include "../../core/juce_TargetPlatform.h"
 #include "../../../juce_Config.h"
 
-#if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IPHONE)
+#if JUCE_QUICKTIME && ! (JUCE_64BIT || JUCE_IOS)
 
 #if ! JUCE_WINDOWS
  #include <QuickTime/Movies.h>

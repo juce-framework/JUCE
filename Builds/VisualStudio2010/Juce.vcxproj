@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\src\containers\juce_ValueTree.cpp"/>
     <ClCompile Include="..\..\src\containers\juce_Variant.cpp"/>
     <ClCompile Include="..\..\src\core\juce_FileLogger.cpp"/>
+    <ClCompile Include="..\..\src\core\juce_Initialisation.cpp"/>
     <ClCompile Include="..\..\src\core\juce_Logger.cpp"/>
     <ClCompile Include="..\..\src\core\juce_PerformanceCounter.cpp"/>
     <ClCompile Include="..\..\src\core\juce_Random.cpp"/>
@@ -468,6 +469,12 @@
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessage.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessageCollector.h"/>
     <ClInclude Include="..\..\src\audio\midi\juce_MidiMessageSequence.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\RTAS\juce_RTAS_DigiCode_Header.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_AudioFilterStreamer.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\Standalone\juce_StandaloneFilterWindow.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_IncludeCharacteristics.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_PluginHeaders.h"/>
+    <ClInclude Include="..\..\extras\audio plugins\wrapper\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\src\audio\plugins\formats\juce_AudioUnitPluginFormat.h"/>
     <ClInclude Include="..\..\src\audio\plugins\formats\juce_DirectXPluginFormat.h"/>
     <ClInclude Include="..\..\src\audio\plugins\formats\juce_LADSPAPluginFormat.h"/>

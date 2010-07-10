@@ -40,7 +40,7 @@
     #include <sys/errno.h>
     #include <unistd.h>
     #include <netinet/in.h>
-  #elif (MACOSX_DEPLOYMENT_TARGET <= MAC_OS_X_VERSION_10_4) && ! JUCE_IPHONE
+  #elif (MACOSX_DEPLOYMENT_TARGET <= MAC_OS_X_VERSION_10_4) && ! JUCE_IOS
     #include <CoreServices/CoreServices.h>
   #endif
 
@@ -58,7 +58,7 @@ BEGIN_JUCE_NAMESPACE
 #include "../../threads/juce_ScopedLock.h"
 #include "../../threads/juce_Thread.h"
 
-#if defined (JUCE_LINUX) || defined (JUCE_MAC) || defined (JUCE_IPHONE)
+#if defined (JUCE_LINUX) || defined (JUCE_MAC) || defined (JUCE_IOS)
  typedef socklen_t juce_socklen_t;
 #else
  typedef int juce_socklen_t;

@@ -25,31 +25,16 @@
 
 #include "../core/juce_StandardHeader.h"
 
-#if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4245 4514 4100)
-  #include <crtdbg.h>
-  #pragma warning (pop)
-#endif
-
 BEGIN_JUCE_NAMESPACE
 
 #include "juce_Application.h"
 #include "../utilities/juce_DeletedAtShutdown.h"
 #include "../events/juce_MessageManager.h"
-#include "../gui/graphics/contexts/juce_Graphics.h"
-#include "../gui/components/windows/juce_AlertWindow.h"
-#include "../gui/components/buttons/juce_TextButton.h"
-#include "../gui/components/lookandfeel/juce_LookAndFeel.h"
 #include "../core/juce_Time.h"
 #include "../core/juce_Initialisation.h"
 #include "../threads/juce_Process.h"
 #include "../core/juce_PlatformUtilities.h"
 #include "../text/juce_LocalisedStrings.h"
-
-void juce_setCurrentThreadName (const String& name);
-
-static JUCEApplication* appInstance = 0;
 
 
 //==============================================================================
@@ -57,6 +42,8 @@ JUCEApplication::JUCEApplication()
     : appReturnValue (0),
       stillInitialising (true)
 {
+    jassert (appInstance == 0);
+    appInstance = this;
 }
 
 JUCEApplication::~JUCEApplication()
@@ -66,7 +53,12 @@ JUCEApplication::~JUCEApplication()
         appLock->exit();
         appLock = 0;
     }
+
+    jassert (appInstance == this);
+    appInstance = 0;
 }
+
+JUCEApplication* JUCEApplication::appInstance = 0;
 
 JUCEApplication* JUCEApplication::getInstance() throw()
 {
@@ -106,6 +98,12 @@ void JUCEApplication::quit()
 void JUCEApplication::setApplicationReturnValue (const int newReturnValue) throw()
 {
     appReturnValue = newReturnValue;
+}
+
+void JUCEApplication::actionListenerCallback (const String& message)
+{
+    if (message.startsWith (getApplicationName() + "/"))
+        anotherInstanceStarted (message.substring (getApplicationName().length() + 1));
 }
 
 //==============================================================================
@@ -160,41 +158,11 @@ bool JUCEApplication::perform (const InvocationInfo& info)
 }
 
 //==============================================================================
-int JUCEApplication::main (String& commandLine, JUCEApplication* const app)
+bool JUCEApplication::initialiseApp (const String& commandLine)
 {
-    if (! app->initialiseApp (commandLine))
-        return 0;
-
-    // now loop until a quit message is received..
-    JUCE_TRY
-    {
-        MessageManager::getInstance()->runDispatchLoop();
-    }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-    catch (const std::exception& e)
-    {
-        app->unhandledException (&e, __FILE__, __LINE__);
-    }
-    catch (...)
-    {
-        app->unhandledException (0, __FILE__, __LINE__);
-    }
-#endif
-
-    return shutdownAppAndClearUp();
-}
-
-bool JUCEApplication::initialiseApp (String& commandLine)
-{
-    jassert (appInstance == 0);
-    appInstance = this;
-
     commandLineParameters = commandLine.trim();
-    commandLine = String::empty;
 
-    initialiseJuce_GUI();
-
-#if ! JUCE_IPHONE
+#if ! JUCE_IOS
     jassert (appLock == 0); // initialiseApp must only be called once!
 
     if (! moreThanOneInstanceAllowed())
@@ -205,9 +173,6 @@ bool JUCEApplication::initialiseApp (String& commandLine)
         {
             appLock = 0;
             MessageManager::broadcastMessage (getApplicationName() + "/" + commandLineParameters);
-
-            delete appInstance;
-            appInstance = 0;
 
             DBG ("Another instance is running - quitting...");
             return false;
@@ -225,151 +190,66 @@ bool JUCEApplication::initialiseApp (String& commandLine)
     return true;
 }
 
-int JUCEApplication::shutdownAppAndClearUp()
+int JUCEApplication::shutdownApp()
 {
-    jassert (appInstance != 0);
-    ScopedPointer<JUCEApplication> app (appInstance);
-    int returnValue = 0;
+    jassert (appInstance == this);
 
-    MessageManager::getInstance()->deregisterBroadcastListener (static_cast <JUCEApplication*> (app));
+    MessageManager::getInstance()->deregisterBroadcastListener (this);
 
-    static bool reentrancyCheck = false;
-
-    if (! reentrancyCheck)
+    JUCE_TRY
     {
-        reentrancyCheck = true;
-
-        JUCE_TRY
-        {
-            // give the app a chance to clean up..
-            app->shutdown();
-        }
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS
-        catch (const std::exception& e)
-        {
-            app->unhandledException (&e, __FILE__, __LINE__);
-        }
-        catch (...)
-        {
-            app->unhandledException (0, __FILE__, __LINE__);
-        }
-#endif
-
-        JUCE_TRY
-        {
-            app->releaseMessageListener();
-
-            shutdownJuce_GUI();
-
-            returnValue = app->getApplicationReturnValue();
-
-            appInstance = 0;
-            app = 0;
-        }
-        JUCE_CATCH_ALL_ASSERT
-
-        reentrancyCheck = false;
+        // give the app a chance to clean up..
+        shutdown();
     }
+    JUCE_CATCH_EXCEPTION
 
-    return returnValue;
+    return getApplicationReturnValue();
 }
 
-#if JUCE_IPHONE
- extern int juce_IPhoneMain (int argc, const char* argv[], JUCEApplication* app);
+//==============================================================================
+int JUCEApplication::main (const String& commandLine, JUCEApplication* const app)
+{
+    const ScopedPointer<JUCEApplication> appDeleter (app);
+
+    if (! app->initialiseApp (commandLine))
+        return 0;
+
+    JUCE_TRY
+    {
+        // loop until a quit message is received..
+        MessageManager::getInstance()->runDispatchLoop();
+    }
+    JUCE_CATCH_EXCEPTION
+
+    return app->shutdownApp();
+}
+
+#if JUCE_IOS
+ extern int juce_iOSMain (int argc, const char* argv[]);
 #endif
 
 #if ! JUCE_WINDOWS
-extern const char* juce_Argv0;
+ extern const char* juce_Argv0;
 #endif
 
 int JUCEApplication::main (int argc, const char* argv[], JUCEApplication* const newApp)
 {
-#if ! JUCE_WINDOWS
+    JUCE_AUTORELEASEPOOL
+
+  #if ! JUCE_WINDOWS
     juce_Argv0 = argv[0];
-#endif
-
-#if JUCE_IPHONE
-    const ScopedAutoReleasePool pool;
-    return juce_IPhoneMain (argc, argv, newApp);
-#else
-
-  #if JUCE_MAC
-    const ScopedAutoReleasePool pool;
   #endif
 
+  #if JUCE_IOS
+    const ScopedPointer<JUCEApplication> appDeleter (newApp);
+    return juce_iOSMain (argc, argv);
+  #else
     String cmd;
     for (int i = 1; i < argc; ++i)
         cmd << argv[i] << ' ';
 
     return JUCEApplication::main (cmd, newApp);
-#endif
-}
-
-void JUCEApplication::actionListenerCallback (const String& message)
-{
-    if (message.startsWith (getApplicationName() + "/"))
-        anotherInstanceStarted (message.substring (getApplicationName().length() + 1));
-}
-
-//==============================================================================
-static bool juceInitialisedGUI = false;
-
-
-void JUCE_PUBLIC_FUNCTION initialiseJuce_GUI()
-{
-    if (! juceInitialisedGUI)
-    {
-#if JUCE_MAC || JUCE_IPHONE
-        const ScopedAutoReleasePool pool;
-#endif
-        juceInitialisedGUI = true;
-
-        initialiseJuce_NonGUI();
-        MessageManager::getInstance();
-        LookAndFeel::setDefaultLookAndFeel (0);
-        juce_setCurrentThreadName ("Juce Message Thread");
-
-#if JUCE_WINDOWS && JUCE_DEBUG
-        // This section is just for catching people who mess up their project settings and
-        // turn RTTI off..
-        try
-        {
-            TextButton tb (String::empty);
-            Component* c = &tb;
-
-            // Got an exception here? Then TURN ON RTTI in your compiler settings!!
-            c = dynamic_cast <Button*> (c);
-        }
-        catch (...)
-        {
-            // Ended up here? If so, TURN ON RTTI in your compiler settings!! And if you
-            // got as far as this catch statement, then why haven't you got exception catching
-            // turned on in the debugger???
-            jassertfalse;
-        }
-#endif
-    }
-}
-
-void JUCE_PUBLIC_FUNCTION shutdownJuce_GUI()
-{
-    if (juceInitialisedGUI)
-    {
-#if JUCE_MAC
-        const ScopedAutoReleasePool pool;
-#endif
-        {
-            DeletedAtShutdown::deleteAll();
-
-            LookAndFeel::clearDefaultLookAndFeel();
-        }
-
-        delete MessageManager::getInstance();
-
-        shutdownJuce_NonGUI();
-
-        juceInitialisedGUI = false;
-    }
+  #endif
 }
 
 END_JUCE_NAMESPACE

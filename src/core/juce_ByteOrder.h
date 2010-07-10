@@ -116,7 +116,7 @@ inline uint16 ByteOrder::swap (uint16 n)
 
 inline uint32 ByteOrder::swap (uint32 n)
 {
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
     return OSSwapInt32 (n);
 #elif JUCE_GCC
     asm("bswap %%eax" : "=a"(n) : "a"(n));
@@ -135,7 +135,7 @@ inline uint32 ByteOrder::swap (uint32 n)
 
 inline uint64 ByteOrder::swap (uint64 value)
 {
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
     return OSSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
     return _byteswap_uint64 (value);

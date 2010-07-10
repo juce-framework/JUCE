@@ -58,7 +58,7 @@ public:
     {
         const ScopedLock sl (getLock());
 
-        for (int i = getCursors().size(); --i >= 0;)
+        for (int i = 0; i < getCursors().size(); ++i)
         {
             SharedCursorHandle* const sc = getCursors().getUnchecked(i);
 

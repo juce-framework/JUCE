@@ -75,8 +75,15 @@ public:
 
     /** Destructor.
 
-        Note that when a component is deleted, any child components it might
-        contain are NOT deleted unless you explicitly call deleteAllChildren() first.
+        Note that when a component is deleted, any child components it contain are NOT
+        automatically deleted. It's your responsibilty to manage their lifespan - you
+        may want to use helper methods like deleteAllChildren(), or less haphazard
+        approaches like using ScopedPointers or normal object aggregation to manage them.
+
+        If the component being deleted is currently the child of another one, then during
+        deletion, it will be removed from its parent, and the parent will receive a childrenChanged()
+        callback. Any ComponentListener objects that have registered with it will also have their
+        ComponentListener::componentBeingDeleted() methods called.
     */
     virtual ~Component();
 
@@ -552,29 +559,37 @@ public:
 
     /** Adds a child component to this one.
 
-        @param child    the new component to add. If the component passed-in is already
-                        the child of another component, it'll first be removed from that.
+        Adding a child component does not mean that the component will own or delete the child - it's
+        your responsibility to delete the component. Note that it's safe to delete a component
+        without first removing it from its parent - doing so will automatically remove it and
+        send out the appropriate notifications before the deletion completes.
 
+        If the child is already a child of this component, then no action will be taken, and its
+        z-order will be left unchanged.
+
+        @param child    the new component to add. If the component passed-in is already
+                        the child of another component, it'll first be removed from it current parent.
         @param zOrder   The index in the child-list at which this component should be inserted.
                         A value of -1 will insert it in front of the others, 0 is the back.
-        @see removeChildComponent, addAndMakeVisible, getChild,
-             ComponentListener::componentChildrenChanged
+        @see removeChildComponent, addAndMakeVisible, getChild, ComponentListener::componentChildrenChanged
     */
     void addChildComponent (Component* child, int zOrder = -1);
 
     /** Adds a child component to this one, and also makes the child visible if it isn't.
 
         Quite a useful function, this is just the same as calling addChildComponent()
-        followed by setVisible (true) on the child.
+        followed by setVisible (true) on the child. See addChildComponent() for more details.
     */
     void addAndMakeVisible (Component* child, int zOrder = -1);
 
     /** Removes one of this component's child-components.
 
         If the child passed-in isn't actually a child of this component (either because
-        it's invalid or is the child of a different parent), then nothing is done.
+        it's invalid or is the child of a different parent), then no action is taken.
 
-        Note that removing a child will not delete it!
+        Note that removing a child will not delete it! But it's ok to delete a component
+        without first removing it - doing so will automatically remove it and send out the
+        appropriate notifications before the deletion completes.
 
         @see addChildComponent, ComponentListener::componentChildrenChanged
     */
@@ -585,7 +600,9 @@ public:
         This will return a pointer to the component that was removed, or null if
         the index was out-of-range.
 
-        Note that removing a child will not delete it!
+        Note that removing a child will not delete it! But it's ok to delete a component
+        without first removing it - doing so will automatically remove it and send out the
+        appropriate notifications before the deletion completes.
 
         @see addChildComponent, ComponentListener::componentChildrenChanged
     */

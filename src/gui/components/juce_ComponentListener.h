@@ -99,10 +99,12 @@ public:
     /** Called when the component is in the process of being deleted.
 
         This callback is made from inside the destructor, so be very, very cautious
-        about what you do inside the callback.
+        about what you do in here.
 
-        It will be called before the component has been removed from its parent, and
-        before any child components have been removed.
+        In particular, bear in mind that it's the Component base class's destructor that calls
+        this - so if the object that's being deleted is a subclass of Component, then the
+        subclass layers of the object will already have been destructed when it gets to this
+        point!
     */
     virtual void componentBeingDeleted (Component& component);
 };

@@ -373,11 +373,18 @@ public:
 
     ~GLESContext()
     {
-        makeInactive();
-        [context release];
+        deleteContext();
+
         [view removeFromSuperview];
         [view release];
         freeGLBuffers();
+    }
+
+    void deleteContext()
+    {
+        makeInactive();
+        [context release];
+        context = nil;
     }
 
     bool makeActive() const throw()

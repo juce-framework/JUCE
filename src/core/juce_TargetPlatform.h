@@ -50,6 +50,7 @@
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
     #define     JUCE_IPHONE 1
+    #define     JUCE_IOS 1
   #else
     #define     JUCE_MAC 1
   #endif
@@ -117,7 +118,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_IPHONE
+#if JUCE_IOS
 
   #ifndef NDEBUG
     #define JUCE_DEBUG 1

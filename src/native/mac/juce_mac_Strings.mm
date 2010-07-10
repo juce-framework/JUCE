@@ -79,7 +79,7 @@ CFStringRef PlatformUtilities::juceStringToCFString (const String& s)
 
 const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 {
-#if JUCE_IPHONE
+#if JUCE_IOS
     const ScopedAutoReleasePool pool;
     return nsStringToJuce ([juceStringToNS (s) precomposedStringWithCanonicalMapping]);
 #else
@@ -142,7 +142,7 @@ const String PlatformUtilities::convertToPrecomposedUnicode (const String& s)
 
 void SystemClipboard::copyTextToClipboard (const String& text)
 {
-#if JUCE_IPHONE
+#if JUCE_IOS
     [[UIPasteboard generalPasteboard] setValue: juceStringToNS (text)
                              forPasteboardType: @"public.text"];
 #else
@@ -156,7 +156,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 const String SystemClipboard::getTextFromClipboard()
 {
-#if JUCE_IPHONE
+#if JUCE_IOS
     NSString* text = [[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"];
 #else
     NSString* text = [[NSPasteboard generalPasteboard] stringForType: NSStringPboardType];

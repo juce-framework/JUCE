@@ -126,5 +126,51 @@ public:
 };
 
 
+//==============================================================================
+/*
+    To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where
+    AppSubClass is the name of a class derived from JUCEApplication.
+
+    See the JUCEApplication class documentation (juce_Application.h) for more details.
+
+*/
+#if defined (JUCE_GCC) || defined (__MWERKS__)
+
+  #define START_JUCE_APPLICATION(AppClass) \
+    int main (int argc, char* argv[]) \
+    { \
+        JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+        return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
+    }
+
+#elif JUCE_WINDOWS
+
+  #ifdef _CONSOLE
+    #define START_JUCE_APPLICATION(AppClass) \
+        int main (int, char* argv[]) \
+        { \
+            JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+            return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+        }
+  #elif ! defined (_AFXDLL)
+    #ifdef _WINDOWS_
+      #define START_JUCE_APPLICATION(AppClass) \
+          int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
+          { \
+              JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+          }
+    #else
+      #define START_JUCE_APPLICATION(AppClass) \
+          int __stdcall WinMain (int, int, const char*, int) \
+          { \
+              JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+              return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+          }
+    #endif
+  #endif
+
+#endif
+
 
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__

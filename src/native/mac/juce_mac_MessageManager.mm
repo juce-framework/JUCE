@@ -411,14 +411,13 @@ static bool isEventBlockedByModalComps (NSEvent* e)
 
 bool MessageManager::runDispatchLoopUntil (int millisecondsToRunFor)
 {
-    const ScopedAutoReleasePool pool;
     jassert (isThisTheMessageThread()); // must only be called by the message thread
 
     uint32 endTime = Time::getMillisecondCounter() + millisecondsToRunFor;
 
     while (! quitMessagePosted)
     {
-        const ScopedAutoReleasePool pool2;
+        const ScopedAutoReleasePool pool;
 
         CFRunLoopRunInMode (kCFRunLoopDefaultMode, 0.001, true);
 

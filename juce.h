@@ -80,7 +80,7 @@ END_JUCE_NAMESPACE
      of 3rd party header files, you may need to use the juce_WithoutMacros.h file - see
      the comments in that file for more information.
   */
-  #if (JUCE_MAC || JUCE_IPHONE) && ! JUCE_DONT_DEFINE_MACROS
+  #if (JUCE_MAC || JUCE_IOS) && ! JUCE_DONT_DEFINE_MACROS
     #define Component       JUCE_NAMESPACE::Component
     #define MemoryBlock     JUCE_NAMESPACE::MemoryBlock
     #define Point           JUCE_NAMESPACE::Point
@@ -150,52 +150,5 @@ END_JUCE_NAMESPACE
   #endif
 
 #endif
-
-
-//==============================================================================
-/*
-    To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where
-    AppSubClass is the name of a class derived from JUCEApplication.
-
-    See the JUCEApplication class documentation (juce_Application.h) for more details.
-
-*/
-#if defined (JUCE_GCC) || defined (__MWERKS__)
-
-  #define START_JUCE_APPLICATION(AppClass) \
-    int main (int argc, char* argv[]) \
-    { \
-        return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
-    }
-
-#elif JUCE_WINDOWS
-
-  #ifdef _CONSOLE
-    #define START_JUCE_APPLICATION(AppClass) \
-        int main (int, char* argv[]) \
-        { \
-            JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-            return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-        }
-  #elif ! defined (_AFXDLL)
-    #ifdef _WINDOWS_
-      #define START_JUCE_APPLICATION(AppClass) \
-          int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
-          { \
-              JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-              return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-          }
-    #else
-      #define START_JUCE_APPLICATION(AppClass) \
-          int __stdcall WinMain (int, int, const char*, int) \
-          { \
-              JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-              return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-          }
-    #endif
-  #endif
-
-#endif
-
 
 #endif   // __JUCE_JUCEHEADER__

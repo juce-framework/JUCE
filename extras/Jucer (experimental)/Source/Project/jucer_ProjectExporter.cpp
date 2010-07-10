@@ -49,7 +49,7 @@ const StringArray ProjectExporter::getExporterNames()
 {
     StringArray s;
     s.add (XCodeProjectExporter::getNameMac());
-    s.add (XCodeProjectExporter::getNameiPhone());
+    s.add (XCodeProjectExporter::getNameiOS());
     s.add (MSVCProjectExporterVC6::getName());
     s.add (MSVCProjectExporterVC2005::getName());
     s.add (MSVCProjectExporterVC2008::getName());

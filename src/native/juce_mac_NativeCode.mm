@@ -32,7 +32,7 @@
 
 #include "../core/juce_TargetPlatform.h"
 
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
 
 #include "mac/juce_mac_NativeIncludes.h"
 
@@ -98,7 +98,7 @@ BEGIN_JUCE_NAMESPACE
 #include "common/juce_posix_SharedCode.h"
 #include "mac/juce_mac_Files.mm"
 
-#if JUCE_IPHONE
+#if JUCE_IOS
  #include "mac/juce_iphone_MiscUtilities.mm"
 #else
  #include "mac/juce_mac_MiscUtilities.mm"
@@ -107,7 +107,7 @@ BEGIN_JUCE_NAMESPACE
 #include "mac/juce_mac_Debugging.mm"
 
 #if ! JUCE_ONLY_BUILD_CORE_LIBRARY
- #if JUCE_IPHONE
+ #if JUCE_IOS
   #include "mac/juce_mac_Fonts.mm"
   #include "mac/juce_mac_CoreGraphicsContext.mm"
   #include "mac/juce_iphone_UIViewComponentPeer.mm"

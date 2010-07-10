@@ -102,6 +102,7 @@
  #include "../src/core/juce_RelativeTime.cpp"
  #include "../src/core/juce_SystemStats.cpp"
  #include "../src/core/juce_Time.cpp"
+ #include "../src/core/juce_Initialisation.cpp"
  #include "../src/containers/juce_BigInteger.cpp"
  #include "../src/containers/juce_MemoryBlock.cpp"
  #include "../src/containers/juce_PropertySet.cpp"

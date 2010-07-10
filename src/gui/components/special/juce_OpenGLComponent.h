@@ -190,7 +190,7 @@ public:
     {
         openGLDefault = 0,
 
-#if JUCE_IPHONE
+#if JUCE_IOS
         openGLES1,  /**< On the iPhone, this selects openGL ES 1.0 */
         openGLES2   /**< On the iPhone, this selects openGL ES 2.0 */
 #endif

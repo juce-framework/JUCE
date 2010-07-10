@@ -131,6 +131,9 @@ public:
 private:
     const ReferenceCountedObjectPtr<Image::SharedImage> image;
     const Rectangle<int> area;
+
+    SubsectionSharedImage (const SubsectionSharedImage&);
+    SubsectionSharedImage& operator= (const SubsectionSharedImage&);
 };
 
 const Image Image::getClippedImage (const Rectangle<int>& area) const

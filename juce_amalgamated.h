@@ -64,7 +64,7 @@
 */
 #define JUCE_MAJOR_VERSION	  1
 #define JUCE_MINOR_VERSION	  52
-#define JUCE_BUILDNUMBER	40
+#define JUCE_BUILDNUMBER	41
 
 /** Current Juce version number.
 
@@ -103,6 +103,7 @@
 
   #if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 	#define	 JUCE_IPHONE 1
+	#define	 JUCE_IOS 1
   #else
 	#define	 JUCE_MAC 1
   #endif
@@ -167,7 +168,7 @@
 
 #endif
 
-#if JUCE_IPHONE
+#if JUCE_IOS
 
   #ifndef NDEBUG
 	#define JUCE_DEBUG 1
@@ -293,11 +294,11 @@
 	If you're building on Windows, you'll need to have the Apple QuickTime SDK
 	installed, and its header files will need to be on your include path.
 */
-#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IPHONE || (JUCE_WINDOWS && ! JUCE_MSVC))
+#if ! (defined (JUCE_QUICKTIME) || JUCE_LINUX || JUCE_IOS || (JUCE_WINDOWS && ! JUCE_MSVC))
   #define JUCE_QUICKTIME 0
 #endif
 
-#if (JUCE_IPHONE || JUCE_LINUX) && JUCE_QUICKTIME
+#if (JUCE_IOS || JUCE_LINUX) && JUCE_QUICKTIME
   #undef JUCE_QUICKTIME
 #endif
 
@@ -562,7 +563,7 @@
 	#endif
   #elif JUCE_MAC
 	#define juce_breakDebugger		  Debugger();
-  #elif JUCE_IPHONE
+  #elif JUCE_IOS
 	#define juce_breakDebugger		  kill (0, SIGTRAP);
   #elif JUCE_LINUX
 	#define juce_breakDebugger		  kill (0, SIGTRAP);
@@ -712,7 +713,7 @@
   #include <intrin.h>
 #endif
 
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
   #include <libkern/OSAtomic.h>
 #endif
 
@@ -1385,7 +1386,7 @@ inline uint16 ByteOrder::swap (uint16 n)
 
 inline uint32 ByteOrder::swap (uint32 n)
 {
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
 	return OSSwapInt32 (n);
 #elif JUCE_GCC
 	asm("bswap %%eax" : "=a"(n) : "a"(n));
@@ -1404,7 +1405,7 @@ inline uint32 ByteOrder::swap (uint32 n)
 
 inline uint64 ByteOrder::swap (uint64 value)
 {
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
 	return OSSwapInt64 (value);
 #elif JUCE_USE_INTRINSICS
 	return _byteswap_uint64 (value);
@@ -5858,11 +5859,11 @@ private:
 /*
 	The following code is in the header so that the atomics can be inlined where possible...
 */
-#if (JUCE_IPHONE && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
+#if (JUCE_IOS && (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_3_2 || ! defined (__IPHONE_3_2))) \
 	  || (JUCE_MAC && (JUCE_PPC || __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 2)))
   #define JUCE_ATOMICS_MAC 1	// Older OSX builds using gcc4.1 or earlier
 
-  #if JUCE_PPC || JUCE_IPHONE
+  #if JUCE_PPC || JUCE_IOS
 	// None of these atomics are available for PPC or for iPhoneOS 3.1 or earlier!!
 	template <typename Type> static Type OSAtomicAdd64Barrier (Type b, volatile Type* a) throw()   { jassertfalse; return *a += b; }
 	template <typename Type> static Type OSAtomicIncrement64Barrier (volatile Type* a) throw()	 { jassertfalse; return ++*a; }
@@ -5875,7 +5876,7 @@ private:
 #elif JUCE_GCC
   #define JUCE_ATOMICS_GCC 1	// GCC with intrinsics
 
-  #if JUCE_IPHONE
+  #if JUCE_IOS
 	#define JUCE_64BIT_ATOMICS_UNAVAILABLE 1  // (on the iphone, the 64-bit ops will compile but not link)
   #endif
 
@@ -13729,6 +13730,51 @@ public:
 	~ScopedJuceInitialiser_GUI()	{ shutdownJuce_GUI(); }
 };
 
+/*
+	To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where
+	AppSubClass is the name of a class derived from JUCEApplication.
+
+	See the JUCEApplication class documentation (juce_Application.h) for more details.
+
+*/
+#if defined (JUCE_GCC) || defined (__MWERKS__)
+
+  #define START_JUCE_APPLICATION(AppClass) \
+	int main (int argc, char* argv[]) \
+	{ \
+		JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+		return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
+	}
+
+#elif JUCE_WINDOWS
+
+  #ifdef _CONSOLE
+	#define START_JUCE_APPLICATION(AppClass) \
+		int main (int, char* argv[]) \
+		{ \
+			JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+			return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+		}
+  #elif ! defined (_AFXDLL)
+	#ifdef _WINDOWS_
+	  #define START_JUCE_APPLICATION(AppClass) \
+		  int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
+		  { \
+			  JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+		  }
+	#else
+	  #define START_JUCE_APPLICATION(AppClass) \
+		  int __stdcall WinMain (int, int, const char*, int) \
+		  { \
+			  JUCE_NAMESPACE::ScopedJuceInitialiser_GUI libraryInitialiser; \
+			  return JUCE_NAMESPACE::JUCEApplication::main (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams(), new AppClass()); \
+		  }
+	#endif
+  #endif
+
+#endif
+
 #endif   // __JUCE_INITIALISATION_JUCEHEADER__
 /*** End of inlined file: juce_Initialisation.h ***/
 
@@ -13857,7 +13903,7 @@ public:
 											const String& bodyText,
 											const StringArray& filesToAttach);
 
-#if JUCE_MAC || JUCE_IPHONE || DOXYGEN
+#if JUCE_MAC || JUCE_IOS || DOXYGEN
 
 	/** MAC ONLY - Turns a Core CF String into a juce one. */
 	static const String cfStringToJuceString (CFStringRef cfString);
@@ -14008,7 +14054,7 @@ private:
 	PlatformUtilities& operator= (const PlatformUtilities&);
 };
 
-#if JUCE_MAC || JUCE_IPHONE
+#if JUCE_MAC || JUCE_IOS
 
 /** A handy C++ wrapper that creates and deletes an NSAutoreleasePool object
 	using RAII.
@@ -14025,6 +14071,12 @@ private:
 	ScopedAutoReleasePool (const ScopedAutoReleasePool&);
 	ScopedAutoReleasePool& operator= (const ScopedAutoReleasePool&);
 };
+
+#define JUCE_AUTORELEASEPOOL  const ScopedAutoReleasePool pool;
+
+#else
+
+#define JUCE_AUTORELEASEPOOL
 
 #endif
 
@@ -19652,10 +19704,12 @@ public:
 	/** Called when the component is in the process of being deleted.
 
 		This callback is made from inside the destructor, so be very, very cautious
-		about what you do inside the callback.
+		about what you do in here.
 
-		It will be called before the component has been removed from its parent, and
-		before any child components have been removed.
+		In particular, bear in mind that it's the Component base class's destructor that calls
+		this - so if the object that's being deleted is a subclass of Component, then the
+		subclass layers of the object will already have been destructed when it gets to this
+		point!
 	*/
 	virtual void componentBeingDeleted (Component& component);
 };
@@ -20538,6 +20592,12 @@ public:
 	{
 		x = newX; y = newY; w = newWidth; h = newHeight;
 	}
+
+	/** Changes the rectangle's X coordinate */
+	void setX (const ValueType newX) throw()			{ x = newX; }
+
+	/** Changes the rectangle's Y coordinate */
+	void setY (const ValueType newY) throw()			{ y = newY; }
 
 	/** Changes the rectangle's width */
 	void setWidth (const ValueType newWidth) throw()		{ w = newWidth; }
@@ -25362,8 +25422,15 @@ public:
 
 	/** Destructor.
 
-		Note that when a component is deleted, any child components it might
-		contain are NOT deleted unless you explicitly call deleteAllChildren() first.
+		Note that when a component is deleted, any child components it contain are NOT
+		automatically deleted. It's your responsibilty to manage their lifespan - you
+		may want to use helper methods like deleteAllChildren(), or less haphazard
+		approaches like using ScopedPointers or normal object aggregation to manage them.
+
+		If the component being deleted is currently the child of another one, then during
+		deletion, it will be removed from its parent, and the parent will receive a childrenChanged()
+		callback. Any ComponentListener objects that have registered with it will also have their
+		ComponentListener::componentBeingDeleted() methods called.
 	*/
 	virtual ~Component();
 
@@ -25829,29 +25896,37 @@ public:
 
 	/** Adds a child component to this one.
 
-		@param child	the new component to add. If the component passed-in is already
-						the child of another component, it'll first be removed from that.
+		Adding a child component does not mean that the component will own or delete the child - it's
+		your responsibility to delete the component. Note that it's safe to delete a component
+		without first removing it from its parent - doing so will automatically remove it and
+		send out the appropriate notifications before the deletion completes.
 
+		If the child is already a child of this component, then no action will be taken, and its
+		z-order will be left unchanged.
+
+		@param child	the new component to add. If the component passed-in is already
+						the child of another component, it'll first be removed from it current parent.
 		@param zOrder   The index in the child-list at which this component should be inserted.
 						A value of -1 will insert it in front of the others, 0 is the back.
-		@see removeChildComponent, addAndMakeVisible, getChild,
-			 ComponentListener::componentChildrenChanged
+		@see removeChildComponent, addAndMakeVisible, getChild, ComponentListener::componentChildrenChanged
 	*/
 	void addChildComponent (Component* child, int zOrder = -1);
 
 	/** Adds a child component to this one, and also makes the child visible if it isn't.
 
 		Quite a useful function, this is just the same as calling addChildComponent()
-		followed by setVisible (true) on the child.
+		followed by setVisible (true) on the child. See addChildComponent() for more details.
 	*/
 	void addAndMakeVisible (Component* child, int zOrder = -1);
 
 	/** Removes one of this component's child-components.
 
 		If the child passed-in isn't actually a child of this component (either because
-		it's invalid or is the child of a different parent), then nothing is done.
+		it's invalid or is the child of a different parent), then no action is taken.
 
-		Note that removing a child will not delete it!
+		Note that removing a child will not delete it! But it's ok to delete a component
+		without first removing it - doing so will automatically remove it and send out the
+		appropriate notifications before the deletion completes.
 
 		@see addChildComponent, ComponentListener::componentChildrenChanged
 	*/
@@ -25862,7 +25937,9 @@ public:
 		This will return a pointer to the component that was removed, or null if
 		the index was out-of-range.
 
-		Note that removing a child will not delete it!
+		Note that removing a child will not delete it! But it's ok to delete a component
+		without first removing it - doing so will automatically remove it and send out the
+		appropriate notifications before the deletion completes.
 
 		@see addChildComponent, ComponentListener::componentChildrenChanged
 	*/
@@ -27785,9 +27862,6 @@ public:
 
 	juce_UseDebuggingNewOperator
 
-	/** @internal */
-	void releaseMessageListener();
-
 private:
 	// (for async invocation of commands)
 	class CommandTargetMessageInvoker  : public MessageListener
@@ -28073,7 +28147,7 @@ public:
 	// These are used by the START_JUCE_APPLICATION() macro and aren't for public use.
 
 	/** @internal */
-	static int main (String& commandLine, JUCEApplication* newApp);
+	static int main (const String& commandLine, JUCEApplication* newApp);
 	/** @internal */
 	static int main (int argc, const char* argv[], JUCEApplication* newApp);
 
@@ -28092,6 +28166,10 @@ public:
 	bool perform (const InvocationInfo& info);
 	/** @internal */
 	void actionListenerCallback (const String& message);
+	/** @internal */
+	bool initialiseApp (const String& commandLine);
+	/** @internal */
+	int shutdownApp();
 
 private:
 
@@ -28099,15 +28177,10 @@ private:
 	int appReturnValue;
 	bool stillInitialising;
 	ScopedPointer<InterProcessLock> appLock;
+	static JUCEApplication* appInstance;
 
 	JUCEApplication (const JUCEApplication&);
 	JUCEApplication& operator= (const JUCEApplication&);
-
-public:
-	/** @internal */
-	bool initialiseApp (String& commandLine);
-	/** @internal */
-	static int shutdownAppAndClearUp();
 };
 
 #endif   // __JUCE_APPLICATION_JUCEHEADER__
@@ -56932,7 +57005,7 @@ public:
 	{
 		openGLDefault = 0,
 
-#if JUCE_IPHONE
+#if JUCE_IOS
 		openGLES1,  /**< On the iPhone, this selects openGL ES 1.0 */
 		openGLES2   /**< On the iPhone, this selects openGL ES 2.0 */
 #endif
@@ -61174,7 +61247,7 @@ END_JUCE_NAMESPACE
 	 of 3rd party header files, you may need to use the juce_WithoutMacros.h file - see
 	 the comments in that file for more information.
   */
-  #if (JUCE_MAC || JUCE_IPHONE) && ! JUCE_DONT_DEFINE_MACROS
+  #if (JUCE_MAC || JUCE_IOS) && ! JUCE_DONT_DEFINE_MACROS
 	#define Component	   JUCE_NAMESPACE::Component
 	#define MemoryBlock	 JUCE_NAMESPACE::MemoryBlock
 	#define Point	   JUCE_NAMESPACE::Point
@@ -61273,50 +61346,6 @@ END_JUCE_NAMESPACE
 
 	#endif
 
-  #endif
-
-#endif
-
-/*
-	To start a JUCE app, use this macro: START_JUCE_APPLICATION (AppSubClass) where
-	AppSubClass is the name of a class derived from JUCEApplication.
-
-	See the JUCEApplication class documentation (juce_Application.h) for more details.
-
-*/
-#if defined (JUCE_GCC) || defined (__MWERKS__)
-
-  #define START_JUCE_APPLICATION(AppClass) \
-	int main (int argc, char* argv[]) \
-	{ \
-		return JUCE_NAMESPACE::JUCEApplication::main (argc, (const char**) argv, new AppClass()); \
-	}
-
-#elif JUCE_WINDOWS
-
-  #ifdef _CONSOLE
-	#define START_JUCE_APPLICATION(AppClass) \
-		int main (int, char* argv[]) \
-		{ \
-			JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-			return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-		}
-  #elif ! defined (_AFXDLL)
-	#ifdef _WINDOWS_
-	  #define START_JUCE_APPLICATION(AppClass) \
-		  int WINAPI WinMain (HINSTANCE, HINSTANCE, LPSTR, int) \
-		  { \
-			  JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-			  return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-		  }
-	#else
-	  #define START_JUCE_APPLICATION(AppClass) \
-		  int __stdcall WinMain (int, int, const char*, int) \
-		  { \
-			  JUCE_NAMESPACE::String commandLineString (JUCE_NAMESPACE::PlatformUtilities::getCurrentCommandLineParams()); \
-			  return JUCE_NAMESPACE::JUCEApplication::main (commandLineString, new AppClass()); \
-		  }
-	#endif
   #endif
 
 #endif

@@ -167,6 +167,12 @@ public:
         x = newX; y = newY; w = newWidth; h = newHeight;
     }
 
+    /** Changes the rectangle's X coordinate */
+    void setX (const ValueType newX) throw()                        { x = newX; }
+
+    /** Changes the rectangle's Y coordinate */
+    void setY (const ValueType newY) throw()                        { y = newY; }
+
     /** Changes the rectangle's width */
     void setWidth (const ValueType newWidth) throw()                { w = newWidth; }
 
